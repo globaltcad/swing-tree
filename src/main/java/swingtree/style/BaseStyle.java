@@ -1,5 +1,8 @@
 package swingtree.style;
 
+import swingtree.UI;
+
+import javax.swing.ImageIcon;
 import java.awt.*;
 import java.util.Objects;
 import java.util.Optional;
@@ -13,10 +16,12 @@ import java.util.Optional;
 final class BaseStyle
 {
     private static final BaseStyle _NONE = new BaseStyle(
-                                                     null,
-                                                     null,
-                                                     null,
-                                                     null
+                                                    null,
+                                                    UI.FitComponent.NO,
+                                                    null,
+                                                    null,
+                                                    null,
+                                                    null
                                                  );
 
     /**
@@ -26,43 +31,56 @@ final class BaseStyle
      */
     public static BaseStyle none() { return _NONE; }
 
-    private final Color _backgroundColor;
-    private final Color _foundationColor;
-    private final Color _foregroundColor;
-    private final Cursor _cursor;
-
+    private final ImageIcon       _icon;
+    private final UI.FitComponent _fit;
+    private final Color           _foundationColor;
+    private final Color           _backgroundColor;
+    private final Color           _foregroundColor;
+    private final Cursor          _cursor;
 
 
     private BaseStyle(
-        Color color,
-        Color foundation,
-        Color foregroundColor,
-        Cursor cursor
+        ImageIcon       icon, 
+        UI.FitComponent fit, 
+        Color           foundation,
+        Color           background,
+        Color           foregroundColor,
+        Cursor          cursor
     ) {
-        _backgroundColor = color;
+        _icon            = icon;
+        _fit             = Objects.requireNonNull(fit);
         _foundationColor = foundation;
+        _backgroundColor = background;
         _foregroundColor = foregroundColor;
         _cursor          = cursor;
     }
 
-    public Optional<Color> backgroundColor() { return Optional.ofNullable(_backgroundColor); }
+    public Optional<ImageIcon> icon() { return Optional.ofNullable(_icon); }
+
+    public UI.FitComponent fit() { return _fit; }
 
     public Optional<Color> foundationColor() { return Optional.ofNullable(_foundationColor); }
+
+    public Optional<Color> backgroundColor() { return Optional.ofNullable(_backgroundColor); }
 
     public Optional<Color> foregroundColo() { return Optional.ofNullable(_foregroundColor); }
 
     public Optional<Cursor> cursor() { return Optional.ofNullable(_cursor); }
 
-    BaseStyle backgroundColor( Color color ) { return new BaseStyle(color, _foundationColor, _foregroundColor, _cursor); }
+    BaseStyle icon( ImageIcon icon ) { return new BaseStyle(icon, _fit, _foundationColor, _backgroundColor, _foregroundColor, _cursor); }
 
-    BaseStyle foundationColor( Color foundation ) { return new BaseStyle(_backgroundColor, foundation, _foregroundColor, _cursor); }
+    BaseStyle fit( UI.FitComponent fit ) { return new BaseStyle(_icon, fit, _foundationColor, _backgroundColor, _foregroundColor, _cursor); }
 
-    BaseStyle foregroundColo( Color color ) { return new BaseStyle(_backgroundColor, _foundationColor, color, _cursor); }
+    BaseStyle foundationColor( Color foundation ) { return new BaseStyle(_icon, _fit, foundation, _backgroundColor, _foregroundColor, _cursor); }
 
-    BaseStyle cursor( Cursor cursor ) { return new BaseStyle(_backgroundColor, _foundationColor, _foregroundColor, cursor); }
+    BaseStyle backgroundColor( Color color ) { return new BaseStyle(_icon, _fit, _foundationColor, color, _foregroundColor, _cursor); }
+
+    BaseStyle foregroundColo( Color color ) { return new BaseStyle(_icon, _fit, _foundationColor, _backgroundColor, color, _cursor); }
+
+    BaseStyle cursor( Cursor cursor ) { return new BaseStyle(_icon, _fit, _foundationColor, _backgroundColor, _foregroundColor, cursor); }
 
     @Override
-    public int hashCode() { return Objects.hash(_backgroundColor, _foundationColor, _foregroundColor, _cursor); }
+    public int hashCode() { return Objects.hash(_icon, _fit, _backgroundColor, _foundationColor, _foregroundColor, _cursor); }
 
     @Override
     public boolean equals( Object obj ) {
@@ -70,19 +88,23 @@ final class BaseStyle
         if ( obj == this ) return true;
         if ( obj.getClass() != getClass() ) return false;
         BaseStyle rhs = (BaseStyle) obj;
-        return Objects.equals(_backgroundColor, rhs._backgroundColor) &&
+        return Objects.equals(_icon,            rhs._icon           ) &&
+               Objects.equals(_fit,             rhs._fit            ) &&
+               Objects.equals(_backgroundColor, rhs._backgroundColor) &&
                Objects.equals(_foundationColor, rhs._foundationColor) &&
                Objects.equals(_foregroundColor, rhs._foregroundColor) &&
-               Objects.equals(_cursor,          rhs._cursor);
+               Objects.equals(_cursor,          rhs._cursor         );
     }
 
     @Override
     public String toString() {
         return this.getClass().getSimpleName() + "[" +
-                    "backgroundColor=" + StyleUtility.toString(_backgroundColor) + ", " +
-                    "foundationColor=" + StyleUtility.toString(_foundationColor) + ", " +
-                    "foregroundColor=" + StyleUtility.toString(_foregroundColor) + ", " +
-                    "cursor="          + ( _cursor     == null ? "?" : _cursor.toString()     ) +
+                    "icon="            + ( _icon       == null ? "?" : _icon.toString()  ) + ", " +
+                    "fitComponent="    + _fit                                              + ", " +
+                    "backgroundColor=" + StyleUtility.toString(_backgroundColor)           + ", " +
+                    "foundationColor=" + StyleUtility.toString(_foundationColor)           + ", " +
+                    "foregroundColor=" + StyleUtility.toString(_foregroundColor)           + ", " +
+                    "cursor="          + ( _cursor     == null ? "?" : _cursor.toString() ) +
                 "]";
     }
 }

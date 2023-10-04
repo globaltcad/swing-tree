@@ -9,6 +9,7 @@ import swingtree.UI;
 import swingtree.animation.AnimationState;
 import swingtree.api.Painter;
 import swingtree.api.Styler;
+import swingtree.components.JIcon;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -360,6 +361,29 @@ public final class ComponentExtension<C extends JComponent>
         style.base().cursor().ifPresent( cursor -> {
             if ( !Objects.equals( _owner.getCursor(), cursor ) )
                 _owner.setCursor( cursor );
+        });
+
+        UI.FitComponent fit = style.base().fit();
+        style.base().icon().ifPresent( icon -> {
+            if ( icon instanceof SVGIcon ) {
+                SVGIcon svgIcon = (SVGIcon) icon;
+                icon = svgIcon.withFitComponent(fit);
+            }
+            if ( _owner instanceof AbstractButton ) {
+                AbstractButton button = (AbstractButton) _owner;
+                if ( !Objects.equals( button.getIcon(), icon ) )
+                    button.setIcon( icon );
+            }
+            if ( _owner instanceof JLabel ) {
+                JLabel label = (JLabel) _owner;
+                if ( !Objects.equals( label.getIcon(), icon ) )
+                    label.setIcon( icon );
+            }
+            if ( _owner instanceof JIcon ) {
+                JIcon jIcon = (JIcon) _owner;
+                if ( !Objects.equals( jIcon.getIcon(), icon ) )
+                    jIcon.setIcon( icon );
+            }
         });
 
         style.layout().alignmentX().ifPresent( alignmentX -> {

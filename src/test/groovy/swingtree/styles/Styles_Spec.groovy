@@ -116,6 +116,8 @@ class Styles_Spec extends Specification
                                             "GradientStyle[transition=TOP_TO_BOTTOM, type=LINEAR, colors=[], layer=BACKGROUND]" +
                                         "], " +
                                         "BaseStyle[" +
+                                            "icon=?, " +
+                                            "fitComponent=NO, " +
                                             "backgroundColor=rgba(0,255,0,255), " +
                                             "foundationColor=rgba(255,0,0,255), " +
                                             "foregroundColor=?, " +

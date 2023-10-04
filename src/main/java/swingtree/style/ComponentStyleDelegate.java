@@ -2,6 +2,7 @@ package swingtree.style;
 
 import org.slf4j.Logger;
 import swingtree.UI;
+import swingtree.api.IconDeclaration;
 import swingtree.api.Painter;
 import swingtree.api.Peeker;
 import swingtree.api.Styler;
@@ -559,26 +560,63 @@ public final class ComponentStyleDelegate<C extends JComponent>
     }
 
     /**
-     *  Returns a new {@link Style} with the provided inner Background color.
-     *  The inner background will be rendered with an inset space based on the padding defined by this {@link Style}.
+     *  Returns a new {@link Style} with the provided {@link ImageIcon} as the icon
+     *  for the current component (see {@link #component()}).
+     *  Note that this will only produce a result for components that actually support icons.
+     *  Like for example all the various {@link AbstractButton} subclasses, {@link JLabel}
+     *  and {@link swingtree.components.JIcon}.
      *
-     * @param color The inner background color.
-     * @return A new {@link ComponentStyleDelegate} with the provided inner background color.
+     * @param icon The icon.
+     * @return A new {@link ComponentStyleDelegate} with the provided icon.
      */
-    public ComponentStyleDelegate<C> backgroundColor( Color color ) {
-        return _withStyle(_style._withBase(_style.base().backgroundColor(color)));
+    public ComponentStyleDelegate<C> icon( ImageIcon icon ) {
+        return _withStyle(_style._withBase(_style.base().icon(icon)));
     }
 
     /**
-     *  Returns a new {@link Style} with the provided inner Background color in the form of a string.
-     *  The string can be either a hex color string, a color name or a color constant from the system properties.
-     *  The inner background will be rendered with an inset space based on the padding defined by this {@link Style}.
+     *  Returns a new {@link Style} with the provided {@link ImageIcon} as the icon
+     *  for the current component (see {@link #component()}) and the provided fit mode
+     *  determining how the icon should be fitted to the component.
+     *  Note that this will only work for components that support icons.
+     *  Like for example all the various {@link AbstractButton} subclasses, {@link JLabel}
+     *  and {@link swingtree.components.JIcon}.
      *
-     * @param colorString The inner background color.
-     * @return A new {@link ComponentStyleDelegate} with the provided inner background color.
+     * @param icon The icon in the form of an {@link ImageIcon}.
+     * @param fit The fit mode for the icon (mostly intended for {@link SVGIcon}).
+     * @return A new {@link ComponentStyleDelegate} with the provided icon.
      */
-    public ComponentStyleDelegate<C> backgroundColor( String colorString ) {
-        return _withStyle(_style._withBase(_style.base().backgroundColor(StyleUtility.toColor(colorString))));
+    public ComponentStyleDelegate<C> icon( ImageIcon icon, UI.FitComponent fit ) {
+        return _withStyle(_style._withBase(_style.base().icon(icon).fit(fit)));
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided {@link IconDeclaration} as the
+     *  source for the icon of the current component (see {@link #component()}).
+     *  Note that this will only have an effect for components that support icons.
+     *  Like for example all the various {@link AbstractButton} subclasses, {@link JLabel}
+     *  and {@link swingtree.components.JIcon}.
+     *
+     * @param icon The icon declaration, which will be resolved to an {@link ImageIcon}.
+     * @return A new {@link ComponentStyleDelegate} with the provided icon.
+     */
+    public ComponentStyleDelegate<C> icon( IconDeclaration icon ) {
+        return icon.find().map(this::icon).orElse(this);
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided {@link IconDeclaration} as the
+     *  source for the icon of the current component (see {@link #component()}) and the provided fit mode
+     *  determining how the icon should be fitted to the component.
+     *  Note that this will only have an effect for components that support icons.
+     *  Like for example all the various {@link AbstractButton} subclasses, {@link JLabel}
+     *  and {@link swingtree.components.JIcon}.
+     *
+     * @param icon The icon declaration, which will be resolved to an {@link ImageIcon}.
+     * @param fit The fit mode for the icon (mostly intended for {@link SVGIcon}).
+     * @return A new {@link ComponentStyleDelegate} with the provided icon.
+     */
+    public ComponentStyleDelegate<C> icon( IconDeclaration icon, UI.FitComponent fit ) {
+        return icon.find().map(it -> icon(it, fit)).orElse(this);
     }
 
     /**
@@ -602,6 +640,29 @@ public final class ComponentStyleDelegate<C extends JComponent>
      */
     public ComponentStyleDelegate<C> foundationColor( String colorString ) {
         return _withStyle(_style._withBase(_style.base().foundationColor(StyleUtility.toColor(colorString))));
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided inner Background color.
+     *  The inner background will be rendered with an inset space based on the padding defined by this {@link Style}.
+     *
+     * @param color The inner background color.
+     * @return A new {@link ComponentStyleDelegate} with the provided inner background color.
+     */
+    public ComponentStyleDelegate<C> backgroundColor( Color color ) {
+        return _withStyle(_style._withBase(_style.base().backgroundColor(color)));
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided inner Background color in the form of a string.
+     *  The string can be either a hex color string, a color name or a color constant from the system properties.
+     *  The inner background will be rendered with an inset space based on the padding defined by this {@link Style}.
+     *
+     * @param colorString The inner background color.
+     * @return A new {@link ComponentStyleDelegate} with the provided inner background color.
+     */
+    public ComponentStyleDelegate<C> backgroundColor( String colorString ) {
+        return _withStyle(_style._withBase(_style.base().backgroundColor(StyleUtility.toColor(colorString))));
     }
 
     /**
