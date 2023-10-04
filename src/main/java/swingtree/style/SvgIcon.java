@@ -36,7 +36,7 @@ public final class SvgIcon extends ImageIcon
     private final UI.FitComponent _fitComponent;
 
 
-    private SvgIcon(SVGDocument svgDocument, int width, int height, UI.FitComponent fitComponent ) {
+    private SvgIcon( SVGDocument svgDocument, int width, int height, UI.FitComponent fitComponent ) {
         super();
         _svgDocument  = svgDocument;
         _width        = width;
@@ -44,16 +44,28 @@ public final class SvgIcon extends ImageIcon
         _fitComponent = fitComponent;
     }
 
-    public SvgIcon(SvgIcon icon ) {
+    public SvgIcon( SvgIcon icon ) {
         this(icon._svgDocument, icon._width, icon._height, icon._fitComponent);
     }
 
-    public SvgIcon(URL svgUrl, int width, int height, UI.FitComponent fitComponent ) {
-        super();
-        _width        = width;
-        _height       = height;
-        _fitComponent = fitComponent;
+    public SvgIcon( URL svgUrl, int width, int height, UI.FitComponent fitComponent ) {
+        this(_loadSvgDocument(svgUrl), width, height, fitComponent);
+    }
 
+    public SvgIcon( URL svgUrl, int width, int height ) {
+        this(svgUrl, width, height, UI.FitComponent.MIN_DIM);
+    }
+
+    public SvgIcon( String path, int width, int height ) {
+        this(SvgIcon.class.getResource(path), width, height);
+    }
+
+    public SvgIcon( String path ) { this(path, -1, -1); }
+
+    public SvgIcon( URL svgUrl ) { this(svgUrl, -1, -1); }
+
+
+    private static SVGDocument _loadSvgDocument( URL svgUrl ) {
         SVGDocument tempSVGDocument = null;
         try {
             SVGLoader loader = new SVGLoader();
@@ -61,20 +73,8 @@ public final class SvgIcon extends ImageIcon
         } catch (Exception e) {
             log.error("Failed to load SVG document from URL: " + svgUrl, e);
         }
-        _svgDocument = tempSVGDocument;
+        return tempSVGDocument;
     }
-
-    public SvgIcon(URL svgUrl, int width, int height ) {
-        this(svgUrl, width, height, UI.FitComponent.MIN_DIM);
-    }
-
-    public SvgIcon(String path, int width, int height ) {
-        this(SvgIcon.class.getResource(path), width, height);
-    }
-
-    public SvgIcon(String path ) { this(path, -1, -1); }
-
-    public SvgIcon(URL svgUrl ) { this(svgUrl, -1, -1); }
 
 
     /**
@@ -89,7 +89,11 @@ public final class SvgIcon extends ImageIcon
      *        If the width is -1, the icon will be rendered according to the width of a given component
      *        or the width of the SVG document itself.
      */
-    public SvgIcon withIconWidth(int width ) { return new SvgIcon(_svgDocument, width, _height, _fitComponent); }
+    public SvgIcon withIconWidth( int width ) {
+        if ( width == _width )
+            return this;
+        return new SvgIcon(_svgDocument, width, _height, _fitComponent);
+    }
 
     /**
      * @return A new {@link SvgIcon} with the given width and height.
@@ -104,14 +108,22 @@ public final class SvgIcon extends ImageIcon
      *        If the height is -1, the icon will be rendered according to the height of a given component
      *        or the height of the SVG document itself.
      */
-    public SvgIcon withIconHeight(int height ) { return new SvgIcon(_svgDocument, _width, height, _fitComponent); }
+    public SvgIcon withIconHeight(int height ) {
+        if ( height == _height )
+            return this;
+        return new SvgIcon(_svgDocument, _width, height, _fitComponent);
+    }
 
     /**
      * @return A new {@link SvgIcon} with the given width and height.
      *        If the width or height is -1, the icon will be rendered according to the width or height of a given component
      *        or the width or height of the SVG document itself.
      */
-    public SvgIcon withIconSize(int width, int height ) { return new SvgIcon(_svgDocument, width, height, _fitComponent); }
+    public SvgIcon withIconSize( int width, int height ) {
+        if ( width == _width && height == _height )
+            return this;
+        return new SvgIcon(_svgDocument, width, height, _fitComponent);
+    }
 
     /**
      * @return The {@link UI.FitComponent} that determines if and how the icon should be fitted into a
@@ -122,7 +134,7 @@ public final class SvgIcon extends ImageIcon
     /**
      * @return A new {@link SvgIcon} with the given {@link UI.FitComponent} policy.
      */
-    public SvgIcon withFitComponent(UI.FitComponent fit ) {
+    public SvgIcon withFitComponent( UI.FitComponent fit ) {
         Objects.requireNonNull(fit);
         if ( fit == _fitComponent )
             return this;
