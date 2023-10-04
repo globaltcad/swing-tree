@@ -48,7 +48,8 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     /**
      *  Binds the provided {@link Val} property to the wrapped button type
      *  and sets the text of the button to the value of the property.
-     * <i>Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fireSet()} in your view model to manually
+     * send the property value to this view component.</i>
      * @param text The view model property which should be bound to this UI.
      * @return This very builder to allow for method chaining.
      * @throws IllegalArgumentException if {@code text} is {@code null}.
@@ -65,7 +66,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *  This is in essence a convenience method to avoid peeking into this builder like so:
      *  <pre>{@code
      *     UI.button("Something")
-     *         .peek( button -> button.setIcon(...) );
+     *     .peek( button -> button.setIcon(...) );
      *  }</pre>
      *
      *
