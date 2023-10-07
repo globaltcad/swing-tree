@@ -660,7 +660,8 @@ public final class UI extends UILayoutConstants
         ImageIcon icon = cache.get(path);
         if ( icon == null ) {
             icon = _loadIcon(path);
-            cache.put(path, icon);
+            if ( icon != null )
+                cache.put(path, icon);
         }
         return Optional.ofNullable(icon);
     }
@@ -671,6 +672,9 @@ public final class UI extends UILayoutConstants
      * @return The icon.
      */
     public static ImageIcon _loadIcon( String path ) {
+        path = path.trim();
+        if ( path.isEmpty() )
+            return null;
         // First we make the path platform independent:
         path = path.replace('\\', '/');
         // Then we try to load the icon url from the classpath:
