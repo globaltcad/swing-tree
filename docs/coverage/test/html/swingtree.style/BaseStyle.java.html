@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BaseStyle.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">BaseStyle.java</span></div><h1>BaseStyle.java</h1><pre class="source lang-java linenums">package swingtree.style;
 
+import swingtree.UI;
+
+import javax.swing.ImageIcon;
 import java.awt.*;
 import java.util.Objects;
 import java.util.Optional;
@@ -12,11 +15,13 @@ import java.util.Optional;
  */
 final class BaseStyle
 {
-<span class="fc" id="L15">    private static final BaseStyle _NONE = new BaseStyle(</span>
-                                                     null,
-                                                     null,
-                                                     null,
-                                                     null
+<span class="fc" id="L18">    private static final BaseStyle _NONE = new BaseStyle(</span>
+                                                    null,
+                                                    UI.FitComponent.NO,
+                                                    null,
+                                                    null,
+                                                    null,
+                                                    null
                                                  );
 
     /**
@@ -24,65 +29,82 @@ final class BaseStyle
      *
      * @return The default {@link BaseStyle}, containing no style properties.
      */
-<span class="fc" id="L27">    public static BaseStyle none() { return _NONE; }</span>
+<span class="fc" id="L32">    public static BaseStyle none() { return _NONE; }</span>
 
-    private final Color _backgroundColor;
-    private final Color _foundationColor;
-    private final Color _foregroundColor;
-    private final Cursor _cursor;
-
+    private final ImageIcon       _icon;
+    private final UI.FitComponent _fit;
+    private final Color           _foundationColor;
+    private final Color           _backgroundColor;
+    private final Color           _foregroundColor;
+    private final Cursor          _cursor;
 
 
     private BaseStyle(
-        Color color,
-        Color foundation,
-        Color foregroundColor,
-        Cursor cursor
-<span class="fc" id="L41">    ) {</span>
-<span class="fc" id="L42">        _backgroundColor = color;</span>
-<span class="fc" id="L43">        _foundationColor = foundation;</span>
-<span class="fc" id="L44">        _foregroundColor = foregroundColor;</span>
-<span class="fc" id="L45">        _cursor          = cursor;</span>
-<span class="fc" id="L46">    }</span>
+        ImageIcon       icon, 
+        UI.FitComponent fit, 
+        Color           foundation,
+        Color           background,
+        Color           foregroundColor,
+        Cursor          cursor
+<span class="fc" id="L49">    ) {</span>
+<span class="fc" id="L50">        _icon            = icon;</span>
+<span class="fc" id="L51">        _fit             = Objects.requireNonNull(fit);</span>
+<span class="fc" id="L52">        _foundationColor = foundation;</span>
+<span class="fc" id="L53">        _backgroundColor = background;</span>
+<span class="fc" id="L54">        _foregroundColor = foregroundColor;</span>
+<span class="fc" id="L55">        _cursor          = cursor;</span>
+<span class="fc" id="L56">    }</span>
 
-<span class="fc" id="L48">    public Optional&lt;Color&gt; backgroundColor() { return Optional.ofNullable(_backgroundColor); }</span>
+<span class="fc" id="L58">    public Optional&lt;ImageIcon&gt; icon() { return Optional.ofNullable(_icon); }</span>
 
-<span class="fc" id="L50">    public Optional&lt;Color&gt; foundationColor() { return Optional.ofNullable(_foundationColor); }</span>
+<span class="fc" id="L60">    public UI.FitComponent fit() { return _fit; }</span>
 
-<span class="fc" id="L52">    public Optional&lt;Color&gt; foregroundColo() { return Optional.ofNullable(_foregroundColor); }</span>
+<span class="fc" id="L62">    public Optional&lt;Color&gt; foundationColor() { return Optional.ofNullable(_foundationColor); }</span>
 
-<span class="fc" id="L54">    public Optional&lt;Cursor&gt; cursor() { return Optional.ofNullable(_cursor); }</span>
+<span class="fc" id="L64">    public Optional&lt;Color&gt; backgroundColor() { return Optional.ofNullable(_backgroundColor); }</span>
 
-<span class="fc" id="L56">    BaseStyle backgroundColor( Color color ) { return new BaseStyle(color, _foundationColor, _foregroundColor, _cursor); }</span>
+<span class="fc" id="L66">    public Optional&lt;Color&gt; foregroundColo() { return Optional.ofNullable(_foregroundColor); }</span>
 
-<span class="fc" id="L58">    BaseStyle foundationColor( Color foundation ) { return new BaseStyle(_backgroundColor, foundation, _foregroundColor, _cursor); }</span>
+<span class="fc" id="L68">    public Optional&lt;Cursor&gt; cursor() { return Optional.ofNullable(_cursor); }</span>
 
-<span class="fc" id="L60">    BaseStyle foregroundColo( Color color ) { return new BaseStyle(_backgroundColor, _foundationColor, color, _cursor); }</span>
+<span class="nc" id="L70">    BaseStyle icon( ImageIcon icon ) { return new BaseStyle(icon, _fit, _foundationColor, _backgroundColor, _foregroundColor, _cursor); }</span>
 
-<span class="fc" id="L62">    BaseStyle cursor( Cursor cursor ) { return new BaseStyle(_backgroundColor, _foundationColor, _foregroundColor, cursor); }</span>
+<span class="nc" id="L72">    BaseStyle fit( UI.FitComponent fit ) { return new BaseStyle(_icon, fit, _foundationColor, _backgroundColor, _foregroundColor, _cursor); }</span>
+
+<span class="fc" id="L74">    BaseStyle foundationColor( Color foundation ) { return new BaseStyle(_icon, _fit, foundation, _backgroundColor, _foregroundColor, _cursor); }</span>
+
+<span class="fc" id="L76">    BaseStyle backgroundColor( Color color ) { return new BaseStyle(_icon, _fit, _foundationColor, color, _foregroundColor, _cursor); }</span>
+
+<span class="fc" id="L78">    BaseStyle foregroundColo( Color color ) { return new BaseStyle(_icon, _fit, _foundationColor, _backgroundColor, color, _cursor); }</span>
+
+<span class="fc" id="L80">    BaseStyle cursor( Cursor cursor ) { return new BaseStyle(_icon, _fit, _foundationColor, _backgroundColor, _foregroundColor, cursor); }</span>
 
     @Override
-<span class="fc" id="L65">    public int hashCode() { return Objects.hash(_backgroundColor, _foundationColor, _foregroundColor, _cursor); }</span>
+<span class="fc" id="L83">    public int hashCode() { return Objects.hash(_icon, _fit, _backgroundColor, _foundationColor, _foregroundColor, _cursor); }</span>
 
     @Override
     public boolean equals( Object obj ) {
-<span class="pc bpc" id="L69" title="1 of 2 branches missed.">        if ( obj == null ) return false;</span>
-<span class="pc bpc" id="L70" title="1 of 2 branches missed.">        if ( obj == this ) return true;</span>
-<span class="pc bpc" id="L71" title="1 of 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
-<span class="fc" id="L72">        BaseStyle rhs = (BaseStyle) obj;</span>
-<span class="fc bfc" id="L73" title="All 2 branches covered.">        return Objects.equals(_backgroundColor, rhs._backgroundColor) &amp;&amp;</span>
-<span class="pc bpc" id="L74" title="1 of 2 branches missed.">               Objects.equals(_foundationColor, rhs._foundationColor) &amp;&amp;</span>
-<span class="fc bfc" id="L75" title="All 2 branches covered.">               Objects.equals(_foregroundColor, rhs._foregroundColor) &amp;&amp;</span>
-<span class="fc bfc" id="L76" title="All 2 branches covered.">               Objects.equals(_cursor,          rhs._cursor);</span>
+<span class="pc bpc" id="L87" title="1 of 2 branches missed.">        if ( obj == null ) return false;</span>
+<span class="pc bpc" id="L88" title="1 of 2 branches missed.">        if ( obj == this ) return true;</span>
+<span class="pc bpc" id="L89" title="1 of 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
+<span class="fc" id="L90">        BaseStyle rhs = (BaseStyle) obj;</span>
+<span class="pc bpc" id="L91" title="1 of 2 branches missed.">        return Objects.equals(_icon,            rhs._icon           ) &amp;&amp;</span>
+<span class="pc bpc" id="L92" title="1 of 2 branches missed.">               Objects.equals(_fit,             rhs._fit            ) &amp;&amp;</span>
+<span class="fc bfc" id="L93" title="All 2 branches covered.">               Objects.equals(_backgroundColor, rhs._backgroundColor) &amp;&amp;</span>
+<span class="pc bpc" id="L94" title="1 of 2 branches missed.">               Objects.equals(_foundationColor, rhs._foundationColor) &amp;&amp;</span>
+<span class="fc bfc" id="L95" title="All 2 branches covered.">               Objects.equals(_foregroundColor, rhs._foregroundColor) &amp;&amp;</span>
+<span class="fc bfc" id="L96" title="All 2 branches covered.">               Objects.equals(_cursor,          rhs._cursor         );</span>
     }
 
     @Override
     public String toString() {
-<span class="fc" id="L81">        return this.getClass().getSimpleName() + &quot;[&quot; +</span>
-<span class="fc" id="L82">                    &quot;backgroundColor=&quot; + StyleUtility.toString(_backgroundColor) + &quot;, &quot; +</span>
-<span class="fc" id="L83">                    &quot;foundationColor=&quot; + StyleUtility.toString(_foundationColor) + &quot;, &quot; +</span>
-<span class="fc" id="L84">                    &quot;foregroundColor=&quot; + StyleUtility.toString(_foregroundColor) + &quot;, &quot; +</span>
-<span class="pc bpc" id="L85" title="1 of 2 branches missed.">                    &quot;cursor=&quot;          + ( _cursor     == null ? &quot;?&quot; : _cursor.toString()     ) +</span>
+<span class="fc" id="L101">        return this.getClass().getSimpleName() + &quot;[&quot; +</span>
+<span class="pc bpc" id="L102" title="1 of 2 branches missed.">                    &quot;icon=&quot;            + ( _icon       == null ? &quot;?&quot; : _icon.toString()  ) + &quot;, &quot; +</span>
+                    &quot;fitComponent=&quot;    + _fit                                              + &quot;, &quot; +
+<span class="fc" id="L104">                    &quot;backgroundColor=&quot; + StyleUtility.toString(_backgroundColor)           + &quot;, &quot; +</span>
+<span class="fc" id="L105">                    &quot;foundationColor=&quot; + StyleUtility.toString(_foundationColor)           + &quot;, &quot; +</span>
+<span class="fc" id="L106">                    &quot;foregroundColor=&quot; + StyleUtility.toString(_foregroundColor)           + &quot;, &quot; +</span>
+<span class="pc bpc" id="L107" title="1 of 2 branches missed.">                    &quot;cursor=&quot;          + ( _cursor     == null ? &quot;?&quot; : _cursor.toString() ) +</span>
                 &quot;]&quot;;
     }
 }

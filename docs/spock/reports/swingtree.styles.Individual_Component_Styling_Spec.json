@@ -4,7 +4,7 @@
   "narrative":"This specification demonstrates how you can use the styling\n    API to style Swing components in a functional and declarative fashion.",
   "subjects":[],
   "statistics":{
-    "runs":"26",
+    "runs":"27",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -474,6 +474,25 @@
         {"kind":"expect","text":"The image is as expected.","code":["Utility.similarityBetween(ui.getComponent(), \"components/nested-buttons.png\", 99.5) > 99.5"]},
 
         {"kind":"where","text":"","code":{"uiScale":["1"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use the style API to design custom tabbed panes from scratch.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Creating heavily customized components in a way which prefers composition over inheritance\n            is one of the main goals of SwingTree and this little example demonstrates \n            how this principle is also applicable for\n            more sophisticated components like tabbed panes.\n            <br>\n            Here you can see an example of a custom SwingTree based tabbed pane:\n            ![components/my-tabbed-pane.png](https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/components/my-tabbed-pane.png)\n\n            As you can see, the resulting tabbed pane looks nothing like the default tabbed pane\n            and we did not need to extend any Swing class to achieve this.\n        ","\n            Creating heavily customized components in a way which prefers composition over inheritance\n            is one of the main goals of SwingTree and this little example demonstrates \n            how this principle is also applicable for\n            more sophisticated components like tabbed panes.\n            <br>\n            Here you can see an example of a custom SwingTree based tabbed pane:\n            ![components/my-tabbed-pane.png](https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/components/my-tabbed-pane.png)\n\n            As you can see, the resulting tabbed pane looks nothing like the default tabbed pane\n            and we did not need to extend any Swing class to achieve this.\n        ","\n            Creating heavily customized components in a way which prefers composition over inheritance\n            is one of the main goals of SwingTree and this little example demonstrates \n            how this principle is also applicable for\n            more sophisticated components like tabbed panes.\n            <br>\n            Here you can see an example of a custom SwingTree based tabbed pane:\n            ![components/my-tabbed-pane.png](https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/components/my-tabbed-pane.png)\n\n            As you can see, the resulting tabbed pane looks nothing like the default tabbed pane\n            and we did not need to extend any Swing class to achieve this.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().getUIScale().setUserScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"","code":["MyTabsViewModel.TabModel tab1 = new MyTabsView.DummyTab(\"Tab 1\", \"\").getModel();","MyTabsViewModel.TabModel tab2 = new MyTabsView.DummyTab(\"Tab 2\", \"img/two-16th-notes.svg\").getModel();","MyTabsViewModel.TabModel tab3 = new MyTabsView.DummyTab(\"Tab 3\", \"img/hopper.svg\").getModel();","MyTabsViewModel vm = new MyTabsViewModel();","vm.getTabs().add(tab1);","vm.getTabs().add(tab2);","vm.getTabs().add(tab3);","vm.getCurrentTab().set(tab2);","var ui = new MyTabsView(vm)","ui.setPreferredSize(new Dimension(UI.scale(220), UI.scale(80)))"]},
+
+        {"kind":"expect","text":"The image is as expected.","code":["Utility.similarityBetween(ui, \"components/my-tabbed-pane.png\", 98) > 98"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","2","3"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },

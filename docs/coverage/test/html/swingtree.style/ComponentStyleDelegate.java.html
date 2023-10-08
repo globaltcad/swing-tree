@@ -2,6 +2,7 @@
 
 import org.slf4j.Logger;
 import swingtree.UI;
+import swingtree.api.IconDeclaration;
 import swingtree.api.Painter;
 import swingtree.api.Peeker;
 import swingtree.api.Styler;
@@ -28,18 +29,18 @@ import java.util.function.Function;
  */
 public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
 {
-<span class="fc" id="L31">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(ComponentStyleDelegate.class);</span>
+<span class="fc" id="L32">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(ComponentStyleDelegate.class);</span>
 
     private final C _component;
     private final Style _style;
 
 
-<span class="fc" id="L37">    public ComponentStyleDelegate( C component, Style style ) {</span>
-<span class="fc" id="L38">        _component = component;</span>
-<span class="fc" id="L39">        _style     = style;</span>
-<span class="fc" id="L40">    }</span>
+<span class="fc" id="L38">    public ComponentStyleDelegate( C component, Style style ) {</span>
+<span class="fc" id="L39">        _component = component;</span>
+<span class="fc" id="L40">        _style     = style;</span>
+<span class="fc" id="L41">    }</span>
 
-<span class="fc" id="L42">    ComponentStyleDelegate&lt;C&gt; _withStyle( Style style ) { return new ComponentStyleDelegate&lt;&gt;(_component, style); }</span>
+<span class="fc" id="L43">    ComponentStyleDelegate&lt;C&gt; _withStyle( Style style ) { return new ComponentStyleDelegate&lt;&gt;(_component, style); }</span>
 
     /**
      *  Returns the {@link JComponent} this {@link ComponentStyleDelegate} is defining a {@link Style} for.
@@ -49,12 +50,12 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * &lt;p&gt;
      * @return The {@link JComponent} this {@link ComponentStyleDelegate} is for.
      */
-<span class="fc" id="L52">    public C component() { return _component; }</span>
+<span class="fc" id="L53">    public C component() { return _component; }</span>
 
     /**
      * @return An optional parent {@link Container} of the {@link JComponent} this {@link ComponentStyleDelegate} is for.
      */
-<span class="fc" id="L57">    public Optional&lt;Container&gt; parent() { return Optional.ofNullable(_component.getParent()); }</span>
+<span class="fc" id="L58">    public Optional&lt;Container&gt; parent() { return Optional.ofNullable(_component.getParent()); }</span>
 
     /**
      *  Use this to peek at the {@link JComponent} of this {@link ComponentStyleDelegate}
@@ -66,12 +67,12 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      */
     public ComponentStyleDelegate&lt;C&gt; peek( Peeker&lt;C&gt; peeker ) {
         try {
-<span class="nc" id="L69">            peeker.accept(_component);</span>
-<span class="nc" id="L70">        } catch( Exception e ) {</span>
-<span class="nc" id="L71">            log.error(&quot;Peeker threw an exception: &quot; + e.getMessage(), e);</span>
+<span class="nc" id="L70">            peeker.accept(_component);</span>
+<span class="nc" id="L71">        } catch( Exception e ) {</span>
+<span class="nc" id="L72">            log.error(&quot;Peeker threw an exception: &quot; + e.getMessage(), e);</span>
             // We don't want to crash the application if the peeker throws an exception.
-<span class="nc" id="L73">        }</span>
-<span class="nc" id="L74">        return this;</span>
+<span class="nc" id="L74">        }</span>
+<span class="nc" id="L75">        return this;</span>
     }
 
     /**
@@ -109,16 +110,16 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
         boolean condition,
         Styler&lt;C&gt; styler
     ) {
-<span class="nc bnc" id="L112" title="All 2 branches missed.">        if ( !condition )</span>
-<span class="nc" id="L113">            return this;</span>
+<span class="fc bfc" id="L113" title="All 2 branches covered.">        if ( !condition )</span>
+<span class="fc" id="L114">            return this;</span>
 
         try {
-<span class="nc" id="L116">            return styler.style(this);</span>
-<span class="nc" id="L117">        } catch( Exception e ) {</span>
-<span class="nc" id="L118">            log.error(&quot;Conditional styler threw an exception: &quot; + e.getMessage(), e);</span>
+<span class="fc" id="L117">            return styler.style(this);</span>
+<span class="nc" id="L118">        } catch( Exception e ) {</span>
+<span class="nc" id="L119">            log.error(&quot;Conditional styler threw an exception: &quot; + e.getMessage(), e);</span>
             // We don't want to crash the application if the conditional styler throws an exception.
         }
-<span class="nc" id="L121">        return this;</span>
+<span class="nc" id="L122">        return this;</span>
     }
 
     /**
@@ -127,7 +128,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * &lt;p&gt;
      * @return The {@link Style} this {@link ComponentStyleDelegate} is for.
      */
-<span class="fc" id="L130">    Style style() { return _style; }</span>
+<span class="fc" id="L131">    Style style() { return _style; }</span>
 
     /**
      *  Creates a new {@link Style} with the provided top, right, left and bottom margin distances.
@@ -142,7 +143,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided padding distances.
      */
     public ComponentStyleDelegate&lt;C&gt; margin( int top, int right, int bottom, int left ) {
-<span class="fc" id="L145">        return _withStyle(_style._withBorder(_style.border().margin(Outline.of(top, right, bottom, left))));</span>
+<span class="fc" id="L146">        return _withStyle(_style._withBorder(_style.border().margin(Outline.of(top, right, bottom, left))));</span>
     }
 
     /**
@@ -155,7 +156,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
      */
     public ComponentStyleDelegate&lt;C&gt; margin( int margin ) {
-<span class="fc" id="L158">        return _withStyle(_style._withBorder(_style.border().margin(Outline.of(margin))));</span>
+<span class="fc" id="L159">        return _withStyle(_style._withBorder(_style.border().margin(Outline.of(margin))));</span>
     }
 
     /**
@@ -168,7 +169,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
      */
     public ComponentStyleDelegate&lt;C&gt; marginTop( int margin ) {
-<span class="fc" id="L171">        return _withStyle(_style._withBorder(_style.border().margin(_style.border().margin().top(margin))));</span>
+<span class="fc" id="L172">        return _withStyle(_style._withBorder(_style.border().margin(_style.border().margin().top(margin))));</span>
     }
 
     /**
@@ -181,7 +182,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
      */
     public ComponentStyleDelegate&lt;C&gt; marginRight( int margin ) {
-<span class="fc" id="L184">        return _withStyle(_style._withBorder(_style.border().margin(_style.border().margin().right(margin))));</span>
+<span class="fc" id="L185">        return _withStyle(_style._withBorder(_style.border().margin(_style.border().margin().right(margin))));</span>
     }
 
     /**
@@ -194,7 +195,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
      */
     public ComponentStyleDelegate&lt;C&gt; marginBottom( int margin ) {
-<span class="nc" id="L197">        return _withStyle(_style._withBorder(_style.border().margin(_style.border().margin().bottom(margin))));</span>
+<span class="nc" id="L198">        return _withStyle(_style._withBorder(_style.border().margin(_style.border().margin().bottom(margin))));</span>
     }
 
     /**
@@ -207,7 +208,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
      */
     public ComponentStyleDelegate&lt;C&gt; marginLeft( int margin ) {
-<span class="fc" id="L210">        return _withStyle(_style._withBorder(_style.border().margin(_style.border().margin().left(margin))));</span>
+<span class="fc" id="L211">        return _withStyle(_style._withBorder(_style.border().margin(_style.border().margin().left(margin))));</span>
     }
 
     /**
@@ -220,7 +221,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
      */
     public ComponentStyleDelegate&lt;C&gt; marginVertical( int margin ) {
-<span class="nc" id="L223">        return _withStyle(_style._withBorder(_style.border().margin(_style.border().margin().top(margin).bottom(margin))));</span>
+<span class="nc" id="L224">        return _withStyle(_style._withBorder(_style.border().margin(_style.border().margin().top(margin).bottom(margin))));</span>
     }
 
     /**
@@ -233,7 +234,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
      */
     public ComponentStyleDelegate&lt;C&gt; marginHorizontal( int margin ) {
-<span class="nc" id="L236">        return _withStyle(_style._withBorder(_style.border().margin(_style.border().margin().left(margin).right(margin))));</span>
+<span class="nc" id="L237">        return _withStyle(_style._withBorder(_style.border().margin(_style.border().margin().left(margin).right(margin))));</span>
     }
 
     /**
@@ -249,7 +250,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided padding distances.
      */
     public ComponentStyleDelegate&lt;C&gt; padding( int top, int right, int bottom, int left ) {
-<span class="fc" id="L252">        return _withStyle(_style._withBorder(_style.border().padding(Outline.of(top, right, bottom, left))));</span>
+<span class="fc" id="L253">        return _withStyle(_style._withBorder(_style.border().padding(Outline.of(top, right, bottom, left))));</span>
     }
 
     /**
@@ -262,7 +263,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
      */
     public ComponentStyleDelegate&lt;C&gt; padding( int padding ) {
-<span class="fc" id="L265">        return _withStyle(_style._withBorder(_style.border().padding(Outline.of(padding))));</span>
+<span class="fc" id="L266">        return _withStyle(_style._withBorder(_style.border().padding(Outline.of(padding))));</span>
     }
 
     /**
@@ -275,7 +276,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
      */
     public ComponentStyleDelegate&lt;C&gt; paddingTop( int padding ) {
-<span class="fc" id="L278">        return _withStyle(_style._withBorder(_style.border().padding(_style.border().padding().top(padding))));</span>
+<span class="fc" id="L279">        return _withStyle(_style._withBorder(_style.border().padding(_style.border().padding().top(padding))));</span>
     }
 
     /**
@@ -289,7 +290,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
      */
     public ComponentStyleDelegate&lt;C&gt; paddingRight( int padding ) {
-<span class="fc" id="L292">        return _withStyle(_style._withBorder(_style.border().padding(_style.border().padding().right(padding))));</span>
+<span class="fc" id="L293">        return _withStyle(_style._withBorder(_style.border().padding(_style.border().padding().right(padding))));</span>
     }
 
     /**
@@ -302,7 +303,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
      */
     public ComponentStyleDelegate&lt;C&gt; paddingBottom( int padding ) {
-<span class="fc" id="L305">        return _withStyle(_style._withBorder(_style.border().padding(_style.border().padding().bottom(padding))));</span>
+<span class="fc" id="L306">        return _withStyle(_style._withBorder(_style.border().padding(_style.border().padding().bottom(padding))));</span>
     }
 
     /**
@@ -315,7 +316,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
      */
     public ComponentStyleDelegate&lt;C&gt; paddingLeft( int padding ) {
-<span class="fc" id="L318">        return _withStyle(_style._withBorder(_style.border().padding(_style.border().padding().left(padding))));</span>
+<span class="fc" id="L319">        return _withStyle(_style._withBorder(_style.border().padding(_style.border().padding().left(padding))));</span>
     }
 
     /**
@@ -328,7 +329,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
      */
     public ComponentStyleDelegate&lt;C&gt; paddingVertical( int padding ) {
-<span class="nc" id="L331">        return _withStyle(_style._withBorder(_style.border().padding(_style.border().padding().top(padding).bottom(padding))));</span>
+<span class="nc" id="L332">        return _withStyle(_style._withBorder(_style.border().padding(_style.border().padding().top(padding).bottom(padding))));</span>
     }
 
     /**
@@ -341,7 +342,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
      */
     public ComponentStyleDelegate&lt;C&gt; paddingHorizontal( int padding ) {
-<span class="nc" id="L344">        return _withStyle(_style._withBorder(_style.border().padding(_style.border().padding().left(padding).right(padding))));</span>
+<span class="nc" id="L345">        return _withStyle(_style._withBorder(_style.border().padding(_style.border().padding().left(padding).right(padding))));</span>
     }
 
     /**
@@ -353,7 +354,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided border width and border color.
      */
     public ComponentStyleDelegate&lt;C&gt; border( int width, Color color ) {
-<span class="fc" id="L356">        return _withStyle(_style._withBorder(_style.border().width(width).color(color)));</span>
+<span class="fc" id="L357">        return _withStyle(_style._withBorder(_style.border().width(width).color(color)));</span>
     }
 
     /**
@@ -368,7 +369,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided border widths and border color.
      */
     public ComponentStyleDelegate&lt;C&gt; border( int top, int right, int bottom, int left, Color color ) {
-<span class="fc" id="L371">        return _withStyle(_style._withBorder(_style.border().widths(Outline.of(top, right, bottom, left)).color(color)));</span>
+<span class="fc" id="L372">        return _withStyle(_style._withBorder(_style.border().widths(Outline.of(top, right, bottom, left)).color(color)));</span>
     }
 
     /**
@@ -381,7 +382,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided border width and border color.
      */
     public ComponentStyleDelegate&lt;C&gt; border( int width, String colorString ) {
-<span class="fc" id="L384">        return _withStyle(_style._withBorder(_style.border().width(width).color(StyleUtility.toColor(colorString))));</span>
+<span class="fc" id="L385">        return _withStyle(_style._withBorder(_style.border().width(width).color(StyleUtility.toColor(colorString))));</span>
     }
 
     /**
@@ -392,7 +393,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided border width.
      */
     public ComponentStyleDelegate&lt;C&gt; borderWidth( int width ) {
-<span class="fc" id="L395">        return _withStyle(_style._withBorder(_style.border().width(width)));</span>
+<span class="fc" id="L396">        return _withStyle(_style._withBorder(_style.border().width(width)));</span>
     }
 
     /**
@@ -404,7 +405,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided border width for the specified edge.
      */
     public ComponentStyleDelegate&lt;C&gt; borderWidthAt( UI.Edge edge, int width ) {
-<span class="nc" id="L407">        return _withStyle(_style._withBorder(_style.border().widthAt(edge, width)));</span>
+<span class="fc" id="L408">        return _withStyle(_style._withBorder(_style.border().widthAt(edge, width)));</span>
     }
 
     /**
@@ -426,7 +427,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @see #borderWidthAt(UI.Edge, int)
      */
     public ComponentStyleDelegate&lt;C&gt; borderWidths( int top, int right, int bottom, int left ) {
-<span class="fc" id="L429">        return _withStyle(_style._withBorder(_style.border().widths(Outline.of(top, right, bottom, left))));</span>
+<span class="fc" id="L430">        return _withStyle(_style._withBorder(_style.border().widths(Outline.of(top, right, bottom, left))));</span>
     }
 
     /**
@@ -444,7 +445,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @see #borderWidthAt(UI.Edge, int)
      */
     public ComponentStyleDelegate&lt;C&gt; borderWidths( int topBottom, int leftRight ) {
-<span class="nc" id="L447">        return _withStyle(_style._withBorder(_style.border().widths(Outline.of(topBottom, leftRight, topBottom, leftRight))));</span>
+<span class="nc" id="L448">        return _withStyle(_style._withBorder(_style.border().widths(Outline.of(topBottom, leftRight, topBottom, leftRight))));</span>
     }
 
     /**
@@ -455,7 +456,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided border color.
      */
     public ComponentStyleDelegate&lt;C&gt; borderColor( Color color ) {
-<span class="fc" id="L458">        return _withStyle(_style._withBorder(_style.border().color(color)));</span>
+<span class="fc" id="L459">        return _withStyle(_style._withBorder(_style.border().color(color)));</span>
     }
 
     /**
@@ -467,7 +468,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided border color.
      */
     public ComponentStyleDelegate&lt;C&gt; borderColor( String colorString ) {
-<span class="fc" id="L470">        return _withStyle(_style._withBorder(_style.border().color(StyleUtility.toColor(colorString))));</span>
+<span class="fc" id="L471">        return _withStyle(_style._withBorder(_style.border().color(StyleUtility.toColor(colorString))));</span>
     }
 
     /**
@@ -479,7 +480,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided border radius.
      */
     public ComponentStyleDelegate&lt;C&gt; borderRadius( int radius ) {
-<span class="fc" id="L482">        return _withStyle(_style._withBorder(_style.border().arcWidth(radius).arcHeight(radius)));</span>
+<span class="fc" id="L483">        return _withStyle(_style._withBorder(_style.border().arcWidth(radius).arcHeight(radius)));</span>
     }
 
     /**
@@ -491,7 +492,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided border arc width and arc height.
      */
     public ComponentStyleDelegate&lt;C&gt; borderRadius( int arcWidth, int arcHeight ) {
-<span class="fc" id="L494">        return _withStyle(_style._withBorder(_style.border().arcWidth(arcWidth).arcHeight(arcHeight)));</span>
+<span class="fc" id="L495">        return _withStyle(_style._withBorder(_style.border().arcWidth(arcWidth).arcHeight(arcHeight)));</span>
     }
 
     /**
@@ -504,7 +505,20 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided border arc width and arc height for the specified corner.
      */
     public ComponentStyleDelegate&lt;C&gt; borderRadiusAt( UI.Corner corner, int arcWidth, int arcHeight ) {
-<span class="fc" id="L507">        return _withStyle(_style._withBorder(_style.border().arcWidthAt(corner, arcWidth).arcHeightAt(corner, arcHeight)));</span>
+<span class="fc" id="L508">        return _withStyle(_style._withBorder(_style.border().arcWidthAt(corner, arcWidth).arcHeightAt(corner, arcHeight)));</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided border radius for the specified corner.
+     *  This will override both the arc width and arc height of the border.
+     *  Note that the border will be rendered with an inset space based on the padding defined by this {@link Style}.
+     *
+     * @param corner The corner to apply the border radius to.
+     * @param radius The border radius in pixels.
+     * @return A new {@link ComponentStyleDelegate} with the provided border radius for the specified corner.
+     */
+    public ComponentStyleDelegate&lt;C&gt; borderRadiusAt( UI.Corner corner, int radius ) {
+<span class="fc" id="L521">        return this.borderRadiusAt(corner, radius, radius);</span>
     }
 
     /**
@@ -525,8 +539,8 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with a border shade defined by the provided styler lambda.
      */
     public ComponentStyleDelegate&lt;C&gt; borderGradient( Function&lt;GradientStyle, GradientStyle&gt; styler ) {
-<span class="fc" id="L528">        Objects.requireNonNull(styler);</span>
-<span class="fc" id="L529">        return _withStyle(_style._withBorder(_style.border().gradient(StyleUtility.DEFAULT_KEY, styler)));</span>
+<span class="fc" id="L542">        Objects.requireNonNull(styler);</span>
+<span class="fc" id="L543">        return _withStyle(_style._withBorder(_style.border().gradient(StyleUtility.DEFAULT_KEY, styler)));</span>
     }
 
     /**
@@ -553,32 +567,69 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with a named border shade defined by the provided styler lambda.
      */
     public ComponentStyleDelegate&lt;C&gt; borderGradient( String shadeName, Function&lt;GradientStyle, GradientStyle&gt; styler ) {
-<span class="fc" id="L556">        Objects.requireNonNull(shadeName);</span>
-<span class="fc" id="L557">        Objects.requireNonNull(styler);</span>
-<span class="fc" id="L558">        return _withStyle(_style._withBorder(_style.border().gradient(shadeName, styler)));</span>
+<span class="fc" id="L570">        Objects.requireNonNull(shadeName);</span>
+<span class="fc" id="L571">        Objects.requireNonNull(styler);</span>
+<span class="fc" id="L572">        return _withStyle(_style._withBorder(_style.border().gradient(shadeName, styler)));</span>
     }
 
     /**
-     *  Returns a new {@link Style} with the provided inner Background color.
-     *  The inner background will be rendered with an inset space based on the padding defined by this {@link Style}.
+     *  Returns a new {@link Style} with the provided {@link ImageIcon} as the icon
+     *  for the current component (see {@link #component()}).
+     *  Note that this will only produce a result for components that actually support icons.
+     *  Like for example all the various {@link AbstractButton} subclasses, {@link JLabel}
+     *  and {@link swingtree.components.JIcon}.
      *
-     * @param color The inner background color.
-     * @return A new {@link ComponentStyleDelegate} with the provided inner background color.
+     * @param icon The icon.
+     * @return A new {@link ComponentStyleDelegate} with the provided icon.
      */
-    public ComponentStyleDelegate&lt;C&gt; backgroundColor( Color color ) {
-<span class="fc" id="L569">        return _withStyle(_style._withBase(_style.base().backgroundColor(color)));</span>
+    public ComponentStyleDelegate&lt;C&gt; icon( ImageIcon icon ) {
+<span class="nc" id="L586">        return _withStyle(_style._withBase(_style.base().icon(icon)));</span>
     }
 
     /**
-     *  Returns a new {@link Style} with the provided inner Background color in the form of a string.
-     *  The string can be either a hex color string, a color name or a color constant from the system properties.
-     *  The inner background will be rendered with an inset space based on the padding defined by this {@link Style}.
+     *  Returns a new {@link Style} with the provided {@link ImageIcon} as the icon
+     *  for the current component (see {@link #component()}) and the provided fit mode
+     *  determining how the icon should be fitted to the component.
+     *  Note that this will only work for components that support icons.
+     *  Like for example all the various {@link AbstractButton} subclasses, {@link JLabel}
+     *  and {@link swingtree.components.JIcon}.
      *
-     * @param colorString The inner background color.
-     * @return A new {@link ComponentStyleDelegate} with the provided inner background color.
+     * @param icon The icon in the form of an {@link ImageIcon}.
+     * @param fit The fit mode for the icon (mostly intended for {@link SvgIcon}).
+     * @return A new {@link ComponentStyleDelegate} with the provided icon.
      */
-    public ComponentStyleDelegate&lt;C&gt; backgroundColor( String colorString ) {
-<span class="fc" id="L581">        return _withStyle(_style._withBase(_style.base().backgroundColor(StyleUtility.toColor(colorString))));</span>
+    public ComponentStyleDelegate&lt;C&gt; icon( ImageIcon icon, UI.FitComponent fit ) {
+<span class="nc" id="L602">        return _withStyle(_style._withBase(_style.base().icon(icon).fit(fit)));</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided {@link IconDeclaration} as the
+     *  source for the icon of the current component (see {@link #component()}).
+     *  Note that this will only have an effect for components that support icons.
+     *  Like for example all the various {@link AbstractButton} subclasses, {@link JLabel}
+     *  and {@link swingtree.components.JIcon}.
+     *
+     * @param icon The icon declaration, which will be resolved to an {@link ImageIcon}.
+     * @return A new {@link ComponentStyleDelegate} with the provided icon.
+     */
+    public ComponentStyleDelegate&lt;C&gt; icon( IconDeclaration icon ) {
+<span class="nc" id="L616">        return icon.find().map(this::icon).orElse(this);</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided {@link IconDeclaration} as the
+     *  source for the icon of the current component (see {@link #component()}) and the provided fit mode
+     *  determining how the icon should be fitted to the component.
+     *  Note that this will only have an effect for components that support icons.
+     *  Like for example all the various {@link AbstractButton} subclasses, {@link JLabel}
+     *  and {@link swingtree.components.JIcon}.
+     *
+     * @param icon The icon declaration, which will be resolved to an {@link ImageIcon}.
+     * @param fit The fit mode for the icon (mostly intended for {@link SvgIcon}).
+     * @return A new {@link ComponentStyleDelegate} with the provided icon.
+     */
+    public ComponentStyleDelegate&lt;C&gt; icon( IconDeclaration icon, UI.FitComponent fit ) {
+<span class="nc" id="L632">        return icon.find().map(it -&gt; icon(it, fit)).orElse(this);</span>
     }
 
     /**
@@ -589,7 +640,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided background color.
      */
     public ComponentStyleDelegate&lt;C&gt; foundationColor( Color color ) {
-<span class="fc" id="L592">        return _withStyle(_style._withBase(_style.base().foundationColor(color)));</span>
+<span class="fc" id="L643">        return _withStyle(_style._withBase(_style.base().foundationColor(color)));</span>
     }
 
     /**
@@ -601,7 +652,30 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided background color.
      */
     public ComponentStyleDelegate&lt;C&gt; foundationColor( String colorString ) {
-<span class="fc" id="L604">        return _withStyle(_style._withBase(_style.base().foundationColor(StyleUtility.toColor(colorString))));</span>
+<span class="fc" id="L655">        return _withStyle(_style._withBase(_style.base().foundationColor(StyleUtility.toColor(colorString))));</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided inner Background color.
+     *  The inner background will be rendered with an inset space based on the padding defined by this {@link Style}.
+     *
+     * @param color The inner background color.
+     * @return A new {@link ComponentStyleDelegate} with the provided inner background color.
+     */
+    public ComponentStyleDelegate&lt;C&gt; backgroundColor( Color color ) {
+<span class="fc" id="L666">        return _withStyle(_style._withBase(_style.base().backgroundColor(color)));</span>
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided inner Background color in the form of a string.
+     *  The string can be either a hex color string, a color name or a color constant from the system properties.
+     *  The inner background will be rendered with an inset space based on the padding defined by this {@link Style}.
+     *
+     * @param colorString The inner background color.
+     * @return A new {@link ComponentStyleDelegate} with the provided inner background color.
+     */
+    public ComponentStyleDelegate&lt;C&gt; backgroundColor( String colorString ) {
+<span class="fc" id="L678">        return _withStyle(_style._withBase(_style.base().backgroundColor(StyleUtility.toColor(colorString))));</span>
     }
 
     /**
@@ -613,7 +687,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided background renderer.
      */
     public ComponentStyleDelegate&lt;C&gt; painter( UI.Layer layer, swingtree.api.Painter renderer ) {
-<span class="fc" id="L616">        return _withStyle(_style.painter(StyleUtility.DEFAULT_KEY, layer, renderer));</span>
+<span class="fc" id="L690">        return _withStyle(_style.painter(StyleUtility.DEFAULT_KEY, layer, renderer));</span>
     }
 
     /**
@@ -630,7 +704,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided background renderer.
      */
     public ComponentStyleDelegate&lt;C&gt; painter( UI.Layer layer, String painterName, swingtree.api.Painter renderer ) {
-<span class="nc" id="L633">        return _withStyle(_style.painter(painterName, layer, renderer));</span>
+<span class="nc" id="L707">        return _withStyle(_style.painter(painterName, layer, renderer));</span>
     }
 
     /**
@@ -640,7 +714,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided foreground color.
      */
     public ComponentStyleDelegate&lt;C&gt; foregroundColor( Color color ) {
-<span class="fc" id="L643">        return _withStyle(_style._withBase(_style.base().foregroundColo(color)));</span>
+<span class="fc" id="L717">        return _withStyle(_style._withBase(_style.base().foregroundColo(color)));</span>
     }
 
     /**
@@ -651,7 +725,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided foreground color.
      */
     public ComponentStyleDelegate&lt;C&gt; foregroundColor( String colorString ) {
-<span class="fc" id="L654">        return _withStyle(_style._withBase(_style.base().foregroundColo(StyleUtility.toColor(colorString))));</span>
+<span class="fc" id="L728">        return _withStyle(_style._withBase(_style.base().foregroundColo(StyleUtility.toColor(colorString))));</span>
     }
 
     /**
@@ -666,7 +740,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided horizontal shadow offset.
      */
     public ComponentStyleDelegate&lt;C&gt; shadowHorizontalOffset( int offset ) {
-<span class="fc" id="L669">        return _withStyle(_style._withShadow( shadow -&gt; shadow.horizontalOffset(offset)));</span>
+<span class="fc" id="L743">        return _withStyle(_style._withShadow( shadow -&gt; shadow.horizontalOffset(offset)));</span>
     }
 
     /**
@@ -681,7 +755,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided vertical shadow offset.
      */
     public ComponentStyleDelegate&lt;C&gt; shadowVerticalOffset( int offset ) {
-<span class="fc" id="L684">        return _withStyle(_style._withShadow( shadow -&gt; shadow.verticalOffset(offset)));</span>
+<span class="fc" id="L758">        return _withStyle(_style._withShadow( shadow -&gt; shadow.verticalOffset(offset)));</span>
     }
 
     /**
@@ -697,7 +771,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided shadow offset.
      */
     public ComponentStyleDelegate&lt;C&gt; shadowOffset( int horizontalOffset, int verticalOffset ) {
-<span class="fc" id="L700">        return _withStyle(_style._withShadow( shadow -&gt; shadow.horizontalOffset(horizontalOffset).verticalOffset(verticalOffset)));</span>
+<span class="fc" id="L774">        return _withStyle(_style._withShadow( shadow -&gt; shadow.horizontalOffset(horizontalOffset).verticalOffset(verticalOffset)));</span>
     }
 
     /**
@@ -712,7 +786,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided shadow offset.
      */
     public ComponentStyleDelegate&lt;C&gt; shadowOffset( int horizontalAndVerticalOffset ) {
-<span class="fc" id="L715">        return _withStyle(_style._withShadow( shadow -&gt; shadow.horizontalOffset(horizontalAndVerticalOffset).verticalOffset(horizontalAndVerticalOffset)));</span>
+<span class="fc" id="L789">        return _withStyle(_style._withShadow( shadow -&gt; shadow.horizontalOffset(horizontalAndVerticalOffset).verticalOffset(horizontalAndVerticalOffset)));</span>
     }
 
     /**
@@ -727,7 +801,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided shadow blur radius.
      */
     public ComponentStyleDelegate&lt;C&gt; shadowBlurRadius( int radius ) {
-<span class="fc" id="L730">        return _withStyle(_style._withShadow( shadow -&gt; shadow.blurRadius(radius)));</span>
+<span class="fc" id="L804">        return _withStyle(_style._withShadow( shadow -&gt; shadow.blurRadius(radius)));</span>
     }
 
     /**
@@ -742,7 +816,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided shadow spread radius.
      */
     public ComponentStyleDelegate&lt;C&gt; shadowSpreadRadius( int radius ) {
-<span class="fc" id="L745">        return _withStyle(_style._withShadow( shadow -&gt; shadow.spreadRadius(radius)));</span>
+<span class="fc" id="L819">        return _withStyle(_style._withShadow( shadow -&gt; shadow.spreadRadius(radius)));</span>
     }
 
     /**
@@ -757,7 +831,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided shadow color.
      */
     public ComponentStyleDelegate&lt;C&gt; shadowColor( Color color ) {
-<span class="fc" id="L760">        return _withStyle(_style._withShadow( shadow -&gt; shadow.color(color)));</span>
+<span class="fc" id="L834">        return _withStyle(_style._withShadow( shadow -&gt; shadow.color(color)));</span>
     }
 
     /**
@@ -773,7 +847,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided shadow color.
      */
     public ComponentStyleDelegate&lt;C&gt; shadowColor( String colorString ) {
-<span class="fc" id="L776">        return _withStyle(_style._withShadow( shadow -&gt; shadow.color(StyleUtility.toColor(colorString))));</span>
+<span class="fc" id="L850">        return _withStyle(_style._withShadow( shadow -&gt; shadow.color(StyleUtility.toColor(colorString))));</span>
     }
 
     /**
@@ -786,7 +860,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided shadow inset flag.
      */
     public ComponentStyleDelegate&lt;C&gt; shadowIsInset( boolean inwards ) {
-<span class="fc" id="L789">        return _withStyle(_style._withShadow( shadow -&gt; shadow.isInset(inwards)));</span>
+<span class="fc" id="L863">        return _withStyle(_style._withShadow( shadow -&gt; shadow.isInset(inwards)));</span>
     }
 
     /**
@@ -796,7 +870,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided shadow layer.
      */
     public ComponentStyleDelegate&lt;C&gt; shadowLayer( UI.Layer layer ) {
-<span class="fc" id="L799">        return _withStyle(_style._withShadow( shadow -&gt; shadow.layer(layer)));</span>
+<span class="fc" id="L873">        return _withStyle(_style._withShadow( shadow -&gt; shadow.layer(layer)));</span>
     }
 
     /**
@@ -829,12 +903,12 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with a named shadow defined by the provided styler lambda.
      */
     public ComponentStyleDelegate&lt;C&gt; shadow( String shadowName, Function&lt;ShadowStyle, ShadowStyle&gt; styler ) {
-<span class="fc" id="L832">        Objects.requireNonNull(shadowName);</span>
-<span class="fc" id="L833">        Objects.requireNonNull(styler);</span>
-<span class="fc" id="L834">        ShadowStyle shadow = Optional.ofNullable(_style.shadow(shadowName)).orElse(ShadowStyle.none());</span>
+<span class="fc" id="L906">        Objects.requireNonNull(shadowName);</span>
+<span class="fc" id="L907">        Objects.requireNonNull(styler);</span>
+<span class="fc" id="L908">        ShadowStyle shadow = Optional.ofNullable(_style.shadow(shadowName)).orElse(ShadowStyle.none());</span>
         // We clone the shadow map:
-<span class="fc" id="L836">        NamedStyles&lt;ShadowStyle&gt; newShadows = _style.shadowsMap().withNamedStyle(shadowName, styler.apply(shadow));</span>
-<span class="fc" id="L837">        return _withStyle(_style._withShadow(newShadows));</span>
+<span class="fc" id="L910">        NamedStyles&lt;ShadowStyle&gt; newShadows = _style.shadowsMap().withNamedStyle(shadowName, styler.apply(shadow));</span>
+<span class="fc" id="L911">        return _withStyle(_style._withShadow(newShadows));</span>
     }
 
     /**
@@ -862,9 +936,9 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with a named background shade defined by the provided styler lambda.
      */
     public ComponentStyleDelegate&lt;C&gt; gradient( String shadeName, Function&lt;GradientStyle, GradientStyle&gt; styler ) {
-<span class="fc" id="L865">        Objects.requireNonNull(shadeName);</span>
-<span class="fc" id="L866">        Objects.requireNonNull(styler);</span>
-<span class="fc" id="L867">        return _withStyle(_style.gradient(shadeName, styler));</span>
+<span class="fc" id="L939">        Objects.requireNonNull(shadeName);</span>
+<span class="fc" id="L940">        Objects.requireNonNull(styler);</span>
+<span class="fc" id="L941">        return _withStyle(_style.gradient(shadeName, styler));</span>
     }
 
     /**
@@ -885,8 +959,8 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with a background shade defined by the provided styler lambda.
      */
     public ComponentStyleDelegate&lt;C&gt; gradient( Function&lt;GradientStyle, GradientStyle&gt; styler ) {
-<span class="fc" id="L888">        Objects.requireNonNull(styler);</span>
-<span class="fc" id="L889">        return _withStyle(_style.gradient(StyleUtility.DEFAULT_KEY, styler));</span>
+<span class="fc" id="L962">        Objects.requireNonNull(styler);</span>
+<span class="fc" id="L963">        return _withStyle(_style.gradient(StyleUtility.DEFAULT_KEY, styler));</span>
     }
 
     /**
@@ -913,9 +987,9 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with a named background image defined by the provided styler lambda.
      */
     public ComponentStyleDelegate&lt;C&gt; image( String imageName, Function&lt;ImageStyle, ImageStyle&gt; styler ) {
-<span class="fc" id="L916">        Objects.requireNonNull(imageName);</span>
-<span class="fc" id="L917">        Objects.requireNonNull(styler);</span>
-<span class="fc" id="L918">        return _withStyle(_style.images(imageName, styler));</span>
+<span class="fc" id="L990">        Objects.requireNonNull(imageName);</span>
+<span class="fc" id="L991">        Objects.requireNonNull(styler);</span>
+<span class="fc" id="L992">        return _withStyle(_style.images(imageName, styler));</span>
     }
 
     /**
@@ -937,8 +1011,8 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with a background image defined by the provided styler lambda.
      */
     public ComponentStyleDelegate&lt;C&gt; image( Function&lt;ImageStyle, ImageStyle&gt; styler ) {
-<span class="fc" id="L940">        Objects.requireNonNull(styler);</span>
-<span class="fc" id="L941">        return _withStyle(_style.images(StyleUtility.DEFAULT_KEY, styler));</span>
+<span class="fc" id="L1014">        Objects.requireNonNull(styler);</span>
+<span class="fc" id="L1015">        return _withStyle(_style.images(StyleUtility.DEFAULT_KEY, styler));</span>
     }
 
     /**
@@ -958,7 +1032,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @throws NullPointerException If the value is {@code null}! (Use {@code &quot;&quot;} to remove a property)
      */
     public ComponentStyleDelegate&lt;C&gt; property( String key, String value ) {
-<span class="fc" id="L961">        return _withStyle(_style.property(key, value));</span>
+<span class="fc" id="L1035">        return _withStyle(_style.property(key, value));</span>
     }
 
     /**
@@ -971,7 +1045,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided font name and size.
      */
     public ComponentStyleDelegate&lt;C&gt; font( String name, int size ) {
-<span class="fc" id="L974">        return _withStyle(_style._withFont(_style.font().name(name).size(size)));</span>
+<span class="fc" id="L1048">        return _withStyle(_style._withFont(_style.font().name(name).size(size)));</span>
     }
 
     /**
@@ -983,7 +1057,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided font name.
      */
     public ComponentStyleDelegate&lt;C&gt; fontName( String name ) {
-<span class="fc" id="L986">        return _withStyle(_style._withFont(_style.font().name(name)));</span>
+<span class="fc" id="L1060">        return _withStyle(_style._withFont(_style.font().name(name)));</span>
     }
 
     /**
@@ -995,7 +1069,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided {@link Font}.
      */
     public ComponentStyleDelegate&lt;C&gt; font( Font font ) {
-<span class="fc" id="L998">        return _withStyle(_style._withFont(_style.font().font(font)));</span>
+<span class="fc" id="L1072">        return _withStyle(_style._withFont(_style.font().font(font)));</span>
     }
 
     /**
@@ -1007,7 +1081,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided font size.
      */
     public ComponentStyleDelegate&lt;C&gt; fontSize( int size ) {
-<span class="fc" id="L1010">        return _withStyle(_style._withFont(_style.font().size(size)));</span>
+<span class="fc" id="L1084">        return _withStyle(_style._withFont(_style.font().size(size)));</span>
     }
 
     /**
@@ -1019,7 +1093,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided font boldness.
      */
     public ComponentStyleDelegate&lt;C&gt; fontBold( boolean bold ) {
-<span class="fc bfc" id="L1022" title="All 2 branches covered.">        return _withStyle(_style._withFont(_style.font().weight( bold ? 2 : 1 )));</span>
+<span class="fc bfc" id="L1096" title="All 2 branches covered.">        return _withStyle(_style._withFont(_style.font().weight( bold ? 2 : 1 )));</span>
     }
 
     /**
@@ -1031,7 +1105,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided font italicness.
      */
     public ComponentStyleDelegate&lt;C&gt; fontItalic( boolean italic ) {
-<span class="pc bpc" id="L1034" title="1 of 2 branches missed.">        return _withStyle(_style._withFont(_style.font().posture( italic ? 0.2f : 0f )));</span>
+<span class="pc bpc" id="L1108" title="1 of 2 branches missed.">        return _withStyle(_style._withFont(_style.font().posture( italic ? 0.2f : 0f )));</span>
     }
 
     /**
@@ -1043,7 +1117,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided font underlinedness.
      */
     public ComponentStyleDelegate&lt;C&gt; fontUnderline( boolean underline ) {
-<span class="fc" id="L1046">        return _withStyle(_style._withFont(_style.font().isUnderlined(underline)));</span>
+<span class="fc" id="L1120">        return _withStyle(_style._withFont(_style.font().isUnderlined(underline)));</span>
     }
 
     /**
@@ -1055,7 +1129,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided font struck throughness.
      */
     public ComponentStyleDelegate&lt;C&gt; fontStrikeThrough( boolean strikeThrough ) {
-<span class="fc" id="L1058">        return _withStyle(_style._withFont(_style.font().isStrike(strikeThrough)));</span>
+<span class="fc" id="L1132">        return _withStyle(_style._withFont(_style.font().isStrike(strikeThrough)));</span>
     }
 
     /**
@@ -1067,7 +1141,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided font color.
      */
     public ComponentStyleDelegate&lt;C&gt; fontColor( Color color ) {
-<span class="fc" id="L1070">        return _withStyle(_style._withFont(_style.font().color(color)));</span>
+<span class="fc" id="L1144">        return _withStyle(_style._withFont(_style.font().color(color)));</span>
     }
 
     /**
@@ -1079,7 +1153,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided font color.
      */
     public ComponentStyleDelegate&lt;C&gt; fontColor( String colorString ) {
-<span class="fc" id="L1082">        return _withStyle(_style._withFont(_style.font().color(StyleUtility.toColor(colorString))));</span>
+<span class="fc" id="L1156">        return _withStyle(_style._withFont(_style.font().color(StyleUtility.toColor(colorString))));</span>
     }
 
     /**
@@ -1091,7 +1165,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided font background color.
      */
     public ComponentStyleDelegate&lt;C&gt; fontBackgroundColor( Color color ) {
-<span class="nc" id="L1094">        return _withStyle(_style._withFont(_style.font().backgroundColor(color)));</span>
+<span class="nc" id="L1168">        return _withStyle(_style._withFont(_style.font().backgroundColor(color)));</span>
     }
 
     /**
@@ -1103,7 +1177,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided font color.
      */
     public ComponentStyleDelegate&lt;C&gt; fontBackgroundColor( String colorString ) {
-<span class="nc" id="L1106">        return _withStyle(_style._withFont(_style.font().backgroundColor(StyleUtility.toColor(colorString))));</span>
+<span class="nc" id="L1180">        return _withStyle(_style._withFont(_style.font().backgroundColor(StyleUtility.toColor(colorString))));</span>
     }
 
     /**
@@ -1115,7 +1189,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided font selection color.
      */
     public ComponentStyleDelegate&lt;C&gt; fontSelectionColor( Color color ) {
-<span class="fc" id="L1118">        return _withStyle(_style._withFont(_style.font().selectionColor(color)));</span>
+<span class="fc" id="L1192">        return _withStyle(_style._withFont(_style.font().selectionColor(color)));</span>
     }
 
     /**
@@ -1127,7 +1201,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided font selection color.
      */
     public ComponentStyleDelegate&lt;C&gt; fontSelectionColor( String colorString ) {
-<span class="fc" id="L1130">        return _withStyle(_style._withFont(_style.font().selectionColor(StyleUtility.toColor(colorString))));</span>
+<span class="fc" id="L1204">        return _withStyle(_style._withFont(_style.font().selectionColor(StyleUtility.toColor(colorString))));</span>
     }
 
     /**
@@ -1135,7 +1209,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided font transform.
      */
     public ComponentStyleDelegate&lt;C&gt; fontTransform( AffineTransform transform ) {
-<span class="nc" id="L1138">        return _withStyle(_style._withFont(_style.font().transform(transform)));</span>
+<span class="nc" id="L1212">        return _withStyle(_style._withFont(_style.font().transform(transform)));</span>
     }
 
     /**
@@ -1143,7 +1217,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided font paint.
      */
     public ComponentStyleDelegate&lt;C&gt; fontPaint( Paint paint ) {
-<span class="nc" id="L1146">        return _withStyle(_style._withFont(_style.font().paint(paint)));</span>
+<span class="nc" id="L1220">        return _withStyle(_style._withFont(_style.font().paint(paint)));</span>
     }
 
     /**
@@ -1154,7 +1228,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided font weight.
      */
     public ComponentStyleDelegate&lt;C&gt; fontWeight( float weight ) {
-<span class="nc" id="L1157">        return _withStyle(_style._withFont(_style.font().weight(weight))); </span>
+<span class="nc" id="L1231">        return _withStyle(_style._withFont(_style.font().weight(weight))); </span>
     }
 
     /**
@@ -1167,7 +1241,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      *  @return A new {@link ComponentStyleDelegate} with the provided font alignment.
      */
     public ComponentStyleDelegate&lt;C&gt; fontAlignment( UI.HorizontalAlignment alignment ) {
-<span class="fc" id="L1170">        return _withStyle(_style._withFont(_style.font().horizontalAlignment(alignment)));</span>
+<span class="fc" id="L1244">        return _withStyle(_style._withFont(_style.font().horizontalAlignment(alignment)));</span>
     }
 
     /**
@@ -1180,7 +1254,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      *  @return A new {@link ComponentStyleDelegate} with the provided font alignment.
      */
     public ComponentStyleDelegate&lt;C&gt; fontAlignment( UI.VerticalAlignment alignment ) {
-<span class="nc" id="L1183">        return _withStyle(_style._withFont(_style.font().verticalAlignment(alignment)));</span>
+<span class="nc" id="L1257">        return _withStyle(_style._withFont(_style.font().verticalAlignment(alignment)));</span>
     }
 
     /**
@@ -1193,7 +1267,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      *  @return A new {@link ComponentStyleDelegate} with the provided font alignment.
      */
     public ComponentStyleDelegate&lt;C&gt; fontAlignment( UI.Alignment alignment ) {
-<span class="nc" id="L1196">        return fontAlignment(alignment.getHorizontal()).fontAlignment(alignment.getVertical());</span>
+<span class="nc" id="L1270">        return fontAlignment(alignment.getHorizontal()).fontAlignment(alignment.getVertical());</span>
     }
 
     /**
@@ -1204,8 +1278,8 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      *          applied to the underlying component when the final {@link Style} is applied.
      */
     public ComponentStyleDelegate&lt;C&gt; minSize( Dimension minSize ) {
-<span class="fc" id="L1207">        Objects.requireNonNull(minSize);</span>
-<span class="fc" id="L1208">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withMinWidth(minSize.width)._withMinHeight(minSize.height)));</span>
+<span class="fc" id="L1281">        Objects.requireNonNull(minSize);</span>
+<span class="fc" id="L1282">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withMinWidth(minSize.width)._withMinHeight(minSize.height)));</span>
     }
 
     /**
@@ -1218,7 +1292,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      *          applied to the underlying component when the final {@link Style} is applied.
      */
     public ComponentStyleDelegate&lt;C&gt; minSize( int width, int height ) {
-<span class="fc" id="L1221">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withMinWidth(width)._withMinHeight(height)));</span>
+<span class="fc" id="L1295">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withMinWidth(width)._withMinHeight(height)));</span>
     }
 
     /**
@@ -1230,7 +1304,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      *          applied to the underlying component when the final {@link Style} is applied.
      */
     public ComponentStyleDelegate&lt;C&gt; minWidth( int minWidth ) {
-<span class="fc" id="L1233">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withMinWidth(minWidth)));</span>
+<span class="fc" id="L1307">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withMinWidth(minWidth)));</span>
     }
 
     /**
@@ -1242,7 +1316,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      *          applied to the underlying component when the final {@link Style} is applied.
      */
     public ComponentStyleDelegate&lt;C&gt; minHeight( int minHeight ) {
-<span class="fc" id="L1245">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withMinHeight(minHeight)));</span>
+<span class="fc" id="L1319">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withMinHeight(minHeight)));</span>
     }
 
     /**
@@ -1255,7 +1329,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      *          applied to the underlying component when the final {@link Style} is applied.
      */
     public ComponentStyleDelegate&lt;C&gt; maxSize( Dimension maxSize ) {
-<span class="fc" id="L1258">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withMaxWidth(maxSize.width)._withMaxHeight(maxSize.height)));</span>
+<span class="fc" id="L1332">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withMaxWidth(maxSize.width)._withMaxHeight(maxSize.height)));</span>
     }
 
     /**
@@ -1269,7 +1343,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      *          applied to the underlying component when the final {@link Style} is applied.
      */
     public ComponentStyleDelegate&lt;C&gt; maxSize( int width, int height ) {
-<span class="fc" id="L1272">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withMaxWidth(width)._withMaxHeight(height)));</span>
+<span class="fc" id="L1346">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withMaxWidth(width)._withMaxHeight(height)));</span>
     }
 
     /**
@@ -1282,7 +1356,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      *          applied to the underlying component when the final {@link Style} is applied.
      */
     public ComponentStyleDelegate&lt;C&gt; maxWidth( int maxWidth ) {
-<span class="fc" id="L1285">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withMaxWidth(maxWidth)));</span>
+<span class="fc" id="L1359">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withMaxWidth(maxWidth)));</span>
     }
 
     /**
@@ -1295,7 +1369,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      *          applied to the underlying component when the final {@link Style} is applied.
      */
     public ComponentStyleDelegate&lt;C&gt; maxHeight( int maxHeight ) {
-<span class="fc" id="L1298">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withMaxHeight(maxHeight)));</span>
+<span class="fc" id="L1372">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withMaxHeight(maxHeight)));</span>
     }
 
     /**
@@ -1308,8 +1382,8 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      *          applied to the underlying component when the final {@link Style} is applied.
      */
     public ComponentStyleDelegate&lt;C&gt; prefSize( Dimension preferredSize ) {
-<span class="fc" id="L1311">        Objects.requireNonNull(preferredSize);</span>
-<span class="fc" id="L1312">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withPreferredWidth(preferredSize.width)._withPreferredHeight(preferredSize.height)));</span>
+<span class="fc" id="L1385">        Objects.requireNonNull(preferredSize);</span>
+<span class="fc" id="L1386">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withPreferredWidth(preferredSize.width)._withPreferredHeight(preferredSize.height)));</span>
     }
 
     /**
@@ -1323,7 +1397,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      *          applied to the underlying component when the final {@link Style} is applied.
      */
     public ComponentStyleDelegate&lt;C&gt; prefSize( int width, int height ) {
-<span class="fc" id="L1326">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withPreferredWidth(width)._withPreferredHeight(height)));</span>
+<span class="fc" id="L1400">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withPreferredWidth(width)._withPreferredHeight(height)));</span>
     }
 
     /**
@@ -1336,7 +1410,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      *          applied to the underlying component when the final {@link Style} is applied.
      */
     public ComponentStyleDelegate&lt;C&gt; prefWidth( int preferredWidth ) {
-<span class="fc" id="L1339">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withPreferredWidth(preferredWidth)));</span>
+<span class="fc" id="L1413">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withPreferredWidth(preferredWidth)));</span>
     }
 
     /**
@@ -1349,7 +1423,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      *          applied to the underlying component when the final {@link Style} is applied.
      */
     public ComponentStyleDelegate&lt;C&gt; prefHeight( int preferredHeight ) {
-<span class="fc" id="L1352">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withPreferredHeight(preferredHeight)));</span>
+<span class="fc" id="L1426">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withPreferredHeight(preferredHeight)));</span>
     }
 
     /**
@@ -1360,8 +1434,8 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      *          applied to the underlying component when the final {@link Style} is applied.
      */
     public ComponentStyleDelegate&lt;C&gt; size( Dimension size ) {
-<span class="fc" id="L1363">        Objects.requireNonNull(size);</span>
-<span class="fc" id="L1364">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withWidth(size.width)._withHeight(size.height)));</span>
+<span class="fc" id="L1437">        Objects.requireNonNull(size);</span>
+<span class="fc" id="L1438">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withWidth(size.width)._withHeight(size.height)));</span>
     }
 
     /**
@@ -1373,7 +1447,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      *          applied to the underlying component when the final {@link Style} is applied.
      */
     public ComponentStyleDelegate&lt;C&gt; size( int width, int height ) {
-<span class="fc" id="L1376">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withWidth(width)._withHeight(height)));</span>
+<span class="fc" id="L1450">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withWidth(width)._withHeight(height)));</span>
     }
 
 
@@ -1385,7 +1459,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      *          applied to the underlying component when the final {@link Style} is applied.
      */
     public ComponentStyleDelegate&lt;C&gt; width( int width ) {
-<span class="fc" id="L1388">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withWidth(width)));</span>
+<span class="fc" id="L1462">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withWidth(width)));</span>
     }
 
     /**
@@ -1396,7 +1470,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      *          applied to the underlying component when the final {@link Style} is applied.
      */
     public ComponentStyleDelegate&lt;C&gt; height( int height ) {
-<span class="fc" id="L1399">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withHeight(height)));</span>
+<span class="fc" id="L1473">        return _withStyle(_style._withDimensionality(_style.dimensionality()._withHeight(height)));</span>
     }
 
     /**
@@ -1409,8 +1483,8 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided cursor type set to be later
      */
     public ComponentStyleDelegate&lt;C&gt; cursor( UI.Cursor cursor ) {
-<span class="fc" id="L1412">        Objects.requireNonNull(cursor);</span>
-<span class="fc" id="L1413">        return this.cursor(cursor.toAWTCursor());</span>
+<span class="fc" id="L1486">        Objects.requireNonNull(cursor);</span>
+<span class="fc" id="L1487">        return this.cursor(cursor.toAWTCursor());</span>
     }
 
     /**
@@ -1424,8 +1498,8 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided cursor type set to be later
      */
     public ComponentStyleDelegate&lt;C&gt; cursor( Cursor cursor ) {
-<span class="fc" id="L1427">        Objects.requireNonNull(cursor);</span>
-<span class="fc" id="L1428">        return _withStyle(_style._withBase(_style.base().cursor(cursor)));</span>
+<span class="fc" id="L1501">        Objects.requireNonNull(cursor);</span>
+<span class="fc" id="L1502">        return _withStyle(_style._withBase(_style.base().cursor(cursor)));</span>
     }
 
     /**
@@ -1433,7 +1507,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided {@link Layout} set to be later
      */
     public ComponentStyleDelegate&lt;C&gt; layout( Layout installer ) {
-<span class="fc" id="L1436">        return _withStyle(_style._withLayout(_style.layout().layout(installer)));</span>
+<span class="fc" id="L1510">        return _withStyle(_style._withLayout(_style.layout().layout(installer)));</span>
     }
 
     /**
@@ -1449,12 +1523,12 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided layout constraints set to be later
      */
     public ComponentStyleDelegate&lt;C&gt; layout( String constraints ) {
-<span class="nc bnc" id="L1452" title="All 2 branches missed.">        if ( _style.layout().layout() instanceof Layout.ForMigLayout ) {</span>
-<span class="nc" id="L1453">            Layout.ForMigLayout migInstaller = (Layout.ForMigLayout) _style.layout().layout();</span>
-<span class="nc" id="L1454">            migInstaller = migInstaller.withConstraint(constraints);</span>
-<span class="nc" id="L1455">            return _withStyle(_style._withLayout(_style.layout().layout(migInstaller)));</span>
+<span class="nc bnc" id="L1526" title="All 2 branches missed.">        if ( _style.layout().layout() instanceof Layout.ForMigLayout ) {</span>
+<span class="nc" id="L1527">            Layout.ForMigLayout migInstaller = (Layout.ForMigLayout) _style.layout().layout();</span>
+<span class="nc" id="L1528">            migInstaller = migInstaller.withConstraint(constraints);</span>
+<span class="nc" id="L1529">            return _withStyle(_style._withLayout(_style.layout().layout(migInstaller)));</span>
         }
-<span class="nc" id="L1457">        return _withStyle(_style._withLayout(_style.layout().layout(Layout.mig(constraints, &quot;&quot;, &quot;&quot;))));</span>
+<span class="nc" id="L1531">        return _withStyle(_style._withLayout(_style.layout().layout(Layout.mig(constraints, &quot;&quot;, &quot;&quot;))));</span>
     }
 
     /**
@@ -1472,12 +1546,12 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided layout constraints set to be later
      */
     public ComponentStyleDelegate&lt;C&gt; layout( String constraints, String columnConstraints ) {
-<span class="nc bnc" id="L1475" title="All 2 branches missed.">        if ( _style.layout().layout() instanceof Layout.ForMigLayout) {</span>
-<span class="nc" id="L1476">            Layout.ForMigLayout migInstaller = (Layout.ForMigLayout) _style.layout().layout();</span>
-<span class="nc" id="L1477">            migInstaller = migInstaller.withConstraint(constraints).withColumnConstraint(columnConstraints);</span>
-<span class="nc" id="L1478">            return _withStyle(_style._withLayout(_style.layout().layout(migInstaller)));</span>
+<span class="nc bnc" id="L1549" title="All 2 branches missed.">        if ( _style.layout().layout() instanceof Layout.ForMigLayout) {</span>
+<span class="nc" id="L1550">            Layout.ForMigLayout migInstaller = (Layout.ForMigLayout) _style.layout().layout();</span>
+<span class="nc" id="L1551">            migInstaller = migInstaller.withConstraint(constraints).withColumnConstraint(columnConstraints);</span>
+<span class="nc" id="L1552">            return _withStyle(_style._withLayout(_style.layout().layout(migInstaller)));</span>
         }
-<span class="nc" id="L1480">        return _withStyle(_style._withLayout(_style.layout().layout(Layout.mig(constraints, columnConstraints, &quot;&quot;))));</span>
+<span class="nc" id="L1554">        return _withStyle(_style._withLayout(_style.layout().layout(Layout.mig(constraints, columnConstraints, &quot;&quot;))));</span>
     }
 
     /**
@@ -1497,7 +1571,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided layout constraints set to be later
      */
     public ComponentStyleDelegate&lt;C&gt; layout( String constraints, String columnConstraints, String rowConstraints ) {
-<span class="fc" id="L1500">        return _withStyle(_style._withLayout(_style.layout().layout(Layout.mig(constraints, columnConstraints, rowConstraints))));</span>
+<span class="fc" id="L1574">        return _withStyle(_style._withLayout(_style.layout().layout(Layout.mig(constraints, columnConstraints, rowConstraints))));</span>
     }
 
     /**
@@ -1513,7 +1587,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided component constraints set to be later
      */
     public ComponentStyleDelegate&lt;C&gt; addConstraint( Object constraints ) {
-<span class="fc" id="L1516">        return _withStyle(_style._withLayout(_style.layout().constraint(constraints)));</span>
+<span class="fc" id="L1590">        return _withStyle(_style._withLayout(_style.layout().constraint(constraints)));</span>
     }
 
     /**
@@ -1530,7 +1604,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided layout constraints set to be later
      */
     public ComponentStyleDelegate&lt;C&gt; layout( LayoutConstraint constraintAttr ) {
-<span class="nc" id="L1533">        return layout(constraintAttr.toString());</span>
+<span class="nc" id="L1607">        return layout(constraintAttr.toString());</span>
     }
 
     /**
@@ -1542,7 +1616,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided alignment percentage alongside the X axis set to be later
      */
     public ComponentStyleDelegate&lt;C&gt; alignmentX( float percentage ) {
-<span class="fc" id="L1545">        return _withStyle(_style._withLayout(_style.layout().alignmentX(percentage)));</span>
+<span class="fc" id="L1619">        return _withStyle(_style._withLayout(_style.layout().alignmentX(percentage)));</span>
     }
 
     /**
@@ -1554,20 +1628,20 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided alignment percentage alongside the Y axis set to be later
      */
     public ComponentStyleDelegate&lt;C&gt; alignmentY( float percentage ) {
-<span class="fc" id="L1557">        return _withStyle(_style._withLayout(_style.layout().alignmentY(percentage)));</span>
+<span class="fc" id="L1631">        return _withStyle(_style._withLayout(_style.layout().alignmentY(percentage)));</span>
     }
 
     /**
      * @return The current UI scale factor, which is used to scale the UI
      *         for high resolution displays (high dots-per-inch, or DPI).
      */
-<span class="nc" id="L1564">    public float getScale() { return UI.scale(); }</span>
+<span class="nc" id="L1638">    public float getScale() { return UI.scale(); }</span>
 
     /**
      * @return The current UI scale factor, which is used to scale the UI
      *         for high resolution displays (high dots-per-inch, or DPI).
      */
-<span class="nc" id="L1570">    public float scale() { return UI.scale(); }</span>
+<span class="nc" id="L1644">    public float scale() { return UI.scale(); }</span>
 
     /**
      *  Use this method inside custom {@link swingtree.api.Painter} implementations (see {@link #painter(UI.Layer, swingtree.api.Painter)})
@@ -1576,7 +1650,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      *  @param value The {@code int} value to scale.
      *  @return The scaled {@code int} value.
      */
-<span class="nc" id="L1579">    public int scale( int value ) { return UI.scale(value); }</span>
+<span class="nc" id="L1653">    public int scale( int value ) { return UI.scale(value); }</span>
 
     /**
      *  Use this method inside custom {@link swingtree.api.Painter} implementations (see {@link #painter(UI.Layer, swingtree.api.Painter)})
@@ -1585,7 +1659,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      *  @param value The {@code float} value to scale.
      *  @return The scaled {@code float} value.
      */
-<span class="nc" id="L1588">    public float scale( float value ) { return UI.scale(value); }</span>
+<span class="nc" id="L1662">    public float scale( float value ) { return UI.scale(value); }</span>
 
     /**
      *  Use this method inside custom {@link swingtree.api.Painter} implementations (see {@link #painter(UI.Layer, Painter)})
@@ -1594,7 +1668,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      *  @param value The {@code double} value to scale.
      *  @return The scaled {@code double} value.
      */
-<span class="nc" id="L1597">    public double scale( double value ) { return UI.scale(value); }</span>
+<span class="nc" id="L1671">    public double scale( double value ) { return UI.scale(value); }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
