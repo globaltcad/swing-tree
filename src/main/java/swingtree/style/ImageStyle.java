@@ -242,8 +242,11 @@ public final class ImageStyle
      *
      * @param image The path to the (icon) image in the form of an {@link IconDeclaration}.
      * @return A new {@link ImageStyle} instance with the specified image.
+     * @throws NullPointerException If the specified {@code image} is null.
      */
-    public ImageStyle image( IconDeclaration image ) { return image.find().map(this::image).orElse(this); }
+    public ImageStyle image( IconDeclaration image ) {
+        Objects.requireNonNull(image);
+        return image.find().map(this::image).orElse(this); }
 
     /**
      *  Here you can specify the <b>placement</b> of the image onto the component.
