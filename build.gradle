@@ -185,7 +185,7 @@ publishing {
             from(components.java)
             pom {
                 name = PROJECT
-                description = 'A library for building declarative Swing GUIs.'
+                description = 'A library for building declarative Swing UIs.'
                 url = 'https://globaltcad.github.io/'+PROJECT+'/index.html'
                 organization {
                     name = 'Global TCAD Solutions'
