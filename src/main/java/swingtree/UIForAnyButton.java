@@ -203,7 +203,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     public I withFontSize( int size ) {
         B button = getComponent();
         Font old = button.getFont();
-        button.setFont(new Font(old.getName(), old.getStyle(), size));
+        button.setFont(old.deriveFont(UI.scale((float)size)));
         return _this();
     }
 

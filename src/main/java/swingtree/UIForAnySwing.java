@@ -2521,8 +2521,6 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withWidth( int width ) {
         C comp = getComponent();
         int currentHeight = comp.getSize().height;
-        if ( !comp.isPreferredSizeSet() && UI.currentLookAndFeel().isOneOf(UI.LookAndFeel.METAL, UI.LookAndFeel.NIMBUS) )
-            currentHeight = UI.scale(currentHeight);
         comp.setSize(new Dimension(UI.scale(width), currentHeight));
         return _this();
     }
@@ -2554,8 +2552,6 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withHeight( int height ) {
         C comp = getComponent();
         int currentWidth = comp.getSize().width;
-        if ( !comp.isPreferredSizeSet() && UI.currentLookAndFeel().isOneOf(UI.LookAndFeel.METAL, UI.LookAndFeel.NIMBUS) )
-            currentWidth = UI.scale(currentWidth);
         comp.setSize(new Dimension(currentWidth, UI.scale(height)));
         return _this();
     }
