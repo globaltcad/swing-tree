@@ -456,6 +456,35 @@ public final class UI extends UILayoutConstants
     }
 
     /**
+     *  Set of enum instances defining common types of Swing look and feels.
+     *  Use {@link UI#currentLookAndFeel()} to check which look and feel is currently active.
+     */
+    public enum LookAndFeel {
+        METAL,
+        FLAT_LAF,
+        NIMBUS,
+        OTHER;
+
+        public boolean isOneOf( LookAndFeel... lafs ) {
+            for ( LookAndFeel laf : lafs )
+                if ( laf == this ) return true;
+            return false;
+        }
+    }
+
+    public static LookAndFeel currentLookAndFeel() {
+        try {
+            String laf = UIManager.getLookAndFeel().getClass().getName();
+            if (laf.contains("FlatLaf")) return LookAndFeel.FLAT_LAF;
+            if (laf.contains("Nimbus")) return LookAndFeel.NIMBUS;
+            if (laf.contains("Metal")) return LookAndFeel.METAL;
+        }
+        catch (Exception ignored) {}
+
+        return LookAndFeel.OTHER;
+    }
+
+    /**
      * @return The current UI scale factor, which is used for DPI aware painting and layouts.
      */
     public static float scale() { return SwingTree.get().getUIScale().getUserScaleFactor(); }

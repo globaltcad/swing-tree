@@ -2149,7 +2149,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very builder to allow for method chaining.
      */
     public final I withMinWidth( int width ) {
-        getComponent().setMinimumSize(new Dimension(UI.scale(width), getComponent().getMinimumSize().height));
+        C comp = getComponent();
+        int currentHeight = comp.getMinimumSize().height;
+        if ( !comp.isMinimumSizeSet() && UI.currentLookAndFeel().isOneOf(UI.LookAndFeel.METAL, UI.LookAndFeel.NIMBUS) )
+            currentHeight = UI.scale(currentHeight);
+        comp.setMinimumSize(new Dimension(UI.scale(width), currentHeight));
         return _this();
     }
 
@@ -2178,7 +2182,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very builder to allow for method chaining.
      */
     public final I withMinHeight( int height ) {
-        getComponent().setMinimumSize(new Dimension(getComponent().getMinimumSize().width, UI.scale(height)));
+        C comp = getComponent();
+        int currentWidth = comp.getMinimumSize().width;
+        if ( !comp.isMinimumSizeSet() && UI.currentLookAndFeel().isOneOf(UI.LookAndFeel.METAL, UI.LookAndFeel.NIMBUS) )
+            currentWidth = UI.scale(currentWidth);
+        comp.setMinimumSize(new Dimension(currentWidth, UI.scale(height)));
         return _this();
     }
 
@@ -2274,7 +2282,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very builder to allow for method chaining.
      */
     public final I withMaxWidth( int width ) {
-        getComponent().setMaximumSize(new Dimension(UI.scale(width), getComponent().getMaximumSize().height));
+        C comp = getComponent();
+        int currentHeight = comp.getMaximumSize().height;
+        if ( !comp.isMaximumSizeSet() && UI.currentLookAndFeel().isOneOf(UI.LookAndFeel.METAL, UI.LookAndFeel.NIMBUS) )
+            currentHeight = UI.scale(currentHeight);
+        comp.setMaximumSize(new Dimension(UI.scale(width), currentHeight));
         return _this();
     }
 
@@ -2302,7 +2314,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very builder to allow for method chaining.
      */
     public final I withMaxHeight( int height ) {
-        getComponent().setMaximumSize(new Dimension(getComponent().getMaximumSize().width, UI.scale(height)));
+        C comp = getComponent();
+        int currentWidth = comp.getMaximumSize().width;
+        if ( !comp.isMaximumSizeSet() && UI.currentLookAndFeel().isOneOf(UI.LookAndFeel.METAL, UI.LookAndFeel.NIMBUS) )
+            currentWidth = UI.scale(currentWidth);
+        comp.setMaximumSize(new Dimension(currentWidth, UI.scale(height)));
         return _this();
     }
 
@@ -2398,7 +2414,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very builder to allow for method chaining.
      */
     public final I withPrefWidth( int width ) {
-        getComponent().setPreferredSize(new Dimension(UI.scale(width), getComponent().getPreferredSize().height));
+        C comp = getComponent();
+        int currentHeight = comp.getPreferredSize().height;
+        if ( !comp.isPreferredSizeSet() && UI.currentLookAndFeel().isOneOf(UI.LookAndFeel.METAL, UI.LookAndFeel.NIMBUS) )
+            currentHeight = UI.scale(currentHeight);
+        comp.setPreferredSize(new Dimension(UI.scale(width), currentHeight));
         return _this();
     }
 
@@ -2426,7 +2446,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very builder to allow for method chaining.
      */
     public final I withPrefHeight( int height ) {
-        getComponent().setPreferredSize(new Dimension(getComponent().getPreferredSize().width, UI.scale(height)));
+        C comp = getComponent();
+        int currentWidth = comp.getPreferredSize().width;
+        if ( !comp.isPreferredSizeSet() && UI.currentLookAndFeel().isOneOf(UI.LookAndFeel.METAL, UI.LookAndFeel.NIMBUS) )
+            currentWidth = UI.scale(currentWidth);
+        comp.setPreferredSize(new Dimension(currentWidth, UI.scale(height)));
         return _this();
     }
 
@@ -2495,7 +2519,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very builder to allow for method chaining.
      */
     public final I withWidth( int width ) {
-        getComponent().setSize(new Dimension(UI.scale(width), getComponent().getSize().height));
+        C comp = getComponent();
+        int currentHeight = comp.getSize().height;
+        if ( !comp.isPreferredSizeSet() && UI.currentLookAndFeel().isOneOf(UI.LookAndFeel.METAL, UI.LookAndFeel.NIMBUS) )
+            currentHeight = UI.scale(currentHeight);
+        comp.setSize(new Dimension(UI.scale(width), currentHeight));
         return _this();
     }
 
@@ -2524,7 +2552,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very builder to allow for method chaining.
      */
     public final I withHeight( int height ) {
-        getComponent().setSize(new Dimension(getComponent().getSize().width, UI.scale(height)));
+        C comp = getComponent();
+        int currentWidth = comp.getSize().width;
+        if ( !comp.isPreferredSizeSet() && UI.currentLookAndFeel().isOneOf(UI.LookAndFeel.METAL, UI.LookAndFeel.NIMBUS) )
+            currentWidth = UI.scale(currentWidth);
+        comp.setSize(new Dimension(currentWidth, UI.scale(height)));
         return _this();
     }
 
