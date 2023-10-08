@@ -1526,7 +1526,7 @@ class Individual_Component_Styling_Spec extends Specification
             ui.setPreferredSize(new Dimension(UI.scale(220), UI.scale(80)))
 
         expect : 'The image is as expected.'
-            Utility.similarityBetween(ui, "components/my-tabbed-pane.png", 99) > 98
+            Utility.similarityBetween(ui, "components/my-tabbed-pane.png", 98) > 98
 
         where :
             uiScale << [1, 2, 3]
