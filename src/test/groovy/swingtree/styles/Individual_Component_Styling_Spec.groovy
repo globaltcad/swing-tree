@@ -1,6 +1,8 @@
 package swingtree.styles
 
 import com.formdev.flatlaf.FlatLightLaf
+import examples.stylish.MyTabsView
+import examples.stylish.MyTabsViewModel
 import net.miginfocom.swing.MigLayout
 import spock.lang.Narrative
 import spock.lang.Specification
@@ -1482,6 +1484,52 @@ class Individual_Component_Styling_Spec extends Specification
 
         where :
             uiScale << [1]
+    }
+
+    def 'Use the style API to design custom tabbed panes from scratch.'(
+        float uiScale
+    ) {
+        reportInfo """
+            Creating heavily customized components in a way which prefers composition over inheritance
+            is one of the main goals of SwingTree and this little example demonstrates 
+            how this principle is also applicable for
+            more sophisticated components like tabbed panes.
+            <br>
+            Here you can see an example of a custom SwingTree based tabbed pane:
+            ${Utility.linkSnapshot('components/my-tabbed-pane.png')}
+
+            As you can see, the resulting tabbed pane looks nothing like the default tabbed pane
+            and we did not need to extend any Swing class to achieve this.
+        """
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+            So when your screen has a higher pixel density then this factor
+            is used by SwingTree to ensure that the UI is upscaled accordingly! 
+            Please note that the line below only exists for testing purposes, 
+            SwingTree will determine a suitable 
+            scaling factor for the current system automatically for you,
+            so you do not have to specify this factor manually. 
+        """
+            SwingTree.get().getUIScale().setUserScaleFactor(uiScale)
+        and :
+            MyTabsViewModel.TabModel tab1 = new MyTabsView.DummyTab("Tab 1", "").getModel();
+            MyTabsViewModel.TabModel tab2 = new MyTabsView.DummyTab("Tab 2", "img/two-16th-notes.svg").getModel();
+            MyTabsViewModel.TabModel tab3 = new MyTabsView.DummyTab("Tab 3", "img/hopper.svg").getModel();
+
+            MyTabsViewModel vm = new MyTabsViewModel();
+            vm.getTabs().add(tab1);
+            vm.getTabs().add(tab2);
+            vm.getTabs().add(tab3);
+
+            vm.getCurrentTab().set(tab2);
+            var ui = new MyTabsView(vm)
+            ui.setPreferredSize(new Dimension(UI.scale(220), UI.scale(80)))
+
+        expect : 'The image is as expected.'
+            Utility.similarityBetween(ui, "components/my-tabbed-pane.png", 99) > 98
+
+        where :
+            uiScale << [1, 2, 3]
     }
 
     def 'You can use the style API to configure client properties for components.'()
