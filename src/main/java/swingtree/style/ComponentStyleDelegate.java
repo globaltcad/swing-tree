@@ -509,6 +509,19 @@ public final class ComponentStyleDelegate<C extends JComponent>
     }
 
     /**
+     *  Returns a new {@link Style} with the provided border radius for the specified corner.
+     *  This will override both the arc width and arc height of the border.
+     *  Note that the border will be rendered with an inset space based on the padding defined by this {@link Style}.
+     *
+     * @param corner The corner to apply the border radius to.
+     * @param radius The border radius in pixels.
+     * @return A new {@link ComponentStyleDelegate} with the provided border radius for the specified corner.
+     */
+    public ComponentStyleDelegate<C> borderRadiusAt( UI.Corner corner, int radius ) {
+        return this.borderRadiusAt(corner, radius, radius);
+    }
+
+    /**
      *  This method makes it possible to define border shades for the border of your UI components.
      *  This is useful when you want to do advanced border effects, such as neumorphism a.k.a. soft UI. <br>
      *  Here is an example of how to use this method:
