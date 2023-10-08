@@ -16,10 +16,11 @@ import java.util.Objects;
 import java.util.function.Function;
 
 /**
- *  This used to smoothly render
- *  custom graphics on top of Swing components without requiring
- *  the user to override the paint method of the component.
- *  This is especially important to allow for declarative UI.
+ *  The core class of the SwingTree style engine, which is responsible for painting
+ *  the various style configurations hosted by the {@link Style} class onto a component.
+ *  <p>
+ *  This is a pretty long class, but it is not very complex, it just has a lot of methods
+ *  that are used to render the various style configurations like gradients, images, shadows, etc...
  */
 final class StylePainter<C extends JComponent>
 {
