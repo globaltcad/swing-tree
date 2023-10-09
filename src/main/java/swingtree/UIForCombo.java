@@ -3,13 +3,16 @@ package swingtree;
 import sprouts.Action;
 import sprouts.Var;
 
-import javax.swing.*;
+import javax.swing.ComboBoxModel;
+import javax.swing.JComboBox;
+import javax.swing.JTextField;
+import javax.swing.ListCellRenderer;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.Document;
-import java.awt.*;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.lang.ref.WeakReference;
@@ -236,7 +239,7 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UIForCom
      */
     public final <V extends E> UIForCombo<E,C> withRenderer( Render.Builder<C,V> renderBuilder ) {
         NullUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
-        return withRenderer((ListCellRenderer<E>) renderBuilder.getForCombo());
+        return withRenderer((ListCellRenderer<E>) renderBuilder.buildForCombo((C)getComponent()));
     }
 
     /**

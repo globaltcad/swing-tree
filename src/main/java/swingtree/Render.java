@@ -5,9 +5,11 @@ import org.slf4j.Logger;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.table.DefaultTableCellRenderer;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.util.*;
-import java.util.List;
 import java.util.function.*;
 
 /**
@@ -456,14 +458,21 @@ public final class Render<C extends JComponent,E>
 			}
 		}
 
-		private class SimpleListCellRenderer<T> extends DefaultListCellRenderer {
+		private class SimpleListCellRenderer<O extends C> extends DefaultListCellRenderer
+		{
+			private final O _component;
+
+			private SimpleListCellRenderer( O component ) {
+				_component = Objects.requireNonNull(component);
+			}
+
 			@Override
 			public Component getListCellRendererComponent(
-					JList list,
-					Object value,
-					final int row,
-					boolean isSelected,
-					boolean hasFocus
+			    JList   list,
+			    Object  value,
+			    final   int row,
+			    boolean isSelected,
+			    boolean hasFocus
 			) {
 				List<Consumer<Cell<C,?>>> interpreter = _find(value, _rendererLookup);
 				if ( interpreter.isEmpty() )
@@ -472,8 +481,8 @@ public final class Render<C extends JComponent,E>
 					Component[] componentRef = new Component[1];
 					Object[] defaultValueRef = new Object[1];
 					List<String> toolTips = new ArrayList<>();
-					Cell<JList<T>,Object> cell = new Cell<JList<T>, Object>() {
-						@Override public JList<T> getComponent() {return list;}
+					Cell<O,Object> cell = new Cell<O, Object>() {
+						@Override public O getComponent() { return _component; }
 						@Override public Optional<Object> value() { return Optional.ofNullable(value); }
 						@Override public boolean isSelected() {return isSelected;}
 						@Override public boolean hasFocus() {return hasFocus;}
@@ -508,7 +517,8 @@ public final class Render<C extends JComponent,E>
 		}
 
 		private static <C extends JComponent> List<Consumer<Cell<C,?>>> _find(
-				Object value, Map<Class<?>, java.util.List<Consumer<Cell<C,?>>>> rendererLookup
+		    Object value,
+			Map<Class<?>, java.util.List<Consumer<Cell<C,?>>>> rendererLookup
 		) {
 			Class<?> type = ( value == null ? Object.class : value.getClass() );
 			List<Consumer<Cell<C,?>>> cellRenderer = new ArrayList<>();
@@ -526,25 +536,43 @@ public final class Render<C extends JComponent,E>
 				throw new IllegalArgumentException("Renderer was set up to be used for a JTable!");
 		}
 
-		ListCellRenderer<E> getForList() {
+		/**
+		 *  Like many things in the SwingTree library, this class is
+		 *  essentially a convenient builder for a {@link ListCellRenderer}.
+		 *  This internal method actually builds the {@link ListCellRenderer} instance,
+		 *  see {@link UIForList#withRenderer(Builder)} for more details
+		 *  about how to use this class as pat of the main API.
+		 *
+		 * @param list The list for which the renderer is to be built.
+		 * @return The new {@link ListCellRenderer} instance specific to the given list.
+		 */
+		ListCellRenderer<E> buildForList( C list ) {
 			if ( JList.class.isAssignableFrom(_componentType) )
-				return (ListCellRenderer<E>) new SimpleListCellRenderer<Object>();
+				return (ListCellRenderer<E>) new SimpleListCellRenderer<>(list);
 			else
 				throw new IllegalArgumentException(
 						"Renderer was set up to be used for a JList! (not "+ _componentType.getSimpleName()+")"
 					);
 		}
 
-		ListCellRenderer<E> getForCombo() {
+		/**
+		 *  Like many things in the SwingTree library, this class is
+		 *  essentially a convenient builder for a {@link ListCellRenderer}.
+		 *  This internal method actually builds the {@link ListCellRenderer} instance,
+		 *  see {@link UIForList#withRenderer(Builder)} for more details
+		 *  about how to use this class as pat of the main API.
+		 *
+		 * @param comboBox The combo box for which the renderer is to be built.
+		 * @return The new {@link ListCellRenderer} instance specific to the given combo box.
+		 */
+		ListCellRenderer<E> buildForCombo( C comboBox ) {
 			if ( JComboBox.class.isAssignableFrom(_componentType) )
-				return (ListCellRenderer<E>) new SimpleListCellRenderer<Object>();
+				return (ListCellRenderer<E>) new SimpleListCellRenderer<>(comboBox);
 			else
 				throw new IllegalArgumentException(
 						"Renderer was set up to be used for a JComboBox! (not "+ _componentType.getSimpleName()+")"
 					);
 		}
-
-
 	}
 
 
@@ -577,6 +605,5 @@ public final class Render<C extends JComponent,E>
 				Math.min((int)(b/FACTOR), 255),
 				alpha);
 	}
-
 
 }
