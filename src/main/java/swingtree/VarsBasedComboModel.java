@@ -11,12 +11,25 @@ class VarsBasedComboModel<E> extends AbstractComboModel<E>
         super(Var.ofNullable(_findCommonType(items), null));
         _items = items;
         _selectedIndex = _indexOf(_selectedItem.orElseNull());
+        _items.onChange( it -> _itemListChanged() );
     }
 
     VarsBasedComboModel( Var<E> var, Vars<E> items ) {
         super(var);
         _items = items;
         _selectedIndex = _indexOf(_selectedItem.orElseNull());
+        _items.onChange( it -> _itemListChanged() );
+    }
+
+    private void _itemListChanged() {
+        UI.run(()-> {
+            int newSelection = _indexOf(_selectedItem.orElseNull());
+            if ( newSelection != _selectedIndex )
+                this.setSelectedItem(_items.at(newSelection).orElseNull());
+                // ^ This will fire the listeners for us already
+            else
+                fireListeners();
+        });
     }
 
     @Override public int getSize() { return _items.size(); }
