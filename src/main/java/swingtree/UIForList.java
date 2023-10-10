@@ -87,7 +87,7 @@ public class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForList<E,
     public final UIForList<E, L> withSelection( Var<E> selection ) {
         getComponent().addListSelectionListener( e -> {
             if ( !e.getValueIsAdjusting() )
-                selection.act( getComponent().getSelectedValue() );
+                selection.set(From.VIEW,  getComponent().getSelectedValue() );
         });
         _onShow( selection, v -> getComponent().setSelectedValue( v, true ) );
         return this;

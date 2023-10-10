@@ -4,6 +4,7 @@ import examples.mvvm.LoginViewModel
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
+import sprouts.From
 import sprouts.Var
 import sprouts.Vars
 import swingtree.SwingTree
@@ -71,7 +72,7 @@ class MVVM_Example_Spec extends Specification
     {
         given : 'We instantiate the "view model" in the form of a single property.'
             var pressedStates = []
-            Var<Boolean> buttonPressed = Var.of(false).onAct({pressedStates.add(it.get()) })
+            Var<Boolean> buttonPressed = Var.of(false).onChange(From.VIEW, {pressedStates.add(it.get()) })
         when : 'We create a view for our view model...'
             var ui = UI.button("Press me!").isPressedIf(buttonPressed)
 
@@ -90,7 +91,7 @@ class MVVM_Example_Spec extends Specification
     {
         given : 'We instantiate the "view model" in the form of a single property.'
             boolean actionPerformed = false
-            Var<Boolean> buttonPressed = Var.of(false).onAct({actionPerformed = true})
+            Var<Boolean> buttonPressed = Var.of(false).onChange(From.VIEW, {actionPerformed = true})
         when : 'We create a view for our view model...'
             var ui = UI.button("Press me!").isSelectedIf(buttonPressed)
 
@@ -160,7 +161,7 @@ class MVVM_Example_Spec extends Specification
         """
         given : 'We instantiate the "view model" in the form of a single property holding an example enum.'
             boolean actionPerformed = false
-            Var<Size> selected = Var.of(Size.SMALL).onAct({actionPerformed = true})
+            Var<Size> selected = Var.of(Size.SMALL).onChange(From.VIEW, {actionPerformed = true})
         expect : 'The enum we use for demonstration has the following values.'
             Size.values() == [Size.SMALL, Size.MEDIUM, Size.LARGE]
 
@@ -190,7 +191,7 @@ class MVVM_Example_Spec extends Specification
         """
         given : 'We instantiate the "view model" in the form of a single property holding an example enum.'
             boolean actionPerformed = false
-            Var<Option> selected = Var.of(Option.YES).onAct({actionPerformed = true})
+            Var<Option> selected = Var.of(Option.YES).onChange(From.VIEW, {actionPerformed = true})
         expect : 'The enum we use for demonstration has the following values.'
             Option.values() == [Option.YES, Option.NO, Option.MAYBE]
 
@@ -223,7 +224,7 @@ class MVVM_Example_Spec extends Specification
         """
         given : 'We instantiate the "view model" in the form of a single property holding a string.'
             boolean actionPerformed = false
-            Var<String> selected = Var.of("Tofu").onAct({actionPerformed = true})
+            Var<String> selected = Var.of("Tofu").onChange(From.VIEW, {actionPerformed = true})
         when : 'We create a view for our view model...'
             var ui = UI.comboBox("Tofu", "Tempeh", "Seitan").withSelectedItem(selected)
 

@@ -1,13 +1,20 @@
 package swingtree;
 
 import sprouts.Action;
+import sprouts.From;
 import sprouts.Val;
 import sprouts.Var;
 
-import javax.swing.*;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.lang.ref.WeakReference;
@@ -205,7 +212,7 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
             _selectionListeners.forEach( l -> l.accept(i) );
         });
         _onChange( e -> _doApp(()->{
-            index.act(getComponent().getSelectedIndex());
+            index.set(From.VIEW, getComponent().getSelectedIndex());
             _selectionListeners.forEach( l -> l.accept(getComponent().getSelectedIndex()) );
         }) );
         return withSelectedIndex(index.get());
@@ -299,7 +306,7 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
         tab.isEnabled().ifPresent( isEnabled -> getComponent().setEnabledAt(indexFinder.get(), isEnabled.get()) );
         tab.isSelected().ifPresent( isSelected -> {
             _selectTab( indexFinder.get(), isSelected.get() );
-            _selectionListeners.add( i -> isSelected.act(Objects.equals(i, indexFinder.get())) );
+            _selectionListeners.add( i -> isSelected.set(From.VIEW, Objects.equals(i, indexFinder.get())) );
             /*
                 The above listener will ensure that the isSelected property of the tab is updated when
                 the selection index property changes.
@@ -337,7 +344,7 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
     private void _selectTab( int tabIndex, boolean isSelected ) {
         int selectedIndex = ( isSelected ? tabIndex : getComponent().getSelectedIndex() );
         if ( _selectedTabIndex != null )
-            _selectedTabIndex.act(selectedIndex);
+            _selectedTabIndex.set(From.VIEW, selectedIndex);
         else
             getComponent().setSelectedIndex(selectedIndex);
 

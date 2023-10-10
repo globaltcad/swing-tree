@@ -1,6 +1,7 @@
 package swingtree;
 
 import sprouts.Action;
+import sprouts.From;
 import sprouts.Var;
 
 import javax.swing.ComboBoxModel;
@@ -273,7 +274,7 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UIForCom
             // The user has a custom model AND wants to bind to a property:
             _onShow( item, this::_setSelectedItem );
             _onSelection(
-                e -> _doApp( (E)getComponent().getSelectedItem(), item::act )
+                e -> _doApp( (E)getComponent().getSelectedItem(), newItem -> item.set(From.VIEW, newItem)  )
             );
         }
         return withSelectedItem(item.get());

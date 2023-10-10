@@ -1,10 +1,11 @@
 package examples.mvvm;
 
+import sprouts.From;
 import sprouts.Var;
 
 public class SomeComponentsViewModel {
 
-	private final Var<BaseSize> baseSize = Var.of(BaseSize.FACTOR).onAct(it->baseSizeChanged());
+	private final Var<BaseSize> baseSize = Var.of(BaseSize.FACTOR).onChange(From.VIEW, it->baseSizeChanged());
 	private final Var<Integer> x = Var.of(100);
 	private final Var<Double> percent = Var.of(100.0);
 

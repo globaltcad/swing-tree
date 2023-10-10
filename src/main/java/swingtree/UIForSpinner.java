@@ -1,6 +1,7 @@
 package swingtree;
 
 import sprouts.Action;
+import sprouts.From;
 import sprouts.Val;
 import sprouts.Var;
 
@@ -206,7 +207,7 @@ public class UIForSpinner<S extends JSpinner> extends UIForAnySwing<UIForSpinner
                         else if (value.type() == Byte.class   ) interpreted = Byte.parseByte((String) current);
                     }
                 }
-                ((Var<Object>) value).act( interpreted );
+                ((Var<Object>) value).set(From.VIEW,  interpreted );
             });
         });
         return withValue( value.get() );

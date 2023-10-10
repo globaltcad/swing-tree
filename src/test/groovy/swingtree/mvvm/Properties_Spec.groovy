@@ -4,11 +4,12 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
-import swingtree.SwingTree
-import swingtree.threading.EventProcessor
-import swingtree.UI
+import sprouts.From
 import sprouts.Val
 import sprouts.Var
+import swingtree.SwingTree
+import swingtree.UI
+import swingtree.threading.EventProcessor
 
 import java.util.function.Consumer
 
@@ -58,7 +59,7 @@ class Properties_Spec extends Specification
         given : 'A simple boolean property modelling a toggle state.'
             boolean userDidToggle = false
             Val<Boolean> toggled = Var.of(false)
-                                        .onAct({userDidToggle = true})
+                                        .onChange(From.VIEW, {userDidToggle = true})
 
         when : 'We create a toggle button using the "toggleButton" factory method and pass the property to it.'
             var ui = UI.toggleButton("Toggle Me!").isSelectedIf(toggled)
@@ -125,7 +126,7 @@ class Properties_Spec extends Specification
         and : 'Something we want to have a side effect on:'
             var list = []
         when : 'We subscribe to the property using the "onSetItem(..)" method.'
-            mutable.onSet { list.add(it.orElseNull()) }
+            mutable.onChange(From.VIEW_MODEL, it -> list.add(it.orElseNull()) )
         and : 'We change the value of the property.'
             mutable.set("Tofu")
         and : 'Then we wait for the EDT to complete the UI modifications...'
@@ -133,7 +134,7 @@ class Properties_Spec extends Specification
         then : 'The side effect is executed.'
             list == ["Tofu"]
         when : 'We trigger the side effect manually.'
-            mutable.fireSet()
+            mutable.fire(From.VIEW_MODEL)
             UI.sync()
         then : 'The side effect is executed again.'
             list.size() == 2
@@ -164,12 +165,12 @@ class Properties_Spec extends Specification
             Var<String> property = Var.of("Hello World")
         and : 'we bind 1 subscriber to the property.'
             var list1 = []
-            property.onSet { list1.add(it.orElseNull()) }
+            property.onChange(From.VIEW_MODEL, it -> list1.add(it.orElseNull()) )
         and : 'We create a new property with a different id.'
             Val<String> property2 = property.withId("XY")
         and : 'Another subscriber to the new property.'
             var list2 = []
-            property2.onSet { list2.add(it.orElseNull()) }
+            property2.onChange(From.VIEW_MODEL, it -> list2.add(it.orElseNull()) )
 
         when : 'We change the value of the original property.'
             property.set("Tofu")
@@ -188,7 +189,7 @@ class Properties_Spec extends Specification
             list2 == ["Tempeh"]
     }
 
-    def 'Properties are similar to the "Optional" class, you can map them and see if they are empty or not.'()
+    def 'Properties are similar to the `Optional` class, you can map them and see if they are empty or not.'()
     {
         given : 'We create a property...'
             Val<String> property = Val.of("Hello World")
@@ -203,7 +204,7 @@ class Properties_Spec extends Specification
             empty.mapTo(Integer, it -> it.length() ) == Val.ofNullable(Integer, null)
     }
 
-    def 'Use the "viewAs" method to create a dynamically updated view of a property.'()
+    def 'Use the `viewAs` method to create a dynamically updated view of a property.'()
     {
         reportInfo """
             The "viewAs" method is used to create a dynamically updated view of a property.
@@ -257,11 +258,12 @@ class Properties_Spec extends Specification
             lastWord.get() == "Saitan"
     }
 
-    def 'Changing the value of a property through the "act" method will also affect its views'()
+    def 'Changing the value of a property through `set(From.VIEW, T)` will also affect its views'()
     {
         reportInfo """
-            Note that the "act" method is used by the view to change the value of the original property.
-            It is conceptually similar to the `set(T)` method with the simple difference
+            Note that the `set(From.VIEW, T)` method is used by the view to change the value of the original property.
+            It is conceptually similar to the `set(T)` (equal to `set(From.VIEW_MODEL, T)`) 
+            method with the simple difference
             that it represents a user action.
             Irrespective as to how the value of the original property is changed,
             the views will be updated.
@@ -274,7 +276,7 @@ class Properties_Spec extends Specification
             words.get() == 2
 
         when : 'We change the value of the food property through the "act" method.'
-            food.act("Faster Than Light")
+            food.set(From.VIEW, "Faster Than Light")
         then : 'The view is updated.'
             words.get() == 3
     }
@@ -338,7 +340,7 @@ class Properties_Spec extends Specification
             arr1.hashCode() == arr2.hashCode()
     }
 
-    def 'The UI uses the "act(T)" method to change the property state to avoid feedback looping.'()
+    def 'The UI uses the `set(From.VIEW, T)` method to change the property state to avoid feedback looping.'()
     {
         reportInfo """
             Unfortunately Swing does not allow us to implement models for all types of UI components.
@@ -347,21 +349,21 @@ class Properties_Spec extends Specification
             to synchronize the state of both UI and view model.
             The problem with this approach is that it may lead to feedback loops.
             To prevent his problem there are 2 type of property mutations and events.
-            The UI uses the `act(T)` method to change the property state, this then triggers the
-            `onAct(..)` actions of the property. On the contrary the `set(T)` method on the other hand
-            is used to change the state and then trigger the `onSet` actions / listeners
+            The UI uses the `set(From.VIEW, T)` method to change the property state, this then triggers the
+            `onChange(From.VIEW, ..)` actions of the property. On the contrary the `set(T)` method on the other hand
+            is used to change the state and then trigger the `onChange(From.VIEW_MODEL, ..)` actions / listeners
             of the property. So if you want to change the state of a property from the UI
-            use the `act(T)` method, if you want to change the state of a property from the view model
+            use the `set(From.VIEW, T)` method, if you want to change the state of a property from the view model
             use the `set(T)` method.
         """
         given : 'A simple property with a view and model actions.'
             var uiListener = []
             var modelListener = []
             var property = Var.of(":)")
-                                .onAct(it ->{
+                                .onChange(From.VIEW, it ->{
                                     modelListener << it.orElseThrow()
                                 })
-            property.onSet(it -> uiListener << it.orElseNull() )
+            property.onChange(From.VIEW_MODEL, it -> uiListener << it.orElseNull() )
 
         when : 'We change the state of the property using the `set(T)` method.'
             property.set(":(")
@@ -373,7 +375,7 @@ class Properties_Spec extends Specification
             modelListener == []
 
         when : 'We change the state of the property using the `act(T)` method.'
-            property.act(":|")
+            property.set(From.VIEW, ":|")
         then : 'The "onSet" actions are NOT triggered, because the `act(T)` method performs an "act on your view model"!'
             uiListener == [":("]
         and : 'The view model actions are triggered.'

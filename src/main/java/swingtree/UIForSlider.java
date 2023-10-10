@@ -1,10 +1,11 @@
 package swingtree;
 
 import sprouts.Action;
+import sprouts.From;
 import sprouts.Val;
 import sprouts.Var;
 
-import javax.swing.*;
+import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.util.function.Consumer;
@@ -140,7 +141,7 @@ public class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSlider<S>
      */
     public final UIForSlider<S> withValue( Var<Integer> var ) {
         NullUtil.nullArgCheck( var, "var", Var.class );
-        _onChange( e -> _doApp(getComponent().getValue(), var::act) );
+        _onChange( e -> _doApp(getComponent().getValue(), newItem -> var.set(From.VIEW, newItem) ) );
         return this.withValue( (Val<Integer>) var );
     }
 

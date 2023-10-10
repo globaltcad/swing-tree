@@ -1,5 +1,6 @@
 package examples.mvvm;
 
+import sprouts.From;
 import sprouts.Var;
 
 public class SomeSettingsViewModel
@@ -14,7 +15,7 @@ public class SomeSettingsViewModel
         CLOCKWISE, COUNTER_CLOCKWISE
     }
 
-    private final Var<Boolean> hasType = Var.of(false).onAct(it-> verifyEnabled());
+    private final Var<Boolean> hasType = Var.of(false).onChange(From.VIEW, it-> verifyEnabled());
     private final Var<Type> type = Var.of(Type.Z);
     private final Var<Boolean> somethingEnabled = Var.of(false);
 
@@ -23,7 +24,7 @@ public class SomeSettingsViewModel
     private final Var<Boolean> flipped = Var.of(false);
 
     private final Var<Orientation> orientation = Var.of(Orientation.CLOCKWISE);
-    private final Var<Double> speed = Var.of(42.0).onAct( it -> speed().fireSet() );
+    private final Var<Double> speed = Var.of(42.0).onChange(From.VIEW,  it -> speed().fire(From.VIEW_MODEL) );
     private final Var<Boolean> speedIsValid = Var.of(true);
 
     public Var<Boolean> hasType() { return hasType; }

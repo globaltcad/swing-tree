@@ -1,6 +1,7 @@
 package examples.stylish;
 
 import sprouts.Event;
+import sprouts.From;
 import sprouts.Var;
 import swingtree.SwingTree;
 import swingtree.UI;
@@ -41,7 +42,7 @@ public class MyTabsView extends Panel
                 .withRepaintIf(repaintEvent)
                 .withTooltip(tabModel.tip())
                 .peek( b ->
-                    tabModel.iconSource().onSet(i -> {
+                    tabModel.iconSource().onChange(From.VIEW_MODEL, i -> {
                         Optional<ImageIcon> icon = i.get().find();
                         if ( icon.isPresent() ) {
                             b.setIcon(icon.get());
@@ -77,7 +78,7 @@ public class MyTabsView extends Panel
                     )
                 )
                 .onClick( it -> {
-                    vm.getCurrentTab().act(tabModel);
+                    vm.getCurrentTab().set(From.VIEW, tabModel);
                     select(vm.getCurrentTab().get());
                     repaintEvent.fire();
                 })
@@ -99,7 +100,7 @@ public class MyTabsView extends Panel
             )
         );
         vm.getCurrentTab().ifPresent( this::select );
-        vm.getCurrentTab().onSet( it -> select(it.get()) );
+        vm.getCurrentTab().onChange(From.VIEW_MODEL,  it -> select(it.get()) );
         vm.getTabs().onChange( it -> {
             updateContentComponents(
                 it.vals().stream()
@@ -110,7 +111,7 @@ public class MyTabsView extends Panel
             );
         });
         for ( MyTabsViewModel.TabModel tab : vm.getTabs() )
-            tab.iconSource().fireSet();
+            tab.iconSource().fire(From.VIEW_MODEL);
     }
 
     private void updateContentComponents(List<JComponent> newList) {

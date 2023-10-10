@@ -1,6 +1,7 @@
 package swingtree;
 
 import sprouts.Action;
+import sprouts.From;
 import sprouts.Val;
 import sprouts.Var;
 import swingtree.api.IconDeclaration;
@@ -48,7 +49,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     /**
      *  Binds the provided {@link Val} property to the wrapped button type
      *  and sets the text of the button to the value of the property.
-     * <i>Hint: Use {@code myProperty.fireSet()} in your view model to manually
+     * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to manually
      * send the property value to this view component.</i>
      * @param text The view model property which should be bound to this UI.
      * @return This very builder to allow for method chaining.
@@ -329,10 +330,10 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
         NullUtil.nullPropertyCheck(selected, "selected", "Null can not be used to model the selection state of a button type.");
         _onShow(selected, v -> _setSelectedSilently(v) );
         _onClick(
-            e -> _doApp(getComponent().isSelected(), selected::act)
+            e -> _doApp(getComponent().isSelected(), newItem -> selected.set(From.VIEW, newItem) )
         );
         _onChange(
-            v -> _doApp(getComponent().isSelected(), selected::act)
+            v -> _doApp(getComponent().isSelected(), newItem -> selected.set(From.VIEW, newItem) )
         );
         return isSelectedIf( selected.orElseThrow() );
     }
@@ -352,10 +353,10 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
         NullUtil.nullPropertyCheck(selected, "selected", "Null can not be used to model the selection state of a button type.");
         _onShow(selected, v -> _setSelectedSilently(!v) );
         _onClick(
-            e -> _doApp(!getComponent().isSelected(), selected::act)
+            e -> _doApp(!getComponent().isSelected(), newItem -> selected.set(From.VIEW, newItem) )
         );
         _onChange(
-            v -> _doApp(!getComponent().isSelected(), selected::act)
+            v -> _doApp(!getComponent().isSelected(), newItem -> selected.set(From.VIEW, newItem) )
         );
         return isSelectedIf( !selected.orElseThrow() );
     }
@@ -375,7 +376,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *  As you can see, the radio button will be selected if the enum property is equal to the supplied enum value
      *  and deselected otherwise. <br>
      *  <br>
-     * <i>Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param enumValue The enum value which, if equal to the supplied enum property, makes the UI component selected.
      * @param enumProperty The enum property which, if equal to the supplied enum value, makes the UI component selected.
@@ -393,7 +394,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *  This is the inverse of {@link #isSelectedIf(Enum, Val)}.
      *  Use this to make the wrapped UI component dynamically deselected or selected,
      *  based on the equality between the supplied enum value and enum property. <br>
-     * <i>Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param enumValue The enum value which, if equal to the supplied enum property, makes the UI component deselected.
      * @param enumProperty The enum property which, if equal to the supplied enum value, makes the UI component deselected.
@@ -421,8 +422,8 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
         _onShow( var, v -> getComponent().getModel().setPressed(v) );
         _onClick(
             e -> _doApp(getComponent().getModel().isPressed(), pressed->{
-                var.act(true);
-                var.act(pressed);
+                var.set(From.VIEW, true);
+                var.set(From.VIEW, pressed);
             })
         );
         // on change is not needed because the pressed state is only changed by the user.
@@ -585,7 +586,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *  }</pre>
      * This sets the horizontal alignment of the icon and text
      * and also binds the provided property to the underlying component. <br>
-     * <i>Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param horizontalAlign The horizontal alignment property which should be bound to the underlying component.
      * @return This very builder to allow for method chaining.
@@ -626,7 +627,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *  }</pre>
      * This sets the vertical alignment of the icon and text
      * and also binds the provided property to the underlying component. <br>
-     * <i>Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param verticalAlign The vertical alignment property which should be bound to the underlying component.
      * @return This very builder to allow for method chaining.
@@ -667,7 +668,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *  }</pre>
      * This sets the horizontal position of the text relative to the icon
      * and also binds the provided property to the underlying component. <br>
-     * <i>Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param horizontalAlign The horizontal text alignment property relative to the icon which should be bound to the underlying component.
      * @return This very builder to allow for method chaining.
@@ -708,7 +709,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *  }</pre>
      * This sets the vertical position of the text relative to the icon
      * and also binds the provided property to the underlying component. <br>
-     * <i>Hint: Use {@code myProperty.fireSet()} in your view model to send the property value to this view component.</i>
+     * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
      * @param verticalAlign The vertical text alignment property relative to the icon which should be bound to the underlying component.
      * @return This very builder to allow for method chaining.

@@ -1,13 +1,14 @@
 package examples.games;
 
 import sprouts.Event;
+import sprouts.From;
 import sprouts.Val;
 import sprouts.Var;
 import swingtree.UI;
 import swingtree.animation.Animation;
 import swingtree.animation.AnimationState;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -21,7 +22,7 @@ public class SymbolGuesserViewModel
     private final Var<Color>  feedbackColor = Var.of(Color.BLACK);
     private final Var<Integer> feedbackFontSize = Var.of(24);
     private final Var<Symbol> currentSymbol = Var.of(new Symbol('?', "?", "?"));
-    private final Var<Boolean> cheatMode = Var.of(false).onAct( it -> cheated() );
+    private final Var<Boolean> cheatMode = Var.of(false).onChange(From.VIEW, it -> cheated() );
 
     private final Var<Integer> score = Var.of(0);
     private final Val<Integer> level = score.view( s -> s / 10 );

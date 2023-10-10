@@ -2,6 +2,7 @@ package swingtree;
 
 import sprouts.Action;
 import sprouts.Event;
+import sprouts.From;
 import sprouts.Var;
 import swingtree.components.JSplitButton;
 
@@ -79,7 +80,7 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAnyButton<UIF
                 .onSelection( it -> {
                     it.selectOnlyCurrentItem();
                     it.setButtonText(e.toString());
-                    selection.act(e);
+                    selection.set(From.VIEW, e);
                 })
             );
 
@@ -103,7 +104,7 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAnyButton<UIF
                 .onSelection( it -> {
                     it.selectOnlyCurrentItem();
                     it.setButtonText(e.toString());
-                    selection.act(e);
+                    selection.set(From.VIEW, e);
                 })
             );
 

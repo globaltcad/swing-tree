@@ -1,11 +1,15 @@
 package swingtree;
 
 import sprouts.Action;
+import sprouts.From;
 import sprouts.Val;
 import sprouts.Var;
 import swingtree.api.IconDeclaration;
 
-import javax.swing.*;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
+import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -94,7 +98,7 @@ public final class Tab
         if ( _contents != null ) throw new IllegalArgumentException("Tab object may not be called anymore after the contents were specified!");
         if ( _isSelected != null ) throw new IllegalArgumentException("Selected state already specified!");
         Var<Boolean> isSelectedMut = Var.of(isSelected.get());
-        isSelected.onSet( it -> isSelectedMut.set(it.get()) );
+        isSelected.onChange(From.VIEW_MODEL, it -> isSelectedMut.set(it.get()) );
         return new Tab(_contents, _headerComponent, _title, isSelectedMut, _isEnabled, _icon, _tip, _onSelected, _onMouseClick);
     }
 
@@ -114,8 +118,8 @@ public final class Tab
         if ( _contents != null ) throw new IllegalArgumentException("Tab object may not be called anymore after the contents were specified!");
         if ( _isSelected != null ) throw new IllegalArgumentException("Selected state already specified!");
         Var<Boolean> isSelected = Var.of(state == selectedState.get());
-        selectedState.onSet( it -> isSelected.set(state == it.get()) );
-        isSelected.onSet( it -> { if ( it.get() ) selectedState.set(state); });
+        selectedState.onChange(From.VIEW_MODEL,  it -> isSelected.set(state == it.get()) );
+        isSelected.onChange(From.VIEW_MODEL,  it -> { if ( it.get() ) selectedState.set(state); });
         return new Tab(_contents, _headerComponent, _title, isSelected, _isEnabled, _icon, _tip, _onSelected, _onMouseClick);
     }
 
@@ -156,7 +160,7 @@ public final class Tab
         if ( _contents != null ) throw new IllegalArgumentException("Tab object may not be called anymore after the contents were specified!");
         if ( _isEnabled != null ) throw new IllegalArgumentException("Enabled state already specified!");
         Var<Boolean> isEnabled = Var.of(state == enabledState.get());
-        enabledState.onSet( it -> isEnabled.set(state == it.get()) );
+        enabledState.onChange(From.VIEW_MODEL,  it -> isEnabled.set(state == it.get()) );
         return new Tab(_contents, _headerComponent, _title, _isSelected, isEnabled, _icon, _tip, _onSelected, _onMouseClick);
     }
 

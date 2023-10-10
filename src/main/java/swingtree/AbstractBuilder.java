@@ -121,9 +121,9 @@ abstract class AbstractBuilder<I, C extends Component>
             }
             @Override public boolean canBeRemoved() { return !component().isPresent(); }
         };
-        val.onSet(action);
+        val.onChange(From.VIEW_MODEL, action);
         if ( val instanceof Var )
-            ((Var)val).onAct(action);
+            ((Var)val).onChange(From.VIEW, action);
     }
 
     /**

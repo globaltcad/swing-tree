@@ -249,7 +249,7 @@ class Properties_List_Spec extends Specification
         and : 'A list where we are going to record changes.'
             var changes = []
         and : 'Now we register a "set" listeners on both objects.'
-            prop.onSet(new Action<Integer>() {
+            prop.onChange(From.VIEW_MODEL, new Action<Integer>() {
                 @Override
                 void accept(Integer delegate) {
                     changes << "Something happened to the property."

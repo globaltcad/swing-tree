@@ -1,9 +1,12 @@
 package examples.stylish;
 
 import com.formdev.flatlaf.FlatLightLaf;
+import sprouts.From;
 import swingtree.UI;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics2D;
 import java.util.Optional;
 
 import static swingtree.UI.*;
@@ -70,7 +73,7 @@ public class BoxShadowPickerView extends UI.Panel
                         .add(GROW_X.and(PUSH_X),
                             textField(vm.shadowColor().mapTo(Integer.class, Color::getRGB).itemAsString())
                             .onContentChange(it -> {
-                                parseColor(it.get().getText()).ifPresent(color -> {vm.shadowColor().act(color);});
+                                parseColor(it.get().getText()).ifPresent(color -> {vm.shadowColor().set(From.VIEW, color);});
                             })
                         )
                         .add(panel(FILL).withBackground(vm.shadowColor()))
@@ -78,7 +81,7 @@ public class BoxShadowPickerView extends UI.Panel
                         .add(GROW_X.and(PUSH_X),
                             textField(vm.backgroundColor().mapTo(Integer.class, Color::getRGB).itemAsString())
                             .onContentChange(it -> {
-                                parseColor(it.get().getText()).ifPresent(color -> {vm.backgroundColor().act(color);});
+                                parseColor(it.get().getText()).ifPresent(color -> {vm.backgroundColor().set(From.VIEW, color);});
                             })
                         )
                         .add(panel(FILL).withBackground(vm.backgroundColor()))
@@ -86,7 +89,7 @@ public class BoxShadowPickerView extends UI.Panel
                         .add(GROW_X.and(PUSH_X),
                             textField(vm.foundationColor().mapTo(Integer.class, Color::getRGB).itemAsString())
                             .onContentChange(it -> {
-                                parseColor(it.get().getText()).ifPresent(color -> {vm.foundationColor().act(color);});
+                                parseColor(it.get().getText()).ifPresent(color -> {vm.foundationColor().set(From.VIEW, color);});
                             })
                         )
                         .add(panel(FILL).withBackground(vm.foundationColor()))
@@ -101,7 +104,7 @@ public class BoxShadowPickerView extends UI.Panel
                 .add(GROW_X.and(PUSH_X),
                     textField(vm.shadowColor().mapTo(Integer.class, Color::getRGB).itemAsString())
                     .onContentChange( it -> {
-                        parseColor(it.get().getText()).ifPresent(color -> {vm.borderColor().act(color);});
+                        parseColor(it.get().getText()).ifPresent(color -> {vm.borderColor().set(From.VIEW, color);});
                     })
                 )
                 .add(WRAP, panel(FILL).withBackground(vm.borderColor()))
