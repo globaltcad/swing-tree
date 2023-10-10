@@ -154,13 +154,14 @@ public final class Render<C extends JComponent,E>
 		 * 	Specify a lambda which receives a {@link Cell} instance
 		 * 	for you to customize its renderer.
 		 * 	This is the most generic way to customize the rendering of a cell,
-		 * 	and you can choose between different ways of rendering:
+		 * 	as you can choose between vastly different ways of rendering:
 		 * 	<pre>{@code
+		 * 	    UI.renderTable()
 		 * 		.when( MyEnum.class )
 		 * 		.as( cell -> {
 		 * 			// do component based rendering:
 		 * 			cell.setRenderer( new JLabel( "Hello World" ) );
-		 * 			// or do graphics based rendering:
+		 * 			// or do graphics rendering directly:
 		 * 			cell.setRenderer( g -> {
 		 * 				// draw something
 		 * 				g.drawString( "Hello World", 0, 0 );
