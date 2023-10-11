@@ -24,7 +24,7 @@ public class SomeSettingsViewModel
     private final Var<Boolean> flipped = Var.of(false);
 
     private final Var<Orientation> orientation = Var.of(Orientation.CLOCKWISE);
-    private final Var<Double> speed = Var.of(42.0).onChange(From.VIEW,  it -> speed().fire(From.VIEW_MODEL) );
+    private final Var<Double> speed = Var.of(42.0).onChange(From.VIEW,  it -> speed().fireChange(From.VIEW_MODEL) );
     private final Var<Boolean> speedIsValid = Var.of(true);
 
     public Var<Boolean> hasType() { return hasType; }

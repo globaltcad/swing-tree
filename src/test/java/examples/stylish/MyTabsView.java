@@ -16,6 +16,10 @@ import java.util.stream.Collectors;
 
 import static swingtree.UI.*;
 
+/**
+ *  A custom tabs view implementation similar to {@link JTabbedPane},
+ *  but based on a declarative design and custom styling.
+ */
 public class MyTabsView extends Panel
 {
     private final JPanel           contentPanel = new JPanel();
@@ -111,7 +115,7 @@ public class MyTabsView extends Panel
             );
         });
         for ( MyTabsViewModel.TabModel tab : vm.getTabs() )
-            tab.iconSource().fire(From.VIEW_MODEL);
+            tab.iconSource().fireChange(From.VIEW_MODEL);
     }
 
     private void updateContentComponents(List<JComponent> newList) {

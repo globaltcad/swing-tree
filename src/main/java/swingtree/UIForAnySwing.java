@@ -1315,7 +1315,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the cursor selection state.");
         NullUtil.nullPropertyCheck(type, "type", "Null is not allowed to model a cursor type.");
         Cursor[] baseCursor = new Cursor[1];
-        _onShow( condition, c -> type.fire(From.VIEW_MODEL) );
+        _onShow( condition, c -> type.fireChange(From.VIEW_MODEL) );
         _onShow( type, c ->{
             if (baseCursor[0] == null) baseCursor[0] = getComponent().getCursor();
             getComponent().setCursor( new java.awt.Cursor( condition.get() ? c.type : baseCursor[0].getType() ) );

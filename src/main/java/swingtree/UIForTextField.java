@@ -106,13 +106,13 @@ public class UIForTextField<F extends JTextField> extends UIForAnyTextComponent<
 
                 if ( isValid.is(false) ) {
                     isValid.set(true);
-                    isValid.fire(From.VIEW);
+                    isValid.fireChange(From.VIEW);
                 }
             } catch (NumberFormatException e) {
                 // ignore
                 if ( isValid.is(true) ) {
                     isValid.set(false);
-                    isValid.fire(From.VIEW);
+                    isValid.fireChange(From.VIEW);
                 }
             }
         });

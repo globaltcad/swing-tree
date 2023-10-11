@@ -49,7 +49,7 @@ class Observing_Properties_Spec extends Specification
         then : 'The side effect is executed.'
             list == ["Tofu"]
         when : 'We trigger the side effect manually.'
-            mutable.fire(From.VIEW_MODEL)
+            mutable.fireChange(From.VIEW_MODEL)
         then : 'The side effect is executed again.'
             list.size() == 2
             list[0] == "Tofu"
