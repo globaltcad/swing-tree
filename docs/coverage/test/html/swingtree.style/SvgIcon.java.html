@@ -135,10 +135,10 @@ public final class SvgIcon extends ImageIcon
      * @return A new {@link SvgIcon} with the given {@link UI.FitComponent} policy.
      */
     public SvgIcon withFitComponent( UI.FitComponent fit ) {
-<span class="nc" id="L138">        Objects.requireNonNull(fit);</span>
-<span class="nc bnc" id="L139" title="All 2 branches missed.">        if ( fit == _fitComponent )</span>
+<span class="fc" id="L138">        Objects.requireNonNull(fit);</span>
+<span class="pc bpc" id="L139" title="1 of 2 branches missed.">        if ( fit == _fitComponent )</span>
 <span class="nc" id="L140">            return this;</span>
-<span class="nc" id="L141">        return new SvgIcon(_svgDocument, _width, _height, fit);</span>
+<span class="fc" id="L141">        return new SvgIcon(_svgDocument, _width, _height, fit);</span>
     }
 
     /**
@@ -242,24 +242,24 @@ public final class SvgIcon extends ImageIcon
 <span class="fc" id="L242">        FloatSize svgSize = _svgDocument.size();</span>
 <span class="pc bpc" id="L243" title="1 of 2 branches missed.">        float svgRefWidth  = ( svgSize.width  &gt; svgSize.height ? 1f : svgSize.width  / svgSize.height );</span>
 <span class="pc bpc" id="L244" title="1 of 2 branches missed.">        float svgRefHeight = ( svgSize.height &gt; svgSize.width  ? 1f : svgSize.height / svgSize.width  );</span>
-<span class="pc bpc" id="L245" title="1 of 2 branches missed.">        float imgRefWidth  = (     width      &gt;=   height      ? 1f :  (float) width /   height       );</span>
+<span class="fc bfc" id="L245" title="All 2 branches covered.">        float imgRefWidth  = (     width      &gt;=   height      ? 1f :  (float) width /   height       );</span>
 <span class="fc bfc" id="L246" title="All 2 branches covered.">        float imgRefHeight = (     height     &gt;=   width       ? 1f : (float) height /   width        );</span>
 
 <span class="fc" id="L248">        float scaleX = imgRefWidth  / svgRefWidth;</span>
 <span class="fc" id="L249">        float scaleY = imgRefHeight / svgRefHeight;</span>
 
-<span class="pc bpc" id="L251" title="3 of 4 branches missed.">        if ( _fitComponent == UI.FitComponent.MIN_DIM || _fitComponent == UI.FitComponent.MAX_DIM ) {</span>
+<span class="pc bpc" id="L251" title="1 of 4 branches missed.">        if ( _fitComponent == UI.FitComponent.MIN_DIM || _fitComponent == UI.FitComponent.MAX_DIM ) {</span>
 <span class="pc bpc" id="L252" title="1 of 2 branches missed.">            if ( width &lt; height )</span>
 <span class="nc" id="L253">                scaleX = 1f;</span>
 <span class="fc bfc" id="L254" title="All 2 branches covered.">            if ( height &lt; width )</span>
 <span class="fc" id="L255">                scaleY = 1f;</span>
         }
 
-<span class="pc bpc" id="L258" title="1 of 2 branches missed.">        if ( _fitComponent == UI.FitComponent.WIDTH )</span>
-<span class="nc" id="L259">            scaleX = 1f;</span>
+<span class="fc bfc" id="L258" title="All 2 branches covered.">        if ( _fitComponent == UI.FitComponent.WIDTH )</span>
+<span class="fc" id="L259">            scaleX = 1f;</span>
 
-<span class="pc bpc" id="L261" title="1 of 2 branches missed.">        if ( _fitComponent == UI.FitComponent.HEIGHT )</span>
-<span class="nc" id="L262">            scaleY = 1f;</span>
+<span class="fc bfc" id="L261" title="All 2 branches covered.">        if ( _fitComponent == UI.FitComponent.HEIGHT )</span>
+<span class="fc" id="L262">            scaleY = 1f;</span>
 
 <span class="fc" id="L264">        ViewBox viewBox = new ViewBox(x, y, width, height);</span>
 <span class="fc" id="L265">        float boxX      = viewBox.x  / scaleX;</span>
@@ -291,10 +291,10 @@ public final class SvgIcon extends ImageIcon
         else
 <span class="fc" id="L292">            viewBox = new ViewBox(boxX, boxY, boxWidth, boxHeight);</span>
 
-<span class="pc bpc" id="L294" title="1 of 2 branches missed.">        if ( _fitComponent == UI.FitComponent.NO ) {</span>
-<span class="nc bnc" id="L295" title="All 2 branches missed.">            width = _width &gt;= 0 ? _width : (int) svgSize.width;</span>
-<span class="nc bnc" id="L296" title="All 2 branches missed.">            height = _height &gt;= 0 ? _height : (int) svgSize.height;</span>
-<span class="nc" id="L297">            viewBox = new ViewBox(x, y, width, height);</span>
+<span class="fc bfc" id="L294" title="All 2 branches covered.">        if ( _fitComponent == UI.FitComponent.NO ) {</span>
+<span class="pc bpc" id="L295" title="1 of 2 branches missed.">            width = _width &gt;= 0 ? _width : (int) svgSize.width;</span>
+<span class="pc bpc" id="L296" title="1 of 2 branches missed.">            height = _height &gt;= 0 ? _height : (int) svgSize.height;</span>
+<span class="fc" id="L297">            viewBox = new ViewBox(x, y, width, height);</span>
         }
 
         // Let's check if the view box exists:
@@ -308,8 +308,8 @@ public final class SvgIcon extends ImageIcon
         // Now onto the actual rendering:
 
 <span class="fc" id="L310">        boolean doAntiAliasing  = StylePainter.DO_ANTIALIASING();</span>
-<span class="pc bpc" id="L311" title="1 of 2 branches missed.">        boolean wasAntiAliasing = g2d.getRenderingHint( java.awt.RenderingHints.KEY_ANTIALIASING ) == java.awt.RenderingHints.VALUE_ANTIALIAS_ON;</span>
-<span class="pc bpc" id="L312" title="1 of 4 branches missed.">        if ( doAntiAliasing &amp;&amp; !wasAntiAliasing )</span>
+<span class="fc bfc" id="L311" title="All 2 branches covered.">        boolean wasAntiAliasing = g2d.getRenderingHint( java.awt.RenderingHints.KEY_ANTIALIASING ) == java.awt.RenderingHints.VALUE_ANTIALIAS_ON;</span>
+<span class="fc bfc" id="L312" title="All 4 branches covered.">        if ( doAntiAliasing &amp;&amp; !wasAntiAliasing )</span>
 <span class="fc" id="L313">            g2d.setRenderingHint( java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_ON );</span>
 
 <span class="fc" id="L315">        AffineTransform oldTransform = g2d.getTransform();</span>
@@ -328,7 +328,7 @@ public final class SvgIcon extends ImageIcon
 
 <span class="fc" id="L329">        g2d.setTransform(oldTransform);</span>
 
-<span class="pc bpc" id="L331" title="1 of 4 branches missed.">        if ( doAntiAliasing &amp;&amp; !wasAntiAliasing )</span>
+<span class="fc bfc" id="L331" title="All 4 branches covered.">        if ( doAntiAliasing &amp;&amp; !wasAntiAliasing )</span>
 <span class="fc" id="L332">            g2d.setRenderingHint( java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_OFF );</span>
 <span class="fc" id="L333">    }</span>
 
@@ -337,7 +337,7 @@ public final class SvgIcon extends ImageIcon
 
     @Override
     public boolean equals( Object obj ) {
-<span class="nc bnc" id="L340" title="All 2 branches missed.">        if ( obj == null ) return false;</span>
+<span class="pc bpc" id="L340" title="1 of 2 branches missed.">        if ( obj == null ) return false;</span>
 <span class="nc bnc" id="L341" title="All 2 branches missed.">        if ( obj == this ) return true;</span>
 <span class="nc bnc" id="L342" title="All 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
 <span class="nc" id="L343">        SvgIcon rhs = (SvgIcon) obj;</span>

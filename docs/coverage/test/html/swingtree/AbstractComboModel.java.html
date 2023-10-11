@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AbstractComboModel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">AbstractComboModel.java</span></div><h1>AbstractComboModel.java</h1><pre class="source lang-java linenums">package swingtree;
 
 import org.slf4j.Logger;
+import sprouts.From;
 import sprouts.Var;
 
-import javax.swing.*;
+import javax.swing.ComboBoxModel;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 import java.util.ArrayList;
@@ -19,113 +20,113 @@ import java.util.Objects;
  */
 abstract class AbstractComboModel&lt;E&gt; implements ComboBoxModel&lt;E&gt;
 {
-<span class="fc" id="L22">	private static final Logger log = org.slf4j.LoggerFactory.getLogger(AbstractComboModel.class);</span>
+<span class="fc" id="L23">	private static final Logger log = org.slf4j.LoggerFactory.getLogger(AbstractComboModel.class);</span>
 
-<span class="fc" id="L24">	protected int _selectedIndex = -1;</span>
+<span class="fc" id="L25">	protected int _selectedIndex = -1;</span>
 	final Var&lt;E&gt; _selectedItem;
-<span class="fc" id="L26">	protected java.util.List&lt;ListDataListener&gt; listeners = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L27">	protected java.util.List&lt;ListDataListener&gt; listeners = new ArrayList&lt;&gt;();</span>
 
-<span class="fc" id="L28">	private boolean _acceptsEditorChanges = true; // This is important to prevent getting feedback loops!</span>
+<span class="fc" id="L29">	private boolean _acceptsEditorChanges = true; // This is important to prevent getting feedback loops!</span>
 
 	protected static &lt;E&gt; Class&lt;E&gt; _findCommonType( E[] items ) {
-<span class="fc" id="L31">		Iterable&lt;E&gt; iterable = () -&gt; java.util.Arrays.stream(items).iterator();</span>
-<span class="fc" id="L32">		return _findCommonType(iterable);</span>
+<span class="fc" id="L32">		Iterable&lt;E&gt; iterable = () -&gt; java.util.Arrays.stream(items).iterator();</span>
+<span class="fc" id="L33">		return _findCommonType(iterable);</span>
 	}
 
 	protected static &lt;E&gt; Class&lt;E&gt; _findCommonType( Iterable&lt;E&gt; items ) {
-<span class="pc bpc" id="L36" title="1 of 2 branches missed.">		if ( items == null ) return (Class&lt;E&gt;) Object.class;</span>
-<span class="fc" id="L37">		Class&lt;E&gt; type = null;</span>
-<span class="fc bfc" id="L38" title="All 2 branches covered.">		for ( E item : items ) {</span>
-<span class="pc bpc" id="L39" title="1 of 2 branches missed.">			if ( item == null ) continue;</span>
-<span class="fc bfc" id="L40" title="All 2 branches covered.">			if ( type == null )</span>
-<span class="fc" id="L41">				type = (Class&lt;E&gt;) item.getClass();</span>
+<span class="pc bpc" id="L37" title="1 of 2 branches missed.">		if ( items == null ) return (Class&lt;E&gt;) Object.class;</span>
+<span class="fc" id="L38">		Class&lt;E&gt; type = null;</span>
+<span class="fc bfc" id="L39" title="All 2 branches covered.">		for ( E item : items ) {</span>
+<span class="pc bpc" id="L40" title="1 of 2 branches missed.">			if ( item == null ) continue;</span>
+<span class="fc bfc" id="L41" title="All 2 branches covered.">			if ( type == null )</span>
+<span class="fc" id="L42">				type = (Class&lt;E&gt;) item.getClass();</span>
 			else
-<span class="fc" id="L43">				type = (Class&lt;E&gt;) Object.class;</span>
-<span class="fc" id="L44">		}</span>
-<span class="fc" id="L45">		return type;</span>
+<span class="fc" id="L44">				type = (Class&lt;E&gt;) Object.class;</span>
+<span class="fc" id="L45">		}</span>
+<span class="fc" id="L46">		return type;</span>
 	}
 
-<span class="fc" id="L48">	AbstractComboModel( Var&lt;E&gt; selectedItem ) {</span>
-<span class="fc" id="L49">		_selectedItem = Objects.requireNonNull(selectedItem);</span>
-<span class="fc" id="L50">	}</span>
+<span class="fc" id="L49">	AbstractComboModel( Var&lt;E&gt; selectedItem ) {</span>
+<span class="fc" id="L50">		_selectedItem = Objects.requireNonNull(selectedItem);</span>
+<span class="fc" id="L51">	}</span>
 
-<span class="fc" id="L52">	final Var&lt;E&gt; _getSelectedItemVar() { return _selectedItem; }</span>
+<span class="fc" id="L53">	final Var&lt;E&gt; _getSelectedItemVar() { return _selectedItem; }</span>
 
 	abstract AbstractComboModel&lt;E&gt; withVar( Var&lt;E&gt; newVar );
 
 	@Override public void setSelectedItem( Object anItem ) {
-<span class="pc bpc" id="L57" title="1 of 4 branches missed.">		if ( anItem != null &amp;&amp; !_selectedItem.type().isAssignableFrom(anItem.getClass()) )</span>
-<span class="fc" id="L58">			anItem = _convert(anItem.toString());</span>
-<span class="fc" id="L59">        E old = _selectedItem.orElseNull();</span>
-<span class="fc" id="L60">		Object finalAnItem = anItem;</span>
-<span class="fc" id="L61">		doQuietly(()-&gt; {</span>
-<span class="fc" id="L62">			_selectedItem.act((E) finalAnItem);</span>
-<span class="fc" id="L63">			_selectedIndex = _indexOf(finalAnItem);</span>
-<span class="fc bfc" id="L64" title="All 2 branches covered.">			if ( !Objects.equals(old, finalAnItem) )</span>
-<span class="fc" id="L65">				fireListeners();</span>
-<span class="fc" id="L66">		});</span>
-<span class="fc" id="L67">	}</span>
+<span class="pc bpc" id="L58" title="1 of 4 branches missed.">		if ( anItem != null &amp;&amp; !_selectedItem.type().isAssignableFrom(anItem.getClass()) )</span>
+<span class="fc" id="L59">			anItem = _convert(anItem.toString());</span>
+<span class="fc" id="L60">        E old = _selectedItem.orElseNull();</span>
+<span class="fc" id="L61">		Object finalAnItem = anItem;</span>
+<span class="fc" id="L62">		doQuietly(()-&gt; {</span>
+<span class="fc" id="L63">			_selectedItem.set(From.VIEW, (E) finalAnItem);</span>
+<span class="fc" id="L64">			_selectedIndex = _indexOf(finalAnItem);</span>
+<span class="fc bfc" id="L65" title="All 2 branches covered.">			if ( !Objects.equals(old, finalAnItem) )</span>
+<span class="fc" id="L66">				fireListeners();</span>
+<span class="fc" id="L67">		});</span>
+<span class="fc" id="L68">	}</span>
 
 	/** {@inheritDoc} */
-<span class="fc" id="L70">	@Override public Object getSelectedItem() { return _selectedItem.orElseNull(); }</span>
+<span class="fc" id="L71">	@Override public Object getSelectedItem() { return _selectedItem.orElseNull(); }</span>
 
 	/** {@inheritDoc} */
-<span class="fc" id="L73">	@Override public void addListDataListener( ListDataListener l ) { listeners.add(l); }</span>
+<span class="fc" id="L74">	@Override public void addListDataListener( ListDataListener l ) { listeners.add(l); }</span>
 
 	/** {@inheritDoc} */
-<span class="fc" id="L76">	@Override public void removeListDataListener( ListDataListener l ) { listeners.remove(l); }</span>
+<span class="fc" id="L77">	@Override public void removeListDataListener( ListDataListener l ) { listeners.remove(l); }</span>
 
     void fireListeners() {
 		try {
-<span class="fc bfc" id="L80" title="All 2 branches covered.">			for ( ListDataListener l : listeners )</span>
-<span class="fc" id="L81">				l.contentsChanged(</span>
-<span class="fc" id="L82">					new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, 0, getSize())</span>
+<span class="fc bfc" id="L81" title="All 2 branches covered.">			for ( ListDataListener l : listeners )</span>
+<span class="fc" id="L82">				l.contentsChanged(</span>
+<span class="fc" id="L83">					new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, 0, getSize())</span>
 				);
-<span class="nc" id="L84">		} catch ( Exception e ) {</span>
-<span class="nc" id="L85">			log.error(&quot;An exception occurred while firing combo box model listeners!&quot;, e);</span>
-<span class="fc" id="L86">		}</span>
-<span class="fc" id="L87">    }</span>
+<span class="nc" id="L85">		} catch ( Exception e ) {</span>
+<span class="nc" id="L86">			log.error(&quot;An exception occurred while firing combo box model listeners!&quot;, e);</span>
+<span class="fc" id="L87">		}</span>
+<span class="fc" id="L88">    }</span>
 
     void doQuietly( Runnable task ) {
-<span class="fc bfc" id="L90" title="All 2 branches covered.">    	boolean alreadyWithinQuietTask = !_acceptsEditorChanges;</span>
-<span class="fc" id="L91">		_acceptsEditorChanges = false;</span>
+<span class="fc bfc" id="L91" title="All 2 branches covered.">    	boolean alreadyWithinQuietTask = !_acceptsEditorChanges;</span>
+<span class="fc" id="L92">		_acceptsEditorChanges = false;</span>
 		try {
-<span class="fc" id="L93">			task.run();</span>
-<span class="nc" id="L94">		} catch ( Exception e ) {</span>
-<span class="nc" id="L95">			log.error(&quot;An exception occurred while running a combo box model task!&quot;, e);</span>
-<span class="fc" id="L96">		}</span>
-<span class="fc bfc" id="L97" title="All 2 branches covered.">		if ( !alreadyWithinQuietTask )</span>
-<span class="fc" id="L98">			_acceptsEditorChanges = true;</span>
-<span class="fc" id="L99">    }</span>
+<span class="fc" id="L94">			task.run();</span>
+<span class="nc" id="L95">		} catch ( Exception e ) {</span>
+<span class="nc" id="L96">			log.error(&quot;An exception occurred while running a combo box model task!&quot;, e);</span>
+<span class="fc" id="L97">		}</span>
+<span class="fc bfc" id="L98" title="All 2 branches covered.">		if ( !alreadyWithinQuietTask )</span>
+<span class="fc" id="L99">			_acceptsEditorChanges = true;</span>
+<span class="fc" id="L100">    }</span>
 
 	abstract protected void setAt( int index, E element );
 
     void updateSelectedIndex() {
-<span class="fc bfc" id="L104" title="All 4 branches covered.">        if ( _selectedIndex &gt;= 0 &amp;&amp; !_selectedItem.is(getElementAt(_selectedIndex)) )</span>
-<span class="fc" id="L105">            _selectedIndex = _indexOf(_selectedItem.orElseNull());</span>
-<span class="fc" id="L106">    }</span>
+<span class="fc bfc" id="L105" title="All 4 branches covered.">        if ( _selectedIndex &gt;= 0 &amp;&amp; !_selectedItem.is(getElementAt(_selectedIndex)) )</span>
+<span class="fc" id="L106">            _selectedIndex = _indexOf(_selectedItem.orElseNull());</span>
+<span class="fc" id="L107">    }</span>
 
 	void setFromEditor( String o ) {
-<span class="fc bfc" id="L109" title="All 2 branches covered.">		if ( !_acceptsEditorChanges )</span>
-<span class="fc" id="L110">			return; // The editor of a combo box can have very strange behaviour when it is updated by listeners</span>
+<span class="fc bfc" id="L110" title="All 2 branches covered.">		if ( !_acceptsEditorChanges )</span>
+<span class="fc" id="L111">			return; // The editor of a combo box can have very strange behaviour when it is updated by listeners</span>
 
-<span class="fc" id="L112">		updateSelectedIndex();</span>
-<span class="fc bfc" id="L113" title="All 2 branches covered.">		if ( _selectedIndex != -1 ) {</span>
+<span class="fc" id="L113">		updateSelectedIndex();</span>
+<span class="fc bfc" id="L114" title="All 2 branches covered.">		if ( _selectedIndex != -1 ) {</span>
 			try {
-<span class="fc" id="L115">				E e = _convert(o);</span>
-<span class="fc" id="L116">				this.setAt( _selectedIndex, e );</span>
-<span class="fc bfc" id="L117" title="All 2 branches covered.">				boolean stateChanged = _selectedItem.orElseNull() != e;</span>
-<span class="fc" id="L118">				_selectedItem.act(e);</span>
-<span class="fc bfc" id="L119" title="All 2 branches covered.">				if ( stateChanged )</span>
-<span class="fc" id="L120">					doQuietly(this::fireListeners);</span>
+<span class="fc" id="L116">				E e = _convert(o);</span>
+<span class="fc" id="L117">				this.setAt( _selectedIndex, e );</span>
+<span class="fc bfc" id="L118" title="All 2 branches covered.">				boolean stateChanged = _selectedItem.orElseNull() != e;</span>
+<span class="fc" id="L119">				_selectedItem.set(From.VIEW, e);</span>
+<span class="fc bfc" id="L120" title="All 2 branches covered.">				if ( stateChanged )</span>
+<span class="fc" id="L121">					doQuietly(this::fireListeners);</span>
 
-<span class="fc" id="L122">			} catch (Exception ignored) {</span>
+<span class="fc" id="L123">			} catch (Exception ignored) {</span>
 				// It looks like conversion was not successful
 				// So this means the editor input could not be converted to the type of the combo box
 				// So we'll just ignore it
-<span class="fc" id="L126">			}</span>
+<span class="fc" id="L127">			}</span>
 		}
-<span class="fc" id="L128">	}</span>
+<span class="fc" id="L129">	}</span>
 
 	/**
 	 *  Tries to convert the given {@link String} to the type of the combo box
@@ -136,121 +137,121 @@ abstract class AbstractComboModel&lt;E&gt; implements ComboBoxModel&lt;E&gt;
 	private E _convert( String o ) {
 		// We need to turn the above string into an object of the correct type!
 		// First of all, we know our target type:
-<span class="fc" id="L139">		Class&lt;E&gt; type = _selectedItem.type();</span>
+<span class="fc" id="L140">		Class&lt;E&gt; type = _selectedItem.type();</span>
 		// Now we need to convert it to that type, let's try a few things:
-<span class="fc bfc" id="L141" title="All 2 branches covered.">		if ( type == Object.class )</span>
-<span class="fc" id="L142">			return (E) o; // So apparently the type is intended to be Object, so we'll just return the string</span>
+<span class="fc bfc" id="L142" title="All 2 branches covered.">		if ( type == Object.class )</span>
+<span class="fc" id="L143">			return (E) o; // So apparently the type is intended to be Object, so we'll just return the string</span>
 
-<span class="fc bfc" id="L144" title="All 2 branches covered.">		if ( type == String.class ) // The most elegant case, the type is String, so we'll just return the string</span>
-<span class="fc" id="L145">			return (E) o;</span>
+<span class="fc bfc" id="L145" title="All 2 branches covered.">		if ( type == String.class ) // The most elegant case, the type is String, so we'll just return the string</span>
+<span class="fc" id="L146">			return (E) o;</span>
 
-<span class="fc bfc" id="L147" title="All 2 branches covered.">		if ( Number.class.isAssignableFrom(type) ) {</span>
+<span class="fc bfc" id="L148" title="All 2 branches covered.">		if ( Number.class.isAssignableFrom(type) ) {</span>
 			// Ah, a number, let's try to parse it, but first we make it easier.
-<span class="fc" id="L149">			o = o.trim();</span>
-<span class="pc bpc" id="L150" title="2 of 4 branches missed.">			if ( o.endsWith(&quot;f&quot;) || o.endsWith(&quot;F&quot;) )</span>
-<span class="nc" id="L151">				o = o.substring(0, o.length() - 1);</span>
+<span class="fc" id="L150">			o = o.trim();</span>
+<span class="pc bpc" id="L151" title="2 of 4 branches missed.">			if ( o.endsWith(&quot;f&quot;) || o.endsWith(&quot;F&quot;) )</span>
+<span class="nc" id="L152">				o = o.substring(0, o.length() - 1);</span>
 
-<span class="pc bpc" id="L153" title="2 of 4 branches missed.">			if ( o.endsWith(&quot;d&quot;) || o.endsWith(&quot;D&quot;) )</span>
-<span class="nc" id="L154">				o = o.substring(0, o.length() - 1);</span>
+<span class="pc bpc" id="L154" title="2 of 4 branches missed.">			if ( o.endsWith(&quot;d&quot;) || o.endsWith(&quot;D&quot;) )</span>
+<span class="nc" id="L155">				o = o.substring(0, o.length() - 1);</span>
 
-<span class="pc bpc" id="L156" title="1 of 4 branches missed.">			if ( o.endsWith(&quot;l&quot;) || o.endsWith(&quot;L&quot;) )</span>
-<span class="fc" id="L157">				o = o.substring(0, o.length() - 1);</span>
+<span class="pc bpc" id="L157" title="1 of 4 branches missed.">			if ( o.endsWith(&quot;l&quot;) || o.endsWith(&quot;L&quot;) )</span>
+<span class="fc" id="L158">				o = o.substring(0, o.length() - 1);</span>
 
 			try {
-<span class="fc bfc" id="L160" title="All 2 branches covered.">				if ( type == Integer.class ) return (E) Integer.valueOf(o);</span>
-<span class="pc bpc" id="L161" title="1 of 2 branches missed.">				if ( type == Double.class  ) return (E) Double.valueOf(o);</span>
-<span class="pc bpc" id="L162" title="1 of 2 branches missed.">				if ( type == Float.class   ) return (E) Float.valueOf(o);</span>
-<span class="fc bfc" id="L163" title="All 2 branches covered.">				if ( type == Long.class    ) return (E) Long.valueOf(o);</span>
-<span class="pc bpc" id="L164" title="1 of 2 branches missed.">				if ( type == Short.class   ) return (E) Short.valueOf(o);</span>
-<span class="pc bpc" id="L165" title="1 of 2 branches missed.">				if ( type == Byte.class    ) return (E) Byte.valueOf(o);</span>
-<span class="fc" id="L166">			} catch ( NumberFormatException e ) {</span>
+<span class="fc bfc" id="L161" title="All 2 branches covered.">				if ( type == Integer.class ) return (E) Integer.valueOf(o);</span>
+<span class="pc bpc" id="L162" title="1 of 2 branches missed.">				if ( type == Double.class  ) return (E) Double.valueOf(o);</span>
+<span class="pc bpc" id="L163" title="1 of 2 branches missed.">				if ( type == Float.class   ) return (E) Float.valueOf(o);</span>
+<span class="fc bfc" id="L164" title="All 2 branches covered.">				if ( type == Long.class    ) return (E) Long.valueOf(o);</span>
+<span class="pc bpc" id="L165" title="1 of 2 branches missed.">				if ( type == Short.class   ) return (E) Short.valueOf(o);</span>
+<span class="pc bpc" id="L166" title="1 of 2 branches missed.">				if ( type == Byte.class    ) return (E) Byte.valueOf(o);</span>
+<span class="fc" id="L167">			} catch ( NumberFormatException e ) {</span>
 				// We failed to parse the number... the input is invalid!
 				// So we cannot update the model, and simply return the old value:
-<span class="fc" id="L169">				return _selectedItem.orElseNull();</span>
-<span class="fc" id="L170">			}</span>
+<span class="fc" id="L170">				return _selectedItem.orElseNull();</span>
+<span class="fc" id="L171">			}</span>
 		}
 		// What now? Hmmm, let's try Boolean!
-<span class="fc bfc" id="L173" title="All 2 branches covered.">		if ( type == Boolean.class ) {</span>
-<span class="fc" id="L174">			o = o.trim().toLowerCase();</span>
-<span class="pc bpc" id="L175" title="1 of 6 branches missed.">			if ( o.equals(&quot;true&quot;) || o.equals(&quot;yes&quot;) || o.equals(&quot;1&quot;) )</span>
-<span class="fc" id="L176">				return (E) Boolean.TRUE;</span>
+<span class="fc bfc" id="L174" title="All 2 branches covered.">		if ( type == Boolean.class ) {</span>
+<span class="fc" id="L175">			o = o.trim().toLowerCase();</span>
+<span class="pc bpc" id="L176" title="1 of 6 branches missed.">			if ( o.equals(&quot;true&quot;) || o.equals(&quot;yes&quot;) || o.equals(&quot;1&quot;) )</span>
+<span class="fc" id="L177">				return (E) Boolean.TRUE;</span>
 
-<span class="pc bpc" id="L178" title="3 of 6 branches missed.">			if ( o.equals(&quot;false&quot;) || o.equals(&quot;no&quot;) || o.equals(&quot;0&quot;) )</span>
-<span class="fc" id="L179">				return (E) Boolean.FALSE;</span>
+<span class="pc bpc" id="L179" title="3 of 6 branches missed.">			if ( o.equals(&quot;false&quot;) || o.equals(&quot;no&quot;) || o.equals(&quot;0&quot;) )</span>
+<span class="fc" id="L180">				return (E) Boolean.FALSE;</span>
 
 			// We failed to parse the boolean... the input is invalid!
 			// So we cannot update the model, and simply return the old value:
-<span class="nc" id="L183">			return _selectedItem.orElseNull();</span>
+<span class="nc" id="L184">			return _selectedItem.orElseNull();</span>
 		}
 		// Ok maybe it's an enum?
-<span class="pc bpc" id="L186" title="1 of 2 branches missed.">		if ( type.isEnum() ) {</span>
-<span class="nc" id="L187">			Class&lt;Enum&gt; enumType = (Class&lt;Enum&gt;) type;</span>
-<span class="nc" id="L188">			String name = o.trim();</span>
-<span class="nc" id="L189">			try { return (E) Enum.valueOf(enumType, name); } catch ( IllegalArgumentException ignored) {}</span>
-<span class="nc" id="L190">			name = o.toUpperCase();</span>
-<span class="nc" id="L191">			try { return (E) Enum.valueOf(enumType, name); } catch ( IllegalArgumentException ignored) {}</span>
-<span class="nc" id="L192">			name = o.toLowerCase();</span>
-<span class="nc" id="L193">			try { return (E) Enum.valueOf(enumType, name); } catch ( IllegalArgumentException ignored) {}</span>
-<span class="nc" id="L194">			name = name.toUpperCase().replace(' ', '_').replace('-', '_');</span>
-<span class="nc" id="L195">			try { return (E) Enum.valueOf(enumType, name); } catch ( IllegalArgumentException ignored) {}</span>
-<span class="nc" id="L196">			name = name.toLowerCase().replace(' ', '_').replace('-', '_');</span>
-<span class="nc" id="L197">			try { return (E) Enum.valueOf(enumType, name); } catch ( IllegalArgumentException ignored) {}</span>
+<span class="pc bpc" id="L187" title="1 of 2 branches missed.">		if ( type.isEnum() ) {</span>
+<span class="nc" id="L188">			Class&lt;Enum&gt; enumType = (Class&lt;Enum&gt;) type;</span>
+<span class="nc" id="L189">			String name = o.trim();</span>
+<span class="nc" id="L190">			try { return (E) Enum.valueOf(enumType, name); } catch ( IllegalArgumentException ignored) {}</span>
+<span class="nc" id="L191">			name = o.toUpperCase();</span>
+<span class="nc" id="L192">			try { return (E) Enum.valueOf(enumType, name); } catch ( IllegalArgumentException ignored) {}</span>
+<span class="nc" id="L193">			name = o.toLowerCase();</span>
+<span class="nc" id="L194">			try { return (E) Enum.valueOf(enumType, name); } catch ( IllegalArgumentException ignored) {}</span>
+<span class="nc" id="L195">			name = name.toUpperCase().replace(' ', '_').replace('-', '_');</span>
+<span class="nc" id="L196">			try { return (E) Enum.valueOf(enumType, name); } catch ( IllegalArgumentException ignored) {}</span>
+<span class="nc" id="L197">			name = name.toLowerCase().replace(' ', '_').replace('-', '_');</span>
+<span class="nc" id="L198">			try { return (E) Enum.valueOf(enumType, name); } catch ( IllegalArgumentException ignored) {}</span>
 			// We failed to parse the enum... the input is invalid!
 			// So we cannot update the model, and simply return the old value:
-<span class="nc" id="L200">			return _selectedItem.orElseNull();</span>
+<span class="nc" id="L201">			return _selectedItem.orElseNull();</span>
 		}
 		// Or a character?
-<span class="pc bpc" id="L203" title="1 of 2 branches missed.">		if ( type == Character.class ) {</span>
-<span class="nc bnc" id="L204" title="All 2 branches missed.">			if ( o.trim().length() == 1 )</span>
-<span class="nc" id="L205">				return (E) Character.valueOf(o.charAt(0));</span>
+<span class="pc bpc" id="L204" title="1 of 2 branches missed.">		if ( type == Character.class ) {</span>
+<span class="nc bnc" id="L205" title="All 2 branches missed.">			if ( o.trim().length() == 1 )</span>
+<span class="nc" id="L206">				return (E) Character.valueOf(o.charAt(0));</span>
 			// Maybe it's all repeated?
-<span class="nc bnc" id="L207" title="All 2 branches missed.">			if ( o.trim().length() &gt; 1 ) {</span>
-<span class="nc" id="L208">				char c = o.charAt(0);</span>
-<span class="nc bnc" id="L209" title="All 2 branches missed.">				for ( int i = 1; i &lt; o.length(); i++ )</span>
-<span class="nc bnc" id="L210" title="All 2 branches missed.">					if ( o.charAt(i) != c )</span>
-<span class="nc" id="L211">						return _selectedItem.orElseNull();</span>
-<span class="nc" id="L212">				return (E) Character.valueOf(c);</span>
+<span class="nc bnc" id="L208" title="All 2 branches missed.">			if ( o.trim().length() &gt; 1 ) {</span>
+<span class="nc" id="L209">				char c = o.charAt(0);</span>
+<span class="nc bnc" id="L210" title="All 2 branches missed.">				for ( int i = 1; i &lt; o.length(); i++ )</span>
+<span class="nc bnc" id="L211" title="All 2 branches missed.">					if ( o.charAt(i) != c )</span>
+<span class="nc" id="L212">						return _selectedItem.orElseNull();</span>
+<span class="nc" id="L213">				return (E) Character.valueOf(c);</span>
 			}
 			// We failed to parse the character... the input is invalid!
 			// So we cannot update the model, and simply return the old value:
-<span class="nc" id="L216">			return _selectedItem.orElseNull();</span>
+<span class="nc" id="L217">			return _selectedItem.orElseNull();</span>
 		}
 		// Now it's getting tricky, but we don't give up. How about arrays?
-<span class="pc bpc" id="L219" title="1 of 2 branches missed.">		if ( type.isArray() ) {</span>
+<span class="pc bpc" id="L220" title="1 of 2 branches missed.">		if ( type.isArray() ) {</span>
 			// We need to split the string into elements, and then convert each element
 			// to the correct type. We can do this recursively, but first we need to
 			// find the type of the elements:
-<span class="nc" id="L223">			Class&lt;?&gt; componentType = type.getComponentType();</span>
+<span class="nc" id="L224">			Class&lt;?&gt; componentType = type.getComponentType();</span>
 			// Now we can split the string:
-<span class="nc" id="L225">			String[] parts = o.split(&quot;,&quot;);</span>
-<span class="nc bnc" id="L226" title="All 2 branches missed.">			if ( parts.length == 1 )</span>
-<span class="nc" id="L227">				parts = o.split(&quot; &quot;);</span>
+<span class="nc" id="L226">			String[] parts = o.split(&quot;,&quot;);</span>
+<span class="nc bnc" id="L227" title="All 2 branches missed.">			if ( parts.length == 1 )</span>
+<span class="nc" id="L228">				parts = o.split(&quot; &quot;);</span>
 
 			// And convert each part to the correct type:
-<span class="nc" id="L230">			Object[] array = (Object[]) java.lang.reflect.Array.newInstance(componentType, parts.length);</span>
-<span class="nc bnc" id="L231" title="All 2 branches missed.">			for ( int i = 0; i &lt; parts.length; i++ )</span>
-<span class="nc" id="L232">				array[i] = _convert(parts[i]);</span>
+<span class="nc" id="L231">			Object[] array = (Object[]) java.lang.reflect.Array.newInstance(componentType, parts.length);</span>
+<span class="nc bnc" id="L232" title="All 2 branches missed.">			for ( int i = 0; i &lt; parts.length; i++ )</span>
+<span class="nc" id="L233">				array[i] = _convert(parts[i]);</span>
 
 			// And finally we can return the array:
-<span class="nc" id="L235">			return (E) array;</span>
+<span class="nc" id="L236">			return (E) array;</span>
 		}
 		// Uff! Still nothing?!? Ok let's be creative, maybe we can try to use the constructor:
 		try {
-<span class="fc" id="L239">			return type.getConstructor(String.class).newInstance(o);</span>
-<span class="nc" id="L240">		} catch ( Exception e ) {</span>
+<span class="fc" id="L240">			return type.getConstructor(String.class).newInstance(o);</span>
+<span class="nc" id="L241">		} catch ( Exception e ) {</span>
 			// We failed to instantiate the class... Quite a pity, but at this point, who cares?
 		}
 
 		// What else is there? We don't know, so we just return the old value:
-<span class="nc" id="L245">		return _selectedItem.orElseNull();</span>
+<span class="nc" id="L246">		return _selectedItem.orElseNull();</span>
 	}
 
 	protected int _indexOf( Object anItem ) {
-<span class="fc bfc" id="L249" title="All 2 branches covered.">		for ( int i = 0; i &lt; getSize(); i++ )</span>
-<span class="fc bfc" id="L250" title="All 2 branches covered.">			if ( Objects.equals(anItem, getElementAt(i)) )</span>
-<span class="fc" id="L251">				return i;</span>
+<span class="fc bfc" id="L250" title="All 2 branches covered.">		for ( int i = 0; i &lt; getSize(); i++ )</span>
+<span class="fc bfc" id="L251" title="All 2 branches covered.">			if ( Objects.equals(anItem, getElementAt(i)) )</span>
+<span class="fc" id="L252">				return i;</span>
 
-<span class="fc" id="L253">		return _selectedIndex;</span>
+<span class="fc" id="L254">		return _selectedIndex;</span>
 	}
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

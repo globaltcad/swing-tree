@@ -238,7 +238,7 @@
 
         {"kind":"and","text":"A list where we are going to record changes.","code":["var changes = []"]},
 
-        {"kind":"and","text":"Now we register a \"set\" listeners on both objects.","code":["prop.onSet(new Action<Integer>() {","    @Override","    void accept(Integer delegate) {","        changes << \"Something happened to the property.\"","    }","    @Override boolean canBeRemoved() { return true }","})","list.onChange(new Action<ValsDelegate<Integer>>() {","    @Override","    void accept(ValsDelegate<Integer> delegate) {","        changes << \"Something happened to the list.\"","    }","    @Override boolean canBeRemoved() { return true }","})"]},
+        {"kind":"and","text":"Now we register a \"set\" listeners on both objects.","code":["prop.onChange(From.VIEW_MODEL, new Action<Integer>() {","    @Override","    void accept(Integer delegate) {","        changes << \"Something happened to the property.\"","    }","    @Override boolean canBeRemoved() { return true }","})","list.onChange(new Action<ValsDelegate<Integer>>() {","    @Override","    void accept(ValsDelegate<Integer> delegate) {","        changes << \"Something happened to the list.\"","    }","    @Override boolean canBeRemoved() { return true }","})"]},
 
         {"kind":"when","text":"We modify the properties in various ways...","code":["prop.set(42)","list.add(1)","list.removeAt(1)","list.setAt(0, 2)","list.addAt(1, 3)","list.remove(3)"]},
 

@@ -65,7 +65,7 @@
 
         {"kind":"then","text":"...an exception is thrown.","code":["thrown(Exception)"]},
 
-        {"kind":"where","text":"The following ways of trying to modify the state of the property should fail:","code":{"code":["{ it.set(7) }","{ it.act(9) }"]}}
+        {"kind":"where","text":"The following ways of trying to modify the state of the property should fail:","code":{"code":["{ it.set(7) }","{ it.set(From.VIEW, 9) }"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },

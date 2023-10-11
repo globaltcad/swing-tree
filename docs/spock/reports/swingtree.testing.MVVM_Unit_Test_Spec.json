@@ -29,23 +29,23 @@
 
         {"kind":"and","text":"It contains the expected messages!","code":["vm.feedback().get().contains(\"Username must be at least 3 characters long\")","vm.feedback().get().contains(\"Password must be at least 8 characters long\")","vm.feedback().get().contains(\"Email must contain an @ character\")","vm.feedback().get().contains(\"You must select a valid gender\")","vm.feedback().get().contains(\"You must accept the terms and conditions\")"]},
 
-        {"kind":"when","text":"We set the username to a valid value.","code":["vm.username().act(\"bob\")"]},
+        {"kind":"when","text":"We set the username to a valid value.","code":["vm.username().set(From.VIEW, \"bob\")"]},
 
         {"kind":"then","text":"The feedback is updated to reflect the change.","code":["!vm.feedback().get().contains(\"Username must be at least 3 characters long\")"]},
 
-        {"kind":"when","text":"We set the password to a valid value.","code":["vm.password().act(\"Password\")"]},
+        {"kind":"when","text":"We set the password to a valid value.","code":["vm.password().set(From.VIEW, \"Password\")"]},
 
         {"kind":"then","text":"The feedback is updated to reflect the change.","code":["!vm.feedback().get().contains(\"Password must be at least 8 characters long\")"]},
 
-        {"kind":"when","text":"We set the email to a valid value.","code":["vm.email().act(\"something@something.com\")"]},
+        {"kind":"when","text":"We set the email to a valid value.","code":["vm.email().set(From.VIEW, \"something@something.com\")"]},
 
         {"kind":"then","text":"The feedback is updated to reflect the change.","code":["!vm.feedback().get().contains(\"Email must contain an @ character\")"]},
 
-        {"kind":"when","text":"We set the gender to a valid value.","code":["vm.gender().act(UserRegistrationViewModel.Gender.FEMALE)"]},
+        {"kind":"when","text":"We set the gender to a valid value.","code":["vm.gender().set(From.VIEW, UserRegistrationViewModel.Gender.FEMALE)"]},
 
         {"kind":"then","text":"The feedback is updated to reflect the change.","code":["!vm.feedback().get().contains(\"You must select a valid gender\")"]},
 
-        {"kind":"when","text":"We set the terms accepted to a valid value.","code":["vm.termsAccepted().act(true)"]},
+        {"kind":"when","text":"We set the terms accepted to a valid value.","code":["vm.termsAccepted().set(From.VIEW, true)"]},
 
         {"kind":"then","text":"The feedback is updated to reflect the change.","code":["!vm.feedback().get().contains(\"You must accept the terms and conditions\")"]},
 

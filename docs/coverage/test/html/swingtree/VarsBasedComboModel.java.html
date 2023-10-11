@@ -11,20 +11,33 @@ class VarsBasedComboModel&lt;E&gt; extends AbstractComboModel&lt;E&gt;
 <span class="fc" id="L11">        super(Var.ofNullable(_findCommonType(items), null));</span>
 <span class="fc" id="L12">        _items = items;</span>
 <span class="fc" id="L13">        _selectedIndex = _indexOf(_selectedItem.orElseNull());</span>
-<span class="fc" id="L14">    }</span>
+<span class="pc" id="L14">        _items.onChange( it -&gt; _itemListChanged() );</span>
+<span class="fc" id="L15">    }</span>
 
     VarsBasedComboModel( Var&lt;E&gt; var, Vars&lt;E&gt; items ) {
-<span class="fc" id="L17">        super(var);</span>
-<span class="fc" id="L18">        _items = items;</span>
-<span class="fc" id="L19">        _selectedIndex = _indexOf(_selectedItem.orElseNull());</span>
-<span class="fc" id="L20">    }</span>
+<span class="fc" id="L18">        super(var);</span>
+<span class="fc" id="L19">        _items = items;</span>
+<span class="fc" id="L20">        _selectedIndex = _indexOf(_selectedItem.orElseNull());</span>
+<span class="fc" id="L21">        _items.onChange( it -&gt; _itemListChanged() );</span>
+<span class="fc" id="L22">    }</span>
 
-<span class="fc" id="L22">    @Override public int getSize() { return _items.size(); }</span>
+    private void _itemListChanged() {
+<span class="fc" id="L25">        UI.run(()-&gt; {</span>
+<span class="fc" id="L26">            int newSelection = _indexOf(_selectedItem.orElseNull());</span>
+<span class="pc bpc" id="L27" title="1 of 2 branches missed.">            if ( newSelection != _selectedIndex )</span>
+<span class="nc" id="L28">                this.setSelectedItem(_items.at(newSelection).orElseNull());</span>
+                // ^ This will fire the listeners for us already
+            else
+<span class="fc" id="L31">                fireListeners();</span>
+<span class="fc" id="L32">        });</span>
+<span class="fc" id="L33">    }</span>
 
-<span class="fc" id="L24">    @Override public E getElementAt( int index ) { return _items.at(index).orElseNull(); }</span>
+<span class="fc" id="L35">    @Override public int getSize() { return _items.size(); }</span>
+
+<span class="fc" id="L37">    @Override public E getElementAt( int index ) { return _items.at(index).orElseNull(); }</span>
 
     @Override public AbstractComboModel&lt;E&gt; withVar(Var&lt;E&gt; newVar) {
-<span class="fc" id="L27">        return new VarsBasedComboModel&lt;&gt;(newVar, _items);</span>
+<span class="fc" id="L40">        return new VarsBasedComboModel&lt;&gt;(newVar, _items);</span>
     }
 
     @Override
@@ -41,10 +54,10 @@ class VarsBasedComboModel&lt;E&gt; extends AbstractComboModel&lt;E&gt;
             So we'll just try to modify it, and if it fails, we'll just ignore it.
          */
         try {
-<span class="fc" id="L44">            _items.at(index).set(element);</span>
-<span class="nc" id="L45">        } catch (UnsupportedOperationException ignored) {</span>
+<span class="fc" id="L57">            _items.at(index).set(element);</span>
+<span class="nc" id="L58">        } catch (UnsupportedOperationException ignored) {</span>
             // ignore, the user of this library doesn't want us to modify the list
-<span class="fc" id="L47">        }</span>
-<span class="fc" id="L48">    }</span>
+<span class="fc" id="L60">        }</span>
+<span class="fc" id="L61">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
