@@ -48,16 +48,29 @@ public final class SwingTree
 	 * Note that this method will create the singleton if it does not exist.
 	 * @return the singleton instance of the {@link SwingTree}.
 	 */
-	public static SwingTree get() { return _INSTANCE.get(); }
+	public static SwingTree get() {
+        if ( _INSTANCE == null )
+            initialize();
+
+        return _INSTANCE.get();
+    }
+
+    /**
+     *  Clears the singleton instance of the {@link SwingTree}.
+     *  This is useful for testing purposes, or if you want to
+     *  reconfigure your application with a different {@link SwingTreeInitConfig}.
+     *  (see {@link #initialiseUsing(SwingTreeConfigurator)}).
+     */
+    public static void clear() { _INSTANCE = null; }
 
     /**
      *  Resets the singleton instance of the {@link SwingTree}
      *  causing it to be recreated the next time it is requested.
      *  This is useful for testing purposes, also in cases where
      *  the UI scale changes (through the reference font).<br>
-     *  Also see {@link #reinitialiseUsing(Font)}.
+     *  Also see {@link #initialiseUsing(SwingTreeConfigurator)}.
      */
-    public static void reinitialize() {
+    public static void initialize() {
         _INSTANCE = new LazyRef<>(SwingTree::new);
     }
 
@@ -68,12 +81,12 @@ public final class SwingTree
      *  to configure the {@link SwingTree} instance.<br>
      *  This is useful for testing purposes, also in cases where
      *  the UI scale changes (through the reference font).<br>
-     *  Also see {@link #reinitialize()}.
+     *  Also see {@link #initialize()}.
      *
      * @param configurator the {@link SwingTreeConfigurator} that is used
      *                     to configure the {@link SwingTree} instance.
      */
-    public static void reinitialiseUsing( SwingTreeConfigurator configurator ) {
+    public static void initialiseUsing( SwingTreeConfigurator configurator ) {
         _INSTANCE = new LazyRef<>(()->new SwingTree(configurator));
     }
 

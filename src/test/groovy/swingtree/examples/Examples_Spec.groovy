@@ -261,7 +261,7 @@ class Examples_Spec extends Specification
             Here we will only test the UI.
         """
         given :
-            SwingTree.reinitialiseUsing( it -> it.defaultFont(new Font("DejaVu Sans", Font.PLAIN, 12)))
+            SwingTree.initialiseUsing(it -> it.defaultFont(new Font("DejaVu Sans", Font.PLAIN, 12)))
             var view = new SomeSettingsView(new SomeSettingsViewModel())
             var speedTextField = new Utility.Query(view).find(JTextField, "speed-text-field").orElse(null)
         expect :

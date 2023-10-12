@@ -34,7 +34,7 @@ class Label_Binding_Spec extends Specification
     }
 
     def cleanupSpec() {
-        SwingTree.reinitialize()
+        SwingTree.clear()
     }
 
     def 'We can bind to the text of a label.'()

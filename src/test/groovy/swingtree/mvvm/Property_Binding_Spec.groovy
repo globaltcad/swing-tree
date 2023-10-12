@@ -30,7 +30,7 @@ class Property_Binding_Spec extends Specification
     }
 
     def cleanupSpec() {
-        SwingTree.reinitialize()
+        SwingTree.clear()
     }
 
     def 'We can bind a property to the size of a swing component.'( float uiScale )

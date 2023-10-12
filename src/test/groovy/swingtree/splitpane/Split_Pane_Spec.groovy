@@ -26,7 +26,7 @@ class Split_Pane_Spec extends Specification
     }
 
     def cleanupSpec() {
-        SwingTree.reinitialize()
+        SwingTree.clear()
     }
 
     def 'A horizontally aligned split pane can be created through the "splitPane" factory method.'()

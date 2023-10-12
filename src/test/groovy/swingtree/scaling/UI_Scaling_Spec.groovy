@@ -41,7 +41,7 @@ class UI_Scaling_Spec extends Specification
     }
 
     def cleanup() {
-        SwingTree.reinitialize()
+        SwingTree.clear()
     }
 
     def 'The dimensionality of components will be scaled by the scaling factor'() {

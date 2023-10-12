@@ -2,7 +2,7 @@ package swingtree;
 
 /**
  *  A functional interface for configuring a {@link SwingTree} instance
- *  through {@link SwingTree#reinitialiseUsing(SwingTreeConfigurator)}.
+ *  through {@link SwingTree#initialiseUsing(SwingTreeConfigurator)}.
  *  <p>
  *  The {@link SwingTreeConfigurator} is a function receiving an immutable
  *  {@link SwingTreeInitConfig} instance and returning a new one
