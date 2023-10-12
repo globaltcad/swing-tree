@@ -36,7 +36,7 @@ class Panel_Spec extends Specification
     }
 
     def cleanupSpec() {
-        SwingTree.reset()
+        SwingTree.reinitialize()
     }
 
     def 'A panel node can be created using the UI.panel() factory method.'() {

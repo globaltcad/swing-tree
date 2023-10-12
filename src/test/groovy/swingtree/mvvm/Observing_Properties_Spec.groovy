@@ -11,7 +11,7 @@ import sprouts.Var
 @Title("Property Change Listeners")
 @Narrative('''
 
-    The core motivation behind the creation of the SwingTree library
+    A core motivation behind the creation of the SwingTree library
     is to provide a simple and powerful way to model the state 
     as well as business logic of your UI without actually depending on it.
     

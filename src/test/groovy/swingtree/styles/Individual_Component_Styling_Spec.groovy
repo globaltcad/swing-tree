@@ -34,7 +34,7 @@ class Individual_Component_Styling_Spec extends Specification
     }
 
     def cleanupSpec() {
-        SwingTree.reset()
+        SwingTree.reinitialize()
     }
 
     def setup() {

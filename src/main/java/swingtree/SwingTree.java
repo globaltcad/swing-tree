@@ -1,10 +1,14 @@
 package swingtree;
 
+import org.slf4j.Logger;
 import swingtree.api.Painter;
 import swingtree.style.StyleSheet;
 import swingtree.threading.EventProcessor;
 
-import javax.swing.*;
+import javax.swing.ImageIcon;
+import javax.swing.LookAndFeel;
+import javax.swing.UIDefaults;
+import javax.swing.UIManager;
 import javax.swing.plaf.DimensionUIResource;
 import javax.swing.plaf.FontUIResource;
 import javax.swing.plaf.InsetsUIResource;
@@ -33,9 +37,11 @@ import java.util.function.Supplier;
  */
 public final class SwingTree
 {
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(SwingTree.class);
+
     private static final String _DEFAULT_FONT = "defaultFont";
 
-	private static LazyRef<SwingTree> _INSTANCE = new LazyRef<>(()->new SwingTree(null));
+	private static LazyRef<SwingTree> _INSTANCE = new LazyRef<>(SwingTree::new);
 
 	/**
 	 * Returns the singleton instance of the {@link SwingTree}.
@@ -49,36 +55,78 @@ public final class SwingTree
      *  causing it to be recreated the next time it is requested.
      *  This is useful for testing purposes, also in cases where
      *  the UI scale changes (through the reference font).<br>
-     *  Also see {@link #resetUsingDefaultFont(Font)}.
+     *  Also see {@link #reinitialiseUsing(Font)}.
      */
-    public static void reset() {
-        _INSTANCE = new LazyRef<>(()->new SwingTree(null));
+    public static void reinitialize() {
+        _INSTANCE = new LazyRef<>(SwingTree::new);
     }
 
     /**
      *  Resets the singleton instance of the {@link SwingTree}
      *  causing it to be recreated the next time it is requested,
-     *  but with a reference font as a basis for the UI scale.
+     *  but with a {@link SwingTreeConfigurator} that is used
+     *  to configure the {@link SwingTree} instance.<br>
      *  This is useful for testing purposes, also in cases where
      *  the UI scale changes (through the reference font).<br>
-     *  Also see {@link #reset()}.
+     *  Also see {@link #reinitialize()}.
      *
-     * @param uiScaleReferenceFont The font to use as a basis for
-     *                             calculating the UI scale factor.
+     * @param configurator the {@link SwingTreeConfigurator} that is used
+     *                     to configure the {@link SwingTree} instance.
      */
-    public static void resetUsingDefaultFont(Font uiScaleReferenceFont ) {
-        _INSTANCE = new LazyRef<>(()->new SwingTree(uiScaleReferenceFont));
+    public static void reinitialiseUsing( SwingTreeConfigurator configurator ) {
+        _INSTANCE = new LazyRef<>(()->new SwingTree(configurator));
     }
 
-	private EventProcessor _eventProcessor = EventProcessor.COUPLED_STRICT;
-	private StyleSheet _styleSheet = null;
+    private SwingTreeInitConfig _config;
 
     private final LazyRef<UIScale> uiScale;
     private final Map<String, ImageIcon> _iconCache = new HashMap<>();
 
 
-	private SwingTree( Font uiScaleReferenceFont ) {
-        this.uiScale = new LazyRef<>( () -> new UIScale(uiScaleReferenceFont) );
+    private SwingTree() { this(config -> config); }
+
+	private SwingTree( SwingTreeConfigurator configurator ) {
+        _config = _resolveConfiguration(configurator);
+        this.uiScale = new LazyRef<>( () -> new UIScale(_config) );
+        _establishMainFont(_config);
+    }
+
+    private SwingTreeInitConfig _resolveConfiguration(SwingTreeConfigurator configurator ) {
+        try {
+            Objects.requireNonNull(configurator);
+            SwingTreeInitConfig config = configurator.configure(SwingTreeInitConfig.none());
+            Objects.requireNonNull(config);
+            return config;
+        } catch (Exception ex) {
+            log.error("Error resolving SwingTree configuration", ex);
+            ex.printStackTrace();
+            return SwingTreeInitConfig.none();
+        }
+    }
+
+    private static void _establishMainFont( SwingTreeInitConfig config ) {
+        try {
+            if (config.fontInstallation() == SwingTreeInitConfig.FontInstallation.HARD)
+                config.defaultFont().ifPresent(font -> {
+                    if (font instanceof FontUIResource)
+                        _installFontInUIManager((FontUIResource) font);
+                    else
+                        _installFontInUIManager(new FontUIResource(font));
+                });
+        } catch (Exception ex) {
+            log.error("Error installing font in UIManager", ex);
+            ex.printStackTrace();
+        }
+    }
+
+    private static void _installFontInUIManager(javax.swing.plaf.FontUIResource f){
+        Enumeration<Object> keys = UIManager.getDefaults().keys();
+        while ( keys.hasMoreElements() ) {
+            Object key = keys.nextElement();
+            Object value = UIManager.get (key);
+            if ( value instanceof javax.swing.plaf.FontUIResource )
+                UIManager.put(key, f);
+        }
     }
 
     /**
@@ -98,7 +146,7 @@ public final class SwingTree
 	 *         GUI and application events.
 	 */
 	public EventProcessor getEventProcessor() {
-		return _eventProcessor;
+		return _config.eventProcessor();
 	}
 
 	/**
@@ -106,22 +154,32 @@ public final class SwingTree
 	 * @param eventProcessor the {@link EventProcessor} that is used to process GUI and application events.
 	 */
 	public void setEventProcessor( EventProcessor eventProcessor ) {
-		_eventProcessor = Objects.requireNonNull(eventProcessor);
+        try {
+            _config = _config.eventProcessor(Objects.requireNonNull(eventProcessor));
+        } catch (Exception ex) {
+            log.error("Error setting event processor", ex);
+            ex.printStackTrace();
+        }
 	}
 
 	/**
 	 * @return The currently configured {@link StyleSheet} that is used to style components.
 	 */
 	public Optional<StyleSheet> getStyleSheet() {
-		return Optional.ofNullable(_styleSheet);
+        return _config.styleSheet();
 	}
 
 	/**
 	 * Sets the {@link StyleSheet} that is used to style components.
 	 * @param styleSheet the {@link StyleSheet} that is used to style components.
 	 */
-	public void setStyleSheet( StyleSheet styleSheet) {
-		_styleSheet = styleSheet;
+	public void setStyleSheet( StyleSheet styleSheet ) {
+        try {
+            _config = _config.styleSheet(styleSheet);
+        } catch ( Exception ex ) {
+            log.error("Error setting style sheet", ex);
+            ex.printStackTrace();
+        }
 	}
 
     /**
@@ -167,25 +225,33 @@ public final class SwingTree
         private boolean initialized;
 
 
-        private UIScale( Font uiScaleReferenceFont ) {// private to prevent instantiation from outside
+        private UIScale( SwingTreeInitConfig config ) // private to prevent instantiation from outside
+        {
             try {
-                UIDefaults defaults = UIManager.getDefaults();
-
-                if ( uiScaleReferenceFont != null )
-                    defaults.put(_DEFAULT_FONT, null);
-
-                if ( uiScaleReferenceFont == null )
-                    uiScaleReferenceFont = UIManager.getFont( _DEFAULT_FONT );
-
-                if ( uiScaleReferenceFont == null ) {
-                    Font highDPIFont = _calculateDPIAwarePlatformFont();
-                    defaults.put(_DEFAULT_FONT, highDPIFont);
+                if ( config.scaling() == SwingTreeInitConfig.Scaling.NONE ) {
+                    initialized = true;
+                    return;
                 }
 
-                initialize();
+                if ( config.scaling() == SwingTreeInitConfig.Scaling.FROM_FONT ) {
 
+                    Font uiScaleReferenceFont = config.defaultFont().orElse(null);
+                    UIDefaults defaults = UIManager.getDefaults();
+
+                    if (uiScaleReferenceFont != null)
+                        defaults.put(_DEFAULT_FONT, null);
+
+                    if (uiScaleReferenceFont == null)
+                        uiScaleReferenceFont = UIManager.getFont(_DEFAULT_FONT);
+
+                    if (uiScaleReferenceFont == null) {
+                        Font highDPIFont = _calculateDPIAwarePlatformFont();
+                        defaults.put(_DEFAULT_FONT, highDPIFont);
+                    }
+                }
+                initialize();
             } catch (Exception ex) {
-                ex.printStackTrace();
+                log.error("Error initializing "+UIScale.class.getSimpleName(), ex);
                 // Usually there should be no exception, if there is one, the library will still work, but
                 // the UI may not be scaled correctly. Please report this exception to the library author.
             }
