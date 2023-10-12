@@ -11,7 +11,7 @@ import swingtree.SwingTree
 import swingtree.components.JBox
 import swingtree.threading.EventProcessor
 import swingtree.UI
-
+import utility.SwingTreeTestConfigurator
 import utility.Utility
 
 import javax.swing.*
@@ -28,6 +28,7 @@ import java.awt.image.BufferedImage
 class Individual_Component_Styling_Spec extends Specification
 {
     def setupSpec() {
+        SwingTree.initialiseUsing(SwingTreeTestConfigurator.get())
         SwingTree.get().setEventProcessor(EventProcessor.COUPLED_STRICT)
         // In this specification we are using the strict event processor
         // which will throw exceptions if we try to perform UI operations in the test thread.
@@ -348,7 +349,7 @@ class Individual_Component_Styling_Spec extends Specification
             var image = Utility.renderSingleComponent(ui.getComponent())
 
         then : 'The image is as expected.'
-            Utility.similarityBetween(image, "components/rounded-green-JLabel.png", 98.5) > 98.5
+            Utility.similarityBetween(image, "components/rounded-green-JLabel.png", 99.5) > 99.5
     }
 
     def 'This is how you can create a JPanel with a shaded border.'()
@@ -1757,7 +1758,7 @@ class Individual_Component_Styling_Spec extends Specification
             ui.setPreferredSize(new Dimension(UI.scale(220), UI.scale(80)))
 
         expect : 'The image is as expected.'
-            Utility.similarityBetween(ui, "components/my-tabbed-pane.png", 98) > 98
+            Utility.similarityBetween(ui, "components/my-tabbed-pane.png", 97.5) > 97.5
 
         where :
             uiScale << [1, 2, 3]

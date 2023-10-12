@@ -25,6 +25,7 @@ import swingtree.components.JSplitButton
 import swingtree.examples.advanced.AdvancedUI
 import swingtree.examples.simple.TableUI
 import swingtree.threading.EventProcessor
+import utility.SwingTreeTestConfigurator
 import utility.Utility
 
 import javax.swing.*
@@ -45,6 +46,7 @@ import java.awt.*
 class Examples_Spec extends Specification
 {
     def setupSpec() {
+        SwingTree.initialiseUsing(SwingTreeTestConfigurator.get())
         SwingTree.get().setEventProcessor(EventProcessor.COUPLED)
         // This is so that the test thread is also allowed to perform UI operations
     }
@@ -236,7 +238,7 @@ class Examples_Spec extends Specification
             var ui = new AnimatedButtonsView()
             ui.setBackground(new Color(242, 242, 242))
         expect : 'It is rendered as shown in the image.'
-            Utility.similarityBetween(ui, "views/animated-buttons-UI.png", 94.3) > 94.3
+            Utility.similarityBetween(ui, "views/animated-buttons-UI.png", 98.3) > 98.3
     }
 
     def 'The animation example view can be created.'()
@@ -261,7 +263,7 @@ class Examples_Spec extends Specification
             Here we will only test the UI.
         """
         given :
-            SwingTree.initialiseUsing(it -> it.defaultFont(new Font("DejaVu Sans", Font.PLAIN, 12)))
+            SwingTree.initialiseUsing(SwingTreeTestConfigurator.get())
             var view = new SomeSettingsView(new SomeSettingsViewModel())
             var speedTextField = new Utility.Query(view).find(JTextField, "speed-text-field").orElse(null)
         expect :
