@@ -1,6 +1,7 @@
 package examples.games;
 
 import sprouts.Event;
+import sprouts.From;
 import sprouts.Val;
 import sprouts.Var;
 import swingtree.UI;
@@ -19,7 +20,7 @@ public class NoteGuesserViewModel
     private final Var<Color>  feedbackColor = Var.of(Color.BLACK);
     private final Var<Integer> feedbackFontSize = Var.of(24);
     private final Var<Integer> currentNoteIndex = Var.of(0);
-    private final Var<Boolean> cheatMode = Var.of(false).onAct( it -> cheated() );
+    private final Var<Boolean> cheatMode = Var.of(false).onChange(From.VIEW, it -> cheated() );
 
     private final Var<Integer> score = Var.of(0);
     private final Val<Integer> level = score.view( s -> s / 10 );

@@ -1,11 +1,12 @@
 package swingtree;
 
-import sprouts.Action;
 import sprouts.*;
 import swingtree.api.ListEntryDelegate;
 import swingtree.api.ListEntryRenderer;
 
-import javax.swing.*;
+import javax.swing.AbstractListModel;
+import javax.swing.JList;
+import javax.swing.ListCellRenderer;
 import javax.swing.event.ListSelectionEvent;
 import java.util.ArrayList;
 import java.util.List;
@@ -86,7 +87,7 @@ public class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForList<E,
     public final UIForList<E, L> withSelection( Var<E> selection ) {
         getComponent().addListSelectionListener( e -> {
             if ( !e.getValueIsAdjusting() )
-                selection.act( getComponent().getSelectedValue() );
+                selection.set(From.VIEW,  getComponent().getSelectedValue() );
         });
         _onShow( selection, v -> getComponent().setSelectedValue( v, true ) );
         return this;
@@ -166,7 +167,7 @@ public class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForList<E,
      */
     public final <V extends E> UIForList<E, L> withRenderer( Render.Builder<L,V> renderBuilder ) {
         NullUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
-        return withRenderer((ListCellRenderer<E>) renderBuilder.getForList());
+        return withRenderer((ListCellRenderer<E>) renderBuilder.buildForList(getComponent()));
     }
 
     /**

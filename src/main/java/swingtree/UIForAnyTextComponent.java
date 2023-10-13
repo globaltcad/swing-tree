@@ -2,14 +2,15 @@ package swingtree;
 
 
 import sprouts.Action;
+import sprouts.From;
 import sprouts.Val;
 import sprouts.Var;
 
-import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.*;
-import java.awt.*;
+import java.awt.Font;
+import java.awt.TextComponent;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -131,7 +132,7 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
                     if ( UI.thisIsUIThread() )
                         UI.runLater( () -> {
                             try {
-                                text.act(e.getDocument().getText(0, e.getDocument().getLength()));
+                                text.set(From.VIEW, e.getDocument().getText(0, e.getDocument().getLength()));
                             } catch (BadLocationException ex) {
                                 throw new RuntimeException(ex);
                             }
@@ -146,7 +147,7 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
                                 at javax.swing.text.AbstractDocument.writeLock(AbstractDocument.java:1338))
                         */
                     else
-                        text.act(t);
+                        text.set(From.VIEW, t);
                 });
             } catch (BadLocationException ex) {
                 throw new RuntimeException(ex);

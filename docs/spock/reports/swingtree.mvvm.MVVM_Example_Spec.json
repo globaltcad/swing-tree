@@ -38,7 +38,7 @@
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"We instantiate the \"view model\" in the form of a single property.","code":["var pressedStates = []","Var<Boolean> buttonPressed = Var.of(false).onAct({pressedStates.add(it.get()) })"]},
+        {"kind":"given","text":"We instantiate the \"view model\" in the form of a single property.","code":["var pressedStates = []","Var<Boolean> buttonPressed = Var.of(false).onChange(From.VIEW, {pressedStates.add(it.get()) })"]},
 
         {"kind":"when","text":"We create a view for our view model...","code":["var ui = UI.button(\"Press me!\").isPressedIf(buttonPressed)"]},
 
@@ -59,7 +59,7 @@
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"We instantiate the \"view model\" in the form of a single property.","code":["boolean actionPerformed = false","Var<Boolean> buttonPressed = Var.of(false).onAct({actionPerformed = true})"]},
+        {"kind":"given","text":"We instantiate the \"view model\" in the form of a single property.","code":["boolean actionPerformed = false","Var<Boolean> buttonPressed = Var.of(false).onChange(From.VIEW, {actionPerformed = true})"]},
 
         {"kind":"when","text":"We create a view for our view model...","code":["var ui = UI.button(\"Press me!\").isSelectedIf(buttonPressed)"]},
 
@@ -143,7 +143,7 @@
       "tags":{},"see":[],"extraInfo":["\n            You can conveniently bind a combo box to any type of property, \n            but there are 2 types of properties which should be used preferably:\n            Enums and Strings. \n            And among these 2 you should always prefer enums over strings, because \n            they have a more manageable room of possible states...\n            Only if the possible states are too many\n            and not predictable during compile time, should you use strings.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We instantiate the \"view model\" in the form of a single property holding an example enum.","code":["boolean actionPerformed = false","Var<Size> selected = Var.of(Size.SMALL).onAct({actionPerformed = true})"]},
+        {"kind":"given","text":"We instantiate the \"view model\" in the form of a single property holding an example enum.","code":["boolean actionPerformed = false","Var<Size> selected = Var.of(Size.SMALL).onChange(From.VIEW, {actionPerformed = true})"]},
 
         {"kind":"expect","text":"The enum we use for demonstration has the following values.","code":["Size.values() == [Size.SMALL, Size.MEDIUM, Size.LARGE]"]},
 
@@ -168,7 +168,7 @@
       "tags":{},"see":[],"extraInfo":["\n            You can conveniently bind a combo box to any type of property, \n            but there are 2 types of properties which should be used preferably:\n            Enums and Strings. \n            And among these 2 you should always prefer enums over strings, because \n            they have a more manageable room of possible states...\n            Only if the possible states are too many\n            and not predictable during compile time, should you use strings.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We instantiate the \"view model\" in the form of a single property holding an example enum.","code":["boolean actionPerformed = false","Var<Option> selected = Var.of(Option.YES).onAct({actionPerformed = true})"]},
+        {"kind":"given","text":"We instantiate the \"view model\" in the form of a single property holding an example enum.","code":["boolean actionPerformed = false","Var<Option> selected = Var.of(Option.YES).onChange(From.VIEW, {actionPerformed = true})"]},
 
         {"kind":"expect","text":"The enum we use for demonstration has the following values.","code":["Option.values() == [Option.YES, Option.NO, Option.MAYBE]"]},
 
@@ -193,7 +193,7 @@
       "tags":{},"see":[],"extraInfo":["\n            You can conveniently bind a combo box to any type of property, \n            but there are 2 types of properties which should be used preferably:\n            Enums and Strings. \n            And among these 2 you should always prefer enums over strings, because \n            they have a more manageable room of possible states...\n            Only if the possible states are too many\n            and not predictable during compile time, should you use strings.\n            In the example below you can see how the usage of a string property\n            makes sense, because there might be requirements to add new food items\n            to the combo box at runtime.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We instantiate the \"view model\" in the form of a single property holding a string.","code":["boolean actionPerformed = false","Var<String> selected = Var.of(\"Tofu\").onAct({actionPerformed = true})"]},
+        {"kind":"given","text":"We instantiate the \"view model\" in the form of a single property holding a string.","code":["boolean actionPerformed = false","Var<String> selected = Var.of(\"Tofu\").onChange(From.VIEW, {actionPerformed = true})"]},
 
         {"kind":"when","text":"We create a view for our view model...","code":["var ui = UI.comboBox(\"Tofu\", \"Tempeh\", \"Seitan\").withSelectedItem(selected)"]},
 

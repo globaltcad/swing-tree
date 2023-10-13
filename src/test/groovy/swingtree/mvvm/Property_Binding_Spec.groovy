@@ -1,25 +1,25 @@
 package swingtree.mvvm
 
-
-import swingtree.SwingTree
-import swingtree.threading.EventProcessor
-import swingtree.UI
-import sprouts.Val
-import sprouts.Var
 import spock.lang.Narrative
 import spock.lang.Specification
+import spock.lang.Subject
 import spock.lang.Title
+import sprouts.Val
+import sprouts.Var
+import swingtree.SwingTree
+import swingtree.UI
+import swingtree.threading.EventProcessor
 
-import java.awt.Color
-import java.awt.Dimension
+import java.awt.*
 
-@Title("Property Binding")
+@Title("Binding Properties to UI Components")
 @Narrative('''
 
     This specification shows you how to bind properties to 
     the states of common types UI components.
 
 ''')
+@Subject([Val, Var])
 class Property_Binding_Spec extends Specification
 {
     enum Accept { YES, NO, MAYBE }
@@ -30,7 +30,7 @@ class Property_Binding_Spec extends Specification
     }
 
     def cleanupSpec() {
-        SwingTree.reset()
+        SwingTree.clear()
     }
 
     def 'We can bind a property to the size of a swing component.'( float uiScale )

@@ -1,9 +1,10 @@
 package swingtree;
 
 import org.slf4j.Logger;
+import sprouts.From;
 import sprouts.Var;
 
-import javax.swing.*;
+import javax.swing.ComboBoxModel;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 import java.util.ArrayList;
@@ -59,7 +60,7 @@ abstract class AbstractComboModel<E> implements ComboBoxModel<E>
         E old = _selectedItem.orElseNull();
 		Object finalAnItem = anItem;
 		doQuietly(()-> {
-			_selectedItem.act((E) finalAnItem);
+			_selectedItem.set(From.VIEW, (E) finalAnItem);
 			_selectedIndex = _indexOf(finalAnItem);
 			if ( !Objects.equals(old, finalAnItem) )
 				fireListeners();
@@ -115,7 +116,7 @@ abstract class AbstractComboModel<E> implements ComboBoxModel<E>
 				E e = _convert(o);
 				this.setAt( _selectedIndex, e );
 				boolean stateChanged = _selectedItem.orElseNull() != e;
-				_selectedItem.act(e);
+				_selectedItem.set(From.VIEW, e);
 				if ( stateChanged )
 					doQuietly(this::fireListeners);
 

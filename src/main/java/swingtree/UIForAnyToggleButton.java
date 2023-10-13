@@ -1,8 +1,9 @@
 package swingtree;
 
+import sprouts.From;
 import sprouts.Var;
 
-import javax.swing.*;
+import javax.swing.JToggleButton;
 
 /**
  *  An abstract precursor for swing tree builder nodes for {@link JToggleButton} instances.
@@ -45,7 +46,7 @@ public abstract class UIForAnyToggleButton<I, B extends JToggleButton> extends U
         // can be updated to reflect the new selection state.
         _onChange( event -> {
             if ( component.isSelected() )
-                selection.act( state ).fireSet();
+                selection.set(From.VIEW,  state ).fireChange(From.VIEW_MODEL);
         });
 
         return (I) this;

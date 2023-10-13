@@ -109,7 +109,7 @@ class Property_Safety_Spec extends Specification
         where : 'The following ways of trying to modify the state of the property should fail:'
            code << [
                    { it.set(7) },
-                   { it.act(9) }
+                   { it.set(From.VIEW, 9) }
                 ]
     }
 

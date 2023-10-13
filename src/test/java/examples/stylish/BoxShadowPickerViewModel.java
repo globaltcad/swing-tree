@@ -1,6 +1,7 @@
 package examples.stylish;
 
 import sprouts.Event;
+import sprouts.From;
 import sprouts.Val;
 import sprouts.Var;
 import swingtree.UI;
@@ -16,21 +17,21 @@ public class BoxShadowPickerViewModel
     private final Event repaint = Event.create();
 
     // Padding
-    private final Var<Integer> paddingTop = Var.of(5).onAct( it -> repaint.fire() );
-    private final Var<Integer> paddingLeft = Var.of(5).onAct( it -> repaint.fire() );
-    private final Var<Integer> paddingRight = Var.of(5).onAct( it -> repaint.fire() );
-    private final Var<Integer> paddingBottom = Var.of(5).onAct( it -> repaint.fire() );
+    private final Var<Integer> paddingTop = Var.of(5).onChange(From.VIEW, it -> repaint.fire() );
+    private final Var<Integer> paddingLeft = Var.of(5).onChange(From.VIEW,  it -> repaint.fire() );
+    private final Var<Integer> paddingRight = Var.of(5).onChange(From.VIEW,  it -> repaint.fire() );
+    private final Var<Integer> paddingBottom = Var.of(5).onChange(From.VIEW,  it -> repaint.fire() );
 
     // Margin
-    private final Var<Integer> marginTop = Var.of(30).onAct( it -> repaint.fire() );
-    private final Var<Integer> marginLeft = Var.of(35).onAct( it -> repaint.fire() );
-    private final Var<Integer> marginRight = Var.of(35).onAct( it -> repaint.fire() );
-    private final Var<Integer> marginBottom = Var.of(30).onAct( it -> repaint.fire() );
+    private final Var<Integer> marginTop = Var.of(30).onChange(From.VIEW,  it -> repaint.fire() );
+    private final Var<Integer> marginLeft = Var.of(35).onChange(From.VIEW,  it -> repaint.fire() );
+    private final Var<Integer> marginRight = Var.of(35).onChange(From.VIEW,  it -> repaint.fire() );
+    private final Var<Integer> marginBottom = Var.of(30).onChange(From.VIEW,  it -> repaint.fire() );
 
     // Border
-    private final Var<Color>   borderColor     = Var.of(new Color(0,0.4f,1)).onAct( it -> repaint.fire() );
-    private final Var<UI.Edge>    borderEdge      = Var.of(UI.Edge.EVERY).onAct(it -> updateEdgeSelection(it.get()) );
-    private final Var<UI.Corner>  borderCorner    = Var.of(UI.Corner.EVERY).onAct(it -> updateCornerSelection(it.get()) );
+    private final Var<Color>   borderColor     = Var.of(new Color(0,0.4f,1)).onChange(From.VIEW,  it -> repaint.fire() );
+    private final Var<UI.Edge>    borderEdge      = Var.of(UI.Edge.EVERY).onChange(From.VIEW, it -> updateEdgeSelection(it.get()) );
+    private final Var<UI.Corner>  borderCorner    = Var.of(UI.Corner.EVERY).onChange(From.VIEW, it -> updateCornerSelection(it.get()) );
 
     private final Map<UI.Edge, BorderEdgeViewModel> edgeModels = new HashMap<>();
     private final Map<UI.Corner, BorderCornerViewModel> cornerModels = new HashMap<>();
@@ -40,7 +41,7 @@ public class BoxShadowPickerViewModel
 
     public class BorderEdgeViewModel
     {
-        private final Var<Integer> borderWidth = Var.of(3).onAct(it -> repaint.fire() );
+        private final Var<Integer> borderWidth = Var.of(3).onChange(From.VIEW, it -> repaint.fire() );
 
         public JComponent createView() {
             return
@@ -53,8 +54,8 @@ public class BoxShadowPickerViewModel
 
     public class BorderCornerViewModel{
 
-        private final Var<Integer> borderArcWidth  = Var.of(25).onAct( it -> repaint.fire() );
-        private final Var<Integer> borderArcHeight = Var.of(25).onAct( it -> repaint.fire() );
+        private final Var<Integer> borderArcWidth  = Var.of(25).onChange(From.VIEW,  it -> repaint.fire() );
+        private final Var<Integer> borderArcHeight = Var.of(25).onChange(From.VIEW,  it -> repaint.fire() );
 
         public JComponent createView() {
             return
@@ -68,19 +69,19 @@ public class BoxShadowPickerViewModel
     }
 
     // Background
-    private final Var<Color> backgroundColor = Var.of(new Color(0.1f, 0.75f, 0.9f)).onAct( it -> repaint.fire() );
-    private final Var<Color> foundationColor = Var.of(new Color(1f,1f,1f)).onAct(it -> repaint.fire() );
+    private final Var<Color> backgroundColor = Var.of(new Color(0.1f, 0.75f, 0.9f)).onChange(From.VIEW,  it -> repaint.fire() );
+    private final Var<Color> foundationColor = Var.of(new Color(1f,1f,1f)).onChange(From.VIEW, it -> repaint.fire() );
 
     // Box Shadow
-    private final Var<Integer> horizontalShadowOffset = Var.of(0).onAct( it -> repaint.fire() );
-    private final Var<Integer> verticalShadowOffset = Var.of(0).onAct( it -> repaint.fire() );
-    private final Var<Integer> shadowBlurRadius = Var.of(6).onAct( it -> repaint.fire() );
-    private final Var<Integer> shadowSpreadRadius = Var.of(5).onAct( it -> repaint.fire() );
-    private final Var<Color> shadowColor = Var.of(Color.DARK_GRAY).onAct( it -> repaint.fire() );
-    private final Var<Boolean> shadowInset = Var.of(false).onAct( it -> repaint.fire() );
+    private final Var<Integer> horizontalShadowOffset = Var.of(0).onChange(From.VIEW,  it -> repaint.fire() );
+    private final Var<Integer> verticalShadowOffset = Var.of(0).onChange(From.VIEW,  it -> repaint.fire() );
+    private final Var<Integer> shadowBlurRadius = Var.of(6).onChange(From.VIEW,  it -> repaint.fire() );
+    private final Var<Integer> shadowSpreadRadius = Var.of(5).onChange(From.VIEW,  it -> repaint.fire() );
+    private final Var<Color> shadowColor = Var.of(Color.DARK_GRAY).onChange(From.VIEW,  it -> repaint.fire() );
+    private final Var<Boolean> shadowInset = Var.of(false).onChange(From.VIEW,  it -> repaint.fire() );
 
     // Smiley (For fun)
-    private final Var<Boolean> drawSmiley = Var.of(false).onAct( it -> repaint.fire() );
+    private final Var<Boolean> drawSmiley = Var.of(false).onChange(From.VIEW,  it -> repaint.fire() );
 
     private final Var<String> code = Var.of("");
 

@@ -1,9 +1,10 @@
 package examples.mvvm;
 
+import sprouts.From;
 import sprouts.Val;
 import sprouts.Var;
 
-import java.awt.*;
+import java.awt.Color;
 
 public class UserRegistrationViewModel
 {
@@ -11,11 +12,11 @@ public class UserRegistrationViewModel
         NOT_SELECTED, MALE, FEMALE, OTHER
     }
 
-    private final Var<String> username           = Var.of("").onAct(it -> validateAll() );
-    private final Var<String> password           = Var.of("").onAct(it -> validateAll() );
-    private final Var<String> email              = Var.of("").onAct(it -> validateAll() );
-    private final Var<Gender> gender             = Var.of(Gender.NOT_SELECTED).onAct(it -> validateAll() );
-    private final Var<Boolean> termsAccepted     = Var.of(false).onAct(it -> validateAll() );
+    private final Var<String> username           = Var.of("").onChange(From.VIEW, it -> validateAll() );
+    private final Var<String> password           = Var.of("").onChange(From.VIEW, it -> validateAll() );
+    private final Var<String> email              = Var.of("").onChange(From.VIEW, it -> validateAll() );
+    private final Var<Gender> gender             = Var.of(Gender.NOT_SELECTED).onChange(From.VIEW, it -> validateAll() );
+    private final Var<Boolean> termsAccepted     = Var.of(false).onChange(From.VIEW, it -> validateAll() );
     private final Var<String> feedback           = Var.of("");
     private final Var<Color> feedbackColor       = Var.of(Color.BLACK);
     private final Var<Boolean> allInputsDisabled = Var.of(false);

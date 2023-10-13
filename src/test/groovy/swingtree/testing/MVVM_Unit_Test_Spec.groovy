@@ -6,6 +6,7 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
+import sprouts.From
 import swingtree.SwingTree
 import swingtree.threading.EventProcessor
 
@@ -55,27 +56,27 @@ class MVVM_Unit_Test_Spec extends Specification
             vm.feedback().get().contains("You must select a valid gender")
             vm.feedback().get().contains("You must accept the terms and conditions")
         when : 'We set the username to a valid value.'
-            vm.username().act("bob")
+            vm.username().set(From.VIEW, "bob")
         then : 'The feedback is updated to reflect the change.'
             !vm.feedback().get().contains("Username must be at least 3 characters long")
 
         when : 'We set the password to a valid value.'
-            vm.password().act("Password")
+            vm.password().set(From.VIEW, "Password")
         then : 'The feedback is updated to reflect the change.'
             !vm.feedback().get().contains("Password must be at least 8 characters long")
 
         when : 'We set the email to a valid value.'
-            vm.email().act("something@something.com")
+            vm.email().set(From.VIEW, "something@something.com")
         then : 'The feedback is updated to reflect the change.'
             !vm.feedback().get().contains("Email must contain an @ character")
 
         when : 'We set the gender to a valid value.'
-            vm.gender().act(UserRegistrationViewModel.Gender.FEMALE)
+            vm.gender().set(From.VIEW, UserRegistrationViewModel.Gender.FEMALE)
         then : 'The feedback is updated to reflect the change.'
             !vm.feedback().get().contains("You must select a valid gender")
 
         when : 'We set the terms accepted to a valid value.'
-            vm.termsAccepted().act(true)
+            vm.termsAccepted().set(From.VIEW, true)
         then : 'The feedback is updated to reflect the change.'
             !vm.feedback().get().contains("You must accept the terms and conditions")
 

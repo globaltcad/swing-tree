@@ -1,10 +1,14 @@
 package swingtree;
 
+import org.slf4j.Logger;
 import swingtree.api.Painter;
 import swingtree.style.StyleSheet;
 import swingtree.threading.EventProcessor;
 
-import javax.swing.*;
+import javax.swing.ImageIcon;
+import javax.swing.LookAndFeel;
+import javax.swing.UIDefaults;
+import javax.swing.UIManager;
 import javax.swing.plaf.DimensionUIResource;
 import javax.swing.plaf.FontUIResource;
 import javax.swing.plaf.InsetsUIResource;
@@ -33,52 +37,109 @@ import java.util.function.Supplier;
  */
 public final class SwingTree
 {
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(SwingTree.class);
+
     private static final String _DEFAULT_FONT = "defaultFont";
 
-	private static LazyRef<SwingTree> _INSTANCE = new LazyRef<>(()->new SwingTree(null));
+	private static LazyRef<SwingTree> _INSTANCE = new LazyRef<>(SwingTree::new);
 
 	/**
 	 * Returns the singleton instance of the {@link SwingTree}.
 	 * Note that this method will create the singleton if it does not exist.
 	 * @return the singleton instance of the {@link SwingTree}.
 	 */
-	public static SwingTree get() { return _INSTANCE.get(); }
+	public static SwingTree get() {
+        if ( _INSTANCE == null )
+            initialize();
 
-    /**
-     *  Resets the singleton instance of the {@link SwingTree}
-     *  causing it to be recreated the next time it is requested.
-     *  This is useful for testing purposes, also in cases where
-     *  the UI scale changes (through the reference font).<br>
-     *  Also see {@link #resetUsingDefaultFont(Font)}.
-     */
-    public static void reset() {
-        _INSTANCE = new LazyRef<>(()->new SwingTree(null));
+        return _INSTANCE.get();
     }
 
     /**
-     *  Resets the singleton instance of the {@link SwingTree}
-     *  causing it to be recreated the next time it is requested,
-     *  but with a reference font as a basis for the UI scale.
+     *  Clears the singleton instance of the {@link SwingTree}.
+     *  This is useful for testing purposes, or if you want to
+     *  reconfigure your application with a different {@link SwingTreeInitConfig}.
+     *  (see {@link #initialiseUsing(SwingTreeConfigurator)}).
+     */
+    public static void clear() { _INSTANCE = null; }
+
+    /**
+     *  A lazy initialization of the singleton instance of the {@link SwingTree} class
+     *  causing it to be recreated the next time it is requested through {@link #get()}.<br>
      *  This is useful for testing purposes, also in cases where
      *  the UI scale changes (through the reference font).<br>
-     *  Also see {@link #reset()}.
+     *  Also see {@link #initialiseUsing(SwingTreeConfigurator)}.
+     */
+    public static void initialize() {
+        _INSTANCE = new LazyRef<>(SwingTree::new);
+    }
+
+    /**
+     *  A lazy initialization of the singleton instance of the {@link SwingTree} class
+     *  causing it to be recreated the next time it is requested through {@link #get()},<br>
+     *  but with a {@link SwingTreeConfigurator} that is used
+     *  to configure the {@link SwingTree} instance.<br>
+     *  This is useful for testing purposes, but also in cases where
+     *  the UI scale must be initialized or changed manually (through the reference font).<br>
+     *  Also see {@link #initialize()}.
      *
-     * @param uiScaleReferenceFont The font to use as a basis for
-     *                             calculating the UI scale factor.
+     * @param configurator the {@link SwingTreeConfigurator} that is used
+     *                     to configure the {@link SwingTree} instance.
      */
-    public static void resetUsingDefaultFont(Font uiScaleReferenceFont ) {
-        _INSTANCE = new LazyRef<>(()->new SwingTree(uiScaleReferenceFont));
+    public static void initialiseUsing( SwingTreeConfigurator configurator ) {
+        _INSTANCE = new LazyRef<>(()->new SwingTree(configurator));
     }
 
-	private EventProcessor _eventProcessor = EventProcessor.COUPLED_STRICT;
-	private StyleSheet _styleSheet = null;
+    private SwingTreeInitConfig _config;
 
     private final LazyRef<UIScale> uiScale;
     private final Map<String, ImageIcon> _iconCache = new HashMap<>();
 
 
-	private SwingTree( Font uiScaleReferenceFont ) {
-        this.uiScale = new LazyRef<>( () -> new UIScale(uiScaleReferenceFont) );
+    private SwingTree() { this(config -> config); }
+
+	private SwingTree( SwingTreeConfigurator configurator ) {
+        _config = _resolveConfiguration(configurator);
+        this.uiScale = new LazyRef<>( () -> new UIScale(_config) );
+        _establishMainFont(_config);
+    }
+
+    private SwingTreeInitConfig _resolveConfiguration( SwingTreeConfigurator configurator ) {
+        try {
+            Objects.requireNonNull(configurator);
+            SwingTreeInitConfig config = configurator.configure(SwingTreeInitConfig.standard());
+            Objects.requireNonNull(config);
+            return config;
+        } catch (Exception ex) {
+            log.error("Error resolving SwingTree configuration", ex);
+            ex.printStackTrace();
+            return SwingTreeInitConfig.standard();
+        }
+    }
+
+    private static void _establishMainFont( SwingTreeInitConfig config ) {
+        try {
+            if (config.fontInstallation() == SwingTreeInitConfig.FontInstallation.HARD)
+                config.defaultFont().ifPresent(font -> {
+                    if (font instanceof FontUIResource)
+                        _installFontInUIManager((FontUIResource) font);
+                    else
+                        _installFontInUIManager(new FontUIResource(font));
+                });
+        } catch (Exception ex) {
+            log.error("Error installing font in UIManager", ex);
+            ex.printStackTrace();
+        }
+    }
+
+    private static void _installFontInUIManager(javax.swing.plaf.FontUIResource f){
+        Enumeration<Object> keys = UIManager.getDefaults().keys();
+        while ( keys.hasMoreElements() ) {
+            Object key = keys.nextElement();
+            Object value = UIManager.get (key);
+            if ( value instanceof javax.swing.plaf.FontUIResource )
+                UIManager.put(key, f);
+        }
     }
 
     /**
@@ -98,7 +159,7 @@ public final class SwingTree
 	 *         GUI and application events.
 	 */
 	public EventProcessor getEventProcessor() {
-		return _eventProcessor;
+		return _config.eventProcessor();
 	}
 
 	/**
@@ -106,22 +167,32 @@ public final class SwingTree
 	 * @param eventProcessor the {@link EventProcessor} that is used to process GUI and application events.
 	 */
 	public void setEventProcessor( EventProcessor eventProcessor ) {
-		_eventProcessor = Objects.requireNonNull(eventProcessor);
+        try {
+            _config = _config.eventProcessor(Objects.requireNonNull(eventProcessor));
+        } catch (Exception ex) {
+            log.error("Error setting event processor", ex);
+            ex.printStackTrace();
+        }
 	}
 
 	/**
 	 * @return The currently configured {@link StyleSheet} that is used to style components.
 	 */
 	public Optional<StyleSheet> getStyleSheet() {
-		return Optional.ofNullable(_styleSheet);
+        return _config.styleSheet();
 	}
 
 	/**
 	 * Sets the {@link StyleSheet} that is used to style components.
 	 * @param styleSheet the {@link StyleSheet} that is used to style components.
 	 */
-	public void setStyleSheet( StyleSheet styleSheet) {
-		_styleSheet = styleSheet;
+	public void setStyleSheet( StyleSheet styleSheet ) {
+        try {
+            _config = _config.styleSheet(styleSheet);
+        } catch ( Exception ex ) {
+            log.error("Error setting style sheet", ex);
+            ex.printStackTrace();
+        }
 	}
 
     /**
@@ -159,6 +230,7 @@ public final class SwingTree
      */
     public static final class UIScale
     {
+        private final SwingTreeInitConfig config;
         private PropertyChangeSupport changeSupport;
 
         private static Boolean jreHiDPI;
@@ -167,25 +239,29 @@ public final class SwingTree
         private boolean initialized;
 
 
-        private UIScale( Font uiScaleReferenceFont ) {// private to prevent instantiation from outside
+        private UIScale( SwingTreeInitConfig config ) // private to prevent instantiation from outside
+        {
+            this.config = config;
             try {
-                UIDefaults defaults = UIManager.getDefaults();
-
-                if ( uiScaleReferenceFont != null )
-                    defaults.put(_DEFAULT_FONT, null);
-
-                if ( uiScaleReferenceFont == null )
-                    uiScaleReferenceFont = UIManager.getFont( _DEFAULT_FONT );
-
-                if ( uiScaleReferenceFont == null ) {
-                    Font highDPIFont = _calculateDPIAwarePlatformFont();
-                    defaults.put(_DEFAULT_FONT, highDPIFont);
+                if ( config.scalingStrategy() == SwingTreeInitConfig.Scaling.NONE ) {
+                    this.scaleFactor = 1;
+                    this.initialized = true;
+                    return;
                 }
 
-                initialize();
+                if ( config.scalingStrategy() == SwingTreeInitConfig.Scaling.FROM_DEFAULT_FONT ) {
+                    Font uiScaleReferenceFont = config.defaultFont().orElse(null);
+                    if (uiScaleReferenceFont != null)
+                        UIManager.getDefaults().put(_DEFAULT_FONT, uiScaleReferenceFont);
+                }
+                if ( config.scalingStrategy() == SwingTreeInitConfig.Scaling.FROM_SYSTEM_FONT ) {
+                    Font highDPIFont = _calculateDPIAwarePlatformFont();
+                    UIManager.getDefaults().put(_DEFAULT_FONT, highDPIFont);
+                }
 
+                _initialize();
             } catch (Exception ex) {
-                ex.printStackTrace();
+                log.error("Error initializing "+UIScale.class.getSimpleName(), ex);
                 // Usually there should be no exception, if there is one, the library will still work, but
                 // the UI may not be scaled correctly. Please report this exception to the library author.
             }
@@ -339,14 +415,14 @@ public final class SwingTree
 
         //---- user scaling (Java 8) ----------------------------------------------
 
-        private void initialize()
+        private void _initialize()
         {
             if ( initialized )
                 return;
 
             initialized = true;
 
-            if ( !isUserScalingEnabled() )
+            if ( !config.isUiScaleFactorEnabled() )
                 return;
 
             // listener to update scale factor if LaF changed, "defaultFont" or "Label.font" changed
@@ -381,7 +457,7 @@ public final class SwingTree
         }
 
         private void updateScaleFactor() {
-            if ( !isUserScalingEnabled() )
+            if ( !config.isUiScaleFactorEnabled() )
                 return;
 
             // apply custom scale factor specified in system property "swingtree.uiScale"
@@ -473,17 +549,13 @@ public final class SwingTree
             return font.getSize() / fontSizeDivider;
         }
 
-        private static boolean isUserScalingEnabled() {
-            return SystemProperties.getBoolean( SystemProperties.UI_SCALE_ENABLED, true );
-        }
-
         /**
          * Applies a custom scale factor given in system property "swingtree.uiScale"
          * to the given font.
          */
         private FontUIResource _applyCustomScaleFactor( FontUIResource font )
         {
-            if ( !isUserScalingEnabled() )
+            if ( !config.isUiScaleFactorEnabled() )
                 return font;
 
             float scaleFactor = getCustomScaleFactor();
@@ -501,34 +573,8 @@ public final class SwingTree
         /**
          * Get custom scale factor specified in system property "swingtree.uiScale".
          */
-        private static float getCustomScaleFactor() {
-            return parseScaleFactor( System.getProperty( SystemProperties.UI_SCALE ) );
-        }
-
-        /**
-         * Similar to sun.java2d.SunGraphicsEnvironment.getScaleFactor(String)
-         */
-        private static float parseScaleFactor( String s ) {
-            if ( s == null )
-                return -1;
-
-            float units = 1;
-            if ( s.endsWith( "x" ) )
-                s = s.substring( 0, s.length() - 1 );
-            else if ( s.endsWith( "dpi" ) ) {
-                units = 96;
-                s = s.substring( 0, s.length() - 3 );
-            } else if ( s.endsWith( "%" ) ) {
-                units = 100;
-                s = s.substring( 0, s.length() - 1 );
-            }
-
-            try {
-                float scale = Float.parseFloat( s );
-                return scale > 0 ? scale / units : -1;
-            } catch( NumberFormatException ex ) {
-                return -1;
-            }
+        private float getCustomScaleFactor() {
+            return config.uiScaleFactor();
         }
 
         /**
@@ -545,12 +591,12 @@ public final class SwingTree
          * @return The user scale factor.
          */
         public float getUserScaleFactor() {
-            initialize();
+            _initialize();
             return scaleFactor;
         }
 
         public void setUserScaleFactor( float scaleFactor ) {
-            initialize();
+            _initialize();
             setUserScaleFactor( scaleFactor, true );
         }
 
@@ -560,7 +606,7 @@ public final class SwingTree
         private void setUserScaleFactor( float scaleFactor, boolean normalize ) {
             if ( normalize ) {
                 if ( scaleFactor < 1f ) {
-                    scaleFactor = SystemProperties.getBoolean( SystemProperties.UI_SCALE_ALLOW_SCALE_DOWN, false )
+                    scaleFactor = config.isUiScaleDownAllowed()
                                     ? Math.round( scaleFactor * 10f ) / 10f // round small scale factor to 1/10
                                     : 1f;
                 }
@@ -589,7 +635,7 @@ public final class SwingTree
          * @return The scaled value.
          */
         public float scale( float value ) {
-            initialize();
+            _initialize();
             return (scaleFactor == 1) ? value : (value * scaleFactor);
         }
 
@@ -600,7 +646,7 @@ public final class SwingTree
          * @return The scaled value.
          */
         public double scale( double value ) {
-            initialize();
+            _initialize();
             return (scaleFactor == 1) ? value : (value * scaleFactor);
         }
 
@@ -611,7 +657,7 @@ public final class SwingTree
          * @return The scaled and rounded value.
          */
         public int scale( int value ) {
-            initialize();
+            _initialize();
             return ( scaleFactor == 1 ? value : Math.round( value * scaleFactor ) );
         }
 
@@ -624,7 +670,7 @@ public final class SwingTree
          * @return The scaled and rounded down value.
          */
         public int scaleRoundedDown( int value ) {
-            initialize();
+            _initialize();
             return ( scaleFactor == 1 ? value : (int) (value * scaleFactor) );
         }
 
@@ -635,7 +681,7 @@ public final class SwingTree
          * @return The resulting un-scaled floating point number.
          */
         public float unscale( float value ) {
-            initialize();
+            _initialize();
             return (scaleFactor == 1f) ? value : (value / scaleFactor);
         }
 
@@ -646,7 +692,7 @@ public final class SwingTree
          * @return The un-scaled and rounded value.
          */
         public int unscale( int value ) {
-            initialize();
+            _initialize();
             return (scaleFactor == 1f) ? value : Math.round( value / scaleFactor );
         }
 
@@ -657,7 +703,7 @@ public final class SwingTree
          * @param g The graphics context to scale.
          */
         public void scaleGraphics( Graphics2D g ) {
-            initialize();
+            _initialize();
             if( scaleFactor != 1f )
                 g.scale( scaleFactor, scaleFactor );
         }
@@ -673,7 +719,7 @@ public final class SwingTree
          * @return A new instance of {@link Dimension} or {@link DimensionUIResource} with scaled width and height.
          */
         public Dimension scale( Dimension dimension ) {
-            initialize();
+            _initialize();
             return (dimension == null || scaleFactor == 1f)
                     ? dimension
                     : (dimension instanceof UIResource
@@ -682,7 +728,7 @@ public final class SwingTree
         }
 
         public Rectangle scale( Rectangle rectangle ) {
-            initialize();
+            _initialize();
             return (rectangle == null || scaleFactor == 1f)
                     ? rectangle
                     : new Rectangle(
@@ -692,7 +738,7 @@ public final class SwingTree
         }
 
         public RoundRectangle2D scale( RoundRectangle2D rectangle ) {
-            initialize();
+            _initialize();
             if ( rectangle == null || scaleFactor == 1f ) return rectangle;
             if ( rectangle instanceof RoundRectangle2D.Float )
                 return new RoundRectangle2D.Float(
@@ -719,7 +765,7 @@ public final class SwingTree
          * @return A new instance of {@link Insets} or {@link InsetsUIResource} with scaled values.
          */
         public Insets scale( Insets insets ) {
-            initialize();
+            _initialize();
             return (insets == null || scaleFactor == 1f)
                     ? insets
                     : (insets instanceof UIResource
@@ -741,54 +787,6 @@ public final class SwingTree
             return UIScale.getSystemScaleFactor( gc ) > 1;
         }
 
-    }
-
-    /**
-     * Defines/documents own system properties used in SwingTree.
-     *
-     * @author Daniel Nepp, but originally a derivative work of Karl Tauber
-     */
-    private static interface SystemProperties
-    {
-        /**
-         * Specifies a custom scale factor used to scale the UI.
-         * <p>
-         * If Java runtime scales (Java 9 or later), this scale factor is applied on top
-         * of the Java system scale factor. Java 8 does not scale and this scale factor
-         * replaces the user scale factor that SwingTree computes based on the font.
-         * To replace the Java 9+ system scale factor, use system property "sun.java2d.uiScale",
-         * which has the same syntax as this one.
-         * <p>
-         * <strong>Allowed Values</strong> e.g. {@code 1.5}, {@code 1.5x}, {@code 150%} or {@code 144dpi} (96dpi is 100%)<br>
-         */
-        String UI_SCALE = "swingtree.uiScale";
-
-        /**
-         * Specifies whether user scaling mode is enabled.
-         * <p>
-         * <strong>Allowed Values</strong> {@code false} and {@code true}<br>
-         * <strong>Default</strong> {@code true}
-         */
-        String UI_SCALE_ENABLED = "swingtree.uiScale.enabled";
-
-        /**
-         * Specifies whether values smaller than 100% are allowed for the user scale factor
-         * (see {@link UI#scale()}).
-         * <p>
-         * <strong>Allowed Values</strong> {@code false} and {@code true}<br>
-         * <strong>Default</strong> {@code false}
-         */
-        String UI_SCALE_ALLOW_SCALE_DOWN = "swingtree.uiScale.allowScaleDown";
-
-        /**
-         * Checks whether a system property is set and returns {@code true} if its value
-         * is {@code "true"} (case-insensitive), otherwise it returns {@code false}.
-         * If the system property is not set, {@code defaultValue} is returned.
-         */
-        static boolean getBoolean( String key, boolean defaultValue ) {
-            String value = System.getProperty( key );
-            return (value != null) ? Boolean.parseBoolean( value ) : defaultValue;
-        }
     }
 
     /**
@@ -960,9 +958,9 @@ public final class SwingTree
 
             // Ubuntu font is rendered poorly (except if running in JetBrains VM)
             // --> use Liberation Sans font
-            if( family.startsWith( "Ubuntu" ) &&
-                    !SystemInfo.isJetBrainsJVM &&
-                    !SystemProperties.getBoolean( "swingtree.USE_UBUNTU_FONT", false ) )
+            String useUbuntu = "swingtree.USE_UBUNTU_FONT";
+
+            if( family.startsWith( "Ubuntu" ) && !SystemInfo.isJetBrainsJVM && !getBoolean( useUbuntu, false ) )
                 family = "Liberation Sans";
 
             // scale font size
@@ -977,6 +975,16 @@ public final class SwingTree
                 family = logicalFamily;
 
             return createFontEx( family, style, size, dsize );
+        }
+
+        /**
+         * Checks whether a system property is set and returns {@code true} if its value
+         * is {@code "true"} (case-insensitive), otherwise it returns {@code false}.
+         * If the system property is not set, {@code defaultValue} is returned.
+         */
+        static boolean getBoolean( String key, boolean defaultValue ) {
+            String value = System.getProperty( key );
+            return (value != null) ? Boolean.parseBoolean( value ) : defaultValue;
         }
 
         /**

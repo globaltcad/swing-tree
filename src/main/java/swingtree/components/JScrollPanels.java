@@ -2,6 +2,7 @@ package swingtree.components;
 
 import net.miginfocom.swing.MigLayout;
 import org.slf4j.Logger;
+import sprouts.From;
 import swingtree.UI;
 import swingtree.api.mvvm.EntryViewModel;
 import swingtree.api.mvvm.ViewSupplier;
@@ -463,16 +464,16 @@ public class JScrollPanels extends JScrollPane
 			this.setLayout(new MigLayout("fill, insets 0", "[grow]"));
 			_viewable = provider;
 			_provider = isSelected -> {
-								provider.position().act(position);
-								provider.isSelected().act(isSelected);
+								provider.position().set(From.VIEW, position);
+								provider.isSelected().set(From.VIEW, isSelected);
 								return (JComponent) viewSupplier.createViewFor(provider).getComponent();
 							};
 			_lastState = _provider.apply(false);
 			this.add(_lastState, constraints != null ? constraints : "grow" );
-			_viewable.isSelected().onSet(it -> _selectThis(components) );
+			_viewable.isSelected().onChange(From.VIEW_MODEL, it -> _selectThis(components) );
 			if ( _viewable.isSelected().is(true) )
 				_selectThis(components);
-			_viewable.position().act(position);
+			_viewable.position().set(From.VIEW, position);
 		}
 
 		private void _selectThis(
@@ -502,7 +503,7 @@ public class JScrollPanels extends JScrollPane
 				this.setBackground( isHighlighted ? HIGHLIGHT : LOW_LIGHT );
 				this.add(_lastState, "grow");
 				this.validate();
-				_viewable.isSelected().act(isHighlighted);
+				_viewable.isSelected().set(From.VIEW, isHighlighted);
 			}
 			_isSelected = isHighlighted;
 		}

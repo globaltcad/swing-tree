@@ -5738,7 +5738,7 @@ public final class UI extends UILayoutConstants
 <span class="nc" id="L5738">            asStr[i] = options[i].toString();</span>
 
 <span class="nc" id="L5740">        int selectedIdx = JOptionPane.showOptionDialog( null, message, title, JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, icon, asStr, asStr[0] );</span>
-<span class="nc" id="L5741">        selected.act( options[selectedIdx] );</span>
+<span class="nc" id="L5741">        selected.set(From.VIEW,  options[selectedIdx] );</span>
 <span class="nc" id="L5742">    }</span>
 
     /**

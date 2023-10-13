@@ -1,5 +1,6 @@
 package swingtree;
 
+import sprouts.From;
 import sprouts.Val;
 import sprouts.Var;
 
@@ -31,7 +32,7 @@ final class ArrayPropertyComboModel<E> extends AbstractComboModel<E>
 		if ( _mutable )
 			_items.ifPresent(i -> {
 				i[index] = element;
-				if ( _items instanceof Var ) ((Var<E>) _items).fireAct();
+				if ( _items instanceof Var ) ((Var<E>) _items).fireChange(From.VIEW);
 			});
 	}
 	@Override public int getSize() { return _items.mapTo(Integer.class, i -> i.length ).orElse(0); }

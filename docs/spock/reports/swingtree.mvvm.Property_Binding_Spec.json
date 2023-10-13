@@ -1,8 +1,8 @@
 {
   "className":"swingtree.mvvm.Property_Binding_Spec",
-  "title":"Property Binding",
+  "title":"Binding Properties to UI Components",
   "narrative":"This specification shows you how to bind properties to \n    the states of common types UI components.",
-  "subjects":[],
+  "subjects":["sprouts.Val","sprouts.Var"],
   "statistics":{
     "runs":"16",
     "successRate":"100.0%",

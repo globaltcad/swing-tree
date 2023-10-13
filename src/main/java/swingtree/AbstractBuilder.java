@@ -92,7 +92,7 @@ abstract class AbstractBuilder<I, C extends Component>
      * @param <T> The type of the item wrapped by the provided property.
      */
     protected final <T> void _onShow( Val<T> val, Consumer<T> displayAction ) {
-        Action<Val<T>> action = new Action<Val<T>>() {
+        val.onChange(From.ALL, new Action<Val<T>>() {
             @Override
             public void accept( Val<T> val ) {
                 T v = val.orElseNull(); // IMPORTANT! We first capture the value and then execute the action in the app thread.
@@ -120,10 +120,7 @@ abstract class AbstractBuilder<I, C extends Component>
                 );
             }
             @Override public boolean canBeRemoved() { return !component().isPresent(); }
-        };
-        val.onSet(action);
-        if ( val instanceof Var )
-            ((Var)val).onAct(action);
+        });
     }
 
     /**

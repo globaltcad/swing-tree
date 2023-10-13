@@ -4,9 +4,6 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
-import swingtree.SwingTree
-import swingtree.threading.EventProcessor
-import swingtree.UI
 import sprouts.Val
 import sprouts.Var
 
@@ -17,13 +14,10 @@ import java.util.function.Consumer
 
     Properties are a powerful tool to model the state 
     as well as business logic of your UI without actually depending on it.
-    This is especially useful for testing your UIs logic.
-    Therefore properties are a root concept in the Swing-Tree library.
-    The decoupling between your UI and the UIs state and logic 
-    is achieved by binding properties to UI components.
-    This specification shows you how to model UI state 
-    and business logic using properties 
-    and how to bind them to UI components.
+    This is especially useful for testing your UIs logic (in a view model for example).
+    This is the core motivation behind the creation of the Sprouts library.
+    
+    This specification introduces you to their API and shows you how to use them.
     
     (For more information about the raw properties themselves
     check out their [repository](https://github.com/globaltcad/sprouts))
@@ -32,11 +26,6 @@ import java.util.function.Consumer
 @Subject([Val, Var])
 class Properties_Spec extends Specification
 {
-    def setupSpec() {
-        SwingTree.get().setEventProcessor(EventProcessor.COUPLED)
-        // This is so that the test thread is also allowed to perform UI operations
-    }
-
     def 'Properties are simple wrappers around a value'()
     {
         given : 'We create a property using the "of" factory method.'
@@ -44,41 +33,6 @@ class Properties_Spec extends Specification
 
         expect : 'The property has the same value as the value we passed to the factory method.'
             property.orElseNull() == "Hello World"
-    }
-
-    def 'They can be bound to the UI by passing them to a builder node.'()
-    {
-        reportInfo """
-            Binding goes both ways, so when the property changes state through the `set(T)` method
-            it will update the UI
-            using the `fireSet()` method on the property (which you can also call manually for UI updates), 
-            and when the UI is changed by the user, it will update the property for us
-            and trigger the property action (if present).
-        """
-        given : 'A simple boolean property modelling a toggle state.'
-            boolean userDidToggle = false
-            Val<Boolean> toggled = Var.of(false)
-                                        .onAct({userDidToggle = true})
-
-        when : 'We create a toggle button using the "toggleButton" factory method and pass the property to it.'
-            var ui = UI.toggleButton("Toggle Me!").isSelectedIf(toggled)
-
-        then : 'The button should be updated when the property changes.'
-            ui.component.selected == false
-
-        when : 'We change and then show the property value...'
-            toggled.set(true)
-        and : 'Then we wait for the EDT to complete the UI modifications...'
-            UI.sync()
-        then : 'The button should be updated.'
-            ui.component.selected == true
-
-        when : 'We try to un-toggle the toggle button in the UI...'
-            ui.component.doClick()
-        then : 'The property should be toggled off again.'
-            toggled.orElseNull() == false
-        and :
-            userDidToggle == true
     }
 
     def 'There are 2 types of properties, an immutable property, and its mutable sub-type.'()
@@ -109,38 +63,6 @@ class Properties_Spec extends Specification
             immutable.orElseNull() == 69
     }
 
-    def 'Properties can be bound by subscribing to them using the "onSetItem(..)" method.'()
-    {
-        reportInfo"""
-            Note that bound Swing-Tree properties have side effects
-            when their state is changed through the "set" method, or
-            they are deliberately triggered to execute their side effects.
-            using the `fireSet()` method.
-            This is important to allow you to decide yourself when
-            the state of a property is "ready" for display in the UI.
-        """
-
-        given : 'We create a mutable property...'
-            Var<String> mutable = Var.of("Tempeh")
-        and : 'Something we want to have a side effect on:'
-            var list = []
-        when : 'We subscribe to the property using the "onSetItem(..)" method.'
-            mutable.onSet { list.add(it.orElseNull()) }
-        and : 'We change the value of the property.'
-            mutable.set("Tofu")
-        and : 'Then we wait for the EDT to complete the UI modifications...'
-            UI.sync()
-        then : 'The side effect is executed.'
-            list == ["Tofu"]
-        when : 'We trigger the side effect manually.'
-            mutable.fireSet()
-            UI.sync()
-        then : 'The side effect is executed again.'
-            list.size() == 2
-            list[0] == "Tofu"
-            list[1] == "Tofu"
-    }
-
     def 'Properties not only have a value but also a type and id!'()
     {
         given : 'We create a property with an id...'
@@ -151,44 +73,7 @@ class Properties_Spec extends Specification
             property.type() == String.class
     }
 
-    def 'The "withID(..)" method produces a new property with all bindings inherited.'()
-    {
-        reportInfo """
-            The wither methods on properties are used to create new property instances
-            with the same value and bindings as the original property
-            but without side effects of the original property.
-            So if you add bindings to a withered property they will not affect the original property.
-        """
-
-        given : 'We create a property...'
-            Var<String> property = Var.of("Hello World")
-        and : 'we bind 1 subscriber to the property.'
-            var list1 = []
-            property.onSet { list1.add(it.orElseNull()) }
-        and : 'We create a new property with a different id.'
-            Val<String> property2 = property.withId("XY")
-        and : 'Another subscriber to the new property.'
-            var list2 = []
-            property2.onSet { list2.add(it.orElseNull()) }
-
-        when : 'We change the value of the original property.'
-            property.set("Tofu")
-        and : 'Then we wait for the EDT to complete the UI modifications...'
-            UI.sync()
-        then : 'The subscriber of the original property is triggered but not the subscriber of the new property.'
-            list1 == ["Tofu"]
-            list2 == []
-
-        when : 'We change the value of the new property.'
-            property2.set("Tempeh")
-        and : 'Then we wait for the EDT to complete the UI modifications...'
-            UI.sync()
-        then : 'Both subscribers are receive the effect.'
-            list1 == ["Tofu", "Tempeh"]
-            list2 == ["Tempeh"]
-    }
-
-    def 'Properties are similar to the "Optional" class, you can map them and see if they are empty or not.'()
+    def 'Properties are similar to the `Optional` class, you can map them and see if they are empty or not.'()
     {
         given : 'We create a property...'
             Val<String> property = Val.of("Hello World")
@@ -219,8 +104,6 @@ class Properties_Spec extends Specification
 
         when : 'We change the value of the property.'
             property.set("Tofu")
-        and : 'Then we wait for the EDT to complete the UI modifications...'
-            UI.sync()
         then : 'The view is updated.'
             view.orElseNull() == 4
     }
@@ -230,12 +113,12 @@ class Properties_Spec extends Specification
         given : 'We create a property...'
             Var<String> food = Var.of("Channa Masala")
         and : 'Different kinds of views:'
-            Var<Integer> words = food.viewAsInt( f -> f.split(" ").length )
-            Var<Integer> words2 = words.view({it * 2})
-            Var<Double> average = food.viewAsDouble( f -> f.chars().average().orElse(0) )
-            Var<Boolean> isLong = food.viewAs(Boolean, f -> f.length() > 14 )
+            Var<Integer> words    = food.viewAsInt( f -> f.split(" ").length )
+            Var<Integer> words2   = words.view({it * 2})
+            Var<Double>  average  = food.viewAsDouble( f -> f.chars().average().orElse(0) )
+            Var<Boolean> isLong   = food.viewAs(Boolean, f -> f.length() > 14 )
             Var<String> firstWord = food.view( f -> f.split(" ")[0] )
-            Var<String> lastWord = food.view( f -> f.split(" ")[f.split(" ").length-1] )
+            Var<String> lastWord  = food.view( f -> f.split(" ")[f.split(" ").length-1] )
         expect : 'The views have the expected values.'
             words.get() == 2
             words2.get() == 4
@@ -246,8 +129,6 @@ class Properties_Spec extends Specification
 
         when : 'We change the value of the property.'
             food.set("Tofu Tempeh Saitan")
-        and : 'Then we wait for the EDT to complete the UI modifications...'
-            UI.sync()
         then : 'The views are updated.'
             words.get() == 3
             words2.get() == 6
@@ -255,28 +136,6 @@ class Properties_Spec extends Specification
             isLong.get() == true
             firstWord.get() == "Tofu"
             lastWord.get() == "Saitan"
-    }
-
-    def 'Changing the value of a property through the "act" method will also affect its views'()
-    {
-        reportInfo """
-            Note that the "act" method is used by the view to change the value of the original property.
-            It is conceptually similar to the `set(T)` method with the simple difference
-            that it represents a user action.
-            Irrespective as to how the value of the original property is changed,
-            the views will be updated.
-        """
-        given : 'We create a property...'
-            Var<String> food = Var.of("Animal Crossing")
-        and : 'We create a view of the property.'
-            Var<Integer> words = food.viewAsInt( f -> f.split(" ").length )
-        expect : 'The view has the expected value.'
-            words.get() == 2
-
-        when : 'We change the value of the food property through the "act" method.'
-            food.act("Faster Than Light")
-        then : 'The view is updated.'
-            words.get() == 3
     }
 
     def 'The "ifPresent" method allows us to see if a property has a value or not.'()
@@ -292,12 +151,12 @@ class Properties_Spec extends Specification
             list == ["Hello World"]
     }
 
-    def 'The "get" method will throw an exception if there is no element present.'()
+    def 'The `get()` method will throw an exception if there is no element present.'()
     {
         reportInfo """
-            Note that accessing the value of an empty property using the "get" method
+            Note that accessing the value of an empty property using the `get()` method
             will throw an exception.
-            It is recommended to use the "orElseNull" method instead, because the "get"
+            It is recommended to use the `orElseNull()` method instead, because the `get()`
             method is intended to be used for non-nullable types, or when it
             is clear that the property is not empty!
         """
@@ -338,52 +197,10 @@ class Properties_Spec extends Specification
             arr1.hashCode() == arr2.hashCode()
     }
 
-    def 'The UI uses the "act(T)" method to change the property state to avoid feedback looping.'()
+    def 'A property constructed using the `of` factory method, does not allow null items.'()
     {
         reportInfo """
-            Unfortunately Swing does not allow us to implement models for all types of UI components.
-            A `JSplitPane` for example does not have a model that we can use to bind to a property.
-            Instead Swing-Tree uses property change listeners and component events 
-            to synchronize the state of both UI and view model.
-            The problem with this approach is that it may lead to feedback loops.
-            To prevent his problem there are 2 type of property mutations and events.
-            The UI uses the `act(T)` method to change the property state, this then triggers the
-            `onAct(..)` actions of the property. On the contrary the `set(T)` method on the other hand
-            is used to change the state and then trigger the `onSet` actions / listeners
-            of the property. So if you want to change the state of a property from the UI
-            use the `act(T)` method, if you want to change the state of a property from the view model
-            use the `set(T)` method.
-        """
-        given : 'A simple property with a view and model actions.'
-            var uiListener = []
-            var modelListener = []
-            var property = Var.of(":)")
-                                .onAct(it ->{
-                                    modelListener << it.orElseThrow()
-                                })
-            property.onSet(it -> uiListener << it.orElseNull() )
-
-        when : 'We change the state of the property using the `set(T)` method.'
-            property.set(":(")
-        and : 'Then we wait for the EDT to complete the UI modifications...'
-            UI.sync()
-        then : 'The `onSet(..)` actions are triggered.'
-            uiListener == [":("]
-        and : 'The view model actions are not triggered.'
-            modelListener == []
-
-        when : 'We change the state of the property using the `act(T)` method.'
-            property.act(":|")
-        then : 'The "onSet" actions are NOT triggered, because the `act(T)` method performs an "act on your view model"!'
-            uiListener == [":("]
-        and : 'The view model actions are triggered.'
-            modelListener == [":|"]
-    }
-
-    def 'A property constructed using the `of(T)` factory method, does not allow null items.'()
-    {
-        reportInfo """
-            The `of(T)`  factory method is used to create a property that does not allow null items.
+            The `of(..)` factory method is used to create a property that does not allow null items.
             If you try to set an item to null, the property will throw an exception.
         """
         given : 'A property constructed using the "of" factory method.'
@@ -412,22 +229,22 @@ class Properties_Spec extends Specification
             var v8 = Var.ofNullable(Integer, 7).withId("maybe_int")
 
         expect :
-            v1.toString() == '"Apple" ( type = String, id = "?" )'
-            v2.toString() == '"Berry" ( type = String, id = "fruit" )'
-            v3.toString() == '42 ( type = Integer, id = "?" )'
-            v4.toString() == '42 ( type = Integer, id = "number" )'
-            v5.toString() == '99.0 ( type = Float, id = "ninety_nine" )'
+            v1.toString() == 'Var<String>["Apple"]'
+            v2.toString() == 'Var<String>[fruit="Berry"]'
+            v3.toString() == 'Var<Integer>[42]'
+            v4.toString() == 'Var<Integer>[number=42]'
+            v5.toString() == 'Var<Float>[ninety_nine=99.0]'
         and : 'Nullable properties have a "?" in the type:'
-            v6.toString() == 'null ( type = String?, id = "?" )'
-            v7.toString() == '5 ( type = Long?, id = "maybe_long" )'
-            v8.toString() == '7 ( type = Integer?, id = "maybe_int" )'
+            v6.toString() == 'Var<String?>[null]'
+            v7.toString() == 'Var<Long?>[maybe_long=5]'
+            v8.toString() == 'Var<Integer?>[maybe_int=7]'
 
     }
 
     def 'A property can be converted to an `Optional`.'()
     {
         reportInfo """
-            A property can be converted to an Optional using the "toOptional()" method.
+            A property can be converted to an `Optional` using the `toOptional()` method.
             This is useful when you want to use the Optional API to query the state of the property.
         """
         given : 'A property with a non-null item.'
@@ -472,6 +289,37 @@ class Properties_Spec extends Specification
             isNot2
             isOneOf1
             !isOneOf2
+    }
+
+    def 'Conveniently compare properties with another item using "is", "isOneOf" or "isNot"'()
+    {
+        reportInfo """
+            Properties represent the items that they hold, so when comparing them with each other
+            you are actually comparing the items they hold.
+            The "is" method can be used to check if the item of a property is equal to the item of another property
+            and the "isNot" method is the exact opposite, it checks if the item of a property
+            is NOT equal to the item of another property.
+            The "isOneOf" method is used to check if the item of a property is equal to one of the
+            items in a varargs list of properties.
+        """
+        given : 'We create a property with a non-null item.'
+            var property1 = Var.of("Hello World")
+            var property2 = Var.of("Hello World!")
+            var property3 = Var.of("Goodbye World")
+        when : 'We compare the item of the property with another item using the above mentioned methods.'
+            var is1 = property1.is(Var.of("Hello World"))
+            var is2 = property1.is(property3)
+            var isNot1 = property1.isNot(Var.of("Hello World"))
+            var isNot2 = property1.isNot(property3)
+            var isOneOf1 = property1.isOneOf(property2, property3)
+            var isOneOf2 = property1.isOneOf(property3, Var.of("Hello World"), property2)
+        then : 'The results are as expected.'
+            is1
+            !is2
+            !isNot1
+            isNot2
+            !isOneOf1
+            isOneOf2
     }
 
 }

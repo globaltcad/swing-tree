@@ -1,10 +1,12 @@
 package examples.mvvm;
 
+import sprouts.From;
 import sprouts.Var;
 import sprouts.Vars;
 import swingtree.components.JScrollPanels;
 
-import javax.swing.*;
+import javax.swing.JList;
+import javax.swing.JTable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,7 +23,7 @@ import java.util.stream.Collectors;
  */
 public class ScrollPanelsViewModel
 {
-	private final Var<String> searchKey = Var.of("").onAct( it -> search() );
+	private final Var<String> searchKey = Var.of("").onChange(From.VIEW, it -> search() );
 	private final Vars<EntryViewModel> entries = Vars.of(EntryViewModel.class);
 	private final List<EntryViewModel> allEntries = new ArrayList<>();
 
