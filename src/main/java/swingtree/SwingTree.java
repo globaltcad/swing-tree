@@ -64,8 +64,8 @@ public final class SwingTree
     public static void clear() { _INSTANCE = null; }
 
     /**
-     *  Resets the singleton instance of the {@link SwingTree}
-     *  causing it to be recreated the next time it is requested.
+     *  A lazy initialization of the singleton instance of the {@link SwingTree} class
+     *  causing it to be recreated the next time it is requested through {@link #get()}.<br>
      *  This is useful for testing purposes, also in cases where
      *  the UI scale changes (through the reference font).<br>
      *  Also see {@link #initialiseUsing(SwingTreeConfigurator)}.
@@ -75,12 +75,12 @@ public final class SwingTree
     }
 
     /**
-     *  Resets the singleton instance of the {@link SwingTree}
-     *  causing it to be recreated the next time it is requested,
+     *  A lazy initialization of the singleton instance of the {@link SwingTree} class
+     *  causing it to be recreated the next time it is requested through {@link #get()},<br>
      *  but with a {@link SwingTreeConfigurator} that is used
      *  to configure the {@link SwingTree} instance.<br>
-     *  This is useful for testing purposes, also in cases where
-     *  the UI scale changes (through the reference font).<br>
+     *  This is useful for testing purposes, but also in cases where
+     *  the UI scale must be initialized or changed manually (through the reference font).<br>
      *  Also see {@link #initialize()}.
      *
      * @param configurator the {@link SwingTreeConfigurator} that is used
@@ -104,7 +104,7 @@ public final class SwingTree
         _establishMainFont(_config);
     }
 
-    private SwingTreeInitConfig _resolveConfiguration(SwingTreeConfigurator configurator ) {
+    private SwingTreeInitConfig _resolveConfiguration( SwingTreeConfigurator configurator ) {
         try {
             Objects.requireNonNull(configurator);
             SwingTreeInitConfig config = configurator.configure(SwingTreeInitConfig.none());
@@ -262,7 +262,7 @@ public final class SwingTree
                         defaults.put(_DEFAULT_FONT, highDPIFont);
                     }
                 }
-                initialize();
+                _initialize();
             } catch (Exception ex) {
                 log.error("Error initializing "+UIScale.class.getSimpleName(), ex);
                 // Usually there should be no exception, if there is one, the library will still work, but
@@ -418,7 +418,7 @@ public final class SwingTree
 
         //---- user scaling (Java 8) ----------------------------------------------
 
-        private void initialize()
+        private void _initialize()
         {
             if ( initialized )
                 return;
@@ -624,12 +624,12 @@ public final class SwingTree
          * @return The user scale factor.
          */
         public float getUserScaleFactor() {
-            initialize();
+            _initialize();
             return scaleFactor;
         }
 
         public void setUserScaleFactor( float scaleFactor ) {
-            initialize();
+            _initialize();
             setUserScaleFactor( scaleFactor, true );
         }
 
@@ -668,7 +668,7 @@ public final class SwingTree
          * @return The scaled value.
          */
         public float scale( float value ) {
-            initialize();
+            _initialize();
             return (scaleFactor == 1) ? value : (value * scaleFactor);
         }
 
@@ -679,7 +679,7 @@ public final class SwingTree
          * @return The scaled value.
          */
         public double scale( double value ) {
-            initialize();
+            _initialize();
             return (scaleFactor == 1) ? value : (value * scaleFactor);
         }
 
@@ -690,7 +690,7 @@ public final class SwingTree
          * @return The scaled and rounded value.
          */
         public int scale( int value ) {
-            initialize();
+            _initialize();
             return ( scaleFactor == 1 ? value : Math.round( value * scaleFactor ) );
         }
 
@@ -703,7 +703,7 @@ public final class SwingTree
          * @return The scaled and rounded down value.
          */
         public int scaleRoundedDown( int value ) {
-            initialize();
+            _initialize();
             return ( scaleFactor == 1 ? value : (int) (value * scaleFactor) );
         }
 
@@ -714,7 +714,7 @@ public final class SwingTree
          * @return The resulting un-scaled floating point number.
          */
         public float unscale( float value ) {
-            initialize();
+            _initialize();
             return (scaleFactor == 1f) ? value : (value / scaleFactor);
         }
 
@@ -725,7 +725,7 @@ public final class SwingTree
          * @return The un-scaled and rounded value.
          */
         public int unscale( int value ) {
-            initialize();
+            _initialize();
             return (scaleFactor == 1f) ? value : Math.round( value / scaleFactor );
         }
 
@@ -736,7 +736,7 @@ public final class SwingTree
          * @param g The graphics context to scale.
          */
         public void scaleGraphics( Graphics2D g ) {
-            initialize();
+            _initialize();
             if( scaleFactor != 1f )
                 g.scale( scaleFactor, scaleFactor );
         }
@@ -752,7 +752,7 @@ public final class SwingTree
          * @return A new instance of {@link Dimension} or {@link DimensionUIResource} with scaled width and height.
          */
         public Dimension scale( Dimension dimension ) {
-            initialize();
+            _initialize();
             return (dimension == null || scaleFactor == 1f)
                     ? dimension
                     : (dimension instanceof UIResource
@@ -761,7 +761,7 @@ public final class SwingTree
         }
 
         public Rectangle scale( Rectangle rectangle ) {
-            initialize();
+            _initialize();
             return (rectangle == null || scaleFactor == 1f)
                     ? rectangle
                     : new Rectangle(
@@ -771,7 +771,7 @@ public final class SwingTree
         }
 
         public RoundRectangle2D scale( RoundRectangle2D rectangle ) {
-            initialize();
+            _initialize();
             if ( rectangle == null || scaleFactor == 1f ) return rectangle;
             if ( rectangle instanceof RoundRectangle2D.Float )
                 return new RoundRectangle2D.Float(
@@ -798,7 +798,7 @@ public final class SwingTree
          * @return A new instance of {@link Insets} or {@link InsetsUIResource} with scaled values.
          */
         public Insets scale( Insets insets ) {
-            initialize();
+            _initialize();
             return (insets == null || scaleFactor == 1f)
                     ? insets
                     : (insets instanceof UIResource
