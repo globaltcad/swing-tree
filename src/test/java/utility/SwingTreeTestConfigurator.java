@@ -24,7 +24,9 @@ public class SwingTreeTestConfigurator implements SwingTreeConfigurator
     private void _loadFonts() {
 
         String[] testFonts = {
-                "/fonts/Ubuntu-Regular.ttf"
+                "/fonts/Ubuntu-Regular.ttf",
+                "/fonts/Buggie-L3y03.ttf",
+                "/fonts/DancingScript-3j68.ttf",
         };
 
         // We simply load the fonts here, so that they are available

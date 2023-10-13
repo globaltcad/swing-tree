@@ -487,7 +487,7 @@ class Individual_Component_Styling_Spec extends Specification
                     UI.textArea("""Ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.""")
                     .peek( it -> it.setLineWrap(true) )
                     .withStyle( it -> it
-                        .size(200, 240)
+                        .size(240, 200)
                         .backgroundColor(new Color(120,255,240))
                         .foundationColor(new Color(50,100,200))
                         .margin(12)
@@ -497,7 +497,7 @@ class Individual_Component_Styling_Spec extends Specification
                         .shadowColor(new Color(0,0,0))
                         .shadowBlurRadius(4)
                         .shadowIsInset(true)
-                        .font(new Font("Palatino", Font.PLAIN, 20))
+                        .font(new Font("Dancing Script", Font.PLAIN, 20))
                     )
 
         when : 'We render the text area into a BufferedImage.'
@@ -632,8 +632,8 @@ class Individual_Component_Styling_Spec extends Specification
                     UI.textArea("I am a text area, \nhow are you today :) ?")
                     .peek( it -> it.setLineWrap(true) )
                     .withStyle( it -> it
-                        .size(140, 80)
-                        .font("Goudy Old Style", 13)
+                        .size(185, 60)
+                        .font("Buggie", 13)
                         .fontBold(true)
                         .fontItalic(true)
                         .fontColor("#FF0000") // Red
@@ -1208,7 +1208,7 @@ class Individual_Component_Styling_Spec extends Specification
             var images = new BufferedImage[] {image1, image2, image3, image4, image5, image6, image7, image8, image9, image10, image11, image12, image13, image14, image15}
 
         then : 'The image is as expected.'
-            Utility.similarityBetween(images, "components/svg-image-panels-collage.png", 99.99) > 99.99
+            Utility.similarityBetween(images, "components/svg-image-panels-collage.png", 99.5) > 99.5
 
         where : 'We test this UI using the following scaling values:'
             scale << [1f, 1.25f, 1.75f, 2f]

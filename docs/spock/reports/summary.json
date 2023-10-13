@@ -1,13 +1,13 @@
 {
   "project": "Swing-Tree",
   "version": "0.2.0",
-  "created": "Wed Oct 11 09:43:56 CEST 2023",
+  "created": "Fri Oct 13 14:14:47 CEST 2023",
   "statistics":{
     "runs":"41",
-    "passed":"41",
-    "failed":"0",
-    "featureFailures":"0",
-    "successRate":"1.0",
+    "passed":"40",
+    "failed":"1",
+    "featureFailures":"2",
+    "successRate":"0.975609756097561",
     "duration":"?"
   },
   "specifications": [{
@@ -15,10 +15,10 @@
       "title":"Examples UIs",
       "narrative":"This is an overview of the various example UIs\n    in the test suite.\n\n    This specification also ensures that the\n    various UI examples in the test suite, \n    run successfully and also produce\n    UIs with expected state and appearance.",
       "featureCount":"19",
-      "failures":"0",
+      "failures":"2",
       "errors":"0",
       "skipped":"0" ,
-      "successRate":"1.0",
+      "successRate":"0.8947368421052632",
       "duration":"?",
       "executedFeatures":[{"id":"The \"MadeWithSwingTree\" example UI defined in the examples can be created.","extraInfo":[]},{"id":"The \"Well rounded\" style example UI defined in the examples can be created.","extraInfo":[]},{"id":"The advanced UI define in the examples has the expected state.","extraInfo":[]},{"id":"The animated buttons view examples UI defined in the examples looks as expected.","extraInfo":[]},{"id":"The animation example view can be created.","extraInfo":[]},{"id":"The box shadow picker example UI defined in the examples can be created.","extraInfo":[]},{"id":"The calculator UI defined in the examples has the expected state and looks.","extraInfo":[]},{"id":"The form UI defined in the examples has the expected state.","extraInfo":[]},{"id":"The list examples UI defined in the examples can be created.","extraInfo":[]},{"id":"The list rendering example UI defined in the examples can be created.","extraInfo":[]},{"id":"The login example UI defined in the examples, a good MVVM demonstration.","extraInfo":[]},{"id":"The note guesser example UI defined in the examples can be created.","extraInfo":[]},{"id":"The settings example UI defined in the examples looks as expected.","extraInfo":[]},{"id":"The simple Table-UI example has the expected state.","extraInfo":[]},{"id":"The soft example UI is rendered as expected.","extraInfo":[]},{"id":"The spinners example UI defined in the examples can be created.","extraInfo":[]},{"id":"The symbol guesser example UI defined in the examples can be created.","extraInfo":[]},{"id":"The todo app UI defined in the examples has the expected state.","extraInfo":[]},{"id":"The user registration example UI defined in the examples, a good MVVM demonstration.","extraInfo":[]}],
       "ignoredFeatures":[]
@@ -493,7 +493,7 @@
     },{
       "className":"swingtree.mvvm.Observing_Properties_Spec",
       "title":"Property Change Listeners",
-      "narrative":"The core motivation behind the creation of the SwingTree library\n    is to provide a simple and powerful way to model the state \n    as well as business logic of your UI without actually depending on it.\n\n    To make the decoupling between your UI and the UIs state and logic \n    possible you need to bind Sprouts properties to UI components.\n    This is done through the use of change listeners and event listeners\n    and so called `Channel`s, which are used to distinguish between\n    different types of events.",
+      "narrative":"A core motivation behind the creation of the SwingTree library\n    is to provide a simple and powerful way to model the state \n    as well as business logic of your UI without actually depending on it.\n\n    To make the decoupling between your UI and the UIs state and logic \n    possible you need to bind Sprouts properties to UI components.\n    This is done through the use of change listeners and event listeners\n    and so called `Channel`s, which are used to distinguish between\n    different types of events.",
       "featureCount":"5",
       "failures":"0",
       "errors":"0",
