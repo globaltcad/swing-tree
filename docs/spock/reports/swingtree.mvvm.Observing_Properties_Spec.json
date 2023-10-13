@@ -1,7 +1,7 @@
 {
   "className":"swingtree.mvvm.Observing_Properties_Spec",
   "title":"Property Change Listeners",
-  "narrative":"The core motivation behind the creation of the SwingTree library\n    is to provide a simple and powerful way to model the state \n    as well as business logic of your UI without actually depending on it.\n\n    To make the decoupling between your UI and the UIs state and logic \n    possible you need to bind Sprouts properties to UI components.\n    This is done through the use of change listeners and event listeners\n    and so called `Channel`s, which are used to distinguish between\n    different types of events.",
+  "narrative":"A core motivation behind the creation of the SwingTree library\n    is to provide a simple and powerful way to model the state \n    as well as business logic of your UI without actually depending on it.\n\n    To make the decoupling between your UI and the UIs state and logic \n    possible you need to bind Sprouts properties to UI components.\n    This is done through the use of change listeners and event listeners\n    and so called `Channel`s, which are used to distinguish between\n    different types of events.",
   "subjects":["sprouts.Val","sprouts.Var"],
   "statistics":{
     "runs":"5",
@@ -31,7 +31,7 @@
 
         {"kind":"then","text":"The side effect is executed.","code":["list == [\"Tofu\"]"]},
 
-        {"kind":"when","text":"We trigger the side effect manually.","code":["mutable.fire(From.VIEW_MODEL)"]},
+        {"kind":"when","text":"We trigger the side effect manually.","code":["mutable.fireChange(From.VIEW_MODEL)"]},
 
         {"kind":"then","text":"The side effect is executed again.","code":["list.size() == 2","list[0] == \"Tofu\"","list[1] == \"Tofu\""]}
       ],

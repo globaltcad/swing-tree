@@ -155,7 +155,7 @@
 
         {"kind":"when","text":"We render the label into a BufferedImage.","code":["var image = Utility.renderSingleComponent(ui.getComponent())"]},
 
-        {"kind":"then","text":"The image is as expected.","code":["Utility.similarityBetween(image, \"components/rounded-green-JLabel.png\", 98.5) > 98.5"]}
+        {"kind":"then","text":"The image is as expected.","code":["Utility.similarityBetween(image, \"components/rounded-green-JLabel.png\", 99.5) > 99.5"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -219,7 +219,7 @@
       "tags":{},"see":[],"extraInfo":["\n            Make a text area look like it is sunken in the background using a shadow going inwards.\n            We achieve this by configuring the default shadow (with the name \"default\").\n            ![components/sunken-JTextArea.png](https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/components/sunken-JTextArea.png)\n\n            This kind of shadow effect looks really nice on text areas.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A text area UI with a custom styler lambda.","code":["var ui =","        UI.textArea(\"\"\"Ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.\"\"\")","        .peek( it -> it.setLineWrap(true) )","        .withStyle( it -> it","            .size(200, 240)","            .backgroundColor(new Color(120,255,240))","            .foundationColor(new Color(50,100,200))","            .margin(12)","            .padding(6, 7, 6, 7)","            .borderRadius(16)","            .foregroundColor(Color.DARK_GRAY)","            .shadowColor(new Color(0,0,0))","            .shadowBlurRadius(4)","            .shadowIsInset(true)","            .font(new Font(\"Palatino\", Font.PLAIN, 20))","        )"]},
+        {"kind":"given","text":"A text area UI with a custom styler lambda.","code":["var ui =","        UI.textArea(\"\"\"Ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.\"\"\")","        .peek( it -> it.setLineWrap(true) )","        .withStyle( it -> it","            .size(240, 200)","            .backgroundColor(new Color(120,255,240))","            .foundationColor(new Color(50,100,200))","            .margin(12)","            .padding(6, 7, 6, 7)","            .borderRadius(16)","            .foregroundColor(Color.DARK_GRAY)","            .shadowColor(new Color(0,0,0))","            .shadowBlurRadius(4)","            .shadowIsInset(true)","            .font(new Font(\"Dancing Script\", Font.PLAIN, 20))","        )"]},
 
         {"kind":"when","text":"We render the text area into a BufferedImage.","code":["var image = Utility.renderSingleComponent(ui.getComponent())"]},
 
@@ -289,7 +289,7 @@
       "tags":{},"see":[],"extraInfo":["\n                The `Styler` lambda exposes a lot of API to adjust how text is styled. <br>\n                More specifically, you can adjust the style of the font, e.g. the font family, size and, well, style. <br>\n                <br>\n                Here you can see an example of a text area with a custom font family, size and style. <br>\n                ![components/custom-font-JTextArea.png](https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/components/custom-font-JTextArea.png)\n            "]
       },
       "blocks":[
-        {"kind":"given","text":"A text area UI with a custom styler lambda.","code":["var ui =","        UI.textArea(\"I am a text area, \\nhow are you today :) ?\")","        .peek( it -> it.setLineWrap(true) )","        .withStyle( it -> it","            .size(140, 80)","            .font(\"Goudy Old Style\", 13)","            .fontBold(true)","            .fontItalic(true)","            .fontColor(\"#FF0000\") // Red","        )"]},
+        {"kind":"given","text":"A text area UI with a custom styler lambda.","code":["var ui =","        UI.textArea(\"I am a text area, \\nhow are you today :) ?\")","        .peek( it -> it.setLineWrap(true) )","        .withStyle( it -> it","            .size(185, 60)","            .font(\"Buggie\", 13)","            .fontBold(true)","            .fontItalic(true)","            .fontColor(\"#FF0000\") // Red","        )"]},
 
         {"kind":"when","text":"We render the text area into a BufferedImage.","code":["var image = Utility.renderSingleComponent(ui.getComponent())"]},
 
@@ -418,7 +418,7 @@
 
         {"kind":"when","text":"We render the UIs into BufferedImage instances.","code":["var image1 = Utility.renderSingleComponent(ui1.getComponent())","var image2 = Utility.renderSingleComponent(ui2.getComponent())","var image3 = Utility.renderSingleComponent(ui3.getComponent())","var image4 = Utility.renderSingleComponent(ui4.getComponent())","var image5 = Utility.renderSingleComponent(ui5.getComponent())","var image6 = Utility.renderSingleComponent(ui6.getComponent())","var image7 = Utility.renderSingleComponent(ui7.getComponent())","var image8 = Utility.renderSingleComponent(ui8.getComponent())","var image9 = Utility.renderSingleComponent(ui9.getComponent())","var image10 = Utility.renderSingleComponent(ui10.getComponent())","var image11 = Utility.renderSingleComponent(ui11.getComponent())","var image12 = Utility.renderSingleComponent(ui12.getComponent())","var image13 = Utility.renderSingleComponent(ui13.getComponent())","var image14 = Utility.renderSingleComponent(ui14.getComponent())","var image15 = Utility.renderSingleComponent(ui15.getComponent())","var images = new BufferedImage[] {image1, image2, image3, image4, image5, image6, image7, image8, image9, image10, image11, image12, image13, image14, image15}"]},
 
-        {"kind":"then","text":"The image is as expected.","code":["Utility.similarityBetween(images, \"components/svg-image-panels-collage.png\", 99.99) > 99.99"]},
+        {"kind":"then","text":"The image is as expected.","code":["Utility.similarityBetween(images, \"components/svg-image-panels-collage.png\", 99.5) > 99.5"]},
 
         {"kind":"where","text":"We test this UI using the following scaling values:","code":{"scale":["1f","1.25f","1.75f","2f"]}}
       ],
@@ -509,7 +509,7 @@
 
         {"kind":"and","text":"","code":["MyTabsViewModel.TabModel tab1 = new MyTabsView.DummyTab(\"Tab 1\", \"\").getModel();","MyTabsViewModel.TabModel tab2 = new MyTabsView.DummyTab(\"Tab 2\", \"img/two-16th-notes.svg\").getModel();","MyTabsViewModel.TabModel tab3 = new MyTabsView.DummyTab(\"Tab 3\", \"img/hopper.svg\").getModel();","MyTabsViewModel vm = new MyTabsViewModel();","vm.getTabs().add(tab1);","vm.getTabs().add(tab2);","vm.getTabs().add(tab3);","vm.getCurrentTab().set(tab2);","var ui = new MyTabsView(vm)","ui.setPreferredSize(new Dimension(UI.scale(220), UI.scale(80)))"]},
 
-        {"kind":"expect","text":"The image is as expected.","code":["Utility.similarityBetween(ui, \"components/my-tabbed-pane.png\", 98) > 98"]},
+        {"kind":"expect","text":"The image is as expected.","code":["Utility.similarityBetween(ui, \"components/my-tabbed-pane.png\", 97.5) > 97.5"]},
 
         {"kind":"where","text":"","code":{"uiScale":["1","2","3"]}}
       ],
