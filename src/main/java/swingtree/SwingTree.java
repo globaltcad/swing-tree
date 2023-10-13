@@ -7,7 +7,6 @@ import swingtree.threading.EventProcessor;
 
 import javax.swing.ImageIcon;
 import javax.swing.LookAndFeel;
-import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.plaf.DimensionUIResource;
 import javax.swing.plaf.FontUIResource;
@@ -461,7 +460,7 @@ public final class SwingTree
                 return;
 
             // apply custom scale factor specified in system property "swingtree.uiScale"
-            float customScaleFactor = getCustomScaleFactor();
+            float customScaleFactor = config.uiScaleFactor();
             if ( customScaleFactor > 0 ) {
                 setUserScaleFactor( customScaleFactor, false );
                 return;
@@ -558,7 +557,7 @@ public final class SwingTree
             if ( !config.isUiScaleFactorEnabled() )
                 return font;
 
-            float scaleFactor = getCustomScaleFactor();
+            float scaleFactor = config.uiScaleFactor();
             if ( scaleFactor <= 0 )
                 return font;
 
@@ -571,13 +570,6 @@ public final class SwingTree
         }
 
         /**
-         * Get custom scale factor specified in system property "swingtree.uiScale".
-         */
-        private float getCustomScaleFactor() {
-            return config.uiScaleFactor();
-        }
-
-        /**
          * Returns the user scale factor is a scaling factor is used by SwingTree's
          * style engine to scale the UI during painting.
          * Note that this is different from the system scale factor, which is
@@ -587,6 +579,10 @@ public final class SwingTree
          * Use this scaling factor for painting operations that are not performed
          * by SwingTree's style engine, e.g. custom painting
          * (see {@link swingtree.style.ComponentStyleDelegate#painter(UI.Layer, Painter)}).
+         * <p>
+         * You can configure this scaling factor through the library initialization
+         * method {@link SwingTree#initialiseUsing(SwingTreeConfigurator)},
+         * or through the system property "swingtree.uiScale".
          *
          * @return The user scale factor.
          */
