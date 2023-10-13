@@ -243,27 +243,22 @@ public final class SwingTree
         {
             this.config = config;
             try {
-                if ( config.scaling() == SwingTreeInitConfig.Scaling.NONE ) {
-                    initialized = true;
+                if ( config.scalingStrategy() == SwingTreeInitConfig.Scaling.NONE ) {
+                    this.scaleFactor = 1;
+                    this.initialized = true;
                     return;
                 }
 
-                if ( config.scaling() == SwingTreeInitConfig.Scaling.FROM_FONT ) {
-
+                if ( config.scalingStrategy() == SwingTreeInitConfig.Scaling.FROM_DEFAULT_FONT ) {
                     Font uiScaleReferenceFont = config.defaultFont().orElse(null);
-                    UIDefaults defaults = UIManager.getDefaults();
-
                     if (uiScaleReferenceFont != null)
-                        defaults.put(_DEFAULT_FONT, null);
-
-                    if (uiScaleReferenceFont == null)
-                        uiScaleReferenceFont = UIManager.getFont(_DEFAULT_FONT);
-
-                    if (uiScaleReferenceFont == null) {
-                        Font highDPIFont = _calculateDPIAwarePlatformFont();
-                        defaults.put(_DEFAULT_FONT, highDPIFont);
-                    }
+                        UIManager.getDefaults().put(_DEFAULT_FONT, uiScaleReferenceFont);
                 }
+                if ( config.scalingStrategy() == SwingTreeInitConfig.Scaling.FROM_SYSTEM_FONT ) {
+                    Font highDPIFont = _calculateDPIAwarePlatformFont();
+                    UIManager.getDefaults().put(_DEFAULT_FONT, highDPIFont);
+                }
+
                 _initialize();
             } catch (Exception ex) {
                 log.error("Error initializing "+UIScale.class.getSimpleName(), ex);

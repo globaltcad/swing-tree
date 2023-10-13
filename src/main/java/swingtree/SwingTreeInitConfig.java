@@ -49,11 +49,12 @@ public final class SwingTreeInitConfig
         /**
          *  The scaling will be derived from the default font size.
          */
-        FROM_FONT,
+        FROM_DEFAULT_FONT,
         /**
          *  The scaling will be derived from the system font size.
          */
         FROM_SYSTEM_FONT,
+        FROM_SCALING_FACTOR,
         /**
          *  No scaling will be performed.
          */
@@ -64,7 +65,6 @@ public final class SwingTreeInitConfig
         return new SwingTreeInitConfig(
                         null,
                         FontInstallation.SOFT,
-                        Scaling.FROM_FONT,
                         EventProcessor.COUPLED_STRICT,
                         null,
                         SystemProperties.parseScaleFactor(System.getProperty( SystemProperties.UI_SCALE )),
@@ -76,7 +76,6 @@ public final class SwingTreeInitConfig
 
     private final Font             _defaultFont; // may be null
     private final FontInstallation _fontInstallation;
-    private final Scaling          _scaling;
     private final EventProcessor   _eventProcessor;
     private final StyleSheet       _styleSheet; // may be null
     private final float            _uiScale;
@@ -87,7 +86,6 @@ public final class SwingTreeInitConfig
     private SwingTreeInitConfig(
             Font             defaultFont,
             FontInstallation fontInstallation,
-            Scaling          scaling,
             EventProcessor   eventProcessor,
             StyleSheet       styleSheet,
             float            uiScale,
@@ -96,7 +94,6 @@ public final class SwingTreeInitConfig
     ) {
         _defaultFont           = defaultFont;
         _fontInstallation      = Objects.requireNonNull(fontInstallation);
-        _scaling               = Objects.requireNonNull(scaling);
         _eventProcessor        = Objects.requireNonNull(eventProcessor);
         _styleSheet            = styleSheet;
         _uiScale               = uiScale;
@@ -122,8 +119,15 @@ public final class SwingTreeInitConfig
     /**
      *  Returns the {@link Scaling} mode.
      */
-    Scaling scaling() {
-        return _scaling;
+    Scaling scalingStrategy() {
+        if ( !_uiScaleEnabled )
+            return Scaling.NONE;
+        if ( _uiScale > 0 )
+            return Scaling.FROM_SCALING_FACTOR;
+        if ( _defaultFont != null )
+            return Scaling.FROM_DEFAULT_FONT;
+
+        return Scaling.FROM_SYSTEM_FONT;
     }
 
     /**
@@ -171,7 +175,7 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new default font.
      */
     public SwingTreeInitConfig defaultFont( Font newDefaultFont ) {
-        return new SwingTreeInitConfig(newDefaultFont, _fontInstallation, _scaling, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown);
+        return new SwingTreeInitConfig(newDefaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown);
     }
 
     /**
@@ -191,22 +195,7 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new default font and {@link FontInstallation} mode.
      */
     public SwingTreeInitConfig defaultFont( Font newDefaultFont, FontInstallation newFontInstallation ) {
-        return new SwingTreeInitConfig(newDefaultFont, newFontInstallation, _scaling, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown);
-    }
-
-    /**
-     *  Used to configure the {@link Scaling} mode, which determines how the UI scaling factor
-     *  is determined (see {@link Scaling}).
-     *  If the {@link Scaling} mode is {@link Scaling#FROM_FONT}, then the UI scaling factor
-     *  will be derived from the default font size. If on the other hand the {@link Scaling}
-     *  mode is {@link Scaling#FROM_SYSTEM_FONT}, then the UI scaling factor will be derived
-     *  from the system font size.
-     *
-     * @param newScaling The new {@link Scaling} mode.
-     * @return A new {@link SwingTreeInitConfig} instance with the new {@link Scaling} mode.
-     */
-    public SwingTreeInitConfig scaling( Scaling newScaling ) {
-        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, newScaling, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown);
+        return new SwingTreeInitConfig(newDefaultFont, newFontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown);
     }
 
     /**
@@ -220,7 +209,7 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new {@link EventProcessor}.
      */
     public SwingTreeInitConfig eventProcessor( EventProcessor newEventProcessor ) {
-        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _scaling, newEventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown);
+        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, newEventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown);
     }
 
     /**
@@ -231,7 +220,7 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new {@link StyleSheet}.
      */
     public SwingTreeInitConfig styleSheet( StyleSheet newStyleSheet ) {
-        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _scaling, _eventProcessor, newStyleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown);
+        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _eventProcessor, newStyleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown);
     }
 
     /**
@@ -249,7 +238,7 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new UI scaling factor.
      */
     public SwingTreeInitConfig uiScaleFactor( float newUiScale ) {
-        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _scaling, _eventProcessor, _styleSheet, newUiScale, _uiScaleEnabled, _uiScaleAllowScaleDown);
+        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _eventProcessor, _styleSheet, newUiScale, _uiScaleEnabled, _uiScaleAllowScaleDown);
     }
 
     /**
@@ -262,7 +251,7 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new UI scaling mode.
      */
     public SwingTreeInitConfig isUiScaleFactorEnabled(boolean newUiScaleEnabled ) {
-        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _scaling, _eventProcessor, _styleSheet, _uiScale, newUiScaleEnabled, _uiScaleAllowScaleDown);
+        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, newUiScaleEnabled, _uiScaleAllowScaleDown);
     }
 
     /**
@@ -276,7 +265,7 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new UI scaling mode.
      */
     public SwingTreeInitConfig isUiScaleDownAllowed(boolean newUiScaleAllowScaleDown ) {
-        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _scaling, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, newUiScaleAllowScaleDown);
+        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, newUiScaleAllowScaleDown);
     }
 
 
