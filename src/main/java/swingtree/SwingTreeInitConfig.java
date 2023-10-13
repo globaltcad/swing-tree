@@ -60,15 +60,18 @@ public final class SwingTreeInitConfig
         NONE
     }
 
-    private final static SwingTreeInitConfig DEFAULT = new SwingTreeInitConfig(
-                                                           null,
-                                                            FontInstallation.SOFT,
-                                                            Scaling.FROM_FONT,
-                                                            EventProcessor.COUPLED_STRICT,
-                                                            null
-                                                        );
-
-    public static SwingTreeInitConfig none() { return DEFAULT; }
+    public static SwingTreeInitConfig standard() {
+        return new SwingTreeInitConfig(
+                        null,
+                        FontInstallation.SOFT,
+                        Scaling.FROM_FONT,
+                        EventProcessor.COUPLED_STRICT,
+                        null,
+                        SystemProperties.parseScaleFactor(System.getProperty( SystemProperties.UI_SCALE )),
+                        SystemProperties.getBoolean( SystemProperties.UI_SCALE_ENABLED, true ),
+                        SystemProperties.getBoolean( SystemProperties.UI_SCALE_ALLOW_SCALE_DOWN, false )
+                    );
+    }
 
 
     private final Font             _defaultFont; // may be null
@@ -76,20 +79,29 @@ public final class SwingTreeInitConfig
     private final Scaling          _scaling;
     private final EventProcessor   _eventProcessor;
     private final StyleSheet       _styleSheet; // may be null
+    private final float            _uiScale;
+    private final boolean          _uiScaleEnabled;
+    private final boolean          _uiScaleAllowScaleDown;
 
 
     private SwingTreeInitConfig(
-        Font             defaultFont,
-        FontInstallation fontInstallation,
-        Scaling          scaling,
-        EventProcessor   eventProcessor,
-        StyleSheet       styleSheet
+            Font             defaultFont,
+            FontInstallation fontInstallation,
+            Scaling          scaling,
+            EventProcessor   eventProcessor,
+            StyleSheet       styleSheet,
+            float            uiScale,
+            boolean          uiScaleEnabled,
+            boolean          uiScaleAllowScaleDown
     ) {
-        _defaultFont      = defaultFont;
-        _fontInstallation = Objects.requireNonNull(fontInstallation);
-        _scaling          = Objects.requireNonNull(scaling);
-        _eventProcessor   = Objects.requireNonNull(eventProcessor);
-        _styleSheet       = styleSheet;
+        _defaultFont           = defaultFont;
+        _fontInstallation      = Objects.requireNonNull(fontInstallation);
+        _scaling               = Objects.requireNonNull(scaling);
+        _eventProcessor        = Objects.requireNonNull(eventProcessor);
+        _styleSheet            = styleSheet;
+        _uiScale               = uiScale;
+        _uiScaleEnabled        = uiScaleEnabled;
+        _uiScaleAllowScaleDown = uiScaleAllowScaleDown;
     }
 
     /**
@@ -130,6 +142,28 @@ public final class SwingTreeInitConfig
     }
 
     /**
+     *  Returns the UI scaling factor as is specified by the system property {@code swingtree.uiScale}.
+     */
+    float uiScaleFactor() {
+        return _uiScale;
+    }
+
+    /**
+     *  Returns whether the UI scaling mode is enabled as is specified by the system property {@code swingtree.uiScale.enabled}.
+     */
+    boolean isUiScaleFactorEnabled() {
+        return _uiScaleEnabled;
+    }
+
+    /**
+     *  Returns whether values smaller than 100% are allowed for the user scale factor
+     *  as is specified by the system property {@code swingtree.uiScale.allowScaleDown}.
+     */
+    boolean isUiScaleDownAllowed() {
+        return _uiScaleAllowScaleDown;
+    }
+
+    /**
      *  Used to configure the default font, which may be used by the {@link SwingTree}
      *  to derive the UI scaling factor and or to install the font in the {@link javax.swing.UIManager}
      *  depending on the {@link FontInstallation} mode (see {@link #defaultFont(Font, FontInstallation)}).
@@ -137,7 +171,7 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new default font.
      */
     public SwingTreeInitConfig defaultFont( Font newDefaultFont ) {
-        return new SwingTreeInitConfig(newDefaultFont, _fontInstallation, _scaling, _eventProcessor, _styleSheet);
+        return new SwingTreeInitConfig(newDefaultFont, _fontInstallation, _scaling, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown);
     }
 
     /**
@@ -157,7 +191,7 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new default font and {@link FontInstallation} mode.
      */
     public SwingTreeInitConfig defaultFont( Font newDefaultFont, FontInstallation newFontInstallation ) {
-        return new SwingTreeInitConfig(newDefaultFont, newFontInstallation, _scaling, _eventProcessor, _styleSheet);
+        return new SwingTreeInitConfig(newDefaultFont, newFontInstallation, _scaling, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown);
     }
 
     /**
@@ -172,7 +206,7 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new {@link Scaling} mode.
      */
     public SwingTreeInitConfig scaling( Scaling newScaling ) {
-        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, newScaling, _eventProcessor, _styleSheet);
+        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, newScaling, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown);
     }
 
     /**
@@ -186,7 +220,7 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new {@link EventProcessor}.
      */
     public SwingTreeInitConfig eventProcessor( EventProcessor newEventProcessor ) {
-        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _scaling, newEventProcessor, _styleSheet);
+        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _scaling, newEventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown);
     }
 
     /**
@@ -197,6 +231,128 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new {@link StyleSheet}.
      */
     public SwingTreeInitConfig styleSheet( StyleSheet newStyleSheet ) {
-        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _scaling, _eventProcessor, newStyleSheet);
+        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _scaling, _eventProcessor, newStyleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown);
+    }
+
+    /**
+     *  Used to configure the UI scaling factor as is specified by the system property {@code swingtree.uiScale}.
+     *  <p>
+     *  If Java runtime scales (Java 9 or later), this scale factor is applied on top
+     *  of the Java system scale factor. Java 8 does not scale and this scale factor
+     *  replaces the user scale factor that SwingTree computes based on the font.
+     *  To replace the Java 9+ system scale factor, use system property "sun.java2d.uiScale",
+     *  which has the same syntax as this one.
+     *  <p>
+     *  <strong>Allowed Values</strong> e.g. {@code 1.5}, {@code 1.5x}, {@code 150%} or {@code 144dpi} (96dpi is 100%)<br>
+     *
+     * @param newUiScale The new UI scaling factor.
+     * @return A new {@link SwingTreeInitConfig} instance with the new UI scaling factor.
+     */
+    public SwingTreeInitConfig uiScaleFactor( float newUiScale ) {
+        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _scaling, _eventProcessor, _styleSheet, newUiScale, _uiScaleEnabled, _uiScaleAllowScaleDown);
+    }
+
+    /**
+     *  Used to configure whether the UI scaling mode is enabled as is specified by the system property {@code swingtree.uiScale.enabled}.
+     *  <p>
+     *  <strong>Allowed Values</strong> {@code false} and {@code true}<br>
+     *  <strong>Default</strong> {@code true}
+     *
+     * @param newUiScaleEnabled The new UI scaling mode.
+     * @return A new {@link SwingTreeInitConfig} instance with the new UI scaling mode.
+     */
+    public SwingTreeInitConfig isUiScaleFactorEnabled(boolean newUiScaleEnabled ) {
+        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _scaling, _eventProcessor, _styleSheet, _uiScale, newUiScaleEnabled, _uiScaleAllowScaleDown);
+    }
+
+    /**
+     *  Used to configure whether values smaller than 100% are allowed for the user scale factor
+     *  as is specified by the system property {@code swingtree.uiScale.allowScaleDown}.
+     *  <p>
+     *  <strong>Allowed Values</strong> {@code false} and {@code true}<br>
+     *  <strong>Default</strong> {@code false}
+     *
+     * @param newUiScaleAllowScaleDown The new UI scaling mode.
+     * @return A new {@link SwingTreeInitConfig} instance with the new UI scaling mode.
+     */
+    public SwingTreeInitConfig isUiScaleDownAllowed(boolean newUiScaleAllowScaleDown ) {
+        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _scaling, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, newUiScaleAllowScaleDown);
+    }
+
+
+    /**
+     * Defines/documents own system properties used in SwingTree.
+     *
+     * @author Daniel Nepp, but originally a derivative work of Karl Tauber
+     */
+    private static interface SystemProperties
+    {
+        /**
+         * Specifies a custom scale factor used to scale the UI.
+         * <p>
+         * If Java runtime scales (Java 9 or later), this scale factor is applied on top
+         * of the Java system scale factor. Java 8 does not scale and this scale factor
+         * replaces the user scale factor that SwingTree computes based on the font.
+         * To replace the Java 9+ system scale factor, use system property "sun.java2d.uiScale",
+         * which has the same syntax as this one.
+         * <p>
+         * <strong>Allowed Values</strong> e.g. {@code 1.5}, {@code 1.5x}, {@code 150%} or {@code 144dpi} (96dpi is 100%)<br>
+         */
+        String UI_SCALE = "swingtree.uiScale";
+
+        /**
+         * Specifies whether user scaling mode is enabled.
+         * <p>
+         * <strong>Allowed Values</strong> {@code false} and {@code true}<br>
+         * <strong>Default</strong> {@code true}
+         */
+        String UI_SCALE_ENABLED = "swingtree.uiScale.enabled";
+
+        /**
+         * Specifies whether values smaller than 100% are allowed for the user scale factor
+         * (see {@link UI#scale()}).
+         * <p>
+         * <strong>Allowed Values</strong> {@code false} and {@code true}<br>
+         * <strong>Default</strong> {@code false}
+         */
+        String UI_SCALE_ALLOW_SCALE_DOWN = "swingtree.uiScale.allowScaleDown";
+
+        /**
+         * Checks whether a system property is set and returns {@code true} if its value
+         * is {@code "true"} (case-insensitive), otherwise it returns {@code false}.
+         * If the system property is not set, {@code defaultValue} is returned.
+         */
+        static boolean getBoolean( String key, boolean defaultValue ) {
+            String value = System.getProperty( key );
+            return (value != null) ? Boolean.parseBoolean( value ) : defaultValue;
+        }
+
+
+        /**
+         * Similar to sun.java2d.SunGraphicsEnvironment.getScaleFactor(String)
+         */
+        static float parseScaleFactor( String s ) {
+            if ( s == null )
+                return -1;
+
+            float units = 1;
+            if ( s.endsWith( "x" ) )
+                s = s.substring( 0, s.length() - 1 );
+            else if ( s.endsWith( "dpi" ) ) {
+                units = 96;
+                s = s.substring( 0, s.length() - 3 );
+            } else if ( s.endsWith( "%" ) ) {
+                units = 100;
+                s = s.substring( 0, s.length() - 1 );
+            }
+
+            try {
+                float scale = Float.parseFloat( s );
+                return scale > 0 ? scale / units : -1;
+            } catch( NumberFormatException ex ) {
+                return -1;
+            }
+        }
+
     }
 }
