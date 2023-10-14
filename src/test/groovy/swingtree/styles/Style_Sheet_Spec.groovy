@@ -475,15 +475,15 @@ class Style_Sheet_Spec extends Specification
             var s4 = ss.applyTo(textField.component)
             var s5 = ss.applyTo(textArea.component)
         then : '...and we check the results'
-            s1.font().name() == "Arial"
+            s1.font().family() == "Arial"
             s1.font().size() == 12
-            s2.font().name() == "Sans"
+            s2.font().family() == "Sans"
             s2.font().size() == 14
-            s3.font().name() == "Papyrus"
+            s3.font().family() == "Papyrus"
             s3.font().size() == 15
-            s4.font().name() == "Arial"
+            s4.font().family() == "Arial"
             s4.font().size() == 12
-            s5.font().name() == "Sans"
+            s5.font().family() == "Sans"
             s5.font().size() == 14
     }
 
@@ -676,7 +676,7 @@ class Style_Sheet_Spec extends Specification
             s.shadow("named shadow").spreadRadius() == 42
             s.shadow("named shadow").color().get() == Color.CYAN
             s.shadow("named shadow").isInset() == false
-            s.font().name() == "Arial"
+            s.font().family() == "Arial"
             s.font().size() == 12
             s.font().posture() == 0
     }

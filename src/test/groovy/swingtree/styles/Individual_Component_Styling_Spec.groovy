@@ -1780,7 +1780,7 @@ class Individual_Component_Styling_Spec extends Specification
             var ui =
                     UI.panel().withLayout("fill, ins 0, wrap 1")
                     .withStyle( it -> it
-                        .fontName("Alloy Ink")
+                        .fontFamily("Alloy Ink")
                         .fontSize(15)
                         .fontColor(Color.WHITE)
                         .fontAlignment(UI.HorizontalAlignment.CENTER)
@@ -1825,7 +1825,7 @@ class Individual_Component_Styling_Spec extends Specification
                                 .margin(5).padding(5)
                                 .borderRadius(6)
                                 .backgroundColor(Color.GRAY)
-                                .fontName("Ubuntu") // we override the font name here
+                                .fontFamily("Ubuntu") // we override the font name here
                             )
                         )
                     )

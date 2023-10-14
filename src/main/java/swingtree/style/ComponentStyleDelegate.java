@@ -1045,19 +1045,19 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided font name and size.
      */
     public ComponentStyleDelegate<C> font( String name, int size ) {
-        return _withStyle(_style._withFont(_style.font().name(name).size(size)));
+        return _withStyle(_style._withFont(_style.font().family(name).size(size)));
     }
 
     /**
-     *  Returns a new {@link Style} with the provided font name.
+     *  Returns a new {@link Style} with the provided font family name.
      *  Note that font styles will only apply if the component that is being rendered
      *  also supports displaying text.
      *
      * @param name The font name.
      * @return A new {@link ComponentStyleDelegate} with the provided font name.
      */
-    public ComponentStyleDelegate<C> fontName( String name ) {
-        return _withStyle(_style._withFont(_style.font().name(name)));
+    public ComponentStyleDelegate<C> fontFamily( String name ) {
+        return _withStyle(_style._withFont(_style.font().family(name)));
     }
 
     /**

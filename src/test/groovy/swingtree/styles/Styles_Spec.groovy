@@ -91,7 +91,7 @@ class Styles_Spec extends Specification
                                 .shadowColor("yellow")
                                 .fontSelectionColor("cyan")
                                 .fontColor("magenta")
-                                .fontName("Times New Roman")
+                                .fontFamily("Times New Roman")
                                 .fontSize(12)
                                 .fontBold(true)
                                 .fontUnderline(true)
@@ -124,7 +124,7 @@ class Styles_Spec extends Specification
                                             "cursor=?" +
                                         "], " +
                                         "FontStyle[" +
-                                            "name=Times New Roman, size=12, posture=0.0, weight=2.0, spacing=0.0, underlined=true, " +
+                                            "family=Times New Roman, size=12, posture=0.0, weight=2.0, spacing=0.0, underlined=true, " +
                                             "strikeThrough=true, color=rgba(255,0,255,255), backgroundColor=?, " +
                                             "selectionColor=rgba(0,255,255,255), transform=?, paint=?, backgroundPaint=?, " +
                                             "horizontalAlignment=?, verticalAlignment=?" +
@@ -179,7 +179,7 @@ class Styles_Spec extends Specification
                                  .shadowColor("yellow")
                                  .fontSelectionColor("cyan")
                                  .fontColor("magenta")
-                                 .fontName("Times New Roman")
+                                 .fontFamily("Times New Roman")
                                  .fontSize(12)
                                  .fontBold(true)
                                  .fontUnderline(true)
@@ -197,7 +197,7 @@ class Styles_Spec extends Specification
                                  .shadowColor("yellow")
                                  .fontSelectionColor("cyan")
                                  .fontColor("magenta")
-                                 .fontName("Times New Roman")
+                                 .fontFamily("Times New Roman")
                                  .fontSize(12)
                                  .fontBold(true)
                                  .fontUnderline(true)
