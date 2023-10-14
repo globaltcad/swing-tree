@@ -1213,12 +1213,23 @@ public final class ComponentStyleDelegate<C extends JComponent>
     }
 
     /**
-     * @param paint The {@link Paint} to use for the foreground of the font.
+     * @param paint The {@link Paint} to use for the foreground of the font, which translates to the
+     *              {@link java.awt.font.TextAttribute#FOREGROUND} attribute.
      * @return A new {@link ComponentStyleDelegate} with the provided font paint.
      */
     public ComponentStyleDelegate<C> fontPaint( Paint paint ) {
         return _withStyle(_style._withFont(_style.font().paint(paint)));
     }
+
+    /**
+     * @param paint The {@link Paint} to use for the background of the font, which translates to the
+     *              {@link java.awt.font.TextAttribute#BACKGROUND} attribute.
+     * @return A new {@link ComponentStyleDelegate} with the provided font background paint.
+     */
+    public ComponentStyleDelegate<C> fontBackgroundPaint( Paint paint ) {
+        return _withStyle(_style._withFont(_style.font().backgroundPaint(paint)));
+    }
+
 
     /**
      *  Use this to define the weight of the default font of the component.
@@ -1229,6 +1240,15 @@ public final class ComponentStyleDelegate<C extends JComponent>
      */
     public ComponentStyleDelegate<C> fontWeight( float weight ) {
         return _withStyle(_style._withFont(_style.font().weight(weight))); 
+    }
+
+    /**
+     * @param spacing The spacing of the default font of the component, which translates to the
+     *                {@link java.awt.font.TextAttribute#TRACKING} attribute.
+     * @return A new {@link ComponentStyleDelegate} with the provided font spacing.
+     */
+    public ComponentStyleDelegate<C> fontSpacing( float spacing ) {
+        return _withStyle(_style._withFont(_style.font().spacing(spacing)));
     }
 
     /**
