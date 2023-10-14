@@ -1755,6 +1755,89 @@ class Individual_Component_Styling_Spec extends Specification
             uiScale << [1]
     }
 
+    def 'The font style of a parent component will be inherited by its children.'(
+        float uiScale
+    ) {
+        reportInfo """
+            The font style of a parent component will be inherited by its children.
+            Here you can see an example of a panel of 2 different panels,
+            one with a label and a button and the other with a big text area.
+            Font related styles are only configured for the parent panel
+            and the children will inherit these styles automatically.
+            ${Utility.linkSnapshot('components/font-style-inheritance.png')}
+        """
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+            So when your screen has a higher pixel density then this factor
+            is used by SwingTree to ensure that the UI is upscaled accordingly! 
+            Please note that the line below only exists for testing purposes, 
+            SwingTree will determine a suitable 
+            scaling factor for the current system automatically for you,
+            so you do not have to specify this factor manually. 
+        """
+            SwingTree.get().getUIScale().setUserScaleFactor(uiScale)
+        and : 'A UI with a higher level of nesting:'
+            var ui =
+                    UI.panel().withLayout("fill, ins 0, wrap 1")
+                    .withStyle( it -> it
+                        .fontName("Alloy Ink")
+                        .fontSize(15)
+                        .fontColor(Color.WHITE)
+                        .fontAlignment(UI.HorizontalAlignment.CENTER)
+                        .margin(5).padding(5)
+                        .borderRadius(6)
+                        .backgroundColor(Color.BLACK)
+                    )
+                    .add(
+                        UI.panel().withLayout("fill, ins 0")
+                        .withStyle( it -> it
+                            .margin(5).padding(5)
+                            .borderRadius(6)
+                            .backgroundColor(Color.DARK_GRAY)
+                        )
+                        .add(
+                            UI.label("Label").withStyle( it -> it
+                                .minWidth(65)
+                                .margin(5).padding(5)
+                                .borderRadius(6)
+                                .fontSize(10)
+                                .backgroundColor(Color.ORANGE)
+                            )
+                        )
+                        .add(
+                            UI.button("Button").withStyle( it -> it
+                                .minWidth(85)
+                                .margin(5).padding(5)
+                                .borderRadius(6)
+                                .backgroundColor(Color.GRAY)
+                            )
+                        )
+                    )
+                    .add("grow",
+                        UI.panel().withLayout("fill, ins 0")
+                        .withStyle( it -> it
+                            .margin(5).padding(5)
+                            .borderRadius(6)
+                            .backgroundColor(Color.DARK_GRAY)
+                        )
+                        .add("grow",
+                            UI.textArea("A simple TextArea").withStyle( it -> it
+                                .margin(5).padding(5)
+                                .borderRadius(6)
+                                .backgroundColor(Color.GRAY)
+                                .fontName("Ubuntu") // we override the font name here
+                            )
+                        )
+                    )
+
+        expect : 'The image is as expected.'
+            Utility.similarityBetween(ui.getComponent(), "components/font-style-inheritance.png", 99.5) > 99.5
+
+        where :
+            uiScale << [1]
+
+    }
+
     def 'Use the style API to design custom tabbed panes from scratch.'(
         float uiScale
     ) {
