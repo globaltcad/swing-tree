@@ -5,7 +5,7 @@ import swingtree.api.Styler;
 
 import javax.swing.JComponent;
 import java.util.*;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 /**
  *  An abstract class intended to be extended to create custom CSS look-alike
@@ -64,7 +64,7 @@ public abstract class StyleSheet
     public static StyleSheet none() { return _NONE; }
 
 
-    private final Function<JComponent, Style> _defaultStyle;
+    private final BiFunction<JComponent, Style, Style> _defaultStyle;
     private final Map<StyleTrait<?>, Styler<?>> _traitStylers = new LinkedHashMap<>();
     private StyleTrait<?>[][] _traitPaths = {}; // The paths are calculated from the above map and used to apply the styles.
 
@@ -73,11 +73,11 @@ public abstract class StyleSheet
     protected StyleSheet() { this(null); }
 
     protected StyleSheet( StyleSheet parentStyleSheet ) {
-        _defaultStyle = c -> {
+        _defaultStyle = (c, startStyle) -> {
                             if ( parentStyleSheet == null )
-                                return Style.none();
+                                return startStyle;
                             else
-                                return parentStyleSheet.applyTo( c, Style.none() );
+                                return parentStyleSheet._applyTo( c, startStyle );
                         };
 
         reconfigure();
@@ -271,7 +271,7 @@ public abstract class StyleSheet
      * @param toBeStyled The component to apply the style sheet to.
      * @return The {@link Style} that was applied to the component.
      */
-    public Style applyTo( JComponent toBeStyled ) { return applyTo( toBeStyled, _defaultStyle.apply(toBeStyled) ); }
+    public Style applyTo( JComponent toBeStyled ) { return applyTo( toBeStyled, Style.none() ); }
 
     /**
      *  Applies the style sheet to the given component using a starting {@link Style}.
@@ -288,8 +288,15 @@ public abstract class StyleSheet
      * @param toBeStyled The component to apply the style sheet to.
      * @param startingStyle The {@link Style} to start with when applying the style sheet.
      * @return The {@link Style} that was applied to the component.
+     * @throws NullPointerException If either argument is null.
      */
-    Style applyTo( JComponent toBeStyled, Style startingStyle ) {
+    public Style applyTo( JComponent toBeStyled, Style startingStyle ) {
+        Objects.requireNonNull(toBeStyled);
+        Objects.requireNonNull(startingStyle);
+        return _applyTo( toBeStyled, _defaultStyle.apply(toBeStyled, startingStyle) );
+    }
+
+    private Style _applyTo( JComponent toBeStyled, Style startingStyle ) {
         if ( !_traitGraphBuilt )
             _buildAndSetStyleTraitPaths();
 

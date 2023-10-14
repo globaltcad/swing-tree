@@ -73,7 +73,16 @@ final class StyleSource<C extends JComponent>
 
 
     Style calculateStyleFor( C owner ) {
-        Style style = _styleSheet.applyTo( owner );
+        Style starterStyle = Optional.ofNullable(owner.getParent())
+                              .map( p -> p instanceof JComponent ? (JComponent) p : null )
+                              .map(ComponentExtension::from)
+                              .map(ComponentExtension::getStyle)
+                              .map(Style::font)
+                              .filter( f -> !f.equals(FontStyle.none()) )
+                              .map( f -> Style.none()._withFont(f) )
+                              .orElse(Style.none());
+
+        Style style = _styleSheet.applyTo( owner, starterStyle );
         style = _localStyler.style(new ComponentStyleDelegate<>(owner, style)).style();
 
         // Animation styles are last: they override everything else:
