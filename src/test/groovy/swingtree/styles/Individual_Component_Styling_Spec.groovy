@@ -861,19 +861,19 @@ class Individual_Component_Styling_Spec extends Specification
                                 .primer(new Color(100,200,230, 100))
                             )
                         )
-           var ui2 =
-                        UI.label("Top Right").withStyle( it -> it
-                            .fontAlignment(UI.HorizontalAlignment.CENTER)
-                            .border(2, Color.GREEN)
-                            .size(120, 120)
-                            .image(ground -> ground
-                                .image(img)
-                                .size(60, 60)
-                                .placement(UI.Placement.TOP_RIGHT)
-                                .opacity(0.5f)
-                                .primer(new Color(100,200,230, 100))
-                            )
-                        )
+            var ui2 =
+                         UI.label("Top Right").withStyle( it -> it
+                             .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .border(2, Color.GREEN)
+                             .size(120, 120)
+                             .image(ground -> ground
+                                 .image(img)
+                                 .size(60, 60)
+                                 .placement(UI.Placement.TOP_RIGHT)
+                                 .opacity(0.5f)
+                                 .primer(new Color(100,200,230, 100))
+                             )
+                         )
             var ui3 =
                         UI.label("Bottom Left").withStyle( it -> it
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
