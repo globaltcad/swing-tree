@@ -4,7 +4,7 @@
   "narrative":"This specification demonstrates how you can use the styling\n    API to style Swing components in a functional and declarative fashion.",
   "subjects":[],
   "statistics":{
-    "runs":"29",
+    "runs":"30",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -512,6 +512,25 @@
         {"kind":"and","text":"Now we create a button UI with a custom styler lambda and a button.","code":["var funnel = UI.findIcon(\"img/funnel.svg\")","var ui =","        UI.button(\"Click\").withLayout(\"fill, ins 0\")","        .withPrefSize(160, 80)","        .withSize(160, 80)","        .withStyle( it -> it","            .fontSize(16)","            .fontAlignment(UI.HorizontalAlignment.LEFT)","            .paddingLeft(10)","            .margin(15)","            .border(3, \"orange\")","        )","        .add(\"right\",","            UI.toggleButton(funnel.get())","            .withStyle( it -> it","                .prefWidth((int)it.parent().map(Container::getSize).map(d -> d.height).orElse(80)-40)","                .prefHeight((int)it.parent().map(Container::getSize).map(d -> d.height).orElse(80)-40)","                .margin(5)","                .padding(5)","                .cursor(UI.Cursor.HAND)","                .border(2, \"gray\")","                .borderRadius(15)","            )","        );"]},
 
         {"kind":"expect","text":"The image is as expected.","code":["Utility.similarityBetween(ui.getComponent(), \"components/nested-buttons.png\", 99.5) > 99.5"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The font style of a parent component will be inherited by its children.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The font style of a parent component will be inherited by its children.\n            Here you can see an example of a panel of 2 different panels,\n            one with a label and a button and the other with a big text area.\n            Font related styles are only configured for the parent panel\n            and the children will inherit these styles automatically.\n            ![components/font-style-inheritance.png](https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/components/font-style-inheritance.png)\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().getUIScale().setUserScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"A UI with a higher level of nesting:","code":["var ui =","        UI.panel().withLayout(\"fill, ins 0, wrap 1\")","        .withStyle( it -> it","            .fontFamily(\"Alloy Ink\")","            .fontSize(15)","            .fontColor(Color.WHITE)","            .fontAlignment(UI.HorizontalAlignment.CENTER)","            .margin(5).padding(5)","            .borderRadius(6)","            .backgroundColor(Color.BLACK)","        )","        .add(","            UI.panel().withLayout(\"fill, ins 0\")","            .withStyle( it -> it","                .margin(5).padding(5)","                .borderRadius(6)","                .backgroundColor(Color.DARK_GRAY)","            )","            .add(","                UI.label(\"Label\").withStyle( it -> it","                    .minWidth(65)","                    .margin(5).padding(5)","                    .borderRadius(6)","                    .fontSize(10)","                    .backgroundColor(Color.ORANGE)","                )","            )","            .add(","                UI.button(\"Button\").withStyle( it -> it","                    .minWidth(85)","                    .margin(5).padding(5)","                    .borderRadius(6)","                    .backgroundColor(Color.GRAY)","                )","            )","        )","        .add(\"grow\",","            UI.panel().withLayout(\"fill, ins 0\")","            .withStyle( it -> it","                .margin(5).padding(5)","                .borderRadius(6)","                .backgroundColor(Color.DARK_GRAY)","            )","            .add(\"grow\",","                UI.textArea(\"A simple TextArea\").withStyle( it -> it","                    .margin(5).padding(5)","                    .borderRadius(6)","                    .backgroundColor(Color.GRAY)","                    .fontFamily(\"Ubuntu\") // we override the font name here","                )","            )","        )"]},
+
+        {"kind":"expect","text":"The image is as expected.","code":["Utility.similarityBetween(ui.getComponent(), \"components/font-style-inheritance.png\", 99.5) > 99.5"]},
 
         {"kind":"where","text":"","code":{"uiScale":["1"]}}
       ],

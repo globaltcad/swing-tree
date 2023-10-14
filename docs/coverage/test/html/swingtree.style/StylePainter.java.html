@@ -239,8 +239,8 @@ final class StylePainter&lt;C extends JComponent&gt;
 <span class="fc" id="L239">            g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );</span>
 
 <span class="fc" id="L241">        Font componentFont = component.getFont();</span>
-<span class="pc bpc" id="L242" title="2 of 4 branches missed.">        if ( componentFont != null &amp;&amp; !componentFont.equals(g2d.getFont()) )</span>
-<span class="nc" id="L243">            g2d.setFont( componentFont );</span>
+<span class="pc bpc" id="L242" title="1 of 4 branches missed.">        if ( componentFont != null &amp;&amp; !componentFont.equals(g2d.getFont()) )</span>
+<span class="fc" id="L243">            g2d.setFont( componentFont );</span>
 
 <span class="fc" id="L245">        _paintStylesOn(UI.Layer.FOREGROUND, g2d, component);</span>
 

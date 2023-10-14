@@ -5,7 +5,7 @@ import swingtree.api.Styler;
 
 import javax.swing.JComponent;
 import java.util.*;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 /**
  *  An abstract class intended to be extended to create custom CSS look-alike
@@ -64,7 +64,7 @@ public abstract class StyleSheet
 <span class="fc" id="L64">    public static StyleSheet none() { return _NONE; }</span>
 
 
-    private final Function&lt;JComponent, Style&gt; _defaultStyle;
+    private final BiFunction&lt;JComponent, Style, Style&gt; _defaultStyle;
 <span class="fc" id="L68">    private final Map&lt;StyleTrait&lt;?&gt;, Styler&lt;?&gt;&gt; _traitStylers = new LinkedHashMap&lt;&gt;();</span>
 <span class="fc" id="L69">    private StyleTrait&lt;?&gt;[][] _traitPaths = {}; // The paths are calculated from the above map and used to apply the styles.</span>
 
@@ -73,11 +73,11 @@ public abstract class StyleSheet
 <span class="fc" id="L73">    protected StyleSheet() { this(null); }</span>
 
 <span class="fc" id="L75">    protected StyleSheet( StyleSheet parentStyleSheet ) {</span>
-<span class="fc" id="L76">        _defaultStyle = c -&gt; {</span>
+<span class="fc" id="L76">        _defaultStyle = (c, startStyle) -&gt; {</span>
 <span class="pc bpc" id="L77" title="1 of 2 branches missed.">                            if ( parentStyleSheet == null )</span>
-<span class="fc" id="L78">                                return Style.none();</span>
+<span class="fc" id="L78">                                return startStyle;</span>
                             else
-<span class="nc" id="L80">                                return parentStyleSheet.applyTo( c, Style.none() );</span>
+<span class="nc" id="L80">                                return parentStyleSheet._applyTo( c, startStyle );</span>
                         };
 
 <span class="fc" id="L83">        reconfigure();</span>
@@ -271,7 +271,7 @@ public abstract class StyleSheet
      * @param toBeStyled The component to apply the style sheet to.
      * @return The {@link Style} that was applied to the component.
      */
-<span class="fc" id="L274">    public Style applyTo( JComponent toBeStyled ) { return applyTo( toBeStyled, _defaultStyle.apply(toBeStyled) ); }</span>
+<span class="fc" id="L274">    public Style applyTo( JComponent toBeStyled ) { return applyTo( toBeStyled, Style.none() ); }</span>
 
     /**
      *  Applies the style sheet to the given component using a starting {@link Style}.
@@ -288,70 +288,77 @@ public abstract class StyleSheet
      * @param toBeStyled The component to apply the style sheet to.
      * @param startingStyle The {@link Style} to start with when applying the style sheet.
      * @return The {@link Style} that was applied to the component.
+     * @throws NullPointerException If either argument is null.
      */
-    Style applyTo( JComponent toBeStyled, Style startingStyle ) {
-<span class="pc bpc" id="L293" title="1 of 2 branches missed.">        if ( !_traitGraphBuilt )</span>
-<span class="nc" id="L294">            _buildAndSetStyleTraitPaths();</span>
+    public Style applyTo( JComponent toBeStyled, Style startingStyle ) {
+<span class="fc" id="L294">        Objects.requireNonNull(toBeStyled);</span>
+<span class="fc" id="L295">        Objects.requireNonNull(startingStyle);</span>
+<span class="fc" id="L296">        return _applyTo( toBeStyled, _defaultStyle.apply(toBeStyled, startingStyle) );</span>
+    }
 
-<span class="fc bfc" id="L296" title="All 2 branches covered.">        if ( _traitPaths.length == 0 )</span>
-<span class="fc" id="L297">            return startingStyle;</span>
+    private Style _applyTo( JComponent toBeStyled, Style startingStyle ) {
+<span class="pc bpc" id="L300" title="1 of 2 branches missed.">        if ( !_traitGraphBuilt )</span>
+<span class="nc" id="L301">            _buildAndSetStyleTraitPaths();</span>
+
+<span class="fc bfc" id="L303" title="All 2 branches covered.">        if ( _traitPaths.length == 0 )</span>
+<span class="fc" id="L304">            return startingStyle;</span>
 
         // Now we run the starting style through the trait graph.
         // We do this by finding valid trait paths from the root traits to the leaf traits.
-<span class="fc" id="L301">        int deepestValidPath = -1;</span>
-<span class="fc" id="L302">        List&lt;List&lt;StyleTrait&lt;?&gt;&gt;&gt; validTraitPaths = new java.util.ArrayList&lt;&gt;();</span>
-<span class="fc bfc" id="L303" title="All 2 branches covered.">        for ( StyleTrait&lt;?&gt;[] traitPath : _traitPaths ) {</span>
-<span class="fc" id="L304">            int lastValidTrait = -1;</span>
-<span class="fc bfc" id="L305" title="All 2 branches covered.">            for ( int i = 0; i &lt; traitPath.length; i++ ) {</span>
-<span class="fc" id="L306">                boolean valid = traitPath[i].isApplicableTo(toBeStyled);</span>
-<span class="fc bfc" id="L307" title="All 2 branches covered.">                if (valid) lastValidTrait = i;</span>
+<span class="fc" id="L308">        int deepestValidPath = -1;</span>
+<span class="fc" id="L309">        List&lt;List&lt;StyleTrait&lt;?&gt;&gt;&gt; validTraitPaths = new java.util.ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L310" title="All 2 branches covered.">        for ( StyleTrait&lt;?&gt;[] traitPath : _traitPaths ) {</span>
+<span class="fc" id="L311">            int lastValidTrait = -1;</span>
+<span class="fc bfc" id="L312" title="All 2 branches covered.">            for ( int i = 0; i &lt; traitPath.length; i++ ) {</span>
+<span class="fc" id="L313">                boolean valid = traitPath[i].isApplicableTo(toBeStyled);</span>
+<span class="fc bfc" id="L314" title="All 2 branches covered.">                if (valid) lastValidTrait = i;</span>
             }
-<span class="fc bfc" id="L309" title="All 2 branches covered.">            if ( lastValidTrait &gt;= 0 ) {</span>
+<span class="fc bfc" id="L316" title="All 2 branches covered.">            if ( lastValidTrait &gt;= 0 ) {</span>
                 // We add the path up to the last valid trait to the list of valid traits.
                 // This is done by slicing the trait path array from 0 to lastValidTrait + 1.
-<span class="fc" id="L312">                validTraitPaths.add(Arrays.asList(Arrays.copyOfRange(traitPath, 0, lastValidTrait + 1)));</span>
+<span class="fc" id="L319">                validTraitPaths.add(Arrays.asList(Arrays.copyOfRange(traitPath, 0, lastValidTrait + 1)));</span>
             }
 
-<span class="fc bfc" id="L315" title="All 2 branches covered.">            if ( lastValidTrait &gt; deepestValidPath )</span>
-<span class="fc" id="L316">                deepestValidPath = lastValidTrait;</span>
+<span class="fc bfc" id="L322" title="All 2 branches covered.">            if ( lastValidTrait &gt; deepestValidPath )</span>
+<span class="fc" id="L323">                deepestValidPath = lastValidTrait;</span>
         }
 
         // Now we are going to create one common path from the valid trait paths by merging them!
         // So first we add all the traits from path step 0, then 1, then 2, etc.
-<span class="fc" id="L321">        List&lt;StyleTrait&lt;?&gt;&gt; subToSuper = new java.util.ArrayList&lt;&gt;(); // The final merged path.</span>
-<span class="fc" id="L322">        List&lt;String&gt; inheritedTraits = new java.util.ArrayList&lt;&gt;();</span>
-<span class="fc" id="L323">        StyleTrait&lt;?&gt; lastAdded = null;</span>
-<span class="fc bfc" id="L324" title="All 2 branches covered.">        for ( int i = 0; i &lt;= deepestValidPath; i++ ) {</span>
-<span class="fc bfc" id="L325" title="All 2 branches covered.">            if ( !inheritedTraits.isEmpty() ) {</span>
-<span class="fc bfc" id="L326" title="All 2 branches covered.">                for ( String inheritedTrait : new ArrayList&lt;&gt;(inheritedTraits) ) {</span>
-<span class="fc bfc" id="L327" title="All 2 branches covered.">                    for ( List&lt;StyleTrait&lt;?&gt;&gt; validTraitPath : validTraitPaths ) {</span>
-<span class="fc" id="L328">                        int index = validTraitPath.size() - i - 1;</span>
-<span class="fc bfc" id="L329" title="All 2 branches covered.">                        if ( index &gt;= 0 ) {</span>
-<span class="fc" id="L330">                            StyleTrait&lt;?&gt; current = validTraitPath.get(index);</span>
-<span class="fc bfc" id="L331" title="All 4 branches covered.">                            if ( !subToSuper.contains(current) &amp;&amp; current.group().equals(inheritedTrait) )</span>
-<span class="fc" id="L332">                                lastAdded = _merge(current, lastAdded, subToSuper, inheritedTraits);</span>
+<span class="fc" id="L328">        List&lt;StyleTrait&lt;?&gt;&gt; subToSuper = new java.util.ArrayList&lt;&gt;(); // The final merged path.</span>
+<span class="fc" id="L329">        List&lt;String&gt; inheritedTraits = new java.util.ArrayList&lt;&gt;();</span>
+<span class="fc" id="L330">        StyleTrait&lt;?&gt; lastAdded = null;</span>
+<span class="fc bfc" id="L331" title="All 2 branches covered.">        for ( int i = 0; i &lt;= deepestValidPath; i++ ) {</span>
+<span class="fc bfc" id="L332" title="All 2 branches covered.">            if ( !inheritedTraits.isEmpty() ) {</span>
+<span class="fc bfc" id="L333" title="All 2 branches covered.">                for ( String inheritedTrait : new ArrayList&lt;&gt;(inheritedTraits) ) {</span>
+<span class="fc bfc" id="L334" title="All 2 branches covered.">                    for ( List&lt;StyleTrait&lt;?&gt;&gt; validTraitPath : validTraitPaths ) {</span>
+<span class="fc" id="L335">                        int index = validTraitPath.size() - i - 1;</span>
+<span class="fc bfc" id="L336" title="All 2 branches covered.">                        if ( index &gt;= 0 ) {</span>
+<span class="fc" id="L337">                            StyleTrait&lt;?&gt; current = validTraitPath.get(index);</span>
+<span class="fc bfc" id="L338" title="All 4 branches covered.">                            if ( !subToSuper.contains(current) &amp;&amp; current.group().equals(inheritedTrait) )</span>
+<span class="fc" id="L339">                                lastAdded = _merge(current, lastAdded, subToSuper, inheritedTraits);</span>
                         }
-<span class="fc" id="L334">                    }</span>
-<span class="fc" id="L335">                }</span>
+<span class="fc" id="L341">                    }</span>
+<span class="fc" id="L342">                }</span>
             }
-<span class="fc bfc" id="L337" title="All 2 branches covered.">            for ( List&lt;StyleTrait&lt;?&gt;&gt; validTraitPath : validTraitPaths ) {</span>
-<span class="fc" id="L338">                int index = validTraitPath.size() - i - 1;</span>
-<span class="fc bfc" id="L339" title="All 2 branches covered.">                if ( index &gt;= 0 ) {</span>
-<span class="fc" id="L340">                    StyleTrait&lt;?&gt; trait = validTraitPath.get(index);</span>
-<span class="fc bfc" id="L341" title="All 2 branches covered.">                    if ( !subToSuper.contains(trait) )</span>
-<span class="fc" id="L342">                        lastAdded = _merge(trait, lastAdded, subToSuper, inheritedTraits);</span>
+<span class="fc bfc" id="L344" title="All 2 branches covered.">            for ( List&lt;StyleTrait&lt;?&gt;&gt; validTraitPath : validTraitPaths ) {</span>
+<span class="fc" id="L345">                int index = validTraitPath.size() - i - 1;</span>
+<span class="fc bfc" id="L346" title="All 2 branches covered.">                if ( index &gt;= 0 ) {</span>
+<span class="fc" id="L347">                    StyleTrait&lt;?&gt; trait = validTraitPath.get(index);</span>
+<span class="fc bfc" id="L348" title="All 2 branches covered.">                    if ( !subToSuper.contains(trait) )</span>
+<span class="fc" id="L349">                        lastAdded = _merge(trait, lastAdded, subToSuper, inheritedTraits);</span>
                 }
-<span class="fc" id="L344">            }</span>
+<span class="fc" id="L351">            }</span>
         }
 
         // Now we apply the valid traits to the starting style.
-<span class="fc bfc" id="L348" title="All 2 branches covered.">        for ( int i = subToSuper.size() - 1; i &gt;= 0; i-- ) {</span>
-<span class="fc" id="L349">            StyleTrait&lt;?&gt; trait = subToSuper.get(i);</span>
-<span class="fc" id="L350">            ComponentStyleDelegate delegate = new ComponentStyleDelegate&lt;&gt;(toBeStyled, startingStyle);</span>
-<span class="fc" id="L351">            startingStyle = _traitStylers.get(trait).style(delegate).style();</span>
+<span class="fc bfc" id="L355" title="All 2 branches covered.">        for ( int i = subToSuper.size() - 1; i &gt;= 0; i-- ) {</span>
+<span class="fc" id="L356">            StyleTrait&lt;?&gt; trait = subToSuper.get(i);</span>
+<span class="fc" id="L357">            ComponentStyleDelegate delegate = new ComponentStyleDelegate&lt;&gt;(toBeStyled, startingStyle);</span>
+<span class="fc" id="L358">            startingStyle = _traitStylers.get(trait).style(delegate).style();</span>
         }
 
-<span class="fc" id="L354">        return startingStyle;</span>
+<span class="fc" id="L361">        return startingStyle;</span>
     }
 
     private StyleTrait&lt;?&gt; _merge(
@@ -360,16 +367,16 @@ public abstract class StyleSheet
         List&lt;StyleTrait&lt;?&gt;&gt; subToSuper,
         List&lt;String&gt;        inheritedTraits
     ) {
-<span class="fc bfc" id="L363" title="All 6 branches covered.">        boolean lastIsSuper = lastAdded != null &amp;&amp; lastAdded.group().isEmpty() &amp;&amp; !lastAdded.thisInherits(currentTrait);</span>
-<span class="fc bfc" id="L364" title="All 2 branches covered.">        if ( lastIsSuper )</span>
-<span class="fc" id="L365">            subToSuper.add(subToSuper.size() - 1, currentTrait);</span>
+<span class="fc bfc" id="L370" title="All 6 branches covered.">        boolean lastIsSuper = lastAdded != null &amp;&amp; lastAdded.group().isEmpty() &amp;&amp; !lastAdded.thisInherits(currentTrait);</span>
+<span class="fc bfc" id="L371" title="All 2 branches covered.">        if ( lastIsSuper )</span>
+<span class="fc" id="L372">            subToSuper.add(subToSuper.size() - 1, currentTrait);</span>
         else {
-<span class="fc" id="L367">            subToSuper.add(currentTrait);</span>
-<span class="fc" id="L368">            lastAdded = currentTrait;</span>
+<span class="fc" id="L374">            subToSuper.add(currentTrait);</span>
+<span class="fc" id="L375">            lastAdded = currentTrait;</span>
         }
-<span class="fc" id="L370">        inheritedTraits.remove(currentTrait.group());</span>
-<span class="fc" id="L371">        inheritedTraits.addAll(Arrays.asList(currentTrait.toInherit()));</span>
-<span class="fc" id="L372">        return lastAdded;</span>
+<span class="fc" id="L377">        inheritedTraits.remove(currentTrait.group());</span>
+<span class="fc" id="L378">        inheritedTraits.addAll(Arrays.asList(currentTrait.toInherit()));</span>
+<span class="fc" id="L379">        return lastAdded;</span>
     }
 
     /**
@@ -379,32 +386,32 @@ public abstract class StyleSheet
      *  of the traits are applied to a component.
      */
     private void _buildAndSetStyleTraitPaths() {
-<span class="fc" id="L382">        _traitPaths = new GraphPathsBuilder().buildTraitGraphPathsFrom(_traitStylers);</span>
-<span class="fc" id="L383">        _traitGraphBuilt = true;</span>
-<span class="fc" id="L384">    }</span>
+<span class="fc" id="L389">        _traitPaths = new GraphPathsBuilder().buildTraitGraphPathsFrom(_traitStylers);</span>
+<span class="fc" id="L390">        _traitGraphBuilt = true;</span>
+<span class="fc" id="L391">    }</span>
 
-<span class="fc" id="L386">    private static class GraphPathsBuilder</span>
+<span class="fc" id="L393">    private static class GraphPathsBuilder</span>
     {
-<span class="fc" id="L388">        private final Map&lt;StyleTrait&lt;?&gt;, List&lt;StyleTrait&lt;?&gt;&gt;&gt; _traitGraph = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc" id="L395">        private final Map&lt;StyleTrait&lt;?&gt;, List&lt;StyleTrait&lt;?&gt;&gt;&gt; _traitGraph = new LinkedHashMap&lt;&gt;();</span>
 
 
         private StyleTrait&lt;?&gt;[][] buildTraitGraphPathsFrom(
             Map&lt;StyleTrait&lt;?&gt;, Styler&lt;?&gt;&gt; _traitStylers
         ) {
             // Let's clear the trait graph. Just in case.
-<span class="fc" id="L395">            _traitGraph.clear();</span>
+<span class="fc" id="L402">            _traitGraph.clear();</span>
 
             /*
                 First we need to initialize the trait graph.
                 We compare each trait to every other trait to see if it inherits from it.
                 If it does, we add the trait to the other trait's list of extensions (the value in the map).
             */
-<span class="fc bfc" id="L402" title="All 2 branches covered.">            for ( StyleTrait&lt;?&gt; trait1 : _traitStylers.keySet() ) {</span>
-<span class="fc" id="L403">                List&lt;StyleTrait&lt;?&gt;&gt; traits = _traitGraph.computeIfAbsent(trait1, k -&gt; new java.util.ArrayList&lt;&gt;());</span>
-<span class="fc bfc" id="L404" title="All 2 branches covered.">                for ( StyleTrait&lt;?&gt; trait2 : _traitStylers.keySet() )</span>
-<span class="fc bfc" id="L405" title="All 4 branches covered.">                    if ( trait2 != trait1 &amp;&amp; trait2.thisInherits(trait1) )</span>
-<span class="fc" id="L406">                        traits.add(trait2);</span>
-<span class="fc" id="L407">            }</span>
+<span class="fc bfc" id="L409" title="All 2 branches covered.">            for ( StyleTrait&lt;?&gt; trait1 : _traitStylers.keySet() ) {</span>
+<span class="fc" id="L410">                List&lt;StyleTrait&lt;?&gt;&gt; traits = _traitGraph.computeIfAbsent(trait1, k -&gt; new java.util.ArrayList&lt;&gt;());</span>
+<span class="fc bfc" id="L411" title="All 2 branches covered.">                for ( StyleTrait&lt;?&gt; trait2 : _traitStylers.keySet() )</span>
+<span class="fc bfc" id="L412" title="All 4 branches covered.">                    if ( trait2 != trait1 &amp;&amp; trait2.thisInherits(trait1) )</span>
+<span class="fc" id="L413">                        traits.add(trait2);</span>
+<span class="fc" id="L414">            }</span>
 
             /*
                 Now we have a graph of traits that inherit from other traits.
@@ -413,68 +420,68 @@ public abstract class StyleSheet
 
                 We do this by performing a depth-first search on the graph.
             */
-<span class="fc bfc" id="L416" title="All 2 branches covered.">            for ( StyleTrait&lt;?&gt; trait : _traitGraph.keySet() ) {</span>
+<span class="fc bfc" id="L423" title="All 2 branches covered.">            for ( StyleTrait&lt;?&gt; trait : _traitGraph.keySet() ) {</span>
                 // We create a stack onto which we will push the traits we visit and then pop them off.
-<span class="fc" id="L418">                List&lt;StyleTrait&lt;?&gt;&gt; visited = new java.util.ArrayList&lt;&gt;();</span>
+<span class="fc" id="L425">                List&lt;StyleTrait&lt;?&gt;&gt; visited = new java.util.ArrayList&lt;&gt;();</span>
                 // We pop the trait off the stack when we return from the recursive call.
-<span class="fc" id="L420">                _depthFirstSearch(trait, visited);</span>
-<span class="fc" id="L421">            }</span>
+<span class="fc" id="L427">                _depthFirstSearch(trait, visited);</span>
+<span class="fc" id="L428">            }</span>
 
             // We copy into a simple array and return it. Arrays are a little faster than lists.
-<span class="fc" id="L424">            List&lt;List&lt;StyleTrait&lt;?&gt;&gt;&gt; result = _findRootAndLeaveTraits();</span>
-<span class="fc" id="L425">            StyleTrait&lt;?&gt;[][] resultArray = new StyleTrait&lt;?&gt;[result.size()][];</span>
-<span class="fc bfc" id="L426" title="All 2 branches covered.">            for ( int i = 0; i &lt; result.size(); i++ )</span>
-<span class="fc" id="L427">                resultArray[i] = result.get(i).toArray(new StyleTrait&lt;?&gt;[0]);</span>
+<span class="fc" id="L431">            List&lt;List&lt;StyleTrait&lt;?&gt;&gt;&gt; result = _findRootAndLeaveTraits();</span>
+<span class="fc" id="L432">            StyleTrait&lt;?&gt;[][] resultArray = new StyleTrait&lt;?&gt;[result.size()][];</span>
+<span class="fc bfc" id="L433" title="All 2 branches covered.">            for ( int i = 0; i &lt; result.size(); i++ )</span>
+<span class="fc" id="L434">                resultArray[i] = result.get(i).toArray(new StyleTrait&lt;?&gt;[0]);</span>
 
-<span class="fc" id="L429">            return resultArray;</span>
+<span class="fc" id="L436">            return resultArray;</span>
         }
 
         private void _depthFirstSearch( StyleTrait&lt;?&gt; current, List&lt;StyleTrait&lt;?&gt;&gt; visited ) {
             // If the current trait is already in the visited list, then we have a cycle.
-<span class="pc bpc" id="L434" title="1 of 2 branches missed.">            if ( visited.contains(current) )</span>
-<span class="nc" id="L435">                throw new IllegalStateException(&quot;The style sheet contains a cycle.&quot;);</span>
+<span class="pc bpc" id="L441" title="1 of 2 branches missed.">            if ( visited.contains(current) )</span>
+<span class="nc" id="L442">                throw new IllegalStateException(&quot;The style sheet contains a cycle.&quot;);</span>
 
             // We add the current trait to the visited list.
-<span class="fc" id="L438">            visited.add(current);</span>
+<span class="fc" id="L445">            visited.add(current);</span>
 
             // We recursively call the dfs method on each of the current trait's extensions.
-<span class="fc bfc" id="L441" title="All 2 branches covered.">            for ( StyleTrait&lt;?&gt; extension : _traitGraph.get(current) )</span>
-<span class="fc" id="L442">                _depthFirstSearch(extension, visited);</span>
+<span class="fc bfc" id="L448" title="All 2 branches covered.">            for ( StyleTrait&lt;?&gt; extension : _traitGraph.get(current) )</span>
+<span class="fc" id="L449">                _depthFirstSearch(extension, visited);</span>
 
             // We remove the current trait from the visited list.
-<span class="fc" id="L445">            visited.remove(current);</span>
-<span class="fc" id="L446">        }</span>
+<span class="fc" id="L452">            visited.remove(current);</span>
+<span class="fc" id="L453">        }</span>
 
         private List&lt;List&lt;StyleTrait&lt;?&gt;&gt;&gt; _findRootAndLeaveTraits() {
         /*
             We find the root traits by finding the traits, which have extensions,
             but are not referenced by any other trait as an extension.
          */
-<span class="fc" id="L453">            List&lt;StyleTrait&lt;?&gt;&gt; rootTraits = new java.util.ArrayList&lt;&gt;();</span>
+<span class="fc" id="L460">            List&lt;StyleTrait&lt;?&gt;&gt; rootTraits = new java.util.ArrayList&lt;&gt;();</span>
 
-<span class="fc bfc" id="L455" title="All 2 branches covered.">            for ( StyleTrait&lt;?&gt; trait1 : _traitGraph.keySet() ) {</span>
-<span class="fc" id="L456">                boolean isLeaf = true;</span>
-<span class="fc bfc" id="L457" title="All 2 branches covered.">                for ( StyleTrait&lt;?&gt; trait2 : _traitGraph.keySet() )</span>
-<span class="fc bfc" id="L458" title="All 2 branches covered.">                    if ( _traitGraph.get(trait2).contains(trait1) ) {</span>
-<span class="fc" id="L459">                        isLeaf = false;</span>
-<span class="fc" id="L460">                        break;</span>
+<span class="fc bfc" id="L462" title="All 2 branches covered.">            for ( StyleTrait&lt;?&gt; trait1 : _traitGraph.keySet() ) {</span>
+<span class="fc" id="L463">                boolean isLeaf = true;</span>
+<span class="fc bfc" id="L464" title="All 2 branches covered.">                for ( StyleTrait&lt;?&gt; trait2 : _traitGraph.keySet() )</span>
+<span class="fc bfc" id="L465" title="All 2 branches covered.">                    if ( _traitGraph.get(trait2).contains(trait1) ) {</span>
+<span class="fc" id="L466">                        isLeaf = false;</span>
+<span class="fc" id="L467">                        break;</span>
                     }
-<span class="fc bfc" id="L462" title="All 2 branches covered.">                if ( isLeaf )</span>
-<span class="fc" id="L463">                    rootTraits.add(trait1);</span>
-<span class="fc" id="L464">            }</span>
+<span class="fc bfc" id="L469" title="All 2 branches covered.">                if ( isLeaf )</span>
+<span class="fc" id="L470">                    rootTraits.add(trait1);</span>
+<span class="fc" id="L471">            }</span>
         /*
             Finally we can calculate all the possible paths from the root traits to the leaf traits.
         */
-<span class="fc" id="L468">            return _findPathsFor(rootTraits);</span>
+<span class="fc" id="L475">            return _findPathsFor(rootTraits);</span>
         }
 
         private List&lt;List&lt;StyleTrait&lt;?&gt;&gt;&gt; _findPathsFor( List&lt;StyleTrait&lt;?&gt;&gt; traits ) {
-<span class="fc" id="L472">            List&lt;List&lt;StyleTrait&lt;?&gt;&gt;&gt; paths = new java.util.ArrayList&lt;&gt;();</span>
-<span class="fc bfc" id="L473" title="All 2 branches covered.">            for ( StyleTrait&lt;?&gt; root : traits ) {</span>
-<span class="fc" id="L474">                List&lt;StyleTrait&lt;?&gt;&gt; stack = new java.util.ArrayList&lt;&gt;();</span>
-<span class="fc" id="L475">                _traverse(root, paths, stack);</span>
-<span class="fc" id="L476">            }</span>
-<span class="fc" id="L477">            return paths;</span>
+<span class="fc" id="L479">            List&lt;List&lt;StyleTrait&lt;?&gt;&gt;&gt; paths = new java.util.ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L480" title="All 2 branches covered.">            for ( StyleTrait&lt;?&gt; root : traits ) {</span>
+<span class="fc" id="L481">                List&lt;StyleTrait&lt;?&gt;&gt; stack = new java.util.ArrayList&lt;&gt;();</span>
+<span class="fc" id="L482">                _traverse(root, paths, stack);</span>
+<span class="fc" id="L483">            }</span>
+<span class="fc" id="L484">            return paths;</span>
         }
 
         private void _traverse(
@@ -482,22 +489,22 @@ public abstract class StyleSheet
                 List&lt;List&lt;StyleTrait&lt;?&gt;&gt;&gt; paths,
                 List&lt;StyleTrait&lt;?&gt;&gt; stack
         ) {
-<span class="fc" id="L485">            stack.add(current);</span>
-<span class="fc bfc" id="L486" title="All 2 branches covered.">            if ( _traitGraph.get(current).isEmpty() ) {</span>
-<span class="fc" id="L487">                List&lt;List&lt;StyleTrait&lt;?&gt;&gt;&gt; newPath = Collections.singletonList(new ArrayList&lt;&gt;(stack));</span>
+<span class="fc" id="L492">            stack.add(current);</span>
+<span class="fc bfc" id="L493" title="All 2 branches covered.">            if ( _traitGraph.get(current).isEmpty() ) {</span>
+<span class="fc" id="L494">                List&lt;List&lt;StyleTrait&lt;?&gt;&gt;&gt; newPath = Collections.singletonList(new ArrayList&lt;&gt;(stack));</span>
                 // We remove the last trait from the stack.
-<span class="fc" id="L489">                stack.remove(stack.size() - 1);</span>
-<span class="fc" id="L490">                paths.addAll(newPath);</span>
-<span class="fc" id="L491">                return;</span>
+<span class="fc" id="L496">                stack.remove(stack.size() - 1);</span>
+<span class="fc" id="L497">                paths.addAll(newPath);</span>
+<span class="fc" id="L498">                return;</span>
             }
 
-<span class="fc bfc" id="L494" title="All 2 branches covered.">            for ( StyleTrait&lt;?&gt; extension : _traitGraph.get(current) )</span>
-<span class="pc bpc" id="L495" title="1 of 2 branches missed.">                if ( extension != current )</span>
-<span class="fc" id="L496">                    _traverse(extension, paths, stack);</span>
+<span class="fc bfc" id="L501" title="All 2 branches covered.">            for ( StyleTrait&lt;?&gt; extension : _traitGraph.get(current) )</span>
+<span class="pc bpc" id="L502" title="1 of 2 branches missed.">                if ( extension != current )</span>
+<span class="fc" id="L503">                    _traverse(extension, paths, stack);</span>
 
             // We remove the last trait from the stack.
-<span class="fc" id="L499">            stack.remove(stack.size() - 1);</span>
-<span class="fc" id="L500">        }</span>
+<span class="fc" id="L506">            stack.remove(stack.size() - 1);</span>
+<span class="fc" id="L507">        }</span>
     }
 
 }

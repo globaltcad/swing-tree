@@ -179,7 +179,7 @@
 
         {"kind":"when","text":"We run them through the style sheet...","code":["var s1 = ss.applyTo(label1.component)","var s2 = ss.applyTo(label2.component)","var s3 = ss.applyTo(label3.component)","var s4 = ss.applyTo(textField.component)","var s5 = ss.applyTo(textArea.component)"]},
 
-        {"kind":"then","text":"...and we check the results","code":["s1.font().name() == \"Arial\"","s1.font().size() == 12","s2.font().name() == \"Sans\"","s2.font().size() == 14","s3.font().name() == \"Papyrus\"","s3.font().size() == 15","s4.font().name() == \"Arial\"","s4.font().size() == 12","s5.font().name() == \"Sans\"","s5.font().size() == 14"]}
+        {"kind":"then","text":"...and we check the results","code":["s1.font().family() == \"Arial\"","s1.font().size() == 12","s2.font().family() == \"Sans\"","s2.font().size() == 14","s3.font().family() == \"Papyrus\"","s3.font().size() == 15","s4.font().family() == \"Arial\"","s4.font().size() == 12","s5.font().family() == \"Sans\"","s5.font().size() == 14"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -238,7 +238,7 @@
 
         {"kind":"and","text":"We run it through the style sheet...","code":["var s = ss.applyTo(button.component)"]},
 
-        {"kind":"then","text":"...and we check the results","code":["s.border().widths().top().get() == 5","s.border().widths().left().get() == 5","s.border().widths().bottom().get() == 5","s.border().widths().right().get() == 5","s.border().color().get() == Color.MAGENTA","s.base().backgroundColor().get() == Color.RED","s.border().gradient().transition() == UI.Transition.BOTTOM_TO_TOP","s.border().gradient().colors() as java.util.List == [Color.RED, Color.BLUE]","s.shadow(\"named shadow\").spreadRadius() == 42","s.shadow(\"named shadow\").color().get() == Color.CYAN","s.shadow(\"named shadow\").isInset() == false","s.font().name() == \"Arial\"","s.font().size() == 12","s.font().posture() == 0"]}
+        {"kind":"then","text":"...and we check the results","code":["s.border().widths().top().get() == 5","s.border().widths().left().get() == 5","s.border().widths().bottom().get() == 5","s.border().widths().right().get() == 5","s.border().color().get() == Color.MAGENTA","s.base().backgroundColor().get() == Color.RED","s.border().gradient().transition() == UI.Transition.BOTTOM_TO_TOP","s.border().gradient().colors() as java.util.List == [Color.RED, Color.BLUE]","s.shadow(\"named shadow\").spreadRadius() == 42","s.shadow(\"named shadow\").color().get() == Color.CYAN","s.shadow(\"named shadow\").isInset() == false","s.font().family() == \"Arial\"","s.font().size() == 12","s.font().posture() == 0"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }
