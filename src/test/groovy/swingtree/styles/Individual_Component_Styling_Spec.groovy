@@ -8,9 +8,9 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
 import swingtree.SwingTree
+import swingtree.UI
 import swingtree.components.JBox
 import swingtree.threading.EventProcessor
-import swingtree.UI
 import utility.SwingTreeTestConfigurator
 import utility.Utility
 
@@ -645,6 +645,42 @@ class Individual_Component_Styling_Spec extends Specification
 
         then : 'The image is as expected.'
             Utility.similarityBetween(image, "components/custom-font-JTextArea.png", 99.95) > 99.95
+    }
+
+    def 'Configure the background, foreground and selection color of a text field through the API exposed in your `Styler` lambdas'()
+    {
+        reportInfo """
+                The `Styler` lambda exposes a lot of API to adjust how text of a text field (or other components) is styled. <br>
+                This includes the background, foreground and selection color. <br>
+                <br>
+                Here you can see an example of a text field with a custom background, foreground and selection color. <br>
+                ${Utility.linkSnapshot('components/custom-colorful-font-JTextField.png')}
+            """
+
+        given : 'A text field UI with a custom styler lambda.'
+            var ui =
+                    UI.textField("When you select me, I will turn blue!")
+                    .withStyle( it -> it
+                        .size(300, 45)
+                        .font("Buggie", 13)
+                        .fontColor(Color.DARK_GRAY)
+                        .fontSelectionColor(Color.BLUE)
+                        .backgroundColor(Color.ORANGE)
+                        .fontBold(false)
+                        .fontItalic(false)
+                        .fontSpacing(0.05)
+                    )
+
+        when : 'We unpack the text field.'
+            var textField = ui.getComponent()
+        then : 'The selection color is blue.'
+            textField.selectionColor == Color.BLUE
+
+        when : 'Then we render the text field into a BufferedImage.'
+            var image = Utility.renderSingleComponent(textField)
+
+        then : 'The image is as expected.'
+            Utility.similarityBetween(image, "components/custom-colorful-font-JTextField.png", 99.95) > 99.95
     }
 
     def 'For full styling freedom, we can add custom painters to a component on various layers.'(
