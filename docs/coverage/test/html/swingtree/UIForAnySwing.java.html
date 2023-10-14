@@ -1315,7 +1315,7 @@ public abstract class UIForAnySwing&lt;I, C extends JComponent&gt; extends Abstr
 <span class="nc" id="L1315">        NullUtil.nullPropertyCheck(condition, &quot;condition&quot;, &quot;Null is not allowed to model the cursor selection state.&quot;);</span>
 <span class="nc" id="L1316">        NullUtil.nullPropertyCheck(type, &quot;type&quot;, &quot;Null is not allowed to model a cursor type.&quot;);</span>
 <span class="nc" id="L1317">        Cursor[] baseCursor = new Cursor[1];</span>
-<span class="nc" id="L1318">        _onShow( condition, c -&gt; type.fire(From.VIEW_MODEL) );</span>
+<span class="nc" id="L1318">        _onShow( condition, c -&gt; type.fireChange(From.VIEW_MODEL) );</span>
 <span class="nc" id="L1319">        _onShow( type, c -&gt;{</span>
 <span class="nc bnc" id="L1320" title="All 2 branches missed.">            if (baseCursor[0] == null) baseCursor[0] = getComponent().getCursor();</span>
 <span class="nc bnc" id="L1321" title="All 2 branches missed.">            getComponent().setCursor( new java.awt.Cursor( condition.get() ? c.type : baseCursor[0].getType() ) );</span>

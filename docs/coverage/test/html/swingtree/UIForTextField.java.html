@@ -106,13 +106,13 @@ public class UIForTextField&lt;F extends JTextField&gt; extends UIForAnyTextComp
 
 <span class="nc bnc" id="L107" title="All 2 branches missed.">                if ( isValid.is(false) ) {</span>
 <span class="nc" id="L108">                    isValid.set(true);</span>
-<span class="nc" id="L109">                    isValid.fire(From.VIEW);</span>
+<span class="nc" id="L109">                    isValid.fireChange(From.VIEW);</span>
                 }
 <span class="fc" id="L111">            } catch (NumberFormatException e) {</span>
                 // ignore
 <span class="fc bfc" id="L113" title="All 2 branches covered.">                if ( isValid.is(true) ) {</span>
 <span class="fc" id="L114">                    isValid.set(false);</span>
-<span class="fc" id="L115">                    isValid.fire(From.VIEW);</span>
+<span class="fc" id="L115">                    isValid.fireChange(From.VIEW);</span>
                 }
 <span class="nc" id="L117">            }</span>
 <span class="fc" id="L118">        });</span>

@@ -46,7 +46,7 @@ public abstract class UIForAnyToggleButton&lt;I, B extends JToggleButton&gt; ext
         // can be updated to reflect the new selection state.
 <span class="nc" id="L47">        _onChange( event -&gt; {</span>
 <span class="nc bnc" id="L48" title="All 2 branches missed.">            if ( component.isSelected() )</span>
-<span class="nc" id="L49">                selection.set(From.VIEW,  state ).fire(From.VIEW_MODEL);</span>
+<span class="nc" id="L49">                selection.set(From.VIEW,  state ).fireChange(From.VIEW_MODEL);</span>
 <span class="nc" id="L50">        });</span>
 
 <span class="nc" id="L52">        return (I) this;</span>

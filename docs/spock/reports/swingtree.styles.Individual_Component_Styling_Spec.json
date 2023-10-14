@@ -4,7 +4,7 @@
   "narrative":"This specification demonstrates how you can use the styling\n    API to style Swing components in a functional and declarative fashion.",
   "subjects":[],
   "statistics":{
-    "runs":"28",
+    "runs":"29",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -289,11 +289,32 @@
       "tags":{},"see":[],"extraInfo":["\n                The `Styler` lambda exposes a lot of API to adjust how text is styled. <br>\n                More specifically, you can adjust the style of the font, e.g. the font family, size and, well, style. <br>\n                <br>\n                Here you can see an example of a text area with a custom font family, size and style. <br>\n                ![components/custom-font-JTextArea.png](https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/components/custom-font-JTextArea.png)\n            "]
       },
       "blocks":[
-        {"kind":"given","text":"A text area UI with a custom styler lambda.","code":["var ui =","        UI.textArea(\"I am a text area, \\nhow are you today :) ?\")","        .peek( it -> it.setLineWrap(true) )","        .withStyle( it -> it","            .size(185, 60)","            .font(\"Buggie\", 13)","            .fontBold(true)","            .fontItalic(true)","            .fontColor(\"#FF0000\") // Red","        )"]},
+        {"kind":"given","text":"A text area UI with a custom styler lambda.","code":["var ui =","        UI.textArea(\"I am a text area, \\nhow are you today :) ?\")","        .peek( it -> it.setLineWrap(true) )","        .withStyle( it -> it","            .size(185, 60)","            .font(\"Buggie\", 13)","            .fontBold(true)","            .fontItalic(true)","            .fontColor(\"#FF0000\") // Red","            .fontSpacing(0.077)","        )"]},
 
         {"kind":"when","text":"We render the text area into a BufferedImage.","code":["var image = Utility.renderSingleComponent(ui.getComponent())"]},
 
         {"kind":"then","text":"The image is as expected.","code":["Utility.similarityBetween(image, \"components/custom-font-JTextArea.png\", 99.95) > 99.95"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Configure the background, foreground and selection color of a text field through the API exposed in your `Styler` lambdas",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n                The `Styler` lambda exposes a lot of API to adjust how text of a text field (or other components) is styled. <br>\n                This includes the background, foreground and selection color. <br>\n                <br>\n                Here you can see an example of a text field with a custom background, foreground and selection color. <br>\n                ![components/custom-colorful-font-JTextField.png](https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/components/custom-colorful-font-JTextField.png)\n            "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A text field UI with a custom styler lambda.","code":["var ui =","        UI.textField(\"When you select me, I will turn blue!\")","        .withStyle( it -> it","            .size(300, 45)","            .font(\"Buggie\", 13)","            .fontColor(Color.DARK_GRAY)","            .fontSelectionColor(Color.BLUE)","            .backgroundColor(Color.ORANGE)","            .fontBold(false)","            .fontItalic(false)","            .fontSpacing(0.05)","        )"]},
+
+        {"kind":"when","text":"We unpack the text field.","code":["var textField = ui.getComponent()"]},
+
+        {"kind":"then","text":"The selection color is blue.","code":["textField.selectionColor == Color.BLUE"]},
+
+        {"kind":"when","text":"Then we render the text field into a BufferedImage.","code":["var image = Utility.renderSingleComponent(textField)"]},
+
+        {"kind":"then","text":"The image is as expected.","code":["Utility.similarityBetween(image, \"components/custom-colorful-font-JTextField.png\", 99.95) > 99.95"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },

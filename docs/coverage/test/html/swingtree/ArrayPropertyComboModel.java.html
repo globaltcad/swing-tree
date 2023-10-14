@@ -32,7 +32,7 @@ final class ArrayPropertyComboModel&lt;E&gt; extends AbstractComboModel&lt;E&gt;
 <span class="nc bnc" id="L32" title="All 2 branches missed.">		if ( _mutable )</span>
 <span class="nc" id="L33">			_items.ifPresent(i -&gt; {</span>
 <span class="nc" id="L34">				i[index] = element;</span>
-<span class="nc bnc" id="L35" title="All 2 branches missed.">				if ( _items instanceof Var ) ((Var&lt;E&gt;) _items).fire(From.VIEW);</span>
+<span class="nc bnc" id="L35" title="All 2 branches missed.">				if ( _items instanceof Var ) ((Var&lt;E&gt;) _items).fireChange(From.VIEW);</span>
 <span class="nc" id="L36">			});</span>
 <span class="nc" id="L37">	}</span>
 <span class="fc" id="L38">	@Override public int getSize() { return _items.mapTo(Integer.class, i -&gt; i.length ).orElse(0); }</span>

@@ -618,7 +618,7 @@ public final class UI extends UILayoutConstants
 <span class="fc" id="L618">            return runAndGet( ()-&gt; use(styleSheet, scope) );</span>
 
 <span class="fc" id="L620">        SwingTree swingTreeContext = SwingTree.get();</span>
-<span class="fc" id="L621">        StyleSheet oldStyleSheet = swingTreeContext.getStyleSheet().orElse(null);</span>
+<span class="fc" id="L621">        StyleSheet oldStyleSheet = swingTreeContext.getStyleSheet();</span>
 <span class="fc" id="L622">        swingTreeContext.setStyleSheet(styleSheet);</span>
         try {
 <span class="fc" id="L624">            T result = scope.get();</span>
