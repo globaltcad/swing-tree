@@ -25,7 +25,7 @@ final class StyleSource<C extends JComponent>
         return new StyleSource<C>(
                         Styler.none(),
                         new Expirable[0],
-                        SwingTree.get().getStyleSheet().orElse(StyleSheet.none())
+                        SwingTree.get().getStyleSheet()
                     );
     }
 
@@ -37,9 +37,9 @@ final class StyleSource<C extends JComponent>
 
 
     private StyleSource(
-        Styler<C> localStyler,
+        Styler<C>              localStyler,
         Expirable<Styler<C>>[] animationStylers,
-        StyleSheet styleSheet
+        StyleSheet             styleSheet
     ) {
         _localStyler      = Objects.requireNonNull(localStyler);
         _animationStylers = Objects.requireNonNull(animationStylers);

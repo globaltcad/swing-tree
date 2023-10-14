@@ -618,7 +618,7 @@ public final class UI extends UILayoutConstants
             return runAndGet( ()-> use(styleSheet, scope) );
 
         SwingTree swingTreeContext = SwingTree.get();
-        StyleSheet oldStyleSheet = swingTreeContext.getStyleSheet().orElse(null);
+        StyleSheet oldStyleSheet = swingTreeContext.getStyleSheet();
         swingTreeContext.setStyleSheet(styleSheet);
         try {
             T result = scope.get();

@@ -66,7 +66,7 @@ public final class SwingTreeInitConfig
                         null,
                         FontInstallation.SOFT,
                         EventProcessor.COUPLED_STRICT,
-                        null,
+                        StyleSheet.none(),
                         SystemProperties.parseScaleFactor(System.getProperty( SystemProperties.UI_SCALE )),
                         SystemProperties.getBoolean( SystemProperties.UI_SCALE_ENABLED, true ),
                         SystemProperties.getBoolean( SystemProperties.UI_SCALE_ALLOW_SCALE_DOWN, false )
@@ -77,7 +77,7 @@ public final class SwingTreeInitConfig
     private final Font             _defaultFont; // may be null
     private final FontInstallation _fontInstallation;
     private final EventProcessor   _eventProcessor;
-    private final StyleSheet       _styleSheet; // may be null
+    private final StyleSheet       _styleSheet;
     private final float            _uiScale;
     private final boolean          _uiScaleEnabled;
     private final boolean          _uiScaleAllowScaleDown;
@@ -95,7 +95,7 @@ public final class SwingTreeInitConfig
         _defaultFont           = defaultFont;
         _fontInstallation      = Objects.requireNonNull(fontInstallation);
         _eventProcessor        = Objects.requireNonNull(eventProcessor);
-        _styleSheet            = styleSheet;
+        _styleSheet            = Objects.requireNonNull(styleSheet);
         _uiScale               = uiScale;
         _uiScaleEnabled        = uiScaleEnabled;
         _uiScaleAllowScaleDown = uiScaleAllowScaleDown;
@@ -141,8 +141,8 @@ public final class SwingTreeInitConfig
      *  Returns an {@link Optional} containing the {@link StyleSheet}
      *  or an empty {@link Optional} if no {@link StyleSheet} is set.
      */
-    Optional<StyleSheet> styleSheet() {
-        return Optional.ofNullable(_styleSheet);
+    StyleSheet styleSheet() {
+        return _styleSheet;
     }
 
     /**

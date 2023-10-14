@@ -163,7 +163,10 @@ public final class SwingTree
 
 	/**
 	 * Sets the {@link EventProcessor} that is used to process GUI and application events.
+     * You may not pass null as an argument, because SwingTree requires an event processor to function.
+     *
 	 * @param eventProcessor the {@link EventProcessor} that is used to process GUI and application events.
+     * @throws NullPointerException if eventProcessor is null!
 	 */
 	public void setEventProcessor( EventProcessor eventProcessor ) {
         try {
@@ -177,17 +180,19 @@ public final class SwingTree
 	/**
 	 * @return The currently configured {@link StyleSheet} that is used to style components.
 	 */
-	public Optional<StyleSheet> getStyleSheet() {
+	public StyleSheet getStyleSheet() {
         return _config.styleSheet();
 	}
 
 	/**
 	 * Sets the {@link StyleSheet} that is used to style components.
-	 * @param styleSheet the {@link StyleSheet} that is used to style components.
+     * Use {@link StyleSheet#none()} instead of null to switch off global styling.
+	 * @param styleSheet The {@link StyleSheet} that is used to style components.
+     * @throws NullPointerException if styleSheet is null!
 	 */
 	public void setStyleSheet( StyleSheet styleSheet ) {
         try {
-            _config = _config.styleSheet(styleSheet);
+            _config = _config.styleSheet(Objects.requireNonNull(styleSheet));
         } catch ( Exception ex ) {
             log.error("Error setting style sheet", ex);
             ex.printStackTrace();

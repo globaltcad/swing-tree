@@ -252,9 +252,9 @@ final class FontStyle
         Paint paint = null;
         try {
             isUnderline = Objects.equals(attributeMap.get(TextAttribute.UNDERLINE), TextAttribute.UNDERLINE_ON);
-            isStriked = Objects.equals(attributeMap.get(TextAttribute.STRIKETHROUGH), TextAttribute.STRIKETHROUGH_ON);
-            paint = (Paint) attributeMap.get(TextAttribute.FOREGROUND);
-            transform = (AffineTransform) attributeMap.get(TextAttribute.TRANSFORM);
+            isStriked   = Objects.equals(attributeMap.get(TextAttribute.STRIKETHROUGH), TextAttribute.STRIKETHROUGH_ON);
+            paint       = (Paint) attributeMap.get(TextAttribute.FOREGROUND);
+            transform   = (AffineTransform) attributeMap.get(TextAttribute.TRANSFORM);
         } catch (Exception e) {
             log.warn("Failed to extract font attributes from font: " + font, e);
         }
