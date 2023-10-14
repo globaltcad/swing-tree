@@ -1035,7 +1035,7 @@ class Individual_Component_Styling_Spec extends Specification
             """
 
         given : 'We create various different UIs with different grounding styles.'
-            var img = UI.findIcon("img/hopper.svg").get()
+            var img = UI.findIcon("img/funnel.svg").get()
             var ui1 =
                         UI.label("Top Left").withStyle( it -> it
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
@@ -1723,7 +1723,7 @@ class Individual_Component_Styling_Spec extends Specification
         """
             SwingTree.get().getUIScale().setUserScaleFactor(uiScale)
         and : 'Now we create a button UI with a custom styler lambda and a button.'
-            var hopper = UI.findIcon("img/hopper.svg")
+            var funnel = UI.findIcon("img/funnel.svg")
             var ui =
                     UI.button("Click").withLayout("fill, ins 0")
                     .withPrefSize(160, 80)
@@ -1736,7 +1736,7 @@ class Individual_Component_Styling_Spec extends Specification
                         .border(3, "orange")
                     )
                     .add("right",
-                        UI.toggleButton(hopper.get())
+                        UI.toggleButton(funnel.get())
                         .withStyle( it -> it
                             .prefWidth((int)it.parent().map(Container::getSize).map(d -> d.height).orElse(80)-40)
                             .prefHeight((int)it.parent().map(Container::getSize).map(d -> d.height).orElse(80)-40)
@@ -1783,7 +1783,7 @@ class Individual_Component_Styling_Spec extends Specification
         and :
             MyTabsViewModel.TabModel tab1 = new MyTabsView.DummyTab("Tab 1", "").getModel();
             MyTabsViewModel.TabModel tab2 = new MyTabsView.DummyTab("Tab 2", "img/two-16th-notes.svg").getModel();
-            MyTabsViewModel.TabModel tab3 = new MyTabsView.DummyTab("Tab 3", "img/hopper.svg").getModel();
+            MyTabsViewModel.TabModel tab3 = new MyTabsView.DummyTab("Tab 3", "img/funnel.svg").getModel();
 
             MyTabsViewModel vm = new MyTabsViewModel();
             vm.getTabs().add(tab1);

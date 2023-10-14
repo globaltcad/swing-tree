@@ -58,7 +58,7 @@ public class SomeSettingsView extends Panel
             )
             .add(SHRINK.and(ALIGN_LEFT),label("m/s"))
             .add(GROW.and(ALIGN_RIGHT),
-                toggleButton(20,20, UI.findIcon("img/hopper.svg").get())
+                toggleButton(20,20, UI.findIcon("img/funnel.svg").get())
             )
         )
         .add(GROW_X, button("Apply").onClick(it->vm.apply()));

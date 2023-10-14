@@ -172,7 +172,7 @@ public class MyTabsView extends Panel
 
         MyTabsViewModel.TabModel tab1 = new DummyTab("Tab 1", "").getModel();
         MyTabsViewModel.TabModel tab2 = new DummyTab("Tab 2", "img/two-16th-notes.svg").getModel();
-        MyTabsViewModel.TabModel tab3 = new DummyTab("Tab 3", "img/hopper.svg").getModel();
+        MyTabsViewModel.TabModel tab3 = new DummyTab("Tab 3", "img/funnel.svg").getModel();
 
         MyTabsViewModel vm = new MyTabsViewModel();
         vm.getTabs().add(tab1);
