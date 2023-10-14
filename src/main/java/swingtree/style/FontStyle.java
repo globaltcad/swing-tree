@@ -44,6 +44,24 @@ import java.util.List;
  *              which is a value between 0 and 2.
  *          </p>
  *      </li>
+ *      <li><h3>Spacing (Tracking)</h3>
+ *          <p>
+ *              This property controls the tracking which is a floating point number
+ *              with the default value of
+ *              {@code 0}, meaning no additional tracking is added to the font.
+ *             
+ *              <p>Useful constant values are the predefined {@link TextAttribute#TRACKING_TIGHT} and {@link
+ *              TextAttribute#TRACKING_LOOSE} values, which represent values of {@code -0.04} and {@code 0.04},
+ *             
+ *              <p>The tracking value is multiplied by the font point size and
+ *              passed through the font transform to determine an additional
+ *              amount to add to the advance of each glyph cluster.  Positive
+ *              tracking values will inhibit formation of optional ligatures.
+ *              Tracking values are typically between {@code -0.1} and
+ *              {@code 0.3}; values outside this range are generally not
+ *              desirable.
+ *          </p>
+ *      </li>
  *      <li><h3>Color</h3>
  *          <p>
  *              The color of the font, which translates to the text property
@@ -133,6 +151,7 @@ final class FontStyle
                                                         0,     // size
                                                         0,     // posture
                                                         0,     // weight
+                                                        0,     // spacing
                                                         null,  // color
                                                         null,  // background color
                                                         null,  // selection color
@@ -150,6 +169,7 @@ final class FontStyle
     private final int     _size;
     private final float   _posture;
     private final float   _weight;
+    private final float   _spacing;
     private final Color   _color;
     private final Color   _backgroundColor;
     private final Color   _selectionColor;
@@ -162,24 +182,26 @@ final class FontStyle
 
 
     private FontStyle(
-        String name,
-        int fontSize,
-        float posture,
-        float weight,
-        Color color,
-        Color backgroundColor,
-        Color selectionColor,
-        Boolean isUnderline,
-        Boolean isStrike,
-        AffineTransform transform,
-        Paint paint,
+        String                 name,
+        int                    fontSize,
+        float                  posture,
+        float                  weight,
+        float                  spacing,
+        Color                  color,
+        Color                  backgroundColor,
+        Color                  selectionColor,
+        Boolean                isUnderline,
+        Boolean                isStrike,
+        AffineTransform        transform,
+        Paint                  paint,
         UI.HorizontalAlignment horizontalAlignment,
-        UI.VerticalAlignment verticalAlignment
+        UI.VerticalAlignment   verticalAlignment
     ) {
         _name    = Objects.requireNonNull(name);
         _size    = fontSize;
         _posture = posture;
         _weight  = weight;
+        _spacing = spacing;
         _color   = color;
         _backgroundColor = backgroundColor;
         _selectionColor  = selectionColor;
@@ -216,58 +238,131 @@ final class FontStyle
 
     public Optional<UI.VerticalAlignment> verticalAlignment() { return Optional.ofNullable(_verticalAlignment); }
 
-    FontStyle name( String fontFamily ) { return new FontStyle(fontFamily, _size, _posture, _weight, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _horizontalAlignment, _verticalAlignment); }
+    FontStyle name( String fontFamily ) { return new FontStyle(fontFamily, _size, _posture, _weight, _spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _horizontalAlignment, _verticalAlignment); }
 
-    FontStyle size( int fontSize ) { return new FontStyle(_name, fontSize, _posture, _weight, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _horizontalAlignment, _verticalAlignment); }
+    FontStyle size( int fontSize ) { return new FontStyle(_name, fontSize, _posture, _weight, _spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _horizontalAlignment, _verticalAlignment); }
 
-    FontStyle posture( float posture ) { return new FontStyle(_name, _size, posture, _weight, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _horizontalAlignment, _verticalAlignment); }
+    FontStyle posture( float posture ) { return new FontStyle(_name, _size, posture, _weight, _spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _horizontalAlignment, _verticalAlignment); }
 
-    FontStyle weight( float fontWeight ) { return new FontStyle(_name, _size, _posture, fontWeight, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _horizontalAlignment, _verticalAlignment); }
+    FontStyle weight( float fontWeight ) { return new FontStyle(_name, _size, _posture, fontWeight, _spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _horizontalAlignment, _verticalAlignment); }
 
-    FontStyle color( Color color ) { return new FontStyle(_name, _size, _posture, _weight, color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _horizontalAlignment, _verticalAlignment); }
+    FontStyle spacing( float spacing ) { return new FontStyle(_name, _size, _posture, _weight, spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _horizontalAlignment, _verticalAlignment); }
 
-    FontStyle backgroundColor( Color backgroundColor ) { return new FontStyle(_name, _size, _posture, _weight, _color, backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _horizontalAlignment, _verticalAlignment); }
+    FontStyle color( Color color ) { return new FontStyle(_name, _size, _posture, _weight, _spacing, color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _horizontalAlignment, _verticalAlignment); }
 
-    FontStyle selectionColor( Color selectionColor ) { return new FontStyle(_name, _size, _posture, _weight, _color, _backgroundColor, selectionColor, _isUnderlined, _isStrike, _transform, _paint, _horizontalAlignment, _verticalAlignment); }
+    FontStyle backgroundColor( Color backgroundColor ) { return new FontStyle(_name, _size, _posture, _weight, _spacing, _color, backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _horizontalAlignment, _verticalAlignment); }
 
-    FontStyle isUnderlined( boolean underlined ) { return new FontStyle(_name, _size, _posture, _weight, _color, _backgroundColor, _selectionColor, underlined, _isStrike, _transform, _paint, _horizontalAlignment, _verticalAlignment); }
+    FontStyle selectionColor( Color selectionColor ) { return new FontStyle(_name, _size, _posture, _weight, _spacing, _color, _backgroundColor, selectionColor, _isUnderlined, _isStrike, _transform, _paint, _horizontalAlignment, _verticalAlignment); }
 
-    FontStyle isStrike( boolean strike ) { return new FontStyle(_name, _size, _posture, _weight, _color, _backgroundColor, _selectionColor, _isUnderlined, strike, _transform, _paint, _horizontalAlignment, _verticalAlignment); }
+    FontStyle isUnderlined( boolean underlined ) { return new FontStyle(_name, _size, _posture, _weight, _spacing, _color, _backgroundColor, _selectionColor, underlined, _isStrike, _transform, _paint, _horizontalAlignment, _verticalAlignment); }
 
-    FontStyle transform( AffineTransform transform ) { return new FontStyle(_name, _size, _posture, _weight, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike, transform, _paint, _horizontalAlignment, _verticalAlignment); }
+    FontStyle isStrike( boolean strike ) { return new FontStyle(_name, _size, _posture, _weight, _spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, strike, _transform, _paint, _horizontalAlignment, _verticalAlignment); }
 
-    FontStyle paint( Paint paint ) { return new FontStyle(_name, _size, _posture, _weight, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, paint, _horizontalAlignment, _verticalAlignment); }
+    FontStyle transform( AffineTransform transform ) { return new FontStyle(_name, _size, _posture, _weight, _spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike, transform, _paint, _horizontalAlignment, _verticalAlignment); }
 
-    FontStyle horizontalAlignment( UI.HorizontalAlignment horizontalAlignment ) { return new FontStyle(_name, _size, _posture, _weight, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, horizontalAlignment, _verticalAlignment); }
+    FontStyle paint( Paint paint ) { return new FontStyle(_name, _size, _posture, _weight, _spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, paint, _horizontalAlignment, _verticalAlignment); }
 
-    FontStyle verticalAlignment( UI.VerticalAlignment verticalAlignment ) { return new FontStyle(_name, _size, _posture, _weight, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _horizontalAlignment, verticalAlignment); }
+    FontStyle horizontalAlignment( UI.HorizontalAlignment horizontalAlignment ) { return new FontStyle(_name, _size, _posture, _weight, _spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, horizontalAlignment, _verticalAlignment); }
+
+    FontStyle verticalAlignment( UI.VerticalAlignment verticalAlignment ) { return new FontStyle(_name, _size, _posture, _weight, _spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _horizontalAlignment, verticalAlignment); }
 
     FontStyle font( Font font ) {
         Map<TextAttribute, ?> attributeMap = font.getAttributes();
-        Color   color       = null;
-        Color   background  = null;
-        boolean isUnderline = false;
-        boolean isStriked   = false;
-        AffineTransform transform = null;
-        Paint paint = null;
+
+        String family = font.getFamily();
+
+        int size = font.getSize();
+
+        float posture = font.isItalic() ? 0.2f : 0f;
         try {
-            isUnderline = Objects.equals(attributeMap.get(TextAttribute.UNDERLINE), TextAttribute.UNDERLINE_ON);
-            isStriked   = Objects.equals(attributeMap.get(TextAttribute.STRIKETHROUGH), TextAttribute.STRIKETHROUGH_ON);
-            paint       = (Paint) attributeMap.get(TextAttribute.FOREGROUND);
-            transform   = (AffineTransform) attributeMap.get(TextAttribute.TRANSFORM);
+            if (attributeMap.containsKey(TextAttribute.POSTURE))
+                posture = ((Number) attributeMap.get(TextAttribute.POSTURE)).floatValue();
+        } catch (Exception e) {
+            log.debug("Failed to fetch TextAttribute.POSTURE in font attributes '" + attributeMap + "' of font '" + font + "'", e);
+        }
+
+        float weight = font.isBold() ? 2f : 0f;
+        try {
+            if (attributeMap.containsKey(TextAttribute.WEIGHT))
+                weight = ((Number) attributeMap.get(TextAttribute.WEIGHT)).floatValue();
+        } catch (Exception e) {
+            log.debug("Failed to fetch TextAttribute.WEIGHT in font attributes '" + attributeMap + "' of font '" + font + "'", e);
+        }
+
+        float spacing = _spacing;
+        try {
+            if (attributeMap.containsKey(TextAttribute.TRACKING))
+                spacing = ((Number) attributeMap.get(TextAttribute.TRACKING)).floatValue();
+        } catch (Exception e) {
+            log.debug("Failed to fetch TextAttribute.TRACKING in font attributes '" + attributeMap + "' of font '" + font + "'", e);
+        }
+
+        Color color = _color;
+        try {
+            if (attributeMap.containsKey(TextAttribute.FOREGROUND))
+                color = (Color) attributeMap.get(TextAttribute.FOREGROUND);
+        } catch (Exception e) {
+            log.debug("Failed to fetch TextAttribute.FOREGROUND in font attributes '" + attributeMap + "' of font '" + font + "'", e);
+        }
+
+        Color backgroundColor = _backgroundColor;
+        try {
+            if (attributeMap.containsKey(TextAttribute.BACKGROUND))
+                backgroundColor = (Color) attributeMap.get(TextAttribute.BACKGROUND);
+        } catch (Exception e) {
+            log.debug("Failed to fetch TextAttribute.BACKGROUND in font attributes '" + attributeMap + "' of font '" + font + "'", e);
+        }
+
+        Color selectionColor = _selectionColor;
+        try {
+            if (attributeMap.containsKey(TextAttribute.BACKGROUND))
+                selectionColor = (Color) attributeMap.get(TextAttribute.BACKGROUND);
+        } catch (Exception e) {
+            log.debug("Failed to fetch TextAttribute.BACKGROUND in font attributes '" + attributeMap + "' of font '" + font + "'", e);
+        }
+
+        boolean isUnderline = ( _isUnderlined != null ? _isUnderlined : false );
+        try {
+            if (attributeMap.containsKey(TextAttribute.UNDERLINE))
+                isUnderline = Objects.equals(attributeMap.get(TextAttribute.UNDERLINE), TextAttribute.UNDERLINE_ON);
+        } catch (Exception e) {
+            log.debug("Failed to fetch TextAttribute.UNDERLINE in font attributes '" + attributeMap + "' of font '" + font + "'", e);
+        }
+
+        boolean isStriked   = ( _isStrike != null ? _isStrike : false );
+        try {
+            if (attributeMap.containsKey(TextAttribute.STRIKETHROUGH))
+                isStriked   = Objects.equals(attributeMap.get(TextAttribute.STRIKETHROUGH), TextAttribute.STRIKETHROUGH_ON);
+        } catch (Exception e) {
+            log.debug("Failed to fetch TextAttribute.STRIKETHROUGH in font attributes '" + attributeMap + "' of font '" + font + "'", e);
+        }
+
+        AffineTransform transform = _transform;
+        try {
+            if (attributeMap.containsKey(TextAttribute.TRANSFORM))
+                transform = (AffineTransform) attributeMap.get(TextAttribute.TRANSFORM);
+        } catch (Exception e) {
+            log.debug("Failed to fetch TextAttribute.TRANSFORM in font attributes '" + attributeMap + "' of font '" + font + "'", e);
+        }
+
+        Paint paint = _paint;
+        try {
+            if (attributeMap.containsKey(TextAttribute.FOREGROUND))
+                paint = (Paint) attributeMap.get(TextAttribute.FOREGROUND);
         } catch (Exception e) {
             log.warn("Failed to extract font attributes from font: " + font, e);
         }
 
         Objects.requireNonNull(font);
         return new FontStyle(
-                    font.getFamily(),
-                    font.getSize(),
-                    font.isItalic() ? 0.2f : 0f,
-                    font.isBold()   ? 2f   : 0f,
-                    _color,
-                    _backgroundColor,
-                    _selectionColor,
+                    family,
+                    size,
+                    posture,
+                    weight,
+                    spacing,
+                    ( paint == null ? color : null ),
+                    backgroundColor,
+                    selectionColor,
                     isUnderline,
                     isStriked,
                     transform,
@@ -343,6 +438,7 @@ final class FontStyle
                     (int) Math.round(_size * scale),
                     _posture,
                     _weight,
+                    _spacing,
                     _color,
                     _backgroundColor,
                     _selectionColor, 
@@ -363,6 +459,7 @@ final class FontStyle
         hash = 97 * hash + _size;
         hash = 97 * hash + Float.hashCode(_posture);
         hash = 97 * hash + Float.hashCode(_weight);
+        hash = 97 * hash + Float.hashCode(_spacing);
         hash = 97 * hash + Objects.hashCode(_color);
         hash = 97 * hash + Objects.hashCode(_backgroundColor);
         hash = 97 * hash + Objects.hashCode(_selectionColor);
@@ -389,6 +486,8 @@ final class FontStyle
         if ( _posture != other._posture)
             return false;
         if ( _weight != other._weight )
+            return false;
+        if ( _spacing != other._spacing )
             return false;
         if ( !Objects.equals(_color, other._color) )
             return false;
@@ -423,6 +522,7 @@ final class FontStyle
                     "size="                + _size                                   + ", " +
                     "posture="             + _posture                                + ", " +
                     "weight="              + _weight                                 + ", " +
+                    "spacing="             + _spacing                                + ", " +
                     "underlined="          + underline                               + ", " +
                     "strikeThrough="       + strike                                  + ", " +
                     "color="               + StyleUtility.toString(_color)           + ", " +
