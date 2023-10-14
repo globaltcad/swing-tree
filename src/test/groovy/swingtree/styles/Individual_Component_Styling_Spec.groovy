@@ -637,6 +637,7 @@ class Individual_Component_Styling_Spec extends Specification
                         .fontBold(true)
                         .fontItalic(true)
                         .fontColor("#FF0000") // Red
+                        .fontSpacing(0.077)
                     )
 
         when : 'We render the text area into a BufferedImage.'
