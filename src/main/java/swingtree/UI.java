@@ -4918,7 +4918,13 @@ public final class UI extends UILayoutConstants
     /**
      * @return A functional API for building a {@link javax.swing.table.TableModel}.
      */
-    public static BasicTableModel.Builder tableModel() { return new BasicTableModel.Builder(); }
+    public static BasicTableModel.Builder<Object> tableModel() {
+        return new BasicTableModel.Builder<>(Object.class);
+    }
+
+    public static <E> BasicTableModel.Builder<E> tableModel(Class<E> entryType) {
+        return new BasicTableModel.Builder<>(entryType);
+    }
 
     public static Render.Builder<JTable, Object> renderTable() {
         return Render.forTable(Object.class, null).when(Object.class).asText(cell->cell.valueAsString().orElse(""));
