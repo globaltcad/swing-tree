@@ -88,7 +88,7 @@ class Split_Pane_Spec extends Specification
             scaling factor for the current system automatically for you,
             so you do not have to specify this factor manually. 
         """
-            SwingTree.get().getUIScale().setUserScaleFactor(uiScale)
+            SwingTree.get().setUiScaleFactor(uiScale)
         and : 'We create a split pane UI node with a divider size of 10.'
             var ui = UI.splitPane(UI.Align.HORIZONTAL).withDividerSize(10)
         expect : 'The split pane is not null.'
@@ -154,7 +154,7 @@ class Split_Pane_Spec extends Specification
             scaling factor for the current system automatically for you,
             so you do not have to specify this factor manually. 
         """
-        SwingTree.get().getUIScale().setUserScaleFactor(uiScale)
+        SwingTree.get().setUiScaleFactor(uiScale)
         and : 'We create a split pane UI node with a division of 50%.'
             var ui = UI.splitPane(UI.Align.HORIZONTAL)
                         .withWidth(42)
@@ -183,7 +183,7 @@ class Split_Pane_Spec extends Specification
             scaling factor for the current system automatically for you,
             so you do not have to specify this factor manually. 
         """
-            SwingTree.get().getUIScale().setUserScaleFactor(uiScale)
+            SwingTree.get().setUiScaleFactor(uiScale)
         and : 'We create a split pane UI node with a division of 50%.'
             var ui = UI.splitPane(UI.Align.VERTICAL)
                         .withWidth(100)
@@ -213,7 +213,7 @@ class Split_Pane_Spec extends Specification
             scaling factor for the current system automatically for you,
             so you do not have to specify this factor manually. 
         """
-            SwingTree.get().getUIScale().setUserScaleFactor(uiScale)
+            SwingTree.get().setUiScaleFactor(uiScale)
 
         and :  'We create a simple view model property holding the division of our split pane.'
             var divisionPercentage = Var.of(0.5d)
@@ -263,7 +263,7 @@ class Split_Pane_Spec extends Specification
             scaling factor for the current system automatically for you,
             so you do not have to specify this factor manually. 
         """
-            SwingTree.get().getUIScale().setUserScaleFactor(uiScale)
+            SwingTree.get().setUiScaleFactor(uiScale)
         and : 'We create a simple view model property holding the divider size of our split pane.'
             var dividerSize = Var.of(10)
         and : 'We create a vertically aligned split pane UI node bound to the property.'

@@ -100,7 +100,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
         }
         else if ( width != icon.getIconWidth() || height != icon.getIconHeight() )
         {
-            float scale = SwingTree.get().getUIScale().getUserScaleFactor();
+            float scale = UI.scale();
 
             int scaleHint = Image.SCALE_SMOOTH;
             if (scale > 1.5f)

@@ -76,7 +76,7 @@ class Individual_Component_Styling_Spec extends Specification
             scaling factor for the current system automatically for you,
             so you do not have to specify this factor manually. 
         """
-            SwingTree.get().getUIScale().setUserScaleFactor(uiScale)
+            SwingTree.get().setUiScaleFactor(uiScale)
         and : 'We create a panel with some custom styling!'
             var panel =
                         UI.panel()
@@ -126,7 +126,7 @@ class Individual_Component_Styling_Spec extends Specification
             scaling factor for the current system automatically for you,
             so you do not have to specify this factor manually. 
         """
-            SwingTree.get().getUIScale().setUserScaleFactor(uiScale)
+            SwingTree.get().setUiScaleFactor(uiScale)
         and : 'We create a panel with some custom styling!'
             var panel =
                         UI.panel()
@@ -173,7 +173,7 @@ class Individual_Component_Styling_Spec extends Specification
             scaling factor for the current system automatically for you,
             so you do not have to specify this factor manually. 
         """
-            SwingTree.get().getUIScale().setUserScaleFactor(uiScale)
+            SwingTree.get().setUiScaleFactor(uiScale)
         and : 'We create a panel with some custom styling!'
             var panel =
                         UI.panel()
@@ -218,7 +218,7 @@ class Individual_Component_Styling_Spec extends Specification
             scaling factor for the current system automatically for you,
             so you do not have to specify this factor manually. 
         """
-            SwingTree.get().getUIScale().setUserScaleFactor(uiScale)
+            SwingTree.get().setUiScaleFactor(uiScale)
         and : 'We create a panel with some custom styling!'
             var panel =
                         UI.panel()
@@ -705,7 +705,7 @@ class Individual_Component_Styling_Spec extends Specification
             scaling factor for the current system automatically for you,
             so you do not have to specify this factor manually. 
         """
-            SwingTree.get().getUIScale().setUserScaleFactor(uiScale)
+            SwingTree.get().setUiScaleFactor(uiScale)
         and : 'A label UI with a custom styler lambda.'
             var ui =
                     UI.label("I am a label")
@@ -1651,7 +1651,7 @@ class Individual_Component_Styling_Spec extends Specification
             scaling factor for the current system automatically for you,
             so you do not have to specify this factor manually. 
         """
-            SwingTree.get().getUIScale().setUserScaleFactor(uiScale)
+            SwingTree.get().setUiScaleFactor(uiScale)
         and : 'Now we create a text field UI with a custom styler lambda and a button.'
             var seed = Utility.loadImage("img/seed.png")
             var trees = Utility.loadImage("img/trees.png")
@@ -1721,7 +1721,7 @@ class Individual_Component_Styling_Spec extends Specification
             scaling factor for the current system automatically for you,
             so you do not have to specify this factor manually. 
         """
-            SwingTree.get().getUIScale().setUserScaleFactor(uiScale)
+            SwingTree.get().setUiScaleFactor(uiScale)
         and : 'Now we create a button UI with a custom styler lambda and a button.'
             var funnel = UI.findIcon("img/funnel.svg")
             var ui =
@@ -1775,7 +1775,7 @@ class Individual_Component_Styling_Spec extends Specification
             scaling factor for the current system automatically for you,
             so you do not have to specify this factor manually. 
         """
-            SwingTree.get().getUIScale().setUserScaleFactor(uiScale)
+            SwingTree.get().setUiScaleFactor(uiScale)
         and : 'A UI with a higher level of nesting:'
             var ui =
                     UI.panel().withLayout("fill, ins 0, wrap 1")
@@ -1862,7 +1862,7 @@ class Individual_Component_Styling_Spec extends Specification
             scaling factor for the current system automatically for you,
             so you do not have to specify this factor manually. 
         """
-            SwingTree.get().getUIScale().setUserScaleFactor(uiScale)
+            SwingTree.get().setUiScaleFactor(uiScale)
         and :
             MyTabsViewModel.TabModel tab1 = new MyTabsView.DummyTab("Tab 1", "").getModel();
             MyTabsViewModel.TabModel tab2 = new MyTabsView.DummyTab("Tab 2", "img/two-16th-notes.svg").getModel();

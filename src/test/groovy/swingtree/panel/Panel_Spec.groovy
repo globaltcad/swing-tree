@@ -124,7 +124,7 @@ class Panel_Spec extends Specification
             scaling factor for the current system automatically for you,
             so you do not have to specify this factor manually. 
         """
-            SwingTree.get().getUIScale().setUserScaleFactor(uiScale)
+            SwingTree.get().setUiScaleFactor(uiScale)
         and : 'A simple property modelling the width of a panel.'
             var width = Var.of(300)
         and : 'A simple property modelling the height of a panel.'
