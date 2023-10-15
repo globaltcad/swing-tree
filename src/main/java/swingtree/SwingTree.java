@@ -8,13 +8,10 @@ import swingtree.threading.EventProcessor;
 import javax.swing.ImageIcon;
 import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
-import javax.swing.plaf.DimensionUIResource;
 import javax.swing.plaf.FontUIResource;
-import javax.swing.plaf.InsetsUIResource;
 import javax.swing.plaf.UIResource;
 import javax.swing.text.StyleContext;
 import java.awt.*;
-import java.awt.geom.RoundRectangle2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -91,7 +88,7 @@ public final class SwingTree
 
     private SwingTreeInitConfig _config;
 
-    private final LazyRef<UIScale> uiScale;
+    private final LazyRef<UiScale> uiScale;
     private final Map<String, ImageIcon> _iconCache = new HashMap<>();
 
 
@@ -99,7 +96,7 @@ public final class SwingTree
 
 	private SwingTree( SwingTreeConfigurator configurator ) {
         _config = _resolveConfiguration(configurator);
-        this.uiScale = new LazyRef<>( () -> new UIScale(_config) );
+        this.uiScale = new LazyRef<>( () -> new UiScale(_config) );
         _establishMainFont(_config);
     }
 
@@ -148,10 +145,126 @@ public final class SwingTree
     public Map<String, ImageIcon> getIconCache() { return _iconCache; }
 
     /**
-     * @return The {@link UIScale} instance of this context, which defines
-     *         how and to what degree the SwingTree UI is scaled (for high DPI displays for example).
+     * Returns the user scale factor is a scaling factor is used by SwingTree's
+     * style engine to scale the UI during painting.
+     * Note that this is different from the system/Graphics2D scale factor, which is
+     * the scale factor that the JRE uses to scale everything through the
+     * {@link java.awt.geom.AffineTransform} of the {@link Graphics2D}.
+     * <p>
+     * Use this scaling factor for painting operations that are not performed
+     * by SwingTree's style engine, e.g. custom painting
+     * (see {@link swingtree.style.ComponentStyleDelegate#painter(UI.Layer, Painter)}).
+     * <p>
+     * You can configure this scaling factor through the library initialization
+     * method {@link SwingTree#initialiseUsing(SwingTreeConfigurator)},
+     * or directly through the system property "swingtree.uiScale".
+     *
+     * @return The user scale factor.
      */
-    public UIScale getUIScale() { return uiScale.get(); }
+    public float getUiScaleFactor() {
+        return uiScale.get().getUserScaleFactor();
+    }
+
+    /**
+     * Sets the user scale factor is a scaling factor that is used by SwingTree's
+     * style engine to scale the UI during painting.
+     * Note that this is different from the system/Graphics2D scale factor, which is
+     * the scale factor that the JRE uses to scale everything through the
+     * {@link java.awt.geom.AffineTransform} of the {@link Graphics2D}.
+     * <p>
+     * Use this scaling factor for painting operations that are not performed
+     * by SwingTree's style engine, e.g. custom painting
+     * (see {@link swingtree.style.ComponentStyleDelegate#painter(UI.Layer, Painter)}).
+     * <p>
+     * You can configure this scaling factor through the library initialization
+     * method {@link SwingTree#initialiseUsing(SwingTreeConfigurator)},
+     * or directly through the system property "swingtree.uiScale".
+     *
+     * @param scaleFactor The user scale factor.
+     */
+    public void setUiScaleFactor( float scaleFactor ) {
+        uiScale.get().setUserScaleFactor(scaleFactor);
+    }
+
+    /**
+     * Adds a property change listener to the user scale factor, so
+     * when the user scale factor changes, the property "swingtree.uiScale" is fired.
+     * The user scale factor is a scaling factor that is used by SwingTree's
+     * style engine to scale the UI during painting.
+     * Note that this is different from the system/Graphics2D scale factor, which is
+     * the scale factor that the JRE uses to scale everything through the
+     * {@link java.awt.geom.AffineTransform} of the {@link Graphics2D}.
+     * <p>
+     * Use this scaling factor for painting operations that are not performed
+     * by SwingTree's style engine, e.g. custom painting
+     * (see {@link swingtree.style.ComponentStyleDelegate#painter(UI.Layer, Painter)}).
+     * <p>
+     * You can configure this scaling factor through the library initialization
+     * method {@link SwingTree#initialiseUsing(SwingTreeConfigurator)},
+     * or directly through the system property "swingtree.uiScale".
+     *
+     * @param listener The property change listener to add.
+     */
+    public void addUiScaleChangeListener(PropertyChangeListener listener) {
+        uiScale.get().addPropertyChangeListener(listener);
+    }
+
+    /**
+     * Removes the provided property change listener from the user scale factor
+     * property with the name "swingtree.uiScale".
+     * The user scale factor is a scaling factor that is used by SwingTree's
+     * style engine to scale the UI during painting.
+     * Note that this is different from the system/Graphics2D scale factor, which is
+     * the scale factor that the JRE uses to scale everything through the
+     * {@link java.awt.geom.AffineTransform} of the {@link Graphics2D}.
+     * <p>
+     * Use this scaling factor for painting operations that are not performed
+     * by SwingTree's style engine, e.g. custom painting
+     * (see {@link swingtree.style.ComponentStyleDelegate#painter(UI.Layer, Painter)}).
+     * <p>
+     * You can configure this scaling factor through the library initialization
+     * method {@link SwingTree#initialiseUsing(SwingTreeConfigurator)},
+     * or directly through the system property "swingtree.uiScale".
+     *
+     * @param listener The property change listener to remove.
+     */
+    public void removeUiScaleChangeListener(PropertyChangeListener listener) {
+        uiScale.get().removePropertyChangeListener(listener);
+    }
+
+    /**
+     * Returns whether system scaling is enabled.
+     * System scaling means that the JRE scales everything
+     * through the {@link java.awt.geom.AffineTransform} of the {@link Graphics2D}.
+     * If this is the case, then we do not have to do scaled painting
+     * and can use the original size of icons, gaps, etc.
+     */
+    public boolean isSystemScalingEnabled() { return UiScale._isSystemScalingEnabled(); }
+
+    /**
+     * Returns the system scale factor for the given graphics context.
+     * The system scale factor is the scale factor that the JRE uses
+     * to scale everything (text, icons, gaps, etc).
+     *
+     * @param g The graphics context to get the system scale factor for.
+     * @return The system scale factor for the given graphics context.
+     */
+    public double getSystemScaleFactorOf( Graphics2D g ) {
+        return UiScale._getSystemScaleFactorOf(g);
+    }
+
+    /**
+     * Returns the system scale factor.
+     * The system scale factor is the scale factor that the JRE uses
+     * to scale everything (text, icons, gaps, etc) irrespective of the
+     * current look and feel, as this is the scale factor that is used
+     * by the {@link java.awt.geom.AffineTransform} of the {@link Graphics2D}.
+     *
+     * @return The system scale factor.
+     */
+    public double getSystemScaleFactor() {
+        return UiScale._getSystemScaleFactor();
+    }
 
 	/**
 	 * @return The currently configured {@link EventProcessor} that is used to process
@@ -200,13 +313,13 @@ public final class SwingTree
 	}
 
     /**
-     * This class handles scaling in Swing UIs.
+     * This class handles scaling in SwingTree UIs.
      * It computes user scaling factor based on font size and
      * provides methods to scale integer, float, {@link Dimension} and {@link Insets}.
      * This class is look and feel independent.
      * <p>
      * Two scaling modes are supported by SwingTree for HiDPI displays:
-     *
+     * <p>
      * <h2>1) system scaling mode</h2>
      *
      * This mode is supported since Java 9 on all platforms and in some Java 8 VMs
@@ -217,14 +330,14 @@ public final class SwingTree
      * E.g. when you draw a 10px line, a 15px line is drawn on screen.
      * The scale factor may be different for each connected display.
      * The scale factor may change for a window when moving the window from one display to another one.
-     *
+     * <p>
      * <h2>2) user scaling mode</h2>
      *
      * This mode is mainly for Java 8 compatibility, but is also used on Linux
      * or if the default font is changed.
      * The user scale factor is computed based on the used font.
      * The JRE does not scale anything.
-     * So we have to invoke {@link #scale(float)} where necessary.
+     * So we have to invoke {@link UI#scale(float)} where necessary.
      * There is only one user scale factor for all displays.
      * The user scale factor may change if the active LaF, "defaultFont" or "Label.font" has changed.
      * If system scaling mode is available the user scale factor is usually 1,
@@ -232,7 +345,7 @@ public final class SwingTree
      *
      * @author Daniel Nepp, but a derivative work originally from Karl Tauber (com.formdev.flatlaf.util.UIScale)
      */
-    public static final class UIScale
+    static final class UiScale
     {
         private final SwingTreeInitConfig config;
         private PropertyChangeSupport changeSupport;
@@ -243,7 +356,7 @@ public final class SwingTree
         private boolean initialized;
 
 
-        private UIScale( SwingTreeInitConfig config ) // private to prevent instantiation from outside
+        private UiScale(SwingTreeInitConfig config ) // private to prevent instantiation from outside
         {
             this.config = config;
             try {
@@ -265,7 +378,7 @@ public final class SwingTree
 
                 _initialize();
             } catch (Exception ex) {
-                log.error("Error initializing "+UIScale.class.getSimpleName(), ex);
+                log.error("Error initializing "+ UiScale.class.getSimpleName(), ex);
                 // Usually there should be no exception, if there is one, the library will still work, but
                 // the UI may not be scaled correctly. Please report this exception to the library author.
             }
@@ -348,10 +461,9 @@ public final class SwingTree
             return (font instanceof FontUIResource) ? (FontUIResource) font : new FontUIResource( font );
         }
 
-
         public void addPropertyChangeListener( PropertyChangeListener listener ) {
             if( changeSupport == null )
-                changeSupport = new PropertyChangeSupport( UIScale.class );
+                changeSupport = new PropertyChangeSupport( UiScale.class );
             changeSupport.addPropertyChangeListener( listener );
         }
 
@@ -370,7 +482,7 @@ public final class SwingTree
          * If this is the case, then we do not have to do scaled painting
          * and can use the original size of icons, gaps, etc.
          */
-        private static boolean _isSystemScalingEnabled() {
+        static boolean _isSystemScalingEnabled() {
             if ( jreHiDPI != null )
                 return jreHiDPI;
 
@@ -405,15 +517,15 @@ public final class SwingTree
          * @param g The graphics context to get the system scale factor for.
          * @return The system scale factor for the given graphics context.
          */
-        public double getSystemScaleFactor( Graphics2D g ) {
-            return _isSystemScalingEnabled() ? getSystemScaleFactor( g.getDeviceConfiguration() ) : 1;
+        private static double _getSystemScaleFactorOf( Graphics2D g ) {
+            return _isSystemScalingEnabled() ? _getSystemScaleFactorOf( g.getDeviceConfiguration() ) : 1;
         }
 
         /**
          * @param gc The graphics configuration to get the system scale factor for.
          * @return The system scale factor for the given graphics configuration.
          */
-        public static double getSystemScaleFactor( GraphicsConfiguration gc ) {
+        private static double _getSystemScaleFactorOf( GraphicsConfiguration gc ) {
             return (_isSystemScalingEnabled() && gc != null) ? gc.getDefaultTransform().getScaleX() : 1;
         }
 
@@ -438,12 +550,12 @@ public final class SwingTree
                             // it is not necessary (and possible) to remove listener of old LaF defaults
                             if( e.getNewValue() instanceof LookAndFeel)
                                 UIManager.getLookAndFeelDefaults().addPropertyChangeListener( this );
-                            updateScaleFactor();
+                            _updateScaleFactor();
                             break;
 
                         case _DEFAULT_FONT:
                         case "Label.font":
-                            updateScaleFactor();
+                            _updateScaleFactor();
                             break;
                     }
                 }
@@ -452,22 +564,17 @@ public final class SwingTree
             UIManager.getDefaults().addPropertyChangeListener( listener );
             UIManager.getLookAndFeelDefaults().addPropertyChangeListener( listener );
 
-            updateScaleFactor();
+            _updateScaleFactor();
         }
 
-        public void reset() {
-            scaleFactor = 1;
-            initialized = false;
-        }
-
-        private void updateScaleFactor() {
+        private void _updateScaleFactor() {
             if ( !config.isUiScaleFactorEnabled() )
                 return;
 
             // apply custom scale factor specified in system property "swingtree.uiScale"
             float customScaleFactor = config.uiScaleFactor();
             if ( customScaleFactor > 0 ) {
-                setUserScaleFactor( customScaleFactor, false );
+                _setUserScaleFactor( customScaleFactor, false );
                 return;
             }
 
@@ -481,7 +588,7 @@ public final class SwingTree
 
             float newScale = _computeScaleFactorFrom( font );
 
-            setUserScaleFactor( newScale, true );
+            _setUserScaleFactor( newScale, true );
         }
 
         /**
@@ -598,13 +705,13 @@ public final class SwingTree
 
         public void setUserScaleFactor( float scaleFactor ) {
             _initialize();
-            setUserScaleFactor( scaleFactor, true );
+            _setUserScaleFactor( scaleFactor, true );
         }
 
         /**
          * Sets the user scale factor.
          */
-        private void setUserScaleFactor( float scaleFactor, boolean normalize ) {
+        private void _setUserScaleFactor(float scaleFactor, boolean normalize ) {
             if ( normalize ) {
                 if ( scaleFactor < 1f ) {
                     scaleFactor = config.isUiScaleDownAllowed()
@@ -630,162 +737,30 @@ public final class SwingTree
         }
 
         /**
-         * Multiplies the given value by the user scale factor.
-         *
-         * @param value The value to scale.
-         * @return The scaled value.
-         */
-        public float scale( float value ) {
-            _initialize();
-            return (scaleFactor == 1) ? value : (value * scaleFactor);
-        }
-
-        /**
-         * Multiplies the given value by the user scale factor.
-         *
-         * @param value The value to scale.
-         * @return The scaled value.
-         */
-        public double scale( double value ) {
-            _initialize();
-            return (scaleFactor == 1) ? value : (value * scaleFactor);
-        }
-
-        /**
-         * Multiplies the given value by the user scale factor and rounds the result.
-         *
-         * @param value The value to scale and then round if the scaled result is not a whole number.
-         * @return The scaled and rounded value.
-         */
-        public int scale( int value ) {
-            _initialize();
-            return ( scaleFactor == 1 ? value : Math.round( value * scaleFactor ) );
-        }
-
-        /**
-         * Similar as {@link #scale(int)} but always "rounds down".
-         * <p>
-         * For use in special cases. {@link #scale(int)} is the preferred method.
-         *
-         * @param value The value to scale and then round down if the scaled result is not a whole number.
-         * @return The scaled and rounded down value.
-         */
-        public int scaleRoundedDown( int value ) {
-            _initialize();
-            return ( scaleFactor == 1 ? value : (int) (value * scaleFactor) );
-        }
-
-        /**
-         * Divides the given value by the user scale factor.
-         *
-         * @param value The value to un-scale.
-         * @return The resulting un-scaled floating point number.
-         */
-        public float unscale( float value ) {
-            _initialize();
-            return (scaleFactor == 1f) ? value : (value / scaleFactor);
-        }
-
-        /**
-         * Divides the given value by the user scale factor and rounds the result.
-         *
-         * @param value The value to un-scale and then round if the un-scaled result is not a whole number.
-         * @return The un-scaled and rounded value.
-         */
-        public int unscale( int value ) {
-            _initialize();
-            return (scaleFactor == 1f) ? value : Math.round( value / scaleFactor );
-        }
-
-        /**
-         * If user scale factor is not 1, scale the given graphics context by invoking
-         * {@link Graphics2D#scale(double, double)} with user scale factor.
-         *
-         * @param g The graphics context to scale.
-         */
-        public void scaleGraphics( Graphics2D g ) {
-            _initialize();
-            if( scaleFactor != 1f )
-                g.scale( scaleFactor, scaleFactor );
-        }
-
-        /**
-         * Scales the given dimension with the user scale factor.
-         * <p>
-         * If user scale factor is 1, then the given dimension is simply returned.
-         * Otherwise, a new instance of {@link Dimension} or {@link DimensionUIResource}
-         * is returned, depending on whether the passed dimension implements {@link UIResource}.
-         *
-         * @param dimension The dimension whose width and height should be scaled.
-         * @return A new instance of {@link Dimension} or {@link DimensionUIResource} with scaled width and height.
-         */
-        public Dimension scale( Dimension dimension ) {
-            _initialize();
-            return (dimension == null || scaleFactor == 1f)
-                    ? dimension
-                    : (dimension instanceof UIResource
-                    ? new DimensionUIResource( scale( dimension.width ), scale( dimension.height ) )
-                    : new Dimension          ( scale( dimension.width ), scale( dimension.height ) ));
-        }
-
-        public Rectangle scale( Rectangle rectangle ) {
-            _initialize();
-            return (rectangle == null || scaleFactor == 1f)
-                    ? rectangle
-                    : new Rectangle(
-                            scale( rectangle.x ),     scale( rectangle.y ),
-                            scale( rectangle.width ), scale( rectangle.height )
-                        );
-        }
-
-        public RoundRectangle2D scale( RoundRectangle2D rectangle ) {
-            _initialize();
-            if ( rectangle == null || scaleFactor == 1f ) return rectangle;
-            if ( rectangle instanceof RoundRectangle2D.Float )
-                return new RoundRectangle2D.Float(
-                        (float) scale( rectangle.getX() ),        (float) scale( rectangle.getY() ),
-                        (float) scale( rectangle.getWidth() ),    (float) scale( rectangle.getHeight() ),
-                        (float) scale( rectangle.getArcWidth() ), (float) scale( rectangle.getArcHeight() )
-                );
-            else
-                return new RoundRectangle2D.Double(
-                        scale( rectangle.getX() ),     scale( rectangle.getY() ),
-                        scale( rectangle.getWidth() ), scale( rectangle.getHeight() ),
-                        scale( rectangle.getArcWidth() ), scale( rectangle.getArcHeight() )
-                );
-        }
-
-        /**
-         * Scales the given insets with the user scale factor.
-         * <p>
-         * If user scale factor is 1, then the given insets is simply returned.
-         * Otherwise, a new instance of {@link Insets} or {@link InsetsUIResource}
-         * is returned, depending on whether the passed dimension implements {@link UIResource}.
-         *
-         * @param insets The insets whose top, left, bottom and right values should be scaled.
-         * @return A new instance of {@link Insets} or {@link InsetsUIResource} with scaled values.
-         */
-        public Insets scale( Insets insets ) {
-            _initialize();
-            return (insets == null || scaleFactor == 1f)
-                    ? insets
-                    : (insets instanceof UIResource
-                    ? new InsetsUIResource( scale( insets.top ), scale( insets.left ), scale( insets.bottom ), scale( insets.right ) )
-                    : new Insets          ( scale( insets.top ), scale( insets.left ), scale( insets.bottom ), scale( insets.right ) ));
-        }
-
-        /**
          * Returns true if the JRE scales, which is the case if:
          *   - environment variable GDK_SCALE is set and running on Java 9 or later
          *   - running on JetBrains Runtime 11 or later and scaling is enabled in system Settings
          */
-        static boolean isSystemScaling() {
+        static boolean _isSystemScaling() {
             if( GraphicsEnvironment.isHeadless() )
                 return true;
 
             GraphicsConfiguration gc = GraphicsEnvironment.getLocalGraphicsEnvironment()
-                    .getDefaultScreenDevice().getDefaultConfiguration();
-            return UIScale.getSystemScaleFactor( gc ) > 1;
+                                                          .getDefaultScreenDevice()
+                                                          .getDefaultConfiguration();
+
+            return UiScale._getSystemScaleFactorOf( gc ) > 1;
+        }
+
+        static double _getSystemScaleFactor() {
+            if ( GraphicsEnvironment.isHeadless() )
+                return 1;
+
+            return UiScale._getSystemScaleFactorOf(
+                                GraphicsEnvironment.getLocalGraphicsEnvironment()
+                                                   .getDefaultScreenDevice()
+                                                   .getDefaultConfiguration()
+                            );
         }
 
     }
@@ -1030,7 +1005,7 @@ public final class SwingTree
         }
 
         private static Font createFont( String family, int style, int size, double dsize ) {
-            Font font = UIScale._createCompositeFont( family, style, size );
+            Font font = UiScale._createCompositeFont( family, style, size );
 
             // set font size in floating points
             font = font.deriveFont( style, (float) dsize );
@@ -1040,7 +1015,7 @@ public final class SwingTree
 
         private static double getGnomeFontScale() {
             // do not scale font here if JRE scales
-            if( UIScale.isSystemScaling() )
+            if( UiScale._isSystemScaling() )
                 return 96. / 72.;
 
             // see class com.sun.java.swing.plaf.gtk.PangoFonts background information
@@ -1055,8 +1030,10 @@ public final class SwingTree
                 return dpi / 72.0;
             } else {
                 return GraphicsEnvironment.getLocalGraphicsEnvironment()
-                        .getDefaultScreenDevice().getDefaultConfiguration()
-                        .getNormalizingTransform().getScaleY();
+                                          .getDefaultScreenDevice()
+                                          .getDefaultConfiguration()
+                                          .getNormalizingTransform()
+                                          .getScaleY();
             }
         }
 
@@ -1075,11 +1052,11 @@ public final class SwingTree
 
         /**
          * Gets the default font for KDE from KDE configuration files.
-         *
+         * <p>
          * The Swing fonts are not updated when the user changes system font size
          * (System Settings > Fonts > Force Font DPI). A application restart is necessary.
          * This is the same behavior as in native KDE applications.
-         *
+         * <p>
          * The "display scale factor" (kdeglobals: [KScreen] > ScaleFactor) is not used
          * KDE also does not use it to calculate font size. Only forceFontDPI is used by KDE.
          * If user changes "display scale factor" (System Settings > Display and Monitors >
@@ -1087,9 +1064,9 @@ public final class SwingTree
          */
         private static Font getKDEFont() {
             List<String> kdeglobals = readConfig( "kdeglobals" );
-            List<String> kcmfonts = readConfig( "kcmfonts" );
+            List<String> kcmfonts   = readConfig( "kcmfonts" );
 
-            String generalFont = getConfigEntry( kdeglobals, "General", "font" );
+            String generalFont  = getConfigEntry( kdeglobals, "General", "font" );
             String forceFontDPI = getConfigEntry( kcmfonts, "General", "forceFontDPI" );
 
             String family = "sansserif";
@@ -1113,7 +1090,7 @@ public final class SwingTree
 
             // font dpi
             int dpi = 96;
-            if( forceFontDPI != null && !UIScale.isSystemScaling() ) {
+            if( forceFontDPI != null && !UiScale._isSystemScaling() ) {
                 try {
                     dpi = Integer.parseInt( forceFontDPI );
                     if( dpi <= 0 )

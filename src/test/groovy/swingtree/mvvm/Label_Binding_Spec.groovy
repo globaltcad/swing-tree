@@ -104,7 +104,7 @@ class Label_Binding_Spec extends Specification
             scaling factor for the current system automatically for you,
             so you do not have to specify this factor manually. 
         """
-        SwingTree.get().getUIScale().setUserScaleFactor(uiScale)
+        SwingTree.get().setUiScaleFactor(uiScale)
 
         and : 'We create a simple swing-tree property for modelling the size.'
             Val<Dimension> minSize = Var.of(new Dimension(100, 100))

@@ -46,7 +46,7 @@ class UI_Scaling_Spec extends Specification
 
     def 'The dimensionality of components will be scaled by the scaling factor'() {
         given:
-        SwingTree.get().getUIScale().setUserScaleFactor(2.0f)
+        SwingTree.get().setUiScaleFactor(2.0f)
 
         when : 'We build a simple panel with a number of various components and custom dimensions'
             var panel =
@@ -118,7 +118,7 @@ class UI_Scaling_Spec extends Specification
             How cool is that? :) 
         """
         given:
-            SwingTree.get().getUIScale().setUserScaleFactor(2.0f)
+            SwingTree.get().setUiScaleFactor(2.0f)
 
         when : 'We build a simple panel with a number of various components and custom dimensions'
             var panel =
@@ -191,7 +191,7 @@ class UI_Scaling_Spec extends Specification
             scaling factor when applied to the UI components dynamically.
         """
         given : 'We set the scaling factor to 2.0'
-            SwingTree.get().getUIScale().setUserScaleFactor(2.0f)
+            SwingTree.get().setUiScaleFactor(2.0f)
         and : 'We create a whole lot of properties:'
             var prefSize = Var.of(new Dimension(70, 50))
             var minSize  = Var.of(new Dimension(75, 25))

@@ -168,7 +168,7 @@ public class MyTabsView extends Panel
 
     public static void main(String... args) {
 
-        SwingTree.get().getUIScale().setUserScaleFactor(3);
+        SwingTree.get().setUiScaleFactor(3);
 
         MyTabsViewModel.TabModel tab1 = new DummyTab("Tab 1", "").getModel();
         MyTabsViewModel.TabModel tab2 = new DummyTab("Tab 2", "img/two-16th-notes.svg").getModel();
