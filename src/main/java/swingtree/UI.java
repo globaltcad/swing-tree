@@ -27,8 +27,10 @@ import javax.swing.plaf.DimensionUIResource;
 import javax.swing.plaf.InsetsUIResource;
 import javax.swing.plaf.UIResource;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.JTableHeader;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
+import java.awt.event.MouseEvent;
 import java.awt.geom.RoundRectangle2D;
 import java.io.File;
 import java.net.MalformedURLException;
@@ -4982,9 +4984,48 @@ public final class UI extends UILayoutConstants
         return of((JTable) new Table()).withModel(dataFormat, dataSource);
     }
 
+    /**
+     *  Creates a new {@link JTable} instance builder with the provided table model
+     *  buildable used for creating the table model in a declarative fashion. <br>
+     *  It is expected to be used like so:
+     *  <pre>{@code
+     *  UI.table(
+     *    UI.tableModel()
+     *    .colCount( () -> data[0].size() )
+     *    .rowCount( () -> data.size() )
+     *    .getsEntryAt((col, row) -> data[col][row] )
+     * )
+     * }</pre>
+     * The factory method {@link #tableModel()} is used to create a builder for the table model
+     * which can be passed to this method, which will call the {@link BasicTableModel.Builder#build()}
+     * method on the provided builder to create the table model for the table.
+     * <br>
+     * The purpose of this pattern is to remove the necessity of implementing the {@link javax.swing.table.TableModel}
+     * interface manually, which is a rather tedious task.
+     * Instead, you can use ths fluent API provided by the {@link BasicTableModel.Builder} to create
+     * a general purpose table model for your table.
+     *
+     * @param tableModelBuildable The table model builder which can be created using the {@link #tableModel()} factory method.
+     * @return A builder instance for a new {@link JTable}.
+     */
     public static UIForTable<JTable> table( Buildable<BasicTableModel> tableModelBuildable ) {
         return of((JTable) new Table()).withModel(tableModelBuildable);
     }
+
+    /**
+     * @param header The table header which should be wrapped by the builder.
+     * @return A builder instance for a new {@link JTableHeader}.
+     * @param <H> The type of the {@link JTableHeader} for which the builder should be created.
+     */
+    public static <H extends TableHeader> UIForTableHeader<H> of( H header ) {
+        NullUtil.nullArgCheck(header, "header", TableHeader.class);
+        return new UIForTableHeader<>(header);
+    }
+
+    /**
+     * @return A builder instance for a new {@link JTableHeader}.
+     */
+    public static UIForTableHeader<TableHeader> tableHeader() { return of(new TableHeader()); }
 
     /**
      * @return A functional API for building a {@link javax.swing.table.TableModel}.
@@ -6071,6 +6112,40 @@ public final class UI extends UILayoutConstants
         @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }
     }
     /** {inheritDoc} */
+    public static class TableHeader extends JTableHeader {
+        private Function<Integer, String> _toolTipTextSupplier;
+        TableHeader() { super(); }
+        /**
+         * @param toolTipTextSupplier A function which receives the column index and returns the
+         *                            tool tip text for that column.
+         */
+        public void setToolTipsSupplier( Function<Integer, String> toolTipTextSupplier ) {
+            Objects.requireNonNull(toolTipTextSupplier);
+            _toolTipTextSupplier = toolTipTextSupplier;
+        }
+        /**
+         * @param toolTips The tool tip texts for the columns.
+         */
+        public void setToolTips( String... toolTips ) {
+            Objects.requireNonNull(toolTips);
+            setToolTipsSupplier( i -> toolTips[i] );
+        }
+        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }
+        @Override public void paintComponent(Graphics g) { super.paintComponent(g); _paintForeground(this, g); }
+        @Override public String getToolTipText(MouseEvent e) {
+            int col = columnAtPoint(e.getPoint());
+            int modelCol = Optional.ofNullable(getTable())
+                                    .map( t -> t.convertColumnIndexToModel(col) )
+                                    .orElse(col);
+            String retStr;
+            try { retStr = _toolTipTextSupplier.apply(modelCol); }
+            catch ( NullPointerException | ArrayIndexOutOfBoundsException ex ) {
+                retStr = "";
+            }
+            return  ( retStr.isEmpty() ? super.getToolTipText(e) : retStr );
+        }
+    }
+    /** {inheritDoc} */
     public static class Slider extends JSlider {
         @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }
         @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }
@@ -6131,6 +6206,11 @@ public final class UI extends UILayoutConstants
         @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }
     }
     /** {inheritDoc} */
+    public static class TextPane extends JTextPane {
+        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }
+        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }
+    }
+    /** {inheritDoc} */
     public static class Spinner extends JSpinner {
         @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }
         @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }
@@ -6148,11 +6228,6 @@ public final class UI extends UILayoutConstants
     }
     /** {inheritDoc} */
     public static class ProgressBar extends JProgressBar {
-        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }
-        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }
-    }
-    /** {inheritDoc} */
-    public static class TextPane extends JTextPane {
         @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }
         @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }
     }
