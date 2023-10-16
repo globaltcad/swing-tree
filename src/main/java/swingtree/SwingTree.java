@@ -371,12 +371,19 @@ public final class SwingTree
                     if (uiScaleReferenceFont != null)
                         UIManager.getDefaults().put(_DEFAULT_FONT, uiScaleReferenceFont);
                 }
-                if ( config.scalingStrategy() == SwingTreeInitConfig.Scaling.FROM_SYSTEM_FONT ) {
-                    Font highDPIFont = _calculateDPIAwarePlatformFont();
-                    UIManager.getDefaults().put(_DEFAULT_FONT, highDPIFont);
-                }
 
-                _initialize();
+                if ( config.scalingStrategy() == SwingTreeInitConfig.Scaling.FROM_SYSTEM_FONT ) {
+                    float defaultScale = this.scaleFactor;
+                    Font highDPIFont = _calculateDPIAwarePlatformFont();
+                    boolean updated = _initialize( highDPIFont );
+                    if ( this.scaleFactor != defaultScale )
+                        UIManager.getDefaults().put(_DEFAULT_FONT, highDPIFont);
+                    if ( updated )
+                        _setScalePropertyListeners();
+                }
+                else
+                    _initialize();
+
             } catch (Exception ex) {
                 log.error("Error initializing "+ UiScale.class.getSimpleName(), ex);
                 // Usually there should be no exception, if there is one, the library will still work, but
@@ -533,14 +540,27 @@ public final class SwingTree
 
         private void _initialize()
         {
+            boolean updated = _initialize( _getDefaultFont() );
+            if ( updated )
+                _setScalePropertyListeners();
+        }
+
+        private boolean _initialize( Font uiScaleReferenceFont )
+        {
             if ( initialized )
-                return;
+                return false;
 
             initialized = true;
 
             if ( !config.isUiScaleFactorEnabled() )
-                return;
+                return false;
 
+            _setUserScaleFactor( _calculateScaleFactor( uiScaleReferenceFont ) );
+
+            return true;
+        }
+
+        private void _setScalePropertyListeners() {
             // listener to update scale factor if LaF changed, "defaultFont" or "Label.font" changed
             PropertyChangeListener listener = new PropertyChangeListener() {
                 @Override
@@ -564,8 +584,6 @@ public final class SwingTree
             UIManager.addPropertyChangeListener( listener );
             UIManager.getDefaults().addPropertyChangeListener( listener );
             UIManager.getLookAndFeelDefaults().addPropertyChangeListener( listener );
-
-            _setUserScaleFactor( _calculateScaleFactor( _getDefaultFont() ) );
         }
 
         private Font _getDefaultFont() {
@@ -582,17 +600,17 @@ public final class SwingTree
 
         /**
          * Computes the scale factor based on the given font.
-         * @param referenceFont font to compute scale factor from
+         * @param font font to compute scale factor from
          * @return scale factor, normalized
          */
-        private float _calculateScaleFactor( Font referenceFont ) {
+        private float _calculateScaleFactor( Font font ) {
             // apply custom scale factor specified in system property "swingtree.uiScale"
             float customScaleFactor = config.uiScaleFactor();
             if ( customScaleFactor > 0 ) {
                 return customScaleFactor;
             }
 
-            return _normalize(_internalComputeScaleFactorFrom( referenceFont ) );
+            return _normalize(_internalComputeScaleFactorFrom( font ) );
         }
 
         /**
