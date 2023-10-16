@@ -1,5 +1,7 @@
 package swingtree;
 
+import javax.swing.JTable;
+import javax.swing.table.TableCellRenderer;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -45,4 +47,54 @@ public class UIForTableHeader<H extends UI.TableHeader> extends UIForAnySwing<UI
         return _this();
     }
 
+    /**
+     * Sets the default renderer for the table header,
+     * which is used when no <code>headerRenderer</code>
+     * is defined by a <code>TableColumn</code>.
+     *
+     * @param renderer The renderer to set.
+     * @return This builder node.
+     */
+    UIForTableHeader<H> withDefaultRenderer( TableCellRenderer renderer ) {
+        Objects.requireNonNull(renderer);
+        getComponent().setDefaultRenderer(renderer);
+        return _this();
+    }
+
+    /**
+     * Sets the default renderer for the table header,
+     * which is used when no <code>headerRenderer</code>
+     * is defined by a <code>TableColumn</code>. <br>
+     * This method does not receive a renderer directly,
+     * instead it expects a builder for the renderer
+     * whose build method will be called for you. <br>
+     * As part of a UI declaration, this might look like this:
+     * <pre>{@code
+     *     UI.table(
+     *         ...
+     *     )
+     *     .withHeader(
+     *         UI.tableHeader()
+     *         .withMaxWidth(100)
+     *         .withDefaultRenderer(
+     *             UI.renderTable()
+     *             .when(Integer.class)
+     *             .asText( cell ->
+     *                 cell.valueAsString()
+     *                     .orElse("")+"!"
+     *             )
+     *             .when(...)
+     *             ...
+     *         )
+     *     )
+     * }</pre>
+     *
+     * @param renderBuilder The builder for the renderer to set.
+     * @return This builder node.
+     */
+    UIForTableHeader<H> withDefaultRenderer( Render.Builder<JTable, ?> renderBuilder ) {
+        Objects.requireNonNull(renderBuilder);
+        getComponent().setDefaultRenderer(renderBuilder.getForTable());
+        return _this();
+    }
 }
