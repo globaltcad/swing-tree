@@ -28,6 +28,7 @@ import javax.swing.plaf.InsetsUIResource;
 import javax.swing.plaf.UIResource;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.JTableHeader;
+import javax.swing.table.TableColumnModel;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.event.MouseEvent;
@@ -6114,7 +6115,8 @@ public final class UI extends UILayoutConstants
     /** {inheritDoc} */
     public static class TableHeader extends JTableHeader {
         private Function<Integer, String> _toolTipTextSupplier;
-        TableHeader() { super(); }
+        public TableHeader() { super(); }
+        public TableHeader(TableColumnModel model) { super(model); }
         /**
          * @param toolTipTextSupplier A function which receives the column index and returns the
          *                            tool tip text for that column.
