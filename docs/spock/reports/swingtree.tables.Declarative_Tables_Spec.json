@@ -53,7 +53,7 @@
       "blocks":[
         {"kind":"given","text":"We have an update event and some data.","code":["var data = [1, 2, 3, 4]","var update = Event.create()"]},
 
-        {"kind":"and","text":"We create a table with a lambda based table model.","code":["var ui =","        UI.table().withModel(","            UI.tableModel()","            .colName( {[\"X\", \"Y\", \"Z\"][it]})","            .colCount({3})","            .rowCount({data.size()})","            .getter({ r, c ->data[r]})","            .updateOn(update)","        )"]},
+        {"kind":"and","text":"We create a table with a lambda based table model.","code":["var ui =","        UI.table().withModel(","            UI.tableModel()","            .colName( col -> [\"X\", \"Y\", \"Z\"].get(col) )","            .colCount( () -> 3 )","            .rowCount( () -> data.size() )","            .getsEntryAt( (r, c) -> data[r] )","            .updateOn(update)","        )"]},
 
         {"kind":"expect","text":"The table has 4 rows and 3 columns.","code":["ui.get(JTable).rowCount == 4","ui.get(JTable).columnCount == 3"]},
 

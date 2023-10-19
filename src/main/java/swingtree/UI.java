@@ -4866,8 +4866,8 @@ public final class UI extends UILayoutConstants
     }
 
     /**
-     *  Creates a new {@link JList} instance with the provided array
-     *  as data model.
+     *  Creates a new {@link JList} instance builder
+     *  with the provided array as data model.
      *  This is functionally equivalent to {@link #listOf(Object...)}.
      *
      * @param elements The elements which should be used as model data for the new {@link JList}.
@@ -4880,17 +4880,52 @@ public final class UI extends UILayoutConstants
         return of(new List<E>()).withEntries( elements );
     }
 
+    /**
+     *  Allows for the creation of a new {@link JList} instance with the provided
+     *  observable property list (a {@link Vals} object) as data model.
+     *  When the property list changes, the {@link JList} will be updated accordingly.
+     *
+     * @param elements The elements which should be used as model data for the new {@link JList}.
+     * @return A builder instance for a new {@link JList} with the provided {@link Vals} as data model.
+     * @param <E> The type of the elements in the list.
+     */
     public static <E> UIForList<E, JList<E>> list( Vals<E> elements ) {
         NullUtil.nullArgCheck(elements, "elements", Vals.class);
         return of(new List<E>()).withEntries( elements );
     }
 
+    /**
+     *  Allows for the creation of a new {@link JList} instance with 2 observable
+     *  collections as data model, a {@link Var} property for the selection and a {@link Vals}
+     *  property list for the elements.
+     *  When any of the properties change, the {@link JList} will be updated accordingly,
+     *  and conversely, when the {@link JList} selection changes, the properties will be updated accordingly.
+     *
+     * @param selection The {@link Var} property which should be bound to the selection of the {@link JList}.
+     * @param elements The {@link Vals} property which should be bound to the displayed elements of the {@link JList}.
+     * @return A builder instance for a new {@link JList} with the provided arguments as data model.
+     * @param <E> The type of the elements in the list.
+     */
     public static <E> UIForList<E, JList<E>> list( Var<E> selection, Vals<E> elements ) {
         NullUtil.nullArgCheck(selection, "selection", Var.class);
         NullUtil.nullArgCheck(elements, "elements", Vals.class);
-        return of(new List<E>()).withEntries( elements ).withSelection( selection );
+        return list( elements ).withSelection( selection );
     }
 
+    /**
+     *  Allows for the creation of a new {@link JList} instance with 2 observable
+     *  collections as data model, a {@link Val} property for the selection and a {@link Vals}
+     *  property list for the elements.
+     *  When any of the properties change, the {@link JList} will be updated accordingly,
+     *  however, due to the usage of a read only {@link Val} property for the selection,
+     *  the {@link JList} selection will not be updated when the property changes.
+     *  If you want a bidirectional binding, use {@link #list(Var, Vals)} instead.
+     *
+     * @param selection The {@link Val} property which should be bound to the selection of the {@link JList}.
+     * @param elements The {@link Vals} property which should be bound to the displayed elements of the {@link JList}.
+     * @return A builder instance for a new {@link JList} with the provided {@link Val} and {@link Vals} as data models.
+     * @param <E> The type of the elements in the list.
+     */
     public static <E> UIForList<E, JList<E>> list( Val<E> selection, Vals<E> elements ) {
         NullUtil.nullArgCheck(selection, "selection", Val.class);
         NullUtil.nullArgCheck(elements, "elements", Vals.class);
@@ -4943,6 +4978,9 @@ public final class UI extends UILayoutConstants
         return new UIForTable<>(table);
     }
 
+    /**
+     * @return A fluent builder instance for a new {@link JTable}.
+     */
     public static UIForTable<JTable> table() { return of(new Table()); }
 
     /**
@@ -4970,9 +5008,9 @@ public final class UI extends UILayoutConstants
      *  on a map of column names to lists of table entries (basically a column major matrix).  <br>
      *  This method will automatically create a {@link AbstractTableModel} instance for you.
      *  <p>
-     *      <b>Please note that when the data of the provided data source changes (i.e. when the data source
-     *      is a {@link Map} which gets modified), the table model will not be updated automatically!
-     *      Use {@link UIForTable#updateTableOn(sprouts.Event)} to bind an update {@link Event} to the table model.</b>
+     *  <b>Please note that when the data of the provided data source changes (i.e. when the data source
+     *  is a {@link Map} which gets modified), the table model will not be updated automatically!
+     *  Use {@link UIForTable#updateTableOn(sprouts.Event)} to bind an update {@link Event} to the table model.</b>
      *
      * @param dataFormat An enum which configures the modifiability of the table in a readable fashion.
      * @param dataSource The {@link TableMapDataSource} returning a column major map based matrix which will be used to populate the table.
@@ -5035,12 +5073,45 @@ public final class UI extends UILayoutConstants
         return new BasicTableModel.Builder<>(Object.class);
     }
 
+    /**
+     * @param entryType The type of the table entries.
+     * @param <E> The type of the table entries.
+     * @return A functional API for building a {@link javax.swing.table.TableModel}.
+     */
     public static <E> BasicTableModel.Builder<E> tableModel(Class<E> entryType) {
         return new BasicTableModel.Builder<>(entryType);
     }
 
+    /**
+     *  Exposes a fluent builder API for creating a table renderer.<br>
+     *  Here an example of how this would typically be used:
+     * <pre>{@code
+     *     UI.table(myModel)
+     *     .withRendererForColumn(0,
+     *         UI.renderTable()
+     *         .when(String.class)
+     *         .asText( cell -> "[" + cell.valueAsString().orElse("") + "]" ) )
+     *     )
+     *     .withRendererForColumn(1,
+     *         UI.renderTable()
+     *         .when(Float.class)
+     *         .asText( cell -> "(" + cell.valueAsString().orElse("") + "f)" ) )
+     *         .when(Double.class)
+     *         .asText( cell -> "(" + cell.valueAsString().orElse("") + "d)" ) )
+     *     );
+     * }</pre>
+     * The above example would render the first column of the table as a string surrounded by square brackets,
+     * and the second column as a float or double value surrounded by parentheses.
+     * Note that the API allows you to specify how specific types of table entry values
+     * should be rendered. This is done by calling the {@link Render.Builder#when(Class)} method
+     * bedore calling the {@link Render.As#asText(Function)} method.
+     *
+     * @return A builder instance for a new {@link JTable}.
+     */
     public static Render.Builder<JTable, Object> renderTable() {
-        return Render.forTable(Object.class, null).when(Object.class).asText(cell->cell.valueAsString().orElse(""));
+        return Render.forTable(Object.class, null)
+                     .when(Object.class)
+                     .asText( cell -> cell.valueAsString().orElse("") );
     }
 
     /**

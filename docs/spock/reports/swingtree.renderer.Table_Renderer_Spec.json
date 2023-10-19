@@ -21,7 +21,7 @@
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"We create a table with a lambda based table model.","code":["var ui =","        UI.table().withModel(","            UI.tableModel()","            .colNames(\"A\", \"B\")","            .colCount({2})","            .rowCount({3})","            .getter({\"O\"})","        )"]},
+        {"kind":"given","text":"We create a table with a lambda based table model.","code":["var ui =","        UI.table().withModel(","            UI.tableModel()","            .colNames(\"A\", \"B\")","            .colCount({2})","            .rowCount({3})","            .getsEntryAt({\"O\"})","        )"]},
 
         {"kind":"and","text":"\n                A mocked cell interpreter which interprets the state of the table cell\n                and then defines how it should be rendered (by setting a UI component).\n            ","code":["var render = Mock(Render.Cell.Interpreter)"]},
 

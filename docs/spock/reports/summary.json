@@ -1,7 +1,7 @@
 {
   "project": "Swing-Tree",
   "version": "0.2.0",
-  "created": "Sun Oct 15 00:51:13 CEST 2023",
+  "created": "Thu Oct 19 12:19:03 CEST 2023",
   "statistics":{
     "runs":"41",
     "passed":"41",
@@ -20,19 +20,19 @@
       "skipped":"0" ,
       "successRate":"1.0",
       "duration":"?",
-      "executedFeatures":[{"id":"The \"MadeWithSwingTree\" example UI defined in the examples can be created.","extraInfo":[]},{"id":"The \"Well rounded\" style example UI defined in the examples can be created.","extraInfo":[]},{"id":"The advanced UI define in the examples has the expected state.","extraInfo":[]},{"id":"The animated buttons view examples UI defined in the examples looks as expected.","extraInfo":[]},{"id":"The animation example view can be created.","extraInfo":[]},{"id":"The box shadow picker example UI defined in the examples can be created.","extraInfo":[]},{"id":"The calculator UI defined in the examples has the expected state and looks.","extraInfo":[]},{"id":"The form UI defined in the examples has the expected state.","extraInfo":[]},{"id":"The list examples UI defined in the examples can be created.","extraInfo":[]},{"id":"The list rendering example UI defined in the examples can be created.","extraInfo":[]},{"id":"The login example UI defined in the examples, a good MVVM demonstration.","extraInfo":[]},{"id":"The note guesser example UI defined in the examples can be created.","extraInfo":[]},{"id":"The settings example UI defined in the examples looks as expected.","extraInfo":[]},{"id":"The simple Table-UI example has the expected state.","extraInfo":[]},{"id":"The soft example UI is rendered as expected.","extraInfo":[]},{"id":"The spinners example UI defined in the examples can be created.","extraInfo":[]},{"id":"The symbol guesser example UI defined in the examples can be created.","extraInfo":[]},{"id":"The todo app UI defined in the examples has the expected state.","extraInfo":[]},{"id":"The user registration example UI defined in the examples, a good MVVM demonstration.","extraInfo":[]}],
+      "executedFeatures":[{"id":"Declare table components using a list of list as data source.","extraInfo":[]},{"id":"The \"MadeWithSwingTree\" example UI defined in the examples can be created.","extraInfo":[]},{"id":"The \"Well rounded\" style example UI defined in the examples can be created.","extraInfo":[]},{"id":"The advanced UI define in the examples has the expected state.","extraInfo":[]},{"id":"The animated buttons view examples UI defined in the examples looks as expected.","extraInfo":[]},{"id":"The animation example view can be created.","extraInfo":[]},{"id":"The box shadow picker example UI defined in the examples can be created.","extraInfo":[]},{"id":"The calculator UI defined in the examples has the expected state and looks.","extraInfo":[]},{"id":"The form UI defined in the examples has the expected state.","extraInfo":[]},{"id":"The list examples UI defined in the examples can be created.","extraInfo":[]},{"id":"The list rendering example UI defined in the examples can be created.","extraInfo":[]},{"id":"The login example UI defined in the examples, a good MVVM demonstration.","extraInfo":[]},{"id":"The note guesser example UI defined in the examples can be created.","extraInfo":[]},{"id":"The settings example UI defined in the examples looks as expected.","extraInfo":[]},{"id":"The soft example UI is rendered as expected.","extraInfo":[]},{"id":"The spinners example UI defined in the examples can be created.","extraInfo":[]},{"id":"The symbol guesser example UI defined in the examples can be created.","extraInfo":[]},{"id":"The todo app UI defined in the examples has the expected state.","extraInfo":[]},{"id":"The user registration example UI defined in the examples, a good MVVM demonstration.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"swingtree.animations.Animations_Spec",
       "title":"Animations",
-      "narrative":"Animations are a great way to make your application more interactive and more fun to use.",
+      "narrative":"Animations are a great way to improve the UX of your application.\n    Swing-Tree has a built in animation scheduler that can execute animations \n    given that you have at least specified the duration of the animation.\n    Internally the animation scheduler is a \"Timer\" that will regularly update\n    your animations and then remove them from the scheduler once they are finished.",
       "featureCount":"4",
       "failures":"0",
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
       "duration":"?",
-      "executedFeatures":[{"id":"Animate the color of a label when it is clicked.","extraInfo":[]},{"id":"Implement the \"finish\" method in your animation to ensure that it is called at least once.","extraInfo":[]},{"id":"The event delegation object of a user event can be used to register animations.","extraInfo":[]},{"id":"Use the API exposed by \"UI.schedule(..)\" to schedule animations","extraInfo":[]}],
+      "executedFeatures":[{"id":"Animate the color of a label when it is clicked.","extraInfo":[]},{"id":"Implement the \"finish\" method in your animation to ensure that it is called at least once.","extraInfo":[]},{"id":"The event delegation object of a user event can be used to register animations.","extraInfo":[]},{"id":"Use the API exposed by `UI.animateFor(..)` to schedule animations","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"swingtree.button.JButton_Example_Spec",
