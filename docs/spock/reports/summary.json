@@ -1,7 +1,7 @@
 {
   "project": "Swing-Tree",
   "version": "0.2.0",
-  "created": "Thu Oct 19 12:19:03 CEST 2023",
+  "created": "Thu Oct 19 12:44:32 CEST 2023",
   "statistics":{
     "runs":"41",
     "passed":"41",
@@ -60,8 +60,8 @@
       "ignoredFeatures":[]
     },{
       "className":"swingtree.common.Basic_UI_Builder_Examples_Spec",
-      "title":"Swing tree makes UI building fun again!",
-      "narrative":"The Swing-Tree library allows you to build UIs using declarative code, \n    which you can think of as a more dynamic type of HTML but for swing.\n    It is inspired by frameworks like Jetpack Compose, Flutter, React and SwiftUI\n    which are also based on nested builder patterns to design your UI.\n    In this specification we cover the utter most basics of swing tree.",
+      "title":"Writing Declarative GUI Code",
+      "narrative":"Imperative code is code that describes how you want to achieve something,\n    typically a procedure or a sequence of steps that need to be executed.\n    Declarative code on the other hand is code that \n    describes **what you want to achieve**,\n    typically a state or data structure that you want to create.\n    This is why declarative code is the perfect fit for UI code,\n    and making it possible to write declarative UI code is the \n    main purpose and core motivation of Swing-Tree.\n\n    Its API is designed so that the code you write with it looks \n    and feels a little bit like HTML, CSS and JavaScript.\n\n    It is inspired by frameworks like Jetpack Compose, Flutter, React and SwiftUI\n    which are also based on nested builder patterns to design your UI.\n\n    In this specification we cover the utter most basics of SwingTree,\n    so that you can get a feeling for how it works and what it can do for you.",
       "featureCount":"16",
       "failures":"0",
       "errors":"0",

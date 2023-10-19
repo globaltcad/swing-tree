@@ -18,14 +18,26 @@ import java.awt.event.ComponentListener
 import java.awt.event.FocusListener
 import java.awt.event.KeyListener
 
-@Title("Swing tree makes UI building fun again!")
+@Title("Writing Declarative GUI Code")
 @Narrative('''
 
-    The Swing-Tree library allows you to build UIs using declarative code, 
-    which you can think of as a more dynamic type of HTML but for swing.
+    Imperative code is code that describes how you want to achieve something,
+    typically a procedure or a sequence of steps that need to be executed.
+    Declarative code on the other hand is code that 
+    describes **what you want to achieve**,
+    typically a state or data structure that you want to create.
+    This is why declarative code is the perfect fit for UI code,
+    and making it possible to write declarative UI code is the 
+    main purpose and core motivation of Swing-Tree.
+    
+    Its API is designed so that the code you write with it looks 
+    and feels a little bit like HTML, CSS and JavaScript.
+    
     It is inspired by frameworks like Jetpack Compose, Flutter, React and SwiftUI
     which are also based on nested builder patterns to design your UI.
-    In this specification we cover the utter most basics of swing tree.
+    
+    In this specification we cover the utter most basics of SwingTree,
+    so that you can get a feeling for how it works and what it can do for you.
 
 ''')
 class Basic_UI_Builder_Examples_Spec extends Specification
@@ -72,9 +84,11 @@ class Basic_UI_Builder_Examples_Spec extends Specification
         reportInfo """
             A regular JPanel will be opaque by default and also have 
             a small padding/inset around it's content.
-            One of the most versatile factory methods is `UI.box()`
-            which creates a transparent JPanel with no padding/inset. 
-            Don't hesitate to use as the main tool for grouping and structuring
+            However, sometimes you just want to group some UI elements
+            without any padding, margin or insets and without any background color.
+            This is where the `JBox` component comes in handy and you can create one
+            using the `UI.box()` factory method.
+            Don't hesitate to use it as the main tool for grouping and structuring
             your UI, just like you would use the 'div' tag in HTML.
         """
         given : 'We create a simple swing tree of JPanel instances.'
