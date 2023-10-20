@@ -65,7 +65,7 @@ public abstract class StyleSheet
 
 
     private final BiFunction<JComponent, Style, Style> _defaultStyle;
-    private final Map<StyleTrait<?>, Styler<?>> _traitStylers = new LinkedHashMap<>();
+    private final Map<StyleTrait<?>, Styler<?>> _styleDeclarations = new LinkedHashMap<>();
     private StyleTrait<?>[][] _traitPaths = {}; // The paths are calculated from the above map and used to apply the styles.
 
     private boolean _traitGraphBuilt = false;
@@ -95,7 +95,7 @@ public abstract class StyleSheet
     public final void reconfigure() {
         _traitGraphBuilt = false;
         _traitPaths = new StyleTrait<?>[0][];
-        _traitStylers.clear();
+        _styleDeclarations.clear();
         try {
             configure(); // The subclass will add traits to this style sheet using the add(..) method.
         } catch ( Exception e ) {
@@ -221,11 +221,11 @@ public abstract class StyleSheet
                 );
 
         // First let's make sure the trait does not already exist.
-        if ( _traitStylers.containsKey(trait) )
+        if ( _styleDeclarations.containsKey(trait) )
             throw new IllegalArgumentException("The trait " + trait.group() + " already exists in this style sheet.");
 
         // Finally we fulfill the purpose of this method, we add the trait to the style sheet.
-        _traitStylers.put( trait, traitStyler );
+        _styleDeclarations.put( trait, traitStyler );
     }
 
     /**
@@ -274,10 +274,11 @@ public abstract class StyleSheet
     public Style applyTo( JComponent toBeStyled ) { return applyTo( toBeStyled, Style.none() ); }
 
     /**
-     *  Applies the style sheet to the given component using a starting {@link Style}.
+     *  Applies the style sheet to the given component using the
+     *  supplied starting {@link Style} as a basis.
      *  Note that the style sheet is already configured at this point,
      *  because the {@link #configure()} method is called in the constructor of the style sheet.
-     *  <br><br>
+     *  <p>
      *  Example:
      *  <pre>{@code
      *      MyStyleSheet styleSheet = new MyStyleSheet();
@@ -296,7 +297,8 @@ public abstract class StyleSheet
         return _applyTo( toBeStyled, _defaultStyle.apply(toBeStyled, startingStyle) );
     }
 
-    private Style _applyTo( JComponent toBeStyled, Style startingStyle ) {
+    private Style _applyTo( JComponent toBeStyled, Style startingStyle )
+    {
         if ( !_traitGraphBuilt )
             _buildAndSetStyleTraitPaths();
 
@@ -355,7 +357,7 @@ public abstract class StyleSheet
         for ( int i = subToSuper.size() - 1; i >= 0; i-- ) {
             StyleTrait<?> trait = subToSuper.get(i);
             ComponentStyleDelegate delegate = new ComponentStyleDelegate<>(toBeStyled, startingStyle);
-            startingStyle = _traitStylers.get(trait).style(delegate).style();
+            startingStyle = _styleDeclarations.get(trait).style(delegate).style();
         }
 
         return startingStyle;
@@ -380,13 +382,14 @@ public abstract class StyleSheet
     }
 
     /**
-     *  Establishes a list of trait lists which represent
+     *  Establishes an array of {@link StyleTrait} arrays which represent
      *  all the possible paths from the root traits to the leaf traits.
      *  These paths are used to determine the order in which the styles
-     *  of the traits are applied to a component.
+     *  of the traits are calculated.
      */
     private void _buildAndSetStyleTraitPaths() {
-        _traitPaths = new GraphPathsBuilder().buildTraitGraphPathsFrom(_traitStylers);
+        if ( !_styleDeclarations.isEmpty() )
+            _traitPaths = new GraphPathsBuilder().buildTraitGraphPathsFrom(_styleDeclarations);
         _traitGraphBuilt = true;
     }
 
