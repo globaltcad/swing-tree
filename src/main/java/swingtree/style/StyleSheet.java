@@ -10,7 +10,7 @@ import java.util.function.BiFunction;
 /**
  *  An abstract class intended to be extended to create custom CSS look-alike
  *  source code based style sheets for your Swing application.
- *  <br><br>
+ *  <p>
  *  A style sheet object is in essence merely a collection of
  *  {@link StyleTrait}s and corresponding {@link Styler} lambdas
  *  which are used by the SwingTree style engine
@@ -47,13 +47,16 @@ import java.util.function.BiFunction;
  *    }
  *  }
  *  }</pre>
- *  Note that the {@link #configure()} method is called once
- *  in the constructor of the style sheet and after that the style sheet may not be modified.
- *  <br><br>
- *  This APIs design is inspired by the CSS styling language, and the use of immutable objects
+ *  This API design is inspired by the CSS styling language, and the use of immutable objects
  *  is a key feature of the style API, which makes it possible to safely compose
  *  {@link swingtree.api.Styler} lambdas into any kind of style inheritance hierarchy
  *  without having to worry about side effects.
+ *  <br><br>
+ *  Note that the {@link #configure()} method, here the {@link Styler} lambdas
+ *  are intended to be registered, is not called eagerly in the constructor of the style sheet,
+ *  but rather lazily when the style sheet is first used to calculate
+ *  the style for a particular component through the
+ *  {@link #applyTo(JComponent)} or {@link #applyTo(JComponent, Style)} methods.
  */
 public abstract class StyleSheet
 {
