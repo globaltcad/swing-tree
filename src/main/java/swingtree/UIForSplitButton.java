@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 public class UIForSplitButton<B extends JSplitButton> extends UIForAnyButton<UIForSplitButton<B>, B>
 {
     private final JPopupMenu _popupMenu = new JPopupMenu();
-    private final Map<JMenuItem, Action<SplitItem.Delegate<JMenuItem>>> _options = new LinkedHashMap<>(16);
+    private final Map<JMenuItem, Action<SplitItemDelegate<JMenuItem>>> _options = new LinkedHashMap<>(16);
     private final JMenuItem[] _lastSelected = {null};
     private final List<Action<SplitButtonDelegate<JMenuItem>>> _onSelections = new ArrayList<>();
 
@@ -37,10 +37,10 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAnyButton<UIF
         getComponent().addButtonClickedActionListener(e -> _doApp(()->{
             List<JMenuItem> selected = _getSelected();
             for ( JMenuItem item : selected ) {
-                Action<SplitItem.Delegate<JMenuItem>> action = _options.get(item);
+                Action<SplitItemDelegate<JMenuItem>> action = _options.get(item);
                 if ( action != null )
                     action.accept(
-                        new SplitItem.Delegate<>(
+                        new SplitItemDelegate<>(
                             e,
                             component,
                             ()-> new ArrayList<>(_options.keySet()),
@@ -133,7 +133,7 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAnyButton<UIF
             e -> _doApp(()->action.accept(
                     new SplitButtonDelegate<>(
                          button,
-                         new SplitItem.Delegate<>(
+                         new SplitItemDelegate<>(
                              e,
                              button,
                              () -> new ArrayList<>(_options.keySet()),
@@ -157,7 +157,7 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAnyButton<UIF
      * the currently selected {@link JMenuItem} and a list of
      * all other items.
      *
-     * @param action The {@link Action} which will receive an {@link SplitItem.Delegate}
+     * @param action The {@link Action} which will receive an {@link SplitItemDelegate}
      *              exposing all essential components making up this {@link JSplitButton}.
      * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if the provided action is null.
@@ -183,13 +183,13 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAnyButton<UIF
      * @return This very instance, which enables builder-style method chaining.
      */
     public UIForSplitButton<B> onButtonClick(
-        Action<SplitItem.Delegate<JMenuItem>> action
+        Action<SplitItemDelegate<JMenuItem>> action
     ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
         B button = getComponent();
         button.addButtonClickedActionListener(
             e -> _doApp(()->action.accept(
-                    new SplitItem.Delegate<>(
+                    new SplitItemDelegate<>(
                        e,
                        button,
                        () -> new ArrayList<>(_options.keySet()),
@@ -325,8 +325,9 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAnyButton<UIF
     public <I extends JMenuItem> UIForSplitButton<B> add( SplitItem<I> splitItem ) {
         NullUtil.nullArgCheck(splitItem, "buttonItem", SplitItem.class);
         I item = splitItem.getItem();
-        if ( splitItem.getIsEnabled() != null )
-            _onShow(splitItem.getIsEnabled(), v -> item.setEnabled(v) );
+        splitItem.getIsEnabled().ifPresent( isEnabled -> {
+            _onShow(isEnabled, item::setEnabled);
+        });
 
         if ( item.isSelected() )
             _lastSelected[0] = item;
@@ -338,8 +339,8 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAnyButton<UIF
             e -> _doApp(()->{
                 _lastSelected[0] = item;
                 item.setSelected(true);
-                SplitItem.Delegate<I> delegate =
-                        new SplitItem.Delegate<>(
+                SplitItemDelegate<I> delegate =
+                        new SplitItemDelegate<>(
                                 e,
                                 button,
                                 () -> _options.keySet().stream().map(o -> (I) o ).collect(Collectors.toList()),
@@ -347,7 +348,7 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAnyButton<UIF
                             );
                 _onSelections.forEach(action -> {
                     try {
-                        action.accept(new SplitButtonDelegate<>(button,(SplitItem.Delegate<JMenuItem>) delegate, this::getSiblinghood));
+                        action.accept(new SplitButtonDelegate<>(button,(SplitItemDelegate<JMenuItem>) delegate, this::getSiblinghood));
                     } catch (Exception exception) {
                         exception.printStackTrace();
                     }

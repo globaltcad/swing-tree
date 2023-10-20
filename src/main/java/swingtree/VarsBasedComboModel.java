@@ -3,20 +3,22 @@ package swingtree;
 import sprouts.Var;
 import sprouts.Vars;
 
+import java.util.Objects;
+
 class VarsBasedComboModel<E> extends AbstractComboModel<E>
 {
     private final Vars<E> _items;
 
     VarsBasedComboModel( Vars<E> items ) {
         super(Var.ofNullable(_findCommonType(items), null));
-        _items = items;
+        _items         = Objects.requireNonNull(items);
         _selectedIndex = _indexOf(_selectedItem.orElseNull());
         _items.onChange( it -> _itemListChanged() );
     }
 
     VarsBasedComboModel( Var<E> var, Vars<E> items ) {
         super(var);
-        _items = items;
+        _items         = Objects.requireNonNull(items);
         _selectedIndex = _indexOf(_selectedItem.orElseNull());
         _items.onChange( it -> _itemListChanged() );
     }

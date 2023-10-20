@@ -3,19 +3,21 @@ package swingtree;
 import sprouts.Var;
 import sprouts.Vals;
 
+import java.util.Objects;
+
 class ValsBasedComboModel<E> extends AbstractComboModel<E>
 {
     private final Vals<E> _items;
 
     ValsBasedComboModel( Vals<E> items ) {
         super(Var.ofNullable(_findCommonType(items), null));
-        _items = items;
+        _items         = Objects.requireNonNull(items);
         _selectedIndex = _indexOf(_selectedItem.orElseNull());
     }
 
     ValsBasedComboModel( Var<E> var, Vals<E> items ) {
         super(var);
-        _items = items;
+        _items         = Objects.requireNonNull(items);
         _selectedIndex = _indexOf(_selectedItem.orElseNull());
     }
 

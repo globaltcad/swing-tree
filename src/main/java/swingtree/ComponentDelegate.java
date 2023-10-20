@@ -5,6 +5,7 @@ import sprouts.Action;
 import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -52,8 +53,8 @@ public class ComponentDelegate<C extends JComponent, E> extends AbstractDelegate
         C component, E event, Supplier<List<JComponent>> siblingSource
     ) {
         super(component, component);
-        this.event = event;
-        this.siblingSource = siblingSource;
+        this.event         = Objects.requireNonNull(event);
+        this.siblingSource = Objects.requireNonNull(siblingSource);
     }
 
     /**
