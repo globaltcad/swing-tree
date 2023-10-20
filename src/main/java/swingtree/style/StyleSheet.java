@@ -69,16 +69,15 @@ public abstract class StyleSheet
     private StyleTrait<?>[][] _traitPaths = {}; // The paths are calculated from the above map and used to apply the styles.
 
     private boolean _traitGraphBuilt = false;
+    private boolean _initialized     = false;
 
     protected StyleSheet() {
         _defaultStyle = (c, startingStyle) -> startingStyle;
-        reconfigure();
     }
 
     protected StyleSheet( StyleSheet parentStyleSheet ) {
         Objects.requireNonNull(parentStyleSheet, "Use StyleSheet.none() instead of null.");
         _defaultStyle = parentStyleSheet::_applyTo;
-        reconfigure();
     }
 
     /**
@@ -92,7 +91,7 @@ public abstract class StyleSheet
      */
     public final void reconfigure() {
         _traitGraphBuilt = false;
-        _traitPaths = new StyleTrait<?>[0][];
+        _traitPaths      = new StyleTrait<?>[0][];
         _styleDeclarations.clear();
         try {
             configure(); // The subclass will add traits to this style sheet using the add(..) method.
@@ -111,6 +110,7 @@ public abstract class StyleSheet
             */
         }
         _buildAndSetStyleTraitPaths();
+        _initialized = true;
     }
 
     /**
@@ -297,6 +297,9 @@ public abstract class StyleSheet
 
     private Style _applyTo( JComponent toBeStyled, Style startingStyle )
     {
+        if ( !_initialized )
+            reconfigure();
+
         if ( !_traitGraphBuilt )
             _buildAndSetStyleTraitPaths();
 

@@ -248,19 +248,22 @@ class Style_Sheet_Spec extends Specification
             and style trait `"B"` specifies a component type of `JPanel`.
             This is because a component cannot be both a `JButton` and a `JPanel` at the same time.
         """
-        when :
-            new StyleSheet() {
-               @Override
-               protected void configure() {
-                    add(group("A").type(JButton.class), it -> it
-                        .borderRadius(3)
-                    );
-                    add(group("B").inherits("A").type(JPanel.class), it -> it
-                        .borderColor(Color.GREEN)
-                    );
-                }
-            }
-        then :
+        given : 'A nonsensical style sheet.'
+            var styleSheet =
+                    new StyleSheet() {
+                       @Override
+                       protected void configure() {
+                            add(group("A").type(JButton.class), it -> it
+                                .borderRadius(3)
+                            );
+                            add(group("B").inherits("A").type(JPanel.class), it -> it
+                                .borderColor(Color.GREEN)
+                            );
+                        }
+                    }
+        when : 'We initialized the `StyleSheet` so that it gets configured.'
+            styleSheet.reconfigure()
+        then : 'We check that an exception was thrown.'
             thrown(IllegalArgumentException)
     }
 
