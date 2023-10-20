@@ -70,16 +70,14 @@ public abstract class StyleSheet
 
     private boolean _traitGraphBuilt = false;
 
-    protected StyleSheet() { this(null); }
+    protected StyleSheet() {
+        _defaultStyle = (c, startingStyle) -> startingStyle;
+        reconfigure();
+    }
 
     protected StyleSheet( StyleSheet parentStyleSheet ) {
-        _defaultStyle = (c, startStyle) -> {
-                            if ( parentStyleSheet == null )
-                                return startStyle;
-                            else
-                                return parentStyleSheet._applyTo( c, startStyle );
-                        };
-
+        Objects.requireNonNull(parentStyleSheet, "Use StyleSheet.none() instead of null.");
+        _defaultStyle = parentStyleSheet::_applyTo;
         reconfigure();
     }
 
