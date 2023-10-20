@@ -33,32 +33,32 @@
     },
   
     {
-      "id":"The `type` style trait allows you to specify how a style trait applies to a component types.",
+      "id":"The `type` style trait factory method determines for which components a particular style should be applied.",
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            Passing a `Class` object to the `type` style trait will cause the style trait to apply \n            to all components of that type.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            A `StyleTrait` with the `Class` object of a particular `JComponent` \n            created from the `type` method will ensure that the style is only applied to\n            components of that type (or any of it's sub-types).\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["var ss = new StyleSheet() {","            @Override","            protected void configure() {","                add(type(JTextField.class), it ->","                        it.shadowBlurRadius(9)","                    );","                 add(type(JPanel.class), it ->","                        it.shadowSpreadRadius(33)","                    );","                add(type(JTextComponent.class), it ->","                        it.shadowOffset(42, 24)","                          .shadowColor(Color.BLUE)","                    );","                add(type(JComponent.class), it ->","                        it.shadowColor(Color.RED)","                          .shadowBlurRadius(17)","                );","             }","         }"]},
+        {"kind":"given","text":"","code":["var ss = new StyleSheet() {","            @Override","            protected void configure() {","                add(type(JTextField.class), it -> it","                    .shadowBlurRadius(9)","                );","                add(type(JPanel.class), it -> it","                    .shadowSpreadRadius(33)","                );","                add(type(JTextComponent.class), it -> it","                    .shadowOffset(42, 24)","                    .shadowColor(Color.BLUE)","                );","                add(type(JComponent.class), it -> it","                    .shadowColor(Color.RED)","                    .shadowBlurRadius(17)","                );","             }","         }"]},
 
-        {"kind":"and","text":"A few components we are going to style","code":["var textField = UI.textField(\"type something\")","var button = UI.button(\"click me!\")","var panel = UI.panel()","var textArea = UI.textArea(\"type some more!\")"]},
+        {"kind":"and","text":"A few components we are going to style using the style sheet.","code":["var textField = UI.textField(\"type something\")","var button = UI.button(\"click me!\")","var panel = UI.panel()","var textArea = UI.textArea(\"type some more!\")"]},
 
-        {"kind":"when","text":"","code":["var fieldStyle  = ss.applyTo(textField.component).shadow()"]},
+        {"kind":"when","text":"We first run the text field through the style sheet...","code":["var fieldStyle  = ss.applyTo(textField.component).shadow()"]},
 
-        {"kind":"then","text":"","code":["fieldStyle.color().get() == Color.BLUE // The text component trait overrides the component trait!","fieldStyle.blurRadius() == 9 // The text field trait overrides the component trait!","fieldStyle.spreadRadius() != 33 // a text field is not a panel","fieldStyle.verticalOffset() == 24","fieldStyle.horizontalOffset() == 42"]},
+        {"kind":"then","text":"The resulting style has the expected properties:","code":["fieldStyle.color().get() == Color.BLUE // The text component trait overrides the component trait!","fieldStyle.blurRadius() == 9 // The text field trait overrides the component trait!","fieldStyle.spreadRadius() != 33 // a text field is not a panel","fieldStyle.verticalOffset() == 24","fieldStyle.horizontalOffset() == 42"]},
 
-        {"kind":"when","text":"","code":["var buttonStyle = ss.applyTo(button.component).shadow()"]},
+        {"kind":"when","text":"We then run the button through the style sheet...","code":["var buttonStyle = ss.applyTo(button.component).shadow()"]},
 
-        {"kind":"then","text":"","code":["buttonStyle.color().get() == Color.RED","buttonStyle.blurRadius() == 17","buttonStyle.spreadRadius() != 33 // a button is not a panel","buttonStyle.verticalOffset() != 42 // a button is not a text component","buttonStyle.horizontalOffset() != 24 // a button is not a text component"]},
+        {"kind":"then","text":"Again, the resulting style is as expected:","code":["buttonStyle.color().get() == Color.RED","buttonStyle.blurRadius() == 17","buttonStyle.spreadRadius() != 33 // a button is not a panel","buttonStyle.verticalOffset() != 42 // a button is not a text component","buttonStyle.horizontalOffset() != 24 // a button is not a text component"]},
 
-        {"kind":"when","text":"","code":["var panelStyle  = ss.applyTo(panel.component).shadow()"]},
+        {"kind":"when","text":"We now run the panel through the style sheet...","code":["var panelStyle  = ss.applyTo(panel.component).shadow()"]},
 
-        {"kind":"then","text":"","code":["panelStyle.color().get() == Color.RED","panelStyle.blurRadius() == 17","panelStyle.spreadRadius() == 33","panelStyle.verticalOffset() != 42 // a panel is not a text component","panelStyle.horizontalOffset() != 24 // a panel is not a text component"]},
+        {"kind":"then","text":"Also no surprises here:","code":["panelStyle.color().get() == Color.RED","panelStyle.blurRadius() == 17","panelStyle.spreadRadius() == 33","panelStyle.verticalOffset() != 42 // a panel is not a text component","panelStyle.horizontalOffset() != 24 // a panel is not a text component"]},
 
-        {"kind":"when","text":"","code":["var areaStyle   = ss.applyTo(textArea.component).shadow()"]},
+        {"kind":"when","text":"We finally run the text area through the style sheet...","code":["var areaStyle   = ss.applyTo(textArea.component).shadow()"]},
 
-        {"kind":"then","text":"","code":["areaStyle.color().get() == Color.BLUE // The text component trait overrides the component trait!","areaStyle.blurRadius() == 17","areaStyle.spreadRadius() != 33 // a text area is not a panel","areaStyle.verticalOffset() == 24","areaStyle.horizontalOffset() == 42"]}
+        {"kind":"then","text":"It too has the expected style:","code":["areaStyle.color().get() == Color.BLUE // The text component trait overrides the component trait!","areaStyle.blurRadius() == 17","areaStyle.spreadRadius() != 33 // a text area is not a panel","areaStyle.verticalOffset() == 24","areaStyle.horizontalOffset() == 42"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -68,16 +68,16 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            In CSS, you can use the `class` attribute to classify elements.\n            In SwingTree, there is a similar concept called `group`.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            In CSS, you can use the `class` attribute to classify elements.\n            In SwingTree, there is a similar concept called `group`.\n\n            You can assign groups to components as part of \n            a SwingTree GUI and then assign style rules to them\n            inside your style sheets.\n\n            Take a look at the following example:\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["var ss = new StyleSheet() {","            @Override","            protected void configure() {","                 add(group(\"group1\"), it -> it","                     .backgroundColor(Color.BLUE)","                 );","                 add(group(\"group2\"), it -> it","                     .foundationColor(Color.CYAN)","                 );","             }","         }"]},
+        {"kind":"given","text":"\n            We create a little example style sheet with two groups\n            and that each have their own style rules.\n        ","code":["var ss = new StyleSheet() {","            @Override","            protected void configure() {","                 add(group(\"group1\"), it -> it","                     .backgroundColor(Color.BLUE)","                 );","                 add(group(\"group2\"), it -> it","                     .foundationColor(Color.CYAN)","                 );","             }","         }"]},
 
-        {"kind":"and","text":"A few components we are going to style","code":["var label = UI.label(\"hi\").group(\"group1\")","var toggle = UI.toggleButton(\"click me!\").group(\"group2\")","var panel = UI.panel().group(\"group1\", \"group2\")"]},
+        {"kind":"and","text":"Also, a few components we are going to style","code":["var label = UI.label(\"hi\").group(\"group1\")","var toggle = UI.toggleButton(\"click me!\").group(\"group2\")","var panel = UI.panel().group(\"group1\", \"group2\")"]},
 
-        {"kind":"when","text":"","code":["var s1 = ss.applyTo(label.component)","var s2 = ss.applyTo(toggle.component)","var s3 = ss.applyTo(panel.component)"]},
+        {"kind":"when","text":"We run them all through the style sheet...","code":["var s1 = ss.applyTo(label.component)","var s2 = ss.applyTo(toggle.component)","var s3 = ss.applyTo(panel.component)"]},
 
-        {"kind":"then","text":"","code":["s1.base().backgroundColor().get() == Color.BLUE","s2.base().foundationColor().get() == Color.CYAN","s3.base().backgroundColor().get() == Color.BLUE","s3.base().foundationColor().get() == Color.CYAN"]}
+        {"kind":"then","text":"We can verify that the colors are applied correctly.","code":["s1.base().backgroundColor().get() == Color.BLUE","s2.base().foundationColor().get() == Color.CYAN","s3.base().backgroundColor().get() == Color.BLUE","s3.base().foundationColor().get() == Color.CYAN"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -90,13 +90,13 @@
       "tags":{},"see":[],"extraInfo":["\n            In CSS, you can use the `class` attribute to classify elements.\n            In SwingTree, there is a similar concept called `group` which\n            is similar to CSS classes but more powerful, because you can\n            specify that a group inherits from other groups.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["var ss = new StyleSheet() {","            @Override","            protected void configure() {","                 add(group(\"group1\"), it -> it","                     .padding(1, 2, 3, 4)","                 );","                 add(group(\"group2\").inherits(\"group1\"), it -> it","                     .foundationColor(Color.CYAN)","                 );","             }","         }"]},
+        {"kind":"given","text":"A simple example style sheet with two groups, one of which inherits from the other.","code":["var ss = new StyleSheet() {","            @Override","            protected void configure() {","                 add(group(\"group1\"), it -> it","                     .padding(1, 2, 3, 4)","                 );","                 add(group(\"group2\").inherits(\"group1\"), it -> it","                     .foundationColor(Color.CYAN)","                 );","             }","         }"]},
 
         {"kind":"and","text":"A few components we are going to style","code":["var textField = UI.textField(\"hi\").group(\"group1\")","var textArea = UI.textArea(\"wassup?\").group(\"group2\")"]},
 
-        {"kind":"when","text":"","code":["var s1 = ss.applyTo(textField.component)","var s2 = ss.applyTo(textArea.component)"]},
+        {"kind":"when","text":"We run them all through the style sheet...","code":["var s1 = ss.applyTo(textField.component)","var s2 = ss.applyTo(textArea.component)"]},
 
-        {"kind":"then","text":"","code":["s1.padding() == Outline.of(1, 2, 3, 4)","s2.padding() == Outline.of(1, 2, 3, 4)","s2.base().foundationColor().get() == Color.CYAN"]}
+        {"kind":"then","text":"We can indeed verify that style 2 inherits from style 1.","code":["s1.padding() == Outline.of(1, 2, 3, 4)","s2.padding() == Outline.of(1, 2, 3, 4)","s2.base().foundationColor().get() == Color.CYAN"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -109,9 +109,11 @@
       "tags":{},"see":[],"extraInfo":["\n            A nonsensical style trait is one that does not make sense in relation to other style traits.\n            So for example, a traits with a group identifier `\"A\"` and another \n            one with a group identifier `\"B\"` and the one with `\"B\"` inherits from `\"A\"`, then it would\n            be nonsensical when style trait `\"A\"` specifies a component type of `JButton` \n            and style trait `\"B\"` specifies a component type of `JPanel`.\n            This is because a component cannot be both a `JButton` and a `JPanel` at the same time.\n        "]
       },
       "blocks":[
-        {"kind":"when","text":"","code":["new StyleSheet() {","   @Override","   protected void configure() {","        add(group(\"A\").type(JButton.class), it -> it","            .borderRadius(3)","        );","        add(group(\"B\").inherits(\"A\").type(JPanel.class), it -> it","            .borderColor(Color.GREEN)","        );","    }","}"]},
+        {"kind":"given","text":"A nonsensical style sheet.","code":["var styleSheet =","        new StyleSheet() {","           @Override","           protected void configure() {","                add(group(\"A\").type(JButton.class), it -> it","                    .borderRadius(3)","                );","                add(group(\"B\").inherits(\"A\").type(JPanel.class), it -> it","                    .borderColor(Color.GREEN)","                );","            }","        }"]},
 
-        {"kind":"then","text":"","code":["thrown(IllegalArgumentException)"]}
+        {"kind":"when","text":"We initialized the `StyleSheet` so that it gets configured.","code":["styleSheet.reconfigure()"]},
+
+        {"kind":"then","text":"We check that an exception was thrown.","code":["thrown(IllegalArgumentException)"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -124,9 +126,11 @@
       "tags":{},"see":[],"extraInfo":["\n            If you try to declare a style trait more than once, then no exception will be thrown\n            even though this is technically a programming error as it does not make sense \n            to declare the same style trait more than once.\n            They might contain conflicting style properties, which would be nonsensical to allow.\n            <br>\n            Instead of throwing a fatal exception, SwingTree will throw and catch an exception\n            locally inside the style sheet and then simply log the stack trace.\n            <br>\n            This is because we don't want to crash the entire application just because of a\n            dumb little style sheet error like this.\n        "]
       },
       "blocks":[
-        {"kind":"when","text":"","code":["new StyleSheet() {","   @Override","   protected void configure() {","        add(group(\"A\"), it -> it","            .borderRadius(3)","        );","        add(group(\"A\"), it -> it","            .borderColor(Color.GREEN)","        );","    }","}"]},
+        {"kind":"given","text":"We create a style sheet with a duplicate style trait declaration.","code":["var styleSheet =","    new StyleSheet() {","        @Override","        protected void configure() {","            add(group(\"A\"), it -> it","                .borderRadius(3)","            );","            add(group(\"A\"), it -> it","                .borderColor(Color.GREEN)","            );","        }","    }"]},
 
-        {"kind":"then","text":"","code":["noExceptionThrown()"]}
+        {"kind":"when","text":"We first initialized the `StyleSheet` so that it gets configured.","code":["styleSheet.reconfigure()"]},
+
+        {"kind":"then","text":"We check that no exception was thrown.","code":["noExceptionThrown()"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -141,7 +145,7 @@
       "blocks":[
         {"kind":"when","text":"","code":["new StyleSheet() {","   @Override","   protected void configure() {","        throw new RuntimeException(\"This is a test exception!\");","    }","}"]},
 
-        {"kind":"then","text":"","code":["noExceptionThrown()"]}
+        {"kind":"then","text":"Indeed, no exception was thrown.","code":["noExceptionThrown()"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },

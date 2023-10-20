@@ -1,7 +1,7 @@
 {
   "project": "Swing-Tree",
   "version": "0.2.0",
-  "created": "Thu Oct 19 12:44:32 CEST 2023",
+  "created": "Fri Oct 20 16:06:18 CEST 2023",
   "statistics":{
     "runs":"41",
     "passed":"41",
@@ -380,7 +380,7 @@
       "skipped":"0" ,
       "successRate":"1.0",
       "duration":"?",
-      "executedFeatures":[{"id":"A StyleSheet can be created with a default style.","extraInfo":[]},{"id":"Any kind of exception inside of the \"configure\" method of a user StyleSheet will not be fatal!","extraInfo":[]},{"id":"Duplicate style trait declarations will not throw an exception!","extraInfo":[]},{"id":"Nonsensical style trait group inheritance rules will throw an exception!","extraInfo":[]},{"id":"The `group` style trait allows for inheritance, meaning a group can inherit from other ones.","extraInfo":[]},{"id":"The `type` style trait allows you to specify how a style trait applies to a component types.","extraInfo":[]},{"id":"The order of inherited style traits determines the order in which they are applied.","extraInfo":[]},{"id":"Use the `group` style trait to classify components.","extraInfo":[]},{"id":"Use the power of `Graphics2D` to render custom backgrounds inside you styles.","extraInfo":[]},{"id":"Write custom style sheet classes by extending the StyleSheet class.","extraInfo":[]},{"id":"You can define complex group inheritance graphs inside your style sheets.","extraInfo":[]},{"id":"You can style the font of a component inside your style sheet.","extraInfo":[]}],
+      "executedFeatures":[{"id":"A StyleSheet can be created with a default style.","extraInfo":[]},{"id":"Any kind of exception inside of the \"configure\" method of a user StyleSheet will not be fatal!","extraInfo":[]},{"id":"Duplicate style trait declarations will not throw an exception!","extraInfo":[]},{"id":"Nonsensical style trait group inheritance rules will throw an exception!","extraInfo":[]},{"id":"The `group` style trait allows for inheritance, meaning a group can inherit from other ones.","extraInfo":[]},{"id":"The `type` style trait factory method determines for which components a particular style should be applied.","extraInfo":[]},{"id":"The order of inherited style traits determines the order in which they are applied.","extraInfo":[]},{"id":"Use the `group` style trait to classify components.","extraInfo":[]},{"id":"Use the power of `Graphics2D` to render custom backgrounds inside you styles.","extraInfo":[]},{"id":"Write custom style sheet classes by extending the StyleSheet class.","extraInfo":[]},{"id":"You can define complex group inheritance graphs inside your style sheets.","extraInfo":[]},{"id":"You can style the font of a component inside your style sheet.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"swingtree.styles.Styles_Spec",

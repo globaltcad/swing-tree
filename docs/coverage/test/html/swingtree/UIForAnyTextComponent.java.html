@@ -122,7 +122,7 @@ public abstract class UIForAnyTextComponent&lt;I, C extends JTextComponent&gt; e
 <span class="fc" id="L122">        NullUtil.nullPropertyCheck(text, &quot;text&quot;, &quot;Use an empty string instead of null!&quot;);</span>
 <span class="fc" id="L123">        _onShow( text, newText -&gt; {</span>
 <span class="fc" id="L124">            C c = getComponent();</span>
-<span class="fc bfc" id="L125" title="All 2 branches covered.">            if ( !Objects.equals(c.getText(), newText) )  // avoid infinite recursion or some other Swing weirdness</span>
+<span class="pc bpc" id="L125" title="1 of 2 branches missed.">            if ( !Objects.equals(c.getText(), newText) )  // avoid infinite recursion or some other Swing weirdness</span>
 <span class="fc" id="L126">                _setTextSilently( c, newText );</span>
 <span class="fc" id="L127">        });</span>
 <span class="fc" id="L128">        _onTextChange( e -&gt; {</span>

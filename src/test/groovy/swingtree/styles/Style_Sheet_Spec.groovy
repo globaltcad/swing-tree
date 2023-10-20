@@ -104,68 +104,69 @@ class Style_Sheet_Spec extends Specification
             s3.border().color().get() == Color.GREEN
     }
 
-    def 'The `type` style trait allows you to specify how a style trait applies to a component types.'()
+    def 'The `type` style trait factory method determines for which components a particular style should be applied.'()
     {
         reportInfo """
-            Passing a `Class` object to the `type` style trait will cause the style trait to apply 
-            to all components of that type.
+            A `StyleTrait` with the `Class` object of a particular `JComponent` 
+            created from the `type` method will ensure that the style is only applied to
+            components of that type (or any of it's sub-types).
         """
         given :
             var ss = new StyleSheet() {
                         @Override
                         protected void configure() {
-                            add(type(JTextField.class), it ->
-                                    it.shadowBlurRadius(9)
-                                );
-                             add(type(JPanel.class), it ->
-                                    it.shadowSpreadRadius(33)
-                                );
-                            add(type(JTextComponent.class), it ->
-                                    it.shadowOffset(42, 24)
-                                      .shadowColor(Color.BLUE)
-                                );
-                            add(type(JComponent.class), it ->
-                                    it.shadowColor(Color.RED)
-                                      .shadowBlurRadius(17)
+                            add(type(JTextField.class), it -> it
+                                .shadowBlurRadius(9)
+                            );
+                            add(type(JPanel.class), it -> it
+                                .shadowSpreadRadius(33)
+                            );
+                            add(type(JTextComponent.class), it -> it
+                                .shadowOffset(42, 24)
+                                .shadowColor(Color.BLUE)
+                            );
+                            add(type(JComponent.class), it -> it
+                                .shadowColor(Color.RED)
+                                .shadowBlurRadius(17)
                             );
                          }
                      }
-        and : 'A few components we are going to style'
+        and : 'A few components we are going to style using the style sheet.'
             var textField = UI.textField("type something")
             var button = UI.button("click me!")
             var panel = UI.panel()
             var textArea = UI.textArea("type some more!")
 
-        when :
+        when : 'We first run the text field through the style sheet...'
             var fieldStyle  = ss.applyTo(textField.component).shadow()
-        then :
+        then : 'The resulting style has the expected properties:'
             fieldStyle.color().get() == Color.BLUE // The text component trait overrides the component trait!
             fieldStyle.blurRadius() == 9 // The text field trait overrides the component trait!
             fieldStyle.spreadRadius() != 33 // a text field is not a panel
             fieldStyle.verticalOffset() == 24
             fieldStyle.horizontalOffset() == 42
 
-        when :
+        when : 'We then run the button through the style sheet...'
             var buttonStyle = ss.applyTo(button.component).shadow()
-        then :
+        then : 'Again, the resulting style is as expected:'
             buttonStyle.color().get() == Color.RED
             buttonStyle.blurRadius() == 17
             buttonStyle.spreadRadius() != 33 // a button is not a panel
             buttonStyle.verticalOffset() != 42 // a button is not a text component
             buttonStyle.horizontalOffset() != 24 // a button is not a text component
 
-        when :
+        when : 'We now run the panel through the style sheet...'
             var panelStyle  = ss.applyTo(panel.component).shadow()
-        then :
+        then : 'Also no surprises here:'
             panelStyle.color().get() == Color.RED
             panelStyle.blurRadius() == 17
             panelStyle.spreadRadius() == 33
             panelStyle.verticalOffset() != 42 // a panel is not a text component
             panelStyle.horizontalOffset() != 24 // a panel is not a text component
 
-        when :
+        when : 'We finally run the text area through the style sheet...'
             var areaStyle   = ss.applyTo(textArea.component).shadow()
-        then :
+        then : 'It too has the expected style:'
             areaStyle.color().get() == Color.BLUE // The text component trait overrides the component trait!
             areaStyle.blurRadius() == 17
             areaStyle.spreadRadius() != 33 // a text area is not a panel
@@ -178,8 +179,17 @@ class Style_Sheet_Spec extends Specification
         reportInfo """
             In CSS, you can use the `class` attribute to classify elements.
             In SwingTree, there is a similar concept called `group`.
+            
+            You can assign groups to components as part of 
+            a SwingTree GUI and then assign style rules to them
+            inside your style sheets.
+            
+            Take a look at the following example:
         """
-        given :
+        given : """
+            We create a little example style sheet with two groups
+            and that each have their own style rules.
+        """
             var ss = new StyleSheet() {
                         @Override
                         protected void configure() {
@@ -191,15 +201,15 @@ class Style_Sheet_Spec extends Specification
                              );
                          }
                      }
-        and : 'A few components we are going to style'
+        and : 'Also, a few components we are going to style'
             var label = UI.label("hi").group("group1")
             var toggle = UI.toggleButton("click me!").group("group2")
             var panel = UI.panel().group("group1", "group2")
-        when :
+        when : 'We run them all through the style sheet...'
             var s1 = ss.applyTo(label.component)
             var s2 = ss.applyTo(toggle.component)
             var s3 = ss.applyTo(panel.component)
-        then :
+        then : 'We can verify that the colors are applied correctly.'
             s1.base().backgroundColor().get() == Color.BLUE
             s2.base().foundationColor().get() == Color.CYAN
             s3.base().backgroundColor().get() == Color.BLUE
@@ -214,7 +224,7 @@ class Style_Sheet_Spec extends Specification
             is similar to CSS classes but more powerful, because you can
             specify that a group inherits from other groups.
         """
-        given :
+        given : 'A simple example style sheet with two groups, one of which inherits from the other.'
             var ss = new StyleSheet() {
                         @Override
                         protected void configure() {
@@ -229,10 +239,10 @@ class Style_Sheet_Spec extends Specification
         and : 'A few components we are going to style'
             var textField = UI.textField("hi").group("group1")
             var textArea = UI.textArea("wassup?").group("group2")
-        when :
+        when : 'We run them all through the style sheet...'
             var s1 = ss.applyTo(textField.component)
             var s2 = ss.applyTo(textArea.component)
-        then :
+        then : 'We can indeed verify that style 2 inherits from style 1.'
             s1.padding() == Outline.of(1, 2, 3, 4)
             s2.padding() == Outline.of(1, 2, 3, 4)
             s2.base().foundationColor().get() == Color.CYAN
@@ -281,19 +291,22 @@ class Style_Sheet_Spec extends Specification
             This is because we don't want to crash the entire application just because of a
             dumb little style sheet error like this.
         """
-        when :
-            new StyleSheet() {
-               @Override
-               protected void configure() {
-                    add(group("A"), it -> it
-                        .borderRadius(3)
-                    );
-                    add(group("A"), it -> it
-                        .borderColor(Color.GREEN)
-                    );
+        given : 'We create a style sheet with a duplicate style trait declaration.'
+            var styleSheet =
+                new StyleSheet() {
+                    @Override
+                    protected void configure() {
+                        add(group("A"), it -> it
+                            .borderRadius(3)
+                        );
+                        add(group("A"), it -> it
+                            .borderColor(Color.GREEN)
+                        );
+                    }
                 }
-            }
-        then :
+        when : 'We first initialized the `StyleSheet` so that it gets configured.'
+            styleSheet.reconfigure()
+        then : 'We check that no exception was thrown.'
             noExceptionThrown()
     }
 
@@ -318,7 +331,7 @@ class Style_Sheet_Spec extends Specification
                     throw new RuntimeException("This is a test exception!");
                 }
             }
-        then :
+        then : 'Indeed, no exception was thrown.'
             noExceptionThrown()
     }
 
