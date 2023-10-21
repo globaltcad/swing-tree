@@ -52,12 +52,12 @@ class VarsBasedComboModel<E> extends AbstractComboModel<E>
             If so, then we should modify it, otherwise we should not.
             The problem is, we don't know if the list is unmodifiable or not.
             We could check if it is an instance of java.util.Collections.UnmodifiableList,
-            but that is a internal class, so we can't rely on it.
+            but that is an internal class, so we can't rely on it.
             So we'll just try to modify it, and if it fails, we'll just ignore it.
          */
         try {
             _items.at(index).set(element);
-        } catch (UnsupportedOperationException ignored) {
+        } catch ( UnsupportedOperationException ignored ) {
             // ignore, the user of this library doesn't want us to modify the list
         }
     }

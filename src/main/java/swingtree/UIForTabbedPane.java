@@ -287,7 +287,7 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
                        JTabbedPane tabbedPane = paneRef.get();
                        if ( tabbedPane == null ) return;
                        int index = indexFinder.get();
-                       if (index >= 0 && index == tabbedPane.getSelectedIndex())
+                       if ( index >= 0 && index == tabbedPane.getSelectedIndex() )
                            _doApp(()->onSelection.accept(new ComponentDelegate<>(tabbedPane, e, this::getSiblinghood)));
                    })
            );
@@ -391,7 +391,7 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
             Action<ComponentDelegate<JTabbedPane, MouseEvent>> mouseClickAction
         ) {
             this.paneRef = new WeakReference<>(pane);
-            this.indexFinder = indexFinder;
+            this.indexFinder = Objects.requireNonNull(indexFinder);
             this.mouseClickAction = mouseClickAction;
             if ( mouseClickAction != null ) {
                 pane.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -410,7 +410,7 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
             }
         }
 
-        private void doAction(JTabbedPane pane, MouseEvent e) {
+        private void doAction( JTabbedPane pane, MouseEvent e ) {
             Point p = e.getPoint();
             if ( e.getSource() != pane ) {
                // We need to find the point relative to the tabbed pane:
