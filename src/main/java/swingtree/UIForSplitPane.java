@@ -7,7 +7,7 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
 /**
- *  A swing tree builder node for {@link JSplitPane} instances.
+ *  A SwingTree builder node designed for configuring {@link JSplitPane} instances.
  */
 public class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UIForSplitPane<P>, P>
 {
@@ -17,7 +17,7 @@ public class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UIForSpl
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.
      */
-    public UIForSplitPane( P component ) { super( component ); }
+    protected UIForSplitPane( P component ) { super( component ); }
 
     /**
      * Sets the alignment of the split bar in the split pane.

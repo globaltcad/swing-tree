@@ -13,7 +13,7 @@ import java.net.URISyntaxException;
 import java.util.Objects;
 
 /**
- *  A swing tree builder node for {@link JLabel} instances.
+ *  A SwingTree builder node designed for configuring {@link JLabel} instances.
  * 	<p>
  * 	<b>Take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
  * 	where you can browse a large collection of examples demonstrating how to use the API of this class.</b>

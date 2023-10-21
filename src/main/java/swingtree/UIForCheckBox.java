@@ -5,7 +5,7 @@ import sprouts.Val;
 import javax.swing.*;
 
 /**
- *  A swing tree builder node for {@link JCheckBox} instances.
+ *  A SwingTree builder node designed for configuring {@link JCheckBox} instances.
  */
 public class UIForCheckBox<B extends JCheckBox> extends UIForAnyButton<UIForCheckBox<B>, B>
 {

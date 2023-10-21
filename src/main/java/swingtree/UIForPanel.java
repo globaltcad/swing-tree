@@ -8,7 +8,7 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- *  A swing tree builder node for {@link JPanel} instances.
+ *  A SwingTree builder node designed for configuring {@link JPanel} instances.
  */
 public class UIForPanel<P extends JPanel> extends UIForAnySwing<UIForPanel<P>, P>
 {

@@ -18,7 +18,7 @@ public class UIForTableHeader<H extends UI.TableHeader> extends UIForAnySwing<UI
      *
      * @param tableHeader The JComponent type which will be wrapped by this builder node.
      */
-    public UIForTableHeader( H tableHeader ) {
+    protected UIForTableHeader( H tableHeader ) {
         super(tableHeader);
     }
 

@@ -31,7 +31,7 @@ import java.util.function.Function;
 
 
 /**
- *  A swing tree builder node for any kind {@link JComponent} instance.
+ *  A generic SwingTree builder node designed as a basis for configuring any kind of {@link JComponent} instance.
  *  This is the most generic builder type and therefore abstract super-type for almost all other builders.
  *  This builder defines nested building for anything extending the {@link JComponent} class.
  * 	<p>

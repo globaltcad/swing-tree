@@ -29,7 +29,7 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForScrollPane<
 	 *
 	 * @param component The JComponent type which will be wrapped by this builder node.
 	 */
-	public UIForScrollPanels( P component ) { super(component); }
+	protected UIForScrollPanels( P component ) { super(component); }
 
 
 	@Override

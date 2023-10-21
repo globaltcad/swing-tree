@@ -3,7 +3,7 @@ package swingtree;
 import javax.swing.*;
 
 /**
- *  A swing tree builder node for {@link UIForTextPane} instances.
+ *  A SwingTree builder node designed for configuring {@link UIForTextPane} instances.
  */
 public class UIForTextPane<P extends JTextPane> extends UIForAnyEditorPane<UIForTextPane<P>, P>
 {
@@ -13,5 +13,5 @@ public class UIForTextPane<P extends JTextPane> extends UIForAnyEditorPane<UIFor
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.
      */
-    public UIForTextPane(P component) { super(component); }
+    protected UIForTextPane( P component ) { super(component); }
 }

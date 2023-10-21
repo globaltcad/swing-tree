@@ -10,10 +10,12 @@ import javax.swing.ListCellRenderer;
 import javax.swing.event.ListSelectionEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 
 /**
- *  A swing tree builder node for {@link JList} instances.
+ *  A SwingTree builder node designed for configuring {@link JList} instances.
  * 	<p>
  * 	<b>Please take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
  * 	where you can browse a large collection of examples demonstrating how to use the API of this class.</b>
@@ -87,6 +89,7 @@ public class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForList<E,
      * @return This instance of the builder node to allow for builder-style fluent method chaining.
      */
     public final UIForList<E, L> withEntries( Vals<E> entries ) {
+        Objects.requireNonNull(entries, "entries");
         ValsListModel<E> model = new ValsListModel<>(entries);
         getComponent().setModel(model);
         _onShow( entries, v -> model.fire(v) );
@@ -184,10 +187,26 @@ public class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForList<E,
 
     /**
      * Receives a {@link Render.Builder} instance providing
-     * a fluent API for configuring how the values of this {@link JList} instance
-     * should be rendered.
+     * a fluent builder API for configuring how the values of this {@link JList} instance
+     * should be rendered. The {@link Render.Builder} instance may be
+     * created through the {@link UI#renderListItem(Class)} method.
      * <p>
-     * @param renderBuilder The {@link Render.Builder} instance.
+     * Take a look at the following example:
+     * <pre>{@code
+     *  UI.list(vm.wordList())
+     *  .withRenderer(
+     *    renderListItem(String.class)
+     *    .asText(
+     *      cell->"("+cell.value().get()+")"
+     *    )
+     *  )
+     *  }</pre>
+     *  In this example, a new {@link JList} is created with a list of words
+     *  in the form of {@link String}s, which is provided by the <code>vm.wordList()</code> method.
+     *  The entries of said list are individually prepared for rendering
+     *  through the {@link Render.As#asText(Function)} method.
+     *
+     * @param renderBuilder The {@link Render.Builder} containing the fluently configured renderer.
      * @return This very instance, which enables builder-style method chaining.
      * @param <V> The type of the values that will be rendered.
      */
@@ -197,7 +216,9 @@ public class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForList<E,
     }
 
     /**
-     * Sets the Swing internal delegate that is used to paint each cell in the list.
+     * Sets the {@link ListCellRenderer} for the {@link JList}, which renders the list items
+     * by supplying a custom component for each item through the
+     * {@link ListCellRenderer#getListCellRendererComponent(JList, Object, int, boolean, boolean)} method.
      * <p>
      * @param renderer The {@link ListCellRenderer} that will be used to paint each cell in the list.
      * @return This very instance, which enables builder-style method chaining.
@@ -213,13 +234,13 @@ public class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForList<E,
         private final Vals<E> _entries;
 
         public ValsListModel( Vals<E> entries ) {
-            _entries = entries;
+            _entries = Objects.requireNonNull(entries, "entries");
         }
 
         @Override public int getSize() { return _entries.size(); }
         @Override public E getElementAt( int i ) { return _entries.at( i ).orElseNull(); }
 
-        public void fire(ValsDelegate<E> v) {
+        public void fire( ValsDelegate<E> v ) {
             switch ( v.changeType() ) {
                 case ADD:    fireIntervalAdded( this, v.index(), v.index() ); break;
                 case REMOVE: fireIntervalRemoved( this, v.index(), v.index() ); break;

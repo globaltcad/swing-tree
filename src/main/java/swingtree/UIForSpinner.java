@@ -16,7 +16,7 @@ import java.util.Date;
 import java.util.function.Consumer;
 
 /**
- *  A swing tree builder node for {@link JSpinner} instances.
+ *  A SwingTree builder node designed for configuring {@link JSpinner} instances.
  */
 public class UIForSpinner<S extends JSpinner> extends UIForAnySwing<UIForSpinner<S>, S>
 {

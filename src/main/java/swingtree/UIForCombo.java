@@ -4,10 +4,7 @@ import sprouts.Action;
 import sprouts.From;
 import sprouts.Var;
 
-import javax.swing.ComboBoxModel;
-import javax.swing.JComboBox;
-import javax.swing.JTextField;
-import javax.swing.ListCellRenderer;
+import javax.swing.*;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
@@ -20,7 +17,7 @@ import java.lang.ref.WeakReference;
 import java.util.function.Consumer;
 
 /**
- *  A swing tree builder node for {@link JComboBox} instances.
+ *  A SwingTree builder node designed for configuring {@link JComboBox} instances.
  * 	<p>
  * 	<b>Please take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
  * 	where you can browse a large collection of examples demonstrating how to use the API of this class.</b>
@@ -249,11 +246,19 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UIForCom
      */
     public final UIForCombo<E,C> withModel( ComboBoxModel<E> model ) {
         if ( model instanceof AbstractComboModel )
-            _bindComboModelToEditor((AbstractComboModel<E>) model);
+            _bindComboModelToEditor( (AbstractComboModel<E>) model );
         getComponent().setModel(model);
         return this;
     }
 
+    /**
+     * Sets the {@link ListCellRenderer} for the {@link JComboBox}, which renders the combo box items
+     * by supplying a custom component for each item through the
+     * {@link ListCellRenderer#getListCellRendererComponent(JList, Object, int, boolean, boolean)} method.
+     * <p>
+     * @param renderer The {@link ListCellRenderer} that will be used to paint each cell in the combo box.
+     * @return This very instance, which enables builder-style method chaining.
+     */
     public final UIForCombo<E,C> withRenderer( ListCellRenderer<E> renderer ) {
         getComponent().setRenderer(renderer);
         return this;

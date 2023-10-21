@@ -8,7 +8,7 @@ import swingtree.layout.LayoutConstraint;
 import java.awt.*;
 
 /**
- *  A swing tree builder node for {@link swingtree.components.JBox} instances.
+ *  A SwingTree builder node designed for configuring {@link swingtree.components.JBox} instances.
  */
 public class UIForBox<B extends JBox> extends UIForAnySwing<UIForBox<B>, B>
 {

@@ -25,7 +25,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
- *  A swing tree builder node for {@link JTabbedPane} instances.
+ *  A SwingTree builder node designed for configuring {@link JTabbedPane} instances.
  */
 public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForTabbedPane<P>, P>
 {
@@ -38,7 +38,7 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.
      */
-    public UIForTabbedPane( P component ) { super(component); }
+    protected UIForTabbedPane( P component ) { super(component); }
 
     /**
      *  Adds an action to be performed when a mouse click is detected on a tab.

@@ -11,7 +11,7 @@ import javax.swing.table.*;
 import java.util.*;
 
 /**
- *  A swing tree builder node for {@link JTable} instances allowing
+ *  A SwingTree builder node designed for configuring {@link JTable} instances allowing
  *  for a fluent API to build tables in a declarative way.
  */
 public class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable<T>, T>
@@ -22,7 +22,7 @@ public class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable<T>, T
      *
      * @param component The JComponent type which will be wrapped by this builder node.
      */
-    public UIForTable( T component ) { super(component); }
+    protected UIForTable( T component ) { super(component); }
 
     /**
      *  Use this to set the table header.

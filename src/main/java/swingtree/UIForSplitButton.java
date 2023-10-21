@@ -17,7 +17,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
- *  A swing tree builder node for {@link JSplitButton} instances.
+ *  A SwingTree builder node designed for configuring {@link JSplitButton} instances.
  */
 public class UIForSplitButton<B extends JSplitButton> extends UIForAnyButton<UIForSplitButton<B>, B>
 {

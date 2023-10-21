@@ -5,7 +5,7 @@ import sprouts.Val;
 import javax.swing.*;
 
 /**
- *  A swing tree builder node for {@link JPasswordField} instances.
+ *  A SwingTree builder node designed for configuring {@link JPasswordField} instances.
  */
 public class UIForPasswordField<F extends JPasswordField> extends UIForAnyTextComponent<UIForPasswordField<F>, F>
 {
