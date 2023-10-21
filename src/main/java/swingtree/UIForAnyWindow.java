@@ -8,6 +8,11 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.function.Consumer;
 
+/**
+ *  A SwingTree builder node for configuring any kind of {@link Window} type.
+ * @param <I> The type of the builder itself.
+ * @param <W> The type of the window which is being configured by this builder.
+ */
 public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Window> extends AbstractNestedBuilder<I,W,Component>
 {
 	/**
