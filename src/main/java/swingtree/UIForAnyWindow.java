@@ -16,7 +16,7 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 	 *
 	 * @param component The component type which will be wrapped by this builder node.
 	 */
-	public UIForAnyWindow( W component ) { super(component); }
+	protected UIForAnyWindow( W component ) { super(component); }
 
 	/**
 	 *  Adds a title to the window. <br>

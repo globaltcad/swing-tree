@@ -57,7 +57,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *
      * @param component The JComponent type which will be wrapped by this builder node.
      */
-    public UIForAnySwing( C component ) { super(component); }
+    protected UIForAnySwing( C component ) { super(component); }
 
     /**
      *  This method exposes a concise way to bind a {@link Observable} (usually a sprouts.Event to the
