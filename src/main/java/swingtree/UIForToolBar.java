@@ -12,7 +12,7 @@ public class UIForToolBar<T extends JToolBar> extends UIForAnySwing<UIForToolBar
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.
      */
-    public UIForToolBar(T component) { super(component); }
+    protected UIForToolBar(T component) { super(component); }
 
     /**
      * @param alignment The {@link UI.Align} value mapping to the {@link JToolBar}'s orientation.

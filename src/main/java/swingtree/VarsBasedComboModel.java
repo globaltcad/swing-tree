@@ -3,20 +3,22 @@ package swingtree;
 import sprouts.Var;
 import sprouts.Vars;
 
+import java.util.Objects;
+
 class VarsBasedComboModel<E> extends AbstractComboModel<E>
 {
     private final Vars<E> _items;
 
     VarsBasedComboModel( Vars<E> items ) {
         super(Var.ofNullable(_findCommonType(items), null));
-        _items = items;
+        _items         = Objects.requireNonNull(items);
         _selectedIndex = _indexOf(_selectedItem.orElseNull());
         _items.onChange( it -> _itemListChanged() );
     }
 
     VarsBasedComboModel( Var<E> var, Vars<E> items ) {
         super(var);
-        _items = items;
+        _items         = Objects.requireNonNull(items);
         _selectedIndex = _indexOf(_selectedItem.orElseNull());
         _items.onChange( it -> _itemListChanged() );
     }
@@ -50,12 +52,12 @@ class VarsBasedComboModel<E> extends AbstractComboModel<E>
             If so, then we should modify it, otherwise we should not.
             The problem is, we don't know if the list is unmodifiable or not.
             We could check if it is an instance of java.util.Collections.UnmodifiableList,
-            but that is a internal class, so we can't rely on it.
+            but that is an internal class, so we can't rely on it.
             So we'll just try to modify it, and if it fails, we'll just ignore it.
          */
         try {
             _items.at(index).set(element);
-        } catch (UnsupportedOperationException ignored) {
+        } catch ( UnsupportedOperationException ignored ) {
             // ignore, the user of this library doesn't want us to modify the list
         }
     }

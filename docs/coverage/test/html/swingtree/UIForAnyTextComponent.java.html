@@ -16,7 +16,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
- *  A swing tree builder node for {@link JTextComponent} instances.
+ *  A SwingTree builder node designed for configuring {@link JTextComponent} instances.
  * 	&lt;p&gt;
  * 	&lt;b&gt;Please take a look at the &lt;a href=&quot;https://globaltcad.github.io/swing-tree/&quot;&gt;living swing-tree documentation&lt;/a&gt;
  * 	where you can browse a large collection of examples demonstrating how to use the API of this class.&lt;/b&gt;
@@ -122,7 +122,7 @@ public abstract class UIForAnyTextComponent&lt;I, C extends JTextComponent&gt; e
 <span class="fc" id="L122">        NullUtil.nullPropertyCheck(text, &quot;text&quot;, &quot;Use an empty string instead of null!&quot;);</span>
 <span class="fc" id="L123">        _onShow( text, newText -&gt; {</span>
 <span class="fc" id="L124">            C c = getComponent();</span>
-<span class="fc bfc" id="L125" title="All 2 branches covered.">            if ( !Objects.equals(c.getText(), newText) )  // avoid infinite recursion or some other Swing weirdness</span>
+<span class="pc bpc" id="L125" title="1 of 2 branches missed.">            if ( !Objects.equals(c.getText(), newText) )  // avoid infinite recursion or some other Swing weirdness</span>
 <span class="fc" id="L126">                _setTextSilently( c, newText );</span>
 <span class="fc" id="L127">        });</span>
 <span class="fc" id="L128">        _onTextChange( e -&gt; {</span>

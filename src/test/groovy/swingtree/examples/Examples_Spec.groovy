@@ -23,7 +23,6 @@ import swingtree.SwingTree
 import swingtree.UI
 import swingtree.components.JSplitButton
 import swingtree.examples.advanced.AdvancedUI
-import swingtree.examples.simple.TableUI
 import swingtree.threading.EventProcessor
 import utility.SwingTreeTestConfigurator
 import utility.Utility
@@ -327,10 +326,53 @@ class Examples_Spec extends Specification
             Utility.similarityBetween(ui, "views/calculator-UI.png", 97.5) > 97.5
     }
 
-    def 'The simple Table-UI example has the expected state.'()
+    def 'Declare table components using a list of list as data source.'()
     {
-        given : 'We get the UI.'
-            var ui = TableUI.create()
+        reportInfo """
+            The UI declaration in this example demonstrates various ways to declare
+            tables from a list of lists as a data source.
+            The UI looks like this:
+            ${Utility.linkSnapshot('views/tables-example-view.png')}
+            
+            As you can see, there are 4 different tables in the UI.
+        """
+        given : 'We declare the UI.'
+            var data = [["X", "Y"], ["1", "2"], ["3", "4"]]
+            def ui =
+                UI.panel("fill")
+                .add("grow",
+                    UI.panel("fill")
+                    .add("grow, span", UI.label("Row Major"))
+                    .add("grow, span", UI.table(UI.ListData.ROW_MAJOR, ()->[["A", "B", "C"], ["a", "b", "c"]]).id("RM"))
+                    .add("grow, span", UI.separator())
+                    .add("grow, span", UI.label("Column Major"))
+                    .add("grow, span", UI.table(UI.ListData.COLUMN_MAJOR, ()->[["A", "B", "C"], ["a", "b", "c"]]).id("CM"))
+                )
+                .add("grow", UI.separator(UI.Align.VERTICAL))
+                .add("grow",
+                    UI.panel("fill")
+                    .add("grow, span", UI.label("Row Major 2"))
+                    .add("grow, span",
+                        UI.table(
+                           UI.tableModel()
+                           .colCount( () -> data[0].size() ).rowCount( () -> data.size() )
+                           .getsEntryAt((col, row) -> data[col][row] )
+                        )
+                        .id("RM2")
+                    )
+                    .add("grow, span", UI.separator())
+                    .add("grow, span", UI.label("Column Major 2"))
+                    .add("grow, span",
+                        UI.table(
+                           UI.tableModel()
+                           .colCount( () -> data.size() )
+                           .rowCount( () -> data[0].size() )
+                           .getsEntryAt((col, row) -> data[row][col] )
+                        )
+                        .id("CM2")
+                    )
+                )
+                .get(JPanel)
         expect : 'The UI contains 2 different JTables.'
             new Utility.Query(ui).find(JTable, "RM").isPresent()
             new Utility.Query(ui).find(JTable, "CM").isPresent()
@@ -373,6 +415,8 @@ class Examples_Spec extends Specification
             new Utility.Query(ui).find(JTable, "CM2").get().getValueAt(1,0) == "Y"
             new Utility.Query(ui).find(JTable, "CM2").get().getValueAt(1,1) == "2"
             new Utility.Query(ui).find(JTable, "CM2").get().getValueAt(1,2) == "4"
+        and : 'It is rendered as expected.'
+            Utility.similarityBetween(ui, "views/tables-example-view.png", 97.5) > 97.5
     }
 
 

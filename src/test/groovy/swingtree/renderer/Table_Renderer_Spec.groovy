@@ -40,7 +40,7 @@ class Table_Renderer_Spec extends Specification
                         .colNames("A", "B")
                         .colCount({2})
                         .rowCount({3})
-                        .getter({"O"})
+                        .getsEntryAt({"O"})
                     )
         and : """
                 A mocked cell interpreter which interprets the state of the table cell

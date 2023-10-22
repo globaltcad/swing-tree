@@ -20,6 +20,7 @@ import java.util.stream.Stream;
  *
  * @param <I> The concrete implementation type of this abstract class, "I" stands for "Implementation".
  * @param <C> The component type parameter which ought to be built in some way.
+ * @param <E> The component type parameter which ought to be built in some way.
  */
 abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extends AbstractBuilder<I, C>
 {
@@ -30,7 +31,7 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extend
      *
      * @param component The component type which will be wrapped by this builder node.
      */
-    public AbstractNestedBuilder( C component ) { super(component); }
+    protected AbstractNestedBuilder( C component ) { super(component); }
 
     /**
      *  A list of all the siblings of the component wrapped by this builder,

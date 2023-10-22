@@ -239,7 +239,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            This type of event occurs when the user replaces in the text area.\n            Internally this is actually based on a `DocumentFilter`\n            which will forward the `replace` method calls \n            to your `onTextReplace` handler.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            This type of event occurs when the user replaces text in the text area.\n            Internally this is actually based on a `DocumentFilter`\n            which will forward the `replace` method calls \n            to your `onTextReplace` handler.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"A simple text area UI.","code":["var ui = UI.textArea(\"Some content...\")"]},

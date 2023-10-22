@@ -15,8 +15,11 @@ import java.awt.*
 @Title("Binding Properties to UI Components")
 @Narrative('''
 
-    This specification shows you how to bind properties to 
-    the states of common types UI components.
+    SwingTree includes support for writing UIs using the MVVM pattern,
+    by shipping with a set of properties that can be bound to UI components
+    to model their state.
+    This specification demonstrates how to bind the properties of
+    you view model to the SwingTree UI.
 
 ''')
 @Subject([Val, Var])

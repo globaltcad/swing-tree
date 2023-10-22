@@ -36,8 +36,8 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
 
 
 <span class="fc" id="L38">    public ComponentStyleDelegate( C component, Style style ) {</span>
-<span class="fc" id="L39">        _component = component;</span>
-<span class="fc" id="L40">        _style     = style;</span>
+<span class="fc" id="L39">        _component = Objects.requireNonNull(component);</span>
+<span class="fc" id="L40">        _style     = Objects.requireNonNull(style);</span>
 <span class="fc" id="L41">    }</span>
 
 <span class="fc" id="L43">    ComponentStyleDelegate&lt;C&gt; _withStyle( Style style ) { return new ComponentStyleDelegate&lt;&gt;(_component, style); }</span>

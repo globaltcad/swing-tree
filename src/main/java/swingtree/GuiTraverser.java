@@ -10,13 +10,17 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-final class Query
+/**
+ *  Traverses the component tree starting from a given component and finds all components
+ *  that match a supplied predicate and type.
+ */
+final class GuiTraverser
 {
-    private static final Logger log = org.slf4j.LoggerFactory.getLogger(Query.class);
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(GuiTraverser.class);
     private final Component _current;
 
 
-    Query( Component current ) {
+    GuiTraverser( Component current ) {
         Objects.requireNonNull(current);
         _current = current;
     }

@@ -6,7 +6,7 @@ import sprouts.Val;
 import javax.swing.*;
 
 /**
- * A swing tree builder node for {@link AbstractButton} sub-type instances,
+ * A SwingTree builder node designed for configuring {@link AbstractButton} sub-type instances,
  * usually the {@link JButton} type.
  */
 public class UIForButton<B extends AbstractButton> extends UIForAnyButton<UIForButton<B>, B>

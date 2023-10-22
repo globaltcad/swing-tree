@@ -87,10 +87,10 @@ class Declarative_Tables_Spec extends Specification
             var ui =
                     UI.table().withModel(
                         UI.tableModel()
-                        .colName( {["X", "Y", "Z"][it]})
-                        .colCount({3})
-                        .rowCount({data.size()})
-                        .getter({ r, c ->data[r]})
+                        .colName( col -> ["X", "Y", "Z"].get(col) )
+                        .colCount( () -> 3 )
+                        .rowCount( () -> data.size() )
+                        .getsEntryAt( (r, c) -> data[r] )
                         .updateOn(update)
                     )
 

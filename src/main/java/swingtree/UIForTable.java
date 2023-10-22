@@ -7,14 +7,11 @@ import swingtree.api.model.TableListDataSource;
 import swingtree.api.model.TableMapDataSource;
 
 import javax.swing.*;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableCellEditor;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableModel;
+import javax.swing.table.*;
 import java.util.*;
 
 /**
- *  A swing tree builder node for {@link JTable} instances allowing
+ *  A SwingTree builder node designed for configuring {@link JTable} instances allowing
  *  for a fluent API to build tables in a declarative way.
  */
 public class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable<T>, T>
@@ -25,7 +22,30 @@ public class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable<T>, T
      *
      * @param component The JComponent type which will be wrapped by this builder node.
      */
-    public UIForTable( T component ) { super(component); }
+    protected UIForTable( T component ) { super(component); }
+
+    /**
+     *  Use this to set the table header.
+     *
+     * @param header The table header to be set.
+     * @return This builder node.
+     */
+    public final UIForTable<T> withHeader( UIForTableHeader<?> header ) {
+        NullUtil.nullArgCheck(header, "header", UIForTableHeader.class);
+        return withHeader(header.getComponent());
+    }
+
+    /**
+     *  Use this to set the table header.
+     *
+     * @param header The table header to be set.
+     * @return This builder node.
+     */
+    public final UIForTable<T> withHeader( JTableHeader header ) {
+        NullUtil.nullArgCheck(header, "header", JTableHeader.class);
+        getComponent().setTableHeader(header);
+        return this;
+    }
 
     /**
      *  Use this to build a table cell renderer for a particular column.

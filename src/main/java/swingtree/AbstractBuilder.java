@@ -11,13 +11,15 @@ import swingtree.threading.EventProcessor;
 import javax.swing.*;
 import java.awt.*;
 import java.lang.ref.WeakReference;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
  *  This is the root builder type for all other builder subtypes.
- *  It is a generic builder which may wrap anything to allow for method chaining based building!
+ *  It is a generic builder which may wrap anything to allow for method chaining based building
+ *  in SwingTree. <br>
  *
  * @param <I> The concrete implementation type of this builder, "I" stands for "Implementation".
  * @param <C> The component type parameter.
@@ -40,7 +42,7 @@ abstract class AbstractBuilder<I, C extends Component>
      *  A strong reference to the component (This is only used to prevent the component from being garbage collected)
      * @param <T> The type of the component.
      */
-    private static class MaybeWeakReference<T extends Component> extends WeakReference<T> {
+    private final static class MaybeWeakReference<T extends Component> extends WeakReference<T> {
         private T _strongRef; // This is only used to prevent the component from being garbage collected
         public MaybeWeakReference( T referent ) { super(referent); _strongRef = referent; }
         public void detachStrongRef() {
@@ -61,7 +63,8 @@ abstract class AbstractBuilder<I, C extends Component>
      * @param component The component type which will be wrapped by this builder node.
      */
     public AbstractBuilder( C component ) {
-        _type = (Class<C>) component.getClass();
+        Objects.requireNonNull(component);
+        _type      = (Class<C>) component.getClass();
         _component = new MaybeWeakReference<>(component);
         if ( component instanceof JComponent )
             ComponentExtension.makeSureComponentHasExtension( (JComponent) component );
@@ -111,7 +114,10 @@ abstract class AbstractBuilder<I, C extends Component>
      *                      is then executed by the UI thread.
      * @param <T> The type of the item wrapped by the provided property.
      */
-    protected final <T> void _onShow( Val<T> val, Consumer<T> displayAction ) {
+    protected final <T> void _onShow( Val<T> val, Consumer<T> displayAction )
+    {
+        Objects.requireNonNull(val);
+        Objects.requireNonNull(displayAction);
         val.onChange(From.ALL, new Action<Val<T>>() {
             @Override
             public void accept( Val<T> val ) {
@@ -152,7 +158,11 @@ abstract class AbstractBuilder<I, C extends Component>
      *                      is then executed by the UI thread.
      * @param <T> The type of the items wrapped by the provided property list.
      */
-    protected final <T> void _onShow( Vals<T> vals, Consumer<ValsDelegate<T>> displayAction ) {
+    protected final <T> void _onShow( Vals<T> vals, Consumer<ValsDelegate<T>> displayAction )
+
+    {
+        Objects.requireNonNull(vals);
+        Objects.requireNonNull(displayAction);
         vals.onChange(new Action<ValsDelegate<T>>() {
             @Override
             public void accept(ValsDelegate<T> delegate) {
@@ -316,7 +326,7 @@ abstract class AbstractBuilder<I, C extends Component>
      * current UI builder as a parameter, which allows you to continue building the UI as usual.
      * <br>
      * The {@code m->ui->ui} may look a bit confusing at first, but it is simply a lambda expression
-     * which takes the optional value and returns a consumer ({@code ui->ui...}) which takes the UI builder
+     * which takes the optional value and returns a consumer ({@code ui->ui... }) which takes the UI builder
      * as a parameter.
      * <br>
      * This is in essence a more advanced {@code Optional} centric version of {@link #applyIf(boolean, Consumer)}
@@ -381,10 +391,11 @@ abstract class AbstractBuilder<I, C extends Component>
      *  readability when using the builder in more extensive ways where
      *  the beginning and end of the method chaining and nesting of the builder does
      *  not fit on one screen. <br>
-     *  In that case the expression "{@code .get(JMenu.class)}" helps
+     *  In such cases the expression "{@code .get(MyJComponent.class)}" helps
      *  to identify which type of {@link javax.swing.JComponent} is currently being built on a given
      *  nesting layer... <br><br>
-     *  Here is a simple example of how this method can be used to build a menu bar:
+     *  Here is a simple example that demonstrates this technique using
+     *  a {@link javax.swing.JPanel} and a {@link javax.swing.JMenuBar}:
      *  <pre>{@code
      *      UI.panel()
      *      .add(
@@ -401,7 +412,7 @@ abstract class AbstractBuilder<I, C extends Component>
      *  }</pre>
      *  As you can see, the expression "{@code .get(JMenuBar.class)}" as well as the expression
      *  "{@code .get(JPanel.class)}" at the end of the builder chain help to identify
-     *  which type of {@link javax.swing.JComponent} is currently being built on a given nesting layer.
+     *  which type of {@link javax.swing.JComponent} is currently being built and returned.
      *
      * @param type The type class of the component which this builder wraps.
      * @param <T> The type parameter of the component which this builder wraps.

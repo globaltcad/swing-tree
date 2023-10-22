@@ -22,8 +22,28 @@ import java.awt.image.BufferedImage
 
 @Title("Styling Components")
 @Narrative('''
-    This specification demonstrates how you can use the styling
-    API to style Swing components in a functional and declarative fashion.
+    This specification demonstrates how the style API can be used to style 
+    individual components declaratively.
+    You may access it on any SwingTree builder by passing a `Styler` lambda
+    to the `withStyle` method.
+    A `Styler` lambda applies style rules to a component
+    by receiving a `ComponentStyleDelegate` and returning
+    an updated version with the desired style rules applied.
+    
+    Here a typical example of how to style a button
+    using the style API:
+    ```java
+        UI.button("Click Me!")
+        .withStyle( it -> it
+            .borderColor(Color.CYAN)
+            .borderWidthAt(Edge.BOTTOM, 3)
+            .borderRadius(10)
+        )
+    ```
+    
+    Here the `it` variable is the `ComponentStyleDelegate` which exposes
+    an extensive API for configuring how a particular component
+    looks and behaves.
 ''')
 class Individual_Component_Styling_Spec extends Specification
 {
@@ -62,8 +82,8 @@ class Individual_Component_Styling_Spec extends Specification
             styles without the need for complicated code at all.
             In practice, this means that your styles become part
             of a compositional tree of `Styler` lambdas.
-            The fact that they are lambdas makes it possible to
-            evaluate the styles every repaint so that they can then applied to
+            The fact that they are side effect free lambdas makes it possible to
+            evaluate the styles every repaint so that they can then be applied to
             the components of the component tree completely dynamically.
             How cool is that? :)
         """
@@ -80,16 +100,16 @@ class Individual_Component_Styling_Spec extends Specification
         and : 'We create a panel with some custom styling!'
             var panel =
                         UI.panel()
-                        .withStyle( it ->
-                            it.foundationColor("green")
-                              .backgroundColor("cyan")
-                              .foregroundColor("blue")
-                              .borderColor("blue")
-                              .borderWidth(5)
-                              .shadowColor("black")
-                              .shadowSpreadRadius(10)
-                              .shadowOffset(10)
-                              .font("Papyrus", 42)
+                        .withStyle( it -> it
+                            .foundationColor("green")
+                            .backgroundColor("cyan")
+                            .foregroundColor("blue")
+                            .borderColor("blue")
+                            .borderWidth(5)
+                            .shadowColor("black")
+                            .shadowSpreadRadius(10)
+                            .shadowOffset(10)
+                            .font("Papyrus", 42)
                         )
         expect : 'The background color of the panel will be set to cyan.'
             panel.component.background == Color.cyan

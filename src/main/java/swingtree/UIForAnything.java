@@ -3,7 +3,7 @@ package swingtree;
 import java.awt.*;
 
 /**
- *  A swing tree builder node for anything.
+ *  A SwingTree builder node for configuring anything which is a sub-type of {@link Component}
  *  Note: This does not support nesting.
  */
 public class UIForAnything<T extends Component> extends AbstractBuilder<UIForAnything<T>, T>

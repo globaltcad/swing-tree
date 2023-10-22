@@ -32,7 +32,7 @@ import java.util.function.Function;
 
 
 /**
- *  A swing tree builder node for any kind {@link JComponent} instance.
+ *  A generic SwingTree builder node designed as a basis for configuring any kind of {@link JComponent} instance.
  *  This is the most generic builder type and therefore abstract super-type for almost all other builders.
  *  This builder defines nested building for anything extending the {@link JComponent} class.
  * 	<p>
@@ -55,7 +55,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *
      * @param component The JComponent type which will be wrapped by this builder node.
      */
-    public UIForAnySwing( C component ) { super(component); }
+    protected UIForAnySwing( C component ) { super(component); }
 
     /**
      *  This method exposes a concise way to bind a {@link Observable} (usually a sprouts.Event to the
@@ -1898,6 +1898,38 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         return this.withBackground( condition.get() ? colorIfTrue.orElseNull() : colorIfFalse.orElseNull() );
     }
 
+    /**
+     *    Allows you to configure how the component wrapped by this builder
+     *    looks and behaves, by passing a {@link Styler} lambda to this method
+     *    which receiving a {@link swingtree.style.ComponentStyleDelegate} and returns
+     *    an updated version with the desired style rules applied.
+     *    <p>
+     *    Here a typical example of how to style a button
+     *    using the style API:
+     *    <pre>{@code
+     *        UI.button("Click Me!")
+     *        .withStyle( it -> it
+     *            .borderColor(Color.CYAN)
+     *            .borderWidthAt(Edge.BOTTOM, 3)
+     *            .borderRadius(10)
+     *        )
+     *    }</pre>
+     *    <p>
+     *    Here the {@code it} variable is the {@link swingtree.style.ComponentStyleDelegate} which
+     *    exposes an extensive API for configuring how a particular component
+     *    looks and behaves.
+     *    <p>
+     *    If you want to define style rules for an entire GUI or a part of it,
+     *    take a look at the {@link swingtree.style.StyleSheet} class,
+     *    which exposes an API for defining style rules similar to CSS
+     *    but based on declarative source code instead of a text file.
+     *
+     * @param styler A {@link Styler} lambda can define a set of style rules for the component wrapped by this builder
+     *               by receiving a {@link swingtree.style.ComponentStyleDelegate} and returning
+     *               an updated version with the desired style rules applied.
+     *
+     * @return This very instance, which enables builder-style method chaining.
+     */
     public final I withStyle( Styler<C> styler ) {
         NullUtil.nullArgCheck(styler, "styler", Function.class);
         ComponentExtension.from(getComponent()).addStyler( styler);

@@ -25,7 +25,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
- *  A swing tree builder node for {@link JTabbedPane} instances.
+ *  A SwingTree builder node designed for configuring {@link JTabbedPane} instances.
  */
 public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForTabbedPane<P>, P>
 {
@@ -38,7 +38,7 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.
      */
-    public UIForTabbedPane( P component ) { super(component); }
+    protected UIForTabbedPane( P component ) { super(component); }
 
     /**
      *  Adds an action to be performed when a mouse click is detected on a tab.
@@ -287,7 +287,7 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
                        JTabbedPane tabbedPane = paneRef.get();
                        if ( tabbedPane == null ) return;
                        int index = indexFinder.get();
-                       if (index >= 0 && index == tabbedPane.getSelectedIndex())
+                       if ( index >= 0 && index == tabbedPane.getSelectedIndex() )
                            _doApp(()->onSelection.accept(new ComponentDelegate<>(tabbedPane, e, this::getSiblinghood)));
                    })
            );
@@ -391,7 +391,7 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
             Action<ComponentDelegate<JTabbedPane, MouseEvent>> mouseClickAction
         ) {
             this.paneRef = new WeakReference<>(pane);
-            this.indexFinder = indexFinder;
+            this.indexFinder = Objects.requireNonNull(indexFinder);
             this.mouseClickAction = mouseClickAction;
             if ( mouseClickAction != null ) {
                 pane.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -410,7 +410,7 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
             }
         }
 
-        private void doAction(JTabbedPane pane, MouseEvent e) {
+        private void doAction( JTabbedPane pane, MouseEvent e ) {
             Point p = e.getPoint();
             if ( e.getSource() != pane ) {
                // We need to find the point relative to the tabbed pane:

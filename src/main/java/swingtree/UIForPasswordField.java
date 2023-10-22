@@ -5,11 +5,11 @@ import sprouts.Val;
 import javax.swing.*;
 
 /**
- *  A swing tree builder node for {@link JPasswordField} instances.
+ *  A SwingTree builder node designed for configuring {@link JPasswordField} instances.
  */
 public class UIForPasswordField<F extends JPasswordField> extends UIForAnyTextComponent<UIForPasswordField<F>, F>
 {
-    protected UIForPasswordField(F component) { super(component); }
+    protected UIForPasswordField( F component ) { super(component); }
 
     /**
      * Sets the echo character for this {@link JPasswordField}.

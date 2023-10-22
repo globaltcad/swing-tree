@@ -3,7 +3,7 @@
 import javax.swing.*;
 
 /**
- *  A swing tree builder node for {@link UIForTextPane} instances.
+ *  A SwingTree builder node designed for configuring {@link UIForTextPane} instances.
  */
 public class UIForTextPane&lt;P extends JTextPane&gt; extends UIForAnyEditorPane&lt;UIForTextPane&lt;P&gt;, P&gt;
 {
@@ -13,6 +13,6 @@ public class UIForTextPane&lt;P extends JTextPane&gt; extends UIForAnyEditorPane
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.
      */
-<span class="nc" id="L16">    public UIForTextPane(P component) { super(component); }</span>
+<span class="nc" id="L16">    protected UIForTextPane( P component ) { super(component); }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -27,8 +27,11 @@ import javax.swing.plaf.DimensionUIResource;
 import javax.swing.plaf.InsetsUIResource;
 import javax.swing.plaf.UIResource;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.JTableHeader;
+import javax.swing.table.TableColumnModel;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
+import java.awt.event.MouseEvent;
 import java.awt.geom.RoundRectangle2D;
 import java.io.File;
 import java.net.MalformedURLException;
@@ -4863,8 +4866,8 @@ public final class UI extends UILayoutConstants
     }
 
     /**
-     *  Creates a new {@link JList} instance with the provided array
-     *  as data model.
+     *  Creates a new {@link JList} instance builder
+     *  with the provided array as data model.
      *  This is functionally equivalent to {@link #listOf(Object...)}.
      *
      * @param elements The elements which should be used as model data for the new {@link JList}.
@@ -4877,17 +4880,52 @@ public final class UI extends UILayoutConstants
         return of(new List<E>()).withEntries( elements );
     }
 
+    /**
+     *  Allows for the creation of a new {@link JList} instance with the provided
+     *  observable property list (a {@link Vals} object) as data model.
+     *  When the property list changes, the {@link JList} will be updated accordingly.
+     *
+     * @param elements The elements which should be used as model data for the new {@link JList}.
+     * @return A builder instance for a new {@link JList} with the provided {@link Vals} as data model.
+     * @param <E> The type of the elements in the list.
+     */
     public static <E> UIForList<E, JList<E>> list( Vals<E> elements ) {
         NullUtil.nullArgCheck(elements, "elements", Vals.class);
         return of(new List<E>()).withEntries( elements );
     }
 
+    /**
+     *  Allows for the creation of a new {@link JList} instance with 2 observable
+     *  collections as data model, a {@link Var} property for the selection and a {@link Vals}
+     *  property list for the elements.
+     *  When any of the properties change, the {@link JList} will be updated accordingly,
+     *  and conversely, when the {@link JList} selection changes, the properties will be updated accordingly.
+     *
+     * @param selection The {@link Var} property which should be bound to the selection of the {@link JList}.
+     * @param elements The {@link Vals} property which should be bound to the displayed elements of the {@link JList}.
+     * @return A builder instance for a new {@link JList} with the provided arguments as data model.
+     * @param <E> The type of the elements in the list.
+     */
     public static <E> UIForList<E, JList<E>> list( Var<E> selection, Vals<E> elements ) {
         NullUtil.nullArgCheck(selection, "selection", Var.class);
         NullUtil.nullArgCheck(elements, "elements", Vals.class);
-        return of(new List<E>()).withEntries( elements ).withSelection( selection );
+        return list( elements ).withSelection( selection );
     }
 
+    /**
+     *  Allows for the creation of a new {@link JList} instance with 2 observable
+     *  collections as data model, a {@link Val} property for the selection and a {@link Vals}
+     *  property list for the elements.
+     *  When any of the properties change, the {@link JList} will be updated accordingly,
+     *  however, due to the usage of a read only {@link Val} property for the selection,
+     *  the {@link JList} selection will not be updated when the property changes.
+     *  If you want a bidirectional binding, use {@link #list(Var, Vals)} instead.
+     *
+     * @param selection The {@link Val} property which should be bound to the selection of the {@link JList}.
+     * @param elements The {@link Vals} property which should be bound to the displayed elements of the {@link JList}.
+     * @return A builder instance for a new {@link JList} with the provided {@link Val} and {@link Vals} as data models.
+     * @param <E> The type of the elements in the list.
+     */
     public static <E> UIForList<E, JList<E>> list( Val<E> selection, Vals<E> elements ) {
         NullUtil.nullArgCheck(selection, "selection", Val.class);
         NullUtil.nullArgCheck(elements, "elements", Vals.class);
@@ -4940,6 +4978,9 @@ public final class UI extends UILayoutConstants
         return new UIForTable<>(table);
     }
 
+    /**
+     * @return A fluent builder instance for a new {@link JTable}.
+     */
     public static UIForTable<JTable> table() { return of(new Table()); }
 
     /**
@@ -4967,9 +5008,9 @@ public final class UI extends UILayoutConstants
      *  on a map of column names to lists of table entries (basically a column major matrix).  <br>
      *  This method will automatically create a {@link AbstractTableModel} instance for you.
      *  <p>
-     *      <b>Please note that when the data of the provided data source changes (i.e. when the data source
-     *      is a {@link Map} which gets modified), the table model will not be updated automatically!
-     *      Use {@link UIForTable#updateTableOn(sprouts.Event)} to bind an update {@link Event} to the table model.</b>
+     *  <b>Please note that when the data of the provided data source changes (i.e. when the data source
+     *  is a {@link Map} which gets modified), the table model will not be updated automatically!
+     *  Use {@link UIForTable#updateTableOn(sprouts.Event)} to bind an update {@link Event} to the table model.</b>
      *
      * @param dataFormat An enum which configures the modifiability of the table in a readable fashion.
      * @param dataSource The {@link TableMapDataSource} returning a column major map based matrix which will be used to populate the table.
@@ -4982,17 +5023,95 @@ public final class UI extends UILayoutConstants
         return of((JTable) new Table()).withModel(dataFormat, dataSource);
     }
 
+    /**
+     *  Creates a new {@link JTable} instance builder with the provided table model
+     *  buildable used for creating the table model in a declarative fashion. <br>
+     *  It is expected to be used like so:
+     *  <pre>{@code
+     *  UI.table(
+     *    UI.tableModel()
+     *    .colCount( () -> data[0].size() )
+     *    .rowCount( () -> data.size() )
+     *    .getsEntryAt((col, row) -> data[col][row] )
+     * )
+     * }</pre>
+     * The factory method {@link #tableModel()} is used to create a builder for the table model
+     * which can be passed to this method, which will call the {@link BasicTableModel.Builder#build()}
+     * method on the provided builder to create the table model for the table.
+     * <br>
+     * The purpose of this pattern is to remove the necessity of implementing the {@link javax.swing.table.TableModel}
+     * interface manually, which is a rather tedious task.
+     * Instead, you can use ths fluent API provided by the {@link BasicTableModel.Builder} to create
+     * a general purpose table model for your table.
+     *
+     * @param tableModelBuildable The table model builder which can be created using the {@link #tableModel()} factory method.
+     * @return A builder instance for a new {@link JTable}.
+     */
     public static UIForTable<JTable> table( Buildable<BasicTableModel> tableModelBuildable ) {
         return of((JTable) new Table()).withModel(tableModelBuildable);
     }
 
     /**
+     * @param header The table header which should be wrapped by the builder.
+     * @return A builder instance for a new {@link JTableHeader}.
+     * @param <H> The type of the {@link JTableHeader} for which the builder should be created.
+     */
+    public static <H extends TableHeader> UIForTableHeader<H> of( H header ) {
+        NullUtil.nullArgCheck(header, "header", TableHeader.class);
+        return new UIForTableHeader<>(header);
+    }
+
+    /**
+     * @return A builder instance for a new {@link JTableHeader}.
+     */
+    public static UIForTableHeader<TableHeader> tableHeader() { return of(new TableHeader()); }
+
+    /**
      * @return A functional API for building a {@link javax.swing.table.TableModel}.
      */
-    public static BasicTableModel.Builder tableModel() { return new BasicTableModel.Builder(); }
+    public static BasicTableModel.Builder<Object> tableModel() {
+        return new BasicTableModel.Builder<>(Object.class);
+    }
 
+    /**
+     * @param entryType The type of the table entries.
+     * @param <E> The type of the table entries.
+     * @return A functional API for building a {@link javax.swing.table.TableModel}.
+     */
+    public static <E> BasicTableModel.Builder<E> tableModel(Class<E> entryType) {
+        return new BasicTableModel.Builder<>(entryType);
+    }
+
+    /**
+     *  Exposes a fluent builder API for creating a table renderer.<br>
+     *  Here an example of how this would typically be used:
+     * <pre>{@code
+     *     UI.table(myModel)
+     *     .withRendererForColumn(0,
+     *         UI.renderTable()
+     *         .when(String.class)
+     *         .asText( cell -> "[" + cell.valueAsString().orElse("") + "]" ) )
+     *     )
+     *     .withRendererForColumn(1,
+     *         UI.renderTable()
+     *         .when(Float.class)
+     *         .asText( cell -> "(" + cell.valueAsString().orElse("") + "f)" ) )
+     *         .when(Double.class)
+     *         .asText( cell -> "(" + cell.valueAsString().orElse("") + "d)" ) )
+     *     );
+     * }</pre>
+     * The above example would render the first column of the table as a string surrounded by square brackets,
+     * and the second column as a float or double value surrounded by parentheses.
+     * Note that the API allows you to specify how specific types of table entry values
+     * should be rendered. This is done by calling the {@link Render.Builder#when(Class)} method
+     * bedore calling the {@link Render.As#asText(Function)} method.
+     *
+     * @return A builder instance for a new {@link JTable}.
+     */
     public static Render.Builder<JTable, Object> renderTable() {
-        return Render.forTable(Object.class, null).when(Object.class).asText(cell->cell.valueAsString().orElse(""));
+        return Render.forTable(Object.class, null)
+                     .when(Object.class)
+                     .asText( cell -> cell.valueAsString().orElse("") );
     }
 
     /**
@@ -5207,7 +5326,7 @@ public final class UI extends UILayoutConstants
     }
 
     /**
-     *  This returns an instance of a Swing-Tree builder for a {@link JFrame} type.
+     *  This returns an instance of a SwingTree builder for a {@link JFrame} type.
      * @param frame The new frame instance which ought to be part of the Swing UI.
      * @return A basic UI builder instance wrapping a {@link JFrame}.
      * @param <F> The concrete type of this new frame.
@@ -5236,7 +5355,7 @@ public final class UI extends UILayoutConstants
     }
 
     /**
-     *  This returns an instance of a Swing-Tree builder for a {@link JDialog} type.
+     *  This returns an instance of a SwingTree builder for a {@link JDialog} type.
      * @param dialog The new dialog instance which ought to be part of the Swing UI.
      * @return A basic UI builder instance wrapping a {@link JDialog}.
      * @param <D> The concrete type of this new dialog.
@@ -5839,7 +5958,7 @@ public final class UI extends UILayoutConstants
      *  Use this to quickly launch a UI component in a {@link JFrame} window
      *  at the center of the screen.
      *
-     * @param ui The Swing-Tree UI to show in the window.
+     * @param ui The SwingTree UI to show in the window.
      * @param <C> The type of the component to show in the window.
      */
     public static <C extends JComponent> void show( UIForAnySwing<?, C> ui ) {
@@ -5851,7 +5970,7 @@ public final class UI extends UILayoutConstants
      *  at the center of the screen.
      *
      * @param title The title of the window.
-     * @param ui The Swing-Tree UI to show in the window.
+     * @param ui The SwingTree UI to show in the window.
      * @param <C> The type of the component to show in the window.
      */
     public static <C extends JComponent> void show( String title, UIForAnySwing<?, C> ui ) {
@@ -6065,6 +6184,41 @@ public final class UI extends UILayoutConstants
         @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }
     }
     /** {inheritDoc} */
+    public static class TableHeader extends JTableHeader {
+        private Function<Integer, String> _toolTipTextSupplier;
+        public TableHeader() { super(); }
+        public TableHeader(TableColumnModel model) { super(model); }
+        /**
+         * @param toolTipTextSupplier A function which receives the column index and returns the
+         *                            tool tip text for that column.
+         */
+        public void setToolTipsSupplier( Function<Integer, String> toolTipTextSupplier ) {
+            Objects.requireNonNull(toolTipTextSupplier);
+            _toolTipTextSupplier = toolTipTextSupplier;
+        }
+        /**
+         * @param toolTips The tool tip texts for the columns.
+         */
+        public void setToolTips( String... toolTips ) {
+            Objects.requireNonNull(toolTips);
+            setToolTipsSupplier( i -> toolTips[i] );
+        }
+        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }
+        @Override public void paintComponent(Graphics g) { super.paintComponent(g); _paintForeground(this, g); }
+        @Override public String getToolTipText(MouseEvent e) {
+            int col = columnAtPoint(e.getPoint());
+            int modelCol = Optional.ofNullable(getTable())
+                                    .map( t -> t.convertColumnIndexToModel(col) )
+                                    .orElse(col);
+            String retStr;
+            try { retStr = _toolTipTextSupplier.apply(modelCol); }
+            catch ( NullPointerException | ArrayIndexOutOfBoundsException ex ) {
+                retStr = "";
+            }
+            return  ( retStr.isEmpty() ? super.getToolTipText(e) : retStr );
+        }
+    }
+    /** {inheritDoc} */
     public static class Slider extends JSlider {
         @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }
         @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }
@@ -6125,6 +6279,11 @@ public final class UI extends UILayoutConstants
         @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }
     }
     /** {inheritDoc} */
+    public static class TextPane extends JTextPane {
+        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }
+        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }
+    }
+    /** {inheritDoc} */
     public static class Spinner extends JSpinner {
         @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }
         @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }
@@ -6142,11 +6301,6 @@ public final class UI extends UILayoutConstants
     }
     /** {inheritDoc} */
     public static class ProgressBar extends JProgressBar {
-        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }
-        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }
-    }
-    /** {inheritDoc} */
-    public static class TextPane extends JTextPane {
         @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }
         @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }
     }

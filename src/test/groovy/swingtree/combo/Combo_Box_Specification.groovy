@@ -20,10 +20,11 @@ import static swingtree.UI.comboBox
 @Title("Drop Downs, aka Combo Boxes")
 @Narrative("""
 
-    In Swing drop downs are called combo boxes, which
-    is what they will be referred to in this specification as well.  
+    In Swing drop downs are called combo boxes and they are used to select
+    one item from a list of options.
+     
     This specification will show you how you can create them and
-    how you can interact with them.
+    how you can interact with them using SwingTree.
 
 """)
 @Subject([UIForCombo])

@@ -5,7 +5,7 @@ import sprouts.Val;
 import javax.swing.*;
 
 /**
- *  A swing tree builder node for {@link JProgressBar} instances.
+ *  A SwingTree builder node designed for configuring {@link JProgressBar} instances.
  */
 public class UIForProgressBar&lt;P extends JProgressBar&gt; extends UIForAnySwing&lt;UIForProgressBar&lt;P&gt;, P&gt;
 {
@@ -15,7 +15,7 @@ public class UIForProgressBar&lt;P extends JProgressBar&gt; extends UIForAnySwin
      *
      * @param component The JComponent type which will be wrapped by this builder node.
      */
-    public UIForProgressBar( P component ) {
+    protected UIForProgressBar( P component ) {
 <span class="fc" id="L19">        super(component);</span>
 <span class="fc" id="L20">    }</span>
 

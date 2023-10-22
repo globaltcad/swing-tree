@@ -1,7 +1,7 @@
 {
   "className":"swingtree.animations.Animations_Spec",
   "title":"Animations",
-  "narrative":"Animations are a great way to make your application more interactive and more fun to use.",
+  "narrative":"Animations are a great way to improve the UX of your application.\n    Swing-Tree has a built in animation scheduler that can execute animations \n    given that you have at least specified the duration of the animation.\n    Internally the animation scheduler is a \"Timer\" that will regularly update\n    your animations and then remove them from the scheduler once they are finished.",
   "subjects":["swingtree.animation.Animator","swingtree.UI","swingtree.animation.LifeTime"],
   "statistics":{
     "runs":"4",
@@ -14,7 +14,7 @@
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
-      "id":"Use the API exposed by \"UI.schedule(..)\" to schedule animations",
+      "id":"Use the API exposed by `UI.animateFor(..)` to schedule animations",
       "result":"PASS",
       "duration":"?",
       "iterations":{

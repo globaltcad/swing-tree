@@ -21,7 +21,11 @@ import java.util.concurrent.TimeUnit
 @Title("Animations")
 @Narrative('''
 
-    Animations are a great way to make your application more interactive and more fun to use.
+    Animations are a great way to improve the UX of your application.
+    Swing-Tree has a built in animation scheduler that can execute animations 
+    given that you have at least specified the duration of the animation.
+    Internally the animation scheduler is a "Timer" that will regularly update
+    your animations and then remove them from the scheduler once they are finished.
 
 ''')
 @Subject([Animator, UI, LifeTime])
@@ -32,7 +36,7 @@ class Animations_Spec extends Specification
         // This is so that the test thread is also allowed to perform UI operations
     }
 
-    def 'Use the API exposed by "UI.schedule(..)" to schedule animations'()
+    def 'Use the API exposed by `UI.animateFor(..)` to schedule animations'()
     {
         reportInfo """
             Swing-Tree has a built in animation scheduler that can be used to schedule 

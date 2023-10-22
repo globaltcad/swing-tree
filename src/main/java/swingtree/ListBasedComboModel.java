@@ -3,29 +3,30 @@ package swingtree;
 import sprouts.Var;
 
 import java.util.List;
+import java.util.Objects;
 
 class ListBasedComboModel<E> extends AbstractComboModel<E>
 {
-	private final List<E> items;
+	private final List<E> _items;
 
-	ListBasedComboModel(List<E> items) {
+	ListBasedComboModel( List<E> items ) {
 		super(Var.ofNullable(_findCommonType( (E[]) items.toArray() ), null));
-		this.items = items;
+		_items         = Objects.requireNonNull(items);
 		_selectedIndex = _indexOf(_selectedItem.orElseNull());
 	}
 
-	ListBasedComboModel(Var<E> var, List<E> items) {
+	ListBasedComboModel( Var<E> var, List<E> items ) {
 		super(var);
-		this.items = items;
+		_items         = Objects.requireNonNull(items);
 		_selectedIndex = _indexOf(_selectedItem.orElseNull());
 	}
 
-	@Override public int getSize() { return items.size(); }
-	@Override public E getElementAt( int index ) { return items.get(index); }
+	@Override public int getSize() { return _items.size(); }
+	@Override public E getElementAt( int index ) { return _items.get(index); }
 
 	@Override
 	public AbstractComboModel<E> withVar(Var<E> newVar) {
-		return new ListBasedComboModel<>(newVar, items);
+		return new ListBasedComboModel<>(newVar, _items);
 	}
 
 	@Override protected void setAt(int index, E element) {
@@ -41,7 +42,7 @@ class ListBasedComboModel<E> extends AbstractComboModel<E>
 			So we'll just try to modify it, and if it fails, we'll just ignore it.
 		 */
 		try {
-			items.set(index, element);
+			_items.set(index, element);
 		} catch (UnsupportedOperationException ignored) {
 			// ignore, the user of this library doesn't want us to modify the list
 		}

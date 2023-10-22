@@ -29,15 +29,20 @@ import java.util.stream.Collectors;
  */
 abstract class AbstractDelegate&lt;C extends JComponent&gt;
 {
-    private final Query _query; // the query object that allows us to query the component tree
+    private final GuiTraverser _guiTraverser; // the traverser object that allows us to query the component tree
     private final C _component;
 
-<span class="fc" id="L35">    AbstractDelegate( C component, JComponent handle ) {</span>
-<span class="fc" id="L36">        _query = new Query(handle);</span>
-<span class="fc" id="L37">        _component = component;</span>
-<span class="fc" id="L38">    }</span>
+    /**
+     * @param component The component that is delegated.
+     * @param handle A component that is used as a starting point for traversing the component tree,
+     *               usually the same component as the one that is delegated.
+     */
+<span class="fc" id="L40">    AbstractDelegate( C component, JComponent handle ) {</span>
+<span class="fc" id="L41">        _guiTraverser = new GuiTraverser(Objects.requireNonNull(handle));</span>
+<span class="fc" id="L42">        _component    = Objects.requireNonNull(component);</span>
+<span class="fc" id="L43">    }</span>
 
-<span class="fc" id="L40">    protected C _component() { return _component; }</span>
+<span class="fc" id="L45">    protected C _component() { return _component; }</span>
 
     /**
      *  This is a delegate to the underlying component, but not every method of the component
@@ -51,12 +56,12 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      * @return The underlying component.
      */
     public final C get() {
-<span class="fc bfc" id="L54" title="All 2 branches covered.">        if ( !UI.thisIsUIThread() )</span>
-<span class="fc" id="L55">            throw new IllegalStateException(</span>
+<span class="fc bfc" id="L59" title="All 2 branches covered.">        if ( !UI.thisIsUIThread() )</span>
+<span class="fc" id="L60">            throw new IllegalStateException(</span>
                     &quot;You can only access the component from the GUI thread. &quot; +
                     &quot;Use 'UI.run(() -&gt; delegate.component())' to access the component from the application thread.&quot;
                 );
-<span class="fc" id="L59">        return _component();</span>
+<span class="fc" id="L64">        return _component();</span>
     }
 
     /**
@@ -65,7 +70,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *
      * @return The x-coordinate of the component relative to its parent.
      */
-<span class="nc" id="L68">    public final int getX() { return _component().getX(); }</span>
+<span class="nc" id="L73">    public final int getX() { return _component().getX(); }</span>
 
     /**
      *  As a delegate to the underlying component, you can use this method to
@@ -73,7 +78,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *
      * @return The y-coordinate of the component relative to its parent.
      */
-<span class="nc" id="L76">    public final int getY() { return _component().getY(); }</span>
+<span class="nc" id="L81">    public final int getY() { return _component().getY(); }</span>
 
     /**
      *  As a delegate to the underlying component, you can use this method to
@@ -84,7 +89,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *
      * @return The location of the component relative to its parent.
      */
-<span class="nc" id="L87">    public final Point getLocation() { return _component().getLocation(); }</span>
+<span class="nc" id="L92">    public final Point getLocation() { return _component().getLocation(); }</span>
 
     /**
      *  This is class a delegate API, which means that it represents
@@ -94,7 +99,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *
      * @return The parent {@link Container} of the underlying component.
      */
-<span class="nc" id="L97">    public final Container getParent() { return _component().getParent(); }</span>
+<span class="nc" id="L102">    public final Container getParent() { return _component().getParent(); }</span>
 
     /**
      *  As a delegate to the underlying component, you can use this method to
@@ -110,8 +115,8 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      * @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setBackground( Color color ) {
-<span class="nc" id="L113">        _component().setBackground(color);</span>
-<span class="nc" id="L114">        return this;</span>
+<span class="nc" id="L118">        _component().setBackground(color);</span>
+<span class="nc" id="L119">        return this;</span>
     }
 
     /**
@@ -128,7 +133,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      * @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setBackgroundColor( double r, double g, double b ) {
-<span class="nc" id="L131">        return setBackgroundColor(r, g, b, 1.0);</span>
+<span class="nc" id="L136">        return setBackgroundColor(r, g, b, 1.0);</span>
     }
 
     /**
@@ -146,7 +151,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      * @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setBackgroundColor( double r, double g, double b, double a ) {
-<span class="nc" id="L149">        return setBackground(new Color((float) r, (float) g, (float) b, (float) a));</span>
+<span class="nc" id="L154">        return setBackground(new Color((float) r, (float) g, (float) b, (float) a));</span>
     }
 
     /**
@@ -163,7 +168,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      * @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setBackgroundColor( int r, int g, int b ) {
-<span class="nc" id="L166">        return setBackgroundColor(r, g, b, 255);</span>
+<span class="nc" id="L171">        return setBackgroundColor(r, g, b, 255);</span>
     }
 
     /**
@@ -181,7 +186,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      * @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setBackgroundColor( int r, int g, int b, int a ) {
-<span class="nc" id="L184">        return setBackground(new Color(r, g, b, a));</span>
+<span class="nc" id="L189">        return setBackground(new Color(r, g, b, a));</span>
     }
 
     /**
@@ -194,7 +199,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      * @return The background color of the component.
      */
     public final Color getBackground() {
-<span class="nc" id="L197">        return _component().getBackground();</span>
+<span class="nc" id="L202">        return _component().getBackground();</span>
     }
 
     /**
@@ -211,8 +216,8 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      * @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setForeground( Color color ) {
-<span class="nc" id="L214">        _component().setForeground(color);</span>
-<span class="nc" id="L215">        return this;</span>
+<span class="nc" id="L219">        _component().setForeground(color);</span>
+<span class="nc" id="L220">        return this;</span>
     }
 
     /**
@@ -225,7 +230,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      * @return The foreground color of the component.
      */
     public final Color getForeground() {
-<span class="nc" id="L228">        return _component().getForeground();</span>
+<span class="nc" id="L233">        return _component().getForeground();</span>
     }
 
     /**
@@ -242,7 +247,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      * @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setForegroundColor( double r, double g, double b ) {
-<span class="nc" id="L245">        return setForegroundColor(r, g, b, 1.0);</span>
+<span class="nc" id="L250">        return setForegroundColor(r, g, b, 1.0);</span>
     }
 
     /**
@@ -260,7 +265,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      * @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setForegroundColor( double r, double g, double b, double a ) {
-<span class="nc" id="L263">        return setForeground(new Color((float) r, (float) g, (float) b, (float) a));</span>
+<span class="nc" id="L268">        return setForeground(new Color((float) r, (float) g, (float) b, (float) a));</span>
     }
 
     /**
@@ -277,7 +282,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      * @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setForegroundColor( int r, int g, int b ) {
-<span class="nc" id="L280">        return setForegroundColor(r, g, b, 255);</span>
+<span class="nc" id="L285">        return setForegroundColor(r, g, b, 255);</span>
     }
 
     /**
@@ -295,7 +300,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      * @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setForegroundColor( int r, int g, int b, int a ) {
-<span class="nc" id="L298">        return setForeground(new Color(r, g, b, a));</span>
+<span class="nc" id="L303">        return setForeground(new Color(r, g, b, a));</span>
     }
 
     /**
@@ -312,8 +317,8 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      * @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setFont( Font font ) {
-<span class="nc" id="L315">        _component().setFont(font);</span>
-<span class="nc" id="L316">        return this;</span>
+<span class="nc" id="L320">        _component().setFont(font);</span>
+<span class="nc" id="L321">        return this;</span>
     }
 
     /**
@@ -326,7 +331,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      * @return The font of the component.
      */
     public final Font getFont() {
-<span class="nc" id="L329">        return _component().getFont();</span>
+<span class="nc" id="L334">        return _component().getFont();</span>
     }
 
     /**
@@ -346,8 +351,8 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The delegate itself, so you can chain calls to this method.
      */
     public final AbstractDelegate&lt;C&gt; setBounds( int x, int y, int width, int height ) {
-<span class="nc" id="L349">        _component().setBounds(x, y, width, height);</span>
-<span class="nc" id="L350">        return this;</span>
+<span class="nc" id="L354">        _component().setBounds(x, y, width, height);</span>
+<span class="nc" id="L355">        return this;</span>
     }
 
     /**
@@ -363,8 +368,8 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      * @return The delegate itself, so you can chain calls to this method.
      */
     public final AbstractDelegate&lt;C&gt; setBounds( Rectangle bounds ) {
-<span class="nc" id="L366">        _component().setBounds(bounds);</span>
-<span class="nc" id="L367">        return this;</span>
+<span class="nc" id="L371">        _component().setBounds(bounds);</span>
+<span class="nc" id="L372">        return this;</span>
     }
 
     /**
@@ -378,7 +383,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *          This is relative to the component's parent.
      */
     public final Rectangle getBounds() {
-<span class="nc" id="L381">        return _component().getBounds();</span>
+<span class="nc" id="L386">        return _component().getBounds();</span>
     }
 
     /**
@@ -393,8 +398,8 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setPrefSize( Dimension size ) {
-<span class="nc" id="L396">        _component().setPreferredSize(size);</span>
-<span class="nc" id="L397">        return this;</span>
+<span class="nc" id="L401">        _component().setPreferredSize(size);</span>
+<span class="nc" id="L402">        return this;</span>
     }
 
     /**
@@ -410,8 +415,8 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setPrefSize( int width, int height ) {
-<span class="nc" id="L413">        _component().setPreferredSize(new Dimension(width, height));</span>
-<span class="nc" id="L414">        return this;</span>
+<span class="nc" id="L418">        _component().setPreferredSize(new Dimension(width, height));</span>
+<span class="nc" id="L419">        return this;</span>
     }
 
     /**
@@ -426,9 +431,9 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setPrefWidth( int width ) {
-<span class="nc" id="L429">        Dimension size = _component().getPreferredSize();</span>
-<span class="nc" id="L430">        _component().setPreferredSize(new Dimension(width, size.height));</span>
-<span class="nc" id="L431">        return this;</span>
+<span class="nc" id="L434">        Dimension size = _component().getPreferredSize();</span>
+<span class="nc" id="L435">        _component().setPreferredSize(new Dimension(width, size.height));</span>
+<span class="nc" id="L436">        return this;</span>
     }
 
     /**
@@ -443,9 +448,9 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setPrefHeight( int height ) {
-<span class="nc" id="L446">        Dimension size = _component().getPreferredSize();</span>
-<span class="nc" id="L447">        _component().setPreferredSize(new Dimension(size.width, height));</span>
-<span class="nc" id="L448">        return this;</span>
+<span class="nc" id="L451">        Dimension size = _component().getPreferredSize();</span>
+<span class="nc" id="L452">        _component().setPreferredSize(new Dimension(size.width, height));</span>
+<span class="nc" id="L453">        return this;</span>
     }
 
     /**
@@ -458,7 +463,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The preferred size of the component.
      */
     public final Dimension getPrefSize() {
-<span class="nc" id="L461">        return _component().getPreferredSize();</span>
+<span class="nc" id="L466">        return _component().getPreferredSize();</span>
     }
 
     /**
@@ -473,8 +478,8 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setMinSize( Dimension size ) {
-<span class="nc" id="L476">        _component().setMinimumSize(size);</span>
-<span class="nc" id="L477">        return this;</span>
+<span class="nc" id="L481">        _component().setMinimumSize(size);</span>
+<span class="nc" id="L482">        return this;</span>
     }
 
     /**
@@ -490,8 +495,8 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setMinSize( int width, int height ) {
-<span class="nc" id="L493">        _component().setMinimumSize(new Dimension(width, height));</span>
-<span class="nc" id="L494">        return this;</span>
+<span class="nc" id="L498">        _component().setMinimumSize(new Dimension(width, height));</span>
+<span class="nc" id="L499">        return this;</span>
     }
 
     /**
@@ -506,9 +511,9 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setMinWidth( int width ) {
-<span class="nc" id="L509">        Dimension size = _component().getMinimumSize();</span>
-<span class="nc" id="L510">        _component().setMinimumSize(new Dimension(width, size.height));</span>
-<span class="nc" id="L511">        return this;</span>
+<span class="nc" id="L514">        Dimension size = _component().getMinimumSize();</span>
+<span class="nc" id="L515">        _component().setMinimumSize(new Dimension(width, size.height));</span>
+<span class="nc" id="L516">        return this;</span>
     }
 
     /**
@@ -523,9 +528,9 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setMinHeight( int height ) {
-<span class="nc" id="L526">        Dimension size = _component().getMinimumSize();</span>
-<span class="nc" id="L527">        _component().setMinimumSize(new Dimension(size.width, height));</span>
-<span class="nc" id="L528">        return this;</span>
+<span class="nc" id="L531">        Dimension size = _component().getMinimumSize();</span>
+<span class="nc" id="L532">        _component().setMinimumSize(new Dimension(size.width, height));</span>
+<span class="nc" id="L533">        return this;</span>
     }
 
     /**
@@ -538,7 +543,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The minimum size of the component.
      */
     public final Dimension getMinSize() {
-<span class="nc" id="L541">        return _component().getMinimumSize();</span>
+<span class="nc" id="L546">        return _component().getMinimumSize();</span>
     }
 
     /**
@@ -553,8 +558,8 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setMaxSize( Dimension size ) {
-<span class="nc" id="L556">        _component().setMaximumSize(size);</span>
-<span class="nc" id="L557">        return this;</span>
+<span class="nc" id="L561">        _component().setMaximumSize(size);</span>
+<span class="nc" id="L562">        return this;</span>
     }
 
     /**
@@ -570,8 +575,8 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setMaxSize( int width, int height ) {
-<span class="nc" id="L573">        _component().setMaximumSize(new Dimension(width, height));</span>
-<span class="nc" id="L574">        return this;</span>
+<span class="nc" id="L578">        _component().setMaximumSize(new Dimension(width, height));</span>
+<span class="nc" id="L579">        return this;</span>
     }
 
     /**
@@ -586,9 +591,9 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setMaxWidth( int width ) {
-<span class="nc" id="L589">        Dimension size = _component().getMaximumSize();</span>
-<span class="nc" id="L590">        _component().setMaximumSize(new Dimension(width, size.height));</span>
-<span class="nc" id="L591">        return this;</span>
+<span class="nc" id="L594">        Dimension size = _component().getMaximumSize();</span>
+<span class="nc" id="L595">        _component().setMaximumSize(new Dimension(width, size.height));</span>
+<span class="nc" id="L596">        return this;</span>
     }
 
     /**
@@ -603,9 +608,9 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setMaxHeight( int height ) {
-<span class="nc" id="L606">        Dimension size = _component().getMaximumSize();</span>
-<span class="nc" id="L607">        _component().setMaximumSize(new Dimension(size.width, height));</span>
-<span class="nc" id="L608">        return this;</span>
+<span class="nc" id="L611">        Dimension size = _component().getMaximumSize();</span>
+<span class="nc" id="L612">        _component().setMaximumSize(new Dimension(size.width, height));</span>
+<span class="nc" id="L613">        return this;</span>
     }
 
     /**
@@ -618,7 +623,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The maximum size of the component.
      */
     public final Dimension getMaxSize() {
-<span class="nc" id="L621">        return _component().getMaximumSize();</span>
+<span class="nc" id="L626">        return _component().getMaximumSize();</span>
     }
 
     /**
@@ -633,8 +638,8 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setSize( Dimension size ) {
-<span class="nc" id="L636">        _component().setSize(size);</span>
-<span class="nc" id="L637">        return this;</span>
+<span class="nc" id="L641">        _component().setSize(size);</span>
+<span class="nc" id="L642">        return this;</span>
     }
 
     /**
@@ -650,8 +655,8 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setSize( int width, int height ) {
-<span class="nc" id="L653">        _component().setSize(new Dimension(width, height));</span>
-<span class="nc" id="L654">        return this;</span>
+<span class="nc" id="L658">        _component().setSize(new Dimension(width, height));</span>
+<span class="nc" id="L659">        return this;</span>
     }
 
     /**
@@ -666,9 +671,9 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setWidth( int width ) {
-<span class="nc" id="L669">        Dimension size = _component().getSize();</span>
-<span class="nc" id="L670">        _component().setSize(new Dimension(width, size.height));</span>
-<span class="nc" id="L671">        return this;</span>
+<span class="nc" id="L674">        Dimension size = _component().getSize();</span>
+<span class="nc" id="L675">        _component().setSize(new Dimension(width, size.height));</span>
+<span class="nc" id="L676">        return this;</span>
     }
 
     /**
@@ -683,9 +688,9 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setHeight( int height ) {
-<span class="nc" id="L686">        Dimension size = _component().getSize();</span>
-<span class="nc" id="L687">        _component().setSize(new Dimension(size.width, height));</span>
-<span class="nc" id="L688">        return this;</span>
+<span class="nc" id="L691">        Dimension size = _component().getSize();</span>
+<span class="nc" id="L692">        _component().setSize(new Dimension(size.width, height));</span>
+<span class="nc" id="L693">        return this;</span>
     }
 
     /**
@@ -698,7 +703,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The size of the component.
      */
     public final Dimension getSize() {
-<span class="nc" id="L701">        return _component().getSize();</span>
+<span class="nc" id="L706">        return _component().getSize();</span>
     }
 
     /**
@@ -711,7 +716,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The width of the component.
      */
     public final int getWidth() {
-<span class="nc" id="L714">        return _component().getSize().width;</span>
+<span class="nc" id="L719">        return _component().getSize().width;</span>
     }
 
     /**
@@ -724,7 +729,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The height of the component.
      */
     public final int getHeight() {
-<span class="nc" id="L727">        return _component().getSize().height;</span>
+<span class="nc" id="L732">        return _component().getSize().height;</span>
     }
 
     /**
@@ -735,8 +740,8 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      * @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setCursor( UI.Cursor cursor ) {
-<span class="nc" id="L738">        _component().setCursor(Cursor.getPredefinedCursor(cursor.type));</span>
-<span class="nc" id="L739">        return this;</span>
+<span class="nc" id="L743">        _component().setCursor(Cursor.getPredefinedCursor(cursor.type));</span>
+<span class="nc" id="L744">        return this;</span>
     }
 
     /**
@@ -746,8 +751,8 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      * @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setCursor( Cursor cursor ) {
-<span class="nc" id="L749">        _component().setCursor(cursor);</span>
-<span class="nc" id="L750">        return this;</span>
+<span class="nc" id="L754">        _component().setCursor(cursor);</span>
+<span class="nc" id="L755">        return this;</span>
     }
 
     /**
@@ -756,7 +761,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      * @return The {@link Cursor} of the component.
      */
     public final Cursor getCursor() {
-<span class="nc" id="L759">        return _component().getCursor();</span>
+<span class="nc" id="L764">        return _component().getCursor();</span>
     }
 
     /**
@@ -770,8 +775,8 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      * @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setTooltip( String text ) {
-<span class="nc" id="L773">        _component().setToolTipText(text);</span>
-<span class="nc" id="L774">        return this;</span>
+<span class="nc" id="L778">        _component().setToolTipText(text);</span>
+<span class="nc" id="L779">        return this;</span>
     }
 
     /**
@@ -783,7 +788,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      * @return The tooltip text.
      */
     public final String getTooltip() {
-<span class="nc" id="L786">        return _component().getToolTipText();</span>
+<span class="nc" id="L791">        return _component().getToolTipText();</span>
     }
 
     /**
@@ -797,8 +802,8 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setEnabled( boolean enabled ) {
-<span class="nc" id="L800">        _component().setEnabled(enabled);</span>
-<span class="nc" id="L801">        return this;</span>
+<span class="nc" id="L805">        _component().setEnabled(enabled);</span>
+<span class="nc" id="L806">        return this;</span>
     }
 
     /**
@@ -810,7 +815,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return True if the component is enabled, false otherwise.
      */
     public final boolean isEnabled() {
-<span class="nc" id="L813">        return _component().isEnabled();</span>
+<span class="nc" id="L818">        return _component().isEnabled();</span>
     }
 
     /**
@@ -824,8 +829,8 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setVisible( boolean visible ) {
-<span class="nc" id="L827">        _component().setVisible(visible);</span>
-<span class="nc" id="L828">        return this;</span>
+<span class="nc" id="L832">        _component().setVisible(visible);</span>
+<span class="nc" id="L833">        return this;</span>
     }
 
     /**
@@ -837,7 +842,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return True if the component is visible, false otherwise.
      */
     public final boolean isVisible() {
-<span class="nc" id="L840">        return _component().isVisible();</span>
+<span class="nc" id="L845">        return _component().isVisible();</span>
     }
 
     /**
@@ -851,8 +856,8 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      * @return The delegate itself.
      */
     public final AbstractDelegate&lt;C&gt; setOpaque( boolean opaque ) {
-<span class="nc" id="L854">        _component().setOpaque(opaque);</span>
-<span class="nc" id="L855">        return this;</span>
+<span class="nc" id="L859">        _component().setOpaque(opaque);</span>
+<span class="nc" id="L860">        return this;</span>
     }
 
     /**
@@ -864,7 +869,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      * @return True if the component is opaque, false otherwise.
      */
     public final boolean isOpaque() {
-<span class="nc" id="L867">        return _component().isOpaque();</span>
+<span class="nc" id="L872">        return _component().isOpaque();</span>
     }
 
     /**
@@ -877,7 +882,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      * @param &lt;T&gt; The type parameter of the component which should be found.
      */
     public final &lt;T extends JComponent&gt; OptionalUI&lt;T&gt; find( Class&lt;T&gt; type, String id ) {
-<span class="fc" id="L880">        return this.find(type, c -&gt; Objects.equals(c.getName(), id));</span>
+<span class="fc" id="L885">        return this.find(type, c -&gt; Objects.equals(c.getName(), id));</span>
     }
 
     /**
@@ -890,7 +895,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      * @param &lt;T&gt; The type parameter of the component which should be found.
      */
     public final &lt;T extends JComponent&gt; OptionalUI&lt;T&gt; find( Class&lt;T&gt; type, Enum&lt;?&gt; id ) {
-<span class="nc" id="L893">        return this.find(type, id.getClass().getSimpleName() + &quot;.&quot; + id.name());</span>
+<span class="nc" id="L898">        return this.find(type, id.getClass().getSimpleName() + &quot;.&quot; + id.name());</span>
     }
 
     /**
@@ -904,10 +909,10 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      * @param &lt;T&gt; The type parameter of the component which should be found.
      */
     public final &lt;T extends JComponent&gt; OptionalUI&lt;T&gt; find( Class&lt;T&gt; type, Predicate&lt;T&gt; predicate ) {
-<span class="fc" id="L907">        return _query.find(type, predicate)</span>
-<span class="fc" id="L908">                .findFirst()</span>
-<span class="fc" id="L909">                .map(OptionalUI::ofNullable)</span>
-<span class="fc" id="L910">                .orElse(OptionalUI.empty());</span>
+<span class="fc" id="L912">        return _guiTraverser.find(type, predicate)</span>
+<span class="fc" id="L913">                .findFirst()</span>
+<span class="fc" id="L914">                .map(OptionalUI::ofNullable)</span>
+<span class="fc" id="L915">                .orElse(OptionalUI.empty());</span>
     }
 
     /**
@@ -921,7 +926,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      * @param &lt;T&gt; The type parameter of the component which should be found.
      */
     public final &lt;T extends JComponent&gt; List&lt;T&gt; findAll( Class&lt;T&gt; type, Predicate&lt;T&gt; predicate ) {
-<span class="fc" id="L924">        return _query.find(type, predicate).collect(Collectors.toList());</span>
+<span class="fc" id="L929">        return _guiTraverser.find(type, predicate).collect(Collectors.toList());</span>
     }
 
     /**
@@ -934,7 +939,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      * @param &lt;T&gt; The type parameter of the component which should be found.
      */
     public final &lt;T extends JComponent&gt; List&lt;T&gt; findAllByGroup( Class&lt;T&gt; type, String group ) {
-<span class="fc" id="L937">        return this.findAll(type, c -&gt; ComponentExtension.from(c).belongsToGroup(group));</span>
+<span class="fc" id="L942">        return this.findAll(type, c -&gt; ComponentExtension.from(c).belongsToGroup(group));</span>
     }
 
     /**
@@ -947,7 +952,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      * @param &lt;T&gt; The type parameter of the component which should be found.
      */
     public final &lt;T extends JComponent&gt; List&lt;T&gt; findAllByGroup( Class&lt;T&gt; type, Enum&lt;?&gt; group ) {
-<span class="nc" id="L950">        return this.findAll(type, c -&gt; ComponentExtension.from(c).belongsToGroup(group));</span>
+<span class="nc" id="L955">        return this.findAll(type, c -&gt; ComponentExtension.from(c).belongsToGroup(group));</span>
     }
 
     /**
@@ -976,11 +981,11 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      * @param painter The rendering task which should be executed on the EDT at the end of the current event cycle.
      */
     public final void paint( AnimationState state, Painter painter ) {
-<span class="nc" id="L979">        UI.run(()-&gt;{ // This method might be called by the application thread, so we need to run on the EDT!</span>
+<span class="nc" id="L984">        UI.run(()-&gt;{ // This method might be called by the application thread, so we need to run on the EDT!</span>
             // We do the rendering later in the paint method of a custom border implementation!
-<span class="nc" id="L981">            ComponentExtension.from(_component).addAnimationPainter(state, painter);</span>
-<span class="nc" id="L982">        });</span>
-<span class="nc" id="L983">    }</span>
+<span class="nc" id="L986">            ComponentExtension.from(_component).addAnimationPainter(state, painter);</span>
+<span class="nc" id="L987">        });</span>
+<span class="nc" id="L988">    }</span>
 
     /**
      *  A common use case is to style the component based on the current animation state.
@@ -1006,11 +1011,11 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      * @param styler The styling task which should be executed on the EDT at the end of the current event cycle.
      */
     public final void style( AnimationState state, Styler&lt;C&gt; styler ) {
-<span class="fc" id="L1009">        UI.run(()-&gt;{ // This method might be called by the application thread, so we need to run on the EDT!</span>
+<span class="fc" id="L1014">        UI.run(()-&gt;{ // This method might be called by the application thread, so we need to run on the EDT!</span>
             // We do the styling later in the paint method of a custom border implementation!
-<span class="fc" id="L1011">            ComponentExtension.from(_component).addAnimationStyler(state, styler);</span>
-<span class="fc" id="L1012">        });</span>
-<span class="fc" id="L1013">    }</span>
+<span class="fc" id="L1016">            ComponentExtension.from(_component).addAnimationStyler(state, styler);</span>
+<span class="fc" id="L1017">        });</span>
+<span class="fc" id="L1018">    }</span>
 
     /**
      *  Exposes access the animation builder API, where you can define the conditions
@@ -1022,7 +1027,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return An {@link Animator} instance which can be used to define how the animation should be executed.
      */
     public final Animator animateFor( double duration, TimeUnit unit ) {
-<span class="fc" id="L1025">        return Animator.animateFor(LifeTime.of(duration, unit), _component());</span>
+<span class="fc" id="L1030">        return Animator.animateFor(LifeTime.of(duration, unit), _component());</span>
     }
 
     /**
@@ -1034,7 +1039,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return An {@link Animator} instance which can be used to define how the animation should be executed.
      */
     public final Animator animateFor( LifeTime lifeTime ) {
-<span class="nc" id="L1037">        return Animator.animateFor(lifeTime, _component());</span>
+<span class="nc" id="L1042">        return Animator.animateFor(lifeTime, _component());</span>
     }
 
     /**
@@ -1060,8 +1065,8 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  @param animation The animation that should be executed.
      */
     public final void animateFor( LifeTime lifeTime, Animation animation ) {
-<span class="nc" id="L1063">        Animator.animateFor(lifeTime, _component()).go(animation);</span>
-<span class="nc" id="L1064">    }</span>
+<span class="nc" id="L1068">        Animator.animateFor(lifeTime, _component()).go(animation);</span>
+<span class="nc" id="L1069">    }</span>
 
     /**
      *  Use this to schedule and run the provided animation
@@ -1074,8 +1079,8 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  @param animation The animation that should be executed.
      */
     public final void animateFor( double duration, TimeUnit unit, Animation animation ) {
-<span class="fc" id="L1077">        this.animateFor(duration, unit).go(animation);</span>
-<span class="fc" id="L1078">    }</span>
+<span class="fc" id="L1082">        this.animateFor(duration, unit).go(animation);</span>
+<span class="fc" id="L1083">    }</span>
 
     /**
      *  The number returned by this method is used to scale the UI
@@ -1086,7 +1091,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      * @return The current UI scale factor, which is used to scale the UI
      *         for high resolution displays (high dots-per-inch, or DPI).
      */
-<span class="nc" id="L1089">    public float getScale() { return UI.scale(); }</span>
+<span class="nc" id="L1094">    public float getScale() { return UI.scale(); }</span>
 
     /**
      *  The number returned by this method is used to scale the UI
@@ -1097,7 +1102,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      * @return The current UI scale factor, which is used to scale the UI
      *         for high resolution displays (high dots-per-inch, or DPI).
      */
-<span class="nc" id="L1100">    public float scale() { return UI.scale(); }</span>
+<span class="nc" id="L1105">    public float scale() { return UI.scale(); }</span>
 
     /**
      *  Use this method inside custom {@link Painter} implementations (see {@link #paint(AnimationState, Painter)})
@@ -1106,7 +1111,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  @param value The {@code int} value to scale.
      *  @return The scaled {@code int} value.
      */
-<span class="nc" id="L1109">    public int scale( int value ) { return UI.scale(value); }</span>
+<span class="nc" id="L1114">    public int scale( int value ) { return UI.scale(value); }</span>
 
     /**
      *  Use this method inside custom {@link Painter} implementations (see {@link #paint(AnimationState, Painter)})
@@ -1115,7 +1120,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  @param value The {@code float} value to scale.
      *  @return The scaled {@code float} value.
      */
-<span class="nc" id="L1118">    public float scale( float value ) { return UI.scale(value); }</span>
+<span class="nc" id="L1123">    public float scale( float value ) { return UI.scale(value); }</span>
 
     /**
      *  Use this method inside custom {@link Painter} implementations (see {@link #paint(AnimationState, Painter)})
@@ -1124,7 +1129,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  @param value The {@code double} value to scale.
      *  @return The scaled {@code double} value.
      */
-<span class="nc" id="L1127">    public double scale( double value ) { return UI.scale(value); }</span>
+<span class="nc" id="L1132">    public double scale( double value ) { return UI.scale(value); }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

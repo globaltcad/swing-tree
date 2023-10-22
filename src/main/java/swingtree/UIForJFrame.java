@@ -2,6 +2,7 @@ package swingtree;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Optional;
 
 public class UIForJFrame<F extends JFrame> extends UIForAnyWindow<UIForJFrame<F>, F>
 {
@@ -43,7 +44,9 @@ public class UIForJFrame<F extends JFrame> extends UIForAnyWindow<UIForJFrame<F>
 		frame.setVisible(true);
 	}
 
-	@Override protected JRootPane _getRootPane() { return getComponent().getRootPane(); }
+	@Override protected Optional<JRootPane> _getRootPane() {
+		return Optional.ofNullable(getComponent().getRootPane());
+	}
 
 	@Override
 	protected void _setTitle(String title) {

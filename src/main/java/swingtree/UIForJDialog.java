@@ -2,6 +2,7 @@ package swingtree;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Optional;
 
 public class UIForJDialog<D extends JDialog> extends UIForAnyWindow<UIForJDialog<D>, D>
 {
@@ -51,8 +52,8 @@ public class UIForJDialog<D extends JDialog> extends UIForAnyWindow<UIForJDialog
 	}
 
 	@Override
-	protected JRootPane _getRootPane() {
-		return getComponent().getRootPane();
+	protected Optional<JRootPane> _getRootPane() {
+		return Optional.ofNullable(getComponent().getRootPane());
 	}
 
 	@Override

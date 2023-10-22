@@ -5,6 +5,7 @@ import sprouts.Action;
 import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -51,19 +52,19 @@ public class ComponentDelegate&lt;C extends JComponent, E&gt; extends AbstractDe
     public ComponentDelegate(
         C component, E event, Supplier&lt;List&lt;JComponent&gt;&gt; siblingSource
     ) {
-<span class="fc" id="L54">        super(component, component);</span>
-<span class="fc" id="L55">        this.event = event;</span>
-<span class="fc" id="L56">        this.siblingSource = siblingSource;</span>
-<span class="fc" id="L57">    }</span>
+<span class="fc" id="L55">        super(component, component);</span>
+<span class="fc" id="L56">        this.event         = Objects.requireNonNull(event);</span>
+<span class="fc" id="L57">        this.siblingSource = Objects.requireNonNull(siblingSource);</span>
+<span class="fc" id="L58">    }</span>
 
     /**
      * @return The component for which the current {@link Action} originated.
      */
     public final C getComponent() {
         // We make sure that only the Swing thread can access the component:
-<span class="fc bfc" id="L64" title="All 2 branches covered.">        if ( UI.thisIsUIThread() ) return _component();</span>
+<span class="fc bfc" id="L65" title="All 2 branches covered.">        if ( UI.thisIsUIThread() ) return _component();</span>
         else
-<span class="fc" id="L66">            throw new IllegalStateException(</span>
+<span class="fc" id="L67">            throw new IllegalStateException(</span>
                     &quot;Component can only be accessed by the Swing thread.&quot;
                 );
     }
@@ -77,25 +78,25 @@ public class ComponentDelegate&lt;C extends JComponent, E&gt; extends AbstractDe
      *               which will be executed by the Swing thread.
      */
     public final void forComponent( Consumer&lt;C&gt; action ) {
-<span class="pc bpc" id="L80" title="1 of 2 branches missed.">        if ( UI.thisIsUIThread() )</span>
-<span class="nc" id="L81">            action.accept(_component());</span>
+<span class="pc bpc" id="L81" title="1 of 2 branches missed.">        if ( UI.thisIsUIThread() )</span>
+<span class="nc" id="L82">            action.accept(_component());</span>
         else
-<span class="fc" id="L83">            UI.run( () -&gt; action.accept(_component()) );</span>
-<span class="fc" id="L84">    }</span>
+<span class="fc" id="L84">            UI.run( () -&gt; action.accept(_component()) );</span>
+<span class="fc" id="L85">    }</span>
 
-<span class="fc" id="L86">    public final E getEvent() { return event; }</span>
+<span class="fc" id="L87">    public final E getEvent() { return event; }</span>
 
     /**
      * @return A list of all siblings excluding the component from which this instance originated.
      */
     public final List&lt;JComponent&gt; getSiblings() {
         // We make sure that only the Swing thread can access the sibling components:
-<span class="fc bfc" id="L93" title="All 2 branches covered.">        if ( !UI.thisIsUIThread() )</span>
-<span class="fc" id="L94">            throw new IllegalStateException(</span>
+<span class="fc bfc" id="L94" title="All 2 branches covered.">        if ( !UI.thisIsUIThread() )</span>
+<span class="fc" id="L95">            throw new IllegalStateException(</span>
                     &quot;Sibling components can only be accessed by the Swing thread. &quot; +
                     &quot;Please use 'forSiblings(..)' methods instead.&quot;
                 );
-<span class="fc bfc" id="L98" title="All 2 branches covered.">        return siblingSource.get().stream().filter( s -&gt; _component() != s ).collect(Collectors.toList());</span>
+<span class="fc bfc" id="L99" title="All 2 branches covered.">        return siblingSource.get().stream().filter( s -&gt; _component() != s ).collect(Collectors.toList());</span>
     }
     
     /**
@@ -108,11 +109,11 @@ public class ComponentDelegate&lt;C extends JComponent, E&gt; extends AbstractDe
      *               which will be executed by the Swing thread.
      */
     public final void forSiblings( Consumer&lt;List&lt;JComponent&gt;&gt; action ) {
-<span class="pc bpc" id="L111" title="1 of 2 branches missed.">        if ( UI.thisIsUIThread() )</span>
-<span class="nc" id="L112">            action.accept(getSiblings());</span>
+<span class="pc bpc" id="L112" title="1 of 2 branches missed.">        if ( UI.thisIsUIThread() )</span>
+<span class="nc" id="L113">            action.accept(getSiblings());</span>
         else
-<span class="fc" id="L114">            UI.run( () -&gt; action.accept(getSiblings()) );</span>
-<span class="fc" id="L115">    }</span>
+<span class="fc" id="L115">            UI.run( () -&gt; action.accept(getSiblings()) );</span>
+<span class="fc" id="L116">    }</span>
 
     /**
      * @param type The type class of the sibling components to return.
@@ -121,16 +122,16 @@ public class ComponentDelegate&lt;C extends JComponent, E&gt; extends AbstractDe
      */
     public final &lt;T extends JComponent&gt; List&lt;T&gt; getSiblingsOfType(Class&lt;T&gt; type) {
         // We make sure that only the Swing thread can access the sibling components:
-<span class="fc bfc" id="L124" title="All 2 branches covered.">        if ( !UI.thisIsUIThread() )</span>
-<span class="fc" id="L125">            throw new IllegalStateException(</span>
+<span class="fc bfc" id="L125" title="All 2 branches covered.">        if ( !UI.thisIsUIThread() )</span>
+<span class="fc" id="L126">            throw new IllegalStateException(</span>
                     &quot;Sibling components can only be accessed by the Swing thread. &quot; +
                     &quot;Please use 'forSiblingsOfType(..)' methods instead.&quot;
             );
-<span class="fc" id="L129">        return getSiblings()</span>
-<span class="fc" id="L130">                .stream()</span>
-<span class="pc" id="L131">                .filter( s -&gt; type.isAssignableFrom(s.getClass()) )</span>
-<span class="pc" id="L132">                .map( s -&gt; (T) s )</span>
-<span class="fc" id="L133">                .collect(Collectors.toList());</span>
+<span class="fc" id="L130">        return getSiblings()</span>
+<span class="fc" id="L131">                .stream()</span>
+<span class="pc" id="L132">                .filter( s -&gt; type.isAssignableFrom(s.getClass()) )</span>
+<span class="pc" id="L133">                .map( s -&gt; (T) s )</span>
+<span class="fc" id="L134">                .collect(Collectors.toList());</span>
     }
 
     /**
@@ -148,23 +149,23 @@ public class ComponentDelegate&lt;C extends JComponent, E&gt; extends AbstractDe
     public final &lt;T extends JComponent&gt; void forSiblingsOfType(
         Class&lt;T&gt; type, Consumer&lt;List&lt;T&gt;&gt; action
     ) {
-<span class="pc bpc" id="L151" title="1 of 2 branches missed.">        if ( UI.thisIsUIThread() )</span>
-<span class="nc" id="L152">            action.accept(getSiblingsOfType(type));</span>
+<span class="pc bpc" id="L152" title="1 of 2 branches missed.">        if ( UI.thisIsUIThread() )</span>
+<span class="nc" id="L153">            action.accept(getSiblingsOfType(type));</span>
         else
-<span class="fc" id="L154">            UI.run( () -&gt; action.accept(getSiblingsOfType(type)) );</span>
-<span class="fc" id="L155">    }</span>
+<span class="fc" id="L155">            UI.run( () -&gt; action.accept(getSiblingsOfType(type)) );</span>
+<span class="fc" id="L156">    }</span>
 
     /**
      * @return A list of all siblings including the component from which this instance originated.
      */
     public final List&lt;JComponent&gt; getSiblinghood() {
         // We make sure that only the Swing thread can access the sibling components:
-<span class="fc bfc" id="L162" title="All 2 branches covered.">        if ( !UI.thisIsUIThread() )</span>
-<span class="fc" id="L163">            throw new IllegalStateException(</span>
+<span class="fc bfc" id="L163" title="All 2 branches covered.">        if ( !UI.thisIsUIThread() )</span>
+<span class="fc" id="L164">            throw new IllegalStateException(</span>
                     &quot;Sibling components can only be accessed by the Swing thread. &quot; +
                     &quot;Please use 'forSiblinghood(..)' methods instead.&quot;
             );
-<span class="fc" id="L167">        return new ArrayList&lt;&gt;(siblingSource.get());</span>
+<span class="fc" id="L168">        return new ArrayList&lt;&gt;(siblingSource.get());</span>
     }
 
     /**
@@ -177,11 +178,11 @@ public class ComponentDelegate&lt;C extends JComponent, E&gt; extends AbstractDe
      *               which will be executed by the Swing thread.
      */
     public final void forSiblinghood( Consumer&lt;List&lt;JComponent&gt;&gt; action ) {
-<span class="pc bpc" id="L180" title="1 of 2 branches missed.">        if ( UI.thisIsUIThread() )</span>
-<span class="nc" id="L181">            action.accept(getSiblinghood());</span>
+<span class="pc bpc" id="L181" title="1 of 2 branches missed.">        if ( UI.thisIsUIThread() )</span>
+<span class="nc" id="L182">            action.accept(getSiblinghood());</span>
         else
-<span class="fc" id="L183">            UI.run( () -&gt; action.accept(getSiblinghood()) );</span>
-<span class="fc" id="L184">    }</span>
+<span class="fc" id="L184">            UI.run( () -&gt; action.accept(getSiblinghood()) );</span>
+<span class="fc" id="L185">    }</span>
 
     /**
      * @param type The type of the sibling components to return.
@@ -190,16 +191,16 @@ public class ComponentDelegate&lt;C extends JComponent, E&gt; extends AbstractDe
      */
     public final &lt;T extends JComponent&gt; List&lt;T&gt; getSiblinghoodOfType(Class&lt;T&gt; type) {
         // We make sure that only the Swing thread can access the sibling components:
-<span class="fc bfc" id="L193" title="All 2 branches covered.">        if ( !UI.thisIsUIThread() )</span>
-<span class="fc" id="L194">            throw new IllegalStateException(</span>
+<span class="fc bfc" id="L194" title="All 2 branches covered.">        if ( !UI.thisIsUIThread() )</span>
+<span class="fc" id="L195">            throw new IllegalStateException(</span>
                 &quot;Sibling components can only be accessed by the Swing thread. &quot; +
                 &quot;Please use 'forSiblinghoodOfType(..)' methods instead.&quot;
             );
-<span class="fc" id="L198">        return new ArrayList&lt;&gt;(siblingSource.get())</span>
-<span class="fc" id="L199">                .stream()</span>
-<span class="pc" id="L200">                .filter( s -&gt; type.isAssignableFrom(s.getClass()) )</span>
-<span class="pc" id="L201">                .map( s -&gt; (T) s )</span>
-<span class="fc" id="L202">                .collect(Collectors.toList());</span>
+<span class="fc" id="L199">        return new ArrayList&lt;&gt;(siblingSource.get())</span>
+<span class="fc" id="L200">                .stream()</span>
+<span class="pc" id="L201">                .filter( s -&gt; type.isAssignableFrom(s.getClass()) )</span>
+<span class="pc" id="L202">                .map( s -&gt; (T) s )</span>
+<span class="fc" id="L203">                .collect(Collectors.toList());</span>
     }
 
     /**
@@ -217,11 +218,11 @@ public class ComponentDelegate&lt;C extends JComponent, E&gt; extends AbstractDe
     public final &lt;T extends JComponent&gt; void forSiblinghoodOfType(
         Class&lt;T&gt; type, Consumer&lt;List&lt;T&gt;&gt; action
     ) {
-<span class="pc bpc" id="L220" title="1 of 2 branches missed.">        if ( UI.thisIsUIThread() )</span>
-<span class="nc" id="L221">            action.accept(getSiblinghoodOfType(type));</span>
+<span class="pc bpc" id="L221" title="1 of 2 branches missed.">        if ( UI.thisIsUIThread() )</span>
+<span class="nc" id="L222">            action.accept(getSiblinghoodOfType(type));</span>
         else
-<span class="fc" id="L223">            UI.run( () -&gt; action.accept(getSiblinghoodOfType(type)) );</span>
-<span class="fc" id="L224">    }</span>
+<span class="fc" id="L224">            UI.run( () -&gt; action.accept(getSiblinghoodOfType(type)) );</span>
+<span class="fc" id="L225">    }</span>
 
 }
 

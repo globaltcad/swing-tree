@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SplitItemDelegate.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">SplitItemDelegate.java</span></div><h1>SplitItemDelegate.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import sprouts.Action;
+import swingtree.components.JSplitButton;
+
+import javax.swing.JMenuItem;
+import java.awt.event.ActionEvent;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+
+/**
+ * Instances of this are delegated to the individual {@link JSplitButton} items
+ * and their {@link ActionEvent}s exposed to you inside your {@link Action} handlers,
+ * like for example one you would supply to {@link #onSelection(Action)}.
+ * This class exists to give said actions all the necessary context
+ * they need to perform their tasks.
+ *
+ * @param &lt;I&gt; The {@link JMenuItem} subtype for which this context was created.
+ */
+public final class SplitItemDelegate&lt;I extends JMenuItem&gt; extends AbstractDelegate&lt;I&gt; {
+    private final ActionEvent event;
+    private final JSplitButton splitButton;
+    private final Supplier&lt;List&lt;I&gt;&gt; siblingsSource;
+
+    SplitItemDelegate(
+            ActionEvent event,
+            JSplitButton splitButton,
+            Supplier&lt;List&lt;I&gt;&gt; siblingsSource,
+            I currentItem
+    ) {
+<span class="fc" id="L33">        super(currentItem, splitButton);</span>
+<span class="fc" id="L34">        this.event = Objects.requireNonNull(event);</span>
+<span class="fc" id="L35">        this.splitButton = Objects.requireNonNull(splitButton);</span>
+<span class="fc" id="L36">        this.siblingsSource = Objects.requireNonNull(siblingsSource);</span>
+<span class="fc" id="L37">    }</span>
+
+    /**
+     * @return The {@link ActionEvent} which caused this action to be executed.
+     */
+    public ActionEvent getEvent() {
+<span class="nc" id="L43">        return event;</span>
+    }
+
+    /**
+     * @return The {@link JSplitButton} to which this {@link SplitItem} (and its {@link JMenuItem}) belongs.
+     */
+    public JSplitButton getSplitButton() {
+        // We make sure that only the Swing thread can access the component:
+<span class="pc bpc" id="L51" title="1 of 2 branches missed.">        if (UI.thisIsUIThread()) return splitButton;</span>
+        else
+<span class="nc" id="L53">            throw new IllegalStateException(</span>
+                    &quot;Split button can only be accessed by the Swing thread.&quot;
+            );
+    }
+
+    /**
+     * @return The {@link JMenuItem} which caused this action to be executed.
+     */
+    public final I getCurrentItem() {
+        // We make sure that only the Swing thread can access the component:
+<span class="pc bpc" id="L63" title="1 of 2 branches missed.">        if (UI.thisIsUIThread()) return _component();</span>
+        else
+<span class="nc" id="L65">            throw new IllegalStateException(</span>
+                    &quot;The current button item can only be accessed by the Swing thread.&quot;
+            );
+    }
+
+    /**
+     * @return A list of all the {@link JMenuItem} which constitute the options exposed by the {@link JSplitButton}.
+     */
+    public List&lt;I&gt; getSiblinghood() {
+        // We make sure that only the Swing thread can access the sibling components:
+<span class="pc bpc" id="L75" title="1 of 2 branches missed.">        if (!UI.thisIsUIThread())</span>
+<span class="nc" id="L76">            throw new IllegalStateException(</span>
+                    &quot;Sibling components can only be accessed by the Swing thread.&quot;
+            );
+<span class="fc" id="L79">        return this.siblingsSource.get();</span>
+    }
+
+    /**
+     * @return A list of all the {@link JMenuItem} which constitute the options exposed by the {@link JSplitButton}
+     * except the current {@link JMenuItem} exposed by {@link #getCurrentItem()}.
+     */
+    public List&lt;I&gt; getSiblings() {
+        // We make sure that only the Swing thread can access the sibling components:
+<span class="nc bnc" id="L88" title="All 2 branches missed.">        if (!UI.thisIsUIThread())</span>
+<span class="nc" id="L89">            throw new IllegalStateException(</span>
+                    &quot;Sibling components can only be accessed by the Swing thread.&quot;
+            );
+<span class="nc" id="L92">        return this.siblingsSource.get()</span>
+<span class="nc" id="L93">                .stream()</span>
+<span class="nc bnc" id="L94" title="All 2 branches missed.">                .filter(s -&gt; s != getCurrentItem())</span>
+<span class="nc" id="L95">                .collect(Collectors.toList());</span>
+    }
+
+    /**
+     * Selects the current {@link JMenuItem} by passing {@code true}
+     * to the {@link JMenuItem#setSelected(boolean)} method.
+     *
+     * @return This {@link SplitItemDelegate} instance to allow for method chaining.
+     */
+    public SplitItemDelegate&lt;I&gt; selectCurrentItem() {
+        // We make sure that only the Swing thread can modify components:
+<span class="nc bnc" id="L106" title="All 2 branches missed.">        if (!UI.thisIsUIThread()) {</span>
+<span class="nc" id="L107">            UI.run(this::selectCurrentItem);</span>
+<span class="nc" id="L108">            return this;</span>
+        }
+<span class="nc" id="L110">        this.getCurrentItem().setSelected(true);</span>
+<span class="nc" id="L111">        return this;</span>
+    }
+
+    /**
+     * Selects only the current {@link JMenuItem} by passing {@code true}
+     * to the {@link JMenuItem#setSelected(boolean)} method.
+     * All other {@link JMenuItem}s will be unselected.
+     *
+     * @return This {@link SplitItemDelegate} instance to allow for method chaining.
+     */
+    public SplitItemDelegate&lt;I&gt; selectOnlyCurrentItem() {
+        // We make sure that only the Swing thread can modify components:
+<span class="pc bpc" id="L123" title="1 of 2 branches missed.">        if (!UI.thisIsUIThread()) {</span>
+<span class="nc" id="L124">            UI.run(this::selectOnlyCurrentItem);</span>
+<span class="nc" id="L125">            return this;</span>
+        }
+<span class="fc" id="L127">        this.unselectAllItems();</span>
+<span class="fc" id="L128">        this.getCurrentItem().setSelected(true);</span>
+<span class="fc" id="L129">        return this;</span>
+    }
+
+    /**
+     * Unselects the current {@link JMenuItem} by passing {@code false}
+     * to the {@link JMenuItem#setSelected(boolean)} method.
+     *
+     * @return This {@link SplitItemDelegate} instance to allow for method chaining.
+     */
+    public SplitItemDelegate&lt;I&gt; unselectCurrentItem() {
+        // We make sure that only the Swing thread can modify components:
+<span class="nc bnc" id="L140" title="All 2 branches missed.">        if (!UI.thisIsUIThread()) {</span>
+<span class="nc" id="L141">            UI.run(this::unselectCurrentItem);</span>
+<span class="nc" id="L142">            return this;</span>
+        }
+<span class="nc" id="L144">        this.getCurrentItem().setSelected(false);</span>
+<span class="nc" id="L145">        return this;</span>
+    }
+
+    /**
+     * Unselects all {@link JMenuItem}s by passing {@code false}
+     * to their {@link JMenuItem#setSelected(boolean)} methods.
+     *
+     * @return This {@link SplitItemDelegate} instance to allow for method chaining.
+     */
+    public SplitItemDelegate&lt;I&gt; unselectAllItems() {
+        // We make sure that only the Swing thread can modify components:
+<span class="pc bpc" id="L156" title="1 of 2 branches missed.">        if (!UI.thisIsUIThread()) {</span>
+<span class="nc" id="L157">            UI.run(this::unselectAllItems);</span>
+<span class="nc" id="L158">            return this;</span>
+        }
+<span class="fc" id="L160">        getSiblinghood().forEach(it -&gt; it.setSelected(false));</span>
+<span class="fc" id="L161">        return this;</span>
+    }
+
+    /**
+     * Selects all {@link JMenuItem}s by passing {@code true}
+     * to their {@link JMenuItem#setSelected(boolean)} methods.
+     *
+     * @return This {@link SplitItemDelegate} instance to allow for method chaining.
+     */
+    public SplitItemDelegate&lt;I&gt; selectAllItems() {
+        // We make sure that only the Swing thread can modify components:
+<span class="nc bnc" id="L172" title="All 2 branches missed.">        if (!UI.thisIsUIThread()) {</span>
+<span class="nc" id="L173">            UI.run(this::selectAllItems);</span>
+<span class="nc" id="L174">            return this;</span>
+        }
+<span class="nc" id="L176">        getSiblinghood().forEach(it -&gt; it.setSelected(true));</span>
+<span class="nc" id="L177">        return this;</span>
+    }
+
+    /**
+     * Use this to conveniently make the {@link JSplitButton} display the text
+     * of the currently selected {@link JMenuItem} (button item).
+     *
+     * @return This {@link SplitItemDelegate} instance to allow for method chaining.
+     */
+    public SplitItemDelegate&lt;I&gt; displayCurrentItemText() {
+        // We make sure that only the Swing thread can modify components:
+<span class="fc bfc" id="L188" title="All 2 branches covered.">        if (!UI.thisIsUIThread()) {</span>
+<span class="fc" id="L189">            UI.run(this::displayCurrentItemText);</span>
+<span class="fc" id="L190">            return this;</span>
+        }
+<span class="pc bpc" id="L192" title="1 of 2 branches missed.">        if (getCurrentItem() != null)</span>
+<span class="fc" id="L193">            getSplitButton().setText(getCurrentItem().getText());</span>
+<span class="fc" id="L194">        return this;</span>
+    }
+
+    /**
+     * @param text The text which should be displayed on the {@link JSplitButton}.
+     * @return This {@link SplitItemDelegate} instance to allow for method chaining.
+     */
+    public SplitItemDelegate&lt;I&gt; setButtonText(String text) {
+        // We make sure that only the Swing thread can modify components:
+<span class="fc bfc" id="L203" title="All 2 branches covered.">        if (!UI.thisIsUIThread()) {</span>
+<span class="fc" id="L204">            UI.run(() -&gt; setButtonText(text));</span>
+<span class="fc" id="L205">            return this;</span>
+        }
+<span class="fc" id="L207">        NullUtil.nullArgCheck(text, &quot;text&quot;, String.class);</span>
+<span class="fc" id="L208">        this.splitButton.setText(text);</span>
+<span class="fc" id="L209">        return this;</span>
+    }
+
+    /**
+     * @return The text displayed on the {@link JSplitButton}.
+     */
+    public String getButtonText() {
+<span class="fc" id="L216">        return this.splitButton.getText();</span>
+    }
+
+    /**
+     * @param postfix The text which should be appended to the text displayed on the {@link JSplitButton}.
+     * @return This {@link SplitItemDelegate} instance to allow for method chaining.
+     */
+    public SplitItemDelegate&lt;I&gt; appendToButtonText(String postfix) {
+<span class="fc" id="L224">        NullUtil.nullArgCheck(postfix, &quot;postfix&quot;, String.class);</span>
+        // We make sure that only the Swing thread can modify components:
+<span class="pc bpc" id="L226" title="1 of 2 branches missed.">        if (!UI.thisIsUIThread()) {</span>
+<span class="nc" id="L227">            UI.run(() -&gt; appendToButtonText(postfix));</span>
+<span class="nc" id="L228">            return this;</span>
+        }
+<span class="fc" id="L230">        this.splitButton.setText(this.getButtonText() + postfix);</span>
+<span class="fc" id="L231">        return this;</span>
+    }
+
+    /**
+     * @param prefix The text which should be prepended to the text displayed on the {@link JSplitButton}.
+     * @return This {@link SplitItemDelegate} instance to allow for method chaining.
+     */
+    public SplitItemDelegate&lt;I&gt; prependToButtonText(String prefix) {
+<span class="nc" id="L239">        NullUtil.nullArgCheck(prefix, &quot;postfix&quot;, String.class);</span>
+        // We make sure that only the Swing thread can modify components:
+<span class="nc bnc" id="L241" title="All 2 branches missed.">        if (!UI.thisIsUIThread()) {</span>
+<span class="nc" id="L242">            UI.run(() -&gt; prependToButtonText(prefix));</span>
+<span class="nc" id="L243">            return this;</span>
+        }
+<span class="nc" id="L245">        this.splitButton.setText(prefix + this.getButtonText());</span>
+<span class="nc" id="L246">        return this;</span>
+    }
+
+    /**
+     * Selects the targeted split item ({@link JMenuItem}).
+     *
+     * @param i The item index of the {@link JMenuItem} which should be selected.
+     * @return This {@link SplitItemDelegate} instance to allow for method chaining.
+     */
+    public SplitItemDelegate&lt;I&gt; selectItem(int i) {
+        // We make sure that only the Swing thread can modify components:
+<span class="nc bnc" id="L257" title="All 2 branches missed.">        if (!UI.thisIsUIThread()) {</span>
+<span class="nc" id="L258">            UI.run(() -&gt; selectItem(i));</span>
+<span class="nc" id="L259">            return this;</span>
+        }
+<span class="nc" id="L261">        getSiblinghood().get(i).setSelected(true);</span>
+<span class="nc" id="L262">        return this;</span>
+    }
+
+    /**
+     * Selects the targeted split item ({@link JMenuItem}) and unselects all other items.
+     *
+     * @param i The item index of the {@link JMenuItem} which should be selected exclusively.
+     * @return This {@link SplitItemDelegate} instance to allow for method chaining.
+     */
+    public SplitItemDelegate&lt;I&gt; selectOnlyItem(int i) {
+        // We make sure that only the Swing thread can modify components:
+<span class="nc bnc" id="L273" title="All 2 branches missed.">        if (!UI.thisIsUIThread()) {</span>
+<span class="nc" id="L274">            UI.run(() -&gt; selectOnlyItem(i));</span>
+<span class="nc" id="L275">            return this;</span>
+        }
+<span class="nc" id="L277">        unselectAllItems().getSiblinghood().get(i).setSelected(true);</span>
+<span class="nc" id="L278">        return this;</span>
+    }
+
+    /**
+     * Unselects the targeted split item ({@link JMenuItem}).
+     *
+     * @param i The item index of the {@link JMenuItem} which should be unselected.
+     * @return This {@link SplitItemDelegate} instance to allow for method chaining.
+     */
+    public SplitItemDelegate&lt;I&gt; unselectItem(int i) {
+        // We make sure that only the Swing thread can modify components:
+<span class="nc bnc" id="L289" title="All 2 branches missed.">        if (!UI.thisIsUIThread()) {</span>
+<span class="nc" id="L290">            UI.run(() -&gt; unselectItem(i));</span>
+<span class="nc" id="L291">            return this;</span>
+        }
+<span class="nc" id="L293">        getSiblinghood().get(i).setSelected(false);</span>
+<span class="nc" id="L294">        return this;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
