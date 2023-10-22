@@ -27,6 +27,11 @@ abstract class AbstractBuilder<I, C extends Component>
     private static final Logger log = LoggerFactory.getLogger(AbstractBuilder.class);
 
     /**
+     *  The type class of the component wrapped by this builder node.
+     */
+    protected final Class<C> _type;
+
+    /**
      *  The component wrapped by this builder node.
      */
     private final MaybeWeakReference<C> _component;
@@ -38,7 +43,9 @@ abstract class AbstractBuilder<I, C extends Component>
     private static class MaybeWeakReference<T extends Component> extends WeakReference<T> {
         private T _strongRef; // This is only used to prevent the component from being garbage collected
         public MaybeWeakReference( T referent ) { super(referent); _strongRef = referent; }
-        public void detachStrongRef() { _strongRef = null; }
+        public void detachStrongRef() {
+            _strongRef = null;
+        }
     }
 
     /**
@@ -46,11 +53,6 @@ abstract class AbstractBuilder<I, C extends Component>
      * And also which type of thread can access the component.
      */
     protected final EventProcessor _eventProcessor = SwingTree.get().getEventProcessor();
-
-    /**
-     *  The type class of the component wrapped by this builder node.
-     */
-    protected final Class<C> _type;
 
     /**
      *  Instances of the {@link AbstractBuilder} as well as its subtypes always wrap

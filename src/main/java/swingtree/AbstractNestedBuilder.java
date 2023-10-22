@@ -6,9 +6,11 @@ import swingtree.threading.EventProcessor;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  *  This class is a conceptual extension of the {@link AbstractBuilder} which expects
@@ -21,12 +23,6 @@ import java.util.stream.Collectors;
  */
 abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extends AbstractBuilder<I, C>
 {
-    /**
-     *  A list of all the child builders.
-     */
-    private final List<AbstractNestedBuilder<?,?,?>> _children = new ArrayList<>();
-    private AbstractNestedBuilder<?,?,?> _parent; // The parent builder (This may be null if no parent present or provided)
-
     /**
      * Instances of the AbstractNestedBuilder as well as its sub types always wrap
      * a single component for which they are responsible.
@@ -43,8 +39,13 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extend
      * @return A list of all the siblings of the component wrapped by this builder.
      */
     protected final List<E> getSiblinghood() {
-        if ( _parent == null ) return new ArrayList<>();
-        return _parent._children.stream().map(c -> (E) c.getComponent()).collect(Collectors.toList());
+        return Optional.ofNullable(getComponent().getParent())
+               .map(Container::getComponents)
+               .map(Arrays::stream)
+               .orElseGet(Stream::empty)
+               .filter(c -> c instanceof JComponent)
+               .map(c -> (E) c)
+               .collect(Collectors.toList());
     }
 
     /**
@@ -84,7 +85,7 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extend
      */
     protected abstract void _add( E component, Object conf );
 
-    protected final void _doAdd( AbstractNestedBuilder<?, ?, ?> builder, Object conf)
+    protected final void _doAdd( AbstractNestedBuilder<?, ?, ?> builder, Object conf )
     {
         NullUtil.nullArgCheck(builder, "builder", AbstractNestedBuilder.class);
 
@@ -98,17 +99,7 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extend
                     "Please use 'UI.run(()->...)' method to execute your modifications on the EDT."
                 );
 
-        if ( _children.contains(builder) )
-            throw new IllegalArgumentException("Builder already used!");
-
-        _children.add(builder);
-
-        if ( builder._parent != null )
-            throw new IllegalArgumentException("Builder already used!");
-
         E component = (E) builder.getComponent();
-
-        builder._parent = this;
 
         if ( component instanceof JComponent ) {
             JComponent c = (JComponent) component;
@@ -127,7 +118,7 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extend
         else
             _add(component, conf);
 
-        _detachStrongRef(); // Detach strong reference to the component to allow it to be garbage collected.
+        builder._detachStrongRef(); // Detach strong reference to the component to allow it to be garbage collected.
     }
 
     /**
@@ -168,6 +159,9 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extend
         return _this();
     }
 
-    protected final int _childCount() { return _children.size(); }
+    protected final int _childCount() {
+        C c = getComponent();
+        return  ( c instanceof Container ? ( (Container) c ).getComponentCount() : 0 );
+    }
 
 }
