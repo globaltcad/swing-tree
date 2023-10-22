@@ -49,9 +49,6 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
 
     private final static String _TIMERS_KEY = "_swing-tree.timers";
 
-    private boolean _idAlreadySet = false; // The id translates to the 'name' property of swing components.
-    private boolean _migAlreadySet = false;
-
     /**
      *  Extensions of the {@link  UIForAnySwing} always wrap
      *  a single component for which they are responsible.
@@ -86,10 +83,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return The JComponent type which will be wrapped by this builder node.
      */
     public final I id( String id ) {
-        if ( _idAlreadySet )
-            throw new IllegalArgumentException("The id has already been specified for this component!");
         getComponent().setName(id);
-        _idAlreadySet = true;
         return _this();
     }
 
@@ -1337,8 +1331,6 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withLayout( LayoutManager layout ) {
-        if ( _migAlreadySet )
-            throw new IllegalArgumentException("The mig layout has already been specified for this component!");
         getComponent().setLayout(layout);
         return _this();
     }
@@ -1706,9 +1698,6 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @see <a href="http://www.miglayout.com/QuickStart.pdf">Quick Start Guide</a>
      */
     public final I withLayout( String constraints, String colConstrains, String rowConstraints ) {
-        if ( _migAlreadySet )
-            throw new IllegalArgumentException("The mig layout has already been specified for this component!");
-
         NullUtil.nullArgCheck(constraints, "constraints", String.class, "Please use an empty String instead of null!");
         NullUtil.nullArgCheck(colConstrains, "colConstrains", String.class, "Please use an empty String instead of null!");
         NullUtil.nullArgCheck(rowConstraints, "rowConstraints", String.class, "Please use an empty String instead of null!");
@@ -1725,7 +1714,6 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
 
         MigLayout migLayout = new MigLayout(constraints, colConstrains, rowConstraints);
         getComponent().setLayout(migLayout);
-        _migAlreadySet = true;
         return _this();
     }
 
@@ -1738,9 +1726,6 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withLayout( LC attr, AC colConstrains, AC rowConstraints ) {
-        if ( _migAlreadySet )
-            throw new IllegalArgumentException("The mig layout has already been specified for this component!");
-
         // We make sure the default hidemode is 2 instead of 3 (which sucks because it takes up too much space)
         if ( attr == null )
             attr = new LC().hideMode(2);
@@ -1749,7 +1734,6 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
 
         MigLayout migLayout = new MigLayout(attr, colConstrains, rowConstraints);
         getComponent().setLayout(migLayout);
-        _migAlreadySet = true;
         return _this();
     }
 
