@@ -67,6 +67,11 @@ abstract class AbstractBuilder<I, C extends Component>
             ComponentExtension.makeSureComponentHasExtension( (JComponent) component );
     }
 
+    protected AbstractBuilder<I,C> _with( Consumer<C> action ) {
+        action.accept( getComponent() );
+        return this;
+    }
+
     protected final boolean _canBeRemoved( Action<?> action ) {
         try {
             return action.canBeRemoved();
@@ -238,8 +243,7 @@ abstract class AbstractBuilder<I, C extends Component>
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I peek( Peeker<C> action ) {
-        action.accept(getComponent());
-        return _this();
+        return _with( c -> action.accept(c) )._this();
     }
 
     /**

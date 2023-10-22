@@ -34,6 +34,11 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
 {
     protected UIForAnyButton(B component ) { super(component); }
 
+    @Override
+    protected UIForAnyButton<I,B> _with( Consumer<B> action ) {
+        return (UIForAnyButton<I, B>) super._with( action );
+    }
+
     /**
      * Defines the single line of text the wrapped button type will display.
      * If the value of text is null or empty string, nothing is displayed.
@@ -42,8 +47,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      */
     public final I withText( String text ) {
-        getComponent().setText(text);
-        return _this();
+        return _with( c -> c.setText(text) )._this();
     }
 
     /**
@@ -58,8 +62,8 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     public final I withText( Val<String> text ) {
         NullUtil.nullArgCheck(text, "val", Val.class);
         NullUtil.nullPropertyCheck(text, "text");
-        _onShow( text, v -> getComponent().setText(v) );
-        return withText( text.orElseThrow() );
+        return _with( c -> _onShow( text, v -> c.setText(v) ) )
+               .withText( text.orElseThrow() );
     }
 
     /**
@@ -77,8 +81,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      */
     public I withIcon( Icon icon ) {
         NullUtil.nullArgCheck(icon,"icon",Icon.class);
-        getComponent().setIcon(icon);
-        return _this();
+        return _with( c -> c.setIcon(icon) )._this();
     }
 
     /**
@@ -111,8 +114,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
 
             icon = new ImageIcon(icon.getImage().getScaledInstance(width, height, scaleHint));
         }
-        getComponent().setIcon(icon);
-        return _this();
+        return withIcon(icon);
     }
 
     /**
@@ -126,7 +128,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
         if ( icon instanceof SvgIcon)
         {
             SvgIcon svgIcon = (SvgIcon) icon;
-            return withIcon(svgIcon.withFitComponent(fitComponent));
+            return withIcon( svgIcon.withFitComponent(fitComponent) );
         }
         else
         {
@@ -137,7 +139,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
                 width  = Math.max(width,  c.getMinimumSize().width);
                 height = Math.max(height, c.getMinimumSize().height);
                 if ( width > 0 && height > 0 )
-                    withIcon(width, height, icon);
+                    withIcon( width, height, icon );
             });
         }
         return _this();
@@ -146,8 +148,9 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     public I withIcon( IconDeclaration icon, UI.FitComponent fitComponent ) {
         NullUtil.nullArgCheck(icon,"icon", IconDeclaration.class);
         NullUtil.nullArgCheck(fitComponent,"fitComponent", UI.FitComponent.class);
-        icon.find().ifPresent( i -> withIcon(i, fitComponent) );
-        return _this();
+        return icon.find()
+                   .map( i -> withIcon(i, fitComponent) )
+                   .orElseGet( this::_this );
     }
 
     /**
@@ -160,8 +163,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      */
     public I withIcon( IconDeclaration icon ) {
         NullUtil.nullArgCheck(icon,"icon", IconDeclaration.class);
-        icon.find().ifPresent( i -> getComponent().setIcon(i) );
-        return _this();
+        return _with( c -> icon.find().ifPresent( i -> c.setIcon(i) ) )._this();
     }
 
     /**
@@ -192,8 +194,8 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     public I withIcon( Val<IconDeclaration> icon ) {
         NullUtil.nullArgCheck(icon, "icon", Val.class);
         NullUtil.nullPropertyCheck(icon, "icon");
-        _onShow( icon, declaration -> declaration.find().ifPresent( i -> getComponent().setIcon(i) ) );
-        return withIcon(icon.orElseThrow());
+        return _with( c -> _onShow( icon, declaration -> declaration.find().ifPresent( i -> c.setIcon(i) ) ) )
+               .withIcon(icon.orElseThrow());
     }
 
     /**
@@ -202,10 +204,11 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      */
     public I withFontSize( int size ) {
-        B button = getComponent();
-        Font old = button.getFont();
-        button.setFont(old.deriveFont(UI.scale((float)size)));
-        return _this();
+        return _with( button -> {
+                   Font old = button.getFont();
+                   button.setFont(old.deriveFont(UI.scale((float)size)));
+               })
+               ._this();
     }
 
     /**
