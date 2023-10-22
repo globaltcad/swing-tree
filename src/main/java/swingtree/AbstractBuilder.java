@@ -1,5 +1,7 @@
 package swingtree;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sprouts.*;
 import sprouts.Action;
 import swingtree.api.Peeker;
@@ -22,6 +24,8 @@ import java.util.function.Supplier;
  */
 abstract class AbstractBuilder<I, C extends Component>
 {
+    private static final Logger log = LoggerFactory.getLogger(AbstractBuilder.class);
+
     /**
      *  The component wrapped by this builder node.
      */
@@ -59,6 +63,15 @@ abstract class AbstractBuilder<I, C extends Component>
         _component = new MaybeWeakReference<>(component);
         if ( component instanceof JComponent )
             ComponentExtension.makeSureComponentHasExtension( (JComponent) component );
+    }
+
+    protected final boolean _canBeRemoved( Action<?> action ) {
+        try {
+            return action.canBeRemoved();
+        } catch ( Exception e ) {
+            log.error("Failed to check if action can be removed.", e);
+            return false;
+        }
     }
 
     /**
