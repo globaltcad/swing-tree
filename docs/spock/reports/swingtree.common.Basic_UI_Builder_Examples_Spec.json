@@ -1,7 +1,7 @@
 {
   "className":"swingtree.common.Basic_UI_Builder_Examples_Spec",
   "title":"Writing Declarative GUI Code",
-  "narrative":"Imperative code is code that describes how you want to achieve something,\n    typically a procedure or a sequence of steps that need to be executed.\n    Declarative code on the other hand is code that \n    describes **what you want to achieve**,\n    typically a state or data structure that you want to create.\n    This is why declarative code is the perfect fit for UI code,\n    and making it possible to write declarative UI code is the \n    main purpose and core motivation of Swing-Tree.\n\n    Its API is designed so that the code you write with it looks \n    and feels a little bit like HTML, CSS and JavaScript.\n\n    It is inspired by frameworks like Jetpack Compose, Flutter, React and SwiftUI\n    which are also based on nested builder patterns to design your UI.\n\n    In this specification we cover the utter most basics of SwingTree,\n    so that you can get a feeling for how it works and what it can do for you.",
+  "narrative":"Imperative code is code that describes how you want to achieve something,\n    typically a procedure or a sequence of steps that needs to be executed.\n    Declarative code on the other hand is code that \n    describes **what you want to achieve**,\n    typically a state or data structure that you want to create.\n    This is why declarative code is the perfect fit for UI code,\n    and making it possible to write declarative UI code is the \n    main purpose and core motivation of Swing-Tree.\n\n    Its API is designed so that the code you write with it looks \n    and feels a little bit like HTML, CSS and JavaScript.\n\n    It is inspired by frameworks like \n    [Jetpack Compose](https://developer.android.com/jetpack/compose), [SwiftUI](https://developer.apple.com/xcode/swiftui/), \n    [Flutter](https://flutter.dev) and \n    [JetBrain's UI DSL](https://plugins.jetbrains.com/docs/intellij/kotlin-ui-dsl-version-2.html#ui-dsl-basics)\n    which are also based on using declarative builder patterns to design your UI.\n\n    In this specification we cover the utter most basics of SwingTree,\n    so that you can get a feeling for how it works and what it can do for you.",
   "subjects":[],
   "statistics":{
     "runs":"16",
@@ -81,7 +81,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            Swing tree wraps you components in builder nodes, so you can\n            use the same API to add any kind of component to your UI.\n            Use the `UI.of(..)` factory method to wrap your components\n            or simply use the various kinds of default factory methods like\n             `UI.panel()`, `UI.button()`, `UI.label()` etc.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            Swing tree wraps you components in builder nodes, so you can\n            use the same API to add any kind of component to your UI.\n            Use the `UI.of(..)` factory method to wrap your components\n            or simply use the various kinds of default factory methods like\n            `UI.panel()`, `UI.button()`, `UI.label()` etc.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"A regular swing object.","code":["var panel = new JPanel()"]},

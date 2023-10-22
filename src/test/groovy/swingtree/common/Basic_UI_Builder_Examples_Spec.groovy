@@ -22,7 +22,7 @@ import java.awt.event.KeyListener
 @Narrative('''
 
     Imperative code is code that describes how you want to achieve something,
-    typically a procedure or a sequence of steps that need to be executed.
+    typically a procedure or a sequence of steps that needs to be executed.
     Declarative code on the other hand is code that 
     describes **what you want to achieve**,
     typically a state or data structure that you want to create.
@@ -33,8 +33,11 @@ import java.awt.event.KeyListener
     Its API is designed so that the code you write with it looks 
     and feels a little bit like HTML, CSS and JavaScript.
     
-    It is inspired by frameworks like Jetpack Compose, Flutter, React and SwiftUI
-    which are also based on nested builder patterns to design your UI.
+    It is inspired by frameworks like 
+    [Jetpack Compose](https://developer.android.com/jetpack/compose), [SwiftUI](https://developer.apple.com/xcode/swiftui/), 
+    [Flutter](https://flutter.dev) and 
+    [JetBrain's UI DSL](https://plugins.jetbrains.com/docs/intellij/kotlin-ui-dsl-version-2.html#ui-dsl-basics)
+    which are also based on using declarative builder patterns to design your UI.
     
     In this specification we cover the utter most basics of SwingTree,
     so that you can get a feeling for how it works and what it can do for you.
@@ -159,7 +162,7 @@ class Basic_UI_Builder_Examples_Spec extends Specification
             use the same API to add any kind of component to your UI.
             Use the `UI.of(..)` factory method to wrap your components
             or simply use the various kinds of default factory methods like
-             `UI.panel()`, `UI.button()`, `UI.label()` etc.
+            `UI.panel()`, `UI.button()`, `UI.label()` etc.
         """
         given : 'A regular swing object.'
             var panel = new JPanel()

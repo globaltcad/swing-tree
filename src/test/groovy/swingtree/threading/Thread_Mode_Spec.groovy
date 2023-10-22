@@ -26,7 +26,6 @@ import java.awt.event.ActionEvent
     in the background without blocking the UI, it improves
     the performance and responsiveness of you desktop application as a whole.
     
-    
 ''')
 class Thread_Mode_Spec extends Specification
 {
@@ -79,9 +78,9 @@ class Thread_Mode_Spec extends Specification
         given: 'A UI built with the coupled thread mode.'
             var eventWasHandled = false
             var node =
-                    UI.use(EventProcessor.COUPLED,
-                        ()-> UI.button("Click Me")
-                                .onClick({ eventWasHandled = true })
+                    UI.use(EventProcessor.COUPLED, ()->
+                        UI.button("Click Me")
+                        .onClick({ eventWasHandled = true })
                     )
         when: 'We click the button.'
             node.component.doClick()
@@ -103,13 +102,13 @@ class Thread_Mode_Spec extends Specification
             """
         given: '2 UIs built with the decoupled thread mode, one error prone and the other one safe.'
             var ui1 =
-                    UI.use(EventProcessor.DECOUPLED,
-                            ()-> UI.button("X").onClick(unsafeAccess)
-                        )
+                    UI.use(EventProcessor.DECOUPLED, ()->
+                        UI.button("X").onClick(unsafeAccess)
+                    )
             var ui2 =
-                    UI.use(EventProcessor.DECOUPLED,
-                            ()-> UI.button("X").onClick(safeAccess)
-                        )
+                    UI.use(EventProcessor.DECOUPLED, ()->
+                        UI.button("X").onClick(safeAccess)
+                    )
         when : 'We click the button and process the event queue (by this current non-swing thread).'
             UI.runNow( () -> ui1.component.doClick() )
             EventProcessor.DECOUPLED.joinUntilDoneOrException() // This is done by a custom thread in a real world application.
@@ -138,12 +137,12 @@ class Thread_Mode_Spec extends Specification
     {
         given : 'A UI built with the decoupled thread mode.'
             var ui =
-                    UI.use(EventProcessor.DECOUPLED,
-                            ()-> UI.checkBox("X").onClick( it ->{
-                                UI.run(()-> it.get() )
-                                // it.get() // This would throw an exception!
-                            })
-                        )
+                    UI.use(EventProcessor.DECOUPLED, ()->
+                        UI.checkBox("X").onClick( it ->{
+                            UI.run(()-> it.get() )
+                            // it.get() // This would throw an exception!
+                        })
+                    )
         when : 'We check the check box and process the event queue (by this current non-swing thread).'
             UI.runNow( () -> ui.component.doClick() )
             EventProcessor.DECOUPLED.joinFor(1) // This is done by a custom thread in a real world application.

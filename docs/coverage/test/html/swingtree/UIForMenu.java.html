@@ -2,24 +2,37 @@
 
 import sprouts.Val;
 
-import javax.swing.*;
+import javax.swing.JMenu;
 
 /**
- *  A swing tree builder node for {@link JMenu} instances.
+ *  A SwingTree builder node designed for configuring {@link JMenu} instances.
  */
 public class UIForMenu&lt;M extends JMenu&gt; extends UIForAnyMenuItem&lt;UIForMenu&lt;M&gt;, M&gt;
 {
 <span class="nc" id="L12">    protected UIForMenu( M component ) { super(component); }</span>
 
-
+    /**
+     *  Sets the popup menu visibility for this {@link JMenu}
+     *  through the {@link JMenu#setPopupMenuVisible(boolean)} method.
+     *
+     * @param popupMenuVisible The popup menu visibility to set.
+     * @return This very instance, which enables builder-style method chaining.
+     */
     public final UIForMenu&lt;M&gt; popupMenuIsVisibleIf( boolean popupMenuVisible ) {
-<span class="nc" id="L16">        getComponent().setPopupMenuVisible(popupMenuVisible);</span>
-<span class="nc" id="L17">        return this;</span>
+<span class="nc" id="L22">        getComponent().setPopupMenuVisible(popupMenuVisible);</span>
+<span class="nc" id="L23">        return this;</span>
     }
 
+    /**
+     *  Binds to a popup menu visibility property for this {@link JMenu}
+     *  through the {@link JMenu#setPopupMenuVisible(boolean)} method.
+     *
+     * @param val The popup menu visibility property to set.
+     * @return This very instance, which enables builder-style method chaining.
+     */
     public final UIForMenu&lt;M&gt; popupMenuIsVisibleIf( Val&lt;Boolean&gt; val ) {
-<span class="nc" id="L21">        _onShow(val, v -&gt; popupMenuIsVisibleIf(v));</span>
-<span class="nc" id="L22">        return popupMenuIsVisibleIf( val.get() );</span>
+<span class="nc" id="L34">        _onShow(val, v -&gt; popupMenuIsVisibleIf(v));</span>
+<span class="nc" id="L35">        return popupMenuIsVisibleIf( val.get() );</span>
     }
 
 }

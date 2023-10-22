@@ -1,7 +1,7 @@
 {
   "className":"swingtree.combo.Combo_Box_Specification",
   "title":"Drop Downs, aka Combo Boxes",
-  "narrative":"In Swing drop downs are called combo boxes, which\n    is what they will be referred to in this specification as well.  \n    This specification will show you how you can create them and\n    how you can interact with them.",
+  "narrative":"In Swing drop downs are called combo boxes and they are used to select\n    one item from a list of options.\n\n    This specification will show you how you can create them and\n    how you can interact with them using SwingTree.",
   "subjects":["swingtree.UIForCombo"],
   "statistics":{
     "runs":"14",

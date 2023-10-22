@@ -5,45 +5,46 @@ import swingtree.components.JSplitButton;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public final class SplitButtonDelegate&lt;I extends JMenuItem&gt; extends AbstractDelegate&lt;JSplitButton&gt;
 {
         private final Supplier&lt;List&lt;JComponent&gt;&gt; _siblingsSource;
-        private final SplitItem.Delegate&lt;I&gt; _itemsDelegate;
+        private final SplitItemDelegate&lt;I&gt; _itemsDelegate;
 
         SplitButtonDelegate(
-                JSplitButton button,
-                SplitItem.Delegate&lt;I&gt; itemsDelegate,
-                Supplier&lt;List&lt;JComponent&gt;&gt; siblingsSource
+            JSplitButton button,
+            SplitItemDelegate&lt;I&gt; itemsDelegate,
+            Supplier&lt;List&lt;JComponent&gt;&gt; siblingsSource
         ) {
-<span class="fc" id="L21">            super(button, button);</span>
-<span class="fc" id="L22">            _itemsDelegate = itemsDelegate;</span>
-<span class="fc" id="L23">            _siblingsSource = siblingsSource;</span>
-<span class="fc" id="L24">        }</span>
+<span class="fc" id="L22">            super(button, button);</span>
+<span class="fc" id="L23">            _itemsDelegate  = Objects.requireNonNull(itemsDelegate);</span>
+<span class="fc" id="L24">            _siblingsSource = Objects.requireNonNull(siblingsSource);</span>
+<span class="fc" id="L25">        }</span>
 
-<span class="nc" id="L26">        public ActionEvent getEvent() { return _itemsDelegate.getEvent(); }</span>
+<span class="nc" id="L27">        public ActionEvent getEvent() { return _itemsDelegate.getEvent(); }</span>
 
         /**
          * @return The {@link JSplitButton} to which this {@link SplitItem} (and its {@link JMenuItem}) belongs.
          */
         public JSplitButton getSplitButton() {
-<span class="nc" id="L32">            return _itemsDelegate.getSplitButton();</span>
+<span class="nc" id="L33">            return _itemsDelegate.getSplitButton();</span>
         }
 
         /**
          * @return A list of all split button items.
          */
         List&lt;I&gt; getItems() {
-<span class="nc" id="L39">            return _itemsDelegate.getSiblinghood();</span>
+<span class="nc" id="L40">            return _itemsDelegate.getSiblinghood();</span>
         }
 
         /**
          * @return The {@link JMenuItem} which caused this action to be executed.
          */
         public final I getCurrentItem() {
-<span class="nc" id="L46">            return _itemsDelegate.getCurrentItem();</span>
+<span class="nc" id="L47">            return _itemsDelegate.getCurrentItem();</span>
         }
 
         /**
@@ -52,11 +53,11 @@ public final class SplitButtonDelegate&lt;I extends JMenuItem&gt; extends Abstra
          */
         public List&lt;JComponent&gt; getSiblinghood() {
             // We make sure that only the Swing thread can access the sibling components:
-<span class="nc bnc" id="L55" title="All 2 branches missed.">            if ( !UI.thisIsUIThread() )</span>
-<span class="nc" id="L56">                throw new IllegalStateException(</span>
+<span class="nc bnc" id="L56" title="All 2 branches missed.">            if ( !UI.thisIsUIThread() )</span>
+<span class="nc" id="L57">                throw new IllegalStateException(</span>
                         &quot;Sibling components can only be accessed by the Swing thread.&quot;
                     );
-<span class="nc" id="L59">            return _siblingsSource.get();</span>
+<span class="nc" id="L60">            return _siblingsSource.get();</span>
         }
 
         /*
@@ -65,14 +66,14 @@ public final class SplitButtonDelegate&lt;I extends JMenuItem&gt; extends Abstra
          */
         public List&lt;JComponent&gt; getSiblings() {
             // We make sure that only the Swing thread can access the sibling components:
-<span class="nc bnc" id="L68" title="All 2 branches missed.">            if ( !UI.thisIsUIThread() )</span>
-<span class="nc" id="L69">                throw new IllegalStateException(</span>
+<span class="nc bnc" id="L69" title="All 2 branches missed.">            if ( !UI.thisIsUIThread() )</span>
+<span class="nc" id="L70">                throw new IllegalStateException(</span>
                         &quot;Sibling components can only be accessed by the Swing thread.&quot;
                     );
-<span class="nc" id="L72">            return _siblingsSource.get()</span>
-<span class="nc" id="L73">                    .stream()</span>
-<span class="nc bnc" id="L74" title="All 2 branches missed.">                    .filter( s -&gt; s != getCurrentItem() )</span>
-<span class="nc" id="L75">                    .collect(Collectors.toList());</span>
+<span class="nc" id="L73">            return _siblingsSource.get()</span>
+<span class="nc" id="L74">                    .stream()</span>
+<span class="nc bnc" id="L75" title="All 2 branches missed.">                    .filter( s -&gt; s != getCurrentItem() )</span>
+<span class="nc" id="L76">                    .collect(Collectors.toList());</span>
         }
 
         /**
@@ -82,8 +83,8 @@ public final class SplitButtonDelegate&lt;I extends JMenuItem&gt; extends Abstra
          * @return This delegate instance to allow for method chaining.
          */
         public SplitButtonDelegate&lt;I&gt; selectCurrentItem() {
-<span class="nc" id="L85">            _itemsDelegate.selectCurrentItem();</span>
-<span class="nc" id="L86">            return this;</span>
+<span class="nc" id="L86">            _itemsDelegate.selectCurrentItem();</span>
+<span class="nc" id="L87">            return this;</span>
         }
 
         /**
@@ -94,8 +95,8 @@ public final class SplitButtonDelegate&lt;I extends JMenuItem&gt; extends Abstra
          * @return This delegate instance to allow for method chaining.
          */
         public SplitButtonDelegate&lt;I&gt; selectOnlyCurrentItem() {
-<span class="nc" id="L97">            _itemsDelegate.selectOnlyCurrentItem();</span>
-<span class="nc" id="L98">            return this;</span>
+<span class="nc" id="L98">            _itemsDelegate.selectOnlyCurrentItem();</span>
+<span class="nc" id="L99">            return this;</span>
         }
 
         /**
@@ -105,8 +106,8 @@ public final class SplitButtonDelegate&lt;I extends JMenuItem&gt; extends Abstra
          * @return This delegate instance to allow for method chaining.
          */
         public SplitButtonDelegate&lt;I&gt; unselectCurrentItem() {
-<span class="nc" id="L108">            _itemsDelegate.unselectCurrentItem();</span>
-<span class="nc" id="L109">            return this;</span>
+<span class="nc" id="L109">            _itemsDelegate.unselectCurrentItem();</span>
+<span class="nc" id="L110">            return this;</span>
         }
 
         /**
@@ -116,8 +117,8 @@ public final class SplitButtonDelegate&lt;I extends JMenuItem&gt; extends Abstra
          * @return This delegate instance to allow for method chaining.
          */
         public SplitButtonDelegate&lt;I&gt; unselectAllItems() {
-<span class="nc" id="L119">            _itemsDelegate.unselectAllItems();</span>
-<span class="nc" id="L120">            return this;</span>
+<span class="nc" id="L120">            _itemsDelegate.unselectAllItems();</span>
+<span class="nc" id="L121">            return this;</span>
         }
 
         /**
@@ -127,8 +128,8 @@ public final class SplitButtonDelegate&lt;I extends JMenuItem&gt; extends Abstra
          * @return This delegate instance to allow for method chaining.
          */
         public SplitButtonDelegate&lt;I&gt; selectAllItems() {
-<span class="nc" id="L130">            _itemsDelegate.selectAllItems();</span>
-<span class="nc" id="L131">            return this;</span>
+<span class="nc" id="L131">            _itemsDelegate.selectAllItems();</span>
+<span class="nc" id="L132">            return this;</span>
         }
 
         /**
@@ -138,8 +139,8 @@ public final class SplitButtonDelegate&lt;I extends JMenuItem&gt; extends Abstra
          * @return This delegate instance to allow for method chaining.
          */
         public SplitButtonDelegate&lt;I&gt; displayCurrentItemText() {
-<span class="fc" id="L141">            _itemsDelegate.displayCurrentItemText();</span>
-<span class="fc" id="L142">            return this;</span>
+<span class="fc" id="L142">            _itemsDelegate.displayCurrentItemText();</span>
+<span class="fc" id="L143">            return this;</span>
         }
 
         /**
@@ -147,15 +148,15 @@ public final class SplitButtonDelegate&lt;I extends JMenuItem&gt; extends Abstra
          * @return This delegate instance to allow for method chaining.
          */
         public SplitButtonDelegate&lt;I&gt; setButtonText( String text ) {
-<span class="fc" id="L150">            _itemsDelegate.setButtonText(text);</span>
-<span class="fc" id="L151">            return this;</span>
+<span class="fc" id="L151">            _itemsDelegate.setButtonText(text);</span>
+<span class="fc" id="L152">            return this;</span>
         }
 
         /**
          * @return The text displayed on the {@link JSplitButton}.
          */
         public String getButtonText() {
-<span class="nc" id="L158">            return _itemsDelegate.getButtonText();</span>
+<span class="nc" id="L159">            return _itemsDelegate.getButtonText();</span>
         }
 
         /**
@@ -163,8 +164,8 @@ public final class SplitButtonDelegate&lt;I extends JMenuItem&gt; extends Abstra
          * @return This delegate instance to allow for method chaining.
          */
         public SplitButtonDelegate&lt;I&gt; appendToButtonText( String postfix ) {
-<span class="nc" id="L166">            _itemsDelegate.appendToButtonText(postfix);</span>
-<span class="nc" id="L167">            return this;</span>
+<span class="nc" id="L167">            _itemsDelegate.appendToButtonText(postfix);</span>
+<span class="nc" id="L168">            return this;</span>
         }
 
         /**
@@ -172,8 +173,8 @@ public final class SplitButtonDelegate&lt;I extends JMenuItem&gt; extends Abstra
          * @return This delegate instance to allow for method chaining.
          */
         public SplitButtonDelegate&lt;I&gt; prependToButtonText( String prefix ) {
-<span class="nc" id="L175">            _itemsDelegate.prependToButtonText(prefix);</span>
-<span class="nc" id="L176">            return this;</span>
+<span class="nc" id="L176">            _itemsDelegate.prependToButtonText(prefix);</span>
+<span class="nc" id="L177">            return this;</span>
         }
 
         /**
@@ -183,8 +184,8 @@ public final class SplitButtonDelegate&lt;I extends JMenuItem&gt; extends Abstra
          * @return This delegate instance to allow for method chaining.
          */
         public SplitButtonDelegate&lt;I&gt; selectItem( int i ) {
-<span class="nc" id="L186">            _itemsDelegate.selectItem(i);</span>
-<span class="nc" id="L187">            return this;</span>
+<span class="nc" id="L187">            _itemsDelegate.selectItem(i);</span>
+<span class="nc" id="L188">            return this;</span>
         }
 
         /**
@@ -194,8 +195,8 @@ public final class SplitButtonDelegate&lt;I extends JMenuItem&gt; extends Abstra
          * @return This delegate instance to allow for method chaining.
          */
         public SplitButtonDelegate&lt;I&gt; selectOnlyItem( int i ) {
-<span class="nc" id="L197">            _itemsDelegate.selectOnlyItem(i);</span>
-<span class="nc" id="L198">            return this;</span>
+<span class="nc" id="L198">            _itemsDelegate.selectOnlyItem(i);</span>
+<span class="nc" id="L199">            return this;</span>
         }
 
         /**
@@ -205,8 +206,8 @@ public final class SplitButtonDelegate&lt;I extends JMenuItem&gt; extends Abstra
          * @return This delegate instance to allow for method chaining.
          */
         public SplitButtonDelegate&lt;I&gt; unselectItem( int i ) {
-<span class="nc" id="L208">            _itemsDelegate.unselectItem(i);</span>
-<span class="nc" id="L209">            return this;</span>
+<span class="nc" id="L209">            _itemsDelegate.unselectItem(i);</span>
+<span class="nc" id="L210">            return this;</span>
         }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

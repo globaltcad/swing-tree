@@ -1,7 +1,7 @@
 {
   "className":"swingtree.mvvm.Property_Binding_Spec",
   "title":"Binding Properties to UI Components",
-  "narrative":"This specification shows you how to bind properties to \n    the states of common types UI components.",
+  "narrative":"SwingTree includes support for writing UIs using the MVVM pattern,\n    by shipping with a set of properties that can be bound to UI components\n    to model their state.\n    This specification demonstrates how to bind the properties of\n    you view model to the SwingTree UI.",
   "subjects":["sprouts.Val","sprouts.Var"],
   "statistics":{
     "runs":"16",

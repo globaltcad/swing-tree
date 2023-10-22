@@ -25,7 +25,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
- *  A swing tree builder node for {@link JTabbedPane} instances.
+ *  A SwingTree builder node designed for configuring {@link JTabbedPane} instances.
  */
 public class UIForTabbedPane&lt;P extends JTabbedPane&gt; extends UIForAnySwing&lt;UIForTabbedPane&lt;P&gt;, P&gt;
 {
@@ -38,7 +38,7 @@ public class UIForTabbedPane&lt;P extends JTabbedPane&gt; extends UIForAnySwing&
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.
      */
-<span class="fc" id="L41">    public UIForTabbedPane( P component ) { super(component); }</span>
+<span class="fc" id="L41">    protected UIForTabbedPane( P component ) { super(component); }</span>
 
     /**
      *  Adds an action to be performed when a mouse click is detected on a tab.
@@ -287,7 +287,7 @@ public class UIForTabbedPane&lt;P extends JTabbedPane&gt; extends UIForAnySwing&
 <span class="nc" id="L287">                       JTabbedPane tabbedPane = paneRef.get();</span>
 <span class="nc bnc" id="L288" title="All 2 branches missed.">                       if ( tabbedPane == null ) return;</span>
 <span class="nc" id="L289">                       int index = indexFinder.get();</span>
-<span class="nc bnc" id="L290" title="All 4 branches missed.">                       if (index &gt;= 0 &amp;&amp; index == tabbedPane.getSelectedIndex())</span>
+<span class="nc bnc" id="L290" title="All 4 branches missed.">                       if ( index &gt;= 0 &amp;&amp; index == tabbedPane.getSelectedIndex() )</span>
 <span class="nc" id="L291">                           _doApp(()-&gt;onSelection.accept(new ComponentDelegate&lt;&gt;(tabbedPane, e, this::getSiblinghood)));</span>
 <span class="nc" id="L292">                   })</span>
            );
@@ -391,7 +391,7 @@ public class UIForTabbedPane&lt;P extends JTabbedPane&gt; extends UIForAnySwing&
             Action&lt;ComponentDelegate&lt;JTabbedPane, MouseEvent&gt;&gt; mouseClickAction
 <span class="fc" id="L392">        ) {</span>
 <span class="fc" id="L393">            this.paneRef = new WeakReference&lt;&gt;(pane);</span>
-<span class="fc" id="L394">            this.indexFinder = indexFinder;</span>
+<span class="fc" id="L394">            this.indexFinder = Objects.requireNonNull(indexFinder);</span>
 <span class="fc" id="L395">            this.mouseClickAction = mouseClickAction;</span>
 <span class="fc bfc" id="L396" title="All 2 branches covered.">            if ( mouseClickAction != null ) {</span>
 <span class="fc" id="L397">                pane.addMouseListener(new java.awt.event.MouseAdapter() {</span>
@@ -410,7 +410,7 @@ public class UIForTabbedPane&lt;P extends JTabbedPane&gt; extends UIForAnySwing&
             }
 <span class="fc" id="L411">        }</span>
 
-        private void doAction(JTabbedPane pane, MouseEvent e) {
+        private void doAction( JTabbedPane pane, MouseEvent e ) {
 <span class="nc" id="L414">            Point p = e.getPoint();</span>
 <span class="nc bnc" id="L415" title="All 2 branches missed.">            if ( e.getSource() != pane ) {</span>
                // We need to find the point relative to the tabbed pane:

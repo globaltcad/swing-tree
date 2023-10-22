@@ -3,29 +3,30 @@
 import sprouts.Var;
 
 import java.util.List;
+import java.util.Objects;
 
 class ListBasedComboModel&lt;E&gt; extends AbstractComboModel&lt;E&gt;
 {
-	private final List&lt;E&gt; items;
+	private final List&lt;E&gt; _items;
 
-	ListBasedComboModel(List&lt;E&gt; items) {
-<span class="fc" id="L12">		super(Var.ofNullable(_findCommonType( (E[]) items.toArray() ), null));</span>
-<span class="fc" id="L13">		this.items = items;</span>
-<span class="fc" id="L14">		_selectedIndex = _indexOf(_selectedItem.orElseNull());</span>
-<span class="fc" id="L15">	}</span>
+	ListBasedComboModel( List&lt;E&gt; items ) {
+<span class="fc" id="L13">		super(Var.ofNullable(_findCommonType( (E[]) items.toArray() ), null));</span>
+<span class="fc" id="L14">		_items         = Objects.requireNonNull(items);</span>
+<span class="fc" id="L15">		_selectedIndex = _indexOf(_selectedItem.orElseNull());</span>
+<span class="fc" id="L16">	}</span>
 
-	ListBasedComboModel(Var&lt;E&gt; var, List&lt;E&gt; items) {
-<span class="fc" id="L18">		super(var);</span>
-<span class="fc" id="L19">		this.items = items;</span>
-<span class="fc" id="L20">		_selectedIndex = _indexOf(_selectedItem.orElseNull());</span>
-<span class="fc" id="L21">	}</span>
+	ListBasedComboModel( Var&lt;E&gt; var, List&lt;E&gt; items ) {
+<span class="fc" id="L19">		super(var);</span>
+<span class="fc" id="L20">		_items         = Objects.requireNonNull(items);</span>
+<span class="fc" id="L21">		_selectedIndex = _indexOf(_selectedItem.orElseNull());</span>
+<span class="fc" id="L22">	}</span>
 
-<span class="fc" id="L23">	@Override public int getSize() { return items.size(); }</span>
-<span class="fc" id="L24">	@Override public E getElementAt( int index ) { return items.get(index); }</span>
+<span class="fc" id="L24">	@Override public int getSize() { return _items.size(); }</span>
+<span class="fc" id="L25">	@Override public E getElementAt( int index ) { return _items.get(index); }</span>
 
 	@Override
 	public AbstractComboModel&lt;E&gt; withVar(Var&lt;E&gt; newVar) {
-<span class="fc" id="L28">		return new ListBasedComboModel&lt;&gt;(newVar, items);</span>
+<span class="fc" id="L29">		return new ListBasedComboModel&lt;&gt;(newVar, _items);</span>
 	}
 
 	@Override protected void setAt(int index, E element) {
@@ -41,11 +42,11 @@ class ListBasedComboModel&lt;E&gt; extends AbstractComboModel&lt;E&gt;
 			So we'll just try to modify it, and if it fails, we'll just ignore it.
 		 */
 		try {
-<span class="nc" id="L44">			items.set(index, element);</span>
-<span class="fc" id="L45">		} catch (UnsupportedOperationException ignored) {</span>
+<span class="nc" id="L45">			_items.set(index, element);</span>
+<span class="fc" id="L46">		} catch (UnsupportedOperationException ignored) {</span>
 			// ignore, the user of this library doesn't want us to modify the list
-<span class="nc" id="L47">		}</span>
-<span class="fc" id="L48">	}</span>
+<span class="nc" id="L48">		}</span>
+<span class="fc" id="L49">	}</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

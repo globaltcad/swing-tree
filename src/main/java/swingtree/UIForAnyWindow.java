@@ -6,10 +6,14 @@ import swingtree.input.Keyboard;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
  *  A SwingTree builder node for configuring any kind of {@link Window} type.
+ *  Take a look at the {@link UIForJDialog} and {@link UIForJFrame} classes,
+ *  which are specialized subtypes of this class.
+ *
  * @param <I> The type of the builder itself.
  * @param <W> The type of the window which is being configured by this builder.
  */
@@ -56,14 +60,16 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 	 */
 	public abstract void show();
 
-	protected abstract JRootPane _getRootPane();
+	protected abstract Optional<JRootPane> _getRootPane();
 
 	protected abstract void _setTitle( String title );
 
-	private void _onKeyStroke(int code, Consumer<ActionEvent> action) {
-		KeyStroke k = KeyStroke.getKeyStroke(code, 0);
-		int w = JComponent.WHEN_IN_FOCUSED_WINDOW;
-		_getRootPane().registerKeyboardAction(action::accept, k, w);
+	private void _onKeyStroke( int code, Consumer<ActionEvent> action ) {
+		_getRootPane().ifPresent( rootPane -> {
+			KeyStroke k = KeyStroke.getKeyStroke(code, 0);
+			int w = JComponent.WHEN_IN_FOCUSED_WINDOW;
+			rootPane.registerKeyboardAction(action::accept, k, w);
+		});
 	}
 
 	/**
@@ -79,7 +85,7 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 		NullUtil.nullArgCheck(key, "key", Keyboard.Key.class);
 		NullUtil.nullArgCheck(onKeyPressed, "onKeyPressed", sprouts.Action.class);
 		W window = getComponent();
-		_onKeyStroke(key.code, e -> onKeyPressed.accept(_createDelegate(window, null)));
+		_onKeyStroke( key.code, e -> onKeyPressed.accept(_createDelegate(window, null)) );
 		return _this();
 	}
 
@@ -95,7 +101,7 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 		W frame = getComponent();
 		frame.addFocusListener(new FocusAdapter() {
 			@Override public void focusGained(FocusEvent e) {
-				_doApp(()->onFocus.accept(_createDelegate(frame, e)));
+		        _doApp(()->onFocus.accept(_createDelegate(frame, e)));
 			}
 		});
 		return _this();

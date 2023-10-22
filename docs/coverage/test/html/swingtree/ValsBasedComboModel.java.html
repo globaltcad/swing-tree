@@ -3,28 +3,30 @@
 import sprouts.Var;
 import sprouts.Vals;
 
+import java.util.Objects;
+
 class ValsBasedComboModel&lt;E&gt; extends AbstractComboModel&lt;E&gt;
 {
     private final Vals&lt;E&gt; _items;
 
     ValsBasedComboModel( Vals&lt;E&gt; items ) {
-<span class="nc" id="L11">        super(Var.ofNullable(_findCommonType(items), null));</span>
-<span class="nc" id="L12">        _items = items;</span>
-<span class="nc" id="L13">        _selectedIndex = _indexOf(_selectedItem.orElseNull());</span>
-<span class="nc" id="L14">    }</span>
+<span class="nc" id="L13">        super(Var.ofNullable(_findCommonType(items), null));</span>
+<span class="nc" id="L14">        _items         = Objects.requireNonNull(items);</span>
+<span class="nc" id="L15">        _selectedIndex = _indexOf(_selectedItem.orElseNull());</span>
+<span class="nc" id="L16">    }</span>
 
     ValsBasedComboModel( Var&lt;E&gt; var, Vals&lt;E&gt; items ) {
-<span class="nc" id="L17">        super(var);</span>
-<span class="nc" id="L18">        _items = items;</span>
-<span class="nc" id="L19">        _selectedIndex = _indexOf(_selectedItem.orElseNull());</span>
-<span class="nc" id="L20">    }</span>
+<span class="nc" id="L19">        super(var);</span>
+<span class="nc" id="L20">        _items         = Objects.requireNonNull(items);</span>
+<span class="nc" id="L21">        _selectedIndex = _indexOf(_selectedItem.orElseNull());</span>
+<span class="nc" id="L22">    }</span>
 
-<span class="nc" id="L22">    @Override public int getSize() { return _items.size(); }</span>
+<span class="nc" id="L24">    @Override public int getSize() { return _items.size(); }</span>
 
-<span class="nc" id="L24">    @Override public E getElementAt( int index ) { return _items.at(index).orElseNull(); }</span>
+<span class="nc" id="L26">    @Override public E getElementAt( int index ) { return _items.at(index).orElseNull(); }</span>
 
     @Override public AbstractComboModel&lt;E&gt; withVar( Var&lt;E&gt; newVar ) {
-<span class="nc" id="L27">        return new ValsBasedComboModel&lt;&gt;(newVar, _items);</span>
+<span class="nc" id="L29">        return new ValsBasedComboModel&lt;&gt;(newVar, _items);</span>
     }
 
     @Override
@@ -33,6 +35,6 @@ class ValsBasedComboModel&lt;E&gt; extends AbstractComboModel&lt;E&gt;
             Vals are immutable, so we can't modify them.
             So we'll just ignore it.
         */
-<span class="nc" id="L36">    }</span>
+<span class="nc" id="L38">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

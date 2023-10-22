@@ -14,7 +14,7 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 /**
- *  A builder node for {@link JScrollPanels} a custom Swing-Tree component
+ *  A builder node for {@link JScrollPanels}, a custom SwingTree component,
  *  which is similar to a {@link JList} but with the ability to interact with
  *  the individual components in the list.
  *  <p>

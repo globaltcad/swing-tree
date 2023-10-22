@@ -5,7 +5,7 @@ import sprouts.Val;
 import javax.swing.*;
 
 /**
- *  A swing tree builder node for {@link JScrollPane} instances.
+ *  A SwingTree builder node designed for configuring {@link JScrollPane} instances.
  */
 public class UIForScrollPane&lt;P extends JScrollPane&gt; extends UIForAnySwing&lt;UIForScrollPane&lt;P&gt;, P&gt;
 {
@@ -15,7 +15,7 @@ public class UIForScrollPane&lt;P extends JScrollPane&gt; extends UIForAnySwing&
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.
      */
-<span class="fc" id="L18">    public UIForScrollPane( P component ) { super(component); }</span>
+<span class="fc" id="L18">    protected UIForScrollPane( P component ) { super(component); }</span>
 
     @Override
     protected void _add( JComponent component, Object conf ) {

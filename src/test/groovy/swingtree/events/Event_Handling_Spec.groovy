@@ -355,7 +355,7 @@ class Event_Handling_Spec extends Specification
     def 'The "onTextReplace" event handler of a text area is triggered when the text area content changes.'()
     {
         reportInfo """
-            This type of event occurs when the user replaces in the text area.
+            This type of event occurs when the user replaces text in the text area.
             Internally this is actually based on a `DocumentFilter`
             which will forward the `replace` method calls 
             to your `onTextReplace` handler.

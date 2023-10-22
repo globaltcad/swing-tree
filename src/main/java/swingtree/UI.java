@@ -5326,7 +5326,7 @@ public final class UI extends UILayoutConstants
     }
 
     /**
-     *  This returns an instance of a Swing-Tree builder for a {@link JFrame} type.
+     *  This returns an instance of a SwingTree builder for a {@link JFrame} type.
      * @param frame The new frame instance which ought to be part of the Swing UI.
      * @return A basic UI builder instance wrapping a {@link JFrame}.
      * @param <F> The concrete type of this new frame.
@@ -5355,7 +5355,7 @@ public final class UI extends UILayoutConstants
     }
 
     /**
-     *  This returns an instance of a Swing-Tree builder for a {@link JDialog} type.
+     *  This returns an instance of a SwingTree builder for a {@link JDialog} type.
      * @param dialog The new dialog instance which ought to be part of the Swing UI.
      * @return A basic UI builder instance wrapping a {@link JDialog}.
      * @param <D> The concrete type of this new dialog.
@@ -5958,7 +5958,7 @@ public final class UI extends UILayoutConstants
      *  Use this to quickly launch a UI component in a {@link JFrame} window
      *  at the center of the screen.
      *
-     * @param ui The Swing-Tree UI to show in the window.
+     * @param ui The SwingTree UI to show in the window.
      * @param <C> The type of the component to show in the window.
      */
     public static <C extends JComponent> void show( UIForAnySwing<?, C> ui ) {
@@ -5970,7 +5970,7 @@ public final class UI extends UILayoutConstants
      *  at the center of the screen.
      *
      * @param title The title of the window.
-     * @param ui The Swing-Tree UI to show in the window.
+     * @param ui The SwingTree UI to show in the window.
      * @param <C> The type of the component to show in the window.
      */
     public static <C extends JComponent> void show( String title, UIForAnySwing<?, C> ui ) {

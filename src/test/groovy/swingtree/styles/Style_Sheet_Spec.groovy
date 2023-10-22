@@ -33,12 +33,15 @@ import java.awt.*
            protected void configure() {
                 add(id("some unique id!"), it -> it
                     .borderRadius(3)
+                    // etc...
                 );
                 add(type(JPanel.class), it -> it
                    .borderColor(Color.GREEN)
+                   // etc...
                 );
                 add(type(JButton.class), it -> it
                     .borderWidth(7)
+                    // etc...
                 );
             }
         }

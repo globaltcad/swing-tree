@@ -2,28 +2,30 @@
 
 import sprouts.Var;
 
+import java.util.Objects;
+
 final class ArrayBasedComboModel&lt;E&gt; extends AbstractComboModel&lt;E&gt;
 {
-	private final E[] items;
+	private final E[] _items;
 
 	ArrayBasedComboModel(E[] items) {
-<span class="fc" id="L10">		this(Var.ofNullable(_findCommonType( items ), null), items);</span>
-<span class="fc" id="L11">	}</span>
+<span class="fc" id="L12">		this(Var.ofNullable(_findCommonType( items ), null), items);</span>
+<span class="fc" id="L13">	}</span>
 
 	ArrayBasedComboModel(Var&lt;E&gt; selection, E[] items) {
-<span class="fc" id="L14">		super(selection);</span>
-<span class="fc" id="L15">		this.items = items;</span>
-<span class="fc" id="L16">		this._selectedIndex = _indexOf(_selectedItem.orElseNull());</span>
-<span class="fc" id="L17">	}</span>
+<span class="fc" id="L16">		super(selection);</span>
+<span class="fc" id="L17">		_items = Objects.requireNonNull(items);</span>
+<span class="fc" id="L18">		_selectedIndex = _indexOf(_selectedItem.orElseNull());</span>
+<span class="fc" id="L19">	}</span>
 
 	@Override
 	public AbstractComboModel&lt;E&gt; withVar( Var&lt;E&gt; newVar ) {
-<span class="fc" id="L21">		return new ArrayBasedComboModel&lt;&gt;(newVar, items);</span>
+<span class="fc" id="L23">		return new ArrayBasedComboModel&lt;&gt;(newVar, _items);</span>
 	}
 
-<span class="fc" id="L24">	@Override protected void setAt(int index, E element) { items[index] = element; }</span>
-<span class="fc" id="L25">	@Override public int getSize() { return items.length; }</span>
-<span class="fc" id="L26">	@Override public E getElementAt( int index ) { return items[index]; }</span>
+<span class="fc" id="L26">	@Override protected void setAt( int index, E element ) { _items[index] = element; }</span>
+<span class="fc" id="L27">	@Override public int getSize() { return _items.length; }</span>
+<span class="fc" id="L28">	@Override public E getElementAt( int index ) { return _items[index]; }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

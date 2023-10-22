@@ -12,10 +12,14 @@ import java.util.function.Consumer
 @Title("Properties")
 @Narrative('''
 
-    Properties are a powerful tool to model the state 
-    as well as business logic of your UI without actually depending on it.
-    This is especially useful for testing your UIs logic (in a view model for example).
-    This is the core motivation behind the creation of the Sprouts library.
+    SwingTree includes support for writing UIs using the MVVM pattern,
+    by shipping with a set of observable property types as part of the 
+    included **Sprouts property API**,
+    which is designed from the ground up to be used for modelling Swing UIs.
+    
+    Properties are a powerful tool because they make it possible to
+    model the state and logic of your UIs without actually depending on them,
+    which is especially useful for testing, debugging and refactoring.
     
     This specification introduces you to their API and shows you how to use them.
     

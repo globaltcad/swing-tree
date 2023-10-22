@@ -14,7 +14,7 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 /**
- *  A builder node for {@link JScrollPanels} a custom Swing-Tree component
+ *  A builder node for {@link JScrollPanels}, a custom SwingTree component,
  *  which is similar to a {@link JList} but with the ability to interact with
  *  the individual components in the list.
  *  &lt;p&gt;
@@ -29,7 +29,7 @@ public class UIForScrollPanels&lt;P extends JScrollPanels&gt; extends UIForScrol
 	 *
 	 * @param component The JComponent type which will be wrapped by this builder node.
 	 */
-<span class="fc" id="L32">	public UIForScrollPanels( P component ) { super(component); }</span>
+<span class="fc" id="L32">	protected UIForScrollPanels( P component ) { super(component); }</span>
 
 
 	@Override
