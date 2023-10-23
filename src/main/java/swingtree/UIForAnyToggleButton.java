@@ -33,22 +33,22 @@ public abstract class UIForAnyToggleButton<I, B extends JToggleButton> extends U
         NullUtil.nullArgCheck(state, "state", Enum.class);
         NullUtil.nullArgCheck(selection, "selection", Var.class);
         NullUtil.nullPropertyCheck(selection, "selection", "Null is not a valid selection state.");
-        this.isSelectedIf( state.equals(selection.get()) );
-        _onShow( selection, s -> isSelectedIf( state.equals(selection.get()) ) );
-        B component = getComponent();
-        String currentText = component.getText();
-        if ( currentText == null || currentText.isEmpty() )
-            component.setText( state.toString() );
+        return _with( button -> {
+            _setSelectedSilently(state.equals(selection.get()), button);
+            _onShow( selection, s -> _setSelectedSilently( state.equals(selection.get()), button ) );
+            String currentText = button.getText();
+            if ( currentText == null || currentText.isEmpty() )
+                button.setText( state.toString() );
 
-        // When the user clicks the button, we update the selection property!
-        // But only if the button is selected, otherwise we'll ignore the click.
-        // And we also trigger "set" events for the button, so that other buttons
-        // can be updated to reflect the new selection state.
-        _onChange( event -> {
-            if ( component.isSelected() )
-                selection.set(From.VIEW,  state ).fireChange(From.VIEW_MODEL);
-        });
-
-        return (I) this;
+            // When the user clicks the button, we update the selection property!
+            // But only if the button is selected, otherwise we'll ignore the click.
+            // And we also trigger "set" events for the button, so that other buttons
+            // can be updated to reflect the new selection state.
+            _onChange(button, event -> {
+                if ( button.isSelected() )
+                    selection.set(From.VIEW,  state ).fireChange(From.VIEW_MODEL);
+            });
+        })
+        ._this();
     }
 }
