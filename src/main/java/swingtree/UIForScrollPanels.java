@@ -54,15 +54,15 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForScrollPane<
 	}
 
 	@Override
-	protected <M> void _addViewableProps( Vals<M> viewables, String attr, ViewSupplier<M> viewSupplier)
+	protected <M> void _addViewableProps( Vals<M> models, String attr, ViewSupplier<M> viewSupplier, P panels )
 	{
-		BiFunction<Integer, Vals<M>, M> viewableFetcher = (i, vals) -> {
+		BiFunction<Integer, Vals<M>, M> modelFetcher = (i, vals) -> {
 			M v = vals.at(i).get();
 			if ( v instanceof EntryViewModel ) ((EntryViewModel) v).position().set(i);
 			return v;
 		};
 		BiFunction<Integer, Vals<M>, M> entryFetcher = (i, vals) -> {
-			M v = viewableFetcher.apply(i, vals);
+			M v = modelFetcher.apply(i, vals);
 			return ( v != null ? (M) v : (M)_entryModel() );
 		};
 
@@ -75,15 +75,14 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForScrollPane<
 			else
 				for ( int i = 0; i< vals.size(); i++ ) {
 					int finalI = i;
-					this.getComponent().addEntry(
-							_entryModel(),//entryFetcher.apply(i,vals),
+					panels.addEntry(
+							_entryModel(),
 							m -> viewSupplier.createViewFor(entryFetcher.apply(finalI,vals))
 						);
 				}
 		};
 
-		_onShow( viewables, delegate -> {
-			JScrollPanels panels = this.getComponent();
+		_onShow( models, delegate -> {
 			Vals<M> vals = delegate.vals();
 			int delegateIndex = delegate.index();
 			Change changeType = delegate.changeType();
@@ -124,6 +123,6 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForScrollPane<
 				default: throw new IllegalStateException("Unknown type: "+delegate.changeType());
 			}
 		});
-		addAll.accept(viewables);
+		addAll.accept(models);
 	}
 }

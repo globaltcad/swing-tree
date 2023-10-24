@@ -3670,7 +3670,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final <M> I add( Val<M> viewable, ViewSupplier<M> viewSupplier) {
         NullUtil.nullArgCheck(viewable, "viewable", Val.class);
         return _with( component -> {
-                   _addViewableProp(viewable, null, viewSupplier);
+                   _addViewableProp(viewable, null, viewSupplier, component);
                })
                ._this();
     }
@@ -3691,8 +3691,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final <M> I add( Vals<M> viewables, ViewSupplier<M> viewSupplier) {
         NullUtil.nullArgCheck(viewables, "viewables", Vals.class);
-        _addViewableProps( viewables, null, viewSupplier);
-        return _this();
+        return _with( c -> {
+                    _addViewableProps( viewables, null, viewSupplier, c );
+                })
+                ._this();
     }
 
     /**
@@ -3712,8 +3714,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final <M> I add( String attr, Val<M> viewable, ViewSupplier<M> viewSupplier) {
         NullUtil.nullArgCheck(attr, "attr", Object.class);
         NullUtil.nullArgCheck(viewable, "viewable", Val.class);
-        _addViewableProp(viewable, attr, viewSupplier);
-        return _this();
+        return _with( component -> {
+                   _addViewableProp(viewable, attr, viewSupplier, component);
+               })
+               ._this();
     }
 
     /**
@@ -3734,8 +3738,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final <M> I add( String attr, Vals<M> viewables, ViewSupplier<M> viewSupplier) {
         NullUtil.nullArgCheck(attr, "attr", Object.class);
         NullUtil.nullArgCheck(viewables, "viewables", Vals.class);
-        _addViewableProps( viewables, attr, viewSupplier);
-        return _this();
+        return _with( c -> {
+                    _addViewableProps( viewables, attr, viewSupplier, c );
+                })
+                ._this();
     }
 
     /**
@@ -3775,24 +3781,24 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         return this.add(attr.toString(), viewables, viewSupplier);
     }
 
-    protected <M> void _addViewableProps( Vals<M> viewables, String attr, ViewSupplier<M> viewSupplier) {
+    protected <M> void _addViewableProps( Vals<M> viewables, String attr, ViewSupplier<M> viewSupplier, C component ) {
         _onShow( viewables, delegate -> {
             // we simply redo all the components.
             switch ( delegate.changeType() ) {
-                case SET: _updateComponentAt(delegate.index(), delegate.newValue().get(), viewSupplier, attr); break;
+                case SET: _updateComponentAt(delegate.index(), delegate.newValue().get(), viewSupplier, attr, component); break;
                 case ADD:
                     if ( delegate.index() < 0 && delegate.newValue().isEmpty() ) {
                         // This is basically a add all operation, so we clear the components first.
-                        _clearComponents();
+                        _clearComponents(component);
                         // and then we add all the components.
                         for ( int i = 0; i < delegate.vals().size(); i++ )
-                            _addComponentAt( i, delegate.vals().at(i).get(), viewSupplier, attr );
+                            _addComponentAt( i, delegate.vals().at(i).get(), viewSupplier, attr, component );
                     }
                     else
-                        _addComponentAt(delegate.index(), delegate.newValue().get(), viewSupplier, attr);
+                        _addComponentAt( delegate.index(), delegate.newValue().get(), viewSupplier, attr, component );
                     break;
-                case REMOVE: _removeComponentAt(delegate.index()); break;
-                case CLEAR: _clearComponents(); break;
+                case REMOVE: _removeComponentAt(delegate.index(), component); break;
+                case CLEAR: _clearComponents(component); break;
                 case NONE: break;
                 default: throw new IllegalStateException("Unknown type: "+delegate.changeType());
             }
@@ -3800,7 +3806,9 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         viewables.forEach( v -> add(viewSupplier.createViewFor(v)) );
     }
 
-    private <M> void _addViewableProp( Val<M> viewable, String attr, ViewSupplier<M> viewSupplier ) {
+    private <M> void _addViewableProp(
+            Val<M> viewable, String attr, ViewSupplier<M> viewSupplier, C component
+    ) {
         // First we remember the index of the component which will be provided by the viewable dynamically.
         final int index = _childCount();
         // Then we add the component provided by the viewable to the list of children.
@@ -3816,56 +3824,52 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
                 this.add(attr, new JPanel()); // We add a dummy component to the list of children.
         }
         // Finally we add a listener to the viewable which will update the component when the viewable changes.
-        _onShow( viewable, v -> _updateComponentAt(index, v, viewSupplier, attr) );
+        _onShow( viewable, v -> _updateComponentAt(index, v, viewSupplier, attr, component) );
     }
 
-    private <M> void _updateComponentAt(int index, M v, ViewSupplier<M> viewSupplier, String attr ) {
-        component().ifPresent( c -> {
-            JComponent newComponent = v == null ? new JPanel() : UI.use(_eventProcessor, () -> viewSupplier.createViewFor(v).getComponent() );
-            // We remove the old component.
-            c.remove(c.getComponent(index));
-            // We add the new component.
-            if ( attr == null )
-                c.add(newComponent, index);
-            else
-                c.add(newComponent, attr, index);
-            // We update the layout.
-            c.revalidate();
-            c.repaint();
-        });
+    private <M> void _updateComponentAt(
+            int index, M v, ViewSupplier<M> viewSupplier, String attr, C c
+    ) {
+        JComponent newComponent = v == null ? new JPanel() : UI.use(_eventProcessor, () -> viewSupplier.createViewFor(v).getComponent() );
+        // We remove the old component.
+        c.remove(c.getComponent(index));
+        // We add the new component.
+        if ( attr == null )
+            c.add(newComponent, index);
+        else
+            c.add(newComponent, attr, index);
+        // We update the layout.
+        c.revalidate();
+        c.repaint();
     }
 
-    private <M> void _addComponentAt(int index, M v, ViewSupplier<M> viewSupplier, String attr ) {
-        component().ifPresent( c -> {
-            // We add the new component.
-            if ( attr == null )
-                c.add(UI.use(_eventProcessor, () -> viewSupplier.createViewFor(v).getComponent()), index);
-            else
-                c.add(UI.use(_eventProcessor, () -> viewSupplier.createViewFor(v).getComponent()), attr, index);
-            // We update the layout.
-            c.revalidate();
-            c.repaint();
-        });
+    private <M> void _addComponentAt(
+        int index, M v, ViewSupplier<M> viewSupplier, String attr, C c
+    ) {
+        // We add the new component.
+        if ( attr == null )
+            c.add(UI.use(_eventProcessor, () -> viewSupplier.createViewFor(v).getComponent()), index);
+        else
+            c.add(UI.use(_eventProcessor, () -> viewSupplier.createViewFor(v).getComponent()), attr, index);
+        // We update the layout.
+        c.revalidate();
+        c.repaint();
     }
 
-    private void _removeComponentAt( int index ) {
-        component().ifPresent( c -> {
-            // We remove the old component.
-            c.remove(c.getComponent(index));
-            // We update the layout.
-            c.revalidate();
-            c.repaint();
-        });
+    private void _removeComponentAt( int index, C c ) {
+        // We remove the old component.
+        c.remove(c.getComponent(index));
+        // We update the layout.
+        c.revalidate();
+        c.repaint();
     }
 
-    private void _clearComponents() {
-        component().ifPresent( c -> {
-            // We remove all components.
-            c.removeAll();
-            // We update the layout.
-            c.revalidate();
-            c.repaint();
-        });
+    private void _clearComponents( C c ) {
+        // We remove all components.
+        c.removeAll();
+        // We update the layout.
+        c.revalidate();
+        c.repaint();
     }
 
     private static boolean _isBorderLayout( Object o ) {
