@@ -41,8 +41,8 @@ public class UIForPanel<P extends JPanel> extends UIForAnySwing<UIForPanel<P>, P
         return _this();
     }
 
-    @Override protected void _setEnabled( boolean isEnabled ) {
-        getComponent().setEnabled( isEnabled );
+    @Override protected void _setEnabled( P component, boolean isEnabled ) {
+        component.setEnabled( isEnabled );
         /*
             In the vast vast majority of cases regular JPanels are simple wrappers for
             other components.
@@ -54,7 +54,7 @@ public class UIForPanel<P extends JPanel> extends UIForAnySwing<UIForPanel<P>, P
             and disable all the components that are contained in the tree
             except for the children of non JPanels.
         */
-        InternalUtil._traverseEnable( getComponent(), isEnabled );
+        InternalUtil._traverseEnable( component, isEnabled );
         /*
             Note:
             If you really only want to disable the JPanel itself, then you can

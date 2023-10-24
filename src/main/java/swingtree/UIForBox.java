@@ -41,8 +41,8 @@ public class UIForBox<B extends JBox> extends UIForAnySwing<UIForBox<B>, B>
         return _this();
     }
 
-    @Override protected void _setEnabled( boolean isEnabled ) {
-        getComponent().setEnabled( isEnabled );
+    @Override protected void _setEnabled( B component, boolean isEnabled ) {
+        component.setEnabled( isEnabled );
         /*
             In the vast vast majority of cases regular JBoxs are simple wrappers for
             other components.
@@ -54,7 +54,7 @@ public class UIForBox<B extends JBox> extends UIForAnySwing<UIForBox<B>, B>
             and disable all the components that are contained in the tree
             except for the children of non JBoxs.
         */
-        InternalUtil._traverseEnable( getComponent(), isEnabled );
+        InternalUtil._traverseEnable( component, isEnabled );
         /*
             Note:
             If you really only want to disable the JBox itself, then you can
