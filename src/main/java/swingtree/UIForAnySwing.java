@@ -3333,7 +3333,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
                        if ( _canBeRemoved(onKeyTyped) )
                            component.removeKeyListener(kl);
                        else
-                           _doApp(() -> onKeyTyped.accept(new ComponentDelegate<>(component, e, this::getSiblinghood)));
+                           _doApp(() -> onKeyTyped.accept(new ComponentDelegate<>(component, e, () -> getSiblinghood())));
                    });
                })
                ._this();
@@ -3481,7 +3481,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I doUpdates( int delay, Action<ComponentDelegate<C, ActionEvent>> onUpdate ) {
         NullUtil.nullArgCheck(onUpdate, "onUpdate", Action.class);
         return _with( component -> {
-                   Timer timer = new Timer(delay, e -> onUpdate.accept(new ComponentDelegate<>(component, e, this::getSiblinghood)));
+                   Timer timer = new Timer(delay, e -> onUpdate.accept(new ComponentDelegate<>(component, e, () -> getSiblinghood())));
                    {
                        java.util.List<Timer> timers = (java.util.List<Timer>) component.getClientProperty(_TIMERS_KEY);
                        if ( timers == null ) {

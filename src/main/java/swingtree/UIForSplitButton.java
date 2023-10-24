@@ -139,7 +139,7 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAnyButton<UIF
                              () -> new ArrayList<>(_options.keySet()),
                              _lastSelected[0]
                          ),
-                        this::getSiblinghood
+                        () -> getSiblinghood()
                     )
                 )
             )
@@ -215,7 +215,7 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAnyButton<UIF
         B button = getComponent();
         button.addButtonClickedActionListener(
             e -> _doApp(()->action.accept(
-                 new ComponentDelegate<>(button, e, this::getSiblinghood)
+                 new ComponentDelegate<>(button, e, () -> getSiblinghood())
             ))
         );
         return this;
@@ -231,7 +231,7 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAnyButton<UIF
      */
     public UIForSplitButton<B> onOpen( Action<ComponentDelegate<B, PopupMenuEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
-        _onPopupOpen( e -> _doApp(()->action.accept(new ComponentDelegate<>( getComponent(), e, this::getSiblinghood )) ) );
+        _onPopupOpen( e -> _doApp(()->action.accept(new ComponentDelegate<>( getComponent(), e, () -> getSiblinghood() )) ) );
         return this;
     }
 
@@ -256,7 +256,7 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAnyButton<UIF
      */
     public UIForSplitButton<B> onClose( Action<ComponentDelegate<B, PopupMenuEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
-        _onPopupClose( e -> _doApp(()->action.accept(new ComponentDelegate<>( getComponent(), e, this::getSiblinghood )) ) );
+        _onPopupClose( e -> _doApp(()->action.accept(new ComponentDelegate<>( getComponent(), e, () -> getSiblinghood() )) ) );
         return this;
     }
 
@@ -280,7 +280,7 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAnyButton<UIF
      */
     public UIForSplitButton<B> onCancel( Action<ComponentDelegate<B, PopupMenuEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
-        _onPopupCancel( e -> _doApp(()->action.accept(new ComponentDelegate<>( getComponent(), e, this::getSiblinghood )) ) );
+        _onPopupCancel( e -> _doApp(()->action.accept(new ComponentDelegate<>( getComponent(), e, () -> getSiblinghood() )) ) );
         return this;
     }
 
@@ -348,7 +348,7 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAnyButton<UIF
                             );
                 _onSelections.forEach(action -> {
                     try {
-                        action.accept(new SplitButtonDelegate<>(button,(SplitItemDelegate<JMenuItem>) delegate, this::getSiblinghood));
+                        action.accept(new SplitButtonDelegate<>(button,(SplitItemDelegate<JMenuItem>) delegate, () -> getSiblinghood()));
                     } catch (Exception exception) {
                         exception.printStackTrace();
                     }

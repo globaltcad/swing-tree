@@ -44,13 +44,13 @@ public class UIForJFrame<F extends JFrame> extends UIForAnyWindow<UIForJFrame<F>
 		frame.setVisible(true);
 	}
 
-	@Override protected Optional<JRootPane> _getRootPane() {
-		return Optional.ofNullable(getComponent().getRootPane());
+	@Override protected Optional<JRootPane> _getRootPaneOf(F thisWindow) {
+		return Optional.ofNullable(thisWindow.getRootPane());
 	}
 
 	@Override
-	protected void _setTitle(String title) {
-		getComponent().setTitle(title);
+	protected void _setTitleOf(F thisWindow, String title) {
+		thisWindow.setTitle(title);
 	}
 
 }

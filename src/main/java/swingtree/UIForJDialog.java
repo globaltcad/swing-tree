@@ -52,12 +52,12 @@ public class UIForJDialog<D extends JDialog> extends UIForAnyWindow<UIForJDialog
 	}
 
 	@Override
-	protected Optional<JRootPane> _getRootPane() {
-		return Optional.ofNullable(getComponent().getRootPane());
+	protected Optional<JRootPane> _getRootPaneOf(D thisWindow) {
+		return Optional.ofNullable(thisWindow.getRootPane());
 	}
 
 	@Override
-	protected void _setTitle(String title) {
-		getComponent().setTitle(title);
+	protected void _setTitleOf( D thisWindow, String title ) {
+		thisWindow.setTitle(title);
 	}
 }

@@ -36,8 +36,10 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 	 * @return This builder.
 	 */
 	public final I withTitle( String title ) {
-		_setTitle( title );
-		return _this();
+		return _with( thisWindow -> {
+					_setTitleOf( thisWindow, title );
+		       })
+			   ._this();
 	}
 
 	/**
@@ -51,8 +53,11 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 	public final I withTitle( Val<String> title ) {
 		NullUtil.nullArgCheck(title, "title", Val.class);
 		NullUtil.nullPropertyCheck(title, "title");
-		_onShow( title, v -> _setTitle( v ) );
-		return withTitle( title.orElseThrow() );
+		return _with( thisWindow -> {
+					_onShow( title, v -> _setTitleOf(thisWindow, v) );
+					_setTitleOf( thisWindow, title.orElseThrow() );
+		       })
+			   ._this();
 	}
 
 	/**
@@ -60,12 +65,12 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 	 */
 	public abstract void show();
 
-	protected abstract Optional<JRootPane> _getRootPane();
+	protected abstract Optional<JRootPane> _getRootPaneOf(W thisWindow);
 
-	protected abstract void _setTitle( String title );
+	protected abstract void _setTitleOf( W thisWindow, String title );
 
-	private void _onKeyStroke( int code, Consumer<ActionEvent> action ) {
-		_getRootPane().ifPresent( rootPane -> {
+	private void _onKeyStroke( int code, Consumer<ActionEvent> action, W thisWindow ) {
+		_getRootPaneOf(thisWindow).ifPresent(rootPane -> {
 			KeyStroke k = KeyStroke.getKeyStroke(code, 0);
 			int w = JComponent.WHEN_IN_FOCUSED_WINDOW;
 			rootPane.registerKeyboardAction(action::accept, k, w);
@@ -84,9 +89,10 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 	public final I onPressed( Keyboard.Key key, sprouts.Action<WindowDelegate<W, ActionEvent>> onKeyPressed ) {
 		NullUtil.nullArgCheck(key, "key", Keyboard.Key.class);
 		NullUtil.nullArgCheck(onKeyPressed, "onKeyPressed", sprouts.Action.class);
-		W window = getComponent();
-		_onKeyStroke( key.code, e -> onKeyPressed.accept(_createDelegate(window, null)) );
-		return _this();
+		return _with( thisWindow -> {
+					_onKeyStroke( key.code, e -> onKeyPressed.accept(_createDelegate(thisWindow, null)), thisWindow );
+		       })
+			   ._this();
 	}
 
 	/**
@@ -98,13 +104,14 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 	 */
 	public final I onFocusGained( sprouts.Action<WindowDelegate<W, FocusEvent>> onFocus ) {
 		NullUtil.nullArgCheck(onFocus, "onFocus", sprouts.Action.class);
-		W frame = getComponent();
-		frame.addFocusListener(new FocusAdapter() {
-			@Override public void focusGained(FocusEvent e) {
-		        _doApp(()->onFocus.accept(_createDelegate(frame, e)));
-			}
-		});
-		return _this();
+		return _with( thisWindow -> {
+					thisWindow.addFocusListener(new FocusAdapter() {
+						@Override public void focusGained(FocusEvent e) {
+							_doApp(()->onFocus.accept(_createDelegate(thisWindow, e)));
+						}
+					});
+		       })
+			   ._this();
 	}
 
 	/**
@@ -116,13 +123,14 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 	 */
 	public final I onFocusLost( sprouts.Action<WindowDelegate<W, FocusEvent>> onFocus ) {
 		NullUtil.nullArgCheck(onFocus, "onFocus", Action.class);
-		W window = getComponent();
-		window.addFocusListener(new FocusAdapter() {
-			@Override public void focusLost(FocusEvent e) {
-				_doApp(()->onFocus.accept(_createDelegate(window, e)));
-			}
-		});
-		return _this();
+		return _with( thisWindow -> {
+					thisWindow.addFocusListener(new FocusAdapter() {
+						@Override public void focusLost(FocusEvent e) {
+							_doApp(()->onFocus.accept(_createDelegate(thisWindow, e)));
+						}
+					});
+		       })
+			   ._this();
 	}
 
 	/**
@@ -138,13 +146,14 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 	 */
 	public final I onClose( sprouts.Action<WindowDelegate<W, WindowEvent>> onClose ) {
 		NullUtil.nullArgCheck(onClose, "onClose", Action.class);
-		W window = getComponent();
-		window.addWindowListener(new WindowAdapter() {
-			@Override public void windowClosing( WindowEvent e ) {
-				_doApp(()->onClose.accept(_createDelegate(window, e)));
-			}
-		});
-		return _this();
+		return _with( thisWindow -> {
+					thisWindow.addWindowListener(new WindowAdapter() {
+						@Override public void windowClosing( WindowEvent e ) {
+							_doApp(()->onClose.accept(_createDelegate(thisWindow, e)));
+						}
+					});
+		       })
+			   ._this();
 	}
 
 	/**
@@ -159,13 +168,14 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 	 */
 	public final I onClosed( sprouts.Action<WindowDelegate<W, WindowEvent>> onClose ) {
 		NullUtil.nullArgCheck(onClose, "onClose", Action.class);
-		W window = getComponent();
-		window.addWindowListener(new WindowAdapter() {
-			@Override public void windowClosed( WindowEvent e ) {
-				_doApp(()->onClose.accept(_createDelegate(window, e)));
-			}
-		});
-		return _this();
+		return _with( thisWindow -> {
+					thisWindow.addWindowListener(new WindowAdapter() {
+						@Override public void windowClosed( WindowEvent e ) {
+							_doApp(()->onClose.accept(_createDelegate(thisWindow, e)));
+						}
+					});
+		       })
+			   ._this();
 	}
 
 	/**
@@ -180,13 +190,14 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 	 */
 	public final I onOpened( sprouts.Action<WindowDelegate<W, WindowEvent>> onOpen ) {
 		NullUtil.nullArgCheck(onOpen, "onOpen", Action.class);
-		W window = getComponent();
-		window.addWindowListener(new WindowAdapter() {
-			@Override public void windowOpened( WindowEvent e ) {
-				_doApp(()->onOpen.accept(_createDelegate(window, e)));
-			}
-		});
-		return _this();
+		return _with( thisWindow -> {
+					thisWindow.addWindowListener(new WindowAdapter() {
+						@Override public void windowOpened( WindowEvent e ) {
+							_doApp(()->onOpen.accept(_createDelegate(thisWindow, e)));
+						}
+					});
+		       })
+			   ._this();
 	}
 
 	/**
@@ -204,13 +215,14 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 	 */
 	public final I onIconified( sprouts.Action<WindowDelegate<W, WindowEvent>> onIconify ) {
 		NullUtil.nullArgCheck(onIconify, "onIconify", Action.class);
-		W window = getComponent();
-		window.addWindowListener(new WindowAdapter() {
-			@Override public void windowIconified( WindowEvent e ) {
-				_doApp(()->onIconify.accept(_createDelegate(window, e)));
-			}
-		});
-		return _this();
+		return _with( thisWindow -> {
+					thisWindow.addWindowListener(new WindowAdapter() {
+						@Override public void windowIconified( WindowEvent e ) {
+							_doApp(()->onIconify.accept(_createDelegate(thisWindow, e)));
+						}
+					});
+		       })
+			   ._this();
 	}
 
 	/**
@@ -224,13 +236,14 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 	 */
 	public final I onDeiconified( sprouts.Action<WindowDelegate<W, WindowEvent>> onDeiconify ) {
 		NullUtil.nullArgCheck(onDeiconify, "onDeiconify", Action.class);
-		W window = getComponent();
-		window.addWindowListener(new WindowAdapter() {
-			@Override public void windowDeiconified( WindowEvent e ) {
-				_doApp(()->onDeiconify.accept(_createDelegate(window, e)));
-			}
-		});
-		return _this();
+		return _with( thisWindow -> {
+					thisWindow.addWindowListener(new WindowAdapter() {
+						@Override public void windowDeiconified( WindowEvent e ) {
+							_doApp(()->onDeiconify.accept(_createDelegate(thisWindow, e)));
+						}
+					});
+		       })
+			   ._this();
 	}
 
 	/**
@@ -250,13 +263,14 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 	 */
 	public final I onActivated( sprouts.Action<WindowDelegate<W, WindowEvent>> onActivate ) {
 		NullUtil.nullArgCheck(onActivate, "onActivate", Action.class);
-		W window = getComponent();
-		window.addWindowListener(new WindowAdapter() {
-			@Override public void windowActivated( WindowEvent e ) {
-				_doApp(()->onActivate.accept(_createDelegate(window, e)));
-			}
-		});
-		return _this();
+		return _with( thisWindow -> {
+					thisWindow.addWindowListener(new WindowAdapter() {
+						@Override public void windowActivated( WindowEvent e ) {
+							_doApp(()->onActivate.accept(_createDelegate(thisWindow, e)));
+						}
+					});
+		       })
+			   ._this();
 	}
 
 	/**
@@ -276,13 +290,14 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 	 */
 	public final I onDeactivated( sprouts.Action<WindowDelegate<W, WindowEvent>> onDeactivate ) {
 		NullUtil.nullArgCheck(onDeactivate, "onDeactivate", Action.class);
-		W window = getComponent();
-		window.addWindowListener(new WindowAdapter() {
-			@Override public void windowDeactivated( WindowEvent e ) {
-				_doApp(()->onDeactivate.accept(_createDelegate(window, e)));
-			}
-		});
-		return _this();
+		return _with( thisWindow -> {
+					thisWindow.addWindowListener(new WindowAdapter() {
+						@Override public void windowDeactivated( WindowEvent e ) {
+							_doApp(()->onDeactivate.accept(_createDelegate(thisWindow, e)));
+						}
+					});
+		       })
+			   ._this();
 	}
 
 	/**
@@ -297,13 +312,14 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 	 */
 	public final I onStateChanged( sprouts.Action<WindowDelegate<W, WindowEvent>> onStateChanged ) {
 		NullUtil.nullArgCheck(onStateChanged, "onStateChanged", Action.class);
-		W window = getComponent();
-		window.addWindowListener(new WindowAdapter() {
-			@Override public void windowStateChanged( WindowEvent e ) {
-				_doApp(()->onStateChanged.accept(_createDelegate(window, e)));
-			}
-		});
-		return _this();
+		return _with( thisWindow -> {
+					thisWindow.addWindowListener(new WindowAdapter() {
+						@Override public void windowStateChanged( WindowEvent e ) {
+							_doApp(()->onStateChanged.accept(_createDelegate(thisWindow, e)));
+						}
+					});
+		       })
+			   ._this();
 	}
 
 	/**
@@ -319,14 +335,15 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 	 */
 	public final I onInputFocusGained( sprouts.Action<WindowDelegate<W, WindowEvent>> onFocusGained ) {
 		NullUtil.nullArgCheck(onFocusGained, "onFocusGained", Action.class);
-		W window = getComponent();
-		window.addWindowFocusListener(new WindowFocusListener() {
-			@Override public void windowGainedFocus( WindowEvent e ) {
-				_doApp(()->onFocusGained.accept(_createDelegate(window, e)));
-			}
-			@Override public void windowLostFocus( WindowEvent e ) {}
-		});
-		return _this();
+		return _with( thisWindow -> {
+					thisWindow.addWindowFocusListener(new WindowFocusListener() {
+						@Override public void windowGainedFocus( WindowEvent e ) {
+							_doApp(()->onFocusGained.accept(_createDelegate(thisWindow, e)));
+						}
+						@Override public void windowLostFocus( WindowEvent e ) {}
+					});
+		       })
+			   ._this();
 	}
 
 	/**
@@ -342,14 +359,15 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 	 */
 	public final I onInputFocusLost( sprouts.Action<WindowDelegate<W, WindowEvent>> onFocusLost ) {
 		NullUtil.nullArgCheck(onFocusLost, "onFocusLost", Action.class);
-		W window = getComponent();
-		window.addWindowFocusListener(new WindowFocusListener() {
-			@Override public void windowGainedFocus( WindowEvent e ) {}
-			@Override public void windowLostFocus( WindowEvent e ) {
-				_doApp(()->onFocusLost.accept(_createDelegate(window, e)));
-			}
-		});
-		return _this();
+		return _with( thisWindow -> {
+					thisWindow.addWindowFocusListener(new WindowFocusListener() {
+						@Override public void windowGainedFocus( WindowEvent e ) {}
+						@Override public void windowLostFocus( WindowEvent e ) {
+							_doApp(()->onFocusLost.accept(_createDelegate(thisWindow, e)));
+						}
+					});
+		       })
+			   ._this();
 	}
 
 	private <E> WindowDelegate<W, E> _createDelegate( W window, E event ) {

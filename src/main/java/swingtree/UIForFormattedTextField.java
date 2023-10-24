@@ -14,7 +14,7 @@ public class UIForFormattedTextField extends UIForAnyTextComponent<UIForFormatte
     public UIForFormattedTextField onEnter( Action<ComponentDelegate<JFormattedTextField, ActionEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
         JFormattedTextField field = getComponent();
-        _onEnter( e -> _doApp(()->action.accept(new ComponentDelegate<>( field, e, this::getSiblinghood )) ) );
+        _onEnter( e -> _doApp(()->action.accept(new ComponentDelegate<>( field, e, () -> getSiblinghood() )) ) );
         return this;
     }
 

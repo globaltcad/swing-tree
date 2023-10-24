@@ -52,7 +52,7 @@ public class UIForPopup<P extends JPopupMenu> extends UIForAnySwing<UIForPopup<P
      */
     public UIForPopup<P> onVisible( Action<ComponentDelegate<P, PopupMenuEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
-        _onPopupOpen( e -> _doApp(()->action.accept(new ComponentDelegate<>( getComponent(), e, this::getSiblinghood )) ) );
+        _onPopupOpen( e -> _doApp(()->action.accept(new ComponentDelegate<>( getComponent(), e, () -> getSiblinghood() )) ) );
         return this;
     }
 
@@ -76,7 +76,7 @@ public class UIForPopup<P extends JPopupMenu> extends UIForAnySwing<UIForPopup<P
      */
     public UIForPopup<P> onInvisible( Action<ComponentDelegate<P, PopupMenuEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
-        _onPopupClose( e -> _doApp(()->action.accept(new ComponentDelegate<>( (P) getComponent(), e, this::getSiblinghood )) ) );
+        _onPopupClose( e -> _doApp(()->action.accept(new ComponentDelegate<>( (P) getComponent(), e, () -> getSiblinghood() )) ) );
         return this;
     }
 
@@ -99,7 +99,7 @@ public class UIForPopup<P extends JPopupMenu> extends UIForAnySwing<UIForPopup<P
      */
     public UIForPopup<P> onCancel( Action<ComponentDelegate<P, PopupMenuEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
-        _onPopupCancel( e -> _doApp(()->action.accept(new ComponentDelegate<>( getComponent(), e, this::getSiblinghood )) ) );
+        _onPopupCancel( e -> _doApp(()->action.accept(new ComponentDelegate<>( getComponent(), e, () -> getSiblinghood() )) ) );
         return this;
     }
 

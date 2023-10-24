@@ -288,7 +288,7 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
                        if ( tabbedPane == null ) return;
                        int index = indexFinder.get();
                        if ( index >= 0 && index == tabbedPane.getSelectedIndex() )
-                           _doApp(()->onSelection.accept(new ComponentDelegate<>(tabbedPane, e, this::getSiblinghood)));
+                           _doApp(()->onSelection.accept(new ComponentDelegate<>(tabbedPane, e, () -> getSiblinghood())));
                    })
            );
 
@@ -404,7 +404,7 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
                         int indexClicked = _indexOfClick(pane, e.getPoint());
                         if ( indexClicked < 0 ) return;
                         if ( indexOfThis == indexClicked )
-                            _doApp(()-> mouseClickAction.accept(new ComponentDelegate<>(pane, e, UIForTabbedPane.this::getSiblinghood)));
+                            _doApp(()-> mouseClickAction.accept(new ComponentDelegate<>(pane, e, () -> getSiblinghood())));
                     }
                 });
             }
@@ -421,7 +421,7 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
             int indexClicked = _indexOfClick( pane, p );
             if ( indexClicked < 0 ) return;
             if ( indexOfThis == indexClicked && mouseClickAction != null )
-                _doApp(()-> { mouseClickAction.accept(new ComponentDelegate<>(pane, e, UIForTabbedPane.this::getSiblinghood)); });
+                _doApp(()-> { mouseClickAction.accept(new ComponentDelegate<>(pane, e, () -> getSiblinghood())); });
             if ( indexOfThis < pane.getTabCount() )
                 pane.setSelectedIndex(indexOfThis);
         }
@@ -476,7 +476,7 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
     public final UIForTabbedPane<P> onChange( Action<ComponentDelegate<P, ChangeEvent>> onChange ) {
         NullUtil.nullArgCheck(onChange, "onChange", Action.class);
         P pane = getComponent();
-        _onChange(e -> _doApp(()->onChange.accept(new ComponentDelegate<>(pane, e, this::getSiblinghood))));
+        _onChange(e -> _doApp(()->onChange.accept(new ComponentDelegate<>(pane, e, () -> getSiblinghood()))));
         return this;
     }
 

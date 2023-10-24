@@ -31,12 +31,13 @@ public class UIForTextField<F extends JTextField> extends UIForAnyTextComponent<
      */
     public UIForTextField<F> onEnter( Action<ComponentDelegate<F, ActionEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
-        F field = getComponent();
-        _onEnter( e -> _doApp( () -> action.accept(new ComponentDelegate<>( field, e, this::getSiblinghood )) ) );
-        return this;
+        return _with( c -> {
+                   _onEnter(c, e -> _doApp( () -> action.accept(new ComponentDelegate<>( c, e, () -> getSiblinghood() )) ) );
+               })
+               ._this();
     }
 
-    private void _onEnter( Consumer<ActionEvent> action ) {
+    private void _onEnter( F thisComponent, Consumer<ActionEvent> action ) {
         /*
             When an action event is fired, Swing will go through all the listeners
             from the most recently added to the first added. This means that if we simply add
@@ -48,14 +49,14 @@ public class UIForTextField<F extends JTextField> extends UIForAnyTextComponent<
             simply because it was added first.
             This is especially true in the context of declarative UI design.
         */
-        ActionListener[] listeners = getComponent().getActionListeners();
+        ActionListener[] listeners = thisComponent.getActionListeners();
         for (ActionListener listener : listeners)
-            getComponent().removeActionListener(listener);
+            thisComponent.removeActionListener(listener);
 
-        getComponent().addActionListener(action::accept);
+        thisComponent.addActionListener(action::accept);
 
         for ( int i = listeners.length - 1; i >= 0; i-- ) // reverse order because swing does not give us the listeners in the order they were added!
-            getComponent().addActionListener(listeners[i]);
+            thisComponent.addActionListener(listeners[i]);
     }
 
     /**
@@ -132,8 +133,10 @@ public class UIForTextField<F extends JTextField> extends UIForAnyTextComponent<
      */
     public final <N extends Number> UIForTextField<F> withNumber( Val<N> number ) {
         NullUtil.nullArgCheck(number, "number", Var.class);
-        _onShow( number, n -> _setTextSilently( getComponent(), n.toString() ) );
-        return this;
+        return _with( thisComponent -> {
+                    _onShow( number, n -> _setTextSilently( thisComponent, n.toString() ) );
+               })
+               ._this();
     }
 
     /**
@@ -151,8 +154,10 @@ public class UIForTextField<F extends JTextField> extends UIForAnyTextComponent<
      */
     public final UIForTextField<F> withTextOrientation( UI.HorizontalAlignment direction ) {
         NullUtil.nullArgCheck(direction, "direction", UI.HorizontalAlignment.class);
-        getComponent().setHorizontalAlignment(direction.forSwing());
-        return _this();
+        return _with( thisComponent -> {
+                   thisComponent.setHorizontalAlignment(direction.forSwing());
+               })
+               ._this();
     }
 
 }

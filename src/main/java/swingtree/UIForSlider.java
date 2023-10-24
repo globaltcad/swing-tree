@@ -56,7 +56,7 @@ public class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSlider<S>
     public final UIForSlider<S> onChange( Action<ComponentDelegate<JSlider, ChangeEvent>> action ) {
         NullUtil.nullArgCheck( action, "action", Action.class );
         S slider = getComponent();
-        _onChange( e -> _doApp(()->action.accept(new ComponentDelegate<>(slider, e, this::getSiblinghood))) );
+        _onChange( e -> _doApp(()->action.accept(new ComponentDelegate<>(slider, e, () -> getSiblinghood()))) );
         return this;
     }
 

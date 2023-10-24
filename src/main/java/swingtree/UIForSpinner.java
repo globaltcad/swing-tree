@@ -136,7 +136,7 @@ public class UIForSpinner<S extends JSpinner> extends UIForAnySwing<UIForSpinner
     public final UIForSpinner<S> onChange( Action<ComponentDelegate<JSpinner, ChangeEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
         S spinner = getComponent();
-        _onChange(e -> _doApp(()->action.accept(new ComponentDelegate<>(spinner, e, this::getSiblinghood))) );
+        _onChange(e -> _doApp(()->action.accept(new ComponentDelegate<>(spinner, e, () -> getSiblinghood()))) );
         return this;
     }
 

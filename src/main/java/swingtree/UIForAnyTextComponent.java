@@ -27,45 +27,12 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
     private final java.util.List<Action<InsertDelegate>>   inserts = new ArrayList<>();
     private final java.util.List<Action<ReplaceDelegate>>  replaces = new ArrayList<>();
 
-    /**
-     *  A custom document filter which is simply a lambda-rization wrapper which ought to make
-     *  the implementation of custom callbacks more convenient, because the user does not have to implement
-     *  all the methods provided by the {@link DocumentFilter}, but can simply pass a lambda for either one
-     *  of them.
-     */
-    private final DocumentFilter filter = new DocumentFilter()
-    {
-        private final C _component = getComponent();
-
-        /**
-         * See documentation in {@link DocumentFilter}!
-         */
-        public void remove(FilterBypass fb, int offset, int length) throws BadLocationException {
-            removes.forEach(action -> action.accept( new RemoveDelegate(_component, fb, offset, length) ) );
-            if ( removes.isEmpty() ) fb.remove(offset, length);
-        }
-        /**
-         * See documentation in {@link DocumentFilter}!
-         */
-        public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
-            inserts.forEach(action -> action.accept( new InsertDelegate(_component, fb, offset, string.length(), string, attr) ) );
-            if ( inserts.isEmpty() ) fb.insertString(offset, string, attr);
-        }
-        /**
-         * See documentation in {@link DocumentFilter}!
-         */
-        public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
-            replaces.forEach(action -> action.accept(new ReplaceDelegate(_component, fb, offset, length, text, attrs)) );
-            if ( replaces.isEmpty() ) fb.replace(offset, length, text, attrs);
-        }
-    };
-
     protected UIForAnyTextComponent(C component) { super(component); }
 
     /**
      * Sets the text of the wrapped <code>{@link TextComponent}</code>
      * to the specified text. If the text is <code>null</code>
-     * or empty, has the effect of simply deleting the old text.
+     * an exception is thrown. Please use an empty string instead of null!
      * When text has been inserted, the resulting caret location
      * is determined by the implementation of the caret class.
      *
@@ -81,8 +48,10 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
      */
     public final I withText( String text ) {
         NullUtil.nullArgCheck(text, "text", String.class, "Please use an empty string instead of null!");
-        _setTextSilently( getComponent(), text );
-        return _this();
+        return _with( thisComponent -> {
+                    _setTextSilently( thisComponent, text );
+                })
+                ._this();
     }
 
     /**
@@ -100,8 +69,11 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
      */
     public final I withText( Val<String> val ) {
         NullUtil.nullArgCheck(val, "val", Val.class);
-        _onShow(val, v -> _setTextSilently( getComponent(), v ) );
-        return withText( val.orElseThrow() );
+        return _with( thisComponent -> {
+                    _onShow(val, v -> _setTextSilently( thisComponent, v ) );
+                    _setTextSilently( thisComponent, val.orElseThrow() );
+                })
+                ._this();
     }
 
     /**
@@ -120,44 +92,47 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
      */
     public final I withText( Var<String> text ) {
         NullUtil.nullPropertyCheck(text, "text", "Use an empty string instead of null!");
-        _onShow( text, newText -> {
-            C c = getComponent();
-            if ( !Objects.equals(c.getText(), newText) )  // avoid infinite recursion or some other Swing weirdness
-                _setTextSilently( c, newText );
-        });
-        _onTextChange( e -> {
-            try {
-                String newText = e.getDocument().getText(0, e.getDocument().getLength());
-                _doApp(newText, t -> {
-                    if ( UI.thisIsUIThread() )
-                        UI.runLater( () -> {
-                            try {
-                                text.set(From.VIEW, e.getDocument().getText(0, e.getDocument().getLength()));
-                            } catch (BadLocationException ex) {
-                                throw new RuntimeException(ex);
-                            }
-                        }); // avoid attempt to mutate in notification
-                        /*
-                            We apply the text to the property in the next EDT cycle,
-                            which is important to avoid mutating the property in a notification.
-                            Because if a user decides to rebroadcast the text property in the 'onAct' callback,
-                            then the text component will receive that new text while it is still in the middle of
-                            document mutation, which is not allowed by Swing!
-                            (java.lang.IllegalStateException: Attempt to mutate in notification
-                                at javax.swing.text.AbstractDocument.writeLock(AbstractDocument.java:1338))
-                        */
-                    else
-                        text.set(From.VIEW, t);
-                });
-            } catch (BadLocationException ex) {
-                throw new RuntimeException(ex);
-            }
-        });
-        return withText( text.orElseThrow() );
+        return _with( thisComponent -> {
+                    _onShow( text, newText -> {
+                        C c = getComponent();
+                        if ( !Objects.equals(c.getText(), newText) )  // avoid infinite recursion or some other Swing weirdness
+                            _setTextSilently( c, newText );
+                    });
+                    _onTextChange(thisComponent, e -> {
+                        try {
+                            String newText = e.getDocument().getText(0, e.getDocument().getLength());
+                            _doApp(newText, t -> {
+                                if ( UI.thisIsUIThread() )
+                                    UI.runLater( () -> {
+                                        try {
+                                            text.set(From.VIEW, e.getDocument().getText(0, e.getDocument().getLength()));
+                                        } catch (BadLocationException ex) {
+                                            throw new RuntimeException(ex);
+                                        }
+                                    }); // avoid attempt to mutate in notification
+                                    /*
+                                        We apply the text to the property in the next EDT cycle,
+                                        which is important to avoid mutating the property in a notification.
+                                        Because if a user decides to rebroadcast the text property in the 'onAct' callback,
+                                        then the text component will receive that new text while it is still in the middle of
+                                        document mutation, which is not allowed by Swing!
+                                        (java.lang.IllegalStateException: Attempt to mutate in notification
+                                            at javax.swing.text.AbstractDocument.writeLock(AbstractDocument.java:1338))
+                                    */
+                                else
+                                    text.set(From.VIEW, t);
+                            });
+                        } catch (BadLocationException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                    });
+                    _setTextSilently( getComponent(), text.orElseThrow() );
+                })
+                ._this();
     }
 
-    protected final void _setTextSilently( C component, String text ) {
-        Document doc = component.getDocument();
+    protected final void _setTextSilently( C thisComponent, String text ) {
+        Document doc = thisComponent.getDocument();
         if (doc instanceof AbstractDocument) {
             AbstractDocument abstractDoc = (AbstractDocument) doc;
             // We remove all document listeners to avoid infinite recursion
@@ -165,14 +140,14 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
             DocumentListener[] listeners = abstractDoc.getListeners(DocumentListener.class);
             for ( DocumentListener listener : listeners )
                 abstractDoc.removeDocumentListener(listener);
-            component.setText(text);
+            thisComponent.setText(text);
             for ( DocumentListener listener : listeners )
                 abstractDoc.addDocumentListener(listener);
 
-            component.repaint(); // otherwise the text is not updated until the next repaint
+            thisComponent.repaint(); // otherwise the text is not updated until the next repaint
         }
         else
-            component.setText(text);
+            thisComponent.setText(text);
     }
 
     /**
@@ -183,8 +158,10 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
      */
     public final I withFont( Font font ) {
         NullUtil.nullArgCheck(font, "font", Font.class);
-        this.getComponent().setFont( font );
-        return _this();
+        return _with( thisComponent -> {
+                    thisComponent.setFont( font );
+                })
+                ._this();
     }
 
     /**
@@ -201,8 +178,12 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
     public final I withFont( Val<Font> font ) {
         NullUtil.nullArgCheck(font, "font", Val.class);
         NullUtil.nullPropertyCheck(font, "font", "Use the default font of this component instead of null!");
-        _onShow( font, v -> withFont(v) );
-        return withFont( font.orElseThrow() );
+        return _with( thisComponent -> {
+                    _onShow( font, thisComponent::setFont );
+                    thisComponent.setFont( font.orElseThrow() );
+                })
+                ._this();
+
     }
 
     /**
@@ -212,8 +193,10 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
      * @return This very builder to allow for method chaining.
      */
     public final I isEditableIf( boolean isEditable ) {
-        getComponent().setEditable(isEditable);
-        return _this();
+        return _with( thisComponent -> {
+                    thisComponent.setEditable(isEditable);
+                })
+                ._this();
     }
 
 
@@ -225,16 +208,18 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
      * @return This very builder to allow for method chaining.
      */
     public final I onContentChange( Consumer<ComponentDelegate<JTextComponent, DocumentEvent>> action ) {
-        C component = getComponent();
-        component.getDocument().addDocumentListener(new DocumentListener() {
-            @Override public void insertUpdate(DocumentEvent e)  {
-                _doApp(()->action.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));}
-            @Override public void removeUpdate(DocumentEvent e)  {
-                _doApp(()->action.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));}
-            @Override public void changedUpdate(DocumentEvent e) {
-                _doApp(()->action.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));}
-        });
-        return _this();
+        NullUtil.nullArgCheck(action, "action", Consumer.class);
+        return _with( thisComponent -> {
+                    thisComponent.getDocument().addDocumentListener(new DocumentListener() {
+                        @Override public void insertUpdate(DocumentEvent e)  {
+                            _doApp(()->action.accept(new ComponentDelegate<>(thisComponent, e, ()->getSiblinghood())));}
+                        @Override public void removeUpdate(DocumentEvent e)  {
+                            _doApp(()->action.accept(new ComponentDelegate<>(thisComponent, e, ()->getSiblinghood())));}
+                        @Override public void changedUpdate(DocumentEvent e) {
+                            _doApp(()->action.accept(new ComponentDelegate<>(thisComponent, e, ()->getSiblinghood())));}
+                    });
+                })
+                ._this();
     }
 
     /**
@@ -246,13 +231,14 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
      */
     public final I onTextChange( Consumer<ComponentDelegate<JTextComponent, DocumentEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Consumer.class);
-        C component = getComponent();
-        _onTextChange( e -> _doApp( () -> action.accept(new ComponentDelegate<>(component, e, () -> getSiblinghood() ))) );
-        return _this();
+        return _with( thisComponent -> {
+                    _onTextChange(thisComponent, e -> _doApp( () -> action.accept(new ComponentDelegate<>(thisComponent, e, () -> getSiblinghood() ))) );
+                })
+                ._this();
     }
 
-    protected final void _onTextChange( Consumer<DocumentEvent> action ) {
-        getComponent().getDocument().addDocumentListener(new DocumentListener() {
+    protected final void _onTextChange( C thisComponent, Consumer<DocumentEvent> action ) {
+        thisComponent.getDocument().addDocumentListener(new DocumentListener() {
             @Override public void insertUpdate(DocumentEvent e) { action.accept(e); }
             @Override public void removeUpdate(DocumentEvent e) { action.accept(e); }
             @Override public void changedUpdate(DocumentEvent e) {}
@@ -260,14 +246,37 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
     }
 
     /**
-     * @param action An action which will be executed in case the underlying
-     *               component supports text filtering (The underlying document is an {@link AbstractDocument}).
+     * @param thisComponent The component which is wrapped by this builder.
+     * @param action        An action which will be executed in case the underlying
+     *                      component supports text filtering (The underlying document is an {@link AbstractDocument}).
      */
-    private void _ifFilterable( Runnable action ) {
-        if ( getComponent().getDocument() instanceof AbstractDocument ) {
+    private void _ifFilterable( C thisComponent, Runnable action ) {
+        if ( thisComponent.getDocument() instanceof AbstractDocument ) {
             action.run();
-            AbstractDocument doc = (AbstractDocument)getComponent().getDocument();
-            doc.setDocumentFilter(filter);
+            AbstractDocument doc = (AbstractDocument)thisComponent.getDocument();
+            doc.setDocumentFilter(new DocumentFilter() {
+                /**
+                 * See documentation in {@link DocumentFilter}!
+                 */
+                public void remove(FilterBypass fb, int offset, int length) throws BadLocationException {
+                    removes.forEach(action -> action.accept( new RemoveDelegate(thisComponent, fb, offset, length) ) );
+                    if ( removes.isEmpty() ) fb.remove(offset, length);
+                }
+                /**
+                 * See documentation in {@link DocumentFilter}!
+                 */
+                public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
+                    inserts.forEach(action -> action.accept( new InsertDelegate(thisComponent, fb, offset, string.length(), string, attr) ) );
+                    if ( inserts.isEmpty() ) fb.insertString(offset, string, attr);
+                }
+                /**
+                 * See documentation in {@link DocumentFilter}!
+                 */
+                public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
+                    replaces.forEach(action -> action.accept(new ReplaceDelegate(thisComponent, fb, offset, length, text, attrs)) );
+                    if ( replaces.isEmpty() ) fb.replace(offset, length, text, attrs);
+                }
+            });
         }
     }
 
@@ -279,8 +288,10 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
      */
     public final I onTextRemove( Action<RemoveDelegate> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
-        _ifFilterable( () -> this.removes.add(action) );
-        return _this();
+        return _with( thisComponent -> {
+                    _ifFilterable(thisComponent, () -> this.removes.add(action));
+               })
+               ._this();
     }
 
     /**
@@ -290,8 +301,10 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
      * @return This very builder to allow for method chaining.
      */
     public final I onTextInsert( Action<InsertDelegate> action ) {
-        _ifFilterable( () -> this.inserts.add(action) );
-        return _this();
+        return _with( thisComponent -> {
+                    _ifFilterable(thisComponent, () -> this.inserts.add(action));
+               })
+               ._this();
     }
 
     /**
@@ -302,8 +315,10 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
      */
     public final I onTextReplace( Action<ReplaceDelegate> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
-        _ifFilterable( () -> this.replaces.add(action) );
-        return _this();
+        return _with( thisComponent -> {
+                    _ifFilterable(thisComponent, () -> this.replaces.add(action));
+               })
+               ._this();
     }
 
 
