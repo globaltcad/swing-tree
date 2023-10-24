@@ -46,33 +46,17 @@ final class StylePainter<C extends JComponent>
         Style style,
         Expirable<Painter>[] animationPainters
     ) {
-        _style               = Objects.requireNonNull(style);
-        _animationPainters   = Objects.requireNonNull(animationPainters);
-    }
-
-    StylePainter<C> beginPaintingWith( Style style, Graphics g ) {
-        if ( Style.none().equals(style) ) return reset();
-        return new StylePainter<>( style, _animationPainters );
+        _style             = Objects.requireNonNull(style);
+        _animationPainters = Objects.requireNonNull(animationPainters);
     }
 
     StylePainter<C> endPainting() {
-        return new StylePainter<>( _style, _animationPainters );
+        _baseArea = null;
+        return this;
     }
 
     StylePainter<C> update( Style style ) {
-        if ( Style.none().equals(style) ) return reset();
         return new StylePainter<>( style, _animationPainters );
-    }
-
-    StylePainter<C> reset() {
-        StylePainter<C> reset = none();
-        if ( _animationPainters.length > 0 )
-            reset = new StylePainter<>(
-                            reset._style,
-                            _animationPainters
-                        );
-
-        return reset;
     }
 
     StylePainter<C> withAnimationPainter( LifeTime lifeTime, Painter animationPainter ) {
@@ -166,16 +150,16 @@ final class StylePainter<C extends JComponent>
         // 4. Painters, which are provided by the user and can be anything
         _style.painters(layer).forEach( backgroundPainter -> {
             if ( backgroundPainter == Painter.none() ) return;
-            g2d.setClip(_getBaseArea(comp));
-            AffineTransform oldTransform = new AffineTransform(g2d.getTransform());
-            try {
-                backgroundPainter.paint(g2d);
-            } catch ( Exception e ) {
-                log.warn(
-                    "An exception occurred while executing painter '" + backgroundPainter + "' " +
-                    "on layer '" + layer + "' of component '" + comp + "'!",
-                    e
-                );
+            _withClip(g2d, _getBaseArea(comp), () -> {
+                AffineTransform oldTransform = new AffineTransform(g2d.getTransform());
+                try {
+                    backgroundPainter.paint(g2d);
+                } catch (Exception e) {
+                    log.warn(
+                            "An exception occurred while executing painter '" + backgroundPainter + "' " +
+                                    "on layer '" + layer + "' of component '" + comp + "'!",
+                            e
+                    );
                 /*
                     If exceptions happen in user provided painters, we don't want to
                     mess up the rendering of the rest of the component, so we catch them here!
@@ -186,10 +170,21 @@ final class StylePainter<C extends JComponent>
                     Hi there! If you are reading this, you are probably a developer using the SwingTree
                     library, thank you for using it! Good luck finding out what went wrong! :)
                 */
-            } finally {
-                g2d.setTransform(oldTransform);
-            }
+                } finally {
+                    g2d.setTransform(oldTransform);
+                }
+            });
         });
+    }
+
+    private void _withClip( Graphics2D g2d, Shape clip, Runnable paintTask ) {
+        Shape formerClip = g2d.getClip();
+        g2d.setClip(clip);
+        try {
+            paintTask.run();
+        } finally {
+            g2d.setClip(formerClip);
+        }
     }
 
     void paintBorderStyle( Graphics2D g2d, JComponent component )
