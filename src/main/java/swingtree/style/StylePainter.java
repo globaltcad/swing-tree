@@ -257,7 +257,7 @@ final class StylePainter<C extends JComponent>
                 Resetting the clip here is visually especially very important for rounded borders and shadows.
             */
             Shape formerClip = g2d.getClip();
-            g2d.setClip(_mainClip);
+            //g2d.setClip(_mainClip);
             try {
                 int leftBorderWidth   = _style.border().widths().left().orElse(0);
                 int topBorderWidth    = _style.border().widths().top().orElse(0);
