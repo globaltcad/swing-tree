@@ -14,6 +14,7 @@ import java.lang.ref.WeakReference;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -73,6 +74,10 @@ abstract class AbstractBuilder<I, C extends Component>
     protected AbstractBuilder<I,C> _with( Consumer<C> action ) {
         action.accept( getComponent() );
         return this;
+    }
+
+    protected I _withAndGet( Function<C, I> action ) {
+        return action.apply( getComponent() );
     }
 
     protected final boolean _canBeRemoved( Action<?> action ) {
