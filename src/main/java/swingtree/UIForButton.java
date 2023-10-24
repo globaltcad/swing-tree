@@ -20,20 +20,22 @@ public class UIForButton<B extends AbstractButton> extends UIForAnyButton<UIForB
      * @return this
      */
     public final UIForButton<B> makeDefaultButton() {
-        if ( !(getComponent() instanceof JButton) ) {
-            log.warn("Method 'makeDefaultButton()' called on a non JButton component.");
-            return this;
-        }
-        UI.runLater(()->{
-            // We do this later because in this point in time the UI is probably not
-            // yet fully built (swing-tree is using the builder-pattern).
-            JButton button = (JButton) getComponent();
-            JRootPane rootPane = SwingUtilities.getRootPane(button);
-            if ( rootPane != null )
-                rootPane.setDefaultButton(button);
-            else
-                log.warn("Method 'makeDefaultButton()' called on a JButton component that is not in a JRootPane.");
-        });
-        return this;
+        return _with( thisButton -> {
+                    if ( !(thisButton instanceof JButton) ) {
+                        log.warn("Method 'makeDefaultButton()' called on a non JButton component.");
+                        return;
+                    }
+                    UI.runLater(()->{
+                        // We do this later because in this point in time the UI is probably not
+                        // yet fully built (swing-tree is using the builder-pattern).
+                        JButton button = (JButton) thisButton;
+                        JRootPane rootPane = SwingUtilities.getRootPane(button);
+                        if ( rootPane != null )
+                            rootPane.setDefaultButton(button);
+                        else
+                            log.warn("Method 'makeDefaultButton()' called on a JButton component that is not in a JRootPane.");
+                    });
+                })
+                ._this();
     }
 }
