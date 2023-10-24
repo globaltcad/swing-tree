@@ -217,8 +217,6 @@ public final class ComponentExtension<C extends JComponent>
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
     }
 
-    Shape getMainClip() { return _stylePainter.getMainClip(); }
-
     Shape getInnerComponentArea() { return _stylePainter._getBaseArea(_owner); }
 
     /**

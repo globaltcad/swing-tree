@@ -57,6 +57,15 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
     @Override
     public void paintBorder( Component c, Graphics g, int x, int y, int width, int height )
     {
+        Shape formerClip = g.getClip();
+        g.setClip(null);
+        /*
+            The border should not be clipped as the current clip may be the inner component area
+            which can produce ugly artifacts between the inner component area
+            and the area around the component (margin), which is not covered by the border.
+            Resetting the clip here is visually especially very important for rounded borders and shadows.
+        */
+
         _compExt.establishStyleAndBeginPainting(g);
 
         _paintBorderAndBorderLayerStyles( (Graphics2D) g );
@@ -66,6 +75,9 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
                 _paintFormerBorder(c, g, x, y, width, height);
         }
         _compExt._renderAnimations((Graphics2D) g);
+
+        if ( formerClip != null )
+            g.setClip(formerClip);
     }
 
     private void _paintFormerBorder( Component c, Graphics g, int x, int y, int width, int height ) {
