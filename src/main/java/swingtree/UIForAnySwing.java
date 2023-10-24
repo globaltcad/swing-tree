@@ -3496,12 +3496,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     }
 
     @Override
-    protected void _add( JComponent component, Object conf ) {
-        NullUtil.nullArgCheck(component, "component", JComponent.class);
+    protected void _doAddComponent( JComponent newComponent, Object conf, C thisComponent ) {
+        NullUtil.nullArgCheck(newComponent, "component", JComponent.class);
         if ( conf == null )
-            getComponent().add(component);
+            thisComponent.add(newComponent);
         else
-            getComponent().add(component, conf);
+            thisComponent.add(newComponent, conf);
     }
 
     /**
@@ -3561,7 +3561,8 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
                            log.warn("Layout ambiguity detected! Border layout constraint cannot be added to 'MigLayout'.");
                        component.setLayout(new BorderLayout()); // The UI Maker tries to fill in the blanks!
                    }
-                   for ( UIForAnySwing<?, ?> b : builders ) _doAdd(b, attr);
+                   for ( UIForAnySwing<?, ?> b : builders )
+                       _doAdd( b, attr, component );
                })
                ._this();
     }
@@ -3607,7 +3608,8 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
                    if ( !(layout instanceof MigLayout) )
                        log.warn("Layout ambiguity detected! Mig layout constraint cannot be added to '{}'.", layout.getClass().getSimpleName());
 
-                   for ( UIForAnySwing<?, ?> b : builders ) _doAdd( b, attr );
+                   for ( UIForAnySwing<?, ?> b : builders )
+                       _doAdd( b, attr, component );
                })
                ._this();
     }
@@ -3781,24 +3783,24 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         return this.add(attr.toString(), viewables, viewSupplier);
     }
 
-    protected <M> void _addViewableProps( Vals<M> viewables, String attr, ViewSupplier<M> viewSupplier, C component ) {
+    protected <M> void _addViewableProps( Vals<M> viewables, String attr, ViewSupplier<M> viewSupplier, C thisComponent ) {
         _onShow( viewables, delegate -> {
             // we simply redo all the components.
             switch ( delegate.changeType() ) {
-                case SET: _updateComponentAt(delegate.index(), delegate.newValue().get(), viewSupplier, attr, component); break;
+                case SET: _updateComponentAt(delegate.index(), delegate.newValue().get(), viewSupplier, attr, thisComponent); break;
                 case ADD:
                     if ( delegate.index() < 0 && delegate.newValue().isEmpty() ) {
                         // This is basically a add all operation, so we clear the components first.
-                        _clearComponents(component);
+                        _clearComponentsOf(thisComponent);
                         // and then we add all the components.
                         for ( int i = 0; i < delegate.vals().size(); i++ )
-                            _addComponentAt( i, delegate.vals().at(i).get(), viewSupplier, attr, component );
+                            _addComponentAt( i, delegate.vals().at(i).get(), viewSupplier, attr, thisComponent );
                     }
                     else
-                        _addComponentAt( delegate.index(), delegate.newValue().get(), viewSupplier, attr, component );
+                        _addComponentAt( delegate.index(), delegate.newValue().get(), viewSupplier, attr, thisComponent );
                     break;
-                case REMOVE: _removeComponentAt(delegate.index(), component); break;
-                case CLEAR: _clearComponents(component); break;
+                case REMOVE: _removeComponentAt(delegate.index(), thisComponent); break;
+                case CLEAR: _clearComponentsOf(thisComponent); break;
                 case NONE: break;
                 default: throw new IllegalStateException("Unknown type: "+delegate.changeType());
             }
@@ -3810,7 +3812,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
             Val<M> viewable, String attr, ViewSupplier<M> viewSupplier, C component
     ) {
         // First we remember the index of the component which will be provided by the viewable dynamically.
-        final int index = _childCount();
+        final int index = _childCount( component );
         // Then we add the component provided by the viewable to the list of children.
         if ( attr == null ) {
             if ( viewable.isPresent() )
@@ -3844,16 +3846,16 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     }
 
     private <M> void _addComponentAt(
-        int index, M v, ViewSupplier<M> viewSupplier, String attr, C c
+        int index, M v, ViewSupplier<M> viewSupplier, String attr, C thisComponent
     ) {
         // We add the new component.
         if ( attr == null )
-            c.add(UI.use(_eventProcessor, () -> viewSupplier.createViewFor(v).getComponent()), index);
+            thisComponent.add(UI.use(_eventProcessor, () -> viewSupplier.createViewFor(v).getComponent()), index);
         else
-            c.add(UI.use(_eventProcessor, () -> viewSupplier.createViewFor(v).getComponent()), attr, index);
+            thisComponent.add(UI.use(_eventProcessor, () -> viewSupplier.createViewFor(v).getComponent()), attr, index);
         // We update the layout.
-        c.revalidate();
-        c.repaint();
+        thisComponent.revalidate();
+        thisComponent.repaint();
     }
 
     private void _removeComponentAt( int index, C c ) {
@@ -3864,7 +3866,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         c.repaint();
     }
 
-    private void _clearComponents( C c ) {
+    private void _clearComponentsOf(C c ) {
         // We remove all components.
         c.removeAll();
         // We update the layout.

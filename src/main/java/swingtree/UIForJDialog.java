@@ -15,8 +15,8 @@ public class UIForJDialog<D extends JDialog> extends UIForAnyWindow<UIForJDialog
 	public UIForJDialog(D component) { super(component); }
 
 	@Override
-	protected void _add(Component component, Object conf) {
-		getComponent().add(conf == null ? null : conf.toString(), component);
+	protected void _doAddComponent( Component newComponent, Object conf, D thisComponent ) {
+		thisComponent.add( conf == null ? null : conf.toString(), newComponent );
 	}
 
 	@Override
