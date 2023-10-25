@@ -94,9 +94,8 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
         NullUtil.nullPropertyCheck(text, "text", "Use an empty string instead of null!");
         return _with( thisComponent -> {
                     _onShow( text, newText -> {
-                        C c = getComponent();
-                        if ( !Objects.equals(c.getText(), newText) )  // avoid infinite recursion or some other Swing weirdness
-                            _setTextSilently( c, newText );
+                        if ( !Objects.equals(thisComponent.getText(), newText) )  // avoid infinite recursion or some other Swing weirdness
+                            _setTextSilently( thisComponent, newText );
                     });
                     _onTextChange(thisComponent, e -> {
                         try {
@@ -126,7 +125,7 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
                             throw new RuntimeException(ex);
                         }
                     });
-                    _setTextSilently( getComponent(), text.orElseThrow() );
+                    _setTextSilently( thisComponent, text.orElseThrow() );
                 })
                 ._this();
     }
@@ -253,7 +252,7 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
     private void _ifFilterable( C thisComponent, Runnable action ) {
         if ( thisComponent.getDocument() instanceof AbstractDocument ) {
             action.run();
-            AbstractDocument doc = (AbstractDocument)thisComponent.getDocument();
+            AbstractDocument doc = (AbstractDocument) thisComponent.getDocument();
             doc.setDocumentFilter(new DocumentFilter() {
                 /**
                  * See documentation in {@link DocumentFilter}!

@@ -62,7 +62,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     public final I withText( Val<String> text ) {
         NullUtil.nullArgCheck(text, "val", Val.class);
         NullUtil.nullPropertyCheck(text, "text");
-        return _with( c -> _onShow( text, v -> c.setText(v) ) )
+        return _with( c -> _onShow( text, c::setText) )
                .withText( text.orElseThrow() );
     }
 
@@ -131,18 +131,18 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
             return withIcon( svgIcon.withFitComponent(fitComponent) );
         }
         else
-        {
-            UI.runLater(()->{
-                JComponent c = getComponent();
-                int width  = c.getWidth();
-                int height = c.getHeight();
-                width  = Math.max(width,  c.getMinimumSize().width);
-                height = Math.max(height, c.getMinimumSize().height);
-                if ( width > 0 && height > 0 )
-                    withIcon( width, height, icon );
-            });
-        }
-        return _this();
+            return _with( thisComponent -> {
+                       UI.runLater(()->{
+                           int width  = thisComponent.getWidth();
+                           int height = thisComponent.getHeight();
+                           width  = Math.max(width,  thisComponent.getMinimumSize().width);
+                           height = Math.max(height, thisComponent.getMinimumSize().height);
+                           if ( width > 0 && height > 0 )
+                               withIcon( width, height, icon );
+                       });
+                   })
+                   ._this();
+
     }
 
     public I withIcon( IconDeclaration icon, UI.FitComponent fitComponent ) {
@@ -163,7 +163,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      */
     public I withIcon( IconDeclaration icon ) {
         NullUtil.nullArgCheck(icon,"icon", IconDeclaration.class);
-        return _with( c -> icon.find().ifPresent( i -> c.setIcon(i) ) )._this();
+        return _with( c -> icon.find().ifPresent(c::setIcon) )._this();
     }
 
     /**
@@ -253,7 +253,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     public final I withFont( Val<Font> font ) {
         NullUtil.nullArgCheck(font, "font", Val.class);
         NullUtil.nullPropertyCheck(font, "font", "Use the default font of this component instead of null!");
-        return _with( button -> _onShow( font, v -> withFont(v) ) )
+        return _with( button -> _onShow( font, v -> button.setFont(v) ) )
                 .withFont( font.orElseThrow() );
     }
 
@@ -267,20 +267,20 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
         return _with( button -> _setSelectedSilently(isSelected, button) )._this();
     }
 
-    void _setSelectedSilently(boolean isSelected, B button) {
+    void _setSelectedSilently( boolean isSelected, B thisButton ) {
         /*
             This is used to change the selection state of the button without triggering
             any action listeners. We need this because we want to construct the
             GUI and the state of its properties without side effects.
          */
-        ItemListener[] listeners = button.getItemListeners();
+        ItemListener[] listeners = thisButton.getItemListeners();
         for ( ItemListener l : listeners )
-            button.removeItemListener(l);
+            thisButton.removeItemListener(l);
 
-        button.setSelected(isSelected);
+        thisButton.setSelected(isSelected);
 
         for ( ItemListener l : listeners )
-            button.addItemListener(l);
+            thisButton.addItemListener(l);
 
     }
 
