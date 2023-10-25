@@ -43,8 +43,10 @@ public class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable<T>, T
      */
     public final UIForTable<T> withHeader( JTableHeader header ) {
         NullUtil.nullArgCheck(header, "header", JTableHeader.class);
-        getComponent().setTableHeader(header);
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.setTableHeader(header);
+                })
+                ._this();
     }
 
     /**
@@ -82,8 +84,10 @@ public class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable<T>, T
     public final UIForTable<T> withRendererForColumn( String columnName, TableCellRenderer renderer ) {
         NullUtil.nullArgCheck(columnName, "columnName", String.class);
         NullUtil.nullArgCheck(renderer, "renderer", TableCellRenderer.class);
-        getComponent().getColumn(columnName).setCellRenderer(renderer);
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.getColumn(columnName).setCellRenderer(renderer);
+                })
+                ._this();
     }
 
     /**
@@ -94,8 +98,10 @@ public class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable<T>, T
      */
     public final UIForTable<T> withRendererForColumn( int columnIndex, TableCellRenderer renderer ) {
         NullUtil.nullArgCheck(renderer, "renderer", TableCellRenderer.class);
-        getComponent().getColumnModel().getColumn(columnIndex).setCellRenderer(renderer);
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.getColumnModel().getColumn(columnIndex).setCellRenderer(renderer);
+                })
+                ._this();
     }
 
     /**
@@ -105,8 +111,10 @@ public class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable<T>, T
      */
     public final UIForTable<T> withRenderer( TableCellRenderer renderer ) {
         NullUtil.nullArgCheck(renderer, "renderer", TableCellRenderer.class);
-        getComponent().setDefaultRenderer(Object.class, renderer);
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.setDefaultRenderer(Object.class, renderer);
+                })
+                ._this();
     }
 
     /**
@@ -128,8 +136,10 @@ public class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable<T>, T
     public final UIForTable<T> withCellEditorForColumn( String columnName, TableCellEditor editor ) {
         NullUtil.nullArgCheck(columnName, "columnName", String.class);
         NullUtil.nullArgCheck(editor, "editor", TableCellEditor.class);
-        getComponent().getColumn(columnName).setCellEditor(editor);
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.getColumn(columnName).setCellEditor(editor);
+                })
+                ._this();
     }
 
     /**
@@ -140,8 +150,10 @@ public class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable<T>, T
      */
     public final UIForTable<T> withCellEditorForColumn( int columnIndex, TableCellEditor editor ) {
         NullUtil.nullArgCheck(editor, "editor", TableCellEditor.class);
-        getComponent().getColumnModel().getColumn(columnIndex).setCellEditor(editor);
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.getColumnModel().getColumn(columnIndex).setCellEditor(editor);
+                })
+                ._this();
     }
 
     /**
@@ -162,8 +174,10 @@ public class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable<T>, T
      */
     public final UIForTable<T> withModel( BasicTableModel model ) {
         NullUtil.nullArgCheck(model, "model", BasicTableModel.class);
-        getComponent().setModel(model);
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.setModel(model);
+                })
+                ._this();
     }
 
     /**
@@ -184,46 +198,50 @@ public class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable<T>, T
     public final <E> UIForTable<T> withModel( UI.ListData mode, TableListDataSource<E> dataSource ) {
         boolean isRowMajor = mode.isRowMajor();
         boolean isEditable = mode.isEditable();
-        if ( isRowMajor ) {
-            getComponent().setModel(new ListBasedTableModel<E>(isEditable, dataSource)
-            {
-                @Override public int getRowCount() { return getData().size(); }
-                @Override public int getColumnCount() {
-                    List<List<E>> data = getData();
-                    return (data.isEmpty() ? 0 : data.get(0).size());
-                }
-                @Override public Object getValueAt(int rowIndex, int columnIndex) {
-                    List<List<E>> data = getData();
-                    if (isNotWithinBounds(rowIndex, columnIndex)) return null;
-                    return data.get(rowIndex).get(columnIndex);
-                }
-                @Override public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-                    List<List<E>> data = getData();
-                    if ( !isEditable || isNotWithinBounds(rowIndex, columnIndex) ) return;
-                    data.get(rowIndex).set(columnIndex, (E)aValue);
-                }
-            });
-        } else { // isColumnMajor
-            getComponent().setModel(new ListBasedTableModel<E>(isEditable, dataSource)
-            {
-                @Override public int getRowCount() {
-                    List<List<E>> data = getData();
-                    return (data.isEmpty() ? 0 : data.get(0).size());
-                }
-                @Override public int getColumnCount() { return getData().size(); }
-                @Override public Object getValueAt(int rowIndex, int columnIndex) {
-                    List<List<E>> data = getData();
-                    if (isNotWithinBounds(rowIndex, columnIndex)) return null;
-                    return data.get(columnIndex).get(rowIndex);
-                }
-                @Override public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-                    List<List<E>> data = getData();
-                    if ( !isEditable || isNotWithinBounds(rowIndex, columnIndex) ) return;
-                    data.get(columnIndex).set(rowIndex, (E)aValue);
-                }
-            });
-        }
-        return this;
+        if ( isRowMajor )
+            return _with( thisComponent ->
+                    thisComponent.setModel(new ListBasedTableModel<E>(isEditable, dataSource)
+                    {
+                        @Override public int getRowCount() { return getData().size(); }
+                        @Override public int getColumnCount() {
+                            List<List<E>> data = getData();
+                            return ( data.isEmpty() ? 0 : data.get(0).size() );
+                        }
+                        @Override public Object getValueAt(int rowIndex, int columnIndex) {
+                            List<List<E>> data = getData();
+                            if (isNotWithinBounds(rowIndex, columnIndex)) return null;
+                            return data.get(rowIndex).get(columnIndex);
+                        }
+                        @Override public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+                            List<List<E>> data = getData();
+                            if ( !isEditable || isNotWithinBounds(rowIndex, columnIndex) ) return;
+                            data.get(rowIndex).set(columnIndex, (E)aValue);
+                        }
+                    })
+                )
+                ._this();
+        else // isColumnMajor
+            return _with( thisComponent ->
+                    thisComponent.setModel(new ListBasedTableModel<E>(isEditable, dataSource)
+                    {
+                        @Override public int getRowCount() {
+                            List<List<E>> data = getData();
+                            return (data.isEmpty() ? 0 : data.get(0).size());
+                        }
+                        @Override public int getColumnCount() { return getData().size(); }
+                        @Override public Object getValueAt( int rowIndex, int columnIndex ) {
+                            List<List<E>> data = getData();
+                            if ( isNotWithinBounds(rowIndex, columnIndex) ) return null;
+                            return data.get(columnIndex).get(rowIndex);
+                        }
+                        @Override public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+                            List<List<E>> data = getData();
+                            if ( !isEditable || isNotWithinBounds(rowIndex, columnIndex) ) return;
+                            data.get(columnIndex).set(rowIndex, (E)aValue);
+                        }
+                    })
+                )
+                ._this();
     }
 
     /**
@@ -241,8 +259,10 @@ public class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable<T>, T
      * @param <E> The type of the table entry {@link Object}s.
      */
     public final <E> UIForTable<T> withModel( UI.MapData mode, TableMapDataSource<E> dataSource ) {
-        getComponent().setModel(new MapBasedColumnMajorTableModel<>(mode.isEditable(), dataSource));
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.setModel(new MapBasedColumnMajorTableModel<>(mode.isEditable(), dataSource));
+                })
+                ._this();
     }
 
     /**
@@ -255,21 +275,23 @@ public class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable<T>, T
      */
     public final UIForTable<T> updateTableOn( Event event ) {
         NullUtil.nullArgCheck(event, "event", Event.class);
-        event.subscribe(()->
-            _doUI(()->{
-                TableModel model = getComponent().getModel();
-                if ( model instanceof AbstractTableModel ) {
-                    // We want the table model update to be as thorough as possible, so we
-                    // will fire a table structure changed event, followed by a table data
-                    // changed event.
-                    ((AbstractTableModel)model).fireTableStructureChanged();
-                    ((AbstractTableModel)model).fireTableDataChanged();
-                }
-                else
-                    throw new IllegalStateException("The table model is not an AbstractTableModel instance.");
-            })
-        );
-        return this;
+        return _with( thisComponent -> {
+                    event.subscribe(()->
+                        _doUI(()->{
+                            TableModel model = thisComponent.getModel();
+                            if ( model instanceof AbstractTableModel ) {
+                                // We want the table model update to be as thorough as possible, so we
+                                // will fire a table structure changed event, followed by a table data
+                                // changed event.
+                                ((AbstractTableModel)model).fireTableStructureChanged();
+                                ((AbstractTableModel)model).fireTableDataChanged();
+                            }
+                            else
+                                throw new IllegalStateException("The table model is not an AbstractTableModel instance.");
+                        })
+                    );
+                })
+                ._this();
     }
 
 
