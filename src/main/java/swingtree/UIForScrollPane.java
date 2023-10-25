@@ -2,7 +2,10 @@ package swingtree;
 
 import sprouts.Val;
 
-import javax.swing.*;
+import javax.swing.JComponent;
+import javax.swing.JScrollPane;
+import javax.swing.ScrollPaneConstants;
+import java.util.Objects;
 
 /**
  *  A SwingTree builder node designed for configuring {@link JScrollPane} instances.
@@ -40,9 +43,12 @@ public class UIForScrollPane<P extends JScrollPane> extends UIForAnySwing<UIForS
      * @return This builder node.
      */
     public final UIForScrollPane<P> withScrollBarPolicy( UI.Active scrollPolicy ) {
-        this.withVerticalScrollBarPolicy(scrollPolicy);
-        this.withHorizontalScrollBarPolicy(scrollPolicy);
-        return this;
+        Objects.requireNonNull(scrollPolicy);
+        return _with( thisComponent -> {
+                    _setVerticalScrollBarPolicy(thisComponent, scrollPolicy);
+                    _setHorizontalScrollBarPolicy(thisComponent, scrollPolicy);
+               })
+               ._this();
     }
 
     /**
@@ -52,14 +58,19 @@ public class UIForScrollPane<P extends JScrollPane> extends UIForAnySwing<UIForS
      * @return This builder node.
      */
     public final UIForScrollPane<P> withVerticalScrollBarPolicy( UI.Active scrollBarPolicy ) {
-        P pane = getComponent();
-        switch ( scrollBarPolicy )
-        {
-            case NEVER: pane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER); break;
-            case ALWAYS: pane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS); break;
-            case AS_NEEDED: pane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED); break;
+        Objects.requireNonNull(scrollBarPolicy);
+        return _with( thisComponent -> {
+                    _setVerticalScrollBarPolicy(thisComponent, scrollBarPolicy);
+                })
+                ._this();
+    }
+
+    private void _setVerticalScrollBarPolicy( P thisComponent, UI.Active scrollBarPolicy ) {
+        switch ( scrollBarPolicy ) {
+            case NEVER:     thisComponent.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER); break;
+            case ALWAYS:    thisComponent.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS); break;
+            case AS_NEEDED: thisComponent.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED); break;
         }
-        return this;
     }
 
     /**
@@ -70,8 +81,12 @@ public class UIForScrollPane<P extends JScrollPane> extends UIForAnySwing<UIForS
      */
     public final UIForScrollPane<P> withVerticalScrollBarPolicy( Val<UI.Active> scrollBarPolicy ) {
         NullUtil.nullArgCheck(scrollBarPolicy, "scrollBarPolicy", Val.class);
-        _onShow(scrollBarPolicy, v -> withVerticalScrollBarPolicy(v));
-        return this;
+        NullUtil.nullPropertyCheck(scrollBarPolicy, "scrollBarPolicy", "Null is not a valid scroll bar policy.");
+        return _with( thisComponent -> {
+                    _onShow(scrollBarPolicy, v -> _setVerticalScrollBarPolicy(thisComponent, v));
+                    _setVerticalScrollBarPolicy(thisComponent, scrollBarPolicy.get());
+                })
+                ._this();
     }
 
     /**
@@ -81,14 +96,19 @@ public class UIForScrollPane<P extends JScrollPane> extends UIForAnySwing<UIForS
      * @return This builder node.
      */
     public final UIForScrollPane<P> withHorizontalScrollBarPolicy(UI.Active scrollBarPolicy ) {
-        P pane = getComponent();
-        switch ( scrollBarPolicy )
-        {
-            case NEVER: pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER); break;
-            case ALWAYS: pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS); break;
-            case AS_NEEDED: pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED); break;
+        Objects.requireNonNull(scrollBarPolicy);
+        return _with( thisComponent -> {
+                    _setHorizontalScrollBarPolicy(thisComponent, scrollBarPolicy);
+                })
+                ._this();
+    }
+
+    private void _setHorizontalScrollBarPolicy( P thisComponent, UI.Active scrollBarPolicy ) {
+        switch ( scrollBarPolicy ) {
+            case NEVER: thisComponent.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER); break;
+            case ALWAYS: thisComponent.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS); break;
+            case AS_NEEDED: thisComponent.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED); break;
         }
-        return this;
     }
 
     /**
@@ -99,8 +119,12 @@ public class UIForScrollPane<P extends JScrollPane> extends UIForAnySwing<UIForS
      */
     public final UIForScrollPane<P> withHorizontalScrollBarPolicy( Val<UI.Active> scrollBarPolicy ) {
         NullUtil.nullArgCheck(scrollBarPolicy, "scrollBarPolicy", Val.class);
-        _onShow(scrollBarPolicy, v -> withHorizontalScrollBarPolicy(v) );
-        return this;
+        NullUtil.nullPropertyCheck(scrollBarPolicy, "scrollBarPolicy", "Null is not a valid scroll bar policy.");
+        return _with( thisComponent -> {
+                    _onShow(scrollBarPolicy, v -> _setHorizontalScrollBarPolicy(thisComponent, v));
+                    _setHorizontalScrollBarPolicy(thisComponent, scrollBarPolicy.get());
+                })
+                ._this();
     }
 
     /**
@@ -110,8 +134,10 @@ public class UIForScrollPane<P extends JScrollPane> extends UIForAnySwing<UIForS
      * @return This builder instance, to allow for method chaining.
      */
     public final UIForScrollPane<P> withVerticalScrollIncrement( int increment ) {
-        getComponent().getVerticalScrollBar().setUnitIncrement(increment);
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.getVerticalScrollBar().setUnitIncrement(increment);
+                })
+                ._this();
     }
 
     /**
@@ -121,8 +147,10 @@ public class UIForScrollPane<P extends JScrollPane> extends UIForAnySwing<UIForS
      * @return This builder instance, to allow for method chaining.
      */
     public final UIForScrollPane<P> withHorizontalScrollIncrement( int increment ) {
-        getComponent().getHorizontalScrollBar().setUnitIncrement(increment);
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.getHorizontalScrollBar().setUnitIncrement(increment);
+                })
+                ._this();
     }
 
     /**
@@ -131,8 +159,11 @@ public class UIForScrollPane<P extends JScrollPane> extends UIForAnySwing<UIForS
      * @return This builder instance, to allow for method chaining.
      */
     public final UIForScrollPane<P> withScrollIncrement( int increment ) {
-        return this.withVerticalScrollIncrement(increment)
-                   .withHorizontalScrollIncrement(increment);
+        return _with( thisComponent -> {
+                    thisComponent.getVerticalScrollBar().setUnitIncrement(increment);
+                    thisComponent.getHorizontalScrollBar().setUnitIncrement(increment);
+                })
+                ._this();
     }
 
     /**
@@ -141,9 +172,11 @@ public class UIForScrollPane<P extends JScrollPane> extends UIForAnySwing<UIForS
      * @param increment The scroll vertical block increment to use.
      * @return This builder instance, to allow for method chaining.
      */
-    public final UIForScrollPane<P> withVerticalBlockScrollIncrement(int increment ) {
-        getComponent().getVerticalScrollBar().setBlockIncrement(increment);
-        return this;
+    public final UIForScrollPane<P> withVerticalBlockScrollIncrement( int increment ) {
+        return _with( thisComponent -> {
+                    thisComponent.getVerticalScrollBar().setBlockIncrement(increment);
+                })
+                ._this();
     }
 
     /**
@@ -156,9 +189,11 @@ public class UIForScrollPane<P extends JScrollPane> extends UIForAnySwing<UIForS
      * @param increment The scroll horizontal block increment to use.
      * @return This builder instance, to allow for method chaining.
      */
-    public final UIForScrollPane<P> withHorizontalBlockScrollIncrement(int increment ) {
-        getComponent().getHorizontalScrollBar().setBlockIncrement(increment);
-        return this;
+    public final UIForScrollPane<P> withHorizontalBlockScrollIncrement( int increment ) {
+        return _with( thisComponent -> {
+                    thisComponent.getHorizontalScrollBar().setBlockIncrement(increment);
+                })
+                ._this();
     }
 
     /**
@@ -172,7 +207,10 @@ public class UIForScrollPane<P extends JScrollPane> extends UIForAnySwing<UIForS
      * @return This builder instance, to allow for method chaining.
      */
     public final UIForScrollPane<P> withBlockScrollIncrement( int increment ) {
-        return this.withVerticalBlockScrollIncrement(increment)
-                   .withHorizontalBlockScrollIncrement(increment);
+        return _with( thisComponent -> {
+                    thisComponent.getVerticalScrollBar().setBlockIncrement(increment);
+                    thisComponent.getHorizontalScrollBar().setBlockIncrement(increment);
+                })
+                ._this();
     }
 }

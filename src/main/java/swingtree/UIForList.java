@@ -39,32 +39,34 @@ public class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForList<E,
      * @return This instance of the builder node.
      */
     public final UIForList<E, L> withEntries( List<E> entries ) {
-        getComponent().setModel (
-                new AbstractListModel<E>() {
+        return _with( thisComponent ->
+                thisComponent.setModel (
+                        new AbstractListModel<E>() {
 
-                    private List<E> _reference = new ArrayList<>(entries);
+                            private List<E> _reference = new ArrayList<>(entries);
 
-                    public int getSize() { _checkContentChange(); return entries.size(); }
-                    public E getElementAt( int i ) { _checkContentChange(); return entries.get( i ); }
+                            public int getSize() { _checkContentChange(); return entries.size(); }
+                            public E getElementAt( int i ) { _checkContentChange(); return entries.get( i ); }
 
-                    private void _checkContentChange() {
-                        UI.runLater(()-> {
-                            if ( _reference.size() != entries.size() ) {
-                                fireContentsChanged( this, 0, entries.size() );
-                                _reference = new ArrayList<>(entries);
-                            }
-                            else
-                                for ( int i = 0; i < entries.size(); i++ )
-                                    if ( !_reference.get( i ).equals( entries.get( i ) ) ) {
+                            private void _checkContentChange() {
+                                UI.runLater(()-> {
+                                    if ( _reference.size() != entries.size() ) {
                                         fireContentsChanged( this, 0, entries.size() );
                                         _reference = new ArrayList<>(entries);
-                                        break;
                                     }
-                        });
-                    }
-                }
-            );
-        return this;
+                                    else
+                                        for ( int i = 0; i < entries.size(); i++ )
+                                            if ( !_reference.get( i ).equals( entries.get( i ) ) ) {
+                                                fireContentsChanged( this, 0, entries.size() );
+                                                _reference = new ArrayList<>(entries);
+                                                break;
+                                            }
+                                });
+                            }
+                        }
+                    )
+                )
+                ._this();
     }
 
     /**
@@ -75,8 +77,10 @@ public class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForList<E,
      */
     @SafeVarargs
     public final UIForList<E, L> withEntries( E... entries ) {
-        getComponent().setListData(entries);
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.setListData( entries );
+                })
+                ._this();
     }
 
     /**
@@ -91,9 +95,11 @@ public class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForList<E,
     public final UIForList<E, L> withEntries( Vals<E> entries ) {
         Objects.requireNonNull(entries, "entries");
         ValsListModel<E> model = new ValsListModel<>(entries);
-        getComponent().setModel(model);
-        _onShow( entries, v -> model.fire(v) );
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.setModel(model);
+                    _onShow( entries, v -> model.fire(v) );
+                })
+                ._this();
     }
 
     /**
@@ -107,12 +113,15 @@ public class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForList<E,
      * @return This instance of the builder node to allow for fluent method chaining.
      */
     public final UIForList<E, L> withSelection( Var<E> selection ) {
-        getComponent().addListSelectionListener( e -> {
-            if ( !e.getValueIsAdjusting() )
-                selection.set(From.VIEW,  getComponent().getSelectedValue() );
-        });
-        _onShow( selection, v -> getComponent().setSelectedValue( v, true ) );
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.addListSelectionListener( e -> {
+                        if ( !e.getValueIsAdjusting() )
+                            selection.set(From.VIEW,  thisComponent.getSelectedValue() );
+                    });
+                    _onShow( selection, v -> thisComponent.setSelectedValue( v, true ) );
+                    thisComponent.setSelectedValue( selection.orElseNull(), true );
+               })
+               ._this();
     }
 
     /**
@@ -126,8 +135,12 @@ public class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForList<E,
      * @return This instance of the builder node to allow for fluent method chaining.
      */
     public final UIForList<E, L> withSelection( Val<E> selection ) {
-        _onShow( selection, v -> getComponent().setSelectedValue( v, true ) );
-        return this;
+        NullUtil.nullArgCheck(selection, "selection", Val.class);
+        return _with( thisComponent -> {
+                    _onShow( selection, v -> thisComponent.setSelectedValue( v, true ) );
+                    thisComponent.setSelectedValue( selection.orElseNull(), true );
+               })
+               ._this();
     }
 
     /**
@@ -159,14 +172,16 @@ public class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForList<E,
      * @return This instance of the builder node to allow for fluent method chaining.
      */
     public final UIForList<E, L> withRenderer( ListEntryRenderer<E, L> renderer ) {
-        getComponent().setCellRenderer((list, value, index, isSelected, cellHasFocus) -> renderer.render(new ListEntryDelegate<E, L>() {
-            @Override public L list() { return (L) list; }
-            @Override public Optional<E> entry() { return Optional.ofNullable(value); }
-            @Override public int index() { return index; }
-            @Override public boolean isSelected() { return isSelected; }
-            @Override public boolean hasFocus() { return cellHasFocus; }
-        }));
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.setCellRenderer((list, value, index, isSelected, cellHasFocus) -> renderer.render(new ListEntryDelegate<E, L>() {
+                        @Override public L list() { return (L) list; }
+                        @Override public Optional<E> entry() { return Optional.ofNullable(value); }
+                        @Override public int index() { return index; }
+                        @Override public boolean isSelected() { return isSelected; }
+                        @Override public boolean hasFocus() { return cellHasFocus; }
+                    }));
+                })
+                ._this();
     }
 
     /**
@@ -180,9 +195,12 @@ public class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForList<E,
      */
     public final UIForList<E, L> onSelection( Action<ComponentDelegate<JList<E>, ListSelectionEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
-        L list = getComponent();
-        list.addListSelectionListener(e -> _doApp(()->action.accept(new ComponentDelegate<>(list, e, ()->getSiblinghood()))) );
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.addListSelectionListener(
+                        e -> _doApp(()->action.accept(new ComponentDelegate<>(thisComponent, e, ()->getSiblinghood())))
+                    );
+                })
+                ._this();
     }
 
     /**
@@ -224,8 +242,10 @@ public class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForList<E,
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForList<E, L> withRenderer( ListCellRenderer<E> renderer ) {
-        getComponent().setCellRenderer(renderer);
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.setCellRenderer(renderer);
+                })
+                ._this();
     }
 
 

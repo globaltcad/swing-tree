@@ -26,8 +26,10 @@ public class UIForPopup<P extends JPopupMenu> extends UIForAnySwing<UIForPopup<P
      * @return This builder node, to qllow for method chaining.
      */
     public final UIForPopup<P> borderIsPaintedIf( boolean borderPainted ) {
-        getComponent().setBorderPainted(borderPainted);
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.setBorderPainted( borderPainted );
+                })
+                ._this();
     }
 
     /**
@@ -39,8 +41,11 @@ public class UIForPopup<P extends JPopupMenu> extends UIForAnySwing<UIForPopup<P
      * @return This builder node, to qllow for method chaining.
      */
     public final UIForPopup<P> borderIsPaintedIf( Val<Boolean> isPainted ) {
-        _onShow(isPainted, v -> borderIsPaintedIf(v) );
-        return borderIsPaintedIf( isPainted.get() );
+        return _with( thisComponent -> {
+                    _onShow(isPainted, it -> thisComponent.setBorderPainted( it ));
+                    thisComponent.setBorderPainted( isPainted.get() );
+                })
+                ._this();
     }
 
     /**
@@ -52,12 +57,16 @@ public class UIForPopup<P extends JPopupMenu> extends UIForAnySwing<UIForPopup<P
      */
     public UIForPopup<P> onVisible( Action<ComponentDelegate<P, PopupMenuEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
-        _onPopupOpen( e -> _doApp(()->action.accept(new ComponentDelegate<>( getComponent(), e, () -> getSiblinghood() )) ) );
-        return this;
+        return _with( thisComponent -> {
+                    _onPopupOpen(thisComponent,
+                        e -> _doApp(()->action.accept(new ComponentDelegate<>( thisComponent, e, () -> getSiblinghood() )) )
+                    );
+                })
+                ._this();
     }
 
-    private void _onPopupOpen( Consumer<PopupMenuEvent> consumer ) {
-        getComponent().addPopupMenuListener(new PopupMenuListener() {
+    private void _onPopupOpen( P thisComponent, Consumer<PopupMenuEvent> consumer ) {
+        thisComponent.addPopupMenuListener(new PopupMenuListener() {
             public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
                 // This method is called before the popup menu becomes visible.
                 consumer.accept(e);
@@ -76,12 +85,16 @@ public class UIForPopup<P extends JPopupMenu> extends UIForAnySwing<UIForPopup<P
      */
     public UIForPopup<P> onInvisible( Action<ComponentDelegate<P, PopupMenuEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
-        _onPopupClose( e -> _doApp(()->action.accept(new ComponentDelegate<>( (P) getComponent(), e, () -> getSiblinghood() )) ) );
-        return this;
+        return _with( thisComponent -> {
+                    _onPopupClose(thisComponent,
+                        e -> _doApp(()->action.accept(new ComponentDelegate<>( (P) thisComponent, e, () -> getSiblinghood() )) )
+                    );
+                })
+                ._this();
     }
 
-    private void _onPopupClose( Consumer<PopupMenuEvent> consumer ) {
-        getComponent().addPopupMenuListener(new PopupMenuListener() {
+    private void _onPopupClose( P thisComponent, Consumer<PopupMenuEvent> consumer ) {
+        thisComponent.addPopupMenuListener(new PopupMenuListener() {
             public void popupMenuWillBecomeVisible(PopupMenuEvent e) {/* Not relevant here */}
             public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
                 consumer.accept(e); // This method is called before the popup menu becomes invisible
@@ -99,12 +112,16 @@ public class UIForPopup<P extends JPopupMenu> extends UIForAnySwing<UIForPopup<P
      */
     public UIForPopup<P> onCancel( Action<ComponentDelegate<P, PopupMenuEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
-        _onPopupCancel( e -> _doApp(()->action.accept(new ComponentDelegate<>( getComponent(), e, () -> getSiblinghood() )) ) );
-        return this;
+        return _with( thisComponent -> {
+                    _onPopupCancel(thisComponent,
+                        e -> _doApp(()->action.accept(new ComponentDelegate<>( thisComponent, e, () -> getSiblinghood() )) )
+                    );
+                })
+                ._this();
     }
 
-    private void _onPopupCancel( Consumer<PopupMenuEvent> consumer ) {
-        getComponent().addPopupMenuListener(new PopupMenuListener() {
+    private void _onPopupCancel( P thisComponent, Consumer<PopupMenuEvent> consumer ) {
+        thisComponent.addPopupMenuListener(new PopupMenuListener() {
             public void popupMenuWillBecomeVisible(PopupMenuEvent e) {/* Not relevant here */}
             public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {/* Not relevant here */}
             public void popupMenuCanceled(PopupMenuEvent e) {
