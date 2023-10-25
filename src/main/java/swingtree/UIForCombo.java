@@ -28,12 +28,12 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UIForCom
         super(component);
     }
 
-    private void _bindComboModelToEditor( AbstractComboModel<E> model ) {
-        Component editor = getComponent().getEditor().getEditorComponent();
+    private void _bindComboModelToEditor( JComboBox<E> thisComponent, AbstractComboModel<E> model ) {
+        Component editor = thisComponent.getEditor().getEditorComponent();
         if ( editor instanceof JTextField ) {
             JTextField field = (JTextField) editor;
             boolean[] comboIsOpen = {false};
-            WeakReference<JComboBox<E>> weakCombo = new WeakReference<>(getComponent());
+            WeakReference<JComboBox<E>> weakCombo = new WeakReference<>(thisComponent);
             UI.of(field).onTextChange( it -> {
                 JComboBox<E> strongCombo = weakCombo.get();
                 if ( !comboIsOpen[0] && strongCombo != null && strongCombo.isEditable() )
@@ -51,7 +51,7 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UIForCom
 
             // Adds a PopupMenu listener which will listen to notification
             // messages from the popup portion of the combo box.
-            getComponent().addPopupMenuListener(new PopupMenuListener() {
+            thisComponent.addPopupMenuListener(new PopupMenuListener() {
                 public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
                     // This method is called before the popup menu becomes visible.
                     comboIsOpen[0] = true;
@@ -78,12 +78,14 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UIForCom
      */
     public UIForCombo<E,C> onOpen( Action<ComponentDelegate<C, PopupMenuEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
-        _onPopupOpen( e -> _doApp(()->action.accept(new ComponentDelegate<>( (C) getComponent(), e, () -> getSiblinghood() )) ) );
-        return this;
+        return _with( thisComponent -> {
+                    _onPopupOpen(thisComponent, e -> _doApp(()->action.accept(new ComponentDelegate<>( (C) thisComponent, e, () -> getSiblinghood() )) ) );
+                })
+                ._this();
     }
 
-    private void _onPopupOpen( Consumer<PopupMenuEvent> consumer ) {
-        getComponent().addPopupMenuListener(new PopupMenuListener() {
+    private void _onPopupOpen( JComboBox<E> thisComponent, Consumer<PopupMenuEvent> consumer ) {
+        thisComponent.addPopupMenuListener(new PopupMenuListener() {
             public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
                 // This method is called before the popup menu becomes visible.
                 consumer.accept(e);
@@ -102,12 +104,16 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UIForCom
      */
     public UIForCombo<E,C> onClose( Action<ComponentDelegate<C, PopupMenuEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
-        _onPopupClose( e -> _doApp(()->action.accept(new ComponentDelegate<>( (C) getComponent(), e, () -> getSiblinghood() )) ) );
-        return this;
+        return _with( thisComponent -> {
+                    _onPopupClose(thisComponent,
+                        e -> _doApp(()->action.accept(new ComponentDelegate<>( (C) thisComponent, e, () -> getSiblinghood() )) )
+                    );
+                })
+                ._this();
     }
 
-    private void _onPopupClose( Consumer<PopupMenuEvent> consumer ) {
-        getComponent().addPopupMenuListener(new PopupMenuListener() {
+    private void _onPopupClose( JComboBox<E> thisComponent, Consumer<PopupMenuEvent> consumer ) {
+        thisComponent.addPopupMenuListener(new PopupMenuListener() {
             public void popupMenuWillBecomeVisible(PopupMenuEvent e) {/* Not relevant here */}
             public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
                 consumer.accept(e); // This method is called before the popup menu becomes invisible
@@ -126,12 +132,16 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UIForCom
      */
     public UIForCombo<E,C> onCancel( Action<ComponentDelegate<C, PopupMenuEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
-        _onPopupCancel( e -> _doApp(()->action.accept(new ComponentDelegate<>( (C) getComponent(), e, () -> getSiblinghood() )) ) );
-        return this;
+        return _with( thisComponent -> {
+                    _onPopupCancel(thisComponent,
+                        e -> _doApp(()->action.accept(new ComponentDelegate<>( (C) thisComponent, e, () -> getSiblinghood() )) )
+                    );
+                })
+                ._this();
     }
 
-    private void _onPopupCancel( Consumer<PopupMenuEvent> consumer ) {
-        getComponent().addPopupMenuListener(new PopupMenuListener() {
+    private void _onPopupCancel( JComboBox<E> thisComponent, Consumer<PopupMenuEvent> consumer ) {
+        thisComponent.addPopupMenuListener(new PopupMenuListener() {
             public void popupMenuWillBecomeVisible(PopupMenuEvent e) {/* Not relevant here */}
             public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {/* Not relevant here */}
             public void popupMenuCanceled(PopupMenuEvent e) {
@@ -153,12 +163,15 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UIForCom
      */
     public UIForCombo<E,C> onSelection( Action<ComponentDelegate<JComboBox<E>, ActionEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
-        JComboBox<E> combo = getComponent();
-        _onSelection(e -> _doApp(()->action.accept(new ComponentDelegate<>( combo, e, () -> getSiblinghood() ))) );
-        return this;
+        return _with( thisComponent -> {
+                   _onSelection(thisComponent,
+                       e -> _doApp(()->action.accept(new ComponentDelegate<>( thisComponent, e, () -> getSiblinghood() )))
+                   );
+               })
+               ._this();
     }
 
-    private void _onSelection( Consumer<ActionEvent> consumer ) {
+    private void _onSelection( JComboBox<E> thisComponent, Consumer<ActionEvent> consumer ) {
         /*
             When an action event is fired, Swing will go through all the listeners
             from the most recently added to the first added. This means that if we simply add
@@ -170,14 +183,14 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UIForCom
             simply because it was added first.
             This is especially true in the context of declarative UI design.
         */
-        ActionListener[] listeners = getComponent().getActionListeners();
+        ActionListener[] listeners = thisComponent.getActionListeners();
         for (ActionListener listener : listeners)
-            getComponent().removeActionListener(listener);
+            thisComponent.removeActionListener(listener);
 
-        getComponent().addActionListener(consumer::accept);
+        thisComponent.addActionListener(consumer::accept);
 
         for ( int i = listeners.length - 1; i >= 0; i-- ) // reverse order because swing does not give us the listeners in the order they were added!
-            getComponent().addActionListener(listeners[i]);
+            thisComponent.addActionListener(listeners[i]);
     }
 
     /**
@@ -191,13 +204,14 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UIForCom
      **/
     public UIForCombo<E,C> onEnter( Action<ComponentDelegate<C, ActionEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
-        C combo = (C) getComponent();
-        _onEnter(e -> _doApp(()->action.accept(new ComponentDelegate<>( combo, e, () -> getSiblinghood() ))) );
-        return this;
+        return _with( thisComponent -> {
+                   _onEnter(thisComponent, e -> _doApp(()->action.accept(new ComponentDelegate<>( (C) thisComponent, e, () -> getSiblinghood() ))) );
+               })
+               ._this();
     }
 
-    private void _onEnter( Consumer<ActionEvent> consumer ) {
-        Component editor = getComponent().getEditor().getEditorComponent();
+    private void _onEnter( JComboBox<E> thisComponent, Consumer<ActionEvent> consumer ) {
+        Component editor = thisComponent.getEditor().getEditorComponent();
         if ( editor instanceof JTextField ) {
             JTextField field = (JTextField) editor;
             UI.of(field).onEnter( it -> consumer.accept(it.getEvent()) );
@@ -211,8 +225,10 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UIForCom
      * @return This very instance, which enables builder-style method chaining.
      */
     public UIForCombo<E,C> isEditableIf( boolean isEditable ) {
-        getComponent().setEditable(isEditable);
-        return this;
+        return _with( thisComponent -> {
+                   thisComponent.setEditable(isEditable);
+               })
+               ._this();
     }
 
     /**
@@ -224,8 +240,12 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UIForCom
      * @throws IllegalArgumentException if {@code isEditable} is {@code null}.
      */
     public UIForCombo<E,C> isEditableIf( Var<Boolean> isEditable ) {
-        _onShow( isEditable, this::isEditableIf );
-        return this;
+        NullUtil.nullPropertyCheck(isEditable, "isEditable", "Null is not a valid state for modelling 'isEditable''.");
+        return _with( thisComponent -> {
+                    _onShow( isEditable, thisComponent::setEditable);
+                    thisComponent.setEditable(isEditable.get());
+                })
+                ._this();
     }
 
     /**
@@ -237,7 +257,9 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UIForCom
      */
     public final <V extends E> UIForCombo<E,C> withRenderer( Render.Builder<C,V> renderBuilder ) {
         NullUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
-        return withRenderer((ListCellRenderer<E>) renderBuilder.buildForCombo((C)getComponent()));
+        return _withAndGet( thisComponent ->
+                    withRenderer((ListCellRenderer<E>) renderBuilder.buildForCombo((C)thisComponent))
+                );
     }
 
     /**
@@ -245,10 +267,12 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UIForCom
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForCombo<E,C> withModel( ComboBoxModel<E> model ) {
-        if ( model instanceof AbstractComboModel )
-            _bindComboModelToEditor( (AbstractComboModel<E>) model );
-        getComponent().setModel(model);
-        return this;
+        return _with( thisComponent -> {
+                    if ( model instanceof AbstractComboModel )
+                        _bindComboModelToEditor(thisComponent, (AbstractComboModel<E>) model );
+                        thisComponent.setModel(model);
+                })
+                ._this();
     }
 
     /**
@@ -260,8 +284,21 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UIForCom
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForCombo<E,C> withRenderer( ListCellRenderer<E> renderer ) {
-        getComponent().setRenderer(renderer);
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.setRenderer(renderer);
+                })
+                ._this();
+    }
+
+    /**
+     * @param item The item which should be set as the currently selected combo box item.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final UIForCombo<E,C> withSelectedItem( E item ) {
+        return _with( thisComponent -> {
+                    _setSelectedItem(thisComponent, item);
+               })
+               ._this();
     }
 
     /**
@@ -272,32 +309,30 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UIForCom
      */
     public final UIForCombo<E,C> withSelectedItem( Var<E> item ) {
         NullUtil.nullArgCheck(item, "item", Var.class);
-        ComboBoxModel<E> model = getComponent().getModel();
-        if ( model instanceof AbstractComboModel )
-            withModel(((AbstractComboModel<E>)model).withVar(item));
-        else {
-            // The user has a custom model AND wants to bind to a property:
-            _onShow( item, this::_setSelectedItem );
-            _onSelection(
-                e -> _doApp( (E)getComponent().getSelectedItem(), newItem -> item.set(From.VIEW, newItem)  )
-            );
-        }
-        return withSelectedItem(item.get());
+        return _with( thisComponent -> {
+                    ComboBoxModel<E> model = thisComponent.getModel();
+                    if ( model instanceof AbstractComboModel )
+                        withModel(((AbstractComboModel<E>)model).withVar(item));
+                    else {
+                        // The user has a custom model AND wants to bind to a property:
+                        _onShow( item, v -> _setSelectedItem(thisComponent, v) );
+                        _onSelection(thisComponent,
+                            e -> _doApp( (E)thisComponent.getSelectedItem(), newItem -> item.set(From.VIEW, newItem)  )
+                        );
+                    }
+                    _setSelectedItem(thisComponent, item.get());
+                })
+                ._this();
     }
 
-    public final UIForCombo<E,C> withSelectedItem( E item ) {
-        _setSelectedItem(item);
-        return this;
-    }
-
-    private void _setSelectedItem( E item ) {
+    private void _setSelectedItem( JComboBox<E> thisComponent, E item ) {
         // Ok, so a combo box fires an event when the selection is changed programmatically.
         // This is a problem, because we don't want to trigger the action listener.
         // So we temporarily remove the action listener(s), and then add them back.
         // 1. Get the action listener(s)
-        Component editor = getComponent().getEditor().getEditorComponent();
+        Component editor = thisComponent.getEditor().getEditorComponent();
         AbstractDocument abstractDocument = null;
-        ActionListener[]   listeners    = getComponent().getActionListeners();
+        ActionListener[]   listeners    = thisComponent.getActionListeners();
         DocumentListener[] docListeners = {};
         if ( editor instanceof JTextField ) {
             JTextField field = (JTextField) editor;
@@ -310,7 +345,7 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UIForCom
 
         // 2. Remove them
         for ( ActionListener listener : listeners )
-            getComponent().removeActionListener(listener);
+            thisComponent.removeActionListener(listener);
         if ( abstractDocument != null ) {
             for (DocumentListener listener : docListeners) {
                 abstractDocument.removeDocumentListener(listener);
@@ -319,9 +354,9 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UIForCom
 
         try {
             // 3. Set the selected item
-            getComponent().setSelectedItem(item);
+            thisComponent.setSelectedItem(item);
             // 3.1 We make sure the editor also gets an update!
-            getComponent().getEditor().setItem(item);
+            thisComponent.getEditor().setItem(item);
 
         } catch ( Exception e ) {
             throw new RuntimeException(e);
@@ -329,7 +364,7 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UIForCom
 
         // 4. Add them back
         for ( ActionListener listener : listeners )
-            getComponent().addActionListener(listener);
+            thisComponent.addActionListener(listener);
         if ( abstractDocument != null ) {
             for (DocumentListener listener : docListeners) {
                 abstractDocument.addDocumentListener(listener);

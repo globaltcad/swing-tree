@@ -86,38 +86,41 @@ public class UIForTextField<F extends JTextField> extends UIForAnyTextComponent<
         NullUtil.nullArgCheck(isValid, "isValid", Var.class);
         NullUtil.nullPropertyCheck(number, "number", "Null is not a valid value for a numeric property.");
         NullUtil.nullPropertyCheck(isValid, "isValid", "Null is not a valid value for a boolean property.");
-        _onShow( number, n -> _setTextSilently( getComponent(), n.toString() ) );
-        Var<String> text = Var.of( number.get().toString() );
-        text.onChange(From.VIEW,  s -> {
-            try {
-                if ( number.type() == Integer.class )
-                    number.set(From.VIEW,  (N) Integer.valueOf(Integer.parseInt(s.get())) );
-                else if ( number.type() == Long.class )
-                    number.set(From.VIEW,  (N) Long.valueOf(Long.parseLong(s.get())) );
-                else if ( number.type() == Float.class )
-                    number.set(From.VIEW,  (N) Float.valueOf(Float.parseFloat(s.get())) );
-                else if ( number.type() == Double.class )
-                    number.set(From.VIEW,  (N) Double.valueOf(Double.parseDouble(s.get())) );
-                else if ( number.type() == Short.class )
-                    number.set(From.VIEW,  (N) Short.valueOf(Short.parseShort(s.get())) );
-                else if ( number.type() == Byte.class )
-                    number.set(From.VIEW,  (N) Byte.valueOf(Byte.parseByte(s.get())) );
-                else
-                    throw new IllegalStateException("Unsupported number type: " + number.type());
+        return _withAndGet( thisComponent -> {
+                    _onShow( number, n -> _setTextSilently( getComponent(), n.toString() ) );
+                    Var<String> text = Var.of( number.get().toString() );
+                    text.onChange(From.VIEW,  s -> {
+                        try {
+                            if ( number.type() == Integer.class )
+                                number.set(From.VIEW,  (N) Integer.valueOf(Integer.parseInt(s.get())) );
+                            else if ( number.type() == Long.class )
+                                number.set(From.VIEW,  (N) Long.valueOf(Long.parseLong(s.get())) );
+                            else if ( number.type() == Float.class )
+                                number.set(From.VIEW,  (N) Float.valueOf(Float.parseFloat(s.get())) );
+                            else if ( number.type() == Double.class )
+                                number.set(From.VIEW,  (N) Double.valueOf(Double.parseDouble(s.get())) );
+                            else if ( number.type() == Short.class )
+                                number.set(From.VIEW,  (N) Short.valueOf(Short.parseShort(s.get())) );
+                            else if ( number.type() == Byte.class )
+                                number.set(From.VIEW,  (N) Byte.valueOf(Byte.parseByte(s.get())) );
+                            else
+                                throw new IllegalStateException("Unsupported number type: " + number.type());
 
-                if ( isValid.is(false) ) {
-                    isValid.set(true);
-                    isValid.fireChange(From.VIEW);
-                }
-            } catch (NumberFormatException e) {
-                // ignore
-                if ( isValid.is(true) ) {
-                    isValid.set(false);
-                    isValid.fireChange(From.VIEW);
-                }
-            }
-        });
-        return withText( text );
+                            if ( isValid.is(false) ) {
+                                isValid.set(true);
+                                isValid.fireChange(From.VIEW);
+                            }
+                        } catch (NumberFormatException e) {
+                            // ignore
+                            if ( isValid.is(true) ) {
+                                isValid.set(false);
+                                isValid.fireChange(From.VIEW);
+                            }
+                        }
+                    });
+                    return withText( text );
+                })
+                ._this();
     }
 
     /**
