@@ -19,8 +19,10 @@ public class UIForMenu<M extends JMenu> extends UIForAnyMenuItem<UIForMenu<M>, M
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForMenu<M> popupMenuIsVisibleIf( boolean popupMenuVisible ) {
-        getComponent().setPopupMenuVisible(popupMenuVisible);
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.setPopupMenuVisible(popupMenuVisible);
+                })
+                ._this();
     }
 
     /**
@@ -31,8 +33,11 @@ public class UIForMenu<M extends JMenu> extends UIForAnyMenuItem<UIForMenu<M>, M
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForMenu<M> popupMenuIsVisibleIf( Val<Boolean> val ) {
-        _onShow(val, v -> popupMenuIsVisibleIf(v));
-        return popupMenuIsVisibleIf( val.get() );
+        return _with( thisComponent -> {
+                    _onShow( val, it -> thisComponent.setPopupMenuVisible( it ) );
+                    thisComponent.setPopupMenuVisible( val.get() );
+                })
+                ._this();
     }
 
 }

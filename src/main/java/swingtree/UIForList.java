@@ -230,7 +230,10 @@ public class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForList<E,
      */
     public final <V extends E> UIForList<E, L> withRenderer( Render.Builder<L,V> renderBuilder ) {
         NullUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
-        return withRenderer((ListCellRenderer<E>) renderBuilder.buildForList(getComponent()));
+        return _with( thisComponent -> {
+                    thisComponent.setCellRenderer((ListCellRenderer<E>) renderBuilder.buildForList(thisComponent));
+                })
+                ._this();
     }
 
     /**

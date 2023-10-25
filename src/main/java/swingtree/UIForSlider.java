@@ -67,15 +67,15 @@ public class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSlider<S>
     public final UIForSlider<S> onChange( Action<ComponentDelegate<JSlider, ChangeEvent>> action ) {
         NullUtil.nullArgCheck( action, "action", Action.class );
         return _with( thisComponent -> {
-                    _onChange(
+                    _onChange(thisComponent,
                         e -> _doApp(()->action.accept(new ComponentDelegate<>(thisComponent, e, () -> getSiblinghood())))
                     );
                 })
                 ._this();
     }
 
-    private void _onChange( Consumer<ChangeEvent> action ) {
-        getComponent().addChangeListener(action::accept);
+    private void _onChange( S thisComponent, Consumer<ChangeEvent> action ) {
+        thisComponent.addChangeListener(action::accept);
     }
 
     /**
@@ -182,7 +182,9 @@ public class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSlider<S>
     public final UIForSlider<S> withValue( Var<Integer> var ) {
         NullUtil.nullArgCheck( var, "var", Var.class );
         return _with( thisComponent -> {
-                    _onChange( e -> _doApp(thisComponent.getValue(), newItem -> var.set(From.VIEW, newItem) ) );
+                    _onChange(thisComponent,
+                        e -> _doApp(thisComponent.getValue(), newItem -> var.set(From.VIEW, newItem) )
+                    );
                     _setValue(thisComponent, var.orElseThrow());
                 })
                 ._this();

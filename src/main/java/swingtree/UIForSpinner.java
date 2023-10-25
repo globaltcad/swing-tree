@@ -135,13 +135,16 @@ public class UIForSpinner<S extends JSpinner> extends UIForAnySwing<UIForSpinner
      */
     public final UIForSpinner<S> onChange( Action<ComponentDelegate<JSpinner, ChangeEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
-        S spinner = getComponent();
-        _onChange(e -> _doApp(()->action.accept(new ComponentDelegate<>(spinner, e, () -> getSiblinghood()))) );
-        return this;
+        return _with( thisComponent ->
+                    _onChange(thisComponent,
+                        e -> _doApp(()->action.accept(new ComponentDelegate<>(thisComponent, e, () -> getSiblinghood())))
+                    )
+                )
+                ._this();
     }
 
-    private void _onChange( Consumer<ChangeEvent> consumer ) {
-        getComponent().addChangeListener(consumer::accept);
+    private void _onChange( S thisComponent, Consumer<ChangeEvent> consumer ) {
+        thisComponent.addChangeListener(consumer::accept);
     }
 
     /**
@@ -153,8 +156,10 @@ public class UIForSpinner<S extends JSpinner> extends UIForAnySwing<UIForSpinner
      */
     public final UIForSpinner<S> withValue( Object value ) {
         NullUtil.nullArgCheck(value, "value", Object.class);
-        getComponent().setValue(value);
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.setValue(value);
+                })
+                ._this();
     }
 
     /**
@@ -167,8 +172,11 @@ public class UIForSpinner<S extends JSpinner> extends UIForAnySwing<UIForSpinner
     public final UIForSpinner<S> withValue( Val<?> value ) {
         NullUtil.nullArgCheck(value, "value", Val.class);
         NullUtil.nullPropertyCheck(value, "value", "Null is not a valid spinner state!");
-        _onShow(value, this::withValue);
-        return withValue(value.get());
+        return _with( thisComponent -> {
+                    _onShow(value, it -> thisComponent.setValue(it));
+                    thisComponent.setValue(value.get());
+                })
+                ._this();
     }
 
     /**
@@ -181,36 +189,39 @@ public class UIForSpinner<S extends JSpinner> extends UIForAnySwing<UIForSpinner
     public final UIForSpinner<S> withValue( Var<?> value ) {
         NullUtil.nullArgCheck(value, "value", Var.class);
         NullUtil.nullPropertyCheck(value, "value", "Null is not a valid spinner state!");
-        _onShow( value, this::withValue );
-        _onChange( e -> {
-            // Get access the current component while still in the EDT. (getComponent() is only allowed in the EDT)
-            final Object current = getComponent().getValue();
-            // Now let's do the actual work in the application thread:
-            _doApp(() -> {
-                Object interpreted = current;
-                if (current != null && Number.class.isAssignableFrom(value.type())) {
-                    if (Number.class.isAssignableFrom(current.getClass())) {
-                        Number n = (Number) current;
-                        if      (value.type() == Integer.class) interpreted = n.intValue();
-                        else if (value.type() == Long.class   ) interpreted = n.longValue();
-                        else if (value.type() == Float.class  ) interpreted = n.floatValue();
-                        else if (value.type() == Double.class ) interpreted = n.doubleValue();
-                        else if (value.type() == Short.class  ) interpreted = n.shortValue();
-                        else if (value.type() == Byte.class   ) interpreted = n.byteValue();
-                    }
-                    if (current.getClass() == String.class) {
-                        if      (value.type() == Integer.class) interpreted = Integer.parseInt((String) current);
-                        else if (value.type() == Long.class   ) interpreted = Long.parseLong((String) current);
-                        else if (value.type() == Float.class  ) interpreted = Float.parseFloat((String) current);
-                        else if (value.type() == Double.class ) interpreted = Double.parseDouble((String) current);
-                        else if (value.type() == Short.class  ) interpreted = Short.parseShort((String) current);
-                        else if (value.type() == Byte.class   ) interpreted = Byte.parseByte((String) current);
-                    }
-                }
-                ((Var<Object>) value).set(From.VIEW,  interpreted );
-            });
-        });
-        return withValue( value.get() );
+        return _with( thisComponent -> {
+                    _onShow( value, this::withValue );
+                    _onChange(thisComponent, e -> {
+                        // Get access the current component while still in the EDT. (getComponent() is only allowed in the EDT)
+                        final Object current = thisComponent.getValue();
+                        // Now let's do the actual work in the application thread:
+                        _doApp(() -> {
+                            Object interpreted = current;
+                            if (current != null && Number.class.isAssignableFrom(value.type())) {
+                                if (Number.class.isAssignableFrom(current.getClass())) {
+                                    Number n = (Number) current;
+                                    if      (value.type() == Integer.class) interpreted = n.intValue();
+                                    else if (value.type() == Long.class   ) interpreted = n.longValue();
+                                    else if (value.type() == Float.class  ) interpreted = n.floatValue();
+                                    else if (value.type() == Double.class ) interpreted = n.doubleValue();
+                                    else if (value.type() == Short.class  ) interpreted = n.shortValue();
+                                    else if (value.type() == Byte.class   ) interpreted = n.byteValue();
+                                }
+                                if (current.getClass() == String.class) {
+                                    if      (value.type() == Integer.class) interpreted = Integer.parseInt((String) current);
+                                    else if (value.type() == Long.class   ) interpreted = Long.parseLong((String) current);
+                                    else if (value.type() == Float.class  ) interpreted = Float.parseFloat((String) current);
+                                    else if (value.type() == Double.class ) interpreted = Double.parseDouble((String) current);
+                                    else if (value.type() == Short.class  ) interpreted = Short.parseShort((String) current);
+                                    else if (value.type() == Byte.class   ) interpreted = Byte.parseByte((String) current);
+                                }
+                            }
+                            ((Var<Object>) value).set(From.VIEW,  interpreted );
+                        });
+                    });
+                    thisComponent.setValue( value.get() );
+                })
+                ._this();
     }
 
     /**
@@ -222,15 +233,17 @@ public class UIForSpinner<S extends JSpinner> extends UIForAnySwing<UIForSpinner
      */
     public final UIForSpinner<S> withStepSize( Number n ) {
         NullUtil.nullArgCheck(n, "n", Number.class);
-        SpinnerModel model = getComponent().getModel();
-        if ( !(model instanceof SpinnerNumberModel) )
-            throw new IllegalArgumentException(
-                    "This JSpinner can not have a numeric step size as it is not " +
-                    "based on the SpinnerNumberModel!"
-                );
-        SpinnerNumberModel numberModel = (SpinnerNumberModel) model;
-        numberModel.setStepSize(n);
-        return this;
+        return _with( thisComponent -> {
+            SpinnerModel model = thisComponent.getModel();
+            if ( !(model instanceof SpinnerNumberModel) )
+                throw new IllegalArgumentException(
+                        "This JSpinner can not have a numeric step size as it is not " +
+                        "based on the SpinnerNumberModel!"
+                    );
+            SpinnerNumberModel numberModel = (SpinnerNumberModel) model;
+            numberModel.setStepSize(n);
+        })
+        ._this();
     }
 
     /**
@@ -245,14 +258,16 @@ public class UIForSpinner<S extends JSpinner> extends UIForAnySwing<UIForSpinner
     public final <N extends Number> UIForSpinner<S> withStepSize( Val<N> val ) {
         NullUtil.nullArgCheck(val, "val", Val.class);
         NullUtil.nullPropertyCheck(val, "val", "Null is not a valid spinner step size!");
-        SpinnerModel model = getComponent().getModel();
-        if ( !(model instanceof SpinnerNumberModel) )
-            throw new IllegalArgumentException(
-                    "This JSpinner can not have a numeric step size as it is not based on the SpinnerNumberModel!"
-                );
-        SpinnerNumberModel numberModel = (SpinnerNumberModel) model;
-        _onShow(val, numberModel::setStepSize);
-        numberModel.setStepSize(val.get());
-        return this;
+        return _with( thisComponent -> {
+                    SpinnerModel model = thisComponent.getModel();
+                    if ( !(model instanceof SpinnerNumberModel) )
+                        throw new IllegalArgumentException(
+                                "This JSpinner can not have a numeric step size as it is not based on the SpinnerNumberModel!"
+                            );
+                    SpinnerNumberModel numberModel = (SpinnerNumberModel) model;
+                    _onShow(val, numberModel::setStepSize);
+                    numberModel.setStepSize(val.get());
+                })
+                ._this();
     }
 }

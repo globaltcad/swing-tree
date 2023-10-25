@@ -69,7 +69,7 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForScrollPane<
 			boolean allAreEntries = vals.stream().allMatch( v -> v instanceof EntryViewModel );
 			if ( allAreEntries ) {
 				List<EntryViewModel> entries = (List) vals.toList();
-				this.getComponent().addAllEntries(attr, entries, (ViewSupplier<EntryViewModel>) viewSupplier);
+				thisComponent.addAllEntries(attr, entries, (ViewSupplier<EntryViewModel>) viewSupplier);
 			}
 			else
 				for ( int i = 0; i< vals.size(); i++ ) {

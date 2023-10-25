@@ -23,8 +23,10 @@ public class UIForPasswordField<F extends JPasswordField> extends UIForAnyTextCo
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForPasswordField<F> withEchoChar( char echoChar ) {
-        getComponent().setEchoChar(echoChar);
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.setEchoChar(echoChar);
+                })
+                ._this();
     }
 
     /**
@@ -39,8 +41,13 @@ public class UIForPasswordField<F extends JPasswordField> extends UIForAnyTextCo
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForPasswordField<F> withEchoChar( Val<Character> echoChar ) {
-        _onShow(echoChar, v -> withEchoChar(v) );
-        return this;
+        NullUtil.nullArgCheck( echoChar, "echoChar", Val.class );
+        NullUtil.nullPropertyCheck( echoChar, "echoChar", "Null is not a valid echo character." );
+        return _with( thisComponent -> {
+                    _onShow( echoChar, it -> thisComponent.setEchoChar( it ) );
+                    thisComponent.setEchoChar( echoChar.orElseThrow() );
+                })
+                ._this();
     }
 
 }
