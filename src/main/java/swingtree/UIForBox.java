@@ -24,21 +24,24 @@ public class UIForBox<B extends JBox> extends UIForAnySwing<UIForBox<B>, B>
     public final UIForBox<B> withLayout( Val<LayoutConstraint> attr ) {
         NullUtil.nullArgCheck(attr, "attr", Val.class);
         NullUtil.nullPropertyCheck(attr, "attr", "Null is not a valid layout attribute.");
-        _onShow(attr, it -> {
-            // Every time the value changes, we need to re-layout the panel.
-            // Note that this is for mig layout:
-            LayoutManager lm = getComponent().getLayout();
-            if (lm instanceof MigLayout) {
-                ((MigLayout)lm).setLayoutConstraints(it.toString());
-                getComponent().revalidate();
-                getComponent().repaint();
-            }
-            else
-                throw new IllegalStateException(
-                        "Cannot set layout mig-layout specific constraints on a panel with a non-mig layout."
-                );
-        });
-        return _this();
+        return _with( thisComponent -> {
+                    _onShow(attr, it -> {
+                        // Every time the value changes, we need to re-layout the panel.
+                        // Note that this is for mig layout:
+                        LayoutManager lm = thisComponent.getLayout();
+                        if ( lm instanceof MigLayout ) {
+                            ((MigLayout)lm).setLayoutConstraints(it.toString());
+                            thisComponent.revalidate();
+                            thisComponent.repaint();
+                        }
+                        else
+                            throw new IllegalStateException(
+                                "Cannot set layout mig-layout specific " +
+                                "constraints on a panel with a non-mig layout."
+                            );
+                    });
+                })
+                ._this();
     }
 
     @Override protected void _setEnabled( B thisComponent, boolean isEnabled ) {

@@ -24,25 +24,27 @@ public class UIForPanel<P extends JPanel> extends UIForAnySwing<UIForPanel<P>, P
     public final UIForPanel<P> withLayout( Val<LayoutConstraint> attr ) {
         NullUtil.nullArgCheck(attr, "attr", Val.class);
         NullUtil.nullPropertyCheck(attr, "attr", "Null is not a valid layout attribute.");
-        _onShow(attr, it -> {
-            // Every time the value changes, we need to re-layout the panel.
-            // Note that this is for mig layout:
-            LayoutManager lm = getComponent().getLayout();
-            if (lm instanceof MigLayout) {
-                ((MigLayout)lm).setLayoutConstraints(it.toString());
-                getComponent().revalidate();
-                getComponent().repaint();
-            }
-            else
-                throw new IllegalStateException(
-                        "Cannot set layout mig-layout specific constraints on a panel with a non-mig layout."
-                    );
-        });
-        return _this();
+        return _with( thisComponent -> {
+                    _onShow(attr, it -> {
+                        // Every time the value changes, we need to re-layout the panel.
+                        // Note that this is for mig layout:
+                        LayoutManager lm = thisComponent.getLayout();
+                        if (lm instanceof MigLayout) {
+                            ((MigLayout)lm).setLayoutConstraints(it.toString());
+                            thisComponent.revalidate();
+                            thisComponent.repaint();
+                        }
+                        else
+                            throw new IllegalStateException(
+                                    "Cannot set layout mig-layout specific constraints on a panel with a non-mig layout."
+                                );
+                    });
+                })
+                ._this();
     }
 
-    @Override protected void _setEnabled( P component, boolean isEnabled ) {
-        component.setEnabled( isEnabled );
+    @Override protected void _setEnabled( P thisComponent, boolean isEnabled ) {
+        thisComponent.setEnabled( isEnabled );
         /*
             In the vast vast majority of cases regular JPanels are simple wrappers for
             other components.
@@ -54,7 +56,7 @@ public class UIForPanel<P extends JPanel> extends UIForAnySwing<UIForPanel<P>, P
             and disable all the components that are contained in the tree
             except for the children of non JPanels.
         */
-        InternalUtil._traverseEnable( component, isEnabled );
+        InternalUtil._traverseEnable( thisComponent, isEnabled );
         /*
             Note:
             If you really only want to disable the JPanel itself, then you can
