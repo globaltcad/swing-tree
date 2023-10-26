@@ -198,10 +198,12 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
     public final UIForTabbedPane<P> withSelectedIndex( Val<Integer> index ) {
         NullUtil.nullArgCheck( index, "index", Val.class );
         NullUtil.nullPropertyCheck( index, "index", "Null is not a valid state for modelling a selected index." );
-        return _with( thisComponent -> {
-                    _onShow( index, i -> thisComponent.setSelectedIndex(i) );
-                    thisComponent.setSelectedIndex(index.get());
+        return _withOnShow( index, (thisComponent,i) -> {
+                    thisComponent.setSelectedIndex(i);
                })
+                ._with( thisComponent -> {
+                    thisComponent.setSelectedIndex(index.get());
+                })
                ._this();
     }
 
@@ -218,16 +220,18 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
                     if ( _selectedTabIndex != null )
                         throw new IllegalStateException("A selected index property has already been set for this tabbed pane.");
                     _selectedTabIndex = index;
-                    _onShow( index, i -> {
-                        thisComponent.setSelectedIndex(i);
-                        _selectionListeners.forEach( l -> l.accept(i) );
-                    });
+               })
+                ._withOnShow( index, (thisComponent,i) -> {
+                    thisComponent.setSelectedIndex(i);
+                    _selectionListeners.forEach( l -> l.accept(i) );
+                })
+                ._with( thisComponent -> {
                     _onChange(thisComponent, e -> _doApp(()->{
                         index.set(From.VIEW, thisComponent.getSelectedIndex());
                         _selectionListeners.forEach( l -> l.accept(thisComponent.getSelectedIndex()) );
                     }));
                     thisComponent.setSelectedIndex(index.get());
-               })
+                })
                ._this();
     }
 
@@ -249,10 +253,12 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
      */
     public final UIForTabbedPane<P> withTabPlacementAt( Val<UI.Side> side ) {
         NullUtil.nullArgCheck(side, "side", Var.class);
-        return _with( thisComponent -> {
-                    _onShow( side, v -> thisComponent.setTabPlacement(side.orElseThrow().forTabbedPane()) );
-                    thisComponent.setTabPlacement(side.get().forTabbedPane());
+        return _withOnShow( side, (thisComponent,v) -> {
+                    thisComponent.setTabPlacement(v.forTabbedPane());
                })
+                ._with( thisComponent -> {
+                    thisComponent.setTabPlacement(side.get().forTabbedPane());
+                })
                ._this();
     }
 
@@ -274,10 +280,12 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
      */
     public final UIForTabbedPane<P> withOverflowPolicy( Val<UI.OverflowPolicy> policy ) {
         NullUtil.nullArgCheck(policy, "policy", Var.class);
-        return _with( thisComponent -> {
-                    _onShow(policy, v -> thisComponent.setTabLayoutPolicy(policy.orElseThrow().forTabbedPane()));
-                    thisComponent.setTabLayoutPolicy(policy.orElseThrow().forTabbedPane());
+        return _withOnShow( policy, (thisComponent,v) -> {
+                    thisComponent.setTabLayoutPolicy(v.forTabbedPane());
                })
+                ._with( thisComponent -> {
+                    thisComponent.setTabLayoutPolicy(policy.orElseThrow().forTabbedPane());
+                })
                ._this();
     }
 
@@ -337,11 +345,11 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
             });
 
             // Now on to binding:
-            tab.title()     .ifPresent( title      -> _onShow(title,      t -> thisComponent.setTitleAt(indexFinder.get(), t)) );
-            tab.icon()      .ifPresent( icon       -> _onShow(icon,       i -> thisComponent.setIconAt(indexFinder.get(), i)) );
-            tab.tip()       .ifPresent( tip        -> _onShow(tip,        t -> thisComponent.setToolTipTextAt(indexFinder.get(), t)) );
-            tab.isEnabled() .ifPresent( enabled    -> _onShow(enabled,    e -> thisComponent.setEnabledAt(indexFinder.get(), e)) );
-            tab.isSelected().ifPresent( isSelected -> _onShow(isSelected, s -> _selectTab(thisComponent, indexFinder.get(), s) ));
+            tab.title()     .ifPresent( title      -> _onShow(title,      thisComponent, (c,t) -> c.setTitleAt(indexFinder.get(), t)) );
+            tab.icon()      .ifPresent( icon       -> _onShow(icon,       thisComponent, (c,i) -> c.setIconAt(indexFinder.get(), i)) );
+            tab.tip()       .ifPresent( tip        -> _onShow(tip,        thisComponent, (c,t) -> c.setToolTipTextAt(indexFinder.get(), t)) );
+            tab.isEnabled() .ifPresent( enabled    -> _onShow(enabled,    thisComponent, (c,e) -> c.setEnabledAt(indexFinder.get(), e)) );
+            tab.isSelected().ifPresent( isSelected -> _onShow(isSelected, thisComponent, (c,s) -> _selectTab(c, indexFinder.get(), s) ));
 
             tab.headerContents().ifPresent( c ->
                     thisComponent

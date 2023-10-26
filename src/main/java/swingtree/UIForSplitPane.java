@@ -125,8 +125,10 @@ public class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UIForSpl
     public final UIForSplitPane<P> withDividerSize( Val<Integer> size ) {
         NullUtil.nullArgCheck( size, "size", Val.class );
         NullUtil.nullPropertyCheck( size, "size", "Null is not a valid divider size." );
-        return _with( thisComponent -> {
-                    _onShow( size, it -> thisComponent.setDividerSize(UI.scale(it)) );
+        return _withOnShow( size, (thisComponent,it) -> {
+                    thisComponent.setDividerSize(UI.scale(it));
+                })
+                ._with( thisComponent -> {
                     thisComponent.setDividerSize( UI.scale(size.orElseThrow()) );
                 })
                 ._this();
@@ -187,8 +189,10 @@ public class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UIForSpl
     public final UIForSplitPane<P> withDivisionOf( Val<Double> percentage ) {
         NullUtil.nullArgCheck( percentage, "percentage", Val.class );
         NullUtil.nullPropertyCheck( percentage, "percentage", "Null is not a valid percentage." );
-        return _with( thisComponent -> {
-                    _onShow( percentage, v -> _calculateDividerLocationFrom(thisComponent, v) );
+        return _withOnShow( percentage, (thisComponent,v) -> {
+                    _calculateDividerLocationFrom(thisComponent, v);
+               })
+                ._with( thisComponent -> {
                     // Now we need to register a listener to the split pane's size, so that we can recalculate the divider location
                     // when the split pane is resized:
                     thisComponent.addComponentListener(new ComponentAdapter() {

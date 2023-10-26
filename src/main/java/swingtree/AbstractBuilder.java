@@ -111,14 +111,6 @@ abstract class AbstractBuilder<I, C extends Component>
      *                      is then executed by the UI thread.
      * @param <T> The type of the item wrapped by the provided property.
      */
-    @Deprecated
-    protected final <T> void _onShow( Val<T> val, Consumer<T> displayAction )
-    {
-        Objects.requireNonNull(val);
-        Objects.requireNonNull(displayAction);
-        _onShow( val, getComponent(), (c, v) -> displayAction.accept(v) );
-    }
-
     protected final <T> void _onShow( Val<T> val, C c, BiConsumer<C, T> displayAction )
     {
         Objects.requireNonNull(val);
