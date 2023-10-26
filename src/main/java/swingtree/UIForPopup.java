@@ -41,8 +41,10 @@ public class UIForPopup<P extends JPopupMenu> extends UIForAnySwing<UIForPopup<P
      * @return This builder node, to qllow for method chaining.
      */
     public final UIForPopup<P> borderIsPaintedIf( Val<Boolean> isPainted ) {
-        return _with( thisComponent -> {
-                    _onShow(isPainted, it -> thisComponent.setBorderPainted( it ));
+        return _withOnShow( isPainted, (thisComponent,it) -> {
+                    thisComponent.setBorderPainted( it );
+                })
+                ._with( thisComponent -> {
                     thisComponent.setBorderPainted( isPainted.get() );
                 })
                 ._this();

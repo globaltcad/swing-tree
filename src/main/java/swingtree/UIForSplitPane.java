@@ -46,8 +46,10 @@ public class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UIForSpl
     public final UIForSplitPane<P> withOrientation( Val<UI.Align> align ) {
         NullUtil.nullArgCheck( align, "align", Val.class );
         NullUtil.nullPropertyCheck( align, "align", "Null is not a valid alignment." );
-        return _with( thisComponent -> {
-                    _onShow( align, it -> thisComponent.setOrientation( it.forSplitPane() ) );
+        return _withOnShow( align, (thisComponent,it) -> {
+                    thisComponent.setOrientation( it.forSplitPane() );
+                })
+                ._with( thisComponent -> {
                     thisComponent.setOrientation( align.orElseThrow().forSplitPane() );
                 })
                 ._this();
@@ -90,8 +92,10 @@ public class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UIForSpl
     public final UIForSplitPane<P> withDividerAt( Val<Integer> location ) {
         NullUtil.nullArgCheck( location, "location", Val.class );
         NullUtil.nullPropertyCheck( location, "location", "Null is not a valid divider location." );
-        return _with( thisComponent -> {
-                    _onShow( location, it -> thisComponent.setDividerLocation(it) );
+        return _withOnShow( location, (thisComponent, it) -> {
+                    thisComponent.setDividerLocation(it);
+                })
+                ._with( thisComponent -> {
                     thisComponent.setDividerLocation( location.orElseThrow() );
                 })
                 ._this();

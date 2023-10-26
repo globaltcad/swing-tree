@@ -53,10 +53,12 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 	public final I withTitle( Val<String> title ) {
 		NullUtil.nullArgCheck(title, "title", Val.class);
 		NullUtil.nullPropertyCheck(title, "title");
-		return _with( thisWindow -> {
-					_onShow( title, v -> _setTitleOf(thisWindow, v) );
-					_setTitleOf( thisWindow, title.orElseThrow() );
+		return _withOnShow( title, (thisWindow,v) -> {
+			       _setTitleOf(thisWindow, v);
 		       })
+			   ._with( thisWindow -> {
+			       _setTitleOf( thisWindow, title.orElseThrow() );
+			   })
 			   ._this();
 	}
 

@@ -116,13 +116,17 @@ public class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForList<E,
      */
     public final UIForList<E, L> withSelection( Var<E> selection ) {
         return _with( thisComponent -> {
-                    thisComponent.addListSelectionListener( e -> {
-                        if ( !e.getValueIsAdjusting() )
-                            selection.set(From.VIEW,  thisComponent.getSelectedValue() );
-                    });
-                    _onShow( selection, v -> thisComponent.setSelectedValue( v, true ) );
+                     thisComponent.addListSelectionListener( e -> {
+                         if ( !e.getValueIsAdjusting() )
+                             selection.set(From.VIEW,  thisComponent.getSelectedValue() );
+                     });
+                })
+                ._withOnShow( selection, (thisComponent,v) -> {
+                    thisComponent.setSelectedValue( v, true );
+                })
+                ._with( thisComponent -> {
                     thisComponent.setSelectedValue( selection.orElseNull(), true );
-               })
+                })
                ._this();
     }
 
@@ -138,10 +142,12 @@ public class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForList<E,
      */
     public final UIForList<E, L> withSelection( Val<E> selection ) {
         NullUtil.nullArgCheck(selection, "selection", Val.class);
-        return _with( thisComponent -> {
-                    _onShow( selection, v -> thisComponent.setSelectedValue( v, true ) );
-                    thisComponent.setSelectedValue( selection.orElseNull(), true );
+        return _withOnShow( selection, (thisComponent,v) -> {
+                    thisComponent.setSelectedValue( v, true );
                })
+                ._with( thisComponent -> {
+                    thisComponent.setSelectedValue( selection.orElseNull(), true );
+                })
                ._this();
     }
 

@@ -2018,8 +2018,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withBackground( Val<Color> bg ) {
         NullUtil.nullArgCheck(bg, "bg", Val.class);
         NullUtil.nullPropertyCheck(bg, "bg", "Please use the default color of this component instead of null!");
-        return _with( c -> {
-                    _onShow( bg, c::setBackground);
+        return _withOnShow( bg, (c,v) -> {
+                    c.setBackground(v);
+                })
+                ._with( c -> {
                     c.setBackground( bg.orElseNull() );
                 })
                 ._this();
@@ -2038,10 +2040,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck(condition, "condition", Val.class);
         NullUtil.nullArgCheck(colorIfTrue, "bg", Color.class);
         NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the usage of the provided background color!");
-        return _with( c -> {
-                    Var<Color> baseColor = Var.of( c.getBackground() );
+        return _with( thisComponent -> {
+                    Var<Color> baseColor = Var.of( thisComponent.getBackground() );
                     Var<Color> color = Var.of( colorIfTrue );
-                    _onShow( condition, v -> _updateBackground( c, condition, color, baseColor ) );
+                    _onShow( condition, thisComponent, (c,v) -> _updateBackground( c, condition, color, baseColor ) );
+                })
+                ._with( c -> {
                     c.setBackground( condition.get() ? colorIfTrue : c.getBackground() );
                 })
                 ._this();
@@ -2061,10 +2065,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck(color, "color", Val.class);
         NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the usage of the provided background color!");
         NullUtil.nullPropertyCheck(color, "color", "Null is not allowed to model the the provided background color! Please use the default color of this component instead.");
-        return _with( c -> {
-                    Var<Color> baseColor = Var.of( c.getBackground() );
-                    _onShow( condition, v -> _updateBackground( c, condition, color, baseColor ) );
-                    _onShow( color, v -> _updateBackground( c, condition, color, baseColor ) );
+        return _with( thisComponent -> {
+                    Var<Color> baseColor = Var.of( thisComponent.getBackground() );
+                    _onShow( condition, thisComponent, (c,v) -> _updateBackground( c, condition, color, baseColor ) );
+                    _onShow( color,     thisComponent, (c,v) -> _updateBackground( c, condition, color, baseColor ) );
+                })
+                ._with( c -> {
                     c.setBackground( condition.get() ? color.get() : c.getBackground() );
                 })
                 ._this();
@@ -2099,13 +2105,19 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck(colorIfTrue, "colorIfTrue", Val.class);
         NullUtil.nullArgCheck(colorIfFalse, "colorIfFalse", Val.class);
         NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the usage of the provided background color!");
-        return _with( c -> {
-                    _onShow( condition,    v -> _updateBackground( c, condition, colorIfTrue, Var.of(colorIfFalse.get()) ) );
-                    _onShow( colorIfTrue,  v -> _updateBackground( c, condition, colorIfTrue, Var.of(colorIfFalse.get()) ) );
-                    _onShow( colorIfFalse, v -> _updateBackground( c, condition, colorIfTrue, Var.of(colorIfFalse.get()) ) );
-                    c.setBackground( condition.get() ? colorIfTrue.get() : colorIfFalse.get() );
-                })
-                ._this();
+        return _withOnShow( condition, (c,v) -> {
+                   _updateBackground( c, condition, colorIfTrue, Var.of(colorIfFalse.get()) );
+               })
+               ._withOnShow( colorIfTrue, (c,v) -> {
+                   _updateBackground( c, condition, colorIfTrue, Var.of(colorIfFalse.get()) );
+               })
+               ._withOnShow( colorIfFalse, (c,v) -> {
+                   _updateBackground( c, condition, colorIfTrue, Var.of(colorIfFalse.get()) );
+               })
+               ._with( c -> {
+                   c.setBackground( condition.get() ? colorIfTrue.get() : colorIfFalse.get() );
+               })
+               ._this();
     }
 
     /**
@@ -2185,8 +2197,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withForeground( Val<Color> fg ) {
         NullUtil.nullArgCheck(fg, "fg", Val.class);
         NullUtil.nullPropertyCheck(fg, "fg", "Please use the default color of this component instead of null!");
-        return _with( c -> {
-                    _onShow( fg, c::setForeground );
+        return _withOnShow( fg, (c,v) -> {
+                    c.setForeground(v);
+                })
+                ._with( c -> {
                     c.setForeground( fg.get() );
                 })
                 ._this();
@@ -2205,10 +2219,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck(condition, "condition", Val.class);
         NullUtil.nullArgCheck(fg, "fg", Color.class);
         NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the usage of the provided foreground color!");
-        return _with( c -> {
-                    Var<Color> baseColor = Var.of( c.getForeground() );
+        return _with( thisComponent -> {
+                    Var<Color> baseColor = Var.of( thisComponent.getForeground() );
                     Var<Color> newColor = Var.of( fg );
-                    _onShow( condition, v -> _updateForeground( c, condition, newColor, baseColor ) );
+                    _onShow( condition, thisComponent, (c,v) -> _updateForeground( c, condition, newColor, baseColor ) );
+                })
+                ._with( c -> {
                     c.setForeground( condition.get() ? fg : c.getForeground() );
                 })
                 ._this();
@@ -2228,10 +2244,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck(color, "color", Val.class);
         NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the usage of the provided foreground color!");
         NullUtil.nullPropertyCheck(color, "color", "Null is not allowed to model the the provided foreground color! Please use the default color of this component instead.");
-        return _with( c -> {
-                    Var<Color> baseColor = Var.of( c.getForeground() );
-                    _onShow( condition, v -> _updateForeground( c, condition, color, baseColor ) );
-                    _onShow( color, v -> _updateForeground( c, condition, color, baseColor ) );
+        return _with( thisComponent -> {
+                    Var<Color> baseColor = Var.of( thisComponent.getForeground() );
+                    _onShow( condition, thisComponent, (c,v) -> _updateForeground( c, condition, color, baseColor ) );
+                    _onShow( color,     thisComponent, (c,v) -> _updateForeground( c, condition, color, baseColor ) );
+                })
+                ._with( c -> {
                     c.setForeground( condition.get() ? color.get() : c.getForeground() );
                 })
                 ._this();
@@ -2252,8 +2270,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck(colorIfTrue, "colorIfTrue", Color.class);
         NullUtil.nullArgCheck(colorIfFalse, "colorIfFalse", Color.class);
         NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the usage of the provided foreground color!");
-        return _with( c -> {
-                    _onShow( condition, v -> _updateForeground( c, condition, Var.of(colorIfTrue), Var.of(colorIfFalse) ) );
+        return _withOnShow( condition, (c,v) -> {
+                    _updateForeground( c, condition, Var.of(colorIfTrue), Var.of(colorIfFalse) );
+                })
+                ._with( c -> {
                     c.setForeground( condition.get() ? colorIfTrue : colorIfFalse );
                 })
                 ._this();
@@ -2346,11 +2366,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withMinSize( Val<Dimension> size ) {
         NullUtil.nullArgCheck(size, "size", Val.class);
         NullUtil.nullPropertyCheck(size, "size", "Null is not allowed to model the minimum size of this component!");
-        return _with( c -> {
-                    _onShow( size, v -> {
-                        c.setMinimumSize(UI.scale(v));
-                        _revalidate(c);
-                    });
+        return _withOnShow( size, (c,v) -> {
+                    c.setMinimumSize(UI.scale(v));
+                    _revalidate(c);
+                })
+                ._with( c -> {
                     c.setMinimumSize( UI.scale(size.get()) );
                 })
                 ._this();
@@ -2423,11 +2443,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withMinWidth( Val<Integer> width ) {
         NullUtil.nullArgCheck(width, "width", Val.class);
         NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the minimum width of this component!");
-        return _with( c -> {
-                    _onShow( width, w -> {
-                        c.setMinimumSize(new Dimension(UI.scale(w), c.getMinimumSize().height));
-                        _revalidate(c); // Swing is not smart enough to do this automatically
-                    });
+        return _withOnShow( width, (c,w) -> {
+                    c.setMinimumSize(new Dimension(UI.scale(w), c.getMinimumSize().height));
+                    _revalidate(c); // Swing is not smart enough to do this automatically
+                })
+                ._with( c -> {
                     _setMinWidth(c, width.get());
                 })
                 ._this();
@@ -2463,11 +2483,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withMinHeight( Val<Integer> height ) {
         NullUtil.nullArgCheck(height, "height", Val.class);
         NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the minimum height of this component!");
-        return _with( c -> {
-                    _onShow( height, h -> {
-                        c.setMinimumSize(new Dimension(c.getMinimumSize().width, UI.scale(h)));
-                        _revalidate(c); // Swing is not smart enough to do this automatically
-                    });
+        return _withOnShow( height, (c,h) -> {
+                    c.setMinimumSize(new Dimension(c.getMinimumSize().width, UI.scale(h)));
+                    _revalidate(c); // Swing is not smart enough to do this automatically
+                })
+                ._with( c -> {
                     _setMinHeight(c, height.get());
                 })
                 ._this();
@@ -2494,11 +2514,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withMaxSize( Val<Dimension> size ) {
         NullUtil.nullArgCheck(size, "size", Val.class);
         NullUtil.nullPropertyCheck(size, "size", "Null is not allowed to model the maximum size of this component!");
-        return _with( c -> {
-                    _onShow( size, v -> {
-                        c.setMaximumSize(UI.scale(v));
-                        _revalidate(c); // For some reason this is needed to make the change visible.
-                    });
+        return _withOnShow( size, (c,v) -> {
+                    c.setMaximumSize(UI.scale(v));
+                    _revalidate(c); // For some reason this is needed to make the change visible.
+                })
+                ._with( c -> {
                     c.setMaximumSize( UI.scale(size.get()) );
                 })
                 ._this();
@@ -2528,15 +2548,15 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck(height, "height", Val.class);
         NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the maximum width of this component!");
         NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the maximum height of this component!");
-        return _with( c -> {
-                    _onShow( width, w -> {
-                        c.setMaximumSize(new Dimension(UI.scale(w), c.getMaximumSize().height));
-                        _revalidate(c); // Raw Swing is not smart enough to do this automatically :(
-                    });
-                    _onShow( height, h -> {
-                        c.setMaximumSize(new Dimension(c.getMaximumSize().width, UI.scale(h)));
-                        _revalidate(c); // Still not smart enough to do this automatically :(
-                    });
+        return _withOnShow( width, (c,w) -> {
+                    c.setMaximumSize(new Dimension(UI.scale(w), c.getMaximumSize().height));
+                    _revalidate(c); // Raw Swing is not smart enough to do this automatically :(
+                })
+                ._withOnShow( height, (c,h) -> {
+                    c.setMaximumSize(new Dimension(c.getMaximumSize().width, UI.scale(h)));
+                    _revalidate(c); // Still not smart enough to do this automatically :(
+                })
+                ._with( c -> {
                     c.setMaximumSize( new Dimension(UI.scale(width.get()), UI.scale(height.get())) );
                 })
                 ._this();
@@ -2571,11 +2591,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withMaxWidth( Val<Integer> width ) {
         NullUtil.nullArgCheck(width, "width", Val.class);
         NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the maximum width of this component!");
-        return _with( c -> {
-                    _onShow( width, w -> {
-                        c.setMaximumSize(new Dimension(UI.scale(w), c.getMaximumSize().height));
-                        _revalidate(c); // When the size changes, the layout manager needs to be informed.
-                    });
+        return _withOnShow( width, (c,w) -> {
+                    c.setMaximumSize(new Dimension(UI.scale(w), c.getMaximumSize().height));
+                    _revalidate(c); // When the size changes, the layout manager needs to be informed.
+                })
+                ._with( c -> {
                     _setMaxWidth(c, width.get());
                 })
                 ._this();
@@ -2610,11 +2630,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withMaxHeight( Val<Integer> height ) {
         NullUtil.nullArgCheck(height, "height", Val.class);
         NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the maximum height of this component!");
-        return _with( c -> {
-                    _onShow( height, h -> {
-                        c.setMaximumSize(new Dimension(c.getMaximumSize().width, UI.scale(h)));
-                        _revalidate(c); // The revalidate is necessary to make the change visible, this makes sure the layout is recalculated.
-                    });
+        return _withOnShow( height, (c,h) -> {
+                    c.setMaximumSize(new Dimension(c.getMaximumSize().width, UI.scale(h)));
+                    _revalidate(c); // The revalidate is necessary to make the change visible, this makes sure the layout is recalculated.
+                })
+                ._with( c -> {
                     _setMaxHeight(c, height.get());
                 })
                 ._this();
@@ -2641,11 +2661,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withPrefSize( Val<Dimension> size ) {
         NullUtil.nullArgCheck(size, "size", Val.class);
         NullUtil.nullPropertyCheck(size, "size", "Null is not allowed to model the preferred size of this component!");
-        return _with( c -> {
-                    _onShow( size, v -> {
-                        c.setPreferredSize(UI.scale(v));
-                        _revalidate(c);
-                    });
+        return _withOnShow( size, (c,v) -> {
+                    c.setPreferredSize(UI.scale(v));
+                    _revalidate(c);
+                })
+                ._with( c -> {
                     c.setPreferredSize( UI.scale(size.get()) );
                 })
                 ._this();
@@ -2675,15 +2695,15 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck(height, "height", Val.class);
         NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the preferred width of this component!");
         NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the preferred height of this component!");
-        return _with( c -> {
-                    _onShow( width, w -> {
-                        c.setPreferredSize(new Dimension(UI.scale(w), c.getPreferredSize().height));
-                        _revalidate(c); // We need to revalidate the component to make sure the layout manager is aware of the new size.
-                    });
-                    _onShow( height, h -> {
-                        c.setPreferredSize(new Dimension(c.getPreferredSize().width, UI.scale(h)));
-                        _revalidate(c); // We need to revalidate the component to make sure the layout manager is aware of the new size.
-                    });
+        return _withOnShow( width, (c,w) -> {
+                    c.setPreferredSize(new Dimension(UI.scale(w), c.getPreferredSize().height));
+                    _revalidate(c); // We need to revalidate the component to make sure the layout manager is aware of the new size.
+                })
+                ._withOnShow( height, (c,h) -> {
+                    c.setPreferredSize(new Dimension(c.getPreferredSize().width, UI.scale(h)));
+                    _revalidate(c); // We need to revalidate the component to make sure the layout manager is aware of the new size.
+                })
+                ._with( c -> {
                     c.setPreferredSize( new Dimension(UI.scale(width.get()), UI.scale(height.get())) );
                 })
                 ._this();
@@ -2718,11 +2738,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withPrefWidth( Val<Integer> width ) {
         NullUtil.nullArgCheck(width, "width", Val.class);
         NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the preferred width of this component!");
-        return _with( c -> {
-                    _onShow( width, w -> {
-                        c.setPreferredSize(new Dimension(UI.scale(w), c.getPreferredSize().height));
-                        _revalidate(c); // We need to revalidate the component to make sure the new preferred size is applied.
-                    });
+        return _withOnShow( width, (c,w) -> {
+                    c.setPreferredSize(new Dimension(UI.scale(w), c.getPreferredSize().height));
+                    _revalidate(c); // We need to revalidate the component to make sure the new preferred size is applied.
+                })
+                ._with( c -> {
                     _setPrefWidth(c, width.get());
                 })
                 ._this();
@@ -2754,14 +2774,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param height The preferred height which should be set for the underlying component wrapped by a {@link Val}.
      * @return This very builder to allow for method chaining.
      */
-    public final I withPrefHeight(Val<Integer> height ) {
+    public final I withPrefHeight( Val<Integer> height ) {
         NullUtil.nullArgCheck(height, "height", Val.class);
         NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the preferred height of this component!");
-        return _with( c -> {
-                    _onShow( height, h -> {
-                        c.setPreferredSize(new Dimension(c.getPreferredSize().width, UI.scale(h)));
-                        _revalidate(c); // We need to revalidate the component to make sure the new preferred size is applied.
-                    });
+        return _withOnShow( height, (c,h) -> {
+                    c.setPreferredSize(new Dimension(c.getPreferredSize().width, UI.scale(h)));
+                    _revalidate(c); // We need to revalidate the component to make sure the new preferred size is applied.
+                })
+                ._with( c -> {
                     _setPrefHeight(c, height.get());
                 })
                 ._this();
@@ -2788,11 +2808,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withSize( Val<Dimension> size ) {
         NullUtil.nullArgCheck(size, "size", Val.class);
         NullUtil.nullPropertyCheck(size, "size", "Null is not allowed to model the size of this component!");
-        return _with( c -> {
-                    _onShow( size, v -> {
-                        c.setSize(UI.scale(v));
-                        _revalidate(c); // We need to revalidate the component to make sure the new size is applied.
-                    });
+        return _withOnShow( size, (c,v) -> {
+                    c.setSize(UI.scale(v));
+                    _revalidate(c); // We need to revalidate the component to make sure the new size is applied.
+                })
+                ._with( c -> {
                     c.setSize( UI.scale(size.get()) );
                 })
                 ._this();
@@ -2832,11 +2852,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withWidth( Val<Integer> width ) {
         NullUtil.nullArgCheck(width, "width", Val.class);
         NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the width of this component!");
-        return _with( c -> {
-                    _onShow( width, w -> {
-                        c.setSize(new Dimension(UI.scale(w), c.getSize().height));
-                        _revalidate(c); // We need to revalidate the component to make sure the new size is applied.
-                    });
+        return _withOnShow( width, (c,w) -> {
+                    c.setSize(new Dimension(UI.scale(w), c.getSize().height));
+                    _revalidate(c); // We need to revalidate the component to make sure the new size is applied.
+                })
+                ._with( c -> {
                     c.setSize(new Dimension(UI.scale(width.get()), c.getSize().height));
                 })
                 ._this();
@@ -2865,11 +2885,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withHeight( Val<Integer> height ) {
         NullUtil.nullArgCheck(height, "height", Val.class);
         NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the height of this component!");
-        return _with( c -> {
-                    _onShow( height, h -> {
-                        c.setSize(new Dimension(c.getSize().width, UI.scale(h)));
-                        _revalidate(c); // We need to revalidate the component to make sure the new size is applied.
-                    });
+        return _withOnShow( height, (c,h) -> {
+                    c.setSize(new Dimension(c.getSize().width, UI.scale(h)));
+                    _revalidate(c); // We need to revalidate the component to make sure the new size is applied.
+                })
+                ._with( c -> {
                     c.setSize(new Dimension(c.getSize().width, UI.scale(height.get())));
                 })
                 ._this();

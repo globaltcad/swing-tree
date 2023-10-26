@@ -83,10 +83,10 @@ public class UIForSeparator<S extends JSeparator> extends UIForAnySwing<UIForSep
     public UIForSeparator<S> withLength( Val<Integer> separatorLength ) {
         NullUtil.nullArgCheck( separatorLength, "separatorLength", Val.class );
         NullUtil.nullPropertyCheck( separatorLength, "separatorLength", "Null is not a valid separator length." );
-        return _with( thisComponent -> {
-                    _onShow( separatorLength, it -> {
-                        _setLength( thisComponent, it );
-                    });
+        return _withOnShow( separatorLength, (thisComponent,it) -> {
+                    _setLength( thisComponent, it );
+                })
+                ._with( thisComponent -> {
                     _setLength( thisComponent, separatorLength.orElseThrow() );
                 })
                 ._this();

@@ -43,8 +43,10 @@ public class UIForPasswordField<F extends JPasswordField> extends UIForAnyTextCo
     public final UIForPasswordField<F> withEchoChar( Val<Character> echoChar ) {
         NullUtil.nullArgCheck( echoChar, "echoChar", Val.class );
         NullUtil.nullPropertyCheck( echoChar, "echoChar", "Null is not a valid echo character." );
-        return _with( thisComponent -> {
-                    _onShow( echoChar, it -> thisComponent.setEchoChar( it ) );
+        return _withOnShow( echoChar, (thisComponent,it) -> {
+                    thisComponent.setEchoChar( it );
+                })
+                ._with( thisComponent -> {
                     thisComponent.setEchoChar( echoChar.orElseThrow() );
                 })
                 ._this();

@@ -348,7 +348,7 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAnyButton<UIF
         return _with( thisComponent -> {
                     I item = splitItem.getItem();
                     splitItem.getIsEnabled().ifPresent( isEnabled -> {
-                        _onShow(isEnabled, item::setEnabled);
+                        _onShow( isEnabled, thisComponent, (c,v) -> item.setEnabled(v) );
                     });
 
                     if ( item.isSelected() )

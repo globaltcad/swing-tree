@@ -47,10 +47,12 @@ public class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSlider<S>
     public final UIForSlider<S> withOrientation( Val<UI.Align> align ) {
         NullUtil.nullArgCheck( align, "align", Val.class );
         NullUtil.nullPropertyCheck( align, "align", "Null is not a valid alignment" );
-        return _with( thisComponent -> {
-                    _onShow( align, v -> _setOrientation(thisComponent, align.orElseThrow()) );
+        return _withOnShow( align, (thisComponent,v) -> {
                     _setOrientation(thisComponent, align.orElseThrow());
                })
+                ._with( thisComponent -> {
+                    _setOrientation(thisComponent, align.orElseThrow());
+                })
                ._this();
     }
 
@@ -103,8 +105,10 @@ public class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSlider<S>
      */
     public final UIForSlider<S> withMin( Val<Integer> min ) {
         NullUtil.nullArgCheck( min, "min", Val.class );
-        return _with( thisComponent -> {
-                    _onShow( min, v -> _setMin(thisComponent, min.orElseThrow()) );
+        return _withOnShow( min, (thisComponent,v) -> {
+                    _setMin(thisComponent, min.orElseThrow());
+                })
+                ._with( thisComponent -> {
                     _setMin(thisComponent, min.orElseThrow());
                 })
                 ._this();
@@ -135,8 +139,10 @@ public class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSlider<S>
      */
     public final UIForSlider<S> withMax( Val<Integer> max ) {
         NullUtil.nullArgCheck( max, "max", Val.class );
-        return _with( thisComponent -> {
-                    _onShow( max, v -> _setMax(thisComponent, max.orElseThrow()) );
+        return _withOnShow( max, (thisComponent,v) -> {
+                    _setMax(thisComponent, max.orElseThrow());
+                })
+                ._with( thisComponent -> {
                     _setMax(thisComponent, max.orElseThrow());
                 })
                 ._this();
@@ -167,8 +173,10 @@ public class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSlider<S>
      */
     public final UIForSlider<S> withValue( Val<Integer> val ) {
         NullUtil.nullArgCheck( val, "val", Val.class );
-        return _with( thisComponent -> {
-                    _onShow( val, v -> _setValue(thisComponent, val.orElseThrow()) );
+        return _withOnShow( val, (thisComponent,v) -> {
+                    _setValue(thisComponent, val.orElseThrow());
+                })
+                ._with( thisComponent -> {
                     _setValue(thisComponent, val.orElseThrow());
                 })
                 ._this();
@@ -228,8 +236,10 @@ public class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSlider<S>
     public final UIForSlider<S> withMajorTickSpacing( Val<Integer> spacing ) {
         NullUtil.nullArgCheck( spacing, "spacing", Val.class );
         NullUtil.nullPropertyCheck( spacing, "spacing" );
-        return _with( thisComponent -> {
-                    _onShow( spacing, v -> thisComponent.setMajorTickSpacing(v) );
+        return _withOnShow( spacing, (thisComponent,v) -> {
+                    thisComponent.setMajorTickSpacing(v);
+                })
+                ._with( thisComponent -> {
                     thisComponent.setMajorTickSpacing( spacing.orElseThrow() );
                 })
                 ._this();
@@ -245,8 +255,10 @@ public class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSlider<S>
     public final UIForSlider<S> withMinorTickSpacing( Val<Integer> spacing ) {
         NullUtil.nullArgCheck( spacing, "spacing", Val.class );
         NullUtil.nullPropertyCheck( spacing, "spacing" );
-        return _with( thisComponent -> {
-                    _onShow( spacing, v -> thisComponent.setMinorTickSpacing(v) );
+        return _withOnShow( spacing, (thisComponent,v) -> {
+                    thisComponent.setMinorTickSpacing(v);
+                })
+                ._with( thisComponent -> {
                     thisComponent.setMinorTickSpacing( spacing.orElseThrow() );
                 })
                 ._this();

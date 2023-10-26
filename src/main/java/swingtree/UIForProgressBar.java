@@ -40,8 +40,10 @@ public class UIForProgressBar<P extends JProgressBar> extends UIForAnySwing<UIFo
     public final UIForProgressBar<P> withOrientation( Val<UI.Align> align ) {
         NullUtil.nullArgCheck( align, "align", Val.class );
         NullUtil.nullPropertyCheck( align, "align", "Null is not a valid alignment" );
-        return _with( thisComponent -> {
-                   _onShow( align, v -> thisComponent.setOrientation(align.orElseThrow().forProgressBar()) );
+        return _withOnShow( align, (thisComponent,v) -> {
+                   thisComponent.setOrientation(v.forProgressBar());
+               })
+               ._with( thisComponent -> {
                    thisComponent.setOrientation(align.orElseThrow().forProgressBar());
                })
                ._this();
@@ -100,9 +102,11 @@ public class UIForProgressBar<P extends JProgressBar> extends UIForAnySwing<UIFo
     public final UIForProgressBar<P> withMax( Val<Integer> max ) {
         NullUtil.nullArgCheck( max, "max", Val.class );
         NullUtil.nullPropertyCheck(max, "max", "Null is not a valid max value for the value of a progress bar.");
-        return _with( thisComponent -> {
-                    _onShow( max, v -> thisComponent.setMaximum( v ) );
-                    thisComponent.setMaximum( max.orElseThrow() );
+        return _withOnShow( max, (thisComponent,v) -> {
+                    thisComponent.setMaximum( v );
+               })
+               ._with( thisComponent -> {
+                   thisComponent.setMaximum( max.orElseThrow() );
                })
                ._this();
     }
@@ -148,9 +152,11 @@ public class UIForProgressBar<P extends JProgressBar> extends UIForAnySwing<UIFo
     public final UIForProgressBar<P> withValue( Val<Integer> val ) {
         NullUtil.nullArgCheck( val, "val", Val.class );
         NullUtil.nullPropertyCheck(val, "value", "Null is not a valid value for the progress property of a progress bar.");
-        return _with( thisComponent -> {
-                    _onShow( val, v -> thisComponent.setValue( v ) );
-                    thisComponent.setValue( val.orElseThrow() );
+        return _withOnShow( val, (thisComponent,v) -> {
+                    thisComponent.setValue( v );
+               })
+               ._with( thisComponent -> {
+                   thisComponent.setValue( val.orElseThrow() );
                })
                ._this();
     }
@@ -163,9 +169,11 @@ public class UIForProgressBar<P extends JProgressBar> extends UIForAnySwing<UIFo
     public final UIForProgressBar<P> withProgress( Val<Double> progress ) {
         NullUtil.nullArgCheck( progress, "progress", Val.class );
         NullUtil.nullPropertyCheck(progress, "progress", "Null is not a valid progress for the progress property of a progress bar.");
-        return _with( thisComponent -> {
-                    _onShow( progress, v -> _setProgress( thisComponent, v ) );
-                    _setProgress( thisComponent, progress.orElseThrow() );
+        return _withOnShow( progress, (thisComponent,v) -> {
+                    _setProgress( thisComponent, v );
+               })
+               ._with( thisComponent -> {
+                   _setProgress( thisComponent, progress.orElseThrow() );
                })
                ._this();
     }

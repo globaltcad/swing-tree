@@ -82,8 +82,10 @@ public class UIForScrollPane<P extends JScrollPane> extends UIForAnySwing<UIForS
     public final UIForScrollPane<P> withVerticalScrollBarPolicy( Val<UI.Active> scrollBarPolicy ) {
         NullUtil.nullArgCheck(scrollBarPolicy, "scrollBarPolicy", Val.class);
         NullUtil.nullPropertyCheck(scrollBarPolicy, "scrollBarPolicy", "Null is not a valid scroll bar policy.");
-        return _with( thisComponent -> {
-                    _onShow(scrollBarPolicy, v -> _setVerticalScrollBarPolicy(thisComponent, v));
+        return _withOnShow( scrollBarPolicy, (thisComponent,v) -> {
+                    _setVerticalScrollBarPolicy(thisComponent, v);
+                })
+                ._with( thisComponent -> {
                     _setVerticalScrollBarPolicy(thisComponent, scrollBarPolicy.get());
                 })
                 ._this();
@@ -120,8 +122,10 @@ public class UIForScrollPane<P extends JScrollPane> extends UIForAnySwing<UIForS
     public final UIForScrollPane<P> withHorizontalScrollBarPolicy( Val<UI.Active> scrollBarPolicy ) {
         NullUtil.nullArgCheck(scrollBarPolicy, "scrollBarPolicy", Val.class);
         NullUtil.nullPropertyCheck(scrollBarPolicy, "scrollBarPolicy", "Null is not a valid scroll bar policy.");
-        return _with( thisComponent -> {
-                    _onShow(scrollBarPolicy, v -> _setHorizontalScrollBarPolicy(thisComponent, v));
+        return _withOnShow( scrollBarPolicy, (thisComponent,v) -> {
+                    _setHorizontalScrollBarPolicy(thisComponent, v);
+                })
+                ._with( thisComponent -> {
                     _setHorizontalScrollBarPolicy(thisComponent, scrollBarPolicy.get());
                 })
                 ._this();

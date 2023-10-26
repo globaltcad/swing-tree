@@ -62,16 +62,18 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
      *     Note that the text of the wrapped text component is only updated if the new value
      *     is different from the old value. This is to avoid infinite feedback loops.
      * <br>
-     * @param val The property instance to bind the text of the wrapped text component to.
+     * @param text The property instance to bind the text of the wrapped text component to.
      * @return This very builder to allow for method chaining.
      * @throws IllegalArgumentException if the specified property is <code>null</code>.
      * @throws IllegalArgumentException if the specified property allows <code>null</code> values.
      */
-    public final I withText( Val<String> val ) {
-        NullUtil.nullArgCheck(val, "val", Val.class);
-        return _with( thisComponent -> {
-                    _onShow(val, v -> _setTextSilently( thisComponent, v ) );
-                    _setTextSilently( thisComponent, val.orElseThrow() );
+    public final I withText( Val<String> text ) {
+        NullUtil.nullArgCheck(text, "text", Val.class);
+        return _withOnShow( text, (c, t) -> {
+                    _setTextSilently( c, t );
+                })
+                ._with( thisComponent -> {
+                    _setTextSilently( thisComponent, text.orElseThrow() );
                 })
                 ._this();
     }
@@ -92,11 +94,11 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
      */
     public final I withText( Var<String> text ) {
         NullUtil.nullPropertyCheck(text, "text", "Use an empty string instead of null!");
-        return _with( thisComponent -> {
-                    _onShow( text, newText -> {
-                        if ( !Objects.equals(thisComponent.getText(), newText) )  // avoid infinite recursion or some other Swing weirdness
-                            _setTextSilently( thisComponent, newText );
-                    });
+        return _withOnShow( text, (c, t) -> {
+                    if ( !Objects.equals(c.getText(), t) )  // avoid infinite recursion or some other Swing weirdness
+                        _setTextSilently( c, t );
+                })
+                ._with( thisComponent -> {
                     _onTextChange(thisComponent, e -> {
                         try {
                             String newText = e.getDocument().getText(0, e.getDocument().getLength());
@@ -177,8 +179,10 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
     public final I withFont( Val<Font> font ) {
         NullUtil.nullArgCheck(font, "font", Val.class);
         NullUtil.nullPropertyCheck(font, "font", "Use the default font of this component instead of null!");
-        return _with( thisComponent -> {
-                    _onShow( font, thisComponent::setFont );
+        return _withOnShow( font, (c,v) -> {
+                    c.setFont( v );
+                })
+                ._with( thisComponent -> {
                     thisComponent.setFont( font.orElseThrow() );
                 })
                 ._this();

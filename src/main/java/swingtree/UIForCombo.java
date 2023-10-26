@@ -40,9 +40,9 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UIForCom
                     model.setFromEditor(field.getText());
             });
 
-            _onShow( model._getSelectedItemVar(), v ->
+            _onShow( model._getSelectedItemVar(), thisComponent, (c, v) ->
                 model.doQuietly(()->{
-                    thisComponent.getEditor().setItem(v);
+                    c.getEditor().setItem(v);
                     model.fireListeners();
                 })
             );
@@ -239,8 +239,10 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UIForCom
      */
     public UIForCombo<E,C> isEditableIf( Var<Boolean> isEditable ) {
         NullUtil.nullPropertyCheck(isEditable, "isEditable", "Null is not a valid state for modelling 'isEditable''.");
-        return _with( thisComponent -> {
-                    _onShow( isEditable, thisComponent::setEditable);
+        return _withOnShow( isEditable, (thisComponent, v) -> {
+                    thisComponent.setEditable(v);
+                })
+                ._with( thisComponent -> {
                     thisComponent.setEditable(isEditable.get());
                 })
                 ._this();
@@ -313,7 +315,7 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UIForCom
                         withModel(((AbstractComboModel<E>)model).withVar(item));
                     else {
                         // The user has a custom model AND wants to bind to a property:
-                        _onShow( item, v -> _setSelectedItem(thisComponent, v) );
+                        _onShow( item, thisComponent, (c,v) -> _setSelectedItem(c, v) );
                         _onSelection(thisComponent,
                             e -> _doApp( (E)thisComponent.getSelectedItem(), newItem -> item.set(From.VIEW, newItem)  )
                         );

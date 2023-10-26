@@ -172,8 +172,10 @@ public class UIForSpinner<S extends JSpinner> extends UIForAnySwing<UIForSpinner
     public final UIForSpinner<S> withValue( Val<?> value ) {
         NullUtil.nullArgCheck(value, "value", Val.class);
         NullUtil.nullPropertyCheck(value, "value", "Null is not a valid spinner state!");
-        return _with( thisComponent -> {
-                    _onShow(value, it -> thisComponent.setValue(it));
+        return _withOnShow( value, (thisComponent,it) -> {
+                    thisComponent.setValue(it);
+                })
+                ._with( thisComponent -> {
                     thisComponent.setValue(value.get());
                 })
                 ._this();
@@ -189,8 +191,10 @@ public class UIForSpinner<S extends JSpinner> extends UIForAnySwing<UIForSpinner
     public final UIForSpinner<S> withValue( Var<?> value ) {
         NullUtil.nullArgCheck(value, "value", Var.class);
         NullUtil.nullPropertyCheck(value, "value", "Null is not a valid spinner state!");
-        return _with( thisComponent -> {
-                    _onShow( value, this::withValue );
+        return _withOnShow( value, (thisComponent,v) -> {
+                    thisComponent.setValue(v);
+                })
+                ._with( thisComponent -> {
                     _onChange(thisComponent, e -> {
                         // Get access the current component while still in the EDT. (getComponent() is only allowed in the EDT)
                         final Object current = thisComponent.getValue();
@@ -265,7 +269,7 @@ public class UIForSpinner<S extends JSpinner> extends UIForAnySwing<UIForSpinner
                                 "This JSpinner can not have a numeric step size as it is not based on the SpinnerNumberModel!"
                             );
                     SpinnerNumberModel numberModel = (SpinnerNumberModel) model;
-                    _onShow(val, numberModel::setStepSize);
+                    _onShow( val, thisComponent, (c,v) -> numberModel.setStepSize(v) );
                     numberModel.setStepSize(val.get());
                 })
                 ._this();

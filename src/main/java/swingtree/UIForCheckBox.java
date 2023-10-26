@@ -20,10 +20,12 @@ public class UIForCheckBox<B extends JCheckBox> extends UIForAnyButton<UIForChec
     }
 
     public UIForCheckBox<B> borderIsPaintedFlatIf(Val<Boolean> val ) {
-        return _with( thisComponent -> {
-                   _onShow(val, v -> thisComponent.setBorderPaintedFlat(v) );
-                   thisComponent.setBorderPaintedFlat( val.get() );
-               })
+        return _withOnShow( val, (thisComponent,v) -> {
+                    thisComponent.setBorderPaintedFlat(v);
+                })
+                ._with( thisComponent -> {
+                    thisComponent.setBorderPaintedFlat( val.get() );
+                })
                ._this();
     }
 
