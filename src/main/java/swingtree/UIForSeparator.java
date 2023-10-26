@@ -47,8 +47,10 @@ public class UIForSeparator<S extends JSeparator> extends UIForAnySwing<UIForSep
     public final UIForSeparator<S> withOrientation( Val<UI.Align> align ) {
         NullUtil.nullArgCheck( align, "align", Val.class );
         NullUtil.nullPropertyCheck( align, "align", "Null is not a valid alignment." );
-        return _with( thisComponent -> {
-                    _onShow( align, it -> thisComponent.setOrientation( it.forSeparator() ) );
+        return _withOnShow( align, (c,v) -> {
+                    c.setOrientation( v.forSeparator() );
+                })
+                ._with( thisComponent -> {
                     thisComponent.setOrientation( align.orElseThrow().forSeparator() );
                 })
                 ._this();

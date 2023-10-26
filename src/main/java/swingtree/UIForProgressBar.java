@@ -69,8 +69,10 @@ public class UIForProgressBar<P extends JProgressBar> extends UIForAnySwing<UIFo
     public final UIForProgressBar<P> withMin( Val<Integer> min ) {
         NullUtil.nullArgCheck( min, "min", Val.class );
         NullUtil.nullPropertyCheck(min, "min", "Null is not a valid min value for the value of a progress bar.");
-        return _with( thisComponent -> {
-                    _onShow( min, v -> thisComponent.setMinimum( v ) );
+        return _withOnShow( min, (c,v) -> {
+                    c.setMinimum( v );
+               })
+               ._with( thisComponent -> {
                     thisComponent.setMinimum( min.orElseThrow() );
                })
                ._this();

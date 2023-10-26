@@ -217,8 +217,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I isVisibleIf( Val<Boolean> isVisible ) {
         NullUtil.nullArgCheck(isVisible, "isVisible", Val.class);
         NullUtil.nullPropertyCheck(isVisible, "isVisible", "Null is not allowed to model the visibility of a UI component!");
-        return _with( c -> {
-                    _onShow( isVisible, c::setVisible);
+        return _withOnShow( isVisible, (c, v) -> {
+                    c.setVisible(v);
+                })
+                ._with( c -> {
                     c.setVisible( isVisible.orElseThrow() );
                 })
                 ._this();
@@ -233,8 +235,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I isVisibleIfNot( Val<Boolean> isVisible ) {
         NullUtil.nullArgCheck(isVisible, "isVisible", Val.class);
         NullUtil.nullPropertyCheck(isVisible, "isVisible", "Null is not allowed to model the visibility of a UI component! A boolean should only be true or false!");
-        return _with( c -> {
-                    _onShow( isVisible, v -> c.setVisible(!v) );
+        return _withOnShow( isVisible, (c, v) -> {
+                    c.setVisible(!v);
+                })
+                ._with( c -> {
                     c.setVisible( !isVisible.orElseThrow() );
                 })
                 ._this();
@@ -254,8 +258,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck(enumValue, "enumValue", Enum.class);
         NullUtil.nullArgCheck(enumProperty, "enumProperty", Val.class);
         NullUtil.nullPropertyCheck(enumProperty, "enumProperty", "Null is not allowed to model the visibility of a UI component!");
-        return _with( c -> {
-                    _onShow( enumProperty, v -> c.setVisible( v == enumValue ) );
+        return _withOnShow( enumProperty, (c,v) -> {
+                    c.setVisible( v == enumValue );
+                })
+                ._with( c -> {
                     c.setVisible( enumValue == enumProperty.orElseThrow() );
                 })
                 ._this();
@@ -274,8 +280,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck(enumValue, "enumValue", Enum.class);
         NullUtil.nullArgCheck(enumProperty, "enumProperty", Val.class);
         NullUtil.nullPropertyCheck(enumProperty, "enumProperty", "Null is not allowed to model the visibility of a UI component!");
-        return _with( c -> {
-                    _onShow( enumProperty, v -> c.setVisible( v != enumValue ) );
+        return _withOnShow( enumProperty, (c,v) -> {
+                    c.setVisible( v != enumValue );
+                })
+                ._with( c -> {
                     c.setVisible( enumValue != enumProperty.orElseThrow() );
                 })
                 ._this();
@@ -311,8 +319,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I isEnabledIf( Val<Boolean> isEnabled ) {
         NullUtil.nullArgCheck(isEnabled, "isEnabled", Val.class);
         NullUtil.nullPropertyCheck(isEnabled, "isEnabled", "Null value for isEnabled is not allowed!");
-        return _with( c -> {
-                    _onShow( isEnabled, c::setEnabled );
+        return _withOnShow( isEnabled, (c,v) -> {
+                    c.setEnabled(v);
+                })
+                ._with( c -> {
                     _setEnabled(c,  isEnabled.orElseThrow() );
                 })
                 ._this();
@@ -328,8 +338,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I isEnabledIfNot( Val<Boolean> isEnabled ) {
         NullUtil.nullArgCheck(isEnabled, "isEnabled", Val.class);
         NullUtil.nullPropertyCheck(isEnabled, "isEnabled", "Null value for isEnabled is not allowed!");
-        return _with( c -> {
-                    _onShow( isEnabled, v -> _setEnabled(c, !v) );
+        return _withOnShow( isEnabled, (c,v) -> {
+                    _setEnabled(c, !v);
+                })
+                ._with( c -> {
                     _setEnabled(c,  !isEnabled.orElseThrow() );
                 })
                 ._this();
@@ -349,8 +361,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck(enumValue, "enumValue", Enum.class);
         NullUtil.nullArgCheck(enumProperty, "enumProperty", Val.class);
         NullUtil.nullPropertyCheck(enumProperty, "enumProperty", "The enumProperty may not have null values!");
-        return _with( c -> {
-                    _onShow( enumProperty, v -> _setEnabled(c,  v == enumValue ) );
+        return _withOnShow( enumProperty, (c,v) -> {
+                    _setEnabled( c,  v == enumValue );
+                })
+                ._with( c -> {
                     _setEnabled(c,  enumValue == enumProperty.orElseThrow() );
                 })
                 ._this();
@@ -371,8 +385,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck(enumValue, "enumValue", Enum.class);
         NullUtil.nullArgCheck(enumProperty, "enumProperty", Val.class);
         NullUtil.nullPropertyCheck(enumProperty, "enumProperty", "The enumProperty may not have null values!");
-        return _with( c -> {
-                    _onShow( enumProperty, v -> _setEnabled(c,  v != enumValue ) );
+        return _withOnShow( enumProperty, (c,v) -> {
+                    _setEnabled( c,  v != enumValue );
+                })
+                ._with( c -> {
                     _setEnabled(c,  enumValue != enumProperty.orElseThrow() );
                 })
                 ._this();
@@ -416,8 +432,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I isFocusableIf( Val<Boolean> isFocusable ) {
         NullUtil.nullArgCheck(isFocusable, "isFocusable", Val.class);
         NullUtil.nullPropertyCheck(isFocusable, "isFocusable", "Null value for isFocusable is not allowed!");
-        return _with( c -> {
-                    _onShow( isFocusable, c::setFocusable );
+        return _withOnShow( isFocusable, (c,v) -> {
+                    c.setFocusable(v);
+                })
+                ._with( c -> {
                     c.setFocusable( isFocusable.orElseThrow() );
                 })
                 ._this();
@@ -446,8 +464,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I isFocusableIfNot( Val<Boolean> isFocusable ) {
         NullUtil.nullArgCheck(isFocusable, "isFocusable", Val.class);
         NullUtil.nullPropertyCheck(isFocusable, "isFocusable", "Null value for isFocusable is not allowed!");
-        return _with( c -> {
-                    _onShow( isFocusable, v -> c.setFocusable( !v ) );
+        return _withOnShow( isFocusable, (c,v) -> {
+                    c.setFocusable( !v );
+                })
+                ._with( c -> {
                     c.setFocusable( !isFocusable.orElseThrow() );
                 })
                 ._this();
@@ -468,8 +488,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck(enumValue, "enumValue", Enum.class);
         NullUtil.nullArgCheck(enumProperty, "enumProperty", Val.class);
         NullUtil.nullPropertyCheck(enumProperty, "enumProperty", "The enumProperty may not have null values!");
-        return _with( c -> {
-                    _onShow( enumProperty, v -> c.setFocusable( v == enumValue ) );
+        return _withOnShow( enumProperty, (c,v) -> {
+                    c.setFocusable( v == enumValue );
+                })
+                ._with( c -> {
                     c.setFocusable( enumValue == enumProperty.orElseThrow() );
                 })
                 ._this();
@@ -491,8 +513,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck(enumValue, "enumValue", Enum.class);
         NullUtil.nullArgCheck(enumProperty, "enumProperty", Val.class);
         NullUtil.nullPropertyCheck(enumProperty, "enumProperty", "The enumProperty may not have null values!");
-        return _with( c -> {
-                    _onShow( enumProperty, v -> c.setFocusable( v != enumValue ) );
+        return _withOnShow( enumProperty, (c,v) -> {
+                    c.setFocusable( v != enumValue );
+                })
+                ._with( c -> {
                     c.setFocusable( enumValue != enumProperty.orElseThrow() );
                 })
                 ._this();
@@ -540,8 +564,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I isOpaqueIf( Val<Boolean> isOpaque ) {
         NullUtil.nullArgCheck( isOpaque, "isOpaque", Val.class );
         NullUtil.nullPropertyCheck(isOpaque, "isOpaque", "Null value for isOpaque is not allowed! A boolean should only have the values true or false!");
-        return _with( c -> {
-                    _onShow( isOpaque, c::setOpaque );
+        return _withOnShow( isOpaque, (c,v) -> {
+                    c.setOpaque(v);
+                })
+                ._with( c -> {
                     c.setOpaque( isOpaque.orElseThrow() );
                 })
                 ._this();
@@ -568,8 +594,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I isOpaqueIfNot( Val<Boolean> notOpaque ) {
         NullUtil.nullArgCheck( notOpaque, "notOpaque", Val.class );
         NullUtil.nullPropertyCheck(notOpaque, "notOpaque", "Null value for isOpaque is not allowed! A boolean should only have the values true or false!");
-        return _with( c -> {
-                    _onShow( notOpaque, v -> c.setOpaque( !v ) );
+        return _withOnShow( notOpaque, (c,v) -> {
+                    c.setOpaque( !v );
+                })
+                ._with( c -> {
                     c.setOpaque( !notOpaque.orElseThrow() );
                 })
                 ._this();
@@ -651,8 +679,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withBorder( Val<Border> border ) {
         NullUtil.nullArgCheck(border, "border", Val.class);
         NullUtil.nullPropertyCheck(border, "border", "Null value for border is not allowed! Use an empty border instead!");
-        return _with( c -> {
-                    _onShow( border, c::setBorder );
+        return _withOnShow( border, (c,v) -> {
+                    c.setBorder(v);
+                })
+                ._with( c -> {
                     c.setBorder( border.orElseThrow() );
                 })
                 ._this();
@@ -709,19 +739,20 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withEmptyBorderTitled( Val<String> title, int top, int left, int bottom, int right ) {
         NullUtil.nullArgCheck( title, "title", Val.class );
         NullUtil.nullPropertyCheck( title, "title", "Null value for title is not allowed! Use an empty string instead!" );
-        return _with( c -> {
-                    _onShow( title, v -> c.setBorder(
+        return _withOnShow( title, (c,v) -> {
+                    c.setBorder(
                             BorderFactory.createTitledBorder(
                                 BorderFactory.createEmptyBorder(top, left, bottom, right),
                                 v
                             )
-                        )
-                    );
+                        );
+                })
+                ._with( c -> {
                     c.setBorder(
-                        BorderFactory.createTitledBorder(
-                            BorderFactory.createEmptyBorder(top, left, bottom, right),
-                            title.orElseThrow()
-                        )
+                            BorderFactory.createTitledBorder(
+                                    BorderFactory.createEmptyBorder(top, left, bottom, right),
+                                    title.orElseThrow()
+                            )
                     );
                 })
                 ._this();
@@ -763,19 +794,20 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withEmptyBorderTitled( Val<String> title, int topBottom, int leftRight ) {
         NullUtil.nullArgCheck( title, "title", Val.class );
         NullUtil.nullPropertyCheck(title, "title", "Null value for title is not allowed! Use an empty string instead!");
-        return _with( c -> {
-                    _onShow( title, v -> c.setBorder(
+        return _withOnShow( title, (c,v) -> {
+                    c.setBorder(
                             BorderFactory.createTitledBorder(
                                 BorderFactory.createEmptyBorder(topBottom, leftRight, topBottom, leftRight),
                                 v
                             )
-                        )
-                    );
+                        );
+                })
+                ._with( c -> {
                     c.setBorder(
-                        BorderFactory.createTitledBorder(
-                            BorderFactory.createEmptyBorder(topBottom, leftRight, topBottom, leftRight),
-                            title.orElseThrow()
-                        )
+                            BorderFactory.createTitledBorder(
+                                    BorderFactory.createEmptyBorder(topBottom, leftRight, topBottom, leftRight),
+                                    title.orElseThrow()
+                            )
                     );
                 })
                 ._this();
@@ -802,8 +834,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withEmptyBorder( Val<Integer> all ) {
         NullUtil.nullArgCheck( all, "all", Val.class );
         NullUtil.nullPropertyCheck(all, "all", "Null value for all is not allowed! Use an empty border instead!");
-        return _with( c -> {
-                    _onShow( all, v -> c.setBorder(BorderFactory.createEmptyBorder(v, v, v, v)) );
+        return _withOnShow( all, (c,v) -> {
+                    c.setBorder(BorderFactory.createEmptyBorder(v, v, v, v));
+                })
+                ._with( c -> {
                     c.setBorder(BorderFactory.createEmptyBorder(all.orElseThrow(), all.orElseThrow(), all.orElseThrow(), all.orElseThrow()));
                 })
                 ._this();
@@ -830,19 +864,20 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withEmptyBorderTitled( Val<String> title, int all ) {
         NullUtil.nullArgCheck( title, "title", Val.class );
         NullUtil.nullPropertyCheck(title, "title", "Null value for title is not allowed! Use an empty string instead!");
-        return _with( c -> {
-                    _onShow( title, v -> c.setBorder(
+        return _withOnShow( title, (c,v) -> {
+                    c.setBorder(
                             BorderFactory.createTitledBorder(
                                 BorderFactory.createEmptyBorder(all, all, all, all),
                                 v
                             )
-                        )
-                    );
+                        );
+                })
+                ._with( c -> {
                     c.setBorder(
-                        BorderFactory.createTitledBorder(
-                            BorderFactory.createEmptyBorder(all, all, all, all),
-                            title.orElseThrow()
-                        )
+                            BorderFactory.createTitledBorder(
+                                    BorderFactory.createEmptyBorder(all, all, all, all),
+                                    title.orElseThrow()
+                            )
                     );
                 })
                 ._this();
@@ -893,8 +928,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withLineBorder( Val<Color> color, int thickness ) {
         NullUtil.nullArgCheck( color, "color", Val.class );
         NullUtil.nullPropertyCheck(color, "color", "Null value for color is not allowed! Use a transparent color or other default color instead!");
-        return _with( c -> {
-                    _onShow( color, v -> c.setBorder(BorderFactory.createLineBorder(v, thickness)) );
+        return _withOnShow( color, (c,v) -> {
+                    c.setBorder(BorderFactory.createLineBorder(v, thickness));
+                })
+                ._with( c -> {
                     c.setBorder(BorderFactory.createLineBorder(color.orElseThrow(), thickness));
                 })
                 ._this();
@@ -931,19 +968,20 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withLineBorderTitled( Val<String> title, Color color, int thickness ) {
         NullUtil.nullArgCheck( title, "title", Val.class );
         NullUtil.nullPropertyCheck(title, "title", "Null value for title is not allowed! Use an empty string instead!");
-        return _with( c -> {
-                    _onShow( title, v -> c.setBorder(
+        return _withOnShow( title, (c,v) -> {
+                    c.setBorder(
                             BorderFactory.createTitledBorder(
                                 BorderFactory.createLineBorder(color, thickness),
                                 v
                             )
-                        )
-                    );
+                        );
+                })
+                ._with( c -> {
                     c.setBorder(
-                        BorderFactory.createTitledBorder(
-                            BorderFactory.createLineBorder(color, thickness),
-                            title.orElseThrow()
-                        )
+                            BorderFactory.createTitledBorder(
+                                    BorderFactory.createLineBorder(color, thickness),
+                                    title.orElseThrow()
+                            )
                     );
                 })
                 ._this();
@@ -964,21 +1002,23 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullPropertyCheck(title, "title", "Null value for title is not allowed! Use an empty string instead!");
         NullUtil.nullArgCheck( color, "color", Val.class );
         NullUtil.nullPropertyCheck(color, "color", "Null value for color is not allowed! Use a transparent color or other default color instead!");
-        return _with( c -> {
-                    _onShow( title, v -> c.setBorder(
-                            BorderFactory.createTitledBorder(
-                                BorderFactory.createLineBorder(color.orElseThrow(), thickness),
-                                v
-                            )
+        return _withOnShow( title, (c,v) -> {
+                    c.setBorder(
+                        BorderFactory.createTitledBorder(
+                            BorderFactory.createLineBorder(color.orElseThrow(), thickness),
+                            v
                         )
                     );
-                    _onShow( color, v -> c.setBorder(
-                            BorderFactory.createTitledBorder(
-                                BorderFactory.createLineBorder(v, thickness),
-                                title.orElseThrow()
-                            )
+                })
+                ._withOnShow( color, (c,v) -> {
+                    c.setBorder(
+                        BorderFactory.createTitledBorder(
+                            BorderFactory.createLineBorder(v, thickness),
+                            title.orElseThrow()
                         )
                     );
+                })
+                ._with( c -> {
                     c.setBorder(
                         BorderFactory.createTitledBorder(
                             BorderFactory.createLineBorder(color.orElseThrow(), thickness),
@@ -1062,14 +1102,15 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withRoundedLineBorderTitled( Val<String> title, Color color, int thickness ) {
         NullUtil.nullArgCheck( title, "title", Val.class );
         NullUtil.nullPropertyCheck(title, "title", "Null value for title is not allowed! Use an empty string instead!");
-        return _with( c -> {
-                    _onShow( title, v -> c.setBorder(
-                            BorderFactory.createTitledBorder(
-                                BorderFactory.createLineBorder(color, thickness, true),
-                                v
-                            )
+        return _withOnShow( title, (c,v) -> {
+                    c.setBorder(
+                        BorderFactory.createTitledBorder(
+                            BorderFactory.createLineBorder(color, thickness, true),
+                            v
                         )
                     );
+                })
+                ._with( c -> {
                     c.setBorder(
                         BorderFactory.createTitledBorder(
                             BorderFactory.createLineBorder(color, thickness, true),
@@ -1097,21 +1138,23 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullPropertyCheck(title, "title", "Null value for title is not allowed! Use an empty string instead!");
         NullUtil.nullArgCheck( color, "color", Val.class );
         NullUtil.nullPropertyCheck(color, "color", "Null value for color is not allowed! Use a transparent color or other default color instead!");
-        return _with( c -> {
-                    _onShow( title, v -> c.setBorder(
-                            BorderFactory.createTitledBorder(
-                                BorderFactory.createLineBorder(color.orElseThrow(), thickness, true),
-                                v
-                            )
+        return _withOnShow( title, (c,v) -> {
+                    c.setBorder(
+                        BorderFactory.createTitledBorder(
+                            BorderFactory.createLineBorder(color.orElseThrow(), thickness, true),
+                            v
                         )
                     );
-                    _onShow( color, v -> c.setBorder(
-                            BorderFactory.createTitledBorder(
-                                BorderFactory.createLineBorder(v, thickness, true),
-                                title.orElseThrow()
-                            )
+                })
+                ._withOnShow( color, (c,v) -> {
+                    c.setBorder(
+                        BorderFactory.createTitledBorder(
+                            BorderFactory.createLineBorder(v, thickness, true),
+                            title.orElseThrow()
                         )
                     );
+                })
+                ._with( c -> {
                     c.setBorder(
                         BorderFactory.createTitledBorder(
                             BorderFactory.createLineBorder(color.orElseThrow(), thickness, true),
@@ -1145,8 +1188,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withRoundedLineBorder( Val<Color> color, int thickness ) {
         NullUtil.nullArgCheck( color, "color", Val.class );
         NullUtil.nullPropertyCheck(color, "color", "Null value for color is not allowed! Use a transparent color or other default color instead!");
-        return _with( c -> {
-                    _onShow( color, v -> c.setBorder(BorderFactory.createLineBorder(v, thickness, true)) );
+        return _withOnShow( color, (c,v) -> {
+                    c.setBorder(BorderFactory.createLineBorder(v, thickness, true));
+                })
+                ._with( c -> {
                     c.setBorder(BorderFactory.createLineBorder(color.orElseThrow(), thickness, true));
                 })
                 ._this();
@@ -1369,14 +1414,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final I withBorderTitled( Val<String> title ) {
         NullUtil.nullArgCheck(title, "title", Val.class);
-        return _with( c -> {
-                    _onShow( title, t -> {
-                        Border foundBorder = c.getBorder();
-                        if ( foundBorder instanceof TitledBorder )
-                            ((TitledBorder)foundBorder).setTitle(t);
-                        else
-                            c.setBorder(BorderFactory.createTitledBorder(t));
-                    });
+        return _withOnShow( title, (c,t) -> {
+                    Border foundBorder = c.getBorder();
+                    if ( foundBorder instanceof TitledBorder )
+                        ((TitledBorder)foundBorder).setTitle(t);
+                    else
+                        c.setBorder(BorderFactory.createTitledBorder(t));
+                })
+                ._with( c -> {
                     c.setBorder(BorderFactory.createTitledBorder(title.orElseThrow()));
                 })
                 ._this();
@@ -1410,8 +1455,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withCursor( Val<UI.Cursor> type ) {
         NullUtil.nullArgCheck( type, "type", Val.class );
         NullUtil.nullPropertyCheck(type, "type", "Null is not allowed to model a cursor type.");
-        return _with( c -> {
-                    _onShow( type, t -> c.setCursor( new java.awt.Cursor( t.type ) ) );
+        return _withOnShow( type, (c,t) -> {
+                    c.setCursor( new java.awt.Cursor( t.type ) );
+                })
+                ._with( c -> {
                     c.setCursor( new java.awt.Cursor( type.orElseThrow().type ) );
                 })
                 ._this();
@@ -1431,8 +1478,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck( condition, "condition", Val.class );
         NullUtil.nullArgCheck( type, "type", UI.Cursor.class );
         NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the cursor selection state.");
-        return _with( c -> {
-                    _onShow( condition, v -> c.setCursor( new java.awt.Cursor( v ? type.type : UI.Cursor.DEFAULT.type ) ) );
+        return _withOnShow( condition, (c,v) -> {
+                    c.setCursor( new java.awt.Cursor( v ? type.type : UI.Cursor.DEFAULT.type ) );
+                })
+                ._with( c -> {
                     c.setCursor( new java.awt.Cursor( condition.orElseThrow() ? type.type : UI.Cursor.DEFAULT.type ) );
                 })
                 ._this();
@@ -1453,13 +1502,15 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck( type, "type", Val.class );
         NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the cursor selection state.");
         NullUtil.nullPropertyCheck(type, "type", "Null is not allowed to model a cursor type.");
-        return _with( c -> {
+        return _with( thisComponent -> {
                     Cursor[] baseCursor = new Cursor[1];
-                    _onShow( condition, v -> type.fireChange(From.VIEW_MODEL) );
-                    _onShow( type, v -> {
-                        if (baseCursor[0] == null) baseCursor[0] = c.getCursor();
+                    _onShow( condition, thisComponent, (c,v) -> type.fireChange(From.VIEW_MODEL) );
+                    _onShow( type, thisComponent, (c,v) -> {
+                        if ( baseCursor[0] == null ) baseCursor[0] = c.getCursor();
                         c.setCursor( new java.awt.Cursor( condition.orElseThrow() ? v.type : baseCursor[0].getType() ) );
                     });
+                })
+                ._with( c -> {
                     c.setCursor( new java.awt.Cursor( condition.orElseThrow() ? type.orElseThrow().type : UI.Cursor.DEFAULT.type ) );
                 })
                 ._this();
@@ -1920,8 +1971,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withTooltip( Val<String> tip ) {
         NullUtil.nullArgCheck(tip, "tip", Val.class);
         NullUtil.nullPropertyCheck(tip, "tip", "Please use an empty string instead of null!");
-        return _with( c -> {
-                    _onShow( tip, v -> c.setToolTipText(v.isEmpty() ? null : v) );
+        return _withOnShow( tip, (c,v) -> {
+                    c.setToolTipText(v.isEmpty() ? null : v);
+                })
+                ._with( c -> {
                     c.setToolTipText( tip.orElseNull() );
                 })
                 ._this();
@@ -2223,10 +2276,16 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the usage of the provided foreground color!");
         NullUtil.nullPropertyCheck(colorIfTrue, "colorIfTrue", "Null is not allowed to model the the provided foreground color! Please use the default color of this component instead.");
         NullUtil.nullPropertyCheck(colorIfFalse, "colorIfFalse", "Null is not allowed to model the the provided foreground color! Please use the default color of this component instead.");
-        return _with( c -> {
-                    _onShow( condition, v -> _updateForeground( c, condition, colorIfTrue, Var.of(colorIfFalse.get()) ) );
-                    _onShow( colorIfTrue, v -> _updateForeground( c, condition, colorIfTrue, Var.of(colorIfFalse.get()) ) );
-                    _onShow( colorIfFalse, v -> _updateForeground( c, condition, colorIfTrue, Var.of(colorIfFalse.get()) ) );
+        return _withOnShow( condition, (c,v) -> {
+                    _updateForeground( c, condition, colorIfTrue, Var.of(colorIfFalse.get()) );
+                })
+                ._withOnShow( colorIfTrue, (c,v) -> {
+                    _updateForeground( c, condition, colorIfTrue, Var.of(colorIfFalse.get()) );
+                })
+                ._withOnShow( colorIfFalse, (c,v) -> {
+                    _updateForeground( c, condition, colorIfTrue, Var.of(colorIfFalse.get()) );
+                })
+                ._with( c -> {
                     c.setForeground( condition.get() ? colorIfTrue.get() : colorIfFalse.get() );
                 })
                 ._this();
@@ -2235,8 +2294,8 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     private void _updateForeground(
         C component,
         Val<Boolean> condition,
-        Val<Color> color,
-        Val<Color> baseColor
+        Val<Color>   color,
+        Val<Color>   baseColor
     ) {
         if ( condition.is(true) )
             component.setForeground(color.get());
@@ -2321,15 +2380,15 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck(height, "height", Val.class);
         NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the minimum width of this component!");
         NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the minimum height of this component!");
-        return _with( c -> {
-                    _onShow( width, w -> {
-                        c.setMinimumSize(new Dimension(UI.scale(w), c.getMinimumSize().height));
-                        _revalidate(c);
-                    });
-                    _onShow( height, h -> {
-                        c.setMinimumSize(new Dimension(c.getMinimumSize().width, UI.scale(h)));
-                        _revalidate(c);
-                    });
+        return _withOnShow( width, (c,w) -> {
+                    c.setMinimumSize(new Dimension(UI.scale(w), c.getMinimumSize().height));
+                    _revalidate(c);
+                })
+                ._withOnShow( height, (c,h) -> {
+                    c.setMinimumSize(new Dimension(c.getMinimumSize().width, UI.scale(h)));
+                    _revalidate(c);
+                })
+                ._with( c -> {
                     c.setMinimumSize( new Dimension(UI.scale(width.get()), UI.scale(height.get())) );
                 })
                 ._this();
