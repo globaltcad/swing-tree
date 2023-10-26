@@ -91,17 +91,17 @@ public final class Render&lt;C extends JComponent,E&gt;
 	 */
 	public interface Cell&lt;C extends JComponent, V&gt;
 	{
-		C           getComponent();
+		C getComponent();
 		Optional&lt;V&gt; value();
 <span class="fc" id="L96">		default Optional&lt;String&gt; valueAsString() { return value().map(Object::toString); }</span>
-		boolean 	isSelected();
-		boolean 	hasFocus();
-		int     	getRow();
-		int     	getColumn();
-		Component   getRenderer();
-		void        setRenderer(Component component);
-		void        setToolTip(String toolTip);
-		void        setDefaultRenderValue(Object newValue);
+		boolean isSelected();
+		boolean hasFocus();
+		int getRow();
+		int getColumn();
+		Component getRenderer();
+		void setRenderer(Component component);
+		void setToolTip(String toolTip);
+		void setDefaultRenderValue(Object newValue);
 		default void setRenderer(Consumer&lt;Graphics2D&gt; painter) {
 <span class="nc" id="L106">			setRenderer(new Component() {</span>
 				@Override

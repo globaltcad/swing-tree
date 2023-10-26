@@ -19,8 +19,10 @@ public class UIForMenu&lt;M extends JMenu&gt; extends UIForAnyMenuItem&lt;UIForM
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForMenu&lt;M&gt; popupMenuIsVisibleIf( boolean popupMenuVisible ) {
-<span class="nc" id="L22">        getComponent().setPopupMenuVisible(popupMenuVisible);</span>
-<span class="nc" id="L23">        return this;</span>
+<span class="nc" id="L22">        return _with( thisComponent -&gt; {</span>
+<span class="nc" id="L23">                    thisComponent.setPopupMenuVisible(popupMenuVisible);</span>
+<span class="nc" id="L24">                })</span>
+<span class="nc" id="L25">                ._this();</span>
     }
 
     /**
@@ -31,8 +33,13 @@ public class UIForMenu&lt;M extends JMenu&gt; extends UIForAnyMenuItem&lt;UIForM
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForMenu&lt;M&gt; popupMenuIsVisibleIf( Val&lt;Boolean&gt; val ) {
-<span class="nc" id="L34">        _onShow(val, v -&gt; popupMenuIsVisibleIf(v));</span>
-<span class="nc" id="L35">        return popupMenuIsVisibleIf( val.get() );</span>
+<span class="nc" id="L36">        return _withOnShow( val, (thisComponent, it) -&gt; {</span>
+<span class="nc" id="L37">                    thisComponent.setPopupMenuVisible( it );</span>
+<span class="nc" id="L38">                })</span>
+<span class="nc" id="L39">                ._with( thisComponent -&gt; {</span>
+<span class="nc" id="L40">                    thisComponent.setPopupMenuVisible( val.get() );</span>
+<span class="nc" id="L41">                })</span>
+<span class="nc" id="L42">                ._this();</span>
     }
 
 }

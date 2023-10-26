@@ -13,12 +13,15 @@ public class UIForFormattedTextField extends UIForAnyTextComponent&lt;UIForForma
 
     public UIForFormattedTextField onEnter( Action&lt;ComponentDelegate&lt;JFormattedTextField, ActionEvent&gt;&gt; action ) {
 <span class="fc" id="L15">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
-<span class="fc" id="L16">        JFormattedTextField field = getComponent();</span>
-<span class="fc" id="L17">        _onEnter( e -&gt; _doApp(()-&gt;action.accept(new ComponentDelegate&lt;&gt;( field, e, this::getSiblinghood )) ) );</span>
-<span class="fc" id="L18">        return this;</span>
+<span class="fc" id="L16">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L17">                    _onEnter(thisComponent,</span>
+<span class="fc" id="L18">                        e -&gt; _doApp(()-&gt;action.accept(new ComponentDelegate&lt;&gt;( thisComponent, e )) )</span>
+                    );
+<span class="fc" id="L20">                })</span>
+<span class="fc" id="L21">                ._this();</span>
     }
 
-    private void _onEnter( Consumer&lt;ActionEvent&gt; action ) {
+    private void _onEnter( JFormattedTextField thisComponent, Consumer&lt;ActionEvent&gt; action ) {
         /*
             When an action event is fired, Swing will go through all the listeners
             from the most recently added to the first added. This means that if we simply add
@@ -30,15 +33,15 @@ public class UIForFormattedTextField extends UIForAnyTextComponent&lt;UIForForma
             simply because it was added first.
             This is especially true in the context of declarative UI design.
         */
-<span class="fc" id="L33">        ActionListener[] listeners = getComponent().getActionListeners();</span>
-<span class="fc bfc" id="L34" title="All 2 branches covered.">        for (ActionListener listener : listeners)</span>
-<span class="fc" id="L35">            getComponent().removeActionListener(listener);</span>
+<span class="fc" id="L36">        ActionListener[] listeners = thisComponent.getActionListeners();</span>
+<span class="fc bfc" id="L37" title="All 2 branches covered.">        for (ActionListener listener : listeners)</span>
+<span class="fc" id="L38">            thisComponent.removeActionListener(listener);</span>
 
-<span class="fc" id="L37">        getComponent().addActionListener(action::accept);</span>
+<span class="fc" id="L40">        thisComponent.addActionListener(action::accept);</span>
 
-<span class="fc bfc" id="L39" title="All 2 branches covered.">        for ( int i = listeners.length - 1; i &gt;= 0; i-- ) // reverse order because swing does not give us the listeners in the order they were added!</span>
-<span class="fc" id="L40">            getComponent().addActionListener(listeners[i]);</span>
-<span class="fc" id="L41">    }</span>
+<span class="fc bfc" id="L42" title="All 2 branches covered.">        for ( int i = listeners.length - 1; i &gt;= 0; i-- ) // reverse order because swing does not give us the listeners in the order they were added!</span>
+<span class="fc" id="L43">            thisComponent.addActionListener(listeners[i]);</span>
+<span class="fc" id="L44">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

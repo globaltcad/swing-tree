@@ -20,21 +20,23 @@ public class UIForButton&lt;B extends AbstractButton&gt; extends UIForAnyButton&
      * @return this
      */
     public final UIForButton&lt;B&gt; makeDefaultButton() {
-<span class="pc bpc" id="L23" title="1 of 2 branches missed.">        if ( !(getComponent() instanceof JButton) ) {</span>
-<span class="nc" id="L24">            log.warn(&quot;Method 'makeDefaultButton()' called on a non JButton component.&quot;);</span>
-<span class="nc" id="L25">            return this;</span>
-        }
-<span class="fc" id="L27">        UI.runLater(()-&gt;{</span>
-            // We do this later because in this point in time the UI is probably not
-            // yet fully built (swing-tree is using the builder-pattern).
-<span class="fc" id="L30">            JButton button = (JButton) getComponent();</span>
-<span class="fc" id="L31">            JRootPane rootPane = SwingUtilities.getRootPane(button);</span>
-<span class="pc bpc" id="L32" title="1 of 2 branches missed.">            if ( rootPane != null )</span>
-<span class="fc" id="L33">                rootPane.setDefaultButton(button);</span>
-            else
-<span class="nc" id="L35">                log.warn(&quot;Method 'makeDefaultButton()' called on a JButton component that is not in a JRootPane.&quot;);</span>
-<span class="fc" id="L36">        });</span>
-<span class="fc" id="L37">        return this;</span>
+<span class="fc" id="L23">        return _with( thisButton -&gt; {</span>
+<span class="pc bpc" id="L24" title="1 of 2 branches missed.">                    if ( !(thisButton instanceof JButton) ) {</span>
+<span class="nc" id="L25">                        log.warn(&quot;Method 'makeDefaultButton()' called on a non JButton component.&quot;);</span>
+<span class="nc" id="L26">                        return;</span>
+                    }
+<span class="fc" id="L28">                    UI.runLater(()-&gt;{</span>
+                        // We do this later because in this point in time the UI is probably not
+                        // yet fully built (swing-tree is using the builder-pattern).
+<span class="fc" id="L31">                        JButton button = (JButton) thisButton;</span>
+<span class="fc" id="L32">                        JRootPane rootPane = SwingUtilities.getRootPane(button);</span>
+<span class="pc bpc" id="L33" title="1 of 2 branches missed.">                        if ( rootPane != null )</span>
+<span class="fc" id="L34">                            rootPane.setDefaultButton(button);</span>
+                        else
+<span class="nc" id="L36">                            log.warn(&quot;Method 'makeDefaultButton()' called on a JButton component that is not in a JRootPane.&quot;);</span>
+<span class="fc" id="L37">                    });</span>
+<span class="fc" id="L38">                })</span>
+<span class="fc" id="L39">                ._this();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

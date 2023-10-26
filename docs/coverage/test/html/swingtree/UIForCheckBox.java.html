@@ -13,13 +13,20 @@ public class UIForCheckBox&lt;B extends JCheckBox&gt; extends UIForAnyButton&lt;
 
 
     public UIForCheckBox&lt;B&gt; borderIsPaintedFlatIf(boolean borderPainted ) {
-<span class="nc" id="L16">        getComponent().setBorderPaintedFlat(borderPainted);</span>
-<span class="nc" id="L17">        return this;</span>
+<span class="nc" id="L16">        return _with( thisComponent -&gt; {</span>
+<span class="nc" id="L17">                   thisComponent.setBorderPaintedFlat(borderPainted);</span>
+<span class="nc" id="L18">               })</span>
+<span class="nc" id="L19">               ._this();</span>
     }
 
     public UIForCheckBox&lt;B&gt; borderIsPaintedFlatIf(Val&lt;Boolean&gt; val ) {
-<span class="nc" id="L21">        _onShow(val, v -&gt; borderIsPaintedFlatIf(v) );</span>
-<span class="nc" id="L22">        return borderIsPaintedFlatIf( val.get() );</span>
+<span class="nc" id="L23">        return _withOnShow( val, (thisComponent,v) -&gt; {</span>
+<span class="nc" id="L24">                    thisComponent.setBorderPaintedFlat(v);</span>
+<span class="nc" id="L25">                })</span>
+<span class="nc" id="L26">                ._with( thisComponent -&gt; {</span>
+<span class="nc" id="L27">                    thisComponent.setBorderPaintedFlat( val.get() );</span>
+<span class="nc" id="L28">                })</span>
+<span class="nc" id="L29">               ._this();</span>
     }
 
 }

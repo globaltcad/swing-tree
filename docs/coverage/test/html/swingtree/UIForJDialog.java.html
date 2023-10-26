@@ -15,8 +15,8 @@ public class UIForJDialog&lt;D extends JDialog&gt; extends UIForAnyWindow&lt;UIF
 <span class="fc" id="L15">	public UIForJDialog(D component) { super(component); }</span>
 
 	@Override
-	protected void _add(Component component, Object conf) {
-<span class="pc bpc" id="L19" title="1 of 2 branches missed.">		getComponent().add(conf == null ? null : conf.toString(), component);</span>
+	protected void _doAddComponent( Component newComponent, Object conf, D thisComponent ) {
+<span class="pc bpc" id="L19" title="1 of 2 branches missed.">		thisComponent.add( conf == null ? null : conf.toString(), newComponent );</span>
 <span class="fc" id="L20">	}</span>
 
 	@Override
@@ -52,13 +52,13 @@ public class UIForJDialog&lt;D extends JDialog&gt; extends UIForAnyWindow&lt;UIF
 <span class="fc" id="L52">	}</span>
 
 	@Override
-	protected Optional&lt;JRootPane&gt; _getRootPane() {
-<span class="fc" id="L56">		return Optional.ofNullable(getComponent().getRootPane());</span>
+	protected Optional&lt;JRootPane&gt; _getRootPaneOf(D thisWindow) {
+<span class="fc" id="L56">		return Optional.ofNullable(thisWindow.getRootPane());</span>
 	}
 
 	@Override
-	protected void _setTitle(String title) {
-<span class="fc" id="L61">		getComponent().setTitle(title);</span>
+	protected void _setTitleOf( D thisWindow, String title ) {
+<span class="fc" id="L61">		thisWindow.setTitle(title);</span>
 <span class="fc" id="L62">	}</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

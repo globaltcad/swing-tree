@@ -1,10 +1,10 @@
 {
   "project": "Swing-Tree",
   "version": "0.2.0",
-  "created": "Sun Oct 22 14:22:42 CEST 2023",
+  "created": "Fri Oct 27 00:26:18 CEST 2023",
   "statistics":{
-    "runs":"41",
-    "passed":"41",
+    "runs":"42",
+    "passed":"42",
     "failed":"0",
     "featureFailures":"0",
     "successRate":"1.0",
@@ -176,7 +176,7 @@
       "skipped":"0" ,
       "successRate":"1.0",
       "duration":"?",
-      "executedFeatures":[{"id":"A list of properties can be turned into an immutable \"Vals\" list using the \"toVals\" method.","extraInfo":[]},{"id":"A list of properties can be turned into lists, sets or maps using various convenience methods.","extraInfo":[]},{"id":"Both the \"Vars\" and immutable \"Vals\" types can be used for functional programming.","extraInfo":[]},{"id":"Change listeners registered on a property list will be called when the list is sorted.","extraInfo":[]},{"id":"Just like a regular \"Var\" property you can register change listeners on \"Vars\".","extraInfo":[]},{"id":"Lists of properties can be sorted based on their natural order through the \"sort\" method.","extraInfo":[]},{"id":"Lists of properties can be sorted using a custom comparator through the \"sort\" method.","extraInfo":[]},{"id":"Map a \"Vals\" instance from one type of properties to another.","extraInfo":[]},{"id":"Map a \"Vars\" instance from one type of properties to another.","extraInfo":[]},{"id":"Multiple properties can be modelled through the \"Vars\" and \"Vals\" classes.","extraInfo":[]},{"id":"The \"Vars\" is a list of properties which can grow and shrink.","extraInfo":[]},{"id":"The \"makeDistinct\" method on a mutable list of properties modifies the list in-place.","extraInfo":[]},{"id":"The display action of a property or list of properties will not be called if they report \"canBeRemoved()\"","extraInfo":[]},{"id":"The listeners registered in property lists will be informed what type of modification occurred.","extraInfo":[]},{"id":"The properties of one property list can be added to another property list.","extraInfo":[]},{"id":"You can create a \"Vars\" list from a regular List of properties.","extraInfo":[]},{"id":"You can create the \"Vars\"/\"Vals\" property lists from property instances.","extraInfo":[]},{"id":"You can remove n leading or trailing entries from a property list.","extraInfo":[]}],
+      "executedFeatures":[{"id":"A list of properties can be turned into an immutable \"Vals\" list using the \"toVals\" method.","extraInfo":[]},{"id":"A list of properties can be turned into lists, sets or maps using various convenience methods.","extraInfo":[]},{"id":"Both the \"Vars\" and immutable \"Vals\" types can be used for functional programming.","extraInfo":[]},{"id":"Change listeners registered on a property list will be called when the list is sorted.","extraInfo":[]},{"id":"Just like a regular \"Var\" property you can register change listeners on \"Vars\".","extraInfo":[]},{"id":"Lists of properties can be sorted based on their natural order through the \"sort\" method.","extraInfo":[]},{"id":"Lists of properties can be sorted using a custom comparator through the \"sort\" method.","extraInfo":[]},{"id":"Map a \"Vals\" instance from one type of properties to another.","extraInfo":[]},{"id":"Map a \"Vars\" instance from one type of properties to another.","extraInfo":[]},{"id":"Multiple properties can be modelled through the \"Vars\" and \"Vals\" classes.","extraInfo":[]},{"id":"The \"Vars\" is a list of properties which can grow and shrink.","extraInfo":[]},{"id":"The \"makeDistinct\" method on a mutable list of properties modifies the list in-place.","extraInfo":[]},{"id":"The display action of a property or list of properties will not be afterit was removed","extraInfo":[]},{"id":"The listeners registered in property lists will be informed what type of modification occurred.","extraInfo":[]},{"id":"The properties of one property list can be added to another property list.","extraInfo":[]},{"id":"You can create a \"Vars\" list from a regular List of properties.","extraInfo":[]},{"id":"You can create the \"Vars\"/\"Vals\" property lists from property instances.","extraInfo":[]},{"id":"You can remove n leading or trailing entries from a property list.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"swingtree.mvvm.Properties_Spec",
@@ -501,6 +501,18 @@
       "successRate":"1.0",
       "duration":"?",
       "executedFeatures":[{"id":"Changing the value of a property through the `.set(From.VIEW, T)` method will also affect its views","extraInfo":[]},{"id":"Properties can be listened to by subscribing to them using the `onChange(..)` method.","extraInfo":[]},{"id":"Subscribing to the `From.ALL` channel will notify you of all changes.","extraInfo":[]},{"id":"The `withID(..)` method produces a new property with all bindings inherited.","extraInfo":[]},{"id":"Use `set(From.VIEW, T)` on our properties to change the property state from the frontend.","extraInfo":[]}],
+      "ignoredFeatures":[]
+    },{
+      "className":"swingtree.mvvm.Auto_Cleaning_Spec",
+      "title":"Automatic Unbinding and Cleaning",
+      "narrative":"When a view, alongside all of the components it consists of, gets garbage collected,\n    the view model should be unbound from the view and cleaned up in order to prevent memory leaks.\n    Doing this manually is tedious and error-prone, which is why SwingTree does it automatically for you.\n\n    This spec tests whether the automatic unbinding and cleaning works as expected\n    when the view is garbage collected.",
+      "featureCount":"1",
+      "failures":"0",
+      "errors":"0",
+      "skipped":"0" ,
+      "successRate":"1.0",
+      "duration":"?",
+      "executedFeatures":[{"id":"The properties of a view model will loose the bindings to garbage collected views.","extraInfo":[]}],
       "ignoredFeatures":[]
     }
   ],

@@ -38,60 +38,59 @@ public class ComponentMouseEventDelegate&lt;C extends JComponent&gt; extends Com
 {
     public ComponentMouseEventDelegate(
         C component,
-        MouseEvent event,
-        Supplier&lt;List&lt;JComponent&gt;&gt; siblingSource
+        MouseEvent event
     ) {
-<span class="fc" id="L44">        super(component, event, siblingSource);</span>
-<span class="fc" id="L45">    }</span>
+<span class="fc" id="L43">        super(component, event);</span>
+<span class="fc" id="L44">    }</span>
 
     /**
      * Returns true if the mouse event of this delegate is the left mouse button.
      *
      * @return true if the left mouse button was active
      */
-<span class="nc" id="L52">    public boolean isLeftMouseButton() { return SwingUtilities.isLeftMouseButton(getEvent()); }</span>
+<span class="nc" id="L51">    public boolean isLeftMouseButton() { return SwingUtilities.isLeftMouseButton(getEvent()); }</span>
 
     /**
      * Returns true if the mouse event of this delegate is the right mouse button.
      *
      * @return true if the right mouse button was active
      */
-<span class="nc" id="L59">    public boolean isRightMouseButton() { return SwingUtilities.isRightMouseButton(getEvent()); }</span>
+<span class="nc" id="L58">    public boolean isRightMouseButton() { return SwingUtilities.isRightMouseButton(getEvent()); }</span>
 
     /**
      * Returns true if the mouse event of this delegate is the middle mouse button.
      *
      * @return true if the middle mouse button was active
      */
-<span class="nc" id="L66">    public boolean isMiddleMouseButton() { return SwingUtilities.isMiddleMouseButton(getEvent()); }</span>
+<span class="nc" id="L65">    public boolean isMiddleMouseButton() { return SwingUtilities.isMiddleMouseButton(getEvent()); }</span>
 
     /**
      * Returns whether the Alt modifier is down on the event of this delegate.
      *
      * @return true if the alt modifier is down
      */
-<span class="nc" id="L73">    public boolean isAltDown() { return getEvent().isAltDown(); }</span>
+<span class="nc" id="L72">    public boolean isAltDown() { return getEvent().isAltDown(); }</span>
 
     /**
      * Returns whether the Control modifier is down on the event of this delegate.
      *
      * @return true if the control modifier is down
      */
-<span class="nc" id="L80">    public boolean isCtrlDown() { return getEvent().isControlDown(); }</span>
+<span class="nc" id="L79">    public boolean isCtrlDown() { return getEvent().isControlDown(); }</span>
 
     /**
      * Returns whether the Shift modifier is down on the event of this delegate.
      *
      * @return true if the shift modifier is down
      */
-<span class="nc" id="L87">    public boolean isShiftDown() { return getEvent().isShiftDown(); }</span>
+<span class="nc" id="L86">    public boolean isShiftDown() { return getEvent().isShiftDown(); }</span>
 
     /**
      * Returns whether the Meta modifier is down on the event of this delegate.
      *
      * @return true if the meta modifier is down
      */
-<span class="nc" id="L94">    public boolean isMetaDown() { return getEvent().isMetaDown(); }</span>
+<span class="nc" id="L93">    public boolean isMetaDown() { return getEvent().isMetaDown(); }</span>
 
     /**
      * Returns the number of mouse clicks associated with the event of this delegate.
@@ -99,21 +98,21 @@ public class ComponentMouseEventDelegate&lt;C extends JComponent&gt; extends Com
      *
      * @return An integer indicating the number of mouse clicks associated with the mouse event.
      */
-<span class="fc" id="L102">    public int clickCount() { return getEvent().getClickCount(); }</span>
+<span class="fc" id="L101">    public int clickCount() { return getEvent().getClickCount(); }</span>
 
     /**
      * Returns the x coordinate of the mouse event of this delegate.
      *
      * @return integer value for the x coordinate
      */
-<span class="nc" id="L109">    public int mouseX() { return getEvent().getX(); }</span>
+<span class="nc" id="L108">    public int mouseX() { return getEvent().getX(); }</span>
 
     /**
      * Returns the y coordinate of the mouse event of this delegate.
      *
      * @return integer value for the y coordinate
      */
-<span class="nc" id="L116">    public int mouseY() { return getEvent().getY(); }</span>
+<span class="nc" id="L115">    public int mouseY() { return getEvent().getY(); }</span>
 
     /**
      * Returns the absolute horizontal x position of the event of this delegate.
@@ -125,7 +124,7 @@ public class ComponentMouseEventDelegate&lt;C extends JComponent&gt; extends Com
      *
      * @return x  an integer indicating absolute horizontal position.
      */
-<span class="nc" id="L128">    public int mouseXOnScreen() { return getEvent().getXOnScreen(); }</span>
+<span class="nc" id="L127">    public int mouseXOnScreen() { return getEvent().getXOnScreen(); }</span>
 
     /**
      * Returns the absolute vertical y position of the event of this delegate.
@@ -137,7 +136,7 @@ public class ComponentMouseEventDelegate&lt;C extends JComponent&gt; extends Com
      *
      * @return y  an integer indicating absolute vertical position.
      */
-<span class="nc" id="L140">    public int mouseYOnScreen() { return getEvent().getYOnScreen(); }</span>
+<span class="nc" id="L139">    public int mouseYOnScreen() { return getEvent().getYOnScreen(); }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

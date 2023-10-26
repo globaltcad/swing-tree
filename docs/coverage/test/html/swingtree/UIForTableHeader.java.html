@@ -30,8 +30,12 @@ public class UIForTableHeader&lt;H extends UI.TableHeader&gt; extends UIForAnySw
      */
     UIForTableHeader&lt;H&gt; withToolTips( String... toolTips ) {
 <span class="nc" id="L32">        Objects.requireNonNull(toolTips);</span>
-<span class="nc" id="L33">        getComponent().setToolTips(toolTips);</span>
-<span class="nc" id="L34">        return _this();</span>
+<span class="nc bnc" id="L33" title="All 2 branches missed.">        for ( String toolTip : toolTips )</span>
+<span class="nc" id="L34">            Objects.requireNonNull(toolTip);</span>
+<span class="nc" id="L35">        return _with( thisComponent -&gt; {</span>
+<span class="nc" id="L36">                    thisComponent.setToolTips(toolTips);</span>
+<span class="nc" id="L37">                })</span>
+<span class="nc" id="L38">                ._this();</span>
     }
 
     /**
@@ -42,9 +46,11 @@ public class UIForTableHeader&lt;H extends UI.TableHeader&gt; extends UIForAnySw
      * @return This builder node.
      */
     UIForTableHeader&lt;H&gt; withToolTipAt( Function&lt;Integer, String&gt; toolTipAt ) {
-<span class="nc" id="L45">        Objects.requireNonNull(toolTipAt);</span>
-<span class="nc" id="L46">        getComponent().setToolTipsSupplier(toolTipAt);</span>
-<span class="nc" id="L47">        return _this();</span>
+<span class="nc" id="L49">        Objects.requireNonNull(toolTipAt);</span>
+<span class="nc" id="L50">        return _with( thisComponent -&gt; {</span>
+<span class="nc" id="L51">                    thisComponent.setToolTipsSupplier(toolTipAt);</span>
+<span class="nc" id="L52">                })</span>
+<span class="nc" id="L53">                ._this();</span>
     }
 
     /**
@@ -56,9 +62,11 @@ public class UIForTableHeader&lt;H extends UI.TableHeader&gt; extends UIForAnySw
      * @return This builder node.
      */
     UIForTableHeader&lt;H&gt; withDefaultRenderer( TableCellRenderer renderer ) {
-<span class="nc" id="L59">        Objects.requireNonNull(renderer);</span>
-<span class="nc" id="L60">        getComponent().setDefaultRenderer(renderer);</span>
-<span class="nc" id="L61">        return _this();</span>
+<span class="nc" id="L65">        Objects.requireNonNull(renderer);</span>
+<span class="nc" id="L66">        return _with( thisComponent -&gt; {</span>
+<span class="nc" id="L67">                    thisComponent.setDefaultRenderer(renderer);</span>
+<span class="nc" id="L68">                })</span>
+<span class="nc" id="L69">                ._this();</span>
     }
 
     /**
@@ -93,9 +101,11 @@ public class UIForTableHeader&lt;H extends UI.TableHeader&gt; extends UIForAnySw
      * @return This builder node.
      */
     UIForTableHeader&lt;H&gt; withDefaultRenderer( Render.Builder&lt;JTable, ?&gt; renderBuilder ) {
-<span class="nc" id="L96">        Objects.requireNonNull(renderBuilder);</span>
-<span class="nc" id="L97">        getComponent().setDefaultRenderer(renderBuilder.getForTable());</span>
-<span class="nc" id="L98">        return _this();</span>
+<span class="nc" id="L104">        Objects.requireNonNull(renderBuilder);</span>
+<span class="nc" id="L105">        return _with( thisComponent -&gt; {</span>
+<span class="nc" id="L106">                    thisComponent.setDefaultRenderer(renderBuilder.getForTable());</span>
+<span class="nc" id="L107">                })</span>
+<span class="nc" id="L108">                ._this();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

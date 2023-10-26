@@ -301,7 +301,7 @@ public final class Tab
      */
     public final Tab onSelection( Action&lt;ComponentDelegate&lt;JTabbedPane, ChangeEvent&gt;&gt; onSelected ) {
 <span class="pc bpc" id="L303" title="1 of 2 branches missed.">        if ( _onSelected != null )</span>
-<span class="nc" id="L304">            onSelected = compose(_onSelected, onSelected);</span>
+<span class="nc" id="L304">            onSelected = _onSelected.andThen(onSelected);</span>
 <span class="fc" id="L305">        return new Tab(_contents, _headerComponent, _title, _isSelected, _isEnabled, _icon, _tip, onSelected, _onMouseClick);</span>
     }
 
@@ -314,7 +314,7 @@ public final class Tab
      */
     public final Tab onMouseClick( Action&lt;ComponentDelegate&lt;JTabbedPane, MouseEvent&gt;&gt; onClick ) {
 <span class="pc bpc" id="L316" title="1 of 2 branches missed.">        if ( _onMouseClick != null )</span>
-<span class="nc" id="L317">            onClick = compose(_onMouseClick, onClick);</span>
+<span class="nc" id="L317">            onClick = _onMouseClick.andThen(onClick);</span>
 <span class="fc" id="L318">        return new Tab(_contents, _headerComponent, _title, _isSelected, _isEnabled, _icon, _tip, _onSelected, onClick);</span>
     }
 
@@ -335,21 +335,5 @@ public final class Tab
 <span class="fc" id="L335">    final Optional&lt;Action&lt;ComponentDelegate&lt;JTabbedPane, ChangeEvent&gt;&gt;&gt; onSelection() { return Optional.ofNullable(_onSelected); }</span>
 
 <span class="fc" id="L337">    final Optional&lt;Action&lt;ComponentDelegate&lt;JTabbedPane, MouseEvent&gt;&gt;&gt; onMouseClick() { return Optional.ofNullable(_onMouseClick); }</span>
-
-
-    private &lt;D&gt; Action&lt;D&gt; compose( Action&lt;D&gt; first, Action&lt;D&gt; second ) {
-<span class="nc" id="L341">        return new Action&lt;D&gt;() {</span>
-            @Override
-            public void accept(D delegate) {
-<span class="nc" id="L344">                first.accept(delegate);</span>
-<span class="nc" id="L345">                second.accept(delegate);</span>
-<span class="nc" id="L346">            }</span>
-
-            @Override
-            public boolean canBeRemoved() {
-<span class="nc bnc" id="L350" title="All 4 branches missed.">                return first.canBeRemoved() &amp;&amp; second.canBeRemoved();</span>
-            }
-        };
-    }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

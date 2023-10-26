@@ -227,7 +227,7 @@
     },
   
     {
-      "id":"The display action of a property or list of properties will not be called if they report \"canBeRemoved()\"",
+      "id":"The display action of a property or list of properties will not be afterit was removed",
       "result":"PASS",
       "duration":"?",
       "iterations":{
@@ -238,11 +238,19 @@
 
         {"kind":"and","text":"A list where we are going to record changes.","code":["var changes = []"]},
 
-        {"kind":"and","text":"Now we register a \"set\" listeners on both objects.","code":["prop.onChange(From.VIEW_MODEL, new Action<Integer>() {","    @Override","    void accept(Integer delegate) {","        changes << \"Something happened to the property.\"","    }","    @Override boolean canBeRemoved() { return true }","})","list.onChange(new Action<ValsDelegate<Integer>>() {","    @Override","    void accept(ValsDelegate<Integer> delegate) {","        changes << \"Something happened to the list.\"","    }","    @Override boolean canBeRemoved() { return true }","})"]},
+        {"kind":"and","text":"","code":["Action<Val<Integer>> action1 = it -> { changes << \"Something happened to the property.\" }","Action<Val<Integer>> action2 = it -> { changes << \"Something happened to the list.\" }"]},
+
+        {"kind":"and","text":"Now we register change listeners on both objects.","code":["prop.onChange(From.VIEW_MODEL, action1)","list.onChange(action2)"]},
 
         {"kind":"when","text":"We modify the properties in various ways...","code":["prop.set(42)","list.add(1)","list.removeAt(1)","list.setAt(0, 2)","list.addAt(1, 3)","list.remove(3)"]},
 
-        {"kind":"then","text":"The change listener has been called zero times.","code":["changes.size() == 0"]}
+        {"kind":"then","text":"The listeners will have been called 6 times.","code":["changes.size() == 6"]},
+
+        {"kind":"when","text":"We remove the property and list.","code":["prop.unsubscribe(action1)","list.unsubscribe(action2)"]},
+
+        {"kind":"and","text":"We do some more unique modifications...","code":["prop.set(73)","list.add(4)","list.removeAt(1)","list.setAt(0, 3)","list.addAt(1, 4)","list.remove(4)"]},
+
+        {"kind":"then","text":"No additional changes have been recorded.","code":["changes.size() == 6"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },

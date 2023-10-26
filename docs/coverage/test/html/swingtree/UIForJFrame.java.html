@@ -14,8 +14,8 @@ public class UIForJFrame&lt;F extends JFrame&gt; extends UIForAnyWindow&lt;UIFor
 <span class="fc" id="L14">	}</span>
 
 	@Override
-	protected void _add(Component component, Object conf) {
-<span class="pc bpc" id="L18" title="1 of 2 branches missed.">		getComponent().add(conf == null ? null : conf.toString(), component);</span>
+	protected void _doAddComponent( Component component, Object conf, F thisComponent ) {
+<span class="pc bpc" id="L18" title="1 of 2 branches missed.">		thisComponent.add(conf == null ? null : conf.toString(), component);</span>
 <span class="fc" id="L19">	}</span>
 
 	@Override
@@ -44,13 +44,13 @@ public class UIForJFrame&lt;F extends JFrame&gt; extends UIForAnyWindow&lt;UIFor
 <span class="fc" id="L44">		frame.setVisible(true);</span>
 <span class="fc" id="L45">	}</span>
 
-	@Override protected Optional&lt;JRootPane&gt; _getRootPane() {
-<span class="fc" id="L48">		return Optional.ofNullable(getComponent().getRootPane());</span>
+	@Override protected Optional&lt;JRootPane&gt; _getRootPaneOf(F thisWindow) {
+<span class="fc" id="L48">		return Optional.ofNullable(thisWindow.getRootPane());</span>
 	}
 
 	@Override
-	protected void _setTitle(String title) {
-<span class="fc" id="L53">		getComponent().setTitle(title);</span>
+	protected void _setTitleOf(F thisWindow, String title) {
+<span class="fc" id="L53">		thisWindow.setTitle(title);</span>
 <span class="fc" id="L54">	}</span>
 
 }
