@@ -97,7 +97,9 @@ public class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForList<E,
         ValsListModel<E> model = new ValsListModel<>(entries);
         return _with( thisComponent -> {
                     thisComponent.setModel(model);
-                    _onShow( entries, v -> model.fire(v) );
+                })
+                ._withOnShow( entries, (thisComponent, v) -> {
+                    model.fire(v);
                 })
                 ._this();
     }

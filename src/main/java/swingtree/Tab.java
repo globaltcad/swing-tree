@@ -301,7 +301,7 @@ public final class Tab
      */
     public final Tab onSelection( Action<ComponentDelegate<JTabbedPane, ChangeEvent>> onSelected ) {
         if ( _onSelected != null )
-            onSelected = compose(_onSelected, onSelected);
+            onSelected = _onSelected.andThen(onSelected);
         return new Tab(_contents, _headerComponent, _title, _isSelected, _isEnabled, _icon, _tip, onSelected, _onMouseClick);
     }
 
@@ -314,7 +314,7 @@ public final class Tab
      */
     public final Tab onMouseClick( Action<ComponentDelegate<JTabbedPane, MouseEvent>> onClick ) {
         if ( _onMouseClick != null )
-            onClick = compose(_onMouseClick, onClick);
+            onClick = _onMouseClick.andThen(onClick);
         return new Tab(_contents, _headerComponent, _title, _isSelected, _isEnabled, _icon, _tip, _onSelected, onClick);
     }
 
@@ -335,20 +335,4 @@ public final class Tab
     final Optional<Action<ComponentDelegate<JTabbedPane, ChangeEvent>>> onSelection() { return Optional.ofNullable(_onSelected); }
 
     final Optional<Action<ComponentDelegate<JTabbedPane, MouseEvent>>> onMouseClick() { return Optional.ofNullable(_onMouseClick); }
-
-
-    private <D> Action<D> compose( Action<D> first, Action<D> second ) {
-        return new Action<D>() {
-            @Override
-            public void accept(D delegate) {
-                first.accept(delegate);
-                second.accept(delegate);
-            }
-
-            @Override
-            public boolean canBeRemoved() {
-                return first.canBeRemoved() && second.canBeRemoved();
-            }
-        };
-    }
 }

@@ -35,10 +35,12 @@ public class UIForAnyMenuItem<I, M extends JMenuItem> extends UIForAnyButton<I, 
      * @return This very builder to allow for method chaining.
      */
     public I withKeyStroke( Val<KeyStroke> val ) {
-        return _with( c -> {
-            _onShow(val, v -> c.setAccelerator(v) );
-            c.setAccelerator(val.orElseNull());
-        })
-        ._this();
+        return _withOnShow( val, (c,v) -> {
+                    c.setAccelerator(v);
+                })
+                ._with( c -> {
+                    c.setAccelerator(val.orElseNull());
+                })
+                ._this();
     }
 }

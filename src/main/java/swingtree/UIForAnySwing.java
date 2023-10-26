@@ -2840,10 +2840,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         return _with( c -> {
                     c.addMouseListener(new MouseAdapter() {
                         @Override public void mouseClicked(MouseEvent e) {
-                            if ( _canBeRemoved(onClick) )
-                                c.removeMouseListener(this);
-                            else
-                                _doApp(() -> onClick.accept(new ComponentMouseEventDelegate<>(c, e, ()->getSiblinghood())));
+                            _doApp(() -> onClick.accept(new ComponentMouseEventDelegate<>(c, e, ()->getSiblinghood())));
                         }
                     });
                 })
@@ -2864,10 +2861,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         return _with( c -> {
                     c.addMouseListener(new MouseAdapter() {
                         @Override public void mouseReleased(MouseEvent e) {
-                            if ( _canBeRemoved(onRelease) )
-                                c.removeMouseListener(this);
-                            else
-                                _doApp(() -> onRelease.accept(new ComponentMouseEventDelegate<>(c, e, ()->getSiblinghood())));
+                            _doApp(() -> onRelease.accept(new ComponentMouseEventDelegate<>(c, e, ()->getSiblinghood())));
                         }
                     });
                 })
@@ -2888,10 +2882,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         return _with( c -> {
                     c.addMouseListener(new MouseAdapter() {
                         @Override public void mousePressed(MouseEvent e) {
-                            if ( _canBeRemoved(onPress) )
-                                c.removeMouseListener(this);
-                            else
-                                _doApp(() -> onPress.accept(new ComponentMouseEventDelegate<>(c, e, ()->getSiblinghood())));
+                            _doApp(() -> onPress.accept(new ComponentMouseEventDelegate<>(c, e, ()->getSiblinghood())));
                         }
                     });
                 })
@@ -2912,10 +2903,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         return _with( c -> {
                     c.addMouseListener(new MouseAdapter() {
                         @Override public void mouseEntered(MouseEvent e) {
-                            if ( _canBeRemoved(onEnter) )
-                                c.removeMouseListener(this);
-                            else
-                                _doApp(() -> onEnter.accept(new ComponentMouseEventDelegate<>(c, e, ()->getSiblinghood())));
+                            _doApp(() -> onEnter.accept(new ComponentMouseEventDelegate<>(c, e, ()->getSiblinghood())));
                         }
                     });
                 })
@@ -2936,10 +2924,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         return _with( c -> {
                     c.addMouseListener(new MouseAdapter() {
                         @Override public void mouseExited(MouseEvent e) {
-                            if ( _canBeRemoved(onExit) )
-                                c.removeMouseListener(this);
-                            else
-                                _doApp(() -> onExit.accept(new ComponentMouseEventDelegate<>(c, e, ()->getSiblinghood())));
+                            _doApp(() -> onExit.accept(new ComponentMouseEventDelegate<>(c, e, ()->getSiblinghood())));
                         }
                     });
                 })
@@ -2972,12 +2957,8 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
                            dragEventHistory.clear();
                        }
                        @Override public void mouseDragged(MouseEvent e) {
-                           if ( _canBeRemoved(onDrag) )
-                               component.removeMouseListener(this);
-                           else {
-                               dragEventHistory.add(e);
-                               _doApp(() -> onDrag.accept(new ComponentDragEventDelegate<>(component, e, () -> getSiblinghood(), dragEventHistory)));
-                           }
+                           dragEventHistory.add(e);
+                           _doApp(() -> onDrag.accept(new ComponentDragEventDelegate<>(component, e, () -> getSiblinghood(), dragEventHistory)));
                        }
                    };
                    component.addMouseListener(listener);
@@ -3000,18 +2981,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         return _with( component -> {
                    component.addMouseListener(new MouseAdapter() {
                        @Override public void mouseMoved(MouseEvent e) {
-                           if ( _canBeRemoved(onMove) )
-                               component.removeMouseListener(this);
-                           else
-                               _doApp(() -> onMove.accept(new ComponentMouseEventDelegate<>(component, e, ()->getSiblinghood())));
+                           _doApp(() -> onMove.accept(new ComponentMouseEventDelegate<>(component, e, ()->getSiblinghood())));
                        }
                    });
                    component.addMouseMotionListener(new MouseMotionAdapter() {
                        @Override public void mouseMoved(MouseEvent e) {
-                           if ( _canBeRemoved(onMove) )
-                               component.removeMouseMotionListener(this);
-                           else
-                               _doApp(() -> onMove.accept(new ComponentMouseEventDelegate<>(component, e, ()->getSiblinghood())));
+                           _doApp(() -> onMove.accept(new ComponentMouseEventDelegate<>(component, e, ()->getSiblinghood())));
                        }
                    });
                })
@@ -3032,10 +3007,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         return _with( component -> {
                    component.addMouseWheelListener(new MouseWheelListener() {
                        @Override public void mouseWheelMoved(MouseWheelEvent e) {
-                           if ( _canBeRemoved(onWheel) )
-                               component.removeMouseWheelListener(this);
-                           else
-                               _doApp(() -> onWheel.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
+                           _doApp(() -> onWheel.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
                        }
                    });
                })
@@ -3055,9 +3027,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         return _with( component -> {
                    component.addMouseWheelListener(new MouseWheelListener() {
                        @Override public void mouseWheelMoved(MouseWheelEvent e) {
-                           if ( _canBeRemoved(onWheelUp) )
-                               component.removeMouseWheelListener(this);
-                           else if ( e.getWheelRotation() < 0 )
+                           if ( e.getWheelRotation() < 0 )
                                _doApp(() -> onWheelUp.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
                        }
                    });
@@ -3078,9 +3048,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         return _with( component -> {
                    component.addMouseWheelListener(new MouseWheelListener() {
                        @Override public void mouseWheelMoved(MouseWheelEvent e) {
-                           if ( _canBeRemoved(onWheelDown) )
-                               component.removeMouseWheelListener(this);
-                           else if ( e.getWheelRotation() > 0 )
+                           if ( e.getWheelRotation() > 0 )
                                    _doApp(() -> onWheelDown.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
                        }
                    });
@@ -3100,10 +3068,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         return _with( component -> {
                    component.addComponentListener(new ComponentAdapter() {
                        @Override public void componentResized(ComponentEvent e) {
-                           if ( _canBeRemoved(onResize) )
-                               component.removeComponentListener(this);
-                           else
-                               _doApp(()->onResize.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
+                           _doApp(()->onResize.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
                        }
                    });
                })
@@ -3123,10 +3088,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
                    component.addComponentListener(new ComponentAdapter() {
                        @Override public void componentMoved(ComponentEvent e) {
 
-                           if ( _canBeRemoved(onMoved) )
-                               component.removeComponentListener(this);
-                           else
-                               _doApp(()->onMoved.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
+                           _doApp(()->onMoved.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
                        }
                    });
                })
@@ -3145,10 +3107,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         return _with( component -> {
                    component.addComponentListener(new ComponentAdapter() {
                        @Override public void componentShown(ComponentEvent e) {
-                           if ( _canBeRemoved(onShown) )
-                               component.removeComponentListener(this);
-                           else
-                               _doApp(()->onShown.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
+                           _doApp(()->onShown.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
                        }
                    });
                })
@@ -3167,10 +3126,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         return _with( component -> {
                    component.addComponentListener(new ComponentAdapter() {
                        @Override public void componentHidden(ComponentEvent e) {
-                           if ( _canBeRemoved(onHidden) )
-                               component.removeComponentListener(this);
-                           else
-                               _doApp(()->onHidden.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
+                           _doApp(()->onHidden.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
                        }
                    });
                })
@@ -3189,10 +3145,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         return _with( component -> {
                    component.addFocusListener(new FocusAdapter() {
                        @Override public void focusGained(FocusEvent e) {
-                           if ( _canBeRemoved(onFocus) )
-                               component.removeFocusListener(this);
-                           else
-                               _doApp(()->onFocus.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
+                           _doApp(()->onFocus.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
                        }
                    });
                })
@@ -3211,10 +3164,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         return _with( component -> {
                    component.addFocusListener(new FocusAdapter() {
                        @Override public void focusLost(FocusEvent e) {
-                           if ( _canBeRemoved(onFocus) )
-                               component.removeFocusListener(this);
-                           else
-                               _doApp(()->onFocus.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
+                           _doApp(()->onFocus.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
                        }
                    });
                })
@@ -3233,10 +3183,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         return _with( component -> {
                    component.addKeyListener(new KeyAdapter() {
                        @Override public void keyPressed(KeyEvent e) {
-                           if ( _canBeRemoved(onKeyPressed) )
-                               component.removeKeyListener(this);
-                           else
-                               _doApp(()->onKeyPressed.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
+                           _doApp(()->onKeyPressed.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
                        }
                    });
                })
@@ -3258,9 +3205,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         return _with( component -> {
                    component.addKeyListener(new KeyAdapter() {
                        @Override public void keyPressed( KeyEvent e ) {
-                           if ( _canBeRemoved(onKeyPressed) )
-                               component.removeKeyListener(this);
-                           else if ( e.getKeyCode() == key.code )
+                           if ( e.getKeyCode() == key.code )
                                _doApp(()->onKeyPressed.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
                        }
                    });
@@ -3281,10 +3226,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         return _with( component -> {
                    component.addKeyListener(new KeyAdapter() {
                        @Override public void keyReleased(KeyEvent e) {
-                           if ( _canBeRemoved(onKeyReleased) )
-                               component.removeKeyListener(this);
-                           else
-                               _doApp(()->onKeyReleased.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood()))); }
+                           _doApp(()->onKeyReleased.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood()))); }
                    });
                })
                ._this();
@@ -3307,9 +3249,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         return _with( component -> {
                    component.addKeyListener(new KeyAdapter() {
                        @Override public void keyReleased( KeyEvent e ) {
-                           if ( _canBeRemoved(onKeyReleased) )
-                               component.removeKeyListener(this);
-                           else if ( e.getKeyCode() == key.code )
+                           if ( e.getKeyCode() == key.code )
                                _doApp(()->onKeyReleased.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
                        }
                    });
@@ -3330,10 +3270,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck(onKeyTyped, "onKeyTyped", Action.class);
         return _with( component -> {
                    _onKeyTyped(component, (e, kl) -> {
-                       if ( _canBeRemoved(onKeyTyped) )
-                           component.removeKeyListener(kl);
-                       else
-                           _doApp(() -> onKeyTyped.accept(new ComponentDelegate<>(component, e, () -> getSiblinghood())));
+                       _doApp(() -> onKeyTyped.accept(new ComponentDelegate<>(component, e, () -> getSiblinghood())));
                    });
                })
                ._this();
@@ -3356,9 +3293,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck(onKeyTyped, "onKeyTyped", Action.class);
         return _with( component -> {
                    _onKeyTyped(component, (e, kl) -> {
-                       if ( _canBeRemoved(onKeyTyped) )
-                           component.removeKeyListener(kl);
-                       else if ( e.getKeyCode() == key.code )
+                       if ( e.getKeyCode() == key.code )
                            _doApp(()->onKeyTyped.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
                    });
                })
@@ -3784,23 +3719,23 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     }
 
     protected <M> void _addViewableProps( Vals<M> viewables, String attr, ViewSupplier<M> viewSupplier, C thisComponent ) {
-        _onShow( viewables, delegate -> {
+        _onShow( viewables, thisComponent, (c, delegate) -> {
             // we simply redo all the components.
             switch ( delegate.changeType() ) {
-                case SET: _updateComponentAt(delegate.index(), delegate.newValue().get(), viewSupplier, attr, thisComponent); break;
+                case SET: _updateComponentAt(delegate.index(), delegate.newValue().get(), viewSupplier, attr, c); break;
                 case ADD:
                     if ( delegate.index() < 0 && delegate.newValue().isEmpty() ) {
                         // This is basically a add all operation, so we clear the components first.
-                        _clearComponentsOf(thisComponent);
+                        _clearComponentsOf(c);
                         // and then we add all the components.
                         for ( int i = 0; i < delegate.vals().size(); i++ )
-                            _addComponentAt( i, delegate.vals().at(i).get(), viewSupplier, attr, thisComponent );
+                            _addComponentAt( i, delegate.vals().at(i).get(), viewSupplier, attr, c );
                     }
                     else
-                        _addComponentAt( delegate.index(), delegate.newValue().get(), viewSupplier, attr, thisComponent );
+                        _addComponentAt( delegate.index(), delegate.newValue().get(), viewSupplier, attr, c );
                     break;
-                case REMOVE: _removeComponentAt(delegate.index(), thisComponent); break;
-                case CLEAR: _clearComponentsOf(thisComponent); break;
+                case REMOVE: _removeComponentAt(delegate.index(), c); break;
+                case CLEAR: _clearComponentsOf(c); break;
                 case NONE: break;
                 default: throw new IllegalStateException("Unknown type: "+delegate.changeType());
             }
@@ -3809,10 +3744,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     }
 
     private <M> void _addViewableProp(
-            Val<M> viewable, String attr, ViewSupplier<M> viewSupplier, C component
+            Val<M> viewable, String attr, ViewSupplier<M> viewSupplier, C thisComponent
     ) {
         // First we remember the index of the component which will be provided by the viewable dynamically.
-        final int index = _childCount( component );
+        final int index = _childCount( thisComponent );
         // Then we add the component provided by the viewable to the list of children.
         if ( attr == null ) {
             if ( viewable.isPresent() )
@@ -3826,7 +3761,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
                 this.add(attr, new JPanel()); // We add a dummy component to the list of children.
         }
         // Finally we add a listener to the viewable which will update the component when the viewable changes.
-        _onShow( viewable, v -> _updateComponentAt(index, v, viewSupplier, attr, component) );
+        _onShow( viewable, thisComponent, (c,v) -> _updateComponentAt(index, v, viewSupplier, attr, c) );
     }
 
     private <M> void _updateComponentAt(

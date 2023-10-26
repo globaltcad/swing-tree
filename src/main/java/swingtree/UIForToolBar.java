@@ -35,8 +35,10 @@ public class UIForToolBar<T extends JToolBar> extends UIForAnySwing<UIForToolBar
     public final UIForToolBar<T> withOrientation( Val<UI.Align> alignment ) {
         NullUtil.nullArgCheck(alignment, "alignment", Val.class);
         NullUtil.nullPropertyCheck(alignment, "alignment", "Null is not a valid alignment.");
-        return _with( thisComponent -> {
-                    _onShow( alignment, a -> thisComponent.setOrientation(a.forToolBar()) );
+        return _withOnShow( alignment, (c,v) -> {
+                    c.setOrientation(v.forToolBar());
+                })
+                ._with( thisComponent -> {
                     thisComponent.setOrientation(alignment.orElseThrow().forToolBar());
                 })
                 ._this();

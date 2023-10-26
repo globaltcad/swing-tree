@@ -53,8 +53,9 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForScrollPane<
 	}
 
 	@Override
-	protected <M> void _addViewableProps( Vals<M> models, String attr, ViewSupplier<M> viewSupplier, P thisComponent)
-	{
+	protected <M> void _addViewableProps(
+			Vals<M> models, String attr, ViewSupplier<M> viewSupplier, P thisComponent
+	) {
 		BiFunction<Integer, Vals<M>, M> modelFetcher = (i, vals) -> {
 			M v = vals.at(i).get();
 			if ( v instanceof EntryViewModel ) ((EntryViewModel) v).position().set(i);
@@ -81,7 +82,7 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForScrollPane<
 				}
 		};
 
-		_onShow( models, delegate -> {
+		_onShow( models, thisComponent, (c, delegate) -> {
 			Vals<M> vals = delegate.vals();
 			int delegateIndex = delegate.index();
 			Change changeType = delegate.changeType();
@@ -94,17 +95,17 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForScrollPane<
 						if ( changeType == Change.ADD ) {
 							M m = entryFetcher.apply(delegateIndex, vals);
 							if ( m instanceof EntryViewModel )
-								thisComponent.addEntryAt(delegateIndex, null, (EntryViewModel)m, (ViewSupplier<EntryViewModel>) viewSupplier);
+								c.addEntryAt(delegateIndex, null, (EntryViewModel)m, (ViewSupplier<EntryViewModel>) viewSupplier);
 							else
-								thisComponent.addEntryAt(delegateIndex, null, _entryModel(), em -> viewSupplier.createViewFor(m));
+								c.addEntryAt(delegateIndex, null, _entryModel(), em -> viewSupplier.createViewFor(m));
 						} else if ( changeType == Change.REMOVE )
-							thisComponent.removeEntryAt( delegateIndex );
+							c.removeEntryAt( delegateIndex );
 						else if ( changeType == Change.SET ) {
 							M m = entryFetcher.apply(delegateIndex, vals);
 							if ( m instanceof EntryViewModel )
-								thisComponent.setEntryAt(delegateIndex, null, (EntryViewModel)m, (ViewSupplier<EntryViewModel>) viewSupplier);
+								c.setEntryAt(delegateIndex, null, (EntryViewModel)m, (ViewSupplier<EntryViewModel>) viewSupplier);
 							else
-								thisComponent.setEntryAt(delegateIndex, null, _entryModel(), em -> viewSupplier.createViewFor(m));
+								c.setEntryAt(delegateIndex, null, _entryModel(), em -> viewSupplier.createViewFor(m));
 						}
 						// Now we need to update the positions of all the entries
 						for ( int i = delegateIndex; i < vals.size(); i++ ) {
@@ -113,11 +114,11 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForScrollPane<
 								((EntryViewModel)m).position().set(i);
 						}
 					} else {
-						thisComponent.removeAllEntries();
+						c.removeAllEntries();
 						addAll.accept(vals);
 					}
 				break;
-				case CLEAR: thisComponent.removeAllEntries(); break;
+				case CLEAR: c.removeAllEntries(); break;
 				case NONE: break;
 				default: throw new IllegalStateException("Unknown type: "+delegate.changeType());
 			}

@@ -13,6 +13,7 @@ import java.awt.*;
 import java.lang.ref.WeakReference;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -80,15 +81,6 @@ abstract class AbstractBuilder<I, C extends Component>
         return action.apply( getComponent() );
     }
 
-    protected final boolean _canBeRemoved( Action<?> action ) {
-        try {
-            return action.canBeRemoved();
-        } catch ( Exception e ) {
-            log.error("Failed to check if action can be removed.", e);
-            return false;
-        }
-    }
-
     /**
      * @param action An action which should be executed by the UI thread (EDT).
      */
@@ -123,6 +115,27 @@ abstract class AbstractBuilder<I, C extends Component>
     {
         Objects.requireNonNull(val);
         Objects.requireNonNull(displayAction);
+        _onShow( val, getComponent(), (c, v) -> displayAction.accept(v) );
+    }
+
+    protected final <T> void _onShow( Val<T> val, C c, BiConsumer<C, T> displayAction )
+    {
+        Objects.requireNonNull(val);
+        Objects.requireNonNull(displayAction);
+        _onShow( val, new WeakReference<>(c), displayAction );
+    }
+
+    protected final <T> AbstractBuilder<I,C> _withOnShow( Val<T> val, BiConsumer<C, T> displayAction )
+    {
+        Objects.requireNonNull(val);
+        Objects.requireNonNull(displayAction);
+        return _with( thisComponent -> _onShow( val, thisComponent, displayAction) );
+    }
+
+    private  <T> void _onShow( Val<T> val, WeakReference<C> ref, BiConsumer<C, T> displayAction )
+    {
+        Objects.requireNonNull(val);
+        Objects.requireNonNull(displayAction);
         val.onChange(From.ALL, new Action<Val<T>>() {
             @Override
             public void accept( Val<T> val ) {
@@ -133,9 +146,9 @@ abstract class AbstractBuilder<I, C extends Component>
                         is not disposed. This is important because the action may
                         access the component, and we don't want to get a NPE.
                      */
-                        component().ifPresent( c -> {
+                        OptionalUI.ofNullable(ref.get()).ifPresent( c -> {
                             try {
-                                displayAction.accept(v); // Here the captured value is used. This is extremely important!
+                                displayAction.accept(c, v); // Here the captured value is used. This is extremely important!
                                 /*
                                      Since this is happening in another thread we are using the captured property item/value.
                                      The property might have changed in the meantime, but we don't care about that,
@@ -150,7 +163,6 @@ abstract class AbstractBuilder<I, C extends Component>
                         })
                 );
             }
-            @Override public boolean canBeRemoved() { return !component().isPresent(); }
         });
     }
 
@@ -163,26 +175,40 @@ abstract class AbstractBuilder<I, C extends Component>
      *                      is then executed by the UI thread.
      * @param <T> The type of the items wrapped by the provided property list.
      */
-    protected final <T> void _onShow( Vals<T> vals, Consumer<ValsDelegate<T>> displayAction )
+    protected final <T> void _onShow(
+            Vals<T> vals, C c, BiConsumer<C, ValsDelegate<T>> displayAction
+    ) {
+        Objects.requireNonNull(vals);
+        Objects.requireNonNull(displayAction);
+        _onShow( vals, new WeakReference<>(c), displayAction );
+    }
 
-    {
+    protected final <T> AbstractBuilder<I,C> _withOnShow(
+        Vals<T> vals, BiConsumer<C, ValsDelegate<T>> displayAction
+    ) {
+        Objects.requireNonNull(vals);
+        Objects.requireNonNull(displayAction);
+        return _with( thisComponent -> _onShow( vals, thisComponent, displayAction ) );
+    }
+
+    private <T> void _onShow(
+        Vals<T> vals, WeakReference<C> ref, BiConsumer<C, ValsDelegate<T>> displayAction
+    ) {
         Objects.requireNonNull(vals);
         Objects.requireNonNull(displayAction);
         vals.onChange(new Action<ValsDelegate<T>>() {
             @Override
-            public void accept(ValsDelegate<T> delegate) {
-                _doUI(() ->
-                        component().ifPresent(c -> {
-                            displayAction.accept(delegate);
-                        /*
-                            We make sure that the action is only executed if the component
-                            is not disposed. This is important because the action may
-                            access the component, and we don't want to get a NPE.
-                         */
-                        })
-                );
+            public void accept( ValsDelegate<T> delegate ) {
+                C component = ref.get();
+                _doUI(() ->{
+                    displayAction.accept(component, delegate);
+                    /*
+                        We make sure that the action is only executed if the component
+                        is not disposed. This is important because the action may
+                        access the component, and we don't want to get a NPE.
+                    */
+                });
             }
-            @Override public boolean canBeRemoved() { return !component().isPresent(); }
         });
     }
 
