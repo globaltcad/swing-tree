@@ -111,6 +111,7 @@ abstract class AbstractBuilder<I, C extends Component>
      *                      is then executed by the UI thread.
      * @param <T> The type of the item wrapped by the provided property.
      */
+    @Deprecated
     protected final <T> void _onShow( Val<T> val, Consumer<T> displayAction )
     {
         Objects.requireNonNull(val);
@@ -132,23 +133,30 @@ abstract class AbstractBuilder<I, C extends Component>
         return _with( thisComponent -> _onShow( val, thisComponent, displayAction) );
     }
 
-    private  <T> void _onShow( Val<T> val, WeakReference<C> ref, BiConsumer<C, T> displayAction )
+    private  <T> void _onShow( Val<T> property, WeakReference<C> ref, BiConsumer<C, T> displayAction )
     {
-        Objects.requireNonNull(val);
+        Objects.requireNonNull(property);
         Objects.requireNonNull(displayAction);
-        val.onChange(From.ALL, new Action<Val<T>>() {
+        Action<Val<T>> action = new Action<Val<T>>() {
             @Override
-            public void accept( Val<T> val ) {
-                T v = val.orElseNull(); // IMPORTANT! We first capture the value and then execute the action in the app thread.
+            public void accept( Val<T> value )
+            {
+                C thisComponent = ref.get();
+                if ( thisComponent == null ) {
+                    property.unsubscribe(this); // We unsubscribe from the property if the component is disposed.
+                    return;
+                }
+
+                T v = value.orElseNull(); // IMPORTANT! We first capture the value and then execute the action in the app thread.
                 _doUI(() ->
                     /*
                         We make sure that the action is only executed if the component
                         is not disposed. This is important because the action may
                         access the component, and we don't want to get a NPE.
                      */
-                        OptionalUI.ofNullable(ref.get()).ifPresent( c -> {
+                        UI.run( () -> {
                             try {
-                                displayAction.accept(c, v); // Here the captured value is used. This is extremely important!
+                                displayAction.accept(thisComponent, v); // Here the captured value is used. This is extremely important!
                                 /*
                                      Since this is happening in another thread we are using the captured property item/value.
                                      The property might have changed in the meantime, but we don't care about that,
@@ -156,14 +164,16 @@ abstract class AbstractBuilder<I, C extends Component>
                                  */
                             } catch ( Exception e ) {
                                 throw new RuntimeException(
-                                    "Failed to apply state of property '" + val + "' to component '" + c + "'.",
-                                    e
+                                        "Failed to apply state of property '" + property + "' to component '" + thisComponent + "'.",
+                                        e
                                 );
                             }
                         })
                 );
             }
-        });
+        };
+        property.onChange(From.ALL, action);
+        CustomCleaner.getInstance().register(ref.get(), () -> property.unsubscribe(action));
     }
 
     /**
@@ -192,16 +202,20 @@ abstract class AbstractBuilder<I, C extends Component>
     }
 
     private <T> void _onShow(
-        Vals<T> vals, WeakReference<C> ref, BiConsumer<C, ValsDelegate<T>> displayAction
+        Vals<T> properties, WeakReference<C> ref, BiConsumer<C, ValsDelegate<T>> displayAction
     ) {
-        Objects.requireNonNull(vals);
+        Objects.requireNonNull(properties);
         Objects.requireNonNull(displayAction);
-        vals.onChange(new Action<ValsDelegate<T>>() {
+        Action<ValsDelegate<T>> action = new Action<ValsDelegate<T>>() {
             @Override
             public void accept( ValsDelegate<T> delegate ) {
-                C component = ref.get();
+                C thisComponent = ref.get();
+                if ( thisComponent == null ) {
+                    properties.unsubscribe(this); // We unsubscribe from the property if the component is disposed.
+                    return;
+                }
                 _doUI(() ->{
-                    displayAction.accept(component, delegate);
+                    displayAction.accept(thisComponent, delegate);
                     /*
                         We make sure that the action is only executed if the component
                         is not disposed. This is important because the action may
@@ -209,7 +223,9 @@ abstract class AbstractBuilder<I, C extends Component>
                     */
                 });
             }
-        });
+        };
+        properties.onChange(action);
+        CustomCleaner.getInstance().register(ref.get(), () -> properties.unsubscribe(action));
     }
 
     /**

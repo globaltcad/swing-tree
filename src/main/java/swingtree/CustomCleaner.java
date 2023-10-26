@@ -1,0 +1,86 @@
+package swingtree;
+
+
+import java.lang.ref.PhantomReference;
+import java.lang.ref.ReferenceQueue;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ *  This class stores actions which are being executed when an associated object is being garbage collected.
+ *  This class is similar to the cleaner class introduced in JDK 11, however the minimal version compatibility target
+ *  for SwingTree is Java 8, which means that this cleaner class introduced in Java 11 is not available here!
+ *  That is why a custom cleaner implementation is needed.<br>
+ *  <br> <br>
+ *  <b>Warning: This is an internal class, meaning it should not be used
+ *  anywhere but within this library. <br>
+ *  This class or its public methods might change or get removed in future versions!</b>
+ */
+final class CustomCleaner
+{
+    private static final CustomCleaner _instance = new CustomCleaner();
+
+    public static CustomCleaner getInstance() {
+        return _instance;
+    }
+
+    private final ReferenceQueue<Object> _referenceQueue = new ReferenceQueue<>();
+    private final long _timeout = 60 * 1000;
+    private int _registered = 0;
+
+    private final List<Object> list = new ArrayList<>();
+
+
+    private CustomCleaner() {}
+
+
+    static class ReferenceWithCleanup<T> extends PhantomReference<T>
+    {
+        private final Runnable _action;
+
+        ReferenceWithCleanup(T o, Runnable action, ReferenceQueue<T> queue) {
+            super( o, queue );
+            _action = action;
+        }
+        public void cleanup() {
+            _action.run();
+        }
+    }
+
+    public void register(Object o, Runnable action) {
+        synchronized ( _referenceQueue ) {
+            list.add(new ReferenceWithCleanup<Object>(o, action, _referenceQueue));
+            _registered++;
+            if ( _registered == 1 ) new Thread( this::run ).start();
+        }
+    }
+
+    public void run() {
+        while ( _registered > 0 ) {
+            try {
+                ReferenceWithCleanup ref = (ReferenceWithCleanup) _referenceQueue.remove(_timeout);
+                if ( ref != null ) {
+                    try {
+                        ref.cleanup();
+                    } catch ( Throwable e ) {
+                        e.printStackTrace();
+                        // ignore exceptions from the cleanup action
+                        // (including interruption of cleanup thread)
+                    }
+                    _registered--;
+                }
+            } catch ( Throwable e ) {
+                e.printStackTrace(); // The queue failed
+            }
+        }
+    }
+
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName()+"@"+Integer.toHexString(this.hashCode())+"[" +
+                    "registered=" + _registered +
+                "]";
+    }
+
+}
+
