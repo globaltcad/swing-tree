@@ -189,7 +189,10 @@ public class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSlider<S>
      */
     public final UIForSlider<S> withValue( Var<Integer> var ) {
         NullUtil.nullArgCheck( var, "var", Var.class );
-        return _with( thisComponent -> {
+        return _withOnShow( var, (thisComponent,v) -> {
+                    _setValue(thisComponent, v);
+                })
+                ._with( thisComponent -> {
                     _onChange(thisComponent,
                         e -> _doApp(thisComponent.getValue(), newItem -> var.set(From.VIEW, newItem) )
                     );

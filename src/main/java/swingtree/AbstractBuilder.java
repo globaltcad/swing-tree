@@ -165,7 +165,11 @@ abstract class AbstractBuilder<I, C extends Component>
             }
         };
         property.onChange(From.ALL, action);
-        CustomCleaner.getInstance().register(ref.get(), () -> property.unsubscribe(action));
+        CustomCleaner
+            .getInstance()
+            .register(ref.get(),
+                () -> property.unsubscribe(action)
+            );
     }
 
     /**
