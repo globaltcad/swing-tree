@@ -61,7 +61,7 @@ public class UIForPopup<P extends JPopupMenu> extends UIForAnySwing<UIForPopup<P
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
                     _onPopupOpen(thisComponent,
-                        e -> _doApp(()->action.accept(new ComponentDelegate<>( thisComponent, e, () -> getSiblinghood() )) )
+                        e -> _doApp(()->action.accept(new ComponentDelegate<>( thisComponent, e )) )
                     );
                 })
                 ._this();
@@ -89,7 +89,7 @@ public class UIForPopup<P extends JPopupMenu> extends UIForAnySwing<UIForPopup<P
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
                     _onPopupClose(thisComponent,
-                        e -> _doApp(()->action.accept(new ComponentDelegate<>( (P) thisComponent, e, () -> getSiblinghood() )) )
+                        e -> _doApp(()->action.accept(new ComponentDelegate<>( (P) thisComponent, e )) )
                     );
                 })
                 ._this();
@@ -116,7 +116,7 @@ public class UIForPopup<P extends JPopupMenu> extends UIForAnySwing<UIForPopup<P
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
                     _onPopupCancel(thisComponent,
-                        e -> _doApp(()->action.accept(new ComponentDelegate<>( thisComponent, e, () -> getSiblinghood() )) )
+                        e -> _doApp(()->action.accept(new ComponentDelegate<>( thisComponent, e )) )
                     );
                 })
                 ._this();

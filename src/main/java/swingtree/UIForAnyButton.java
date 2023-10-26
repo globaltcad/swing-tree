@@ -512,7 +512,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( button -> {
                     _onChange(button, e ->
-                        _doApp(()->action.accept(new ComponentDelegate<>(button, e, () -> getSiblinghood())))
+                        _doApp(()->action.accept(new ComponentDelegate<>(button, e)))
                     );
                 })
                 ._this();
@@ -566,7 +566,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
         return _with( button -> {
                     _onClick(button, e ->
                         _doApp(() ->
-                            action.accept(new ComponentDelegate<>(button, e, () -> getSiblinghood()))
+                            action.accept(new ComponentDelegate<>(button, e))
                         )
                     );
                 })

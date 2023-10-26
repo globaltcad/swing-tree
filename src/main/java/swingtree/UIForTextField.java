@@ -32,7 +32,7 @@ public class UIForTextField<F extends JTextField> extends UIForAnyTextComponent<
     public UIForTextField<F> onEnter( Action<ComponentDelegate<F, ActionEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( c -> {
-                   _onEnter(c, e -> _doApp( () -> action.accept(new ComponentDelegate<>( c, e, () -> getSiblinghood() )) ) );
+                   _onEnter(c, e -> _doApp( () -> action.accept(new ComponentDelegate<>( c, e )) ) );
                })
                ._this();
     }

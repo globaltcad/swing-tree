@@ -10,12 +10,15 @@ import swingtree.api.Styler;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  *  Extensions of this class delegate a component
@@ -43,6 +46,16 @@ abstract class AbstractDelegate<C extends JComponent>
     }
 
     protected C _component() { return _component; }
+
+    protected List<JComponent> _siblingsSource() {
+        return Optional.ofNullable(_component.getParent())
+                .map(Container::getComponents)
+                .map(Arrays::stream)
+                .orElseGet(Stream::empty)
+                .filter(c -> c instanceof JComponent)
+                .map(c -> (JComponent) c)
+                .collect(Collectors.toList());
+    }
 
     /**
      *  This is a delegate to the underlying component, but not every method of the component

@@ -15,7 +15,7 @@ public class UIForFormattedTextField extends UIForAnyTextComponent<UIForFormatte
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
                     _onEnter(thisComponent,
-                        e -> _doApp(()->action.accept(new ComponentDelegate<>( thisComponent, e, () -> getSiblinghood() )) )
+                        e -> _doApp(()->action.accept(new ComponentDelegate<>( thisComponent, e )) )
                     );
                 })
                 ._this();

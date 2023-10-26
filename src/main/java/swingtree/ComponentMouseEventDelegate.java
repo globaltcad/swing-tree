@@ -38,10 +38,9 @@ public class ComponentMouseEventDelegate<C extends JComponent> extends Component
 {
     public ComponentMouseEventDelegate(
         C component,
-        MouseEvent event,
-        Supplier<List<JComponent>> siblingSource
+        MouseEvent event
     ) {
-        super(component, event, siblingSource);
+        super(component, event);
     }
 
     /**

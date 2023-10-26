@@ -11,17 +11,14 @@ import java.util.stream.Collectors;
 
 public final class SplitButtonDelegate<I extends JMenuItem> extends AbstractDelegate<JSplitButton>
 {
-        private final Supplier<List<JComponent>> _siblingsSource;
         private final SplitItemDelegate<I> _itemsDelegate;
 
         SplitButtonDelegate(
-            JSplitButton button,
-            SplitItemDelegate<I> itemsDelegate,
-            Supplier<List<JComponent>> siblingsSource
+                JSplitButton button,
+                SplitItemDelegate<I> itemsDelegate
         ) {
             super(button, button);
             _itemsDelegate  = Objects.requireNonNull(itemsDelegate);
-            _siblingsSource = Objects.requireNonNull(siblingsSource);
         }
 
         public ActionEvent getEvent() { return _itemsDelegate.getEvent(); }
@@ -57,7 +54,7 @@ public final class SplitButtonDelegate<I extends JMenuItem> extends AbstractDele
                 throw new IllegalStateException(
                         "Sibling components can only be accessed by the Swing thread."
                     );
-            return _siblingsSource.get();
+            return _siblingsSource();
         }
 
         /*
@@ -70,7 +67,7 @@ public final class SplitButtonDelegate<I extends JMenuItem> extends AbstractDele
                 throw new IllegalStateException(
                         "Sibling components can only be accessed by the Swing thread."
                     );
-            return _siblingsSource.get()
+            return _siblingsSource()
                     .stream()
                     .filter( s -> s != getCurrentItem() )
                     .collect(Collectors.toList());

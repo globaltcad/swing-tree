@@ -3,12 +3,12 @@ package swingtree;
 import sprouts.Action;
 
 import javax.swing.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.awt.Container;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  *  Instances of this are delegates for a specific components and events that
@@ -47,14 +47,13 @@ import java.util.stream.Collectors;
 public class ComponentDelegate<C extends JComponent, E> extends AbstractDelegate<C>
 {
     private final E event;
-    private final Supplier<List<JComponent>> siblingSource;
+
 
     public ComponentDelegate(
-        C component, E event, Supplier<List<JComponent>> siblingSource
+            C component, E event
     ) {
         super(component, component);
-        this.event         = Objects.requireNonNull(event);
-        this.siblingSource = Objects.requireNonNull(siblingSource);
+        this.event = Objects.requireNonNull(event);
     }
 
     /**
@@ -96,7 +95,7 @@ public class ComponentDelegate<C extends JComponent, E> extends AbstractDelegate
                     "Sibling components can only be accessed by the Swing thread. " +
                     "Please use 'forSiblings(..)' methods instead."
                 );
-        return siblingSource.get().stream().filter( s -> _component() != s ).collect(Collectors.toList());
+        return _siblingsSource().stream().filter( s -> _component() != s ).collect(Collectors.toList());
     }
     
     /**
@@ -165,7 +164,7 @@ public class ComponentDelegate<C extends JComponent, E> extends AbstractDelegate
                     "Sibling components can only be accessed by the Swing thread. " +
                     "Please use 'forSiblinghood(..)' methods instead."
             );
-        return new ArrayList<>(siblingSource.get());
+        return new ArrayList<>(_siblingsSource());
     }
 
     /**
@@ -196,7 +195,7 @@ public class ComponentDelegate<C extends JComponent, E> extends AbstractDelegate
                 "Sibling components can only be accessed by the Swing thread. " +
                 "Please use 'forSiblinghoodOfType(..)' methods instead."
             );
-        return new ArrayList<>(siblingSource.get())
+        return new ArrayList<>(_siblingsSource())
                 .stream()
                 .filter( s -> type.isAssignableFrom(s.getClass()) )
                 .map( s -> (T) s )

@@ -77,7 +77,7 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UIForCom
     public UIForCombo<E,C> onOpen( Action<ComponentDelegate<C, PopupMenuEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
-                    _onPopupOpen(thisComponent, e -> _doApp(()->action.accept(new ComponentDelegate<>( (C) thisComponent, e, () -> getSiblinghood() )) ) );
+                    _onPopupOpen(thisComponent, e -> _doApp(()->action.accept(new ComponentDelegate<>( (C) thisComponent, e )) ) );
                 })
                 ._this();
     }
@@ -104,7 +104,7 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UIForCom
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
                     _onPopupClose(thisComponent,
-                        e -> _doApp(()->action.accept(new ComponentDelegate<>( (C) thisComponent, e, () -> getSiblinghood() )) )
+                        e -> _doApp(()->action.accept(new ComponentDelegate<>( (C) thisComponent, e )) )
                     );
                 })
                 ._this();
@@ -132,7 +132,7 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UIForCom
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
                     _onPopupCancel(thisComponent,
-                        e -> _doApp(()->action.accept(new ComponentDelegate<>( (C) thisComponent, e, () -> getSiblinghood() )) )
+                        e -> _doApp(()->action.accept(new ComponentDelegate<>( (C) thisComponent, e )) )
                     );
                 })
                 ._this();
@@ -163,7 +163,7 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UIForCom
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
                    _onSelection(thisComponent,
-                       e -> _doApp(()->action.accept(new ComponentDelegate<>( thisComponent, e, () -> getSiblinghood() )))
+                       e -> _doApp(()->action.accept(new ComponentDelegate<>( thisComponent, e )))
                    );
                })
                ._this();
@@ -203,7 +203,7 @@ public class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UIForCom
     public UIForCombo<E,C> onEnter( Action<ComponentDelegate<C, ActionEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
-                   _onEnter(thisComponent, e -> _doApp(()->action.accept(new ComponentDelegate<>( (C) thisComponent, e, () -> getSiblinghood() ))) );
+                   _onEnter(thisComponent, e -> _doApp(()->action.accept(new ComponentDelegate<>( (C) thisComponent, e ))) );
                })
                ._this();
     }

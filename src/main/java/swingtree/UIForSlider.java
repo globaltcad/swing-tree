@@ -70,7 +70,7 @@ public class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSlider<S>
         NullUtil.nullArgCheck( action, "action", Action.class );
         return _with( thisComponent -> {
                     _onChange(thisComponent,
-                        e -> _doApp(()->action.accept(new ComponentDelegate<>(thisComponent, e, () -> getSiblinghood())))
+                        e -> _doApp(()->action.accept(new ComponentDelegate<>(thisComponent, e)))
                     );
                 })
                 ._this();

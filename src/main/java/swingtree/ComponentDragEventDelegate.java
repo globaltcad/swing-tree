@@ -21,13 +21,13 @@ public final class ComponentDragEventDelegate<C extends JComponent> extends Comp
 {
     private final List<MouseEvent> _dragEventHistory = new java.util.ArrayList<>();
 
+
     ComponentDragEventDelegate(
             C component,
             MouseEvent event,
-            Supplier<List<JComponent>> siblingSource,
             List<MouseEvent> dragEventHistory
     ) {
-        super(component, event, siblingSource);
+        super(component, event);
         _dragEventHistory.addAll(dragEventHistory);
     }
 

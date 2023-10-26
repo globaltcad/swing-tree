@@ -205,7 +205,7 @@ public class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForList<E,
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
                     thisComponent.addListSelectionListener(
-                        e -> _doApp(()->action.accept(new ComponentDelegate<>(thisComponent, e, ()->getSiblinghood())))
+                        e -> _doApp(()->action.accept(new ComponentDelegate<>( thisComponent, e)))
                     );
                 })
                 ._this();

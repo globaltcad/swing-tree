@@ -58,7 +58,7 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
                            int indexOfTab = _indexOfClick(thisComponent, e.getPoint());
                            int tabCount = thisComponent.getTabCount();
                            if ( indexOfTab >= 0 && indexOfTab < tabCount )
-                               _doApp(() -> onClick.accept(new TabDelegate(thisComponent, e, () -> getSiblinghood(), indexOfTab)));
+                               _doApp(() -> onClick.accept(new TabDelegate(thisComponent, e, indexOfTab)));
                        }
                    });
                })
@@ -83,7 +83,7 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
                             int indexOfTab = _indexOfClick(thisComponent, e.getPoint());
                             int tabCount = thisComponent.getTabCount();
                             if ( indexOfTab >= 0 && indexOfTab < tabCount )
-                                _doApp(() -> onPress.accept(new TabDelegate(thisComponent, e, () -> getSiblinghood(), indexOfTab)));
+                                _doApp(() -> onPress.accept(new TabDelegate(thisComponent, e, indexOfTab)));
                         }
                     });
                })
@@ -108,7 +108,7 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
                             int indexOfTab = _indexOfClick(thisComponent, e.getPoint());
                             int tabCount = thisComponent.getTabCount();
                             if ( indexOfTab >= 0 && indexOfTab < tabCount )
-                                _doApp(() -> onRelease.accept(new TabDelegate(thisComponent, e, () -> getSiblinghood(), indexOfTab)));
+                                _doApp(() -> onRelease.accept(new TabDelegate(thisComponent, e, indexOfTab)));
                         }
                     });
                })
@@ -133,7 +133,7 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
                             int indexOfTab = _indexOfClick(thisComponent, e.getPoint());
                             int tabCount = thisComponent.getTabCount();
                             if ( indexOfTab >= 0 && indexOfTab < tabCount )
-                                _doApp(() -> onEnter.accept(new TabDelegate(thisComponent, e, () -> getSiblinghood(), indexOfTab)));
+                                _doApp(() -> onEnter.accept(new TabDelegate(thisComponent, e, indexOfTab)));
                         }
                     });
                })
@@ -158,7 +158,7 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
                             int indexOfTab = _indexOfClick(thisComponent, e.getPoint());
                             int tabCount = thisComponent.getTabCount();
                             if ( indexOfTab >= 0 && indexOfTab < tabCount )
-                                _doApp(() -> onExit.accept(new TabDelegate(thisComponent, e, () -> getSiblinghood(), indexOfTab)));
+                                _doApp(() -> onExit.accept(new TabDelegate(thisComponent, e, indexOfTab)));
                         }
                     });
                })
@@ -319,7 +319,7 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
                        if ( tabbedPane == null ) return;
                        int index = indexFinder.get();
                        if ( index >= 0 && index == tabbedPane.getSelectedIndex() )
-                           _doApp(()->onSelection.accept(new ComponentDelegate<>(tabbedPane, e, () -> getSiblinghood())));
+                           _doApp(()->onSelection.accept(new ComponentDelegate<>(tabbedPane, e )));
                    })
                );
 
@@ -436,7 +436,7 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
                         int indexClicked = _indexOfClick(pane, e.getPoint());
                         if ( indexClicked < 0 ) return;
                         if ( indexOfThis == indexClicked )
-                            _doApp(()-> mouseClickAction.accept(new ComponentDelegate<>(pane, e, () -> getSiblinghood())));
+                            _doApp(()-> mouseClickAction.accept(new ComponentDelegate<>(pane, e )));
                     }
                 });
             }
@@ -453,7 +453,7 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
             int indexClicked = _indexOfClick( pane, p );
             if ( indexClicked < 0 ) return;
             if ( indexOfThis == indexClicked && mouseClickAction != null )
-                _doApp(()-> { mouseClickAction.accept(new ComponentDelegate<>(pane, e, () -> getSiblinghood())); });
+                _doApp(()-> { mouseClickAction.accept(new ComponentDelegate<>(pane, e)); });
             if ( indexOfThis < pane.getTabCount() )
                 pane.setSelectedIndex(indexOfThis);
         }
@@ -508,7 +508,7 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
     public final UIForTabbedPane<P> onChange( Action<ComponentDelegate<P, ChangeEvent>> onChange ) {
         NullUtil.nullArgCheck(onChange, "onChange", Action.class);
         return _with( thisComponent -> {
-                    _onChange(thisComponent, e -> _doApp(()->onChange.accept(new ComponentDelegate<>(thisComponent, e, () -> getSiblinghood()))));
+                    _onChange(thisComponent, e -> _doApp(()->onChange.accept(new ComponentDelegate<>(thisComponent, e))));
                 })
                 ._this();
     }
