@@ -59,7 +59,7 @@ public interface BasicTableModel extends TableModel
      */
     @FunctionalInterface interface EntryGetter<E> { E get(int rowIndex, int colIndex); }
     /**
-     *  Implementations of this functional interface translate to the {@link TableModel#setValueAt(E, int, int)} method.
+     *  Implementations of this functional interface translate to the {@link TableModel#setValueAt(Object, int, int)} method.
      */
     @FunctionalInterface interface EntrySetter<E> { void set(int rowIndex, int colIndex, E aValue); }
     /**

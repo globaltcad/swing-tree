@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 /**
  * Instances of this are delegated to the individual {@link JSplitButton} items
  * and their {@link ActionEvent}s exposed to you inside your {@link Action} handlers,
- * like for example one you would supply to {@link #onSelection(Action)}.
+ * like for example one you would supply to {@link SplitItem#onSelection(Action)}.
  * This class exists to give said actions all the necessary context
  * they need to perform their tasks.
  *

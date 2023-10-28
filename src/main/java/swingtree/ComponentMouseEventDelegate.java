@@ -32,7 +32,7 @@ import java.util.function.Supplier;
  *  }</pre>
  *  <p>
  *  For some more examples <b>please take a look at the
- *  <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
+ *  <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a></b>.
  */
 public class ComponentMouseEventDelegate<C extends JComponent> extends ComponentDelegate<C, MouseEvent>
 {

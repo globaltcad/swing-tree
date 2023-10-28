@@ -238,6 +238,7 @@ public final class SwingTree
      * through the {@link java.awt.geom.AffineTransform} of the {@link Graphics2D}.
      * If this is the case, then we do not have to do scaled painting
      * and can use the original size of icons, gaps, etc.
+     * @return true if system scaling is enabled.
      */
     public boolean isSystemScalingEnabled() { return UiScale._isSystemScalingEnabled(); }
 

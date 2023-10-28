@@ -15,7 +15,8 @@ public interface SwingTreeConfigurator
      *  Configures the given {@link SwingTreeInitConfig} instance
      *  and returns a new one with the desired configuration applied.
      *
-     *  @param config the {@link SwingTreeInitConfig} instance to configure
+     *  @param config The {@link SwingTreeInitConfig} instance to configure.
+     *  @return A new {@link SwingTreeInitConfig} instance with the desired configuration applied.
      */
     SwingTreeInitConfig configure( SwingTreeInitConfig config );
 }

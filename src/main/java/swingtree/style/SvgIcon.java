@@ -85,6 +85,8 @@ public final class SvgIcon extends ImageIcon
     public int getIconWidth() { return _width; }
 
     /**
+     * @param width The width of the icon, or -1 if the icon should be rendered according
+     *              to the width of a given component or the width of the SVG document itself.
      * @return A new {@link SvgIcon} with the given width.
      *        If the width is -1, the icon will be rendered according to the width of a given component
      *        or the width of the SVG document itself.
@@ -104,17 +106,23 @@ public final class SvgIcon extends ImageIcon
     public int getIconHeight() { return _height; }
 
     /**
+     * @param height The height of the icon, or -1 if the icon should be rendered according
+     *               to the height of a given component or the height of the SVG document itself.
      * @return A new {@link SvgIcon} with the given height.
      *        If the height is -1, the icon will be rendered according to the height of a given component
      *        or the height of the SVG document itself.
      */
-    public SvgIcon withIconHeight(int height ) {
+    public SvgIcon withIconHeight( int height ) {
         if ( height == _height )
             return this;
         return new SvgIcon(_svgDocument, _width, height, _fitComponent);
     }
 
     /**
+     * @param width The width of the icon, or -1 if the icon should be rendered according
+     *              to the width of a given component or the width of the SVG document itself.
+     * @param height The height of the icon, or -1 if the icon should be rendered according
+     *               to the height of a given component or the height of the SVG document itself.
      * @return A new {@link SvgIcon} with the given width and height.
      *        If the width or height is -1, the icon will be rendered according to the width or height of a given component
      *        or the width or height of the SVG document itself.
@@ -132,6 +140,8 @@ public final class SvgIcon extends ImageIcon
     public UI.FitComponent getFitComponent() { return _fitComponent; }
 
     /**
+     * @param fit The {@link UI.FitComponent} that determines if and how the icon should be fitted into a
+     *            any given component (see {@link #paintIcon(Component, java.awt.Graphics, int, int, int, int)}).
      * @return A new {@link SvgIcon} with the given {@link UI.FitComponent} policy.
      */
     public SvgIcon withFitComponent( UI.FitComponent fit ) {

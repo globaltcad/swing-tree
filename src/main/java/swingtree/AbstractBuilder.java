@@ -107,6 +107,7 @@ abstract class AbstractBuilder<I, C extends Component>
      *  which will be executed by the UI thread (see {@link EventProcessor}).
      *
      * @param val A property whose state changes should be listened to on the UI thread.
+     * @param c The component which is wrapped by this builder.
      * @param displayAction A consumer lambda receiving the provided value and
      *                      is then executed by the UI thread.
      * @param <T> The type of the item wrapped by the provided property.
@@ -177,6 +178,7 @@ abstract class AbstractBuilder<I, C extends Component>
      *  which will be executed by the UI thread (see {@link EventProcessor}).
      *
      * @param vals A property list whose state changes should be listened to on the UI thread.
+     * @param c The component which is wrapped by this builder.
      * @param displayAction A consumer lambda receiving the action delegate and
      *                      is then executed by the UI thread.
      * @param <T> The type of the items wrapped by the provided property list.

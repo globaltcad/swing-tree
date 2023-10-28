@@ -34,22 +34,6 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extend
     protected AbstractNestedBuilder( C component ) { super(component); }
 
     /**
-     *  A list of all the siblings of the component wrapped by this builder,
-     *  which includes the current component itself.
-     *
-     * @return A list of all the siblings of the component wrapped by this builder.
-     */
-    protected final List<E> getSiblinghood() {
-        return Optional.ofNullable(getComponent().getParent())
-               .map(Container::getComponents)
-               .map(Arrays::stream)
-               .orElseGet(Stream::empty)
-               .filter(c -> c instanceof JComponent)
-               .map(c -> (E) c)
-               .collect(Collectors.toList());
-    }
-
-    /**
      *  This builder class expects its implementations to be builder types
      *  for anything which can be built in a nested tree-like structure.
      *  Implementations of this abstract method ought to enable support for nested building.
