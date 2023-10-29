@@ -12,7 +12,16 @@ import java.awt.*;
  */
 public class UIForBox<B extends JBox> extends UIForAnySwing<UIForBox<B>, B>
 {
-    protected UIForBox( B component ) { super(component); }
+    private final BuilderState<B> _state;
+
+    protected UIForBox( B component ) {
+        _state = new BuilderState<>(component);
+    }
+
+    @Override
+    protected BuilderState<B> _state() {
+        return _state;
+    }
 
     /**
      *  Use this to dynamically set the {@link MigLayout} attributes of the {@link MigLayout} of the {@link JBox}.

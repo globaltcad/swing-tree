@@ -16,9 +16,18 @@ import java.util.function.Consumer;
  * 	<b>Please take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
  * 	where you can browse a large collection of examples demonstrating how to use the API of this class.</b>
  */
-public class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSlider<S>, S>
+public final class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSlider<S>, S>
 {
-    protected UIForSlider( S component ) { super(component); }
+    private final BuilderState<S> _state;
+
+    UIForSlider( S component ) {
+        _state = new BuilderState<>(component);
+    }
+
+    @Override
+    protected BuilderState<S> _state() {
+        return _state;
+    }
 
     /**
      *  Sets the orientation of the slider.

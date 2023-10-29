@@ -14,8 +14,6 @@ import javax.swing.JToggleButton;
  */
 public abstract class UIForAnyToggleButton<I, B extends JToggleButton> extends UIForAnyButton<I, B>
 {
-    protected UIForAnyToggleButton(B component ) { super(component); }
-
     /**
      *  Use this to dynamically bind to an enum based {@link sprouts.Var}
      *  instance which will be used to dynamically model the selection state of the

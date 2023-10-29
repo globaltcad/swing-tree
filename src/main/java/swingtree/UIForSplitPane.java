@@ -2,22 +2,33 @@ package swingtree;
 
 import sprouts.Val;
 
-import javax.swing.*;
+import javax.swing.JComponent;
+import javax.swing.JSplitPane;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
 /**
  *  A SwingTree builder node designed for configuring {@link JSplitPane} instances.
  */
-public class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UIForSplitPane<P>, P>
+public final class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UIForSplitPane<P>, P>
 {
+    private final BuilderState<P> _state;
+
     /**
      * {@link UIForAnySwing} (sub)types always wrap
      * a single component for which they are responsible.
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.
      */
-    protected UIForSplitPane( P component ) { super( component ); }
+
+    UIForSplitPane( P component ) {
+        _state = new BuilderState<>(component);
+    }
+
+    @Override
+    protected BuilderState<P> _state() {
+        return _state;
+    }
 
     /**
      * Sets the alignment of the split bar in the split pane.

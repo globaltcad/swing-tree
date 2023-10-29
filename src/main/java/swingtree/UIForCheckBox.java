@@ -2,14 +2,23 @@ package swingtree;
 
 import sprouts.Val;
 
-import javax.swing.*;
+import javax.swing.JCheckBox;
 
 /**
  *  A SwingTree builder node designed for configuring {@link JCheckBox} instances.
  */
-public class UIForCheckBox<B extends JCheckBox> extends UIForAnyButton<UIForCheckBox<B>, B>
+public final class UIForCheckBox<B extends JCheckBox> extends UIForAnyButton<UIForCheckBox<B>, B>
 {
-    protected UIForCheckBox(B component) { super(component); }
+    private final BuilderState<B> _state;
+
+    UIForCheckBox( B component ) {
+        _state = new BuilderState<>(component);
+    }
+
+    @Override
+    protected BuilderState<B> _state() {
+        return _state;
+    }
 
 
     public UIForCheckBox<B> borderIsPaintedFlatIf(boolean borderPainted ) {

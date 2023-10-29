@@ -4,13 +4,20 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.Optional;
 
-public class UIForJFrame<F extends JFrame> extends UIForAnyWindow<UIForJFrame<F>, F>
+public final class UIForJFrame<F extends JFrame> extends UIForAnyWindow<UIForJFrame<F>, F>
 {
+	private final BuilderState<F> _state;
+
 	/**
 	 * @param component The component type which will be wrapped by this builder node.
 	 */
-	public UIForJFrame( F component ) {
-		super(component);
+	UIForJFrame( F component ) {
+		_state = new BuilderState<>(component);
+	}
+
+	@Override
+	protected BuilderState<F> _state() {
+		return _state;
 	}
 
 	@Override

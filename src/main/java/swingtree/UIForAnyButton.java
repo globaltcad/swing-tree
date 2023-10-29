@@ -32,8 +32,6 @@ import java.util.function.Consumer;
  */
 public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForAnySwing<I, B>
 {
-    protected UIForAnyButton( B component ) { super(component); }
-
     /**
      * Defines the single line of text the wrapped button type will display.
      * If the value of text is null or empty string, nothing is displayed.

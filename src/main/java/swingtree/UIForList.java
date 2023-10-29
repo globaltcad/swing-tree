@@ -22,15 +22,24 @@ import java.util.function.Function;
  *
  * @param <L> The type of the {@link JList} instance which will be wrapped by this builder node.
  */
-public class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForList<E, L>, L>
+public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForList<E, L>, L>
 {
+    private final BuilderState<L> _state;
+
     /**
      * Extensions of the {@link  UIForAnySwing} always wrap
      * a single component for which they are responsible.
      *
      * @param component The JComponent type which will be wrapped by this builder node.
      */
-    UIForList( L component ) { super(component); }
+    UIForList( L component ) {
+        _state = new BuilderState<>(component);
+    }
+
+    @Override
+    protected BuilderState<L> _state() {
+        return _state;
+    }
 
     /**
      *  Takes the provided list of entry objects and sets them as {@link JList} data.

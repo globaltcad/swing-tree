@@ -7,9 +7,18 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.function.Consumer;
 
-public class UIForFormattedTextField extends UIForAnyTextComponent<UIForFormattedTextField, JFormattedTextField>
+public final class UIForFormattedTextField extends UIForAnyTextComponent<UIForFormattedTextField, JFormattedTextField>
 {
-    protected UIForFormattedTextField( JFormattedTextField component ) { super(component); }
+    private final BuilderState<JFormattedTextField> _state;
+
+    UIForFormattedTextField( JFormattedTextField component ) {
+        _state = new BuilderState<>(component);
+    }
+
+    @Override
+    protected BuilderState<JFormattedTextField> _state() {
+        return _state;
+    }
 
     public UIForFormattedTextField onEnter( Action<ComponentDelegate<JFormattedTextField, ActionEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);

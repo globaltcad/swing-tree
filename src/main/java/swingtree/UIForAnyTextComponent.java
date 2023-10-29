@@ -24,8 +24,6 @@ import java.util.function.Consumer;
  */
 public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends UIForAnySwing<I, C>
 {
-    protected UIForAnyTextComponent(C component) { super(component); }
-
     /**
      * Sets the text of the wrapped <code>{@link TextComponent}</code>
      * to the specified text. If the text is <code>null</code>

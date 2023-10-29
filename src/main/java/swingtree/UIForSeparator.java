@@ -11,15 +11,24 @@ import java.awt.*;
  * 	<b>Please take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
  * 	where you can browse a large collection of examples demonstrating how to use the API of this class.</b>
  */
-public class UIForSeparator<S extends JSeparator> extends UIForAnySwing<UIForSeparator<S>, S>
+public final class UIForSeparator<S extends JSeparator> extends UIForAnySwing<UIForSeparator<S>, S>
 {
+    private final BuilderState<S> _state;
+
     /**
      * Instances of ths {@link UIForSeparator} always wrap
      * a single {@link JSeparator} for which they are responsible and expose helpful utility methods.
      *
      * @param component The JComponent type which will be wrapped by this builder node.
      */
-    protected UIForSeparator(S component) { super(component); }
+    UIForSeparator(S component) {
+        _state = new BuilderState<>(component);
+    }
+
+    @Override
+    protected BuilderState<S> _state() {
+        return _state;
+    }
 
     /**
      * Sets the orientation of the separator which can be either

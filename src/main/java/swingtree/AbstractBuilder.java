@@ -23,25 +23,12 @@ import java.util.function.Supplier;
  */
 abstract class AbstractBuilder<I, C extends Component>
 {
-    private final BuilderState<C> _state;
-
-    /**
-     *  Instances of the {@link AbstractBuilder} as well as its subtypes always wrap
-     *  a single component for which they are responsible.
-     *
-     * @param component The component type which will be wrapped by this builder node.
-     */
-    public AbstractBuilder( C component ) {
-        Objects.requireNonNull(component);
-        _state = new BuilderState<>(component);
-    }
-
     /**
      *  Returns the state of the builder, which is a container for the wrapped component
      *  as well as it's type and current {@link EventProcessor}.
      * @return The state of the builder.
      */
-    protected BuilderState<C> _state() { return _state; }
+    protected abstract BuilderState<C> _state();
 
     protected AbstractBuilder<I,C> _with( Consumer<C> action ) {
         action.accept( getComponent() );

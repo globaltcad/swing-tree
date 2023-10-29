@@ -4,10 +4,8 @@ import sprouts.Val;
 
 import javax.swing.*;
 
-public class UIForAnyMenuItem<I, M extends JMenuItem> extends UIForAnyButton<I, M>
+public abstract class UIForAnyMenuItem<I, M extends JMenuItem> extends UIForAnyButton<I, M>
 {
-    protected UIForAnyMenuItem(M component ) { super(component); }
-
     /**
      * Sets the key combination which invokes the wrapped {@link JMenuItem}'s
      * action listeners without navigating the menu hierarchy. It is the

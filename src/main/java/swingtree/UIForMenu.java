@@ -7,9 +7,18 @@ import javax.swing.JMenu;
 /**
  *  A SwingTree builder node designed for configuring {@link JMenu} instances.
  */
-public class UIForMenu<M extends JMenu> extends UIForAnyMenuItem<UIForMenu<M>, M>
+public final class UIForMenu<M extends JMenu> extends UIForAnyMenuItem<UIForMenu<M>, M>
 {
-    protected UIForMenu( M component ) { super(component); }
+    private final BuilderState<M> _state;
+
+    UIForMenu( M component ) {
+        _state = new BuilderState<>(component);
+    }
+
+    @Override
+    protected BuilderState<M> _state() {
+        return _state;
+    }
 
     /**
      *  Sets the popup menu visibility for this {@link JMenu}

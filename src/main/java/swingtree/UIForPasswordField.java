@@ -9,7 +9,16 @@ import javax.swing.*;
  */
 public class UIForPasswordField<F extends JPasswordField> extends UIForAnyTextComponent<UIForPasswordField<F>, F>
 {
-    protected UIForPasswordField( F component ) { super(component); }
+    private final BuilderState<F> _state;
+
+    protected UIForPasswordField( F component ) {
+        _state = new BuilderState<>(component);
+    }
+
+    @Override
+    protected BuilderState<F> _state() {
+        return _state;
+    }
 
     /**
      * Sets the echo character for this {@link JPasswordField}.

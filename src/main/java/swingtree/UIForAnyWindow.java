@@ -20,14 +20,6 @@ import java.util.function.Consumer;
 public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Window> extends AbstractNestedBuilder<I,W,Component>
 {
 	/**
-	 * Instances of the {@link AbstractBuilder} as well as its subtypes always wrap
-	 * a single component for which they are responsible.
-	 *
-	 * @param component The component type which will be wrapped by this builder node.
-	 */
-	protected UIForAnyWindow( W component ) { super(component); }
-
-	/**
 	 *  Adds a title to the window. <br>
 	 *  Note that the way this is displayed depends on the window type and the
 	 *  operating system.

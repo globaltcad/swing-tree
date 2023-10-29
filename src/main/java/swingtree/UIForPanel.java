@@ -4,15 +4,24 @@ import net.miginfocom.swing.MigLayout;
 import sprouts.Val;
 import swingtree.layout.LayoutConstraint;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JPanel;
+import java.awt.LayoutManager;
 
 /**
  *  A SwingTree builder node designed for configuring {@link JPanel} instances.
  */
-public class UIForPanel<P extends JPanel> extends UIForAnySwing<UIForPanel<P>, P>
+public final class UIForPanel<P extends JPanel> extends UIForAnySwing<UIForPanel<P>, P>
 {
-    protected UIForPanel( P component ) { super(component); }
+    private final BuilderState<P> _state;
+
+    UIForPanel( P component ) {
+        _state = new BuilderState<>(component);
+    }
+
+    @Override
+    protected BuilderState<P> _state() {
+        return _state;
+    }
 
     /**
      *  Use this to dynamically set the {@link MigLayout} attributes of the {@link MigLayout} of the {@link JPanel}.

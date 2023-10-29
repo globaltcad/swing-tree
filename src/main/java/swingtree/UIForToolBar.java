@@ -4,15 +4,24 @@ import sprouts.Val;
 
 import javax.swing.*;
 
-public class UIForToolBar<T extends JToolBar> extends UIForAnySwing<UIForToolBar<T>, T>
+public final class UIForToolBar<T extends JToolBar> extends UIForAnySwing<UIForToolBar<T>, T>
 {
+    private final BuilderState<T> _state;
+
     /**
      * {@link UIForAnySwing} (sub)types always wrap
      * a single component for which they are responsible.
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.
      */
-    protected UIForToolBar(T component) { super(component); }
+    UIForToolBar(T component) {
+        _state = new BuilderState<>(component);
+    }
+
+    @Override
+    protected BuilderState<T> _state() {
+        return _state;
+    }
 
     /**
      * @param alignment The {@link UI.Align} value mapping to the {@link JToolBar}'s orientation.

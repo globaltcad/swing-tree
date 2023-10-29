@@ -7,16 +7,23 @@ import javax.swing.*;
 /**
  *  A SwingTree builder node designed for configuring {@link JProgressBar} instances.
  */
-public class UIForProgressBar<P extends JProgressBar> extends UIForAnySwing<UIForProgressBar<P>, P>
+public final class UIForProgressBar<P extends JProgressBar> extends UIForAnySwing<UIForProgressBar<P>, P>
 {
+    private final BuilderState<P> _state;
+
     /**
      * Extensions of the {@link  UIForAnySwing} always wrap
      * a single component for which they are responsible.
      *
      * @param component The JComponent type which will be wrapped by this builder node.
      */
-    protected UIForProgressBar( P component ) {
-        super(component);
+    UIForProgressBar( P component ) {
+        _state = new BuilderState<>(component);
+    }
+
+    @Override
+    protected BuilderState<P> _state() {
+        return _state;
     }
 
     /**

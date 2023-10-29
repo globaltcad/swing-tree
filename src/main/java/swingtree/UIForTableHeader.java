@@ -10,16 +10,23 @@ import java.util.function.Function;
  *
  * @param <H> The type of the table header.
  */
-public class UIForTableHeader<H extends UI.TableHeader> extends UIForAnySwing<UIForTableHeader<H>, H>
+public final class UIForTableHeader<H extends UI.TableHeader> extends UIForAnySwing<UIForTableHeader<H>, H>
 {
+    private final BuilderState<H> _state;
+
     /**
      * Extensions of the {@link  UIForAnySwing} always wrap
      * a single component for which they are responsible.
      *
      * @param tableHeader The JComponent type which will be wrapped by this builder node.
      */
-    protected UIForTableHeader( H tableHeader ) {
-        super(tableHeader);
+    UIForTableHeader(H tableHeader) {
+        _state = new BuilderState<>(tableHeader);
+    }
+
+    @Override
+    protected BuilderState<H> _state() {
+        return _state;
     }
 
     /**

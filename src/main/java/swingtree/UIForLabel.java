@@ -18,9 +18,18 @@ import java.util.Objects;
  * 	<b>Take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
  * 	where you can browse a large collection of examples demonstrating how to use the API of this class.</b>
  */
-public class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel<L>, L>
+public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel<L>, L>
 {
-    protected UIForLabel( L component ) { super(component); }
+    private final BuilderState<L> _state;
+
+    UIForLabel( L component ) {
+        _state = new BuilderState<>(component);
+    }
+
+    @Override
+    protected BuilderState<L> _state() {
+        return _state;
+    }
 
     private void _makeBold( L thisComponent ) {
         Font f = thisComponent.getFont();

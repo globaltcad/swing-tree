@@ -19,15 +19,17 @@ import java.util.stream.Collectors;
 /**
  *  A SwingTree builder node designed for configuring {@link JSplitButton} instances.
  */
-public class UIForSplitButton<B extends JSplitButton> extends UIForAnyButton<UIForSplitButton<B>, B>
+public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButton<UIForSplitButton<B>, B>
 {
+    private final BuilderState<B> _state;
+
     /**
      *  Creates a new instance wrapping the given {@link JSplitButton} component.
      *
      * @param component The {@link JSplitButton} instance to wrap.
      */
     protected UIForSplitButton( B component ) {
-        super(component);
+        _state = new BuilderState<>(component);
         ExtraState state = ExtraState.of(component);
         component.setPopupMenu(state.popupMenu);
         component.addButtonClickedActionListener(e -> _doApp(()->{
@@ -45,6 +47,11 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAnyButton<UIF
                     );
             }
         }));
+    }
+
+    @Override
+    protected BuilderState<B> _state() {
+        return _state;
     }
 
     private List<JMenuItem> _getSelected(B component) {

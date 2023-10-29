@@ -18,36 +18,9 @@ import java.util.function.Consumer;
 /**
  *  A SwingTree builder node designed for configuring {@link JSpinner} instances.
  */
-public class UIForSpinner<S extends JSpinner> extends UIForAnySwing<UIForSpinner<S>, S>
+public final class UIForSpinner<S extends JSpinner> extends UIForAnySwing<UIForSpinner<S>, S>
 {
-    private JFormattedTextField.AbstractFormatterFactory getDefaultFormatterFactory(Object type) {
-        if (type instanceof DateFormat) {
-            return new DefaultFormatterFactory(new DateFormatter
-                    ((DateFormat)type));
-        }
-        if (type instanceof NumberFormat) {
-            return new DefaultFormatterFactory(new NumberFormatter(
-                    (NumberFormat)type));
-        }
-        if (type instanceof Format) {
-            return new DefaultFormatterFactory(new InternationalFormatter(
-                    (Format)type));
-        }
-        if (type instanceof Date) {
-            return new DefaultFormatterFactory(new DateFormatter());
-        }
-        if (type instanceof Number) {
-            JFormattedTextField.AbstractFormatter displayFormatter = new NumberFormatter();
-            ((NumberFormatter)displayFormatter).setValueClass(type.getClass());
-            JFormattedTextField.AbstractFormatter editFormatter = new NumberFormatter(
-                    new DecimalFormat("#.#"));
-            ((NumberFormatter)editFormatter).setValueClass(type.getClass());
-
-            return new DefaultFormatterFactory(displayFormatter,
-                    displayFormatter,editFormatter);
-        }
-        return new DefaultFormatterFactory(new DefaultFormatter());
-    }
+    private final BuilderState<S> _state;
 
     /**
      * {@link UIForAnySwing} (sub)types always wrap
@@ -55,8 +28,8 @@ public class UIForSpinner<S extends JSpinner> extends UIForAnySwing<UIForSpinner
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.
      */
-    protected UIForSpinner( S component ) {
-        super(component);
+    UIForSpinner( S component ) {
+        _state = new BuilderState<>(component);
         if ( component.getModel() == null || component.getModel().getClass() == SpinnerNumberModel.class ) {
             /*
                 So it turns out that the default SpinnerNumberModel implementation
@@ -123,6 +96,40 @@ public class UIForSpinner<S extends JSpinner> extends UIForAnySwing<UIForSpinner
                 }
             );
         }
+    }
+
+    @Override
+    protected BuilderState<S> _state() {
+        return _state;
+    }
+
+    private JFormattedTextField.AbstractFormatterFactory getDefaultFormatterFactory(Object type) {
+        if (type instanceof DateFormat) {
+            return new DefaultFormatterFactory(new DateFormatter
+                    ((DateFormat)type));
+        }
+        if (type instanceof NumberFormat) {
+            return new DefaultFormatterFactory(new NumberFormatter(
+                    (NumberFormat)type));
+        }
+        if (type instanceof Format) {
+            return new DefaultFormatterFactory(new InternationalFormatter(
+                    (Format)type));
+        }
+        if (type instanceof Date) {
+            return new DefaultFormatterFactory(new DateFormatter());
+        }
+        if (type instanceof Number) {
+            JFormattedTextField.AbstractFormatter displayFormatter = new NumberFormatter();
+            ((NumberFormatter)displayFormatter).setValueClass(type.getClass());
+            JFormattedTextField.AbstractFormatter editFormatter = new NumberFormatter(
+                    new DecimalFormat("#.#"));
+            ((NumberFormatter)editFormatter).setValueClass(type.getClass());
+
+            return new DefaultFormatterFactory(displayFormatter,
+                    displayFormatter,editFormatter);
+        }
+        return new DefaultFormatterFactory(new DefaultFormatter());
     }
 
     /**

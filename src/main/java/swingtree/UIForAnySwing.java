@@ -49,14 +49,6 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     private final static String _TIMERS_KEY = "_swing-tree.timers";
 
     /**
-     *  Extensions of the {@link  UIForAnySwing} always wrap
-     *  a single component for which they are responsible.
-     *
-     * @param component The JComponent type which will be wrapped by this builder node.
-     */
-    protected UIForAnySwing( C component ) { super(component); }
-
-    /**
      *  This method exposes a concise way to bind a {@link Observable} (usually a sprouts.Event to the
      *  {@link JComponent#repaint()} method of the component wrapped by this {@link UI}!
      *  This means that the component will be repainted whenever the event is fired.

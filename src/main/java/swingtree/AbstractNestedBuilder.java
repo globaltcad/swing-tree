@@ -22,15 +22,6 @@ import java.util.List;
 abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extends AbstractBuilder<I, C>
 {
     /**
-     * Instances of the AbstractNestedBuilder as well as its sub types always wrap
-     * a single component for which they are responsible.
-     * In addition to the AbstractBuilder this builder also requires nesting.
-     *
-     * @param component The component type which will be wrapped by this builder node.
-     */
-    protected AbstractNestedBuilder( C component ) { super(component); }
-
-    /**
      *  This builder class expects its implementations to be builder types
      *  for anything which can be built in a nested tree-like structure.
      *  Implementations of this abstract method ought to enable support for nested building.

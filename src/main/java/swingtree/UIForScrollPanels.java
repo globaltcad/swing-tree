@@ -21,16 +21,24 @@ import java.util.function.Consumer;
  *
  * @param <P> The type of the component which this builder node wraps.
  */
-public class UIForScrollPanels<P extends JScrollPanels> extends UIForScrollPane<P>
+public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPane<UIForScrollPanels<P>, P>
 {
+	private final BuilderState<P> _state;
+
 	/**
 	 * Extensions of the {@link  UIForAnySwing} always wrap
 	 * a single component for which they are responsible.
 	 *
 	 * @param component The JComponent type which will be wrapped by this builder node.
 	 */
-	protected UIForScrollPanels( P component ) { super(component); }
+	protected UIForScrollPanels( P component ) {
+		_state = new BuilderState<>(component);
+	}
 
+	@Override
+	protected BuilderState<P> _state() {
+		return _state;
+	}
 
 	@Override
 	protected void _doAddComponent(JComponent newComponent, Object conf, P thisComponent ) {

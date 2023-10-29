@@ -21,7 +21,7 @@ class BuilderState<C extends Component>
      */
     private final Class<C> componentType;
 
-    private DetachableReference<Supplier<C>> componentSupplier;
+    private final DetachableReference<Supplier<C>> componentSupplier;
 
     BuilderState( C component )
     {

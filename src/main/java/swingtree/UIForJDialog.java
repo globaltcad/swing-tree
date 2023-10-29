@@ -4,15 +4,25 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.Optional;
 
-public class UIForJDialog<D extends JDialog> extends UIForAnyWindow<UIForJDialog<D>, D>
+public final class UIForJDialog<D extends JDialog> extends UIForAnyWindow<UIForJDialog<D>, D>
 {
+	private final BuilderState<D> _state;
+
 	/**
 	 * Instances of the {@link AbstractBuilder} as well as its subtypes always wrap
 	 * a single component for which they are responsible.
 	 *
 	 * @param component The component type which will be wrapped by this builder node.
 	 */
-	public UIForJDialog(D component) { super(component); }
+	UIForJDialog( D component ) {
+		_state = new BuilderState<>(component);
+	}
+
+	@Override
+	protected BuilderState<D> _state() {
+		return _state;
+	}
+
 
 	@Override
 	protected void _doAddComponent( Component newComponent, Object conf, D thisComponent ) {

@@ -8,11 +8,20 @@ import java.awt.*;
  */
 public class UIForAnything<T extends Component> extends AbstractBuilder<UIForAnything<T>, T>
 {
+    private final BuilderState<T> _state;
+
     /**
      * Instances of the {@link UIForAnything} builder do not support the
      * "add" method as defined inside the {@link AbstractNestedBuilder}.
      *
      * @param component The component type which will be wrapped by this builder node.
      */
-    protected UIForAnything(T component) { super(component); }
+    protected UIForAnything( T component ) {
+        _state = new BuilderState<>(component);
+    }
+
+    @Override
+    protected BuilderState<T> _state() {
+        return _state;
+    }
 }

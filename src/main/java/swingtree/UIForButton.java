@@ -13,7 +13,16 @@ public class UIForButton<B extends AbstractButton> extends UIForAnyButton<UIForB
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(UIForButton.class);
 
-    protected UIForButton( B component ) { super(component); }
+    private final BuilderState<B> _state;
+
+    UIForButton( B component ) {
+        _state = new BuilderState<>(component);
+    }
+
+    @Override
+    protected BuilderState<B> _state() {
+        return _state;
+    }
 
     /**
      * Make this button the default button for the root pane it is in.
