@@ -7,9 +7,18 @@ import javax.swing.JMenu;
 /**
  *  A SwingTree builder node designed for configuring {@link JMenu} instances.
  */
-public class UIForMenu&lt;M extends JMenu&gt; extends UIForAnyMenuItem&lt;UIForMenu&lt;M&gt;, M&gt;
+public final class UIForMenu&lt;M extends JMenu&gt; extends UIForAnyMenuItem&lt;UIForMenu&lt;M&gt;, M&gt;
 {
-<span class="nc" id="L12">    protected UIForMenu( M component ) { super(component); }</span>
+    private final BuilderState&lt;M&gt; _state;
+
+<span class="nc" id="L14">    UIForMenu( M component ) {</span>
+<span class="nc" id="L15">        _state = new BuilderState&lt;&gt;(component);</span>
+<span class="nc" id="L16">    }</span>
+
+    @Override
+    protected BuilderState&lt;M&gt; _state() {
+<span class="nc" id="L20">        return _state;</span>
+    }
 
     /**
      *  Sets the popup menu visibility for this {@link JMenu}
@@ -19,10 +28,10 @@ public class UIForMenu&lt;M extends JMenu&gt; extends UIForAnyMenuItem&lt;UIForM
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForMenu&lt;M&gt; popupMenuIsVisibleIf( boolean popupMenuVisible ) {
-<span class="nc" id="L22">        return _with( thisComponent -&gt; {</span>
-<span class="nc" id="L23">                    thisComponent.setPopupMenuVisible(popupMenuVisible);</span>
-<span class="nc" id="L24">                })</span>
-<span class="nc" id="L25">                ._this();</span>
+<span class="nc" id="L31">        return _with( thisComponent -&gt; {</span>
+<span class="nc" id="L32">                    thisComponent.setPopupMenuVisible(popupMenuVisible);</span>
+<span class="nc" id="L33">                })</span>
+<span class="nc" id="L34">                ._this();</span>
     }
 
     /**
@@ -33,13 +42,13 @@ public class UIForMenu&lt;M extends JMenu&gt; extends UIForAnyMenuItem&lt;UIForM
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForMenu&lt;M&gt; popupMenuIsVisibleIf( Val&lt;Boolean&gt; val ) {
-<span class="nc" id="L36">        return _withOnShow( val, (thisComponent, it) -&gt; {</span>
-<span class="nc" id="L37">                    thisComponent.setPopupMenuVisible( it );</span>
-<span class="nc" id="L38">                })</span>
-<span class="nc" id="L39">                ._with( thisComponent -&gt; {</span>
-<span class="nc" id="L40">                    thisComponent.setPopupMenuVisible( val.get() );</span>
-<span class="nc" id="L41">                })</span>
-<span class="nc" id="L42">                ._this();</span>
+<span class="nc" id="L45">        return _withOnShow( val, (thisComponent, it) -&gt; {</span>
+<span class="nc" id="L46">                    thisComponent.setPopupMenuVisible( it );</span>
+<span class="nc" id="L47">                })</span>
+<span class="nc" id="L48">                ._with( thisComponent -&gt; {</span>
+<span class="nc" id="L49">                    thisComponent.setPopupMenuVisible( val.get() );</span>
+<span class="nc" id="L50">                })</span>
+<span class="nc" id="L51">                ._this();</span>
     }
 
 }

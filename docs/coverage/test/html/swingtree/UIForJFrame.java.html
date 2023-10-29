@@ -4,54 +4,61 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.Optional;
 
-public class UIForJFrame&lt;F extends JFrame&gt; extends UIForAnyWindow&lt;UIForJFrame&lt;F&gt;, F&gt;
+public final class UIForJFrame&lt;F extends JFrame&gt; extends UIForAnyWindow&lt;UIForJFrame&lt;F&gt;, F&gt;
 {
+	private final BuilderState&lt;F&gt; _state;
+
 	/**
 	 * @param component The component type which will be wrapped by this builder node.
 	 */
-	public UIForJFrame( F component ) {
-<span class="fc" id="L13">		super(component);</span>
-<span class="fc" id="L14">	}</span>
+<span class="fc" id="L14">	UIForJFrame( F component ) {</span>
+<span class="fc" id="L15">		_state = new BuilderState&lt;&gt;(component);</span>
+<span class="fc" id="L16">	}</span>
+
+	@Override
+	protected BuilderState&lt;F&gt; _state() {
+<span class="fc" id="L20">		return _state;</span>
+	}
 
 	@Override
 	protected void _doAddComponent( Component component, Object conf, F thisComponent ) {
-<span class="pc bpc" id="L18" title="1 of 2 branches missed.">		thisComponent.add(conf == null ? null : conf.toString(), component);</span>
-<span class="fc" id="L19">	}</span>
+<span class="pc bpc" id="L25" title="1 of 2 branches missed.">		thisComponent.add(conf == null ? null : conf.toString(), component);</span>
+<span class="fc" id="L26">	}</span>
 
 	@Override
 	public void show() {
-<span class="fc" id="L23">		JFrame frame = getComponent();</span>
-<span class="fc" id="L24">		Component[] components = frame.getComponents();</span>
-<span class="fc" id="L25">		frame.setLocationRelativeTo(null); // Initial centering!v</span>
-<span class="fc" id="L26">		frame.pack(); // Otherwise some components resize strangely or are not shown at all...</span>
+<span class="fc" id="L30">		JFrame frame = getComponent();</span>
+<span class="fc" id="L31">		Component[] components = frame.getComponents();</span>
+<span class="fc" id="L32">		frame.setLocationRelativeTo(null); // Initial centering!v</span>
+<span class="fc" id="L33">		frame.pack(); // Otherwise some components resize strangely or are not shown at all...</span>
 		// Make sure that the window is centered on the screen again but with the component:
-<span class="fc" id="L28">		frame.setLocationRelativeTo(null);</span>
+<span class="fc" id="L35">		frame.setLocationRelativeTo(null);</span>
 		// We set the size to fit the component:
-<span class="pc bpc" id="L30" title="1 of 2 branches missed.">		if ( components.length &gt; 0 ) {</span>
-<span class="nc" id="L31">			Dimension size = frame.getSize();</span>
-<span class="nc bnc" id="L32" title="All 2 branches missed.">			if ( size == null ) // The frame has no size! It is best to set the size to the preferred size of the component:</span>
-<span class="nc" id="L33">				size = components[0].getPreferredSize();</span>
+<span class="pc bpc" id="L37" title="1 of 2 branches missed.">		if ( components.length &gt; 0 ) {</span>
+<span class="nc" id="L38">			Dimension size = frame.getSize();</span>
+<span class="nc bnc" id="L39" title="All 2 branches missed.">			if ( size == null ) // The frame has no size! It is best to set the size to the preferred size of the component:</span>
+<span class="nc" id="L40">				size = components[0].getPreferredSize();</span>
 
-<span class="nc bnc" id="L35" title="All 2 branches missed.">			if ( size == null ) // The component has no preferred size! It is best to set the size to the minimum size of the component:</span>
-<span class="nc" id="L36">				size = components[0].getMinimumSize();</span>
+<span class="nc bnc" id="L42" title="All 2 branches missed.">			if ( size == null ) // The component has no preferred size! It is best to set the size to the minimum size of the component:</span>
+<span class="nc" id="L43">				size = components[0].getMinimumSize();</span>
 
-<span class="nc bnc" id="L38" title="All 2 branches missed.">			if ( size == null ) // The component has no minimum size! Let's just look up the size of the component:</span>
-<span class="nc" id="L39">				size = components[0].getSize();</span>
+<span class="nc bnc" id="L45" title="All 2 branches missed.">			if ( size == null ) // The component has no minimum size! Let's just look up the size of the component:</span>
+<span class="nc" id="L46">				size = components[0].getSize();</span>
 
-<span class="nc" id="L41">			frame.setSize(size);</span>
+<span class="nc" id="L48">			frame.setSize(size);</span>
 		}
 
-<span class="fc" id="L44">		frame.setVisible(true);</span>
-<span class="fc" id="L45">	}</span>
+<span class="fc" id="L51">		frame.setVisible(true);</span>
+<span class="fc" id="L52">	}</span>
 
 	@Override protected Optional&lt;JRootPane&gt; _getRootPaneOf(F thisWindow) {
-<span class="fc" id="L48">		return Optional.ofNullable(thisWindow.getRootPane());</span>
+<span class="fc" id="L55">		return Optional.ofNullable(thisWindow.getRootPane());</span>
 	}
 
 	@Override
 	protected void _setTitleOf(F thisWindow, String title) {
-<span class="fc" id="L53">		thisWindow.setTitle(title);</span>
-<span class="fc" id="L54">	}</span>
+<span class="fc" id="L60">		thisWindow.setTitle(title);</span>
+<span class="fc" id="L61">	}</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

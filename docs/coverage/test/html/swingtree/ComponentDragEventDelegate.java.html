@@ -21,20 +21,21 @@ public final class ComponentDragEventDelegate&lt;C extends JComponent&gt; extend
 {
 <span class="nc" id="L22">    private final List&lt;MouseEvent&gt; _dragEventHistory = new java.util.ArrayList&lt;&gt;();</span>
 
+
     ComponentDragEventDelegate(
             C component,
             MouseEvent event,
             List&lt;MouseEvent&gt; dragEventHistory
     ) {
-<span class="nc" id="L29">        super(component, event);</span>
-<span class="nc" id="L30">        _dragEventHistory.addAll(dragEventHistory);</span>
-<span class="nc" id="L31">    }</span>
+<span class="nc" id="L30">        super(component, event);</span>
+<span class="nc" id="L31">        _dragEventHistory.addAll(dragEventHistory);</span>
+<span class="nc" id="L32">    }</span>
 
     /**
      * @return A list of all {@link MouseEvent}s of a continuous mouse drag performed on the component.
      */
     public List&lt;MouseEvent&gt; dragEvents() {
-<span class="nc" id="L37">        return Collections.unmodifiableList(_dragEventHistory);</span>
+<span class="nc" id="L38">        return Collections.unmodifiableList(_dragEventHistory);</span>
     }
 
     /**
@@ -42,7 +43,7 @@ public final class ComponentDragEventDelegate&lt;C extends JComponent&gt; extend
      *         The points of this list represent the mouse movement track since the start of a continuous drag.
      */
     public List&lt;Point&gt; dragPositions() {
-<span class="nc" id="L45">        return Collections.unmodifiableList(_dragEventHistory.stream().map(MouseEvent::getPoint).collect(Collectors.toList()));</span>
+<span class="nc" id="L46">        return Collections.unmodifiableList(_dragEventHistory.stream().map(MouseEvent::getPoint).collect(Collectors.toList()));</span>
     }
 
 }

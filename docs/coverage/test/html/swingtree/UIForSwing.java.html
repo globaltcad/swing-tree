@@ -7,12 +7,22 @@ import javax.swing.*;
  */
 public class UIForSwing&lt;C extends JComponent&gt; extends UIForAnySwing&lt;UIForSwing&lt;C&gt;, C&gt;
 {
+    private final BuilderState&lt;C&gt; _state;
+
     /**
      * {@link UIForAnySwing} (sub)types always wrap
      * a single component for which they are responsible.
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.
      */
-<span class="fc" id="L16">    protected UIForSwing( C component ) { super(component); }</span>
+<span class="fc" id="L18">    protected UIForSwing( C component ) {</span>
+<span class="fc" id="L19">        _state = new BuilderState&lt;&gt;(component);</span>
+<span class="fc" id="L20">    }</span>
+
+
+    @Override
+    protected BuilderState&lt;C&gt; _state() {
+<span class="fc" id="L25">        return _state;</span>
+    }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

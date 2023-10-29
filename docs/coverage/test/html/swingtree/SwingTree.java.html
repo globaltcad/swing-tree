@@ -238,8 +238,9 @@ public final class SwingTree
      * through the {@link java.awt.geom.AffineTransform} of the {@link Graphics2D}.
      * If this is the case, then we do not have to do scaled painting
      * and can use the original size of icons, gaps, etc.
+     * @return true if system scaling is enabled.
      */
-<span class="nc" id="L242">    public boolean isSystemScalingEnabled() { return UiScale._isSystemScalingEnabled(); }</span>
+<span class="nc" id="L243">    public boolean isSystemScalingEnabled() { return UiScale._isSystemScalingEnabled(); }</span>
 
     /**
      * Returns the system scale factor for the given graphics context.
@@ -250,7 +251,7 @@ public final class SwingTree
      * @return The system scale factor for the given graphics context.
      */
     public double getSystemScaleFactorOf( Graphics2D g ) {
-<span class="nc" id="L253">        return UiScale._getSystemScaleFactorOf(g);</span>
+<span class="nc" id="L254">        return UiScale._getSystemScaleFactorOf(g);</span>
     }
 
     /**
@@ -263,7 +264,7 @@ public final class SwingTree
      * @return The system scale factor.
      */
     public double getSystemScaleFactor() {
-<span class="nc" id="L266">        return UiScale._getSystemScaleFactor();</span>
+<span class="nc" id="L267">        return UiScale._getSystemScaleFactor();</span>
     }
 
 	/**
@@ -271,7 +272,7 @@ public final class SwingTree
 	 *         GUI and application events.
 	 */
 	public EventProcessor getEventProcessor() {
-<span class="fc" id="L274">		return _config.eventProcessor();</span>
+<span class="fc" id="L275">		return _config.eventProcessor();</span>
 	}
 
 	/**
@@ -283,18 +284,18 @@ public final class SwingTree
 	 */
 	public void setEventProcessor( EventProcessor eventProcessor ) {
         try {
-<span class="fc" id="L286">            _config = _config.eventProcessor(Objects.requireNonNull(eventProcessor));</span>
-<span class="nc" id="L287">        } catch (Exception ex) {</span>
-<span class="nc" id="L288">            log.error(&quot;Error setting event processor&quot;, ex);</span>
-<span class="nc" id="L289">            ex.printStackTrace();</span>
-<span class="fc" id="L290">        }</span>
-<span class="fc" id="L291">	}</span>
+<span class="fc" id="L287">            _config = _config.eventProcessor(Objects.requireNonNull(eventProcessor));</span>
+<span class="nc" id="L288">        } catch (Exception ex) {</span>
+<span class="nc" id="L289">            log.error(&quot;Error setting event processor&quot;, ex);</span>
+<span class="nc" id="L290">            ex.printStackTrace();</span>
+<span class="fc" id="L291">        }</span>
+<span class="fc" id="L292">	}</span>
 
 	/**
 	 * @return The currently configured {@link StyleSheet} that is used to style components.
 	 */
 	public StyleSheet getStyleSheet() {
-<span class="fc" id="L297">        return _config.styleSheet();</span>
+<span class="fc" id="L298">        return _config.styleSheet();</span>
 	}
 
 	/**
@@ -305,12 +306,12 @@ public final class SwingTree
 	 */
 	public void setStyleSheet( StyleSheet styleSheet ) {
         try {
-<span class="fc" id="L308">            _config = _config.styleSheet(Objects.requireNonNull(styleSheet));</span>
-<span class="nc" id="L309">        } catch ( Exception ex ) {</span>
-<span class="nc" id="L310">            log.error(&quot;Error setting style sheet&quot;, ex);</span>
-<span class="nc" id="L311">            ex.printStackTrace();</span>
-<span class="fc" id="L312">        }</span>
-<span class="fc" id="L313">	}</span>
+<span class="fc" id="L309">            _config = _config.styleSheet(Objects.requireNonNull(styleSheet));</span>
+<span class="nc" id="L310">        } catch ( Exception ex ) {</span>
+<span class="nc" id="L311">            log.error(&quot;Error setting style sheet&quot;, ex);</span>
+<span class="nc" id="L312">            ex.printStackTrace();</span>
+<span class="fc" id="L313">        }</span>
+<span class="fc" id="L314">	}</span>
 
     /**
      * This class handles scaling in SwingTree UIs.
@@ -352,92 +353,92 @@ public final class SwingTree
 
         private static Boolean jreHiDPI;
 
-<span class="fc" id="L355">        private float scaleFactor = 1;</span>
+<span class="fc" id="L356">        private float scaleFactor = 1;</span>
         private boolean initialized;
 
 
         private UiScale(SwingTreeInitConfig config ) // private to prevent instantiation from outside
-<span class="fc" id="L360">        {</span>
-<span class="fc" id="L361">            this.config = config;</span>
+<span class="fc" id="L361">        {</span>
+<span class="fc" id="L362">            this.config = config;</span>
             try {
-<span class="pc bpc" id="L363" title="1 of 2 branches missed.">                if ( config.scalingStrategy() == SwingTreeInitConfig.Scaling.NONE ) {</span>
-<span class="nc" id="L364">                    this.scaleFactor = 1;</span>
-<span class="nc" id="L365">                    this.initialized = true;</span>
-<span class="nc" id="L366">                    return;</span>
+<span class="pc bpc" id="L364" title="1 of 2 branches missed.">                if ( config.scalingStrategy() == SwingTreeInitConfig.Scaling.NONE ) {</span>
+<span class="nc" id="L365">                    this.scaleFactor = 1;</span>
+<span class="nc" id="L366">                    this.initialized = true;</span>
+<span class="nc" id="L367">                    return;</span>
                 }
 
-<span class="fc bfc" id="L369" title="All 2 branches covered.">                if ( config.scalingStrategy() == SwingTreeInitConfig.Scaling.FROM_DEFAULT_FONT ) {</span>
-<span class="fc" id="L370">                    Font uiScaleReferenceFont = config.defaultFont().orElse(null);</span>
-<span class="pc bpc" id="L371" title="1 of 2 branches missed.">                    if (uiScaleReferenceFont != null)</span>
-<span class="fc" id="L372">                        UIManager.getDefaults().put(_DEFAULT_FONT, uiScaleReferenceFont);</span>
+<span class="fc bfc" id="L370" title="All 2 branches covered.">                if ( config.scalingStrategy() == SwingTreeInitConfig.Scaling.FROM_DEFAULT_FONT ) {</span>
+<span class="fc" id="L371">                    Font uiScaleReferenceFont = config.defaultFont().orElse(null);</span>
+<span class="pc bpc" id="L372" title="1 of 2 branches missed.">                    if (uiScaleReferenceFont != null)</span>
+<span class="fc" id="L373">                        UIManager.getDefaults().put(_DEFAULT_FONT, uiScaleReferenceFont);</span>
                 }
 
-<span class="fc bfc" id="L375" title="All 2 branches covered.">                if ( config.scalingStrategy() == SwingTreeInitConfig.Scaling.FROM_SYSTEM_FONT ) {</span>
-<span class="fc" id="L376">                    float defaultScale = this.scaleFactor;</span>
-<span class="fc" id="L377">                    Font highDPIFont = _calculateDPIAwarePlatformFont();</span>
-<span class="fc" id="L378">                    boolean updated = _initialize( highDPIFont );</span>
-<span class="pc bpc" id="L379" title="1 of 2 branches missed.">                    if ( this.scaleFactor != defaultScale )</span>
-<span class="nc" id="L380">                        UIManager.getDefaults().put(_DEFAULT_FONT, highDPIFont);</span>
-<span class="pc bpc" id="L381" title="1 of 2 branches missed.">                    if ( updated )</span>
-<span class="fc" id="L382">                        _setScalePropertyListeners();</span>
-<span class="fc" id="L383">                }</span>
+<span class="fc bfc" id="L376" title="All 2 branches covered.">                if ( config.scalingStrategy() == SwingTreeInitConfig.Scaling.FROM_SYSTEM_FONT ) {</span>
+<span class="fc" id="L377">                    float defaultScale = this.scaleFactor;</span>
+<span class="fc" id="L378">                    Font highDPIFont = _calculateDPIAwarePlatformFont();</span>
+<span class="fc" id="L379">                    boolean updated = _initialize( highDPIFont );</span>
+<span class="pc bpc" id="L380" title="1 of 2 branches missed.">                    if ( this.scaleFactor != defaultScale )</span>
+<span class="nc" id="L381">                        UIManager.getDefaults().put(_DEFAULT_FONT, highDPIFont);</span>
+<span class="pc bpc" id="L382" title="1 of 2 branches missed.">                    if ( updated )</span>
+<span class="fc" id="L383">                        _setScalePropertyListeners();</span>
+<span class="fc" id="L384">                }</span>
                 else
-<span class="fc" id="L385">                    _initialize();</span>
+<span class="fc" id="L386">                    _initialize();</span>
 
-<span class="nc" id="L387">            } catch (Exception ex) {</span>
-<span class="nc" id="L388">                log.error(&quot;Error initializing &quot;+ UiScale.class.getSimpleName(), ex);</span>
+<span class="nc" id="L388">            } catch (Exception ex) {</span>
+<span class="nc" id="L389">                log.error(&quot;Error initializing &quot;+ UiScale.class.getSimpleName(), ex);</span>
                 // Usually there should be no exception, if there is one, the library will still work, but
                 // the UI may not be scaled correctly. Please report this exception to the library author.
-<span class="fc" id="L391">            }</span>
-<span class="fc" id="L392">        }</span>
+<span class="fc" id="L392">            }</span>
+<span class="fc" id="L393">        }</span>
 
         private Font _calculateDPIAwarePlatformFont()
         {
-<span class="fc" id="L396">            FontUIResource dpiAwareFont = null;</span>
+<span class="fc" id="L397">            FontUIResource dpiAwareFont = null;</span>
 
             // determine UI font based on operating system
-<span class="pc bpc" id="L399" title="1 of 2 branches missed.">            if( SystemInfo.isWindows ) {</span>
-<span class="nc" id="L400">                Font winFont = (Font) Toolkit.getDefaultToolkit().getDesktopProperty( &quot;win.messagebox.font&quot; );</span>
-<span class="nc bnc" id="L401" title="All 2 branches missed.">                if( winFont != null ) {</span>
-<span class="nc bnc" id="L402" title="All 2 branches missed.">                    if( SystemInfo.isWinPE ) {</span>
+<span class="pc bpc" id="L400" title="1 of 2 branches missed.">            if( SystemInfo.isWindows ) {</span>
+<span class="nc" id="L401">                Font winFont = (Font) Toolkit.getDefaultToolkit().getDesktopProperty( &quot;win.messagebox.font&quot; );</span>
+<span class="nc bnc" id="L402" title="All 2 branches missed.">                if( winFont != null ) {</span>
+<span class="nc bnc" id="L403" title="All 2 branches missed.">                    if( SystemInfo.isWinPE ) {</span>
                         // on WinPE use &quot;win.defaultGUI.font&quot;, which is usually Tahoma,
                         // because Segoe UI font is not available on WinPE
-<span class="nc" id="L405">                        Font winPEFont = (Font) Toolkit.getDefaultToolkit().getDesktopProperty( &quot;win.defaultGUI.font&quot; );</span>
-<span class="nc bnc" id="L406" title="All 2 branches missed.">                        if ( winPEFont != null )</span>
-<span class="nc" id="L407">                            dpiAwareFont = _createCompositeFont( winPEFont.getFamily(), winPEFont.getStyle(), winFont.getSize() );</span>
-<span class="nc" id="L408">                    }</span>
+<span class="nc" id="L406">                        Font winPEFont = (Font) Toolkit.getDefaultToolkit().getDesktopProperty( &quot;win.defaultGUI.font&quot; );</span>
+<span class="nc bnc" id="L407" title="All 2 branches missed.">                        if ( winPEFont != null )</span>
+<span class="nc" id="L408">                            dpiAwareFont = _createCompositeFont( winPEFont.getFamily(), winPEFont.getStyle(), winFont.getSize() );</span>
+<span class="nc" id="L409">                    }</span>
                     else
-<span class="nc" id="L410">                        dpiAwareFont = _createCompositeFont( winFont.getFamily(), winFont.getStyle(), winFont.getSize() );</span>
+<span class="nc" id="L411">                        dpiAwareFont = _createCompositeFont( winFont.getFamily(), winFont.getStyle(), winFont.getSize() );</span>
                 }
 
-<span class="pc bpc" id="L413" title="1 of 2 branches missed.">            } else if ( SystemInfo.isMacOS ) {</span>
+<span class="pc bpc" id="L414" title="1 of 2 branches missed.">            } else if ( SystemInfo.isMacOS ) {</span>
                 String fontName;
-<span class="nc bnc" id="L415" title="All 2 branches missed.">                if( SystemInfo.isMacOS_10_15_Catalina_orLater ) {</span>
-<span class="nc bnc" id="L416" title="All 2 branches missed.">                    if ( SystemInfo.isJetBrainsJVM_11_orLater ) {</span>
+<span class="nc bnc" id="L416" title="All 2 branches missed.">                if( SystemInfo.isMacOS_10_15_Catalina_orLater ) {</span>
+<span class="nc bnc" id="L417" title="All 2 branches missed.">                    if ( SystemInfo.isJetBrainsJVM_11_orLater ) {</span>
                         // See https://youtrack.jetbrains.com/issue/JBR-1915
-<span class="nc" id="L418">                        fontName = &quot;.AppleSystemUIFont&quot;;</span>
+<span class="nc" id="L419">                        fontName = &quot;.AppleSystemUIFont&quot;;</span>
                     } else {
                         // use Helvetica Neue font
-<span class="nc" id="L421">                        fontName = &quot;Helvetica Neue&quot;;</span>
+<span class="nc" id="L422">                        fontName = &quot;Helvetica Neue&quot;;</span>
                     }
-<span class="nc bnc" id="L423" title="All 2 branches missed.">                } else if( SystemInfo.isMacOS_10_11_ElCapitan_orLater ) {</span>
+<span class="nc bnc" id="L424" title="All 2 branches missed.">                } else if( SystemInfo.isMacOS_10_11_ElCapitan_orLater ) {</span>
                     // use San Francisco Text font
-<span class="nc" id="L425">                    fontName = &quot;.SF NS Text&quot;;</span>
+<span class="nc" id="L426">                    fontName = &quot;.SF NS Text&quot;;</span>
                 } else {
                     // default font on older systems (see com.apple.laf.AquaFonts)
-<span class="nc" id="L428">                    fontName = &quot;Lucida Grande&quot;;</span>
+<span class="nc" id="L429">                    fontName = &quot;Lucida Grande&quot;;</span>
                 }
 
-<span class="nc" id="L431">                dpiAwareFont = _createCompositeFont( fontName, Font.PLAIN, 13 );</span>
+<span class="nc" id="L432">                dpiAwareFont = _createCompositeFont( fontName, Font.PLAIN, 13 );</span>
 
-<span class="pc bpc" id="L433" title="1 of 2 branches missed.">            } else if( SystemInfo.isLinux ) {</span>
-<span class="fc" id="L434">                Font font = LinuxFontPolicy.getFont();</span>
-<span class="pc bpc" id="L435" title="1 of 2 branches missed.">                dpiAwareFont = (font instanceof FontUIResource) ? (FontUIResource) font : new FontUIResource( font );</span>
+<span class="pc bpc" id="L434" title="1 of 2 branches missed.">            } else if( SystemInfo.isLinux ) {</span>
+<span class="fc" id="L435">                Font font = LinuxFontPolicy.getFont();</span>
+<span class="pc bpc" id="L436" title="1 of 2 branches missed.">                dpiAwareFont = (font instanceof FontUIResource) ? (FontUIResource) font : new FontUIResource( font );</span>
             }
 
             // fallback
-<span class="pc bpc" id="L439" title="1 of 2 branches missed.">            if( dpiAwareFont == null )</span>
-<span class="nc" id="L440">                dpiAwareFont = _createCompositeFont( Font.SANS_SERIF, Font.PLAIN, 12 );</span>
+<span class="pc bpc" id="L440" title="1 of 2 branches missed.">            if( dpiAwareFont == null )</span>
+<span class="nc" id="L441">                dpiAwareFont = _createCompositeFont( Font.SANS_SERIF, Font.PLAIN, 12 );</span>
 
             // Todo: Look at ActiveFont in FlatLaf to see if we need to do anything with it here.
             // Comment from FlatLaf code base below:
@@ -455,30 +456,30 @@ public final class SwingTree
             */
 
             // increase font size if system property &quot;swingtree.uiScale&quot; is set
-<span class="fc" id="L458">            dpiAwareFont = _applyCustomScaleFactor( dpiAwareFont );</span>
+<span class="fc" id="L459">            dpiAwareFont = _applyCustomScaleFactor( dpiAwareFont );</span>
 
-<span class="fc" id="L460">            return dpiAwareFont;</span>
+<span class="fc" id="L461">            return dpiAwareFont;</span>
         }
 
         private static FontUIResource _createCompositeFont( String family, int style, int size ) {
             // using StyleContext.getFont() here because it uses
             // sun.font.FontUtilities.getCompositeFontUIResource()
             // and creates a composite font that is able to display all Unicode characters
-<span class="fc" id="L467">            Font font = StyleContext.getDefaultStyleContext().getFont( family, style, size );</span>
-<span class="pc bpc" id="L468" title="1 of 2 branches missed.">            return (font instanceof FontUIResource) ? (FontUIResource) font : new FontUIResource( font );</span>
+<span class="fc" id="L468">            Font font = StyleContext.getDefaultStyleContext().getFont( family, style, size );</span>
+<span class="pc bpc" id="L469" title="1 of 2 branches missed.">            return (font instanceof FontUIResource) ? (FontUIResource) font : new FontUIResource( font );</span>
         }
 
         public void addPropertyChangeListener( PropertyChangeListener listener ) {
-<span class="nc bnc" id="L472" title="All 2 branches missed.">            if( changeSupport == null )</span>
-<span class="nc" id="L473">                changeSupport = new PropertyChangeSupport( UiScale.class );</span>
-<span class="nc" id="L474">            changeSupport.addPropertyChangeListener( listener );</span>
-<span class="nc" id="L475">        }</span>
+<span class="nc bnc" id="L473" title="All 2 branches missed.">            if( changeSupport == null )</span>
+<span class="nc" id="L474">                changeSupport = new PropertyChangeSupport( UiScale.class );</span>
+<span class="nc" id="L475">            changeSupport.addPropertyChangeListener( listener );</span>
+<span class="nc" id="L476">        }</span>
 
         public void removePropertyChangeListener( PropertyChangeListener listener ) {
-<span class="nc bnc" id="L478" title="All 2 branches missed.">            if( changeSupport == null )</span>
-<span class="nc" id="L479">                return;</span>
-<span class="nc" id="L480">            changeSupport.removePropertyChangeListener( listener );</span>
-<span class="nc" id="L481">        }</span>
+<span class="nc bnc" id="L479" title="All 2 branches missed.">            if( changeSupport == null )</span>
+<span class="nc" id="L480">                return;</span>
+<span class="nc" id="L481">            changeSupport.removePropertyChangeListener( listener );</span>
+<span class="nc" id="L482">        }</span>
 
         //---- system scaling (Java 9) --------------------------------------------
 
@@ -490,30 +491,30 @@ public final class SwingTree
          * and can use the original size of icons, gaps, etc.
          */
         static boolean _isSystemScalingEnabled() {
-<span class="fc bfc" id="L493" title="All 2 branches covered.">            if ( jreHiDPI != null )</span>
-<span class="fc" id="L494">                return jreHiDPI;</span>
+<span class="fc bfc" id="L494" title="All 2 branches covered.">            if ( jreHiDPI != null )</span>
+<span class="fc" id="L495">                return jreHiDPI;</span>
 
-<span class="fc" id="L496">            jreHiDPI = false;</span>
+<span class="fc" id="L497">            jreHiDPI = false;</span>
 
-<span class="pc bpc" id="L498" title="1 of 2 branches missed.">            if ( SystemInfo.isJava_9_orLater ) {</span>
+<span class="pc bpc" id="L499" title="1 of 2 branches missed.">            if ( SystemInfo.isJava_9_orLater ) {</span>
                 // Java 9 and later supports per-monitor scaling
-<span class="fc" id="L500">                jreHiDPI = true;</span>
-<span class="nc bnc" id="L501" title="All 2 branches missed.">            } else if ( SystemInfo.isJetBrainsJVM ) {</span>
+<span class="fc" id="L501">                jreHiDPI = true;</span>
+<span class="nc bnc" id="L502" title="All 2 branches missed.">            } else if ( SystemInfo.isJetBrainsJVM ) {</span>
                 // IntelliJ IDEA ships its own JetBrains Java 8 JRE that may support per-monitor scaling
                 // see com.intellij.ui.JreHiDpiUtil.isJreHiDPIEnabled()
                 try {
-<span class="nc" id="L505">                    GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();</span>
-<span class="nc" id="L506">                    Class&lt;?&gt; sunGeClass = Class.forName( &quot;sun.java2d.SunGraphicsEnvironment&quot; );</span>
-<span class="nc bnc" id="L507" title="All 2 branches missed.">                    if( sunGeClass.isInstance( ge ) ) {</span>
-<span class="nc" id="L508">                        Method m = sunGeClass.getDeclaredMethod( &quot;isUIScaleOn&quot; );</span>
-<span class="nc" id="L509">                        jreHiDPI = (Boolean) m.invoke( ge );</span>
+<span class="nc" id="L506">                    GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();</span>
+<span class="nc" id="L507">                    Class&lt;?&gt; sunGeClass = Class.forName( &quot;sun.java2d.SunGraphicsEnvironment&quot; );</span>
+<span class="nc bnc" id="L508" title="All 2 branches missed.">                    if( sunGeClass.isInstance( ge ) ) {</span>
+<span class="nc" id="L509">                        Method m = sunGeClass.getDeclaredMethod( &quot;isUIScaleOn&quot; );</span>
+<span class="nc" id="L510">                        jreHiDPI = (Boolean) m.invoke( ge );</span>
                     }
-<span class="nc" id="L511">                } catch( Throwable ex ) {</span>
+<span class="nc" id="L512">                } catch( Throwable ex ) {</span>
                     // ignore
-<span class="nc" id="L513">                }</span>
+<span class="nc" id="L514">                }</span>
             }
 
-<span class="fc" id="L516">            return jreHiDPI;</span>
+<span class="fc" id="L517">            return jreHiDPI;</span>
         }
 
         /**
@@ -525,7 +526,7 @@ public final class SwingTree
          * @return The system scale factor for the given graphics context.
          */
         private static double _getSystemScaleFactorOf( Graphics2D g ) {
-<span class="nc bnc" id="L528" title="All 2 branches missed.">            return _isSystemScalingEnabled() ? _getSystemScaleFactorOf( g.getDeviceConfiguration() ) : 1;</span>
+<span class="nc bnc" id="L529" title="All 2 branches missed.">            return _isSystemScalingEnabled() ? _getSystemScaleFactorOf( g.getDeviceConfiguration() ) : 1;</span>
         }
 
         /**
@@ -533,69 +534,69 @@ public final class SwingTree
          * @return The system scale factor for the given graphics configuration.
          */
         private static double _getSystemScaleFactorOf( GraphicsConfiguration gc ) {
-<span class="pc bpc" id="L536" title="2 of 4 branches missed.">            return (_isSystemScalingEnabled() &amp;&amp; gc != null) ? gc.getDefaultTransform().getScaleX() : 1;</span>
+<span class="pc bpc" id="L537" title="2 of 4 branches missed.">            return (_isSystemScalingEnabled() &amp;&amp; gc != null) ? gc.getDefaultTransform().getScaleX() : 1;</span>
         }
 
         //---- user scaling (Java 8) ----------------------------------------------
 
         private void _initialize()
         {
-<span class="fc" id="L543">            boolean updated = _initialize( _getDefaultFont() );</span>
-<span class="fc bfc" id="L544" title="All 2 branches covered.">            if ( updated )</span>
-<span class="fc" id="L545">                _setScalePropertyListeners();</span>
-<span class="fc" id="L546">        }</span>
+<span class="fc" id="L544">            boolean updated = _initialize( _getDefaultFont() );</span>
+<span class="fc bfc" id="L545" title="All 2 branches covered.">            if ( updated )</span>
+<span class="fc" id="L546">                _setScalePropertyListeners();</span>
+<span class="fc" id="L547">        }</span>
 
         private boolean _initialize( Font uiScaleReferenceFont )
         {
-<span class="fc bfc" id="L550" title="All 2 branches covered.">            if ( initialized )</span>
-<span class="fc" id="L551">                return false;</span>
+<span class="fc bfc" id="L551" title="All 2 branches covered.">            if ( initialized )</span>
+<span class="fc" id="L552">                return false;</span>
 
-<span class="fc" id="L553">            initialized = true;</span>
+<span class="fc" id="L554">            initialized = true;</span>
 
-<span class="pc bpc" id="L555" title="1 of 2 branches missed.">            if ( !config.isUiScaleFactorEnabled() )</span>
-<span class="nc" id="L556">                return false;</span>
+<span class="pc bpc" id="L556" title="1 of 2 branches missed.">            if ( !config.isUiScaleFactorEnabled() )</span>
+<span class="nc" id="L557">                return false;</span>
 
-<span class="fc" id="L558">            _setUserScaleFactor( _calculateScaleFactor( uiScaleReferenceFont ) );</span>
+<span class="fc" id="L559">            _setUserScaleFactor( _calculateScaleFactor( uiScaleReferenceFont ) );</span>
 
-<span class="fc" id="L560">            return true;</span>
+<span class="fc" id="L561">            return true;</span>
         }
 
         private void _setScalePropertyListeners() {
             // listener to update scale factor if LaF changed, &quot;defaultFont&quot; or &quot;Label.font&quot; changed
-<span class="fc" id="L565">            PropertyChangeListener listener = new PropertyChangeListener() {</span>
+<span class="fc" id="L566">            PropertyChangeListener listener = new PropertyChangeListener() {</span>
                 @Override
                 public void propertyChange( PropertyChangeEvent e ) {
-<span class="fc bfc" id="L568" title="All 3 branches covered.">                    switch( e.getPropertyName() ) {</span>
+<span class="pc bpc" id="L569" title="1 of 3 branches missed.">                    switch( e.getPropertyName() ) {</span>
                         case &quot;lookAndFeel&quot;:
                             // it is not necessary (and possible) to remove listener of old LaF defaults
-<span class="pc bpc" id="L571" title="1 of 2 branches missed.">                            if( e.getNewValue() instanceof LookAndFeel)</span>
-<span class="fc" id="L572">                                UIManager.getLookAndFeelDefaults().addPropertyChangeListener( this );</span>
+<span class="pc bpc" id="L572" title="1 of 2 branches missed.">                            if( e.getNewValue() instanceof LookAndFeel)</span>
+<span class="fc" id="L573">                                UIManager.getLookAndFeelDefaults().addPropertyChangeListener( this );</span>
 
-<span class="fc" id="L574">                            _setUserScaleFactor( _calculateScaleFactor( _getDefaultFont() ) );</span>
-<span class="fc" id="L575">                            break;</span>
+<span class="fc" id="L575">                            _setUserScaleFactor( _calculateScaleFactor( _getDefaultFont() ) );</span>
+<span class="fc" id="L576">                            break;</span>
 
                         case _DEFAULT_FONT:
                         case &quot;Label.font&quot;:
-<span class="fc" id="L579">                            _setUserScaleFactor( _calculateScaleFactor( _getDefaultFont() ) );</span>
+<span class="nc" id="L580">                            _setUserScaleFactor( _calculateScaleFactor( _getDefaultFont() ) );</span>
                             break;
                     }
-<span class="fc" id="L582">                }</span>
+<span class="fc" id="L583">                }</span>
             };
-<span class="fc" id="L584">            UIManager.addPropertyChangeListener( listener );</span>
-<span class="fc" id="L585">            UIManager.getDefaults().addPropertyChangeListener( listener );</span>
-<span class="fc" id="L586">            UIManager.getLookAndFeelDefaults().addPropertyChangeListener( listener );</span>
-<span class="fc" id="L587">        }</span>
+<span class="fc" id="L585">            UIManager.addPropertyChangeListener( listener );</span>
+<span class="fc" id="L586">            UIManager.getDefaults().addPropertyChangeListener( listener );</span>
+<span class="fc" id="L587">            UIManager.getLookAndFeelDefaults().addPropertyChangeListener( listener );</span>
+<span class="fc" id="L588">        }</span>
 
         private Font _getDefaultFont() {
             // use font size to calculate scale factor (instead of DPI)
             // because even if we are on a HiDPI display it is not sure
             // that a larger font size is set by the current LaF
             // (e.g. can avoid large icons with small text)
-<span class="fc" id="L594">            Font font = UIManager.getFont( _DEFAULT_FONT );</span>
-<span class="fc bfc" id="L595" title="All 2 branches covered.">            if ( font == null )</span>
-<span class="fc" id="L596">                font = UIManager.getFont( &quot;Label.font&quot; );</span>
+<span class="fc" id="L595">            Font font = UIManager.getFont( _DEFAULT_FONT );</span>
+<span class="pc bpc" id="L596" title="1 of 2 branches missed.">            if ( font == null )</span>
+<span class="nc" id="L597">                font = UIManager.getFont( &quot;Label.font&quot; );</span>
 
-<span class="fc" id="L598">            return font;</span>
+<span class="fc" id="L599">            return font;</span>
         }
 
         /**
@@ -605,12 +606,12 @@ public final class SwingTree
          */
         private float _calculateScaleFactor( Font font ) {
             // apply custom scale factor specified in system property &quot;swingtree.uiScale&quot;
-<span class="fc" id="L608">            float customScaleFactor = config.uiScaleFactor();</span>
-<span class="pc bpc" id="L609" title="1 of 2 branches missed.">            if ( customScaleFactor &gt; 0 ) {</span>
-<span class="nc" id="L610">                return customScaleFactor;</span>
+<span class="fc" id="L609">            float customScaleFactor = config.uiScaleFactor();</span>
+<span class="pc bpc" id="L610" title="1 of 2 branches missed.">            if ( customScaleFactor &gt; 0 ) {</span>
+<span class="nc" id="L611">                return customScaleFactor;</span>
             }
 
-<span class="fc" id="L613">            return _normalize(_internalComputeScaleFactorFrom( font ) );</span>
+<span class="fc" id="L614">            return _normalize(_internalComputeScaleFactorFrom( font ) );</span>
         }
 
         /**
@@ -619,7 +620,7 @@ public final class SwingTree
          * @return scale factor
          */
         private float _internalComputeScaleFactorFrom( Font font ) {
-<span class="pc bpc" id="L622" title="1 of 2 branches missed.">            if ( SystemInfo.isWindows ) {</span>
+<span class="pc bpc" id="L623" title="1 of 2 branches missed.">            if ( SystemInfo.isWindows ) {</span>
                 // Special handling for Windows to be compatible with OS scaling,
                 // which distinguish between &quot;screen scaling&quot; and &quot;text scaling&quot;.
                 //  - Windows &quot;screen scaling&quot; scales everything (text, icon, gaps, etc)
@@ -629,14 +630,14 @@ public final class SwingTree
                 // Both can be changed by the user in the Windows 10 Settings:
                 //  - Settings &gt; Display &gt; Scale and layout
                 //  - Settings &gt; Ease of Access &gt; Display &gt; Make text bigger (100% - 225%)
-<span class="nc bnc" id="L632" title="All 2 branches missed.">                if( font instanceof UIResource) {</span>
-<span class="nc" id="L633">                    Font uiFont = (Font) Toolkit.getDefaultToolkit().getDesktopProperty( &quot;win.messagebox.font&quot; );</span>
-<span class="nc bnc" id="L634" title="All 4 branches missed.">                    if( uiFont == null || uiFont.getSize() == font.getSize() ) {</span>
-<span class="nc bnc" id="L635" title="All 2 branches missed.">                        if( _isSystemScalingEnabled() ) {</span>
+<span class="nc bnc" id="L633" title="All 2 branches missed.">                if( font instanceof UIResource) {</span>
+<span class="nc" id="L634">                    Font uiFont = (Font) Toolkit.getDefaultToolkit().getDesktopProperty( &quot;win.messagebox.font&quot; );</span>
+<span class="nc bnc" id="L635" title="All 4 branches missed.">                    if( uiFont == null || uiFont.getSize() == font.getSize() ) {</span>
+<span class="nc bnc" id="L636" title="All 2 branches missed.">                        if( _isSystemScalingEnabled() ) {</span>
                             // Do not apply own scaling if the JRE scales using Windows screen scale factor.
                             // If user increases font size in Windows 10 settings, desktop property
                             // &quot;win.messagebox.font&quot; is changed and SwingTree uses the larger font.
-<span class="nc" id="L639">                            return 1;</span>
+<span class="nc" id="L640">                            return 1;</span>
                         } else {
                             // If the JRE does not scale (Java 8), the size of the UI font
                             // (usually from desktop property &quot;win.messagebox.font&quot;)
@@ -644,8 +645,8 @@ public final class SwingTree
                             // But the font in desktop property &quot;win.defaultGUI.font&quot; is only
                             // scaled with the Windows screen scale factor. So use it to compute
                             // our scale factor that is equal to Windows screen scale factor.
-<span class="nc" id="L647">                            Font winFont = (Font) Toolkit.getDefaultToolkit().getDesktopProperty( &quot;win.defaultGUI.font&quot; );</span>
-<span class="nc bnc" id="L648" title="All 2 branches missed.">                            return _computeScaleFactorFromFontSize( (winFont != null) ? winFont : font );</span>
+<span class="nc" id="L648">                            Font winFont = (Font) Toolkit.getDefaultToolkit().getDesktopProperty( &quot;win.defaultGUI.font&quot; );</span>
+<span class="nc bnc" id="L649" title="All 2 branches missed.">                            return _computeScaleFactorFromFontSize( (winFont != null) ? winFont : font );</span>
                         }
                     }
                 }
@@ -658,28 +659,28 @@ public final class SwingTree
                 // E.g. SwingTree Demo supports increasing font size in &quot;Font&quot; menu and UI scales.
             }
 
-<span class="fc" id="L661">            return _computeScaleFactorFromFontSize( font );</span>
+<span class="fc" id="L662">            return _computeScaleFactorFromFontSize( font );</span>
         }
 
         private static float _computeScaleFactorFromFontSize(Font font ) {
             // default font size
-<span class="fc" id="L666">            float fontSizeDivider = 12f;</span>
+<span class="fc" id="L667">            float fontSizeDivider = 12f;</span>
 
-<span class="pc bpc" id="L668" title="1 of 2 branches missed.">            if( SystemInfo.isWindows ) {</span>
+<span class="pc bpc" id="L669" title="1 of 2 branches missed.">            if( SystemInfo.isWindows ) {</span>
                 // Windows LaF uses Tahoma font rather than the actual Windows system font (Segoe UI),
                 // and its size is always ca. 10% smaller than the actual system font size.
                 // Tahoma 11 is used at 100%
-<span class="nc bnc" id="L672" title="All 2 branches missed.">                if( &quot;Tahoma&quot;.equals( font.getFamily() ) )</span>
-<span class="nc" id="L673">                    fontSizeDivider = 11f;</span>
-<span class="pc bpc" id="L674" title="1 of 2 branches missed.">            } else if( SystemInfo.isMacOS ) {</span>
+<span class="nc bnc" id="L673" title="All 2 branches missed.">                if( &quot;Tahoma&quot;.equals( font.getFamily() ) )</span>
+<span class="nc" id="L674">                    fontSizeDivider = 11f;</span>
+<span class="pc bpc" id="L675" title="1 of 2 branches missed.">            } else if( SystemInfo.isMacOS ) {</span>
                 // default font size on macOS is 13
-<span class="nc" id="L676">                fontSizeDivider = 13f;</span>
-<span class="pc bpc" id="L677" title="1 of 2 branches missed.">            } else if( SystemInfo.isLinux ) {</span>
+<span class="nc" id="L677">                fontSizeDivider = 13f;</span>
+<span class="pc bpc" id="L678" title="1 of 2 branches missed.">            } else if( SystemInfo.isLinux ) {</span>
                 // default font size for Unity and Gnome is 15 and for KDE it is 13
-<span class="pc bpc" id="L679" title="1 of 2 branches missed.">                fontSizeDivider = SystemInfo.isKDE ? 13f : 15f;</span>
+<span class="pc bpc" id="L680" title="1 of 2 branches missed.">                fontSizeDivider = SystemInfo.isKDE ? 13f : 15f;</span>
             }
 
-<span class="fc" id="L682">            return font.getSize() / fontSizeDivider;</span>
+<span class="fc" id="L683">            return font.getSize() / fontSizeDivider;</span>
         }
 
         /**
@@ -688,19 +689,19 @@ public final class SwingTree
          */
         private FontUIResource _applyCustomScaleFactor( FontUIResource font )
         {
-<span class="pc bpc" id="L691" title="1 of 2 branches missed.">            if ( !config.isUiScaleFactorEnabled() )</span>
-<span class="nc" id="L692">                return font;</span>
+<span class="pc bpc" id="L692" title="1 of 2 branches missed.">            if ( !config.isUiScaleFactorEnabled() )</span>
+<span class="nc" id="L693">                return font;</span>
 
-<span class="fc" id="L694">            float scaleFactor = config.uiScaleFactor();</span>
-<span class="pc bpc" id="L695" title="1 of 2 branches missed.">            if ( scaleFactor &lt;= 0 )</span>
-<span class="fc" id="L696">                return font;</span>
+<span class="fc" id="L695">            float scaleFactor = config.uiScaleFactor();</span>
+<span class="pc bpc" id="L696" title="1 of 2 branches missed.">            if ( scaleFactor &lt;= 0 )</span>
+<span class="fc" id="L697">                return font;</span>
 
-<span class="nc" id="L698">            float fontScaleFactor = _computeScaleFactorFromFontSize( font );</span>
-<span class="nc bnc" id="L699" title="All 2 branches missed.">            if ( scaleFactor == fontScaleFactor )</span>
-<span class="nc" id="L700">                return font;</span>
+<span class="nc" id="L699">            float fontScaleFactor = _computeScaleFactorFromFontSize( font );</span>
+<span class="nc bnc" id="L700" title="All 2 branches missed.">            if ( scaleFactor == fontScaleFactor )</span>
+<span class="nc" id="L701">                return font;</span>
 
-<span class="nc" id="L702">            int newFontSize = Math.max( Math.round( (font.getSize() / fontScaleFactor) * scaleFactor ), 1 );</span>
-<span class="nc" id="L703">            return new FontUIResource( font.deriveFont( (float) newFontSize ) );</span>
+<span class="nc" id="L703">            int newFontSize = Math.max( Math.round( (font.getSize() / fontScaleFactor) * scaleFactor ), 1 );</span>
+<span class="nc" id="L704">            return new FontUIResource( font.deriveFont( (float) newFontSize ) );</span>
         }
 
         /**
@@ -721,25 +722,25 @@ public final class SwingTree
          * @return The user scale factor.
          */
         public float getUserScaleFactor() {
-<span class="fc" id="L724">            _initialize();</span>
-<span class="fc" id="L725">            return scaleFactor;</span>
+<span class="fc" id="L725">            _initialize();</span>
+<span class="fc" id="L726">            return scaleFactor;</span>
         }
 
         public void setUserScaleFactor( float scaleFactor ) {
-<span class="fc" id="L729">            _initialize();</span>
-<span class="fc" id="L730">            _setUserScaleFactor( _normalize(scaleFactor) );</span>
-<span class="fc" id="L731">        }</span>
+<span class="fc" id="L730">            _initialize();</span>
+<span class="fc" id="L731">            _setUserScaleFactor( _normalize(scaleFactor) );</span>
+<span class="fc" id="L732">        }</span>
 
         private float _normalize( float scaleFactor ) {
-<span class="fc bfc" id="L734" title="All 2 branches covered.">            if ( scaleFactor &lt; 1f ) {</span>
-<span class="pc bpc" id="L735" title="1 of 2 branches missed.">                scaleFactor = config.isUiScaleDownAllowed()</span>
-<span class="nc" id="L736">                        ? Math.round( scaleFactor * 10f ) / 10f // round small scale factor to 1/10</span>
-<span class="fc" id="L737">                        : 1f;</span>
+<span class="fc bfc" id="L735" title="All 2 branches covered.">            if ( scaleFactor &lt; 1f ) {</span>
+<span class="pc bpc" id="L736" title="1 of 2 branches missed.">                scaleFactor = config.isUiScaleDownAllowed()</span>
+<span class="nc" id="L737">                        ? Math.round( scaleFactor * 10f ) / 10f // round small scale factor to 1/10</span>
+<span class="fc" id="L738">                        : 1f;</span>
             }
-<span class="fc bfc" id="L739" title="All 2 branches covered.">            else if ( scaleFactor &gt; 1f ) // round scale factor to 1/4</span>
-<span class="fc" id="L740">                scaleFactor = Math.round( scaleFactor * 4f ) / 4f;</span>
+<span class="fc bfc" id="L740" title="All 2 branches covered.">            else if ( scaleFactor &gt; 1f ) // round scale factor to 1/4</span>
+<span class="fc" id="L741">                scaleFactor = Math.round( scaleFactor * 4f ) / 4f;</span>
 
-<span class="fc" id="L742">            return scaleFactor;</span>
+<span class="fc" id="L743">            return scaleFactor;</span>
         }
 
         /**
@@ -747,18 +748,18 @@ public final class SwingTree
          */
         private void _setUserScaleFactor(float scaleFactor) {
             // minimum scale factor
-<span class="fc" id="L750">            scaleFactor = Math.max( scaleFactor, 0.1f );</span>
+<span class="fc" id="L751">            scaleFactor = Math.max( scaleFactor, 0.1f );</span>
 
-<span class="fc" id="L752">            float oldScaleFactor = this.scaleFactor;</span>
-<span class="fc" id="L753">            this.scaleFactor = scaleFactor;</span>
+<span class="fc" id="L753">            float oldScaleFactor = this.scaleFactor;</span>
+<span class="fc" id="L754">            this.scaleFactor = scaleFactor;</span>
 
             // We set the &quot;laf.scaleFactor&quot; property in the UIManager to allow
             // MigLayout to scale its pixel values.
-<span class="fc" id="L757">            UIManager.put( &quot;laf.scaleFactor&quot;, scaleFactor );</span>
+<span class="fc" id="L758">            UIManager.put( &quot;laf.scaleFactor&quot;, scaleFactor );</span>
 
-<span class="pc bpc" id="L759" title="1 of 2 branches missed.">            if ( changeSupport != null )</span>
-<span class="nc" id="L760">                changeSupport.firePropertyChange( &quot;userScaleFactor&quot;, oldScaleFactor, scaleFactor );</span>
-<span class="fc" id="L761">        }</span>
+<span class="pc bpc" id="L760" title="1 of 2 branches missed.">            if ( changeSupport != null )</span>
+<span class="nc" id="L761">                changeSupport.firePropertyChange( &quot;userScaleFactor&quot;, oldScaleFactor, scaleFactor );</span>
+<span class="fc" id="L762">        }</span>
 
         /**
          * Returns true if the JRE scales, which is the case if:
@@ -766,24 +767,24 @@ public final class SwingTree
          *   - running on JetBrains Runtime 11 or later and scaling is enabled in system Settings
          */
         static boolean _isSystemScaling() {
-<span class="pc bpc" id="L769" title="1 of 2 branches missed.">            if( GraphicsEnvironment.isHeadless() )</span>
-<span class="nc" id="L770">                return true;</span>
+<span class="pc bpc" id="L770" title="1 of 2 branches missed.">            if( GraphicsEnvironment.isHeadless() )</span>
+<span class="nc" id="L771">                return true;</span>
 
-<span class="fc" id="L772">            GraphicsConfiguration gc = GraphicsEnvironment.getLocalGraphicsEnvironment()</span>
-<span class="fc" id="L773">                                                          .getDefaultScreenDevice()</span>
-<span class="fc" id="L774">                                                          .getDefaultConfiguration();</span>
+<span class="fc" id="L773">            GraphicsConfiguration gc = GraphicsEnvironment.getLocalGraphicsEnvironment()</span>
+<span class="fc" id="L774">                                                          .getDefaultScreenDevice()</span>
+<span class="fc" id="L775">                                                          .getDefaultConfiguration();</span>
 
-<span class="pc bpc" id="L776" title="1 of 2 branches missed.">            return UiScale._getSystemScaleFactorOf( gc ) &gt; 1;</span>
+<span class="pc bpc" id="L777" title="1 of 2 branches missed.">            return UiScale._getSystemScaleFactorOf( gc ) &gt; 1;</span>
         }
 
         static double _getSystemScaleFactor() {
-<span class="nc bnc" id="L780" title="All 2 branches missed.">            if ( GraphicsEnvironment.isHeadless() )</span>
-<span class="nc" id="L781">                return 1;</span>
+<span class="nc bnc" id="L781" title="All 2 branches missed.">            if ( GraphicsEnvironment.isHeadless() )</span>
+<span class="nc" id="L782">                return 1;</span>
 
-<span class="nc" id="L783">            return UiScale._getSystemScaleFactorOf(</span>
-<span class="nc" id="L784">                                GraphicsEnvironment.getLocalGraphicsEnvironment()</span>
-<span class="nc" id="L785">                                                   .getDefaultScreenDevice()</span>
-<span class="nc" id="L786">                                                   .getDefaultConfiguration()</span>
+<span class="nc" id="L784">            return UiScale._getSystemScaleFactorOf(</span>
+<span class="nc" id="L785">                                GraphicsEnvironment.getLocalGraphicsEnvironment()</span>
+<span class="nc" id="L786">                                                   .getDefaultScreenDevice()</span>
+<span class="nc" id="L787">                                                   .getDefaultConfiguration()</span>
                             );
         }
 
@@ -839,75 +840,75 @@ public final class SwingTree
 
         static {
             // platforms
-<span class="fc" id="L842">            String osName = System.getProperty( &quot;os.name&quot; ).toLowerCase( Locale.ENGLISH );</span>
-<span class="fc" id="L843">            isWindows = osName.startsWith( &quot;windows&quot; );</span>
-<span class="fc" id="L844">            isMacOS = osName.startsWith( &quot;mac&quot; );</span>
-<span class="fc" id="L845">            isLinux = osName.startsWith( &quot;linux&quot; );</span>
+<span class="fc" id="L843">            String osName = System.getProperty( &quot;os.name&quot; ).toLowerCase( Locale.ENGLISH );</span>
+<span class="fc" id="L844">            isWindows = osName.startsWith( &quot;windows&quot; );</span>
+<span class="fc" id="L845">            isMacOS = osName.startsWith( &quot;mac&quot; );</span>
+<span class="fc" id="L846">            isLinux = osName.startsWith( &quot;linux&quot; );</span>
 
             // OS versions
-<span class="fc" id="L848">            osVersion = scanVersion( System.getProperty( &quot;os.version&quot; ) );</span>
-<span class="pc bpc" id="L849" title="3 of 4 branches missed.">            isWindows_10_orLater = (isWindows &amp;&amp; osVersion &gt;= toVersion( 10, 0, 0, 0 ));</span>
-<span class="pc bpc" id="L850" title="3 of 4 branches missed.">            isWindows_11_orLater = (isWindows_10_orLater &amp;&amp; osName.length() &gt; &quot;windows &quot;.length() &amp;&amp;</span>
-<span class="pc bnc" id="L851" title="All 2 branches missed.">                    scanVersion( osName.substring( &quot;windows &quot;.length() ) ) &gt;= toVersion( 11, 0, 0, 0 ));</span>
-<span class="pc bpc" id="L852" title="3 of 4 branches missed.">            isMacOS_10_11_ElCapitan_orLater = (isMacOS &amp;&amp; osVersion &gt;= toVersion( 10, 11, 0, 0 ));</span>
-<span class="pc bpc" id="L853" title="3 of 4 branches missed.">            isMacOS_10_14_Mojave_orLater = (isMacOS &amp;&amp; osVersion &gt;= toVersion( 10, 14, 0, 0 ));</span>
-<span class="pc bpc" id="L854" title="3 of 4 branches missed.">            isMacOS_10_15_Catalina_orLater = (isMacOS &amp;&amp; osVersion &gt;= toVersion( 10, 15, 0, 0 ));</span>
+<span class="fc" id="L849">            osVersion = scanVersion( System.getProperty( &quot;os.version&quot; ) );</span>
+<span class="pc bpc" id="L850" title="3 of 4 branches missed.">            isWindows_10_orLater = (isWindows &amp;&amp; osVersion &gt;= toVersion( 10, 0, 0, 0 ));</span>
+<span class="pc bpc" id="L851" title="3 of 4 branches missed.">            isWindows_11_orLater = (isWindows_10_orLater &amp;&amp; osName.length() &gt; &quot;windows &quot;.length() &amp;&amp;</span>
+<span class="pc bnc" id="L852" title="All 2 branches missed.">                    scanVersion( osName.substring( &quot;windows &quot;.length() ) ) &gt;= toVersion( 11, 0, 0, 0 ));</span>
+<span class="pc bpc" id="L853" title="3 of 4 branches missed.">            isMacOS_10_11_ElCapitan_orLater = (isMacOS &amp;&amp; osVersion &gt;= toVersion( 10, 11, 0, 0 ));</span>
+<span class="pc bpc" id="L854" title="3 of 4 branches missed.">            isMacOS_10_14_Mojave_orLater = (isMacOS &amp;&amp; osVersion &gt;= toVersion( 10, 14, 0, 0 ));</span>
+<span class="pc bpc" id="L855" title="3 of 4 branches missed.">            isMacOS_10_15_Catalina_orLater = (isMacOS &amp;&amp; osVersion &gt;= toVersion( 10, 15, 0, 0 ));</span>
 
             // OS architecture
-<span class="fc" id="L857">            String osArch = System.getProperty( &quot;os.arch&quot; );</span>
-<span class="fc" id="L858">            isX86 = osArch.equals( &quot;x86&quot; );</span>
-<span class="pc bpc" id="L859" title="3 of 4 branches missed.">            isX86_64 = osArch.equals( &quot;amd64&quot; ) || osArch.equals( &quot;x86_64&quot; );</span>
-<span class="fc" id="L860">            isAARCH64 = osArch.equals( &quot;aarch64&quot; );</span>
+<span class="fc" id="L858">            String osArch = System.getProperty( &quot;os.arch&quot; );</span>
+<span class="fc" id="L859">            isX86 = osArch.equals( &quot;x86&quot; );</span>
+<span class="pc bpc" id="L860" title="3 of 4 branches missed.">            isX86_64 = osArch.equals( &quot;amd64&quot; ) || osArch.equals( &quot;x86_64&quot; );</span>
+<span class="fc" id="L861">            isAARCH64 = osArch.equals( &quot;aarch64&quot; );</span>
 
             // Java versions
-<span class="fc" id="L863">            javaVersion = scanVersion( System.getProperty( &quot;java.version&quot; ) );</span>
-<span class="pc bpc" id="L864" title="1 of 2 branches missed.">            isJava_9_orLater = (javaVersion &gt;= toVersion( 9, 0, 0, 0 ));</span>
-<span class="pc bpc" id="L865" title="1 of 2 branches missed.">            isJava_11_orLater = (javaVersion &gt;= toVersion( 11, 0, 0, 0 ));</span>
-<span class="pc bpc" id="L866" title="1 of 2 branches missed.">            isJava_15_orLater = (javaVersion &gt;= toVersion( 15, 0, 0, 0 ));</span>
-<span class="pc bpc" id="L867" title="1 of 2 branches missed.">            isJava_17_orLater = (javaVersion &gt;= toVersion( 17, 0, 0, 0 ));</span>
-<span class="pc bpc" id="L868" title="1 of 2 branches missed.">            isJava_18_orLater = (javaVersion &gt;= toVersion( 18, 0, 0, 0 ));</span>
+<span class="fc" id="L864">            javaVersion = scanVersion( System.getProperty( &quot;java.version&quot; ) );</span>
+<span class="pc bpc" id="L865" title="1 of 2 branches missed.">            isJava_9_orLater = (javaVersion &gt;= toVersion( 9, 0, 0, 0 ));</span>
+<span class="pc bpc" id="L866" title="1 of 2 branches missed.">            isJava_11_orLater = (javaVersion &gt;= toVersion( 11, 0, 0, 0 ));</span>
+<span class="pc bpc" id="L867" title="1 of 2 branches missed.">            isJava_15_orLater = (javaVersion &gt;= toVersion( 15, 0, 0, 0 ));</span>
+<span class="pc bpc" id="L868" title="1 of 2 branches missed.">            isJava_17_orLater = (javaVersion &gt;= toVersion( 17, 0, 0, 0 ));</span>
+<span class="pc bpc" id="L869" title="1 of 2 branches missed.">            isJava_18_orLater = (javaVersion &gt;= toVersion( 18, 0, 0, 0 ));</span>
 
             // Java VMs
-<span class="fc" id="L871">            isJetBrainsJVM = System.getProperty( &quot;java.vm.vendor&quot;, &quot;Unknown&quot; )</span>
-<span class="fc" id="L872">                    .toLowerCase( Locale.ENGLISH ).contains( &quot;jetbrains&quot; );</span>
-<span class="pc bpc" id="L873" title="3 of 4 branches missed.">            isJetBrainsJVM_11_orLater = isJetBrainsJVM &amp;&amp; isJava_11_orLater;</span>
+<span class="fc" id="L872">            isJetBrainsJVM = System.getProperty( &quot;java.vm.vendor&quot;, &quot;Unknown&quot; )</span>
+<span class="fc" id="L873">                    .toLowerCase( Locale.ENGLISH ).contains( &quot;jetbrains&quot; );</span>
+<span class="pc bpc" id="L874" title="3 of 4 branches missed.">            isJetBrainsJVM_11_orLater = isJetBrainsJVM &amp;&amp; isJava_11_orLater;</span>
 
             // UI toolkits
-<span class="pc bpc" id="L876" title="2 of 4 branches missed.">            isKDE = (isLinux &amp;&amp; System.getenv( &quot;KDE_FULL_SESSION&quot; ) != null);</span>
+<span class="pc bpc" id="L877" title="2 of 4 branches missed.">            isKDE = (isLinux &amp;&amp; System.getenv( &quot;KDE_FULL_SESSION&quot; ) != null);</span>
 
             // other
-<span class="fc" id="L879">            isProjector = Boolean.getBoolean( &quot;org.jetbrains.projector.server.enable&quot; );</span>
-<span class="pc bpc" id="L880" title="1 of 2 branches missed.">            isWebswing = (System.getProperty( &quot;webswing.rootDir&quot; ) != null);</span>
-<span class="pc bpc" id="L881" title="3 of 4 branches missed.">            isWinPE = isWindows &amp;&amp; &quot;X:\\Windows\\System32&quot;.equalsIgnoreCase( System.getProperty( &quot;user.dir&quot; ) );</span>
-<span class="fc" id="L882">        }</span>
+<span class="fc" id="L880">            isProjector = Boolean.getBoolean( &quot;org.jetbrains.projector.server.enable&quot; );</span>
+<span class="pc bpc" id="L881" title="1 of 2 branches missed.">            isWebswing = (System.getProperty( &quot;webswing.rootDir&quot; ) != null);</span>
+<span class="pc bpc" id="L882" title="3 of 4 branches missed.">            isWinPE = isWindows &amp;&amp; &quot;X:\\Windows\\System32&quot;.equalsIgnoreCase( System.getProperty( &quot;user.dir&quot; ) );</span>
+<span class="fc" id="L883">        }</span>
 
         public static long scanVersion( String version ) {
-<span class="fc" id="L885">            int major = 1;</span>
-<span class="fc" id="L886">            int minor = 0;</span>
-<span class="fc" id="L887">            int micro = 0;</span>
-<span class="fc" id="L888">            int patch = 0;</span>
+<span class="fc" id="L886">            int major = 1;</span>
+<span class="fc" id="L887">            int minor = 0;</span>
+<span class="fc" id="L888">            int micro = 0;</span>
+<span class="fc" id="L889">            int patch = 0;</span>
             try {
-<span class="fc" id="L890">                StringTokenizer st = new StringTokenizer( version, &quot;._-+&quot; );</span>
-<span class="fc" id="L891">                major = Integer.parseInt( st.nextToken() );</span>
-<span class="fc" id="L892">                minor = Integer.parseInt( st.nextToken() );</span>
-<span class="fc" id="L893">                micro = Integer.parseInt( st.nextToken() );</span>
-<span class="fc" id="L894">                patch = Integer.parseInt( st.nextToken() );</span>
-<span class="fc" id="L895">            } catch( Exception ex ) {</span>
+<span class="fc" id="L891">                StringTokenizer st = new StringTokenizer( version, &quot;._-+&quot; );</span>
+<span class="fc" id="L892">                major = Integer.parseInt( st.nextToken() );</span>
+<span class="fc" id="L893">                minor = Integer.parseInt( st.nextToken() );</span>
+<span class="fc" id="L894">                micro = Integer.parseInt( st.nextToken() );</span>
+<span class="fc" id="L895">                patch = Integer.parseInt( st.nextToken() );</span>
+<span class="fc" id="L896">            } catch( Exception ex ) {</span>
                 // ignore
-<span class="fc" id="L897">            }</span>
+<span class="fc" id="L898">            }</span>
 
-<span class="fc" id="L899">            return toVersion( major, minor, micro, patch );</span>
+<span class="fc" id="L900">            return toVersion( major, minor, micro, patch );</span>
         }
 
         public static long toVersion( int major, int minor, int micro, int patch ) {
-<span class="fc" id="L903">            return ((long) major &lt;&lt; 48) + ((long) minor &lt;&lt; 32) + ((long) micro &lt;&lt; 16) + patch;</span>
+<span class="fc" id="L904">            return ((long) major &lt;&lt; 48) + ((long) minor &lt;&lt; 32) + ((long) micro &lt;&lt; 16) + patch;</span>
         }
     }
 
     private static class LinuxFontPolicy
     {
         static Font getFont() {
-<span class="pc bpc" id="L910" title="1 of 2 branches missed.">            return SystemInfo.isKDE ? getKDEFont() : getGnomeFont();</span>
+<span class="pc bpc" id="L911" title="1 of 2 branches missed.">            return SystemInfo.isKDE ? getKDEFont() : getGnomeFont();</span>
         }
 
         /**
@@ -916,65 +917,65 @@ public final class SwingTree
         private static Font getGnomeFont() {
             // see class com.sun.java.swing.plaf.gtk.PangoFonts background information
 
-<span class="fc" id="L919">            Object fontName = Toolkit.getDefaultToolkit().getDesktopProperty( &quot;gnome.Gtk/FontName&quot; );</span>
-<span class="pc bpc" id="L920" title="1 of 2 branches missed.">            if( !(fontName instanceof String) )</span>
-<span class="nc" id="L921">                fontName = &quot;sans 10&quot;;</span>
+<span class="fc" id="L920">            Object fontName = Toolkit.getDefaultToolkit().getDesktopProperty( &quot;gnome.Gtk/FontName&quot; );</span>
+<span class="pc bpc" id="L921" title="1 of 2 branches missed.">            if( !(fontName instanceof String) )</span>
+<span class="nc" id="L922">                fontName = &quot;sans 10&quot;;</span>
 
-<span class="fc" id="L923">            String family = &quot;&quot;;</span>
-<span class="fc" id="L924">            int style = Font.PLAIN;</span>
-<span class="fc" id="L925">            double dsize = 10;</span>
+<span class="fc" id="L924">            String family = &quot;&quot;;</span>
+<span class="fc" id="L925">            int style = Font.PLAIN;</span>
+<span class="fc" id="L926">            double dsize = 10;</span>
 
             // parse pango font description
             // see https://developer.gnome.org/pango/1.46/pango-Fonts.html#pango-font-description-from-string
-<span class="fc" id="L929">            StringTokenizer st = new StringTokenizer( (String) fontName );</span>
-<span class="fc bfc" id="L930" title="All 2 branches covered.">            while( st.hasMoreTokens() ) {</span>
-<span class="fc" id="L931">                String word = st.nextToken();</span>
+<span class="fc" id="L930">            StringTokenizer st = new StringTokenizer( (String) fontName );</span>
+<span class="fc bfc" id="L931" title="All 2 branches covered.">            while( st.hasMoreTokens() ) {</span>
+<span class="fc" id="L932">                String word = st.nextToken();</span>
 
                 // remove trailing ',' (e.g. in &quot;Ubuntu Condensed, 11&quot; or &quot;Ubuntu Condensed, Bold 11&quot;)
-<span class="pc bpc" id="L934" title="1 of 2 branches missed.">                if( word.endsWith( &quot;,&quot; ) )</span>
-<span class="nc" id="L935">                    word = word.substring( 0, word.length() - 1 ).trim();</span>
+<span class="pc bpc" id="L935" title="1 of 2 branches missed.">                if( word.endsWith( &quot;,&quot; ) )</span>
+<span class="nc" id="L936">                    word = word.substring( 0, word.length() - 1 ).trim();</span>
 
-<span class="fc" id="L937">                String lword = word.toLowerCase();</span>
-<span class="pc bpc" id="L938" title="2 of 4 branches missed.">                if( lword.equals( &quot;italic&quot; ) || lword.equals( &quot;oblique&quot; ) )</span>
-<span class="nc" id="L939">                    style |= Font.ITALIC;</span>
-<span class="pc bpc" id="L940" title="1 of 2 branches missed.">                else if( lword.equals( &quot;bold&quot; ) )</span>
-<span class="nc" id="L941">                    style |= Font.BOLD;</span>
-<span class="fc bfc" id="L942" title="All 2 branches covered.">                else if( Character.isDigit( word.charAt( 0 ) ) ) {</span>
+<span class="fc" id="L938">                String lword = word.toLowerCase();</span>
+<span class="pc bpc" id="L939" title="2 of 4 branches missed.">                if( lword.equals( &quot;italic&quot; ) || lword.equals( &quot;oblique&quot; ) )</span>
+<span class="nc" id="L940">                    style |= Font.ITALIC;</span>
+<span class="pc bpc" id="L941" title="1 of 2 branches missed.">                else if( lword.equals( &quot;bold&quot; ) )</span>
+<span class="nc" id="L942">                    style |= Font.BOLD;</span>
+<span class="fc bfc" id="L943" title="All 2 branches covered.">                else if( Character.isDigit( word.charAt( 0 ) ) ) {</span>
                     try {
-<span class="fc" id="L944">                        dsize = Double.parseDouble( word );</span>
-<span class="nc" id="L945">                    } catch( NumberFormatException ex ) {</span>
+<span class="fc" id="L945">                        dsize = Double.parseDouble( word );</span>
+<span class="nc" id="L946">                    } catch( NumberFormatException ex ) {</span>
                         // ignore
-<span class="pc" id="L947">                    }</span>
+<span class="pc" id="L948">                    }</span>
                 } else {
                     // remove '-' from &quot;Semi-Bold&quot;, &quot;Extra-Light&quot;, etc
-<span class="pc bpc" id="L950" title="2 of 4 branches missed.">                    if( lword.startsWith( &quot;semi-&quot; ) || lword.startsWith( &quot;demi-&quot; ) )</span>
-<span class="nc" id="L951">                        word = word.substring( 0, 4 ) + word.substring( 5 );</span>
-<span class="pc bpc" id="L952" title="2 of 4 branches missed.">                    else if( lword.startsWith( &quot;extra-&quot; ) || lword.startsWith( &quot;ultra-&quot; ) )</span>
-<span class="nc" id="L953">                        word = word.substring( 0, 5 ) + word.substring( 6 );</span>
+<span class="pc bpc" id="L951" title="2 of 4 branches missed.">                    if( lword.startsWith( &quot;semi-&quot; ) || lword.startsWith( &quot;demi-&quot; ) )</span>
+<span class="nc" id="L952">                        word = word.substring( 0, 4 ) + word.substring( 5 );</span>
+<span class="pc bpc" id="L953" title="2 of 4 branches missed.">                    else if( lword.startsWith( &quot;extra-&quot; ) || lword.startsWith( &quot;ultra-&quot; ) )</span>
+<span class="nc" id="L954">                        word = word.substring( 0, 5 ) + word.substring( 6 );</span>
 
-<span class="pc bpc" id="L955" title="1 of 2 branches missed.">                    family = family.isEmpty() ? word : (family + ' ' + word);</span>
+<span class="pc bpc" id="L956" title="1 of 2 branches missed.">                    family = family.isEmpty() ? word : (family + ' ' + word);</span>
                 }
-<span class="fc" id="L957">            }</span>
+<span class="fc" id="L958">            }</span>
 
             // Ubuntu font is rendered poorly (except if running in JetBrains VM)
             // --&gt; use Liberation Sans font
-<span class="fc" id="L961">            String useUbuntu = &quot;swingtree.USE_UBUNTU_FONT&quot;;</span>
+<span class="fc" id="L962">            String useUbuntu = &quot;swingtree.USE_UBUNTU_FONT&quot;;</span>
 
-<span class="pc bpc" id="L963" title="3 of 6 branches missed.">            if( family.startsWith( &quot;Ubuntu&quot; ) &amp;&amp; !SystemInfo.isJetBrainsJVM &amp;&amp; !getBoolean( useUbuntu, false ) )</span>
-<span class="fc" id="L964">                family = &quot;Liberation Sans&quot;;</span>
+<span class="pc bpc" id="L964" title="3 of 6 branches missed.">            if( family.startsWith( &quot;Ubuntu&quot; ) &amp;&amp; !SystemInfo.isJetBrainsJVM &amp;&amp; !getBoolean( useUbuntu, false ) )</span>
+<span class="fc" id="L965">                family = &quot;Liberation Sans&quot;;</span>
 
             // scale font size
-<span class="fc" id="L967">            dsize *= getGnomeFontScale();</span>
-<span class="fc" id="L968">            int size = (int) (dsize + 0.5);</span>
-<span class="pc bpc" id="L969" title="1 of 2 branches missed.">            if( size &lt; 1 )</span>
-<span class="nc" id="L970">                size = 1;</span>
+<span class="fc" id="L968">            dsize *= getGnomeFontScale();</span>
+<span class="fc" id="L969">            int size = (int) (dsize + 0.5);</span>
+<span class="pc bpc" id="L970" title="1 of 2 branches missed.">            if( size &lt; 1 )</span>
+<span class="nc" id="L971">                size = 1;</span>
 
             // handle logical font names
-<span class="fc" id="L973">            String logicalFamily = mapFcName( family.toLowerCase() );</span>
-<span class="pc bpc" id="L974" title="1 of 2 branches missed.">            if( logicalFamily != null )</span>
-<span class="nc" id="L975">                family = logicalFamily;</span>
+<span class="fc" id="L974">            String logicalFamily = mapFcName( family.toLowerCase() );</span>
+<span class="pc bpc" id="L975" title="1 of 2 branches missed.">            if( logicalFamily != null )</span>
+<span class="nc" id="L976">                family = logicalFamily;</span>
 
-<span class="fc" id="L977">            return createFontEx( family, style, size, dsize );</span>
+<span class="fc" id="L978">            return createFontEx( family, style, size, dsize );</span>
         }
 
         /**
@@ -983,8 +984,8 @@ public final class SwingTree
          * If the system property is not set, {@code defaultValue} is returned.
          */
         static boolean getBoolean( String key, boolean defaultValue ) {
-<span class="fc" id="L986">            String value = System.getProperty( key );</span>
-<span class="pc bpc" id="L987" title="1 of 2 branches missed.">            return (value != null) ? Boolean.parseBoolean( value ) : defaultValue;</span>
+<span class="fc" id="L987">            String value = System.getProperty( key );</span>
+<span class="pc bpc" id="L988" title="1 of 2 branches missed.">            return (value != null) ? Boolean.parseBoolean( value ) : defaultValue;</span>
         }
 
         /**
@@ -996,68 +997,68 @@ public final class SwingTree
          */
         private static Font createFontEx( String family, int style, int size, double dsize ) {
             for(;;) {
-<span class="fc" id="L999">                Font font = createFont( family, style, size, dsize );</span>
+<span class="fc" id="L1000">                Font font = createFont( family, style, size, dsize );</span>
 
-<span class="pc bpc" id="L1001" title="1 of 2 branches missed.">                if( Font.DIALOG.equals( family ) )</span>
-<span class="nc" id="L1002">                    return font;</span>
+<span class="pc bpc" id="L1002" title="1 of 2 branches missed.">                if( Font.DIALOG.equals( family ) )</span>
+<span class="nc" id="L1003">                    return font;</span>
 
                 // if the font family does not match any font on the system, &quot;Dialog&quot; family is returned
-<span class="pc bpc" id="L1005" title="1 of 2 branches missed.">                if( !Font.DIALOG.equals( font.getFamily() ) ) {</span>
+<span class="pc bpc" id="L1006" title="1 of 2 branches missed.">                if( !Font.DIALOG.equals( font.getFamily() ) ) {</span>
                     // check for font problems
                     // - font height much larger than expected (e.g. font Inter; Oracle Java 8)
                     // - character width is zero (e.g. font Cantarell; Fedora; Oracle Java 8)
-<span class="fc" id="L1009">                    FontMetrics fm = StyleContext.getDefaultStyleContext().getFontMetrics( font );</span>
-<span class="pc bpc" id="L1010" title="2 of 4 branches missed.">                    if( fm.getHeight() &gt; size * 2 || fm.stringWidth( &quot;a&quot; ) == 0 )</span>
-<span class="nc" id="L1011">                        return createFont( Font.DIALOG, style, size, dsize );</span>
+<span class="fc" id="L1010">                    FontMetrics fm = StyleContext.getDefaultStyleContext().getFontMetrics( font );</span>
+<span class="pc bpc" id="L1011" title="2 of 4 branches missed.">                    if( fm.getHeight() &gt; size * 2 || fm.stringWidth( &quot;a&quot; ) == 0 )</span>
+<span class="nc" id="L1012">                        return createFont( Font.DIALOG, style, size, dsize );</span>
 
-<span class="fc" id="L1013">                    return font;</span>
+<span class="fc" id="L1014">                    return font;</span>
                 }
 
                 // find last word in family
-<span class="nc" id="L1017">                int index = family.lastIndexOf( ' ' );</span>
-<span class="nc bnc" id="L1018" title="All 2 branches missed.">                if( index &lt; 0 )</span>
-<span class="nc" id="L1019">                    return createFont( Font.DIALOG, style, size, dsize );</span>
+<span class="nc" id="L1018">                int index = family.lastIndexOf( ' ' );</span>
+<span class="nc bnc" id="L1019" title="All 2 branches missed.">                if( index &lt; 0 )</span>
+<span class="nc" id="L1020">                    return createFont( Font.DIALOG, style, size, dsize );</span>
 
                 // check whether last work contains some font weight (e.g. Ultra-Bold or Heavy)
-<span class="nc" id="L1022">                String lastWord = family.substring( index + 1 ).toLowerCase();</span>
-<span class="nc bnc" id="L1023" title="All 6 branches missed.">                if( lastWord.contains( &quot;bold&quot; ) || lastWord.contains( &quot;heavy&quot; ) || lastWord.contains( &quot;black&quot; ) )</span>
-<span class="nc" id="L1024">                    style |= Font.BOLD;</span>
+<span class="nc" id="L1023">                String lastWord = family.substring( index + 1 ).toLowerCase();</span>
+<span class="nc bnc" id="L1024" title="All 6 branches missed.">                if( lastWord.contains( &quot;bold&quot; ) || lastWord.contains( &quot;heavy&quot; ) || lastWord.contains( &quot;black&quot; ) )</span>
+<span class="nc" id="L1025">                    style |= Font.BOLD;</span>
 
                 // remove last word from family and try again
-<span class="nc" id="L1027">                family = family.substring( 0, index );</span>
-<span class="nc" id="L1028">            }</span>
+<span class="nc" id="L1028">                family = family.substring( 0, index );</span>
+<span class="nc" id="L1029">            }</span>
         }
 
         private static Font createFont( String family, int style, int size, double dsize ) {
-<span class="fc" id="L1032">            Font font = UiScale._createCompositeFont( family, style, size );</span>
+<span class="fc" id="L1033">            Font font = UiScale._createCompositeFont( family, style, size );</span>
 
             // set font size in floating points
-<span class="fc" id="L1035">            font = font.deriveFont( style, (float) dsize );</span>
+<span class="fc" id="L1036">            font = font.deriveFont( style, (float) dsize );</span>
 
-<span class="fc" id="L1037">            return font;</span>
+<span class="fc" id="L1038">            return font;</span>
         }
 
         private static double getGnomeFontScale() {
             // do not scale font here if JRE scales
-<span class="pc bpc" id="L1042" title="1 of 2 branches missed.">            if( UiScale._isSystemScaling() )</span>
-<span class="nc" id="L1043">                return 96. / 72.;</span>
+<span class="pc bpc" id="L1043" title="1 of 2 branches missed.">            if( UiScale._isSystemScaling() )</span>
+<span class="nc" id="L1044">                return 96. / 72.;</span>
 
             // see class com.sun.java.swing.plaf.gtk.PangoFonts background information
 
-<span class="fc" id="L1047">            Object value = Toolkit.getDefaultToolkit().getDesktopProperty( &quot;gnome.Xft/DPI&quot; );</span>
-<span class="pc bpc" id="L1048" title="1 of 2 branches missed.">            if( value instanceof Integer ) {</span>
-<span class="fc" id="L1049">                int dpi = (Integer) value / 1024;</span>
-<span class="pc bpc" id="L1050" title="1 of 2 branches missed.">                if( dpi == -1 )</span>
-<span class="nc" id="L1051">                    dpi = 96;</span>
-<span class="pc bpc" id="L1052" title="1 of 2 branches missed.">                if( dpi &lt; 50 )</span>
-<span class="nc" id="L1053">                    dpi = 50;</span>
-<span class="fc" id="L1054">                return dpi / 72.0;</span>
+<span class="fc" id="L1048">            Object value = Toolkit.getDefaultToolkit().getDesktopProperty( &quot;gnome.Xft/DPI&quot; );</span>
+<span class="pc bpc" id="L1049" title="1 of 2 branches missed.">            if( value instanceof Integer ) {</span>
+<span class="fc" id="L1050">                int dpi = (Integer) value / 1024;</span>
+<span class="pc bpc" id="L1051" title="1 of 2 branches missed.">                if( dpi == -1 )</span>
+<span class="nc" id="L1052">                    dpi = 96;</span>
+<span class="pc bpc" id="L1053" title="1 of 2 branches missed.">                if( dpi &lt; 50 )</span>
+<span class="nc" id="L1054">                    dpi = 50;</span>
+<span class="fc" id="L1055">                return dpi / 72.0;</span>
             } else {
-<span class="nc" id="L1056">                return GraphicsEnvironment.getLocalGraphicsEnvironment()</span>
-<span class="nc" id="L1057">                                          .getDefaultScreenDevice()</span>
-<span class="nc" id="L1058">                                          .getDefaultConfiguration()</span>
-<span class="nc" id="L1059">                                          .getNormalizingTransform()</span>
-<span class="nc" id="L1060">                                          .getScaleY();</span>
+<span class="nc" id="L1057">                return GraphicsEnvironment.getLocalGraphicsEnvironment()</span>
+<span class="nc" id="L1058">                                          .getDefaultScreenDevice()</span>
+<span class="nc" id="L1059">                                          .getDefaultConfiguration()</span>
+<span class="nc" id="L1060">                                          .getNormalizingTransform()</span>
+<span class="nc" id="L1061">                                          .getScaleY();</span>
             }
         }
 
@@ -1065,13 +1066,13 @@ public final class SwingTree
          * map GTK/fontconfig names to equivalent JDK logical font name
          */
         private static String mapFcName( String name ) {
-<span class="pc bpc" id="L1068" title="4 of 5 branches missed.">            switch( name ) {</span>
-<span class="nc" id="L1069">                case &quot;sans&quot;:		return &quot;sansserif&quot;;</span>
-<span class="nc" id="L1070">                case &quot;sans-serif&quot;:	return &quot;sansserif&quot;;</span>
-<span class="nc" id="L1071">                case &quot;serif&quot;:		return &quot;serif&quot;;</span>
-<span class="nc" id="L1072">                case &quot;monospace&quot;:	return &quot;monospaced&quot;;</span>
+<span class="pc bpc" id="L1069" title="4 of 5 branches missed.">            switch( name ) {</span>
+<span class="nc" id="L1070">                case &quot;sans&quot;:		return &quot;sansserif&quot;;</span>
+<span class="nc" id="L1071">                case &quot;sans-serif&quot;:	return &quot;sansserif&quot;;</span>
+<span class="nc" id="L1072">                case &quot;serif&quot;:		return &quot;serif&quot;;</span>
+<span class="nc" id="L1073">                case &quot;monospace&quot;:	return &quot;monospaced&quot;;</span>
             }
-<span class="fc" id="L1074">            return null;</span>
+<span class="fc" id="L1075">            return null;</span>
         }
 
         /**
@@ -1087,113 +1088,113 @@ public final class SwingTree
          * Displays &gt; Scale Display), the forceFontDPI is also changed to reflect the scale factor.
          */
         private static Font getKDEFont() {
-<span class="nc" id="L1090">            List&lt;String&gt; kdeglobals = readConfig( &quot;kdeglobals&quot; );</span>
-<span class="nc" id="L1091">            List&lt;String&gt; kcmfonts   = readConfig( &quot;kcmfonts&quot; );</span>
+<span class="nc" id="L1091">            List&lt;String&gt; kdeglobals = readConfig( &quot;kdeglobals&quot; );</span>
+<span class="nc" id="L1092">            List&lt;String&gt; kcmfonts   = readConfig( &quot;kcmfonts&quot; );</span>
 
-<span class="nc" id="L1093">            String generalFont  = getConfigEntry( kdeglobals, &quot;General&quot;, &quot;font&quot; );</span>
-<span class="nc" id="L1094">            String forceFontDPI = getConfigEntry( kcmfonts, &quot;General&quot;, &quot;forceFontDPI&quot; );</span>
+<span class="nc" id="L1094">            String generalFont  = getConfigEntry( kdeglobals, &quot;General&quot;, &quot;font&quot; );</span>
+<span class="nc" id="L1095">            String forceFontDPI = getConfigEntry( kcmfonts, &quot;General&quot;, &quot;forceFontDPI&quot; );</span>
 
-<span class="nc" id="L1096">            String family = &quot;sansserif&quot;;</span>
-<span class="nc" id="L1097">            int style = Font.PLAIN;</span>
-<span class="nc" id="L1098">            int size = 10;</span>
+<span class="nc" id="L1097">            String family = &quot;sansserif&quot;;</span>
+<span class="nc" id="L1098">            int style = Font.PLAIN;</span>
+<span class="nc" id="L1099">            int size = 10;</span>
 
-<span class="nc bnc" id="L1100" title="All 2 branches missed.">            if( generalFont != null ) {</span>
-<span class="nc" id="L1101">                List&lt;String&gt; strs = StringUtils.split( generalFont, ',' );</span>
+<span class="nc bnc" id="L1101" title="All 2 branches missed.">            if( generalFont != null ) {</span>
+<span class="nc" id="L1102">                List&lt;String&gt; strs = StringUtils.split( generalFont, ',' );</span>
                 try {
-<span class="nc" id="L1103">                    family = strs.get( 0 );</span>
-<span class="nc" id="L1104">                    size = Integer.parseInt( strs.get( 1 ) );</span>
-<span class="nc bnc" id="L1105" title="All 2 branches missed.">                    if( &quot;75&quot;.equals( strs.get( 4 ) ) )</span>
-<span class="nc" id="L1106">                        style |= Font.BOLD;</span>
-<span class="nc bnc" id="L1107" title="All 2 branches missed.">                    if( &quot;1&quot;.equals( strs.get( 5 ) ) )</span>
-<span class="nc" id="L1108">                        style |= Font.ITALIC;</span>
-<span class="nc" id="L1109">                } catch( RuntimeException ex ) {</span>
-<span class="nc" id="L1110">                    ex.printStackTrace();</span>
+<span class="nc" id="L1104">                    family = strs.get( 0 );</span>
+<span class="nc" id="L1105">                    size = Integer.parseInt( strs.get( 1 ) );</span>
+<span class="nc bnc" id="L1106" title="All 2 branches missed.">                    if( &quot;75&quot;.equals( strs.get( 4 ) ) )</span>
+<span class="nc" id="L1107">                        style |= Font.BOLD;</span>
+<span class="nc bnc" id="L1108" title="All 2 branches missed.">                    if( &quot;1&quot;.equals( strs.get( 5 ) ) )</span>
+<span class="nc" id="L1109">                        style |= Font.ITALIC;</span>
+<span class="nc" id="L1110">                } catch( RuntimeException ex ) {</span>
+<span class="nc" id="L1111">                    ex.printStackTrace();</span>
                     //LoggingFacade.INSTANCE.logConfig( &quot;SwingTree: Failed to parse 'font=&quot; + generalFont + &quot;'.&quot;, ex );
-<span class="nc" id="L1112">                }</span>
+<span class="nc" id="L1113">                }</span>
             }
 
             // font dpi
-<span class="nc" id="L1116">            int dpi = 96;</span>
-<span class="nc bnc" id="L1117" title="All 4 branches missed.">            if( forceFontDPI != null &amp;&amp; !UiScale._isSystemScaling() ) {</span>
+<span class="nc" id="L1117">            int dpi = 96;</span>
+<span class="nc bnc" id="L1118" title="All 4 branches missed.">            if( forceFontDPI != null &amp;&amp; !UiScale._isSystemScaling() ) {</span>
                 try {
-<span class="nc" id="L1119">                    dpi = Integer.parseInt( forceFontDPI );</span>
-<span class="nc bnc" id="L1120" title="All 2 branches missed.">                    if( dpi &lt;= 0 )</span>
-<span class="nc" id="L1121">                        dpi = 96;</span>
-<span class="nc bnc" id="L1122" title="All 2 branches missed.">                    if( dpi &lt; 50 )</span>
-<span class="nc" id="L1123">                        dpi = 50;</span>
-<span class="nc" id="L1124">                } catch( NumberFormatException ex ) {</span>
-<span class="nc" id="L1125">                    ex.printStackTrace();</span>
+<span class="nc" id="L1120">                    dpi = Integer.parseInt( forceFontDPI );</span>
+<span class="nc bnc" id="L1121" title="All 2 branches missed.">                    if( dpi &lt;= 0 )</span>
+<span class="nc" id="L1122">                        dpi = 96;</span>
+<span class="nc bnc" id="L1123" title="All 2 branches missed.">                    if( dpi &lt; 50 )</span>
+<span class="nc" id="L1124">                        dpi = 50;</span>
+<span class="nc" id="L1125">                } catch( NumberFormatException ex ) {</span>
+<span class="nc" id="L1126">                    ex.printStackTrace();</span>
                     //LoggingFacade.INSTANCE.logConfig( &quot;SwingTree: Failed to parse 'forceFontDPI=&quot; + forceFontDPI + &quot;'.&quot;, ex );
-<span class="nc" id="L1127">                }</span>
+<span class="nc" id="L1128">                }</span>
             }
 
             // scale font size
-<span class="nc" id="L1131">            double fontScale = dpi / 72.0;</span>
-<span class="nc" id="L1132">            double dsize = size * fontScale;</span>
-<span class="nc" id="L1133">            size = (int) (dsize + 0.5);</span>
-<span class="nc bnc" id="L1134" title="All 2 branches missed.">            if( size &lt; 1 )</span>
-<span class="nc" id="L1135">                size = 1;</span>
+<span class="nc" id="L1132">            double fontScale = dpi / 72.0;</span>
+<span class="nc" id="L1133">            double dsize = size * fontScale;</span>
+<span class="nc" id="L1134">            size = (int) (dsize + 0.5);</span>
+<span class="nc bnc" id="L1135" title="All 2 branches missed.">            if( size &lt; 1 )</span>
+<span class="nc" id="L1136">                size = 1;</span>
 
-<span class="nc" id="L1137">            return createFont( family, style, size, dsize );</span>
+<span class="nc" id="L1138">            return createFont( family, style, size, dsize );</span>
         }
 
         private static List&lt;String&gt; readConfig( String filename ) {
-<span class="nc" id="L1141">            File userHome = new File( System.getProperty( &quot;user.home&quot; ) );</span>
+<span class="nc" id="L1142">            File userHome = new File( System.getProperty( &quot;user.home&quot; ) );</span>
 
             // search for config file
-<span class="nc" id="L1144">            String[] configDirs = {</span>
+<span class="nc" id="L1145">            String[] configDirs = {</span>
                     &quot;.config&quot;, // KDE 5
                     &quot;.kde4/share/config&quot;, // KDE 4
                     &quot;.kde/share/config&quot;// KDE 3
             };
-<span class="nc" id="L1149">            File file = null;</span>
-<span class="nc bnc" id="L1150" title="All 2 branches missed.">            for( String configDir : configDirs ) {</span>
-<span class="nc" id="L1151">                file = new File( userHome, configDir + &quot;/&quot; + filename );</span>
-<span class="nc bnc" id="L1152" title="All 2 branches missed.">                if( file.isFile() )</span>
-<span class="nc" id="L1153">                    break;</span>
+<span class="nc" id="L1150">            File file = null;</span>
+<span class="nc bnc" id="L1151" title="All 2 branches missed.">            for( String configDir : configDirs ) {</span>
+<span class="nc" id="L1152">                file = new File( userHome, configDir + &quot;/&quot; + filename );</span>
+<span class="nc bnc" id="L1153" title="All 2 branches missed.">                if( file.isFile() )</span>
+<span class="nc" id="L1154">                    break;</span>
             }
-<span class="nc bnc" id="L1155" title="All 2 branches missed.">            if( !file.isFile() )</span>
-<span class="nc" id="L1156">                return Collections.emptyList();</span>
+<span class="nc bnc" id="L1156" title="All 2 branches missed.">            if( !file.isFile() )</span>
+<span class="nc" id="L1157">                return Collections.emptyList();</span>
 
             // read config file
-<span class="nc" id="L1159">            ArrayList&lt;String&gt; lines = new ArrayList&lt;&gt;( 200 );</span>
-<span class="nc" id="L1160">            try( BufferedReader reader = new BufferedReader( new FileReader( file ) ) ) {</span>
+<span class="nc" id="L1160">            ArrayList&lt;String&gt; lines = new ArrayList&lt;&gt;( 200 );</span>
+<span class="nc" id="L1161">            try( BufferedReader reader = new BufferedReader( new FileReader( file ) ) ) {</span>
                 String line;
-<span class="nc bnc" id="L1162" title="All 2 branches missed.">                while( (line = reader.readLine()) != null )</span>
-<span class="nc" id="L1163">                    lines.add( line );</span>
-<span class="nc" id="L1164">            } catch( IOException ex ) {</span>
-<span class="nc" id="L1165">                ex.printStackTrace();</span>
+<span class="nc bnc" id="L1163" title="All 2 branches missed.">                while( (line = reader.readLine()) != null )</span>
+<span class="nc" id="L1164">                    lines.add( line );</span>
+<span class="nc" id="L1165">            } catch( IOException ex ) {</span>
+<span class="nc" id="L1166">                ex.printStackTrace();</span>
                 //LoggingFacade.INSTANCE.logConfig( &quot;SwingTree: Failed to read '&quot; + filename + &quot;'.&quot;, ex );
-<span class="nc" id="L1167">            }</span>
-<span class="nc" id="L1168">            return lines;</span>
+<span class="nc" id="L1168">            }</span>
+<span class="nc" id="L1169">            return lines;</span>
         }
 
         private static String getConfigEntry( List&lt;String&gt; config, String group, String key ) {
-<span class="nc" id="L1172">            int groupLength = group.length();</span>
-<span class="nc" id="L1173">            int keyLength = key.length();</span>
-<span class="nc" id="L1174">            boolean inGroup = false;</span>
-<span class="nc bnc" id="L1175" title="All 2 branches missed.">            for( String line : config ) {</span>
-<span class="nc bnc" id="L1176" title="All 2 branches missed.">                if( !inGroup ) {</span>
-<span class="nc bnc" id="L1177" title="All 2 branches missed.">                    if( line.length() &gt;= groupLength + 2 &amp;&amp;</span>
-<span class="nc bnc" id="L1178" title="All 2 branches missed.">                            line.charAt( 0 ) == '[' &amp;&amp;</span>
-<span class="nc bnc" id="L1179" title="All 2 branches missed.">                            line.charAt( groupLength + 1 ) == ']' &amp;&amp;</span>
-<span class="nc bnc" id="L1180" title="All 2 branches missed.">                            line.indexOf( group ) == 1 )</span>
+<span class="nc" id="L1173">            int groupLength = group.length();</span>
+<span class="nc" id="L1174">            int keyLength = key.length();</span>
+<span class="nc" id="L1175">            boolean inGroup = false;</span>
+<span class="nc bnc" id="L1176" title="All 2 branches missed.">            for( String line : config ) {</span>
+<span class="nc bnc" id="L1177" title="All 2 branches missed.">                if( !inGroup ) {</span>
+<span class="nc bnc" id="L1178" title="All 2 branches missed.">                    if( line.length() &gt;= groupLength + 2 &amp;&amp;</span>
+<span class="nc bnc" id="L1179" title="All 2 branches missed.">                            line.charAt( 0 ) == '[' &amp;&amp;</span>
+<span class="nc bnc" id="L1180" title="All 2 branches missed.">                            line.charAt( groupLength + 1 ) == ']' &amp;&amp;</span>
+<span class="nc bnc" id="L1181" title="All 2 branches missed.">                            line.indexOf( group ) == 1 )</span>
                     {
-<span class="nc" id="L1182">                        inGroup = true;</span>
+<span class="nc" id="L1183">                        inGroup = true;</span>
                     }
                 } else {
-<span class="nc bnc" id="L1185" title="All 2 branches missed.">                    if( line.startsWith( &quot;[&quot; ) )</span>
-<span class="nc" id="L1186">                        return null;</span>
+<span class="nc bnc" id="L1186" title="All 2 branches missed.">                    if( line.startsWith( &quot;[&quot; ) )</span>
+<span class="nc" id="L1187">                        return null;</span>
 
-<span class="nc bnc" id="L1188" title="All 2 branches missed.">                    if( line.length() &gt;= keyLength + 2 &amp;&amp;</span>
-<span class="nc bnc" id="L1189" title="All 2 branches missed.">                            line.charAt( keyLength ) == '=' &amp;&amp;</span>
-<span class="nc bnc" id="L1190" title="All 2 branches missed.">                            line.startsWith( key ) )</span>
+<span class="nc bnc" id="L1189" title="All 2 branches missed.">                    if( line.length() &gt;= keyLength + 2 &amp;&amp;</span>
+<span class="nc bnc" id="L1190" title="All 2 branches missed.">                            line.charAt( keyLength ) == '=' &amp;&amp;</span>
+<span class="nc bnc" id="L1191" title="All 2 branches missed.">                            line.startsWith( key ) )</span>
                     {
-<span class="nc" id="L1192">                        return line.substring( keyLength + 1 );</span>
+<span class="nc" id="L1193">                        return line.substring( keyLength + 1 );</span>
                     }
                 }
-<span class="nc" id="L1195">            }</span>
-<span class="nc" id="L1196">            return null;</span>
+<span class="nc" id="L1196">            }</span>
+<span class="nc" id="L1197">            return null;</span>
         }
 
     }
@@ -1202,20 +1203,20 @@ public final class SwingTree
         private final Supplier&lt;T&gt; supplier;
         private volatile T value;
 
-<span class="fc" id="L1205">        LazyRef( Supplier&lt;T&gt; supplier ) {</span>
-<span class="fc" id="L1206">            this.supplier = Objects.requireNonNull( supplier );</span>
-<span class="fc" id="L1207">        }</span>
+<span class="fc" id="L1206">        LazyRef( Supplier&lt;T&gt; supplier ) {</span>
+<span class="fc" id="L1207">            this.supplier = Objects.requireNonNull( supplier );</span>
+<span class="fc" id="L1208">        }</span>
 
         T get() {
-<span class="fc" id="L1210">            T value = this.value;</span>
-<span class="fc bfc" id="L1211" title="All 2 branches covered.">            if( value == null ) {</span>
-<span class="fc" id="L1212">                synchronized( this ) {</span>
-<span class="fc" id="L1213">                    value = this.value;</span>
-<span class="pc bpc" id="L1214" title="1 of 2 branches missed.">                    if ( value == null )</span>
-<span class="fc" id="L1215">                        this.value = value = supplier.get();</span>
-<span class="fc" id="L1216">                }</span>
+<span class="fc" id="L1211">            T value = this.value;</span>
+<span class="fc bfc" id="L1212" title="All 2 branches covered.">            if( value == null ) {</span>
+<span class="fc" id="L1213">                synchronized( this ) {</span>
+<span class="fc" id="L1214">                    value = this.value;</span>
+<span class="pc bpc" id="L1215" title="1 of 2 branches missed.">                    if ( value == null )</span>
+<span class="fc" id="L1216">                        this.value = value = supplier.get();</span>
+<span class="fc" id="L1217">                }</span>
             }
-<span class="fc" id="L1218">            return value;</span>
+<span class="fc" id="L1219">            return value;</span>
         }
     }
 }

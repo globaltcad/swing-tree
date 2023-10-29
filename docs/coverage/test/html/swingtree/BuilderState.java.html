@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BuilderState.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">BuilderState.java</span></div><h1>BuilderState.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import swingtree.style.ComponentExtension;
+import swingtree.threading.EventProcessor;
+
+import javax.swing.JComponent;
+import java.awt.Component;
+import java.util.Objects;
+import java.util.function.Supplier;
+
+class BuilderState&lt;C extends Component&gt;
+{
+    /**
+     * The thread mode determines how events are dispatched to the component.
+     * And also which type of thread can access the component.
+     */
+<span class="fc" id="L17">    private final EventProcessor eventProcessor = SwingTree.get().getEventProcessor();</span>
+
+    /**
+     *  The type class of the component wrapped by this builder node.
+     */
+    private final Class&lt;C&gt; componentType;
+
+    private DetachableReference&lt;Supplier&lt;C&gt;&gt; componentSupplier;
+
+    BuilderState( C component )
+<span class="fc" id="L27">    {</span>
+<span class="fc" id="L28">        Objects.requireNonNull(component, &quot;component&quot;);</span>
+<span class="fc bfc" id="L29" title="All 2 branches covered.">        if ( component instanceof JComponent)</span>
+<span class="fc" id="L30">            ComponentExtension.makeSureComponentHasExtension( (JComponent) component );</span>
+<span class="fc" id="L31">        this.componentType = (Class&lt;C&gt;) component.getClass();</span>
+<span class="fc" id="L32">        this.componentSupplier = new DetachableReference&lt;&gt;( () -&gt; component );</span>
+<span class="fc" id="L33">    }</span>
+
+    public C component() {
+<span class="fc" id="L36">        return Objects.requireNonNull(componentSupplier.get()).get();</span>
+    }
+
+    public void dispose() {
+<span class="fc" id="L40">        componentSupplier.detach();</span>
+<span class="fc" id="L41">    }</span>
+
+    public EventProcessor eventProcessor() {
+<span class="fc" id="L44">        return eventProcessor;</span>
+    }
+
+    /**
+     *  The type class of the component wrapped by this builder node.
+     */
+    public Class&lt;C&gt; componentType() {
+<span class="fc" id="L51">        return componentType;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

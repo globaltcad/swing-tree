@@ -5,8 +5,17 @@ import javax.swing.*;
 /**
  *  A SwingTree builder node designed for configuring {@link JRadioButton} instances.
  */
-public class UIForRadioButton&lt;R extends JRadioButton&gt; extends UIForAnyToggleButton&lt;UIForRadioButton&lt;R&gt;, R&gt;
+public final class UIForRadioButton&lt;R extends JRadioButton&gt; extends UIForAnyToggleButton&lt;UIForRadioButton&lt;R&gt;, R&gt;
 {
-<span class="fc" id="L10">    protected UIForRadioButton( R component ) { super(component); }</span>
+    private final BuilderState&lt;R&gt; _state;
+
+<span class="fc" id="L12">    UIForRadioButton( R component ) {</span>
+<span class="fc" id="L13">        _state = new BuilderState&lt;&gt;(component);</span>
+<span class="fc" id="L14">    }</span>
+
+    @Override
+    protected BuilderState&lt;R&gt; _state() {
+<span class="fc" id="L18">        return _state;</span>
+    }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

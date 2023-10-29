@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UIForAnyScrollPane.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">UIForAnyScrollPane.java</span></div><h1>UIForAnyScrollPane.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import sprouts.Val;
+
+import javax.swing.JComponent;
+import javax.swing.JScrollPane;
+import javax.swing.ScrollPaneConstants;
+import java.util.Objects;
+
+<span class="fc" id="L10">public abstract class UIForAnyScrollPane&lt;I, P extends JScrollPane&gt; extends UIForAnySwing&lt;I, P&gt;</span>
+{
+    @Override
+    protected void _doAddComponent( JComponent newComponent, Object conf, P thisComponent ) {
+<span class="pc bpc" id="L14" title="1 of 2 branches missed.">        if ( conf != null ) {</span>
+            // The user wants to add a component to the scroll pane with a specific constraint.
+            // Swing does not support any constraints for scroll panes, but we are not Swing, we are SwingTree!
+<span class="nc" id="L17">            newComponent = UI.panel(&quot;fill, ins 0&quot;).add(conf.toString(), newComponent).getComponent();</span>
+            //  ^ So we improve this situation by wrapping the component in a mig layout panel, supporting constraints.
+
+            // Let's strip it of any visible properties, since it should serve merely as a container.
+<span class="nc" id="L21">            newComponent.setBorder(null);</span>
+<span class="nc" id="L22">            newComponent.setOpaque(false);</span>
+<span class="nc" id="L23">            newComponent.setBackground(null);</span>
+        }
+<span class="fc" id="L25">        thisComponent.setViewportView(newComponent);</span>
+<span class="fc" id="L26">    }</span>
+
+    /**
+     *  Use this to set the scroll bars policy for both horizontal and vertical scroll bars.
+     *
+     * @param scrollPolicy The scroll policy to use.
+     * @return This builder node.
+     */
+    public final I withScrollBarPolicy( UI.Active scrollPolicy ) {
+<span class="fc" id="L35">        Objects.requireNonNull(scrollPolicy);</span>
+<span class="fc" id="L36">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L37">                    _setVerticalScrollBarPolicy(thisComponent, scrollPolicy);</span>
+<span class="fc" id="L38">                    _setHorizontalScrollBarPolicy(thisComponent, scrollPolicy);</span>
+<span class="fc" id="L39">               })</span>
+<span class="fc" id="L40">               ._this();</span>
+    }
+
+    /**
+     *  Use this to set the scroll bars policy for the vertical scroll bar.
+     *
+     * @param scrollBarPolicy The scroll policy to use.
+     * @return This builder node.
+     */
+    public final I withVerticalScrollBarPolicy( UI.Active scrollBarPolicy ) {
+<span class="fc" id="L50">        Objects.requireNonNull(scrollBarPolicy);</span>
+<span class="fc" id="L51">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L52">                    _setVerticalScrollBarPolicy(thisComponent, scrollBarPolicy);</span>
+<span class="fc" id="L53">                })</span>
+<span class="fc" id="L54">                ._this();</span>
+    }
+
+    private void _setVerticalScrollBarPolicy( P thisComponent, UI.Active scrollBarPolicy ) {
+<span class="pc bpc" id="L58" title="1 of 4 branches missed.">        switch ( scrollBarPolicy ) {</span>
+<span class="fc" id="L59">            case NEVER:     thisComponent.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER); break;</span>
+<span class="fc" id="L60">            case ALWAYS:    thisComponent.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS); break;</span>
+<span class="fc" id="L61">            case AS_NEEDED: thisComponent.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED); break;</span>
+        }
+<span class="fc" id="L63">    }</span>
+
+    /**
+     *  Use this to dynamically set the scroll bars policy for the vertical scroll bar.
+     *
+     * @param scrollBarPolicy The scroll policy property to use.
+     * @return This builder node.
+     */
+    public final I withVerticalScrollBarPolicy( Val&lt;UI.Active&gt; scrollBarPolicy ) {
+<span class="fc" id="L72">        NullUtil.nullArgCheck(scrollBarPolicy, &quot;scrollBarPolicy&quot;, Val.class);</span>
+<span class="fc" id="L73">        NullUtil.nullPropertyCheck(scrollBarPolicy, &quot;scrollBarPolicy&quot;, &quot;Null is not a valid scroll bar policy.&quot;);</span>
+<span class="fc" id="L74">        return _withOnShow( scrollBarPolicy, (thisComponent,v) -&gt; {</span>
+<span class="fc" id="L75">                    _setVerticalScrollBarPolicy(thisComponent, v);</span>
+<span class="fc" id="L76">                })</span>
+<span class="fc" id="L77">                ._with( thisComponent -&gt; {</span>
+<span class="fc" id="L78">                    _setVerticalScrollBarPolicy(thisComponent, scrollBarPolicy.get());</span>
+<span class="fc" id="L79">                })</span>
+<span class="fc" id="L80">                ._this();</span>
+    }
+
+    /**
+     *  Use this to set the scroll bars policy for the horizontal scroll bar.
+     *
+     * @param scrollBarPolicy The scroll policy to use.
+     * @return This builder node.
+     */
+    public final I withHorizontalScrollBarPolicy(UI.Active scrollBarPolicy ) {
+<span class="fc" id="L90">        Objects.requireNonNull(scrollBarPolicy);</span>
+<span class="fc" id="L91">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L92">                    _setHorizontalScrollBarPolicy(thisComponent, scrollBarPolicy);</span>
+<span class="fc" id="L93">                })</span>
+<span class="fc" id="L94">                ._this();</span>
+    }
+
+    private void _setHorizontalScrollBarPolicy( P thisComponent, UI.Active scrollBarPolicy ) {
+<span class="pc bpc" id="L98" title="1 of 4 branches missed.">        switch ( scrollBarPolicy ) {</span>
+<span class="fc" id="L99">            case NEVER: thisComponent.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER); break;</span>
+<span class="fc" id="L100">            case ALWAYS: thisComponent.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS); break;</span>
+<span class="fc" id="L101">            case AS_NEEDED: thisComponent.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED); break;</span>
+        }
+<span class="fc" id="L103">    }</span>
+
+    /**
+     *  Use this to dynamically set the scroll bars policy for the horizontal scroll bar.
+     *
+     * @param scrollBarPolicy The scroll policy property to use.
+     * @return This builder node.
+     */
+    public final I withHorizontalScrollBarPolicy( Val&lt;UI.Active&gt; scrollBarPolicy ) {
+<span class="fc" id="L112">        NullUtil.nullArgCheck(scrollBarPolicy, &quot;scrollBarPolicy&quot;, Val.class);</span>
+<span class="fc" id="L113">        NullUtil.nullPropertyCheck(scrollBarPolicy, &quot;scrollBarPolicy&quot;, &quot;Null is not a valid scroll bar policy.&quot;);</span>
+<span class="fc" id="L114">        return _withOnShow( scrollBarPolicy, (thisComponent,v) -&gt; {</span>
+<span class="fc" id="L115">                    _setHorizontalScrollBarPolicy(thisComponent, v);</span>
+<span class="fc" id="L116">                })</span>
+<span class="fc" id="L117">                ._with( thisComponent -&gt; {</span>
+<span class="fc" id="L118">                    _setHorizontalScrollBarPolicy(thisComponent, scrollBarPolicy.get());</span>
+<span class="fc" id="L119">                })</span>
+<span class="fc" id="L120">                ._this();</span>
+    }
+
+    /**
+     *  Use this to set the vertical scroll increment.
+     *
+     * @param increment The scroll vertical increment to use.
+     * @return This builder instance, to allow for method chaining.
+     */
+    public final I withVerticalScrollIncrement( int increment ) {
+<span class="fc" id="L130">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L131">                    thisComponent.getVerticalScrollBar().setUnitIncrement(increment);</span>
+<span class="fc" id="L132">                })</span>
+<span class="fc" id="L133">                ._this();</span>
+    }
+
+    /**
+     *  Use this to set the horizontal scroll increment.
+     *
+     * @param increment The scroll horizontal increment to use.
+     * @return This builder instance, to allow for method chaining.
+     */
+    public final I withHorizontalScrollIncrement( int increment ) {
+<span class="fc" id="L143">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L144">                    thisComponent.getHorizontalScrollBar().setUnitIncrement(increment);</span>
+<span class="fc" id="L145">                })</span>
+<span class="fc" id="L146">                ._this();</span>
+    }
+
+    /**
+     * Use this to set the vertical and horizontal scroll increment.
+     * @param increment The scroll increment to use.
+     * @return This builder instance, to allow for method chaining.
+     */
+    public final I withScrollIncrement( int increment ) {
+<span class="fc" id="L155">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L156">                    thisComponent.getVerticalScrollBar().setUnitIncrement(increment);</span>
+<span class="fc" id="L157">                    thisComponent.getHorizontalScrollBar().setUnitIncrement(increment);</span>
+<span class="fc" id="L158">                })</span>
+<span class="fc" id="L159">                ._this();</span>
+    }
+
+    /**
+     *  Use this to set the vertical scroll block increment.
+     *
+     * @param increment The scroll vertical block increment to use.
+     * @return This builder instance, to allow for method chaining.
+     */
+    public final I withVerticalBlockScrollIncrement( int increment ) {
+<span class="fc" id="L169">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L170">                    thisComponent.getVerticalScrollBar().setBlockIncrement(increment);</span>
+<span class="fc" id="L171">                })</span>
+<span class="fc" id="L172">                ._this();</span>
+    }
+
+    /**
+     *  Use this to set the horizontal scroll block increment.
+     *  It is the amount to change the scrollbar's value by,
+     *  given a block (usually &quot;page&quot;) up/down request or when the user clicks
+     *  above or below the scrollbar &quot;knob&quot; to change the value
+     *  up or down by large amount.
+     *
+     * @param increment The scroll horizontal block increment to use.
+     * @return This builder instance, to allow for method chaining.
+     */
+    public final I withHorizontalBlockScrollIncrement( int increment ) {
+<span class="fc" id="L186">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L187">                    thisComponent.getHorizontalScrollBar().setBlockIncrement(increment);</span>
+<span class="fc" id="L188">                })</span>
+<span class="fc" id="L189">                ._this();</span>
+    }
+
+    /**
+     * Use this to set the vertical and horizontal scroll block increment.
+     * The block increment is the amount to change the scrollbar's value by,
+     * given a block (usually &quot;page&quot;) up/down request or when the user clicks
+     * above or below the scrollbar &quot;knob&quot; to change the value
+     * up or down by large amount.
+     *
+     * @param increment The scroll block increment to use.
+     * @return This builder instance, to allow for method chaining.
+     */
+    public final I withBlockScrollIncrement( int increment ) {
+<span class="fc" id="L203">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L204">                    thisComponent.getVerticalScrollBar().setBlockIncrement(increment);</span>
+<span class="fc" id="L205">                    thisComponent.getHorizontalScrollBar().setBlockIncrement(increment);</span>
+<span class="fc" id="L206">                })</span>
+<span class="fc" id="L207">                ._this();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -4,15 +4,24 @@ import sprouts.Val;
 
 import javax.swing.*;
 
-public class UIForToolBar&lt;T extends JToolBar&gt; extends UIForAnySwing&lt;UIForToolBar&lt;T&gt;, T&gt;
+public final class UIForToolBar&lt;T extends JToolBar&gt; extends UIForAnySwing&lt;UIForToolBar&lt;T&gt;, T&gt;
 {
+    private final BuilderState&lt;T&gt; _state;
+
     /**
      * {@link UIForAnySwing} (sub)types always wrap
      * a single component for which they are responsible.
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.
      */
-<span class="fc" id="L15">    protected UIForToolBar(T component) { super(component); }</span>
+<span class="fc" id="L17">    UIForToolBar(T component) {</span>
+<span class="fc" id="L18">        _state = new BuilderState&lt;&gt;(component);</span>
+<span class="fc" id="L19">    }</span>
+
+    @Override
+    protected BuilderState&lt;T&gt; _state() {
+<span class="nc" id="L23">        return _state;</span>
+    }
 
     /**
      * @param alignment The {@link UI.Align} value mapping to the {@link JToolBar}'s orientation.
@@ -20,11 +29,11 @@ public class UIForToolBar&lt;T extends JToolBar&gt; extends UIForAnySwing&lt;UIF
      * @return This builder node.
      */
     public final UIForToolBar&lt;T&gt; withOrientation( UI.Align alignment ) {
-<span class="nc" id="L23">        NullUtil.nullArgCheck(alignment, &quot;alignment&quot;, UI.Align.class);</span>
-<span class="nc" id="L24">        return _with( thisComponent -&gt; {</span>
-<span class="nc" id="L25">                    thisComponent.setOrientation(alignment.forToolBar());</span>
-<span class="nc" id="L26">                })</span>
-<span class="nc" id="L27">                ._this();</span>
+<span class="nc" id="L32">        NullUtil.nullArgCheck(alignment, &quot;alignment&quot;, UI.Align.class);</span>
+<span class="nc" id="L33">        return _with( thisComponent -&gt; {</span>
+<span class="nc" id="L34">                    thisComponent.setOrientation(alignment.forToolBar());</span>
+<span class="nc" id="L35">                })</span>
+<span class="nc" id="L36">                ._this();</span>
     }
 
     /**
@@ -33,15 +42,15 @@ public class UIForToolBar&lt;T extends JToolBar&gt; extends UIForAnySwing&lt;UIF
      * @return This builder node.
      */
     public final UIForToolBar&lt;T&gt; withOrientation( Val&lt;UI.Align&gt; alignment ) {
-<span class="nc" id="L36">        NullUtil.nullArgCheck(alignment, &quot;alignment&quot;, Val.class);</span>
-<span class="nc" id="L37">        NullUtil.nullPropertyCheck(alignment, &quot;alignment&quot;, &quot;Null is not a valid alignment.&quot;);</span>
-<span class="nc" id="L38">        return _withOnShow( alignment, (c,v) -&gt; {</span>
-<span class="nc" id="L39">                    c.setOrientation(v.forToolBar());</span>
-<span class="nc" id="L40">                })</span>
-<span class="nc" id="L41">                ._with( thisComponent -&gt; {</span>
-<span class="nc" id="L42">                    thisComponent.setOrientation(alignment.orElseThrow().forToolBar());</span>
-<span class="nc" id="L43">                })</span>
-<span class="nc" id="L44">                ._this();</span>
+<span class="nc" id="L45">        NullUtil.nullArgCheck(alignment, &quot;alignment&quot;, Val.class);</span>
+<span class="nc" id="L46">        NullUtil.nullPropertyCheck(alignment, &quot;alignment&quot;, &quot;Null is not a valid alignment.&quot;);</span>
+<span class="nc" id="L47">        return _withOnShow( alignment, (c,v) -&gt; {</span>
+<span class="nc" id="L48">                    c.setOrientation(v.forToolBar());</span>
+<span class="nc" id="L49">                })</span>
+<span class="nc" id="L50">                ._with( thisComponent -&gt; {</span>
+<span class="nc" id="L51">                    thisComponent.setOrientation(alignment.orElseThrow().forToolBar());</span>
+<span class="nc" id="L52">                })</span>
+<span class="nc" id="L53">                ._this();</span>
     }
 
 }

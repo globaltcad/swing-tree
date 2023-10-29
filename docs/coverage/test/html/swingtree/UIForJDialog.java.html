@@ -4,61 +4,71 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.Optional;
 
-public class UIForJDialog&lt;D extends JDialog&gt; extends UIForAnyWindow&lt;UIForJDialog&lt;D&gt;, D&gt;
+public final class UIForJDialog&lt;D extends JDialog&gt; extends UIForAnyWindow&lt;UIForJDialog&lt;D&gt;, D&gt;
 {
+	private final BuilderState&lt;D&gt; _state;
+
 	/**
 	 * Instances of the {@link AbstractBuilder} as well as its subtypes always wrap
 	 * a single component for which they are responsible.
 	 *
 	 * @param component The component type which will be wrapped by this builder node.
 	 */
-<span class="fc" id="L15">	public UIForJDialog(D component) { super(component); }</span>
+<span class="fc" id="L17">	UIForJDialog( D component ) {</span>
+<span class="fc" id="L18">		_state = new BuilderState&lt;&gt;(component);</span>
+<span class="fc" id="L19">	}</span>
+
+	@Override
+	protected BuilderState&lt;D&gt; _state() {
+<span class="fc" id="L23">		return _state;</span>
+	}
+
 
 	@Override
 	protected void _doAddComponent( Component newComponent, Object conf, D thisComponent ) {
-<span class="pc bpc" id="L19" title="1 of 2 branches missed.">		thisComponent.add( conf == null ? null : conf.toString(), newComponent );</span>
-<span class="fc" id="L20">	}</span>
+<span class="pc bpc" id="L29" title="1 of 2 branches missed.">		thisComponent.add( conf == null ? null : conf.toString(), newComponent );</span>
+<span class="fc" id="L30">	}</span>
 
 	@Override
 	public void show() {
-<span class="fc" id="L24">		JDialog dialog = getComponent();</span>
-<span class="fc" id="L25">		Component[] components = dialog.getComponents();</span>
-<span class="fc" id="L26">		dialog.setLocationRelativeTo(null); // Initial centering!v</span>
-<span class="fc" id="L27">		dialog.pack(); // Otherwise some components resize strangely or are not shown at all...</span>
+<span class="fc" id="L34">		JDialog dialog = getComponent();</span>
+<span class="fc" id="L35">		Component[] components = dialog.getComponents();</span>
+<span class="fc" id="L36">		dialog.setLocationRelativeTo(null); // Initial centering!v</span>
+<span class="fc" id="L37">		dialog.pack(); // Otherwise some components resize strangely or are not shown at all...</span>
 		// First let's check if the dialog has an owner:
-<span class="fc" id="L29">		Window owner = dialog.getOwner();</span>
+<span class="fc" id="L39">		Window owner = dialog.getOwner();</span>
 		// If there is no owner, we make sure that the window is centered on the screen again but with the component:
-<span class="pc bpc" id="L31" title="1 of 2 branches missed.">		if ( owner == null )</span>
-<span class="fc" id="L32">			dialog.setLocationRelativeTo(null);</span>
+<span class="pc bpc" id="L41" title="1 of 2 branches missed.">		if ( owner == null )</span>
+<span class="fc" id="L42">			dialog.setLocationRelativeTo(null);</span>
 		else // Otherwise we center the dialog on the owner:
-<span class="nc" id="L34">			dialog.setLocationRelativeTo(owner);</span>
+<span class="nc" id="L44">			dialog.setLocationRelativeTo(owner);</span>
 
 		// We set the size to fit the component:
-<span class="pc bpc" id="L37" title="1 of 2 branches missed.">		if ( components.length &gt; 0 ) {</span>
-<span class="nc" id="L38">			Dimension size = dialog.getSize();</span>
-<span class="nc bnc" id="L39" title="All 2 branches missed.">			if ( size == null ) // The dialog has no size! It is best to set the size to the preferred size of the component:</span>
-<span class="nc" id="L40">				size = components[0].getPreferredSize();</span>
+<span class="pc bpc" id="L47" title="1 of 2 branches missed.">		if ( components.length &gt; 0 ) {</span>
+<span class="nc" id="L48">			Dimension size = dialog.getSize();</span>
+<span class="nc bnc" id="L49" title="All 2 branches missed.">			if ( size == null ) // The dialog has no size! It is best to set the size to the preferred size of the component:</span>
+<span class="nc" id="L50">				size = components[0].getPreferredSize();</span>
 
-<span class="nc bnc" id="L42" title="All 2 branches missed.">			if ( size == null ) // The component has no preferred size! It is best to set the size to the minimum size of the component:</span>
-<span class="nc" id="L43">				size = components[0].getMinimumSize();</span>
+<span class="nc bnc" id="L52" title="All 2 branches missed.">			if ( size == null ) // The component has no preferred size! It is best to set the size to the minimum size of the component:</span>
+<span class="nc" id="L53">				size = components[0].getMinimumSize();</span>
 
-<span class="nc bnc" id="L45" title="All 2 branches missed.">			if ( size == null ) // The component has no minimum size! Let's just look up the size of the component:</span>
-<span class="nc" id="L46">				size = components[0].getSize();</span>
+<span class="nc bnc" id="L55" title="All 2 branches missed.">			if ( size == null ) // The component has no minimum size! Let's just look up the size of the component:</span>
+<span class="nc" id="L56">				size = components[0].getSize();</span>
 
-<span class="nc" id="L48">			dialog.setSize(size);</span>
+<span class="nc" id="L58">			dialog.setSize(size);</span>
 		}
 
-<span class="fc" id="L51">		dialog.setVisible(true);</span>
-<span class="fc" id="L52">	}</span>
+<span class="fc" id="L61">		dialog.setVisible(true);</span>
+<span class="fc" id="L62">	}</span>
 
 	@Override
 	protected Optional&lt;JRootPane&gt; _getRootPaneOf(D thisWindow) {
-<span class="fc" id="L56">		return Optional.ofNullable(thisWindow.getRootPane());</span>
+<span class="fc" id="L66">		return Optional.ofNullable(thisWindow.getRootPane());</span>
 	}
 
 	@Override
 	protected void _setTitleOf( D thisWindow, String title ) {
-<span class="fc" id="L61">		thisWindow.setTitle(title);</span>
-<span class="fc" id="L62">	}</span>
+<span class="fc" id="L71">		thisWindow.setTitle(title);</span>
+<span class="fc" id="L72">	}</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

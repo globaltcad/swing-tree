@@ -17,16 +17,8 @@ import java.util.function.Consumer;
  * @param &lt;I&gt; The type of the builder itself.
  * @param &lt;W&gt; The type of the window which is being configured by this builder.
  */
-public abstract class UIForAnyWindow&lt;I extends UIForAnyWindow&lt;I,W&gt;, W extends Window&gt; extends AbstractNestedBuilder&lt;I,W,Component&gt;
+<span class="fc" id="L20">public abstract class UIForAnyWindow&lt;I extends UIForAnyWindow&lt;I,W&gt;, W extends Window&gt; extends AbstractNestedBuilder&lt;I,W,Component&gt;</span>
 {
-	/**
-	 * Instances of the {@link AbstractBuilder} as well as its subtypes always wrap
-	 * a single component for which they are responsible.
-	 *
-	 * @param component The component type which will be wrapped by this builder node.
-	 */
-<span class="fc" id="L28">	protected UIForAnyWindow( W component ) { super(component); }</span>
-
 	/**
 	 *  Adds a title to the window. &lt;br&gt;
 	 *  Note that the way this is displayed depends on the window type and the
@@ -36,10 +28,10 @@ public abstract class UIForAnyWindow&lt;I extends UIForAnyWindow&lt;I,W&gt;, W e
 	 * @return This builder.
 	 */
 	public final I withTitle( String title ) {
-<span class="fc" id="L39">		return _with( thisWindow -&gt; {</span>
-<span class="fc" id="L40">					_setTitleOf( thisWindow, title );</span>
-<span class="fc" id="L41">		       })</span>
-<span class="fc" id="L42">			   ._this();</span>
+<span class="fc" id="L31">		return _with( thisWindow -&gt; {</span>
+<span class="fc" id="L32">					_setTitleOf( thisWindow, title );</span>
+<span class="fc" id="L33">		       })</span>
+<span class="fc" id="L34">			   ._this();</span>
 	}
 
 	/**
@@ -51,15 +43,15 @@ public abstract class UIForAnyWindow&lt;I extends UIForAnyWindow&lt;I,W&gt;, W e
 	 * @return This builder.
 	 */
 	public final I withTitle( Val&lt;String&gt; title ) {
-<span class="nc" id="L54">		NullUtil.nullArgCheck(title, &quot;title&quot;, Val.class);</span>
-<span class="nc" id="L55">		NullUtil.nullPropertyCheck(title, &quot;title&quot;);</span>
-<span class="nc" id="L56">		return _withOnShow( title, (thisWindow,v) -&gt; {</span>
-<span class="nc" id="L57">			       _setTitleOf(thisWindow, v);</span>
-<span class="nc" id="L58">		       })</span>
-<span class="nc" id="L59">			   ._with( thisWindow -&gt; {</span>
-<span class="nc" id="L60">			       _setTitleOf( thisWindow, title.orElseThrow() );</span>
-<span class="nc" id="L61">			   })</span>
-<span class="nc" id="L62">			   ._this();</span>
+<span class="nc" id="L46">		NullUtil.nullArgCheck(title, &quot;title&quot;, Val.class);</span>
+<span class="nc" id="L47">		NullUtil.nullPropertyCheck(title, &quot;title&quot;);</span>
+<span class="nc" id="L48">		return _withOnShow( title, (thisWindow,v) -&gt; {</span>
+<span class="nc" id="L49">			       _setTitleOf(thisWindow, v);</span>
+<span class="nc" id="L50">		       })</span>
+<span class="nc" id="L51">			   ._with( thisWindow -&gt; {</span>
+<span class="nc" id="L52">			       _setTitleOf( thisWindow, title.orElseThrow() );</span>
+<span class="nc" id="L53">			   })</span>
+<span class="nc" id="L54">			   ._this();</span>
 	}
 
 	/**
@@ -72,12 +64,12 @@ public abstract class UIForAnyWindow&lt;I extends UIForAnyWindow&lt;I,W&gt;, W e
 	protected abstract void _setTitleOf( W thisWindow, String title );
 
 	private void _onKeyStroke( int code, Consumer&lt;ActionEvent&gt; action, W thisWindow ) {
-<span class="fc" id="L75">		_getRootPaneOf(thisWindow).ifPresent(rootPane -&gt; {</span>
-<span class="fc" id="L76">			KeyStroke k = KeyStroke.getKeyStroke(code, 0);</span>
-<span class="fc" id="L77">			int w = JComponent.WHEN_IN_FOCUSED_WINDOW;</span>
-<span class="fc" id="L78">			rootPane.registerKeyboardAction(action::accept, k, w);</span>
-<span class="fc" id="L79">		});</span>
-<span class="fc" id="L80">	}</span>
+<span class="fc" id="L67">		_getRootPaneOf(thisWindow).ifPresent(rootPane -&gt; {</span>
+<span class="fc" id="L68">			KeyStroke k = KeyStroke.getKeyStroke(code, 0);</span>
+<span class="fc" id="L69">			int w = JComponent.WHEN_IN_FOCUSED_WINDOW;</span>
+<span class="fc" id="L70">			rootPane.registerKeyboardAction(action::accept, k, w);</span>
+<span class="fc" id="L71">		});</span>
+<span class="fc" id="L72">	}</span>
 
 	/**
 	 * Adds the supplied {@link sprouts.Action} wrapped in a {@link KeyListener} to the component,
@@ -89,12 +81,12 @@ public abstract class UIForAnyWindow&lt;I extends UIForAnyWindow&lt;I,W&gt;, W e
 	 * @return This very instance, which enables builder-style method chaining.
 	 */
 	public final I onPressed( Keyboard.Key key, sprouts.Action&lt;WindowDelegate&lt;W, ActionEvent&gt;&gt; onKeyPressed ) {
-<span class="fc" id="L92">		NullUtil.nullArgCheck(key, &quot;key&quot;, Keyboard.Key.class);</span>
-<span class="fc" id="L93">		NullUtil.nullArgCheck(onKeyPressed, &quot;onKeyPressed&quot;, sprouts.Action.class);</span>
-<span class="fc" id="L94">		return _with( thisWindow -&gt; {</span>
-<span class="pc" id="L95">					_onKeyStroke( key.code, e -&gt; onKeyPressed.accept(_createDelegate(thisWindow, null)), thisWindow );</span>
-<span class="fc" id="L96">		       })</span>
-<span class="fc" id="L97">			   ._this();</span>
+<span class="fc" id="L84">		NullUtil.nullArgCheck(key, &quot;key&quot;, Keyboard.Key.class);</span>
+<span class="fc" id="L85">		NullUtil.nullArgCheck(onKeyPressed, &quot;onKeyPressed&quot;, sprouts.Action.class);</span>
+<span class="fc" id="L86">		return _with( thisWindow -&gt; {</span>
+<span class="pc" id="L87">					_onKeyStroke( key.code, e -&gt; onKeyPressed.accept(_createDelegate(thisWindow, null)), thisWindow );</span>
+<span class="fc" id="L88">		       })</span>
+<span class="fc" id="L89">			   ._this();</span>
 	}
 
 	/**
@@ -105,15 +97,15 @@ public abstract class UIForAnyWindow&lt;I extends UIForAnyWindow&lt;I,W&gt;, W e
 	 * @return This very instance, which enables builder-style method chaining.
 	 */
 	public final I onFocusGained( sprouts.Action&lt;WindowDelegate&lt;W, FocusEvent&gt;&gt; onFocus ) {
-<span class="fc" id="L108">		NullUtil.nullArgCheck(onFocus, &quot;onFocus&quot;, sprouts.Action.class);</span>
-<span class="fc" id="L109">		return _with( thisWindow -&gt; {</span>
-<span class="fc" id="L110">					thisWindow.addFocusListener(new FocusAdapter() {</span>
+<span class="fc" id="L100">		NullUtil.nullArgCheck(onFocus, &quot;onFocus&quot;, sprouts.Action.class);</span>
+<span class="fc" id="L101">		return _with( thisWindow -&gt; {</span>
+<span class="fc" id="L102">					thisWindow.addFocusListener(new FocusAdapter() {</span>
 						@Override public void focusGained(FocusEvent e) {
-<span class="nc" id="L112">							_doApp(()-&gt;onFocus.accept(_createDelegate(thisWindow, e)));</span>
-<span class="nc" id="L113">						}</span>
+<span class="nc" id="L104">							_doApp(()-&gt;onFocus.accept(_createDelegate(thisWindow, e)));</span>
+<span class="nc" id="L105">						}</span>
 					});
-<span class="fc" id="L115">		       })</span>
-<span class="fc" id="L116">			   ._this();</span>
+<span class="fc" id="L107">		       })</span>
+<span class="fc" id="L108">			   ._this();</span>
 	}
 
 	/**
@@ -124,15 +116,15 @@ public abstract class UIForAnyWindow&lt;I extends UIForAnyWindow&lt;I,W&gt;, W e
 	 * @return This very instance, which enables builder-style method chaining.
 	 */
 	public final I onFocusLost( sprouts.Action&lt;WindowDelegate&lt;W, FocusEvent&gt;&gt; onFocus ) {
-<span class="fc" id="L127">		NullUtil.nullArgCheck(onFocus, &quot;onFocus&quot;, Action.class);</span>
-<span class="fc" id="L128">		return _with( thisWindow -&gt; {</span>
-<span class="fc" id="L129">					thisWindow.addFocusListener(new FocusAdapter() {</span>
+<span class="fc" id="L119">		NullUtil.nullArgCheck(onFocus, &quot;onFocus&quot;, Action.class);</span>
+<span class="fc" id="L120">		return _with( thisWindow -&gt; {</span>
+<span class="fc" id="L121">					thisWindow.addFocusListener(new FocusAdapter() {</span>
 						@Override public void focusLost(FocusEvent e) {
-<span class="nc" id="L131">							_doApp(()-&gt;onFocus.accept(_createDelegate(thisWindow, e)));</span>
-<span class="nc" id="L132">						}</span>
+<span class="nc" id="L123">							_doApp(()-&gt;onFocus.accept(_createDelegate(thisWindow, e)));</span>
+<span class="nc" id="L124">						}</span>
 					});
-<span class="fc" id="L134">		       })</span>
-<span class="fc" id="L135">			   ._this();</span>
+<span class="fc" id="L126">		       })</span>
+<span class="fc" id="L127">			   ._this();</span>
 	}
 
 	/**
@@ -147,15 +139,15 @@ public abstract class UIForAnyWindow&lt;I extends UIForAnyWindow&lt;I,W&gt;, W e
 	 * @return This very instance, which enables builder-style method chaining.
 	 */
 	public final I onClose( sprouts.Action&lt;WindowDelegate&lt;W, WindowEvent&gt;&gt; onClose ) {
-<span class="nc" id="L150">		NullUtil.nullArgCheck(onClose, &quot;onClose&quot;, Action.class);</span>
-<span class="nc" id="L151">		return _with( thisWindow -&gt; {</span>
-<span class="nc" id="L152">					thisWindow.addWindowListener(new WindowAdapter() {</span>
+<span class="nc" id="L142">		NullUtil.nullArgCheck(onClose, &quot;onClose&quot;, Action.class);</span>
+<span class="nc" id="L143">		return _with( thisWindow -&gt; {</span>
+<span class="nc" id="L144">					thisWindow.addWindowListener(new WindowAdapter() {</span>
 						@Override public void windowClosing( WindowEvent e ) {
-<span class="nc" id="L154">							_doApp(()-&gt;onClose.accept(_createDelegate(thisWindow, e)));</span>
-<span class="nc" id="L155">						}</span>
+<span class="nc" id="L146">							_doApp(()-&gt;onClose.accept(_createDelegate(thisWindow, e)));</span>
+<span class="nc" id="L147">						}</span>
 					});
-<span class="nc" id="L157">		       })</span>
-<span class="nc" id="L158">			   ._this();</span>
+<span class="nc" id="L149">		       })</span>
+<span class="nc" id="L150">			   ._this();</span>
 	}
 
 	/**
@@ -169,15 +161,15 @@ public abstract class UIForAnyWindow&lt;I extends UIForAnyWindow&lt;I,W&gt;, W e
 	 * @return This very instance, which enables builder-style method chaining.
 	 */
 	public final I onClosed( sprouts.Action&lt;WindowDelegate&lt;W, WindowEvent&gt;&gt; onClose ) {
-<span class="nc" id="L172">		NullUtil.nullArgCheck(onClose, &quot;onClose&quot;, Action.class);</span>
-<span class="nc" id="L173">		return _with( thisWindow -&gt; {</span>
-<span class="nc" id="L174">					thisWindow.addWindowListener(new WindowAdapter() {</span>
+<span class="nc" id="L164">		NullUtil.nullArgCheck(onClose, &quot;onClose&quot;, Action.class);</span>
+<span class="nc" id="L165">		return _with( thisWindow -&gt; {</span>
+<span class="nc" id="L166">					thisWindow.addWindowListener(new WindowAdapter() {</span>
 						@Override public void windowClosed( WindowEvent e ) {
-<span class="nc" id="L176">							_doApp(()-&gt;onClose.accept(_createDelegate(thisWindow, e)));</span>
-<span class="nc" id="L177">						}</span>
+<span class="nc" id="L168">							_doApp(()-&gt;onClose.accept(_createDelegate(thisWindow, e)));</span>
+<span class="nc" id="L169">						}</span>
 					});
-<span class="nc" id="L179">		       })</span>
-<span class="nc" id="L180">			   ._this();</span>
+<span class="nc" id="L171">		       })</span>
+<span class="nc" id="L172">			   ._this();</span>
 	}
 
 	/**
@@ -191,15 +183,15 @@ public abstract class UIForAnyWindow&lt;I extends UIForAnyWindow&lt;I,W&gt;, W e
 	 * @return This very instance, which enables builder-style method chaining.
 	 */
 	public final I onOpened( sprouts.Action&lt;WindowDelegate&lt;W, WindowEvent&gt;&gt; onOpen ) {
-<span class="nc" id="L194">		NullUtil.nullArgCheck(onOpen, &quot;onOpen&quot;, Action.class);</span>
-<span class="nc" id="L195">		return _with( thisWindow -&gt; {</span>
-<span class="nc" id="L196">					thisWindow.addWindowListener(new WindowAdapter() {</span>
+<span class="nc" id="L186">		NullUtil.nullArgCheck(onOpen, &quot;onOpen&quot;, Action.class);</span>
+<span class="nc" id="L187">		return _with( thisWindow -&gt; {</span>
+<span class="nc" id="L188">					thisWindow.addWindowListener(new WindowAdapter() {</span>
 						@Override public void windowOpened( WindowEvent e ) {
-<span class="nc" id="L198">							_doApp(()-&gt;onOpen.accept(_createDelegate(thisWindow, e)));</span>
-<span class="nc" id="L199">						}</span>
+<span class="nc" id="L190">							_doApp(()-&gt;onOpen.accept(_createDelegate(thisWindow, e)));</span>
+<span class="nc" id="L191">						}</span>
 					});
-<span class="nc" id="L201">		       })</span>
-<span class="nc" id="L202">			   ._this();</span>
+<span class="nc" id="L193">		       })</span>
+<span class="nc" id="L194">			   ._this();</span>
 	}
 
 	/**
@@ -216,15 +208,15 @@ public abstract class UIForAnyWindow&lt;I extends UIForAnyWindow&lt;I,W&gt;, W e
 	 * @return This very instance, which enables builder-style method chaining.
 	 */
 	public final I onIconified( sprouts.Action&lt;WindowDelegate&lt;W, WindowEvent&gt;&gt; onIconify ) {
-<span class="nc" id="L219">		NullUtil.nullArgCheck(onIconify, &quot;onIconify&quot;, Action.class);</span>
-<span class="nc" id="L220">		return _with( thisWindow -&gt; {</span>
-<span class="nc" id="L221">					thisWindow.addWindowListener(new WindowAdapter() {</span>
+<span class="nc" id="L211">		NullUtil.nullArgCheck(onIconify, &quot;onIconify&quot;, Action.class);</span>
+<span class="nc" id="L212">		return _with( thisWindow -&gt; {</span>
+<span class="nc" id="L213">					thisWindow.addWindowListener(new WindowAdapter() {</span>
 						@Override public void windowIconified( WindowEvent e ) {
-<span class="nc" id="L223">							_doApp(()-&gt;onIconify.accept(_createDelegate(thisWindow, e)));</span>
-<span class="nc" id="L224">						}</span>
+<span class="nc" id="L215">							_doApp(()-&gt;onIconify.accept(_createDelegate(thisWindow, e)));</span>
+<span class="nc" id="L216">						}</span>
 					});
-<span class="nc" id="L226">		       })</span>
-<span class="nc" id="L227">			   ._this();</span>
+<span class="nc" id="L218">		       })</span>
+<span class="nc" id="L219">			   ._this();</span>
 	}
 
 	/**
@@ -237,15 +229,15 @@ public abstract class UIForAnyWindow&lt;I extends UIForAnyWindow&lt;I,W&gt;, W e
 	 * @return This very instance, which enables builder-style method chaining.
 	 */
 	public final I onDeiconified( sprouts.Action&lt;WindowDelegate&lt;W, WindowEvent&gt;&gt; onDeiconify ) {
-<span class="nc" id="L240">		NullUtil.nullArgCheck(onDeiconify, &quot;onDeiconify&quot;, Action.class);</span>
-<span class="nc" id="L241">		return _with( thisWindow -&gt; {</span>
-<span class="nc" id="L242">					thisWindow.addWindowListener(new WindowAdapter() {</span>
+<span class="nc" id="L232">		NullUtil.nullArgCheck(onDeiconify, &quot;onDeiconify&quot;, Action.class);</span>
+<span class="nc" id="L233">		return _with( thisWindow -&gt; {</span>
+<span class="nc" id="L234">					thisWindow.addWindowListener(new WindowAdapter() {</span>
 						@Override public void windowDeiconified( WindowEvent e ) {
-<span class="nc" id="L244">							_doApp(()-&gt;onDeiconify.accept(_createDelegate(thisWindow, e)));</span>
-<span class="nc" id="L245">						}</span>
+<span class="nc" id="L236">							_doApp(()-&gt;onDeiconify.accept(_createDelegate(thisWindow, e)));</span>
+<span class="nc" id="L237">						}</span>
 					});
-<span class="nc" id="L247">		       })</span>
-<span class="nc" id="L248">			   ._this();</span>
+<span class="nc" id="L239">		       })</span>
+<span class="nc" id="L240">			   ._this();</span>
 	}
 
 	/**
@@ -264,15 +256,15 @@ public abstract class UIForAnyWindow&lt;I extends UIForAnyWindow&lt;I,W&gt;, W e
 	 * @return This very instance, which enables builder-style method chaining.
 	 */
 	public final I onActivated( sprouts.Action&lt;WindowDelegate&lt;W, WindowEvent&gt;&gt; onActivate ) {
-<span class="nc" id="L267">		NullUtil.nullArgCheck(onActivate, &quot;onActivate&quot;, Action.class);</span>
-<span class="nc" id="L268">		return _with( thisWindow -&gt; {</span>
-<span class="nc" id="L269">					thisWindow.addWindowListener(new WindowAdapter() {</span>
+<span class="nc" id="L259">		NullUtil.nullArgCheck(onActivate, &quot;onActivate&quot;, Action.class);</span>
+<span class="nc" id="L260">		return _with( thisWindow -&gt; {</span>
+<span class="nc" id="L261">					thisWindow.addWindowListener(new WindowAdapter() {</span>
 						@Override public void windowActivated( WindowEvent e ) {
-<span class="nc" id="L271">							_doApp(()-&gt;onActivate.accept(_createDelegate(thisWindow, e)));</span>
-<span class="nc" id="L272">						}</span>
+<span class="nc" id="L263">							_doApp(()-&gt;onActivate.accept(_createDelegate(thisWindow, e)));</span>
+<span class="nc" id="L264">						}</span>
 					});
-<span class="nc" id="L274">		       })</span>
-<span class="nc" id="L275">			   ._this();</span>
+<span class="nc" id="L266">		       })</span>
+<span class="nc" id="L267">			   ._this();</span>
 	}
 
 	/**
@@ -291,15 +283,15 @@ public abstract class UIForAnyWindow&lt;I extends UIForAnyWindow&lt;I,W&gt;, W e
 	 * @return This very instance, which enables builder-style method chaining.
 	 */
 	public final I onDeactivated( sprouts.Action&lt;WindowDelegate&lt;W, WindowEvent&gt;&gt; onDeactivate ) {
-<span class="nc" id="L294">		NullUtil.nullArgCheck(onDeactivate, &quot;onDeactivate&quot;, Action.class);</span>
-<span class="nc" id="L295">		return _with( thisWindow -&gt; {</span>
-<span class="nc" id="L296">					thisWindow.addWindowListener(new WindowAdapter() {</span>
+<span class="nc" id="L286">		NullUtil.nullArgCheck(onDeactivate, &quot;onDeactivate&quot;, Action.class);</span>
+<span class="nc" id="L287">		return _with( thisWindow -&gt; {</span>
+<span class="nc" id="L288">					thisWindow.addWindowListener(new WindowAdapter() {</span>
 						@Override public void windowDeactivated( WindowEvent e ) {
-<span class="nc" id="L298">							_doApp(()-&gt;onDeactivate.accept(_createDelegate(thisWindow, e)));</span>
-<span class="nc" id="L299">						}</span>
+<span class="nc" id="L290">							_doApp(()-&gt;onDeactivate.accept(_createDelegate(thisWindow, e)));</span>
+<span class="nc" id="L291">						}</span>
 					});
-<span class="nc" id="L301">		       })</span>
-<span class="nc" id="L302">			   ._this();</span>
+<span class="nc" id="L293">		       })</span>
+<span class="nc" id="L294">			   ._this();</span>
 	}
 
 	/**
@@ -313,15 +305,15 @@ public abstract class UIForAnyWindow&lt;I extends UIForAnyWindow&lt;I,W&gt;, W e
 	 * @return This very instance, which enables builder-style method chaining.
 	 */
 	public final I onStateChanged( sprouts.Action&lt;WindowDelegate&lt;W, WindowEvent&gt;&gt; onStateChanged ) {
-<span class="nc" id="L316">		NullUtil.nullArgCheck(onStateChanged, &quot;onStateChanged&quot;, Action.class);</span>
-<span class="nc" id="L317">		return _with( thisWindow -&gt; {</span>
-<span class="nc" id="L318">					thisWindow.addWindowListener(new WindowAdapter() {</span>
+<span class="nc" id="L308">		NullUtil.nullArgCheck(onStateChanged, &quot;onStateChanged&quot;, Action.class);</span>
+<span class="nc" id="L309">		return _with( thisWindow -&gt; {</span>
+<span class="nc" id="L310">					thisWindow.addWindowListener(new WindowAdapter() {</span>
 						@Override public void windowStateChanged( WindowEvent e ) {
-<span class="nc" id="L320">							_doApp(()-&gt;onStateChanged.accept(_createDelegate(thisWindow, e)));</span>
-<span class="nc" id="L321">						}</span>
+<span class="nc" id="L312">							_doApp(()-&gt;onStateChanged.accept(_createDelegate(thisWindow, e)));</span>
+<span class="nc" id="L313">						}</span>
 					});
-<span class="nc" id="L323">		       })</span>
-<span class="nc" id="L324">			   ._this();</span>
+<span class="nc" id="L315">		       })</span>
+<span class="nc" id="L316">			   ._this();</span>
 	}
 
 	/**
@@ -336,16 +328,16 @@ public abstract class UIForAnyWindow&lt;I extends UIForAnyWindow&lt;I,W&gt;, W e
 	 * @return This very instance, which enables builder-style method chaining.
 	 */
 	public final I onInputFocusGained( sprouts.Action&lt;WindowDelegate&lt;W, WindowEvent&gt;&gt; onFocusGained ) {
-<span class="nc" id="L339">		NullUtil.nullArgCheck(onFocusGained, &quot;onFocusGained&quot;, Action.class);</span>
-<span class="nc" id="L340">		return _with( thisWindow -&gt; {</span>
-<span class="nc" id="L341">					thisWindow.addWindowFocusListener(new WindowFocusListener() {</span>
+<span class="nc" id="L331">		NullUtil.nullArgCheck(onFocusGained, &quot;onFocusGained&quot;, Action.class);</span>
+<span class="nc" id="L332">		return _with( thisWindow -&gt; {</span>
+<span class="nc" id="L333">					thisWindow.addWindowFocusListener(new WindowFocusListener() {</span>
 						@Override public void windowGainedFocus( WindowEvent e ) {
-<span class="nc" id="L343">							_doApp(()-&gt;onFocusGained.accept(_createDelegate(thisWindow, e)));</span>
-<span class="nc" id="L344">						}</span>
-<span class="nc" id="L345">						@Override public void windowLostFocus( WindowEvent e ) {}</span>
+<span class="nc" id="L335">							_doApp(()-&gt;onFocusGained.accept(_createDelegate(thisWindow, e)));</span>
+<span class="nc" id="L336">						}</span>
+<span class="nc" id="L337">						@Override public void windowLostFocus( WindowEvent e ) {}</span>
 					});
-<span class="nc" id="L347">		       })</span>
-<span class="nc" id="L348">			   ._this();</span>
+<span class="nc" id="L339">		       })</span>
+<span class="nc" id="L340">			   ._this();</span>
 	}
 
 	/**
@@ -360,22 +352,22 @@ public abstract class UIForAnyWindow&lt;I extends UIForAnyWindow&lt;I,W&gt;, W e
 	 * @return This very instance, which enables builder-style method chaining.
 	 */
 	public final I onInputFocusLost( sprouts.Action&lt;WindowDelegate&lt;W, WindowEvent&gt;&gt; onFocusLost ) {
-<span class="nc" id="L363">		NullUtil.nullArgCheck(onFocusLost, &quot;onFocusLost&quot;, Action.class);</span>
-<span class="nc" id="L364">		return _with( thisWindow -&gt; {</span>
-<span class="nc" id="L365">					thisWindow.addWindowFocusListener(new WindowFocusListener() {</span>
-<span class="nc" id="L366">						@Override public void windowGainedFocus( WindowEvent e ) {}</span>
+<span class="nc" id="L355">		NullUtil.nullArgCheck(onFocusLost, &quot;onFocusLost&quot;, Action.class);</span>
+<span class="nc" id="L356">		return _with( thisWindow -&gt; {</span>
+<span class="nc" id="L357">					thisWindow.addWindowFocusListener(new WindowFocusListener() {</span>
+<span class="nc" id="L358">						@Override public void windowGainedFocus( WindowEvent e ) {}</span>
 						@Override public void windowLostFocus( WindowEvent e ) {
-<span class="nc" id="L368">							_doApp(()-&gt;onFocusLost.accept(_createDelegate(thisWindow, e)));</span>
-<span class="nc" id="L369">						}</span>
+<span class="nc" id="L360">							_doApp(()-&gt;onFocusLost.accept(_createDelegate(thisWindow, e)));</span>
+<span class="nc" id="L361">						}</span>
 					});
-<span class="nc" id="L371">		       })</span>
-<span class="nc" id="L372">			   ._this();</span>
+<span class="nc" id="L363">		       })</span>
+<span class="nc" id="L364">			   ._this();</span>
 	}
 
 	private &lt;E&gt; WindowDelegate&lt;W, E&gt; _createDelegate( W window, E event ) {
-<span class="nc" id="L376">		return new WindowDelegate&lt;W, E&gt;() {</span>
-<span class="nc" id="L377">			@Override public W get() { return window; }</span>
-<span class="nc" id="L378">			@Override public E getEvent() { return event; }</span>
+<span class="nc" id="L368">		return new WindowDelegate&lt;W, E&gt;() {</span>
+<span class="nc" id="L369">			@Override public W get() { return window; }</span>
+<span class="nc" id="L370">			@Override public E getEvent() { return event; }</span>
 		};
 	}
 

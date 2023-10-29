@@ -13,30 +13,39 @@ public class UIForButton&lt;B extends AbstractButton&gt; extends UIForAnyButton&
 {
 <span class="fc" id="L14">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(UIForButton.class);</span>
 
-<span class="fc" id="L16">    protected UIForButton( B component ) { super(component); }</span>
+    private final BuilderState&lt;B&gt; _state;
+
+<span class="fc" id="L18">    UIForButton( B component ) {</span>
+<span class="fc" id="L19">        _state = new BuilderState&lt;&gt;(component);</span>
+<span class="fc" id="L20">    }</span>
+
+    @Override
+    protected BuilderState&lt;B&gt; _state() {
+<span class="fc" id="L24">        return _state;</span>
+    }
 
     /**
      * Make this button the default button for the root pane it is in.
      * @return this
      */
     public final UIForButton&lt;B&gt; makeDefaultButton() {
-<span class="fc" id="L23">        return _with( thisButton -&gt; {</span>
-<span class="pc bpc" id="L24" title="1 of 2 branches missed.">                    if ( !(thisButton instanceof JButton) ) {</span>
-<span class="nc" id="L25">                        log.warn(&quot;Method 'makeDefaultButton()' called on a non JButton component.&quot;);</span>
-<span class="nc" id="L26">                        return;</span>
+<span class="fc" id="L32">        return _with( thisButton -&gt; {</span>
+<span class="pc bpc" id="L33" title="1 of 2 branches missed.">                    if ( !(thisButton instanceof JButton) ) {</span>
+<span class="nc" id="L34">                        log.warn(&quot;Method 'makeDefaultButton()' called on a non JButton component.&quot;);</span>
+<span class="nc" id="L35">                        return;</span>
                     }
-<span class="fc" id="L28">                    UI.runLater(()-&gt;{</span>
+<span class="fc" id="L37">                    UI.runLater(()-&gt;{</span>
                         // We do this later because in this point in time the UI is probably not
                         // yet fully built (swing-tree is using the builder-pattern).
-<span class="fc" id="L31">                        JButton button = (JButton) thisButton;</span>
-<span class="fc" id="L32">                        JRootPane rootPane = SwingUtilities.getRootPane(button);</span>
-<span class="pc bpc" id="L33" title="1 of 2 branches missed.">                        if ( rootPane != null )</span>
-<span class="fc" id="L34">                            rootPane.setDefaultButton(button);</span>
+<span class="fc" id="L40">                        JButton button = (JButton) thisButton;</span>
+<span class="fc" id="L41">                        JRootPane rootPane = SwingUtilities.getRootPane(button);</span>
+<span class="pc bpc" id="L42" title="1 of 2 branches missed.">                        if ( rootPane != null )</span>
+<span class="fc" id="L43">                            rootPane.setDefaultButton(button);</span>
                         else
-<span class="nc" id="L36">                            log.warn(&quot;Method 'makeDefaultButton()' called on a JButton component that is not in a JRootPane.&quot;);</span>
-<span class="fc" id="L37">                    });</span>
-<span class="fc" id="L38">                })</span>
-<span class="fc" id="L39">                ._this();</span>
+<span class="nc" id="L45">                            log.warn(&quot;Method 'makeDefaultButton()' called on a JButton component that is not in a JRootPane.&quot;);</span>
+<span class="fc" id="L46">                    });</span>
+<span class="fc" id="L47">                })</span>
+<span class="fc" id="L48">                ._this();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

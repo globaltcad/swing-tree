@@ -6,8 +6,17 @@ import javax.swing.*;
 /**
  *  A SwingTree builder node designed for configuring {@link JMenuItem} instances.
  */
-public class UIForMenuItem&lt;M extends JMenuItem&gt; extends UIForAnyMenuItem&lt;UIForMenuItem&lt;M&gt;, M&gt;
+public final class UIForMenuItem&lt;M extends JMenuItem&gt; extends UIForAnyMenuItem&lt;UIForMenuItem&lt;M&gt;, M&gt;
 {
-<span class="fc" id="L11">    protected UIForMenuItem( M component ) { super(component); }</span>
+    private final BuilderState&lt;M&gt; _state;
+
+<span class="fc" id="L13">    UIForMenuItem( M component ) {</span>
+<span class="fc" id="L14">        _state = new BuilderState&lt;&gt;(component);</span>
+<span class="fc" id="L15">    }</span>
+
+    @Override
+    protected BuilderState&lt;M&gt; _state() {
+<span class="fc" id="L19">        return _state;</span>
+    }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

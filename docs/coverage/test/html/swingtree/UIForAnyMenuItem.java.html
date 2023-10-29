@@ -4,10 +4,8 @@ import sprouts.Val;
 
 import javax.swing.*;
 
-public class UIForAnyMenuItem&lt;I, M extends JMenuItem&gt; extends UIForAnyButton&lt;I, M&gt;
+<span class="fc" id="L7">public abstract class UIForAnyMenuItem&lt;I, M extends JMenuItem&gt; extends UIForAnyButton&lt;I, M&gt;</span>
 {
-<span class="fc" id="L9">    protected UIForAnyMenuItem(M component ) { super(component); }</span>
-
     /**
      * Sets the key combination which invokes the wrapped {@link JMenuItem}'s
      * action listeners without navigating the menu hierarchy. It is the
@@ -20,7 +18,7 @@ public class UIForAnyMenuItem&lt;I, M extends JMenuItem&gt; extends UIForAnyButt
      * @return This very builder to allow for method chaining.
      */
     public I withKeyStroke( KeyStroke keyStroke ) {
-<span class="nc" id="L23">        return _with( c -&gt; c.setAccelerator(keyStroke) )._this();</span>
+<span class="nc" id="L21">        return _with( c -&gt; c.setAccelerator(keyStroke) )._this();</span>
     }
 
     /**
@@ -35,13 +33,13 @@ public class UIForAnyMenuItem&lt;I, M extends JMenuItem&gt; extends UIForAnyButt
      * @return This very builder to allow for method chaining.
      */
     public I withKeyStroke( Val&lt;KeyStroke&gt; val ) {
-<span class="nc" id="L38">        return _withOnShow( val, (c,v) -&gt; {</span>
-<span class="nc" id="L39">                    c.setAccelerator(v);</span>
-<span class="nc" id="L40">                })</span>
-<span class="nc" id="L41">                ._with( c -&gt; {</span>
-<span class="nc" id="L42">                    c.setAccelerator(val.orElseNull());</span>
-<span class="nc" id="L43">                })</span>
-<span class="nc" id="L44">                ._this();</span>
+<span class="nc" id="L36">        return _withOnShow( val, (c,v) -&gt; {</span>
+<span class="nc" id="L37">                    c.setAccelerator(v);</span>
+<span class="nc" id="L38">                })</span>
+<span class="nc" id="L39">                ._with( c -&gt; {</span>
+<span class="nc" id="L40">                    c.setAccelerator(val.orElseNull());</span>
+<span class="nc" id="L41">                })</span>
+<span class="nc" id="L42">                ._this();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

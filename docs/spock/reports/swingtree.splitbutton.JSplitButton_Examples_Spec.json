@@ -25,9 +25,9 @@
 
         {"kind":"expect","text":"The component wrapped by the UI builder is in fact a split button:","code":["ui.component instanceof JSplitButton"]},
 
-        {"kind":"and","text":"This button should have a popup menu with 3 components.","code":["ui.popupMenu.components.length == 3"]},
+        {"kind":"and","text":"This button should have a popup menu with 3 components.","code":["ui.component.popupMenu.components.length == 3"]},
 
-        {"kind":"and","text":"They have the expected names:","code":["((JMenuItem)ui.popupMenu.getComponent(0)).getText() == \"I am the first drop down item.\"","((JMenuItem)ui.popupMenu.getComponent(1)).getText() == \"I am the second item.\"","((JMenuItem)ui.popupMenu.getComponent(2)).getText() == \"And I am the third.\""]}
+        {"kind":"and","text":"They have the expected names:","code":["((JMenuItem)ui.component.popupMenu.getComponent(0)).getText() == \"I am the first drop down item.\"","((JMenuItem)ui.component.popupMenu.getComponent(1)).getText() == \"I am the second item.\"","((JMenuItem)ui.component.popupMenu.getComponent(2)).getText() == \"And I am the third.\""]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -44,7 +44,7 @@
 
         {"kind":"expect","text":"The split button has the correct text displayed","code":["ui.component.text == \"I will be replaced!\""]},
 
-        {"kind":"when","text":"","code":["((JMenuItem)ui.popupMenu.getComponent(1)).doClick()","UI.sync()"]},
+        {"kind":"when","text":"","code":["((JMenuItem)ui.component.popupMenu.getComponent(1)).doClick()","UI.sync()"]},
 
         {"kind":"then","text":"","code":["ui.component.text == \"second\""]}
       ],
@@ -63,15 +63,15 @@
 
         {"kind":"expect","text":"The split button has the correct text displayed","code":["ui.component.text == \"I may be replaced!\""]},
 
-        {"kind":"when","text":"We simulate a user selecting the first button item","code":["UI.runNow(()->((JMenuItem)ui.popupMenu.getComponent(0)).doClick())"]},
+        {"kind":"when","text":"We simulate a user selecting the first button item","code":["UI.runNow(()->((JMenuItem)ui.component.popupMenu.getComponent(0)).doClick())"]},
 
         {"kind":"then","text":"The displayed button should still be as it was previously.","code":["ui.component.text == \"I may be replaced!\""]},
 
-        {"kind":"when","text":"We now select the third button item","code":["((JMenuItem)ui.popupMenu.getComponent(2)).doClick()"]},
+        {"kind":"when","text":"We now select the third button item","code":["((JMenuItem)ui.component.popupMenu.getComponent(2)).doClick()"]},
 
         {"kind":"then","text":"Again the button text is still the same.","code":["ui.component.text == \"I may be replaced!\""]},
 
-        {"kind":"when","text":"We now simulate a selection on the second item (for which we registered an action).","code":["UI.runNow(()->((JMenuItem)ui.popupMenu.getComponent(1)).doClick())"]},
+        {"kind":"when","text":"We now simulate a selection on the second item (for which we registered an action).","code":["UI.runNow(()->((JMenuItem)ui.component.popupMenu.getComponent(1)).doClick())"]},
 
         {"kind":"then","text":"The displayed button text will have changed because of our selection lambda","code":["ui.component.text == \"second\""]}
       ],
@@ -90,15 +90,15 @@
 
         {"kind":"expect","text":"The split button has the correct text displayed","code":["ui.component.text == \"I may be replaced!\""]},
 
-        {"kind":"when","text":"We select the first item and click the button.","code":["((JMenuItem)ui.popupMenu.getComponent(0)).doClick()","UI.runNow( () -> ui.component.doClick() );"]},
+        {"kind":"when","text":"We select the first item and click the button.","code":["((JMenuItem)ui.component.popupMenu.getComponent(0)).doClick()","UI.runNow( () -> ui.component.doClick() );"]},
 
         {"kind":"then","text":"We expect that the button has the default text displayed according to the first action","code":["ui.component.text == \"default text\""]},
 
-        {"kind":"when","text":"We select and click the third button.","code":["((JMenuItem)ui.popupMenu.getComponent(2)).doClick()","UI.runNow( () -> ui.component.doClick() );"]},
+        {"kind":"when","text":"We select and click the third button.","code":["((JMenuItem)ui.component.popupMenu.getComponent(2)).doClick()","UI.runNow( () -> ui.component.doClick() );"]},
 
         {"kind":"then","text":"This should have the same effect as previously.","code":["ui.component.text == \"default text\""]},
 
-        {"kind":"when","text":"We now select and click the second button item.","code":["((JMenuItem)ui.popupMenu.getComponent(1)).doClick()","UI.runNow( () -> ui.component.doClick() );"]},
+        {"kind":"when","text":"We now select and click the second button item.","code":["((JMenuItem)ui.component.popupMenu.getComponent(1)).doClick()","UI.runNow( () -> ui.component.doClick() );"]},
 
         {"kind":"then","text":"The split button text will be different because the button item action fired last.","code":["ui.component.text == \"text by second item\""]}
       ],
@@ -153,7 +153,7 @@
 
         {"kind":"then","text":"The button text now indicates which items were selected and triggered!","code":["ui.component.text == \"triggered: 1 3\""]},
 
-        {"kind":"when","text":"We now select the second button item.","code":["UI.runNow(()->((JMenuItem)ui.popupMenu.getComponent(1)).doClick())"]},
+        {"kind":"when","text":"We now select the second button item.","code":["UI.runNow(()->((JMenuItem)ui.component.popupMenu.getComponent(1)).doClick())"]},
 
         {"kind":"then","text":"The split button text will not have changed (internally the selection should be different however).","code":["ui.component.text == \"triggered: 1 3\""]},
 
@@ -178,21 +178,21 @@
 
         {"kind":"when","text":"We add a menu item to the split button.","code":["ui.add(new JMenuItem(\"First\"))"]},
 
-        {"kind":"then","text":"The split button has a popup menu with one component.","code":["ui.popupMenu.components.length == 1"]},
+        {"kind":"then","text":"The split button has a popup menu with one component.","code":["ui.component.popupMenu.components.length == 1"]},
 
         {"kind":"when","text":"We add another menu item to the split button.","code":["ui.add(UI.menuItem(\"Second\"))"]},
 
-        {"kind":"then","text":"The split button has a popup menu with two components.","code":["ui.popupMenu.components.length == 2"]},
+        {"kind":"then","text":"The split button has a popup menu with two components.","code":["ui.component.popupMenu.components.length == 2"]},
 
         {"kind":"when","text":"We add a split item to the split button.","code":["ui.add(UI.splitItem(\"Third\"))"]},
 
-        {"kind":"then","text":"The split button has a popup menu with three components.","code":["ui.popupMenu.components.length == 3"]},
+        {"kind":"then","text":"The split button has a popup menu with three components.","code":["ui.component.popupMenu.components.length == 3"]},
 
         {"kind":"when","text":"We add a split radio button to the split button.","code":["ui.add(UI.splitRadioItem(\"Fourth\"))"]},
 
-        {"kind":"then","text":"The split button has a popup menu with four components.","code":["ui.popupMenu.components.length == 4"]},
+        {"kind":"then","text":"The split button has a popup menu with four components.","code":["ui.component.popupMenu.components.length == 4"]},
 
-        {"kind":"and","text":"","code":["ui.popupMenu.components.findAll({it instanceof JRadioButtonMenuItem}).size() == 1","ui.popupMenu.components.findAll({it instanceof JMenuItem}).size() == 4"]}
+        {"kind":"and","text":"","code":["ui.component.popupMenu.components.findAll({it instanceof JRadioButtonMenuItem}).size() == 1","ui.component.popupMenu.components.findAll({it instanceof JMenuItem}).size() == 4"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -211,7 +211,7 @@
 
         {"kind":"expect","text":"It wraps a JSplitButton.","code":["ui.component instanceof JSplitButton"]},
 
-        {"kind":"and","text":"There are 3 options.","code":["ui.popupMenu.components.length == 3","ui.popupMenu.components[0].text == \"Small\"","ui.popupMenu.components[1].text == \"Medium\"","ui.popupMenu.components[2].text == \"Large\""]}
+        {"kind":"and","text":"There are 3 options.","code":["ui.component.popupMenu.components.length == 3","ui.component.popupMenu.components[0].text == \"Small\"","ui.component.popupMenu.components[1].text == \"Medium\"","ui.component.popupMenu.components[2].text == \"Large\""]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -230,11 +230,11 @@
 
         {"kind":"expect","text":"It wraps a JSplitButton.","code":["ui.component instanceof JSplitButton"]},
 
-        {"kind":"and","text":"There are 3 options.","code":["ui.popupMenu.components.length == 3","ui.popupMenu.components[0].text == \"Red\"","ui.popupMenu.components[1].text == \"Green\"","ui.popupMenu.components[2].text == \"Blue\""]},
+        {"kind":"and","text":"There are 3 options.","code":["ui.component.popupMenu.components.length == 3","ui.component.popupMenu.components[0].text == \"Red\"","ui.component.popupMenu.components[1].text == \"Green\"","ui.component.popupMenu.components[2].text == \"Blue\""]},
 
         {"kind":"and","text":"The button text is initially set to the current selection.","code":["ui.component.text == \"Blue\""]},
 
-        {"kind":"when","text":"We select the second option.","code":["UI.runNow(()->((JMenuItem)ui.popupMenu.getComponent(1)).doClick())"]},
+        {"kind":"when","text":"We select the second option.","code":["UI.runNow(()->((JMenuItem)ui.component.popupMenu.getComponent(1)).doClick())"]},
 
         {"kind":"then","text":"The tracker will have recorded a selection action event.","code":["tracker == [\"#\"]"]},
 

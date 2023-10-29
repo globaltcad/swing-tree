@@ -2,9 +2,24 @@
 
 import javax.swing.*;
 
-public class UIForRadioButtonMenuItem&lt;M extends JRadioButtonMenuItem&gt;
+/**
+ *  A SwingTree builder node designed for configuring {@link JRadioButtonMenuItem} instances.
+ *  &lt;p&gt;
+ *  This class is a {@link UIForAnyMenuItem} subtype, and as such, it inherits all of the
+ *  builder methods from that class.
+ */
+public final class UIForRadioButtonMenuItem&lt;M extends JRadioButtonMenuItem&gt;
 extends UIForAnyMenuItem&lt;UIForRadioButtonMenuItem&lt;M&gt;, M&gt;
 {
-<span class="nc" id="L8">    protected UIForRadioButtonMenuItem(M component) { super(component); }</span>
+    private final BuilderState&lt;M&gt; _state;
+
+<span class="nc" id="L16">    UIForRadioButtonMenuItem(M component) {</span>
+<span class="nc" id="L17">        _state = new BuilderState&lt;&gt;(component);</span>
+<span class="nc" id="L18">    }</span>
+
+    @Override
+    protected BuilderState&lt;M&gt; _state() {
+<span class="nc" id="L22">        return _state;</span>
+    }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -7,17 +7,24 @@ import javax.swing.*;
 /**
  *  A SwingTree builder node designed for configuring {@link JProgressBar} instances.
  */
-public class UIForProgressBar&lt;P extends JProgressBar&gt; extends UIForAnySwing&lt;UIForProgressBar&lt;P&gt;, P&gt;
+public final class UIForProgressBar&lt;P extends JProgressBar&gt; extends UIForAnySwing&lt;UIForProgressBar&lt;P&gt;, P&gt;
 {
+    private final BuilderState&lt;P&gt; _state;
+
     /**
      * Extensions of the {@link  UIForAnySwing} always wrap
      * a single component for which they are responsible.
      *
      * @param component The JComponent type which will be wrapped by this builder node.
      */
-    protected UIForProgressBar( P component ) {
-<span class="fc" id="L19">        super(component);</span>
-<span class="fc" id="L20">    }</span>
+<span class="fc" id="L20">    UIForProgressBar( P component ) {</span>
+<span class="fc" id="L21">        _state = new BuilderState&lt;&gt;(component);</span>
+<span class="fc" id="L22">    }</span>
+
+    @Override
+    protected BuilderState&lt;P&gt; _state() {
+<span class="fc" id="L26">        return _state;</span>
+    }
 
     /**
      *  Sets the orientation of the slider.
@@ -25,11 +32,11 @@ public class UIForProgressBar&lt;P extends JProgressBar&gt; extends UIForAnySwin
      *  @return This builder node.
      */
     public final UIForProgressBar&lt;P&gt; withOrientation( UI.Align align ) {
-<span class="fc" id="L28">        NullUtil.nullArgCheck( align, &quot;align&quot;, UI.Align.class );</span>
-<span class="fc" id="L29">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L30">                    thisComponent.setOrientation(align.forProgressBar());</span>
-<span class="fc" id="L31">                })</span>
-<span class="fc" id="L32">                ._this();</span>
+<span class="fc" id="L35">        NullUtil.nullArgCheck( align, &quot;align&quot;, UI.Align.class );</span>
+<span class="fc" id="L36">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L37">                    thisComponent.setOrientation(align.forProgressBar());</span>
+<span class="fc" id="L38">                })</span>
+<span class="fc" id="L39">                ._this();</span>
     }
 
     /**
@@ -38,15 +45,15 @@ public class UIForProgressBar&lt;P extends JProgressBar&gt; extends UIForAnySwin
      *  @return This builder node.
      */
     public final UIForProgressBar&lt;P&gt; withOrientation( Val&lt;UI.Align&gt; align ) {
-<span class="nc" id="L41">        NullUtil.nullArgCheck( align, &quot;align&quot;, Val.class );</span>
-<span class="nc" id="L42">        NullUtil.nullPropertyCheck( align, &quot;align&quot;, &quot;Null is not a valid alignment&quot; );</span>
-<span class="nc" id="L43">        return _withOnShow( align, (thisComponent,v) -&gt; {</span>
-<span class="nc" id="L44">                   thisComponent.setOrientation(v.forProgressBar());</span>
-<span class="nc" id="L45">               })</span>
-<span class="nc" id="L46">               ._with( thisComponent -&gt; {</span>
-<span class="nc" id="L47">                   thisComponent.setOrientation(align.orElseThrow().forProgressBar());</span>
-<span class="nc" id="L48">               })</span>
-<span class="nc" id="L49">               ._this();</span>
+<span class="nc" id="L48">        NullUtil.nullArgCheck( align, &quot;align&quot;, Val.class );</span>
+<span class="nc" id="L49">        NullUtil.nullPropertyCheck( align, &quot;align&quot;, &quot;Null is not a valid alignment&quot; );</span>
+<span class="nc" id="L50">        return _withOnShow( align, (thisComponent,v) -&gt; {</span>
+<span class="nc" id="L51">                   thisComponent.setOrientation(v.forProgressBar());</span>
+<span class="nc" id="L52">               })</span>
+<span class="nc" id="L53">               ._with( thisComponent -&gt; {</span>
+<span class="nc" id="L54">                   thisComponent.setOrientation(align.orElseThrow().forProgressBar());</span>
+<span class="nc" id="L55">               })</span>
+<span class="nc" id="L56">               ._this();</span>
     }
 
     /**
@@ -57,10 +64,10 @@ public class UIForProgressBar&lt;P extends JProgressBar&gt; extends UIForAnySwin
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForProgressBar&lt;P&gt; withMin( int min ) {
-<span class="fc" id="L60">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L61">                    thisComponent.setMinimum( min );</span>
-<span class="fc" id="L62">               })</span>
-<span class="fc" id="L63">               ._this();</span>
+<span class="fc" id="L67">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L68">                    thisComponent.setMinimum( min );</span>
+<span class="fc" id="L69">               })</span>
+<span class="fc" id="L70">               ._this();</span>
     }
 
     /**
@@ -69,15 +76,15 @@ public class UIForProgressBar&lt;P extends JProgressBar&gt; extends UIForAnySwin
      * @throws IllegalArgumentException if {@code min} is {@code null}.
      */
     public final UIForProgressBar&lt;P&gt; withMin( Val&lt;Integer&gt; min ) {
-<span class="nc" id="L72">        NullUtil.nullArgCheck( min, &quot;min&quot;, Val.class );</span>
-<span class="nc" id="L73">        NullUtil.nullPropertyCheck(min, &quot;min&quot;, &quot;Null is not a valid min value for the value of a progress bar.&quot;);</span>
-<span class="nc" id="L74">        return _withOnShow( min, (c,v) -&gt; {</span>
-<span class="nc" id="L75">                    c.setMinimum( v );</span>
-<span class="nc" id="L76">               })</span>
-<span class="nc" id="L77">               ._with( thisComponent -&gt; {</span>
-<span class="nc" id="L78">                    thisComponent.setMinimum( min.orElseThrow() );</span>
-<span class="nc" id="L79">               })</span>
-<span class="nc" id="L80">               ._this();</span>
+<span class="nc" id="L79">        NullUtil.nullArgCheck( min, &quot;min&quot;, Val.class );</span>
+<span class="nc" id="L80">        NullUtil.nullPropertyCheck(min, &quot;min&quot;, &quot;Null is not a valid min value for the value of a progress bar.&quot;);</span>
+<span class="nc" id="L81">        return _withOnShow( min, (c,v) -&gt; {</span>
+<span class="nc" id="L82">                    c.setMinimum( v );</span>
+<span class="nc" id="L83">               })</span>
+<span class="nc" id="L84">               ._with( thisComponent -&gt; {</span>
+<span class="nc" id="L85">                    thisComponent.setMinimum( min.orElseThrow() );</span>
+<span class="nc" id="L86">               })</span>
+<span class="nc" id="L87">               ._this();</span>
     }
 
     /**
@@ -88,10 +95,10 @@ public class UIForProgressBar&lt;P extends JProgressBar&gt; extends UIForAnySwin
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForProgressBar&lt;P&gt; withMax( int max ) {
-<span class="fc" id="L91">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L92">                    thisComponent.setMaximum( max );</span>
-<span class="fc" id="L93">               })</span>
-<span class="fc" id="L94">               ._this();</span>
+<span class="fc" id="L98">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L99">                    thisComponent.setMaximum( max );</span>
+<span class="fc" id="L100">               })</span>
+<span class="fc" id="L101">               ._this();</span>
     }
 
     /**
@@ -100,15 +107,15 @@ public class UIForProgressBar&lt;P extends JProgressBar&gt; extends UIForAnySwin
      * @throws IllegalArgumentException if {@code max} is {@code null}.
      */
     public final UIForProgressBar&lt;P&gt; withMax( Val&lt;Integer&gt; max ) {
-<span class="nc" id="L103">        NullUtil.nullArgCheck( max, &quot;max&quot;, Val.class );</span>
-<span class="nc" id="L104">        NullUtil.nullPropertyCheck(max, &quot;max&quot;, &quot;Null is not a valid max value for the value of a progress bar.&quot;);</span>
-<span class="nc" id="L105">        return _withOnShow( max, (thisComponent,v) -&gt; {</span>
-<span class="nc" id="L106">                    thisComponent.setMaximum( v );</span>
-<span class="nc" id="L107">               })</span>
-<span class="nc" id="L108">               ._with( thisComponent -&gt; {</span>
-<span class="nc" id="L109">                   thisComponent.setMaximum( max.orElseThrow() );</span>
-<span class="nc" id="L110">               })</span>
-<span class="nc" id="L111">               ._this();</span>
+<span class="nc" id="L110">        NullUtil.nullArgCheck( max, &quot;max&quot;, Val.class );</span>
+<span class="nc" id="L111">        NullUtil.nullPropertyCheck(max, &quot;max&quot;, &quot;Null is not a valid max value for the value of a progress bar.&quot;);</span>
+<span class="nc" id="L112">        return _withOnShow( max, (thisComponent,v) -&gt; {</span>
+<span class="nc" id="L113">                    thisComponent.setMaximum( v );</span>
+<span class="nc" id="L114">               })</span>
+<span class="nc" id="L115">               ._with( thisComponent -&gt; {</span>
+<span class="nc" id="L116">                   thisComponent.setMaximum( max.orElseThrow() );</span>
+<span class="nc" id="L117">               })</span>
+<span class="nc" id="L118">               ._this();</span>
     }
 
     /**
@@ -116,10 +123,10 @@ public class UIForProgressBar&lt;P extends JProgressBar&gt; extends UIForAnySwin
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForProgressBar&lt;P&gt; withValue( int value ) {
-<span class="fc" id="L119">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L120">                    thisComponent.setValue( value );</span>
-<span class="fc" id="L121">               })</span>
-<span class="fc" id="L122">               ._this();</span>
+<span class="fc" id="L126">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L127">                    thisComponent.setValue( value );</span>
+<span class="fc" id="L128">               })</span>
+<span class="fc" id="L129">               ._this();</span>
     }
 
     /**
@@ -128,21 +135,21 @@ public class UIForProgressBar&lt;P extends JProgressBar&gt; extends UIForAnySwin
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForProgressBar&lt;P&gt; withProgress( double progress ) {
-<span class="nc bnc" id="L131" title="All 4 branches missed.">        if ( progress &lt; 0 || progress &gt; 1 )</span>
-<span class="nc" id="L132">            throw new IllegalArgumentException( &quot;Progress value must be between 0 and 1&quot; );</span>
-<span class="nc" id="L133">        return _with( thisComponent -&gt; {</span>
-<span class="nc" id="L134">                    _setProgress( thisComponent, progress );</span>
-<span class="nc" id="L135">               })</span>
-<span class="nc" id="L136">               ._this();</span>
+<span class="nc bnc" id="L138" title="All 4 branches missed.">        if ( progress &lt; 0 || progress &gt; 1 )</span>
+<span class="nc" id="L139">            throw new IllegalArgumentException( &quot;Progress value must be between 0 and 1&quot; );</span>
+<span class="nc" id="L140">        return _with( thisComponent -&gt; {</span>
+<span class="nc" id="L141">                    _setProgress( thisComponent, progress );</span>
+<span class="nc" id="L142">               })</span>
+<span class="nc" id="L143">               ._this();</span>
     }
 
     private void _setProgress( P thisComponent, double progress ) {
-<span class="nc" id="L140">        int min = thisComponent.getMinimum();</span>
-<span class="nc" id="L141">        int max = thisComponent.getMaximum();</span>
-<span class="nc" id="L142">        int range = max - min;</span>
-<span class="nc" id="L143">        int value = (int) ( min + range * progress );</span>
-<span class="nc" id="L144">        thisComponent.setValue( value );</span>
-<span class="nc" id="L145">    }</span>
+<span class="nc" id="L147">        int min = thisComponent.getMinimum();</span>
+<span class="nc" id="L148">        int max = thisComponent.getMaximum();</span>
+<span class="nc" id="L149">        int range = max - min;</span>
+<span class="nc" id="L150">        int value = (int) ( min + range * progress );</span>
+<span class="nc" id="L151">        thisComponent.setValue( value );</span>
+<span class="nc" id="L152">    }</span>
 
     /**
      * @param val An integer property used to dynamically update the value of the progress bar.
@@ -150,15 +157,15 @@ public class UIForProgressBar&lt;P extends JProgressBar&gt; extends UIForAnySwin
      * @throws IllegalArgumentException if {@code value} is {@code null}.
      */
     public final UIForProgressBar&lt;P&gt; withValue( Val&lt;Integer&gt; val ) {
-<span class="nc" id="L153">        NullUtil.nullArgCheck( val, &quot;val&quot;, Val.class );</span>
-<span class="nc" id="L154">        NullUtil.nullPropertyCheck(val, &quot;value&quot;, &quot;Null is not a valid value for the progress property of a progress bar.&quot;);</span>
-<span class="nc" id="L155">        return _withOnShow( val, (thisComponent,v) -&gt; {</span>
-<span class="nc" id="L156">                    thisComponent.setValue( v );</span>
-<span class="nc" id="L157">               })</span>
-<span class="nc" id="L158">               ._with( thisComponent -&gt; {</span>
-<span class="nc" id="L159">                   thisComponent.setValue( val.orElseThrow() );</span>
-<span class="nc" id="L160">               })</span>
-<span class="nc" id="L161">               ._this();</span>
+<span class="nc" id="L160">        NullUtil.nullArgCheck( val, &quot;val&quot;, Val.class );</span>
+<span class="nc" id="L161">        NullUtil.nullPropertyCheck(val, &quot;value&quot;, &quot;Null is not a valid value for the progress property of a progress bar.&quot;);</span>
+<span class="nc" id="L162">        return _withOnShow( val, (thisComponent,v) -&gt; {</span>
+<span class="nc" id="L163">                    thisComponent.setValue( v );</span>
+<span class="nc" id="L164">               })</span>
+<span class="nc" id="L165">               ._with( thisComponent -&gt; {</span>
+<span class="nc" id="L166">                   thisComponent.setValue( val.orElseThrow() );</span>
+<span class="nc" id="L167">               })</span>
+<span class="nc" id="L168">               ._this();</span>
     }
 
     /**
@@ -167,15 +174,15 @@ public class UIForProgressBar&lt;P extends JProgressBar&gt; extends UIForAnySwin
      * @throws IllegalArgumentException if {@code value} is {@code null}.
      */
     public final UIForProgressBar&lt;P&gt; withProgress( Val&lt;Double&gt; progress ) {
-<span class="nc" id="L170">        NullUtil.nullArgCheck( progress, &quot;progress&quot;, Val.class );</span>
-<span class="nc" id="L171">        NullUtil.nullPropertyCheck(progress, &quot;progress&quot;, &quot;Null is not a valid progress for the progress property of a progress bar.&quot;);</span>
-<span class="nc" id="L172">        return _withOnShow( progress, (thisComponent,v) -&gt; {</span>
-<span class="nc" id="L173">                    _setProgress( thisComponent, v );</span>
-<span class="nc" id="L174">               })</span>
-<span class="nc" id="L175">               ._with( thisComponent -&gt; {</span>
-<span class="nc" id="L176">                   _setProgress( thisComponent, progress.orElseThrow() );</span>
-<span class="nc" id="L177">               })</span>
-<span class="nc" id="L178">               ._this();</span>
+<span class="nc" id="L177">        NullUtil.nullArgCheck( progress, &quot;progress&quot;, Val.class );</span>
+<span class="nc" id="L178">        NullUtil.nullPropertyCheck(progress, &quot;progress&quot;, &quot;Null is not a valid progress for the progress property of a progress bar.&quot;);</span>
+<span class="nc" id="L179">        return _withOnShow( progress, (thisComponent,v) -&gt; {</span>
+<span class="nc" id="L180">                    _setProgress( thisComponent, v );</span>
+<span class="nc" id="L181">               })</span>
+<span class="nc" id="L182">               ._with( thisComponent -&gt; {</span>
+<span class="nc" id="L183">                   _setProgress( thisComponent, progress.orElseThrow() );</span>
+<span class="nc" id="L184">               })</span>
+<span class="nc" id="L185">               ._this();</span>
     }
 
 }

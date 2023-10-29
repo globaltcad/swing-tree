@@ -5,14 +5,23 @@ import javax.swing.*;
 /**
  *  A SwingTree builder node designed for configuring {@link UIForTextPane} instances.
  */
-public class UIForTextPane&lt;P extends JTextPane&gt; extends UIForAnyEditorPane&lt;UIForTextPane&lt;P&gt;, P&gt;
+public final class UIForTextPane&lt;P extends JTextPane&gt; extends UIForAnyEditorPane&lt;UIForTextPane&lt;P&gt;, P&gt;
 {
+    private final BuilderState&lt;P&gt; _state;
+
     /**
      * {@link UIForAnySwing} (sub)types always wrap
      * a single component for which they are responsible.
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.
      */
-<span class="nc" id="L16">    protected UIForTextPane( P component ) { super(component); }</span>
+<span class="nc" id="L18">    UIForTextPane( P component ) {</span>
+<span class="nc" id="L19">        _state = new BuilderState&lt;&gt;(component);</span>
+<span class="nc" id="L20">    }</span>
+
+    @Override
+    protected BuilderState&lt;P&gt; _state() {
+<span class="nc" id="L24">        return _state;</span>
+    }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -5,16 +5,23 @@ import swingtree.components.JIcon;
 /**
  * A {@link UIForAnySwing} subclass specifically designed for adding icons to your SwingTree.
  */
-public class UIForIcon&lt;I extends JIcon&gt; extends UIForAnySwing&lt;UIForIcon&lt;I&gt;, I&gt;
+public final class UIForIcon&lt;I extends JIcon&gt; extends UIForAnySwing&lt;UIForIcon&lt;I&gt;, I&gt;
 {
+    private final BuilderState&lt;I&gt; _state;
+
     /**
      * Extensions of the {@link  UIForAnySwing} always wrap
      * a single component for which they are responsible.
      *
      * @param component The JComponent type which will be wrapped by this builder node.
      */
-    protected UIForIcon( I component ) {
-<span class="fc" id="L17">        super(component);</span>
-<span class="fc" id="L18">    }</span>
+<span class="fc" id="L18">    UIForIcon( I component ) {</span>
+<span class="fc" id="L19">        _state = new BuilderState&lt;&gt;(component);</span>
+<span class="fc" id="L20">    }</span>
+
+    @Override
+    protected BuilderState&lt;I&gt; _state() {
+<span class="fc" id="L24">        return _state;</span>
+    }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
