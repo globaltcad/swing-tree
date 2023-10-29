@@ -4,13 +4,10 @@ import swingtree.style.ComponentExtension;
 import swingtree.style.Style;
 import swingtree.threading.EventProcessor;
 
-import javax.swing.*;
-import java.awt.*;
-import java.util.Arrays;
+import javax.swing.JComponent;
+import java.awt.Component;
+import java.awt.Container;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  *  This class is a conceptual extension of the {@link AbstractBuilder} which expects
@@ -77,8 +74,8 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extend
     {
         NullUtil.nullArgCheck(builder, "builder", AbstractNestedBuilder.class);
 
-        boolean isCoupled       = _eventProcessor == EventProcessor.COUPLED;
-        boolean isCoupledStrict = _eventProcessor == EventProcessor.COUPLED_STRICT;
+        boolean isCoupled       = _state().eventProcessor() == EventProcessor.COUPLED;
+        boolean isCoupledStrict = _state().eventProcessor() == EventProcessor.COUPLED_STRICT;
 
         if ( !isCoupled && !isCoupledStrict && !UI.thisIsUIThread() )
             throw new IllegalStateException(

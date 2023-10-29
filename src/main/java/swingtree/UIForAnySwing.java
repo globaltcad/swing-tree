@@ -3845,7 +3845,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     private <M> void _updateComponentAt(
             int index, M v, ViewSupplier<M> viewSupplier, String attr, C c
     ) {
-        JComponent newComponent = v == null ? new JPanel() : UI.use(_eventProcessor, () -> viewSupplier.createViewFor(v).getComponent() );
+        JComponent newComponent = v == null ? new JPanel() : UI.use(_state().eventProcessor(), () -> viewSupplier.createViewFor(v).getComponent() );
         // We remove the old component.
         c.remove(c.getComponent(index));
         // We add the new component.
@@ -3863,9 +3863,9 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     ) {
         // We add the new component.
         if ( attr == null )
-            thisComponent.add(UI.use(_eventProcessor, () -> viewSupplier.createViewFor(v).getComponent()), index);
+            thisComponent.add(UI.use(_state().eventProcessor(), () -> viewSupplier.createViewFor(v).getComponent()), index);
         else
-            thisComponent.add(UI.use(_eventProcessor, () -> viewSupplier.createViewFor(v).getComponent()), attr, index);
+            thisComponent.add(UI.use(_state().eventProcessor(), () -> viewSupplier.createViewFor(v).getComponent()), attr, index);
         // We update the layout.
         thisComponent.revalidate();
         thisComponent.repaint();

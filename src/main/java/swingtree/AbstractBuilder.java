@@ -1,15 +1,10 @@
 package swingtree;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import sprouts.*;
-import sprouts.Action;
 import swingtree.api.Peeker;
-import swingtree.style.ComponentExtension;
 import swingtree.threading.EventProcessor;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Component;
 import java.lang.ref.WeakReference;
 import java.util.Objects;
 import java.util.Optional;
@@ -28,35 +23,7 @@ import java.util.function.Supplier;
  */
 abstract class AbstractBuilder<I, C extends Component>
 {
-    private static final Logger log = LoggerFactory.getLogger(AbstractBuilder.class);
-
-    /**
-     *  The type class of the component wrapped by this builder node.
-     */
-    protected final Class<C> _type;
-
-    /**
-     *  The component wrapped by this builder node.
-     */
-    private final MaybeWeakReference<C> _component;
-
-    /**
-     *  A strong reference to the component (This is only used to prevent the component from being garbage collected)
-     * @param <T> The type of the component.
-     */
-    private final static class MaybeWeakReference<T extends Component> extends WeakReference<T> {
-        private T _strongRef; // This is only used to prevent the component from being garbage collected
-        public MaybeWeakReference( T referent ) { super(referent); _strongRef = referent; }
-        public void detachStrongRef() {
-            _strongRef = null;
-        }
-    }
-
-    /**
-     * The thread mode determines how events are dispatched to the component.
-     * And also which type of thread can access the component.
-     */
-    protected final EventProcessor _eventProcessor = SwingTree.get().getEventProcessor();
+    private final BuilderState<C> _state;
 
     /**
      *  Instances of the {@link AbstractBuilder} as well as its subtypes always wrap
@@ -66,11 +33,15 @@ abstract class AbstractBuilder<I, C extends Component>
      */
     public AbstractBuilder( C component ) {
         Objects.requireNonNull(component);
-        _type      = (Class<C>) component.getClass();
-        _component = new MaybeWeakReference<>(component);
-        if ( component instanceof JComponent )
-            ComponentExtension.makeSureComponentHasExtension( (JComponent) component );
+        _state = new BuilderState<>(component);
     }
+
+    /**
+     *  Returns the state of the builder, which is a container for the wrapped component
+     *  as well as it's type and current {@link EventProcessor}.
+     * @return The state of the builder.
+     */
+    protected BuilderState<C> _state() { return _state; }
 
     protected AbstractBuilder<I,C> _with( Consumer<C> action ) {
         action.accept( getComponent() );
@@ -84,14 +55,14 @@ abstract class AbstractBuilder<I, C extends Component>
     /**
      * @param action An action which should be executed by the UI thread (EDT).
      */
-    protected final void _doUI( Runnable action ) { _eventProcessor.registerUIEvent( action ); }
+    protected final void _doUI( Runnable action ) { _state().eventProcessor().registerUIEvent( action ); }
 
     /**
      * @param action An action which should be executed by the application thread,
      *               which is determined by implementations of the {@link EventProcessor},
      *               also see {@link UI#use(EventProcessor, Supplier)}.
      */
-    protected final void _doApp( Runnable action ) { _eventProcessor.registerAppEvent(action); }
+    protected final void _doApp( Runnable action ) { _state().eventProcessor().registerAppEvent(action); }
 
     /**
      * @param value A value which should be captured and then passed to the provided action
@@ -238,7 +209,7 @@ abstract class AbstractBuilder<I, C extends Component>
      *  part of a tree of components, and if one component is not garbage collected,
      *  then the whole tree is not garbage collected.
      */
-    protected final void _detachStrongRef() { _component.detachStrongRef(); }
+    protected final void _detachStrongRef() { _state().dispose(); }
 
     /**
      *  The component wrapped by this builder node.
@@ -249,8 +220,8 @@ abstract class AbstractBuilder<I, C extends Component>
      *  @return The component wrapped by this builder node.
      */
     public final C getComponent() {
-        boolean isCoupled       = _eventProcessor == EventProcessor.COUPLED;
-        boolean isCoupledStrict = _eventProcessor == EventProcessor.COUPLED_STRICT;
+        boolean isCoupled       = _state().eventProcessor() == EventProcessor.COUPLED;
+        boolean isCoupledStrict = _state().eventProcessor() == EventProcessor.COUPLED_STRICT;
 
         if ( !isCoupled && !isCoupledStrict && !UI.thisIsUIThread() )
             throw new IllegalStateException(
@@ -258,7 +229,7 @@ abstract class AbstractBuilder<I, C extends Component>
                     "which means that it can only be modified from the EDT. " +
                     "Please use 'UI.run(()->...)' method to execute your modifications on the EDT."
                 );
-        return _component.get();
+        return _state().component();
     }
 
     /**
@@ -269,14 +240,14 @@ abstract class AbstractBuilder<I, C extends Component>
      *         application has an application thread (see {@link UI#use(EventProcessor, Supplier)})
      *         and this method is called from a thread other than the EDT.
      */
-    public final OptionalUI<C> component() { return OptionalUI.ofNullable(_component.get()); }
+    public final OptionalUI<C> component() { return OptionalUI.ofNullable(_state().component()); }
 
     /**
      *  The type class of the component wrapped by this builder node.
      *  See documentation for method "build" for more information.
      * @return The type class of the component wrapped by this builder node.
      */
-    public final Class<C> getType() { return _type; }
+    public final Class<C> getType() { return _state().componentType(); }
 
     /**
      *  Use this if you wish to access the component wrapped by this builder directly.
@@ -464,7 +435,7 @@ abstract class AbstractBuilder<I, C extends Component>
      * @return The result of the building process, namely: a type of JComponent.
      */
     public <T extends C> T get( Class<T> type ) {
-        assert type == _type || type.isAssignableFrom(_type);
-        return (T) _component.get();
+        assert type == _state().componentType() || type.isAssignableFrom(_state().componentType());
+        return (T) _state().component();
     }
 }
