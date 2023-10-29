@@ -6,6 +6,7 @@ import sprouts.From;
 import sprouts.Val;
 import sprouts.Var;
 
+import javax.swing.JTabbedPane;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.*;
@@ -23,10 +24,6 @@ import java.util.function.Consumer;
  */
 public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends UIForAnySwing<I, C>
 {
-    private final java.util.List<Action<RemoveDelegate>>   removes = new ArrayList<>();
-    private final java.util.List<Action<InsertDelegate>>   inserts = new ArrayList<>();
-    private final java.util.List<Action<ReplaceDelegate>>  replaces = new ArrayList<>();
-
     protected UIForAnyTextComponent(C component) { super(component); }
 
     /**
@@ -255,6 +252,7 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
      */
     private void _ifFilterable( C thisComponent, Runnable action ) {
         if ( thisComponent.getDocument() instanceof AbstractDocument ) {
+            ExtraState state = ExtraState.of( thisComponent );
             action.run();
             AbstractDocument doc = (AbstractDocument) thisComponent.getDocument();
             doc.setDocumentFilter(new DocumentFilter() {
@@ -262,22 +260,22 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
                  * See documentation in {@link DocumentFilter}!
                  */
                 public void remove(FilterBypass fb, int offset, int length) throws BadLocationException {
-                    removes.forEach(action -> action.accept( new RemoveDelegate(thisComponent, fb, offset, length) ) );
-                    if ( removes.isEmpty() ) fb.remove(offset, length);
+                    state.removes.forEach(action -> action.accept( new RemoveDelegate(thisComponent, fb, offset, length) ) );
+                    if ( state.removes.isEmpty() ) fb.remove(offset, length);
                 }
                 /**
                  * See documentation in {@link DocumentFilter}!
                  */
                 public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
-                    inserts.forEach(action -> action.accept( new InsertDelegate(thisComponent, fb, offset, string.length(), string, attr) ) );
-                    if ( inserts.isEmpty() ) fb.insertString(offset, string, attr);
+                    state.inserts.forEach(action -> action.accept( new InsertDelegate(thisComponent, fb, offset, string.length(), string, attr) ) );
+                    if ( state.inserts.isEmpty() ) fb.insertString(offset, string, attr);
                 }
                 /**
                  * See documentation in {@link DocumentFilter}!
                  */
                 public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
-                    replaces.forEach(action -> action.accept(new ReplaceDelegate(thisComponent, fb, offset, length, text, attrs)) );
-                    if ( replaces.isEmpty() ) fb.replace(offset, length, text, attrs);
+                    state.replaces.forEach(action -> action.accept(new ReplaceDelegate(thisComponent, fb, offset, length, text, attrs)) );
+                    if ( state.replaces.isEmpty() ) fb.replace(offset, length, text, attrs);
                 }
             });
         }
@@ -292,7 +290,8 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
     public final I onTextRemove( Action<RemoveDelegate> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
-                    _ifFilterable(thisComponent, () -> this.removes.add(action));
+                    ExtraState state = ExtraState.of( thisComponent );
+                    _ifFilterable(thisComponent, () -> state.removes.add(action));
                })
                ._this();
     }
@@ -305,7 +304,8 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
      */
     public final I onTextInsert( Action<InsertDelegate> action ) {
         return _with( thisComponent -> {
-                    _ifFilterable(thisComponent, () -> this.inserts.add(action));
+                    ExtraState state = ExtraState.of( thisComponent );
+                    _ifFilterable(thisComponent, () -> state.inserts.add(action));
                })
                ._this();
     }
@@ -319,7 +319,8 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
     public final I onTextReplace( Action<ReplaceDelegate> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
-                    _ifFilterable(thisComponent, () -> this.replaces.add(action));
+                    ExtraState state = ExtraState.of( thisComponent );
+                    _ifFilterable(thisComponent, () -> state.replaces.add(action));
                })
                ._this();
     }
@@ -401,6 +402,21 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
             }
         }
         public AttributeSet getAttributeSet() { return attributeSet; }
+    }
+
+    private static class ExtraState
+    {
+        static ExtraState of( JTextComponent textComponent ) {
+            Object found = textComponent.getClientProperty(ExtraState.class);
+            if ( found instanceof ExtraState) return (ExtraState) found;
+            ExtraState state = new ExtraState();
+            textComponent.putClientProperty(ExtraState.class, state);
+            return state;
+        }
+
+        final java.util.List<Action<RemoveDelegate>>   removes = new ArrayList<>();
+        final java.util.List<Action<InsertDelegate>>   inserts = new ArrayList<>();
+        final java.util.List<Action<ReplaceDelegate>>  replaces = new ArrayList<>();
     }
 
 }

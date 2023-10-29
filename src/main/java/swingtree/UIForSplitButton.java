@@ -21,11 +21,6 @@ import java.util.stream.Collectors;
  */
 public class UIForSplitButton<B extends JSplitButton> extends UIForAnyButton<UIForSplitButton<B>, B>
 {
-    private final JPopupMenu _popupMenu = new JPopupMenu();
-    private final Map<JMenuItem, Action<SplitItemDelegate<JMenuItem>>> _options = new LinkedHashMap<>(16);
-    private final JMenuItem[] _lastSelected = {null};
-    private final List<Action<SplitButtonDelegate<JMenuItem>>> _onSelections = new ArrayList<>();
-
     /**
      *  Creates a new instance wrapping the given {@link JSplitButton} component.
      *
@@ -33,17 +28,18 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAnyButton<UIF
      */
     protected UIForSplitButton( B component ) {
         super(component);
-        component.setPopupMenu(_popupMenu);
+        ExtraState state = ExtraState.of(component);
+        component.setPopupMenu(state.popupMenu);
         component.addButtonClickedActionListener(e -> _doApp(()->{
-            List<JMenuItem> selected = _getSelected();
+            List<JMenuItem> selected = _getSelected(component);
             for ( JMenuItem item : selected ) {
-                Action<SplitItemDelegate<JMenuItem>> action = _options.get(item);
+                Action<SplitItemDelegate<JMenuItem>> action = state.options.get(item);
                 if ( action != null )
                     action.accept(
                         new SplitItemDelegate<>(
                             e,
                             component,
-                            ()-> new ArrayList<>(_options.keySet()),
+                            ()-> new ArrayList<>(state.options.keySet()),
                             item
                         )
                     );
@@ -51,8 +47,9 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAnyButton<UIF
         }));
     }
 
-    private List<JMenuItem> _getSelected() {
-        return Arrays.stream(_popupMenu.getComponents())
+    private List<JMenuItem> _getSelected(B component) {
+        ExtraState state = ExtraState.of(component);
+        return Arrays.stream(state.popupMenu.getComponents())
                 .filter( c -> c instanceof JMenuItem )
                 .map( c -> (JMenuItem) c )
                 .filter(AbstractButton::isSelected)
@@ -134,7 +131,8 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAnyButton<UIF
         Action<SplitButtonDelegate<JMenuItem>> action
     ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
-        return _with( thisComponent ->
+        return _with( thisComponent -> {
+                    ExtraState state = ExtraState.of(thisComponent);
                     thisComponent.addSplitButtonClickedActionListener(
                         e -> _doApp(()->action.accept(
                                 new SplitButtonDelegate<>(
@@ -142,14 +140,14 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAnyButton<UIF
                                      new SplitItemDelegate<>(
                                          e,
                                          thisComponent,
-                                         () -> new ArrayList<>(_options.keySet()),
-                                         _lastSelected[0]
+                                         () -> new ArrayList<>(state.options.keySet()),
+                                         state.lastSelected[0]
                                      )
                                 )
                             )
                         )
-                    )
-                )
+                    );
+                })
                 ._this();
     }
 
@@ -172,8 +170,11 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAnyButton<UIF
         Action<SplitButtonDelegate<JMenuItem>> action
     ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
-        _onSelections.add(action);
-        return this;
+        return _with( thisComponent -> {
+                    ExtraState state = ExtraState.of(thisComponent);
+                    state.onSelections.add(action);
+                })
+                ._this();
     }
 
     /**
@@ -192,18 +193,19 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAnyButton<UIF
         Action<SplitItemDelegate<JMenuItem>> action
     ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
-        return _with( thisComponent ->
+        return _with( thisComponent -> {
+                    ExtraState state = ExtraState.of(thisComponent);
                     thisComponent.addButtonClickedActionListener(
                         e -> _doApp(()->action.accept(
                                 new SplitItemDelegate<>(
                                    e,
                                    thisComponent,
-                                   () -> new ArrayList<>(_options.keySet()),
-                                   _lastSelected[0]
+                                   () -> new ArrayList<>(state.options.keySet()),
+                                   state.lastSelected[0]
                                 )
                             ))
-                    )
-                )
+                    );
+                })
                 ._this();
     }
 
@@ -345,28 +347,29 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAnyButton<UIF
     public <I extends JMenuItem> UIForSplitButton<B> add( SplitItem<I> splitItem ) {
         NullUtil.nullArgCheck(splitItem, "buttonItem", SplitItem.class);
         return _with( thisComponent -> {
+                    ExtraState state = ExtraState.of(thisComponent);
                     I item = splitItem.getItem();
                     splitItem.getIsEnabled().ifPresent( isEnabled -> {
                         _onShow( isEnabled, thisComponent, (c,v) -> item.setEnabled(v) );
                     });
 
                     if ( item.isSelected() )
-                        _lastSelected[0] = item;
+                        state.lastSelected[0] = item;
 
-                    _popupMenu.add(item);
-                    _options.put(item, ( (SplitItem<JMenuItem>) splitItem).getOnClick());
+                    state.popupMenu.add(item);
+                    state.options.put(item, ( (SplitItem<JMenuItem>) splitItem).getOnClick());
                     item.addActionListener(
                         e -> _doApp(()->{
-                            _lastSelected[0] = item;
+                            state.lastSelected[0] = item;
                             item.setSelected(true);
                             SplitItemDelegate<I> delegate =
                                     new SplitItemDelegate<>(
                                             e,
                                             thisComponent,
-                                            () -> _options.keySet().stream().map(o -> (I) o ).collect(Collectors.toList()),
+                                            () -> state.options.keySet().stream().map(o -> (I) o ).collect(Collectors.toList()),
                                             item
                                         );
-                            _onSelections.forEach(action -> {
+                            state.onSelections.forEach(action -> {
                                 try {
                                     action.accept(new SplitButtonDelegate<>( thisComponent,(SplitItemDelegate<JMenuItem>) delegate ));
                                 } catch (Exception exception) {
@@ -380,6 +383,19 @@ public class UIForSplitButton<B extends JSplitButton> extends UIForAnyButton<UIF
                 ._this();
     }
 
-    JPopupMenu getPopupMenu() { return _popupMenu; }
+    private static class ExtraState {
+        static ExtraState of( JSplitButton pane ) {
+            Object found = pane.getClientProperty(ExtraState.class);
+            if ( found instanceof ExtraState ) return (ExtraState) found;
+            ExtraState state = new ExtraState();
+            pane.putClientProperty(ExtraState.class, state);
+            return state;
+        }
+
+        final JPopupMenu popupMenu = new JPopupMenu();
+        final Map<JMenuItem, Action<SplitItemDelegate<JMenuItem>>> options = new LinkedHashMap<>(16);
+        final JMenuItem[] lastSelected = {null};
+        final List<Action<SplitButtonDelegate<JMenuItem>>> onSelections = new ArrayList<>();
+    }
 
 }

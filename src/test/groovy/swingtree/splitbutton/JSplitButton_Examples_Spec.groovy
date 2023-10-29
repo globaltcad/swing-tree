@@ -70,11 +70,11 @@ class JSplitButton_Examples_Spec extends Specification
         expect : 'The component wrapped by the UI builder is in fact a split button:'
             ui.component instanceof JSplitButton
         and : 'This button should have a popup menu with 3 components.'
-            ui.popupMenu.components.length == 3
+            ui.component.popupMenu.components.length == 3
         and : 'They have the expected names:'
-            ((JMenuItem)ui.popupMenu.getComponent(0)).getText() == "I am the first drop down item."
-            ((JMenuItem)ui.popupMenu.getComponent(1)).getText() == "I am the second item."
-            ((JMenuItem)ui.popupMenu.getComponent(2)).getText() == "And I am the third."
+            ((JMenuItem)ui.component.popupMenu.getComponent(0)).getText() == "I am the first drop down item."
+            ((JMenuItem)ui.component.popupMenu.getComponent(1)).getText() == "I am the second item."
+            ((JMenuItem)ui.component.popupMenu.getComponent(2)).getText() == "And I am the third."
     }
 
 
@@ -91,7 +91,7 @@ class JSplitButton_Examples_Spec extends Specification
             ui.component.text == "I will be replaced!"
 
         when :
-            ((JMenuItem)ui.popupMenu.getComponent(1)).doClick()
+            ((JMenuItem)ui.component.popupMenu.getComponent(1)).doClick()
             UI.sync()
         then :
             ui.component.text == "second"
@@ -110,17 +110,17 @@ class JSplitButton_Examples_Spec extends Specification
             ui.component.text == "I may be replaced!"
 
         when : 'We simulate a user selecting the first button item'
-            UI.runNow(()->((JMenuItem)ui.popupMenu.getComponent(0)).doClick())
+            UI.runNow(()->((JMenuItem)ui.component.popupMenu.getComponent(0)).doClick())
         then : 'The displayed button should still be as it was previously.'
             ui.component.text == "I may be replaced!"
 
         when : 'We now select the third button item'
-            ((JMenuItem)ui.popupMenu.getComponent(2)).doClick()
+            ((JMenuItem)ui.component.popupMenu.getComponent(2)).doClick()
         then : 'Again the button text is still the same.'
             ui.component.text == "I may be replaced!"
 
         when : 'We now simulate a selection on the second item (for which we registered an action).'
-            UI.runNow(()->((JMenuItem)ui.popupMenu.getComponent(1)).doClick())
+            UI.runNow(()->((JMenuItem)ui.component.popupMenu.getComponent(1)).doClick())
         then : 'The displayed button text will have changed because of our selection lambda'
             ui.component.text == "second"
     }
@@ -139,19 +139,19 @@ class JSplitButton_Examples_Spec extends Specification
             ui.component.text == "I may be replaced!"
 
         when : 'We select the first item and click the button.'
-            ((JMenuItem)ui.popupMenu.getComponent(0)).doClick()
+            ((JMenuItem)ui.component.popupMenu.getComponent(0)).doClick()
             UI.runNow( () -> ui.component.doClick() );
         then : 'We expect that the button has the default text displayed according to the first action'
             ui.component.text == "default text"
 
         when : 'We select and click the third button.'
-            ((JMenuItem)ui.popupMenu.getComponent(2)).doClick()
+            ((JMenuItem)ui.component.popupMenu.getComponent(2)).doClick()
             UI.runNow( () -> ui.component.doClick() );
         then : 'This should have the same effect as previously.'
             ui.component.text == "default text"
 
         when : 'We now select and click the second button item.'
-            ((JMenuItem)ui.popupMenu.getComponent(1)).doClick()
+            ((JMenuItem)ui.component.popupMenu.getComponent(1)).doClick()
             UI.runNow( () -> ui.component.doClick() );
         then : 'The split button text will be different because the button item action fired last.'
             ui.component.text == "text by second item"
@@ -209,7 +209,7 @@ class JSplitButton_Examples_Spec extends Specification
             ui.component.text == "triggered: 1 3"
 
         when : 'We now select the second button item.'
-            UI.runNow(()->((JMenuItem)ui.popupMenu.getComponent(1)).doClick())
+            UI.runNow(()->((JMenuItem)ui.component.popupMenu.getComponent(1)).doClick())
         then : 'The split button text will not have changed (internally the selection should be different however).'
             ui.component.text == "triggered: 1 3"
 
@@ -238,25 +238,25 @@ class JSplitButton_Examples_Spec extends Specification
         when : 'We add a menu item to the split button.'
             ui.add(new JMenuItem("First"))
         then : 'The split button has a popup menu with one component.'
-            ui.popupMenu.components.length == 1
+            ui.component.popupMenu.components.length == 1
 
         when : 'We add another menu item to the split button.'
             ui.add(UI.menuItem("Second"))
         then : 'The split button has a popup menu with two components.'
-            ui.popupMenu.components.length == 2
+            ui.component.popupMenu.components.length == 2
 
         when : 'We add a split item to the split button.'
             ui.add(UI.splitItem("Third"))
         then : 'The split button has a popup menu with three components.'
-            ui.popupMenu.components.length == 3
+            ui.component.popupMenu.components.length == 3
 
         when : 'We add a split radio button to the split button.'
             ui.add(UI.splitRadioItem("Fourth"))
         then : 'The split button has a popup menu with four components.'
-            ui.popupMenu.components.length == 4
+            ui.component.popupMenu.components.length == 4
         and :
-            ui.popupMenu.components.findAll({it instanceof JRadioButtonMenuItem}).size() == 1
-            ui.popupMenu.components.findAll({it instanceof JMenuItem}).size() == 4
+            ui.component.popupMenu.components.findAll({it instanceof JRadioButtonMenuItem}).size() == 1
+            ui.component.popupMenu.components.findAll({it instanceof JMenuItem}).size() == 4
     }
 
 
@@ -288,10 +288,10 @@ class JSplitButton_Examples_Spec extends Specification
         expect : 'It wraps a JSplitButton.'
             ui.component instanceof JSplitButton
         and : 'There are 3 options.'
-            ui.popupMenu.components.length == 3
-            ui.popupMenu.components[0].text == "Small"
-            ui.popupMenu.components[1].text == "Medium"
-            ui.popupMenu.components[2].text == "Large"
+            ui.component.popupMenu.components.length == 3
+            ui.component.popupMenu.components[0].text == "Small"
+            ui.component.popupMenu.components[1].text == "Medium"
+            ui.component.popupMenu.components[2].text == "Large"
     }
 
 
@@ -322,14 +322,14 @@ class JSplitButton_Examples_Spec extends Specification
         expect : 'It wraps a JSplitButton.'
             ui.component instanceof JSplitButton
         and : 'There are 3 options.'
-            ui.popupMenu.components.length == 3
-            ui.popupMenu.components[0].text == "Red"
-            ui.popupMenu.components[1].text == "Green"
-            ui.popupMenu.components[2].text == "Blue"
+            ui.component.popupMenu.components.length == 3
+            ui.component.popupMenu.components[0].text == "Red"
+            ui.component.popupMenu.components[1].text == "Green"
+            ui.component.popupMenu.components[2].text == "Blue"
         and : 'The button text is initially set to the current selection.'
             ui.component.text == "Blue"
         when : 'We select the second option.'
-            UI.runNow(()->((JMenuItem)ui.popupMenu.getComponent(1)).doClick())
+            UI.runNow(()->((JMenuItem)ui.component.popupMenu.getComponent(1)).doClick())
         then : 'The tracker will have recorded a selection action event.'
             tracker == ["#"]
         and : 'The button text will have changed to the new selection.'

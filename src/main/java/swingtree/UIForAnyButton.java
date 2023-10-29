@@ -32,12 +32,7 @@ import java.util.function.Consumer;
  */
 public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForAnySwing<I, B>
 {
-    protected UIForAnyButton(B component ) { super(component); }
-
-    @Override
-    protected UIForAnyButton<I,B> _with( Consumer<B> action ) {
-        return (UIForAnyButton<I, B>) super._with( action );
-    }
+    protected UIForAnyButton( B component ) { super(component); }
 
     /**
      * Defines the single line of text the wrapped button type will display.

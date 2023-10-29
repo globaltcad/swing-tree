@@ -29,9 +29,6 @@ import java.util.function.Supplier;
  */
 public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForTabbedPane<P>, P>
 {
-    private final List<Consumer<Integer>> _selectionListeners = new ArrayList<>();
-    private Var<Integer> _selectedTabIndex = null;
-
     /**
      * {@link UIForAnySwing} (sub)types always wrap
      * a single component for which they are responsible.
@@ -217,18 +214,21 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
         NullUtil.nullArgCheck( index, "index", Var.class );
         NullUtil.nullPropertyCheck( index, "index", "Null is not a valid state for modelling a selected index." );
         return _with( thisComponent -> {
-                    if ( _selectedTabIndex != null )
+                    ExtraState state = ExtraState.of(thisComponent);
+                    if ( state.selectedTabIndex != null )
                         throw new IllegalStateException("A selected index property has already been set for this tabbed pane.");
-                    _selectedTabIndex = index;
+                    state.selectedTabIndex = index;
                })
                 ._withOnShow( index, (thisComponent,i) -> {
+                    ExtraState state = ExtraState.of(thisComponent);
                     thisComponent.setSelectedIndex(i);
-                    _selectionListeners.forEach( l -> l.accept(i) );
+                    state.selectionListeners.forEach(l -> l.accept(i) );
                 })
                 ._with( thisComponent -> {
                     _onChange(thisComponent, e -> _doApp(()->{
+                        ExtraState state = ExtraState.of(thisComponent);
                         index.set(From.VIEW, thisComponent.getSelectedIndex());
-                        _selectionListeners.forEach( l -> l.accept(thisComponent.getSelectedIndex()) );
+                        state.selectionListeners.forEach(l -> l.accept(thisComponent.getSelectedIndex()) );
                     }));
                     thisComponent.setSelectedIndex(index.get());
                 })
@@ -336,8 +336,9 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
             );
             tab.isEnabled().ifPresent( isEnabled -> thisComponent.setEnabledAt(indexFinder.get(), isEnabled.get()) );
             tab.isSelected().ifPresent( isSelected -> {
+                ExtraState state = ExtraState.of(thisComponent);
                 _selectTab(thisComponent, indexFinder.get(), isSelected.get());
-                _selectionListeners.add( i -> isSelected.set(From.VIEW, Objects.equals(i, indexFinder.get())) );
+                state.selectionListeners.add(i -> isSelected.set(From.VIEW, Objects.equals(i, indexFinder.get())) );
             /*
                 The above listener will ensure that the isSelected property of the tab is updated when
                 the selection index property changes.
@@ -374,13 +375,14 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
     }
 
     private void _selectTab( P thisComponent, int tabIndex, boolean isSelected ) {
+        ExtraState state = ExtraState.of(thisComponent);
         int selectedIndex = ( isSelected ? tabIndex : thisComponent.getSelectedIndex() );
-        if ( _selectedTabIndex != null )
-            _selectedTabIndex.set(From.VIEW, selectedIndex);
+        if ( state.selectedTabIndex != null )
+            state.selectedTabIndex.set(From.VIEW, selectedIndex);
         else
             thisComponent.setSelectedIndex(selectedIndex);
 
-        _selectionListeners.forEach(l -> l.accept(selectedIndex));
+        state.selectionListeners.forEach(l -> l.accept(selectedIndex));
     }
 
     private JComponent _buildTabHeader( Tab tab, TabMouseClickListener mouseListener )
@@ -515,6 +517,20 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
 
     private void _onChange( P thisComponent, Consumer<ChangeEvent> action ) {
         thisComponent.addChangeListener(action::accept);
+    }
+
+    private static class ExtraState
+    {
+        static ExtraState of( JTabbedPane pane ) {
+            Object found = pane.getClientProperty(ExtraState.class);
+            if ( found instanceof ExtraState ) return (ExtraState) found;
+            ExtraState state = new ExtraState();
+            pane.putClientProperty(ExtraState.class, state);
+            return state;
+        }
+
+        final List<Consumer<Integer>> selectionListeners = new ArrayList<>();
+        Var<Integer> selectedTabIndex = null;
     }
 
 }
