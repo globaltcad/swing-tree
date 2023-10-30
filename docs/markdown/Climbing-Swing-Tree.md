@@ -332,8 +332,8 @@ basic set of events like for example:
   .onMouseRelease( it -> System.out.println("Mouse released panel") )
   .onMouseClick( it -> System.out.println("Mouse clicked panel") )
   .onMouseDrag( it -> System.out.println("Mouse dragged panel") )
-  .onFocusGained( it -> System.out.println("Panel gained focus") )
-  .onFocusLost( it -> System.out.println("Panel lost focus") )
+  .onFocusGain( it -> System.out.println("Panel gained focus") )
+  .onFocusLoss( it -> System.out.println("Panel lost focus") )
   ...
 ``` 
 

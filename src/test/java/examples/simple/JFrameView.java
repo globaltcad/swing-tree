@@ -13,15 +13,15 @@ public class JFrameView extends JFrame
 {
 	public JFrameView() {
 		of(this)
-		.onFocusGained( it -> System.out.println("Focus gained") )
-		.onFocusLost( it -> System.out.println("Focus lost") )
+		.onFocusGain(it -> System.out.println("Focus gained") )
+		.onFocusLoss(it -> System.out.println("Focus lost") )
 		.onPressed( Keyboard.Key.ENTER, it -> System.out.println("Enter key pressed") )
 		.add(
 			panel("fill")
 			.add(
 				button("Hello")
-				.onFocusGained( it -> System.out.println("Button focus gained") )
-				.onFocusLost( it -> System.out.println("Button focus lost") )
+				.onFocusGain( it -> System.out.println("Button focus gained") )
+				.onFocusLoss(it -> System.out.println("Button focus lost") )
 				.onKeyPressed( it -> System.out.println("Button key pressed: " + it.getEvent().getKeyChar() ) )
 				.onKeyReleased( it -> System.out.println("Button key released: " + it.getEvent().getKeyChar()) )
 				.onKeyTyped( it -> System.out.println("Button key typed: " + it.getEvent().getKeyChar()) )

@@ -49,11 +49,11 @@ class Showing_UI_Spec extends Specification
             var frame =
                 UI.frame()
                 .withTitle("My JFrame")
-                .onFocusGained({ record << "focus gained" })
-                .onFocusLost({ record << "focus lost" })
+                .onFocusGain( it -> record << "focus gained" )
+                .onFocusLoss( it -> record << "focus lost" )
                 .add(
                     UI.button().withText("My Button")
-                    .onClick({ record << "button clicked" })
+                    .onClick( it -> record << "button clicked" )
                 )
                 .get(JFrame)
 
