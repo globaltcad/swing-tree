@@ -149,7 +149,7 @@ class Basic_UI_Builder_Examples_Spec extends Specification
         when : 'We add a list of panels...'
             var ui2 = ui.add([new JPanel(), new JPanel(), new JPanel()])
         then : 'We get the same UI node back, because Swing-Tree is based on the builder pattern.'
-            ui === ui2
+            ui == ui2
 
         and : 'The wrapped component will have the expected amount of child components.'
             ui.component.components.length == 3

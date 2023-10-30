@@ -35,9 +35,10 @@ abstract class AbstractBuilder<I, C extends Component>
     protected final AbstractBuilder<I,C> _with( Consumer<C> action ) {
         action.accept( getComponent() );
         return this;
+        //return _with(_state().with(action));
     }
 
-    protected I _withAndGet( Function<C, I> action ) {
+    protected final I _withAndGet( Function<C, I> action ) {
         return action.apply( getComponent() );
     }
 
@@ -423,8 +424,28 @@ abstract class AbstractBuilder<I, C extends Component>
      * @param <T> The type parameter of the component which this builder wraps.
      * @return The result of the building process, namely: a type of JComponent.
      */
-    public <T extends C> T get( Class<T> type ) {
+    public final <T extends C> T get( Class<T> type ) {
         assert type == _state().componentType() || type.isAssignableFrom(_state().componentType());
         return (T) _state().component();
+    }
+
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "[" + _state().componentType().getSimpleName() + "]";
+    }
+
+    @Override
+    public int hashCode() {
+        return _state().hashCode();
+    }
+
+    @Override
+    public boolean equals( Object obj ) {
+        if ( obj == null ) return false;
+        if ( obj == this ) return true;
+        if ( obj.getClass() != getClass() ) return false;
+        AbstractBuilder<?,?> other = (AbstractBuilder<?,?>) obj;
+        return _state().equals(other._state());
     }
 }

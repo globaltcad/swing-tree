@@ -62,4 +62,24 @@ class BuilderState<C extends Component>
     public Class<C> componentType() {
         return componentType;
     }
+
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName() + "[" + componentType.getSimpleName() + "]";
+    }
+
+    @Override
+    public boolean equals( Object o ) {
+        if ( this == o ) return true;
+        if ( o == null || getClass() != o.getClass() ) return false;
+
+        BuilderState<?> that = (BuilderState<?>) o;
+
+        return componentType.equals(that.componentType);
+    }
+
+    @Override
+    public int hashCode() {
+        return componentType.hashCode();
+    }
 }

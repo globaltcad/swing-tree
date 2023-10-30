@@ -30,18 +30,21 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
      */
     UIForSplitButton( BuilderState<B> state ) {
         Objects.requireNonNull(state);
-        _state = state.with( component -> {
-            ExtraState extraState = ExtraState.of(component);
-            component.setPopupMenu(extraState.popupMenu);
-            component.addButtonClickedActionListener(e -> _doApp(()->{
-                List<JMenuItem> selected = _getSelected(component);
+        _state = state.with(this::_initialize);
+    }
+
+    private void _initialize( B thisComponent ) {
+        ExtraState.of( thisComponent, extraState -> {
+            thisComponent.setPopupMenu(extraState.popupMenu);
+            thisComponent.addButtonClickedActionListener(e -> _doApp(()->{
+                List<JMenuItem> selected = _getSelected(thisComponent);
                 for ( JMenuItem item : selected ) {
                     Action<SplitItemDelegate<JMenuItem>> action = extraState.options.get(item);
                     if ( action != null )
                         action.accept(
                             new SplitItemDelegate<>(
                                 e,
-                                component,
+                                thisComponent,
                                 ()-> new ArrayList<>(extraState.options.keySet()),
                                 item
                             )
@@ -361,12 +364,12 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
     public <I extends JMenuItem> UIForSplitButton<B> add( SplitItem<I> splitItem ) {
         NullUtil.nullArgCheck(splitItem, "buttonItem", SplitItem.class);
         return _with( thisComponent -> {
-                    ExtraState state = ExtraState.of(thisComponent);
                     I item = splitItem.getItem();
                     splitItem.getIsEnabled().ifPresent( isEnabled -> {
                         _onShow( isEnabled, thisComponent, (c,v) -> item.setEnabled(v) );
                     });
 
+                    ExtraState state = ExtraState.of(thisComponent);
                     if ( item.isSelected() )
                         state.lastSelected[0] = item;
 
@@ -399,10 +402,14 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
 
     private static class ExtraState {
         static ExtraState of( JSplitButton pane ) {
+            return of(pane, state->{});
+        }
+        static ExtraState of( JSplitButton pane, Consumer<ExtraState> ini ) {
             Object found = pane.getClientProperty(ExtraState.class);
             if ( found instanceof ExtraState ) return (ExtraState) found;
             ExtraState state = new ExtraState();
             pane.putClientProperty(ExtraState.class, state);
+            ini.accept(state);
             return state;
         }
 
