@@ -21,6 +21,11 @@ public final class UIForMenu<M extends JMenu> extends UIForAnyMenuItem<UIForMenu
     protected BuilderState<M> _state() {
         return _state;
     }
+    
+    @Override
+    protected UIForMenu<M> _with( BuilderState<M> newState ) {
+        return new UIForMenu<>(newState);
+    }
 
     /**
      *  Sets the popup menu visibility for this {@link JMenu}

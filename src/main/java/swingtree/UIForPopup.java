@@ -29,6 +29,11 @@ public final class UIForPopup<P extends JPopupMenu> extends UIForAnySwing<UIForP
     protected BuilderState<P> _state() {
         return _state;
     }
+    
+    @Override
+    protected UIForPopup<P> _with( BuilderState<P> newState ) {
+        return new UIForPopup<>(newState);
+    }
 
     /**
      *  Determines if the border is painted or not.

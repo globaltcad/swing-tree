@@ -24,6 +24,11 @@ public final class UIForPanel<P extends JPanel> extends UIForAnySwing<UIForPanel
     protected BuilderState<P> _state() {
         return _state;
     }
+    
+    @Override
+    protected UIForPanel<P> _with( BuilderState<P> newState ) {
+        return new UIForPanel<>(newState);
+    }
 
     /**
      *  Use this to dynamically set the {@link MigLayout} attributes of the {@link MigLayout} of the {@link JPanel}.

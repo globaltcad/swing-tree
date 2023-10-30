@@ -25,6 +25,11 @@ public final class UIForProgressBar<P extends JProgressBar> extends UIForAnySwin
     protected BuilderState<P> _state() {
         return _state;
     }
+    
+    @Override
+    protected UIForProgressBar<P> _with( BuilderState<P> newState ) {
+        return new UIForProgressBar<>(newState);
+    }
 
     /**
      *  Sets the orientation of the slider.

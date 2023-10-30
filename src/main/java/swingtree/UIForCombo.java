@@ -36,6 +36,11 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
     protected BuilderState<JComboBox<E>> _state() {
         return _state;
     }
+    
+    @Override
+    protected UIForCombo<E,C> _with( BuilderState<JComboBox<E>> newState ) {
+        return new UIForCombo<>(newState);
+    }
 
     private void _bindComboModelToEditor( JComboBox<E> thisComponent, AbstractComboModel<E> model ) {
         Component editor = thisComponent.getEditor().getEditorComponent();

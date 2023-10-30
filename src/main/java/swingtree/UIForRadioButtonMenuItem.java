@@ -23,4 +23,9 @@ extends UIForAnyMenuItem<UIForRadioButtonMenuItem<M>, M>
     protected BuilderState<M> _state() {
         return _state;
     }
+    
+    @Override
+    protected UIForRadioButtonMenuItem<M> _with( BuilderState<M> newState ) {
+        return new UIForRadioButtonMenuItem<>(newState);
+    }
 }

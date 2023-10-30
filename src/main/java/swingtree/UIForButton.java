@@ -25,6 +25,11 @@ public class UIForButton<B extends AbstractButton> extends UIForAnyButton<UIForB
     protected BuilderState<B> _state() {
         return _state;
     }
+    
+    @Override
+    protected UIForButton<B> _with( BuilderState<B> newState ) {
+        return new UIForButton<>(newState);
+    }
 
     /**
      * Make this button the default button for the root pane it is in.

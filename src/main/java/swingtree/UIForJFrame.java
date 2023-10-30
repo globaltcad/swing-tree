@@ -23,6 +23,11 @@ public final class UIForJFrame<F extends JFrame> extends UIForAnyWindow<UIForJFr
 	}
 
 	@Override
+	protected UIForJFrame<F> _with( BuilderState<F> newState ) {
+		return new UIForJFrame<>(newState);
+	}
+
+	@Override
 	protected void _doAddComponent( Component component, Object conf, F thisComponent ) {
 		thisComponent.add(conf == null ? null : conf.toString(), component);
 	}

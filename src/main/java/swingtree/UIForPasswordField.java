@@ -21,6 +21,11 @@ public class UIForPasswordField<F extends JPasswordField> extends UIForAnyTextCo
     protected BuilderState<F> _state() {
         return _state;
     }
+    
+    @Override
+    protected UIForPasswordField<F> _with( BuilderState<F> newState ) {
+        return new UIForPasswordField<>(newState);
+    }
 
     /**
      * Sets the echo character for this {@link JPasswordField}.

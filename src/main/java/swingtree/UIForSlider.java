@@ -30,6 +30,11 @@ public final class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSli
     protected BuilderState<S> _state() {
         return _state;
     }
+    
+    @Override
+    protected UIForSlider<S> _with( BuilderState<S> newState ) {
+        return new UIForSlider<>(newState);
+    }
 
     /**
      *  Sets the orientation of the slider.

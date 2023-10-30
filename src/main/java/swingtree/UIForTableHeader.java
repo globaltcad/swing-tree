@@ -29,6 +29,11 @@ public final class UIForTableHeader<H extends UI.TableHeader> extends UIForAnySw
     protected BuilderState<H> _state() {
         return _state;
     }
+    
+    @Override
+    protected UIForTableHeader<H> _with( BuilderState<H> newState ) {
+        return new UIForTableHeader<>(newState);
+    }
 
     /**
      * Sets the tool tips for the table header.

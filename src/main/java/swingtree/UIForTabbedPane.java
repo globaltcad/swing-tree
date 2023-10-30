@@ -46,6 +46,11 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
     protected BuilderState<P> _state() {
         return _state;
     }
+    
+    @Override
+    protected UIForTabbedPane<P> _with( BuilderState<P> newState ) {
+        return new UIForTabbedPane<>(newState);
+    }
 
     /**
      *  Adds an action to be performed when a mouse click is detected on a tab.

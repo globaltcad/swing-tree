@@ -30,7 +30,9 @@ abstract class AbstractBuilder<I, C extends Component>
      */
     protected abstract BuilderState<C> _state();
 
-    protected AbstractBuilder<I,C> _with( Consumer<C> action ) {
+    protected abstract AbstractBuilder<I,C> _with( BuilderState<C> newState );
+
+    protected final AbstractBuilder<I,C> _with( Consumer<C> action ) {
         action.accept( getComponent() );
         return this;
     }

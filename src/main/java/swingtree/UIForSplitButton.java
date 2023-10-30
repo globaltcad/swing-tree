@@ -55,6 +55,11 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
     protected BuilderState<B> _state() {
         return _state;
     }
+    
+    @Override
+    protected UIForSplitButton<B> _with( BuilderState<B> newState ) {
+        return new UIForSplitButton<>(newState);
+    }
 
     private List<JMenuItem> _getSelected(B component) {
         ExtraState state = ExtraState.of(component);

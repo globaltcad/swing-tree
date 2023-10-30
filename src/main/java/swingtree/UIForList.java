@@ -41,6 +41,11 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
     protected BuilderState<L> _state() {
         return _state;
     }
+    
+    @Override
+    protected UIForList<E, L> _with( BuilderState<L> newState ) {
+        return new UIForList<>(newState);
+    }
 
     /**
      *  Takes the provided list of entry objects and sets them as {@link JList} data.

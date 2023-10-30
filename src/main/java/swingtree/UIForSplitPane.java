@@ -31,6 +31,11 @@ public final class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UI
     protected BuilderState<P> _state() {
         return _state;
     }
+    
+    @Override
+    protected UIForSplitPane<P> _with( BuilderState<P> newState ) {
+        return new UIForSplitPane<>(newState);
+    }
 
     /**
      * Sets the alignment of the split bar in the split pane.

@@ -21,6 +21,11 @@ public final class UIForCheckBox<B extends JCheckBox> extends UIForAnyButton<UIF
     protected BuilderState<B> _state() {
         return _state;
     }
+    
+    @Override
+    protected UIForCheckBox<B> _with( BuilderState<B> newState ) {
+        return new UIForCheckBox<>(newState);
+    }
 
 
     public UIForCheckBox<B> borderIsPaintedFlatIf(boolean borderPainted ) {

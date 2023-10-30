@@ -33,6 +33,11 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
     protected BuilderState<T> _state() {
         return _state;
     }
+    
+    @Override
+    protected UIForTable<T> _with( BuilderState<T> newState ) {
+        return new UIForTable<>(newState);
+    }
 
     /**
      *  Use this to set the table header.

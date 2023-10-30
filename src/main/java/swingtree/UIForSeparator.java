@@ -31,6 +31,11 @@ public final class UIForSeparator<S extends JSeparator> extends UIForAnySwing<UI
     protected BuilderState<S> _state() {
         return _state;
     }
+    
+    @Override
+    protected UIForSeparator<S> _with( BuilderState<S> newState ) {
+        return new UIForSeparator<>(newState);
+    }
 
     /**
      * Sets the orientation of the separator which can be either

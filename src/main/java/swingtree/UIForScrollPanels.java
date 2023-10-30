@@ -42,6 +42,11 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
 	}
 
 	@Override
+	protected UIForScrollPanels<P> _with( BuilderState<P> newState ) {
+		return new UIForScrollPanels<>(newState);
+	}
+
+	@Override
 	protected void _doAddComponent(JComponent newComponent, Object conf, P thisComponent ) {
 		Objects.requireNonNull(newComponent);
 

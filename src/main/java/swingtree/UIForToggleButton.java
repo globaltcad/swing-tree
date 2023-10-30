@@ -23,4 +23,9 @@ public final class UIForToggleButton<B extends JToggleButton> extends UIForAnyTo
     protected BuilderState<B> _state() {
         return _state;
     }
+    
+    @Override
+    protected UIForToggleButton<B> _with( BuilderState<B> newState ) {
+        return new UIForToggleButton<>(newState);
+    }
 }

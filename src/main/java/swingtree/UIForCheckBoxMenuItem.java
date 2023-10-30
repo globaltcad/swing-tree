@@ -17,4 +17,9 @@ extends UIForAnyMenuItem<UIForCheckBoxMenuItem<M>, M>
     protected BuilderState<M> _state() {
         return _state;
     }
+    
+    @Override
+    protected UIForCheckBoxMenuItem<M> _with( BuilderState<M> newState ) {
+        return new UIForCheckBoxMenuItem<>(newState);
+    }
 }

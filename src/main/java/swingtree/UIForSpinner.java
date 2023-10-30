@@ -105,6 +105,11 @@ public final class UIForSpinner<S extends JSpinner> extends UIForAnySwing<UIForS
     protected BuilderState<S> _state() {
         return _state;
     }
+    
+    @Override
+    protected UIForSpinner<S> _with( BuilderState<S> newState ) {
+        return new UIForSpinner<>(newState);
+    }
 
     private JFormattedTextField.AbstractFormatterFactory getDefaultFormatterFactory(Object type) {
         if (type instanceof DateFormat) {

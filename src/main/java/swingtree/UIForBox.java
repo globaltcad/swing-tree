@@ -30,6 +30,11 @@ public class UIForBox<B extends JBox> extends UIForAnySwing<UIForBox<B>, B>
     protected BuilderState<B> _state() {
         return _state;
     }
+    
+    @Override
+    protected UIForBox<B> _with( BuilderState<B> newState ) {
+        return new UIForBox<>(newState);
+    }
 
     /**
      *  Use this to dynamically set the {@link MigLayout} attributes of the {@link MigLayout} of the {@link JBox}.

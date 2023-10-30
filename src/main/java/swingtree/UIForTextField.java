@@ -33,6 +33,11 @@ public final class UIForTextField<F extends JTextField> extends UIForAnyTextComp
     protected BuilderState<F> _state() {
         return _state;
     }
+    
+    @Override
+    protected UIForTextField<F> _with( BuilderState<F> newState ) {
+        return new UIForTextField<>(newState);
+    }
 
     /**
      *  Allows you to register an action to be performed when the user presses the enter key.

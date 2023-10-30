@@ -24,6 +24,11 @@ public final class UIForToolBar<T extends JToolBar> extends UIForAnySwing<UIForT
     protected BuilderState<T> _state() {
         return _state;
     }
+    
+    @Override
+    protected UIForToolBar<T> _with( BuilderState<T> newState ) {
+        return new UIForToolBar<>(newState);
+    }
 
     /**
      * @param alignment The {@link UI.Align} value mapping to the {@link JToolBar}'s orientation.

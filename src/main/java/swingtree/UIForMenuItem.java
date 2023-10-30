@@ -20,4 +20,9 @@ public final class UIForMenuItem<M extends JMenuItem> extends UIForAnyMenuItem<U
     protected BuilderState<M> _state() {
         return _state;
     }
+    
+    @Override
+    protected UIForMenuItem<M> _with( BuilderState<M> newState ) {
+        return new UIForMenuItem<>(newState);
+    }
 }

@@ -34,6 +34,11 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
     protected BuilderState<L> _state() {
         return _state;
     }
+    
+    @Override
+    protected UIForLabel<L> _with( BuilderState<L> newState ) {
+        return new UIForLabel<>(newState);
+    }
 
     private void _makeBold( L thisComponent ) {
         Font f = thisComponent.getFont();

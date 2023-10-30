@@ -28,4 +28,9 @@ public final class UIForEditorPane<P extends JEditorPane> extends UIForAnyEditor
     protected BuilderState<P> _state() {
         return _state;
     }
+    
+    @Override
+    protected UIForEditorPane<P> _with( BuilderState<P> newState ) {
+        return new UIForEditorPane<>(newState);
+    }
 }
