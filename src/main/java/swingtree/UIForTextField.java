@@ -11,6 +11,7 @@ import java.awt.Component;
 import java.awt.LayoutManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
@@ -23,8 +24,9 @@ public final class UIForTextField<F extends JTextField> extends UIForAnyTextComp
 {
     private final BuilderState<F> _state;
 
-    UIForTextField( F component ) {
-        _state = new BuilderState<>(component);
+    UIForTextField( BuilderState<F> state ) {
+        Objects.requireNonNull(state);
+        _state = state;
     }
 
     @Override

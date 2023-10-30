@@ -35,10 +35,11 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
      * {@link UIForAnySwing} (sub)types always wrap
      * a single component for which they are responsible.
      *
-     * @param component The {@link JComponent} type which will be wrapped by this builder node.
+     * @param state The {@link BuilderState} modelling how the component is built.
      */
-    UIForTabbedPane( P component ) {
-        _state = new BuilderState<>(component);
+    UIForTabbedPane( BuilderState<P> state ) {
+        Objects.requireNonNull(state);
+        _state = state;
     }
 
     @Override

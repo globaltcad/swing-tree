@@ -2,6 +2,7 @@ package swingtree;
 
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
+import java.util.Objects;
 
 /**
  *  A SwingTree builder node designed for configuring {@link JScrollPane} instances.
@@ -16,8 +17,9 @@ public final class UIForScrollPane<P extends JScrollPane> extends UIForAnyScroll
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.
      */
-    UIForScrollPane( P component ) {
-        _state = new BuilderState<>(component);
+    UIForScrollPane( BuilderState<P> state ) {
+        Objects.requireNonNull(state);
+        _state = state;
     }
 
     @Override

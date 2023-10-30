@@ -3,6 +3,7 @@ package swingtree;
 import sprouts.Val;
 
 import javax.swing.*;
+import java.util.Objects;
 
 public final class UIForToolBar<T extends JToolBar> extends UIForAnySwing<UIForToolBar<T>, T>
 {
@@ -12,10 +13,11 @@ public final class UIForToolBar<T extends JToolBar> extends UIForAnySwing<UIForT
      * {@link UIForAnySwing} (sub)types always wrap
      * a single component for which they are responsible.
      *
-     * @param component The {@link JComponent} type which will be wrapped by this builder node.
+     * @param state The {@link BuilderState} modelling how the component is built.
      */
-    UIForToolBar(T component) {
-        _state = new BuilderState<>(component);
+    UIForToolBar( BuilderState<T> state ) {
+        Objects.requireNonNull(state);
+        _state = state;
     }
 
     @Override

@@ -2,6 +2,7 @@ package swingtree;
 
 
 import javax.swing.*;
+import java.util.Objects;
 
 /**
  *  A SwingTree builder node designed for configuring {@link JToggleButton} instances.
@@ -13,8 +14,9 @@ public final class UIForToggleButton<B extends JToggleButton> extends UIForAnyTo
 {
     private final BuilderState<B> _state;
 
-    UIForToggleButton( B component ) {
-        _state = new BuilderState<>(component);
+    UIForToggleButton( BuilderState<B> state ) {
+        Objects.requireNonNull(state);
+        _state = state;
     }
 
     @Override

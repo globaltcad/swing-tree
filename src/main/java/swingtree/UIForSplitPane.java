@@ -6,6 +6,7 @@ import javax.swing.JComponent;
 import javax.swing.JSplitPane;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.util.Objects;
 
 /**
  *  A SwingTree builder node designed for configuring {@link JSplitPane} instances.
@@ -18,11 +19,12 @@ public final class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UI
      * {@link UIForAnySwing} (sub)types always wrap
      * a single component for which they are responsible.
      *
-     * @param component The {@link JComponent} type which will be wrapped by this builder node.
+     * @param state The {@link BuilderState} modelling how the component is built.
      */
 
-    UIForSplitPane( P component ) {
-        _state = new BuilderState<>(component);
+    UIForSplitPane( BuilderState<P> state ) {
+        Objects.requireNonNull(state);
+        _state = state;
     }
 
     @Override

@@ -18,10 +18,11 @@ public final class UIForTableHeader<H extends UI.TableHeader> extends UIForAnySw
      * Extensions of the {@link  UIForAnySwing} always wrap
      * a single component for which they are responsible.
      *
-     * @param tableHeader The JComponent type which will be wrapped by this builder node.
+     * @param state The {@link BuilderState} modelling how the component is built.
      */
-    UIForTableHeader(H tableHeader) {
-        _state = new BuilderState<>(tableHeader);
+    UIForTableHeader( BuilderState<H> state ) {
+        Objects.requireNonNull(state);
+        _state = state;
     }
 
     @Override

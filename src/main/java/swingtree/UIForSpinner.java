@@ -13,6 +13,7 @@ import java.text.DecimalFormat;
 import java.text.Format;
 import java.text.NumberFormat;
 import java.util.Date;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
@@ -26,76 +27,78 @@ public final class UIForSpinner<S extends JSpinner> extends UIForAnySwing<UIForS
      * {@link UIForAnySwing} (sub)types always wrap
      * a single component for which they are responsible.
      *
-     * @param component The {@link JComponent} type which will be wrapped by this builder node.
+     * @param state The {@link BuilderState} modelling how the component is built.
      */
-    UIForSpinner( S component ) {
-        _state = new BuilderState<>(component);
-        if ( component.getModel() == null || component.getModel().getClass() == SpinnerNumberModel.class ) {
-            /*
-                So it turns out that the default SpinnerNumberModel implementation
-                is not very good. It does not support floating point step sizes...
-                So we have to replace it with our own implementation, where the incrementation logic
-                is a bit more flexible.
-             */
-            SpinnerNumberModel model = (SpinnerNumberModel) component.getModel();
-            component.setModel(
-                new SpinnerNumberModel(
-                    model.getNumber(),
-                    model.getMinimum(),
-                    model.getMaximum(),
-                    model.getStepSize()
-                ) {
-                    @Override public void setValue(Object value) {
-                        super.setValue(value);
-                        updateEditorFormatter();
-                    }
-                    @Override public Object getNextValue() { return incrValue(+1); }
-                    @Override public Object getPreviousValue() { return incrValue(-1); }
-                    private Number incrValue(int dir)
-                    {
-                        Number newValue;
-                        Number value = this.getNumber();
-                        Number stepSize = this.getStepSize();
-                        Comparable<Number> maximum = (Comparable<Number>) this.getMaximum();
-                        Comparable<Number> minimum = (Comparable<Number>) this.getMinimum();
-                        boolean valueIsRational = (value instanceof Float) || (value instanceof Double);
-                        boolean stepIsRational = (stepSize instanceof Float) || (stepSize instanceof Double);
-                        if ( valueIsRational || stepIsRational ) {
-                            double v = value.doubleValue() + (stepSize.doubleValue() * (double)dir);
-                            if ( value instanceof Double || stepSize instanceof Double )
-                                newValue = v;
-                            else
-                                newValue = (float) v;
+    UIForSpinner( BuilderState<S> state ) {
+        Objects.requireNonNull(state);
+        _state = state.with( component -> {
+            if ( component.getModel() == null || component.getModel().getClass() == SpinnerNumberModel.class ) {
+                /*
+                    So it turns out that the default SpinnerNumberModel implementation
+                    is not very good. It does not support floating point step sizes...
+                    So we have to replace it with our own implementation, where the incrementation logic
+                    is a bit more flexible.
+                 */
+                SpinnerNumberModel model = (SpinnerNumberModel) component.getModel();
+                component.setModel(
+                    new SpinnerNumberModel(
+                        model.getNumber(),
+                        model.getMinimum(),
+                        model.getMaximum(),
+                        model.getStepSize()
+                    ) {
+                        @Override public void setValue(Object value) {
+                            super.setValue(value);
+                            updateEditorFormatter();
                         }
-                        else {
-                            long v = value.longValue() + (stepSize.longValue() * (long)dir);
+                        @Override public Object getNextValue() { return incrValue(+1); }
+                        @Override public Object getPreviousValue() { return incrValue(-1); }
+                        private Number incrValue(int dir)
+                        {
+                            Number newValue;
+                            Number value = this.getNumber();
+                            Number stepSize = this.getStepSize();
+                            Comparable<Number> maximum = (Comparable<Number>) this.getMaximum();
+                            Comparable<Number> minimum = (Comparable<Number>) this.getMinimum();
+                            boolean valueIsRational = (value instanceof Float) || (value instanceof Double);
+                            boolean stepIsRational = (stepSize instanceof Float) || (stepSize instanceof Double);
+                            if ( valueIsRational || stepIsRational ) {
+                                double v = value.doubleValue() + (stepSize.doubleValue() * (double)dir);
+                                if ( value instanceof Double || stepSize instanceof Double )
+                                    newValue = v;
+                                else
+                                    newValue = (float) v;
+                            }
+                            else {
+                                long v = value.longValue() + (stepSize.longValue() * (long)dir);
 
-                            if      ( value instanceof Long    ) newValue = v;
-                            else if ( value instanceof Integer ) newValue = (int) v;
-                            else if ( value instanceof Short   ) newValue = (short) v;
+                                if      ( value instanceof Long    ) newValue = v;
+                                else if ( value instanceof Integer ) newValue = (int) v;
+                                else if ( value instanceof Short   ) newValue = (short) v;
+                                else
+                                    newValue = (byte) v;
+                            }
+                            if ( (maximum != null) && (maximum.compareTo(newValue) < 0) ) return null;
+                            if ( (minimum != null) && (minimum.compareTo(newValue) > 0) ) return null;
                             else
-                                newValue = (byte) v;
+                                return newValue;
                         }
-                        if ( (maximum != null) && (maximum.compareTo(newValue) < 0) ) return null;
-                        if ( (minimum != null) && (minimum.compareTo(newValue) > 0) ) return null;
-                        else
-                            return newValue;
-                    }
-                    private void updateEditorFormatter() {
-                        JComponent editor = component.getEditor();
-                        if (editor instanceof JSpinner.DefaultEditor) {
-                            ((JSpinner.DefaultEditor)editor).getTextField().setFormatterFactory(
-                                    new JFormattedTextField.AbstractFormatterFactory() {
-                                        @Override public JFormattedTextField.AbstractFormatter getFormatter(JFormattedTextField tf) {
-                                            return getDefaultFormatterFactory(getNumber().getClass()).getFormatter(tf);
+                        private void updateEditorFormatter() {
+                            JComponent editor = component.getEditor();
+                            if (editor instanceof JSpinner.DefaultEditor) {
+                                ((JSpinner.DefaultEditor)editor).getTextField().setFormatterFactory(
+                                        new JFormattedTextField.AbstractFormatterFactory() {
+                                            @Override public JFormattedTextField.AbstractFormatter getFormatter(JFormattedTextField tf) {
+                                                return getDefaultFormatterFactory(getNumber().getClass()).getFormatter(tf);
+                                            }
                                         }
-                                    }
-                            );
+                                );
+                            }
                         }
                     }
-                }
-            );
-        }
+                );
+            }
+        });
     }
 
     @Override

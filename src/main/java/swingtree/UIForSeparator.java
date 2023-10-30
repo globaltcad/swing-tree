@@ -4,6 +4,7 @@ import sprouts.Val;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Objects;
 
 /**
  *  A SwingTree builder node designed for configuring {@link JSeparator} instances.
@@ -21,8 +22,9 @@ public final class UIForSeparator<S extends JSeparator> extends UIForAnySwing<UI
      *
      * @param component The JComponent type which will be wrapped by this builder node.
      */
-    UIForSeparator(S component) {
-        _state = new BuilderState<>(component);
+    UIForSeparator( BuilderState<S> state ) {
+        Objects.requireNonNull(state);
+        _state = state;
     }
 
     @Override

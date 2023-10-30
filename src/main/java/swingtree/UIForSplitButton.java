@@ -26,27 +26,29 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
     /**
      *  Creates a new instance wrapping the given {@link JSplitButton} component.
      *
-     * @param component The {@link JSplitButton} instance to wrap.
+     * @param state The {@link BuilderState} modelling how the component is built.
      */
-    protected UIForSplitButton( B component ) {
-        _state = new BuilderState<>(component);
-        ExtraState state = ExtraState.of(component);
-        component.setPopupMenu(state.popupMenu);
-        component.addButtonClickedActionListener(e -> _doApp(()->{
-            List<JMenuItem> selected = _getSelected(component);
-            for ( JMenuItem item : selected ) {
-                Action<SplitItemDelegate<JMenuItem>> action = state.options.get(item);
-                if ( action != null )
-                    action.accept(
-                        new SplitItemDelegate<>(
-                            e,
-                            component,
-                            ()-> new ArrayList<>(state.options.keySet()),
-                            item
-                        )
-                    );
-            }
-        }));
+    UIForSplitButton( BuilderState<B> state ) {
+        Objects.requireNonNull(state);
+        _state = state.with( component -> {
+            ExtraState extraState = ExtraState.of(component);
+            component.setPopupMenu(extraState.popupMenu);
+            component.addButtonClickedActionListener(e -> _doApp(()->{
+                List<JMenuItem> selected = _getSelected(component);
+                for ( JMenuItem item : selected ) {
+                    Action<SplitItemDelegate<JMenuItem>> action = extraState.options.get(item);
+                    if ( action != null )
+                        action.accept(
+                            new SplitItemDelegate<>(
+                                e,
+                                component,
+                                ()-> new ArrayList<>(extraState.options.keySet()),
+                                item
+                            )
+                        );
+                }
+            }));
+        });
     }
 
     @Override

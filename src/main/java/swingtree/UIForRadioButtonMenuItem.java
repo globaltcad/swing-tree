@@ -1,6 +1,7 @@
 package swingtree;
 
 import javax.swing.*;
+import java.util.Objects;
 
 /**
  *  A SwingTree builder node designed for configuring {@link JRadioButtonMenuItem} instances.
@@ -13,8 +14,9 @@ extends UIForAnyMenuItem<UIForRadioButtonMenuItem<M>, M>
 {
     private final BuilderState<M> _state;
 
-    UIForRadioButtonMenuItem(M component) {
-        _state = new BuilderState<>(component);
+    UIForRadioButtonMenuItem( BuilderState<M> state ) {
+        Objects.requireNonNull(state);
+        _state = state;
     }
 
     @Override

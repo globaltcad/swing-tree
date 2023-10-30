@@ -1,6 +1,7 @@
 package swingtree;
 
 import javax.swing.*;
+import java.util.Objects;
 
 /**
  *  A SwingTree builder node designed for configuring {@link JRadioButton} instances.
@@ -9,8 +10,9 @@ public final class UIForRadioButton<R extends JRadioButton> extends UIForAnyTogg
 {
     private final BuilderState<R> _state;
 
-    UIForRadioButton( R component ) {
-        _state = new BuilderState<>(component);
+    UIForRadioButton( BuilderState<R> state ) {
+        Objects.requireNonNull(state);
+        _state = state;
     }
 
     @Override

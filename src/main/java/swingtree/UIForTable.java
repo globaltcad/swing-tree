@@ -22,10 +22,11 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      * Extensions of the {@link  UIForAnySwing} always wrap
      * a single component for which they are responsible.
      *
-     * @param component The JComponent type which will be wrapped by this builder node.
+     * @param state The {@link BuilderState} modelling how the component is built.
      */
-    UIForTable( T component ) {
-        _state = new BuilderState<>(component);
+    UIForTable( BuilderState<T> state ) {
+        Objects.requireNonNull(state);
+        _state = state;
     }
 
     @Override

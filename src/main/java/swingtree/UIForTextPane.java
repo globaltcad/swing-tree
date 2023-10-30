@@ -1,6 +1,7 @@
 package swingtree;
 
 import javax.swing.*;
+import java.util.Objects;
 
 /**
  *  A SwingTree builder node designed for configuring {@link UIForTextPane} instances.
@@ -13,10 +14,11 @@ public final class UIForTextPane<P extends JTextPane> extends UIForAnyEditorPane
      * {@link UIForAnySwing} (sub)types always wrap
      * a single component for which they are responsible.
      *
-     * @param component The {@link JComponent} type which will be wrapped by this builder node.
+     * @param state The {@link BuilderState} modelling how the component is built.
      */
-    UIForTextPane( P component ) {
-        _state = new BuilderState<>(component);
+    UIForTextPane( BuilderState<P> state ) {
+        Objects.requireNonNull(state);
+        _state = state;
     }
 
     @Override

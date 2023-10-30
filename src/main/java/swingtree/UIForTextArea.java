@@ -1,6 +1,7 @@
 package swingtree;
 
 import javax.swing.*;
+import java.util.Objects;
 
 /**
  *  A SwingTree builder node designed for configuring {@link JTextArea} instances.
@@ -9,8 +10,9 @@ public final class UIForTextArea<A extends JTextArea> extends UIForAnyTextCompon
 {
     private final BuilderState<A> _state;
 
-    UIForTextArea( A component ) {
-        _state = new BuilderState<>(component);
+    UIForTextArea( BuilderState<A> state ) {
+        Objects.requireNonNull(state);
+        _state = state;
     }
 
     @Override

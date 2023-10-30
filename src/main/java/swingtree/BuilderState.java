@@ -6,6 +6,7 @@ import swingtree.threading.EventProcessor;
 import javax.swing.JComponent;
 import java.awt.Component;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -36,6 +37,11 @@ class BuilderState<C extends Component>
             ComponentExtension.makeSureComponentHasExtension( (JComponent) component );
         this.componentType = (Class<C>) component.getClass();
         this.componentSupplier = new DetachableReference<>( () -> component );
+    }
+
+    BuilderState<C> with( Consumer<C> action ) {
+        action.accept(component());
+        return this;
     }
 
     public C component() {

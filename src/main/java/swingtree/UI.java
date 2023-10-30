@@ -834,7 +834,7 @@ public final class UI extends UILayoutConstants
     public static <T extends JComponent> UIForSwing<T> of( T component )
     {
         NullUtil.nullArgCheck(component, "component", JComponent.class);
-        return new UIForSwing<>(component);
+        return new UIForSwing<>(new BuilderState<>(component));
     }
 
     /**
@@ -1517,7 +1517,7 @@ public final class UI extends UILayoutConstants
     public static <S extends JSeparator> UIForSeparator<S> of( S separator )
     {
         NullUtil.nullArgCheck(separator, "separator", JSeparator.class);
-        return new UIForSeparator<>(separator);
+        return new UIForSeparator<>(new BuilderState<>(separator));
     }
 
     /**
@@ -1850,7 +1850,7 @@ public final class UI extends UILayoutConstants
      */
     public static <B extends JSplitButton> UIForSplitButton<B> of( B splitButton ) {
         NullUtil.nullArgCheck(splitButton, "splitButton", JSplitButton.class);
-        return new UIForSplitButton<>(splitButton);
+        return new UIForSplitButton<>(new BuilderState<>(splitButton));
     }
 
     /**
@@ -1869,7 +1869,8 @@ public final class UI extends UILayoutConstants
      */
     public static UIForSplitButton<JSplitButton> splitButton( String text ) {
         NullUtil.nullArgCheck(text, "text", String.class);
-        return new UIForSplitButton<>((JSplitButton) new SplitButton()).withText(text);
+        return new UIForSplitButton<>(new BuilderState<>((JSplitButton) new SplitButton()))
+                    .withText(text);
     }
 
     /**
@@ -2007,7 +2008,7 @@ public final class UI extends UILayoutConstants
      */
     public static <P extends JTabbedPane> UIForTabbedPane<P> of( P pane ) {
         NullUtil.nullArgCheck(pane, "pane", JTabbedPane.class);
-        return new UIForTabbedPane<>(pane);
+        return new UIForTabbedPane<>(new BuilderState<>(pane));
     }
 
     /**
@@ -2422,7 +2423,7 @@ public final class UI extends UILayoutConstants
      */
     public static <M extends JRadioButtonMenuItem> UIForRadioButtonMenuItem<M> of( M radioMenuItem ) {
         NullUtil.nullArgCheck(radioMenuItem, "component", JRadioButtonMenuItem.class);
-        return new UIForRadioButtonMenuItem<>(radioMenuItem);
+        return new UIForRadioButtonMenuItem<>(new BuilderState<>(radioMenuItem));
     }
 
     /**
@@ -2437,7 +2438,7 @@ public final class UI extends UILayoutConstants
      * @return A builder instance for the provided {@link JRadioButtonMenuItem}, which enables fluent method chaining.
      */
     public static UIForRadioButtonMenuItem<JRadioButtonMenuItem> radioButtonMenuItem() {
-        return new UIForRadioButtonMenuItem<>((JRadioButtonMenuItem) new RadioButtonMenuItem());
+        return new UIForRadioButtonMenuItem<>(new BuilderState<>(new RadioButtonMenuItem()));
     }
 
     /**
@@ -2788,7 +2789,7 @@ public final class UI extends UILayoutConstants
      */
     public static <T extends JToolBar> UIForToolBar<T> of( T component ) {
         NullUtil.nullArgCheck(component, "component", JToolBar.class);
-        return new UIForToolBar<>(component);
+        return new UIForToolBar<>(new BuilderState<>(component));
     }
 
     /**
@@ -2808,7 +2809,7 @@ public final class UI extends UILayoutConstants
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
     public static UIForToolBar<JToolBar> toolBar() {
-        return new UIForToolBar<>(new ToolBar());
+        return new UIForToolBar<>(new BuilderState<>(new ToolBar()));
     }
 
     /**
@@ -2821,7 +2822,7 @@ public final class UI extends UILayoutConstants
      */
     public static UIForToolBar<JToolBar> toolBar( Align align ) {
         NullUtil.nullArgCheck(align, "align", Align.class);
-        return new UIForToolBar<>((JToolBar) new ToolBar()).withOrientation(align);
+        return toolBar().withOrientation(align);
     }
 
     /**
@@ -2835,7 +2836,7 @@ public final class UI extends UILayoutConstants
      */
     public static UIForToolBar<JToolBar> toolBar( Val<Align> align ) {
         NullUtil.nullArgCheck(align, "align", Val.class);
-        return new UIForToolBar<>((JToolBar) new ToolBar()).withOrientation(align);
+        return toolBar().withOrientation(align);
     }
 
     /**
@@ -2848,7 +2849,7 @@ public final class UI extends UILayoutConstants
      */
     public static <P extends JScrollPane> UIForScrollPane<P> of( P component ) {
         NullUtil.nullArgCheck(component, "component", JScrollPane.class);
-        return new UIForScrollPane<>(component);
+        return new UIForScrollPane<>(new BuilderState<>(component));
     }
 
     /**
@@ -2875,7 +2876,7 @@ public final class UI extends UILayoutConstants
      */
     public static <P extends JScrollPanels> UIForScrollPanels<P> of( P component ) {
         NullUtil.nullArgCheck(component, "component", JScrollPane.class);
-        return new UIForScrollPanels<>(component);
+        return new UIForScrollPanels<>(new BuilderState<>(component));
     }
 
     /**
@@ -2945,7 +2946,7 @@ public final class UI extends UILayoutConstants
      */
     public static <P extends JSplitPane> UIForSplitPane<P> of( P component ) {
         NullUtil.nullArgCheck(component, "component", JSplitPane.class);
-        return new UIForSplitPane<>(component);
+        return new UIForSplitPane<>(new BuilderState<>(component));
     }
 
     /**
@@ -3028,7 +3029,7 @@ public final class UI extends UILayoutConstants
      */
     public static <P extends JTextPane> UIForTextPane<P> of( P component ) {
         NullUtil.nullArgCheck(component, "component", JTextPane.class);
-        return new UIForTextPane<>(component);
+        return new UIForTextPane<>(new BuilderState<>(component));
     }
 
     /**
@@ -3049,7 +3050,7 @@ public final class UI extends UILayoutConstants
      */
     public static <S extends JSlider> UIForSlider<S> of( S component ) {
         NullUtil.nullArgCheck(component, "component", JSlider.class);
-        return new UIForSlider<>(component);
+        return new UIForSlider<>(new BuilderState<>(component));
     }
 
     /**
@@ -3465,7 +3466,7 @@ public final class UI extends UILayoutConstants
      */
     public static <S extends JSpinner> UIForSpinner<S> of( S spinner ) {
         NullUtil.nullArgCheck(spinner, "spinner", JSpinner.class);
-        return new UIForSpinner<>(spinner);
+        return new UIForSpinner<>(new BuilderState<>(spinner));
     }
 
     /**
@@ -4079,7 +4080,7 @@ public final class UI extends UILayoutConstants
      */
     public static <R extends JRadioButton> UIForRadioButton<R> of( R component ) {
         NullUtil.nullArgCheck(component, "component", JRadioButton.class);
-        return new UIForRadioButton<>(component);
+        return new UIForRadioButton<>(new BuilderState<>(component));
     }
 
     /**
@@ -4315,7 +4316,7 @@ public final class UI extends UILayoutConstants
      */
     public static <B extends JToggleButton> UIForToggleButton<B> of( B component ) {
         NullUtil.nullArgCheck(component, "component", JToggleButton.class);
-        return new UIForToggleButton<>(component);
+        return new UIForToggleButton<>(new BuilderState<>(component));
     }
 
     /**
@@ -4328,7 +4329,7 @@ public final class UI extends UILayoutConstants
      */
     public static <F extends JTextField> UIForTextField<F> of( F component ) {
         NullUtil.nullArgCheck(component, "component", JTextComponent.class);
-        return new UIForTextField<>(component);
+        return new UIForTextField<>(new BuilderState<>(component));
     }
 
     /**
@@ -4796,7 +4797,7 @@ public final class UI extends UILayoutConstants
      */
     public static <A extends JTextArea> UIForTextArea<A> of( A area ) {
         NullUtil.nullArgCheck(area, "area", JTextArea.class);
-        return new UIForTextArea<>(area);
+        return new UIForTextArea<>(new BuilderState<>(area));
     }
 
     /**
@@ -4982,7 +4983,7 @@ public final class UI extends UILayoutConstants
      */
     public static <T extends JTable> UIForTable<T> of( T table ) {
         NullUtil.nullArgCheck(table, "table", JTable.class);
-        return new UIForTable<>(table);
+        return new UIForTable<>(new BuilderState<>(table));
     }
 
     /**
@@ -5065,7 +5066,7 @@ public final class UI extends UILayoutConstants
      */
     public static <H extends TableHeader> UIForTableHeader<H> of( H header ) {
         NullUtil.nullArgCheck(header, "header", TableHeader.class);
-        return new UIForTableHeader<>(header);
+        return new UIForTableHeader<>(new BuilderState<>(header));
     }
 
     /**

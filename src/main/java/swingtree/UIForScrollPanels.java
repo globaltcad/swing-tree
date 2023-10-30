@@ -29,10 +29,11 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
 	 * Extensions of the {@link  UIForAnySwing} always wrap
 	 * a single component for which they are responsible.
 	 *
-	 * @param component The JComponent type which will be wrapped by this builder node.
+	 * @param state The {@link BuilderState} modelling how the underlying component is build.
 	 */
-	protected UIForScrollPanels( P component ) {
-		_state = new BuilderState<>(component);
+	protected UIForScrollPanels( BuilderState<P> state ) {
+		Objects.requireNonNull(state);
+		_state = state;
 	}
 
 	@Override

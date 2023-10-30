@@ -8,6 +8,7 @@ import sprouts.Var;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
@@ -20,8 +21,9 @@ public final class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSli
 {
     private final BuilderState<S> _state;
 
-    UIForSlider( S component ) {
-        _state = new BuilderState<>(component);
+    UIForSlider( BuilderState<S> state ) {
+        Objects.requireNonNull(state);
+        _state = state;
     }
 
     @Override
