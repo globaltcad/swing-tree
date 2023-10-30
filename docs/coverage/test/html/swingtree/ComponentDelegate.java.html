@@ -3,11 +3,12 @@
 import sprouts.Action;
 
 import javax.swing.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.awt.Container;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  *  Instances of this are delegates for a specific components and events that
@@ -46,14 +47,13 @@ import java.util.stream.Collectors;
 public class ComponentDelegate&lt;C extends JComponent, E&gt; extends AbstractDelegate&lt;C&gt;
 {
     private final E event;
-    private final Supplier&lt;List&lt;JComponent&gt;&gt; siblingSource;
+
 
     public ComponentDelegate(
-        C component, E event, Supplier&lt;List&lt;JComponent&gt;&gt; siblingSource
+            C component, E event
     ) {
-<span class="fc" id="L54">        super(component, component);</span>
-<span class="fc" id="L55">        this.event = event;</span>
-<span class="fc" id="L56">        this.siblingSource = siblingSource;</span>
+<span class="fc" id="L55">        super(component, component);</span>
+<span class="fc" id="L56">        this.event = Objects.requireNonNull(event);</span>
 <span class="fc" id="L57">    }</span>
 
     /**
@@ -95,7 +95,7 @@ public class ComponentDelegate&lt;C extends JComponent, E&gt; extends AbstractDe
                     &quot;Sibling components can only be accessed by the Swing thread. &quot; +
                     &quot;Please use 'forSiblings(..)' methods instead.&quot;
                 );
-<span class="fc bfc" id="L98" title="All 2 branches covered.">        return siblingSource.get().stream().filter( s -&gt; _component() != s ).collect(Collectors.toList());</span>
+<span class="fc bfc" id="L98" title="All 2 branches covered.">        return _siblingsSource().stream().filter( s -&gt; _component() != s ).collect(Collectors.toList());</span>
     }
     
     /**
@@ -164,7 +164,7 @@ public class ComponentDelegate&lt;C extends JComponent, E&gt; extends AbstractDe
                     &quot;Sibling components can only be accessed by the Swing thread. &quot; +
                     &quot;Please use 'forSiblinghood(..)' methods instead.&quot;
             );
-<span class="fc" id="L167">        return new ArrayList&lt;&gt;(siblingSource.get());</span>
+<span class="fc" id="L167">        return new ArrayList&lt;&gt;(_siblingsSource());</span>
     }
 
     /**
@@ -195,7 +195,7 @@ public class ComponentDelegate&lt;C extends JComponent, E&gt; extends AbstractDe
                 &quot;Sibling components can only be accessed by the Swing thread. &quot; +
                 &quot;Please use 'forSiblinghoodOfType(..)' methods instead.&quot;
             );
-<span class="fc" id="L198">        return new ArrayList&lt;&gt;(siblingSource.get())</span>
+<span class="fc" id="L198">        return new ArrayList&lt;&gt;(_siblingsSource())</span>
 <span class="fc" id="L199">                .stream()</span>
 <span class="pc" id="L200">                .filter( s -&gt; type.isAssignableFrom(s.getClass()) )</span>
 <span class="pc" id="L201">                .map( s -&gt; (T) s )</span>

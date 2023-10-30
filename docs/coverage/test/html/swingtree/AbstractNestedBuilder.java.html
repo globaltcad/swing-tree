@@ -6,9 +6,11 @@ import swingtree.threading.EventProcessor;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  *  This class is a conceptual extension of the {@link AbstractBuilder} which expects
@@ -18,15 +20,10 @@ import java.util.stream.Collectors;
  *
  * @param &lt;I&gt; The concrete implementation type of this abstract class, &quot;I&quot; stands for &quot;Implementation&quot;.
  * @param &lt;C&gt; The component type parameter which ought to be built in some way.
+ * @param &lt;E&gt; The component type parameter which ought to be built in some way.
  */
 abstract class AbstractNestedBuilder&lt;I, C extends E, E extends Component&gt; extends AbstractBuilder&lt;I, C&gt;
 {
-    /**
-     *  A list of all the child builders.
-     */
-<span class="fc" id="L27">    private final List&lt;AbstractNestedBuilder&lt;?,?,?&gt;&gt; _children = new ArrayList&lt;&gt;();</span>
-    private AbstractNestedBuilder&lt;?,?,?&gt; _parent; // The parent builder (This may be null if no parent present or provided)
-
     /**
      * Instances of the AbstractNestedBuilder as well as its sub types always wrap
      * a single component for which they are responsible.
@@ -34,7 +31,7 @@ abstract class AbstractNestedBuilder&lt;I, C extends E, E extends Component&gt; 
      *
      * @param component The component type which will be wrapped by this builder node.
      */
-<span class="fc" id="L37">    public AbstractNestedBuilder( C component ) { super(component); }</span>
+<span class="fc" id="L34">    protected AbstractNestedBuilder( C component ) { super(component); }</span>
 
     /**
      *  A list of all the siblings of the component wrapped by this builder,
@@ -43,8 +40,13 @@ abstract class AbstractNestedBuilder&lt;I, C extends E, E extends Component&gt; 
      * @return A list of all the siblings of the component wrapped by this builder.
      */
     protected final List&lt;E&gt; getSiblinghood() {
-<span class="fc bfc" id="L46" title="All 2 branches covered.">        if ( _parent == null ) return new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L47">        return _parent._children.stream().map(c -&gt; (E) c.getComponent()).collect(Collectors.toList());</span>
+<span class="nc" id="L43">        return Optional.ofNullable(getComponent().getParent())</span>
+<span class="nc" id="L44">               .map(Container::getComponents)</span>
+<span class="nc" id="L45">               .map(Arrays::stream)</span>
+<span class="nc" id="L46">               .orElseGet(Stream::empty)</span>
+<span class="nc" id="L47">               .filter(c -&gt; c instanceof JComponent)</span>
+<span class="nc" id="L48">               .map(c -&gt; (E) c)</span>
+<span class="nc" id="L49">               .collect(Collectors.toList());</span>
     }
 
     /**
@@ -58,9 +60,12 @@ abstract class AbstractNestedBuilder&lt;I, C extends E, E extends Component&gt; 
      */
     @SafeVarargs
     public final I add( E... components ) {
-<span class="fc" id="L61">        NullUtil.nullArgCheck(components, &quot;components&quot;, Object[].class);</span>
-<span class="fc bfc" id="L62" title="All 2 branches covered.">        for ( E c : components ) _doAdd(UI.of((JComponent) c), null);</span>
-<span class="fc" id="L63">        return _this();</span>
+<span class="fc" id="L63">        NullUtil.nullArgCheck(components, &quot;components&quot;, Object[].class);</span>
+<span class="fc" id="L64">        return _with( c -&gt; {</span>
+<span class="fc bfc" id="L65" title="All 2 branches covered.">                   for ( E other : components )</span>
+<span class="fc" id="L66">                       _doAdd( UI.of((JComponent) other), null, c );</span>
+<span class="fc" id="L67">               })</span>
+<span class="fc" id="L68">               ._this();</span>
     }
 
     /**
@@ -69,66 +74,56 @@ abstract class AbstractNestedBuilder&lt;I, C extends E, E extends Component&gt; 
      * @return This very instance, which enables builder-style method chaining.
      */
     public final &lt;T extends JComponent&gt; I add( UIForAnySwing&lt;?, T&gt; builder ) {
-<span class="fc" id="L72">        this.add(new AbstractNestedBuilder[]{builder});</span>
-<span class="fc" id="L73">        return _this();</span>
+<span class="fc" id="L77">        return (I) this.add(new AbstractNestedBuilder[]{builder});</span>
     }
 
     /**
-     *  This builder class expects its implementations to be builder types
-     *  for anything which can be built in a nested tree-like structure.
-     *  Implementations of this abstract method ought to enable support for nested building.
-     *  &lt;br&gt;&lt;br&gt;
+     * This builder class expects its implementations to be builder types
+     * for anything which can be built in a nested tree-like structure.
+     * Implementations of this abstract method ought to enable support for nested building.
+     * &lt;br&gt;&lt;br&gt;
      *
      * @param component A component instance which ought to be added to the wrapped component type.
-     * @param conf The layout constraint which ought to be used to add the component to the wrapped component type.
+     * @param conf      The layout constraint which ought to be used to add the component to the wrapped component type.
+     * @param thisComponent The component which is wrapped by this builder.
      */
-    protected abstract void _add( E component, Object conf );
+    protected abstract void _doAddComponent( E component, Object conf, C thisComponent );
 
-    protected final void _doAdd( AbstractNestedBuilder&lt;?, ?, ?&gt; builder, Object conf)
+    protected final void _doAdd( AbstractNestedBuilder&lt;?, ?, ?&gt; builder, Object conf, C thisComponent )
     {
-<span class="fc" id="L89">        NullUtil.nullArgCheck(builder, &quot;builder&quot;, AbstractNestedBuilder.class);</span>
+<span class="fc" id="L94">        NullUtil.nullArgCheck(builder, &quot;builder&quot;, AbstractNestedBuilder.class);</span>
 
-<span class="fc bfc" id="L91" title="All 2 branches covered.">        boolean isCoupled       = _eventProcessor == EventProcessor.COUPLED;</span>
-<span class="fc bfc" id="L92" title="All 2 branches covered.">        boolean isCoupledStrict = _eventProcessor == EventProcessor.COUPLED_STRICT;</span>
+<span class="fc bfc" id="L96" title="All 2 branches covered.">        boolean isCoupled       = _eventProcessor == EventProcessor.COUPLED;</span>
+<span class="fc bfc" id="L97" title="All 2 branches covered.">        boolean isCoupledStrict = _eventProcessor == EventProcessor.COUPLED_STRICT;</span>
 
-<span class="pc bpc" id="L94" title="1 of 6 branches missed.">        if ( !isCoupled &amp;&amp; !isCoupledStrict &amp;&amp; !UI.thisIsUIThread() )</span>
-<span class="nc" id="L95">            throw new IllegalStateException(</span>
+<span class="pc bpc" id="L99" title="1 of 6 branches missed.">        if ( !isCoupled &amp;&amp; !isCoupledStrict &amp;&amp; !UI.thisIsUIThread() )</span>
+<span class="nc" id="L100">            throw new IllegalStateException(</span>
                     &quot;This UI is configured to be decoupled from the application thread, &quot; +
                     &quot;which means that it can only be modified from the EDT. &quot; +
                     &quot;Please use 'UI.run(()-&gt;...)' method to execute your modifications on the EDT.&quot;
                 );
 
-<span class="pc bpc" id="L101" title="1 of 2 branches missed.">        if ( _children.contains(builder) )</span>
-<span class="nc" id="L102">            throw new IllegalArgumentException(&quot;Builder already used!&quot;);</span>
+<span class="fc" id="L106">        E childComponent = (E) builder.getComponent();</span>
 
-<span class="fc" id="L104">        _children.add(builder);</span>
+<span class="pc bpc" id="L108" title="1 of 2 branches missed.">        if ( childComponent instanceof JComponent ) {</span>
+<span class="fc" id="L109">            JComponent child = (JComponent) childComponent;</span>
 
-<span class="pc bpc" id="L106" title="1 of 2 branches missed.">        if ( builder._parent != null )</span>
-<span class="nc" id="L107">            throw new IllegalArgumentException(&quot;Builder already used!&quot;);</span>
+<span class="fc bfc" id="L111" title="All 2 branches covered.">            Style style = ( conf != null ? null : ComponentExtension.from(child).calculateStyle() );</span>
+<span class="fc bfc" id="L112" title="All 2 branches covered.">            if ( style != null )</span>
+<span class="fc" id="L113">                conf = style.layout().constraint().orElse(null);</span>
 
-<span class="fc" id="L109">        E component = (E) builder.getComponent();</span>
+<span class="fc" id="L115">            _doAddComponent( childComponent, conf, thisComponent );</span>
 
-<span class="fc" id="L111">        builder._parent = this;</span>
-
-<span class="pc bpc" id="L113" title="1 of 2 branches missed.">        if ( component instanceof JComponent ) {</span>
-<span class="fc" id="L114">            JComponent c = (JComponent) component;</span>
-
-<span class="fc bfc" id="L116" title="All 2 branches covered.">            Style style = ( conf != null ? null : ComponentExtension.from(c).calculateStyle() );</span>
 <span class="fc bfc" id="L117" title="All 2 branches covered.">            if ( style != null )</span>
-<span class="fc" id="L118">                conf = style.layout().constraint().orElse(null);</span>
-
-<span class="fc" id="L120">            _add(component, conf);</span>
-
-<span class="fc bfc" id="L122" title="All 2 branches covered.">            if ( style != null )</span>
-<span class="fc" id="L123">                ComponentExtension.from(c).applyAndInstallStyle(style, true);</span>
+<span class="fc" id="L118">                ComponentExtension.from(child).applyAndInstallStyle(style, true);</span>
             else
-<span class="fc" id="L125">                ComponentExtension.from(c).calculateApplyAndInstallStyle(true);</span>
-<span class="fc" id="L126">        }</span>
+<span class="fc" id="L120">                ComponentExtension.from(child).calculateApplyAndInstallStyle(true);</span>
+<span class="fc" id="L121">        }</span>
         else
-<span class="nc" id="L128">            _add(component, conf);</span>
+<span class="nc" id="L123">            _doAddComponent( childComponent, conf, thisComponent );</span>
 
-<span class="fc" id="L130">        _detachStrongRef(); // Detach strong reference to the component to allow it to be garbage collected.</span>
-<span class="fc" id="L131">    }</span>
+<span class="fc" id="L125">        builder._detachStrongRef(); // Detach strong reference to the component to allow it to be garbage collected.</span>
+<span class="fc" id="L126">    }</span>
 
     /**
      *  This method provides the same functionality as the other &quot;add&quot; methods.
@@ -142,14 +137,16 @@ abstract class AbstractNestedBuilder&lt;I, C extends E, E extends Component&gt; 
      */
     @SafeVarargs
     @SuppressWarnings(&quot;varargs&quot;)
-    public final &lt;B extends AbstractNestedBuilder&lt;?, ?, JComponent&gt;&gt; I add( B... builders ) {
-<span class="pc bpc" id="L146" title="1 of 2 branches missed.">        if ( builders == null )</span>
-<span class="nc" id="L147">            throw new IllegalArgumentException(&quot;Swing tree builders may not be null!&quot;);</span>
+    public final &lt;B extends AbstractNestedBuilder&lt;?, ?, JComponent&gt;&gt; I add( B... builders )
+    {
+<span class="pc bpc" id="L142" title="1 of 2 branches missed.">        if ( builders == null )</span>
+<span class="nc" id="L143">            throw new IllegalArgumentException(&quot;Swing tree builders may not be null!&quot;);</span>
 
-<span class="fc bfc" id="L149" title="All 2 branches covered.">        for ( AbstractNestedBuilder&lt;?, ?, ?&gt; b : builders )</span>
-<span class="fc" id="L150">            _doAdd( b, null );</span>
-
-<span class="fc" id="L152">        return _this();</span>
+<span class="fc" id="L145">        return _with( thisComponent -&gt; {</span>
+<span class="fc bfc" id="L146" title="All 2 branches covered.">                    for ( AbstractNestedBuilder&lt;?, ?, ?&gt; b : builders )</span>
+<span class="fc" id="L147">                        _doAdd( b, null, thisComponent );</span>
+<span class="fc" id="L148">                })</span>
+<span class="fc" id="L149">                ._this();</span>
     }
 
     /**
@@ -162,13 +159,17 @@ abstract class AbstractNestedBuilder&lt;I, C extends E, E extends Component&gt; 
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I add( List&lt;E&gt; components ) {
-<span class="fc bfc" id="L165" title="All 2 branches covered.">        for ( E component : components )</span>
-<span class="fc" id="L166">            _doAdd(UI.of((JComponent) component), null);</span>
+<span class="fc" id="L162">        return _with( thisComponent -&gt; {</span>
+<span class="fc bfc" id="L163" title="All 2 branches covered.">                    for ( E component : components )</span>
+<span class="fc" id="L164">                        _doAdd( UI.of((JComponent) component), null, thisComponent );</span>
 
-<span class="fc" id="L168">        return _this();</span>
+<span class="fc" id="L166">                })</span>
+<span class="fc" id="L167">                ._this();</span>
     }
 
-<span class="fc" id="L171">    protected final int _childCount() { return _children.size(); }</span>
+    protected final int _childCount( C c ) {
+<span class="pc bpc" id="L171" title="1 of 2 branches missed.">        return  ( c instanceof Container ? ( (Container) c ).getComponentCount() : 0 );</span>
+    }
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -13,12 +13,15 @@ public class UIForFormattedTextField extends UIForAnyTextComponent<UIForFormatte
 
     public UIForFormattedTextField onEnter( Action<ComponentDelegate<JFormattedTextField, ActionEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
-        JFormattedTextField field = getComponent();
-        _onEnter( e -> _doApp(()->action.accept(new ComponentDelegate<>( field, e, this::getSiblinghood )) ) );
-        return this;
+        return _with( thisComponent -> {
+                    _onEnter(thisComponent,
+                        e -> _doApp(()->action.accept(new ComponentDelegate<>( thisComponent, e )) )
+                    );
+                })
+                ._this();
     }
 
-    private void _onEnter( Consumer<ActionEvent> action ) {
+    private void _onEnter( JFormattedTextField thisComponent, Consumer<ActionEvent> action ) {
         /*
             When an action event is fired, Swing will go through all the listeners
             from the most recently added to the first added. This means that if we simply add
@@ -30,14 +33,14 @@ public class UIForFormattedTextField extends UIForAnyTextComponent<UIForFormatte
             simply because it was added first.
             This is especially true in the context of declarative UI design.
         */
-        ActionListener[] listeners = getComponent().getActionListeners();
+        ActionListener[] listeners = thisComponent.getActionListeners();
         for (ActionListener listener : listeners)
-            getComponent().removeActionListener(listener);
+            thisComponent.removeActionListener(listener);
 
-        getComponent().addActionListener(action::accept);
+        thisComponent.addActionListener(action::accept);
 
         for ( int i = listeners.length - 1; i >= 0; i-- ) // reverse order because swing does not give us the listeners in the order they were added!
-            getComponent().addActionListener(listeners[i]);
+            thisComponent.addActionListener(listeners[i]);
     }
 
 }

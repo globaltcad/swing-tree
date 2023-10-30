@@ -33,23 +33,25 @@ public abstract class UIForAnyToggleButton&lt;I, B extends JToggleButton&gt; ext
 <span class="nc" id="L33">        NullUtil.nullArgCheck(state, &quot;state&quot;, Enum.class);</span>
 <span class="nc" id="L34">        NullUtil.nullArgCheck(selection, &quot;selection&quot;, Var.class);</span>
 <span class="nc" id="L35">        NullUtil.nullPropertyCheck(selection, &quot;selection&quot;, &quot;Null is not a valid selection state.&quot;);</span>
-<span class="nc" id="L36">        this.isSelectedIf( state.equals(selection.get()) );</span>
-<span class="nc" id="L37">        _onShow( selection, s -&gt; isSelectedIf( state.equals(selection.get()) ) );</span>
-<span class="nc" id="L38">        B component = getComponent();</span>
-<span class="nc" id="L39">        String currentText = component.getText();</span>
-<span class="nc bnc" id="L40" title="All 4 branches missed.">        if ( currentText == null || currentText.isEmpty() )</span>
-<span class="nc" id="L41">            component.setText( state.toString() );</span>
+<span class="nc" id="L36">        return _withOnShow( selection, (button,s) -&gt; {</span>
+<span class="nc" id="L37">                   _setSelectedSilently( state.equals(s), button );</span>
+<span class="nc" id="L38">               })</span>
+<span class="nc" id="L39">               ._with( button -&gt; {</span>
+<span class="nc" id="L40">                   _setSelectedSilently(state.equals(selection.get()), button);</span>
+<span class="nc" id="L41">                   String currentText = button.getText();</span>
+<span class="nc bnc" id="L42" title="All 4 branches missed.">                   if ( currentText == null || currentText.isEmpty() )</span>
+<span class="nc" id="L43">                       button.setText( state.toString() );</span>
 
-        // When the user clicks the button, we update the selection property!
-        // But only if the button is selected, otherwise we'll ignore the click.
-        // And we also trigger &quot;set&quot; events for the button, so that other buttons
-        // can be updated to reflect the new selection state.
-<span class="nc" id="L47">        _onChange( event -&gt; {</span>
-<span class="nc bnc" id="L48" title="All 2 branches missed.">            if ( component.isSelected() )</span>
-<span class="nc" id="L49">                selection.set(From.VIEW,  state ).fireChange(From.VIEW_MODEL);</span>
-<span class="nc" id="L50">        });</span>
-
-<span class="nc" id="L52">        return (I) this;</span>
+                   // When the user clicks the button, we update the selection property!
+                   // But only if the button is selected, otherwise we'll ignore the click.
+                   // And we also trigger &quot;set&quot; events for the button, so that other buttons
+                   // can be updated to reflect the new selection state.
+<span class="nc" id="L49">                   _onChange(button, event -&gt; {</span>
+<span class="nc bnc" id="L50" title="All 2 branches missed.">                       if ( button.isSelected() )</span>
+<span class="nc" id="L51">                           selection.set(From.VIEW,  state ).fireChange(From.VIEW_MODEL);</span>
+<span class="nc" id="L52">                   });</span>
+<span class="nc" id="L53">               })</span>
+<span class="nc" id="L54">               ._this();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

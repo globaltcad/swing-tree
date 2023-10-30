@@ -12,7 +12,7 @@ public class UIForToolBar&lt;T extends JToolBar&gt; extends UIForAnySwing&lt;UIF
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.
      */
-<span class="fc" id="L15">    public UIForToolBar(T component) { super(component); }</span>
+<span class="fc" id="L15">    protected UIForToolBar(T component) { super(component); }</span>
 
     /**
      * @param alignment The {@link UI.Align} value mapping to the {@link JToolBar}'s orientation.
@@ -21,15 +21,27 @@ public class UIForToolBar&lt;T extends JToolBar&gt; extends UIForAnySwing&lt;UIF
      */
     public final UIForToolBar&lt;T&gt; withOrientation( UI.Align alignment ) {
 <span class="nc" id="L23">        NullUtil.nullArgCheck(alignment, &quot;alignment&quot;, UI.Align.class);</span>
-<span class="nc" id="L24">        getComponent().setOrientation(alignment.forToolBar());</span>
-<span class="nc" id="L25">        return this;</span>
+<span class="nc" id="L24">        return _with( thisComponent -&gt; {</span>
+<span class="nc" id="L25">                    thisComponent.setOrientation(alignment.forToolBar());</span>
+<span class="nc" id="L26">                })</span>
+<span class="nc" id="L27">                ._this();</span>
     }
 
+    /**
+     * @param alignment The {@link UI.Align} property mapping to the {@link JToolBar}'s orientation.
+     *                  See {@link JToolBar#setOrientation(int)}.
+     * @return This builder node.
+     */
     public final UIForToolBar&lt;T&gt; withOrientation( Val&lt;UI.Align&gt; alignment ) {
-<span class="nc" id="L29">        NullUtil.nullArgCheck(alignment, &quot;alignment&quot;, Val.class);</span>
-<span class="nc" id="L30">        NullUtil.nullPropertyCheck(alignment, &quot;alignment&quot;, &quot;Null is not a valid alignment.&quot;);</span>
-<span class="nc" id="L31">        _onShow( alignment, a -&gt; withOrientation(a) );</span>
-<span class="nc" id="L32">        return withOrientation(alignment.get());</span>
+<span class="nc" id="L36">        NullUtil.nullArgCheck(alignment, &quot;alignment&quot;, Val.class);</span>
+<span class="nc" id="L37">        NullUtil.nullPropertyCheck(alignment, &quot;alignment&quot;, &quot;Null is not a valid alignment.&quot;);</span>
+<span class="nc" id="L38">        return _withOnShow( alignment, (c,v) -&gt; {</span>
+<span class="nc" id="L39">                    c.setOrientation(v.forToolBar());</span>
+<span class="nc" id="L40">                })</span>
+<span class="nc" id="L41">                ._with( thisComponent -&gt; {</span>
+<span class="nc" id="L42">                    thisComponent.setOrientation(alignment.orElseThrow().forToolBar());</span>
+<span class="nc" id="L43">                })</span>
+<span class="nc" id="L44">                ._this();</span>
     }
 
 }

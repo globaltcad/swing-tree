@@ -3,7 +3,7 @@ package swingtree;
 import javax.swing.*;
 
 /**
- *  A swing tree builder node for {@link JTextArea} instances.
+ *  A SwingTree builder node designed for configuring {@link JTextArea} instances.
  */
 public class UIForTextArea<A extends JTextArea> extends UIForAnyTextComponent<UIForTextArea<A>, A>
 {

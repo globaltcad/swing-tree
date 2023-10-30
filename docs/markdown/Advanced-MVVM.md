@@ -61,24 +61,27 @@ Cool, right? :)
 This might look like magic, but it's actually quite simple how
 this binding mechanism works under the hood:
 
-Every type of property allows you to register 2 kinds of listeners to
-observe changes to the property:
+Every type of property allows you to register change observers which observe events
+through 2 different kinds of channels, a view change event channel and a view model change event channel.
 
-1. An application action listener you can register using the `onSet` method, 
-   which is notified when the property is changed by calling the `set` method.
-2. A user action listener you can register using the `onAct` method, 
-   which is notified when the property is changed by calling the `act` method.
+1. An **application action listener** is registered through the `onChange(From.VIEW_MODEL, ..)` method call, 
+   which is notified when the property is changed by calling `set(From.VIEW_MODEL, ..)`, which 
+   is what the application logic does when it changes the value of the property.
+2. A **user action listener** is registered through the `onChange(From.VIEW, ..)` method call, 
+   which is notified when the property is changed by calling `set(From.VIEW, ..)`, which
+   is what the view does when the user interacts with it.
 
-The `act` method is a special setter method that represents changes performed by the user (though the view), 
-so when the user enters text into a text field, the `act` method is called by 
-the text field automatically.
+The `set(From.VIEW, ..)` call specifies that the change is performed by the view (usually the user), 
+so when the user enters text into a text field, the `set` method is called through the `From.VIEW` channel
+by the SwingTree text field automatically.
 
-The `set` method on the other hand represents changes performed by the application inside a view model
+The regular `set` method call or the explicit `set(From.VIEW_MODEL, ..)` call
+on the other hand represents changes performed by the application inside a view model
 as part of the business logic.
 
 This clean distinction allows for more control over the flow of information 
 in your application,
-and it avoids certain kinds of infinite loops, 
+and it avoids certain kinds of infinite feedback loops, 
 redundant updates, and other nasty side effects.
 
 # Lists of Properties #

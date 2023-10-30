@@ -23,10 +23,9 @@ public final class TabDelegate extends ComponentMouseEventDelegate<JTabbedPane>
     public TabDelegate(
         JTabbedPane component,
         MouseEvent event,
-        Supplier<List<JComponent>> siblingSource,
         int clickedTab
     ) {
-        super(component, event, siblingSource);
+        super(component, event);
         _clickedTab = clickedTab;
     }
 

@@ -13,7 +13,7 @@ import java.net.URISyntaxException;
 import java.util.Objects;
 
 /**
- *  A swing tree builder node for {@link JLabel} instances.
+ *  A SwingTree builder node designed for configuring {@link JLabel} instances.
  * 	<p>
  * 	<b>Take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
  * 	where you can browse a large collection of examples demonstrating how to use the API of this class.</b>
@@ -22,6 +22,16 @@ public class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel<L>, L
 {
     protected UIForLabel( L component ) { super(component); }
 
+    private void _makeBold( L thisComponent ) {
+        Font f = thisComponent.getFont();
+        thisComponent.setFont(f.deriveFont(f.getStyle() | Font.BOLD));
+    }
+
+    private void _makePlain( L thisComponent ) {
+        Font f = thisComponent.getFont();
+        thisComponent.setFont(f.deriveFont(f.getStyle() & ~Font.BOLD));
+    }
+
     /**
      *  Makes the wrapped {@link JLabel} font bold (!plain).
      *
@@ -29,8 +39,7 @@ public class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel<L>, L
      */
     public UIForLabel<L> makeBold() {
         this.peek( label -> {
-            Font f = label.getFont();
-            label.setFont(f.deriveFont(f.getStyle() | Font.BOLD));
+            _makeBold(label);
         });
         return this;
     }
@@ -60,27 +69,28 @@ public class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel<L>, L
     public UIForLabel<L> makeLinkTo( Val<String> href ) {
         NullUtil.nullArgCheck( href, "href", Val.class );
         NullUtil.nullPropertyCheck( href, "href", "Use an empty String instead of null to model a link going nowhere." );
-        L list = getComponent();
-        LazyRef<String> text = LazyRef.of(list::getText);
-        list.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                try {
-                    String ref = href.orElseThrow().trim();
-                    if ( ref.isEmpty() ) return;
-                    if ( !ref.startsWith("http") ) ref = "https://" + ref;
-                    Desktop.getDesktop().browse(new URI(ref));
-                } catch (IOException | URISyntaxException e1) {
-                    e1.printStackTrace();
-                }
-            }
-            @Override  public void mouseExited(MouseEvent e) { list.setText(text.get()); }
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                list.setText("<html><a href=''>" + text.get() + "</a></html>");
-            }
-        });
-        return this;
+        return _with( thisComponent -> {
+                    LazyRef<String> text = LazyRef.of(thisComponent::getText);
+                    thisComponent.addMouseListener(new MouseAdapter() {
+                        @Override
+                        public void mouseClicked(MouseEvent e) {
+                            try {
+                                String ref = href.orElseThrow().trim();
+                                if ( ref.isEmpty() ) return;
+                                if ( !ref.startsWith("http") ) ref = "https://" + ref;
+                                Desktop.getDesktop().browse(new URI(ref));
+                            } catch (IOException | URISyntaxException e1) {
+                                e1.printStackTrace();
+                            }
+                        }
+                        @Override  public void mouseExited(MouseEvent e) { thisComponent.setText(text.get()); }
+                        @Override
+                        public void mouseEntered(MouseEvent e) {
+                            thisComponent.setText("<html><a href=''>" + text.get() + "</a></html>");
+                        }
+                    });
+                })
+                ._this();
     }
 
     /**
@@ -89,9 +99,8 @@ public class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel<L>, L
      * @return This very builder to allow for method chaining.
      */
     public UIForLabel<L> makePlain() {
-        this.peek(label -> {
-            Font f = label.getFont();
-            label.setFont(f.deriveFont(f.getStyle() & ~Font.BOLD));
+        this.peek( label -> {
+            _makePlain(label);
         });
         return this;
     }
@@ -115,9 +124,10 @@ public class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel<L>, L
      * @return This very builder to allow for method chaining.
      */
     public final UIForLabel<L> isBoldIf( boolean isBold ) {
-        if ( isBold ) makeBold();
-        else makePlain();
-        return this;
+        if ( isBold )
+            return makeBold();
+        else
+            return makePlain();
     }
 
     /**
@@ -131,8 +141,19 @@ public class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel<L>, L
     public final UIForLabel<L> isBoldIf( Val<Boolean> isBold ) {
         NullUtil.nullArgCheck( isBold, "isBold", Val.class );
         NullUtil.nullPropertyCheck( isBold, "isBold", "You can not use null to model if a label is bold or not." );
-        _onShow( isBold, this::isBoldIf );
-        return isBoldIf( isBold.get() );
+        return _withOnShow( isBold, (thisComponent,v) -> {
+                    if ( v )
+                        _makeBold(thisComponent);
+                    else
+                        _makePlain(thisComponent);
+                })
+                ._with( thisComponent -> {
+                    if ( isBold.orElseThrow() )
+                        _makeBold(thisComponent);
+                    else
+                        _makePlain(thisComponent);
+                })
+                ._this();
     }
 
     /**
@@ -148,8 +169,10 @@ public class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel<L>, L
      */
     public final UIForLabel<L> withText( String text ) {
         NullUtil.nullArgCheck( text, "text", String.class );
-        getComponent().setText(text);
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.setText(text);
+                })
+                ._this();
     }
 
     /**
@@ -165,8 +188,13 @@ public class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel<L>, L
     public final UIForLabel<L> withText( Val<String> text ) {
         NullUtil.nullArgCheck( text, "text", Val.class );
         NullUtil.nullPropertyCheck( text, "text", "Please use an empty String instead of null." );
-        _onShow( text, v -> getComponent().setText(v) );
-        return withText( text.orElseThrow() );
+        return _withOnShow( text, (thisComponent,v) -> {
+                    thisComponent.setText(v);
+                })
+                ._with( thisComponent -> {
+                    thisComponent.setText( text.orElseThrow() );
+                })
+                ._this();
     }
 
     /**
@@ -183,8 +211,10 @@ public class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel<L>, L
      */
     public UIForLabel<L> withHorizontalAlignment( UI.HorizontalAlignment horizontalAlign ) {
         NullUtil.nullArgCheck( horizontalAlign, "horizontalAlign", UI.HorizontalAlignment.class );
-        getComponent().setHorizontalAlignment(horizontalAlign.forSwing());
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.setHorizontalAlignment(horizontalAlign.forSwing());
+                })
+                ._this();
     }
 
 
@@ -200,8 +230,13 @@ public class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel<L>, L
     public UIForLabel<L> withHorizontalAlignment(Val<UI.HorizontalAlignment> horizontalAlign ) {
         NullUtil.nullArgCheck( horizontalAlign, "horizontalAlign", Val.class );
         NullUtil.nullPropertyCheck( horizontalAlign, "horizontalAlign", "Null is not a valid alignment." );
-        _onShow( horizontalAlign, v -> getComponent().setHorizontalAlignment(v.forSwing()) );
-        return withHorizontalAlignment(horizontalAlign.orElseThrow());
+        return _withOnShow( horizontalAlign, (thisComponent,v) -> {
+                    thisComponent.setHorizontalAlignment(v.forSwing());
+                })
+                ._with( thisComponent -> {
+                    thisComponent.setHorizontalAlignment(horizontalAlign.orElseThrow().forSwing());
+                })
+                ._this();
     }
 
     /**
@@ -209,7 +244,7 @@ public class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel<L>, L
      *  This is a convenience method to avoid peeking into this builder like so:
      *  <pre>{@code
      *     UI.label("Something")
-     *         .peek( label -> label.setVerticalAlignment(...) );
+     *     .peek( label -> label.setVerticalAlignment(...) );
      *  }</pre>
      *
      * @param verticalAlign The vertical alignment which should be applied to the underlying component.
@@ -218,8 +253,10 @@ public class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel<L>, L
      */
     public UIForLabel<L> withVerticalAlignment( UI.VerticalAlignment verticalAlign ) {
         NullUtil.nullArgCheck( verticalAlign, "verticalAlign", UI.VerticalAlignment.class );
-        getComponent().setVerticalAlignment(verticalAlign.forSwing());
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.setVerticalAlignment(verticalAlign.forSwing());
+                })
+                ._this();
     }
 
     /**
@@ -234,8 +271,13 @@ public class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel<L>, L
     public UIForLabel<L> withVerticalAlignment( Val<UI.VerticalAlignment> verticalAlign ) {
         NullUtil.nullArgCheck( verticalAlign, "verticalAlign", Val.class );
         NullUtil.nullPropertyCheck( verticalAlign, "verticalAlign", "Null is not a valid alignment." );
-        _onShow( verticalAlign, v -> getComponent().setVerticalAlignment(v.forSwing()) );
-        return withVerticalAlignment(verticalAlign.orElseThrow());
+        return _withOnShow( verticalAlign, (thisComponent,v) -> {
+                    thisComponent.setVerticalAlignment(v.forSwing());
+                })
+                ._with( thisComponent -> {
+                    thisComponent.setVerticalAlignment(verticalAlign.orElseThrow().forSwing());
+                })
+                ._this();
     }
 
     /**
@@ -252,9 +294,11 @@ public class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel<L>, L
      */
     public UIForLabel<L> withAlignment( UI.Alignment alignment ) {
         NullUtil.nullArgCheck( alignment, "alignment", UI.Alignment.class );
-        getComponent().setHorizontalAlignment(alignment.getHorizontal().forSwing());
-        getComponent().setVerticalAlignment(alignment.getVertical().forSwing());
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.setHorizontalAlignment(alignment.getHorizontal().forSwing());
+                    thisComponent.setVerticalAlignment(alignment.getVertical().forSwing());
+                })
+                ._this();
     }
 
     /**
@@ -269,11 +313,16 @@ public class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel<L>, L
     public UIForLabel<L> withAlignment( Val<UI.Alignment> alignment ) {
         NullUtil.nullArgCheck( alignment, "alignment", Val.class );
         NullUtil.nullPropertyCheck( alignment, "alignment", "Null is not a valid alignment." );
-        _onShow( alignment, v -> {
-            getComponent().setHorizontalAlignment(v.getHorizontal().forSwing());
-            getComponent().setVerticalAlignment(v.getVertical().forSwing());
-        });
-        return withAlignment(alignment.orElseThrow());
+        return _withOnShow( alignment, (thisComponent,v) -> {
+                    thisComponent.setHorizontalAlignment(v.getHorizontal().forSwing());
+                    thisComponent.setVerticalAlignment(v.getVertical().forSwing());
+                })
+                ._with( thisComponent -> {
+                    UI.Alignment a = alignment.orElseThrow();
+                    thisComponent.setHorizontalAlignment(a.getHorizontal().forSwing());
+                    thisComponent.setVerticalAlignment(a.getVertical().forSwing());
+                })
+                ._this();
     }
 
 
@@ -291,8 +340,10 @@ public class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel<L>, L
      */
     public UIForLabel<L> withHorizontalTextPosition( UI.HorizontalAlignment horizontalAlign ) {
         NullUtil.nullArgCheck( horizontalAlign, "horizontalAlign", UI.HorizontalAlignment.class );
-        getComponent().setHorizontalTextPosition(horizontalAlign.forSwing());
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.setHorizontalTextPosition(horizontalAlign.forSwing());
+                })
+                ._this();
     }
 
     /**
@@ -307,8 +358,13 @@ public class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel<L>, L
     public UIForLabel<L> withHorizontalTextPosition( Val<UI.HorizontalAlignment> horizontalAlign ) {
         NullUtil.nullArgCheck( horizontalAlign, "horizontalAlign", Val.class );
         NullUtil.nullPropertyCheck( horizontalAlign, "horizontalAlign", "Null is not a valid alignment." );
-        _onShow( horizontalAlign, v -> getComponent().setHorizontalTextPosition(v.forSwing()) );
-        return withHorizontalTextPosition(horizontalAlign.orElseThrow());
+        return _withOnShow( horizontalAlign, (thisComponent, v) -> {
+                    thisComponent.setHorizontalTextPosition(v.forSwing());
+                })
+                ._with( thisComponent -> {
+                    thisComponent.setHorizontalTextPosition(horizontalAlign.orElseThrow().forSwing());
+                })
+                ._this();
     }
 
     /**
@@ -325,8 +381,10 @@ public class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel<L>, L
      */
     public UIForLabel<L> withVerticalTextPosition( UI.VerticalAlignment verticalAlign ) {
         NullUtil.nullArgCheck( verticalAlign, "verticalAlign", UI.VerticalAlignment.class );
-        getComponent().setVerticalTextPosition(verticalAlign.forSwing());
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.setVerticalTextPosition(verticalAlign.forSwing());
+                })
+                ._this();
     }
 
     /**
@@ -341,8 +399,13 @@ public class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel<L>, L
     public UIForLabel<L> withVerticalTextPosition( Val<UI.VerticalAlignment> verticalAlign ) {
         NullUtil.nullArgCheck( verticalAlign, "verticalAlign", Val.class );
         NullUtil.nullPropertyCheck( verticalAlign, "verticalAlign", "Null is not a valid alignment." );
-        _onShow( verticalAlign, v -> getComponent().setVerticalTextPosition(v.forSwing()) );
-        return withVerticalTextPosition(verticalAlign.orElseThrow());
+        return _withOnShow( verticalAlign, (thisComponent,v) -> {
+                    thisComponent.setVerticalTextPosition(v.forSwing());
+                })
+                ._with( thisComponent -> {
+                    thisComponent.setVerticalTextPosition(verticalAlign.orElseThrow().forSwing());
+                })
+                ._this();
     }
 
     /**
@@ -359,9 +422,11 @@ public class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel<L>, L
      */
     public UIForLabel<L> withTextPosition( UI.Alignment alignment ) {
         NullUtil.nullArgCheck( alignment, "alignment", UI.Alignment.class );
-        getComponent().setHorizontalTextPosition(alignment.getHorizontal().forSwing());
-        getComponent().setVerticalTextPosition(alignment.getVertical().forSwing());
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.setHorizontalTextPosition(alignment.getHorizontal().forSwing());
+                    thisComponent.setVerticalTextPosition(alignment.getVertical().forSwing());
+                })
+                ._this();
     }
 
     /**
@@ -377,8 +442,10 @@ public class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel<L>, L
      * @return This very builder to allow for method chaining.
      */
     public UIForLabel<L> withIcon( Icon icon ) {
-        getComponent().setIcon(icon);
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.setIcon(icon);
+                })
+                ._this();
     }
 
     /**
@@ -395,8 +462,10 @@ public class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel<L>, L
      */
     public UIForLabel<L> withIcon( IconDeclaration icon ) {
         Objects.requireNonNull(icon,"icon");
-        icon.find().ifPresent( i -> getComponent().setIcon(i) );
-        return this;
+        return _with( thisComponent -> {
+                    icon.find().ifPresent( i -> thisComponent.setIcon(i) );
+                })
+                ._this();
     }
 
     /**
@@ -426,8 +495,13 @@ public class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel<L>, L
      */
     public UIForLabel<L> withIcon( Val<IconDeclaration> icon ) {
         NullUtil.nullArgCheck(icon,"icon",Val.class);
-        _onShow( icon, d -> d.find().ifPresent( i -> getComponent().setIcon(i) ) );
-        return withIcon(icon.orElseNull());
+        return _withOnShow( icon, (thisComponent,v) -> {
+                    v.find().ifPresent(thisComponent::setIcon);
+                })
+                ._with( thisComponent -> {
+                    icon.orElseThrow().find().ifPresent(thisComponent::setIcon);
+                })
+                ._this();
     }
 
     /**
@@ -436,10 +510,11 @@ public class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel<L>, L
      * @return This very builder to allow for method chaining.
      */
     public UIForLabel<L> withFontSize( int size ) {
-        L label = getComponent();
-        Font old = label.getFont();
-        label.setFont(new Font(old.getName(), old.getStyle(), size));
-        return this;
+        return _with( thisComponent -> {
+                    Font f = thisComponent.getFont();
+                    thisComponent.setFont(f.deriveFont((float)size));
+                })
+                ._this();
     }
 
     /**
@@ -454,8 +529,16 @@ public class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel<L>, L
      */
     public UIForLabel<L> withFontSize( Val<Integer> size ) {
         NullUtil.nullArgCheck( size, "size", Val.class );
-        _onShow( size, this::withFontSize );
-        return withFontSize(size.orElseThrow());
+        NullUtil.nullPropertyCheck( size, "size", "Use the default font size of this component instead of null!" );
+        return _withOnShow( size, (thisComponent,v) -> {
+                    Font f = thisComponent.getFont();
+                    thisComponent.setFont(f.deriveFont((float)v));
+                })
+                ._with( thisComponent -> {
+                    Font f = thisComponent.getFont();
+                    thisComponent.setFont(f.deriveFont((float)size.orElseThrow()));
+                })
+                ._this();
     }
 
     /**
@@ -466,8 +549,10 @@ public class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel<L>, L
      */
     public final UIForLabel<L> withFont( Font font ) {
         NullUtil.nullArgCheck(font, "font", Font.class);
-        this.getComponent().setFont( font );
-        return _this();
+        return _with( thisComponent -> {
+                    thisComponent.setFont(font);
+                })
+                ._this();
     }
 
     /**
@@ -484,8 +569,13 @@ public class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel<L>, L
     public final UIForLabel<L> withFont( Val<Font> font ) {
         NullUtil.nullArgCheck(font, "font", Val.class);
         NullUtil.nullPropertyCheck(font, "font", "Use the default font of this component instead of null!");
-        _onShow( font, v -> withFont(v) );
-        return withFont( font.orElseThrow() );
+        return _withOnShow( font, (thisComponent,v) -> {
+                    thisComponent.setFont(v);
+                })
+                ._with( thisComponent -> {
+                    thisComponent.setFont(font.orElseThrow());
+                })
+                ._this();
     }
 
 }

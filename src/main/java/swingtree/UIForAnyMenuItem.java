@@ -20,9 +20,7 @@ public class UIForAnyMenuItem<I, M extends JMenuItem> extends UIForAnyButton<I, 
      * @return This very builder to allow for method chaining.
      */
     public I withKeyStroke( KeyStroke keyStroke ) {
-        getComponent().setAccelerator(keyStroke);
-        @SuppressWarnings("unchecked") I self = (I) this;
-        return self;
+        return _with( c -> c.setAccelerator(keyStroke) )._this();
     }
 
     /**
@@ -37,9 +35,12 @@ public class UIForAnyMenuItem<I, M extends JMenuItem> extends UIForAnyButton<I, 
      * @return This very builder to allow for method chaining.
      */
     public I withKeyStroke( Val<KeyStroke> val ) {
-        _onShow(val, v -> withKeyStroke(v) );
-        getComponent().setAccelerator(val.get());
-        @SuppressWarnings("unchecked") I self = (I) this;
-        return self;
+        return _withOnShow( val, (c,v) -> {
+                    c.setAccelerator(v);
+                })
+                ._with( c -> {
+                    c.setAccelerator(val.orElseNull());
+                })
+                ._this();
     }
 }

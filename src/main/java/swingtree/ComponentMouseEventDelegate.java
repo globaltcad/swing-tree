@@ -6,21 +6,41 @@ import java.util.List;
 import java.util.function.Supplier;
 
 /**
- *  A {@link JComponent} delegate providing useful context information to various {@link sprouts.Action} listeners
- *  used by {@link UIForAnySwing#onMouseClick(sprouts.Action)}}, {@link UIForAnySwing#onMousePress(sprouts.Action)} and
- *  {@link UIForAnySwing#onMouseRelease(sprouts.Action)}, for example.
+ *  A {@link JComponent} as well as {@link MouseEvent} delegate
+ *  providing useful context information to various {@link sprouts.Action} listeners which are
+ *  typically registered through
+ *  {@link UIForAnySwing#onMouseClick(sprouts.Action)}},
+ *  {@link UIForAnySwing#onMousePress(sprouts.Action)} and
+ *  {@link UIForAnySwing#onMouseRelease(sprouts.Action)}, among others.
  *  <br>
- *  Not only does this delegate provide access to the {@link JComponent} component itself, but also to the
- *  {@link MouseEvent} that triggered the event.
+ *  This delegate is designed to provide clutter-free access to both the
+ *  concrete {@link JComponent} subtype {@code C} as well a the {@link MouseEvent}
+ *  which triggered the action.
+ *  <p>
+ *  Here is an example of how this delegate is typically exposed in your {@link sprouts.Action}:
+ *  <pre>{@code
+ *  UI.panel()
+ *  .onMouseMove( it -> {
+ *    System.out.println("Moved on " + it.get());
+ *    System.out.println("Moved at " + it.mouseX() + ", " + it.mouseY());
+ *  })
+ *  .onMouseClick( it -> {
+ *    System.out.println("Clicked on " + it.get());
+ *    System.out.println("Click count: " + it.clickCount());
+ *  })
+ *  //...
+ *  }</pre>
+ *  <p>
+ *  For some more examples <b>please take a look at the
+ *  <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
  */
 public class ComponentMouseEventDelegate<C extends JComponent> extends ComponentDelegate<C, MouseEvent>
 {
     public ComponentMouseEventDelegate(
         C component,
-        MouseEvent event,
-        Supplier<List<JComponent>> siblingSource
+        MouseEvent event
     ) {
-        super(component, event, siblingSource);
+        super(component, event);
     }
 
     /**
@@ -74,8 +94,9 @@ public class ComponentMouseEventDelegate<C extends JComponent> extends Component
 
     /**
      * Returns the number of mouse clicks associated with the event of this delegate.
+     * You can use the returned number to distinguish between single-click and double-click events.
      *
-     * @return integer value for the number of clicks
+     * @return An integer indicating the number of mouse clicks associated with the mouse event.
      */
     public int clickCount() { return getEvent().getClickCount(); }
 

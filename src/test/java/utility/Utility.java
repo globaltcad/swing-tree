@@ -332,6 +332,7 @@ public class Utility {
 
     public static String linkSnapshot(String filename) {
         String pathBase = "https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/";
-        return "![" + filename + "](" + pathBase + filename + ")";
+        //return "![" + filename + "](" + pathBase + filename + ")"; // old way
+        return "<img src=\"" + pathBase + filename + "\" alt=\"" + filename + "\" style=\"max-width: 50%;\" />";
     }
 }

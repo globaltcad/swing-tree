@@ -17,12 +17,12 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
- *  A swing tree builder node for {@link JSplitButton} instances.
+ *  A SwingTree builder node designed for configuring {@link JSplitButton} instances.
  */
 public class UIForSplitButton&lt;B extends JSplitButton&gt; extends UIForAnyButton&lt;UIForSplitButton&lt;B&gt;, B&gt;
 {
 <span class="fc" id="L24">    private final JPopupMenu _popupMenu = new JPopupMenu();</span>
-<span class="fc" id="L25">    private final Map&lt;JMenuItem, Action&lt;SplitItem.Delegate&lt;JMenuItem&gt;&gt;&gt; _options = new LinkedHashMap&lt;&gt;(16);</span>
+<span class="fc" id="L25">    private final Map&lt;JMenuItem, Action&lt;SplitItemDelegate&lt;JMenuItem&gt;&gt;&gt; _options = new LinkedHashMap&lt;&gt;(16);</span>
 <span class="fc" id="L26">    private final JMenuItem[] _lastSelected = {null};</span>
 <span class="fc" id="L27">    private final List&lt;Action&lt;SplitButtonDelegate&lt;JMenuItem&gt;&gt;&gt; _onSelections = new ArrayList&lt;&gt;();</span>
 
@@ -33,14 +33,14 @@ public class UIForSplitButton&lt;B extends JSplitButton&gt; extends UIForAnyButt
      */
     protected UIForSplitButton( B component ) {
 <span class="fc" id="L35">        super(component);</span>
-<span class="fc" id="L36">        getComponent().setPopupMenu(_popupMenu);</span>
-<span class="fc" id="L37">        getComponent().addButtonClickedActionListener(e -&gt; _doApp(()-&gt;{</span>
+<span class="fc" id="L36">        component.setPopupMenu(_popupMenu);</span>
+<span class="fc" id="L37">        component.addButtonClickedActionListener(e -&gt; _doApp(()-&gt;{</span>
 <span class="fc" id="L38">            List&lt;JMenuItem&gt; selected = _getSelected();</span>
 <span class="fc bfc" id="L39" title="All 2 branches covered.">            for ( JMenuItem item : selected ) {</span>
-<span class="fc" id="L40">                Action&lt;SplitItem.Delegate&lt;JMenuItem&gt;&gt; action = _options.get(item);</span>
+<span class="fc" id="L40">                Action&lt;SplitItemDelegate&lt;JMenuItem&gt;&gt; action = _options.get(item);</span>
 <span class="pc bpc" id="L41" title="1 of 2 branches missed.">                if ( action != null )</span>
 <span class="fc" id="L42">                    action.accept(</span>
-                        new SplitItem.Delegate&lt;&gt;(
+                        new SplitItemDelegate&lt;&gt;(
                             e,
                             component,
 <span class="nc" id="L46">                            ()-&gt; new ArrayList&lt;&gt;(_options.keySet()),</span>
@@ -73,18 +73,21 @@ public class UIForSplitButton&lt;B extends JSplitButton&gt; extends UIForAnyButt
     public &lt;E extends Enum&lt;E&gt;&gt; UIForSplitButton&lt;B&gt; withSelection( Var&lt;E&gt; selection, Event clickEvent ) {
 <span class="fc" id="L74">        NullUtil.nullArgCheck(selection, &quot;selection&quot;, Var.class);</span>
 <span class="fc" id="L75">        NullUtil.nullArgCheck(clickEvent, &quot;clickEvent&quot;, Event.class);</span>
-<span class="fc bfc" id="L76" title="All 2 branches covered.">        for ( E e : selection.type().getEnumConstants() )</span>
-<span class="fc" id="L77">            this.add(</span>
-<span class="fc" id="L78">                UI.splitItem(e.toString())</span>
-<span class="fc" id="L79">                .onButtonClick( it -&gt; clickEvent.fire() )</span>
-<span class="fc" id="L80">                .onSelection( it -&gt; {</span>
-<span class="fc" id="L81">                    it.selectOnlyCurrentItem();</span>
-<span class="fc" id="L82">                    it.setButtonText(e.toString());</span>
-<span class="fc" id="L83">                    selection.set(From.VIEW, e);</span>
-<span class="fc" id="L84">                })</span>
-            );
+<span class="fc" id="L76">        return _withAndGet( thisComponent -&gt; {</span>
+<span class="fc bfc" id="L77" title="All 2 branches covered.">                    for ( E e : selection.type().getEnumConstants() )</span>
+<span class="fc" id="L78">                        this.add(</span>
+<span class="fc" id="L79">                            UI.splitItem(e.toString())</span>
+<span class="fc" id="L80">                            .onButtonClick( it -&gt; clickEvent.fire() )</span>
+<span class="fc" id="L81">                            .onSelection( it -&gt; {</span>
+<span class="fc" id="L82">                                it.selectOnlyCurrentItem();</span>
+<span class="fc" id="L83">                                it.setButtonText(e.toString());</span>
+<span class="fc" id="L84">                                selection.set(From.VIEW, e);</span>
+<span class="fc" id="L85">                            })</span>
+                        );
 
-<span class="fc" id="L87">        return this.withText(selection.viewAsString());</span>
+<span class="fc" id="L88">                    return this.withText(selection.viewAsString());</span>
+                })
+<span class="fc" id="L90">                ._this();</span>
     }
 
     /**
@@ -97,18 +100,21 @@ public class UIForSplitButton&lt;B extends JSplitButton&gt; extends UIForAnyButt
      * @return A UI builder instance wrapping a {@link JSplitButton}.
      */
     public &lt;E extends Enum&lt;E&gt;&gt; UIForSplitButton&lt;B&gt; withSelection( Var&lt;E&gt; selection ) {
-<span class="fc" id="L100">        NullUtil.nullArgCheck(selection, &quot;selection&quot;, Var.class);</span>
-<span class="fc bfc" id="L101" title="All 2 branches covered.">        for ( E e : selection.type().getEnumConstants() )</span>
-<span class="fc" id="L102">            this.add(</span>
-<span class="fc" id="L103">                UI.splitItem(e.toString())</span>
-<span class="fc" id="L104">                .onSelection( it -&gt; {</span>
-<span class="nc" id="L105">                    it.selectOnlyCurrentItem();</span>
-<span class="nc" id="L106">                    it.setButtonText(e.toString());</span>
-<span class="nc" id="L107">                    selection.set(From.VIEW, e);</span>
-<span class="nc" id="L108">                })</span>
-            );
+<span class="fc" id="L103">        NullUtil.nullArgCheck(selection, &quot;selection&quot;, Var.class);</span>
+<span class="fc" id="L104">        return _withAndGet( thisComponent -&gt; {</span>
+<span class="fc bfc" id="L105" title="All 2 branches covered.">                    for ( E e : selection.type().getEnumConstants() )</span>
+<span class="fc" id="L106">                        this.add(</span>
+<span class="fc" id="L107">                            UI.splitItem(e.toString())</span>
+<span class="fc" id="L108">                            .onSelection( it -&gt; {</span>
+<span class="nc" id="L109">                                it.selectOnlyCurrentItem();</span>
+<span class="nc" id="L110">                                it.setButtonText(e.toString());</span>
+<span class="nc" id="L111">                                selection.set(From.VIEW, e);</span>
+<span class="nc" id="L112">                            })</span>
+                        );
 
-<span class="fc" id="L111">        return this.withText(selection.viewAsString());</span>
+<span class="fc" id="L115">                    return this.withText(selection.viewAsString());</span>
+                })
+<span class="fc" id="L117">                ._this();</span>
     }
 
     /**
@@ -127,24 +133,24 @@ public class UIForSplitButton&lt;B extends JSplitButton&gt; extends UIForAnyButt
     public UIForSplitButton&lt;B&gt; onSplitClick(
         Action&lt;SplitButtonDelegate&lt;JMenuItem&gt;&gt; action
     ) {
-<span class="fc" id="L130">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
-<span class="fc" id="L131">        B button = getComponent();</span>
-<span class="fc" id="L132">        button.addSplitButtonClickedActionListener(</span>
-<span class="nc" id="L133">            e -&gt; _doApp(()-&gt;action.accept(</span>
-                    new SplitButtonDelegate&lt;&gt;(
-                         button,
-                         new SplitItem.Delegate&lt;&gt;(
-                             e,
-                             button,
-<span class="nc" id="L139">                             () -&gt; new ArrayList&lt;&gt;(_options.keySet()),</span>
-                             _lastSelected[0]
-                         ),
-                        this::getSiblinghood
+<span class="fc" id="L136">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
+<span class="fc" id="L137">        return _with( thisComponent -&gt;</span>
+<span class="fc" id="L138">                    thisComponent.addSplitButtonClickedActionListener(</span>
+<span class="nc" id="L139">                        e -&gt; _doApp(()-&gt;action.accept(</span>
+                                new SplitButtonDelegate&lt;&gt;(
+                                     thisComponent,
+                                     new SplitItemDelegate&lt;&gt;(
+                                         e,
+                                         thisComponent,
+<span class="nc" id="L145">                                         () -&gt; new ArrayList&lt;&gt;(_options.keySet()),</span>
+                                         _lastSelected[0]
+                                     )
+                                )
+                            )
+                        )
                     )
                 )
-            )
-        );
-<span class="fc" id="L147">        return this;</span>
+<span class="fc" id="L153">                ._this();</span>
     }
 
     /**
@@ -157,17 +163,17 @@ public class UIForSplitButton&lt;B extends JSplitButton&gt; extends UIForAnyButt
      * the currently selected {@link JMenuItem} and a list of
      * all other items.
      *
-     * @param action The {@link Action} which will receive an {@link SplitItem.Delegate}
+     * @param action The {@link Action} which will receive an {@link SplitItemDelegate}
      *              exposing all essential components making up this {@link JSplitButton}.
      * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if the provided action is null.
      */
     public UIForSplitButton&lt;B&gt; onSelection(
-            Action&lt;SplitButtonDelegate&lt;JMenuItem&gt;&gt; action
+        Action&lt;SplitButtonDelegate&lt;JMenuItem&gt;&gt; action
     ) {
-<span class="fc" id="L168">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
-<span class="fc" id="L169">        _onSelections.add(action);</span>
-<span class="fc" id="L170">        return this;</span>
+<span class="fc" id="L174">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
+<span class="fc" id="L175">        _onSelections.add(action);</span>
+<span class="fc" id="L176">        return this;</span>
     }
 
     /**
@@ -183,21 +189,22 @@ public class UIForSplitButton&lt;B extends JSplitButton&gt; extends UIForAnyButt
      * @return This very instance, which enables builder-style method chaining.
      */
     public UIForSplitButton&lt;B&gt; onButtonClick(
-        Action&lt;SplitItem.Delegate&lt;JMenuItem&gt;&gt; action
+        Action&lt;SplitItemDelegate&lt;JMenuItem&gt;&gt; action
     ) {
-<span class="fc" id="L188">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
-<span class="fc" id="L189">        B button = getComponent();</span>
-<span class="fc" id="L190">        button.addButtonClickedActionListener(</span>
-<span class="nc" id="L191">            e -&gt; _doApp(()-&gt;action.accept(</span>
-                    new SplitItem.Delegate&lt;&gt;(
-                       e,
-                       button,
-<span class="nc" id="L195">                       () -&gt; new ArrayList&lt;&gt;(_options.keySet()),</span>
-                       _lastSelected[0]
+<span class="fc" id="L194">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
+<span class="fc" id="L195">        return _with( thisComponent -&gt;</span>
+<span class="fc" id="L196">                    thisComponent.addButtonClickedActionListener(</span>
+<span class="nc" id="L197">                        e -&gt; _doApp(()-&gt;action.accept(</span>
+                                new SplitItemDelegate&lt;&gt;(
+                                   e,
+                                   thisComponent,
+<span class="nc" id="L201">                                   () -&gt; new ArrayList&lt;&gt;(_options.keySet()),</span>
+                                   _lastSelected[0]
+                                )
+                            ))
                     )
-                ))
-        );
-<span class="fc" id="L200">        return this;</span>
+                )
+<span class="fc" id="L207">                ._this();</span>
     }
 
     /**
@@ -211,14 +218,15 @@ public class UIForSplitButton&lt;B extends JSplitButton&gt; extends UIForAnyButt
      */
     @Override
     public UIForSplitButton&lt;B&gt; onClick( Action&lt;ComponentDelegate&lt;B, ActionEvent&gt;&gt; action ) {
-<span class="nc" id="L214">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
-<span class="nc" id="L215">        B button = getComponent();</span>
-<span class="nc" id="L216">        button.addButtonClickedActionListener(</span>
-<span class="nc" id="L217">            e -&gt; _doApp(()-&gt;action.accept(</span>
-                 new ComponentDelegate&lt;&gt;(button, e, this::getSiblinghood)
-            ))
-        );
-<span class="nc" id="L221">        return this;</span>
+<span class="nc" id="L221">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
+<span class="nc" id="L222">        return _with( thisComponent -&gt;</span>
+<span class="nc" id="L223">                    thisComponent.addButtonClickedActionListener(</span>
+<span class="nc" id="L224">                        e -&gt; _doApp(()-&gt;action.accept(</span>
+                             new ComponentDelegate&lt;&gt;( thisComponent, e )
+                        ))
+                    )
+                )
+<span class="nc" id="L229">                ._this();</span>
     }
 
     /**
@@ -230,21 +238,25 @@ public class UIForSplitButton&lt;B extends JSplitButton&gt; extends UIForAnyButt
      * @return this very instance, which enables builder-style method chaining.
      */
     public UIForSplitButton&lt;B&gt; onOpen( Action&lt;ComponentDelegate&lt;B, PopupMenuEvent&gt;&gt; action ) {
-<span class="fc" id="L233">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
-<span class="pc" id="L234">        _onPopupOpen( e -&gt; _doApp(()-&gt;action.accept(new ComponentDelegate&lt;&gt;( getComponent(), e, this::getSiblinghood )) ) );</span>
-<span class="fc" id="L235">        return this;</span>
+<span class="fc" id="L241">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
+<span class="fc" id="L242">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L243">                    _onPopupOpen(thisComponent, e -&gt;</span>
+<span class="nc" id="L244">                        _doApp(()-&gt;action.accept(new ComponentDelegate&lt;&gt;( thisComponent, e )) )</span>
+                    );
+<span class="fc" id="L246">                })</span>
+<span class="fc" id="L247">                ._this();</span>
     }
 
-    private void _onPopupOpen( Consumer&lt;PopupMenuEvent&gt; consumer ) {
-<span class="fc" id="L239">        getComponent().getPopupMenu().addPopupMenuListener(new PopupMenuListener() {</span>
+    private void _onPopupOpen( B thisComponent, Consumer&lt;PopupMenuEvent&gt; consumer ) {
+<span class="fc" id="L251">        thisComponent.getPopupMenu().addPopupMenuListener(new PopupMenuListener() {</span>
             public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
                 // This method is called before the popup menu becomes visible.
-<span class="nc" id="L242">                consumer.accept(e);</span>
-<span class="nc" id="L243">            }</span>
-<span class="nc" id="L244">            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {/* Not relevant here */}</span>
-<span class="nc" id="L245">            public void popupMenuCanceled(PopupMenuEvent e) {/* Not relevant here */}</span>
+<span class="nc" id="L254">                consumer.accept(e);</span>
+<span class="nc" id="L255">            }</span>
+<span class="nc" id="L256">            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {/* Not relevant here */}</span>
+<span class="nc" id="L257">            public void popupMenuCanceled(PopupMenuEvent e) {/* Not relevant here */}</span>
         });
-<span class="fc" id="L247">    }</span>
+<span class="fc" id="L259">    }</span>
 
     /**
      *  Registers a listener to be notified when the split button is closed,
@@ -255,21 +267,25 @@ public class UIForSplitButton&lt;B extends JSplitButton&gt; extends UIForAnyButt
      * @return this very instance, which enables builder-style method chaining.
      */
     public UIForSplitButton&lt;B&gt; onClose( Action&lt;ComponentDelegate&lt;B, PopupMenuEvent&gt;&gt; action ) {
-<span class="fc" id="L258">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
-<span class="pc" id="L259">        _onPopupClose( e -&gt; _doApp(()-&gt;action.accept(new ComponentDelegate&lt;&gt;( getComponent(), e, this::getSiblinghood )) ) );</span>
-<span class="fc" id="L260">        return this;</span>
+<span class="fc" id="L270">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
+<span class="fc" id="L271">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L272">                    _onPopupClose(thisComponent,</span>
+<span class="nc" id="L273">                        e -&gt; _doApp(()-&gt;action.accept(new ComponentDelegate&lt;&gt;( thisComponent, e )) )</span>
+                    );
+<span class="fc" id="L275">                })</span>
+<span class="fc" id="L276">                ._this();</span>
     }
 
-    private void _onPopupClose( Consumer&lt;PopupMenuEvent&gt; consumer ) {
-<span class="fc" id="L264">        getComponent().getPopupMenu().addPopupMenuListener(new PopupMenuListener() {</span>
-<span class="nc" id="L265">            public void popupMenuWillBecomeVisible(PopupMenuEvent e) {/* Not relevant here */}</span>
+    private void _onPopupClose( B thisComponent, Consumer&lt;PopupMenuEvent&gt; consumer ) {
+<span class="fc" id="L280">        thisComponent.getPopupMenu().addPopupMenuListener(new PopupMenuListener() {</span>
+<span class="nc" id="L281">            public void popupMenuWillBecomeVisible(PopupMenuEvent e) {/* Not relevant here */}</span>
             public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
                 // This method is called before the popup menu becomes invisible.
-<span class="nc" id="L268">                consumer.accept(e);</span>
-<span class="nc" id="L269">            }</span>
-<span class="nc" id="L270">            public void popupMenuCanceled(PopupMenuEvent e) {/* Not relevant here */}</span>
+<span class="nc" id="L284">                consumer.accept(e);</span>
+<span class="nc" id="L285">            }</span>
+<span class="nc" id="L286">            public void popupMenuCanceled(PopupMenuEvent e) {/* Not relevant here */}</span>
         });
-<span class="fc" id="L272">    }</span>
+<span class="fc" id="L288">    }</span>
 
     /**
      *  Registers a listener to be notified when the split button options drop down popup is canceled,
@@ -279,21 +295,25 @@ public class UIForSplitButton&lt;B extends JSplitButton&gt; extends UIForAnyButt
      * @return this very instance, which enables builder-style method chaining.
      */
     public UIForSplitButton&lt;B&gt; onCancel( Action&lt;ComponentDelegate&lt;B, PopupMenuEvent&gt;&gt; action ) {
-<span class="fc" id="L282">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
-<span class="pc" id="L283">        _onPopupCancel( e -&gt; _doApp(()-&gt;action.accept(new ComponentDelegate&lt;&gt;( getComponent(), e, this::getSiblinghood )) ) );</span>
-<span class="fc" id="L284">        return this;</span>
+<span class="fc" id="L298">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
+<span class="fc" id="L299">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L300">                    _onPopupCancel(thisComponent,</span>
+<span class="nc" id="L301">                        e -&gt; _doApp(()-&gt;action.accept(new ComponentDelegate&lt;&gt;( thisComponent, e )) )</span>
+                    );
+<span class="fc" id="L303">                })</span>
+<span class="fc" id="L304">                ._this();</span>
     }
 
-    private void _onPopupCancel( Consumer&lt;PopupMenuEvent&gt; consumer ) {
-<span class="fc" id="L288">        getComponent().getPopupMenu().addPopupMenuListener(new PopupMenuListener() {</span>
-<span class="nc" id="L289">            public void popupMenuWillBecomeVisible(PopupMenuEvent e) {/* Not relevant here */}</span>
-<span class="nc" id="L290">            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {/* Not relevant here */}</span>
+    private void _onPopupCancel( B thisComponent, Consumer&lt;PopupMenuEvent&gt; consumer ) {
+<span class="fc" id="L308">        thisComponent.getPopupMenu().addPopupMenuListener(new PopupMenuListener() {</span>
+<span class="nc" id="L309">            public void popupMenuWillBecomeVisible(PopupMenuEvent e) {/* Not relevant here */}</span>
+<span class="nc" id="L310">            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {/* Not relevant here */}</span>
             public void popupMenuCanceled(PopupMenuEvent e) {
                 // This method is called when the popup menu is canceled.
-<span class="nc" id="L293">                consumer.accept(e);</span>
-<span class="nc" id="L294">            }</span>
+<span class="nc" id="L313">                consumer.accept(e);</span>
+<span class="nc" id="L314">            }</span>
         });
-<span class="fc" id="L296">    }</span>
+<span class="fc" id="L316">    }</span>
 
     /**
      *  Use this to add a {@link JMenuItem} to the {@link JSplitButton} popup menu.
@@ -304,8 +324,8 @@ public class UIForSplitButton&lt;B extends JSplitButton&gt; extends UIForAnyButt
      * @return This very instance, which enables builder-style method chaining.
      */
     public &lt;M extends JMenuItem&gt; UIForSplitButton&lt;B&gt; add( UIForMenuItem&lt;M&gt; forItem ) {
-<span class="fc" id="L307">        NullUtil.nullArgCheck(forItem, &quot;forItem&quot;, UIForMenuItem.class);</span>
-<span class="fc" id="L308">        return this.add(forItem.getComponent());</span>
+<span class="fc" id="L327">        NullUtil.nullArgCheck(forItem, &quot;forItem&quot;, UIForMenuItem.class);</span>
+<span class="fc" id="L328">        return this.add(forItem.getComponent());</span>
     }
 
     /**
@@ -313,8 +333,8 @@ public class UIForSplitButton&lt;B extends JSplitButton&gt; extends UIForAnyButt
      * @return This very instance, which enables builder-style method chaining.
      */
     public UIForSplitButton&lt;B&gt; add( JMenuItem item ) {
-<span class="fc" id="L316">        NullUtil.nullArgCheck(item, &quot;item&quot;, JMenuItem.class);</span>
-<span class="fc" id="L317">        return this.add(SplitItem.of(item));</span>
+<span class="fc" id="L336">        NullUtil.nullArgCheck(item, &quot;item&quot;, JMenuItem.class);</span>
+<span class="fc" id="L337">        return this.add(SplitItem.of(item));</span>
     }
 
     /**
@@ -323,42 +343,44 @@ public class UIForSplitButton&lt;B extends JSplitButton&gt; extends UIForAnyButt
      * @return This very instance, which enables builder-style method chaining.
      */
     public &lt;I extends JMenuItem&gt; UIForSplitButton&lt;B&gt; add( SplitItem&lt;I&gt; splitItem ) {
-<span class="fc" id="L326">        NullUtil.nullArgCheck(splitItem, &quot;buttonItem&quot;, SplitItem.class);</span>
-<span class="fc" id="L327">        I item = splitItem.getItem();</span>
-<span class="fc bfc" id="L328" title="All 2 branches covered.">        if ( splitItem.getIsEnabled() != null )</span>
-<span class="fc" id="L329">            _onShow(splitItem.getIsEnabled(), v -&gt; item.setEnabled(v) );</span>
+<span class="fc" id="L346">        NullUtil.nullArgCheck(splitItem, &quot;buttonItem&quot;, SplitItem.class);</span>
+<span class="fc" id="L347">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L348">                    I item = splitItem.getItem();</span>
+<span class="fc" id="L349">                    splitItem.getIsEnabled().ifPresent( isEnabled -&gt; {</span>
+<span class="fc" id="L350">                        _onShow( isEnabled, thisComponent, (c,v) -&gt; item.setEnabled(v) );</span>
+<span class="fc" id="L351">                    });</span>
 
-<span class="fc bfc" id="L331" title="All 2 branches covered.">        if ( item.isSelected() )</span>
-<span class="fc" id="L332">            _lastSelected[0] = item;</span>
+<span class="fc bfc" id="L353" title="All 2 branches covered.">                    if ( item.isSelected() )</span>
+<span class="fc" id="L354">                        _lastSelected[0] = item;</span>
 
-<span class="fc" id="L334">        B button = getComponent();</span>
-<span class="fc" id="L335">        _popupMenu.add(item);</span>
-<span class="fc" id="L336">        _options.put(item, ( (SplitItem&lt;JMenuItem&gt;) splitItem).getOnClick());</span>
-<span class="fc" id="L337">        item.addActionListener(</span>
-<span class="fc" id="L338">            e -&gt; _doApp(()-&gt;{</span>
-<span class="fc" id="L339">                _lastSelected[0] = item;</span>
-<span class="fc" id="L340">                item.setSelected(true);</span>
-<span class="fc" id="L341">                SplitItem.Delegate&lt;I&gt; delegate =</span>
-                        new SplitItem.Delegate&lt;&gt;(
-                                e,
-                                button,
-<span class="fc" id="L345">                                () -&gt; _options.keySet().stream().map(o -&gt; (I) o ).collect(Collectors.toList()),</span>
-                                item
-                            );
-<span class="fc" id="L348">                _onSelections.forEach(action -&gt; {</span>
-                    try {
-<span class="fc" id="L350">                        action.accept(new SplitButtonDelegate&lt;&gt;(button,(SplitItem.Delegate&lt;JMenuItem&gt;) delegate, this::getSiblinghood));</span>
-<span class="nc" id="L351">                    } catch (Exception exception) {</span>
-<span class="nc" id="L352">                        exception.printStackTrace();</span>
-<span class="fc" id="L353">                    }</span>
-<span class="fc" id="L354">                });</span>
-<span class="fc" id="L355">                splitItem.getOnSelected().accept(delegate);</span>
-<span class="fc" id="L356">            })</span>
-        );
-<span class="fc" id="L358">        return this;</span>
+<span class="fc" id="L356">                    _popupMenu.add(item);</span>
+<span class="fc" id="L357">                    _options.put(item, ( (SplitItem&lt;JMenuItem&gt;) splitItem).getOnClick());</span>
+<span class="fc" id="L358">                    item.addActionListener(</span>
+<span class="fc" id="L359">                        e -&gt; _doApp(()-&gt;{</span>
+<span class="fc" id="L360">                            _lastSelected[0] = item;</span>
+<span class="fc" id="L361">                            item.setSelected(true);</span>
+<span class="fc" id="L362">                            SplitItemDelegate&lt;I&gt; delegate =</span>
+                                    new SplitItemDelegate&lt;&gt;(
+                                            e,
+                                            thisComponent,
+<span class="fc" id="L366">                                            () -&gt; _options.keySet().stream().map(o -&gt; (I) o ).collect(Collectors.toList()),</span>
+                                            item
+                                        );
+<span class="fc" id="L369">                            _onSelections.forEach(action -&gt; {</span>
+                                try {
+<span class="fc" id="L371">                                    action.accept(new SplitButtonDelegate&lt;&gt;( thisComponent,(SplitItemDelegate&lt;JMenuItem&gt;) delegate ));</span>
+<span class="nc" id="L372">                                } catch (Exception exception) {</span>
+<span class="nc" id="L373">                                    exception.printStackTrace();</span>
+<span class="fc" id="L374">                                }</span>
+<span class="fc" id="L375">                            });</span>
+<span class="fc" id="L376">                            splitItem.getOnSelected().accept(delegate);</span>
+<span class="fc" id="L377">                        })</span>
+                    );
+<span class="fc" id="L379">                })</span>
+<span class="fc" id="L380">                ._this();</span>
     }
 
-<span class="fc" id="L361">    JPopupMenu getPopupMenu() { return _popupMenu; }</span>
+<span class="fc" id="L383">    JPopupMenu getPopupMenu() { return _popupMenu; }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

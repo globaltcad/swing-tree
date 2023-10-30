@@ -6,9 +6,11 @@ import swingtree.threading.EventProcessor;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  *  This class is a conceptual extension of the {@link AbstractBuilder} which expects
@@ -18,15 +20,10 @@ import java.util.stream.Collectors;
  *
  * @param <I> The concrete implementation type of this abstract class, "I" stands for "Implementation".
  * @param <C> The component type parameter which ought to be built in some way.
+ * @param <E> The component type parameter which ought to be built in some way.
  */
 abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extends AbstractBuilder<I, C>
 {
-    /**
-     *  A list of all the child builders.
-     */
-    private final List<AbstractNestedBuilder<?,?,?>> _children = new ArrayList<>();
-    private AbstractNestedBuilder<?,?,?> _parent; // The parent builder (This may be null if no parent present or provided)
-
     /**
      * Instances of the AbstractNestedBuilder as well as its sub types always wrap
      * a single component for which they are responsible.
@@ -34,7 +31,7 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extend
      *
      * @param component The component type which will be wrapped by this builder node.
      */
-    public AbstractNestedBuilder( C component ) { super(component); }
+    protected AbstractNestedBuilder( C component ) { super(component); }
 
     /**
      *  A list of all the siblings of the component wrapped by this builder,
@@ -43,8 +40,13 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extend
      * @return A list of all the siblings of the component wrapped by this builder.
      */
     protected final List<E> getSiblinghood() {
-        if ( _parent == null ) return new ArrayList<>();
-        return _parent._children.stream().map(c -> (E) c.getComponent()).collect(Collectors.toList());
+        return Optional.ofNullable(getComponent().getParent())
+               .map(Container::getComponents)
+               .map(Arrays::stream)
+               .orElseGet(Stream::empty)
+               .filter(c -> c instanceof JComponent)
+               .map(c -> (E) c)
+               .collect(Collectors.toList());
     }
 
     /**
@@ -59,8 +61,11 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extend
     @SafeVarargs
     public final I add( E... components ) {
         NullUtil.nullArgCheck(components, "components", Object[].class);
-        for ( E c : components ) _doAdd(UI.of((JComponent) c), null);
-        return _this();
+        return _with( c -> {
+                   for ( E other : components )
+                       _doAdd( UI.of((JComponent) other), null, c );
+               })
+               ._this();
     }
 
     /**
@@ -69,22 +74,22 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extend
      * @return This very instance, which enables builder-style method chaining.
      */
     public final <T extends JComponent> I add( UIForAnySwing<?, T> builder ) {
-        this.add(new AbstractNestedBuilder[]{builder});
-        return _this();
+        return (I) this.add(new AbstractNestedBuilder[]{builder});
     }
 
     /**
-     *  This builder class expects its implementations to be builder types
-     *  for anything which can be built in a nested tree-like structure.
-     *  Implementations of this abstract method ought to enable support for nested building.
-     *  <br><br>
+     * This builder class expects its implementations to be builder types
+     * for anything which can be built in a nested tree-like structure.
+     * Implementations of this abstract method ought to enable support for nested building.
+     * <br><br>
      *
      * @param component A component instance which ought to be added to the wrapped component type.
-     * @param conf The layout constraint which ought to be used to add the component to the wrapped component type.
+     * @param conf      The layout constraint which ought to be used to add the component to the wrapped component type.
+     * @param thisComponent The component which is wrapped by this builder.
      */
-    protected abstract void _add( E component, Object conf );
+    protected abstract void _doAddComponent( E component, Object conf, C thisComponent );
 
-    protected final void _doAdd( AbstractNestedBuilder<?, ?, ?> builder, Object conf)
+    protected final void _doAdd( AbstractNestedBuilder<?, ?, ?> builder, Object conf, C thisComponent )
     {
         NullUtil.nullArgCheck(builder, "builder", AbstractNestedBuilder.class);
 
@@ -98,36 +103,26 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extend
                     "Please use 'UI.run(()->...)' method to execute your modifications on the EDT."
                 );
 
-        if ( _children.contains(builder) )
-            throw new IllegalArgumentException("Builder already used!");
+        E childComponent = (E) builder.getComponent();
 
-        _children.add(builder);
+        if ( childComponent instanceof JComponent ) {
+            JComponent child = (JComponent) childComponent;
 
-        if ( builder._parent != null )
-            throw new IllegalArgumentException("Builder already used!");
-
-        E component = (E) builder.getComponent();
-
-        builder._parent = this;
-
-        if ( component instanceof JComponent ) {
-            JComponent c = (JComponent) component;
-
-            Style style = ( conf != null ? null : ComponentExtension.from(c).calculateStyle() );
+            Style style = ( conf != null ? null : ComponentExtension.from(child).calculateStyle() );
             if ( style != null )
                 conf = style.layout().constraint().orElse(null);
 
-            _add(component, conf);
+            _doAddComponent( childComponent, conf, thisComponent );
 
             if ( style != null )
-                ComponentExtension.from(c).applyAndInstallStyle(style, true);
+                ComponentExtension.from(child).applyAndInstallStyle(style, true);
             else
-                ComponentExtension.from(c).calculateApplyAndInstallStyle(true);
+                ComponentExtension.from(child).calculateApplyAndInstallStyle(true);
         }
         else
-            _add(component, conf);
+            _doAddComponent( childComponent, conf, thisComponent );
 
-        _detachStrongRef(); // Detach strong reference to the component to allow it to be garbage collected.
+        builder._detachStrongRef(); // Detach strong reference to the component to allow it to be garbage collected.
     }
 
     /**
@@ -142,14 +137,16 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extend
      */
     @SafeVarargs
     @SuppressWarnings("varargs")
-    public final <B extends AbstractNestedBuilder<?, ?, JComponent>> I add( B... builders ) {
+    public final <B extends AbstractNestedBuilder<?, ?, JComponent>> I add( B... builders )
+    {
         if ( builders == null )
             throw new IllegalArgumentException("Swing tree builders may not be null!");
 
-        for ( AbstractNestedBuilder<?, ?, ?> b : builders )
-            _doAdd( b, null );
-
-        return _this();
+        return _with( thisComponent -> {
+                    for ( AbstractNestedBuilder<?, ?, ?> b : builders )
+                        _doAdd( b, null, thisComponent );
+                })
+                ._this();
     }
 
     /**
@@ -162,12 +159,16 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extend
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I add( List<E> components ) {
-        for ( E component : components )
-            _doAdd(UI.of((JComponent) component), null);
+        return _with( thisComponent -> {
+                    for ( E component : components )
+                        _doAdd( UI.of((JComponent) component), null, thisComponent );
 
-        return _this();
+                })
+                ._this();
     }
 
-    protected final int _childCount() { return _children.size(); }
+    protected final int _childCount( C c ) {
+        return  ( c instanceof Container ? ( (Container) c ).getComponentCount() : 0 );
+    }
 
 }

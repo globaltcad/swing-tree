@@ -5,7 +5,7 @@ import sprouts.Val;
 import javax.swing.*;
 
 /**
- *  A swing tree builder node for {@link JCheckBox} instances.
+ *  A SwingTree builder node designed for configuring {@link JCheckBox} instances.
  */
 public class UIForCheckBox<B extends JCheckBox> extends UIForAnyButton<UIForCheckBox<B>, B>
 {
@@ -13,13 +13,20 @@ public class UIForCheckBox<B extends JCheckBox> extends UIForAnyButton<UIForChec
 
 
     public UIForCheckBox<B> borderIsPaintedFlatIf(boolean borderPainted ) {
-        getComponent().setBorderPaintedFlat(borderPainted);
-        return this;
+        return _with( thisComponent -> {
+                   thisComponent.setBorderPaintedFlat(borderPainted);
+               })
+               ._this();
     }
 
     public UIForCheckBox<B> borderIsPaintedFlatIf(Val<Boolean> val ) {
-        _onShow(val, v -> borderIsPaintedFlatIf(v) );
-        return borderIsPaintedFlatIf( val.get() );
+        return _withOnShow( val, (thisComponent,v) -> {
+                    thisComponent.setBorderPaintedFlat(v);
+                })
+                ._with( thisComponent -> {
+                    thisComponent.setBorderPaintedFlat( val.get() );
+                })
+               ._this();
     }
 
 }

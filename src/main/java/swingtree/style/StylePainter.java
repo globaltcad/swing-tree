@@ -26,7 +26,7 @@ final class StylePainter<C extends JComponent>
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(StylePainter.class);
 
-    private static final StylePainter<?> _NONE = new StylePainter<>(Style.none(), new Expirable[0], null, false);
+    private static final StylePainter<?> _NONE = new StylePainter<>(Style.none(), new Expirable[0]);
 
     public static <C extends JComponent> StylePainter<C> none() { return (StylePainter<C>) _NONE; }
 
@@ -37,9 +37,6 @@ final class StylePainter<C extends JComponent>
 
     private final Style                _style;
     private final Expirable<Painter>[] _animationPainters;
-    private final Shape                _mainClip;
-    private final boolean              _mainClipEstablished;
-
 
     // Cached Area object representing the inner component area:
     private Area _baseArea = null;
@@ -47,67 +44,38 @@ final class StylePainter<C extends JComponent>
 
     private StylePainter(
         Style style,
-        Expirable<Painter>[] animationPainters,
-        Shape mainClip,
-        boolean mainClipEstablished
+        Expirable<Painter>[] animationPainters
     ) {
-        _style               = Objects.requireNonNull(style);
-        _mainClip            = mainClip;
-        _mainClipEstablished = mainClipEstablished;
-        _animationPainters   = Objects.requireNonNull(animationPainters);
-    }
-
-    StylePainter<C> beginPaintingWith( Style style, Graphics g ) {
-        if ( Style.none().equals(style) ) return reset();
-        if ( !_mainClipEstablished ) {
-            Shape mainClip = g.getClip();
-            boolean mainClipEstablished = true;
-            return new StylePainter<>( style, _animationPainters, mainClip, mainClipEstablished);
-        }
-        return new StylePainter<>( style, _animationPainters, _mainClip, _mainClipEstablished);
+        _style             = Objects.requireNonNull(style);
+        _animationPainters = Objects.requireNonNull(animationPainters);
     }
 
     StylePainter<C> endPainting() {
-        return new StylePainter<>( _style, _animationPainters, null, false );
+        _baseArea = null;
+        return this;
     }
 
     StylePainter<C> update( Style style ) {
-        if ( Style.none().equals(style) ) return reset();
-        return new StylePainter<>( style, _animationPainters, _mainClip, _mainClipEstablished);
-    }
-
-    StylePainter<C> reset() {
-        StylePainter<C> reset = none();
-        if ( _animationPainters.length > 0 )
-            reset = new StylePainter<>(
-                            reset._style,
-                            _animationPainters,
-                            reset._mainClip,
-                            reset._mainClipEstablished
-                        );
-
-        return reset;
+        return new StylePainter<>( style, _animationPainters );
     }
 
     StylePainter<C> withAnimationPainter( LifeTime lifeTime, Painter animationPainter ) {
         java.util.List<Expirable<Painter>> animationPainters = new ArrayList<>(Arrays.asList(_animationPainters));
         animationPainters.add(new Expirable<>(lifeTime, animationPainter));
-        return new StylePainter<>(_style, animationPainters.toArray(new Expirable[0]), _mainClip, _mainClipEstablished);
+        return new StylePainter<>( _style, animationPainters.toArray(new Expirable[0]) );
     }
 
     StylePainter<C> withoutAnimationPainters() {
-        return new StylePainter<>(_style, new Expirable[0], _mainClip, _mainClipEstablished);
+        return new StylePainter<>( _style, new Expirable[0] );
     }
 
     StylePainter<C> withoutExpiredAnimationPainters() {
         List<Expirable<Painter>> animationPainters = new ArrayList<>(Arrays.asList(_animationPainters));
         animationPainters.removeIf(Expirable::isExpired);
-        return new StylePainter<>(_style, animationPainters.toArray(new Expirable[0]), _mainClip, _mainClipEstablished);
+        return new StylePainter<>( _style, animationPainters.toArray(new Expirable[0]) );
     }
 
     Style getStyle() { return _style; }
-
-    Shape getMainClip() { return _mainClip; }
 
     Area _getBaseArea(JComponent comp)
     {
@@ -182,16 +150,16 @@ final class StylePainter<C extends JComponent>
         // 4. Painters, which are provided by the user and can be anything
         _style.painters(layer).forEach( backgroundPainter -> {
             if ( backgroundPainter == Painter.none() ) return;
-            g2d.setClip(_getBaseArea(comp));
-            AffineTransform oldTransform = new AffineTransform(g2d.getTransform());
-            try {
-                backgroundPainter.paint(g2d);
-            } catch ( Exception e ) {
-                log.warn(
-                    "An exception occurred while executing painter '" + backgroundPainter + "' " +
-                    "on layer '" + layer + "' of component '" + comp + "'!",
-                    e
-                );
+            _withClip(g2d, _getBaseArea(comp), () -> {
+                AffineTransform oldTransform = new AffineTransform(g2d.getTransform());
+                try {
+                    backgroundPainter.paint(g2d);
+                } catch (Exception e) {
+                    log.warn(
+                            "An exception occurred while executing painter '" + backgroundPainter + "' " +
+                                    "on layer '" + layer + "' of component '" + comp + "'!",
+                            e
+                    );
                 /*
                     If exceptions happen in user provided painters, we don't want to
                     mess up the rendering of the rest of the component, so we catch them here!
@@ -202,10 +170,21 @@ final class StylePainter<C extends JComponent>
                     Hi there! If you are reading this, you are probably a developer using the SwingTree
                     library, thank you for using it! Good luck finding out what went wrong! :)
                 */
-            } finally {
-                g2d.setTransform(oldTransform);
-            }
+                } finally {
+                    g2d.setTransform(oldTransform);
+                }
+            });
         });
+    }
+
+    private void _withClip( Graphics2D g2d, Shape clip, Runnable paintTask ) {
+        Shape formerClip = g2d.getClip();
+        g2d.setClip(clip);
+        try {
+            paintTask.run();
+        } finally {
+            g2d.setClip(formerClip);
+        }
     }
 
     void paintBorderStyle( Graphics2D g2d, JComponent component )
@@ -250,14 +229,6 @@ final class StylePainter<C extends JComponent>
 
     private void _drawBorder( Color color, Graphics2D g2d, JComponent comp ) {
         if ( !Outline.none().equals(_style.border().widths()) ) {
-            /*
-                The border should not be clipped as it can not be drawn outside the component's bounds,
-                and it will also cover up ugly artifacts between the inner component area
-                and the area around the component (margin), which is not covered by the border.
-                Resetting the clip here is visually especially very important for rounded borders and shadows.
-            */
-            Shape formerClip = g2d.getClip();
-            g2d.setClip(_mainClip);
             try {
                 int leftBorderWidth   = _style.border().widths().left().orElse(0);
                 int topBorderWidth    = _style.border().widths().top().orElse(0);
@@ -281,8 +252,15 @@ final class StylePainter<C extends JComponent>
                         }
                     }
                 }
-            } finally {
-                g2d.setClip(formerClip);
+            } catch ( Exception e ) {
+                log.warn(
+                    "An exception occurred while drawing the border of component '" + comp + "'!",
+                    e
+                );
+                /*
+                    If exceptions happen in user provided painters, we don't want to
+                    mess up the rendering of the rest of the component, so we catch them here!
+                */
             }
         }
     }

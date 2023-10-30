@@ -196,7 +196,7 @@ public final class ComponentExtension<C extends JComponent>
      */
     public void paintForegroundStyle( Graphics2D g2d )
     {
-        establishStyleAndBeginPainting(g2d);
+        establishStyleAndBeginPainting();
 
         // We remember if antialiasing was enabled before we render:
         boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
@@ -216,8 +216,6 @@ public final class ComponentExtension<C extends JComponent>
         // Reset antialiasing to its previous state:
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
     }
-
-    Shape getMainClip() { return _stylePainter.getMainClip(); }
 
     Shape getInnerComponentArea() { return _stylePainter._getBaseArea(_owner); }
 
@@ -269,9 +267,8 @@ public final class ComponentExtension<C extends JComponent>
         _installStylePainterFor( _applyStyleToComponentState(style, force) );
     }
 
-    void establishStyleAndBeginPainting( Graphics g ) {
-        Style style = _calculateAndApplyStyle(false);
-        _stylePainter = _stylePainter.beginPaintingWith( style, g );
+    void establishStyleAndBeginPainting() {
+        _stylePainter = _stylePainter.update( _calculateAndApplyStyle(false) );
     }
 
     private Style _calculateAndApplyStyle( boolean force ) {
@@ -279,7 +276,6 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     private void _installStylePainterFor( Style style ) {
-        _stylePainter = _stylePainter.reset(); // We reset the style painter so that the style is applied again!
         _stylePainter = _stylePainter.update(style);
     }
 
@@ -288,7 +284,7 @@ public final class ComponentExtension<C extends JComponent>
         // If end the painting of the last painting cycle if it was not already ended:
         _stylePainter = _stylePainter.endPainting();
 
-        establishStyleAndBeginPainting(g);
+        establishStyleAndBeginPainting();
 
         _stylePainter.renderBackgroundStyle( (Graphics2D) g, _owner );
     }

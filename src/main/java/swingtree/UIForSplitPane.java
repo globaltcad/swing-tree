@@ -7,7 +7,7 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
 /**
- *  A swing tree builder node for {@link JSplitPane} instances.
+ *  A SwingTree builder node designed for configuring {@link JSplitPane} instances.
  */
 public class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UIForSplitPane<P>, P>
 {
@@ -17,7 +17,7 @@ public class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UIForSpl
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.
      */
-    public UIForSplitPane( P component ) { super( component ); }
+    protected UIForSplitPane( P component ) { super( component ); }
 
     /**
      * Sets the alignment of the split bar in the split pane.
@@ -28,8 +28,10 @@ public class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UIForSpl
      */
     public final UIForSplitPane<P> withOrientation( UI.Align align ) {
         NullUtil.nullArgCheck( align, "split", UI.Align.class );
-        getComponent().setOrientation( align.forSplitPane() );
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.setOrientation( align.forSplitPane() );
+                })
+                ._this();
     }
 
     /**
@@ -44,8 +46,13 @@ public class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UIForSpl
     public final UIForSplitPane<P> withOrientation( Val<UI.Align> align ) {
         NullUtil.nullArgCheck( align, "align", Val.class );
         NullUtil.nullPropertyCheck( align, "align", "Null is not a valid alignment." );
-        _onShow( align, v -> withOrientation(align.orElseThrow()) );
-        return withOrientation(align.get());
+        return _withOnShow( align, (thisComponent,it) -> {
+                    thisComponent.setOrientation( it.forSplitPane() );
+                })
+                ._with( thisComponent -> {
+                    thisComponent.setOrientation( align.orElseThrow().forSplitPane() );
+                })
+                ._this();
     }
 
     /**
@@ -61,8 +68,10 @@ public class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UIForSpl
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForSplitPane<P> withDividerAt( int location ) {
-        getComponent().setDividerLocation(location);
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.setDividerLocation(location);
+                })
+                ._this();
     }
 
     /**
@@ -83,8 +92,13 @@ public class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UIForSpl
     public final UIForSplitPane<P> withDividerAt( Val<Integer> location ) {
         NullUtil.nullArgCheck( location, "location", Val.class );
         NullUtil.nullPropertyCheck( location, "location", "Null is not a valid divider location." );
-        _onShow( location, this::withDividerAt );
-        return this.withDividerAt( location.orElseThrow() );
+        return _withOnShow( location, (thisComponent, it) -> {
+                    thisComponent.setDividerLocation(it);
+                })
+                ._with( thisComponent -> {
+                    thisComponent.setDividerLocation( location.orElseThrow() );
+                })
+                ._this();
     }
 
     /**
@@ -94,8 +108,10 @@ public class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UIForSpl
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForSplitPane<P> withDividerSize( int size ) {
-        getComponent().setDividerSize(UI.scale(size));
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.setDividerSize(UI.scale(size));
+                })
+                ._this();
     }
 
     /**
@@ -109,12 +125,16 @@ public class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UIForSpl
     public final UIForSplitPane<P> withDividerSize( Val<Integer> size ) {
         NullUtil.nullArgCheck( size, "size", Val.class );
         NullUtil.nullPropertyCheck( size, "size", "Null is not a valid divider size." );
-        _onShow( size, this::withDividerSize );
-        return this.withDividerSize( size.orElseThrow() );
+        return _withOnShow( size, (thisComponent,it) -> {
+                    thisComponent.setDividerSize(UI.scale(it));
+                })
+                ._with( thisComponent -> {
+                    thisComponent.setDividerSize( UI.scale(size.orElseThrow()) );
+                })
+                ._this();
     }
 
-    private void _calculateDividerLocationFrom( double percentage ) {
-        P p = getComponent();
+    private void _calculateDividerLocationFrom( P p, double percentage ) {
         int loc = (int) (
                         p.getOrientation() == JSplitPane.HORIZONTAL_SPLIT
                             ? p.getWidth()  * percentage
@@ -140,8 +160,10 @@ public class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UIForSpl
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForSplitPane<P> withDivisionOf( double percentage ) {
-        _calculateDividerLocationFrom(percentage);
-        return this;
+        return _with( thisComponent -> {
+                    _calculateDividerLocationFrom(thisComponent, percentage);
+                })
+                ._this();
     }
 
     /**
@@ -167,16 +189,21 @@ public class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UIForSpl
     public final UIForSplitPane<P> withDivisionOf( Val<Double> percentage ) {
         NullUtil.nullArgCheck( percentage, "percentage", Val.class );
         NullUtil.nullPropertyCheck( percentage, "percentage", "Null is not a valid percentage." );
-        _onShow( percentage, this::withDivisionOf );
-        // Now we need to register a listener to the split pane's size, so that we can recalculate the divider location
-        // when the split pane is resized:
-        getComponent().addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentResized( ComponentEvent e ) {
-                _calculateDividerLocationFrom(percentage.orElseThrow());
-            }
-        });
-        return this.withDivisionOf(percentage.orElseThrow());
+        return _withOnShow( percentage, (thisComponent,v) -> {
+                    _calculateDividerLocationFrom(thisComponent, v);
+               })
+                ._with( thisComponent -> {
+                    // Now we need to register a listener to the split pane's size, so that we can recalculate the divider location
+                    // when the split pane is resized:
+                    thisComponent.addComponentListener(new ComponentAdapter() {
+                        @Override
+                        public void componentResized( ComponentEvent e ) {
+                            _calculateDividerLocationFrom(thisComponent, percentage.orElseThrow());
+                        }
+                    });
+                    _calculateDividerLocationFrom(thisComponent, percentage.orElseThrow());
+                })
+                ._this();
     }
 
 }

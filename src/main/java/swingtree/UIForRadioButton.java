@@ -3,7 +3,7 @@ package swingtree;
 import javax.swing.*;
 
 /**
- *  A swing tree builder node for {@link JRadioButton} instances.
+ *  A SwingTree builder node designed for configuring {@link JRadioButton} instances.
  */
 public class UIForRadioButton<R extends JRadioButton> extends UIForAnyToggleButton<UIForRadioButton<R>, R>
 {

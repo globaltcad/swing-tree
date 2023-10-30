@@ -6,7 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- *  A swing tree builder node for {@link JSeparator} instances.
+ *  A SwingTree builder node designed for configuring {@link JSeparator} instances.
  * 	<p>
  * 	<b>Please take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
  * 	where you can browse a large collection of examples demonstrating how to use the API of this class.</b>
@@ -33,8 +33,10 @@ public class UIForSeparator<S extends JSeparator> extends UIForAnySwing<UIForSep
      */
     public final UIForSeparator<S> withOrientation( UI.Align align ) {
         NullUtil.nullArgCheck( align, "align", Val.class );
-        getComponent().setOrientation(align.forSeparator());
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.setOrientation( align.forSeparator() );
+                })
+                ._this();
     }
 
     /**
@@ -45,8 +47,13 @@ public class UIForSeparator<S extends JSeparator> extends UIForAnySwing<UIForSep
     public final UIForSeparator<S> withOrientation( Val<UI.Align> align ) {
         NullUtil.nullArgCheck( align, "align", Val.class );
         NullUtil.nullPropertyCheck( align, "align", "Null is not a valid alignment." );
-        _onShow( align, v -> getComponent().setOrientation(v.forSeparator()) );
-        return withOrientation(align.get());
+        return _withOnShow( align, (c,v) -> {
+                    c.setOrientation( v.forSeparator() );
+                })
+                ._with( thisComponent -> {
+                    thisComponent.setOrientation( align.orElseThrow().forSeparator() );
+                })
+                ._this();
     }
 
     /**
@@ -54,12 +61,19 @@ public class UIForSeparator<S extends JSeparator> extends UIForAnySwing<UIForSep
      * @return This very builder to allow for method chaining.
      */
     public final UIForSeparator<S> withLength( int separatorLength ) {
-        S separator = getComponent();
-        Dimension d = separator.getPreferredSize();
-        if ( separator.getOrientation() == JSeparator.VERTICAL ) d.height = separatorLength;
-        else if ( separator.getOrientation() == JSeparator.HORIZONTAL ) d.width = separatorLength;
-        separator.setPreferredSize(d);
-        return this;
+        return _with( thisComponent -> {
+                    _setLength( thisComponent, separatorLength );
+                })
+                ._this();
+    }
+
+    private void _setLength( S thisComponent, int separatorLength ) {
+        Dimension d = thisComponent.getPreferredSize();
+        if ( thisComponent.getOrientation() == JSeparator.VERTICAL )
+            d.height = separatorLength;
+        else if ( thisComponent.getOrientation() == JSeparator.HORIZONTAL )
+            d.width = separatorLength;
+        thisComponent.setPreferredSize(d);
     }
 
     /**
@@ -69,7 +83,12 @@ public class UIForSeparator<S extends JSeparator> extends UIForAnySwing<UIForSep
     public UIForSeparator<S> withLength( Val<Integer> separatorLength ) {
         NullUtil.nullArgCheck( separatorLength, "separatorLength", Val.class );
         NullUtil.nullPropertyCheck( separatorLength, "separatorLength", "Null is not a valid separator length." );
-        _onShow( separatorLength, this::withLength );
-        return this;
+        return _withOnShow( separatorLength, (thisComponent,it) -> {
+                    _setLength( thisComponent, it );
+                })
+                ._with( thisComponent -> {
+                    _setLength( thisComponent, separatorLength.orElseThrow() );
+                })
+                ._this();
     }
 }

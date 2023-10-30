@@ -26,12 +26,12 @@ import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 
 /**
- *  A swing tree builder node for any kind {@link JComponent} instance.
+ *  A generic SwingTree builder node designed as a basis for configuring any kind of {@link JComponent} instance.
  *  This is the most generic builder type and therefore abstract super-type for almost all other builders.
  *  This builder defines nested building for anything extending the {@link JComponent} class.
  * 	<p>
@@ -48,16 +48,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
 
     private final static String _TIMERS_KEY = "_swing-tree.timers";
 
-    private boolean _idAlreadySet = false; // The id translates to the 'name' property of swing components.
-    private boolean _migAlreadySet = false;
-
     /**
      *  Extensions of the {@link  UIForAnySwing} always wrap
      *  a single component for which they are responsible.
      *
      * @param component The JComponent type which will be wrapped by this builder node.
      */
-    public UIForAnySwing( C component ) { super(component); }
+    protected UIForAnySwing( C component ) { super(component); }
 
     /**
      *  This method exposes a concise way to bind a {@link Observable} (usually a sprouts.Event to the
@@ -68,8 +65,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return The JComponent type which will be wrapped by this builder node.
      */
     public final I withRepaintIf( Observable noticeable ) {
-        noticeable.subscribe( () -> _doUI( () -> getComponent().repaint() ) );
-        return _this();
+        return _with( c -> noticeable.subscribe( () -> _doUI(c::repaint) ) )._this();
     }
 
     /**
@@ -85,11 +81,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return The JComponent type which will be wrapped by this builder node.
      */
     public final I id( String id ) {
-        if ( _idAlreadySet )
-            throw new IllegalArgumentException("The id has already been specified for this component!");
-        getComponent().setName(id);
-        _idAlreadySet = true;
-        return _this();
+        return _with( c -> c.setName(id) )._this();
     }
 
     /**
@@ -151,8 +143,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I group( String... groupTags ) {
-        ComponentExtension.from(getComponent()).setStyleGroups(groupTags);
-        return _this();
+        return _with( c -> ComponentExtension.from(c).setStyleGroups(groupTags) )._this();
     }
 
     /**
@@ -193,8 +184,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     @SafeVarargs
     public final <E extends Enum<E>> I group( E... groupTags ) {
-        ComponentExtension.from(getComponent()).setStyleGroups(groupTags);
-        return _this();
+        return _with( c -> ComponentExtension.from(c).setStyleGroups(groupTags) )._this();
     }
 
     /**
@@ -204,8 +194,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I isVisibleIf( boolean isVisible ) {
-        getComponent().setVisible( isVisible );
-        return _this();
+        return _with( c -> c.setVisible(isVisible) )._this();
     }
 
     /**
@@ -215,8 +204,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I isVisibleIfNot( boolean isVisible ) {
-        getComponent().setVisible(!isVisible);
-        return _this();
+        return _with( c -> c.setVisible(!isVisible) )._this();
     }
 
     /**
@@ -229,8 +217,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I isVisibleIf( Val<Boolean> isVisible ) {
         NullUtil.nullArgCheck(isVisible, "isVisible", Val.class);
         NullUtil.nullPropertyCheck(isVisible, "isVisible", "Null is not allowed to model the visibility of a UI component!");
-        _onShow( isVisible, v -> getComponent().setVisible(v) );
-        return isVisibleIf( isVisible.orElseThrow() );
+        return _withOnShow( isVisible, (c, v) -> {
+                    c.setVisible(v);
+                })
+                ._with( c -> {
+                    c.setVisible( isVisible.orElseThrow() );
+                })
+                ._this();
     }
 
     /**
@@ -242,8 +235,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I isVisibleIfNot( Val<Boolean> isVisible ) {
         NullUtil.nullArgCheck(isVisible, "isVisible", Val.class);
         NullUtil.nullPropertyCheck(isVisible, "isVisible", "Null is not allowed to model the visibility of a UI component! A boolean should only be true or false!");
-        _onShow( isVisible, v -> getComponent().setVisible(!v) );
-        return isVisibleIf( !isVisible.orElseThrow() );
+        return _withOnShow( isVisible, (c, v) -> {
+                    c.setVisible(!v);
+                })
+                ._with( c -> {
+                    c.setVisible( !isVisible.orElseThrow() );
+                })
+                ._this();
     }
 
     /**
@@ -260,8 +258,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck(enumValue, "enumValue", Enum.class);
         NullUtil.nullArgCheck(enumProperty, "enumProperty", Val.class);
         NullUtil.nullPropertyCheck(enumProperty, "enumProperty", "Null is not allowed to model the visibility of a UI component!");
-        _onShow( enumProperty, v -> getComponent().setVisible( v == enumValue ) );
-        return isVisibleIf( enumValue == enumProperty.orElseThrow() );
+        return _withOnShow( enumProperty, (c,v) -> {
+                    c.setVisible( v == enumValue );
+                })
+                ._with( c -> {
+                    c.setVisible( enumValue == enumProperty.orElseThrow() );
+                })
+                ._this();
     }
 
     /**
@@ -277,8 +280,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck(enumValue, "enumValue", Enum.class);
         NullUtil.nullArgCheck(enumProperty, "enumProperty", Val.class);
         NullUtil.nullPropertyCheck(enumProperty, "enumProperty", "Null is not allowed to model the visibility of a UI component!");
-        _onShow( enumProperty, v -> getComponent().setVisible( v != enumValue ) );
-        return isVisibleIf( enumValue != enumProperty.orElseThrow() );
+        return _withOnShow( enumProperty, (c,v) -> {
+                    c.setVisible( v != enumValue );
+                })
+                ._with( c -> {
+                    c.setVisible( enumValue != enumProperty.orElseThrow() );
+                })
+                ._this();
     }
 
     /**
@@ -288,8 +296,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I isEnabledIf( boolean isEnabled ) {
-        _setEnabled( isEnabled );
-        return _this();
+        return _with( c -> _setEnabled(c, isEnabled) )._this();
     }
 
     /**
@@ -300,8 +307,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I isEnabledIfNot( boolean isEnabled ) {
-        _setEnabled( !isEnabled );
-        return _this();
+        return _with( c -> _setEnabled(c, !isEnabled) )._this();
     }
 
     /**
@@ -313,8 +319,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I isEnabledIf( Val<Boolean> isEnabled ) {
         NullUtil.nullArgCheck(isEnabled, "isEnabled", Val.class);
         NullUtil.nullPropertyCheck(isEnabled, "isEnabled", "Null value for isEnabled is not allowed!");
-        _onShow( isEnabled, v -> _setEnabled(v) );
-        return isEnabledIf( isEnabled.orElseThrow() );
+        return _withOnShow( isEnabled, (c,v) -> {
+                    c.setEnabled(v);
+                })
+                ._with( c -> {
+                    _setEnabled(c,  isEnabled.orElseThrow() );
+                })
+                ._this();
     }
 
     /**
@@ -327,8 +338,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I isEnabledIfNot( Val<Boolean> isEnabled ) {
         NullUtil.nullArgCheck(isEnabled, "isEnabled", Val.class);
         NullUtil.nullPropertyCheck(isEnabled, "isEnabled", "Null value for isEnabled is not allowed!");
-        _onShow( isEnabled, v -> _setEnabled(!v) );
-        return isEnabledIf( !isEnabled.orElseThrow() );
+        return _withOnShow( isEnabled, (c,v) -> {
+                    _setEnabled(c, !v);
+                })
+                ._with( c -> {
+                    _setEnabled(c,  !isEnabled.orElseThrow() );
+                })
+                ._this();
     }
 
     /**
@@ -345,8 +361,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck(enumValue, "enumValue", Enum.class);
         NullUtil.nullArgCheck(enumProperty, "enumProperty", Val.class);
         NullUtil.nullPropertyCheck(enumProperty, "enumProperty", "The enumProperty may not have null values!");
-        _onShow( enumProperty, v -> _setEnabled( v == enumValue ) );
-        return isEnabledIf( enumValue == enumProperty.orElseThrow() );
+        return _withOnShow( enumProperty, (c,v) -> {
+                    _setEnabled( c,  v == enumValue );
+                })
+                ._with( c -> {
+                    _setEnabled(c,  enumValue == enumProperty.orElseThrow() );
+                })
+                ._this();
     }
 
     /**
@@ -364,23 +385,30 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck(enumValue, "enumValue", Enum.class);
         NullUtil.nullArgCheck(enumProperty, "enumProperty", Val.class);
         NullUtil.nullPropertyCheck(enumProperty, "enumProperty", "The enumProperty may not have null values!");
-        _onShow( enumProperty, v -> _setEnabled( v != enumValue ) );
-        return isEnabledIf( enumValue != enumProperty.orElseThrow() );
+        return _withOnShow( enumProperty, (c,v) -> {
+                    _setEnabled( c,  v != enumValue );
+                })
+                ._with( c -> {
+                    _setEnabled(c,  enumValue != enumProperty.orElseThrow() );
+                })
+                ._this();
     }
 
-    protected void _setEnabled( boolean isEnabled ) { getComponent().setEnabled( isEnabled ); }
+    protected void _setEnabled(C c, boolean isEnabled ) { c.setEnabled( isEnabled ); }
 
     /**
      *  Use this to make the wrapped UI component grab the input focus.
      *  @return This very instance, which enables builder-style method chaining.
      */
     public final I makeFocused() {
-        UI.runLater(() -> {
-            getComponent().grabFocus();
-            // We do this later because in this point in time the UI is probably not
-            // yet fully built (swing-tree is using the builder-pattern).
-        });
-        return _this();
+        return _with( c -> {
+                    UI.runLater(() -> {
+                        c.grabFocus();
+                        // We do this later because in this point in time the UI is probably not
+                        // yet fully built (swing-tree is using the builder-pattern).
+                    });
+                })
+                ._this();
     }
 
     /**
@@ -389,8 +417,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *  @return This very instance, which enables builder-style method chaining.
      */
     public final I isFocusableIf( boolean isFocusable ) {
-        getComponent().setFocusable( isFocusable );
-        return _this();
+        return _with( c -> c.setFocusable(isFocusable) )._this();
     }
 
     /**
@@ -405,9 +432,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I isFocusableIf( Val<Boolean> isFocusable ) {
         NullUtil.nullArgCheck(isFocusable, "isFocusable", Val.class);
         NullUtil.nullPropertyCheck(isFocusable, "isFocusable", "Null value for isFocusable is not allowed!");
-        _onShow( isFocusable, v -> isFocusableIf(v) );
-        this.isFocusableIf( isFocusable.orElseThrow() );
-        return _this();
+        return _withOnShow( isFocusable, (c,v) -> {
+                    c.setFocusable(v);
+                })
+                ._with( c -> {
+                    c.setFocusable( isFocusable.orElseThrow() );
+                })
+                ._this();
     }
 
     /**
@@ -417,8 +448,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *  @return This very instance, which enables builder-style method chaining.
      */
     public final I isFocusableIfNot( boolean notFocusable ) {
-        getComponent().setFocusable( !notFocusable );
-        return _this();
+        return _with( c -> c.setFocusable( !notFocusable ) )._this();
     }
 
     /**
@@ -434,9 +464,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I isFocusableIfNot( Val<Boolean> isFocusable ) {
         NullUtil.nullArgCheck(isFocusable, "isFocusable", Val.class);
         NullUtil.nullPropertyCheck(isFocusable, "isFocusable", "Null value for isFocusable is not allowed!");
-        _onShow( isFocusable, v -> isFocusableIf(!v) );
-        this.isFocusableIf( !isFocusable.orElseThrow() );
-        return _this();
+        return _withOnShow( isFocusable, (c,v) -> {
+                    c.setFocusable( !v );
+                })
+                ._with( c -> {
+                    c.setFocusable( !isFocusable.orElseThrow() );
+                })
+                ._this();
     }
 
     /**
@@ -454,8 +488,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck(enumValue, "enumValue", Enum.class);
         NullUtil.nullArgCheck(enumProperty, "enumProperty", Val.class);
         NullUtil.nullPropertyCheck(enumProperty, "enumProperty", "The enumProperty may not have null values!");
-        _onShow( enumProperty, v -> isFocusableIf( v == enumValue ) );
-        return isFocusableIf( enumValue == enumProperty.orElseThrow() );
+        return _withOnShow( enumProperty, (c,v) -> {
+                    c.setFocusable( v == enumValue );
+                })
+                ._with( c -> {
+                    c.setFocusable( enumValue == enumProperty.orElseThrow() );
+                })
+                ._this();
     }
 
     /**
@@ -474,8 +513,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck(enumValue, "enumValue", Enum.class);
         NullUtil.nullArgCheck(enumProperty, "enumProperty", Val.class);
         NullUtil.nullPropertyCheck(enumProperty, "enumProperty", "The enumProperty may not have null values!");
-        _onShow( enumProperty, v -> isFocusableIf( v != enumValue ) );
-        return isFocusableIf( enumValue != enumProperty.orElseThrow() );
+        return _withOnShow( enumProperty, (c,v) -> {
+                    c.setFocusable( v != enumValue );
+                })
+                ._with( c -> {
+                    c.setFocusable( enumValue != enumProperty.orElseThrow() );
+                })
+                ._this();
     }
 
 
@@ -486,8 +530,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *  @return This very instance, which enables builder-style method chaining.
      */
     public final I makeOpaque() {
-        getComponent().setOpaque( true );
-        return _this();
+        return _with( c -> c.setOpaque( true ) )._this();
     }
 
     /**
@@ -497,8 +540,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *  @return This very instance, which enables builder-style method chaining.
      */
     public final I makeNonOpaque() {
-        getComponent().setOpaque( false );
-        return _this();
+        return _with( c -> c.setOpaque( false ) )._this();
     }
 
     /**
@@ -507,8 +549,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *  @return This very instance, which enables builder-style method chaining.
      */
     public final I isOpaqueIf( boolean isOpaque ) {
-        getComponent().setOpaque( isOpaque );
-        return _this();
+        return _with( c -> c.setOpaque( isOpaque ) )._this();
     }
 
     /**
@@ -523,9 +564,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I isOpaqueIf( Val<Boolean> isOpaque ) {
         NullUtil.nullArgCheck( isOpaque, "isOpaque", Val.class );
         NullUtil.nullPropertyCheck(isOpaque, "isOpaque", "Null value for isOpaque is not allowed! A boolean should only have the values true or false!");
-        _onShow( isOpaque, v -> isOpaqueIf(v) );
-        this.isOpaqueIf( isOpaque.orElseThrow() );
-        return _this();
+        return _withOnShow( isOpaque, (c,v) -> {
+                    c.setOpaque(v);
+                })
+                ._with( c -> {
+                    c.setOpaque( isOpaque.orElseThrow() );
+                })
+                ._this();
     }
 
     /**
@@ -534,8 +579,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *  @return This very instance, which enables builder-style method chaining.
      */
     public final I isOpaqueIfNot( boolean notOpaque ) {
-        getComponent().setOpaque( !notOpaque );
-        return _this();
+        return _with( c -> c.setOpaque( !notOpaque ) )._this();
     }
 
     /**
@@ -550,9 +594,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I isOpaqueIfNot( Val<Boolean> notOpaque ) {
         NullUtil.nullArgCheck( notOpaque, "notOpaque", Val.class );
         NullUtil.nullPropertyCheck(notOpaque, "notOpaque", "Null value for isOpaque is not allowed! A boolean should only have the values true or false!");
-        _onShow( notOpaque, v -> isOpaqueIf(!v) );
-        this.isOpaqueIf( !notOpaque.orElseThrow() );
-        return _this();
+        return _withOnShow( notOpaque, (c,v) -> {
+                    c.setOpaque( !v );
+                })
+                ._with( c -> {
+                    c.setOpaque( !notOpaque.orElseThrow() );
+                })
+                ._this();
     }
 
     /**
@@ -565,23 +613,24 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I isValidIf( UIVerifier<C> verifier ) {
-        getComponent().setInputVerifier(new InputVerifier() {
-            @Override
-            public boolean verify( JComponent input ) {
-                return verifier.isValid(
-                        new ComponentDelegate<>(
-                                getComponent(),
-                                new ComponentEvent(getComponent(), 0),
-                                () -> getSiblinghood()
-                            )
-                        );
-                /*
-                    We expect the user to model the state of the UI components
-                    using properties in the view model.
-                 */
-            }
-        });
-        return _this();
+        return _with( c -> {
+                    c.setInputVerifier(new InputVerifier() {
+                        @Override
+                        public boolean verify( JComponent input ) {
+                            return verifier.isValid(
+                                    new ComponentDelegate<>(
+                                            c,
+                                            new ComponentEvent(c, 0)
+                                    )
+                            );
+                        /*
+                            We expect the user to model the state of the UI components
+                            using properties in the view model.
+                         */
+                        }
+                    });
+                })
+                ._this();
     }
 
     /**
@@ -605,8 +654,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withProperty( String key, String value ) {
-        getComponent().putClientProperty(key, value);
-        return _this();
+        return _with( c -> c.putClientProperty(key, value) )._this();
     }
 
     /**
@@ -617,8 +665,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final I withBorder( Border border ) {
         Objects.requireNonNull(border, "Null value for border is not allowed! Use an empty border instead!");
-        getComponent().setBorder( border );
-        return _this();
+        return _with( c -> c.setBorder(border) )._this();
     }
 
     /**
@@ -631,8 +678,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withBorder( Val<Border> border ) {
         NullUtil.nullArgCheck(border, "border", Val.class);
         NullUtil.nullPropertyCheck(border, "border", "Null value for border is not allowed! Use an empty border instead!");
-        _onShow( border, v -> getComponent().setBorder(v) );
-        return this.withBorder( border.orElseNull() );
+        return _withOnShow( border, (c,v) -> {
+                    c.setBorder(v);
+                })
+                ._with( c -> {
+                    c.setBorder( border.orElseThrow() );
+                })
+                ._this();
     }
 
 
@@ -646,8 +698,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withEmptyBorder( int top, int left, int bottom, int right ) {
-        getComponent().setBorder(BorderFactory.createEmptyBorder(top, left, bottom, right));
-        return _this();
+        return _with( c -> c.setBorder(BorderFactory.createEmptyBorder(top, left, bottom, right)) )._this();
     }
 
     /**
@@ -662,8 +713,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final I withEmptyBorderTitled( String title, int top, int left, int bottom, int right ) {
         NullUtil.nullArgCheck( title, "title", String.class );
-        getComponent().setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(top, left, bottom, right), title));
-        return _this();
+        return _with( c -> c.setBorder(
+                        BorderFactory.createTitledBorder(
+                            BorderFactory.createEmptyBorder(top, left, bottom, right),
+                            title
+                        )
+                    )
+                )
+                ._this();
     }
 
     /**
@@ -681,12 +738,23 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withEmptyBorderTitled( Val<String> title, int top, int left, int bottom, int right ) {
         NullUtil.nullArgCheck( title, "title", Val.class );
         NullUtil.nullPropertyCheck( title, "title", "Null value for title is not allowed! Use an empty string instead!" );
-        _onShow( title, v ->
-                getComponent().setBorder(
-                        BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(top, left, bottom, right), v)
-                    )
-            );
-        return this.withEmptyBorderTitled( title.orElseNull(), top, left, bottom, right );
+        return _withOnShow( title, (c,v) -> {
+                    c.setBorder(
+                            BorderFactory.createTitledBorder(
+                                BorderFactory.createEmptyBorder(top, left, bottom, right),
+                                v
+                            )
+                        );
+                })
+                ._with( c -> {
+                    c.setBorder(
+                            BorderFactory.createTitledBorder(
+                                    BorderFactory.createEmptyBorder(top, left, bottom, right),
+                                    title.orElseThrow()
+                            )
+                    );
+                })
+                ._this();
     }
 
     /**
@@ -697,7 +765,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withEmptyBorder( int topBottom, int leftRight ) {
-        return withEmptyBorder(topBottom, leftRight, topBottom, leftRight);
+        return withEmptyBorder( topBottom, leftRight, topBottom, leftRight );
     }
 
     /**
@@ -725,8 +793,23 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withEmptyBorderTitled( Val<String> title, int topBottom, int leftRight ) {
         NullUtil.nullArgCheck( title, "title", Val.class );
         NullUtil.nullPropertyCheck(title, "title", "Null value for title is not allowed! Use an empty string instead!");
-        _onShow( title, v -> getComponent().setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(topBottom, leftRight, topBottom, leftRight), v)) );
-        return this.withEmptyBorderTitled( title.orElseNull(), topBottom, leftRight );
+        return _withOnShow( title, (c,v) -> {
+                    c.setBorder(
+                            BorderFactory.createTitledBorder(
+                                BorderFactory.createEmptyBorder(topBottom, leftRight, topBottom, leftRight),
+                                v
+                            )
+                        );
+                })
+                ._with( c -> {
+                    c.setBorder(
+                            BorderFactory.createTitledBorder(
+                                    BorderFactory.createEmptyBorder(topBottom, leftRight, topBottom, leftRight),
+                                    title.orElseThrow()
+                            )
+                    );
+                })
+                ._this();
     }
 
     /**
@@ -750,8 +833,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withEmptyBorder( Val<Integer> all ) {
         NullUtil.nullArgCheck( all, "all", Val.class );
         NullUtil.nullPropertyCheck(all, "all", "Null value for all is not allowed! Use an empty border instead!");
-        _onShow( all, v -> getComponent().setBorder(BorderFactory.createEmptyBorder(v, v, v, v)) );
-        return this.withEmptyBorder( all.get() );
+        return _withOnShow( all, (c,v) -> {
+                    c.setBorder(BorderFactory.createEmptyBorder(v, v, v, v));
+                })
+                ._with( c -> {
+                    c.setBorder(BorderFactory.createEmptyBorder(all.orElseThrow(), all.orElseThrow(), all.orElseThrow(), all.orElseThrow()));
+                })
+                ._this();
     }
 
             /**
@@ -775,12 +863,23 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withEmptyBorderTitled( Val<String> title, int all ) {
         NullUtil.nullArgCheck( title, "title", Val.class );
         NullUtil.nullPropertyCheck(title, "title", "Null value for title is not allowed! Use an empty string instead!");
-        _onShow( title, v ->
-            getComponent().setBorder(
-                BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(all, all, all, all), v)
-            )
-        );
-        return this.withEmptyBorderTitled( title.orElseNull(), all );
+        return _withOnShow( title, (c,v) -> {
+                    c.setBorder(
+                            BorderFactory.createTitledBorder(
+                                BorderFactory.createEmptyBorder(all, all, all, all),
+                                v
+                            )
+                        );
+                })
+                ._with( c -> {
+                    c.setBorder(
+                            BorderFactory.createTitledBorder(
+                                    BorderFactory.createEmptyBorder(all, all, all, all),
+                                    title.orElseThrow()
+                            )
+                    );
+                })
+                ._this();
     }
 
     /**
@@ -815,8 +914,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final I withLineBorder( Color color, int thickness ) {
         NullUtil.nullArgCheck( color, "color", Color.class );
-        getComponent().setBorder(BorderFactory.createLineBorder(color, thickness));
-        return _this();
+        return _with( c -> c.setBorder(BorderFactory.createLineBorder(color, thickness)) )._this();
     }
 
     /**
@@ -829,8 +927,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withLineBorder( Val<Color> color, int thickness ) {
         NullUtil.nullArgCheck( color, "color", Val.class );
         NullUtil.nullPropertyCheck(color, "color", "Null value for color is not allowed! Use a transparent color or other default color instead!");
-        _onShow( color, v -> getComponent().setBorder(BorderFactory.createLineBorder(v, thickness)) );
-        return this.withLineBorder( color.get(), thickness );
+        return _withOnShow( color, (c,v) -> {
+                    c.setBorder(BorderFactory.createLineBorder(v, thickness));
+                })
+                ._with( c -> {
+                    c.setBorder(BorderFactory.createLineBorder(color.orElseThrow(), thickness));
+                })
+                ._this();
     }
 
     /**
@@ -844,8 +947,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withLineBorderTitled( String title, Color color, int thickness ) {
         NullUtil.nullArgCheck( title, "title", String.class );
         NullUtil.nullArgCheck( color, "color", Color.class );
-        getComponent().setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(color, thickness), title));
-        return _this();
+        return _with( c -> c.setBorder(
+                        BorderFactory.createTitledBorder(
+                            BorderFactory.createLineBorder(color, thickness),
+                            title
+                        )
+                    )
+                )
+                ._this();
     }
 
     /**
@@ -858,12 +967,23 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withLineBorderTitled( Val<String> title, Color color, int thickness ) {
         NullUtil.nullArgCheck( title, "title", Val.class );
         NullUtil.nullPropertyCheck(title, "title", "Null value for title is not allowed! Use an empty string instead!");
-        _onShow( title, v ->
-            getComponent().setBorder(
-                BorderFactory.createTitledBorder(BorderFactory.createLineBorder(color, thickness), v)
-            )
-        );
-        return this.withLineBorderTitled( title.orElseNull(), color, thickness );
+        return _withOnShow( title, (c,v) -> {
+                    c.setBorder(
+                            BorderFactory.createTitledBorder(
+                                BorderFactory.createLineBorder(color, thickness),
+                                v
+                            )
+                        );
+                })
+                ._with( c -> {
+                    c.setBorder(
+                            BorderFactory.createTitledBorder(
+                                    BorderFactory.createLineBorder(color, thickness),
+                                    title.orElseThrow()
+                            )
+                    );
+                })
+                ._this();
     }
 
     /**
@@ -881,17 +1001,31 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullPropertyCheck(title, "title", "Null value for title is not allowed! Use an empty string instead!");
         NullUtil.nullArgCheck( color, "color", Val.class );
         NullUtil.nullPropertyCheck(color, "color", "Null value for color is not allowed! Use a transparent color or other default color instead!");
-        _onShow( title, v ->
-            getComponent().setBorder(
-                BorderFactory.createTitledBorder(BorderFactory.createLineBorder(color.get(), thickness), v)
-            )
-        );
-        _onShow( color, v ->
-            getComponent().setBorder(
-                BorderFactory.createTitledBorder(BorderFactory.createLineBorder(v, thickness), title.get())
-            )
-        );
-        return this.withLineBorderTitled( title.orElseNull(), color.get(), thickness );
+        return _withOnShow( title, (c,v) -> {
+                    c.setBorder(
+                        BorderFactory.createTitledBorder(
+                            BorderFactory.createLineBorder(color.orElseThrow(), thickness),
+                            v
+                        )
+                    );
+                })
+                ._withOnShow( color, (c,v) -> {
+                    c.setBorder(
+                        BorderFactory.createTitledBorder(
+                            BorderFactory.createLineBorder(v, thickness),
+                            title.orElseThrow()
+                        )
+                    );
+                })
+                ._with( c -> {
+                    c.setBorder(
+                        BorderFactory.createTitledBorder(
+                            BorderFactory.createLineBorder(color.orElseThrow(), thickness),
+                            title.orElseThrow()
+                        )
+                    );
+                })
+                ._this();
     }
 
     /**
@@ -928,8 +1062,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final I withRoundedLineBorder( Color color, int thickness ) {
         NullUtil.nullArgCheck( color, "color", Color.class );
-        getComponent().setBorder(BorderFactory.createLineBorder(color, thickness, true));
-        return _this();
+        return _with( c -> c.setBorder(BorderFactory.createLineBorder(color, thickness, true)) )._this();
     }
 
     /**
@@ -944,8 +1077,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withRoundedLineBorderTitled( String title, Color color, int thickness ) {
         NullUtil.nullArgCheck( title, "title", String.class );
         NullUtil.nullArgCheck( color, "color", Color.class );
-        getComponent().setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(color, thickness, true), title));
-        return _this();
+        return _with( c -> c.setBorder(
+                        BorderFactory.createTitledBorder(
+                            BorderFactory.createLineBorder(color, thickness, true),
+                            title
+                        )
+                    )
+                )
+                ._this();
     }
 
     /**
@@ -962,12 +1101,23 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withRoundedLineBorderTitled( Val<String> title, Color color, int thickness ) {
         NullUtil.nullArgCheck( title, "title", Val.class );
         NullUtil.nullPropertyCheck(title, "title", "Null value for title is not allowed! Use an empty string instead!");
-        _onShow( title, v ->
-            getComponent().setBorder(
-                BorderFactory.createTitledBorder(BorderFactory.createLineBorder(color, thickness, true), v)
-            )
-        );
-        return this.withRoundedLineBorderTitled( title.orElseNull(), color, thickness );
+        return _withOnShow( title, (c,v) -> {
+                    c.setBorder(
+                        BorderFactory.createTitledBorder(
+                            BorderFactory.createLineBorder(color, thickness, true),
+                            v
+                        )
+                    );
+                })
+                ._with( c -> {
+                    c.setBorder(
+                        BorderFactory.createTitledBorder(
+                            BorderFactory.createLineBorder(color, thickness, true),
+                            title.orElseThrow()
+                        )
+                    );
+                })
+                ._this();
     }
 
     /**
@@ -987,17 +1137,31 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullPropertyCheck(title, "title", "Null value for title is not allowed! Use an empty string instead!");
         NullUtil.nullArgCheck( color, "color", Val.class );
         NullUtil.nullPropertyCheck(color, "color", "Null value for color is not allowed! Use a transparent color or other default color instead!");
-        _onShow( title, v ->
-            getComponent().setBorder(
-                BorderFactory.createTitledBorder(BorderFactory.createLineBorder(color.get(), thickness, true), v)
-            )
-        );
-        _onShow( color, v ->
-            getComponent().setBorder(
-                BorderFactory.createTitledBorder(BorderFactory.createLineBorder(v, thickness, true), title.get())
-            )
-        );
-        return this.withRoundedLineBorderTitled( title.get(), color.get(), thickness );
+        return _withOnShow( title, (c,v) -> {
+                    c.setBorder(
+                        BorderFactory.createTitledBorder(
+                            BorderFactory.createLineBorder(color.orElseThrow(), thickness, true),
+                            v
+                        )
+                    );
+                })
+                ._withOnShow( color, (c,v) -> {
+                    c.setBorder(
+                        BorderFactory.createTitledBorder(
+                            BorderFactory.createLineBorder(v, thickness, true),
+                            title.orElseThrow()
+                        )
+                    );
+                })
+                ._with( c -> {
+                    c.setBorder(
+                        BorderFactory.createTitledBorder(
+                            BorderFactory.createLineBorder(color.orElseThrow(), thickness, true),
+                            title.orElseThrow()
+                        )
+                    );
+                })
+                ._this();
     }
 
     /**
@@ -1023,10 +1187,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withRoundedLineBorder( Val<Color> color, int thickness ) {
         NullUtil.nullArgCheck( color, "color", Val.class );
         NullUtil.nullPropertyCheck(color, "color", "Null value for color is not allowed! Use a transparent color or other default color instead!");
-        _onShow( color, v ->
-            getComponent().setBorder(BorderFactory.createLineBorder(v, thickness, true))
-        );
-        return this.withRoundedLineBorder( color.get(), thickness );
+        return _withOnShow( color, (c,v) -> {
+                    c.setBorder(BorderFactory.createLineBorder(v, thickness, true));
+                })
+                ._with( c -> {
+                    c.setBorder(BorderFactory.createLineBorder(color.orElseThrow(), thickness, true));
+                })
+                ._this();
     }
 
     /**
@@ -1106,8 +1273,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final I withMatteBorder( Color color, int top, int left, int bottom, int right ) {
         NullUtil.nullArgCheck( color, "color", Color.class );
-        getComponent().setBorder(BorderFactory.createMatteBorder(top, left, bottom, right, color));
-        return _this();
+        return _with( c -> c.setBorder(BorderFactory.createMatteBorder(top, left, bottom, right, color)) )._this();
     }
 
     /**
@@ -1125,8 +1291,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withMatteBorderTitled( String title, Color color, int top, int left, int bottom, int right ) {
         NullUtil.nullArgCheck( title, "title", String.class );
         NullUtil.nullArgCheck( color, "color", Color.class );
-        getComponent().setBorder(BorderFactory.createTitledBorder(BorderFactory.createMatteBorder(top, left, bottom, right, color), title));
-        return _this();
+        return _with( c -> c.setBorder(
+                        BorderFactory.createTitledBorder(
+                            BorderFactory.createMatteBorder(top, left, bottom, right, color),
+                            title
+                        )
+                    )
+                )
+                ._this();
     }
 
     /**
@@ -1198,8 +1370,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withCompoundBorder( Border first, Border second ) {
         NullUtil.nullArgCheck( first, "first", Border.class );
         NullUtil.nullArgCheck( second, "second", Border.class );
-        getComponent().setBorder(BorderFactory.createCompoundBorder(first, second));
-        return _this();
+        return _with( c -> c.setBorder(BorderFactory.createCompoundBorder(first, second)) )._this();
     }
 
     /**
@@ -1212,8 +1383,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withCompoundBorderTitled( String title, Border first, Border second ) {
-        getComponent().setBorder(BorderFactory.createTitledBorder(BorderFactory.createCompoundBorder(first, second), title));
-        return _this();
+        return _with( c -> c.setBorder(
+                        BorderFactory.createTitledBorder(
+                            BorderFactory.createCompoundBorder(first, second),
+                            title
+                        )
+                    )
+                )
+                ._this();
     }
 
     /**
@@ -1224,8 +1401,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final I withBorderTitled( String title ) {
         NullUtil.nullArgCheck(title, "title", String.class, "Please use an empty String instead of null!");
-        getComponent().setBorder(BorderFactory.createTitledBorder(title));
-        return _this();
+        return _with( c -> c.setBorder(BorderFactory.createTitledBorder(title)) )._this();
     }
 
     /**
@@ -1237,15 +1413,17 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final I withBorderTitled( Val<String> title ) {
         NullUtil.nullArgCheck(title, "title", Val.class);
-        getComponent().setBorder(BorderFactory.createTitledBorder(title.get()));
-        _onShow( title, t -> {
-            Border foundBorder = getComponent().getBorder();
-            if ( foundBorder instanceof TitledBorder)
-                ((TitledBorder)foundBorder).setTitle(t);
-            else
-                getComponent().setBorder(BorderFactory.createTitledBorder(t));
-        });
-        return _this();
+        return _withOnShow( title, (c,t) -> {
+                    Border foundBorder = c.getBorder();
+                    if ( foundBorder instanceof TitledBorder )
+                        ((TitledBorder)foundBorder).setTitle(t);
+                    else
+                        c.setBorder(BorderFactory.createTitledBorder(t));
+                })
+                ._with( c -> {
+                    c.setBorder(BorderFactory.createTitledBorder(title.orElseThrow()));
+                })
+                ._this();
     }
 
     /**
@@ -1262,8 +1440,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final I withCursor( UI.Cursor type ) {
         NullUtil.nullArgCheck( type, "type", UI.Cursor.class );
-        getComponent().setCursor( new java.awt.Cursor( type.type ) );
-        return _this();
+        return _with( c -> c.setCursor( new java.awt.Cursor( type.type ) ) )._this();
     }
 
     /**
@@ -1277,8 +1454,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withCursor( Val<UI.Cursor> type ) {
         NullUtil.nullArgCheck( type, "type", Val.class );
         NullUtil.nullPropertyCheck(type, "type", "Null is not allowed to model a cursor type.");
-        _onShow( type, t -> getComponent().setCursor( new java.awt.Cursor( t.type ) ) );
-        return withCursor( type.orElseThrow() );
+        return _withOnShow( type, (c,t) -> {
+                    c.setCursor( new java.awt.Cursor( t.type ) );
+                })
+                ._with( c -> {
+                    c.setCursor( new java.awt.Cursor( type.orElseThrow().type ) );
+                })
+                ._this();
     }
 
     /**
@@ -1295,8 +1477,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck( condition, "condition", Val.class );
         NullUtil.nullArgCheck( type, "type", UI.Cursor.class );
         NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the cursor selection state.");
-        _onShow( condition, c -> getComponent().setCursor( new java.awt.Cursor( c ? type.type : UI.Cursor.DEFAULT.type ) ) );
-        return withCursor( condition.orElseThrow() ? type : UI.Cursor.DEFAULT );
+        return _withOnShow( condition, (c,v) -> {
+                    c.setCursor( new java.awt.Cursor( v ? type.type : UI.Cursor.DEFAULT.type ) );
+                })
+                ._with( c -> {
+                    c.setCursor( new java.awt.Cursor( condition.orElseThrow() ? type.type : UI.Cursor.DEFAULT.type ) );
+                })
+                ._this();
     }
 
     /**
@@ -1314,13 +1501,18 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck( type, "type", Val.class );
         NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the cursor selection state.");
         NullUtil.nullPropertyCheck(type, "type", "Null is not allowed to model a cursor type.");
-        Cursor[] baseCursor = new Cursor[1];
-        _onShow( condition, c -> type.fireChange(From.VIEW_MODEL) );
-        _onShow( type, c ->{
-            if (baseCursor[0] == null) baseCursor[0] = getComponent().getCursor();
-            getComponent().setCursor( new java.awt.Cursor( condition.get() ? c.type : baseCursor[0].getType() ) );
-        });
-        return withCursor( condition.orElseThrow() ? type.orElseThrow() : UI.Cursor.DEFAULT );
+        return _with( thisComponent -> {
+                    Cursor[] baseCursor = new Cursor[1];
+                    _onShow( condition, thisComponent, (c,v) -> type.fireChange(From.VIEW_MODEL) );
+                    _onShow( type, thisComponent, (c,v) -> {
+                        if ( baseCursor[0] == null ) baseCursor[0] = c.getCursor();
+                        c.setCursor( new java.awt.Cursor( condition.orElseThrow() ? v.type : baseCursor[0].getType() ) );
+                    });
+                })
+                ._with( c -> {
+                    c.setCursor( new java.awt.Cursor( condition.orElseThrow() ? type.orElseThrow().type : UI.Cursor.DEFAULT.type ) );
+                })
+                ._this();
     }
 
     /**
@@ -1336,10 +1528,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withLayout( LayoutManager layout ) {
-        if ( _migAlreadySet )
-            throw new IllegalArgumentException("The mig layout has already been specified for this component!");
-        getComponent().setLayout(layout);
-        return _this();
+        return _with( c -> c.setLayout(layout) )._this();
     }
 
     /**
@@ -1472,7 +1661,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final I withBoxLayout( UI.Axis axis ) {
         NullUtil.nullArgCheck( axis, "axis", UI.Axis.class );
-        return this.withLayout(new BoxLayout(getComponent(), axis.forBoxLayout()));
+        return _with( c -> c.setLayout(new BoxLayout(c, axis.forBoxLayout())) )._this();
     }
 
     /**
@@ -1705,9 +1894,6 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @see <a href="http://www.miglayout.com/QuickStart.pdf">Quick Start Guide</a>
      */
     public final I withLayout( String constraints, String colConstrains, String rowConstraints ) {
-        if ( _migAlreadySet )
-            throw new IllegalArgumentException("The mig layout has already been specified for this component!");
-
         NullUtil.nullArgCheck(constraints, "constraints", String.class, "Please use an empty String instead of null!");
         NullUtil.nullArgCheck(colConstrains, "colConstrains", String.class, "Please use an empty String instead of null!");
         NullUtil.nullArgCheck(rowConstraints, "rowConstraints", String.class, "Please use an empty String instead of null!");
@@ -1723,9 +1909,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         rowConstraints = ( rowConstraints.isEmpty() ? null : rowConstraints );
 
         MigLayout migLayout = new MigLayout(constraints, colConstrains, rowConstraints);
-        getComponent().setLayout(migLayout);
-        _migAlreadySet = true;
-        return _this();
+        return _with( c -> c.setLayout(migLayout) )._this();
     }
 
     /**
@@ -1737,9 +1921,6 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withLayout( LC attr, AC colConstrains, AC rowConstraints ) {
-        if ( _migAlreadySet )
-            throw new IllegalArgumentException("The mig layout has already been specified for this component!");
-
         // We make sure the default hidemode is 2 instead of 3 (which sucks because it takes up too much space)
         if ( attr == null )
             attr = new LC().hideMode(2);
@@ -1747,9 +1928,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
             attr = attr.hideMode(2);
 
         MigLayout migLayout = new MigLayout(attr, colConstrains, rowConstraints);
-        getComponent().setLayout(migLayout);
-        _migAlreadySet = true;
-        return _this();
+        return _with( c -> c.setLayout(migLayout) )._this();
     }
 
     /**
@@ -1768,8 +1947,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final I withTooltip( String tooltip ) {
         NullUtil.nullArgCheck(tooltip, "tooltip", String.class, "Use the empty string to clear the tooltip text!");
-        getComponent().setToolTipText(tooltip.isEmpty() ? null : tooltip);
-        return _this();
+        return _with( c -> c.setToolTipText(tooltip.isEmpty() ? null : tooltip) )._this();
     }
 
     /**
@@ -1792,8 +1970,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withTooltip( Val<String> tip ) {
         NullUtil.nullArgCheck(tip, "tip", Val.class);
         NullUtil.nullPropertyCheck(tip, "tip", "Please use an empty string instead of null!");
-        _onShow( tip, v -> getComponent().setToolTipText(v.isEmpty() ? null : v) );
-        return this.withTooltip( tip.orElseThrow() );
+        return _withOnShow( tip, (c,v) -> {
+                    c.setToolTipText(v.isEmpty() ? null : v);
+                })
+                ._with( c -> {
+                    c.setToolTipText( tip.orElseNull() );
+                })
+                ._this();
     }
 
     /**
@@ -1811,8 +1994,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final I withBackground( Color color ) {
         NullUtil.nullArgCheck(color, "color", Color.class);
-        getComponent().setBackground(color);
-        return _this();
+        return _with( c -> c.setBackground(color) )._this();
     }
 
     /**
@@ -1835,8 +2017,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withBackground( Val<Color> bg ) {
         NullUtil.nullArgCheck(bg, "bg", Val.class);
         NullUtil.nullPropertyCheck(bg, "bg", "Please use the default color of this component instead of null!");
-        _onShow( bg, v -> getComponent().setBackground(v) );
-        return this.withBackground( bg.orElseNull() );
+        return _withOnShow( bg, (c,v) -> {
+                    c.setBackground(v);
+                })
+                ._with( c -> {
+                    c.setBackground( bg.orElseNull() );
+                })
+                ._this();
     }
 
     /**
@@ -1852,10 +2039,15 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck(condition, "condition", Val.class);
         NullUtil.nullArgCheck(colorIfTrue, "bg", Color.class);
         NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the usage of the provided background color!");
-        Var<Color> baseColor = Var.of( getComponent().getBackground() );
-        Var<Color> color = Var.of( colorIfTrue );
-        _onShow( condition, v -> _updateBackground( condition, color, baseColor ) );
-        return this.withBackground( condition.orElse(false) ? colorIfTrue : getComponent().getBackground() );
+        return _with( thisComponent -> {
+                    Var<Color> baseColor = Var.of( thisComponent.getBackground() );
+                    Var<Color> color = Var.of( colorIfTrue );
+                    _onShow( condition, thisComponent, (c,v) -> _updateBackground( c, condition, color, baseColor ) );
+                })
+                ._with( c -> {
+                    c.setBackground( condition.get() ? colorIfTrue : c.getBackground() );
+                })
+                ._this();
     }
 
     /**
@@ -1872,10 +2064,15 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck(color, "color", Val.class);
         NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the usage of the provided background color!");
         NullUtil.nullPropertyCheck(color, "color", "Null is not allowed to model the the provided background color! Please use the default color of this component instead.");
-        Var<Color> baseColor = Var.of(getComponent().getBackground());
-        _onShow( condition, setColor -> _updateBackground(condition, color, baseColor) );
-        _onShow( color, v -> _updateBackground(condition, color, baseColor) );
-        return this.withBackground(condition.orElse(false) ? color.orElseThrow() : getComponent().getBackground());
+        return _with( thisComponent -> {
+                    Var<Color> baseColor = Var.of( thisComponent.getBackground() );
+                    _onShow( condition, thisComponent, (c,v) -> _updateBackground( c, condition, color, baseColor ) );
+                    _onShow( color,     thisComponent, (c,v) -> _updateBackground( c, condition, color, baseColor ) );
+                })
+                ._with( c -> {
+                    c.setBackground( condition.get() ? color.get() : c.getBackground() );
+                })
+                ._this();
     }
 
     /**
@@ -1907,16 +2104,59 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck(colorIfTrue, "colorIfTrue", Val.class);
         NullUtil.nullArgCheck(colorIfFalse, "colorIfFalse", Val.class);
         NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the usage of the provided background color!");
-        _onShow( condition,    v -> _updateBackground( condition, colorIfTrue, Var.of(colorIfFalse.get()) ) );
-        _onShow( colorIfTrue,  v -> _updateBackground( condition, colorIfTrue, Var.of(colorIfFalse.get()) ) );
-        _onShow( colorIfFalse, v -> _updateBackground( condition, colorIfTrue, Var.of(colorIfFalse.get()) ) );
-        return this.withBackground( condition.get() ? colorIfTrue.orElseNull() : colorIfFalse.orElseNull() );
+        return _withOnShow( condition, (c,v) -> {
+                   _updateBackground( c, condition, colorIfTrue, Var.of(colorIfFalse.get()) );
+               })
+               ._withOnShow( colorIfTrue, (c,v) -> {
+                   _updateBackground( c, condition, colorIfTrue, Var.of(colorIfFalse.get()) );
+               })
+               ._withOnShow( colorIfFalse, (c,v) -> {
+                   _updateBackground( c, condition, colorIfTrue, Var.of(colorIfFalse.get()) );
+               })
+               ._with( c -> {
+                   c.setBackground( condition.get() ? colorIfTrue.get() : colorIfFalse.get() );
+               })
+               ._this();
     }
 
+    /**
+     *    Allows you to configure how the component wrapped by this builder
+     *    looks and behaves, by passing a {@link Styler} lambda to this method
+     *    which receiving a {@link swingtree.style.ComponentStyleDelegate} and returns
+     *    an updated version with the desired style rules applied.
+     *    <p>
+     *    Here a typical example of how to style a button
+     *    using the style API:
+     *    <pre>{@code
+     *        UI.button("Click Me!")
+     *        .withStyle( it -> it
+     *            .borderColor(Color.CYAN)
+     *            .borderWidthAt(Edge.BOTTOM, 3)
+     *            .borderRadius(10)
+     *        )
+     *    }</pre>
+     *    <p>
+     *    Here the {@code it} variable is the {@link swingtree.style.ComponentStyleDelegate} which
+     *    exposes an extensive API for configuring how a particular component
+     *    looks and behaves.
+     *    <p>
+     *    If you want to define style rules for an entire GUI or a part of it,
+     *    take a look at the {@link swingtree.style.StyleSheet} class,
+     *    which exposes an API for defining style rules similar to CSS
+     *    but based on declarative source code instead of a text file.
+     *
+     * @param styler A {@link Styler} lambda can define a set of style rules for the component wrapped by this builder
+     *               by receiving a {@link swingtree.style.ComponentStyleDelegate} and returning
+     *               an updated version with the desired style rules applied.
+     *
+     * @return This very instance, which enables builder-style method chaining.
+     */
     public final I withStyle( Styler<C> styler ) {
         NullUtil.nullArgCheck(styler, "styler", Function.class);
-        ComponentExtension.from(getComponent()).addStyler( styler);
-        return _this();
+        return _with( c -> {
+                    ComponentExtension.from(c).addStyler( styler );
+                })
+                ._this();
     }
 
     /**
@@ -1933,8 +2173,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final I withForeground( Color color ) {
         NullUtil.nullArgCheck(color, "color", Color.class);
-        getComponent().setForeground(color);
-        return _this();
+        return _with( c -> c.setForeground(color) )._this();
     }
 
     /**
@@ -1957,8 +2196,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withForeground( Val<Color> fg ) {
         NullUtil.nullArgCheck(fg, "fg", Val.class);
         NullUtil.nullPropertyCheck(fg, "fg", "Please use the default color of this component instead of null!");
-        _onShow( fg, v -> getComponent().setForeground(v) );
-        return this.withForeground( fg.orElseNull() );
+        return _withOnShow( fg, (c,v) -> {
+                    c.setForeground(v);
+                })
+                ._with( c -> {
+                    c.setForeground( fg.get() );
+                })
+                ._this();
     }
     
     /**
@@ -1974,10 +2218,15 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck(condition, "condition", Val.class);
         NullUtil.nullArgCheck(fg, "fg", Color.class);
         NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the usage of the provided foreground color!");
-        Var<Color> baseColor = Var.of(getComponent().getForeground());
-        Var<Color> newColor = Var.of(fg);
-        _onShow( condition, v -> _updateForeground( condition, newColor, baseColor ) );
-        return this.withForeground( condition.orElse(false) ? fg : getComponent().getForeground() );
+        return _with( thisComponent -> {
+                    Var<Color> baseColor = Var.of( thisComponent.getForeground() );
+                    Var<Color> newColor = Var.of( fg );
+                    _onShow( condition, thisComponent, (c,v) -> _updateForeground( c, condition, newColor, baseColor ) );
+                })
+                ._with( c -> {
+                    c.setForeground( condition.get() ? fg : c.getForeground() );
+                })
+                ._this();
     }
     
     /**
@@ -1994,10 +2243,15 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck(color, "color", Val.class);
         NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the usage of the provided foreground color!");
         NullUtil.nullPropertyCheck(color, "color", "Null is not allowed to model the the provided foreground color! Please use the default color of this component instead.");
-        Var<Color> baseColor = Var.of(getComponent().getForeground());
-        _onShow( condition, setColor -> _updateForeground(condition, color, baseColor) );
-        _onShow( color, v -> _updateForeground(condition, color, baseColor) );
-        return this.withForeground(condition.orElse(false) ? color.orElseThrow() : getComponent().getForeground());
+        return _with( thisComponent -> {
+                    Var<Color> baseColor = Var.of( thisComponent.getForeground() );
+                    _onShow( condition, thisComponent, (c,v) -> _updateForeground( c, condition, color, baseColor ) );
+                    _onShow( color,     thisComponent, (c,v) -> _updateForeground( c, condition, color, baseColor ) );
+                })
+                ._with( c -> {
+                    c.setForeground( condition.get() ? color.get() : c.getForeground() );
+                })
+                ._this();
     }
 
     /**
@@ -2015,8 +2269,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck(colorIfTrue, "colorIfTrue", Color.class);
         NullUtil.nullArgCheck(colorIfFalse, "colorIfFalse", Color.class);
         NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the usage of the provided foreground color!");
-        _onShow( condition, v -> _updateForeground( condition, Var.of(colorIfTrue), Var.of(colorIfFalse) ) );
-        return this.withForeground( condition.get() ? colorIfTrue : colorIfFalse );
+        return _withOnShow( condition, (c,v) -> {
+                    _updateForeground( c, condition, Var.of(colorIfTrue), Var.of(colorIfFalse) );
+                })
+                ._with( c -> {
+                    c.setForeground( condition.get() ? colorIfTrue : colorIfFalse );
+                })
+                ._this();
     }
 
     /**
@@ -2036,32 +2295,43 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the usage of the provided foreground color!");
         NullUtil.nullPropertyCheck(colorIfTrue, "colorIfTrue", "Null is not allowed to model the the provided foreground color! Please use the default color of this component instead.");
         NullUtil.nullPropertyCheck(colorIfFalse, "colorIfFalse", "Null is not allowed to model the the provided foreground color! Please use the default color of this component instead.");
-        _onShow( condition, v -> _updateForeground( condition, colorIfTrue, Var.of(colorIfFalse.get()) ) );
-        _onShow( colorIfTrue, v -> _updateForeground( condition, colorIfTrue, Var.of(colorIfFalse.get()) ) );
-        _onShow( colorIfFalse, v -> _updateForeground( condition, colorIfTrue, Var.of(colorIfFalse.get()) ) );
-        return this.withForeground( condition.get() ? colorIfTrue.get() : colorIfFalse.get() );
+        return _withOnShow( condition, (c,v) -> {
+                    _updateForeground( c, condition, colorIfTrue, Var.of(colorIfFalse.get()) );
+                })
+                ._withOnShow( colorIfTrue, (c,v) -> {
+                    _updateForeground( c, condition, colorIfTrue, Var.of(colorIfFalse.get()) );
+                })
+                ._withOnShow( colorIfFalse, (c,v) -> {
+                    _updateForeground( c, condition, colorIfTrue, Var.of(colorIfFalse.get()) );
+                })
+                ._with( c -> {
+                    c.setForeground( condition.get() ? colorIfTrue.get() : colorIfFalse.get() );
+                })
+                ._this();
     }
 
     private void _updateForeground(
+        C component,
         Val<Boolean> condition,
-        Val<Color> color,
-        Val<Color> baseColor
+        Val<Color>   color,
+        Val<Color>   baseColor
     ) {
-        if ( condition.get() )
-            getComponent().setForeground(color.get());
+        if ( condition.is(true) )
+            component.setForeground(color.get());
         else
-            getComponent().setForeground(baseColor.get());
+            component.setForeground(baseColor.get());
     }
 
     private void _updateBackground(
+            C component,
             Val<Boolean> condition,
             Val<Color> color,
             Val<Color> baseColor
     ) {
-        if ( condition.get() )
-            getComponent().setBackground(color.get());
+        if ( condition.is(true) )
+            component.setBackground(color.get());
         else
-            getComponent().setBackground(baseColor.get());
+            component.setBackground(baseColor.get());
     }
 
     /**
@@ -2072,8 +2342,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final I withMinSize( Dimension size ) {
         NullUtil.nullArgCheck(size, "size", Dimension.class);
-        getComponent().setMinimumSize(UI.scale(size));
-        return _this();
+        return _with( c -> c.setMinimumSize(UI.scale(size)) )._this();
     }
 
     /**
@@ -2096,12 +2365,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withMinSize( Val<Dimension> size ) {
         NullUtil.nullArgCheck(size, "size", Val.class);
         NullUtil.nullPropertyCheck(size, "size", "Null is not allowed to model the minimum size of this component!");
-        _onShow( size, v -> {
-            C comp = getComponent();
-            comp.setMinimumSize(UI.scale(v));
-            _revalidate(comp);
-        });
-        return this.withMinSize( size.orElseThrow() );
+        return _withOnShow( size, (c,v) -> {
+                    c.setMinimumSize(UI.scale(v));
+                    _revalidate(c);
+                })
+                ._with( c -> {
+                    c.setMinimumSize( UI.scale(size.get()) );
+                })
+                ._this();
     }
 
     /**
@@ -2112,8 +2383,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very builder to allow for method chaining.
      */
     public final I withMinSize( int width, int height ) {
-        getComponent().setMinimumSize(new Dimension(UI.scale(width), UI.scale(height)));
-        return _this();
+        return _with( c -> c.setMinimumSize(new Dimension(UI.scale(width), UI.scale(height))) )._this();
     }
 
     /**
@@ -2129,17 +2399,18 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck(height, "height", Val.class);
         NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the minimum width of this component!");
         NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the minimum height of this component!");
-        _onShow( width, w -> {
-            C comp = getComponent();
-            comp.setMinimumSize(new Dimension(UI.scale(w), getComponent().getMinimumSize().height));
-            _revalidate(comp);
-        });
-        _onShow( height, h -> {
-            C comp = getComponent();
-            comp.setMinimumSize(new Dimension(getComponent().getMinimumSize().width, UI.scale(h)));
-            _revalidate(comp);
-        });
-        return this.withMinSize( width.orElseThrow(), height.orElseThrow() );
+        return _withOnShow( width, (c,w) -> {
+                    c.setMinimumSize(new Dimension(UI.scale(w), c.getMinimumSize().height));
+                    _revalidate(c);
+                })
+                ._withOnShow( height, (c,h) -> {
+                    c.setMinimumSize(new Dimension(c.getMinimumSize().width, UI.scale(h)));
+                    _revalidate(c);
+                })
+                ._with( c -> {
+                    c.setMinimumSize( new Dimension(UI.scale(width.get()), UI.scale(height.get())) );
+                })
+                ._this();
     }
 
     /**
@@ -2149,12 +2420,17 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very builder to allow for method chaining.
      */
     public final I withMinWidth( int width ) {
-        C comp = getComponent();
-        int currentHeight = comp.getMinimumSize().height;
-        if ( !comp.isMinimumSizeSet() && UI.currentLookAndFeel().isOneOf(UI.LookAndFeel.METAL, UI.LookAndFeel.NIMBUS) )
+        return _with( c -> {
+                    _setMinWidth(c, width);
+               })
+               ._this();
+    }
+
+    protected final void _setMinWidth( C component, int width ) {
+        int currentHeight = component.getMinimumSize().height;
+        if ( !component.isMinimumSizeSet() && UI.currentLookAndFeel().isOneOf(UI.LookAndFeel.METAL, UI.LookAndFeel.NIMBUS) )
             currentHeight = UI.scale(currentHeight);
-        comp.setMinimumSize(new Dimension(UI.scale(width), currentHeight));
-        return _this();
+        component.setMinimumSize(new Dimension(UI.scale(width), currentHeight));
     }
 
     /**
@@ -2166,12 +2442,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withMinWidth( Val<Integer> width ) {
         NullUtil.nullArgCheck(width, "width", Val.class);
         NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the minimum width of this component!");
-        _onShow( width, w -> {
-            C comp = getComponent();
-            comp.setMinimumSize(new Dimension(UI.scale(w), getComponent().getMinimumSize().height));
-            _revalidate(comp); // Swing is not smart enough to do this automatically
-        });
-        return this.withMinWidth( width.orElseThrow() );
+        return _withOnShow( width, (c,w) -> {
+                    c.setMinimumSize(new Dimension(UI.scale(w), c.getMinimumSize().height));
+                    _revalidate(c); // Swing is not smart enough to do this automatically
+                })
+                ._with( c -> {
+                    _setMinWidth(c, width.get());
+                })
+                ._this();
     }
 
 
@@ -2182,12 +2460,17 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very builder to allow for method chaining.
      */
     public final I withMinHeight( int height ) {
-        C comp = getComponent();
-        int currentWidth = comp.getMinimumSize().width;
-        if ( !comp.isMinimumSizeSet() && UI.currentLookAndFeel().isOneOf(UI.LookAndFeel.METAL, UI.LookAndFeel.NIMBUS) )
+        return _with( c -> {
+                    _setMinHeight(c, height);
+                })
+                ._this();
+    }
+
+    protected final void _setMinHeight( C component, int height ) {
+        int currentWidth = component.getMinimumSize().width;
+        if ( !component.isMinimumSizeSet() && UI.currentLookAndFeel().isOneOf(UI.LookAndFeel.METAL, UI.LookAndFeel.NIMBUS) )
             currentWidth = UI.scale(currentWidth);
-        comp.setMinimumSize(new Dimension(currentWidth, UI.scale(height)));
-        return _this();
+        component.setMinimumSize(new Dimension(currentWidth, UI.scale(height)));
     }
 
     /**
@@ -2199,12 +2482,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withMinHeight( Val<Integer> height ) {
         NullUtil.nullArgCheck(height, "height", Val.class);
         NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the minimum height of this component!");
-        _onShow( height, h -> {
-            C comp = getComponent();
-            comp.setMinimumSize( new Dimension(getComponent().getMinimumSize().width, UI.scale(h)) );
-            _revalidate(comp); // The revalidate is necessary to make the change visible.
-        });
-        return this.withMinHeight( height.orElseThrow() );
+        return _withOnShow( height, (c,h) -> {
+                    c.setMinimumSize(new Dimension(c.getMinimumSize().width, UI.scale(h)));
+                    _revalidate(c); // Swing is not smart enough to do this automatically
+                })
+                ._with( c -> {
+                    _setMinHeight(c, height.get());
+                })
+                ._this();
     }
 
     /**
@@ -2215,8 +2500,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final I withMaxSize( Dimension size ) {
         NullUtil.nullArgCheck(size, "size", Dimension.class);
-        getComponent().setMaximumSize(UI.scale(size));
-        return _this();
+        return _with( c -> c.setMaximumSize(UI.scale(size)) )._this();
     }
 
     /**
@@ -2229,12 +2513,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withMaxSize( Val<Dimension> size ) {
         NullUtil.nullArgCheck(size, "size", Val.class);
         NullUtil.nullPropertyCheck(size, "size", "Null is not allowed to model the maximum size of this component!");
-        _onShow( size, v -> {
-            C comp = getComponent();
-            comp.setMaximumSize( UI.scale(v) );
-            _revalidate(comp); // For some reason this is needed to make the change visible.
-        });
-        return this.withMaxSize( size.orElseThrow() );
+        return _withOnShow( size, (c,v) -> {
+                    c.setMaximumSize(UI.scale(v));
+                    _revalidate(c); // For some reason this is needed to make the change visible.
+                })
+                ._with( c -> {
+                    c.setMaximumSize( UI.scale(size.get()) );
+                })
+                ._this();
     }
 
     /**
@@ -2245,8 +2531,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very builder to allow for method chaining.
      */
     public final I withMaxSize( int width, int height ) {
-        getComponent().setMaximumSize(new Dimension(UI.scale(width), UI.scale(height)));
-        return _this();
+        return _with( c -> c.setMaximumSize(new Dimension(UI.scale(width), UI.scale(height))) )._this();
     }
 
     /**
@@ -2262,17 +2547,18 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck(height, "height", Val.class);
         NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the maximum width of this component!");
         NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the maximum height of this component!");
-        _onShow( width, w -> {
-            C comp = getComponent();
-            comp.setMaximumSize(new Dimension(UI.scale(w), getComponent().getMaximumSize().height));
-            _revalidate(comp); // Swing is not smart enough to do this automatically :(
-        });
-        _onShow( height, h -> {
-            C comp = getComponent();
-            comp.setMaximumSize(new Dimension(getComponent().getMaximumSize().width, UI.scale(h)));
-            _revalidate(comp); // Still not smart enough to do this automatically :(
-        });
-        return this.withMaxSize( width.orElseThrow(), height.orElseThrow() );
+        return _withOnShow( width, (c,w) -> {
+                    c.setMaximumSize(new Dimension(UI.scale(w), c.getMaximumSize().height));
+                    _revalidate(c); // Raw Swing is not smart enough to do this automatically :(
+                })
+                ._withOnShow( height, (c,h) -> {
+                    c.setMaximumSize(new Dimension(c.getMaximumSize().width, UI.scale(h)));
+                    _revalidate(c); // Still not smart enough to do this automatically :(
+                })
+                ._with( c -> {
+                    c.setMaximumSize( new Dimension(UI.scale(width.get()), UI.scale(height.get())) );
+                })
+                ._this();
     }
 
     /**
@@ -2282,12 +2568,17 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very builder to allow for method chaining.
      */
     public final I withMaxWidth( int width ) {
-        C comp = getComponent();
-        int currentHeight = comp.getMaximumSize().height;
-        if ( !comp.isMaximumSizeSet() && UI.currentLookAndFeel().isOneOf(UI.LookAndFeel.METAL, UI.LookAndFeel.NIMBUS) )
+        return _with( c -> {
+                    _setMaxWidth(c, width);
+                })
+                ._this();
+    }
+
+    private void _setMaxWidth( C component, int width ) {
+        int currentHeight = component.getMaximumSize().height;
+        if ( !component.isMaximumSizeSet() && UI.currentLookAndFeel().isOneOf(UI.LookAndFeel.METAL, UI.LookAndFeel.NIMBUS) )
             currentHeight = UI.scale(currentHeight);
-        comp.setMaximumSize(new Dimension(UI.scale(width), currentHeight));
-        return _this();
+        component.setMaximumSize(new Dimension(UI.scale(width), currentHeight));
     }
 
     /**
@@ -2299,12 +2590,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withMaxWidth( Val<Integer> width ) {
         NullUtil.nullArgCheck(width, "width", Val.class);
         NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the maximum width of this component!");
-        _onShow( width, w -> {
-            C comp = getComponent();
-            comp.setMaximumSize(new Dimension(UI.scale(w), getComponent().getMaximumSize().height));
-            _revalidate(comp); // When the size changes, the layout manager needs to be informed.
-        });
-        return this.withMaxWidth( width.orElseThrow() );
+        return _withOnShow( width, (c,w) -> {
+                    c.setMaximumSize(new Dimension(UI.scale(w), c.getMaximumSize().height));
+                    _revalidate(c); // When the size changes, the layout manager needs to be informed.
+                })
+                ._with( c -> {
+                    _setMaxWidth(c, width.get());
+                })
+                ._this();
     }
 
     /**
@@ -2314,12 +2607,17 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very builder to allow for method chaining.
      */
     public final I withMaxHeight( int height ) {
-        C comp = getComponent();
-        int currentWidth = comp.getMaximumSize().width;
-        if ( !comp.isMaximumSizeSet() && UI.currentLookAndFeel().isOneOf(UI.LookAndFeel.METAL, UI.LookAndFeel.NIMBUS) )
+        return _with( c -> {
+                    _setMaxHeight(c, height);
+                })
+                ._this();
+    }
+
+    private void _setMaxHeight( C component, int height ) {
+        int currentWidth = component.getMaximumSize().width;
+        if ( !component.isMaximumSizeSet() && UI.currentLookAndFeel().isOneOf(UI.LookAndFeel.METAL, UI.LookAndFeel.NIMBUS) )
             currentWidth = UI.scale(currentWidth);
-        comp.setMaximumSize(new Dimension(currentWidth, UI.scale(height)));
-        return _this();
+        component.setMaximumSize(new Dimension(currentWidth, UI.scale(height)));
     }
 
     /**
@@ -2331,12 +2629,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withMaxHeight( Val<Integer> height ) {
         NullUtil.nullArgCheck(height, "height", Val.class);
         NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the maximum height of this component!");
-        _onShow( height, h -> {
-            C comp = getComponent();
-            comp.setMaximumSize(new Dimension(getComponent().getMaximumSize().width, UI.scale(h)));
-            _revalidate(comp); // The revalidate is necessary to make the change visible, this makes sure the layout is recalculated.
-        });
-        return this.withMaxHeight( height.orElseThrow() );
+        return _withOnShow( height, (c,h) -> {
+                    c.setMaximumSize(new Dimension(c.getMaximumSize().width, UI.scale(h)));
+                    _revalidate(c); // The revalidate is necessary to make the change visible, this makes sure the layout is recalculated.
+                })
+                ._with( c -> {
+                    _setMaxHeight(c, height.get());
+                })
+                ._this();
     }
 
     /**
@@ -2347,8 +2647,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final I withPrefSize( Dimension size ) {
         NullUtil.nullArgCheck(size, "size", Dimension.class);
-        getComponent().setPreferredSize(UI.scale(size));
-        return _this();
+        return _with( c -> c.setPreferredSize(UI.scale(size)) )._this();
     }
 
     /**
@@ -2361,12 +2660,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withPrefSize( Val<Dimension> size ) {
         NullUtil.nullArgCheck(size, "size", Val.class);
         NullUtil.nullPropertyCheck(size, "size", "Null is not allowed to model the preferred size of this component!");
-        _onShow( size, v -> {
-            C comp = getComponent();
-            comp.setPreferredSize(UI.scale(v));
-            _revalidate(comp);
-        });
-        return this.withPrefSize( size.orElseNull() );
+        return _withOnShow( size, (c,v) -> {
+                    c.setPreferredSize(UI.scale(v));
+                    _revalidate(c);
+                })
+                ._with( c -> {
+                    c.setPreferredSize( UI.scale(size.get()) );
+                })
+                ._this();
     }
 
     /**
@@ -2377,8 +2678,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very builder to allow for method chaining.
      */
     public final I withPrefSize( int width, int height ) {
-        getComponent().setPreferredSize(new Dimension(UI.scale(width), UI.scale(height)));
-        return _this();
+        return _with( c -> c.setPreferredSize(new Dimension(UI.scale(width), UI.scale(height))) )._this();
     }
 
     /**
@@ -2394,17 +2694,18 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck(height, "height", Val.class);
         NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the preferred width of this component!");
         NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the preferred height of this component!");
-        _onShow( width, w -> {
-            C comp = getComponent();
-            comp.setPreferredSize(new Dimension(UI.scale(w), getComponent().getPreferredSize().height));
-            _revalidate(comp); // We need to revalidate the component to make sure the layout manager is aware of the new size.
-        });
-        _onShow( height, h -> {
-            C comp = getComponent();
-            comp.setPreferredSize(new Dimension(getComponent().getPreferredSize().width, UI.scale(h)));
-            _revalidate(comp); // We need to revalidate the component to make sure the layout manager is aware of the new size.
-        });
-        return this.withPrefSize( width.orElseThrow(), height.orElseThrow() );
+        return _withOnShow( width, (c,w) -> {
+                    c.setPreferredSize(new Dimension(UI.scale(w), c.getPreferredSize().height));
+                    _revalidate(c); // We need to revalidate the component to make sure the layout manager is aware of the new size.
+                })
+                ._withOnShow( height, (c,h) -> {
+                    c.setPreferredSize(new Dimension(c.getPreferredSize().width, UI.scale(h)));
+                    _revalidate(c); // We need to revalidate the component to make sure the layout manager is aware of the new size.
+                })
+                ._with( c -> {
+                    c.setPreferredSize( new Dimension(UI.scale(width.get()), UI.scale(height.get())) );
+                })
+                ._this();
     }
 
     /**
@@ -2414,12 +2715,17 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very builder to allow for method chaining.
      */
     public final I withPrefWidth( int width ) {
-        C comp = getComponent();
-        int currentHeight = comp.getPreferredSize().height;
-        if ( !comp.isPreferredSizeSet() && UI.currentLookAndFeel().isOneOf(UI.LookAndFeel.METAL, UI.LookAndFeel.NIMBUS) )
+        return _with( c -> {
+                    _setPrefWidth(c, width);
+                })
+                ._this();
+    }
+
+    protected final void _setPrefWidth( C component, int width ) {
+        int currentHeight = component.getPreferredSize().height;
+        if ( !component.isPreferredSizeSet() && UI.currentLookAndFeel().isOneOf(UI.LookAndFeel.METAL, UI.LookAndFeel.NIMBUS) )
             currentHeight = UI.scale(currentHeight);
-        comp.setPreferredSize(new Dimension(UI.scale(width), currentHeight));
-        return _this();
+        component.setPreferredSize(new Dimension(UI.scale(width), currentHeight));
     }
 
     /**
@@ -2431,12 +2737,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withPrefWidth( Val<Integer> width ) {
         NullUtil.nullArgCheck(width, "width", Val.class);
         NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the preferred width of this component!");
-        _onShow( width, w -> {
-            C comp = getComponent();
-            comp.setPreferredSize(new Dimension(UI.scale(w), getComponent().getPreferredSize().height));
-            _revalidate(comp); // We need to revalidate the component to make sure the new preferred size is applied.
-        });
-        return this.withPrefWidth( width.orElseThrow() );
+        return _withOnShow( width, (c,w) -> {
+                    c.setPreferredSize(new Dimension(UI.scale(w), c.getPreferredSize().height));
+                    _revalidate(c); // We need to revalidate the component to make sure the new preferred size is applied.
+                })
+                ._with( c -> {
+                    _setPrefWidth(c, width.get());
+                })
+                ._this();
     }
 
     /**
@@ -2446,12 +2754,17 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very builder to allow for method chaining.
      */
     public final I withPrefHeight( int height ) {
-        C comp = getComponent();
-        int currentWidth = comp.getPreferredSize().width;
-        if ( !comp.isPreferredSizeSet() && UI.currentLookAndFeel().isOneOf(UI.LookAndFeel.METAL, UI.LookAndFeel.NIMBUS) )
+        return _with( c -> {
+                    _setPrefHeight(c, height);
+                })
+                ._this();
+    }
+
+    private void _setPrefHeight( C component, int height ) {
+        int currentWidth = component.getPreferredSize().width;
+        if ( !component.isPreferredSizeSet() && UI.currentLookAndFeel().isOneOf(UI.LookAndFeel.METAL, UI.LookAndFeel.NIMBUS) )
             currentWidth = UI.scale(currentWidth);
-        comp.setPreferredSize(new Dimension(currentWidth, UI.scale(height)));
-        return _this();
+        component.setPreferredSize(new Dimension(currentWidth, UI.scale(height)));
     }
 
     /**
@@ -2460,15 +2773,17 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param height The preferred height which should be set for the underlying component wrapped by a {@link Val}.
      * @return This very builder to allow for method chaining.
      */
-    public final I withPrefHeight(Val<Integer> height ) {
+    public final I withPrefHeight( Val<Integer> height ) {
         NullUtil.nullArgCheck(height, "height", Val.class);
         NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the preferred height of this component!");
-        _onShow( height, h -> {
-            C comp = getComponent();
-            comp.setPreferredSize(new Dimension(getComponent().getPreferredSize().width, UI.scale(h)));
-            _revalidate(comp); // We need to revalidate the component to make sure the new preferred size is applied.
-        });
-        return this.withPrefHeight( height.orElseThrow() );
+        return _withOnShow( height, (c,h) -> {
+                    c.setPreferredSize(new Dimension(c.getPreferredSize().width, UI.scale(h)));
+                    _revalidate(c); // We need to revalidate the component to make sure the new preferred size is applied.
+                })
+                ._with( c -> {
+                    _setPrefHeight(c, height.get());
+                })
+                ._this();
     }
 
     /**
@@ -2479,8 +2794,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final I withSize( Dimension size ) {
         NullUtil.nullArgCheck(size, "size", Dimension.class);
-        getComponent().setSize( UI.scale(size) );
-        return _this();
+        return _with( c -> c.setSize(UI.scale(size)) )._this();
     }
 
     /**
@@ -2493,12 +2807,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withSize( Val<Dimension> size ) {
         NullUtil.nullArgCheck(size, "size", Val.class);
         NullUtil.nullPropertyCheck(size, "size", "Null is not allowed to model the size of this component!");
-        _onShow( size, v -> {
-            C comp = getComponent();
-            comp.setSize( UI.scale(v) );
-            _revalidate(comp); // We need to revalidate the component to make sure the new size is applied.
-        });
-        return this.withSize( size.orElseNull() );
+        return _withOnShow( size, (c,v) -> {
+                    c.setSize(UI.scale(v));
+                    _revalidate(c); // We need to revalidate the component to make sure the new size is applied.
+                })
+                ._with( c -> {
+                    c.setSize( UI.scale(size.get()) );
+                })
+                ._this();
     }
 
     /**
@@ -2519,10 +2835,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very builder to allow for method chaining.
      */
     public final I withWidth( int width ) {
-        C comp = getComponent();
-        int currentHeight = comp.getSize().height;
-        comp.setSize(new Dimension(UI.scale(width), currentHeight));
-        return _this();
+        return _with( c -> {
+                    c.setSize(new Dimension(UI.scale(width), c.getSize().height));
+                })
+                ._this();
     }
 
     /**
@@ -2535,12 +2851,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withWidth( Val<Integer> width ) {
         NullUtil.nullArgCheck(width, "width", Val.class);
         NullUtil.nullPropertyCheck(width, "width", "Null is not allowed to model the width of this component!");
-        _onShow( width, w -> {
-            C comp = getComponent();
-            comp.setSize(new Dimension(UI.scale(w), getComponent().getSize().height));
-            _revalidate(comp); // We need to revalidate the component to make sure the new size is applied.
-        });
-        return this.withWidth( width.orElseThrow() );
+        return _withOnShow( width, (c,w) -> {
+                    c.setSize(new Dimension(UI.scale(w), c.getSize().height));
+                    _revalidate(c); // We need to revalidate the component to make sure the new size is applied.
+                })
+                ._with( c -> {
+                    c.setSize(new Dimension(UI.scale(width.get()), c.getSize().height));
+                })
+                ._this();
     }
 
     /**
@@ -2550,10 +2868,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very builder to allow for method chaining.
      */
     public final I withHeight( int height ) {
-        C comp = getComponent();
-        int currentWidth = comp.getSize().width;
-        comp.setSize(new Dimension(currentWidth, UI.scale(height)));
-        return _this();
+        return _with( c -> {
+                    c.setSize(new Dimension(c.getSize().width, UI.scale(height)));
+                })
+                ._this();
     }
 
     /**
@@ -2566,12 +2884,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I withHeight( Val<Integer> height ) {
         NullUtil.nullArgCheck(height, "height", Val.class);
         NullUtil.nullPropertyCheck(height, "height", "Null is not allowed to model the height of this component!");
-        _onShow( height, h -> {
-            C comp = getComponent();
-            comp.setSize(new Dimension(getComponent().getSize().width, UI.scale(h)));
-            _revalidate(comp); // We need to revalidate the component to make sure the new size is applied.
-        });
-        return this.withHeight( height.orElseThrow() );
+        return _withOnShow( height, (c,h) -> {
+                    c.setSize(new Dimension(c.getSize().width, UI.scale(h)));
+                    _revalidate(c); // We need to revalidate the component to make sure the new size is applied.
+                })
+                ._with( c -> {
+                    c.setSize(new Dimension(c.getSize().width, UI.scale(height.get())));
+                })
+                ._this();
     }
 
     private static void _revalidate( Component comp ) {
@@ -2595,13 +2915,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final I onMouseClick( Action<ComponentMouseEventDelegate<C>> onClick ) {
         NullUtil.nullArgCheck(onClick, "onClick", Action.class);
-        C component = getComponent();
-        component.addMouseListener(new MouseAdapter() {
-            @Override public void mouseClicked(MouseEvent e) { 
-                _doApp(() -> onClick.accept(new ComponentMouseEventDelegate<>(component, e, ()->getSiblinghood())));
-            }
-        });
-        return _this();
+        return _with( c -> {
+                    c.addMouseListener(new MouseAdapter() {
+                        @Override public void mouseClicked(MouseEvent e) {
+                            _doApp(() -> onClick.accept(new ComponentMouseEventDelegate<>( c, e )));
+                        }
+                    });
+                })
+                ._this();
     }
 
     /**
@@ -2615,13 +2936,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final I onMouseRelease( Action<ComponentMouseEventDelegate<C>> onRelease ) {
         NullUtil.nullArgCheck(onRelease, "onRelease", Action.class);
-        C component = getComponent();
-        component.addMouseListener(new MouseAdapter() {
-            @Override public void mouseReleased(MouseEvent e) {
-                _doApp(() -> onRelease.accept(new ComponentMouseEventDelegate<>(component, e, ()->getSiblinghood())));
-            }
-        });
-        return _this();
+        return _with( c -> {
+                    c.addMouseListener(new MouseAdapter() {
+                        @Override public void mouseReleased(MouseEvent e) {
+                            _doApp(() -> onRelease.accept(new ComponentMouseEventDelegate<>(c, e )));
+                        }
+                    });
+                })
+                ._this();
     }
 
     /**
@@ -2635,13 +2957,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final I onMousePress( Action<ComponentMouseEventDelegate<C>> onPress ) {
         NullUtil.nullArgCheck(onPress, "onPress", Action.class);
-        C component = getComponent();
-        component.addMouseListener(new MouseAdapter() {
-            @Override public void mousePressed(MouseEvent e) {
-                _doApp(() -> onPress.accept(new ComponentMouseEventDelegate<>(component, e, ()->getSiblinghood())));
-            }
-        });
-        return _this();
+        return _with( c -> {
+                    c.addMouseListener(new MouseAdapter() {
+                        @Override public void mousePressed(MouseEvent e) {
+                            _doApp(() -> onPress.accept(new ComponentMouseEventDelegate<>(c, e )));
+                        }
+                    });
+                })
+                ._this();
     }
 
     /**
@@ -2655,13 +2978,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final I onMouseEnter( Action<ComponentMouseEventDelegate<C>> onEnter ) {
         NullUtil.nullArgCheck(onEnter, "onEnter", Action.class);
-        C component = getComponent();
-        component.addMouseListener(new MouseAdapter() {
-            @Override public void mouseEntered(MouseEvent e) {
-                _doApp(() -> onEnter.accept(new ComponentMouseEventDelegate<>(component, e, ()->getSiblinghood())));
-            }
-        });
-        return _this();
+        return _with( c -> {
+                    c.addMouseListener(new MouseAdapter() {
+                        @Override public void mouseEntered(MouseEvent e) {
+                            _doApp(() -> onEnter.accept(new ComponentMouseEventDelegate<>(c, e )));
+                        }
+                    });
+                })
+                ._this();
     }
 
     /**
@@ -2675,13 +2999,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final I onMouseExit( Action<ComponentMouseEventDelegate<C>> onExit ) {
         NullUtil.nullArgCheck(onExit, "onExit", Action.class);
-        C component = getComponent();
-        component.addMouseListener(new MouseAdapter() {
-            @Override public void mouseExited(MouseEvent e) {
-                _doApp(() -> onExit.accept(new ComponentMouseEventDelegate<>(component, e, ()->getSiblinghood())));
-            }
-        });
-        return _this();
+        return _with( c -> {
+                    c.addMouseListener(new MouseAdapter() {
+                        @Override public void mouseExited(MouseEvent e) {
+                            _doApp(() -> onExit.accept(new ComponentMouseEventDelegate<>(c, e )));
+                        }
+                    });
+                })
+                ._this();
     }
 
     /**
@@ -2699,24 +3024,25 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final I onMouseDrag( Action<ComponentDragEventDelegate<C>> onDrag ) {
         NullUtil.nullArgCheck(onDrag, "onDrag", Action.class);
-        java.util.List<MouseEvent> dragEventHistory = new ArrayList<>();
-        C component = getComponent();
-        MouseAdapter listener = new MouseAdapter() {
-            @Override public void mousePressed(MouseEvent e) {
-                dragEventHistory.clear();
-                dragEventHistory.add(e);
-            }
-            @Override public void mouseReleased(MouseEvent e) {
-                dragEventHistory.clear();
-            }
-            @Override public void mouseDragged(MouseEvent e) {
-                dragEventHistory.add(e);
-                _doApp(() -> onDrag.accept(new ComponentDragEventDelegate<>(component, e, ()->getSiblinghood(), dragEventHistory)));
-            }
-        };
-        component.addMouseListener(listener);
-        component.addMouseMotionListener(listener);
-        return _this();
+        return _with( component -> {
+                   java.util.List<MouseEvent> dragEventHistory = new ArrayList<>();
+                   MouseAdapter listener = new MouseAdapter() {
+                       @Override public void mousePressed(MouseEvent e) {
+                           dragEventHistory.clear();
+                           dragEventHistory.add(e);
+                       }
+                       @Override public void mouseReleased(MouseEvent e) {
+                           dragEventHistory.clear();
+                       }
+                       @Override public void mouseDragged(MouseEvent e) {
+                           dragEventHistory.add(e);
+                           _doApp(() -> onDrag.accept(new ComponentDragEventDelegate<>(component, e, dragEventHistory)));
+                       }
+                   };
+                   component.addMouseListener(listener);
+                   component.addMouseMotionListener(listener);
+               })
+               ._this();
     }
 
     /**
@@ -2730,18 +3056,19 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final I onMouseMove( Action<ComponentMouseEventDelegate<C>> onMove ) {
         NullUtil.nullArgCheck(onMove, "onMove", Action.class);
-        C component = getComponent();
-        component.addMouseListener(new MouseAdapter() {
-            @Override public void mouseMoved(MouseEvent e) {
-                _doApp(() -> onMove.accept(new ComponentMouseEventDelegate<>(component, e, ()->getSiblinghood())));
-            }
-        });
-        component.addMouseMotionListener(new MouseMotionAdapter() {
-            @Override public void mouseMoved(MouseEvent e) {
-                _doApp(() -> onMove.accept(new ComponentMouseEventDelegate<>(component, e, ()->getSiblinghood())));
-            }
-        });
-        return _this();
+        return _with( component -> {
+                   component.addMouseListener(new MouseAdapter() {
+                       @Override public void mouseMoved(MouseEvent e) {
+                           _doApp(() -> onMove.accept(new ComponentMouseEventDelegate<>( component, e )));
+                       }
+                   });
+                   component.addMouseMotionListener(new MouseMotionAdapter() {
+                       @Override public void mouseMoved(MouseEvent e) {
+                           _doApp(() -> onMove.accept(new ComponentMouseEventDelegate<>( component, e )));
+                       }
+                   });
+               })
+               ._this();
     }
 
     /**
@@ -2755,13 +3082,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final I onMouseWheelMove( Action<ComponentDelegate<C, MouseWheelEvent>> onWheel ) {
         NullUtil.nullArgCheck(onWheel, "onWheel", Action.class);
-        C component = getComponent();
-        component.addMouseWheelListener(new MouseWheelListener() {
-            @Override public void mouseWheelMoved(MouseWheelEvent e) {
-                _doApp(() -> onWheel.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
-            }
-        });
-        return _this();
+        return _with( component -> {
+                   component.addMouseWheelListener(new MouseWheelListener() {
+                       @Override public void mouseWheelMoved(MouseWheelEvent e) {
+                           _doApp(() -> onWheel.accept(new ComponentDelegate<>(component, e )));
+                       }
+                   });
+               })
+               ._this();
     }
 
     /**
@@ -2774,15 +3102,15 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final I onMouseWheelUp( Action<ComponentDelegate<C, MouseWheelEvent>> onWheelUp ) {
         NullUtil.nullArgCheck(onWheelUp, "onWheelUp", Action.class);
-        C component = getComponent();
-        component.addMouseWheelListener(new MouseWheelListener() {
-            @Override public void mouseWheelMoved(MouseWheelEvent e) {
-                if( e.getWheelRotation() < 0 ) {
-                    _doApp(() -> onWheelUp.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
-                }
-            }
-        });
-        return _this();
+        return _with( component -> {
+                   component.addMouseWheelListener(new MouseWheelListener() {
+                       @Override public void mouseWheelMoved(MouseWheelEvent e) {
+                           if ( e.getWheelRotation() < 0 )
+                               _doApp(() -> onWheelUp.accept(new ComponentDelegate<>(component, e )));
+                       }
+                   });
+               })
+               ._this();
     }
 
     /**
@@ -2795,12 +3123,15 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final I onMouseWheelDown( Action<ComponentDelegate<C, MouseWheelEvent>> onWheelDown ) {
         NullUtil.nullArgCheck(onWheelDown, "onWheelDown", Action.class);
-        C component = getComponent();
-        component.addMouseWheelListener( e -> {
-                if ( e.getWheelRotation() > 0 )
-                    _doApp(() -> onWheelDown.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
-            });
-        return _this();
+        return _with( component -> {
+                   component.addMouseWheelListener(new MouseWheelListener() {
+                       @Override public void mouseWheelMoved(MouseWheelEvent e) {
+                           if ( e.getWheelRotation() > 0 )
+                                   _doApp(() -> onWheelDown.accept(new ComponentDelegate<>(component, e )));
+                       }
+                   });
+               })
+               ._this();
     }
 
     /**
@@ -2812,13 +3143,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final I onResize( Action<ComponentDelegate<C, ComponentEvent>> onResize ) {
         NullUtil.nullArgCheck(onResize, "onResize", Action.class);
-        C component = getComponent();
-        component.addComponentListener(new ComponentAdapter() {
-            @Override public void componentResized(ComponentEvent e) {
-                _doApp(()->onResize.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
-            }
-        });
-        return _this();
+        return _with( component -> {
+                   component.addComponentListener(new ComponentAdapter() {
+                       @Override public void componentResized(ComponentEvent e) {
+                           _doApp(()->onResize.accept(new ComponentDelegate<>(component, e )));
+                       }
+                   });
+               })
+               ._this();
     }
 
     /**
@@ -2830,13 +3162,15 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final I onMoved( Action<ComponentDelegate<C, ComponentEvent>> onMoved ) {
         NullUtil.nullArgCheck(onMoved, "onMoved", Action.class);
-        C component = getComponent();
-        component.addComponentListener(new ComponentAdapter() {
-            @Override public void componentMoved(ComponentEvent e) {
-                _doApp(()->onMoved.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
-            }
-        });
-        return _this();
+        return _with( component -> {
+                   component.addComponentListener(new ComponentAdapter() {
+                       @Override public void componentMoved(ComponentEvent e) {
+
+                           _doApp(()->onMoved.accept(new ComponentDelegate<>( component, e )));
+                       }
+                   });
+               })
+               ._this();
     }
 
     /**
@@ -2848,13 +3182,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final I onShown( Action<ComponentDelegate<C, ComponentEvent>> onShown ) {
         NullUtil.nullArgCheck(onShown, "onShown", Action.class);
-        C component = getComponent();
-        component.addComponentListener(new ComponentAdapter() {
-            @Override public void componentShown(ComponentEvent e) {
-                _doApp(()->onShown.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
-            }
-        });
-        return _this();
+        return _with( component -> {
+                   component.addComponentListener(new ComponentAdapter() {
+                       @Override public void componentShown(ComponentEvent e) {
+                           _doApp(()->onShown.accept(new ComponentDelegate<>(component, e )));
+                       }
+                   });
+               })
+               ._this();
     }
 
     /**
@@ -2866,13 +3201,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final I onHidden( Action<ComponentDelegate<C, ComponentEvent>> onHidden ) {
         NullUtil.nullArgCheck(onHidden, "onHidden", Action.class);
-        C component = getComponent();
-        component.addComponentListener(new ComponentAdapter() {
-            @Override public void componentHidden(ComponentEvent e) {
-                _doApp(()->onHidden.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
-            }
-        });
-        return _this();
+        return _with( component -> {
+                   component.addComponentListener(new ComponentAdapter() {
+                       @Override public void componentHidden(ComponentEvent e) {
+                           _doApp(()->onHidden.accept(new ComponentDelegate<>(component, e )));
+                       }
+                   });
+               })
+               ._this();
     }
 
     /**
@@ -2884,13 +3220,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final I onFocusGain( Action<ComponentDelegate<C, ComponentEvent>> onFocus ) {
         NullUtil.nullArgCheck(onFocus, "onFocus", Action.class);
-        C component = getComponent();
-        component.addFocusListener(new FocusAdapter() {
-            @Override public void focusGained(FocusEvent e) {
-                _doApp(()->onFocus.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
-            }
-        });
-        return _this();
+        return _with( component -> {
+                   component.addFocusListener(new FocusAdapter() {
+                       @Override public void focusGained(FocusEvent e) {
+                           _doApp(()->onFocus.accept(new ComponentDelegate<>(component, e )));
+                       }
+                   });
+               })
+               ._this();
     }
 
     /**
@@ -2902,13 +3239,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final I onFocusLoss( Action<ComponentDelegate<C, ComponentEvent>> onFocus ) {
         NullUtil.nullArgCheck(onFocus, "onFocus", Action.class);
-        C component = getComponent();
-        component.addFocusListener(new FocusAdapter() {
-            @Override public void focusLost(FocusEvent e) {
-                _doApp(()->onFocus.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
-            }
-        });
-        return _this();
+        return _with( component -> {
+                   component.addFocusListener(new FocusAdapter() {
+                       @Override public void focusLost(FocusEvent e) {
+                           _doApp(()->onFocus.accept(new ComponentDelegate<>(component, e )));
+                       }
+                   });
+               })
+               ._this();
     }
 
     /**
@@ -2920,13 +3258,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final I onKeyPressed( Action<ComponentDelegate<C, KeyEvent>> onKeyPressed ) {
         NullUtil.nullArgCheck(onKeyPressed, "onKeyPressed", Action.class);
-        C component = getComponent();
-        component.addKeyListener(new KeyAdapter() {
-            @Override public void keyPressed(KeyEvent e) {
-                _doApp(()->onKeyPressed.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
-            }
-        });
-        return _this();
+        return _with( component -> {
+                   component.addKeyListener(new KeyAdapter() {
+                       @Override public void keyPressed(KeyEvent e) {
+                           _doApp(()->onKeyPressed.accept(new ComponentDelegate<>(component, e )));
+                       }
+                   });
+               })
+               ._this();
     }
 
     /**
@@ -2941,14 +3280,15 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I onPressed( Keyboard.Key key, Action<ComponentDelegate<C, KeyEvent>> onKeyPressed ) {
         NullUtil.nullArgCheck(key, "key", Keyboard.Key.class);
         NullUtil.nullArgCheck(onKeyPressed, "onKeyPressed", Action.class);
-        C component = getComponent();
-        component.addKeyListener(new KeyAdapter() {
-            @Override public void keyPressed( KeyEvent e ) {
-                if ( e.getKeyCode() == key.code )
-                    _doApp(()->onKeyPressed.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
-            }
-        });
-        return _this();
+        return _with( component -> {
+                   component.addKeyListener(new KeyAdapter() {
+                       @Override public void keyPressed( KeyEvent e ) {
+                           if ( e.getKeyCode() == key.code )
+                               _doApp(()->onKeyPressed.accept(new ComponentDelegate<>(component, e )));
+                       }
+                   });
+               })
+               ._this();
     }
 
                              /**
@@ -2961,12 +3301,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final I onKeyReleased( Action<ComponentDelegate<C, KeyEvent>> onKeyReleased ) {
         NullUtil.nullArgCheck(onKeyReleased, "onKeyReleased", Action.class);
-        C component = getComponent();
-        component.addKeyListener(new KeyAdapter() {
-            @Override public void keyReleased(KeyEvent e) {
-                _doApp(()->onKeyReleased.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood()))); }
-        });
-        return _this();
+        return _with( component -> {
+                   component.addKeyListener(new KeyAdapter() {
+                       @Override public void keyReleased(KeyEvent e) {
+                           _doApp(()->onKeyReleased.accept(new ComponentDelegate<>(component, e ))); }
+                   });
+               })
+               ._this();
     }
 
     /**
@@ -2983,14 +3324,15 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I onReleased( Keyboard.Key key, Action<ComponentDelegate<C, KeyEvent>> onKeyReleased ) {
         NullUtil.nullArgCheck(key, "key", Keyboard.Key.class);
         NullUtil.nullArgCheck(onKeyReleased, "onKeyReleased", Action.class);
-        C component = getComponent();
-        component.addKeyListener(new KeyAdapter() {
-            @Override public void keyReleased( KeyEvent e ) {
-                if ( e.getKeyCode() == key.code )
-                    _doApp(()->onKeyReleased.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
-            }
-        });
-        return _this();
+        return _with( component -> {
+                   component.addKeyListener(new KeyAdapter() {
+                       @Override public void keyReleased( KeyEvent e ) {
+                           if ( e.getKeyCode() == key.code )
+                               _doApp(()->onKeyReleased.accept(new ComponentDelegate<>(component, e )));
+                       }
+                   });
+               })
+               ._this();
     }
 
     /**
@@ -3004,11 +3346,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final I onKeyTyped( Action<ComponentDelegate<C, KeyEvent>> onKeyTyped ) {
         NullUtil.nullArgCheck(onKeyTyped, "onKeyTyped", Action.class);
-        C component = getComponent();
-        _onKeyTyped( e ->
-            _doApp(()->onKeyTyped.accept(new ComponentDelegate<>(component, e, this::getSiblinghood)))
-        );
-        return _this();
+        return _with( component -> {
+                   _onKeyTyped(component, (e, kl) -> {
+                       _doApp(() -> onKeyTyped.accept(new ComponentDelegate<>(component, e )));
+                   });
+               })
+               ._this();
     }
 
     /**
@@ -3026,18 +3369,19 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final I onTyped( Keyboard.Key key, Action<ComponentDelegate<C, KeyEvent>> onKeyTyped ) {
         NullUtil.nullArgCheck(key, "key", Keyboard.Key.class);
         NullUtil.nullArgCheck(onKeyTyped, "onKeyTyped", Action.class);
-        C component = getComponent();
-        _onKeyTyped( e -> {
-            if ( e.getKeyCode() == key.code )
-                _doApp(()->onKeyTyped.accept(new ComponentDelegate<>(component, e, ()->getSiblinghood())));
-        });
-        return _this();
+        return _with( component -> {
+                   _onKeyTyped(component, (e, kl) -> {
+                       if ( e.getKeyCode() == key.code )
+                           _doApp(()->onKeyTyped.accept(new ComponentDelegate<>(component, e )));
+                   });
+               })
+               ._this();
     }
 
-    protected void _onKeyTyped( Consumer<KeyEvent> action ) {
-        getComponent().addKeyListener(new KeyAdapter() {
+    protected void _onKeyTyped(C component, BiConsumer<KeyEvent, KeyAdapter> action ) {
+        component.addKeyListener(new KeyAdapter() {
             @Override public void keyTyped(KeyEvent e) {
-                action.accept(e);
+                action.accept(e, this);
             }
         });
     }
@@ -3093,11 +3437,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final <E extends Observable> I on( E noticeableEvent, Action<ComponentDelegate<C, E>> action ) {
         NullUtil.nullArgCheck(noticeableEvent, "noticeableEvent", Observable.class);
         NullUtil.nullArgCheck(action, "action", Action.class);
-        C component = getComponent();
-        noticeableEvent.subscribe( () -> {
-            _doApp(() -> action.accept(new ComponentDelegate<>(component, noticeableEvent, ()->getSiblinghood())));
-        });
-        return _this();
+        return _with( component -> {
+                   noticeableEvent.subscribe(() -> {
+                       _doApp(() -> action.accept(new ComponentDelegate<>(component, noticeableEvent )));
+                   });
+               })
+               ._this();
     }
 
     /**
@@ -3128,7 +3473,9 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param <E> The type of the {@link Observable} event.
      */
     public final <E extends Observable> I on( Function<C, E> noticeableEvent, Action<ComponentDelegate<C, E>> action ) {
-        return this.on(noticeableEvent.apply(getComponent()), action);
+        return _withAndGet( component ->
+                   this.on(noticeableEvent.apply(component), action)
+               );
     }
 
     /**
@@ -3146,26 +3493,28 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final I doUpdates( int delay, Action<ComponentDelegate<C, ActionEvent>> onUpdate ) {
         NullUtil.nullArgCheck(onUpdate, "onUpdate", Action.class);
-        Timer timer = new Timer(delay, e -> onUpdate.accept(new ComponentDelegate<>(getComponent(), e, this::getSiblinghood)));
-        {
-            java.util.List<Timer> timers = (java.util.List<Timer>) getComponent().getClientProperty(_TIMERS_KEY);
-            if ( timers == null ) {
-                timers = new ArrayList<>();
-                getComponent().putClientProperty(_TIMERS_KEY, timers);
-            }
-            timers.add(timer);
-        }
-        timer.start();
-        return _this();
+        return _with( component -> {
+                   Timer timer = new Timer(delay, e -> onUpdate.accept(new ComponentDelegate<>(component, e )));
+                   {
+                       java.util.List<Timer> timers = (java.util.List<Timer>) component.getClientProperty(_TIMERS_KEY);
+                       if ( timers == null ) {
+                           timers = new ArrayList<>();
+                           component.putClientProperty(_TIMERS_KEY, timers);
+                       }
+                       timers.add(timer);
+                   }
+                   timer.start();
+               })
+               ._this();
     }
 
     @Override
-    protected void _add( JComponent component, Object conf ) {
-        NullUtil.nullArgCheck(component, "component", JComponent.class);
+    protected void _doAddComponent( JComponent newComponent, Object conf, C thisComponent ) {
+        NullUtil.nullArgCheck(newComponent, "component", JComponent.class);
         if ( conf == null )
-            getComponent().add(component);
+            thisComponent.add(newComponent);
         else
-            getComponent().add(component, conf);
+            thisComponent.add(newComponent, conf);
     }
 
     /**
@@ -3217,15 +3566,18 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very instance, which enables builder-style method chaining.
      */
     @SafeVarargs
-    public final <B extends UIForAnySwing<?, ?>> I add(String attr, B... builders ) {
-        LayoutManager layout = getComponent().getLayout();
-        if ( _isBorderLayout(attr) && !(layout instanceof BorderLayout) ) {
-            if ( layout instanceof MigLayout )
-                log.warn("Layout ambiguity detected! Border layout constraint cannot be added to 'MigLayout'.");
-            getComponent().setLayout(new BorderLayout()); // The UI Maker tries to fill in the blanks!
-        }
-        for ( UIForAnySwing<?, ?> b : builders ) _doAdd(b, attr);
-        return _this();
+    public final <B extends UIForAnySwing<?, ?>> I add( String attr, B... builders ) {
+        return _with( component -> {
+                   LayoutManager layout = component.getLayout();
+                   if ( _isBorderLayout(attr) && !(layout instanceof BorderLayout) ) {
+                       if ( layout instanceof MigLayout )
+                           log.warn("Layout ambiguity detected! Border layout constraint cannot be added to 'MigLayout'.");
+                       component.setLayout(new BorderLayout()); // The UI Maker tries to fill in the blanks!
+                   }
+                   for ( UIForAnySwing<?, ?> b : builders )
+                       _doAdd( b, attr, component );
+               })
+               ._this();
     }
 
     /**
@@ -3264,12 +3616,15 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     @SafeVarargs
     public final <B extends UIForAnySwing<?, ?>> I add( CC attr, B... builders ) {
-        LayoutManager layout = getComponent().getLayout();
-        if ( !(layout instanceof MigLayout) )
-            log.warn("Layout ambiguity detected! Mig layout constraint cannot be added to '{}'.", layout.getClass().getSimpleName());
+        return _with( component -> {
+                   LayoutManager layout = component.getLayout();
+                   if ( !(layout instanceof MigLayout) )
+                       log.warn("Layout ambiguity detected! Mig layout constraint cannot be added to '{}'.", layout.getClass().getSimpleName());
 
-        for ( UIForAnySwing<?, ?> b : builders ) _doAdd( b, attr );
-        return _this();
+                   for ( UIForAnySwing<?, ?> b : builders )
+                       _doAdd( b, attr, component );
+               })
+               ._this();
     }
 
     /**
@@ -3288,11 +3643,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final <E extends JComponent> I add( String attr, E... components ) {
         NullUtil.nullArgCheck(attr, "conf", Object.class);
         NullUtil.nullArgCheck(components, "components", Object[].class);
-        for( E component : components ) {
-            NullUtil.nullArgCheck(component, "component", JComponent.class);
-            this.add(attr, UI.of(component));
-        }
-        return _this();
+        return _with( c -> {
+                   for ( E component : components ) {
+                       NullUtil.nullArgCheck(component, "component", JComponent.class);
+                       this.add(attr, UI.of(component));
+                   }
+               })
+               ._this();
     }
 
     /**
@@ -3327,8 +3684,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final <M> I add( Val<M> viewable, ViewSupplier<M> viewSupplier) {
         NullUtil.nullArgCheck(viewable, "viewable", Val.class);
-        _addViewableProp(viewable, null, viewSupplier);
-        return _this();
+        return _with( component -> {
+                   _addViewableProp(viewable, null, viewSupplier, component);
+               })
+               ._this();
     }
 
     /**
@@ -3347,8 +3706,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final <M> I add( Vals<M> viewables, ViewSupplier<M> viewSupplier) {
         NullUtil.nullArgCheck(viewables, "viewables", Vals.class);
-        _addViewableProps( viewables, null, viewSupplier);
-        return _this();
+        return _with( c -> {
+                    _addViewableProps( viewables, null, viewSupplier, c );
+                })
+                ._this();
     }
 
     /**
@@ -3368,8 +3729,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final <M> I add( String attr, Val<M> viewable, ViewSupplier<M> viewSupplier) {
         NullUtil.nullArgCheck(attr, "attr", Object.class);
         NullUtil.nullArgCheck(viewable, "viewable", Val.class);
-        _addViewableProp(viewable, attr, viewSupplier);
-        return _this();
+        return _with( component -> {
+                   _addViewableProp(viewable, attr, viewSupplier, component);
+               })
+               ._this();
     }
 
     /**
@@ -3390,8 +3753,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     public final <M> I add( String attr, Vals<M> viewables, ViewSupplier<M> viewSupplier) {
         NullUtil.nullArgCheck(attr, "attr", Object.class);
         NullUtil.nullArgCheck(viewables, "viewables", Vals.class);
-        _addViewableProps( viewables, attr, viewSupplier);
-        return _this();
+        return _with( c -> {
+                    _addViewableProps( viewables, attr, viewSupplier, c );
+                })
+                ._this();
     }
 
     /**
@@ -3427,28 +3792,28 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very instance, which enables builder-style method chaining.
      * @param <M> The type of the items in the {@link Vals} list.
      */
-    public final <M> I add(AddConstraint attr, Vals<M> viewables, ViewSupplier<M> viewSupplier) {
+    public final <M> I add( AddConstraint attr, Vals<M> viewables, ViewSupplier<M> viewSupplier ) {
         return this.add(attr.toString(), viewables, viewSupplier);
     }
 
-    protected <M> void _addViewableProps( Vals<M> viewables, String attr, ViewSupplier<M> viewSupplier) {
-        _onShow( viewables, delegate -> {
+    protected <M> void _addViewableProps( Vals<M> viewables, String attr, ViewSupplier<M> viewSupplier, C thisComponent ) {
+        _onShow( viewables, thisComponent, (c, delegate) -> {
             // we simply redo all the components.
             switch ( delegate.changeType() ) {
-                case SET: _updateComponentAt(delegate.index(), delegate.newValue().get(), viewSupplier, attr); break;
+                case SET: _updateComponentAt(delegate.index(), delegate.newValue().get(), viewSupplier, attr, c); break;
                 case ADD:
                     if ( delegate.index() < 0 && delegate.newValue().isEmpty() ) {
                         // This is basically a add all operation, so we clear the components first.
-                        _clearComponents();
+                        _clearComponentsOf(c);
                         // and then we add all the components.
                         for ( int i = 0; i < delegate.vals().size(); i++ )
-                            _addComponentAt( i, delegate.vals().at(i).get(), viewSupplier, attr );
+                            _addComponentAt( i, delegate.vals().at(i).get(), viewSupplier, attr, c );
                     }
                     else
-                        _addComponentAt(delegate.index(), delegate.newValue().get(), viewSupplier, attr);
+                        _addComponentAt( delegate.index(), delegate.newValue().get(), viewSupplier, attr, c );
                     break;
-                case REMOVE: _removeComponentAt(delegate.index()); break;
-                case CLEAR: _clearComponents(); break;
+                case REMOVE: _removeComponentAt(delegate.index(), c); break;
+                case CLEAR: _clearComponentsOf(c); break;
                 case NONE: break;
                 default: throw new IllegalStateException("Unknown type: "+delegate.changeType());
             }
@@ -3456,9 +3821,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         viewables.forEach( v -> add(viewSupplier.createViewFor(v)) );
     }
 
-    private <M> void _addViewableProp( Val<M> viewable, String attr, ViewSupplier<M> viewSupplier) {
+    private <M> void _addViewableProp(
+            Val<M> viewable, String attr, ViewSupplier<M> viewSupplier, C thisComponent
+    ) {
         // First we remember the index of the component which will be provided by the viewable dynamically.
-        final int index = _childCount();
+        final int index = _childCount( thisComponent );
         // Then we add the component provided by the viewable to the list of children.
         if ( attr == null ) {
             if ( viewable.isPresent() )
@@ -3472,56 +3839,52 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
                 this.add(attr, new JPanel()); // We add a dummy component to the list of children.
         }
         // Finally we add a listener to the viewable which will update the component when the viewable changes.
-        _onShow( viewable, v -> _updateComponentAt(index, v, viewSupplier, attr) );
+        _onShow( viewable, thisComponent, (c,v) -> _updateComponentAt(index, v, viewSupplier, attr, c) );
     }
 
-    private <M> void _updateComponentAt(int index, M v, ViewSupplier<M> viewSupplier, String attr ) {
-        component().ifPresent( c -> {
-            JComponent newComponent = v == null ? new JPanel() : UI.use(_eventProcessor, () -> viewSupplier.createViewFor(v).getComponent() );
-            // We remove the old component.
-            c.remove(c.getComponent(index));
-            // We add the new component.
-            if ( attr == null )
-                c.add(newComponent, index);
-            else
-                c.add(newComponent, attr, index);
-            // We update the layout.
-            c.revalidate();
-            c.repaint();
-        });
+    private <M> void _updateComponentAt(
+            int index, M v, ViewSupplier<M> viewSupplier, String attr, C c
+    ) {
+        JComponent newComponent = v == null ? new JPanel() : UI.use(_eventProcessor, () -> viewSupplier.createViewFor(v).getComponent() );
+        // We remove the old component.
+        c.remove(c.getComponent(index));
+        // We add the new component.
+        if ( attr == null )
+            c.add(newComponent, index);
+        else
+            c.add(newComponent, attr, index);
+        // We update the layout.
+        c.revalidate();
+        c.repaint();
     }
 
-    private <M> void _addComponentAt(int index, M v, ViewSupplier<M> viewSupplier, String attr ) {
-        component().ifPresent( c -> {
-            // We add the new component.
-            if ( attr == null )
-                c.add(UI.use(_eventProcessor, () -> viewSupplier.createViewFor(v).getComponent()), index);
-            else
-                c.add(UI.use(_eventProcessor, () -> viewSupplier.createViewFor(v).getComponent()), attr, index);
-            // We update the layout.
-            c.revalidate();
-            c.repaint();
-        });
+    private <M> void _addComponentAt(
+        int index, M v, ViewSupplier<M> viewSupplier, String attr, C thisComponent
+    ) {
+        // We add the new component.
+        if ( attr == null )
+            thisComponent.add(UI.use(_eventProcessor, () -> viewSupplier.createViewFor(v).getComponent()), index);
+        else
+            thisComponent.add(UI.use(_eventProcessor, () -> viewSupplier.createViewFor(v).getComponent()), attr, index);
+        // We update the layout.
+        thisComponent.revalidate();
+        thisComponent.repaint();
     }
 
-    private void _removeComponentAt( int index ) {
-        component().ifPresent( c -> {
-            // We remove the old component.
-            c.remove(c.getComponent(index));
-            // We update the layout.
-            c.revalidate();
-            c.repaint();
-        });
+    private void _removeComponentAt( int index, C c ) {
+        // We remove the old component.
+        c.remove(c.getComponent(index));
+        // We update the layout.
+        c.revalidate();
+        c.repaint();
     }
 
-    private void _clearComponents() {
-        component().ifPresent( c -> {
-            // We remove all components.
-            c.removeAll();
-            // We update the layout.
-            c.revalidate();
-            c.repaint();
-        });
+    private void _clearComponentsOf(C c ) {
+        // We remove all components.
+        c.removeAll();
+        // We update the layout.
+        c.revalidate();
+        c.repaint();
     }
 
     private static boolean _isBorderLayout( Object o ) {

@@ -254,13 +254,14 @@ input              { font-family: "Roboto",sans-serif; }
 
 
 #navbar_menu {
-    position: absolute;
+    position: fixed;
     right: -1em;
     padding-right: 1.25em;
     padding-bottom: 0.25em;
     padding-top: 0.25em;
     width: auto;
     max-width: 26em;
+    z-index: 1;
 }
 
 #navbar_list {

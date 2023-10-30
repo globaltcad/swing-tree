@@ -14,7 +14,7 @@ import java.awt.event.ActionListener;
 import java.util.function.Consumer;
 
 /**
- *  A swing tree builder node for {@link JTextField} instances.
+ *  A SwingTree builder node designed for configuring {@link JTextField} instances.
  * 	<p>
  * 	<b>Take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
  * 	where you can browse a large collection of examples demonstrating how to use the API of this class or other classes.</b>
@@ -31,12 +31,13 @@ public class UIForTextField<F extends JTextField> extends UIForAnyTextComponent<
      */
     public UIForTextField<F> onEnter( Action<ComponentDelegate<F, ActionEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
-        F field = getComponent();
-        _onEnter( e -> _doApp( () -> action.accept(new ComponentDelegate<>( field, e, this::getSiblinghood )) ) );
-        return this;
+        return _with( c -> {
+                   _onEnter(c, e -> _doApp( () -> action.accept(new ComponentDelegate<>( c, e )) ) );
+               })
+               ._this();
     }
 
-    private void _onEnter( Consumer<ActionEvent> action ) {
+    private void _onEnter( F thisComponent, Consumer<ActionEvent> action ) {
         /*
             When an action event is fired, Swing will go through all the listeners
             from the most recently added to the first added. This means that if we simply add
@@ -48,14 +49,14 @@ public class UIForTextField<F extends JTextField> extends UIForAnyTextComponent<
             simply because it was added first.
             This is especially true in the context of declarative UI design.
         */
-        ActionListener[] listeners = getComponent().getActionListeners();
+        ActionListener[] listeners = thisComponent.getActionListeners();
         for (ActionListener listener : listeners)
-            getComponent().removeActionListener(listener);
+            thisComponent.removeActionListener(listener);
 
-        getComponent().addActionListener(action::accept);
+        thisComponent.addActionListener(action::accept);
 
         for ( int i = listeners.length - 1; i >= 0; i-- ) // reverse order because swing does not give us the listeners in the order they were added!
-            getComponent().addActionListener(listeners[i]);
+            thisComponent.addActionListener(listeners[i]);
     }
 
     /**
@@ -85,38 +86,41 @@ public class UIForTextField<F extends JTextField> extends UIForAnyTextComponent<
         NullUtil.nullArgCheck(isValid, "isValid", Var.class);
         NullUtil.nullPropertyCheck(number, "number", "Null is not a valid value for a numeric property.");
         NullUtil.nullPropertyCheck(isValid, "isValid", "Null is not a valid value for a boolean property.");
-        _onShow( number, n -> _setTextSilently( getComponent(), n.toString() ) );
-        Var<String> text = Var.of( number.get().toString() );
-        text.onChange(From.VIEW,  s -> {
-            try {
-                if ( number.type() == Integer.class )
-                    number.set(From.VIEW,  (N) Integer.valueOf(Integer.parseInt(s.get())) );
-                else if ( number.type() == Long.class )
-                    number.set(From.VIEW,  (N) Long.valueOf(Long.parseLong(s.get())) );
-                else if ( number.type() == Float.class )
-                    number.set(From.VIEW,  (N) Float.valueOf(Float.parseFloat(s.get())) );
-                else if ( number.type() == Double.class )
-                    number.set(From.VIEW,  (N) Double.valueOf(Double.parseDouble(s.get())) );
-                else if ( number.type() == Short.class )
-                    number.set(From.VIEW,  (N) Short.valueOf(Short.parseShort(s.get())) );
-                else if ( number.type() == Byte.class )
-                    number.set(From.VIEW,  (N) Byte.valueOf(Byte.parseByte(s.get())) );
-                else
-                    throw new IllegalStateException("Unsupported number type: " + number.type());
+        return _withAndGet( thisComponent -> {
+                    _onShow( number, thisComponent, (c,n) -> _setTextSilently( thisComponent, n.toString() ) );
+                    Var<String> text = Var.of( number.get().toString() );
+                    text.onChange(From.VIEW,  s -> {
+                        try {
+                            if ( number.type() == Integer.class )
+                                number.set(From.VIEW,  (N) Integer.valueOf(Integer.parseInt(s.get())) );
+                            else if ( number.type() == Long.class )
+                                number.set(From.VIEW,  (N) Long.valueOf(Long.parseLong(s.get())) );
+                            else if ( number.type() == Float.class )
+                                number.set(From.VIEW,  (N) Float.valueOf(Float.parseFloat(s.get())) );
+                            else if ( number.type() == Double.class )
+                                number.set(From.VIEW,  (N) Double.valueOf(Double.parseDouble(s.get())) );
+                            else if ( number.type() == Short.class )
+                                number.set(From.VIEW,  (N) Short.valueOf(Short.parseShort(s.get())) );
+                            else if ( number.type() == Byte.class )
+                                number.set(From.VIEW,  (N) Byte.valueOf(Byte.parseByte(s.get())) );
+                            else
+                                throw new IllegalStateException("Unsupported number type: " + number.type());
 
-                if ( isValid.is(false) ) {
-                    isValid.set(true);
-                    isValid.fireChange(From.VIEW);
-                }
-            } catch (NumberFormatException e) {
-                // ignore
-                if ( isValid.is(true) ) {
-                    isValid.set(false);
-                    isValid.fireChange(From.VIEW);
-                }
-            }
-        });
-        return withText( text );
+                            if ( isValid.is(false) ) {
+                                isValid.set(true);
+                                isValid.fireChange(From.VIEW);
+                            }
+                        } catch (NumberFormatException e) {
+                            // ignore
+                            if ( isValid.is(true) ) {
+                                isValid.set(false);
+                                isValid.fireChange(From.VIEW);
+                            }
+                        }
+                    });
+                    return withText( text );
+                })
+                ._this();
     }
 
     /**
@@ -132,8 +136,10 @@ public class UIForTextField<F extends JTextField> extends UIForAnyTextComponent<
      */
     public final <N extends Number> UIForTextField<F> withNumber( Val<N> number ) {
         NullUtil.nullArgCheck(number, "number", Var.class);
-        _onShow( number, n -> _setTextSilently( getComponent(), n.toString() ) );
-        return this;
+        return _withOnShow( number, (thisComponent, n) -> {
+                    _setTextSilently( thisComponent, n.toString() );
+               })
+               ._this();
     }
 
     /**
@@ -151,8 +157,10 @@ public class UIForTextField<F extends JTextField> extends UIForAnyTextComponent<
      */
     public final UIForTextField<F> withTextOrientation( UI.HorizontalAlignment direction ) {
         NullUtil.nullArgCheck(direction, "direction", UI.HorizontalAlignment.class);
-        getComponent().setHorizontalAlignment(direction.forSwing());
-        return _this();
+        return _with( thisComponent -> {
+                   thisComponent.setHorizontalAlignment(direction.forSwing());
+               })
+               ._this();
     }
 
 }

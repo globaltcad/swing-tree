@@ -14,6 +14,8 @@ import swingtree.layout.LayoutConstraint;
  *  The constants as well as static factory methods in this class
  *  are intended to be used like this:
  *  <pre>{@code
+ * import static swingtree.UI.*;
+ * //...
  * panel(FILL.and(WRAP(2)))
  * .withPrefSize(500, 300)
  * .add(GROW,

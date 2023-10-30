@@ -18,7 +18,7 @@ public class UIForTableHeader<H extends UI.TableHeader> extends UIForAnySwing<UI
      *
      * @param tableHeader The JComponent type which will be wrapped by this builder node.
      */
-    public UIForTableHeader( H tableHeader ) {
+    protected UIForTableHeader( H tableHeader ) {
         super(tableHeader);
     }
 
@@ -30,8 +30,12 @@ public class UIForTableHeader<H extends UI.TableHeader> extends UIForAnySwing<UI
      */
     UIForTableHeader<H> withToolTips( String... toolTips ) {
         Objects.requireNonNull(toolTips);
-        getComponent().setToolTips(toolTips);
-        return _this();
+        for ( String toolTip : toolTips )
+            Objects.requireNonNull(toolTip);
+        return _with( thisComponent -> {
+                    thisComponent.setToolTips(toolTips);
+                })
+                ._this();
     }
 
     /**
@@ -43,8 +47,10 @@ public class UIForTableHeader<H extends UI.TableHeader> extends UIForAnySwing<UI
      */
     UIForTableHeader<H> withToolTipAt( Function<Integer, String> toolTipAt ) {
         Objects.requireNonNull(toolTipAt);
-        getComponent().setToolTipsSupplier(toolTipAt);
-        return _this();
+        return _with( thisComponent -> {
+                    thisComponent.setToolTipsSupplier(toolTipAt);
+                })
+                ._this();
     }
 
     /**
@@ -57,8 +63,10 @@ public class UIForTableHeader<H extends UI.TableHeader> extends UIForAnySwing<UI
      */
     UIForTableHeader<H> withDefaultRenderer( TableCellRenderer renderer ) {
         Objects.requireNonNull(renderer);
-        getComponent().setDefaultRenderer(renderer);
-        return _this();
+        return _with( thisComponent -> {
+                    thisComponent.setDefaultRenderer(renderer);
+                })
+                ._this();
     }
 
     /**
@@ -94,7 +102,9 @@ public class UIForTableHeader<H extends UI.TableHeader> extends UIForAnySwing<UI
      */
     UIForTableHeader<H> withDefaultRenderer( Render.Builder<JTable, ?> renderBuilder ) {
         Objects.requireNonNull(renderBuilder);
-        getComponent().setDefaultRenderer(renderBuilder.getForTable());
-        return _this();
+        return _with( thisComponent -> {
+                    thisComponent.setDefaultRenderer(renderBuilder.getForTable());
+                })
+                ._this();
     }
 }

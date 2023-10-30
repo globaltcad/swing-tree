@@ -10,12 +10,15 @@ import swingtree.api.Styler;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  *  Extensions of this class delegate a component
@@ -29,15 +32,30 @@ import java.util.stream.Collectors;
  */
 abstract class AbstractDelegate<C extends JComponent>
 {
-    private final Query _query; // the query object that allows us to query the component tree
+    private final GuiTraverser _guiTraverser; // the traverser object that allows us to query the component tree
     private final C _component;
 
+    /**
+     * @param component The component that is delegated.
+     * @param handle A component that is used as a starting point for traversing the component tree,
+     *               usually the same component as the one that is delegated.
+     */
     AbstractDelegate( C component, JComponent handle ) {
-        _query = new Query(handle);
-        _component = component;
+        _guiTraverser = new GuiTraverser(Objects.requireNonNull(handle));
+        _component    = Objects.requireNonNull(component);
     }
 
     protected C _component() { return _component; }
+
+    protected List<JComponent> _siblingsSource() {
+        return Optional.ofNullable(_component.getParent())
+                .map(Container::getComponents)
+                .map(Arrays::stream)
+                .orElseGet(Stream::empty)
+                .filter(c -> c instanceof JComponent)
+                .map(c -> (JComponent) c)
+                .collect(Collectors.toList());
+    }
 
     /**
      *  This is a delegate to the underlying component, but not every method of the component
@@ -904,7 +922,7 @@ abstract class AbstractDelegate<C extends JComponent>
      * @param <T> The type parameter of the component which should be found.
      */
     public final <T extends JComponent> OptionalUI<T> find( Class<T> type, Predicate<T> predicate ) {
-        return _query.find(type, predicate)
+        return _guiTraverser.find(type, predicate)
                 .findFirst()
                 .map(OptionalUI::ofNullable)
                 .orElse(OptionalUI.empty());
@@ -921,7 +939,7 @@ abstract class AbstractDelegate<C extends JComponent>
      * @param <T> The type parameter of the component which should be found.
      */
     public final <T extends JComponent> List<T> findAll( Class<T> type, Predicate<T> predicate ) {
-        return _query.find(type, predicate).collect(Collectors.toList());
+        return _guiTraverser.find(type, predicate).collect(Collectors.toList());
     }
 
     /**

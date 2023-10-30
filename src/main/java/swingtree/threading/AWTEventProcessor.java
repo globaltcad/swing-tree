@@ -26,12 +26,12 @@ final class AWTEventProcessor extends BasicSingleThreadedEventProcessor
         if ( !UI.thisIsUIThread() ) {
             Thread currentThread = Thread.currentThread();
             String threadName    = currentThread.getName();
-            String problem       = "The current thread is not the UI thread!";
-            String requirement   = "The current event processor is the '" + AWTEventProcessor.class.getSimpleName() + "' which " +
-                                   "only supports running tasks in the UI thread.  The current thread however is '" + threadName + "' which " +
-                                   "is not the UI thread (the AWT thread).";
-
-            throw new RuntimeException( problem + "  " + requirement );
+            String problem       = "Encountered the wrong thread instead of the expected UI thread!";
+            String requirement   = "The currently used '" + EventProcessor.class.getName() + "' is the '" + AWTEventProcessor.class.getSimpleName() + "' which " +
+                                   "expects tasks to be registered by the UI thread. The current thread however, \nis the '" + threadName + "' which " +
+                                   "is not recognized as the UI thread (AWT's EDT thread).";
+            String consequence   = "This problem is not fatal, but it may be caused by a bug and it may also cause bugs. Continuing anyway...";
+            throw new RuntimeException( problem + "\n" + requirement + "\n" + consequence );
         }
     }
 }

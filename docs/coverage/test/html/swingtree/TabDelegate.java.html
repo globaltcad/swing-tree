@@ -23,37 +23,36 @@ public final class TabDelegate extends ComponentMouseEventDelegate&lt;JTabbedPan
     public TabDelegate(
         JTabbedPane component,
         MouseEvent event,
-        Supplier&lt;List&lt;JComponent&gt;&gt; siblingSource,
         int clickedTab
     ) {
-<span class="fc" id="L29">        super(component, event, siblingSource);</span>
-<span class="fc" id="L30">        _clickedTab = clickedTab;</span>
-<span class="fc" id="L31">    }</span>
+<span class="fc" id="L28">        super(component, event);</span>
+<span class="fc" id="L29">        _clickedTab = clickedTab;</span>
+<span class="fc" id="L30">    }</span>
 
     /**
      * @return The index of the clicked tab.
      */
     public final int tabIndex() {
-<span class="fc" id="L37">        return _clickedTab;</span>
+<span class="fc" id="L36">        return _clickedTab;</span>
     }
 
     /**
      * @return The component of the clicked tab.
      */
     public final boolean tabIsSelected() {
-<span class="nc bnc" id="L44" title="All 2 branches missed.">        return tabIndex() == get().getSelectedIndex();</span>
+<span class="nc bnc" id="L43" title="All 2 branches missed.">        return tabIndex() == get().getSelectedIndex();</span>
     }
 
     /**
      * @return The component of the clicked tab.
      */
     public final JComponent tabComponent() {
-<span class="nc" id="L51">        Component found = get().getComponentAt(tabIndex());</span>
-<span class="nc bnc" id="L52" title="All 2 branches missed.">        if ( found instanceof JComponent )</span>
-<span class="nc" id="L53">            return (JComponent) found;</span>
+<span class="nc" id="L50">        Component found = get().getComponentAt(tabIndex());</span>
+<span class="nc bnc" id="L51" title="All 2 branches missed.">        if ( found instanceof JComponent )</span>
+<span class="nc" id="L52">            return (JComponent) found;</span>
         else
-<span class="nc" id="L55">            throw new RuntimeException(</span>
-<span class="nc" id="L56">                    &quot;The component at index &quot; + tabIndex() + &quot; is not a JComponent&quot;</span>
+<span class="nc" id="L54">            throw new RuntimeException(</span>
+<span class="nc" id="L55">                    &quot;The component at index &quot; + tabIndex() + &quot; is not a JComponent&quot;</span>
                 );
     }
 

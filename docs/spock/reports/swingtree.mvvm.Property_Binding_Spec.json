@@ -1,7 +1,7 @@
 {
   "className":"swingtree.mvvm.Property_Binding_Spec",
   "title":"Binding Properties to UI Components",
-  "narrative":"This specification shows you how to bind properties to \n    the states of common types UI components.",
+  "narrative":"SwingTree includes support for writing UIs using the MVVM pattern,\n    by shipping with a set of properties that can be bound to UI components\n    to model their state.\n    This specification demonstrates how to bind the properties of\n    you view model to the SwingTree UI.",
   "subjects":["sprouts.Val","sprouts.Var"],
   "statistics":{
     "runs":"16",
@@ -21,7 +21,7 @@
       "tags":{},"see":[],"extraInfo":["\n            Note that the binding of a Swing-Tree property will only have side effects\n            when it is deliberately triggered to execute its side effects.\n            This is important to allow you to decide yourself when\n            the state of a property is \"ready\" for display in the UI.\n        ","\n            Note that the binding of a Swing-Tree property will only have side effects\n            when it is deliberately triggered to execute its side effects.\n            This is important to allow you to decide yourself when\n            the state of a property is \"ready\" for display in the UI.\n        ","\n            Note that the binding of a Swing-Tree property will only have side effects\n            when it is deliberately triggered to execute its side effects.\n            This is important to allow you to decide yourself when\n            the state of a property is \"ready\" for display in the UI.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().getUIScale().setUserScaleFactor(uiScale)"]},
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
 
         {"kind":"and","text":"We create a property representing the size of a component.","code":["Val<Dimension> size = Var.of(new Dimension(100, 100))"]},
 
@@ -48,7 +48,7 @@
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().getUIScale().setUserScaleFactor(uiScale)"]},
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
 
         {"kind":"and","text":"We create properties representing the width and heights of a components.","code":["Var<Integer> minWidth = Var.of(60)","Var<Integer> prefHeight = Var.of(40)","Var<Integer> maxWidth = Var.of(90)"]},
 
@@ -75,7 +75,7 @@
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().getUIScale().setUserScaleFactor(uiScale)"]},
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
 
         {"kind":"and","text":"We create a property representing the width of a component.","code":["Var<Integer> width = Var.of(60)","Var<Integer> height = Var.of(40)"]},
 
@@ -352,7 +352,7 @@
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().getUIScale().setUserScaleFactor(uiScale)"]},
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
 
         {"kind":"and","text":"We create a property representing the minimum and maximum height.","code":["Val<Integer> property = Var.of(50)"]},
 
@@ -383,7 +383,7 @@
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().getUIScale().setUserScaleFactor(uiScale)"]},
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
 
         {"kind":"and","text":"We create a property representing the width and height.","code":["Val<Integer> widthProperty = Var.of(50)","Val<Integer> heightProperty = Var.of(100)"]},
 

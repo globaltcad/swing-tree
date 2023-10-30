@@ -34,6 +34,11 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
 {
     protected UIForAnyButton(B component ) { super(component); }
 
+    @Override
+    protected UIForAnyButton<I,B> _with( Consumer<B> action ) {
+        return (UIForAnyButton<I, B>) super._with( action );
+    }
+
     /**
      * Defines the single line of text the wrapped button type will display.
      * If the value of text is null or empty string, nothing is displayed.
@@ -42,8 +47,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      */
     public final I withText( String text ) {
-        getComponent().setText(text);
-        return _this();
+        return _with( c -> c.setText(text) )._this();
     }
 
     /**
@@ -58,8 +62,9 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     public final I withText( Val<String> text ) {
         NullUtil.nullArgCheck(text, "val", Val.class);
         NullUtil.nullPropertyCheck(text, "text");
-        _onShow( text, v -> getComponent().setText(v) );
-        return withText( text.orElseThrow() );
+        return _withOnShow( text, (c,t)->c.setText(t) )
+               ._with( c -> c.setText(text.orElseThrow()) )
+               ._this();
     }
 
     /**
@@ -77,8 +82,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      */
     public I withIcon( Icon icon ) {
         NullUtil.nullArgCheck(icon,"icon",Icon.class);
-        getComponent().setIcon(icon);
-        return _this();
+        return _with( c -> c.setIcon(icon) )._this();
     }
 
     /**
@@ -111,8 +115,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
 
             icon = new ImageIcon(icon.getImage().getScaledInstance(width, height, scaleHint));
         }
-        getComponent().setIcon(icon);
-        return _this();
+        return withIcon(icon);
     }
 
     /**
@@ -126,28 +129,29 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
         if ( icon instanceof SvgIcon)
         {
             SvgIcon svgIcon = (SvgIcon) icon;
-            return withIcon(svgIcon.withFitComponent(fitComponent));
+            return withIcon( svgIcon.withFitComponent(fitComponent) );
         }
         else
-        {
-            UI.runLater(()->{
-                JComponent c = getComponent();
-                int width  = c.getWidth();
-                int height = c.getHeight();
-                width  = Math.max(width,  c.getMinimumSize().width);
-                height = Math.max(height, c.getMinimumSize().height);
-                if ( width > 0 && height > 0 )
-                    withIcon(width, height, icon);
-            });
-        }
-        return _this();
+            return _with( thisComponent -> {
+                       UI.runLater(()->{
+                           int width  = thisComponent.getWidth();
+                           int height = thisComponent.getHeight();
+                           width  = Math.max(width,  thisComponent.getMinimumSize().width);
+                           height = Math.max(height, thisComponent.getMinimumSize().height);
+                           if ( width > 0 && height > 0 )
+                               withIcon( width, height, icon );
+                       });
+                   })
+                   ._this();
+
     }
 
     public I withIcon( IconDeclaration icon, UI.FitComponent fitComponent ) {
         NullUtil.nullArgCheck(icon,"icon", IconDeclaration.class);
         NullUtil.nullArgCheck(fitComponent,"fitComponent", UI.FitComponent.class);
-        icon.find().ifPresent( i -> withIcon(i, fitComponent) );
-        return _this();
+        return icon.find()
+                   .map( i -> withIcon(i, fitComponent) )
+                   .orElseGet( this::_this );
     }
 
     /**
@@ -160,8 +164,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      */
     public I withIcon( IconDeclaration icon ) {
         NullUtil.nullArgCheck(icon,"icon", IconDeclaration.class);
-        icon.find().ifPresent( i -> getComponent().setIcon(i) );
-        return _this();
+        return _with( c -> icon.find().ifPresent(c::setIcon) )._this();
     }
 
     /**
@@ -192,8 +195,9 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     public I withIcon( Val<IconDeclaration> icon ) {
         NullUtil.nullArgCheck(icon, "icon", Val.class);
         NullUtil.nullPropertyCheck(icon, "icon");
-        _onShow( icon, declaration -> declaration.find().ifPresent( i -> getComponent().setIcon(i) ) );
-        return withIcon(icon.orElseThrow());
+        return _withOnShow( icon, (c, v) -> v.find().ifPresent(c::setIcon) )
+               ._with( c -> icon.orElseThrow().find().ifPresent(c::setIcon) )
+               ._this();
     }
 
     /**
@@ -202,10 +206,11 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      */
     public I withFontSize( int size ) {
-        B button = getComponent();
-        Font old = button.getFont();
-        button.setFont(old.deriveFont(UI.scale((float)size)));
-        return _this();
+        return _with( button -> {
+                   Font old = button.getFont();
+                   button.setFont(old.deriveFont(UI.scale((float)size)));
+               })
+               ._this();
     }
 
     /**
@@ -221,8 +226,13 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     public I withFontSize( Val<Integer> size ) {
         NullUtil.nullArgCheck(size, "val", Val.class);
         NullUtil.nullPropertyCheck(size, "size", "Null is not a sensible value for a font size.");
-        _onShow( size, this::withFontSize );
-        return withFontSize(size.orElseThrow());
+        return _withOnShow( size, (c,v)->{
+                    c.setFont(c.getFont().deriveFont(UI.scale((float)v)));
+                })
+                ._with( c -> {
+                    c.setFont(c.getFont().deriveFont(UI.scale((float)size.orElseThrow())));
+                })
+                ._this();
     }
 
     /**
@@ -233,8 +243,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      */
     public final I withFont( Font font ) {
         NullUtil.nullArgCheck(font, "font", Font.class);
-        this.getComponent().setFont( font );
-        return _this();
+        return _with( button -> button.setFont(font) )._this();
     }
 
     /**
@@ -251,8 +260,9 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     public final I withFont( Val<Font> font ) {
         NullUtil.nullArgCheck(font, "font", Val.class);
         NullUtil.nullPropertyCheck(font, "font", "Use the default font of this component instead of null!");
-        _onShow( font, v -> withFont(v) );
-        return withFont( font.orElseThrow() );
+        return _withOnShow( font, (c,v) -> c.setFont(v) )
+               ._with( button -> button.setFont(font.orElseThrow()) )
+               ._this();
     }
 
     /**
@@ -262,24 +272,23 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This builder instance, to allow for method chaining.
      */
     public final I isSelectedIf( boolean isSelected ) {
-        _setSelectedSilently(isSelected);
-        return _this();
+        return _with( button -> _setSelectedSilently(isSelected, button) )._this();
     }
 
-    private void _setSelectedSilently( boolean isSelected ) {
+    void _setSelectedSilently( boolean isSelected, B thisButton ) {
         /*
             This is used to change the selection state of the button without triggering
             any action listeners. We need this because we want to construct the
             GUI and the state of its properties without side effects.
          */
-        ItemListener[] listeners = getComponent().getItemListeners();
+        ItemListener[] listeners = thisButton.getItemListeners();
         for ( ItemListener l : listeners )
-            getComponent().removeItemListener(l);
+            thisButton.removeItemListener(l);
 
-        getComponent().setSelected(isSelected);
+        thisButton.setSelected(isSelected);
 
         for ( ItemListener l : listeners )
-            getComponent().addItemListener(l);
+            thisButton.addItemListener(l);
 
     }
 
@@ -295,8 +304,8 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     public final I isSelectedIf( Val<Boolean> selected ) {
         NullUtil.nullArgCheck(selected, "selected", Val.class);
         NullUtil.nullPropertyCheck(selected, "selected", "Null can not be used to model the selection state of a button type.");
-        _onShow(selected, v -> _setSelectedSilently(v) );
-        return isSelectedIf( selected.orElseThrow() );
+        return _withOnShow(selected, (c, v) -> _setSelectedSilently(v, c) )
+               ._with( button -> _setSelectedSilently(selected.get(), button) )._this();
     }
 
     /**
@@ -312,8 +321,8 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     public final I isSelectedIfNot( Val<Boolean> selected ) {
         NullUtil.nullArgCheck(selected, "selected", Val.class);
         NullUtil.nullPropertyCheck(selected, "selected", "Null can not be used to model the selection state of a button type.");
-        _onShow(selected, v -> _setSelectedSilently(!v) );
-        return isSelectedIf( !selected.orElseThrow() );
+        return _withOnShow( selected, (c, v) -> _setSelectedSilently(!v, c) )
+               ._with( button -> _setSelectedSilently(!selected.is(true), button) )._this();
     }
 
     /**
@@ -328,14 +337,19 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     public final I isSelectedIf( Var<Boolean> selected ) {
         NullUtil.nullArgCheck(selected, "selected", Var.class);
         NullUtil.nullPropertyCheck(selected, "selected", "Null can not be used to model the selection state of a button type.");
-        _onShow(selected, v -> _setSelectedSilently(v) );
-        _onClick(
-            e -> _doApp(getComponent().isSelected(), newItem -> selected.set(From.VIEW, newItem) )
-        );
-        _onChange(
-            v -> _doApp(getComponent().isSelected(), newItem -> selected.set(From.VIEW, newItem) )
-        );
-        return isSelectedIf( selected.orElseThrow() );
+        return _withOnShow( selected, (c, v) -> {
+                    _setSelectedSilently(v, c);
+                })
+                ._with( button -> {
+                    _onClick(button,
+                        e -> _doApp(button.isSelected(), newItem -> selected.set(From.VIEW, newItem) )
+                    );
+                    _onChange(button,
+                        v -> _doApp(button.isSelected(), newItem -> selected.set(From.VIEW, newItem) )
+                    );
+                })
+                ._with( button -> _setSelectedSilently(selected.get(), button) )
+                ._this();
     }
 
     /**
@@ -351,14 +365,19 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     public final I isSelectedIfNot( Var<Boolean> selected ) {
         NullUtil.nullArgCheck(selected, "selected", Var.class);
         NullUtil.nullPropertyCheck(selected, "selected", "Null can not be used to model the selection state of a button type.");
-        _onShow(selected, v -> _setSelectedSilently(!v) );
-        _onClick(
-            e -> _doApp(!getComponent().isSelected(), newItem -> selected.set(From.VIEW, newItem) )
-        );
-        _onChange(
-            v -> _doApp(!getComponent().isSelected(), newItem -> selected.set(From.VIEW, newItem) )
-        );
-        return isSelectedIf( !selected.orElseThrow() );
+        return _withOnShow( selected, (c, v) -> {
+                    _setSelectedSilently(!v, c);
+                })
+                ._with( button -> {
+                    _onClick(button,
+                        e -> _doApp(!button.isSelected(), newItem -> selected.set(From.VIEW, newItem) )
+                    );
+                    _onChange(button,
+                        v -> _doApp(!button.isSelected(), newItem -> selected.set(From.VIEW, newItem) )
+                    );
+                })
+                ._with( button -> _setSelectedSilently(!selected.is(true), button) )
+                ._this();
     }
 
     /**
@@ -386,8 +405,11 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     public final <E extends Enum<E>> I isSelectedIf( E enumValue, Val<E> enumProperty ) {
         NullUtil.nullArgCheck(enumValue, "enumValue", Enum.class);
         NullUtil.nullArgCheck(enumProperty, "enumProperty", Val.class);
-        _onShow( enumProperty, v -> _setSelectedSilently(enumValue.equals(v)) );
-        return isSelectedIf( enumValue.equals(enumProperty.orElseThrow()) );
+        return _withOnShow( enumProperty, (c,v) -> _setSelectedSilently(enumValue.equals(v), c) )
+                ._with( button ->
+                     _setSelectedSilently(enumValue.equals(enumProperty.orElseThrow()), button)
+                )
+                ._this();
     }
 
     /**
@@ -404,8 +426,11 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     public final <E extends Enum<E>> I isSelectedIfNot( E enumValue, Val<E> enumProperty ) {
         NullUtil.nullArgCheck(enumValue, "enumValue", Enum.class);
         NullUtil.nullArgCheck(enumProperty, "enumProperty", Val.class);
-        _onShow( enumProperty, v -> _setSelectedSilently(!enumValue.equals(v)) );
-        return isSelectedIf( !enumValue.equals(enumProperty.orElseThrow()) );
+        return _withOnShow( enumProperty, (c, v) -> _setSelectedSilently(!enumValue.equals(v), c) )
+                ._with( button ->
+                     _setSelectedSilently(!enumValue.equals(enumProperty.orElseThrow()), button)
+                )
+                ._this();
     }
 
     /**
@@ -419,15 +444,22 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      */
     public final I isPressedIf( Var<Boolean> var ) {
         NullUtil.nullArgCheck(var, "var", Var.class);
-        _onShow( var, v -> getComponent().getModel().setPressed(v) );
-        _onClick(
-            e -> _doApp(getComponent().getModel().isPressed(), pressed->{
-                var.set(From.VIEW, true);
-                var.set(From.VIEW, pressed);
-            })
-        );
-        // on change is not needed because the pressed state is only changed by the user.
-        return isSelectedIf( var.orElseThrow() );
+        return _withOnShow( var, (c,v) -> {
+                    c.getModel().setPressed(v);
+                })
+                ._with( button -> {
+                    _onClick(button, e ->
+                        _doApp(button.getModel().isPressed(), pressed->{
+                            var.set(From.VIEW, true);
+                            var.set(From.VIEW, pressed);
+                        })
+                    );
+                })
+                // on change is not needed because the pressed state is only changed by the user.
+                ._with( button ->
+                    button.setSelected(var.orElseThrow())
+                )
+                ._this();
     }
 
     /**
@@ -435,8 +467,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very instance, which enables builder-style method chaining.
      */
     public I isBorderPaintedIf( boolean borderPainted ) {
-        getComponent().setBorderPainted(borderPainted);
-        return _this();
+        return _with( button -> button.setBorderPainted(borderPainted) )._this();
     }
 
     /**
@@ -444,8 +475,11 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very instance, which enables builder-style method chaining.
      */
     public I isBorderPaintedIf( Val<Boolean> val ) {
-        _onShow(val, v -> isBorderPaintedIf(v) );
-        return isBorderPaintedIf( val.get() );
+        NullUtil.nullArgCheck(val, "val", Val.class);
+        NullUtil.nullPropertyCheck(val, "val", "Null is not a valid value for the border painted property.");
+        return _withOnShow( val, (c, v) -> c.setBorderPainted(v) )
+               ._with( button -> button.setBorderPainted(val.orElseThrow()) )
+               ._this();
     }
 
     /**
@@ -456,14 +490,13 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I makePlain() {
-        peek( it -> {
-            it.setBorderPainted(false);
-            it.setContentAreaFilled(false);
-            it.setOpaque(false);
-            it.setFocusPainted(false);
-            it.setMargin(new Insets(0,0,0,0));
-        });
-        return _this();
+        return peek( it -> {
+                    it.setBorderPainted(false);
+                    it.setContentAreaFilled(false);
+                    it.setOpaque(false);
+                    it.setFocusPainted(false);
+                    it.setMargin(new Insets(0,0,0,0));
+                });
     }
 
     /**
@@ -477,11 +510,15 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      */
     public final I onChange( Action<ComponentDelegate<B, ItemEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
-        _onChange( e -> _doApp(()->action.accept(new ComponentDelegate<>(getComponent(), e, this::getSiblinghood))) );
-        return _this();
+        return _with( button -> {
+                    _onChange(button, e ->
+                        _doApp(()->action.accept(new ComponentDelegate<>(button, e)))
+                    );
+                })
+                ._this();
     }
 
-    protected final void _onChange( Consumer<ItemEvent> action ) {
+    protected final void _onChange( B button, Consumer<ItemEvent> action ) {
         /*
             When an item event is fired Swing will go through all the listeners
             from the most recently added to the first added. This means that if we simply add
@@ -493,14 +530,14 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
             To solve this problem, we do the revers by making sure that our listener is added
             at the first position in the list of listeners inside the button.
         */
-        ItemListener[] listeners = getComponent().getItemListeners();
+        ItemListener[] listeners = button.getItemListeners();
         for (ItemListener listener : listeners)
-            getComponent().removeItemListener(listener);
+            button.removeItemListener(listener);
 
-        getComponent().addItemListener(action::accept);
+        button.addItemListener(action::accept);
 
         for ( int i = listeners.length - 1; i >= 0; i-- ) // reverse order because swing does not give us the listeners in the order they were added!
-            getComponent().addItemListener(listeners[i]);
+            button.addItemListener(listeners[i]);
         /*
             The reasoning behind why Swing calls item listeners from last to first is
             the assumption that the last listener added is more interested in the event
@@ -526,16 +563,17 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      */
     public I onClick( Action<ComponentDelegate<B, ActionEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
-        B button = getComponent();
-        _onClick(
-           e -> _doApp(()->action.accept(
-                           new ComponentDelegate<>(button, e, this::getSiblinghood)
-                       ))
-        );
-        return _this();
+        return _with( button -> {
+                    _onClick(button, e ->
+                        _doApp(() ->
+                            action.accept(new ComponentDelegate<>(button, e))
+                        )
+                    );
+                })
+                ._this();
     }
 
-    protected final void _onClick( Consumer<ActionEvent> action ) {
+    protected final void _onClick( B button, Consumer<ActionEvent> action ) {
         /*
             When an action event is fired, Swing will go through all the listeners
             from the most recently added to the first added. This means that if we simply add
@@ -547,14 +585,14 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
             simply because it was added first.
             This is especially true in the context of declarative UI design.
         */
-        ActionListener[] listeners = getComponent().getActionListeners();
+        ActionListener[] listeners = button.getActionListeners();
         for (ActionListener listener : listeners)
-            getComponent().removeActionListener(listener);
+            button.removeActionListener(listener);
 
-        getComponent().addActionListener(action::accept);
+        button.addActionListener(action::accept);
 
         for ( int i = listeners.length - 1; i >= 0; i-- ) // reverse order because swing does not give us the listeners in the order they were added!
-            getComponent().addActionListener(listeners[i]);
+            button.addActionListener(listeners[i]);
     }
 
     /**
@@ -571,8 +609,10 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      */
     public final I withHorizontalAlignment( UI.HorizontalAlignment horizontalAlign ) {
         NullUtil.nullArgCheck(horizontalAlign, "horizontalAlign", UI.HorizontalAlignment.class);
-        getComponent().setHorizontalAlignment(horizontalAlign.forSwing());
-        return _this();
+        return _with( c ->
+                    c.setHorizontalAlignment(horizontalAlign.forSwing())
+                )
+                ._this();
     }
 
     /**
@@ -594,8 +634,12 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      */
     public final I withHorizontalAlignment( Val<UI.HorizontalAlignment> horizontalAlign ) {
         NullUtil.nullArgCheck(horizontalAlign, "horizontalAlign", Val.class);
-        _onShow(horizontalAlign, align -> getComponent().setHorizontalAlignment(align.forSwing()) );
-        return withHorizontalAlignment(horizontalAlign.orElseThrow());
+        NullUtil.nullPropertyCheck(horizontalAlign, "horizontalAlign");
+        return _withOnShow( horizontalAlign, (c, align) -> c.setHorizontalAlignment(align.forSwing()) )
+               ._with( c ->
+                   c.setHorizontalAlignment(horizontalAlign.orElseThrow().forSwing())
+               )
+               ._this();
     }
 
     /**
@@ -610,10 +654,12 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      * @throws IllegalArgumentException if {@code verticalAlign} is {@code null}.
      */
-    public final I withHorizontalAlignment(UI.VerticalAlignment verticalAlign ) {
+    public final I withVerticalAlignment( UI.VerticalAlignment verticalAlign ) {
         NullUtil.nullArgCheck(verticalAlign, "verticalAlign", UI.VerticalAlignment.class);
-        getComponent().setVerticalAlignment(verticalAlign.forSwing());
-        return _this();
+        return _with( c ->
+                    c.setVerticalAlignment(verticalAlign.forSwing())
+                )
+                ._this();
     }
 
     /**
@@ -635,8 +681,12 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      */
     public final I withVerticalAlignment( Val<UI.VerticalAlignment> verticalAlign ) {
         NullUtil.nullArgCheck(verticalAlign, "verticalAlign", Val.class);
-        _onShow(verticalAlign, align -> getComponent().setVerticalAlignment(align.forSwing()) );
-        return withHorizontalAlignment(verticalAlign.orElseThrow());
+        NullUtil.nullPropertyCheck(verticalAlign, "verticalAlign");
+        return _withOnShow( verticalAlign, (c, align) -> c.setVerticalAlignment(align.forSwing()) )
+               ._with( c ->
+                   c.setVerticalAlignment(verticalAlign.orElseThrow().forSwing())
+               )
+               ._this();
     }
 
     /**
@@ -653,8 +703,10 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      */
     public final I withHorizontalTextAlignment( UI.HorizontalAlignment horizontalAlign ) {
         NullUtil.nullArgCheck(horizontalAlign, "horizontalAlign", UI.HorizontalAlignment.class);
-        getComponent().setHorizontalTextPosition(horizontalAlign.forSwing());
-        return _this();
+        return _with( c ->
+                    c.setHorizontalTextPosition(horizontalAlign.forSwing())
+                )
+                ._this();
     }
 
     /**
@@ -676,8 +728,11 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      */
     public final I withHorizontalTextAlignment( Val<UI.HorizontalAlignment> horizontalAlign ) {
         NullUtil.nullArgCheck(horizontalAlign, "horizontalAlign", Val.class);
-        _onShow(horizontalAlign, align -> getComponent().setHorizontalTextPosition(align.forSwing()) );
-        return withHorizontalTextAlignment(horizontalAlign.orElseThrow());
+        return _withOnShow( horizontalAlign, (c, align) -> c.setHorizontalTextPosition(align.forSwing()) )
+                ._with( c ->
+                    c.setHorizontalTextPosition(horizontalAlign.orElseThrow().forSwing())
+                )
+                ._this();
     }
 
     /**
@@ -694,8 +749,10 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      */
     public final I withVerticalTextAlignment( UI.VerticalAlignment verticalAlign ) {
         NullUtil.nullArgCheck(verticalAlign, "verticalAlign", UI.VerticalAlignment.class);
-        getComponent().setVerticalTextPosition(verticalAlign.forSwing());
-        return _this();
+        return _with( c ->
+                    c.setVerticalTextPosition(verticalAlign.forSwing())
+                )
+                ._this();
     }
 
     /**
@@ -717,8 +774,11 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      */
     public final I withVerticalTextAlignment( Val<UI.VerticalAlignment> verticalAlign ) {
         NullUtil.nullArgCheck(verticalAlign, "verticalAlign", Val.class);
-        _onShow( verticalAlign, align -> getComponent().setVerticalTextPosition(align.forSwing()) );
-        return withVerticalTextAlignment(verticalAlign.orElseThrow());
+        return _withOnShow( verticalAlign, (c, align) -> c.setVerticalTextPosition(align.forSwing()) )
+                ._with( c ->
+                    c.setVerticalTextPosition(verticalAlign.orElseThrow().forSwing())
+                )
+                ._this();
     }
 
     /**
@@ -729,14 +789,15 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      */
     public final I withButtonGroup( ButtonGroup group ) {
         NullUtil.nullArgCheck(group, "group", ButtonGroup.class);
-        group.add(getComponent());
-        return _this();
+        return _with(group::add)._this();
     }
 
     public final I withMargin( Insets insets ) {
         NullUtil.nullArgCheck(insets, "insets", Insets.class);
-        getComponent().setMargin( insets );
-        return _this();
+        return _with( c ->
+                    c.setMargin(insets)
+                )
+                ._this();
     }
 
     public final I withMargin( int top, int left, int bottom, int right ) {

@@ -28,7 +28,7 @@ import java.util.function.Supplier;
  * {@code OptionalUI} may have unpredictable results and should be avoided.
  *
  * Note that
- * {@code OptionalUI} is primarily intended for use as a Swing-Tree query return type where
+ * {@code OptionalUI} is primarily intended for use as a SwingTree query return type where
  * there is a clear need to represent "no result," and where returning {@code null} as well
  * as expose the UI components to the application thread directly
  * is likely to cause errors. A variable whose type is {@code OptionalUI} should

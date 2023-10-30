@@ -57,26 +57,26 @@ final class StyleAndAnimationBorder&lt;C extends JComponent&gt; implements Borde
     @Override
     public void paintBorder( Component c, Graphics g, int x, int y, int width, int height )
     {
-<span class="fc" id="L60">        _compExt.establishStyleAndBeginPainting(g);</span>
+<span class="fc" id="L60">        _compExt.establishStyleAndBeginPainting();</span>
 
-        // We remember the clip:
-<span class="fc" id="L63">        Shape formerClip = g.getClip();</span>
+<span class="fc" id="L62">        Shape formerClip = g.getClip();</span>
+<span class="fc" id="L63">        g.setClip(null);</span>
+        /*
+            The border should not be clipped as the current clip may be the inner component area
+            which can produce ugly artifacts between the inner component area
+            and the area around the component (margin), which is not covered by the border.
+            Resetting the clip here is visually especially very important for rounded borders and shadows.
+        */
 
-<span class="fc" id="L65">        g.setClip(_compExt.getMainClip());</span>
-
-<span class="fc" id="L67">        _paintBorderAndBorderLayerStyles( (Graphics2D) g );</span>
-<span class="fc bfc" id="L68" title="All 4 branches covered.">        if ( _formerBorder != null &amp;&amp; !_borderWasNotPainted ) {</span>
-<span class="fc" id="L69">            BorderStyle borderStyle = _compExt.getStyle().border();</span>
-<span class="fc bfc" id="L70" title="All 2 branches covered.">            if ( !borderStyle.isVisible() )</span>
-<span class="fc" id="L71">                _paintFormerBorder(c, g, x, y, width, height);</span>
+<span class="fc" id="L71">        _paintBorderAndBorderLayerStyles( (Graphics2D) g );</span>
+<span class="fc bfc" id="L72" title="All 4 branches covered.">        if ( _formerBorder != null &amp;&amp; !_borderWasNotPainted ) {</span>
+<span class="fc" id="L73">            BorderStyle borderStyle = _compExt.getStyle().border();</span>
+<span class="fc bfc" id="L74" title="All 2 branches covered.">            if ( !borderStyle.isVisible() )</span>
+<span class="fc" id="L75">                _paintFormerBorder(c, g, x, y, width, height);</span>
         }
-
-<span class="pc bpc" id="L74" title="1 of 2 branches missed.">        if ( g.getClip() != formerClip )</span>
-<span class="fc" id="L75">            g.setClip(formerClip);</span>
-
 <span class="fc" id="L77">        _compExt._renderAnimations((Graphics2D) g);</span>
 
-<span class="pc bpc" id="L79" title="1 of 2 branches missed.">        if ( g.getClip() != formerClip )</span>
+<span class="pc bpc" id="L79" title="1 of 2 branches missed.">        if ( formerClip != null )</span>
 <span class="fc" id="L80">            g.setClip(formerClip);</span>
 <span class="fc" id="L81">    }</span>
 

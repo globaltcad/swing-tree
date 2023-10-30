@@ -11,7 +11,7 @@ import javax.swing.event.ChangeListener;
 import java.util.function.Consumer;
 
 /**
- *  A swing tree builder node for {@link JSlider} instances.
+ *  A SwingTree builder node designed for configuring {@link JSlider} instances.
  * 	<p>
  * 	<b>Please take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
  * 	where you can browse a large collection of examples demonstrating how to use the API of this class.</b>
@@ -27,8 +27,16 @@ public class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSlider<S>
      */
     public final UIForSlider<S> withOrientation( UI.Align align ) {
         NullUtil.nullArgCheck( align, "align", UI.Align.class );
-        _doWithoutListeners(()->getComponent().setOrientation(align.forSlider()));
-        return this;
+        return _with( thisComponent -> {
+                   _setOrientation( thisComponent, align );
+               })
+               ._this();
+    }
+
+    private void _setOrientation( S thisComponent, UI.Align align ) {
+        _doWithoutListeners(thisComponent,
+            () -> thisComponent.setOrientation(align.forSlider())
+        );
     }
 
     /**
@@ -39,8 +47,13 @@ public class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSlider<S>
     public final UIForSlider<S> withOrientation( Val<UI.Align> align ) {
         NullUtil.nullArgCheck( align, "align", Val.class );
         NullUtil.nullPropertyCheck( align, "align", "Null is not a valid alignment" );
-        _onShow( align, v -> withOrientation(align.orElseThrow()) );
-        return withOrientation(align.orElseThrow());
+        return _withOnShow( align, (thisComponent,v) -> {
+                    _setOrientation(thisComponent, align.orElseThrow());
+               })
+                ._with( thisComponent -> {
+                    _setOrientation(thisComponent, align.orElseThrow());
+                })
+               ._this();
     }
 
     /**
@@ -55,13 +68,16 @@ public class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSlider<S>
      */
     public final UIForSlider<S> onChange( Action<ComponentDelegate<JSlider, ChangeEvent>> action ) {
         NullUtil.nullArgCheck( action, "action", Action.class );
-        S slider = getComponent();
-        _onChange( e -> _doApp(()->action.accept(new ComponentDelegate<>(slider, e, this::getSiblinghood))) );
-        return this;
+        return _with( thisComponent -> {
+                    _onChange(thisComponent,
+                        e -> _doApp(()->action.accept(new ComponentDelegate<>(thisComponent, e)))
+                    );
+                })
+                ._this();
     }
 
-    private void _onChange( Consumer<ChangeEvent> action ) {
-        getComponent().addChangeListener(action::accept);
+    private void _onChange( S thisComponent, Consumer<ChangeEvent> action ) {
+        thisComponent.addChangeListener(action::accept);
     }
 
     /**
@@ -72,8 +88,14 @@ public class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSlider<S>
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForSlider<S> withMin( int min ) {
-        _doWithoutListeners(()->getComponent().setMinimum( min ));
-        return this;
+        return _with( thisComponent -> {
+                    _setMin( thisComponent, min );
+                })
+                ._this();
+    }
+
+    private void _setMin( S thisComponent, int min ) {
+        _doWithoutListeners(thisComponent, ()->thisComponent.setMinimum( min ));
     }
 
     /**
@@ -83,8 +105,13 @@ public class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSlider<S>
      */
     public final UIForSlider<S> withMin( Val<Integer> min ) {
         NullUtil.nullArgCheck( min, "min", Val.class );
-        _onShow( min, this::withMin);
-        return this;
+        return _withOnShow( min, (thisComponent,v) -> {
+                    _setMin(thisComponent, min.orElseThrow());
+                })
+                ._with( thisComponent -> {
+                    _setMin(thisComponent, min.orElseThrow());
+                })
+                ._this();
     }
 
     /**
@@ -95,8 +122,14 @@ public class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSlider<S>
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForSlider<S> withMax( int max ) {
-        _doWithoutListeners(()->getComponent().setMaximum( max ));
-        return this;
+        return _with( thisComponent -> {
+                    _setMax( thisComponent, max );
+                })
+                ._this();
+    }
+
+    private void _setMax( S thisComponent, int max ) {
+        _doWithoutListeners(thisComponent, ()->thisComponent.setMaximum( max ));
     }
 
     /**
@@ -106,8 +139,13 @@ public class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSlider<S>
      */
     public final UIForSlider<S> withMax( Val<Integer> max ) {
         NullUtil.nullArgCheck( max, "max", Val.class );
-        _onShow( max, this::withMax);
-        return this;
+        return _withOnShow( max, (thisComponent,v) -> {
+                    _setMax(thisComponent, max.orElseThrow());
+                })
+                ._with( thisComponent -> {
+                    _setMax(thisComponent, max.orElseThrow());
+                })
+                ._this();
     }
 
     /**
@@ -118,8 +156,14 @@ public class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSlider<S>
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForSlider<S> withValue( int value ) {
-        _doWithoutListeners(()->getComponent().setValue( value ));
-        return this;
+        return _with( thisComponent -> {
+                    _setValue( thisComponent, value );
+                })
+                ._this();
+    }
+
+    private void _setValue( S thisComponent, int value ) {
+        _doWithoutListeners(thisComponent, ()->thisComponent.setValue( value ));
     }
 
     /**
@@ -129,9 +173,13 @@ public class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSlider<S>
      */
     public final UIForSlider<S> withValue( Val<Integer> val ) {
         NullUtil.nullArgCheck( val, "val", Val.class );
-        _onShow( val, this::withValue );
-        getComponent().setValue( val.orElseThrow() );
-        return this;
+        return _withOnShow( val, (thisComponent,v) -> {
+                    _setValue(thisComponent, val.orElseThrow());
+                })
+                ._with( thisComponent -> {
+                    _setValue(thisComponent, val.orElseThrow());
+                })
+                ._this();
     }
 
     /**
@@ -141,8 +189,16 @@ public class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSlider<S>
      */
     public final UIForSlider<S> withValue( Var<Integer> var ) {
         NullUtil.nullArgCheck( var, "var", Var.class );
-        _onChange( e -> _doApp(getComponent().getValue(), newItem -> var.set(From.VIEW, newItem) ) );
-        return this.withValue( (Val<Integer>) var );
+        return _withOnShow( var, (thisComponent,v) -> {
+                    _setValue(thisComponent, v);
+                })
+                ._with( thisComponent -> {
+                    _onChange(thisComponent,
+                        e -> _doApp(thisComponent.getValue(), newItem -> var.set(From.VIEW, newItem) )
+                    );
+                    _setValue(thisComponent, var.orElseThrow());
+                })
+                ._this();
     }
 
     /**
@@ -153,8 +209,10 @@ public class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSlider<S>
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForSlider<S> withMajorTickSpacing( int spacing ) {
-        getComponent().setMajorTickSpacing( spacing );
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.setMajorTickSpacing( spacing );
+                })
+                ._this();
     }
 
     /**
@@ -165,8 +223,10 @@ public class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSlider<S>
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForSlider<S> withMinorTickSpacing( int spacing ) {
-        getComponent().setMinorTickSpacing( spacing );
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.setMinorTickSpacing( spacing );
+                })
+                ._this();
     }
 
     /**
@@ -179,8 +239,13 @@ public class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSlider<S>
     public final UIForSlider<S> withMajorTickSpacing( Val<Integer> spacing ) {
         NullUtil.nullArgCheck( spacing, "spacing", Val.class );
         NullUtil.nullPropertyCheck( spacing, "spacing" );
-        _onShow( spacing, v -> getComponent().setMajorTickSpacing(v) );
-        return this;
+        return _withOnShow( spacing, (thisComponent,v) -> {
+                    thisComponent.setMajorTickSpacing(v);
+                })
+                ._with( thisComponent -> {
+                    thisComponent.setMajorTickSpacing( spacing.orElseThrow() );
+                })
+                ._this();
     }
 
     /**
@@ -193,22 +258,27 @@ public class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSlider<S>
     public final UIForSlider<S> withMinorTickSpacing( Val<Integer> spacing ) {
         NullUtil.nullArgCheck( spacing, "spacing", Val.class );
         NullUtil.nullPropertyCheck( spacing, "spacing" );
-        _onShow( spacing, v -> getComponent().setMinorTickSpacing(v) );
-        return this;
+        return _withOnShow( spacing, (thisComponent,v) -> {
+                    thisComponent.setMinorTickSpacing(v);
+                })
+                ._with( thisComponent -> {
+                    thisComponent.setMinorTickSpacing( spacing.orElseThrow() );
+                })
+                ._this();
     }
 
 
-    private void _doWithoutListeners(Runnable someTask) {
+    private void _doWithoutListeners( S thisComponent, Runnable someTask ) {
         // We need to first remove the change listener, otherwise we might trigger unwanted events.
-        ChangeListener[] listeners = getComponent().getChangeListeners();
+        ChangeListener[] listeners = thisComponent.getChangeListeners();
         for ( ChangeListener listener : listeners )
-            getComponent().removeChangeListener( listener );
+            thisComponent.removeChangeListener( listener );
 
         someTask.run();
 
         // Now we can add the listeners back.
         for ( ChangeListener listener : listeners )
-            getComponent().addChangeListener( listener );
+            thisComponent.addChangeListener( listener );
     }
 
 }

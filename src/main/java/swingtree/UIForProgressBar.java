@@ -5,7 +5,7 @@ import sprouts.Val;
 import javax.swing.*;
 
 /**
- *  A swing tree builder node for {@link JProgressBar} instances.
+ *  A SwingTree builder node designed for configuring {@link JProgressBar} instances.
  */
 public class UIForProgressBar<P extends JProgressBar> extends UIForAnySwing<UIForProgressBar<P>, P>
 {
@@ -15,7 +15,7 @@ public class UIForProgressBar<P extends JProgressBar> extends UIForAnySwing<UIFo
      *
      * @param component The JComponent type which will be wrapped by this builder node.
      */
-    public UIForProgressBar( P component ) {
+    protected UIForProgressBar( P component ) {
         super(component);
     }
 
@@ -26,8 +26,10 @@ public class UIForProgressBar<P extends JProgressBar> extends UIForAnySwing<UIFo
      */
     public final UIForProgressBar<P> withOrientation( UI.Align align ) {
         NullUtil.nullArgCheck( align, "align", UI.Align.class );
-        getComponent().setOrientation(align.forProgressBar());
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.setOrientation(align.forProgressBar());
+                })
+                ._this();
     }
 
     /**
@@ -38,8 +40,13 @@ public class UIForProgressBar<P extends JProgressBar> extends UIForAnySwing<UIFo
     public final UIForProgressBar<P> withOrientation( Val<UI.Align> align ) {
         NullUtil.nullArgCheck( align, "align", Val.class );
         NullUtil.nullPropertyCheck( align, "align", "Null is not a valid alignment" );
-        _onShow( align, v -> withOrientation(align.orElseThrow()) );
-        return withOrientation(align.orElseThrow());
+        return _withOnShow( align, (thisComponent,v) -> {
+                   thisComponent.setOrientation(v.forProgressBar());
+               })
+               ._with( thisComponent -> {
+                   thisComponent.setOrientation(align.orElseThrow().forProgressBar());
+               })
+               ._this();
     }
 
     /**
@@ -50,8 +57,10 @@ public class UIForProgressBar<P extends JProgressBar> extends UIForAnySwing<UIFo
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForProgressBar<P> withMin( int min ) {
-        getComponent().setMinimum( min );
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.setMinimum( min );
+               })
+               ._this();
     }
 
     /**
@@ -62,8 +71,13 @@ public class UIForProgressBar<P extends JProgressBar> extends UIForAnySwing<UIFo
     public final UIForProgressBar<P> withMin( Val<Integer> min ) {
         NullUtil.nullArgCheck( min, "min", Val.class );
         NullUtil.nullPropertyCheck(min, "min", "Null is not a valid min value for the value of a progress bar.");
-        _onShow( min, this::withMin);
-        return this;
+        return _withOnShow( min, (c,v) -> {
+                    c.setMinimum( v );
+               })
+               ._with( thisComponent -> {
+                    thisComponent.setMinimum( min.orElseThrow() );
+               })
+               ._this();
     }
 
     /**
@@ -74,8 +88,10 @@ public class UIForProgressBar<P extends JProgressBar> extends UIForAnySwing<UIFo
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForProgressBar<P> withMax( int max ) {
-        getComponent().setMaximum( max );
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.setMaximum( max );
+               })
+               ._this();
     }
 
     /**
@@ -86,8 +102,13 @@ public class UIForProgressBar<P extends JProgressBar> extends UIForAnySwing<UIFo
     public final UIForProgressBar<P> withMax( Val<Integer> max ) {
         NullUtil.nullArgCheck( max, "max", Val.class );
         NullUtil.nullPropertyCheck(max, "max", "Null is not a valid max value for the value of a progress bar.");
-        _onShow( max, this::withMax);
-        return this;
+        return _withOnShow( max, (thisComponent,v) -> {
+                    thisComponent.setMaximum( v );
+               })
+               ._with( thisComponent -> {
+                   thisComponent.setMaximum( max.orElseThrow() );
+               })
+               ._this();
     }
 
     /**
@@ -95,8 +116,10 @@ public class UIForProgressBar<P extends JProgressBar> extends UIForAnySwing<UIFo
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForProgressBar<P> withValue( int value ) {
-        getComponent().setValue(value);
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.setValue( value );
+               })
+               ._this();
     }
 
     /**
@@ -107,12 +130,18 @@ public class UIForProgressBar<P extends JProgressBar> extends UIForAnySwing<UIFo
     public final UIForProgressBar<P> withProgress( double progress ) {
         if ( progress < 0 || progress > 1 )
             throw new IllegalArgumentException( "Progress value must be between 0 and 1" );
-        int min = getComponent().getMinimum();
-        int max = getComponent().getMaximum();
+        return _with( thisComponent -> {
+                    _setProgress( thisComponent, progress );
+               })
+               ._this();
+    }
+
+    private void _setProgress( P thisComponent, double progress ) {
+        int min = thisComponent.getMinimum();
+        int max = thisComponent.getMaximum();
         int range = max - min;
-        int value = (int) (min + range * progress);
-        getComponent().setValue(value);
-        return this;
+        int value = (int) ( min + range * progress );
+        thisComponent.setValue( value );
     }
 
     /**
@@ -123,8 +152,13 @@ public class UIForProgressBar<P extends JProgressBar> extends UIForAnySwing<UIFo
     public final UIForProgressBar<P> withValue( Val<Integer> val ) {
         NullUtil.nullArgCheck( val, "val", Val.class );
         NullUtil.nullPropertyCheck(val, "value", "Null is not a valid value for the progress property of a progress bar.");
-        _onShow( val, this::withValue );
-        return withValue(val.orElseThrow());
+        return _withOnShow( val, (thisComponent,v) -> {
+                    thisComponent.setValue( v );
+               })
+               ._with( thisComponent -> {
+                   thisComponent.setValue( val.orElseThrow() );
+               })
+               ._this();
     }
 
     /**
@@ -135,8 +169,13 @@ public class UIForProgressBar<P extends JProgressBar> extends UIForAnySwing<UIFo
     public final UIForProgressBar<P> withProgress( Val<Double> progress ) {
         NullUtil.nullArgCheck( progress, "progress", Val.class );
         NullUtil.nullPropertyCheck(progress, "progress", "Null is not a valid progress for the progress property of a progress bar.");
-        _onShow( progress, this::withProgress );
-        return withProgress(progress.orElseThrow());
+        return _withOnShow( progress, (thisComponent,v) -> {
+                    _setProgress( thisComponent, v );
+               })
+               ._with( thisComponent -> {
+                   _setProgress( thisComponent, progress.orElseThrow() );
+               })
+               ._this();
     }
 
 }

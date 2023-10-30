@@ -25,7 +25,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
- *  A swing tree builder node for {@link JTabbedPane} instances.
+ *  A SwingTree builder node designed for configuring {@link JTabbedPane} instances.
  */
 public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForTabbedPane<P>, P>
 {
@@ -38,7 +38,7 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
      *
      * @param component The {@link JComponent} type which will be wrapped by this builder node.
      */
-    public UIForTabbedPane( P component ) { super(component); }
+    protected UIForTabbedPane( P component ) { super(component); }
 
     /**
      *  Adds an action to be performed when a mouse click is detected on a tab.
@@ -52,16 +52,17 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
      */
     public final UIForTabbedPane<P> onTabMouseClick(Action<TabDelegate> onClick ) {
         NullUtil.nullArgCheck(onClick, "onClick", Action.class);
-        P pane = getComponent();
-        pane.addMouseListener(new MouseAdapter() {
-            @Override public void mouseClicked(MouseEvent e) {
-                int indexOfTab = _indexOfClick(pane, e.getPoint());
-                int tabCount = pane.getTabCount();
-                if ( indexOfTab >= 0 && indexOfTab < tabCount )
-                    _doApp(() -> onClick.accept(new TabDelegate(pane, e, () -> getSiblinghood(), indexOfTab)));
-            }
-        });
-        return this;
+        return _with( thisComponent -> {
+                   thisComponent.addMouseListener(new MouseAdapter() {
+                       @Override public void mouseClicked(MouseEvent e) {
+                           int indexOfTab = _indexOfClick(thisComponent, e.getPoint());
+                           int tabCount = thisComponent.getTabCount();
+                           if ( indexOfTab >= 0 && indexOfTab < tabCount )
+                               _doApp(() -> onClick.accept(new TabDelegate(thisComponent, e, indexOfTab)));
+                       }
+                   });
+               })
+               ._this();
     }
 
     /**
@@ -76,16 +77,17 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
      */
     public final UIForTabbedPane<P> onTabMousePress( Action<TabDelegate> onPress ) {
         NullUtil.nullArgCheck(onPress, "onPress", Action.class);
-        P pane = getComponent();
-        pane.addMouseListener(new MouseAdapter() {
-            @Override public void mousePressed(MouseEvent e) {
-                int indexOfTab = _indexOfClick(pane, e.getPoint());
-                int tabCount = pane.getTabCount();
-                if ( indexOfTab >= 0 && indexOfTab < tabCount )
-                    _doApp(() -> onPress.accept(new TabDelegate(pane, e, () -> getSiblinghood(), indexOfTab)));
-            }
-        });
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.addMouseListener(new MouseAdapter() {
+                        @Override public void mousePressed(MouseEvent e) {
+                            int indexOfTab = _indexOfClick(thisComponent, e.getPoint());
+                            int tabCount = thisComponent.getTabCount();
+                            if ( indexOfTab >= 0 && indexOfTab < tabCount )
+                                _doApp(() -> onPress.accept(new TabDelegate(thisComponent, e, indexOfTab)));
+                        }
+                    });
+               })
+               ._this();
     }
 
     /**
@@ -100,16 +102,17 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
      */
     public final UIForTabbedPane<P> onTabMouseRelease( Action<TabDelegate> onRelease ) {
         NullUtil.nullArgCheck(onRelease, "onRelease", Action.class);
-        P pane = getComponent();
-        pane.addMouseListener(new MouseAdapter() {
-            @Override public void mouseReleased(MouseEvent e) {
-                int indexOfTab = _indexOfClick(pane, e.getPoint());
-                int tabCount = pane.getTabCount();
-                if ( indexOfTab >= 0 && indexOfTab < tabCount )
-                    _doApp(() -> onRelease.accept(new TabDelegate(pane, e, () -> getSiblinghood(), indexOfTab)));
-            }
-        });
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.addMouseListener(new MouseAdapter() {
+                        @Override public void mouseReleased(MouseEvent e) {
+                            int indexOfTab = _indexOfClick(thisComponent, e.getPoint());
+                            int tabCount = thisComponent.getTabCount();
+                            if ( indexOfTab >= 0 && indexOfTab < tabCount )
+                                _doApp(() -> onRelease.accept(new TabDelegate(thisComponent, e, indexOfTab)));
+                        }
+                    });
+               })
+               ._this();
     }
 
     /**
@@ -124,16 +127,17 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
      */
     public final UIForTabbedPane<P> onTabMouseEnter( Action<TabDelegate> onEnter ) {
         NullUtil.nullArgCheck(onEnter, "onEnter", Action.class);
-        P pane = getComponent();
-        pane.addMouseListener(new MouseAdapter() {
-            @Override public void mouseEntered(MouseEvent e) {
-                int indexOfTab = _indexOfClick(pane, e.getPoint());
-                int tabCount = pane.getTabCount();
-                if ( indexOfTab >= 0 && indexOfTab < tabCount )
-                    _doApp(() -> onEnter.accept(new TabDelegate(pane, e, () -> getSiblinghood(), indexOfTab)));
-            }
-        });
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.addMouseListener(new MouseAdapter() {
+                        @Override public void mouseEntered(MouseEvent e) {
+                            int indexOfTab = _indexOfClick(thisComponent, e.getPoint());
+                            int tabCount = thisComponent.getTabCount();
+                            if ( indexOfTab >= 0 && indexOfTab < tabCount )
+                                _doApp(() -> onEnter.accept(new TabDelegate(thisComponent, e, indexOfTab)));
+                        }
+                    });
+               })
+               ._this();
     }
 
     /**
@@ -148,16 +152,17 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
      */
     public final UIForTabbedPane<P> onTabMouseExit( Action<TabDelegate> onExit ) {
         NullUtil.nullArgCheck(onExit, "onExit", Action.class);
-        P pane = getComponent();
-        pane.addMouseListener(new MouseAdapter() {
-            @Override public void mouseExited(MouseEvent e) {
-                int indexOfTab = _indexOfClick(pane, e.getPoint());
-                int tabCount = pane.getTabCount();
-                if ( indexOfTab >= 0 && indexOfTab < tabCount )
-                    _doApp(() -> onExit.accept(new TabDelegate(pane, e, () -> getSiblinghood(), indexOfTab)));
-            }
-        });
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.addMouseListener(new MouseAdapter() {
+                        @Override public void mouseExited(MouseEvent e) {
+                            int indexOfTab = _indexOfClick(thisComponent, e.getPoint());
+                            int tabCount = thisComponent.getTabCount();
+                            if ( indexOfTab >= 0 && indexOfTab < tabCount )
+                                _doApp(() -> onExit.accept(new TabDelegate(thisComponent, e, indexOfTab)));
+                        }
+                    });
+               })
+               ._this();
     }
 
     private static int _indexOfClick( JTabbedPane pane, Point p ) {
@@ -178,8 +183,10 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
      * @return This builder node.
      */
     public final UIForTabbedPane<P> withSelectedIndex( int index ) {
-        getComponent().setSelectedIndex(index);
-        return this;
+        return _with( thisComponent -> {
+                   thisComponent.setSelectedIndex(index);
+               })
+               ._this();
     }
 
     /**
@@ -191,8 +198,13 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
     public final UIForTabbedPane<P> withSelectedIndex( Val<Integer> index ) {
         NullUtil.nullArgCheck( index, "index", Val.class );
         NullUtil.nullPropertyCheck( index, "index", "Null is not a valid state for modelling a selected index." );
-        _onShow( index, i -> getComponent().setSelectedIndex(i) );
-        return withSelectedIndex(index.get());
+        return _withOnShow( index, (thisComponent,i) -> {
+                    thisComponent.setSelectedIndex(i);
+               })
+                ._with( thisComponent -> {
+                    thisComponent.setSelectedIndex(index.get());
+                })
+               ._this();
     }
 
     /**
@@ -204,18 +216,23 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
     public final UIForTabbedPane<P> withSelectedIndex( Var<Integer> index ) {
         NullUtil.nullArgCheck( index, "index", Var.class );
         NullUtil.nullPropertyCheck( index, "index", "Null is not a valid state for modelling a selected index." );
-        if ( _selectedTabIndex != null )
-            throw new IllegalStateException("A selected index property has already been set for this tabbed pane.");
-        _selectedTabIndex = index;
-        _onShow( index, i -> {
-            getComponent().setSelectedIndex(i);
-            _selectionListeners.forEach( l -> l.accept(i) );
-        });
-        _onChange( e -> _doApp(()->{
-            index.set(From.VIEW, getComponent().getSelectedIndex());
-            _selectionListeners.forEach( l -> l.accept(getComponent().getSelectedIndex()) );
-        }) );
-        return withSelectedIndex(index.get());
+        return _with( thisComponent -> {
+                    if ( _selectedTabIndex != null )
+                        throw new IllegalStateException("A selected index property has already been set for this tabbed pane.");
+                    _selectedTabIndex = index;
+               })
+                ._withOnShow( index, (thisComponent,i) -> {
+                    thisComponent.setSelectedIndex(i);
+                    _selectionListeners.forEach( l -> l.accept(i) );
+                })
+                ._with( thisComponent -> {
+                    _onChange(thisComponent, e -> _doApp(()->{
+                        index.set(From.VIEW, thisComponent.getSelectedIndex());
+                        _selectionListeners.forEach( l -> l.accept(thisComponent.getSelectedIndex()) );
+                    }));
+                    thisComponent.setSelectedIndex(index.get());
+                })
+               ._this();
     }
 
     /**
@@ -224,8 +241,10 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
      */
     public final UIForTabbedPane<P> withTabPlacementAt( UI.Side side ) {
         NullUtil.nullArgCheck(side, "side", UI.Side.class );
-        getComponent().setTabPlacement(side.forTabbedPane());
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.setTabPlacement(side.forTabbedPane());
+               })
+               ._this();
     }
 
     /**
@@ -234,8 +253,13 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
      */
     public final UIForTabbedPane<P> withTabPlacementAt( Val<UI.Side> side ) {
         NullUtil.nullArgCheck(side, "side", Var.class);
-        _onShow( side, v -> withTabPlacementAt(side.orElseThrow()) );
-        return withTabPlacementAt(side.get());
+        return _withOnShow( side, (thisComponent,v) -> {
+                    thisComponent.setTabPlacement(v.forTabbedPane());
+               })
+                ._with( thisComponent -> {
+                    thisComponent.setTabPlacement(side.get().forTabbedPane());
+                })
+               ._this();
     }
 
     /**
@@ -244,8 +268,10 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
      */
     public final UIForTabbedPane<P> withOverflowPolicy( UI.OverflowPolicy policy ) {
         NullUtil.nullArgCheck( policy, "policy", UI.OverflowPolicy.class );
-        getComponent().setTabLayoutPolicy(policy.forTabbedPane());
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.setTabLayoutPolicy(policy.forTabbedPane());
+               })
+               ._this();
     }
 
     /**
@@ -254,8 +280,13 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
      */
     public final UIForTabbedPane<P> withOverflowPolicy( Val<UI.OverflowPolicy> policy ) {
         NullUtil.nullArgCheck(policy, "policy", Var.class);
-        _onShow(policy, v -> withOverflowPolicy(policy.orElseThrow()));
-        return withOverflowPolicy(policy.orElseThrow());
+        return _withOnShow( policy, (thisComponent,v) -> {
+                    thisComponent.setTabLayoutPolicy(v.forTabbedPane());
+               })
+                ._with( thisComponent -> {
+                    thisComponent.setTabLayoutPolicy(policy.orElseThrow().forTabbedPane());
+                })
+               ._this();
     }
 
     private Supplier<Integer> _indexFinderFor(
@@ -274,79 +305,80 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
         };
     }
 
-    public final UIForTabbedPane<P> add( Tab tab ) {
-
-        JComponent dummyContent = new JPanel();
-        WeakReference<P> paneRef = new WeakReference<>(getComponent());
-        WeakReference<JComponent> contentRef = new WeakReference<>(tab.contents().orElse(dummyContent));
-        Supplier<Integer> indexFinder = _indexFinderFor(paneRef, contentRef);
-        tab.onSelection()
-           .ifPresent(
-               onSelection ->
-                   getComponent().addChangeListener(e -> {
+    public final UIForTabbedPane<P> add( Tab tab )
+    {
+        return _with( thisComponent -> {
+            JComponent dummyContent = new JPanel();
+            WeakReference<P> paneRef = new WeakReference<>(thisComponent);
+            WeakReference<JComponent> contentRef = new WeakReference<>(tab.contents().orElse(dummyContent));
+            Supplier<Integer> indexFinder = _indexFinderFor(paneRef, contentRef);
+            tab.onSelection()
+               .ifPresent(onSelection ->
+                   thisComponent.addChangeListener(e -> {
                        JTabbedPane tabbedPane = paneRef.get();
                        if ( tabbedPane == null ) return;
                        int index = indexFinder.get();
-                       if (index >= 0 && index == tabbedPane.getSelectedIndex())
-                           _doApp(()->onSelection.accept(new ComponentDelegate<>(tabbedPane, e, this::getSiblinghood)));
+                       if ( index >= 0 && index == tabbedPane.getSelectedIndex() )
+                           _doApp(()->onSelection.accept(new ComponentDelegate<>(tabbedPane, e )));
                    })
-           );
+               );
 
-        TabMouseClickListener mouseListener = new TabMouseClickListener(getComponent(), indexFinder, tab.onMouseClick().orElse(null));
+            TabMouseClickListener mouseListener = new TabMouseClickListener(thisComponent, indexFinder, tab.onMouseClick().orElse(null));
 
-        // Initial tab setup:
-        _doWithoutListeners(()->
-            getComponent().addTab(
-                tab.title().map(Val::orElseNull).orElse(null),
-                tab.icon().map(Val::orElseNull).orElse(null),
-                tab.contents().orElse(dummyContent),
-                tab.tip().map(Val::orElseNull).orElse(null)
-            )
-        );
-        tab.isEnabled().ifPresent( isEnabled -> getComponent().setEnabledAt(indexFinder.get(), isEnabled.get()) );
-        tab.isSelected().ifPresent( isSelected -> {
-            _selectTab( indexFinder.get(), isSelected.get() );
-            _selectionListeners.add( i -> isSelected.set(From.VIEW, Objects.equals(i, indexFinder.get())) );
+            // Initial tab setup:
+            _doWithoutListeners(thisComponent, ()->
+                thisComponent.addTab(
+                    tab.title().map(Val::orElseNull).orElse(null),
+                    tab.icon().map(Val::orElseNull).orElse(null),
+                    tab.contents().orElse(dummyContent),
+                    tab.tip().map(Val::orElseNull).orElse(null)
+                )
+            );
+            tab.isEnabled().ifPresent( isEnabled -> thisComponent.setEnabledAt(indexFinder.get(), isEnabled.get()) );
+            tab.isSelected().ifPresent( isSelected -> {
+                _selectTab(thisComponent, indexFinder.get(), isSelected.get());
+                _selectionListeners.add( i -> isSelected.set(From.VIEW, Objects.equals(i, indexFinder.get())) );
             /*
                 The above listener will ensure that the isSelected property of the tab is updated when
                 the selection index property changes.
              */
-        });
+            });
 
-        // Now on to binding:
-        tab.title()     .ifPresent( title      -> _onShow(title,      t -> getComponent().setTitleAt(indexFinder.get(), t)) );
-        tab.icon()      .ifPresent( icon       -> _onShow(icon,       i -> getComponent().setIconAt(indexFinder.get(), i)) );
-        tab.tip()       .ifPresent( tip        -> _onShow(tip,        t -> getComponent().setToolTipTextAt(indexFinder.get(), t)) );
-        tab.isEnabled() .ifPresent( enabled    -> _onShow(enabled,    e -> getComponent().setEnabledAt(indexFinder.get(), e)) );
-        tab.isSelected().ifPresent( isSelected -> _onShow(isSelected, s -> _selectTab(indexFinder.get(), s) ));
+            // Now on to binding:
+            tab.title()     .ifPresent( title      -> _onShow(title,      thisComponent, (c,t) -> c.setTitleAt(indexFinder.get(), t)) );
+            tab.icon()      .ifPresent( icon       -> _onShow(icon,       thisComponent, (c,i) -> c.setIconAt(indexFinder.get(), i)) );
+            tab.tip()       .ifPresent( tip        -> _onShow(tip,        thisComponent, (c,t) -> c.setToolTipTextAt(indexFinder.get(), t)) );
+            tab.isEnabled() .ifPresent( enabled    -> _onShow(enabled,    thisComponent, (c,e) -> c.setEnabledAt(indexFinder.get(), e)) );
+            tab.isSelected().ifPresent( isSelected -> _onShow(isSelected, thisComponent, (c,s) -> _selectTab(c, indexFinder.get(), s) ));
 
-        tab.headerContents().ifPresent( c ->
-            getComponent()
-            .setTabComponentAt(
-                getComponent().getTabCount()-1,
-                _buildTabHeader( tab, mouseListener )
-            )
-        );
-        return this;
+            tab.headerContents().ifPresent( c ->
+                    thisComponent
+                    .setTabComponentAt(
+                        thisComponent.getTabCount()-1,
+                        _buildTabHeader( tab, mouseListener )
+                    )
+                );
+        })
+        ._this();
     }
 
-    private void _doWithoutListeners( Runnable r ) {
-        ChangeListener[] listeners = getComponent().getChangeListeners();
-        for ( ChangeListener l : listeners ) getComponent().removeChangeListener(l);
+    private void _doWithoutListeners( P thisComponent, Runnable r ) {
+        ChangeListener[] listeners = thisComponent.getChangeListeners();
+        for ( ChangeListener l : listeners ) thisComponent.removeChangeListener(l);
         r.run();
-        for ( ChangeListener l : listeners ) getComponent().addChangeListener(l);
+        for ( ChangeListener l : listeners ) thisComponent.addChangeListener(l);
         /*
             This is important because the tabbed pane will fire a change event when a tab is added.
             This is not desirable because the tabbed pane is not yet fully initialized at that point.
         */
     }
 
-    private void _selectTab( int tabIndex, boolean isSelected ) {
-        int selectedIndex = ( isSelected ? tabIndex : getComponent().getSelectedIndex() );
+    private void _selectTab( P thisComponent, int tabIndex, boolean isSelected ) {
+        int selectedIndex = ( isSelected ? tabIndex : thisComponent.getSelectedIndex() );
         if ( _selectedTabIndex != null )
             _selectedTabIndex.set(From.VIEW, selectedIndex);
         else
-            getComponent().setSelectedIndex(selectedIndex);
+            thisComponent.setSelectedIndex(selectedIndex);
 
         _selectionListeners.forEach(l -> l.accept(selectedIndex));
     }
@@ -391,7 +423,7 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
             Action<ComponentDelegate<JTabbedPane, MouseEvent>> mouseClickAction
         ) {
             this.paneRef = new WeakReference<>(pane);
-            this.indexFinder = indexFinder;
+            this.indexFinder = Objects.requireNonNull(indexFinder);
             this.mouseClickAction = mouseClickAction;
             if ( mouseClickAction != null ) {
                 pane.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -404,13 +436,13 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
                         int indexClicked = _indexOfClick(pane, e.getPoint());
                         if ( indexClicked < 0 ) return;
                         if ( indexOfThis == indexClicked )
-                            _doApp(()-> mouseClickAction.accept(new ComponentDelegate<>(pane, e, UIForTabbedPane.this::getSiblinghood)));
+                            _doApp(()-> mouseClickAction.accept(new ComponentDelegate<>(pane, e )));
                     }
                 });
             }
         }
 
-        private void doAction(JTabbedPane pane, MouseEvent e) {
+        private void doAction( JTabbedPane pane, MouseEvent e ) {
             Point p = e.getPoint();
             if ( e.getSource() != pane ) {
                // We need to find the point relative to the tabbed pane:
@@ -421,7 +453,7 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
             int indexClicked = _indexOfClick( pane, p );
             if ( indexClicked < 0 ) return;
             if ( indexOfThis == indexClicked && mouseClickAction != null )
-                _doApp(()-> { mouseClickAction.accept(new ComponentDelegate<>(pane, e, UIForTabbedPane.this::getSiblinghood)); });
+                _doApp(()-> { mouseClickAction.accept(new ComponentDelegate<>(pane, e)); });
             if ( indexOfThis < pane.getTabCount() )
                 pane.setSelectedIndex(indexOfThis);
         }
@@ -475,13 +507,14 @@ public class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForT
      */
     public final UIForTabbedPane<P> onChange( Action<ComponentDelegate<P, ChangeEvent>> onChange ) {
         NullUtil.nullArgCheck(onChange, "onChange", Action.class);
-        P pane = getComponent();
-        _onChange(e -> _doApp(()->onChange.accept(new ComponentDelegate<>(pane, e, this::getSiblinghood))));
-        return this;
+        return _with( thisComponent -> {
+                    _onChange(thisComponent, e -> _doApp(()->onChange.accept(new ComponentDelegate<>(thisComponent, e))));
+                })
+                ._this();
     }
 
-    private void _onChange( Consumer<ChangeEvent> action ) {
-        getComponent().addChangeListener(action::accept);
+    private void _onChange( P thisComponent, Consumer<ChangeEvent> action ) {
+        thisComponent.addChangeListener(action::accept);
     }
 
 }

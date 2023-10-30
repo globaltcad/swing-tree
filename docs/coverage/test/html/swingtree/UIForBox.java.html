@@ -8,7 +8,7 @@ import swingtree.layout.LayoutConstraint;
 import java.awt.*;
 
 /**
- *  A swing tree builder node for {@link swingtree.components.JBox} instances.
+ *  A SwingTree builder node designed for configuring {@link swingtree.components.JBox} instances.
  */
 public class UIForBox&lt;B extends JBox&gt; extends UIForAnySwing&lt;UIForBox&lt;B&gt;, B&gt;
 {
@@ -24,25 +24,26 @@ public class UIForBox&lt;B extends JBox&gt; extends UIForAnySwing&lt;UIForBox&lt
     public final UIForBox&lt;B&gt; withLayout( Val&lt;LayoutConstraint&gt; attr ) {
 <span class="nc" id="L25">        NullUtil.nullArgCheck(attr, &quot;attr&quot;, Val.class);</span>
 <span class="nc" id="L26">        NullUtil.nullPropertyCheck(attr, &quot;attr&quot;, &quot;Null is not a valid layout attribute.&quot;);</span>
-<span class="nc" id="L27">        _onShow(attr, it -&gt; {</span>
-            // Every time the value changes, we need to re-layout the panel.
-            // Note that this is for mig layout:
-<span class="nc" id="L30">            LayoutManager lm = getComponent().getLayout();</span>
-<span class="nc bnc" id="L31" title="All 2 branches missed.">            if (lm instanceof MigLayout) {</span>
-<span class="nc" id="L32">                ((MigLayout)lm).setLayoutConstraints(it.toString());</span>
-<span class="nc" id="L33">                getComponent().revalidate();</span>
-<span class="nc" id="L34">                getComponent().repaint();</span>
-            }
-            else
-<span class="nc" id="L37">                throw new IllegalStateException(</span>
-                        &quot;Cannot set layout mig-layout specific constraints on a panel with a non-mig layout.&quot;
-                );
-<span class="nc" id="L40">        });</span>
-<span class="nc" id="L41">        return _this();</span>
+<span class="nc" id="L27">        return _withOnShow( attr, (thisComponent, it) -&gt; {</span>
+                    // Every time the value changes, we need to re-layout the panel.
+                    // Note that this is for mig layout:
+<span class="nc" id="L30">                    LayoutManager lm = thisComponent.getLayout();</span>
+<span class="nc bnc" id="L31" title="All 2 branches missed.">                    if ( lm instanceof MigLayout ) {</span>
+<span class="nc" id="L32">                        ((MigLayout)lm).setLayoutConstraints(it.toString());</span>
+<span class="nc" id="L33">                        thisComponent.revalidate();</span>
+<span class="nc" id="L34">                        thisComponent.repaint();</span>
+                    }
+                    else
+<span class="nc" id="L37">                        throw new IllegalStateException(</span>
+                            &quot;Cannot set layout mig-layout specific &quot; +
+                            &quot;constraints on a panel with a non-mig layout.&quot;
+                        );
+<span class="nc" id="L41">                })</span>
+<span class="nc" id="L42">                ._this();</span>
     }
 
-    @Override protected void _setEnabled( boolean isEnabled ) {
-<span class="nc" id="L45">        getComponent().setEnabled( isEnabled );</span>
+    @Override protected void _setEnabled( B thisComponent, boolean isEnabled ) {
+<span class="nc" id="L46">        thisComponent.setEnabled( isEnabled );</span>
         /*
             In the vast vast majority of cases regular JBoxs are simple wrappers for
             other components.
@@ -54,7 +55,7 @@ public class UIForBox&lt;B extends JBox&gt; extends UIForAnySwing&lt;UIForBox&lt
             and disable all the components that are contained in the tree
             except for the children of non JBoxs.
         */
-<span class="nc" id="L57">        InternalUtil._traverseEnable( getComponent(), isEnabled );</span>
+<span class="nc" id="L58">        InternalUtil._traverseEnable( thisComponent, isEnabled );</span>
         /*
             Note:
             If you really only want to disable the JBox itself, then you can
@@ -63,7 +64,7 @@ public class UIForBox&lt;B extends JBox&gt; extends UIForAnySwing&lt;UIForBox&lt
             of the JBox to make it look and behave like a disabled component,
             but still allow the user to interact with the components it contains.
          */
-<span class="nc" id="L66">    }</span>
+<span class="nc" id="L67">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -1,5 +1,6 @@
 package swingtree;
 
+import org.slf4j.Logger;
 import sprouts.Action;
 import sprouts.From;
 import sprouts.Val;
@@ -32,40 +33,44 @@ import java.util.Optional;
  */
 public final class Tab
 {
-    private final JComponent _contents;
-    private final JComponent _headerComponent;
-    private final Val<String> _title;
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(Tab.class);
+
+    private final JComponent   _contents;
+    private final JComponent   _headerComponent;
+    private final Val<String>  _title;
     private final Var<Boolean> _isSelected;
     private final Val<Boolean> _isEnabled;
-    private final Val<Icon> _icon;
-    private final Val<String> _tip;
+    private final Val<Icon>    _icon;
+    private final Val<String>  _tip;
     private final Action<ComponentDelegate<JTabbedPane, ChangeEvent>> _onSelected;
 
-    private final Action<ComponentDelegate<JTabbedPane, MouseEvent>> _onMouseClick;
+    private final Action<ComponentDelegate<JTabbedPane, MouseEvent>>  _onMouseClick;
 
     Tab(
-        JComponent contents,
-        JComponent headerComponent,
-        Val<String> title,
-        Var<Boolean> isSelected, Val<Boolean> isEnabled,
-        Val<Icon> icon,
-        Val<String> tip,
+        JComponent   contents,
+        JComponent   headerComponent,
+        Val<String>  title,
+        Var<Boolean> isSelected,
+        Val<Boolean> isEnabled,
+        Val<Icon>    icon,
+        Val<String>  tip,
         Action<ComponentDelegate<JTabbedPane, ChangeEvent>> onSelected,
-        Action<ComponentDelegate<JTabbedPane, MouseEvent>> onMouseClick
+        Action<ComponentDelegate<JTabbedPane, MouseEvent>>  onMouseClick
     ) {
         if ( headerComponent == null )
             NullUtil.nullArgCheck(title,"title",String.class);
         if ( title == null )
             NullUtil.nullArgCheck(headerComponent,"headerComponent",JComponent.class);
-        _contents = contents;
+
+        _contents        = contents;
         _headerComponent = headerComponent;
-        _title = title;
-        _isSelected = isSelected;
-        _isEnabled = isEnabled;
-        _icon = icon;
-        _tip = tip;
-        _onSelected = onSelected;
-        _onMouseClick = onMouseClick;
+        _title           = title;
+        _isSelected      = isSelected;
+        _isEnabled       = isEnabled;
+        _icon            = icon;
+        _tip             = tip;
+        _onSelected      = onSelected;
+        _onMouseClick    = onMouseClick;
     }
 
     /**
@@ -73,8 +78,9 @@ public final class Tab
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
     public final Tab isSelectedIf( boolean isSelected ) {
-        if ( _contents != null ) throw new IllegalArgumentException("Tab object may not be called anymore after the contents were specified!");
-        if ( _isSelected != null ) throw new IllegalArgumentException("Selected state already specified!");
+        if ( _isSelected != null )
+            log.warn("Selection flag already specified!", new Throwable());
+
         return new Tab(_contents, _headerComponent, _title, Var.of(isSelected), _isEnabled, _icon, _tip, _onSelected, _onMouseClick);
     }
 
@@ -84,8 +90,9 @@ public final class Tab
      */
     public final Tab isSelectedIf( Var<Boolean> isSelected ) {
         NullUtil.nullArgCheck(isSelected,"isSelected",Val.class);
-        if ( _contents != null ) throw new IllegalArgumentException("Tab object may not be called anymore after the contents were specified!");
-        if ( _isSelected != null ) throw new IllegalArgumentException("Selected state already specified!");
+        if ( _isSelected != null )
+            log.warn("Selection flag already specified!", new Throwable());
+
         return new Tab(_contents, _headerComponent, _title, isSelected, _isEnabled, _icon, _tip, _onSelected, _onMouseClick);
     }
 
@@ -95,8 +102,9 @@ public final class Tab
      */
     public final Tab isSelectedIf( Val<Boolean> isSelected ) {
         NullUtil.nullArgCheck(isSelected,"isSelected",Val.class);
-        if ( _contents != null ) throw new IllegalArgumentException("Tab object may not be called anymore after the contents were specified!");
-        if ( _isSelected != null ) throw new IllegalArgumentException("Selected state already specified!");
+        if ( _isSelected != null )
+            log.warn("Selection flag already specified!", new Throwable());
+
         Var<Boolean> isSelectedMut = Var.of(isSelected.get());
         isSelected.onChange(From.VIEW_MODEL, it -> isSelectedMut.set(it.get()) );
         return new Tab(_contents, _headerComponent, _title, isSelectedMut, _isEnabled, _icon, _tip, _onSelected, _onMouseClick);
@@ -115,8 +123,9 @@ public final class Tab
     public final <E extends Enum<E>> Tab isSelectedIf( E state, Var<E> selectedState ) {
         NullUtil.nullArgCheck(state,"state",Enum.class);
         NullUtil.nullArgCheck(selectedState,"selectedState",Var.class);
-        if ( _contents != null ) throw new IllegalArgumentException("Tab object may not be called anymore after the contents were specified!");
-        if ( _isSelected != null ) throw new IllegalArgumentException("Selected state already specified!");
+        if ( _isSelected != null )
+            log.warn("Selection flag already specified!", new Throwable());
+
         Var<Boolean> isSelected = Var.of(state == selectedState.get());
         selectedState.onChange(From.VIEW_MODEL,  it -> isSelected.set(state == it.get()) );
         isSelected.onChange(From.VIEW_MODEL,  it -> { if ( it.get() ) selectedState.set(state); });
@@ -128,8 +137,9 @@ public final class Tab
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
     public final Tab isEnabledIf( boolean isEnabled ) {
-        if ( _contents != null ) throw new IllegalArgumentException("Tab object may not be called anymore after the contents were specified!");
-        if ( _isEnabled != null ) throw new IllegalArgumentException("Enabled state already specified!");
+        if ( _isEnabled != null )
+            log.warn("Enabled flag already specified!", new Throwable());
+
         return new Tab(_contents, _headerComponent, _title, _isSelected, Val.of(isEnabled), _icon, _tip, _onSelected, _onMouseClick);
     }
 
@@ -139,8 +149,8 @@ public final class Tab
      */
     public final Tab isEnabledIf( Val<Boolean> isEnabled ) {
         NullUtil.nullArgCheck(isEnabled,"isEnabled",Val.class);
-        if ( _contents != null ) throw new IllegalArgumentException("Tab object may not be called anymore after the contents were specified!");
-        if ( _isEnabled != null ) throw new IllegalArgumentException("Enabled state already specified!");
+        if ( _isEnabled != null )
+            log.warn("Enabled flag already specified!", new Throwable());
         return new Tab(_contents, _headerComponent, _title, _isSelected, isEnabled, _icon, _tip, _onSelected, _onMouseClick);
     }
 
@@ -157,8 +167,8 @@ public final class Tab
     public final <E extends Enum<E>> Tab isEnabledIf( E state, Var<E> enabledState ) {
         NullUtil.nullArgCheck(state,"state",Enum.class);
         NullUtil.nullArgCheck(enabledState,"enabledState",Var.class);
-        if ( _contents != null ) throw new IllegalArgumentException("Tab object may not be called anymore after the contents were specified!");
-        if ( _isEnabled != null ) throw new IllegalArgumentException("Enabled state already specified!");
+        if ( _isEnabled != null )
+            log.warn("Enabled flag already specified!", new Throwable());
         Var<Boolean> isEnabled = Var.of(state == enabledState.get());
         enabledState.onChange(From.VIEW_MODEL,  it -> isEnabled.set(state == it.get()) );
         return new Tab(_contents, _headerComponent, _title, _isSelected, isEnabled, _icon, _tip, _onSelected, _onMouseClick);
@@ -170,8 +180,8 @@ public final class Tab
      */
     public final Tab withIcon( Icon icon ) {
         NullUtil.nullArgCheck(icon,"icon",Icon.class);
-        if ( _contents != null ) throw new IllegalArgumentException("Tab object may not be called anymore after the contents were specified!");
-        if ( _icon != null ) throw new IllegalArgumentException("Icon already specified!");
+        if ( _icon != null )
+            log.warn("Icon already specified!", new Throwable());
         return new Tab(_contents, _headerComponent, _title, _isSelected, _isEnabled, Val.of(icon), _tip, _onSelected, _onMouseClick);
     }
 
@@ -185,7 +195,7 @@ public final class Tab
      */
     public final Tab withIcon( IconDeclaration icon ) {
         Objects.requireNonNull(icon);
-        return icon.find().map( it -> withIcon(it) ).orElse(this);
+        return icon.find().map(this::withIcon).orElse(this);
     }
 
     /**
@@ -214,8 +224,8 @@ public final class Tab
      */
     public final Tab withIcon( Val<IconDeclaration> iconDeclaration ) {
         NullUtil.nullArgCheck(iconDeclaration,"icon",Val.class);
-        if ( _contents != null ) throw new IllegalArgumentException("Tab object may not be called anymore after the contents were specified!");
-        if ( _icon != null ) throw new IllegalArgumentException("Icon already specified!");
+        if ( _icon != null )
+            log.warn("Icon already specified!", new Throwable());
         Val<Icon> asIcon = iconDeclaration.viewAs( Icon.class, it -> it.find().orElse(null) );
         return new Tab(_contents, _headerComponent, _title, _isSelected, _isEnabled, asIcon, _tip, _onSelected, _onMouseClick);
     }
@@ -226,8 +236,8 @@ public final class Tab
      */
     public final Tab withTip( String tip ) {
         NullUtil.nullArgCheck(tip,"tip",String.class);
-        if ( _contents != null ) throw new IllegalArgumentException("Tab object may not be called anymore after the contents were specified!");
-        if ( _tip != null ) throw new IllegalArgumentException("Tip already specified!");
+        if ( _tip != null )
+            log.warn("Tip already specified!", new Throwable());
         return new Tab(_contents, _headerComponent, _title, _isSelected, _isEnabled, _icon, Val.of(tip), _onSelected, _onMouseClick);
     }
 
@@ -237,15 +247,15 @@ public final class Tab
      */
     public final Tab withTip( Val<String> tip ) {
         NullUtil.nullArgCheck(tip,"tip",String.class);
-        if ( _contents != null ) throw new IllegalArgumentException("Tab object may not be called anymore after the contents were specified!");
-        if ( _tip != null ) throw new IllegalArgumentException("Tip already specified!");
+        if ( _tip != null )
+            log.warn("Tip already specified!", new Throwable());
         return new Tab(_contents, _headerComponent, _title, _isSelected, _isEnabled, _icon, tip, _onSelected, _onMouseClick);
     }
 
     public final Tab withHeader( JComponent headerComponent ) {
         NullUtil.nullArgCheck(headerComponent,"headerComponent",JComponent.class);
-        if ( _contents != null ) throw new IllegalArgumentException("Tab object may not be called anymore after the contents were specified!");
-        if ( _headerComponent != null ) throw new IllegalArgumentException("Header component already specified!");
+        if ( _headerComponent != null )
+            log.warn("Header component already specified!", new Throwable());
         return new Tab(_contents, headerComponent, _title, _isSelected, _isEnabled, _icon, _tip, _onSelected, _onMouseClick);
     }
 
@@ -267,8 +277,9 @@ public final class Tab
      * @param contents The contents which should be displayed in the tab.
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
-    public final Tab add(UIForAnySwing<?,?> contents) {
-        if ( _contents != null ) throw new IllegalArgumentException("Contents already specified!");
+    public final Tab add( UIForAnySwing<?,?> contents ) {
+        if ( _contents != null )
+            log.warn("Content component already specified!", new Throwable());
         return new Tab(contents.getComponent(), _headerComponent, _title, _isSelected, _isEnabled, _icon, _tip, _onSelected, _onMouseClick);
     }
 
@@ -278,8 +289,9 @@ public final class Tab
      * @param contents The contents which should be displayed in the tab.
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
-    public final Tab add(JComponent contents) {
-        if ( _contents != null ) throw new IllegalArgumentException("Contents already specified!");
+    public final Tab add( JComponent contents ) {
+        if ( _contents != null )
+            log.warn("Content component already specified!", new Throwable());
         return new Tab(contents, _headerComponent, _title, _isSelected, _isEnabled, _icon, _tip, _onSelected, _onMouseClick);
     }
 
@@ -288,7 +300,8 @@ public final class Tab
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
     public final Tab onSelection( Action<ComponentDelegate<JTabbedPane, ChangeEvent>> onSelected ) {
-        if ( _onSelected != null ) throw new IllegalArgumentException("Selection event already specified!");
+        if ( _onSelected != null )
+            onSelected = _onSelected.andThen(onSelected);
         return new Tab(_contents, _headerComponent, _title, _isSelected, _isEnabled, _icon, _tip, onSelected, _onMouseClick);
     }
 
@@ -300,7 +313,8 @@ public final class Tab
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
     public final Tab onMouseClick( Action<ComponentDelegate<JTabbedPane, MouseEvent>> onClick ) {
-        if ( _onMouseClick != null ) throw new IllegalArgumentException("Mouse click event already specified!");
+        if ( _onMouseClick != null )
+            onClick = _onMouseClick.andThen(onClick);
         return new Tab(_contents, _headerComponent, _title, _isSelected, _isEnabled, _icon, _tip, _onSelected, onClick);
     }
 

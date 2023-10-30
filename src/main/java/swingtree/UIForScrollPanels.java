@@ -14,7 +14,7 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 /**
- *  A builder node for {@link JScrollPanels} a custom Swing-Tree component
+ *  A builder node for {@link JScrollPanels}, a custom SwingTree component,
  *  which is similar to a {@link JList} but with the ability to interact with
  *  the individual components in the list.
  *  <p>
@@ -29,19 +29,18 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForScrollPane<
 	 *
 	 * @param component The JComponent type which will be wrapped by this builder node.
 	 */
-	public UIForScrollPanels( P component ) { super(component); }
+	protected UIForScrollPanels( P component ) { super(component); }
 
 
 	@Override
-	protected void _add( JComponent component, Object conf ) {
-		Objects.requireNonNull(component);
-		JScrollPanels panels = this.getComponent();
+	protected void _doAddComponent(JComponent newComponent, Object conf, P thisComponent ) {
+		Objects.requireNonNull(newComponent);
 
 		EntryViewModel entry = _entryModel();
 		if ( conf == null )
-			panels.addEntry(entry, m -> UI.of(component));
+			thisComponent.addEntry( entry, m -> UI.of(newComponent) );
 		else
-			panels.addEntry(conf.toString(), entry, m -> UI.of(component));
+			thisComponent.addEntry( conf.toString(), entry, m -> UI.of(newComponent) );
 	}
 
 	private EntryViewModel _entryModel() {
@@ -54,15 +53,16 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForScrollPane<
 	}
 
 	@Override
-	protected <M> void _addViewableProps( Vals<M> viewables, String attr, ViewSupplier<M> viewSupplier)
-	{
-		BiFunction<Integer, Vals<M>, M> viewableFetcher = (i, vals) -> {
+	protected <M> void _addViewableProps(
+			Vals<M> models, String attr, ViewSupplier<M> viewSupplier, P thisComponent
+	) {
+		BiFunction<Integer, Vals<M>, M> modelFetcher = (i, vals) -> {
 			M v = vals.at(i).get();
 			if ( v instanceof EntryViewModel ) ((EntryViewModel) v).position().set(i);
 			return v;
 		};
 		BiFunction<Integer, Vals<M>, M> entryFetcher = (i, vals) -> {
-			M v = viewableFetcher.apply(i, vals);
+			M v = modelFetcher.apply(i, vals);
 			return ( v != null ? (M) v : (M)_entryModel() );
 		};
 
@@ -70,20 +70,19 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForScrollPane<
 			boolean allAreEntries = vals.stream().allMatch( v -> v instanceof EntryViewModel );
 			if ( allAreEntries ) {
 				List<EntryViewModel> entries = (List) vals.toList();
-				this.getComponent().addAllEntries(attr, entries, (ViewSupplier<EntryViewModel>) viewSupplier);
+				thisComponent.addAllEntries(attr, entries, (ViewSupplier<EntryViewModel>) viewSupplier);
 			}
 			else
 				for ( int i = 0; i< vals.size(); i++ ) {
 					int finalI = i;
-					this.getComponent().addEntry(
-							_entryModel(),//entryFetcher.apply(i,vals),
+					thisComponent.addEntry(
+							_entryModel(),
 							m -> viewSupplier.createViewFor(entryFetcher.apply(finalI,vals))
 						);
 				}
 		};
 
-		_onShow( viewables, delegate -> {
-			JScrollPanels panels = this.getComponent();
+		_onShow( models, thisComponent, (c, delegate) -> {
 			Vals<M> vals = delegate.vals();
 			int delegateIndex = delegate.index();
 			Change changeType = delegate.changeType();
@@ -96,17 +95,17 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForScrollPane<
 						if ( changeType == Change.ADD ) {
 							M m = entryFetcher.apply(delegateIndex, vals);
 							if ( m instanceof EntryViewModel )
-								panels.addEntryAt(delegateIndex, null, (EntryViewModel)m, (ViewSupplier<EntryViewModel>) viewSupplier);
+								c.addEntryAt(delegateIndex, null, (EntryViewModel)m, (ViewSupplier<EntryViewModel>) viewSupplier);
 							else
-								panels.addEntryAt(delegateIndex, null, _entryModel(), em -> viewSupplier.createViewFor(m));
+								c.addEntryAt(delegateIndex, null, _entryModel(), em -> viewSupplier.createViewFor(m));
 						} else if ( changeType == Change.REMOVE )
-							panels.removeEntryAt( delegateIndex );
+							c.removeEntryAt( delegateIndex );
 						else if ( changeType == Change.SET ) {
 							M m = entryFetcher.apply(delegateIndex, vals);
 							if ( m instanceof EntryViewModel )
-								panels.setEntryAt(delegateIndex, null, (EntryViewModel)m, (ViewSupplier<EntryViewModel>) viewSupplier);
+								c.setEntryAt(delegateIndex, null, (EntryViewModel)m, (ViewSupplier<EntryViewModel>) viewSupplier);
 							else
-								panels.setEntryAt(delegateIndex, null, _entryModel(), em -> viewSupplier.createViewFor(m));
+								c.setEntryAt(delegateIndex, null, _entryModel(), em -> viewSupplier.createViewFor(m));
 						}
 						// Now we need to update the positions of all the entries
 						for ( int i = delegateIndex; i < vals.size(); i++ ) {
@@ -115,15 +114,15 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForScrollPane<
 								((EntryViewModel)m).position().set(i);
 						}
 					} else {
-						panels.removeAllEntries();
+						c.removeAllEntries();
 						addAll.accept(vals);
 					}
 				break;
-				case CLEAR: panels.removeAllEntries(); break;
+				case CLEAR: c.removeAllEntries(); break;
 				case NONE: break;
 				default: throw new IllegalStateException("Unknown type: "+delegate.changeType());
 			}
 		});
-		addAll.accept(viewables);
+		addAll.accept(models);
 	}
 }

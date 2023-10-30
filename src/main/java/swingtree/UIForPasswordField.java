@@ -5,11 +5,11 @@ import sprouts.Val;
 import javax.swing.*;
 
 /**
- *  A swing tree builder node for {@link JPasswordField} instances.
+ *  A SwingTree builder node designed for configuring {@link JPasswordField} instances.
  */
 public class UIForPasswordField<F extends JPasswordField> extends UIForAnyTextComponent<UIForPasswordField<F>, F>
 {
-    protected UIForPasswordField(F component) { super(component); }
+    protected UIForPasswordField( F component ) { super(component); }
 
     /**
      * Sets the echo character for this {@link JPasswordField}.
@@ -23,8 +23,10 @@ public class UIForPasswordField<F extends JPasswordField> extends UIForAnyTextCo
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForPasswordField<F> withEchoChar( char echoChar ) {
-        getComponent().setEchoChar(echoChar);
-        return this;
+        return _with( thisComponent -> {
+                    thisComponent.setEchoChar(echoChar);
+                })
+                ._this();
     }
 
     /**
@@ -39,8 +41,15 @@ public class UIForPasswordField<F extends JPasswordField> extends UIForAnyTextCo
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForPasswordField<F> withEchoChar( Val<Character> echoChar ) {
-        _onShow(echoChar, v -> withEchoChar(v) );
-        return this;
+        NullUtil.nullArgCheck( echoChar, "echoChar", Val.class );
+        NullUtil.nullPropertyCheck( echoChar, "echoChar", "Null is not a valid echo character." );
+        return _withOnShow( echoChar, (thisComponent,it) -> {
+                    thisComponent.setEchoChar( it );
+                })
+                ._with( thisComponent -> {
+                    thisComponent.setEchoChar( echoChar.orElseThrow() );
+                })
+                ._this();
     }
 
 }

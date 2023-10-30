@@ -1,5 +1,7 @@
 package swingtree;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sprouts.*;
 import sprouts.Action;
 import swingtree.api.Peeker;
@@ -9,19 +11,30 @@ import swingtree.threading.EventProcessor;
 import javax.swing.*;
 import java.awt.*;
 import java.lang.ref.WeakReference;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
  *  This is the root builder type for all other builder subtypes.
- *  It is a generic builder which may wrap anything to allow for method chaining based building!
+ *  It is a generic builder which may wrap anything to allow for method chaining based building
+ *  in SwingTree. <br>
  *
  * @param <I> The concrete implementation type of this builder, "I" stands for "Implementation".
  * @param <C> The component type parameter.
  */
 abstract class AbstractBuilder<I, C extends Component>
 {
+    private static final Logger log = LoggerFactory.getLogger(AbstractBuilder.class);
+
+    /**
+     *  The type class of the component wrapped by this builder node.
+     */
+    protected final Class<C> _type;
+
     /**
      *  The component wrapped by this builder node.
      */
@@ -31,10 +44,12 @@ abstract class AbstractBuilder<I, C extends Component>
      *  A strong reference to the component (This is only used to prevent the component from being garbage collected)
      * @param <T> The type of the component.
      */
-    private static class MaybeWeakReference<T extends Component> extends WeakReference<T> {
+    private final static class MaybeWeakReference<T extends Component> extends WeakReference<T> {
         private T _strongRef; // This is only used to prevent the component from being garbage collected
         public MaybeWeakReference( T referent ) { super(referent); _strongRef = referent; }
-        public void detachStrongRef() { _strongRef = null; }
+        public void detachStrongRef() {
+            _strongRef = null;
+        }
     }
 
     /**
@@ -44,21 +59,26 @@ abstract class AbstractBuilder<I, C extends Component>
     protected final EventProcessor _eventProcessor = SwingTree.get().getEventProcessor();
 
     /**
-     *  The type class of the component wrapped by this builder node.
-     */
-    protected final Class<C> _type;
-
-    /**
      *  Instances of the {@link AbstractBuilder} as well as its subtypes always wrap
      *  a single component for which they are responsible.
      *
      * @param component The component type which will be wrapped by this builder node.
      */
     public AbstractBuilder( C component ) {
-        _type = (Class<C>) component.getClass();
+        Objects.requireNonNull(component);
+        _type      = (Class<C>) component.getClass();
         _component = new MaybeWeakReference<>(component);
         if ( component instanceof JComponent )
             ComponentExtension.makeSureComponentHasExtension( (JComponent) component );
+    }
+
+    protected AbstractBuilder<I,C> _with( Consumer<C> action ) {
+        action.accept( getComponent() );
+        return this;
+    }
+
+    protected I _withAndGet( Function<C, I> action ) {
+        return action.apply( getComponent() );
     }
 
     /**
@@ -91,20 +111,44 @@ abstract class AbstractBuilder<I, C extends Component>
      *                      is then executed by the UI thread.
      * @param <T> The type of the item wrapped by the provided property.
      */
-    protected final <T> void _onShow( Val<T> val, Consumer<T> displayAction ) {
-        val.onChange(From.ALL, new Action<Val<T>>() {
+    protected final <T> void _onShow( Val<T> val, C c, BiConsumer<C, T> displayAction )
+    {
+        Objects.requireNonNull(val);
+        Objects.requireNonNull(displayAction);
+        _onShow( val, new WeakReference<>(c), displayAction );
+    }
+
+    protected final <T> AbstractBuilder<I,C> _withOnShow( Val<T> val, BiConsumer<C, T> displayAction )
+    {
+        Objects.requireNonNull(val);
+        Objects.requireNonNull(displayAction);
+        return _with( thisComponent -> _onShow( val, thisComponent, displayAction) );
+    }
+
+    private  <T> void _onShow( Val<T> property, WeakReference<C> ref, BiConsumer<C, T> displayAction )
+    {
+        Objects.requireNonNull(property);
+        Objects.requireNonNull(displayAction);
+        Action<Val<T>> action = new Action<Val<T>>() {
             @Override
-            public void accept( Val<T> val ) {
-                T v = val.orElseNull(); // IMPORTANT! We first capture the value and then execute the action in the app thread.
+            public void accept( Val<T> value )
+            {
+                C thisComponent = ref.get();
+                if ( thisComponent == null ) {
+                    property.unsubscribe(this); // We unsubscribe from the property if the component is disposed.
+                    return;
+                }
+
+                T v = value.orElseNull(); // IMPORTANT! We first capture the value and then execute the action in the app thread.
                 _doUI(() ->
                     /*
                         We make sure that the action is only executed if the component
                         is not disposed. This is important because the action may
                         access the component, and we don't want to get a NPE.
                      */
-                        component().ifPresent( c -> {
+                        UI.run( () -> {
                             try {
-                                displayAction.accept(v); // Here the captured value is used. This is extremely important!
+                                displayAction.accept(thisComponent, v); // Here the captured value is used. This is extremely important!
                                 /*
                                      Since this is happening in another thread we are using the captured property item/value.
                                      The property might have changed in the meantime, but we don't care about that,
@@ -112,15 +156,20 @@ abstract class AbstractBuilder<I, C extends Component>
                                  */
                             } catch ( Exception e ) {
                                 throw new RuntimeException(
-                                    "Failed to apply state of property '" + val + "' to component '" + c + "'.",
-                                    e
+                                        "Failed to apply state of property '" + property + "' to component '" + thisComponent + "'.",
+                                        e
                                 );
                             }
                         })
                 );
             }
-            @Override public boolean canBeRemoved() { return !component().isPresent(); }
-        });
+        };
+        property.onChange(From.ALL, action);
+        CustomCleaner
+            .getInstance()
+            .register(ref.get(),
+                () -> property.unsubscribe(action)
+            );
     }
 
     /**
@@ -132,23 +181,47 @@ abstract class AbstractBuilder<I, C extends Component>
      *                      is then executed by the UI thread.
      * @param <T> The type of the items wrapped by the provided property list.
      */
-    protected final <T> void _onShow( Vals<T> vals, Consumer<ValsDelegate<T>> displayAction ) {
-        vals.onChange(new Action<ValsDelegate<T>>() {
+    protected final <T> void _onShow(
+            Vals<T> vals, C c, BiConsumer<C, ValsDelegate<T>> displayAction
+    ) {
+        Objects.requireNonNull(vals);
+        Objects.requireNonNull(displayAction);
+        _onShow( vals, new WeakReference<>(c), displayAction );
+    }
+
+    protected final <T> AbstractBuilder<I,C> _withOnShow(
+        Vals<T> vals, BiConsumer<C, ValsDelegate<T>> displayAction
+    ) {
+        Objects.requireNonNull(vals);
+        Objects.requireNonNull(displayAction);
+        return _with( thisComponent -> _onShow( vals, thisComponent, displayAction ) );
+    }
+
+    private <T> void _onShow(
+        Vals<T> properties, WeakReference<C> ref, BiConsumer<C, ValsDelegate<T>> displayAction
+    ) {
+        Objects.requireNonNull(properties);
+        Objects.requireNonNull(displayAction);
+        Action<ValsDelegate<T>> action = new Action<ValsDelegate<T>>() {
             @Override
-            public void accept(ValsDelegate<T> delegate) {
-                _doUI(() ->
-                        component().ifPresent(c -> {
-                            displayAction.accept(delegate);
-                        /*
-                            We make sure that the action is only executed if the component
-                            is not disposed. This is important because the action may
-                            access the component, and we don't want to get a NPE.
-                         */
-                        })
-                );
+            public void accept( ValsDelegate<T> delegate ) {
+                C thisComponent = ref.get();
+                if ( thisComponent == null ) {
+                    properties.unsubscribe(this); // We unsubscribe from the property if the component is disposed.
+                    return;
+                }
+                _doUI(() ->{
+                    displayAction.accept(thisComponent, delegate);
+                    /*
+                        We make sure that the action is only executed if the component
+                        is not disposed. This is important because the action may
+                        access the component, and we don't want to get a NPE.
+                    */
+                });
             }
-            @Override public boolean canBeRemoved() { return !component().isPresent(); }
-        });
+        };
+        properties.onChange(action);
+        CustomCleaner.getInstance().register(ref.get(), () -> properties.unsubscribe(action));
     }
 
     /**
@@ -223,8 +296,7 @@ abstract class AbstractBuilder<I, C extends Component>
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I peek( Peeker<C> action ) {
-        action.accept(getComponent());
-        return _this();
+        return _with( c -> action.accept(c) )._this();
     }
 
     /**
@@ -297,7 +369,7 @@ abstract class AbstractBuilder<I, C extends Component>
      * current UI builder as a parameter, which allows you to continue building the UI as usual.
      * <br>
      * The {@code m->ui->ui} may look a bit confusing at first, but it is simply a lambda expression
-     * which takes the optional value and returns a consumer ({@code ui->ui...}) which takes the UI builder
+     * which takes the optional value and returns a consumer ({@code ui->ui... }) which takes the UI builder
      * as a parameter.
      * <br>
      * This is in essence a more advanced {@code Optional} centric version of {@link #applyIf(boolean, Consumer)}
@@ -362,10 +434,11 @@ abstract class AbstractBuilder<I, C extends Component>
      *  readability when using the builder in more extensive ways where
      *  the beginning and end of the method chaining and nesting of the builder does
      *  not fit on one screen. <br>
-     *  In that case the expression "{@code .get(JMenu.class)}" helps
+     *  In such cases the expression "{@code .get(MyJComponent.class)}" helps
      *  to identify which type of {@link javax.swing.JComponent} is currently being built on a given
      *  nesting layer... <br><br>
-     *  Here is a simple example of how this method can be used to build a menu bar:
+     *  Here is a simple example that demonstrates this technique using
+     *  a {@link javax.swing.JPanel} and a {@link javax.swing.JMenuBar}:
      *  <pre>{@code
      *      UI.panel()
      *      .add(
@@ -382,7 +455,7 @@ abstract class AbstractBuilder<I, C extends Component>
      *  }</pre>
      *  As you can see, the expression "{@code .get(JMenuBar.class)}" as well as the expression
      *  "{@code .get(JPanel.class)}" at the end of the builder chain help to identify
-     *  which type of {@link javax.swing.JComponent} is currently being built on a given nesting layer.
+     *  which type of {@link javax.swing.JComponent} is currently being built and returned.
      *
      * @param type The type class of the component which this builder wraps.
      * @param <T> The type parameter of the component which this builder wraps.

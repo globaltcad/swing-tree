@@ -26,12 +26,12 @@ import swingtree.UI;
 <span class="fc bfc" id="L26" title="All 2 branches covered.">        if ( !UI.thisIsUIThread() ) {</span>
 <span class="fc" id="L27">            Thread currentThread = Thread.currentThread();</span>
 <span class="fc" id="L28">            String threadName    = currentThread.getName();</span>
-<span class="fc" id="L29">            String problem       = &quot;The current thread is not the UI thread!&quot;;</span>
-<span class="fc" id="L30">            String requirement   = &quot;The current event processor is the '&quot; + AWTEventProcessor.class.getSimpleName() + &quot;' which &quot; +</span>
-                                   &quot;only supports running tasks in the UI thread.  The current thread however is '&quot; + threadName + &quot;' which &quot; +
-                                   &quot;is not the UI thread (the AWT thread).&quot;;
-
-<span class="fc" id="L34">            throw new RuntimeException( problem + &quot;  &quot; + requirement );</span>
+<span class="fc" id="L29">            String problem       = &quot;Encountered the wrong thread instead of the expected UI thread!&quot;;</span>
+<span class="fc" id="L30">            String requirement   = &quot;The currently used '&quot; + EventProcessor.class.getName() + &quot;' is the '&quot; + AWTEventProcessor.class.getSimpleName() + &quot;' which &quot; +</span>
+                                   &quot;expects tasks to be registered by the UI thread. The current thread however, \nis the '&quot; + threadName + &quot;' which &quot; +
+                                   &quot;is not recognized as the UI thread (AWT's EDT thread).&quot;;
+<span class="fc" id="L33">            String consequence   = &quot;This problem is not fatal, but it may be caused by a bug and it may also cause bugs. Continuing anyway...&quot;;</span>
+<span class="fc" id="L34">            throw new RuntimeException( problem + &quot;\n&quot; + requirement + &quot;\n&quot; + consequence );</span>
         }
 <span class="fc" id="L36">    }</span>
 }

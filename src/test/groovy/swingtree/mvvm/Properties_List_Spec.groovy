@@ -241,28 +241,19 @@ class Properties_List_Spec extends Specification
             changes == [1, 0, 1, 2]
     }
 
-    def 'The display action of a property or list of properties will not be called if they report "canBeRemoved()"'()
+    def 'The display action of a property or list of properties will not be afterit was removed'()
     {
         given : 'A single property and list of two properties.'
             var prop = Var.of(7)
             var list = Vars.of(42, 73)
         and : 'A list where we are going to record changes.'
             var changes = []
-        and : 'Now we register a "set" listeners on both objects.'
-            prop.onChange(From.VIEW_MODEL, new Action<Integer>() {
-                @Override
-                void accept(Integer delegate) {
-                    changes << "Something happened to the property."
-                }
-                @Override boolean canBeRemoved() { return true }
-            })
-            list.onChange(new Action<ValsDelegate<Integer>>() {
-                @Override
-                void accept(ValsDelegate<Integer> delegate) {
-                    changes << "Something happened to the list."
-                }
-                @Override boolean canBeRemoved() { return true }
-            })
+        and:
+            Action<Val<Integer>> action1 = it -> { changes << "Something happened to the property." }
+            Action<Val<Integer>> action2 = it -> { changes << "Something happened to the list." }
+        and : 'Now we register change listeners on both objects.'
+            prop.onChange(From.VIEW_MODEL, action1)
+            list.onChange(action2)
 
         when : 'We modify the properties in various ways...'
             prop.set(42)
@@ -272,8 +263,22 @@ class Properties_List_Spec extends Specification
             list.addAt(1, 3)
             list.remove(3)
 
-        then : 'The change listener has been called zero times.'
-            changes.size() == 0
+        then : 'The listeners will have been called 6 times.'
+            changes.size() == 6
+
+        when : 'We remove the property and list.'
+            prop.unsubscribe(action1)
+            list.unsubscribe(action2)
+        and : 'We do some more unique modifications...'
+            prop.set(73)
+            list.add(4)
+            list.removeAt(1)
+            list.setAt(0, 3)
+            list.addAt(1, 4)
+            list.remove(4)
+
+        then : 'No additional changes have been recorded.'
+            changes.size() == 6
     }
 
     def 'The listeners registered in property lists will be informed what type of modification occurred.'()

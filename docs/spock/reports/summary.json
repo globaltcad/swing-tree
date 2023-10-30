@@ -1,10 +1,10 @@
 {
   "project": "Swing-Tree",
   "version": "0.2.0",
-  "created": "Sun Oct 15 00:51:13 CEST 2023",
+  "created": "Fri Oct 27 00:26:18 CEST 2023",
   "statistics":{
-    "runs":"41",
-    "passed":"41",
+    "runs":"42",
+    "passed":"42",
     "failed":"0",
     "featureFailures":"0",
     "successRate":"1.0",
@@ -20,19 +20,19 @@
       "skipped":"0" ,
       "successRate":"1.0",
       "duration":"?",
-      "executedFeatures":[{"id":"The \"MadeWithSwingTree\" example UI defined in the examples can be created.","extraInfo":[]},{"id":"The \"Well rounded\" style example UI defined in the examples can be created.","extraInfo":[]},{"id":"The advanced UI define in the examples has the expected state.","extraInfo":[]},{"id":"The animated buttons view examples UI defined in the examples looks as expected.","extraInfo":[]},{"id":"The animation example view can be created.","extraInfo":[]},{"id":"The box shadow picker example UI defined in the examples can be created.","extraInfo":[]},{"id":"The calculator UI defined in the examples has the expected state and looks.","extraInfo":[]},{"id":"The form UI defined in the examples has the expected state.","extraInfo":[]},{"id":"The list examples UI defined in the examples can be created.","extraInfo":[]},{"id":"The list rendering example UI defined in the examples can be created.","extraInfo":[]},{"id":"The login example UI defined in the examples, a good MVVM demonstration.","extraInfo":[]},{"id":"The note guesser example UI defined in the examples can be created.","extraInfo":[]},{"id":"The settings example UI defined in the examples looks as expected.","extraInfo":[]},{"id":"The simple Table-UI example has the expected state.","extraInfo":[]},{"id":"The soft example UI is rendered as expected.","extraInfo":[]},{"id":"The spinners example UI defined in the examples can be created.","extraInfo":[]},{"id":"The symbol guesser example UI defined in the examples can be created.","extraInfo":[]},{"id":"The todo app UI defined in the examples has the expected state.","extraInfo":[]},{"id":"The user registration example UI defined in the examples, a good MVVM demonstration.","extraInfo":[]}],
+      "executedFeatures":[{"id":"Declare table components using a list of list as data source.","extraInfo":[]},{"id":"The \"MadeWithSwingTree\" example UI defined in the examples can be created.","extraInfo":[]},{"id":"The \"Well rounded\" style example UI defined in the examples can be created.","extraInfo":[]},{"id":"The advanced UI define in the examples has the expected state.","extraInfo":[]},{"id":"The animated buttons view examples UI defined in the examples looks as expected.","extraInfo":[]},{"id":"The animation example view can be created.","extraInfo":[]},{"id":"The box shadow picker example UI defined in the examples can be created.","extraInfo":[]},{"id":"The calculator UI defined in the examples has the expected state and looks.","extraInfo":[]},{"id":"The form UI defined in the examples has the expected state.","extraInfo":[]},{"id":"The list examples UI defined in the examples can be created.","extraInfo":[]},{"id":"The list rendering example UI defined in the examples can be created.","extraInfo":[]},{"id":"The login example UI defined in the examples, a good MVVM demonstration.","extraInfo":[]},{"id":"The note guesser example UI defined in the examples can be created.","extraInfo":[]},{"id":"The settings example UI defined in the examples looks as expected.","extraInfo":[]},{"id":"The soft example UI is rendered as expected.","extraInfo":[]},{"id":"The spinners example UI defined in the examples can be created.","extraInfo":[]},{"id":"The symbol guesser example UI defined in the examples can be created.","extraInfo":[]},{"id":"The todo app UI defined in the examples has the expected state.","extraInfo":[]},{"id":"The user registration example UI defined in the examples, a good MVVM demonstration.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"swingtree.animations.Animations_Spec",
       "title":"Animations",
-      "narrative":"Animations are a great way to make your application more interactive and more fun to use.",
+      "narrative":"Animations are a great way to improve the UX of your application.\n    Swing-Tree has a built in animation scheduler that can execute animations \n    given that you have at least specified the duration of the animation.\n    Internally the animation scheduler is a \"Timer\" that will regularly update\n    your animations and then remove them from the scheduler once they are finished.",
       "featureCount":"4",
       "failures":"0",
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
       "duration":"?",
-      "executedFeatures":[{"id":"Animate the color of a label when it is clicked.","extraInfo":[]},{"id":"Implement the \"finish\" method in your animation to ensure that it is called at least once.","extraInfo":[]},{"id":"The event delegation object of a user event can be used to register animations.","extraInfo":[]},{"id":"Use the API exposed by \"UI.schedule(..)\" to schedule animations","extraInfo":[]}],
+      "executedFeatures":[{"id":"Animate the color of a label when it is clicked.","extraInfo":[]},{"id":"Implement the \"finish\" method in your animation to ensure that it is called at least once.","extraInfo":[]},{"id":"The event delegation object of a user event can be used to register animations.","extraInfo":[]},{"id":"Use the API exposed by `UI.animateFor(..)` to schedule animations","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"swingtree.button.JButton_Example_Spec",
@@ -49,7 +49,7 @@
     },{
       "className":"swingtree.combo.Combo_Box_Specification",
       "title":"Drop Downs, aka Combo Boxes",
-      "narrative":"In Swing drop downs are called combo boxes, which\n    is what they will be referred to in this specification as well.  \n    This specification will show you how you can create them and\n    how you can interact with them.",
+      "narrative":"In Swing drop downs are called combo boxes and they are used to select\n    one item from a list of options.\n\n    This specification will show you how you can create them and\n    how you can interact with them using SwingTree.",
       "featureCount":"14",
       "failures":"0",
       "errors":"0",
@@ -60,8 +60,8 @@
       "ignoredFeatures":[]
     },{
       "className":"swingtree.common.Basic_UI_Builder_Examples_Spec",
-      "title":"Swing tree makes UI building fun again!",
-      "narrative":"The Swing-Tree library allows you to build UIs using declarative code, \n    which you can think of as a more dynamic type of HTML but for swing.\n    It is inspired by frameworks like Jetpack Compose, Flutter, React and SwiftUI\n    which are also based on nested builder patterns to design your UI.\n    In this specification we cover the utter most basics of swing tree.",
+      "title":"Writing Declarative GUI Code",
+      "narrative":"Imperative code is code that describes how you want to achieve something,\n    typically a procedure or a sequence of steps that needs to be executed.\n    Declarative code on the other hand is code that \n    describes **what you want to achieve**,\n    typically a state or data structure that you want to create.\n    This is why declarative code is the perfect fit for UI code,\n    and making it possible to write declarative UI code is the \n    main purpose and core motivation of Swing-Tree.\n\n    Its API is designed so that the code you write with it looks \n    and feels a little bit like HTML, CSS and JavaScript.\n\n    It is inspired by frameworks like \n    [Jetpack Compose](https://developer.android.com/jetpack/compose), [SwiftUI](https://developer.apple.com/xcode/swiftui/), \n    [Flutter](https://flutter.dev) and \n    [JetBrain's UI DSL](https://plugins.jetbrains.com/docs/intellij/kotlin-ui-dsl-version-2.html#ui-dsl-basics)\n    which are also based on using declarative builder patterns to design your UI.\n\n    In this specification we cover the utter most basics of SwingTree,\n    so that you can get a feeling for how it works and what it can do for you.",
       "featureCount":"16",
       "failures":"0",
       "errors":"0",
@@ -176,12 +176,12 @@
       "skipped":"0" ,
       "successRate":"1.0",
       "duration":"?",
-      "executedFeatures":[{"id":"A list of properties can be turned into an immutable \"Vals\" list using the \"toVals\" method.","extraInfo":[]},{"id":"A list of properties can be turned into lists, sets or maps using various convenience methods.","extraInfo":[]},{"id":"Both the \"Vars\" and immutable \"Vals\" types can be used for functional programming.","extraInfo":[]},{"id":"Change listeners registered on a property list will be called when the list is sorted.","extraInfo":[]},{"id":"Just like a regular \"Var\" property you can register change listeners on \"Vars\".","extraInfo":[]},{"id":"Lists of properties can be sorted based on their natural order through the \"sort\" method.","extraInfo":[]},{"id":"Lists of properties can be sorted using a custom comparator through the \"sort\" method.","extraInfo":[]},{"id":"Map a \"Vals\" instance from one type of properties to another.","extraInfo":[]},{"id":"Map a \"Vars\" instance from one type of properties to another.","extraInfo":[]},{"id":"Multiple properties can be modelled through the \"Vars\" and \"Vals\" classes.","extraInfo":[]},{"id":"The \"Vars\" is a list of properties which can grow and shrink.","extraInfo":[]},{"id":"The \"makeDistinct\" method on a mutable list of properties modifies the list in-place.","extraInfo":[]},{"id":"The display action of a property or list of properties will not be called if they report \"canBeRemoved()\"","extraInfo":[]},{"id":"The listeners registered in property lists will be informed what type of modification occurred.","extraInfo":[]},{"id":"The properties of one property list can be added to another property list.","extraInfo":[]},{"id":"You can create a \"Vars\" list from a regular List of properties.","extraInfo":[]},{"id":"You can create the \"Vars\"/\"Vals\" property lists from property instances.","extraInfo":[]},{"id":"You can remove n leading or trailing entries from a property list.","extraInfo":[]}],
+      "executedFeatures":[{"id":"A list of properties can be turned into an immutable \"Vals\" list using the \"toVals\" method.","extraInfo":[]},{"id":"A list of properties can be turned into lists, sets or maps using various convenience methods.","extraInfo":[]},{"id":"Both the \"Vars\" and immutable \"Vals\" types can be used for functional programming.","extraInfo":[]},{"id":"Change listeners registered on a property list will be called when the list is sorted.","extraInfo":[]},{"id":"Just like a regular \"Var\" property you can register change listeners on \"Vars\".","extraInfo":[]},{"id":"Lists of properties can be sorted based on their natural order through the \"sort\" method.","extraInfo":[]},{"id":"Lists of properties can be sorted using a custom comparator through the \"sort\" method.","extraInfo":[]},{"id":"Map a \"Vals\" instance from one type of properties to another.","extraInfo":[]},{"id":"Map a \"Vars\" instance from one type of properties to another.","extraInfo":[]},{"id":"Multiple properties can be modelled through the \"Vars\" and \"Vals\" classes.","extraInfo":[]},{"id":"The \"Vars\" is a list of properties which can grow and shrink.","extraInfo":[]},{"id":"The \"makeDistinct\" method on a mutable list of properties modifies the list in-place.","extraInfo":[]},{"id":"The display action of a property or list of properties will not be afterit was removed","extraInfo":[]},{"id":"The listeners registered in property lists will be informed what type of modification occurred.","extraInfo":[]},{"id":"The properties of one property list can be added to another property list.","extraInfo":[]},{"id":"You can create a \"Vars\" list from a regular List of properties.","extraInfo":[]},{"id":"You can create the \"Vars\"/\"Vals\" property lists from property instances.","extraInfo":[]},{"id":"You can remove n leading or trailing entries from a property list.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"swingtree.mvvm.Properties_Spec",
       "title":"Properties",
-      "narrative":"Properties are a powerful tool to model the state \n    as well as business logic of your UI without actually depending on it.\n    This is especially useful for testing your UIs logic (in a view model for example).\n    This is the core motivation behind the creation of the Sprouts library.\n\n    This specification introduces you to their API and shows you how to use them.\n\n    (For more information about the raw properties themselves\n    check out their [repository](https://github.com/globaltcad/sprouts))",
+      "narrative":"SwingTree includes support for writing UIs using the MVVM pattern,\n    by shipping with a set of observable property types as part of the \n    included **Sprouts property API**,\n    which is designed from the ground up to be used for modelling Swing UIs.\n\n    Properties are a powerful tool because they make it possible to\n    model the state and logic of your UIs without actually depending on them,\n    which is especially useful for testing, debugging and refactoring.\n\n    This specification introduces you to their API and shows you how to use them.\n\n    (For more information about the raw properties themselves\n    check out their [repository](https://github.com/globaltcad/sprouts))",
       "featureCount":"14",
       "failures":"0",
       "errors":"0",
@@ -193,7 +193,7 @@
     },{
       "className":"swingtree.mvvm.Property_Binding_Spec",
       "title":"Binding Properties to UI Components",
-      "narrative":"This specification shows you how to bind properties to \n    the states of common types UI components.",
+      "narrative":"SwingTree includes support for writing UIs using the MVVM pattern,\n    by shipping with a set of properties that can be bound to UI components\n    to model their state.\n    This specification demonstrates how to bind the properties of\n    you view model to the SwingTree UI.",
       "featureCount":"16",
       "failures":"0",
       "errors":"0",
@@ -337,7 +337,7 @@
     },{
       "className":"swingtree.styles.Individual_Component_Styling_Spec",
       "title":"Styling Components",
-      "narrative":"This specification demonstrates how you can use the styling\n    API to style Swing components in a functional and declarative fashion.",
+      "narrative":"This specification demonstrates how the style API can be used to style \n    individual components declaratively.\n    You may access it on any SwingTree builder by passing a `Styler` lambda\n    to the `withStyle` method.\n    A `Styler` lambda applies style rules to a component\n    by receiving a `ComponentStyleDelegate` and returning\n    an updated version with the desired style rules applied.\n\n    Here a typical example of how to style a button\n    using the style API:\n    ```java\n        UI.button(\"Click Me!\")\n        .withStyle( it -> it\n            .borderColor(Color.CYAN)\n            .borderWidthAt(Edge.BOTTOM, 3)\n            .borderRadius(10)\n        )\n    ```\n\n    Here the `it` variable is the `ComponentStyleDelegate` which exposes\n    an extensive API for configuring how a particular component\n    looks and behaves.",
       "featureCount":"30",
       "failures":"0",
       "errors":"0",
@@ -373,14 +373,14 @@
     },{
       "className":"swingtree.styles.Style_Sheet_Spec",
       "title":"Creating Style Sheets",
-      "narrative":"No, SwingTree does not have a CSS parser.  \n    It does, however, have something better, which is similar to CSS.\n    An API for configuring styles in a declarative and type-safe way.\n\n    The main class for creating style sheets is the `StyleSheet` class,\n    an abstract class that you can extend to create your own styles like so:\n    ```java\n        class MyStyleSheet {\n           @Override\n           protected void configure() {\n                add(id(\"some unique id!\"), it -> it\n                    .borderRadius(3)\n                );\n                add(type(JPanel.class), it -> it\n                   .borderColor(Color.GREEN)\n                );\n                add(type(JButton.class), it -> it\n                    .borderWidth(7)\n                );\n            }\n        }\n    ```\n    You can then easily apply this style sheet to you SwingTree views like so:\n    ```java\n        UI.use(new MyStyleSheet(), () -> new MyView());\n    ```\n    The style sheet will be applied to all UI components created within the scope of the `use` method.",
+      "narrative":"No, SwingTree does not have a CSS parser.  \n    It does, however, have something better, which is similar to CSS.\n    An API for configuring styles in a declarative and type-safe way.\n\n    The main class for creating style sheets is the `StyleSheet` class,\n    an abstract class that you can extend to create your own styles like so:\n    ```java\n        class MyStyleSheet {\n           @Override\n           protected void configure() {\n                add(id(\"some unique id!\"), it -> it\n                    .borderRadius(3)\n                    // etc...\n                );\n                add(type(JPanel.class), it -> it\n                   .borderColor(Color.GREEN)\n                   // etc...\n                );\n                add(type(JButton.class), it -> it\n                    .borderWidth(7)\n                    // etc...\n                );\n            }\n        }\n    ```\n    You can then easily apply this style sheet to you SwingTree views like so:\n    ```java\n        UI.use(new MyStyleSheet(), () -> new MyView());\n    ```\n    The style sheet will be applied to all UI components created within the scope of the `use` method.",
       "featureCount":"12",
       "failures":"0",
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
       "duration":"?",
-      "executedFeatures":[{"id":"A StyleSheet can be created with a default style.","extraInfo":[]},{"id":"Any kind of exception inside of the \"configure\" method of a user StyleSheet will not be fatal!","extraInfo":[]},{"id":"Duplicate style trait declarations will not throw an exception!","extraInfo":[]},{"id":"Nonsensical style trait group inheritance rules will throw an exception!","extraInfo":[]},{"id":"The `group` style trait allows for inheritance, meaning a group can inherit from other ones.","extraInfo":[]},{"id":"The `type` style trait allows you to specify how a style trait applies to a component types.","extraInfo":[]},{"id":"The order of inherited style traits determines the order in which they are applied.","extraInfo":[]},{"id":"Use the `group` style trait to classify components.","extraInfo":[]},{"id":"Use the power of `Graphics2D` to render custom backgrounds inside you styles.","extraInfo":[]},{"id":"Write custom style sheet classes by extending the StyleSheet class.","extraInfo":[]},{"id":"You can define complex group inheritance graphs inside your style sheets.","extraInfo":[]},{"id":"You can style the font of a component inside your style sheet.","extraInfo":[]}],
+      "executedFeatures":[{"id":"A StyleSheet can be created with a default style.","extraInfo":[]},{"id":"Any kind of exception inside of the \"configure\" method of a user StyleSheet will not be fatal!","extraInfo":[]},{"id":"Duplicate style trait declarations will not throw an exception!","extraInfo":[]},{"id":"Nonsensical style trait group inheritance rules will throw an exception!","extraInfo":[]},{"id":"The `group` style trait allows for inheritance, meaning a group can inherit from other ones.","extraInfo":[]},{"id":"The `type` style trait factory method determines for which components a particular style should be applied.","extraInfo":[]},{"id":"The order of inherited style traits determines the order in which they are applied.","extraInfo":[]},{"id":"Use the `group` style trait to classify components.","extraInfo":[]},{"id":"Use the power of `Graphics2D` to render custom backgrounds inside you styles.","extraInfo":[]},{"id":"Write custom style sheet classes by extending the StyleSheet class.","extraInfo":[]},{"id":"You can define complex group inheritance graphs inside your style sheets.","extraInfo":[]},{"id":"You can style the font of a component inside your style sheet.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"swingtree.styles.Styles_Spec",
@@ -501,6 +501,18 @@
       "successRate":"1.0",
       "duration":"?",
       "executedFeatures":[{"id":"Changing the value of a property through the `.set(From.VIEW, T)` method will also affect its views","extraInfo":[]},{"id":"Properties can be listened to by subscribing to them using the `onChange(..)` method.","extraInfo":[]},{"id":"Subscribing to the `From.ALL` channel will notify you of all changes.","extraInfo":[]},{"id":"The `withID(..)` method produces a new property with all bindings inherited.","extraInfo":[]},{"id":"Use `set(From.VIEW, T)` on our properties to change the property state from the frontend.","extraInfo":[]}],
+      "ignoredFeatures":[]
+    },{
+      "className":"swingtree.mvvm.Auto_Cleaning_Spec",
+      "title":"Automatic Unbinding and Cleaning",
+      "narrative":"When a view, alongside all of the components it consists of, gets garbage collected,\n    the view model should be unbound from the view and cleaned up in order to prevent memory leaks.\n    Doing this manually is tedious and error-prone, which is why SwingTree does it automatically for you.\n\n    This spec tests whether the automatic unbinding and cleaning works as expected\n    when the view is garbage collected.",
+      "featureCount":"1",
+      "failures":"0",
+      "errors":"0",
+      "skipped":"0" ,
+      "successRate":"1.0",
+      "duration":"?",
+      "executedFeatures":[{"id":"The properties of a view model will loose the bindings to garbage collected views.","extraInfo":[]}],
       "ignoredFeatures":[]
     }
   ],
