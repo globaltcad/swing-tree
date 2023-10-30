@@ -3210,7 +3210,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param onFocus The {@link Action} which should be executed once the input focus was gained on the wrapped component.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onFocusGained( Action<ComponentDelegate<C, ComponentEvent>> onFocus ) {
+    public final I onFocusGain( Action<ComponentDelegate<C, ComponentEvent>> onFocus ) {
         NullUtil.nullArgCheck(onFocus, "onFocus", Action.class);
         return _with( component -> {
                    component.addFocusListener(new FocusAdapter() {
@@ -3229,7 +3229,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param onFocus The {@link Action} which should be executed once the input focus was lost on the wrapped component.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onFocusLost( Action<ComponentDelegate<C, ComponentEvent>> onFocus ) {
+    public final I onFocusLoss( Action<ComponentDelegate<C, ComponentEvent>> onFocus ) {
         NullUtil.nullArgCheck(onFocus, "onFocus", Action.class);
         return _with( component -> {
                    component.addFocusListener(new FocusAdapter() {

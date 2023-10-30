@@ -96,7 +96,7 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 	 * @param onFocus The {@link sprouts.Action} which should be executed once the input focus was gained on the wrapped component.
 	 * @return This very instance, which enables builder-style method chaining.
 	 */
-	public final I onFocusGained( sprouts.Action<WindowDelegate<W, FocusEvent>> onFocus ) {
+	public final I onFocusGain( sprouts.Action<WindowDelegate<W, FocusEvent>> onFocus ) {
 		NullUtil.nullArgCheck(onFocus, "onFocus", sprouts.Action.class);
 		return _with( thisWindow -> {
 					thisWindow.addFocusListener(new FocusAdapter() {
@@ -115,7 +115,7 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 	 * @param onFocus The {@link sprouts.Action} which should be executed once the input focus was lost on the wrapped component.
 	 * @return This very instance, which enables builder-style method chaining.
 	 */
-	public final I onFocusLost( sprouts.Action<WindowDelegate<W, FocusEvent>> onFocus ) {
+	public final I onFocusLoss( sprouts.Action<WindowDelegate<W, FocusEvent>> onFocus ) {
 		NullUtil.nullArgCheck(onFocus, "onFocus", Action.class);
 		return _with( thisWindow -> {
 					thisWindow.addFocusListener(new FocusAdapter() {

@@ -300,8 +300,8 @@ class Basic_UI_Builder_Examples_Spec extends Specification
             def frame =
                     UI.frame("Test Frame")
                     .onPressed(Keyboard.Key.H, it -> {/*something*/})
-                    .onFocusGained(it -> {/*something*/})
-                    .onFocusLost(it -> {/*something*/})
+                    .onFocusGain( it -> {/*something*/} )
+                    .onFocusLoss( it -> {/*something*/} )
                     .get(JFrame)
 
         then :
@@ -342,8 +342,8 @@ class Basic_UI_Builder_Examples_Spec extends Specification
         when : 'We create a panel UI node and attach various kinds of actions to it.'
             def panel =
                     UI.of(new JPanel()).id("Root")
-                    .onFocusGained(it -> {/*something*/})
-                    .onFocusLost(it -> {/*something*/})
+                    .onFocusGain( it -> {/*something*/} )
+                    .onFocusLoss( it -> {/*something*/} )
                     .get(JPanel)
         then : 'We can verify that the panel has the expected number of listeners.'
             panel.getListeners(FocusListener.class).size() == 2
