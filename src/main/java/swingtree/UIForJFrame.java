@@ -2,6 +2,7 @@ package swingtree;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Objects;
 import java.util.Optional;
 
 public final class UIForJFrame<F extends JFrame> extends UIForAnyWindow<UIForJFrame<F>, F>
@@ -9,10 +10,11 @@ public final class UIForJFrame<F extends JFrame> extends UIForAnyWindow<UIForJFr
 	private final BuilderState<F> _state;
 
 	/**
-	 * @param component The component type which will be wrapped by this builder node.
+	 * @param state The {@link BuilderState} modelling how the underlying component is built.
 	 */
-	UIForJFrame( F component ) {
-		_state = new BuilderState<>(component);
+	UIForJFrame( BuilderState<F> state ) {
+		Objects.requireNonNull(state);
+		_state = state;
 	}
 
 	@Override

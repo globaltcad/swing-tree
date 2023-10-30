@@ -2,6 +2,8 @@ package swingtree;
 
 import swingtree.components.JIcon;
 
+import java.util.Objects;
+
 /**
  * A {@link UIForAnySwing} subclass specifically designed for adding icons to your SwingTree.
  */
@@ -15,8 +17,9 @@ public final class UIForIcon<I extends JIcon> extends UIForAnySwing<UIForIcon<I>
      *
      * @param component The JComponent type which will be wrapped by this builder node.
      */
-    UIForIcon( I component ) {
-        _state = new BuilderState<>(component);
+    UIForIcon( BuilderState<I> state ) {
+        Objects.requireNonNull(state);
+        _state = state;
     }
 
     @Override

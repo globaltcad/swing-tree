@@ -3,6 +3,7 @@ package swingtree;
 import sprouts.Val;
 
 import javax.swing.JCheckBox;
+import java.util.Objects;
 
 /**
  *  A SwingTree builder node designed for configuring {@link JCheckBox} instances.
@@ -11,8 +12,9 @@ public final class UIForCheckBox<B extends JCheckBox> extends UIForAnyButton<UIF
 {
     private final BuilderState<B> _state;
 
-    UIForCheckBox( B component ) {
-        _state = new BuilderState<>(component);
+    UIForCheckBox( BuilderState<B> state ) {
+        Objects.requireNonNull(state, "state");
+        _state = state;
     }
 
     @Override

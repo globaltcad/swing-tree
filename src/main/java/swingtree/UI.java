@@ -819,7 +819,7 @@ public final class UI extends UILayoutConstants
      */
     public static <T extends Component> UIForAnything<T> of( T component ) {
         NullUtil.nullArgCheck(component, "component", Component.class);
-        return new UIForAnything<>(component);
+        return new UIForAnything<>(new BuilderState<>(component));
     }
 
     /**
@@ -873,7 +873,7 @@ public final class UI extends UILayoutConstants
      */
     public static <P extends JPanel> UIForPanel<P> of( P component ) {
         NullUtil.nullArgCheck(component, "component", JPanel.class);
-        return new UIForPanel<>(component);
+        return new UIForPanel<>(new BuilderState<>(component));
     }
 
     /**
@@ -1139,7 +1139,7 @@ public final class UI extends UILayoutConstants
      */
     public static <B extends JBox> UIForBox<B> of( B component ) {
         NullUtil.nullArgCheck(component, "component", JPanel.class);
-        return new UIForBox<>(component);
+        return new UIForBox<>(new BuilderState<>(component));
     }
 
     /**
@@ -1482,7 +1482,7 @@ public final class UI extends UILayoutConstants
     public static <M extends JMenuItem> UIForMenuItem<M> of( MenuBuilder<M> builder )
     {
         NullUtil.nullArgCheck(builder, "builder", MenuBuilder.class);
-        return new UIForMenuItem<>(builder.build());
+        return new UIForMenuItem<>(new BuilderState<>(builder.build()));
     }
 
     /**
@@ -1495,7 +1495,7 @@ public final class UI extends UILayoutConstants
     public static <P extends JPopupMenu> UIForPopup<P> of( P popup )
     {
         NullUtil.nullArgCheck(popup, "popup", JPopupMenu.class);
-        return new UIForPopup<>(popup);
+        return new UIForPopup<>(new BuilderState<>(popup));
     }
 
     /**
@@ -1564,7 +1564,7 @@ public final class UI extends UILayoutConstants
     public static <T extends AbstractButton> UIForButton<T> of( T component )
     {
         NullUtil.nullArgCheck(component, "component", AbstractButton.class);
-        return new UIForButton<>(component);
+        return new UIForButton<>(new BuilderState<>(component));
     }
 
     /**
@@ -2230,7 +2230,7 @@ public final class UI extends UILayoutConstants
      */
     public static <M extends JMenu> UIForMenu<M> of( M component ) {
         NullUtil.nullArgCheck(component, "component", JMenu.class);
-        return new UIForMenu<>(component);
+        return new UIForMenu<>(new BuilderState<>(component));
     }
 
     /**
@@ -2243,7 +2243,14 @@ public final class UI extends UILayoutConstants
      */
     public static <M extends JMenuItem> UIForMenuItem<M> of( M component ) {
         NullUtil.nullArgCheck(component, "component", JMenuItem.class);
-        return new UIForMenuItem<>(component);
+        return new UIForMenuItem<>(new BuilderState<>(component));
+    }
+
+    /**
+     * @return A SwingTree builder node for the {@link JMenuItem} type.
+     */
+    public static UIForMenuItem<JMenuItem> menuItem() {
+        return new UIForMenuItem<>(new BuilderState<>(new MenuItem()));
     }
 
     /**
@@ -2261,7 +2268,7 @@ public final class UI extends UILayoutConstants
      */
     public static UIForMenuItem<JMenuItem> menuItem( String text ) {
         NullUtil.nullArgCheck(text, "text", String.class);
-        return new UIForMenuItem<>((JMenuItem) new MenuItem()).withText(text);
+        return menuItem().withText(text);
     }
 
     /**
@@ -2270,7 +2277,7 @@ public final class UI extends UILayoutConstants
      */
     public static UIForMenuItem<JMenuItem> menuItem( Val<String> text ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
-        return new UIForMenuItem<>((JMenuItem) new MenuItem()).withText(text);
+        return menuItem().withText(text);
     }
 
     /**
@@ -2290,7 +2297,7 @@ public final class UI extends UILayoutConstants
     public static UIForMenuItem<JMenuItem> menuItem( String text, Icon icon ) {
         NullUtil.nullArgCheck(text, "text", String.class);
         NullUtil.nullArgCheck(icon, "icon", Icon.class);
-        return new UIForMenuItem<>((JMenuItem) new MenuItem())
+        return menuItem()
                     .withText(text)
                     .withIcon(icon);
     }
@@ -2312,7 +2319,7 @@ public final class UI extends UILayoutConstants
     public static UIForMenuItem<JMenuItem> menuItem( String text, IconDeclaration icon ) {
         NullUtil.nullArgCheck(text, "text", String.class);
         NullUtil.nullArgCheck(icon, "icon", IconDeclaration.class);
-        return new UIForMenuItem<>((JMenuItem) new MenuItem())
+        return menuItem()
                     .withText(text)
                     .withIcon(icon);
     }
@@ -2325,7 +2332,7 @@ public final class UI extends UILayoutConstants
     public static UIForMenuItem<JMenuItem> menuItem( Val<String> text, Icon icon ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullArgCheck(icon, "icon", Icon.class);
-        return new UIForMenuItem<>((JMenuItem) new MenuItem())
+        return menuItem()
                     .withText(text)
                     .withIcon(icon);
     }
@@ -2338,7 +2345,7 @@ public final class UI extends UILayoutConstants
     public static UIForMenuItem<JMenuItem> menuItem( Val<String> text, IconDeclaration icon ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullArgCheck(icon, "icon", IconDeclaration.class);
-        return new UIForMenuItem<>((JMenuItem) new MenuItem())
+        return menuItem()
                     .withText(text)
                     .withIcon(icon);
     }
@@ -2371,7 +2378,7 @@ public final class UI extends UILayoutConstants
     public static UIForMenuItem<JMenuItem> menuItem( String text, Val<IconDeclaration> icon ) {
         NullUtil.nullArgCheck(text, "text", String.class);
         NullUtil.nullArgCheck(icon, "icon", Val.class);
-        return new UIForMenuItem<>((JMenuItem) new MenuItem()).withText(text).withIcon(icon);
+        return menuItem().withText(text).withIcon(icon);
     }
 
     /**
@@ -2403,7 +2410,7 @@ public final class UI extends UILayoutConstants
     public static UIForMenuItem<JMenuItem> menuItem( Val<String> text, Val<IconDeclaration> icon ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullArgCheck(icon, "icon", Val.class);
-        return new UIForMenuItem<>((JMenuItem) new MenuItem()).withText(text).withIcon(icon);
+        return menuItem().withText(text).withIcon(icon);
     }
 
     /**
@@ -2609,7 +2616,7 @@ public final class UI extends UILayoutConstants
      */
     public static <M extends JCheckBoxMenuItem> UIForCheckBoxMenuItem<M> of( M checkBoxMenuItem ) {
         NullUtil.nullArgCheck(checkBoxMenuItem, "component", JCheckBoxMenuItem.class);
-        return new UIForCheckBoxMenuItem<>(checkBoxMenuItem);
+        return new UIForCheckBoxMenuItem<>(new BuilderState<>(checkBoxMenuItem));
     }
 
     /**
@@ -3000,7 +3007,7 @@ public final class UI extends UILayoutConstants
      */
     public static <P extends JEditorPane> UIForEditorPane<P> of( P component ) {
         NullUtil.nullArgCheck(component, "component", JEditorPane.class);
-        return new UIForEditorPane<>(component);
+        return new UIForEditorPane<>(new BuilderState<>(component));
     }
 
     /**
@@ -3191,7 +3198,7 @@ public final class UI extends UILayoutConstants
      */
     public static <E, C extends JComboBox<E>> UIForCombo<E,C> of( C component ) {
         NullUtil.nullArgCheck(component, "component", JComboBox.class);
-        return new UIForCombo<>(component);
+        return new UIForCombo<>(new BuilderState<>(component));
     }
 
     /**
@@ -3530,7 +3537,7 @@ public final class UI extends UILayoutConstants
      */
     public static <L extends JLabel> UIForLabel<L> of( L label ) {
         NullUtil.nullArgCheck(label, "component", JLabel.class);
-        return new UIForLabel<>(label);
+        return new UIForLabel<>(new BuilderState<>(label));
     }
 
     /**
@@ -3760,7 +3767,7 @@ public final class UI extends UILayoutConstants
      */
     public static <I extends JIcon> UIForIcon<I> of( I icon ) {
         NullUtil.nullArgCheck(icon, "icon", JIcon.class);
-        return new UIForIcon<>(icon);
+        return new UIForIcon<>(new BuilderState<>(icon));
     }
 
     /**
@@ -3944,7 +3951,7 @@ public final class UI extends UILayoutConstants
      */
     public static <B extends JCheckBox> UIForCheckBox<B> of( B component ) {
         NullUtil.nullArgCheck(component, "component", JCheckBox.class);
-        return new UIForCheckBox<>(component);
+        return new UIForCheckBox<>(new BuilderState<>(component));
     }
 
     /**
@@ -4493,7 +4500,7 @@ public final class UI extends UILayoutConstants
      */
     public static UIForFormattedTextField of( JFormattedTextField component ) {
         NullUtil.nullArgCheck(component, "component", JFormattedTextField.class);
-        return new UIForFormattedTextField(component);
+        return new UIForFormattedTextField(new BuilderState<>(component));
     }
 
     /**
@@ -4559,7 +4566,7 @@ public final class UI extends UILayoutConstants
      */
     public static <F extends JPasswordField> UIForPasswordField<F> of( F component ) {
         NullUtil.nullArgCheck(component, "component", JPasswordField.class);
-        return new UIForPasswordField<>(component);
+        return new UIForPasswordField<>(new BuilderState<>(component));
     }
 
     /**
@@ -4625,7 +4632,7 @@ public final class UI extends UILayoutConstants
      */
     public static <P extends JProgressBar> UIForProgressBar<P> of( P component ) {
         NullUtil.nullArgCheck(component, "component", JProgressBar.class);
-        return new UIForProgressBar<>(component);
+        return new UIForProgressBar<>(new BuilderState<>(component));
     }
 
     /**
@@ -4844,7 +4851,7 @@ public final class UI extends UILayoutConstants
      */
     public static <E> UIForList<E, JList<E>> of( JList<E> list ) {
         NullUtil.nullArgCheck(list, "list", JList.class);
-        return new UIForList<>(list);
+        return new UIForList<>(new BuilderState<>(list));
     }
 
     /**
@@ -5332,7 +5339,7 @@ public final class UI extends UILayoutConstants
      * @param <F> The concrete type of this new frame.
      */
     public static <F extends JFrame> UIForJFrame<F> of( F frame ) {
-        return new UIForJFrame<>(frame);
+        return new UIForJFrame<>(new BuilderState<>(frame));
     }
 
     /**
@@ -5342,7 +5349,7 @@ public final class UI extends UILayoutConstants
      * @return A basic UI builder instance wrapping a {@link JFrame}.
      */
     public static UIForJFrame<JFrame> frame() {
-        return new UIForJFrame<>(new JFrame());
+        return new UIForJFrame<>(new BuilderState<>(new JFrame()));
     }
 
     /**
@@ -5351,7 +5358,8 @@ public final class UI extends UILayoutConstants
      * @return A basic UI builder instance wrapping a {@link JFrame}.
      */
     public static UIForJFrame<JFrame> frame( String title ) {
-        return new UIForJFrame<>(new JFrame()).withTitle(title);
+        return new UIForJFrame<>(new BuilderState<>(new JFrame()))
+                    .withTitle(title);
     }
 
     /**
@@ -5361,7 +5369,7 @@ public final class UI extends UILayoutConstants
      * @param <D> The concrete type of this new dialog.
      */
     public static <D extends JDialog> UIForJDialog<D> of( D dialog ) {
-        return new UIForJDialog<>(dialog);
+        return new UIForJDialog<>(new BuilderState<>(dialog));
     }
 
     /**
@@ -5371,7 +5379,7 @@ public final class UI extends UILayoutConstants
      * @return A basic UI builder instance wrapping a {@link JDialog}.
      */
     public static UIForJDialog<JDialog> dialog() {
-        return new UIForJDialog<>(new JDialog());
+        return new UIForJDialog<>(new BuilderState<>(new JDialog()));
     }
 
     /**
@@ -5380,7 +5388,7 @@ public final class UI extends UILayoutConstants
      * @return A basic UI builder instance wrapping a {@link JDialog}.
      */
     public static UIForJDialog<JDialog> dialog( Window owner ) {
-        return new UIForJDialog<>(new JDialog(owner));
+        return new UIForJDialog<>(new BuilderState<>(new JDialog(owner)));
     }
 
     /**
@@ -5389,7 +5397,7 @@ public final class UI extends UILayoutConstants
      * @return A basic UI builder instance wrapping a {@link JDialog}.
      */
     public static UIForJDialog<JDialog> dialog( String title ) {
-        return new UIForJDialog<>(new JDialog()).withTitle(title);
+        return new UIForJDialog<>(new BuilderState<>(new JDialog())).withTitle(title);
     }
 
     /**
@@ -5399,7 +5407,8 @@ public final class UI extends UILayoutConstants
      * @return A basic UI builder instance wrapping a {@link JDialog}.
      */
     public static UIForJDialog<JDialog> dialog( Window owner, String title ) {
-        return new UIForJDialog<>(new JDialog(owner)).withTitle(title);
+        return new UIForJDialog<>(new BuilderState<>(new JDialog(owner)))
+                    .withTitle(title);
     }
 
     /**

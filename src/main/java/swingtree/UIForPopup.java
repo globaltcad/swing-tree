@@ -7,6 +7,7 @@ import javax.swing.*;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import java.awt.*;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
@@ -19,8 +20,9 @@ public final class UIForPopup<P extends JPopupMenu> extends UIForAnySwing<UIForP
 {
     private final BuilderState<P> _state;
 
-    UIForPopup( P component ) {
-        _state = new BuilderState<>(component);
+    UIForPopup( BuilderState<P> state ) {
+        Objects.requireNonNull(state);
+        _state = state;
     }
 
     @Override

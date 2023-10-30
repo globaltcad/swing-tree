@@ -1,6 +1,7 @@
 package swingtree;
 
 import java.awt.*;
+import java.util.Objects;
 
 /**
  *  A SwingTree builder node for configuring anything which is a sub-type of {@link Component}
@@ -14,10 +15,11 @@ public class UIForAnything<T extends Component> extends AbstractBuilder<UIForAny
      * Instances of the {@link UIForAnything} builder do not support the
      * "add" method as defined inside the {@link AbstractNestedBuilder}.
      *
-     * @param component The component type which will be wrapped by this builder node.
+     * @param state The {@link BuilderState} modelling the component which will be wrapped by this builder node.
      */
-    protected UIForAnything( T component ) {
-        _state = new BuilderState<>(component);
+    protected UIForAnything( BuilderState<T> state ) {
+        Objects.requireNonNull(state, "state");
+        _state = state;
     }
 
     @Override

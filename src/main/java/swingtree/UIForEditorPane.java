@@ -1,6 +1,7 @@
 package swingtree;
 
 import javax.swing.*;
+import java.util.Objects;
 
 /**
  *  A SwingTree builder node designed for configuring {@link JEditorPane} instances.
@@ -16,10 +17,11 @@ public final class UIForEditorPane<P extends JEditorPane> extends UIForAnyEditor
      * {@link UIForAnySwing} (sub)types always wrap
      * a single component for which they are responsible.
      *
-     * @param component The {@link JComponent} type which will be wrapped by this builder node.
+     * @param state The {@link BuilderState} containing the component which will be wrapped by this builder node.
      */
-    UIForEditorPane( P component ) {
-        _state = new BuilderState<>(component);
+    UIForEditorPane( BuilderState<P> state ) {
+        Objects.requireNonNull(state, "state");
+        _state = state;
     }
 
     @Override

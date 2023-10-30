@@ -1,14 +1,16 @@
 package swingtree;
 
 import javax.swing.*;
+import java.util.Objects;
 
 public final class UIForCheckBoxMenuItem<M extends JCheckBoxMenuItem>
 extends UIForAnyMenuItem<UIForCheckBoxMenuItem<M>, M>
 {
     private final BuilderState<M> _state;
 
-    protected UIForCheckBoxMenuItem( M component ) {
-        _state = new BuilderState<>(component);
+    UIForCheckBoxMenuItem( BuilderState<M> state ) {
+        Objects.requireNonNull(state, "state");
+        _state = state;
     }
 
     @Override

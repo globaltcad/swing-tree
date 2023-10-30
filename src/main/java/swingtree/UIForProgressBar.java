@@ -15,10 +15,10 @@ public final class UIForProgressBar<P extends JProgressBar> extends UIForAnySwin
      * Extensions of the {@link  UIForAnySwing} always wrap
      * a single component for which they are responsible.
      *
-     * @param component The JComponent type which will be wrapped by this builder node.
+     * @param state The {@link BuilderState} modelling how the component is built.
      */
-    UIForProgressBar( P component ) {
-        _state = new BuilderState<>(component);
+    UIForProgressBar( BuilderState<P> state ) {
+        _state = state;
     }
 
     @Override

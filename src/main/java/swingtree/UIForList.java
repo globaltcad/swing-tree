@@ -30,10 +30,11 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
      * Extensions of the {@link  UIForAnySwing} always wrap
      * a single component for which they are responsible.
      *
-     * @param component The JComponent type which will be wrapped by this builder node.
+     * @param state The {@link BuilderState} modelling how the underlying component is built.
      */
-    UIForList( L component ) {
-        _state = new BuilderState<>(component);
+    UIForList( BuilderState<L> state ) {
+        Objects.requireNonNull(state);
+        _state = state;
     }
 
     @Override

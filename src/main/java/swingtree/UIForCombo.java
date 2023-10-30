@@ -14,6 +14,7 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.lang.ref.WeakReference;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
@@ -26,8 +27,9 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
 {
     private final BuilderState<JComboBox<E>> _state;
 
-    UIForCombo( JComboBox<E> component ) {
-        _state = new BuilderState<>(component);
+    UIForCombo( BuilderState<JComboBox<E>> state ) {
+        Objects.requireNonNull(state);
+        _state = state;
     }
 
     @Override

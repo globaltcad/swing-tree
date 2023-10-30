@@ -6,6 +6,7 @@ import swingtree.layout.LayoutConstraint;
 
 import javax.swing.JPanel;
 import java.awt.LayoutManager;
+import java.util.Objects;
 
 /**
  *  A SwingTree builder node designed for configuring {@link JPanel} instances.
@@ -14,8 +15,9 @@ public final class UIForPanel<P extends JPanel> extends UIForAnySwing<UIForPanel
 {
     private final BuilderState<P> _state;
 
-    UIForPanel( P component ) {
-        _state = new BuilderState<>(component);
+    UIForPanel( BuilderState<P> state ) {
+        Objects.requireNonNull(state);
+        _state = state;
     }
 
     @Override

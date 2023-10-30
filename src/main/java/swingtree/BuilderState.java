@@ -8,6 +8,12 @@ import java.awt.Component;
 import java.util.Objects;
 import java.util.function.Supplier;
 
+/**
+ *  A library internal object for modelling the state of a builder node,
+ *  in particular the component wrapped by the builder node.
+ *
+ * @param <C> The type of the component wrapped by the builder node.
+ */
 class BuilderState<C extends Component>
 {
     /**

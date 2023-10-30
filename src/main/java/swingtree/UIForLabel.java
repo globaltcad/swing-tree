@@ -3,8 +3,11 @@ package swingtree;
 import sprouts.Val;
 import swingtree.api.IconDeclaration;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import java.awt.Desktop;
+import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
@@ -22,8 +25,9 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
 {
     private final BuilderState<L> _state;
 
-    UIForLabel( L component ) {
-        _state = new BuilderState<>(component);
+    UIForLabel( BuilderState<L> state ) {
+        Objects.requireNonNull(state);
+        _state = state;
     }
 
     @Override

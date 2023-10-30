@@ -3,6 +3,7 @@ package swingtree;
 import sprouts.Val;
 
 import javax.swing.JMenu;
+import java.util.Objects;
 
 /**
  *  A SwingTree builder node designed for configuring {@link JMenu} instances.
@@ -11,8 +12,9 @@ public final class UIForMenu<M extends JMenu> extends UIForAnyMenuItem<UIForMenu
 {
     private final BuilderState<M> _state;
 
-    UIForMenu( M component ) {
-        _state = new BuilderState<>(component);
+    UIForMenu( BuilderState<M> state ) {
+        Objects.requireNonNull(state);
+        _state = state;
     }
 
     @Override

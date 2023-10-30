@@ -6,6 +6,7 @@ import swingtree.components.JBox;
 import swingtree.layout.LayoutConstraint;
 
 import java.awt.*;
+import java.util.Objects;
 
 /**
  *  A SwingTree builder node designed for configuring {@link swingtree.components.JBox} instances.
@@ -14,8 +15,15 @@ public class UIForBox<B extends JBox> extends UIForAnySwing<UIForBox<B>, B>
 {
     private final BuilderState<B> _state;
 
-    protected UIForBox( B component ) {
-        _state = new BuilderState<>(component);
+    /**
+     * {@link UIForAnySwing} (sub)types always wrap
+     * a builder state which defines how a component is created.
+     *
+     * @param state The {@link BuilderState} containing the component which will be wrapped by this builder node.
+     */
+    protected UIForBox( BuilderState<B> state ) {
+        Objects.requireNonNull(state, "state");
+        _state = state;
     }
 
     @Override

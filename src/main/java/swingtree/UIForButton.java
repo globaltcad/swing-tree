@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import sprouts.Val;
 
 import javax.swing.*;
+import java.util.Objects;
 
 /**
  * A SwingTree builder node designed for configuring {@link AbstractButton} sub-type instances,
@@ -15,8 +16,9 @@ public class UIForButton<B extends AbstractButton> extends UIForAnyButton<UIForB
 
     private final BuilderState<B> _state;
 
-    UIForButton( B component ) {
-        _state = new BuilderState<>(component);
+    UIForButton( BuilderState<B> state ) {
+        Objects.requireNonNull(state, "state");
+        _state = state;
     }
 
     @Override

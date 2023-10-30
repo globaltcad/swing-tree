@@ -5,14 +5,16 @@ import sprouts.Action;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 public final class UIForFormattedTextField extends UIForAnyTextComponent<UIForFormattedTextField, JFormattedTextField>
 {
     private final BuilderState<JFormattedTextField> _state;
 
-    UIForFormattedTextField( JFormattedTextField component ) {
-        _state = new BuilderState<>(component);
+    UIForFormattedTextField( BuilderState<JFormattedTextField> state ) {
+        Objects.requireNonNull(state);
+        _state = state;
     }
 
     @Override

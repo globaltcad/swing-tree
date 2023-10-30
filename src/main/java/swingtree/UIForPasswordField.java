@@ -3,6 +3,7 @@ package swingtree;
 import sprouts.Val;
 
 import javax.swing.*;
+import java.util.Objects;
 
 /**
  *  A SwingTree builder node designed for configuring {@link JPasswordField} instances.
@@ -11,8 +12,9 @@ public class UIForPasswordField<F extends JPasswordField> extends UIForAnyTextCo
 {
     private final BuilderState<F> _state;
 
-    protected UIForPasswordField( F component ) {
-        _state = new BuilderState<>(component);
+    protected UIForPasswordField( BuilderState<F> state ) {
+        Objects.requireNonNull(state);
+        _state = state;
     }
 
     @Override
