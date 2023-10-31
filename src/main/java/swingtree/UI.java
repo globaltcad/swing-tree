@@ -1869,7 +1869,7 @@ public final class UI extends UILayoutConstants
      */
     public static UIForSplitButton<JSplitButton> splitButton( String text ) {
         NullUtil.nullArgCheck(text, "text", String.class);
-        return new UIForSplitButton<>(new BuilderState<>((JSplitButton) new SplitButton()))
+        return new UIForSplitButton<>(new BuilderState<>(JSplitButton.class, SplitButton::new))
                     .withText(text);
     }
 
@@ -2027,7 +2027,9 @@ public final class UI extends UILayoutConstants
      *
      * @return A builder instance for a new {@link JTabbedPane}, which enables fluent method chaining.
      */
-    public static UIForTabbedPane<JTabbedPane> tabbedPane() { return of(new TabbedPane()); }
+    public static UIForTabbedPane<JTabbedPane> tabbedPane() {
+        return new UIForTabbedPane<>(new BuilderState<>(JTabbedPane.class, TabbedPane::new));
+    }
 
     /**
      *  Use this to create a builder for a new {@link JTabbedPane} UI component
@@ -2251,7 +2253,7 @@ public final class UI extends UILayoutConstants
      * @return A SwingTree builder node for the {@link JMenuItem} type.
      */
     public static UIForMenuItem<JMenuItem> menuItem() {
-        return new UIForMenuItem<>(new BuilderState<>(new MenuItem()));
+        return new UIForMenuItem<>(new BuilderState<>(JMenuItem.class, MenuItem::new));
     }
 
     /**
@@ -2438,7 +2440,7 @@ public final class UI extends UILayoutConstants
      * @return A builder instance for the provided {@link JRadioButtonMenuItem}, which enables fluent method chaining.
      */
     public static UIForRadioButtonMenuItem<JRadioButtonMenuItem> radioButtonMenuItem() {
-        return new UIForRadioButtonMenuItem<>(new BuilderState<>(new RadioButtonMenuItem()));
+        return new UIForRadioButtonMenuItem<>(new BuilderState<>(JRadioButtonMenuItem.class, RadioButtonMenuItem::new));
     }
 
     /**
@@ -2633,7 +2635,7 @@ public final class UI extends UILayoutConstants
      * @return A builder instance for the provided {@link JCheckBoxMenuItem}, which enables fluent method chaining.
      */
     public static UIForCheckBoxMenuItem<JCheckBoxMenuItem> checkBoxMenuItem() {
-        return of(new CheckBoxMenuItem());
+        return new UIForCheckBoxMenuItem<>(new BuilderState<>(JCheckBoxMenuItem.class, CheckBoxMenuItem::new));
     }
 
     /**
@@ -2809,7 +2811,7 @@ public final class UI extends UILayoutConstants
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
     public static UIForToolBar<JToolBar> toolBar() {
-        return new UIForToolBar<>(new BuilderState<>(new ToolBar()));
+        return new UIForToolBar<>(new BuilderState<>(JToolBar.class, ToolBar::new));
     }
 
     /**
@@ -2864,7 +2866,9 @@ public final class UI extends UILayoutConstants
      *
      * @return A builder instance for a new {@link JScrollPane}, which enables fluent method chaining.
      */
-    public static UIForScrollPane<JScrollPane> scrollPane() { return of(new ScrollPane()); }
+    public static UIForScrollPane<JScrollPane> scrollPane() {
+        return new UIForScrollPane<>(new BuilderState<>(JScrollPane.class, ScrollPane::new));
+    }
 
     /**
      *  Use this to create a builder for the provided {@link JScrollPanels} component.
@@ -2894,7 +2898,7 @@ public final class UI extends UILayoutConstants
      * @return A builder instance for a new {@link JScrollPanels}, which enables fluent method chaining.
      */
     public static UIForScrollPanels<JScrollPanels> scrollPanels() {
-        return of(JScrollPanels.of(Align.VERTICAL, new Dimension(100,100)));
+        return new UIForScrollPanels<>(new BuilderState<>(JScrollPanels.class, ()->JScrollPanels.of(Align.VERTICAL, new Dimension(100,100))));
     }
 
     /**
@@ -2913,7 +2917,7 @@ public final class UI extends UILayoutConstants
      * @return A builder instance for a new {@link JScrollPanels}, which enables fluent method chaining.
      */
     public static UIForScrollPanels<JScrollPanels> scrollPanels(Align align) {
-        return of(JScrollPanels.of(align, null));
+        return new UIForScrollPanels<>(new BuilderState<>(JScrollPanels.class, ()->JScrollPanels.of(align, null)));
     }
 
     /**
@@ -2933,7 +2937,7 @@ public final class UI extends UILayoutConstants
      * @return A builder instance for a new {@link JScrollPanels}, which enables fluent method chaining.
      */
     public static UIForScrollPanels<JScrollPanels> scrollPanels(Align align, Dimension size) {
-        return of(JScrollPanels.of(align, size));
+        return new UIForScrollPanels<>(new BuilderState<>(JScrollPanels.class, ()->JScrollPanels.of(align, size)));
     }
 
     /**
@@ -2967,7 +2971,8 @@ public final class UI extends UILayoutConstants
      */
     public static UIForSplitPane<JSplitPane> splitPane( Align align ) {
         NullUtil.nullArgCheck(align, "align", Align.class);
-        return of((JSplitPane) new SplitPane(align)).withOrientation(align);
+        return new UIForSplitPane<>(new BuilderState<>(JSplitPane.class, ()->new SplitPane(align)))
+                    .withOrientation(align);
     }
 
     /**
@@ -2994,7 +2999,7 @@ public final class UI extends UILayoutConstants
     public static UIForSplitPane<JSplitPane> splitPane( Val<Align> align ) {
         NullUtil.nullArgCheck(align, "align", Val.class);
         NullUtil.nullPropertyCheck(align, "align", "Null is not a valid alignment.");
-        return of((JSplitPane) new SplitPane(align.get()))
+        return new UIForSplitPane<>(new BuilderState<>(JSplitPane.class, ()->new SplitPane(align.get())))
                 .withOrientation(align);
     }
 
@@ -3017,7 +3022,9 @@ public final class UI extends UILayoutConstants
      *
      * @return A builder instance for a new {@link JEditorPane}, which enables fluent method chaining.
      */
-    public static UIForEditorPane<JEditorPane> editorPane() { return of(new EditorPane()); }
+    public static UIForEditorPane<JEditorPane> editorPane() {
+        return new UIForEditorPane<>(new BuilderState<>(JEditorPane.class, EditorPane::new));
+    }
 
     /**
      *  Use this to create a builder for the provided {@link JTextPane} instance.
@@ -3066,7 +3073,8 @@ public final class UI extends UILayoutConstants
      */
     public static UIForSlider<JSlider> slider( Align align ) {
         NullUtil.nullArgCheck(align, "align", Align.class);
-        return of((JSlider) new Slider()).withOrientation(align);
+        return new UIForSlider<>(new BuilderState<>(JSlider.class, Slider::new))
+                    .withOrientation(align);
     }
 
     /**
@@ -3082,7 +3090,8 @@ public final class UI extends UILayoutConstants
      */
     public static UIForSlider<JSlider> slider( Val<Align> align ) {
         NullUtil.nullArgCheck( align, "align", Val.class );
-        return of((JSlider) new Slider()).withOrientation(align);
+        return new UIForSlider<>(new BuilderState<>(JSlider.class, Slider::new))
+                .withOrientation(align);
     }
 
     /**
@@ -3102,7 +3111,7 @@ public final class UI extends UILayoutConstants
      */
     public static UIForSlider<JSlider> slider( Align align, int min, int max ) {
         NullUtil.nullArgCheck(align, "align", Align.class);
-        return of((JSlider) new Slider())
+        return new UIForSlider<>(new BuilderState<>(JSlider.class, Slider::new))
                     .withOrientation(align)
                     .withMin(min)
                     .withMax(max)
@@ -3128,7 +3137,7 @@ public final class UI extends UILayoutConstants
      */
     public static UIForSlider<JSlider> slider( Align align, int min, int max, int value ) {
         NullUtil.nullArgCheck(align, "align", Align.class);
-        return of((JSlider) new Slider())
+        return new UIForSlider<>(new BuilderState<>(JSlider.class, Slider::new))
                 .withOrientation(align)
                 .withMin(min)
                 .withMax(max)
@@ -3155,7 +3164,7 @@ public final class UI extends UILayoutConstants
     public static UIForSlider<JSlider> slider( Align align, int min, int max, Val<Integer> value ) {
         NullUtil.nullArgCheck(align, "align", Align.class);
         NullUtil.nullPropertyCheck(value, "value", "The state of the slider should not be null!");
-        return of((JSlider) new Slider())
+        return new UIForSlider<>(new BuilderState<>(JSlider.class, Slider::new))
                 .withOrientation(align)
                 .withMin(min)
                 .withMax(max)
@@ -3182,7 +3191,7 @@ public final class UI extends UILayoutConstants
     public static UIForSlider<JSlider> slider( Align align, int min, int max, Var<Integer> value ) {
         NullUtil.nullArgCheck(align, "align", Align.class);
         NullUtil.nullPropertyCheck(value, "value", "The state of the slider should not be null!");
-        return of((JSlider) new Slider())
+        return new UIForSlider<>(new BuilderState<>(JSlider.class, Slider::new))
                 .withOrientation(align)
                 .withMin(min)
                 .withMax(max)
@@ -3208,7 +3217,9 @@ public final class UI extends UILayoutConstants
      *
      * @return A builder instance for a new {@link JComboBox}, which enables fluent method chaining.
      */
-    public static UIForCombo<Object,JComboBox<Object>> comboBox() { return of(new ComboBox<>()); }
+    public static UIForCombo<Object,JComboBox<Object>> comboBox() {
+        return new UIForCombo<>(new BuilderState<>((Class) JComboBox.class,()->new ComboBox<>()));
+    }
 
     /**
      *  Use this to create a builder for a new {@link JComboBox} instance

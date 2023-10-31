@@ -33,9 +33,11 @@ abstract class AbstractBuilder<I, C extends Component>
     protected abstract AbstractBuilder<I,C> _with( BuilderState<C> newState );
 
     protected final AbstractBuilder<I,C> _with( Consumer<C> action ) {
-        action.accept( getComponent() );
-        return this;
-        //return _with(_state().with(action));
+        BuilderState<C> newState = _state().with(action);
+        if ( newState == _state() )
+            return this;
+        else
+            return _with(newState);
     }
 
     protected final I _withAndGet( Function<C, I> action ) {
