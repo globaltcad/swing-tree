@@ -6,6 +6,7 @@ import java.awt.Component;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.lang.ref.WeakReference;
+import java.util.Optional;
 
 /**
  *  This {@link MouseWheelListener} exists to make {@link JScrollPane} scroll
@@ -48,8 +49,9 @@ public class NestedJScrollPanelScrollCorrection implements MouseWheelListener
 
     private JScrollPane getParentScrollPane()
     {
-        JScrollPane parentScrollPane = _parentScrollPane.get();
-
+        JScrollPane parentScrollPane = Optional.ofNullable(_parentScrollPane)
+                                               .map(WeakReference::get)
+                                               .orElse(null);
         if ( parentScrollPane == null ) {
             Component parent = _ownerScrollPane.getParent();
             while ( !(parent instanceof JScrollPane) && parent != null )
