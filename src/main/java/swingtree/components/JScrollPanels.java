@@ -6,6 +6,7 @@ import sprouts.From;
 import swingtree.UI;
 import swingtree.api.mvvm.EntryViewModel;
 import swingtree.api.mvvm.ViewSupplier;
+import swingtree.components.listener.NestedJScrollPanelScrollCorrection;
 import swingtree.style.ComponentExtension;
 
 import javax.swing.*;
@@ -107,6 +108,7 @@ public class JScrollPanels extends JScrollPane
 	private JScrollPanels(InternalPanel listWrapper) {
 		super(listWrapper);
 		_internal = listWrapper;
+		this.addMouseWheelListener(new NestedJScrollPanelScrollCorrection(this));
 	}
 
 	/** {@inheritDoc} */

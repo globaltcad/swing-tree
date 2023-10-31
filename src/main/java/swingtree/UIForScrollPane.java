@@ -1,5 +1,8 @@
 package swingtree;
 
+import swingtree.components.JScrollPanels;
+import swingtree.components.listener.NestedJScrollPanelScrollCorrection;
+
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import java.util.Objects;
@@ -15,11 +18,14 @@ public final class UIForScrollPane<P extends JScrollPane> extends UIForAnyScroll
      * {@link UIForAnySwing} (sub)types always wrap
      * a single component for which they are responsible.
      *
-     * @param component The {@link JComponent} type which will be wrapped by this builder node.
+     * @param state The {@link BuilderState} modelling how the underlying component is build.
      */
     UIForScrollPane( BuilderState<P> state ) {
         Objects.requireNonNull(state);
-        _state = state;
+        _state = state.with( thisComponent -> {
+           if ( !(thisComponent instanceof UI.ScrollPane) && !(thisComponent instanceof JScrollPanels) )
+               thisComponent.addMouseWheelListener(new NestedJScrollPanelScrollCorrection(thisComponent));
+        });
     }
 
     @Override
