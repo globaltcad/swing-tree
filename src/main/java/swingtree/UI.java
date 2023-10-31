@@ -14,6 +14,7 @@ import swingtree.components.JBox;
 import swingtree.components.JIcon;
 import swingtree.components.JScrollPanels;
 import swingtree.components.JSplitButton;
+import swingtree.components.listener.NestedJScrollPanelScrollCorrection;
 import swingtree.dialogs.ConfirmAnswer;
 import swingtree.dialogs.ConfirmDialogBuilder;
 import swingtree.dialogs.MessageDialogBuilder;
@@ -6276,6 +6277,12 @@ public final class UI extends UILayoutConstants
     }
     /** {inheritDoc} */
     public static class ScrollPane extends JScrollPane {
+        public ScrollPane() {
+            super();
+
+            addMouseWheelListener(new NestedJScrollPanelScrollCorrection(this));
+        }
+
         @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }
         @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }
     }
