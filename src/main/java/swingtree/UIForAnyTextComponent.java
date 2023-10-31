@@ -412,6 +412,10 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
             return state;
         }
 
+        static void clear( JTextComponent textComponent ) {
+            textComponent.putClientProperty(ExtraState.class, null);
+        }
+
         final java.util.List<Action<RemoveDelegate>>   removes = new ArrayList<>();
         final java.util.List<Action<InsertDelegate>>   inserts = new ArrayList<>();
         final java.util.List<Action<ReplaceDelegate>>  replaces = new ArrayList<>();

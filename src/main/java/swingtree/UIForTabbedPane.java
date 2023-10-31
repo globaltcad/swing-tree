@@ -1,5 +1,7 @@
 package swingtree;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sprouts.Action;
 import sprouts.From;
 import sprouts.Val;
@@ -29,6 +31,8 @@ import java.util.function.Supplier;
  */
 public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<UIForTabbedPane<P>, P>
 {
+    private static Logger log = LoggerFactory.getLogger(UIForTabbedPane.class);
+
     private final BuilderState<P> _state;
 
     /**
@@ -39,7 +43,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
      */
     UIForTabbedPane( BuilderState<P> state ) {
         Objects.requireNonNull(state);
-        _state = state;
+        _state = state.with(ExtraState::clear);
     }
 
     @Override
@@ -231,7 +235,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
         return _with( thisComponent -> {
                     ExtraState state = ExtraState.of(thisComponent);
                     if ( state.selectedTabIndex != null )
-                        throw new IllegalStateException("A selected index property has already been set for this tabbed pane.");
+                        log.warn("A selected index property has already been set for this tabbed pane.");
                     state.selectedTabIndex = index;
                })
                 ._withOnShow( index, (thisComponent,i) -> {
@@ -542,6 +546,10 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
             ExtraState state = new ExtraState();
             pane.putClientProperty(ExtraState.class, state);
             return state;
+        }
+
+        static void clear( JTabbedPane pane ) {
+            pane.putClientProperty(ExtraState.class, null);
         }
 
         final List<Consumer<Integer>> selectionListeners = new ArrayList<>();
