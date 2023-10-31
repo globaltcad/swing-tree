@@ -6,6 +6,7 @@ import sprouts.Action;
 import sprouts.From;
 import sprouts.Val;
 import sprouts.Var;
+import swingtree.style.ComponentExtension;
 
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -43,7 +44,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
      */
     UIForTabbedPane( BuilderState<P> state ) {
         Objects.requireNonNull(state);
-        _state = state.with(ExtraState::clear);
+        _state = state;
     }
 
     @Override
@@ -541,15 +542,8 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
     private static class ExtraState
     {
         static ExtraState of( JTabbedPane pane ) {
-            Object found = pane.getClientProperty(ExtraState.class);
-            if ( found instanceof ExtraState ) return (ExtraState) found;
-            ExtraState state = new ExtraState();
-            pane.putClientProperty(ExtraState.class, state);
-            return state;
-        }
-
-        static void clear( JTabbedPane pane ) {
-            pane.putClientProperty(ExtraState.class, null);
+            return ComponentExtension.from(pane)
+                    .getOrSet(ExtraState.class, ExtraState::new);
         }
 
         final List<Consumer<Integer>> selectionListeners = new ArrayList<>();

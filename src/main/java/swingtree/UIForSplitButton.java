@@ -5,6 +5,7 @@ import sprouts.Event;
 import sprouts.From;
 import sprouts.Var;
 import swingtree.components.JSplitButton;
+import swingtree.style.ComponentExtension;
 
 import javax.swing.AbstractButton;
 import javax.swing.JMenuItem;
@@ -400,17 +401,18 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
                 ._this();
     }
 
-    private static class ExtraState {
+    private static class ExtraState
+    {
         static ExtraState of( JSplitButton pane ) {
             return of(pane, state->{});
         }
         static ExtraState of( JSplitButton pane, Consumer<ExtraState> ini ) {
-            Object found = pane.getClientProperty(ExtraState.class);
-            if ( found instanceof ExtraState ) return (ExtraState) found;
-            ExtraState state = new ExtraState();
-            pane.putClientProperty(ExtraState.class, state);
-            ini.accept(state);
-            return state;
+            return ComponentExtension.from(pane)
+                                    .getOrSet(ExtraState.class, ()->{
+                                        ExtraState s = new ExtraState();
+                                        ini.accept(s);
+                                        return s;
+                                    });
         }
 
         final JPopupMenu popupMenu = new JPopupMenu();

@@ -37,7 +37,7 @@ class BuilderState<C extends Component>
     {
         Objects.requireNonNull(component, "component");
         if ( component instanceof JComponent)
-            ComponentExtension.makeSureComponentHasExtension( (JComponent) component );
+            ComponentExtension.initializeFor( (JComponent) component );
 
         this.eventProcessor    = SwingTree.get().getEventProcessor();
         this.mode              = Mode.EAGER_BUILDER;

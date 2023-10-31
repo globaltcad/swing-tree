@@ -17,6 +17,7 @@ import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.util.List;
 import java.util.*;
+import java.util.function.Supplier;
 
 /**
  *  Is attached to UI components in the form of a client property.
@@ -41,10 +42,21 @@ public final class ComponentExtension<C extends JComponent>
         return ext;
     }
 
-    public static void makeSureComponentHasExtension( JComponent comp ) { from(comp); }
-
+    /**
+     *  Initializes the given component with a new {@link ComponentExtension}.
+     *  This method is called by a SwingTree builder node when it
+     *  receives and builds a new component.
+     *  The former extension of the component is replaced by a new one.
+     *
+     * @param comp The component to initialize.
+     */
+    public static void initializeFor( JComponent comp ) {
+        comp.putClientProperty( ComponentExtension.class, new ComponentExtension<>(comp) );
+    }
 
     private final C _owner;
+
+    private final List<Object> _extraState = new ArrayList<>(0);
 
     private final List<String> _styleGroups = new ArrayList<>(0);
 
@@ -60,6 +72,29 @@ public final class ComponentExtension<C extends JComponent>
 
 
     C getOwner() { return _owner; }
+
+    /**
+     *  Allows for extra state to be attached to the component extension.
+     *  (Conceptually similar to how Swing components can have client properties.)<br>
+     *  If the component already has an object of the given type attached,
+     *  that object is returned. Otherwise, the given fetcher is used to create
+     *  a new object of the given type, which is then attached to the component
+     *  and returned.
+     *
+     * @param type The type of the extra state to attach.
+     * @param fetcher A supplier which is used to create a new object of the given type.
+     * @return The extra state object of the given type which is attached to the component.
+     * @param <P> The type of the extra state.
+     */
+    public <P> P getOrSet( Class<P> type, Supplier<P> fetcher ) {
+        for ( Object plugin : _extraState)
+            if ( type.isInstance(plugin) )
+                return (P) plugin;
+
+        P plugin = fetcher.get();
+        _extraState.add(plugin);
+        return plugin;
+    }
 
     /**
      *   This method is used by {@link swingtree.UIForAnySwing#group(String...)} to attach
@@ -115,8 +150,14 @@ public final class ComponentExtension<C extends JComponent>
      */
     public List<String> getStyleGroups() { return Collections.unmodifiableList(_styleGroups); }
 
+    /**
+     * @return {@code true} if the component belongs to the given group.
+     */
     public boolean belongsToGroup( String group ) { return _styleGroups.contains(group); }
 
+    /**
+     * @return {@code true} if the component belongs to the given group.
+     */
     public boolean belongsToGroup( Enum<?> group ) {
         return belongsToGroup(group.getClass().getSimpleName() + "." + group.name());
     }

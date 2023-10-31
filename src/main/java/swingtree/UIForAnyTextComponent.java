@@ -5,6 +5,7 @@ import sprouts.Action;
 import sprouts.From;
 import sprouts.Val;
 import sprouts.Var;
+import swingtree.style.ComponentExtension;
 
 import javax.swing.JTabbedPane;
 import javax.swing.event.DocumentEvent;
@@ -405,15 +406,8 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
     private static class ExtraState
     {
         static ExtraState of( JTextComponent textComponent ) {
-            Object found = textComponent.getClientProperty(ExtraState.class);
-            if ( found instanceof ExtraState) return (ExtraState) found;
-            ExtraState state = new ExtraState();
-            textComponent.putClientProperty(ExtraState.class, state);
-            return state;
-        }
-
-        static void clear( JTextComponent textComponent ) {
-            textComponent.putClientProperty(ExtraState.class, null);
+            return ComponentExtension.from(textComponent)
+                                     .getOrSet(ExtraState.class, ExtraState::new);
         }
 
         final java.util.List<Action<RemoveDelegate>>   removes = new ArrayList<>();
