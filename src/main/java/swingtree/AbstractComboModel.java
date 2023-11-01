@@ -78,7 +78,7 @@ abstract class AbstractComboModel<E> implements ComboBoxModel<E>
 
     void fireListeners() {
 		try {
-			for ( ListDataListener l : listeners )
+			for ( ListDataListener l : new ArrayList<>(listeners) )
 				l.contentsChanged(
 					new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, 0, getSize())
 				);
