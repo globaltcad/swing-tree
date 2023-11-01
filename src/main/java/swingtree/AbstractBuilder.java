@@ -302,10 +302,10 @@ abstract class AbstractBuilder<I, C extends Component>
         if ( !condition )
             return _this();
 
-        BuilderState<C> capture = _state().mutable();
+        BuilderState<C> capture = _state().procedural();
         building.accept(_with(capture)._this());
 
-        return _with(_state().incorporate(capture))._this();
+        return _with(_state().supersede(capture))._this();
     }
 
 

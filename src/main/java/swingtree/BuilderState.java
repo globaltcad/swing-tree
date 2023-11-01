@@ -19,9 +19,8 @@ import java.util.function.Supplier;
 class BuilderState<C extends Component>
 {
     enum Mode {
-        EAGER_MUTATION,
-        MUTATION_BUILDING,
-        INLINE_MUTATION_BUILDING
+        DECLARATIVE,
+        PROCEDURAL
     }
 
     private final Mode mode;
@@ -47,7 +46,7 @@ class BuilderState<C extends Component>
             ComponentExtension.initializeFor( (JComponent) component );
 
         this.eventProcessor    = SwingTree.get().getEventProcessor();
-        this.mode              = Mode.EAGER_MUTATION;
+        this.mode              = Mode.DECLARATIVE;
         this.componentType     = (Class<C>) component.getClass();
         this.componentFactory  = () -> component;
         this.componentMutator  = c -> c;
@@ -56,13 +55,6 @@ class BuilderState<C extends Component>
     BuilderState( Class<C> type, Supplier<C> componentSource )
     {
         this(type.cast(componentSource.get()));
-        //Objects.requireNonNull(type, "type");
-        //Objects.requireNonNull(componentSource, "componentSource");
-        //this.eventProcessor    = SwingTree.get().getEventProcessor();
-        //this.mode              = Mode.MUTATION_BUILDING;
-        //this.componentType     = type;
-        //this.componentFactory  = componentSource;
-        //this.componentMutator  = c -> c;
     }
 
     private BuilderState(
@@ -106,18 +98,12 @@ class BuilderState<C extends Component>
     }
 
     BuilderState<C> with( Consumer<C> action ) {
-        if ( mode == Mode.EAGER_MUTATION || true )
+        action.accept(this.componentFactory.get());
+        if ( mode == Mode.PROCEDURAL )
         {
-            action.accept(this.componentFactory.get());
             return this;
         }
-        else if ( mode == Mode.INLINE_MUTATION_BUILDING ) {
-            this.componentMutator = this.componentMutator.andThen( c -> {
-                                                            action.accept(c);
-                                                            return c;
-                                                        });
-            return this;
-        } else if ( mode == Mode.MUTATION_BUILDING ) {
+        else if ( mode == Mode.DECLARATIVE ) {
             EventProcessor eventProcessor   = this.eventProcessor;
             Mode           mode             = this.mode;
             Class<C>       componentType    = this.componentType;
@@ -129,32 +115,31 @@ class BuilderState<C extends Component>
                     mode,
                     componentType,
                     componentFactory,
-                    componentMutator.andThen(c -> {
-                        action.accept(c);
-                        return c;
-                    })
+                    componentMutator
                 );
-        } else
+        }
+        else
             throw new IllegalStateException("Unknown mode: " + mode);
     }
 
-    BuilderState<C> mutable() {
+    BuilderState<C> procedural() {
         return new BuilderState<>(
             this.eventProcessor,
-            Mode.INLINE_MUTATION_BUILDING,
+            Mode.PROCEDURAL,
             this.componentType,
             this.componentFactory,
             this.componentMutator
         );
     }
 
-    BuilderState<C> incorporate( BuilderState<C> other ) {
+    BuilderState<C> supersede( BuilderState<C> other ) {
+        other.dispose();
         return new BuilderState<>(
-            this.eventProcessor,
-            this.mode,
-            this.componentType,
-            this.componentFactory,
-            this.componentMutator.andThen(other.componentMutator)
+                this.eventProcessor,
+                this.mode,
+                this.componentType,
+                this.componentFactory,
+                this.componentMutator
         );
     }
 
