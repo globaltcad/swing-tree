@@ -34,10 +34,15 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extend
     public final I add( E... components ) {
         NullUtil.nullArgCheck(components, "components", Object[].class);
         return _with( c -> {
-                   for ( E other : components )
-                       _doAdd( UI.of((JComponent) other), null, c );
+                    _addComponents( c, components );
                })
                ._this();
+    }
+
+    @SafeVarargs
+    final void _addComponents( C thisComponent, E... components) {
+        for ( E other : components )
+            _doAdd( UI.of((JComponent) other), null, thisComponent );
     }
 
     /**
@@ -115,10 +120,14 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extend
             throw new IllegalArgumentException("Swing tree builders may not be null!");
 
         return _with( thisComponent -> {
-                    for ( AbstractNestedBuilder<?, ?, ?> b : builders )
-                        _doAdd( b, null, thisComponent );
+                    _addBuilders( thisComponent, builders );
                 })
                 ._this();
+    }
+
+    <B extends AbstractNestedBuilder<?, ?, JComponent>> void _addBuilders( C thisComponent, B... builders ) {
+        for ( AbstractNestedBuilder<?, ?, ?> b : builders )
+            _doAdd( b, null, thisComponent );
     }
 
     /**

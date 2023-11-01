@@ -3564,18 +3564,22 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very instance, which enables builder-style method chaining.
      */
     @SafeVarargs
-    public final <B extends UIForAnySwing<?, ?>> I add( String attr, B... builders ) {
-        return _with( component -> {
-                   LayoutManager layout = component.getLayout();
-                   if ( _isBorderLayout(attr) && !(layout instanceof BorderLayout) ) {
-                       if ( layout instanceof MigLayout )
-                           log.warn("Layout ambiguity detected! Border layout constraint cannot be added to 'MigLayout'.");
-                       component.setLayout(new BorderLayout()); // The UI Maker tries to fill in the blanks!
-                   }
-                   for ( UIForAnySwing<?, ?> b : builders )
-                       _doAdd( b, attr, component );
+    public final <B extends UIForAnySwing<?, ?>> I add(String attr, B... builders ) {
+        return _with( thisComponent -> {
+                   _addBuilders(thisComponent, attr, builders);
                })
                ._this();
+    }
+
+    private void _addBuilders( C thisComponent, String attr, UIForAnySwing<?, ?>... builders ) {
+        LayoutManager layout = thisComponent.getLayout();
+        if ( _isBorderLayout(attr) && !(layout instanceof BorderLayout) ) {
+            if ( layout instanceof MigLayout )
+                log.warn("Layout ambiguity detected! Border layout constraint cannot be added to 'MigLayout'.");
+            thisComponent.setLayout(new BorderLayout()); // The UI Maker tries to fill in the blanks!
+        }
+        for ( UIForAnySwing<?, ?> b : builders )
+            _doAdd( b, attr, thisComponent );
     }
 
     /**
@@ -3593,8 +3597,8 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very instance, which enables builder-style method chaining.
      */
     @SafeVarargs
-    public final <B extends UIForAnySwing<?, ?>> I add(AddConstraint attr, B... builders ) {
-        return this.add(attr.toString(), builders);
+    public final <B extends UIForAnySwing<?, ?>> I add( AddConstraint attr, B... builders ) {
+        return this.add( attr.toString(), builders );
     }
 
     /**
@@ -3642,12 +3646,16 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck(attr, "conf", Object.class);
         NullUtil.nullArgCheck(components, "components", Object[].class);
         return _with( c -> {
-                   for ( E component : components ) {
-                       NullUtil.nullArgCheck(component, "component", JComponent.class);
-                       this.add(attr, UI.of(component));
-                   }
+                     _addComponents(c, attr, components);
                })
                ._this();
+    }
+
+    private <E extends JComponent> void _addComponents( C thisComponent, String attr, E... components ) {
+        for ( E component : components ) {
+            NullUtil.nullArgCheck(component, "component", JComponent.class);
+            _addBuilders( thisComponent, attr, new UIForSwing[]{UI.of(component)} );
+        }
     }
 
     /**
@@ -3827,14 +3835,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         // Then we add the component provided by the viewable to the list of children.
         if ( attr == null ) {
             if ( viewable.isPresent() )
-                this.add(viewSupplier.createViewFor(viewable.get()));
+                _addBuilders(thisComponent, viewSupplier.createViewFor(viewable.get()));
             else
-                this.add(new JPanel()); // We add a dummy component to the list of children.
+                _addComponents(thisComponent, new JPanel()); // We add a dummy component to the list of children.
         } else {
             if ( viewable.isPresent() )
-                this.add(attr, viewSupplier.createViewFor(viewable.get()));
+                _addBuilders(thisComponent, attr, viewSupplier.createViewFor(viewable.get()));
             else
-                this.add(attr, new JPanel()); // We add a dummy component to the list of children.
+                _addComponents(thisComponent, attr, new JPanel()); // We add a dummy component to the list of children.
         }
         // Finally we add a listener to the viewable which will update the component when the viewable changes.
         _onShow( viewable, thisComponent, (c,v) -> _updateComponentAt(index, v, viewSupplier, attr, c) );
