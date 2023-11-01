@@ -39,18 +39,20 @@ class Combo_Box_Specification extends Specification
     {
         given : 'We pass the combo box to the Swing-Tree factory method.'
             var ui = UI.of(new JComboBox<>(new DefaultComboBoxModel<>(new String[]{"A", "B", "C"})))
+        and : 'We unpack the combo box.'
+            var combo = ui.component
         expect : 'The underlying component is a combo box.'
-            ui.component instanceof JComboBox
+            combo instanceof JComboBox
         and : 'It has the expected state:'
-            ui.component.itemCount == 3
-            ui.component.getItemAt(0) == "A"
-            ui.component.getItemAt(1) == "B"
-            ui.component.getItemAt(2) == "C"
-            ui.component.model instanceof DefaultComboBoxModel
-            ui.component.model.size == 3
-            ui.component.model.getElementAt(0) == "A"
-            ui.component.model.getElementAt(1) == "B"
-            ui.component.model.getElementAt(2) == "C"
+            combo.itemCount == 3
+            combo.getItemAt(0) == "A"
+            combo.getItemAt(1) == "B"
+            combo.getItemAt(2) == "C"
+            combo.model instanceof DefaultComboBoxModel
+            combo.model.size == 3
+            combo.model.getElementAt(0) == "A"
+            combo.model.getElementAt(1) == "B"
+            combo.model.getElementAt(2) == "C"
     }
 
     def 'The "comboBox" factory method allows you to easily create a combo box from an array.'()
@@ -117,21 +119,23 @@ class Combo_Box_Specification extends Specification
             var ui = UI.comboBox("A", "B", "C")
                             .isEditableIf(true)
                             .withSelectedItem("B")
+        and : 'We get the combo box.'
+            var combo = ui.component
         expect : 'The combo box is editable.'
-            ui.component.isEditable()
+            combo.isEditable()
         and : 'The selected item is set.'
-            ui.component.getSelectedItem() == "B"
+            combo.getSelectedItem() == "B"
 
         when : 'We simulate the user typing "XY" into the combo box.'
-            UI.runNow( () -> ui.component.editor.item = "XY" )
+            UI.runNow( () -> combo.editor.item = "XY" )
             UI.sync()
         then : 'The combo box is updated.'
-            ui.component.getSelectedItem() == "XY"
+            combo.getSelectedItem() == "XY"
         and : 'This change is reflected in the model.'
-            ui.component.model.size == 3
-            ui.component.model.getElementAt(0) == "A"
-            ui.component.model.getElementAt(1) == "XY"
-            ui.component.model.getElementAt(2) == "C"
+            combo.model.size == 3
+            combo.model.getElementAt(0) == "A"
+            combo.model.getElementAt(1) == "XY"
+            combo.model.getElementAt(2) == "C"
     }
 
     def 'The options of an editable combo box are only editable if their items list is modifyable.'()
@@ -140,20 +144,22 @@ class Combo_Box_Specification extends Specification
             var ui = UI.comboBox(Collections.unmodifiableList(["A", "B", "C"]))
                             .isEditableIf(true)
                             .withSelectedItem("B")
+        and : 'We get the combo box.'
+            var combo = ui.component
         expect : 'The combo box is editable.'
-            ui.component.isEditable()
+            combo.isEditable()
         and : 'The selected item is set.'
-            ui.component.getSelectedItem() == "B"
+            combo.getSelectedItem() == "B"
 
         when : 'We simulate the user typing "XY" into the combo box.'
-            ui.component.editor.item = "XY"
+            combo.editor.item = "XY"
         then : 'The combo box is updated.'
-            ui.component.getSelectedItem() == "XY"
+            combo.getSelectedItem() == "XY"
         and : 'This change is NOT reflected in the model.'
-            ui.component.model.size == 3
-            ui.component.model.getElementAt(0) == "A"
-            ui.component.model.getElementAt(1) == "B"
-            ui.component.model.getElementAt(2) == "C"
+            combo.model.size == 3
+            combo.model.getElementAt(0) == "A"
+            combo.model.getElementAt(1) == "B"
+            combo.model.getElementAt(2) == "C"
     }
 
     def 'You can model both the current selection state as well as options of your combo box using a property and an array.'()
@@ -169,34 +175,36 @@ class Combo_Box_Specification extends Specification
             var options = new Integer[]{ 73 , 42 , 17 }
         and : 'We create a combo box that is bound to the property and the list.'
             var ui = UI.comboBox(selection, options)
+        and : 'We get the combo box.'
+            var combo = ui.component
         expect : 'The combo box is initialized with the current selection.'
-            ui.component.getSelectedItem() == 42
+            combo.getSelectedItem() == 42
         and : 'It also reports the correct selection index.'
-            ui.component.getSelectedIndex() == 1
+            combo.getSelectedIndex() == 1
         and : 'The there are all 3 options available.'
-            ui.component.itemCount == 3
-            ui.component.getItemAt(0) == 73
-            ui.component.getItemAt(1) == 42
-            ui.component.getItemAt(2) == 17
+            combo.itemCount == 3
+            combo.getItemAt(0) == 73
+            combo.getItemAt(1) == 42
+            combo.getItemAt(2) == 17
 
         when : 'We change the selection.'
             selection.set(17)
         then : 'This change translates from the property to the UI element.'
-            ui.component.getSelectedItem() == 17
+            combo.getSelectedItem() == 17
         and : 'The combo box options are still the same.'
-            ui.component.itemCount == 3
-            ui.component.getItemAt(0) == 73
-            ui.component.getItemAt(1) == 42
-            ui.component.getItemAt(2) == 17
+            combo.itemCount == 3
+            combo.getItemAt(0) == 73
+            combo.getItemAt(1) == 42
+            combo.getItemAt(2) == 17
 
         when : 'We change one of the options.'
             options[0] = 99
         and : 'We select this option...'
-            ui.component.setSelectedItem(99)
+            combo.setSelectedItem(99)
         then : 'The selection is updated.'
             selection.get() == 99
         and : 'The combo box also reports the correct selection index!'
-            ui.component.getSelectedIndex() == 0
+            combo.getSelectedIndex() == 0
     }
 
 
@@ -213,38 +221,40 @@ class Combo_Box_Specification extends Specification
             var options = [73, 42, 17]
         and : 'We create a combo box that is bound to the property and the list.'
             var ui = UI.comboBox(selection, options)
+        and : 'We get the combo box.'
+            var combo = ui.component
         expect : 'The combo box is initialized with the current selection.'
-            ui.component.getSelectedItem() == 42
+            combo.getSelectedItem() == 42
         and : 'It also reports the correct selection index.'
-            ui.component.getSelectedIndex() == 1
+            combo.getSelectedIndex() == 1
         and : 'The there are all 3 options available.'
-            ui.component.itemCount == 3
-            ui.component.getItemAt(0) == 73
-            ui.component.getItemAt(1) == 42
-            ui.component.getItemAt(2) == 17
+            combo.itemCount == 3
+            combo.getItemAt(0) == 73
+            combo.getItemAt(1) == 42
+            combo.getItemAt(2) == 17
 
         when : 'We change the selection.'
             selection.set(17)
         then : 'This change translates from the property to the UI element.'
-            ui.component.getSelectedItem() == 17
+            combo.getSelectedItem() == 17
         and : 'The combo box options are still the same.'
-            ui.component.itemCount == 3
-            ui.component.getItemAt(0) == 73
-            ui.component.getItemAt(1) == 42
-            ui.component.getItemAt(2) == 17
+            combo.itemCount == 3
+            combo.getItemAt(0) == 73
+            combo.getItemAt(1) == 42
+            combo.getItemAt(2) == 17
 
         when : 'We add another option somewhere in the middle.'
             options.add(1, 99)
         then : 'The combo box options are updated.'
-            ui.component.itemCount == 4
-            ui.component.getItemAt(0) == 73
-            ui.component.getItemAt(1) == 99
-            ui.component.getItemAt(2) == 42
-            ui.component.getItemAt(3) == 17
+            combo.itemCount == 4
+            combo.getItemAt(0) == 73
+            combo.getItemAt(1) == 99
+            combo.getItemAt(2) == 42
+            combo.getItemAt(3) == 17
         and : 'The selection is still the same.'
-            ui.component.getSelectedItem() == 17
+            combo.getSelectedItem() == 17
         and : 'The combo box also reports the correct selection index!'
-            ui.component.getSelectedIndex() == 3
+            combo.getSelectedIndex() == 3
     }
 
 
@@ -261,27 +271,29 @@ class Combo_Box_Specification extends Specification
             var options = Var.of([73, 42, 17] as Integer[])
         and : 'We create a combo box that is bound to the property and the list.'
             var ui = UI.comboBox(selection, options)
+        and : 'We get the combo box.'
+            var combo = ui.component
         expect : 'The combo box is initialized with the current selection.'
-            ui.component.getSelectedItem() == 42
+            combo.getSelectedItem() == 42
         and : 'It also reports the correct selection index.'
-            ui.component.getSelectedIndex() == 1
+            combo.getSelectedIndex() == 1
         and : 'The there are all 3 options available.'
-            ui.component.itemCount == 3
-            ui.component.getItemAt(0) == 73
-            ui.component.getItemAt(1) == 42
-            ui.component.getItemAt(2) == 17
+            combo.itemCount == 3
+            combo.getItemAt(0) == 73
+            combo.getItemAt(1) == 42
+            combo.getItemAt(2) == 17
 
         when : 'We change the selection.'
             selection.set(17)
         then : 'This change translates from the property to the UI element.'
-            ui.component.getSelectedItem() == 17
+            combo.getSelectedItem() == 17
 
         when : 'We change the options property.'
             options.set([99, 17] as Integer[])
         then : 'The combo box options are updated.'
-            ui.component.itemCount == 2
-            ui.component.getItemAt(0) == 99
-            ui.component.getItemAt(1) == 17
+            combo.itemCount == 2
+            combo.getItemAt(0) == 99
+            combo.getItemAt(1) == 17
     }
 
 
@@ -300,36 +312,38 @@ class Combo_Box_Specification extends Specification
             var options = Vars.of(73, 42, 17)
         and : 'We create a combo box that is bound to the property and the list.'
             var ui = UI.comboBox(selection, options)
+        and : 'We get the combo box.'
+            var combo = ui.component
         expect : 'The combo box is initialized with the current selection.'
-            ui.component.getSelectedItem() == 42
+            combo.getSelectedItem() == 42
         and : 'It also reports the correct selection index.'
-            ui.component.getSelectedIndex() == 1
+            combo.getSelectedIndex() == 1
         and : 'The there are all 3 options available.'
-            ui.component.itemCount == 3
-            ui.component.getItemAt(0) == 73
-            ui.component.getItemAt(1) == 42
-            ui.component.getItemAt(2) == 17
+            combo.itemCount == 3
+            combo.getItemAt(0) == 73
+            combo.getItemAt(1) == 42
+            combo.getItemAt(2) == 17
 
         when : 'We change the selection.'
             selection.set(17)
         then : 'This change translates from the property to the UI element.'
-            ui.component.getSelectedItem() == 17
+            combo.getSelectedItem() == 17
 
         when : 'We change the options property.'
             options.clear().addAll(99, 17)
         then : 'The combo box options are updated.'
-            ui.component.itemCount == 2
-            ui.component.getItemAt(0) == 99
-            ui.component.getItemAt(1) == 17
+            combo.itemCount == 2
+            combo.getItemAt(0) == 99
+            combo.getItemAt(1) == 17
 
         when : 'We add another option somewhere in the middle.'
             options.addAll(16, 42)
         then : 'The combo box options are updated.'
-            ui.component.itemCount == 4
-            ui.component.getItemAt(0) == 99
-            ui.component.getItemAt(1) == 17
-            ui.component.getItemAt(2) == 16
-            ui.component.getItemAt(3) == 42
+            combo.itemCount == 4
+            combo.getItemAt(0) == 99
+            combo.getItemAt(1) == 17
+            combo.getItemAt(2) == 16
+            combo.getItemAt(3) == 42
     }
 
     def 'An editable combo box will try to parse user input to match bound properties.'()
@@ -349,13 +363,15 @@ class Combo_Box_Specification extends Specification
             var ui =
                         UI.comboBox(selection, 73, 42, 17)
                         .isEditableIf(true)
+        and : 'We get the combo box.'
+            var combo = ui.component
         expect : 'The combo box is initialized with the current selection.'
-            ui.component.getSelectedItem() == 42
+            combo.getSelectedItem() == 42
         and : 'It also reports the correct selection index.'
-            ui.component.getSelectedIndex() == 1
+            combo.getSelectedIndex() == 1
 
         when : 'We simulate the user editing the combo box.'
-            ui.component.setSelectedItem('99')
+            combo.setSelectedItem('99')
         then : 'The combo box updates the selection property to the parsed value.'
             selection.get() == 99
     }
@@ -377,11 +393,13 @@ class Combo_Box_Specification extends Specification
             var ui =
                         UI.comboBox(selection, items)
                         .isEditableIf(true)
+        and : 'We get the combo box.'
+            var combo = ui.component
         expect : 'The combo box is initialized with the current selection.'
-            ui.component.getSelectedItem() == selection.get()
+            combo.getSelectedItem() == selection.get()
 
         when : 'We simulate the user editing the combo box.'
-            ui.component.setSelectedItem(input)
+            combo.setSelectedItem(input)
             UI.sync()
         then : 'The combo box updates the selection property to the parsed value.'
             selection.get() == expectedSelection
@@ -411,13 +429,15 @@ class Combo_Box_Specification extends Specification
             var ui =
                 comboBox(options)
 				.withSelectedItem(selected)
+        and : 'We get the combo box.'
+            var combo = ui.component
 
 		when : 'We change the selected property to 1...'
 		    selected.set(1)
             UI.sync()
 		then : 'The combo box has been updated as expected!'
-		    ui.component.selectedItem == 1
-		    ui.component.editor.item == 1
+		    combo.selectedItem == 1
+		    combo.editor.item == 1
     }
 
     def 'Changing properties in you view model automatically updates an editable combo box.'()
@@ -429,13 +449,15 @@ class Combo_Box_Specification extends Specification
             var ui =
                 comboBox(options).isEditableIf(true)
 				.withSelectedItem(selected)
+        and : 'We get the combo box.'
+            var combo = ui.component
 
 		when : 'We change the selected property to 1...'
 		    selected.set(1)
             UI.sync()
 		then : 'The combo box has been updated as expected!'
-		    ui.component.selectedItem == 1
-		    ui.component.editor.item == 1
+		    combo.selectedItem == 1
+		    combo.editor.item == 1
     }
 
 }

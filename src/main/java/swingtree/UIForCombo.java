@@ -283,11 +283,15 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
      */
     public final UIForCombo<E,C> withModel( ComboBoxModel<E> model ) {
         return _with( thisComponent -> {
-                    if ( model instanceof AbstractComboModel )
-                        _bindComboModelToEditor(thisComponent, (AbstractComboModel<E>) model );
-                        thisComponent.setModel(model);
+                    _setModel(model, thisComponent);
                 })
                 ._this();
+    }
+
+    private void _setModel( ComboBoxModel<E> model, JComboBox<E> thisComponent ) {
+        if ( model instanceof AbstractComboModel )
+            _bindComboModelToEditor(thisComponent, (AbstractComboModel<E>) model );
+        thisComponent.setModel(model);
     }
 
     /**
@@ -327,7 +331,7 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
         return _with( thisComponent -> {
                     ComboBoxModel<E> model = thisComponent.getModel();
                     if ( model instanceof AbstractComboModel )
-                        withModel(((AbstractComboModel<E>)model).withVar(item));
+                        _setModel(((AbstractComboModel<E>)model).withVar(item), thisComponent);
                     else {
                         // The user has a custom model AND wants to bind to a property:
                         _onShow( item, thisComponent, (c,v) -> _setSelectedItem(c, v) );
