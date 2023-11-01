@@ -3459,15 +3459,21 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *  Although neither Swing nor SwingTree have a touch gesture event system, this example illustrates
      *  how one could easily integrate a custom event system into the SwingTree UI tree.
      *
-     * @param noticeableEvent The {@link Observable} event to which the {@link Action} should be attached.
+     * @param eventSource The {@link Observable} event to which the {@link Action} should be attached.
      * @param action The {@link Action} which is invoked by the application thread after the {@link Observable} event was fired.
      * @return This very instance, which enables builder-style method chaining.
      * @param <E> The type of the {@link Observable} event.
      */
-    public final <E extends Observable> I on( Function<C, E> noticeableEvent, Action<ComponentDelegate<C, E>> action ) {
-        return _withAndGet( component ->
-                   this.on(noticeableEvent.apply(component), action)
-               );
+    public final <E extends Observable> I on( Function<C, E> eventSource, Action<ComponentDelegate<C, E>> action ) {
+        NullUtil.nullArgCheck(eventSource, "noticeableEvent", Observable.class);
+        NullUtil.nullArgCheck(action, "action", Action.class);
+        return _with( component -> {
+                   E observableEvent = eventSource.apply(component);
+                   observableEvent.subscribe(() -> {
+                       _doApp(() -> action.accept(new ComponentDelegate<>( component, observableEvent )));
+                   });
+               })
+               ._this();
     }
 
     /**

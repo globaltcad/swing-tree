@@ -17,7 +17,7 @@ import java.util.function.Supplier;
  */
 class BuilderState<C extends Component>
 {
-    enum Mode { EAGER_BUILDER, FACTORY_BUILDER }
+    enum Mode { EAGER_BUILDER, FACTORY_BUILDER, MUTABLE_BUILDER }
 
     private final Mode mode;
     /**
@@ -30,7 +30,7 @@ class BuilderState<C extends Component>
      */
     private final Class<C> componentType;
 
-    private final DetachableReference<Supplier<C>> componentSupplier;
+    private DetachableReference<Supplier<C>> componentSupplier;
 
 
     BuilderState( C component )
@@ -49,17 +49,17 @@ class BuilderState<C extends Component>
     {
         this(type.cast(componentSource.get()));
         /*
-            Objects.requireNonNull(type, "type");
-            Objects.requireNonNull(componentSource, "componentSource");
-            this.eventProcessor    = SwingTree.get().getEventProcessor();
-            this.mode              = Mode.FACTORY_BUILDER;
-            this.componentType     = type;
-            this.componentSupplier = new DetachableReference<>( () -> {
-                C component = componentSource.get();
-                if ( component instanceof JComponent)
-                    ComponentExtension.makeSureComponentHasExtension( (JComponent) component );
-                return component;
-            } );
+        Objects.requireNonNull(type, "type");
+        Objects.requireNonNull(componentSource, "componentSource");
+        this.eventProcessor    = SwingTree.get().getEventProcessor();
+        this.mode              = Mode.FACTORY_BUILDER;
+        this.componentType     = type;
+        this.componentSupplier = new DetachableReference<>( () -> {
+            C component = componentSource.get();
+            if ( component instanceof JComponent)
+                ComponentExtension.initializeFor( (JComponent) component );
+            return component;
+         });
         */
     }
 
@@ -80,11 +80,19 @@ class BuilderState<C extends Component>
     }
 
     BuilderState<C> with( Consumer<C> action ) {
-        if ( mode == Mode.EAGER_BUILDER ) {
+        if ( mode == Mode.EAGER_BUILDER || true ) {
             action.accept(component());
             return this;
         }
-        else if ( mode == Mode.FACTORY_BUILDER )
+        else if ( mode == Mode.MUTABLE_BUILDER ) {
+            Supplier<C> newSupplier = () -> {
+                C component = Objects.requireNonNull(componentSupplier.get()).get();
+                action.accept(component);
+                return component;
+            };
+            this.componentSupplier = new DetachableReference<>(newSupplier);
+            return this;
+        } else  if ( mode == Mode.FACTORY_BUILDER )
             return new BuilderState<>(
                 this.eventProcessor,
                 this.mode,
@@ -97,6 +105,19 @@ class BuilderState<C extends Component>
             );
         else
             throw new IllegalStateException("Unknown mode: " + mode);
+    }
+
+    BuilderState<C> mutable() {
+        return new BuilderState<>(
+            this.eventProcessor,
+            Mode.MUTABLE_BUILDER,
+            this.componentType,
+            this.componentSupplier.get()
+        );
+    }
+
+    BuilderState<C> incorporate( BuilderState<C> other ) {
+        return other;
     }
 
     public C component() {

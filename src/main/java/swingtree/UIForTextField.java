@@ -102,9 +102,9 @@ public final class UIForTextField<F extends JTextField> extends UIForAnyTextComp
         NullUtil.nullArgCheck(isValid, "isValid", Var.class);
         NullUtil.nullPropertyCheck(number, "number", "Null is not a valid value for a numeric property.");
         NullUtil.nullPropertyCheck(isValid, "isValid", "Null is not a valid value for a boolean property.");
-        return _withAndGet( thisComponent -> {
+        Var<String> text = Var.of( number.get().toString() );
+        return  ((UIForTextField<F>)_with( thisComponent -> {
                     _onShow( number, thisComponent, (c,n) -> _setTextSilently( thisComponent, n.toString() ) );
-                    Var<String> text = Var.of( number.get().toString() );
                     text.onChange(From.VIEW,  s -> {
                         try {
                             if ( number.type() == Integer.class )
@@ -134,8 +134,8 @@ public final class UIForTextField<F extends JTextField> extends UIForAnyTextComp
                             }
                         }
                     });
-                    return withText( text );
-                })
+                }))
+                .withText( text )
                 ._this();
     }
 
