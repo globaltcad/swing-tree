@@ -3218,7 +3218,7 @@ public final class UI extends UILayoutConstants
      *
      * @return A builder instance for a new {@link JComboBox}, which enables fluent method chaining.
      */
-    public static UIForCombo<Object,JComboBox<Object>> comboBox() {
+    public static <E> UIForCombo<E,JComboBox<E>> comboBox() {
         return new UIForCombo<>(new BuilderState<>((Class) JComboBox.class,()->new ComboBox<>()));
     }
 
@@ -3234,7 +3234,7 @@ public final class UI extends UILayoutConstants
     @SafeVarargs
     public static <E> UIForCombo<E,JComboBox<E>> comboBox( E... items ) {
         NullUtil.nullArgCheck(items, "items", Object[].class);
-        return of((JComboBox<E>) new ComboBox<E>()).withModel(new ArrayBasedComboModel<>(items));
+        return ((UIForCombo)comboBox()).withModel(new ArrayBasedComboModel<>(items));
     }
 
     /**
@@ -3301,7 +3301,7 @@ public final class UI extends UILayoutConstants
      */
     public static <E> UIForCombo<E,JComboBox<E>> comboBox( java.util.List<E> items ) {
         NullUtil.nullArgCheck(items, "items", List.class);
-        return of((JComboBox<E>) new ComboBox<E>()).withModel(new ListBasedComboModel<>(items));
+        return ((UIForCombo)comboBox()).withModel(new ListBasedComboModel<>(items));
     }
 
     /**
@@ -3334,7 +3334,7 @@ public final class UI extends UILayoutConstants
      public static <E> UIForCombo<E,JComboBox<E>> comboBox( Var<E> selection, java.util.List<E> items ) {
         NullUtil.nullArgCheck(items, "items", List.class);
         NullUtil.nullArgCheck(selection, "selection", Var.class);
-        return of((JComboBox<E>) new ComboBox<E>()).withModel(new ListBasedComboModel<>(selection, items));
+        return ((UIForCombo)comboBox()).withModel(new ListBasedComboModel<>(selection, items));
     }
 
     //___
@@ -3350,7 +3350,7 @@ public final class UI extends UILayoutConstants
      */
     public static <E> UIForCombo<E,JComboBox<E>> comboBox( Vars<E> items ) {
         NullUtil.nullArgCheck(items, "items", Vars.class);
-        return of((JComboBox<E>) new ComboBox<E>()).withModel(new VarsBasedComboModel<>(items));
+        return ((UIForCombo)comboBox()).withModel(new VarsBasedComboModel<>(items));
     }
 
     /**
@@ -3364,7 +3364,7 @@ public final class UI extends UILayoutConstants
      */
     public static <E> UIForCombo<E,JComboBox<E>> comboBox( Vals<E> items ) {
         NullUtil.nullArgCheck(items, "items", Vals.class);
-        return of((JComboBox<E>) new ComboBox<E>()).withModel(new ValsBasedComboModel<>(items));
+        return ((UIForCombo)comboBox()).withModel(new ValsBasedComboModel<>(items));
     }
 
     /**
@@ -3382,7 +3382,7 @@ public final class UI extends UILayoutConstants
      public static <E> UIForCombo<E,JComboBox<E>> comboBox( Var<E> selection, Vars<E> items ) {
         NullUtil.nullArgCheck(items, "items", Vars.class);
         NullUtil.nullArgCheck(selection, "selection", Var.class);
-        return of((JComboBox<E>) new ComboBox<E>()).withModel(new VarsBasedComboModel<>(selection, items));
+        return ((UIForCombo)comboBox()).withModel(new VarsBasedComboModel<>(selection, items));
     }
 
     /**
@@ -3398,7 +3398,7 @@ public final class UI extends UILayoutConstants
      public static <E> UIForCombo<E,JComboBox<E>> comboBox( Var<E> selection, Vals<E> items ) {
         NullUtil.nullArgCheck(items, "items", Vals.class);
         NullUtil.nullArgCheck(selection, "selection", Var.class);
-        return of((JComboBox<E>) new ComboBox<E>()).withModel(new ValsBasedComboModel<>(selection, items));
+        return ((UIForCombo)comboBox()).withModel(new ValsBasedComboModel<>(selection, items));
     }
 
     /**
@@ -3415,7 +3415,7 @@ public final class UI extends UILayoutConstants
      */
     public static <E> UIForCombo<E,JComboBox<E>> comboBox( Var<E> var, E... items ) {
         NullUtil.nullArgCheck(items, "items", List.class);
-        return of((JComboBox<E>) new ComboBox<E>()).withModel(new ArrayBasedComboModel<>(var, items));
+        return ((UIForCombo)comboBox()).withModel(new ArrayBasedComboModel<>(var, items));
     }
 
     /**
@@ -3432,7 +3432,7 @@ public final class UI extends UILayoutConstants
      */
     public static <E> UIForCombo<E,JComboBox<E>> comboBox( Var<E> var, Var<E[]> items ) {
         NullUtil.nullArgCheck(items, "items", List.class);
-        return of((JComboBox<E>) new ComboBox<E>()).withModel(new ArrayPropertyComboModel<>(var, items));
+        return ((UIForCombo)comboBox()).withModel(new ArrayPropertyComboModel<>(var, items));
     }
 
     /**
@@ -3450,7 +3450,7 @@ public final class UI extends UILayoutConstants
     public static <E> UIForCombo<E,JComboBox<E>> comboBox( Var<E> selectedItem, Val<E[]> items ) {
         NullUtil.nullArgCheck(items, "items", List.class);
         NullUtil.nullArgCheck(selectedItem, "selectedItem", Var.class);
-        return of((JComboBox<E>) new ComboBox<E>()).withModel(new ArrayPropertyComboModel<>(selectedItem, items));
+        return ((UIForCombo)comboBox()).withModel(new ArrayPropertyComboModel<>(selectedItem, items));
     }
 
     /**
@@ -3462,9 +3462,7 @@ public final class UI extends UILayoutConstants
      */
     public static <E> UIForCombo<E,JComboBox<E>> comboBox( ComboBoxModel<E> model ) {
         NullUtil.nullArgCheck(model, "model", ComboBoxModel.class);
-        JComboBox<E> c = new ComboBox<E>();
-        c.setModel(model);
-        return of(c);
+        return (UIForCombo)comboBox().peek( c -> ((JComboBox)c).setModel(model) );
     }
 
     /**
