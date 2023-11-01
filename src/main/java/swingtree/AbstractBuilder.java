@@ -296,16 +296,16 @@ abstract class AbstractBuilder<I, C extends Component>
      */
     public final I applyIf( boolean condition, Consumer<I> building ) {
         NullUtil.nullArgCheck(building, "building", Consumer.class);
-        I builder = _this();
-        if ( condition ) building.accept(builder);
-        return builder;
-        //if ( !condition )
-        //    return _this();
-//
-        //BuilderState<C> capture = _state().mutable();
-        //building.accept(_with(capture)._this());
-//
-        //return _with(_state().incorporate(capture))._this();
+        //I builder = _this();
+        //if ( condition ) building.accept(builder);
+        //return builder;
+        if ( !condition )
+            return _this();
+
+        BuilderState<C> capture = _state().mutable();
+        building.accept(_with(capture)._this());
+
+        return _with(_state().incorporate(capture))._this();
     }
 
 
