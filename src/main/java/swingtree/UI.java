@@ -884,7 +884,13 @@ public final class UI extends UILayoutConstants
      *
      * @return A builder instance for a new {@link JPanel}, which enables fluent method chaining.
      */
-    public static UIForPanel<JPanel> panel() { return of((JPanel) new Panel()).withLayout(new MigLayout("hidemode 2")); }
+    public static UIForPanel<JPanel> panel() { 
+        return _panel().withLayout(new MigLayout("hidemode 2")); 
+    }
+    
+    private static UIForPanel<JPanel> _panel() {
+        return new UIForPanel<>(new BuilderState<>(JPanel.class, Panel::new));
+    }
 
     /**
      *  Use this to create a builder for the {@link JPanel} UI component.
@@ -900,7 +906,7 @@ public final class UI extends UILayoutConstants
      */
     public static UIForPanel<JPanel> panel( String attr ) {
         NullUtil.nullArgCheck(attr, "attr", String.class);
-        return of((JPanel) new Panel()).withLayout(attr);
+        return _panel().withLayout(attr);
     }
 
     /**
@@ -918,7 +924,7 @@ public final class UI extends UILayoutConstants
     public static UIForPanel<JPanel> panel( String attr, String colConstraints ) {
         NullUtil.nullArgCheck(attr, "attr", String.class);
         NullUtil.nullArgCheck(colConstraints, "colConstraints", String.class);
-        return of((JPanel) new Panel()).withLayout(attr, colConstraints);
+        return _panel().withLayout(attr, colConstraints);
     }
 
     /**
@@ -939,7 +945,7 @@ public final class UI extends UILayoutConstants
         NullUtil.nullArgCheck(attr, "attr", String.class);
         NullUtil.nullArgCheck(colConstraints, "colConstraints", String.class);
         NullUtil.nullArgCheck(rowConstraints, "rowConstraints", String.class);
-        return of((JPanel) new Panel()).withLayout(attr, colConstraints, rowConstraints);
+        return _panel().withLayout(attr, colConstraints, rowConstraints);
     }
 
     /**
@@ -971,7 +977,7 @@ public final class UI extends UILayoutConstants
     public static UIForPanel<JPanel> panel( LayoutConstraint attr, String colConstraints ) {
         NullUtil.nullArgCheck(attr, "attr", LayoutConstraint.class);
         NullUtil.nullArgCheck(colConstraints, "colConstraints", String.class);
-        return of((JPanel)new Panel()).withLayout(attr, colConstraints);
+        return _panel().withLayout(attr, colConstraints);
     }
 
     /**
@@ -992,7 +998,7 @@ public final class UI extends UILayoutConstants
         NullUtil.nullArgCheck(attr, "attr", LayoutConstraint.class);
         NullUtil.nullArgCheck(colConstraints, "colConstraints", String.class);
         NullUtil.nullArgCheck(rowConstraints, "rowConstraints", String.class);
-        return of((JPanel) new Panel()).withLayout(attr, colConstraints, rowConstraints);
+        return _panel().withLayout(attr, colConstraints, rowConstraints);
     }
 
     /**
@@ -1018,7 +1024,7 @@ public final class UI extends UILayoutConstants
      */
     public static UIForPanel<JPanel> panel( LC attr ) {
         NullUtil.nullArgCheck(attr, "attr", LC.class);
-        return panel().withLayout( attr );
+        return _panel().withLayout( attr );
     }
 
     /**
@@ -1037,7 +1043,7 @@ public final class UI extends UILayoutConstants
     public static UIForPanel<JPanel> panel( LC attr, String colConstraints ) {
         NullUtil.nullArgCheck(attr, "attr", LC.class);
         NullUtil.nullArgCheck(colConstraints, "colConstraints", String.class);
-        return of((JPanel) new Panel()).withLayout( attr, colConstraints );
+        return _panel().withLayout( attr, colConstraints );
     }
 
     /**
@@ -1064,7 +1070,7 @@ public final class UI extends UILayoutConstants
         NullUtil.nullArgCheck(attr, "attr", LC.class);
         NullUtil.nullArgCheck(colConstraints, "colConstraints", String.class);
         NullUtil.nullArgCheck(rowConstraints, "rowConstraints", String.class);
-        return of((JPanel) new Panel()).withLayout(attr, colConstraints, rowConstraints);
+        return _panel().withLayout(attr, colConstraints, rowConstraints);
     }
 
     /**
