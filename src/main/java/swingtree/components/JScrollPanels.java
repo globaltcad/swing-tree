@@ -111,6 +111,18 @@ public class JScrollPanels extends JScrollPane
 		this.addMouseWheelListener(new NestedJScrollPanelScrollCorrection(this));
 	}
 
+	@Override
+	public void setOpaque( boolean shouldBeOpaque ) {
+		super.setOpaque(shouldBeOpaque);
+		this.getViewport().setOpaque(shouldBeOpaque);
+	}
+
+	@Override
+	public void setBackground( Color newBackgroundColor ) {
+		super.setBackground(newBackgroundColor);
+		this.getViewport().setBackground(newBackgroundColor);
+	}
+
 	/** {@inheritDoc} */
 	@Override public void paint(Graphics g){
 		ComponentExtension.from(this).paintBackgroundStyle( g, ()->{
@@ -260,7 +272,7 @@ public class JScrollPanels extends JScrollPane
 		Objects.requireNonNull(condition);
 		return
 			Arrays.stream(_internal.getComponents())
-					.filter( c -> c != null )
+					.filter(Objects::nonNull)
 					.map( c -> (EntryPanel) c )
 					.filter( c -> type.isAssignableFrom(c.getLastState().getClass()) )
 					.filter( c -> condition.test(c) )
@@ -341,7 +353,7 @@ public class JScrollPanels extends JScrollPane
 	 * 	It wraps {@link EntryPanel} instances which themselves
 	 * 	wrap user provided {@link JPanel} implementations rendering the actual content.
 	 */
-	private static class InternalPanel extends JPanel implements Scrollable
+	private static class InternalPanel extends JBox implements Scrollable
 	{
 		private final int _W, _H, _horizontalGap, _verticalGap;
 		private final UI.Align _type;
@@ -349,9 +361,9 @@ public class JScrollPanels extends JScrollPane
 
 
 		private InternalPanel(
-				List<EntryPanel> entryPanels,
-				Dimension shape,
-				UI.Align type
+		    List<EntryPanel> entryPanels,
+		    Dimension shape,
+		    UI.Align type
 		) {
 			shape = ( shape == null ? new Dimension(120, 100) : shape );
 			int n = entryPanels.size() / 2;
@@ -378,7 +390,7 @@ public class JScrollPanels extends JScrollPane
 			else
 				_size = new Dimension(_W + 2 * _horizontalGap, n * _H + (n + 1) * _verticalGap);
 
-			for ( EntryPanel c : entryPanels ) {
+			for ( EntryPanel c : entryPanels )
 				c.addMouseListener(
 						new MouseAdapter() {
 							@Override
@@ -388,7 +400,9 @@ public class JScrollPanels extends JScrollPane
 							}
 						}
 				);
-			}
+
+			setOpaque(false);
+			setBackground(Color.PINK);
 		}
 
 		@Override public Dimension getPreferredScrollableViewportSize() { return _size; }
@@ -444,7 +458,7 @@ public class JScrollPanels extends JScrollPane
 	 * 	The {@link ViewSupplier} turn whatever kind of view model the user provides into
 	 * 	a {@link JComponent} which is then wrapped by an {@link EntryPanel}.
 	 */
-	public static class EntryPanel extends JPanel
+	public static class EntryPanel extends JBox
 	{
 		private static final Color HIGHLIGHT = Color.GREEN;
 		private static final Color LOW_LIGHT = Color.WHITE;
@@ -455,11 +469,11 @@ public class JScrollPanels extends JScrollPane
 
 
 		private <M extends EntryViewModel> EntryPanel(
-				Supplier<List<EntryPanel>> components,
-				int position,
-				M provider,
-				ViewSupplier<M> viewSupplier,
-				String constraints
+			Supplier<List<EntryPanel>> components,
+			int position,
+			M provider,
+			ViewSupplier<M> viewSupplier,
+			String constraints
 		) {
 			Objects.requireNonNull(components);
 			Objects.requireNonNull(provider);
