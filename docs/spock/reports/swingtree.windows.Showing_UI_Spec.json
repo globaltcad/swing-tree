@@ -23,7 +23,7 @@
       "blocks":[
         {"kind":"given","text":"","code":["var record = []"]},
 
-        {"kind":"and","text":"Then we build a declarative JFrame wrapping a button.","code":["var frame =","    UI.frame()","    .withTitle(\"My JFrame\")","    .onFocusGained({ record << \"focus gained\" })","    .onFocusLost({ record << \"focus lost\" })","    .add(","        UI.button().withText(\"My Button\")","        .onClick({ record << \"button clicked\" })","    )","    .get(JFrame)"]},
+        {"kind":"and","text":"Then we build a declarative JFrame wrapping a button.","code":["var frame =","    UI.frame()","    .withTitle(\"My JFrame\")","    .onFocusGain( it -> record << \"focus gained\" )","    .onFocusLoss( it -> record << \"focus lost\" )","    .add(","        UI.button().withText(\"My Button\")","        .onClick( it -> record << \"button clicked\" )","    )","    .get(JFrame)"]},
 
         {"kind":"expect","text":"","code":["frame.title == \"My JFrame\"","frame.focusListeners.size() == 2","frame.contentPane.componentCount == 1","frame.contentPane.getComponent(0).text == \"My Button\"","frame.contentPane.getComponent(0).actionListeners.size() == 1"]},
 

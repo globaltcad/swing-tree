@@ -96,7 +96,7 @@ import java.util.function.Consumer;
 	 * @param onFocus The {@link sprouts.Action} which should be executed once the input focus was gained on the wrapped component.
 	 * @return This very instance, which enables builder-style method chaining.
 	 */
-	public final I onFocusGained( sprouts.Action&lt;WindowDelegate&lt;W, FocusEvent&gt;&gt; onFocus ) {
+	public final I onFocusGain( sprouts.Action&lt;WindowDelegate&lt;W, FocusEvent&gt;&gt; onFocus ) {
 <span class="fc" id="L100">		NullUtil.nullArgCheck(onFocus, &quot;onFocus&quot;, sprouts.Action.class);</span>
 <span class="fc" id="L101">		return _with( thisWindow -&gt; {</span>
 <span class="fc" id="L102">					thisWindow.addFocusListener(new FocusAdapter() {</span>
@@ -115,7 +115,7 @@ import java.util.function.Consumer;
 	 * @param onFocus The {@link sprouts.Action} which should be executed once the input focus was lost on the wrapped component.
 	 * @return This very instance, which enables builder-style method chaining.
 	 */
-	public final I onFocusLost( sprouts.Action&lt;WindowDelegate&lt;W, FocusEvent&gt;&gt; onFocus ) {
+	public final I onFocusLoss( sprouts.Action&lt;WindowDelegate&lt;W, FocusEvent&gt;&gt; onFocus ) {
 <span class="fc" id="L119">		NullUtil.nullArgCheck(onFocus, &quot;onFocus&quot;, Action.class);</span>
 <span class="fc" id="L120">		return _with( thisWindow -&gt; {</span>
 <span class="fc" id="L121">					thisWindow.addFocusListener(new FocusAdapter() {</span>

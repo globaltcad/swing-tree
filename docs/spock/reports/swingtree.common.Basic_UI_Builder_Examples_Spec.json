@@ -69,9 +69,9 @@
 
         {"kind":"when","text":"We add a list of panels...","code":["var ui2 = ui.add([new JPanel(), new JPanel(), new JPanel()])"]},
 
-        {"kind":"then","text":"We get the same UI node back, because Swing-Tree is based on the builder pattern.","code":["ui === ui2"]},
+        {"kind":"then","text":"We get the same UI node back, because Swing-Tree is based on the builder pattern.","code":["ui == ui2"]},
 
-        {"kind":"and","text":"The wrapped component will have the expected amount of child components.","code":["ui.component.components.length == 3"]}
+        {"kind":"and","text":"The wrapped component will have the expected amount of child components.","code":["ui2.component.components.length == 3"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -92,13 +92,13 @@
 
         {"kind":"and","text":"The UI node is a JPanel without children.","code":["ui.component instanceof JPanel","panel.components.length == 0"]},
 
-        {"kind":"when","text":"We now add something to our UI node...","code":["ui.add(UI.label(\"Hey! I am a wrapped JLabel.\"))"]},
+        {"kind":"when","text":"We now add something to our UI node...","code":["ui = ui.add(UI.label(\"Hey! I am a wrapped JLabel.\"))"]},
 
         {"kind":"then","text":"The panel will have received a new component.","code":["panel.components.length == 1"]},
 
         {"kind":"and","text":"This component is a label with the expected text.","code":["panel.components[0] instanceof JLabel","panel.components[0].text == \"Hey! I am a wrapped JLabel.\""]},
 
-        {"kind":"when","text":"We add 2 more components...","code":["ui.add(UI.button(\"Button 1\"), UI.button(\"Button 2\"))"]},
+        {"kind":"when","text":"We add 2 more components...","code":["ui = ui.add(UI.button(\"Button 1\"), UI.button(\"Button 2\"))"]},
 
         {"kind":"then","text":"The panel will have 3 components in total.","code":["panel.components.length == 3"]}
       ],
@@ -117,7 +117,7 @@
 
         {"kind":"expect","text":"At the beginning the default cursor will be set.","code":["ui.component.cursor.type == Cursor.DEFAULT_CURSOR"]},
 
-        {"kind":"when","text":"We set the cursor of the button to be something else...","code":["ui.withCursor(UI.Cursor.RESIZE_SOUTH_EAST)"]},
+        {"kind":"when","text":"We set the cursor of the button to be something else...","code":["ui = ui.withCursor(UI.Cursor.RESIZE_SOUTH_EAST)"]},
 
         {"kind":"then","text":"This will lead to the correct cursor being chosen.","code":["ui.component.cursor.type == Cursor.SE_RESIZE_CURSOR"]}
       ],
@@ -176,7 +176,7 @@
       "tags":{},"see":[],"extraInfo":["\n            The Swing-Tree API exposes various methods to register different kinds of Swing component\n            or keyboard events. \n            All such event registration methods can be identified by the 'on' prefix.\n        "]
       },
       "blocks":[
-        {"kind":"when","text":"We create a JFrame UI builder and attach various kinds of actions to it.","code":["def frame =","        UI.frame(\"Test Frame\")","        .onPressed(Keyboard.Key.H, it -> {/*something*/})","        .onFocusGained(it -> {/*something*/})","        .onFocusLost(it -> {/*something*/})","        .get(JFrame)"]},
+        {"kind":"when","text":"We create a JFrame UI builder and attach various kinds of actions to it.","code":["def frame =","        UI.frame(\"Test Frame\")","        .onPressed(Keyboard.Key.H, it -> {/*something*/})","        .onFocusGain( it -> {/*something*/} )","        .onFocusLoss( it -> {/*something*/} )","        .get(JFrame)"]},
 
         {"kind":"then","text":"","code":["frame.title == \"Test Frame\"","frame.focusable == true"]}
       ],
@@ -206,7 +206,7 @@
       "tags":{},"see":[],"extraInfo":["\n            The Swing-Tree API exposes various methods to register different kinds of Swing component\n            events, like for example UI focus events. \n            All such event registration methods can be identified by the 'on' prefix.\n        "]
       },
       "blocks":[
-        {"kind":"when","text":"We create a panel UI node and attach various kinds of actions to it.","code":["def panel =","        UI.of(new JPanel()).id(\"Root\")","        .onFocusGained(it -> {/*something*/})","        .onFocusLost(it -> {/*something*/})","        .get(JPanel)"]},
+        {"kind":"when","text":"We create a panel UI node and attach various kinds of actions to it.","code":["def panel =","        UI.of(new JPanel()).id(\"Root\")","        .onFocusGain( it -> {/*something*/} )","        .onFocusLoss( it -> {/*something*/} )","        .get(JPanel)"]},
 
         {"kind":"then","text":"We can verify that the panel has the expected number of listeners.","code":["panel.getListeners(FocusListener.class).size() == 2"]}
       ],

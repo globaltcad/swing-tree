@@ -22,15 +22,21 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
      * Extensions of the {@link  UIForAnySwing} always wrap
      * a single component for which they are responsible.
      *
-     * @param component The JComponent type which will be wrapped by this builder node.
+     * @param state The {@link BuilderState} modelling how the component is built.
      */
-<span class="fc" id="L27">    UIForTable( T component ) {</span>
-<span class="fc" id="L28">        _state = new BuilderState&lt;&gt;(component);</span>
-<span class="fc" id="L29">    }</span>
+<span class="fc" id="L27">    UIForTable( BuilderState&lt;T&gt; state ) {</span>
+<span class="fc" id="L28">        Objects.requireNonNull(state);</span>
+<span class="fc" id="L29">        _state = state;</span>
+<span class="fc" id="L30">    }</span>
 
     @Override
     protected BuilderState&lt;T&gt; _state() {
-<span class="fc" id="L33">        return _state;</span>
+<span class="fc" id="L34">        return _state;</span>
+    }
+    
+    @Override
+    protected UIForTable&lt;T&gt; _with( BuilderState&lt;T&gt; newState ) {
+<span class="fc" id="L39">        return new UIForTable&lt;&gt;(newState);</span>
     }
 
     /**
@@ -40,8 +46,8 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
      * @return This builder node.
      */
     public final UIForTable&lt;T&gt; withHeader( UIForTableHeader&lt;?&gt; header ) {
-<span class="nc" id="L43">        NullUtil.nullArgCheck(header, &quot;header&quot;, UIForTableHeader.class);</span>
-<span class="nc" id="L44">        return withHeader(header.getComponent());</span>
+<span class="nc" id="L49">        NullUtil.nullArgCheck(header, &quot;header&quot;, UIForTableHeader.class);</span>
+<span class="nc" id="L50">        return withHeader(header.getComponent());</span>
     }
 
     /**
@@ -51,11 +57,11 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
      * @return This builder node.
      */
     public final UIForTable&lt;T&gt; withHeader( JTableHeader header ) {
-<span class="nc" id="L54">        NullUtil.nullArgCheck(header, &quot;header&quot;, JTableHeader.class);</span>
-<span class="nc" id="L55">        return _with( thisComponent -&gt; {</span>
-<span class="nc" id="L56">                    thisComponent.setTableHeader(header);</span>
-<span class="nc" id="L57">                })</span>
-<span class="nc" id="L58">                ._this();</span>
+<span class="nc" id="L60">        NullUtil.nullArgCheck(header, &quot;header&quot;, JTableHeader.class);</span>
+<span class="nc" id="L61">        return _with( thisComponent -&gt; {</span>
+<span class="nc" id="L62">                    thisComponent.setTableHeader(header);</span>
+<span class="nc" id="L63">                })</span>
+<span class="nc" id="L64">                ._this();</span>
     }
 
     /**
@@ -67,8 +73,8 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
      * @return This builder node.
      */
     public final UIForTable&lt;T&gt; withRendererForColumn( String columnName, Render.Builder&lt;JTable, ?&gt; renderBuilder ) {
-<span class="fc" id="L70">        NullUtil.nullArgCheck(renderBuilder, &quot;renderBuilder&quot;, Render.Builder.class);</span>
-<span class="fc" id="L71">        return withRendererForColumn(columnName, renderBuilder.getForTable());</span>
+<span class="fc" id="L76">        NullUtil.nullArgCheck(renderBuilder, &quot;renderBuilder&quot;, Render.Builder.class);</span>
+<span class="fc" id="L77">        return withRendererForColumn(columnName, renderBuilder.getForTable());</span>
     }
 
     /**
@@ -80,8 +86,8 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
      * @return This builder node.
      */
     public final UIForTable&lt;T&gt; withRendererForColumn( int columnIndex, Render.Builder&lt;JTable, ?&gt; renderBuilder ) {
-<span class="fc" id="L83">        NullUtil.nullArgCheck(renderBuilder, &quot;renderBuilder&quot;, Render.Builder.class);</span>
-<span class="fc" id="L84">        return withRendererForColumn(columnIndex, renderBuilder.getForTable());</span>
+<span class="fc" id="L89">        NullUtil.nullArgCheck(renderBuilder, &quot;renderBuilder&quot;, Render.Builder.class);</span>
+<span class="fc" id="L90">        return withRendererForColumn(columnIndex, renderBuilder.getForTable());</span>
     }
 
     /**
@@ -91,12 +97,12 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
      * @return This builder node, to allow for builder-style method chaining.
      */
     public final UIForTable&lt;T&gt; withRendererForColumn( String columnName, TableCellRenderer renderer ) {
-<span class="fc" id="L94">        NullUtil.nullArgCheck(columnName, &quot;columnName&quot;, String.class);</span>
-<span class="fc" id="L95">        NullUtil.nullArgCheck(renderer, &quot;renderer&quot;, TableCellRenderer.class);</span>
-<span class="fc" id="L96">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L97">                    thisComponent.getColumn(columnName).setCellRenderer(renderer);</span>
-<span class="fc" id="L98">                })</span>
-<span class="fc" id="L99">                ._this();</span>
+<span class="fc" id="L100">        NullUtil.nullArgCheck(columnName, &quot;columnName&quot;, String.class);</span>
+<span class="fc" id="L101">        NullUtil.nullArgCheck(renderer, &quot;renderer&quot;, TableCellRenderer.class);</span>
+<span class="fc" id="L102">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L103">                    thisComponent.getColumn(columnName).setCellRenderer(renderer);</span>
+<span class="fc" id="L104">                })</span>
+<span class="fc" id="L105">                ._this();</span>
     }
 
     /**
@@ -106,11 +112,11 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
      * @return This builder node.
      */
     public final UIForTable&lt;T&gt; withRendererForColumn( int columnIndex, TableCellRenderer renderer ) {
-<span class="fc" id="L109">        NullUtil.nullArgCheck(renderer, &quot;renderer&quot;, TableCellRenderer.class);</span>
-<span class="fc" id="L110">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L111">                    thisComponent.getColumnModel().getColumn(columnIndex).setCellRenderer(renderer);</span>
-<span class="fc" id="L112">                })</span>
-<span class="fc" id="L113">                ._this();</span>
+<span class="fc" id="L115">        NullUtil.nullArgCheck(renderer, &quot;renderer&quot;, TableCellRenderer.class);</span>
+<span class="fc" id="L116">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L117">                    thisComponent.getColumnModel().getColumn(columnIndex).setCellRenderer(renderer);</span>
+<span class="fc" id="L118">                })</span>
+<span class="fc" id="L119">                ._this();</span>
     }
 
     /**
@@ -119,11 +125,11 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
      * @return This builder node.
      */
     public final UIForTable&lt;T&gt; withRenderer( TableCellRenderer renderer ) {
-<span class="fc" id="L122">        NullUtil.nullArgCheck(renderer, &quot;renderer&quot;, TableCellRenderer.class);</span>
-<span class="fc" id="L123">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L124">                    thisComponent.setDefaultRenderer(Object.class, renderer);</span>
-<span class="fc" id="L125">                })</span>
-<span class="fc" id="L126">                ._this();</span>
+<span class="fc" id="L128">        NullUtil.nullArgCheck(renderer, &quot;renderer&quot;, TableCellRenderer.class);</span>
+<span class="fc" id="L129">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L130">                    thisComponent.setDefaultRenderer(Object.class, renderer);</span>
+<span class="fc" id="L131">                })</span>
+<span class="fc" id="L132">                ._this();</span>
     }
 
     /**
@@ -132,8 +138,8 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
      * @return  This builder node.
      */
     public final UIForTable&lt;T&gt; withRenderer( Render.Builder&lt;JTable, ?&gt; renderBuilder ) {
-<span class="fc" id="L135">        NullUtil.nullArgCheck(renderBuilder, &quot;renderBuilder&quot;, Render.Builder.class);</span>
-<span class="fc" id="L136">        return withRenderer(renderBuilder.getForTable());</span>
+<span class="fc" id="L141">        NullUtil.nullArgCheck(renderBuilder, &quot;renderBuilder&quot;, Render.Builder.class);</span>
+<span class="fc" id="L142">        return withRenderer(renderBuilder.getForTable());</span>
     }
 
     /**
@@ -143,12 +149,12 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
      * @return This builder instance, to allow for method chaining.
      */
     public final UIForTable&lt;T&gt; withCellEditorForColumn( String columnName, TableCellEditor editor ) {
-<span class="nc" id="L146">        NullUtil.nullArgCheck(columnName, &quot;columnName&quot;, String.class);</span>
-<span class="nc" id="L147">        NullUtil.nullArgCheck(editor, &quot;editor&quot;, TableCellEditor.class);</span>
-<span class="nc" id="L148">        return _with( thisComponent -&gt; {</span>
-<span class="nc" id="L149">                    thisComponent.getColumn(columnName).setCellEditor(editor);</span>
-<span class="nc" id="L150">                })</span>
-<span class="nc" id="L151">                ._this();</span>
+<span class="nc" id="L152">        NullUtil.nullArgCheck(columnName, &quot;columnName&quot;, String.class);</span>
+<span class="nc" id="L153">        NullUtil.nullArgCheck(editor, &quot;editor&quot;, TableCellEditor.class);</span>
+<span class="nc" id="L154">        return _with( thisComponent -&gt; {</span>
+<span class="nc" id="L155">                    thisComponent.getColumn(columnName).setCellEditor(editor);</span>
+<span class="nc" id="L156">                })</span>
+<span class="nc" id="L157">                ._this();</span>
     }
 
     /**
@@ -158,11 +164,11 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
      * @return This builder node, to allow for builder-style method chaining.
      */
     public final UIForTable&lt;T&gt; withCellEditorForColumn( int columnIndex, TableCellEditor editor ) {
-<span class="nc" id="L161">        NullUtil.nullArgCheck(editor, &quot;editor&quot;, TableCellEditor.class);</span>
-<span class="nc" id="L162">        return _with( thisComponent -&gt; {</span>
-<span class="nc" id="L163">                    thisComponent.getColumnModel().getColumn(columnIndex).setCellEditor(editor);</span>
-<span class="nc" id="L164">                })</span>
-<span class="nc" id="L165">                ._this();</span>
+<span class="nc" id="L167">        NullUtil.nullArgCheck(editor, &quot;editor&quot;, TableCellEditor.class);</span>
+<span class="nc" id="L168">        return _with( thisComponent -&gt; {</span>
+<span class="nc" id="L169">                    thisComponent.getColumnModel().getColumn(columnIndex).setCellEditor(editor);</span>
+<span class="nc" id="L170">                })</span>
+<span class="nc" id="L171">                ._this();</span>
     }
 
     /**
@@ -173,7 +179,7 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
      * @return This builder object.
      */
     public final UIForTable&lt;T&gt; withModel( Buildable&lt;BasicTableModel&gt; dataModelBuilder ) {
-<span class="fc" id="L176">        return this.withModel(dataModelBuilder.build());</span>
+<span class="fc" id="L182">        return this.withModel(dataModelBuilder.build());</span>
     }
 
     /**
@@ -182,11 +188,11 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
      * @return This builder object.
      */
     public final UIForTable&lt;T&gt; withModel( BasicTableModel model ) {
-<span class="fc" id="L185">        NullUtil.nullArgCheck(model, &quot;model&quot;, BasicTableModel.class);</span>
-<span class="fc" id="L186">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L187">                    thisComponent.setModel(model);</span>
-<span class="fc" id="L188">                })</span>
-<span class="fc" id="L189">                ._this();</span>
+<span class="fc" id="L191">        NullUtil.nullArgCheck(model, &quot;model&quot;, BasicTableModel.class);</span>
+<span class="fc" id="L192">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L193">                    thisComponent.setModel(model);</span>
+<span class="fc" id="L194">                })</span>
+<span class="fc" id="L195">                ._this();</span>
     }
 
     /**
@@ -205,52 +211,52 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
      * @param &lt;E&gt; The type of the table entry {@link Object}s.
      */
     public final &lt;E&gt; UIForTable&lt;T&gt; withModel( UI.ListData mode, TableListDataSource&lt;E&gt; dataSource ) {
-<span class="fc" id="L208">        boolean isRowMajor = mode.isRowMajor();</span>
-<span class="fc" id="L209">        boolean isEditable = mode.isEditable();</span>
-<span class="fc bfc" id="L210" title="All 2 branches covered.">        if ( isRowMajor )</span>
-<span class="fc" id="L211">            return _with( thisComponent -&gt;</span>
-<span class="fc" id="L212">                    thisComponent.setModel(new ListBasedTableModel&lt;E&gt;(isEditable, dataSource)</span>
-<span class="fc" id="L213">                    {</span>
-<span class="fc" id="L214">                        @Override public int getRowCount() { return getData().size(); }</span>
+<span class="fc" id="L214">        boolean isRowMajor = mode.isRowMajor();</span>
+<span class="fc" id="L215">        boolean isEditable = mode.isEditable();</span>
+<span class="fc bfc" id="L216" title="All 2 branches covered.">        if ( isRowMajor )</span>
+<span class="fc" id="L217">            return _with( thisComponent -&gt;</span>
+<span class="fc" id="L218">                    thisComponent.setModel(new ListBasedTableModel&lt;E&gt;(isEditable, dataSource)</span>
+<span class="fc" id="L219">                    {</span>
+<span class="fc" id="L220">                        @Override public int getRowCount() { return getData().size(); }</span>
                         @Override public int getColumnCount() {
-<span class="fc" id="L216">                            List&lt;List&lt;E&gt;&gt; data = getData();</span>
-<span class="pc bpc" id="L217" title="1 of 2 branches missed.">                            return ( data.isEmpty() ? 0 : data.get(0).size() );</span>
+<span class="fc" id="L222">                            List&lt;List&lt;E&gt;&gt; data = getData();</span>
+<span class="pc bpc" id="L223" title="1 of 2 branches missed.">                            return ( data.isEmpty() ? 0 : data.get(0).size() );</span>
                         }
                         @Override public Object getValueAt(int rowIndex, int columnIndex) {
-<span class="fc" id="L220">                            List&lt;List&lt;E&gt;&gt; data = getData();</span>
-<span class="pc bpc" id="L221" title="1 of 2 branches missed.">                            if (isNotWithinBounds(rowIndex, columnIndex)) return null;</span>
-<span class="fc" id="L222">                            return data.get(rowIndex).get(columnIndex);</span>
+<span class="fc" id="L226">                            List&lt;List&lt;E&gt;&gt; data = getData();</span>
+<span class="pc bpc" id="L227" title="1 of 2 branches missed.">                            if (isNotWithinBounds(rowIndex, columnIndex)) return null;</span>
+<span class="fc" id="L228">                            return data.get(rowIndex).get(columnIndex);</span>
                         }
                         @Override public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-<span class="nc" id="L225">                            List&lt;List&lt;E&gt;&gt; data = getData();</span>
-<span class="nc bnc" id="L226" title="All 4 branches missed.">                            if ( !isEditable || isNotWithinBounds(rowIndex, columnIndex) ) return;</span>
-<span class="nc" id="L227">                            data.get(rowIndex).set(columnIndex, (E)aValue);</span>
-<span class="nc" id="L228">                        }</span>
+<span class="nc" id="L231">                            List&lt;List&lt;E&gt;&gt; data = getData();</span>
+<span class="nc bnc" id="L232" title="All 4 branches missed.">                            if ( !isEditable || isNotWithinBounds(rowIndex, columnIndex) ) return;</span>
+<span class="nc" id="L233">                            data.get(rowIndex).set(columnIndex, (E)aValue);</span>
+<span class="nc" id="L234">                        }</span>
                     })
                 )
-<span class="fc" id="L231">                ._this();</span>
+<span class="fc" id="L237">                ._this();</span>
         else // isColumnMajor
-<span class="fc" id="L233">            return _with( thisComponent -&gt;</span>
-<span class="fc" id="L234">                    thisComponent.setModel(new ListBasedTableModel&lt;E&gt;(isEditable, dataSource)</span>
-<span class="fc" id="L235">                    {</span>
+<span class="fc" id="L239">            return _with( thisComponent -&gt;</span>
+<span class="fc" id="L240">                    thisComponent.setModel(new ListBasedTableModel&lt;E&gt;(isEditable, dataSource)</span>
+<span class="fc" id="L241">                    {</span>
                         @Override public int getRowCount() {
-<span class="fc" id="L237">                            List&lt;List&lt;E&gt;&gt; data = getData();</span>
-<span class="pc bpc" id="L238" title="1 of 2 branches missed.">                            return (data.isEmpty() ? 0 : data.get(0).size());</span>
+<span class="fc" id="L243">                            List&lt;List&lt;E&gt;&gt; data = getData();</span>
+<span class="pc bpc" id="L244" title="1 of 2 branches missed.">                            return (data.isEmpty() ? 0 : data.get(0).size());</span>
                         }
-<span class="fc" id="L240">                        @Override public int getColumnCount() { return getData().size(); }</span>
+<span class="fc" id="L246">                        @Override public int getColumnCount() { return getData().size(); }</span>
                         @Override public Object getValueAt( int rowIndex, int columnIndex ) {
-<span class="fc" id="L242">                            List&lt;List&lt;E&gt;&gt; data = getData();</span>
-<span class="pc bpc" id="L243" title="1 of 2 branches missed.">                            if ( isNotWithinBounds(rowIndex, columnIndex) ) return null;</span>
-<span class="fc" id="L244">                            return data.get(columnIndex).get(rowIndex);</span>
+<span class="fc" id="L248">                            List&lt;List&lt;E&gt;&gt; data = getData();</span>
+<span class="pc bpc" id="L249" title="1 of 2 branches missed.">                            if ( isNotWithinBounds(rowIndex, columnIndex) ) return null;</span>
+<span class="fc" id="L250">                            return data.get(columnIndex).get(rowIndex);</span>
                         }
                         @Override public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-<span class="nc" id="L247">                            List&lt;List&lt;E&gt;&gt; data = getData();</span>
-<span class="nc bnc" id="L248" title="All 4 branches missed.">                            if ( !isEditable || isNotWithinBounds(rowIndex, columnIndex) ) return;</span>
-<span class="nc" id="L249">                            data.get(columnIndex).set(rowIndex, (E)aValue);</span>
-<span class="nc" id="L250">                        }</span>
+<span class="nc" id="L253">                            List&lt;List&lt;E&gt;&gt; data = getData();</span>
+<span class="nc bnc" id="L254" title="All 4 branches missed.">                            if ( !isEditable || isNotWithinBounds(rowIndex, columnIndex) ) return;</span>
+<span class="nc" id="L255">                            data.get(columnIndex).set(rowIndex, (E)aValue);</span>
+<span class="nc" id="L256">                        }</span>
                     })
                 )
-<span class="fc" id="L253">                ._this();</span>
+<span class="fc" id="L259">                ._this();</span>
     }
 
     /**
@@ -268,10 +274,10 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
      * @param &lt;E&gt; The type of the table entry {@link Object}s.
      */
     public final &lt;E&gt; UIForTable&lt;T&gt; withModel( UI.MapData mode, TableMapDataSource&lt;E&gt; dataSource ) {
-<span class="fc" id="L271">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L272">                    thisComponent.setModel(new MapBasedColumnMajorTableModel&lt;&gt;(mode.isEditable(), dataSource));</span>
-<span class="fc" id="L273">                })</span>
-<span class="fc" id="L274">                ._this();</span>
+<span class="fc" id="L277">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L278">                    thisComponent.setModel(new MapBasedColumnMajorTableModel&lt;&gt;(mode.isEditable(), dataSource));</span>
+<span class="fc" id="L279">                })</span>
+<span class="fc" id="L280">                ._this();</span>
     }
 
     /**
@@ -283,24 +289,24 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
      * @return This builder node, for chaining.
      */
     public final UIForTable&lt;T&gt; updateTableOn( Event event ) {
-<span class="fc" id="L286">        NullUtil.nullArgCheck(event, &quot;event&quot;, Event.class);</span>
-<span class="fc" id="L287">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L288">                    event.subscribe(()-&gt;</span>
-<span class="fc" id="L289">                        _doUI(()-&gt;{</span>
-<span class="fc" id="L290">                            TableModel model = thisComponent.getModel();</span>
-<span class="pc bpc" id="L291" title="1 of 2 branches missed.">                            if ( model instanceof AbstractTableModel ) {</span>
+<span class="fc" id="L292">        NullUtil.nullArgCheck(event, &quot;event&quot;, Event.class);</span>
+<span class="fc" id="L293">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L294">                    event.subscribe(()-&gt;</span>
+<span class="fc" id="L295">                        _doUI(()-&gt;{</span>
+<span class="fc" id="L296">                            TableModel model = thisComponent.getModel();</span>
+<span class="pc bpc" id="L297" title="1 of 2 branches missed.">                            if ( model instanceof AbstractTableModel ) {</span>
                                 // We want the table model update to be as thorough as possible, so we
                                 // will fire a table structure changed event, followed by a table data
                                 // changed event.
-<span class="fc" id="L295">                                ((AbstractTableModel)model).fireTableStructureChanged();</span>
-<span class="fc" id="L296">                                ((AbstractTableModel)model).fireTableDataChanged();</span>
+<span class="fc" id="L301">                                ((AbstractTableModel)model).fireTableStructureChanged();</span>
+<span class="fc" id="L302">                                ((AbstractTableModel)model).fireTableDataChanged();</span>
                             }
                             else
-<span class="nc" id="L299">                                throw new IllegalStateException(&quot;The table model is not an AbstractTableModel instance.&quot;);</span>
-<span class="fc" id="L300">                        })</span>
+<span class="nc" id="L305">                                throw new IllegalStateException(&quot;The table model is not an AbstractTableModel instance.&quot;);</span>
+<span class="fc" id="L306">                        })</span>
                     );
-<span class="fc" id="L302">                })</span>
-<span class="fc" id="L303">                ._this();</span>
+<span class="fc" id="L308">                })</span>
+<span class="fc" id="L309">                ._this();</span>
     }
 
 
@@ -309,22 +315,22 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
         private final TableListDataSource&lt;E&gt; dataSource;
         private final boolean isEditable;
 
-<span class="fc" id="L312">        ListBasedTableModel(boolean isEditable, TableListDataSource&lt;E&gt; dataSource) {</span>
-<span class="fc" id="L313">            this.isEditable = isEditable;</span>
-<span class="fc" id="L314">            this.dataSource = dataSource;</span>
-<span class="fc" id="L315">        }</span>
+<span class="fc" id="L318">        ListBasedTableModel(boolean isEditable, TableListDataSource&lt;E&gt; dataSource) {</span>
+<span class="fc" id="L319">            this.isEditable = isEditable;</span>
+<span class="fc" id="L320">            this.dataSource = dataSource;</span>
+<span class="fc" id="L321">        }</span>
 
-<span class="nc" id="L317">        @Override public boolean isCellEditable( int rowIndex, int columnIndex ) { return this.isEditable; }</span>
+<span class="nc" id="L323">        @Override public boolean isCellEditable( int rowIndex, int columnIndex ) { return this.isEditable; }</span>
 
         protected List&lt;List&lt;E&gt;&gt; getData() {
-<span class="fc" id="L320">            List&lt;List&lt;E&gt;&gt; data = dataSource.get();</span>
-<span class="pc bpc" id="L321" title="1 of 2 branches missed.">            if ( data == null ) return new ArrayList&lt;&gt;(); // We really don't want null pointer in UIs.</span>
-<span class="fc" id="L322">            return data;</span>
+<span class="fc" id="L326">            List&lt;List&lt;E&gt;&gt; data = dataSource.get();</span>
+<span class="pc bpc" id="L327" title="1 of 2 branches missed.">            if ( data == null ) return new ArrayList&lt;&gt;(); // We really don't want null pointer in UIs.</span>
+<span class="fc" id="L328">            return data;</span>
         }
         protected boolean isNotWithinBounds(int rowIndex, int colIndex) {
-<span class="pc bpc" id="L325" title="2 of 4 branches missed.">            if ( rowIndex &lt; 0 || rowIndex &gt;= getRowCount()     ) return true;</span>
-<span class="pc bpc" id="L326" title="2 of 4 branches missed.">            if ( colIndex &lt; 0 || colIndex &gt;= getColumnCount()  ) return true;</span>
-<span class="fc" id="L327">            return false;</span>
+<span class="pc bpc" id="L331" title="2 of 4 branches missed.">            if ( rowIndex &lt; 0 || rowIndex &gt;= getRowCount()     ) return true;</span>
+<span class="pc bpc" id="L332" title="2 of 4 branches missed.">            if ( colIndex &lt; 0 || colIndex &gt;= getColumnCount()  ) return true;</span>
+<span class="fc" id="L333">            return false;</span>
         }
     }
 
@@ -334,31 +340,31 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
         private final TableMapDataSource&lt;E&gt; dataSource;
         private final boolean isEditable;
 
-<span class="fc" id="L337">        MapBasedTableModel(boolean isEditable, TableMapDataSource&lt;E&gt; dataSource) {</span>
-<span class="fc" id="L338">            this.isEditable = isEditable;</span>
-<span class="fc" id="L339">            this.dataSource = dataSource;</span>
-<span class="fc" id="L340">        }</span>
+<span class="fc" id="L343">        MapBasedTableModel(boolean isEditable, TableMapDataSource&lt;E&gt; dataSource) {</span>
+<span class="fc" id="L344">            this.isEditable = isEditable;</span>
+<span class="fc" id="L345">            this.dataSource = dataSource;</span>
+<span class="fc" id="L346">        }</span>
 
         protected Map&lt;String, List&lt;E&gt;&gt; getData() {
-<span class="fc" id="L343">            Map&lt;String, List&lt;E&gt;&gt; data = dataSource.get();</span>
-<span class="pc bpc" id="L344" title="1 of 2 branches missed.">            if ( data == null ) return Collections.emptyMap(); // We really don't want null pointer in UIs.</span>
-<span class="fc" id="L345">            return data;</span>
+<span class="fc" id="L349">            Map&lt;String, List&lt;E&gt;&gt; data = dataSource.get();</span>
+<span class="pc bpc" id="L350" title="1 of 2 branches missed.">            if ( data == null ) return Collections.emptyMap(); // We really don't want null pointer in UIs.</span>
+<span class="fc" id="L351">            return data;</span>
         }
 
         @Override
         public String getColumnName(int column) {
-<span class="fc" id="L350">            List&lt;String&gt; columnNames = new ArrayList&lt;&gt;(getData().keySet());</span>
-<span class="pc bpc" id="L351" title="2 of 4 branches missed.">            if ( column &lt; 0 || column &gt;= columnNames.size() ) return null;</span>
-<span class="fc" id="L352">            return columnNames.get(column);</span>
+<span class="fc" id="L356">            List&lt;String&gt; columnNames = new ArrayList&lt;&gt;(getData().keySet());</span>
+<span class="pc bpc" id="L357" title="2 of 4 branches missed.">            if ( column &lt; 0 || column &gt;= columnNames.size() ) return null;</span>
+<span class="fc" id="L358">            return columnNames.get(column);</span>
         }
 
-<span class="nc" id="L355">        @Override public boolean isCellEditable( int rowIndex, int columnIndex ) { return this.isEditable; }</span>
+<span class="nc" id="L361">        @Override public boolean isCellEditable( int rowIndex, int columnIndex ) { return this.isEditable; }</span>
 
 
         protected boolean isNotWithinBounds(int rowIndex, int colIndex) {
-<span class="pc bpc" id="L359" title="2 of 4 branches missed.">            if ( rowIndex &lt; 0 || rowIndex &gt;= getRowCount()     ) return true;</span>
-<span class="pc bpc" id="L360" title="2 of 4 branches missed.">            if ( colIndex &lt; 0 || colIndex &gt;= getColumnCount()  ) return true;</span>
-<span class="fc" id="L361">            return false;</span>
+<span class="pc bpc" id="L365" title="2 of 4 branches missed.">            if ( rowIndex &lt; 0 || rowIndex &gt;= getRowCount()     ) return true;</span>
+<span class="pc bpc" id="L366" title="2 of 4 branches missed.">            if ( colIndex &lt; 0 || colIndex &gt;= getColumnCount()  ) return true;</span>
+<span class="fc" id="L367">            return false;</span>
         }
 
     }
@@ -366,30 +372,30 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
     private static class MapBasedColumnMajorTableModel&lt;E&gt; extends MapBasedTableModel&lt;E&gt;
     {
         MapBasedColumnMajorTableModel(boolean isEditable, TableMapDataSource&lt;E&gt; dataSource) {
-<span class="fc" id="L369">            super(isEditable, dataSource);</span>
-<span class="fc" id="L370">        }</span>
+<span class="fc" id="L375">            super(isEditable, dataSource);</span>
+<span class="fc" id="L376">        }</span>
 
         @Override
         public int getRowCount() {
-<span class="fc" id="L374">            Map&lt;String, List&lt;E&gt;&gt; data = getData();</span>
-<span class="fc" id="L375">            return data.values()</span>
-<span class="fc" id="L376">                        .stream()</span>
-<span class="fc" id="L377">                        .filter(Objects::nonNull) // Again, we don't want null pointer exceptions in UIs.</span>
-<span class="fc" id="L378">                        .mapToInt(List::size)</span>
-<span class="fc" id="L379">                        .max()</span>
-<span class="fc" id="L380">                        .orElse(0);</span>
+<span class="fc" id="L380">            Map&lt;String, List&lt;E&gt;&gt; data = getData();</span>
+<span class="fc" id="L381">            return data.values()</span>
+<span class="fc" id="L382">                        .stream()</span>
+<span class="fc" id="L383">                        .filter(Objects::nonNull) // Again, we don't want null pointer exceptions in UIs.</span>
+<span class="fc" id="L384">                        .mapToInt(List::size)</span>
+<span class="fc" id="L385">                        .max()</span>
+<span class="fc" id="L386">                        .orElse(0);</span>
         }
 
         @Override
-<span class="fc" id="L384">        public int getColumnCount() { return getData().size(); }</span>
+<span class="fc" id="L390">        public int getColumnCount() { return getData().size(); }</span>
 
         @Override
         public Object getValueAt( int rowIndex, int columnIndex ) {
-<span class="pc bpc" id="L388" title="1 of 2 branches missed.">            if ( isNotWithinBounds(rowIndex, columnIndex) ) return null;</span>
-<span class="fc" id="L389">            List&lt;E&gt; column = getData().values().stream().skip(columnIndex).findFirst().orElse(null);</span>
-<span class="pc bpc" id="L390" title="1 of 2 branches missed.">            if ( column == null ) return null;</span>
-<span class="pc bpc" id="L391" title="2 of 4 branches missed.">            if ( rowIndex &lt; 0 || rowIndex &gt;= column.size() ) return null;</span>
-<span class="fc" id="L392">            return column.get(rowIndex);</span>
+<span class="pc bpc" id="L394" title="1 of 2 branches missed.">            if ( isNotWithinBounds(rowIndex, columnIndex) ) return null;</span>
+<span class="fc" id="L395">            List&lt;E&gt; column = getData().values().stream().skip(columnIndex).findFirst().orElse(null);</span>
+<span class="pc bpc" id="L396" title="1 of 2 branches missed.">            if ( column == null ) return null;</span>
+<span class="pc bpc" id="L397" title="2 of 4 branches missed.">            if ( rowIndex &lt; 0 || rowIndex &gt;= column.size() ) return null;</span>
+<span class="fc" id="L398">            return column.get(rowIndex);</span>
         }
     }
 

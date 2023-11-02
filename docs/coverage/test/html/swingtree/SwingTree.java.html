@@ -566,7 +566,7 @@ public final class SwingTree
 <span class="fc" id="L566">            PropertyChangeListener listener = new PropertyChangeListener() {</span>
                 @Override
                 public void propertyChange( PropertyChangeEvent e ) {
-<span class="pc bpc" id="L569" title="1 of 3 branches missed.">                    switch( e.getPropertyName() ) {</span>
+<span class="fc bfc" id="L569" title="All 3 branches covered.">                    switch( e.getPropertyName() ) {</span>
                         case &quot;lookAndFeel&quot;:
                             // it is not necessary (and possible) to remove listener of old LaF defaults
 <span class="pc bpc" id="L572" title="1 of 2 branches missed.">                            if( e.getNewValue() instanceof LookAndFeel)</span>
@@ -577,7 +577,7 @@ public final class SwingTree
 
                         case _DEFAULT_FONT:
                         case &quot;Label.font&quot;:
-<span class="nc" id="L580">                            _setUserScaleFactor( _calculateScaleFactor( _getDefaultFont() ) );</span>
+<span class="fc" id="L580">                            _setUserScaleFactor( _calculateScaleFactor( _getDefaultFont() ) );</span>
                             break;
                     }
 <span class="fc" id="L583">                }</span>
@@ -593,8 +593,8 @@ public final class SwingTree
             // that a larger font size is set by the current LaF
             // (e.g. can avoid large icons with small text)
 <span class="fc" id="L595">            Font font = UIManager.getFont( _DEFAULT_FONT );</span>
-<span class="pc bpc" id="L596" title="1 of 2 branches missed.">            if ( font == null )</span>
-<span class="nc" id="L597">                font = UIManager.getFont( &quot;Label.font&quot; );</span>
+<span class="fc bfc" id="L596" title="All 2 branches covered.">            if ( font == null )</span>
+<span class="fc" id="L597">                font = UIManager.getFont( &quot;Label.font&quot; );</span>
 
 <span class="fc" id="L599">            return font;</span>
         }

@@ -162,7 +162,7 @@
 
         {"kind":"and","text":"A simple list where handlers are going to leave a trace.","code":["var trace = []"]},
 
-        {"kind":"and","text":"A handler that records the text area content.","code":["ui.onContentChange( it -> trace.add(it.component.text) )"]},
+        {"kind":"and","text":"A handler that records the text area content.","code":["ui = ui.onContentChange( it -> trace.add(it.component.text) )"]},
 
         {"kind":"when","text":"The text area content is changed.","code":["UI.runNow { ui.component.setText(\"Some other content...\") }","UI.sync()"]},
 
@@ -183,7 +183,7 @@
 
         {"kind":"and","text":"A simple list where handlers are going to leave a trace.","code":["var trace = []"]},
 
-        {"kind":"and","text":"A handler that records the text area content.","code":["ui.onTextChange( it -> trace.add(it.component.text) )"]},
+        {"kind":"and","text":"A handler that records the text area content.","code":["ui = ui.onTextChange( it -> trace.add(it.component.text) )"]},
 
         {"kind":"when","text":"The text area content is changed.","code":["UI.runNow { ui.component.setText(\"Some other content...\") }","UI.sync()"]},
 
@@ -204,7 +204,7 @@
 
         {"kind":"and","text":"A simple list where handlers are going to leave a trace.","code":["var trace1 = []","var trace2 = []"]},
 
-        {"kind":"and","text":"A handler that records the text area content.","code":["ui.onTextInsert( it -> {","    trace1.add(it.component.text)","    trace2.add(it.textToBeInserted)","})"]},
+        {"kind":"and","text":"A handler that records the text area content.","code":["ui = ui.onTextInsert( it -> {","        trace1.add(it.component.text)","        trace2.add(it.textToBeInserted)","    })"]},
 
         {"kind":"when","text":"The text area content is changed.","code":["UI.runNow { ui.component.document.insertString(5, \"other \", null) }","UI.sync()"]},
 
@@ -225,7 +225,7 @@
 
         {"kind":"and","text":"A simple list where handlers are going to leave a trace.","code":["var trace1 = []","var trace2 = []"]},
 
-        {"kind":"and","text":"A handler that records the text area content.","code":["ui.onTextRemove( it -> {","    trace1.add(it.component.text)","    trace2.add(it.textToBeRemoved)","})"]},
+        {"kind":"and","text":"A handler that records the text area content.","code":["ui = ui.onTextRemove( it -> {","        trace1.add(it.component.text)","        trace2.add(it.textToBeRemoved)","    })"]},
 
         {"kind":"when","text":"The text area content is changed.","code":["UI.runNow { ui.component.document.remove(5, 5) }","UI.sync()"]},
 
@@ -246,7 +246,7 @@
 
         {"kind":"and","text":"A simple list where handlers are going to leave a trace.","code":["var trace1 = []","var trace2 = []","var trace3 = []"]},
 
-        {"kind":"and","text":"A handler that records the text area content.","code":["ui.onTextReplace( it -> {","    trace1.add(it.component.text)","    trace2.add(it.replacementText)","    trace3.add(\"$it.offset|$it.length\")","})"]},
+        {"kind":"and","text":"A handler that records the text area content.","code":["ui = ui.onTextReplace( it -> {","        trace1.add(it.component.text)","        trace2.add(it.replacementText)","        trace3.add(\"$it.offset|$it.length\")","    })"]},
 
         {"kind":"when","text":"The text area content is changed.","code":["UI.runNow { ui.component.setText(\"Some other content...\") }","UI.sync()"]},
 
@@ -267,7 +267,7 @@
 
         {"kind":"and","text":"A simple list where handlers are going to leave a trace.","code":["var trace = []"]},
 
-        {"kind":"and","text":"A handler that records the text area content.","code":["ui.onTextReplace( it -> trace.add(\"1\") )","  .onTextReplace( it -> trace.add(\"2\") )","  .onTextReplace( it -> trace.add(\"3\") )","  .onTextReplace( it -> trace.add(\"4\") )","  .onTextReplace( it -> trace.add(\"5\") )","  .onTextReplace( it -> trace.add(\"6\") )","  .onTextReplace( it -> trace.add(\"7\") )"]},
+        {"kind":"and","text":"A handler that records the text area content.","code":["ui = ui.onTextReplace( it -> trace.add(\"1\") )","       .onTextReplace( it -> trace.add(\"2\") )","       .onTextReplace( it -> trace.add(\"3\") )","       .onTextReplace( it -> trace.add(\"4\") )","       .onTextReplace( it -> trace.add(\"5\") )","       .onTextReplace( it -> trace.add(\"6\") )","       .onTextReplace( it -> trace.add(\"7\") )"]},
 
         {"kind":"when","text":"The text area content is changed.","code":["UI.runNow { ui.component.setText(\"Some other content...\") }","UI.sync()"]},
 

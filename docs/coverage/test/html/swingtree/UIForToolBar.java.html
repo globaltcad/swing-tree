@@ -3,6 +3,7 @@
 import sprouts.Val;
 
 import javax.swing.*;
+import java.util.Objects;
 
 public final class UIForToolBar&lt;T extends JToolBar&gt; extends UIForAnySwing&lt;UIForToolBar&lt;T&gt;, T&gt;
 {
@@ -12,15 +13,21 @@ public final class UIForToolBar&lt;T extends JToolBar&gt; extends UIForAnySwing&
      * {@link UIForAnySwing} (sub)types always wrap
      * a single component for which they are responsible.
      *
-     * @param component The {@link JComponent} type which will be wrapped by this builder node.
+     * @param state The {@link BuilderState} modelling how the component is built.
      */
-<span class="fc" id="L17">    UIForToolBar(T component) {</span>
-<span class="fc" id="L18">        _state = new BuilderState&lt;&gt;(component);</span>
-<span class="fc" id="L19">    }</span>
+<span class="fc" id="L18">    UIForToolBar( BuilderState&lt;T&gt; state ) {</span>
+<span class="fc" id="L19">        Objects.requireNonNull(state);</span>
+<span class="fc" id="L20">        _state = state;</span>
+<span class="fc" id="L21">    }</span>
 
     @Override
     protected BuilderState&lt;T&gt; _state() {
-<span class="nc" id="L23">        return _state;</span>
+<span class="nc" id="L25">        return _state;</span>
+    }
+    
+    @Override
+    protected UIForToolBar&lt;T&gt; _with( BuilderState&lt;T&gt; newState ) {
+<span class="nc" id="L30">        return new UIForToolBar&lt;&gt;(newState);</span>
     }
 
     /**
@@ -29,11 +36,11 @@ public final class UIForToolBar&lt;T extends JToolBar&gt; extends UIForAnySwing&
      * @return This builder node.
      */
     public final UIForToolBar&lt;T&gt; withOrientation( UI.Align alignment ) {
-<span class="nc" id="L32">        NullUtil.nullArgCheck(alignment, &quot;alignment&quot;, UI.Align.class);</span>
-<span class="nc" id="L33">        return _with( thisComponent -&gt; {</span>
-<span class="nc" id="L34">                    thisComponent.setOrientation(alignment.forToolBar());</span>
-<span class="nc" id="L35">                })</span>
-<span class="nc" id="L36">                ._this();</span>
+<span class="nc" id="L39">        NullUtil.nullArgCheck(alignment, &quot;alignment&quot;, UI.Align.class);</span>
+<span class="nc" id="L40">        return _with( thisComponent -&gt; {</span>
+<span class="nc" id="L41">                    thisComponent.setOrientation(alignment.forToolBar());</span>
+<span class="nc" id="L42">                })</span>
+<span class="nc" id="L43">                ._this();</span>
     }
 
     /**
@@ -42,15 +49,15 @@ public final class UIForToolBar&lt;T extends JToolBar&gt; extends UIForAnySwing&
      * @return This builder node.
      */
     public final UIForToolBar&lt;T&gt; withOrientation( Val&lt;UI.Align&gt; alignment ) {
-<span class="nc" id="L45">        NullUtil.nullArgCheck(alignment, &quot;alignment&quot;, Val.class);</span>
-<span class="nc" id="L46">        NullUtil.nullPropertyCheck(alignment, &quot;alignment&quot;, &quot;Null is not a valid alignment.&quot;);</span>
-<span class="nc" id="L47">        return _withOnShow( alignment, (c,v) -&gt; {</span>
-<span class="nc" id="L48">                    c.setOrientation(v.forToolBar());</span>
-<span class="nc" id="L49">                })</span>
-<span class="nc" id="L50">                ._with( thisComponent -&gt; {</span>
-<span class="nc" id="L51">                    thisComponent.setOrientation(alignment.orElseThrow().forToolBar());</span>
-<span class="nc" id="L52">                })</span>
-<span class="nc" id="L53">                ._this();</span>
+<span class="nc" id="L52">        NullUtil.nullArgCheck(alignment, &quot;alignment&quot;, Val.class);</span>
+<span class="nc" id="L53">        NullUtil.nullPropertyCheck(alignment, &quot;alignment&quot;, &quot;Null is not a valid alignment.&quot;);</span>
+<span class="nc" id="L54">        return _withOnShow( alignment, (c,v) -&gt; {</span>
+<span class="nc" id="L55">                    c.setOrientation(v.forToolBar());</span>
+<span class="nc" id="L56">                })</span>
+<span class="nc" id="L57">                ._with( thisComponent -&gt; {</span>
+<span class="nc" id="L58">                    thisComponent.setOrientation(alignment.orElseThrow().forToolBar());</span>
+<span class="nc" id="L59">                })</span>
+<span class="nc" id="L60">                ._this();</span>
     }
 
 }

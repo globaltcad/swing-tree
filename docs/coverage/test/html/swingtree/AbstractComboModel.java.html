@@ -78,7 +78,7 @@ abstract class AbstractComboModel&lt;E&gt; implements ComboBoxModel&lt;E&gt;
 
     void fireListeners() {
 		try {
-<span class="fc bfc" id="L81" title="All 2 branches covered.">			for ( ListDataListener l : listeners )</span>
+<span class="fc bfc" id="L81" title="All 2 branches covered.">			for ( ListDataListener l : new ArrayList&lt;&gt;(listeners) )</span>
 <span class="fc" id="L82">				l.contentsChanged(</span>
 <span class="fc" id="L83">					new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, 0, getSize())</span>
 				);
@@ -176,12 +176,12 @@ abstract class AbstractComboModel&lt;E&gt; implements ComboBoxModel&lt;E&gt;
 <span class="pc bpc" id="L176" title="1 of 6 branches missed.">			if ( o.equals(&quot;true&quot;) || o.equals(&quot;yes&quot;) || o.equals(&quot;1&quot;) )</span>
 <span class="fc" id="L177">				return (E) Boolean.TRUE;</span>
 
-<span class="pc bpc" id="L179" title="3 of 6 branches missed.">			if ( o.equals(&quot;false&quot;) || o.equals(&quot;no&quot;) || o.equals(&quot;0&quot;) )</span>
+<span class="pc bpc" id="L179" title="1 of 6 branches missed.">			if ( o.equals(&quot;false&quot;) || o.equals(&quot;no&quot;) || o.equals(&quot;0&quot;) )</span>
 <span class="fc" id="L180">				return (E) Boolean.FALSE;</span>
 
 			// We failed to parse the boolean... the input is invalid!
 			// So we cannot update the model, and simply return the old value:
-<span class="nc" id="L184">			return _selectedItem.orElseNull();</span>
+<span class="fc" id="L184">			return _selectedItem.orElseNull();</span>
 		}
 		// Ok maybe it's an enum?
 <span class="pc bpc" id="L187" title="1 of 2 branches missed.">		if ( type.isEnum() ) {</span>

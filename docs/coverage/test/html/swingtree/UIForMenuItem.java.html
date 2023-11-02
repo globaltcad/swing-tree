@@ -2,6 +2,7 @@
 
 
 import javax.swing.*;
+import java.util.Objects;
 
 /**
  *  A SwingTree builder node designed for configuring {@link JMenuItem} instances.
@@ -10,13 +11,19 @@ public final class UIForMenuItem&lt;M extends JMenuItem&gt; extends UIForAnyMenu
 {
     private final BuilderState&lt;M&gt; _state;
 
-<span class="fc" id="L13">    UIForMenuItem( M component ) {</span>
-<span class="fc" id="L14">        _state = new BuilderState&lt;&gt;(component);</span>
-<span class="fc" id="L15">    }</span>
+<span class="fc" id="L14">    UIForMenuItem( BuilderState&lt;M&gt; state ) {</span>
+<span class="fc" id="L15">        Objects.requireNonNull(state);</span>
+<span class="fc" id="L16">        _state = state;</span>
+<span class="fc" id="L17">    }</span>
 
     @Override
     protected BuilderState&lt;M&gt; _state() {
-<span class="fc" id="L19">        return _state;</span>
+<span class="fc" id="L21">        return _state;</span>
+    }
+    
+    @Override
+    protected UIForMenuItem&lt;M&gt; _with( BuilderState&lt;M&gt; newState ) {
+<span class="fc" id="L26">        return new UIForMenuItem&lt;&gt;(newState);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

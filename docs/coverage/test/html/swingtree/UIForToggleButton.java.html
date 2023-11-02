@@ -2,6 +2,7 @@
 
 
 import javax.swing.*;
+import java.util.Objects;
 
 /**
  *  A SwingTree builder node designed for configuring {@link JToggleButton} instances.
@@ -13,13 +14,19 @@ public final class UIForToggleButton&lt;B extends JToggleButton&gt; extends UIFo
 {
     private final BuilderState&lt;B&gt; _state;
 
-<span class="fc" id="L16">    UIForToggleButton( B component ) {</span>
-<span class="fc" id="L17">        _state = new BuilderState&lt;&gt;(component);</span>
-<span class="fc" id="L18">    }</span>
+<span class="fc" id="L17">    UIForToggleButton( BuilderState&lt;B&gt; state ) {</span>
+<span class="fc" id="L18">        Objects.requireNonNull(state);</span>
+<span class="fc" id="L19">        _state = state;</span>
+<span class="fc" id="L20">    }</span>
 
     @Override
     protected BuilderState&lt;B&gt; _state() {
-<span class="fc" id="L22">        return _state;</span>
+<span class="fc" id="L24">        return _state;</span>
+    }
+    
+    @Override
+    protected UIForToggleButton&lt;B&gt; _with( BuilderState&lt;B&gt; newState ) {
+<span class="fc" id="L29">        return new UIForToggleButton&lt;&gt;(newState);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

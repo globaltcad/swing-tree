@@ -895,7 +895,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      * @param &lt;T&gt; The type parameter of the component which should be found.
      */
     public final &lt;T extends JComponent&gt; OptionalUI&lt;T&gt; find( Class&lt;T&gt; type, String id ) {
-<span class="fc" id="L898">        return this.find(type, c -&gt; Objects.equals(c.getName(), id));</span>
+<span class="fc" id="L898">        return this.find( type, c -&gt; Objects.equals(c.getName(), id) );</span>
     }
 
     /**
@@ -908,7 +908,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      * @param &lt;T&gt; The type parameter of the component which should be found.
      */
     public final &lt;T extends JComponent&gt; OptionalUI&lt;T&gt; find( Class&lt;T&gt; type, Enum&lt;?&gt; id ) {
-<span class="nc" id="L911">        return this.find(type, id.getClass().getSimpleName() + &quot;.&quot; + id.name());</span>
+<span class="nc" id="L911">        return this.find( type, id.getClass().getSimpleName() + &quot;.&quot; + id.name() );</span>
     }
 
     /**
@@ -948,12 +948,24 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *
      * @param type The {@link JComponent} type which should be found in the swing tree.
      * @param group The style group which should be used to test the {@link JComponent}.
-     * @return A list of {@link JComponent} instances which match the given type and predicate.
+     * @return A list of {@link JComponent} instances which match the given type and group.
      * @param &lt;T&gt; The type parameter of the component which should be found.
      */
     public final &lt;T extends JComponent&gt; List&lt;T&gt; findAllByGroup( Class&lt;T&gt; type, String group ) {
-<span class="fc" id="L955">        return this.findAll(type, c -&gt; ComponentExtension.from(c).belongsToGroup(group));</span>
+<span class="fc" id="L955">        return this.findAll( type, c -&gt; ComponentExtension.from(c).belongsToGroup(group) );</span>
     }
+
+    /**
+     *  Use this to query the UI tree and find all {@link JComponent}s
+     *  that belong to a particular style group.
+     *
+     * @param group The style group which should be used to check if a particular {@link JComponent} belongs to it.
+     * @return A list of {@link JComponent} instances which all have the given style group.
+     */
+    public final List&lt;JComponent&gt; findAllByGroup( String group ) {
+<span class="nc" id="L966">        return this.findAll( JComponent.class, c -&gt; ComponentExtension.from(c).belongsToGroup(group) );</span>
+    }
+
 
     /**
      *  Use this to query the UI tree and find all {@link JComponent}s
@@ -965,7 +977,18 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      * @param &lt;T&gt; The type parameter of the component which should be found.
      */
     public final &lt;T extends JComponent&gt; List&lt;T&gt; findAllByGroup( Class&lt;T&gt; type, Enum&lt;?&gt; group ) {
-<span class="nc" id="L968">        return this.findAll(type, c -&gt; ComponentExtension.from(c).belongsToGroup(group));</span>
+<span class="nc" id="L980">        return this.findAll( type, c -&gt; ComponentExtension.from(c).belongsToGroup(group) );</span>
+    }
+
+    /**
+     *  Use this to query the UI tree and find all {@link JComponent}s
+     *  that belong to a particular style group.
+     *
+     * @param group The style group which should be used to check if a particular {@link JComponent} belongs to it.
+     * @return A list of {@link JComponent} instances which all have the given style group.
+     */
+    public final List&lt;JComponent&gt; findAllByGroup( Enum&lt;?&gt; group ) {
+<span class="nc" id="L991">        return this.findAll( JComponent.class, c -&gt; ComponentExtension.from(c).belongsToGroup(group) );</span>
     }
 
     /**
@@ -980,7 +1003,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  &lt;pre&gt;{@code
      *      UI.button(&quot;Click me&quot;).withPrefSize(400, 400)
      *      .onMouseClick( it -&gt; it.animateFor(2, TimeUnit.SECONDS, state -&gt; {
-     *          double r = 300 * state.progress() * it.getScale();
+     *          double r = 300 * state.progress() * it.scale();
      *          double x = it.mouseX() - r / 2;
      *          double y = it.mouseY() - r / 2;
      *          it.paint(state, g -&gt; {
@@ -994,11 +1017,11 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      * @param painter The rendering task which should be executed on the EDT at the end of the current event cycle.
      */
     public final void paint( AnimationState state, Painter painter ) {
-<span class="nc" id="L997">        UI.run(()-&gt;{ // This method might be called by the application thread, so we need to run on the EDT!</span>
+<span class="nc" id="L1020">        UI.run(()-&gt;{ // This method might be called by the application thread, so we need to run on the EDT!</span>
             // We do the rendering later in the paint method of a custom border implementation!
-<span class="nc" id="L999">            ComponentExtension.from(_component).addAnimationPainter(state, painter);</span>
-<span class="nc" id="L1000">        });</span>
-<span class="nc" id="L1001">    }</span>
+<span class="nc" id="L1022">            ComponentExtension.from(_component).addAnimationPainter(state, painter);</span>
+<span class="nc" id="L1023">        });</span>
+<span class="nc" id="L1024">    }</span>
 
     /**
      *  A common use case is to style the component based on the current animation state.
@@ -1024,11 +1047,11 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      * @param styler The styling task which should be executed on the EDT at the end of the current event cycle.
      */
     public final void style( AnimationState state, Styler&lt;C&gt; styler ) {
-<span class="fc" id="L1027">        UI.run(()-&gt;{ // This method might be called by the application thread, so we need to run on the EDT!</span>
+<span class="fc" id="L1050">        UI.run(()-&gt;{ // This method might be called by the application thread, so we need to run on the EDT!</span>
             // We do the styling later in the paint method of a custom border implementation!
-<span class="fc" id="L1029">            ComponentExtension.from(_component).addAnimationStyler(state, styler);</span>
-<span class="fc" id="L1030">        });</span>
-<span class="fc" id="L1031">    }</span>
+<span class="fc" id="L1052">            ComponentExtension.from(_component).addAnimationStyler(state, styler);</span>
+<span class="fc" id="L1053">        });</span>
+<span class="fc" id="L1054">    }</span>
 
     /**
      *  Exposes access the animation builder API, where you can define the conditions
@@ -1040,7 +1063,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return An {@link Animator} instance which can be used to define how the animation should be executed.
      */
     public final Animator animateFor( double duration, TimeUnit unit ) {
-<span class="fc" id="L1043">        return Animator.animateFor(LifeTime.of(duration, unit), _component());</span>
+<span class="fc" id="L1066">        return Animator.animateFor(LifeTime.of(duration, unit), _component());</span>
     }
 
     /**
@@ -1052,7 +1075,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  @return An {@link Animator} instance which can be used to define how the animation should be executed.
      */
     public final Animator animateFor( LifeTime lifeTime ) {
-<span class="nc" id="L1055">        return Animator.animateFor(lifeTime, _component());</span>
+<span class="nc" id="L1078">        return Animator.animateFor(lifeTime, _component());</span>
     }
 
     /**
@@ -1078,8 +1101,8 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  @param animation The animation that should be executed.
      */
     public final void animateFor( LifeTime lifeTime, Animation animation ) {
-<span class="nc" id="L1081">        Animator.animateFor(lifeTime, _component()).go(animation);</span>
-<span class="nc" id="L1082">    }</span>
+<span class="nc" id="L1104">        Animator.animateFor(lifeTime, _component()).go(animation);</span>
+<span class="nc" id="L1105">    }</span>
 
     /**
      *  Use this to schedule and run the provided animation
@@ -1092,8 +1115,8 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  @param animation The animation that should be executed.
      */
     public final void animateFor( double duration, TimeUnit unit, Animation animation ) {
-<span class="fc" id="L1095">        this.animateFor(duration, unit).go(animation);</span>
-<span class="fc" id="L1096">    }</span>
+<span class="fc" id="L1118">        this.animateFor(duration, unit).go(animation);</span>
+<span class="fc" id="L1119">    }</span>
 
     /**
      *  The number returned by this method is used to scale the UI
@@ -1104,7 +1127,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      * @return The current UI scale factor, which is used to scale the UI
      *         for high resolution displays (high dots-per-inch, or DPI).
      */
-<span class="nc" id="L1107">    public float getScale() { return UI.scale(); }</span>
+<span class="nc" id="L1130">    public float getScale() { return UI.scale(); }</span>
 
     /**
      *  The number returned by this method is used to scale the UI
@@ -1115,7 +1138,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      * @return The current UI scale factor, which is used to scale the UI
      *         for high resolution displays (high dots-per-inch, or DPI).
      */
-<span class="nc" id="L1118">    public float scale() { return UI.scale(); }</span>
+<span class="nc" id="L1141">    public float scale() { return UI.scale(); }</span>
 
     /**
      *  Use this method inside custom {@link Painter} implementations (see {@link #paint(AnimationState, Painter)})
@@ -1124,7 +1147,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  @param value The {@code int} value to scale.
      *  @return The scaled {@code int} value.
      */
-<span class="nc" id="L1127">    public int scale( int value ) { return UI.scale(value); }</span>
+<span class="nc" id="L1150">    public int scale( int value ) { return UI.scale(value); }</span>
 
     /**
      *  Use this method inside custom {@link Painter} implementations (see {@link #paint(AnimationState, Painter)})
@@ -1133,7 +1156,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  @param value The {@code float} value to scale.
      *  @return The scaled {@code float} value.
      */
-<span class="nc" id="L1136">    public float scale( float value ) { return UI.scale(value); }</span>
+<span class="nc" id="L1159">    public float scale( float value ) { return UI.scale(value); }</span>
 
     /**
      *  Use this method inside custom {@link Painter} implementations (see {@link #paint(AnimationState, Painter)})
@@ -1142,7 +1165,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      *  @param value The {@code double} value to scale.
      *  @return The scaled {@code double} value.
      */
-<span class="nc" id="L1145">    public double scale( double value ) { return UI.scale(value); }</span>
+<span class="nc" id="L1168">    public double scale( double value ) { return UI.scale(value); }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

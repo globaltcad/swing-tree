@@ -29,34 +29,40 @@ public class UIForScrollPanels&lt;P extends JScrollPanels&gt; extends UIForAnySc
 	 * Extensions of the {@link  UIForAnySwing} always wrap
 	 * a single component for which they are responsible.
 	 *
-	 * @param component The JComponent type which will be wrapped by this builder node.
+	 * @param state The {@link BuilderState} modelling how the underlying component is build.
 	 */
-<span class="fc" id="L34">	protected UIForScrollPanels( P component ) {</span>
-<span class="fc" id="L35">		_state = new BuilderState&lt;&gt;(component);</span>
-<span class="fc" id="L36">	}</span>
+<span class="fc" id="L34">	protected UIForScrollPanels( BuilderState&lt;P&gt; state ) {</span>
+<span class="fc" id="L35">		Objects.requireNonNull(state);</span>
+<span class="fc" id="L36">		_state = state;</span>
+<span class="fc" id="L37">	}</span>
 
 	@Override
 	protected BuilderState&lt;P&gt; _state() {
-<span class="fc" id="L40">		return _state;</span>
+<span class="fc" id="L41">		return _state;</span>
+	}
+
+	@Override
+	protected UIForScrollPanels&lt;P&gt; _with( BuilderState&lt;P&gt; newState ) {
+<span class="fc" id="L46">		return new UIForScrollPanels&lt;&gt;(newState);</span>
 	}
 
 	@Override
 	protected void _doAddComponent(JComponent newComponent, Object conf, P thisComponent ) {
-<span class="fc" id="L45">		Objects.requireNonNull(newComponent);</span>
+<span class="fc" id="L51">		Objects.requireNonNull(newComponent);</span>
 
-<span class="fc" id="L47">		EntryViewModel entry = _entryModel();</span>
-<span class="pc bpc" id="L48" title="1 of 2 branches missed.">		if ( conf == null )</span>
-<span class="fc" id="L49">			thisComponent.addEntry( entry, m -&gt; UI.of(newComponent) );</span>
+<span class="fc" id="L53">		EntryViewModel entry = _entryModel();</span>
+<span class="pc bpc" id="L54" title="1 of 2 branches missed.">		if ( conf == null )</span>
+<span class="fc" id="L55">			thisComponent.addEntry( entry, m -&gt; UI.of(newComponent) );</span>
 		else
-<span class="nc" id="L51">			thisComponent.addEntry( conf.toString(), entry, m -&gt; UI.of(newComponent) );</span>
-<span class="fc" id="L52">	}</span>
+<span class="nc" id="L57">			thisComponent.addEntry( conf.toString(), entry, m -&gt; UI.of(newComponent) );</span>
+<span class="fc" id="L58">	}</span>
 
 	private EntryViewModel _entryModel() {
-<span class="fc" id="L55">		Var&lt;Boolean&gt; selected = Var.of(false);</span>
-<span class="fc" id="L56">		Var&lt;Integer&gt; position = Var.of(0);</span>
-<span class="fc" id="L57">		return new EntryViewModel() {</span>
-<span class="fc" id="L58">			@Override public Var&lt;Boolean&gt; isSelected() { return selected; }</span>
-<span class="fc" id="L59">			@Override public Var&lt;Integer&gt; position() { return position; }</span>
+<span class="fc" id="L61">		Var&lt;Boolean&gt; selected = Var.of(false);</span>
+<span class="fc" id="L62">		Var&lt;Integer&gt; position = Var.of(0);</span>
+<span class="fc" id="L63">		return new EntryViewModel() {</span>
+<span class="fc" id="L64">			@Override public Var&lt;Boolean&gt; isSelected() { return selected; }</span>
+<span class="fc" id="L65">			@Override public Var&lt;Integer&gt; position() { return position; }</span>
 		};
 	}
 
@@ -64,74 +70,74 @@ public class UIForScrollPanels&lt;P extends JScrollPanels&gt; extends UIForAnySc
 	protected &lt;M&gt; void _addViewableProps(
 			Vals&lt;M&gt; models, String attr, ViewSupplier&lt;M&gt; viewSupplier, P thisComponent
 	) {
-<span class="fc" id="L67">		BiFunction&lt;Integer, Vals&lt;M&gt;, M&gt; modelFetcher = (i, vals) -&gt; {</span>
-<span class="fc" id="L68">			M v = vals.at(i).get();</span>
-<span class="fc bfc" id="L69" title="All 2 branches covered.">			if ( v instanceof EntryViewModel ) ((EntryViewModel) v).position().set(i);</span>
-<span class="fc" id="L70">			return v;</span>
+<span class="fc" id="L73">		BiFunction&lt;Integer, Vals&lt;M&gt;, M&gt; modelFetcher = (i, vals) -&gt; {</span>
+<span class="fc" id="L74">			M v = vals.at(i).get();</span>
+<span class="fc bfc" id="L75" title="All 2 branches covered.">			if ( v instanceof EntryViewModel ) ((EntryViewModel) v).position().set(i);</span>
+<span class="fc" id="L76">			return v;</span>
 		};
-<span class="fc" id="L72">		BiFunction&lt;Integer, Vals&lt;M&gt;, M&gt; entryFetcher = (i, vals) -&gt; {</span>
-<span class="fc" id="L73">			M v = modelFetcher.apply(i, vals);</span>
-<span class="pc bpc" id="L74" title="1 of 2 branches missed.">			return ( v != null ? (M) v : (M)_entryModel() );</span>
+<span class="fc" id="L78">		BiFunction&lt;Integer, Vals&lt;M&gt;, M&gt; entryFetcher = (i, vals) -&gt; {</span>
+<span class="fc" id="L79">			M v = modelFetcher.apply(i, vals);</span>
+<span class="pc bpc" id="L80" title="1 of 2 branches missed.">			return ( v != null ? (M) v : (M)_entryModel() );</span>
 		};
 
-<span class="fc" id="L77">		Consumer&lt;Vals&lt;M&gt;&gt; addAll = vals -&gt; {</span>
-<span class="fc" id="L78">			boolean allAreEntries = vals.stream().allMatch( v -&gt; v instanceof EntryViewModel );</span>
-<span class="fc bfc" id="L79" title="All 2 branches covered.">			if ( allAreEntries ) {</span>
-<span class="fc" id="L80">				List&lt;EntryViewModel&gt; entries = (List) vals.toList();</span>
-<span class="fc" id="L81">				thisComponent.addAllEntries(attr, entries, (ViewSupplier&lt;EntryViewModel&gt;) viewSupplier);</span>
-<span class="fc" id="L82">			}</span>
+<span class="fc" id="L83">		Consumer&lt;Vals&lt;M&gt;&gt; addAll = vals -&gt; {</span>
+<span class="fc" id="L84">			boolean allAreEntries = vals.stream().allMatch( v -&gt; v instanceof EntryViewModel );</span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">			if ( allAreEntries ) {</span>
+<span class="fc" id="L86">				List&lt;EntryViewModel&gt; entries = (List) vals.toList();</span>
+<span class="fc" id="L87">				thisComponent.addAllEntries(attr, entries, (ViewSupplier&lt;EntryViewModel&gt;) viewSupplier);</span>
+<span class="fc" id="L88">			}</span>
 			else
-<span class="fc bfc" id="L84" title="All 2 branches covered.">				for ( int i = 0; i&lt; vals.size(); i++ ) {</span>
-<span class="fc" id="L85">					int finalI = i;</span>
-<span class="fc" id="L86">					thisComponent.addEntry(</span>
-<span class="fc" id="L87">							_entryModel(),</span>
-<span class="fc" id="L88">							m -&gt; viewSupplier.createViewFor(entryFetcher.apply(finalI,vals))</span>
+<span class="fc bfc" id="L90" title="All 2 branches covered.">				for ( int i = 0; i&lt; vals.size(); i++ ) {</span>
+<span class="fc" id="L91">					int finalI = i;</span>
+<span class="fc" id="L92">					thisComponent.addEntry(</span>
+<span class="fc" id="L93">							_entryModel(),</span>
+<span class="fc" id="L94">							m -&gt; viewSupplier.createViewFor(entryFetcher.apply(finalI,vals))</span>
 						);
 				}
-<span class="fc" id="L91">		};</span>
+<span class="fc" id="L97">		};</span>
 
-<span class="fc" id="L93">		_onShow( models, thisComponent, (c, delegate) -&gt; {</span>
-<span class="fc" id="L94">			Vals&lt;M&gt; vals = delegate.vals();</span>
-<span class="fc" id="L95">			int delegateIndex = delegate.index();</span>
-<span class="fc" id="L96">			Change changeType = delegate.changeType();</span>
+<span class="fc" id="L99">		_onShow( models, thisComponent, (c, delegate) -&gt; {</span>
+<span class="fc" id="L100">			Vals&lt;M&gt; vals = delegate.vals();</span>
+<span class="fc" id="L101">			int delegateIndex = delegate.index();</span>
+<span class="fc" id="L102">			Change changeType = delegate.changeType();</span>
 			// we simply redo all the components.
-<span class="pc bpc" id="L98" title="3 of 4 branches missed.">			switch ( changeType ) {</span>
+<span class="pc bpc" id="L104" title="3 of 4 branches missed.">			switch ( changeType ) {</span>
 				case SET:
 				case ADD:
 				case REMOVE:
-<span class="pc bpc" id="L102" title="1 of 2 branches missed.">					if ( delegateIndex &gt;= 0 ) {</span>
-<span class="fc bfc" id="L103" title="All 2 branches covered.">						if ( changeType == Change.ADD ) {</span>
-<span class="fc" id="L104">							M m = entryFetcher.apply(delegateIndex, vals);</span>
-<span class="pc bpc" id="L105" title="1 of 2 branches missed.">							if ( m instanceof EntryViewModel )</span>
-<span class="nc" id="L106">								c.addEntryAt(delegateIndex, null, (EntryViewModel)m, (ViewSupplier&lt;EntryViewModel&gt;) viewSupplier);</span>
+<span class="pc bpc" id="L108" title="1 of 2 branches missed.">					if ( delegateIndex &gt;= 0 ) {</span>
+<span class="fc bfc" id="L109" title="All 2 branches covered.">						if ( changeType == Change.ADD ) {</span>
+<span class="fc" id="L110">							M m = entryFetcher.apply(delegateIndex, vals);</span>
+<span class="pc bpc" id="L111" title="1 of 2 branches missed.">							if ( m instanceof EntryViewModel )</span>
+<span class="nc" id="L112">								c.addEntryAt(delegateIndex, null, (EntryViewModel)m, (ViewSupplier&lt;EntryViewModel&gt;) viewSupplier);</span>
 							else
-<span class="fc" id="L108">								c.addEntryAt(delegateIndex, null, _entryModel(), em -&gt; viewSupplier.createViewFor(m));</span>
-<span class="pc bpc" id="L109" title="1 of 2 branches missed.">						} else if ( changeType == Change.REMOVE )</span>
-<span class="fc" id="L110">							c.removeEntryAt( delegateIndex );</span>
-<span class="nc bnc" id="L111" title="All 2 branches missed.">						else if ( changeType == Change.SET ) {</span>
-<span class="nc" id="L112">							M m = entryFetcher.apply(delegateIndex, vals);</span>
-<span class="nc bnc" id="L113" title="All 2 branches missed.">							if ( m instanceof EntryViewModel )</span>
-<span class="nc" id="L114">								c.setEntryAt(delegateIndex, null, (EntryViewModel)m, (ViewSupplier&lt;EntryViewModel&gt;) viewSupplier);</span>
+<span class="fc" id="L114">								c.addEntryAt(delegateIndex, null, _entryModel(), em -&gt; viewSupplier.createViewFor(m));</span>
+<span class="pc bpc" id="L115" title="1 of 2 branches missed.">						} else if ( changeType == Change.REMOVE )</span>
+<span class="fc" id="L116">							c.removeEntryAt( delegateIndex );</span>
+<span class="nc bnc" id="L117" title="All 2 branches missed.">						else if ( changeType == Change.SET ) {</span>
+<span class="nc" id="L118">							M m = entryFetcher.apply(delegateIndex, vals);</span>
+<span class="nc bnc" id="L119" title="All 2 branches missed.">							if ( m instanceof EntryViewModel )</span>
+<span class="nc" id="L120">								c.setEntryAt(delegateIndex, null, (EntryViewModel)m, (ViewSupplier&lt;EntryViewModel&gt;) viewSupplier);</span>
 							else
-<span class="nc" id="L116">								c.setEntryAt(delegateIndex, null, _entryModel(), em -&gt; viewSupplier.createViewFor(m));</span>
+<span class="nc" id="L122">								c.setEntryAt(delegateIndex, null, _entryModel(), em -&gt; viewSupplier.createViewFor(m));</span>
 						}
 						// Now we need to update the positions of all the entries
-<span class="fc bfc" id="L119" title="All 2 branches covered.">						for ( int i = delegateIndex; i &lt; vals.size(); i++ ) {</span>
-<span class="fc" id="L120">							M m = entryFetcher.apply(i, vals);</span>
-<span class="fc bfc" id="L121" title="All 2 branches covered.">							if ( m instanceof EntryViewModel )</span>
-<span class="fc" id="L122">								((EntryViewModel)m).position().set(i);</span>
+<span class="fc bfc" id="L125" title="All 2 branches covered.">						for ( int i = delegateIndex; i &lt; vals.size(); i++ ) {</span>
+<span class="fc" id="L126">							M m = entryFetcher.apply(i, vals);</span>
+<span class="fc bfc" id="L127" title="All 2 branches covered.">							if ( m instanceof EntryViewModel )</span>
+<span class="fc" id="L128">								((EntryViewModel)m).position().set(i);</span>
 						}
 					} else {
-<span class="nc" id="L125">						c.removeAllEntries();</span>
-<span class="nc" id="L126">						addAll.accept(vals);</span>
+<span class="nc" id="L131">						c.removeAllEntries();</span>
+<span class="nc" id="L132">						addAll.accept(vals);</span>
 					}
-<span class="nc" id="L128">				break;</span>
-<span class="nc" id="L129">				case CLEAR: c.removeAllEntries(); break;</span>
-<span class="nc" id="L130">				case NONE: break;</span>
-<span class="nc" id="L131">				default: throw new IllegalStateException(&quot;Unknown type: &quot;+delegate.changeType());</span>
+<span class="nc" id="L134">				break;</span>
+<span class="nc" id="L135">				case CLEAR: c.removeAllEntries(); break;</span>
+<span class="nc" id="L136">				case NONE: break;</span>
+<span class="nc" id="L137">				default: throw new IllegalStateException(&quot;Unknown type: &quot;+delegate.changeType());</span>
 			}
-<span class="fc" id="L133">		});</span>
-<span class="fc" id="L134">		addAll.accept(models);</span>
-<span class="fc" id="L135">	}</span>
+<span class="fc" id="L139">		});</span>
+<span class="fc" id="L140">		addAll.accept(models);</span>
+<span class="fc" id="L141">	}</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

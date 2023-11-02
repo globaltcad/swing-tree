@@ -5,29 +5,36 @@ import sprouts.Action;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 public final class UIForFormattedTextField extends UIForAnyTextComponent&lt;UIForFormattedTextField, JFormattedTextField&gt;
 {
     private final BuilderState&lt;JFormattedTextField&gt; _state;
 
-<span class="fc" id="L14">    UIForFormattedTextField( JFormattedTextField component ) {</span>
-<span class="fc" id="L15">        _state = new BuilderState&lt;&gt;(component);</span>
-<span class="fc" id="L16">    }</span>
+<span class="fc" id="L15">    UIForFormattedTextField( BuilderState&lt;JFormattedTextField&gt; state ) {</span>
+<span class="fc" id="L16">        Objects.requireNonNull(state);</span>
+<span class="fc" id="L17">        _state = state;</span>
+<span class="fc" id="L18">    }</span>
 
     @Override
     protected BuilderState&lt;JFormattedTextField&gt; _state() {
-<span class="fc" id="L20">        return _state;</span>
+<span class="fc" id="L22">        return _state;</span>
+    }
+    
+    @Override
+    protected UIForFormattedTextField _with( BuilderState&lt;JFormattedTextField&gt; newState ) {
+<span class="fc" id="L27">        return new UIForFormattedTextField(newState);</span>
     }
 
     public UIForFormattedTextField onEnter( Action&lt;ComponentDelegate&lt;JFormattedTextField, ActionEvent&gt;&gt; action ) {
-<span class="fc" id="L24">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
-<span class="fc" id="L25">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L26">                    _onEnter(thisComponent,</span>
-<span class="fc" id="L27">                        e -&gt; _doApp(()-&gt;action.accept(new ComponentDelegate&lt;&gt;( thisComponent, e )) )</span>
+<span class="fc" id="L31">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
+<span class="fc" id="L32">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L33">                    _onEnter(thisComponent,</span>
+<span class="fc" id="L34">                        e -&gt; _doApp(()-&gt;action.accept(new ComponentDelegate&lt;&gt;( thisComponent, e )) )</span>
                     );
-<span class="fc" id="L29">                })</span>
-<span class="fc" id="L30">                ._this();</span>
+<span class="fc" id="L36">                })</span>
+<span class="fc" id="L37">                ._this();</span>
     }
 
     private void _onEnter( JFormattedTextField thisComponent, Consumer&lt;ActionEvent&gt; action ) {
@@ -42,15 +49,15 @@ public final class UIForFormattedTextField extends UIForAnyTextComponent&lt;UIFo
             simply because it was added first.
             This is especially true in the context of declarative UI design.
         */
-<span class="fc" id="L45">        ActionListener[] listeners = thisComponent.getActionListeners();</span>
-<span class="fc bfc" id="L46" title="All 2 branches covered.">        for (ActionListener listener : listeners)</span>
-<span class="fc" id="L47">            thisComponent.removeActionListener(listener);</span>
+<span class="fc" id="L52">        ActionListener[] listeners = thisComponent.getActionListeners();</span>
+<span class="fc bfc" id="L53" title="All 2 branches covered.">        for (ActionListener listener : listeners)</span>
+<span class="fc" id="L54">            thisComponent.removeActionListener(listener);</span>
 
-<span class="fc" id="L49">        thisComponent.addActionListener(action::accept);</span>
+<span class="fc" id="L56">        thisComponent.addActionListener(action::accept);</span>
 
-<span class="fc bfc" id="L51" title="All 2 branches covered.">        for ( int i = listeners.length - 1; i &gt;= 0; i-- ) // reverse order because swing does not give us the listeners in the order they were added!</span>
-<span class="fc" id="L52">            thisComponent.addActionListener(listeners[i]);</span>
-<span class="fc" id="L53">    }</span>
+<span class="fc bfc" id="L58" title="All 2 branches covered.">        for ( int i = listeners.length - 1; i &gt;= 0; i-- ) // reverse order because swing does not give us the listeners in the order they were added!</span>
+<span class="fc" id="L59">            thisComponent.addActionListener(listeners[i]);</span>
+<span class="fc" id="L60">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

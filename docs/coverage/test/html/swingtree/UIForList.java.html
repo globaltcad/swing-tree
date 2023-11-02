@@ -30,15 +30,21 @@ public final class UIForList&lt;E, L extends JList&lt;E&gt;&gt; extends UIForAny
      * Extensions of the {@link  UIForAnySwing} always wrap
      * a single component for which they are responsible.
      *
-     * @param component The JComponent type which will be wrapped by this builder node.
+     * @param state The {@link BuilderState} modelling how the underlying component is built.
      */
-<span class="fc" id="L35">    UIForList( L component ) {</span>
-<span class="fc" id="L36">        _state = new BuilderState&lt;&gt;(component);</span>
-<span class="fc" id="L37">    }</span>
+<span class="fc" id="L35">    UIForList( BuilderState&lt;L&gt; state ) {</span>
+<span class="fc" id="L36">        Objects.requireNonNull(state);</span>
+<span class="fc" id="L37">        _state = state;</span>
+<span class="fc" id="L38">    }</span>
 
     @Override
     protected BuilderState&lt;L&gt; _state() {
-<span class="fc" id="L41">        return _state;</span>
+<span class="fc" id="L42">        return _state;</span>
+    }
+    
+    @Override
+    protected UIForList&lt;E, L&gt; _with( BuilderState&lt;L&gt; newState ) {
+<span class="fc" id="L47">        return new UIForList&lt;&gt;(newState);</span>
     }
 
     /**
@@ -48,34 +54,34 @@ public final class UIForList&lt;E, L extends JList&lt;E&gt;&gt; extends UIForAny
      * @return This instance of the builder node.
      */
     public final UIForList&lt;E, L&gt; withEntries( List&lt;E&gt; entries ) {
-<span class="fc" id="L51">        return _with( thisComponent -&gt;</span>
-<span class="fc" id="L52">                thisComponent.setModel (</span>
-<span class="fc" id="L53">                        new AbstractListModel&lt;E&gt;() {</span>
+<span class="fc" id="L57">        return _with( thisComponent -&gt;</span>
+<span class="fc" id="L58">                thisComponent.setModel (</span>
+<span class="fc" id="L59">                        new AbstractListModel&lt;E&gt;() {</span>
 
-<span class="fc" id="L55">                            private List&lt;E&gt; _reference = new ArrayList&lt;&gt;(entries);</span>
+<span class="fc" id="L61">                            private List&lt;E&gt; _reference = new ArrayList&lt;&gt;(entries);</span>
 
-<span class="nc" id="L57">                            public int getSize() { _checkContentChange(); return entries.size(); }</span>
-<span class="nc" id="L58">                            public E getElementAt( int i ) { _checkContentChange(); return entries.get( i ); }</span>
+<span class="nc" id="L63">                            public int getSize() { _checkContentChange(); return entries.size(); }</span>
+<span class="nc" id="L64">                            public E getElementAt( int i ) { _checkContentChange(); return entries.get( i ); }</span>
 
                             private void _checkContentChange() {
-<span class="nc" id="L61">                                UI.runLater(()-&gt; {</span>
-<span class="nc bnc" id="L62" title="All 2 branches missed.">                                    if ( _reference.size() != entries.size() ) {</span>
-<span class="nc" id="L63">                                        fireContentsChanged( this, 0, entries.size() );</span>
-<span class="nc" id="L64">                                        _reference = new ArrayList&lt;&gt;(entries);</span>
+<span class="nc" id="L67">                                UI.runLater(()-&gt; {</span>
+<span class="nc bnc" id="L68" title="All 2 branches missed.">                                    if ( _reference.size() != entries.size() ) {</span>
+<span class="nc" id="L69">                                        fireContentsChanged( this, 0, entries.size() );</span>
+<span class="nc" id="L70">                                        _reference = new ArrayList&lt;&gt;(entries);</span>
                                     }
                                     else
-<span class="nc bnc" id="L67" title="All 2 branches missed.">                                        for ( int i = 0; i &lt; entries.size(); i++ )</span>
-<span class="nc bnc" id="L68" title="All 2 branches missed.">                                            if ( !_reference.get( i ).equals( entries.get( i ) ) ) {</span>
-<span class="nc" id="L69">                                                fireContentsChanged( this, 0, entries.size() );</span>
-<span class="nc" id="L70">                                                _reference = new ArrayList&lt;&gt;(entries);</span>
-<span class="nc" id="L71">                                                break;</span>
+<span class="nc bnc" id="L73" title="All 2 branches missed.">                                        for ( int i = 0; i &lt; entries.size(); i++ )</span>
+<span class="nc bnc" id="L74" title="All 2 branches missed.">                                            if ( !_reference.get( i ).equals( entries.get( i ) ) ) {</span>
+<span class="nc" id="L75">                                                fireContentsChanged( this, 0, entries.size() );</span>
+<span class="nc" id="L76">                                                _reference = new ArrayList&lt;&gt;(entries);</span>
+<span class="nc" id="L77">                                                break;</span>
                                             }
-<span class="nc" id="L73">                                });</span>
-<span class="nc" id="L74">                            }</span>
+<span class="nc" id="L79">                                });</span>
+<span class="nc" id="L80">                            }</span>
                         }
                     )
                 )
-<span class="fc" id="L78">                ._this();</span>
+<span class="fc" id="L84">                ._this();</span>
     }
 
     /**
@@ -86,10 +92,10 @@ public final class UIForList&lt;E, L extends JList&lt;E&gt;&gt; extends UIForAny
      */
     @SafeVarargs
     public final UIForList&lt;E, L&gt; withEntries( E... entries ) {
-<span class="fc" id="L89">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L90">                    thisComponent.setListData( entries );</span>
-<span class="fc" id="L91">                })</span>
-<span class="fc" id="L92">                ._this();</span>
+<span class="fc" id="L95">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L96">                    thisComponent.setListData( entries );</span>
+<span class="fc" id="L97">                })</span>
+<span class="fc" id="L98">                ._this();</span>
     }
 
     /**
@@ -102,15 +108,15 @@ public final class UIForList&lt;E, L extends JList&lt;E&gt;&gt; extends UIForAny
      * @return This instance of the builder node to allow for builder-style fluent method chaining.
      */
     public final UIForList&lt;E, L&gt; withEntries( Vals&lt;E&gt; entries ) {
-<span class="fc" id="L105">        Objects.requireNonNull(entries, &quot;entries&quot;);</span>
-<span class="fc" id="L106">        ValsListModel&lt;E&gt; model = new ValsListModel&lt;&gt;(entries);</span>
-<span class="fc" id="L107">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L108">                    thisComponent.setModel(model);</span>
-<span class="fc" id="L109">                })</span>
-<span class="fc" id="L110">                ._withOnShow( entries, (thisComponent, v) -&gt; {</span>
-<span class="nc" id="L111">                    model.fire(v);</span>
-<span class="nc" id="L112">                })</span>
-<span class="fc" id="L113">                ._this();</span>
+<span class="fc" id="L111">        Objects.requireNonNull(entries, &quot;entries&quot;);</span>
+<span class="fc" id="L112">        ValsListModel&lt;E&gt; model = new ValsListModel&lt;&gt;(entries);</span>
+<span class="fc" id="L113">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L114">                    thisComponent.setModel(model);</span>
+<span class="fc" id="L115">                })</span>
+<span class="fc" id="L116">                ._withOnShow( entries, (thisComponent, v) -&gt; {</span>
+<span class="nc" id="L117">                    model.fire(v);</span>
+<span class="nc" id="L118">                })</span>
+<span class="fc" id="L119">                ._this();</span>
     }
 
     /**
@@ -124,19 +130,19 @@ public final class UIForList&lt;E, L extends JList&lt;E&gt;&gt; extends UIForAny
      * @return This instance of the builder node to allow for fluent method chaining.
      */
     public final UIForList&lt;E, L&gt; withSelection( Var&lt;E&gt; selection ) {
-<span class="nc" id="L127">        return _with( thisComponent -&gt; {</span>
-<span class="nc" id="L128">                     thisComponent.addListSelectionListener( e -&gt; {</span>
-<span class="nc bnc" id="L129" title="All 2 branches missed.">                         if ( !e.getValueIsAdjusting() )</span>
-<span class="nc" id="L130">                             selection.set(From.VIEW,  thisComponent.getSelectedValue() );</span>
-<span class="nc" id="L131">                     });</span>
-<span class="nc" id="L132">                })</span>
-<span class="nc" id="L133">                ._withOnShow( selection, (thisComponent,v) -&gt; {</span>
-<span class="nc" id="L134">                    thisComponent.setSelectedValue( v, true );</span>
-<span class="nc" id="L135">                })</span>
-<span class="nc" id="L136">                ._with( thisComponent -&gt; {</span>
-<span class="nc" id="L137">                    thisComponent.setSelectedValue( selection.orElseNull(), true );</span>
+<span class="nc" id="L133">        return _with( thisComponent -&gt; {</span>
+<span class="nc" id="L134">                     thisComponent.addListSelectionListener( e -&gt; {</span>
+<span class="nc bnc" id="L135" title="All 2 branches missed.">                         if ( !e.getValueIsAdjusting() )</span>
+<span class="nc" id="L136">                             selection.set(From.VIEW,  thisComponent.getSelectedValue() );</span>
+<span class="nc" id="L137">                     });</span>
 <span class="nc" id="L138">                })</span>
-<span class="nc" id="L139">               ._this();</span>
+<span class="nc" id="L139">                ._withOnShow( selection, (thisComponent,v) -&gt; {</span>
+<span class="nc" id="L140">                    thisComponent.setSelectedValue( v, true );</span>
+<span class="nc" id="L141">                })</span>
+<span class="nc" id="L142">                ._with( thisComponent -&gt; {</span>
+<span class="nc" id="L143">                    thisComponent.setSelectedValue( selection.orElseNull(), true );</span>
+<span class="nc" id="L144">                })</span>
+<span class="nc" id="L145">               ._this();</span>
     }
 
     /**
@@ -150,14 +156,14 @@ public final class UIForList&lt;E, L extends JList&lt;E&gt;&gt; extends UIForAny
      * @return This instance of the builder node to allow for fluent method chaining.
      */
     public final UIForList&lt;E, L&gt; withSelection( Val&lt;E&gt; selection ) {
-<span class="nc" id="L153">        NullUtil.nullArgCheck(selection, &quot;selection&quot;, Val.class);</span>
-<span class="nc" id="L154">        return _withOnShow( selection, (thisComponent,v) -&gt; {</span>
-<span class="nc" id="L155">                    thisComponent.setSelectedValue( v, true );</span>
-<span class="nc" id="L156">               })</span>
-<span class="nc" id="L157">                ._with( thisComponent -&gt; {</span>
-<span class="nc" id="L158">                    thisComponent.setSelectedValue( selection.orElseNull(), true );</span>
-<span class="nc" id="L159">                })</span>
-<span class="nc" id="L160">               ._this();</span>
+<span class="nc" id="L159">        NullUtil.nullArgCheck(selection, &quot;selection&quot;, Val.class);</span>
+<span class="nc" id="L160">        return _withOnShow( selection, (thisComponent,v) -&gt; {</span>
+<span class="nc" id="L161">                    thisComponent.setSelectedValue( v, true );</span>
+<span class="nc" id="L162">               })</span>
+<span class="nc" id="L163">                ._with( thisComponent -&gt; {</span>
+<span class="nc" id="L164">                    thisComponent.setSelectedValue( selection.orElseNull(), true );</span>
+<span class="nc" id="L165">                })</span>
+<span class="nc" id="L166">               ._this();</span>
     }
 
     /**
@@ -189,16 +195,16 @@ public final class UIForList&lt;E, L extends JList&lt;E&gt;&gt; extends UIForAny
      * @return This instance of the builder node to allow for fluent method chaining.
      */
     public final UIForList&lt;E, L&gt; withRenderer( ListEntryRenderer&lt;E, L&gt; renderer ) {
-<span class="fc" id="L192">        return _with( thisComponent -&gt; {</span>
-<span class="pc" id="L193">                    thisComponent.setCellRenderer((list, value, index, isSelected, cellHasFocus) -&gt; renderer.render(new ListEntryDelegate&lt;E, L&gt;() {</span>
-<span class="nc" id="L194">                        @Override public L list() { return (L) list; }</span>
-<span class="nc" id="L195">                        @Override public Optional&lt;E&gt; entry() { return Optional.ofNullable(value); }</span>
-<span class="nc" id="L196">                        @Override public int index() { return index; }</span>
-<span class="nc" id="L197">                        @Override public boolean isSelected() { return isSelected; }</span>
-<span class="nc" id="L198">                        @Override public boolean hasFocus() { return cellHasFocus; }</span>
+<span class="fc" id="L198">        return _with( thisComponent -&gt; {</span>
+<span class="pc" id="L199">                    thisComponent.setCellRenderer((list, value, index, isSelected, cellHasFocus) -&gt; renderer.render(new ListEntryDelegate&lt;E, L&gt;() {</span>
+<span class="nc" id="L200">                        @Override public L list() { return (L) list; }</span>
+<span class="nc" id="L201">                        @Override public Optional&lt;E&gt; entry() { return Optional.ofNullable(value); }</span>
+<span class="nc" id="L202">                        @Override public int index() { return index; }</span>
+<span class="nc" id="L203">                        @Override public boolean isSelected() { return isSelected; }</span>
+<span class="nc" id="L204">                        @Override public boolean hasFocus() { return cellHasFocus; }</span>
                     }));
-<span class="fc" id="L200">                })</span>
-<span class="fc" id="L201">                ._this();</span>
+<span class="fc" id="L206">                })</span>
+<span class="fc" id="L207">                ._this();</span>
     }
 
     /**
@@ -211,13 +217,13 @@ public final class UIForList&lt;E, L extends JList&lt;E&gt;&gt; extends UIForAny
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForList&lt;E, L&gt; onSelection( Action&lt;ComponentDelegate&lt;JList&lt;E&gt;, ListSelectionEvent&gt;&gt; action ) {
-<span class="fc" id="L214">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
-<span class="fc" id="L215">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L216">                    thisComponent.addListSelectionListener(</span>
-<span class="nc" id="L217">                        e -&gt; _doApp(()-&gt;action.accept(new ComponentDelegate&lt;&gt;( thisComponent, e)))</span>
+<span class="fc" id="L220">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
+<span class="fc" id="L221">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L222">                    thisComponent.addListSelectionListener(</span>
+<span class="nc" id="L223">                        e -&gt; _doApp(()-&gt;action.accept(new ComponentDelegate&lt;&gt;( thisComponent, e)))</span>
                     );
-<span class="fc" id="L219">                })</span>
-<span class="fc" id="L220">                ._this();</span>
+<span class="fc" id="L225">                })</span>
+<span class="fc" id="L226">                ._this();</span>
     }
 
     /**
@@ -246,11 +252,11 @@ public final class UIForList&lt;E, L extends JList&lt;E&gt;&gt; extends UIForAny
      * @param &lt;V&gt; The type of the values that will be rendered.
      */
     public final &lt;V extends E&gt; UIForList&lt;E, L&gt; withRenderer( Render.Builder&lt;L,V&gt; renderBuilder ) {
-<span class="fc" id="L249">        NullUtil.nullArgCheck(renderBuilder, &quot;renderBuilder&quot;, Render.Builder.class);</span>
-<span class="fc" id="L250">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L251">                    thisComponent.setCellRenderer((ListCellRenderer&lt;E&gt;) renderBuilder.buildForList(thisComponent));</span>
-<span class="fc" id="L252">                })</span>
-<span class="fc" id="L253">                ._this();</span>
+<span class="fc" id="L255">        NullUtil.nullArgCheck(renderBuilder, &quot;renderBuilder&quot;, Render.Builder.class);</span>
+<span class="fc" id="L256">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L257">                    thisComponent.setCellRenderer((ListCellRenderer&lt;E&gt;) renderBuilder.buildForList(thisComponent));</span>
+<span class="fc" id="L258">                })</span>
+<span class="fc" id="L259">                ._this();</span>
     }
 
     /**
@@ -262,10 +268,10 @@ public final class UIForList&lt;E, L extends JList&lt;E&gt;&gt; extends UIForAny
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForList&lt;E, L&gt; withRenderer( ListCellRenderer&lt;E&gt; renderer ) {
-<span class="nc" id="L265">        return _with( thisComponent -&gt; {</span>
-<span class="nc" id="L266">                    thisComponent.setCellRenderer(renderer);</span>
-<span class="nc" id="L267">                })</span>
-<span class="nc" id="L268">                ._this();</span>
+<span class="nc" id="L271">        return _with( thisComponent -&gt; {</span>
+<span class="nc" id="L272">                    thisComponent.setCellRenderer(renderer);</span>
+<span class="nc" id="L273">                })</span>
+<span class="nc" id="L274">                ._this();</span>
     }
 
 
@@ -273,22 +279,22 @@ public final class UIForList&lt;E, L extends JList&lt;E&gt;&gt; extends UIForAny
     {
         private final Vals&lt;E&gt; _entries;
 
-<span class="fc" id="L276">        public ValsListModel( Vals&lt;E&gt; entries ) {</span>
-<span class="fc" id="L277">            _entries = Objects.requireNonNull(entries, &quot;entries&quot;);</span>
-<span class="fc" id="L278">        }</span>
+<span class="fc" id="L282">        public ValsListModel( Vals&lt;E&gt; entries ) {</span>
+<span class="fc" id="L283">            _entries = Objects.requireNonNull(entries, &quot;entries&quot;);</span>
+<span class="fc" id="L284">        }</span>
 
-<span class="nc" id="L280">        @Override public int getSize() { return _entries.size(); }</span>
-<span class="nc" id="L281">        @Override public E getElementAt( int i ) { return _entries.at( i ).orElseNull(); }</span>
+<span class="nc" id="L286">        @Override public int getSize() { return _entries.size(); }</span>
+<span class="nc" id="L287">        @Override public E getElementAt( int i ) { return _entries.at( i ).orElseNull(); }</span>
 
         public void fire( ValsDelegate&lt;E&gt; v ) {
-<span class="nc bnc" id="L284" title="All 4 branches missed.">            switch ( v.changeType() ) {</span>
-<span class="nc" id="L285">                case ADD:    fireIntervalAdded( this, v.index(), v.index() ); break;</span>
-<span class="nc" id="L286">                case REMOVE: fireIntervalRemoved( this, v.index(), v.index() ); break;</span>
-<span class="nc" id="L287">                case SET:    fireContentsChanged( this, v.index(), v.index() ); break;</span>
+<span class="nc bnc" id="L290" title="All 4 branches missed.">            switch ( v.changeType() ) {</span>
+<span class="nc" id="L291">                case ADD:    fireIntervalAdded( this, v.index(), v.index() ); break;</span>
+<span class="nc" id="L292">                case REMOVE: fireIntervalRemoved( this, v.index(), v.index() ); break;</span>
+<span class="nc" id="L293">                case SET:    fireContentsChanged( this, v.index(), v.index() ); break;</span>
                 default:
-<span class="nc" id="L289">                    fireContentsChanged( this, 0, _entries.size() );</span>
+<span class="nc" id="L295">                    fireContentsChanged( this, 0, _entries.size() );</span>
             }
-<span class="nc" id="L291">        }</span>
+<span class="nc" id="L297">        }</span>
     }
 
 }

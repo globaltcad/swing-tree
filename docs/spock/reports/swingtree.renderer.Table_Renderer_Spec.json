@@ -25,7 +25,7 @@
 
         {"kind":"and","text":"\n                A mocked cell interpreter which interprets the state of the table cell\n                and then defines how it should be rendered (by setting a UI component).\n            ","code":["var render = Mock(Render.Cell.Interpreter)"]},
 
-        {"kind":"when","text":"We attach the interpreter to a table renderer which we then attach to the table.","code":["ui.withRendererForColumn(\"A\", UI.renderTable().when(String).as(render) )"]},
+        {"kind":"when","text":"We attach the interpreter to a table renderer which we then attach to the table.","code":["ui = ui.withRendererForColumn(\"A\", UI.renderTable().when(String).as(render) )"]},
 
         {"kind":"and","text":"We we access the resulting TableCellRenderer instance from the UI.","code":["var found = ui.get(JTable).getColumn(\"A\").cellRenderer"]},
 
@@ -50,7 +50,7 @@
 
         {"kind":"expect","text":"The table UI has the following state:","code":["ui.component.getColumnName(0) == \"A\" // default column names","ui.component.getColumnName(1) == \"B\"","ui.component.getRowCount() == 2","ui.component.getValueAt(0, 0) == \"a\"","ui.component.getValueAt(0, 1) == \"b\""]},
 
-        {"kind":"when","text":"We build a table renderer for strings and pass our mocked renderer to it.","code":["ui.withRendererForColumn(1, UI.renderTable().when(String).as(render) )"]},
+        {"kind":"when","text":"We build a table renderer for strings and pass our mocked renderer to it.","code":["ui = ui.withRendererForColumn(1, UI.renderTable().when(String).as(render) )"]},
 
         {"kind":"and","text":"We we access the resulting TableCellRenderer instance from the UI.","code":["var found = ui.get(JTable)","        .columnModel","        .getColumn(1)","        .cellRenderer"]},
 
@@ -75,7 +75,7 @@
 
         {"kind":"expect","text":"The table UI has the following state:","code":["ui.component.getColumnName(0) == \"A\" // default column names","ui.component.getColumnName(1) == \"B\"","ui.component.getRowCount() == 3","ui.component.getColumnCount() == 2","ui.component.getValueAt(0, 0) == \"a\"","ui.component.getValueAt(0, 1) == \"1\""]},
 
-        {"kind":"when","text":"We build a table renderer for strings and pass our mocked renderer to it.","code":["ui.withRendererForColumn(1, UI.renderTable().when(String).as(render) )"]},
+        {"kind":"when","text":"We build a table renderer for strings and pass our mocked renderer to it.","code":["ui = ui.withRendererForColumn(1, UI.renderTable().when(String).as(render) )"]},
 
         {"kind":"and","text":"","code":["var found = ui.get(JTable)","        .columnModel","        .getColumn(1)","        .cellRenderer"]},
 
@@ -100,7 +100,7 @@
 
         {"kind":"expect","text":"The table UI has the following state:","code":["ui.component.getColumnName(0) == \"X\"","ui.component.getColumnName(1) == \"Y\"","ui.component.getRowCount() == 3","ui.component.getColumnCount() == 2","ui.component.getValueAt(0, 0) == \"a\"","ui.component.getValueAt(0, 1) == \"1\""]},
 
-        {"kind":"when","text":"We build a table renderer for strings and pass our mocked renderer to it.","code":["ui.withRendererForColumn(1, UI.renderTable().when(String).as(render) )"]},
+        {"kind":"when","text":"We build a table renderer for strings and pass our mocked renderer to it.","code":["ui = ui.withRendererForColumn(1, UI.renderTable().when(String).as(render) )"]},
 
         {"kind":"and","text":"We we access the resulting TableCellRenderer instance from the UI.","code":["var found = ui.get(JTable)","            .columnModel","            .getColumn(1)","            .cellRenderer"]},
 

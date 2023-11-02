@@ -6,6 +6,7 @@ import swingtree.components.JBox;
 import swingtree.layout.LayoutConstraint;
 
 import java.awt.*;
+import java.util.Objects;
 
 /**
  *  A SwingTree builder node designed for configuring {@link swingtree.components.JBox} instances.
@@ -14,13 +15,25 @@ public class UIForBox&lt;B extends JBox&gt; extends UIForAnySwing&lt;UIForBox&lt
 {
     private final BuilderState&lt;B&gt; _state;
 
-<span class="fc" id="L17">    protected UIForBox( B component ) {</span>
-<span class="fc" id="L18">        _state = new BuilderState&lt;&gt;(component);</span>
-<span class="fc" id="L19">    }</span>
+    /**
+     * {@link UIForAnySwing} (sub)types always wrap
+     * a builder state which defines how a component is created.
+     *
+     * @param state The {@link BuilderState} containing the component which will be wrapped by this builder node.
+     */
+<span class="fc" id="L24">    protected UIForBox( BuilderState&lt;B&gt; state ) {</span>
+<span class="fc" id="L25">        Objects.requireNonNull(state, &quot;state&quot;);</span>
+<span class="fc" id="L26">        _state = state;</span>
+<span class="fc" id="L27">    }</span>
 
     @Override
     protected BuilderState&lt;B&gt; _state() {
-<span class="fc" id="L23">        return _state;</span>
+<span class="fc" id="L31">        return _state;</span>
+    }
+    
+    @Override
+    protected UIForBox&lt;B&gt; _with( BuilderState&lt;B&gt; newState ) {
+<span class="fc" id="L36">        return new UIForBox&lt;&gt;(newState);</span>
     }
 
     /**
@@ -31,28 +44,28 @@ public class UIForBox&lt;B extends JBox&gt; extends UIForAnySwing&lt;UIForBox&lt
      * @throws IllegalArgumentException if {@code attr} is {@code null}.
      */
     public final UIForBox&lt;B&gt; withLayout( Val&lt;LayoutConstraint&gt; attr ) {
-<span class="nc" id="L34">        NullUtil.nullArgCheck(attr, &quot;attr&quot;, Val.class);</span>
-<span class="nc" id="L35">        NullUtil.nullPropertyCheck(attr, &quot;attr&quot;, &quot;Null is not a valid layout attribute.&quot;);</span>
-<span class="nc" id="L36">        return _withOnShow( attr, (thisComponent, it) -&gt; {</span>
+<span class="nc" id="L47">        NullUtil.nullArgCheck(attr, &quot;attr&quot;, Val.class);</span>
+<span class="nc" id="L48">        NullUtil.nullPropertyCheck(attr, &quot;attr&quot;, &quot;Null is not a valid layout attribute.&quot;);</span>
+<span class="nc" id="L49">        return _withOnShow( attr, (thisComponent, it) -&gt; {</span>
                     // Every time the value changes, we need to re-layout the panel.
                     // Note that this is for mig layout:
-<span class="nc" id="L39">                    LayoutManager lm = thisComponent.getLayout();</span>
-<span class="nc bnc" id="L40" title="All 2 branches missed.">                    if ( lm instanceof MigLayout ) {</span>
-<span class="nc" id="L41">                        ((MigLayout)lm).setLayoutConstraints(it.toString());</span>
-<span class="nc" id="L42">                        thisComponent.revalidate();</span>
-<span class="nc" id="L43">                        thisComponent.repaint();</span>
+<span class="nc" id="L52">                    LayoutManager lm = thisComponent.getLayout();</span>
+<span class="nc bnc" id="L53" title="All 2 branches missed.">                    if ( lm instanceof MigLayout ) {</span>
+<span class="nc" id="L54">                        ((MigLayout)lm).setLayoutConstraints(it.toString());</span>
+<span class="nc" id="L55">                        thisComponent.revalidate();</span>
+<span class="nc" id="L56">                        thisComponent.repaint();</span>
                     }
                     else
-<span class="nc" id="L46">                        throw new IllegalStateException(</span>
+<span class="nc" id="L59">                        throw new IllegalStateException(</span>
                             &quot;Cannot set layout mig-layout specific &quot; +
                             &quot;constraints on a panel with a non-mig layout.&quot;
                         );
-<span class="nc" id="L50">                })</span>
-<span class="nc" id="L51">                ._this();</span>
+<span class="nc" id="L63">                })</span>
+<span class="nc" id="L64">                ._this();</span>
     }
 
     @Override protected void _setEnabled( B thisComponent, boolean isEnabled ) {
-<span class="nc" id="L55">        thisComponent.setEnabled( isEnabled );</span>
+<span class="nc" id="L68">        thisComponent.setEnabled( isEnabled );</span>
         /*
             In the vast vast majority of cases regular JBoxs are simple wrappers for
             other components.
@@ -64,7 +77,7 @@ public class UIForBox&lt;B extends JBox&gt; extends UIForAnySwing&lt;UIForBox&lt
             and disable all the components that are contained in the tree
             except for the children of non JBoxs.
         */
-<span class="nc" id="L67">        InternalUtil._traverseEnable( thisComponent, isEnabled );</span>
+<span class="nc" id="L80">        InternalUtil._traverseEnable( thisComponent, isEnabled );</span>
         /*
             Note:
             If you really only want to disable the JBox itself, then you can
@@ -73,7 +86,7 @@ public class UIForBox&lt;B extends JBox&gt; extends UIForAnySwing&lt;UIForBox&lt
             of the JBox to make it look and behave like a disabled component,
             but still allow the user to interact with the components it contains.
          */
-<span class="nc" id="L76">    }</span>
+<span class="nc" id="L89">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
