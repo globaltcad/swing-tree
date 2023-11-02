@@ -54,8 +54,9 @@ public class JIcon extends JLabel
 
     /** {@inheritDoc} */
     @Override public void paint(Graphics g){
-        ComponentExtension.from(this).paintBackgroundStyle( g );
-        super.paint(g);
+        ComponentExtension.from(this).paintBackgroundStyle( g, ()->{
+            super.paint(g);
+        });
     }
 
     /** {@inheritDoc} */

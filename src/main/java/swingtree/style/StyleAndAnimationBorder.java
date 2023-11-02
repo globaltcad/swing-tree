@@ -5,7 +5,10 @@ import swingtree.api.Styler;
 import javax.swing.AbstractButton;
 import javax.swing.JComponent;
 import javax.swing.border.Border;
-import java.awt.*;
+import java.awt.Component;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Insets;
 
 /**
  *  A custom {@link Border} implementation which is capable of painting large parts of
@@ -59,14 +62,7 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
     {
         _compExt.establishStyleAndBeginPainting();
 
-        Shape formerClip = g.getClip();
-        g.setClip(null);
-        /*
-            The border should not be clipped as the current clip may be the inner component area
-            which can produce ugly artifacts between the inner component area
-            and the area around the component (margin), which is not covered by the border.
-            Resetting the clip here is visually especially very important for rounded borders and shadows.
-        */
+        g.setClip( _compExt.getMainClip() );
 
         _paintBorderAndBorderLayerStyles( (Graphics2D) g );
         if ( _formerBorder != null && !_borderWasNotPainted ) {
@@ -75,9 +71,6 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
                 _paintFormerBorder(c, g, x, y, width, height);
         }
         _compExt._renderAnimations((Graphics2D) g);
-
-        if ( formerClip != null )
-            g.setClip(formerClip);
     }
 
     private void _paintFormerBorder( Component c, Graphics g, int x, int y, int width, int height ) {

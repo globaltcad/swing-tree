@@ -242,7 +242,7 @@ class DynamicLaF
 
         PanelStyler() {}
 
-        @Override public void paint(Graphics g, JComponent c ) { ComponentExtension.from(c)._paintBackground(g); }
+        @Override public void paint(Graphics g, JComponent c ) { ComponentExtension.from(c)._paintBackground(g, null); }
         @Override public void update( Graphics g, JComponent c ) { paint(g, c); }
         @Override
         public boolean contains(JComponent c, int x, int y) { return _contains(c, x, y, ()->super.contains(c, x, y)); }
@@ -255,8 +255,9 @@ class DynamicLaF
         ButtonStyler(ButtonUI formerUI) { _formerUI = formerUI; }
 
         @Override public void paint( Graphics g, JComponent c ) {
-            ComponentExtension.from(c)._paintBackground(g);
-            _paintComponentThroughFormerIU(_formerUI, g, c);
+            ComponentExtension.from(c)._paintBackground(g, ()->{
+                _paintComponentThroughFormerIU(_formerUI, g, c);
+            });
         }
         @Override public void update( Graphics g, JComponent c ) { paint(g, c); }
         @Override
@@ -270,11 +271,12 @@ class DynamicLaF
         LabelStyler(LabelUI formerUI) { _formerUI = formerUI; }
 
         @Override public void paint( Graphics g, JComponent c ) {
-            ComponentExtension.from(c)._paintBackground(g);
-            if ( _formerUI != null )
-                _paintComponentThroughFormerIU(_formerUI, g, c);
-            else
-                super.paint(g, c);
+            ComponentExtension.from(c)._paintBackground(g, ()->{
+                if ( _formerUI != null )
+                    _paintComponentThroughFormerIU(_formerUI, g, c);
+                else
+                    super.paint(g, c);
+            });
         }
         @Override public void update( Graphics g, JComponent c ) { paint(g, c); }
         @Override
@@ -318,9 +320,11 @@ class DynamicLaF
                         c.getWidth() - insetLeft - insetRight, c.getHeight() - insetTop - insetBottom
                     );
             //}
-            ComponentExtension.from(c)._paintBackground(g);
-            if ( insetLeft == 0 && insetRight == 0 && insetTop == 0 && insetBottom == 0 )
-                _paintComponentThroughFormerIU(_formerUI, g, c);
+            boolean shouldPaintFormerUI = ( insetLeft == 0 && insetRight == 0 && insetTop == 0 && insetBottom == 0 );
+            ComponentExtension.from(c)._paintBackground(g, ()->{
+                if ( shouldPaintFormerUI )
+                    _paintComponentThroughFormerIU(_formerUI, g, c);
+            });
         }
 
         @Override public void update( Graphics g, JComponent c ) { paint(g, c); }

@@ -67,6 +67,8 @@ public final class ComponentExtension<C extends JComponent>
 
     private Color _initialBackgroundColor = null;
 
+    private Shape _mainClip = null;
+
 
     private ComponentExtension( C owner ) { _owner = Objects.requireNonNull(owner); }
 
@@ -162,6 +164,8 @@ public final class ComponentExtension<C extends JComponent>
         return belongsToGroup(group.getClass().getSimpleName() + "." + group.name());
     }
 
+    Shape getMainClip() { return _mainClip; }
+
     /**
      * @return The current {@link Style} configuration of the component
      *         which is calculated based on the {@link Styler} lambdas
@@ -218,15 +222,21 @@ public final class ComponentExtension<C extends JComponent>
      *
      * @param g The {@link Graphics} object to use for rendering.
      */
-    public void paintBackgroundStyle( Graphics g )
+    public void paintBackgroundStyle( Graphics g, Runnable lookAndFeelPaint )
     {
-        if ( _dynamicLaF.customLookAndFeelIsInstalled() )
-            return; // We render through the custom installed UI!
+        if ( _dynamicLaF.customLookAndFeelIsInstalled() ) {
+            if ( lookAndFeelPaint != null )
+                lookAndFeelPaint.run();
+            return; // We render ĥere through the custom installed UI!
+        }
 
         if ( _componentIsDeclaredInUI(_owner) )
-            _paintBackground(g);
-        else
+            _paintBackground(g, lookAndFeelPaint);
+        else {
             _stylePainter = _stylePainter.endPainting(); // custom style rendering unfortunately not possible for this component :/
+            if ( lookAndFeelPaint != null )
+                lookAndFeelPaint.run();
+        }
     }
 
     /**
@@ -320,7 +330,7 @@ public final class ComponentExtension<C extends JComponent>
         _stylePainter = _stylePainter.update(style);
     }
 
-    void _paintBackground(Graphics g)
+    void _paintBackground( Graphics g, Runnable lookAndFeelPainting )
     {
         // If end the painting of the last painting cycle if it was not already ended:
         _stylePainter = _stylePainter.endPainting();
@@ -328,6 +338,24 @@ public final class ComponentExtension<C extends JComponent>
         establishStyleAndBeginPainting();
 
         _stylePainter.renderBackgroundStyle( (Graphics2D) g, _owner );
+
+        if ( lookAndFeelPainting != null ) {
+            _mainClip = g.getClip();
+            Shape clip = _mainClip;
+            if (_stylePainter._getBaseArea() != null)
+                clip = _stylePainter._getBaseArea(_owner);
+            else if (_stylePainter.getStyle().margin().isPositive())
+                clip = _stylePainter._getBaseArea(_owner);
+
+            _stylePainter._withClip((Graphics2D) g, clip, () -> {
+                try {
+                    lookAndFeelPainting.run();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+            _mainClip = null;
+        }
     }
 
     void _paintBorderStyle( Graphics2D g2d, JComponent component ) {

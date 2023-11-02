@@ -113,11 +113,10 @@ final class StylePainter<C extends JComponent>
 
         // Reset antialiasing to its previous state:
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
+    }
 
-        if ( _baseArea != null )
-            g2d.setClip(_getBaseArea(comp));
-        else if ( _style.margin().isPositive() )
-            g2d.setClip(_getBaseArea(comp));
+    Area _getBaseArea() {
+        return _baseArea;
     }
 
     private void _paintStylesOn( UI.Layer layer, Graphics2D g2d , JComponent comp ) {
@@ -177,7 +176,7 @@ final class StylePainter<C extends JComponent>
         });
     }
 
-    private void _withClip( Graphics2D g2d, Shape clip, Runnable paintTask ) {
+    void _withClip( Graphics2D g2d, Shape clip, Runnable paintTask ) {
         Shape formerClip = g2d.getClip();
         g2d.setClip(clip);
         try {
