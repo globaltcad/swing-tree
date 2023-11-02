@@ -22,15 +22,18 @@ class BuilderState<C extends Component>
     private static final Logger log = LoggerFactory.getLogger(BuilderState.class);
 
     static final String WHY_A_BUILDER_IS_DISPOSED =
-                    "A builder is disposed when it has already been superseded by " +
-                    "a new builder node of a subsequent builder method (-chaining) call.\n" +
-                    "The SwingTree builder API is designed to be used for writing declarative code only " +
-                    "to prevent error prone misuse as part of regular procedural code, " +
-                    "which means that you may not store and reuse references to spent builder nodes. " +
+                    "\nA builder is automatically disposed when it is being superseded by a\n" +
+                    "new builder instance through a subsequent call to the next builder method\n" +
+                    "in the chain of builder method calls.\n" +
+                    "The SwingTree API only allows for writing declarative code,\n" +
+                    "and the use of procedural GUI code is largely forbidden " +
+                    "to ensure readability and prevent side effects.\n" +
+                    "In practise, this means that you may not store and reuse references to spent builders.\n" +
                     "This is a similar design choice as in Java's Stream API,\n" +
-                    "where an exception is thrown when trying to reuse a stream after it has already been consumed.";
+                    "where an exception is thrown when trying to reuse a stream after it has already been consumed.\n";
 
-    enum Mode {
+    enum Mode
+    {
         DECLARATIVE, // Builder states get disposed after being used for building.
         PROCEDURAL   // Builder states do not get disposed after being used for building.
     }
@@ -57,6 +60,7 @@ class BuilderState<C extends Component>
      *  The supplier is null when the builder is disposed.
      */
     private Supplier<C> _componentFetcher; // Is null when the builder is disposed.
+
 
     BuilderState( C component )
     {
@@ -86,20 +90,24 @@ class BuilderState<C extends Component>
         Objects.requireNonNull(type,             "type");
         Objects.requireNonNull(componentFetcher, "componentFetcher");
 
-        _eventProcessor = eventProcessor;
-        _mode = mode;
-        _componentType = type;
+        _eventProcessor   = eventProcessor;
+        _mode             = mode;
+        _componentType    = type;
         _componentFetcher = componentFetcher;
     }
 
+    /**
+     *  @return The component wrapped by this builder node.
+     *  @throws IllegalStateException If this builder state is disposed (it's reference to the component is null).
+     */
     public C component()
     {
         if ( this.isDisposed() )
             throw new IllegalStateException(
-                    "Trying to access the component of a spent and disposed builder!\n" +
-                    WHY_A_BUILDER_IS_DISPOSED + "\n" +
+                    "Trying to access the component of a spent and disposed builder!" +
+                    WHY_A_BUILDER_IS_DISPOSED +
                     "If you need to access the component of a builder node, " +
-                    "you may only do so through the most recent builder node of the most recent builder method call."
+                    "you may only do so through the builder instance returned by the most recent builder method call."
                 );
 
         return _componentType.cast(_componentFetcher.get());
@@ -146,9 +154,9 @@ class BuilderState<C extends Component>
     {
         if ( this.isDisposed() )
             throw new IllegalStateException(
-                    "Trying to build using a builder which has already been spent and disposed!\n" +
-                    WHY_A_BUILDER_IS_DISPOSED + "\n" +
-                    "Make sure to only use the most recent builder node of the most recent builder method call."
+                    "Trying to build using a builder which has already been spent and disposed!" +
+                    WHY_A_BUILDER_IS_DISPOSED +
+                    "Make sure to only use the builder instance returned by the most recent builder method call."
                 );
 
         try {
@@ -168,15 +176,12 @@ class BuilderState<C extends Component>
         {
             case DECLARATIVE :
             {
-                EventProcessor eventProcessor   = _eventProcessor;
-                Mode           mode             = _mode;
-                Class<C>       componentType    = _componentType;
-                Supplier<C>    componentFactory = _componentFetcher;
-                this.dispose();
+                Supplier<C> componentFactory = _componentFetcher;
+                this.dispose(); // detach strong reference to the component to allow it to be garbage collected.
                 return new BuilderState<>(
-                        eventProcessor,
-                        mode,
-                        componentType,
+                        _eventProcessor,
+                        _mode,
+                        _componentType,
                         componentFactory
                     );
             }
@@ -193,7 +198,7 @@ class BuilderState<C extends Component>
     {
         if ( this.isDisposed() )
             throw new IllegalStateException(
-                    "Trying to build using a builder which has already been spent and disposed!\n" +
+                    "Trying to build using a builder which is already spent and disposed!" +
                     WHY_A_BUILDER_IS_DISPOSED
                 );
         return new BuilderState<>(
