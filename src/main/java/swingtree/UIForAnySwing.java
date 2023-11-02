@@ -180,9 +180,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     }
 
     /**
-     *  Use this to make the wrapped UI component visible or invisible.
+     *  Make the underlying {@link JComponent} type visible or invisible
+     *  depending on the supplied boolean value.
      *
-     * @param isVisible The truth value determining if the UI component should be visible or not.
+     * @param isVisible The truth value determining if the component should be visible or not.
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I isVisibleIf( boolean isVisible ) {
@@ -190,8 +191,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     }
 
     /**
-     *  This is the inverse of {@link #isVisibleIf(boolean)}.
-     *  Use this to make the wrapped UI component invisible or visible.
+     *  This is the inverse of {@link #isVisibleIf(boolean)}, and it is
+     *  used to make the underlying {@link JComponent} type visible or invisible.
+     *  <p>
+     *  If the supplied boolean value is {@code true}, the component will be invisible. <br>
+     *  If the supplied boolean value is {@code false}, the component will be visible.
+     *
      * @param isVisible The truth value determining if the UI component should be visible or not.
      * @return This very instance, which enables builder-style method chaining.
      */
@@ -200,8 +205,17 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     }
 
     /**
-     *  Use this to make the wrapped UI component dynamically visible or invisible. <br>
-     * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     *  Make the underlying {@link JComponent} type dynamically visible or invisible
+     *  through the supplied {@link Val} property, which is automatically bound
+     *  to the {@link JComponent#setVisible(boolean)} method of the underlying {@link JComponent} type.
+     *  <p>
+     *  This means that when the supplied {@link Val} property changes its value,
+     *  then visibility of the underlying {@link JComponent} type will be updated accordingly.
+     *  <p>
+     * <i>
+     *     Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to
+     *           send the property value to this view component.
+     * </i>
      *
      * @param isVisible The truth value determining if the UI component should be visible or not wrapped in a {@link Val}.
      * @return This very instance, which enables builder-style method chaining.
@@ -219,8 +233,19 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     }
 
     /**
-     *  This is the inverse of {@link #isVisibleIf(Val)}.
-     *  Use this to make the wrapped UI component dynamically invisible or visible. <br>
+     *  This is the inverse of {@link #isVisibleIf(Val)}, and it is
+     *  used to make the underlying {@link JComponent} type dynamically visible or invisible.
+     *  <p>
+     *  This means that when the supplied {@link Val} property changes its value,
+     *  then visibility of the underlying {@link JComponent} type will be updated accordingly.
+     *  <p>
+     *  If the supplied {@link Val} property is {@code true}, the component will be invisible. <br>
+     *  If the supplied {@link Val} property is {@code false}, the component will be visible.
+     *  <p>
+     *  <i>
+     *      Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to
+     *            send the property value to this view component.
+     *  </i>
      * @param isVisible The truth value determining if the UI component should be visible or not wrapped in a {@link Val}.
      * @return This very instance, which enables builder-style method chaining.
      */
@@ -237,9 +262,17 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     }
 
     /**
-     *  Use this to make the wrapped UI component dynamically visible or invisible,
+     *  Make the underlying {@link JComponent} type dynamically visible or invisible
      *  based on the equality between the supplied enum value and enum property. <br>
-     * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     *  <p>
+     *  This means that when the supplied {@link Val} property changes its value,
+     *  and the new value is equal to the supplied enum value,
+     *  then the underlying {@link JComponent} type will be visible,
+     *  otherwise it will be invisible.
+     * <i>
+     *     Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your
+     *           view model to send the property value to this view component.
+     * </i>
      *
      * @param enumValue The enum value which, if equal to the supplied enum property, makes the UI component visible.
      * @param enumProperty The enum property which, if equal to the supplied enum value, makes the UI component visible.
@@ -260,9 +293,17 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     }
 
     /**
-     *  This is the inverse of {@link #isVisibleIf(Enum, Val)}.
-     *  Use this to make the wrapped UI component dynamically invisible or visible,
-     *  based on the equality between the supplied enum value and enum property. <br>
+     *  This is the inverse of {@link #isVisibleIf(Enum, Val)}, and it is
+     *  used to make the underlying {@link JComponent} type dynamically visible or invisible.
+     *  <p>
+     *  This means that when the supplied {@link Val} property changes its value,
+     *  and the new value is equal to the supplied enum value,
+     *  then the underlying {@link JComponent} type will be invisible,
+     *  otherwise it will be visible.
+     * <i>
+     *     Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your
+     *           view model to send the property value to this view component.
+     * </i>
      * @param enumValue The enum value which, if equal to the supplied enum property, makes the UI component invisible.
      * @param enumProperty The enum property which, if equal to the supplied enum value, makes the UI component invisible.
      * @param <E> The enum type for both the supplied enum value and enum property.
