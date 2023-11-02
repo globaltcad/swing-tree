@@ -895,7 +895,7 @@ abstract class AbstractDelegate<C extends JComponent>
      * @param <T> The type parameter of the component which should be found.
      */
     public final <T extends JComponent> OptionalUI<T> find( Class<T> type, String id ) {
-        return this.find(type, c -> Objects.equals(c.getName(), id));
+        return this.find( type, c -> Objects.equals(c.getName(), id) );
     }
 
     /**
@@ -908,7 +908,7 @@ abstract class AbstractDelegate<C extends JComponent>
      * @param <T> The type parameter of the component which should be found.
      */
     public final <T extends JComponent> OptionalUI<T> find( Class<T> type, Enum<?> id ) {
-        return this.find(type, id.getClass().getSimpleName() + "." + id.name());
+        return this.find( type, id.getClass().getSimpleName() + "." + id.name() );
     }
 
     /**
@@ -948,12 +948,24 @@ abstract class AbstractDelegate<C extends JComponent>
      *
      * @param type The {@link JComponent} type which should be found in the swing tree.
      * @param group The style group which should be used to test the {@link JComponent}.
-     * @return A list of {@link JComponent} instances which match the given type and predicate.
+     * @return A list of {@link JComponent} instances which match the given type and group.
      * @param <T> The type parameter of the component which should be found.
      */
     public final <T extends JComponent> List<T> findAllByGroup( Class<T> type, String group ) {
-        return this.findAll(type, c -> ComponentExtension.from(c).belongsToGroup(group));
+        return this.findAll( type, c -> ComponentExtension.from(c).belongsToGroup(group) );
     }
+
+    /**
+     *  Use this to query the UI tree and find all {@link JComponent}s
+     *  that belong to a particular style group.
+     *
+     * @param group The style group which should be used to check if a particular {@link JComponent} belongs to it.
+     * @return A list of {@link JComponent} instances which all have the given style group.
+     */
+    public final List<JComponent> findAllByGroup( String group ) {
+        return this.findAll( JComponent.class, c -> ComponentExtension.from(c).belongsToGroup(group) );
+    }
+
 
     /**
      *  Use this to query the UI tree and find all {@link JComponent}s
@@ -965,7 +977,18 @@ abstract class AbstractDelegate<C extends JComponent>
      * @param <T> The type parameter of the component which should be found.
      */
     public final <T extends JComponent> List<T> findAllByGroup( Class<T> type, Enum<?> group ) {
-        return this.findAll(type, c -> ComponentExtension.from(c).belongsToGroup(group));
+        return this.findAll( type, c -> ComponentExtension.from(c).belongsToGroup(group) );
+    }
+
+    /**
+     *  Use this to query the UI tree and find all {@link JComponent}s
+     *  that belong to a particular style group.
+     *
+     * @param group The style group which should be used to check if a particular {@link JComponent} belongs to it.
+     * @return A list of {@link JComponent} instances which all have the given style group.
+     */
+    public final List<JComponent> findAllByGroup( Enum<?> group ) {
+        return this.findAll( JComponent.class, c -> ComponentExtension.from(c).belongsToGroup(group) );
     }
 
     /**
@@ -980,7 +1003,7 @@ abstract class AbstractDelegate<C extends JComponent>
      *  <pre>{@code
      *      UI.button("Click me").withPrefSize(400, 400)
      *      .onMouseClick( it -> it.animateFor(2, TimeUnit.SECONDS, state -> {
-     *          double r = 300 * state.progress() * it.getScale();
+     *          double r = 300 * state.progress() * it.scale();
      *          double x = it.mouseX() - r / 2;
      *          double y = it.mouseY() - r / 2;
      *          it.paint(state, g -> {
