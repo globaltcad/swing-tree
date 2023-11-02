@@ -10,7 +10,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -34,14 +33,7 @@ abstract class AbstractBuilder<I, C extends Component>
 
     protected final AbstractBuilder<I,C> _with( Consumer<C> action ) {
         BuilderState<C> newState = _state().with(action);
-        if ( newState == _state() )
-            return this;
-        else
-            return _with(newState);
-    }
-
-    protected final I _withAndGet( Function<C, I> action ) {
-        return action.apply( getComponent() );
+        return _with(newState);
     }
 
     /**

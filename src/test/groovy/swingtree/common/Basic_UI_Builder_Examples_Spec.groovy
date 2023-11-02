@@ -152,7 +152,7 @@ class Basic_UI_Builder_Examples_Spec extends Specification
             ui == ui2
 
         and : 'The wrapped component will have the expected amount of child components.'
-            ui.component.components.length == 3
+            ui2.component.components.length == 3
     }
 
     def 'Swing tree nests all kinds of components (trough builder nodes).'()
@@ -176,7 +176,7 @@ class Basic_UI_Builder_Examples_Spec extends Specification
             panel.components.length == 0
 
         when : 'We now add something to our UI node...'
-            ui.add(UI.label("Hey! I am a wrapped JLabel."))
+            ui = ui.add(UI.label("Hey! I am a wrapped JLabel."))
 
         then : 'The panel will have received a new component.'
             panel.components.length == 1
@@ -185,7 +185,7 @@ class Basic_UI_Builder_Examples_Spec extends Specification
             panel.components[0].text == "Hey! I am a wrapped JLabel."
 
         when : 'We add 2 more components...'
-            ui.add(UI.button("Button 1"), UI.button("Button 2"))
+            ui = ui.add(UI.button("Button 1"), UI.button("Button 2"))
 
         then : 'The panel will have 3 components in total.'
             panel.components.length == 3
@@ -199,7 +199,7 @@ class Basic_UI_Builder_Examples_Spec extends Specification
             ui.component.cursor.type == Cursor.DEFAULT_CURSOR
 
         when : 'We set the cursor of the button to be something else...'
-            ui.withCursor(UI.Cursor.RESIZE_SOUTH_EAST)
+            ui = ui.withCursor(UI.Cursor.RESIZE_SOUTH_EAST)
         then : 'This will lead to the correct cursor being chosen.'
             ui.component.cursor.type == Cursor.SE_RESIZE_CURSOR
     }

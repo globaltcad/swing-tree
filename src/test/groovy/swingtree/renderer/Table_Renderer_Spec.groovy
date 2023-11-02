@@ -49,7 +49,7 @@ class Table_Renderer_Spec extends Specification
             var render = Mock(Render.Cell.Interpreter)
 
         when : 'We attach the interpreter to a table renderer which we then attach to the table.'
-            ui.withRendererForColumn("A", UI.renderTable().when(String).as(render) )
+            ui = ui.withRendererForColumn("A", UI.renderTable().when(String).as(render) )
         and : 'We we access the resulting TableCellRenderer instance from the UI.'
             var found = ui.get(JTable).getColumn("A").cellRenderer
         and : 'Finally we access the component from the renderer (which is responsible for the actual rendering).'
@@ -82,7 +82,7 @@ class Table_Renderer_Spec extends Specification
             ui.component.getValueAt(0, 1) == "b"
 
         when : 'We build a table renderer for strings and pass our mocked renderer to it.'
-            ui.withRendererForColumn(1, UI.renderTable().when(String).as(render) )
+            ui = ui.withRendererForColumn(1, UI.renderTable().when(String).as(render) )
         and : 'We we access the resulting TableCellRenderer instance from the UI.'
             var found = ui.get(JTable)
                     .columnModel
@@ -119,7 +119,7 @@ class Table_Renderer_Spec extends Specification
             ui.component.getValueAt(0, 1) == "1"
 
         when : 'We build a table renderer for strings and pass our mocked renderer to it.'
-            ui.withRendererForColumn(1, UI.renderTable().when(String).as(render) )
+            ui = ui.withRendererForColumn(1, UI.renderTable().when(String).as(render) )
         and :
             var found = ui.get(JTable)
                     .columnModel
@@ -157,7 +157,7 @@ class Table_Renderer_Spec extends Specification
             ui.component.getValueAt(0, 1) == "1"
 
         when : 'We build a table renderer for strings and pass our mocked renderer to it.'
-            ui.withRendererForColumn(1, UI.renderTable().when(String).as(render) )
+            ui = ui.withRendererForColumn(1, UI.renderTable().when(String).as(render) )
         and : 'We we access the resulting TableCellRenderer instance from the UI.'
             var found = ui.get(JTable)
                         .columnModel

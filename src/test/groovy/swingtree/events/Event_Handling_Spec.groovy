@@ -257,7 +257,7 @@ class Event_Handling_Spec extends Specification
             var trace = []
 
         and : 'A handler that records the text area content.'
-            ui.onContentChange( it -> trace.add(it.component.text) )
+            ui = ui.onContentChange( it -> trace.add(it.component.text) )
 
         when : 'The text area content is changed.'
             UI.runNow { ui.component.setText("Some other content...") }
@@ -282,7 +282,7 @@ class Event_Handling_Spec extends Specification
             var trace = []
 
         and : 'A handler that records the text area content.'
-            ui.onTextChange( it -> trace.add(it.component.text) )
+            ui = ui.onTextChange( it -> trace.add(it.component.text) )
 
         when : 'The text area content is changed.'
             UI.runNow { ui.component.setText("Some other content...") }
@@ -308,10 +308,10 @@ class Event_Handling_Spec extends Specification
             var trace2 = []
 
         and : 'A handler that records the text area content.'
-            ui.onTextInsert( it -> {
-                trace1.add(it.component.text)
-                trace2.add(it.textToBeInserted)
-            })
+            ui = ui.onTextInsert( it -> {
+                    trace1.add(it.component.text)
+                    trace2.add(it.textToBeInserted)
+                })
 
         when : 'The text area content is changed.'
             UI.runNow { ui.component.document.insertString(5, "other ", null) }
@@ -338,10 +338,10 @@ class Event_Handling_Spec extends Specification
             var trace2 = []
 
         and : 'A handler that records the text area content.'
-            ui.onTextRemove( it -> {
-                trace1.add(it.component.text)
-                trace2.add(it.textToBeRemoved)
-            })
+            ui = ui.onTextRemove( it -> {
+                    trace1.add(it.component.text)
+                    trace2.add(it.textToBeRemoved)
+                })
 
         when : 'The text area content is changed.'
             UI.runNow { ui.component.document.remove(5, 5) }
@@ -369,11 +369,11 @@ class Event_Handling_Spec extends Specification
             var trace3 = []
 
         and : 'A handler that records the text area content.'
-            ui.onTextReplace( it -> {
-                trace1.add(it.component.text)
-                trace2.add(it.replacementText)
-                trace3.add("$it.offset|$it.length")
-            })
+            ui = ui.onTextReplace( it -> {
+                    trace1.add(it.component.text)
+                    trace2.add(it.replacementText)
+                    trace3.add("$it.offset|$it.length")
+                })
 
         when : 'The text area content is changed.'
             UI.runNow { ui.component.setText("Some other content...") }
@@ -394,13 +394,13 @@ class Event_Handling_Spec extends Specification
             var trace = []
 
         and : 'A handler that records the text area content.'
-            ui.onTextReplace( it -> trace.add("1") )
-              .onTextReplace( it -> trace.add("2") )
-              .onTextReplace( it -> trace.add("3") )
-              .onTextReplace( it -> trace.add("4") )
-              .onTextReplace( it -> trace.add("5") )
-              .onTextReplace( it -> trace.add("6") )
-              .onTextReplace( it -> trace.add("7") )
+            ui = ui.onTextReplace( it -> trace.add("1") )
+                   .onTextReplace( it -> trace.add("2") )
+                   .onTextReplace( it -> trace.add("3") )
+                   .onTextReplace( it -> trace.add("4") )
+                   .onTextReplace( it -> trace.add("5") )
+                   .onTextReplace( it -> trace.add("6") )
+                   .onTextReplace( it -> trace.add("7") )
 
         when : 'The text area content is changed.'
             UI.runNow { ui.component.setText("Some other content...") }

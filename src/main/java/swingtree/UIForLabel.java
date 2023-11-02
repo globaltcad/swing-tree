@@ -56,10 +56,9 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
      * @return This very builder to allow for method chaining.
      */
     public UIForLabel<L> makeBold() {
-        this.peek( label -> {
+        return this.peek( label -> {
             _makeBold(label);
         });
-        return this;
     }
 
     /**

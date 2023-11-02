@@ -3824,7 +3824,9 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
                 default: throw new IllegalStateException("Unknown type: "+delegate.changeType());
             }
         });
-        viewables.forEach( v -> add(viewSupplier.createViewFor(v)) );
+        viewables.forEach( v -> {
+            _addBuilders( thisComponent, new AbstractNestedBuilder[]{viewSupplier.createViewFor(v)} );
+        });
     }
 
     private <M> void _addViewableProp(
