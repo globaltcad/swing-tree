@@ -288,16 +288,14 @@ abstract class AbstractBuilder<I, C extends Component>
      */
     public final I applyIf( boolean condition, Consumer<I> building ) {
         NullUtil.nullArgCheck(building, "building", Consumer.class);
-        //I builder = _this();
-        //if ( condition ) building.accept(builder);
-        //return builder;
+
         if ( !condition )
             return _this();
 
-        BuilderState<C> capture = _state().procedural();
-        building.accept(_with(capture)._this());
+        BuilderState<C> proceduralBuilder = _state().procedural();
+        building.accept(_with(proceduralBuilder)._this());
 
-        return _with(_state().supersede(capture))._this();
+        return _with(_state().supersede(proceduralBuilder))._this();
     }
 
 
