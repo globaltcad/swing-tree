@@ -575,6 +575,53 @@ class Individual_Component_Styling_Spec extends Specification
             Utility.similarityBetween(image, "components/soft-JSlider.png", 99.8) > 99.8
     }
 
+    def 'Create a soft progress bar that looks like it is raised from the background.'()
+    {
+        reportInfo """
+            Specifying multiple (named) shadows, allows you to create soft UI,
+            like for example a progress bar that looks raised from the background. <br>
+            The reason why we use named shadows is because we don't want to override
+            the default shadow of the slider, but rather add a new one. <br>
+
+            ${Utility.linkSnapshot('components/soft-raised-JProgressBar.png')}
+            
+            The concept of naming exists to make any number of sub-styles possible.
+            This concept of sub-styles is not exclusive to shadows.
+            You can also name shadesa and custom foreground or background painters.
+        """
+        given : 'Before we create the styled slider, we first setup up FlatLaF as a basis.'
+            FlatLightLaf.setup()
+        and : 'Now a progress bar UI with a custom styler lambda.'
+            var ui =
+                    UI.progressBar(UI.Align.HORIZONTAL, 0, 100, 38)
+                    .peek(it->{it.setString("%"); it.setStringPainted(true);})
+                    .withStyle( it -> it
+                        .borderRadius(13)
+                        .backgroundColor(new Color(0.3f, 0.9f, 0.95f))
+                        .foundationColor(new Color(0.3f, 0.8f, 0.9f))
+                        .shadow("bright", s -> s
+                            .color(new Color(1f, 1f, 1f, 0.3f))
+                            .offset(-11)
+                        )
+                        .shadow("dark", s -> s
+                            .color(new Color(0, 0f, 0f, 0.15f))
+                            .offset(+6)
+                        )
+                        .shadowBlurRadius(13)
+                        .shadowSpreadRadius(-5)
+                        .shadowIsInset(false)
+                        .padding(30)
+                        .margin(10)
+                        .size(230, 30)
+                    )
+
+        when : 'We render the bar into a BufferedImage.'
+            var image = Utility.renderSingleComponent(ui.getComponent())
+
+        then : 'The image is as expected.'
+            Utility.similarityBetween(image, "components/soft-raised-JProgressBar.png", 99.8) > 99.8
+    }
+
     def 'The look of a component, like a button for example, will be preserved if possible, when doing custom styling.'()
     {
         reportInfo """
