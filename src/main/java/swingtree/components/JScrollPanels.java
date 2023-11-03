@@ -392,13 +392,13 @@ public class JScrollPanels extends JScrollPane
 
 			for ( EntryPanel c : entryPanels )
 				c.addMouseListener(
-						new MouseAdapter() {
-							@Override
-							public void mouseClicked(MouseEvent e) {
-								entryPanels.forEach( entry -> entry.setEntrySelected(false) );
-								c.setEntrySelected(true);
-							}
-						}
+				    new MouseAdapter() {
+				    	@Override
+				    	public void mouseClicked(MouseEvent e) {
+				    		entryPanels.forEach( entry -> entry.setEntrySelected(false) );
+				    		c.setEntrySelected(true);
+				    	}
+				    }
 				);
 
 			setOpaque(false);
