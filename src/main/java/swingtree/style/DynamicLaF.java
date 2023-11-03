@@ -11,6 +11,7 @@ import javax.swing.plaf.basic.BasicLabelUI;
 import javax.swing.plaf.basic.BasicPanelUI;
 import javax.swing.plaf.basic.BasicTextFieldUI;
 import java.awt.*;
+import java.awt.geom.Area;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -333,19 +334,27 @@ class DynamicLaF
     }
 
 
-    private static void _paintComponentThroughFormerIU(ComponentUI formerUI, Graphics g, JComponent c) {
+    private static void _paintComponentThroughFormerIU(
+        ComponentUI formerUI, Graphics g, JComponent c
+    ) {
         try {
             if ( formerUI != null ) {
                 Style style = ComponentExtension.from(c).getStyle();
-                boolean hasMargin = style.margin().isPositive();
+                boolean hasMargin       = style.margin().isPositive();
                 boolean hasBorderRadius = style.border().hasAnyNonZeroArcs();
                 if ( !hasMargin && !hasBorderRadius )
                     formerUI.update(g, c);
                 else {
                     Shape oldClip = g.getClip();
                     Shape newClip = ComponentExtension.from(c).getInnerComponentArea();
-                    if ( newClip != null && newClip != oldClip )
+                    if ( newClip != null && newClip != oldClip ) {
+                        if ( oldClip != null ) {
+                            Area common = new Area(oldClip);
+                            common.intersect(new Area(newClip));
+                            newClip = common;
+                        }
                         g.setClip(newClip);
+                    }
 
                     formerUI.update(g, c);
 

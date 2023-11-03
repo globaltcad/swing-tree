@@ -15,6 +15,7 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
+import java.awt.geom.Area;
 import java.util.List;
 import java.util.*;
 import java.util.function.Supplier;
@@ -341,11 +342,19 @@ public final class ComponentExtension<C extends JComponent>
 
         if ( lookAndFeelPainting != null ) {
             _mainClip = g.getClip();
-            Shape clip = _mainClip;
-            if (_stylePainter._getBaseArea() != null)
+            Shape clip = null;
+            if ( _stylePainter._getBaseArea() != null )
                 clip = _stylePainter._getBaseArea(_owner);
-            else if (_stylePainter.getStyle().margin().isPositive())
+            else if ( _stylePainter.getStyle().margin().isPositive() )
                 clip = _stylePainter._getBaseArea(_owner);
+
+            if ( clip == null )
+                clip = _mainClip;
+            else if ( _mainClip != null ) {
+                Area common = new Area(_mainClip);
+                common.intersect(new Area(clip));
+                clip = common;
+            }
 
             _stylePainter._withClip((Graphics2D) g, clip, () -> {
                 try {
