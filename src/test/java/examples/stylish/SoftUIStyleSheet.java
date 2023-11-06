@@ -95,6 +95,8 @@ public class SoftUIStyleSheet extends StyleSheet
             .shadowBlurRadius(13)
             .shadowSpreadRadius(-2)
             .shadowIsInset(true)
+        );
+        add(group(Soft.SINK_ROOMY).inherits(Soft.SINK), it -> it
             .padding(30)
             .margin(10)
         );

@@ -3,10 +3,11 @@ package examples.stylish;
 import com.formdev.flatlaf.FlatLightLaf;
 import swingtree.UI;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.font.TextAttribute;
 import java.util.concurrent.TimeUnit;
 
-import static swingtree.UI.Panel;
 import static swingtree.UI.*;
 
 public class SoftUIView extends Panel
@@ -14,8 +15,8 @@ public class SoftUIView extends Panel
     public SoftUIView() {
         FlatLightLaf.setup();
         UI.use(new SoftUIStyleSheet(), ()->
-            UI.of(this).group(Soft.SINK)
-            .add(SHRINK.and(ALIGN_LEFT),
+            UI.of(this).group(Soft.SINK_ROOMY)
+            .add(SHRINK_Y.and(ALIGN_LEFT),
                 box().group(Soft.RAISE)
                 .withLayout(FILL.and(WRAP(3)).and(INS(32)), "", "[][]24[]24[]")
                 .add( SHRINK.and(SPAN).and(ALIGN_CENTER),
@@ -44,7 +45,7 @@ public class SoftUIView extends Panel
                     )
                 )
                 .add( SHRINK.and(SPAN).and(ALIGN_CENTER),
-                    box().group(Soft.SINK)
+                    box().group(Soft.SINK_ROOMY)
                     .add(
                         slider(Align.VERTICAL, 0, 255).group(Soft.SLIM)
                     )
@@ -91,8 +92,46 @@ public class SoftUIView extends Panel
                     )
                 )
             )
-            .add(
-                icon(512, 512, "img/swing.png").withStyle( it -> it.padding(24) )
+            .add(GROW.and(PUSH_Y),
+                box(WRAP(1).and(FILL))
+                .add(
+                    icon(256, 256, "img/swing.png")
+                    .withStyle( it -> it.padding(24) )
+                )
+                .add(SHRINK.and(CENTER), html("<h2>Progress</h2>").withMaxHeight(30))
+                .add(GROW.and(PUSH_Y),
+                    scrollPanels().group(Soft.SINK).withBackground(Color.RED).isOpaqueIf(false)
+                    .withMinHeight(262)
+                    .apply( ui -> {
+                        for ( int i = 0; i < 16; i++ )
+                            ui.add(
+                                box().withStyle( it -> it
+                                    .margin(3)
+                                    .padding(3)
+                                    //.border(3, Color.RED)
+                                    //.backgroundColor(Color.ORANGE)
+                                )
+                                .add(
+                                    label("Step " + (i+1)).isOpaqueIf(false)
+                                    .withBackground(new Color(0,0,0,0))
+                                    .withStyle( it -> it
+                                        .fontFamily("Dancing Script")
+                                        .fontSize(12)
+                                        .fontColor(new Color(14, 90, 140))
+                                        .fontWeight(2f)
+                                    )
+                                )
+                                .add(
+                                    slider(Align.HORIZONTAL, 0, 100).group(Soft.SLIM)
+                                    .withValue(25+(int) Math.abs(Math.pow(91,i+7)%51))
+                                )
+                                .add(
+                                    toggleButton(11,11,findIcon("img/two-16th-notes.svg").get())
+                                    .group(Soft.BUTTON)
+                                )
+                            );
+                    })
+                )
             )
             .onMouseClick( it -> it.animateFor(2, TimeUnit.SECONDS, state -> {
                 it.paint(state, g -> {
@@ -107,7 +146,6 @@ public class SoftUIView extends Panel
             }))
         );
     }
-
 
     public static void main(String[] args) {
         UI.show(new SoftUIView());
