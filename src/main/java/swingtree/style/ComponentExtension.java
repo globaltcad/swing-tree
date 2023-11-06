@@ -340,8 +340,9 @@ public final class ComponentExtension<C extends JComponent>
 
         _stylePainter.renderBackgroundStyle( (Graphics2D) g, _owner );
 
+        _mainClip = g.getClip();
+
         if ( lookAndFeelPainting != null ) {
-            _mainClip = g.getClip();
             Shape clip = null;
             if ( _stylePainter._getBaseArea() != null )
                 clip = _stylePainter._getBaseArea(_owner);
@@ -359,6 +360,7 @@ public final class ComponentExtension<C extends JComponent>
             _stylePainter._withClip((Graphics2D) g, clip, () -> {
                 try {
                     lookAndFeelPainting.run();
+                    g.setClip(_mainClip);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
