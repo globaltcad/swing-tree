@@ -68,7 +68,7 @@ public final class ComponentExtension<C extends JComponent>
 
     private Color _initialBackgroundColor = null;
 
-    private Shape _mainClip = null;
+    private Shape _outerBaseClip = null;
 
 
     private ComponentExtension( C owner ) { _owner = Objects.requireNonNull(owner); }
@@ -165,7 +165,7 @@ public final class ComponentExtension<C extends JComponent>
         return belongsToGroup(group.getClass().getSimpleName() + "." + group.name());
     }
 
-    Shape getMainClip() { return _mainClip; }
+    Shape getMainClip() { return _outerBaseClip; }
 
     /**
      * @return The current {@link Style} configuration of the component
@@ -340,32 +340,41 @@ public final class ComponentExtension<C extends JComponent>
 
         _stylePainter.renderBackgroundStyle( (Graphics2D) g, _owner );
 
-        _mainClip = g.getClip();
+        _outerBaseClip = g.getClip();
+
+        if ( _outerBaseClip == null && _owner.getParent() == null ) {
+            // Happens when rendering individual components (usually unit tests)!
+            int x = (int) ((Graphics2D) g).getTransform().getTranslateX();
+            int y = (int) ((Graphics2D) g).getTransform().getTranslateY();
+            int w = _owner.getWidth();
+            int h = _owner.getHeight();
+            _outerBaseClip = new Rectangle(x,y,w,h);
+        }
 
         if ( lookAndFeelPainting != null ) {
-            Shape clip = null;
+            Shape contentClip = null;
             if ( _stylePainter._getBaseArea() != null )
-                clip = _stylePainter._getBaseArea(_owner);
+                contentClip = _stylePainter._getBaseArea(_owner);
             else if ( _stylePainter.getStyle().margin().isPositive() )
-                clip = _stylePainter._getBaseArea(_owner);
+                contentClip = _stylePainter._getBaseArea(_owner);
 
-            if ( clip == null )
-                clip = _mainClip;
-            else if ( _mainClip != null ) {
-                Area common = new Area(_mainClip);
-                common.intersect(new Area(clip));
-                clip = common;
+            if ( contentClip == null )
+                contentClip = _outerBaseClip;
+            else if ( _outerBaseClip != null ) {
+                Area common = new Area(_outerBaseClip);
+                common.intersect(new Area(contentClip));
+                contentClip = common;
             }
 
-            _stylePainter._withClip((Graphics2D) g, clip, () -> {
+            _stylePainter._withClip((Graphics2D) g, contentClip, () -> {
                 try {
                     lookAndFeelPainting.run();
-                    g.setClip(_mainClip);
+                    g.setClip(_outerBaseClip);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             });
-            _mainClip = null;
+            _outerBaseClip = null;
         }
     }
 
