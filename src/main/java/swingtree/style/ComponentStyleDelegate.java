@@ -1233,6 +1233,10 @@ public final class ComponentStyleDelegate<C extends JComponent>
 
     /**
      *  Use this to define the weight of the default font of the component.
+     *  The default value is 1.0 (see {@link java.awt.font.TextAttribute#WEIGHT_REGULAR}),
+     *  whereas a bold font typically has a font weight
+     *  of 2.0 (see {@link java.awt.font.TextAttribute#WEIGHT_BOLD}).
+     *  <p>
      *  Note that font styles will only apply if the component that is being rendered
      *  also supports displaying text.
      * @param weight The weight of the font.
