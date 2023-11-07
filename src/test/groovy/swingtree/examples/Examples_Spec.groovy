@@ -3,6 +3,7 @@ package swingtree.examples
 import examples.Calculator
 import examples.animated.AnimatedButtonsView
 import examples.animated.AnimatedView
+import examples.comparisons.comparison1.MadeWithNetBeansEditor
 import examples.comparisons.comparison1.MadeWithSwingTree
 import examples.games.NoteGuesserView
 import examples.games.NoteGuesserViewModel
@@ -299,9 +300,37 @@ class Examples_Spec extends Specification
         expect : new ListRendering()
     }
 
-    def 'The "MadeWithSwingTree" example UI defined in the examples can be created.'()
+    def 'How SwingTree compares to a GUI Editor based implementation.'()
     {
-        expect : new MadeWithSwingTree()
+        reportInfo """
+            This example GUI serves as a comparison between SwingTree
+            and an identically looking implementation based on 
+            NetBeans's GUI Editor.
+            ${Utility.link('This class', MadeWithNetBeansEditor)} 
+            is an implementation that is editor based, wherease
+            ${Utility.link('this class', MadeWithSwingTree)} 
+            uses SwingTree to achieve the same appearance.
+            
+            ${Utility.linkSnapshot('views/made-with-SwingTree.png')}
+
+            Here we only check that it is rendered as expected,
+            but the really interesting part is how the two implementations
+            compare to each other side by side.
+
+            As you can see, the components of this view 
+            each have unique layout requirements which can be difficult to handle.
+            ${Utility.link('The SwingTree implementation', MadeWithSwingTree)} 
+            demonstrates nicely how the requirements can be met
+            without much boilerplate using the various MigLayout
+            keywords and layout modes.
+
+            Feel free to visit the two examples and run them yourself, they each 
+            have main methods for that purpose already.
+        """
+        given :
+            var ui = new MadeWithSwingTree()
+        and :
+            Utility.similarityBetween(ui, "views/made-with-SwingTree.png", 97.5) > 97.5
     }
 
     def 'The calculator UI defined in the examples has the expected state and looks.'()
