@@ -191,7 +191,7 @@
       "tags":{},"see":[],"extraInfo":["\n            The Swing-Tree API exposes various methods to register different kinds of Swing component\n            or keyboard events. \n            All such event registration methods can be identified by the 'on' prefix.\n        "]
       },
       "blocks":[
-        {"kind":"when","text":"We create a panel UI node and attach various kinds of actions to it.","code":["def panel =","        UI.panel().id(\"Root\")","        .onKeyPressed(it -> {/*something*/})","        .onPressed(Keyboard.Key.H, it -> {/*something*/})","        .onKeyReleased(it -> {/*something*/})","        .onReleased(Keyboard.Key.X, it -> {/*something*/})","        .onKeyTyped(it -> {/*something*/})","        .onTyped(Keyboard.Key.X, it -> {/*something*/})","        .get(JPanel)"]},
+        {"kind":"when","text":"We create a panel UI node and attach various kinds of actions to it.","code":["def panel =","        UI.panel().id(\"Root\")","        .onKeyPress( it -> {/*something*/})","        .onPressed(Keyboard.Key.H, it -> {/*something*/})","        .onKeyRelease( it -> {/*something*/})","        .onRelease(Keyboard.Key.X, it -> {/*something*/})","        .onKeyTyped(it -> {/*something*/})","        .onTyped(Keyboard.Key.X, it -> {/*something*/})","        .get(JPanel)"]},
 
         {"kind":"then","text":"We can verify that the panel has the expected number of listeners.","code":["panel.getListeners(KeyListener.class).size() == 6"]}
       ],
