@@ -100,6 +100,10 @@ public class SoftUIStyleSheet extends StyleSheet
             .padding(30)
             .margin(10)
         );
+        add(group(Soft.SINK_SLIM).inherits(Soft.SINK), it -> it
+            .padding(0)
+            .borderRadius(60)
+        );
         add(group(Soft.RAISE).inherits(Soft.BASE), it -> it
             .foundationColor(new Color(0.4f, 0.85f, 1))
             .shadow("bright", s -> s

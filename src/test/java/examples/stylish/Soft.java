@@ -8,6 +8,7 @@ public enum Soft {
     BANNER,
     BUTTON,
     SINK,
+    SINK_SLIM,
     SINK_ROOMY,
     SLIM,
     RAISE,

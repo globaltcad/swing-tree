@@ -4,8 +4,6 @@ import com.formdev.flatlaf.FlatLightLaf;
 import swingtree.UI;
 
 import java.awt.Color;
-import java.awt.Font;
-import java.awt.font.TextAttribute;
 import java.util.concurrent.TimeUnit;
 
 import static swingtree.UI.*;
@@ -100,7 +98,7 @@ public class SoftUIView extends Panel
                 )
                 .add(SHRINK.and(CENTER), html("<h2>Progress</h2>").withMaxHeight(30))
                 .add(GROW.and(PUSH_Y),
-                    scrollPanels().group(Soft.SINK).withBackground(Color.RED).isOpaqueIf(false)
+                    scrollPanels().group(Soft.SINK_SLIM)
                     .withMinHeight(262)
                     .apply( ui -> {
                         for ( int i = 0; i < 16; i++ )
@@ -112,7 +110,7 @@ public class SoftUIView extends Panel
                                     //.backgroundColor(Color.ORANGE)
                                 )
                                 .add(
-                                    label("Step " + (i+1)).isOpaqueIf(false)
+                                    label("Step " + (i+1))
                                     .withBackground(new Color(0,0,0,0))
                                     .withStyle( it -> it
                                         .fontFamily("Dancing Script")
