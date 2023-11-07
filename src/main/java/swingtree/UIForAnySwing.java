@@ -3289,7 +3289,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param onKeyPressed The {@link Action} which will be executed once the wrapped component received a key press.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I onKeyPressed( Action<ComponentDelegate<C, KeyEvent>> onKeyPressed ) {
+    public final I onKeyPress( Action<ComponentDelegate<C, KeyEvent>> onKeyPressed ) {
         NullUtil.nullArgCheck(onKeyPressed, "onKeyPressed", Action.class);
         return _with( component -> {
                    component.addKeyListener(new KeyAdapter() {
@@ -3330,9 +3330,9 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * <br><br>
      * @param onKeyReleased The {@link Action} which will be executed once the wrapped component received a key release.
      * @return This very instance, which enables builder-style method chaining.
-     * @see #onKeyPressed(Action)
+     * @see #onKeyPress(Action)
      */
-    public final I onKeyReleased( Action<ComponentDelegate<C, KeyEvent>> onKeyReleased ) {
+    public final I onKeyRelease( Action<ComponentDelegate<C, KeyEvent>> onKeyReleased ) {
         NullUtil.nullArgCheck(onKeyReleased, "onKeyReleased", Action.class);
         return _with( component -> {
                    component.addKeyListener(new KeyAdapter() {
@@ -3351,10 +3351,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param key The {@link swingtree.input.Keyboard.Key} which should be matched to the key event.
      * @param onKeyReleased The {@link Action} which will be executed once the wrapped component received the targeted key release.
      * @return This very instance, which enables builder-style method chaining.
-     * @see #onKeyPressed(Action)
-     * @see #onKeyReleased(Action)
+     * @see #onKeyPress(Action)
+     * @see #onKeyRelease(Action)
      */
-    public final I onReleased( Keyboard.Key key, Action<ComponentDelegate<C, KeyEvent>> onKeyReleased ) {
+    public final I onRelease( Keyboard.Key key, Action<ComponentDelegate<C, KeyEvent>> onKeyReleased ) {
         NullUtil.nullArgCheck(key, "key", Keyboard.Key.class);
         NullUtil.nullArgCheck(onKeyReleased, "onKeyReleased", Action.class);
         return _with( component -> {
@@ -3374,8 +3374,8 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * <br><br>
      * @param onKeyTyped The {@link Action} which will be executed once the wrapped component received a key typed.
      * @return This very instance, which enables builder-style method chaining.
-     * @see #onKeyPressed(Action)
-     * @see #onKeyReleased(Action)
+     * @see #onKeyPress(Action)
+     * @see #onKeyRelease(Action)
      */
     public final I onKeyTyped( Action<ComponentDelegate<C, KeyEvent>> onKeyTyped ) {
         NullUtil.nullArgCheck(onKeyTyped, "onKeyTyped", Action.class);
@@ -3395,8 +3395,8 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param key The {@link swingtree.input.Keyboard.Key} which should be matched to the key event.
      * @param onKeyTyped The {@link Action} which will be executed once the wrapped component received the targeted key typed.
      * @return This very instance, which enables builder-style method chaining.
-     * @see #onKeyPressed(Action)
-     * @see #onKeyReleased(Action)
+     * @see #onKeyPress(Action)
+     * @see #onKeyRelease(Action)
      * @see #onKeyTyped(Action)
      */
     public final I onTyped( Keyboard.Key key, Action<ComponentDelegate<C, KeyEvent>> onKeyTyped ) {
@@ -3586,7 +3586,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param <T> The type of the {@link JComponent} which is wrapped by the provided builder.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final <T extends JComponent> I add(AddConstraint attr, UIForAnySwing<?, T> builder ) {
+    public final <T extends JComponent> I add( AddConstraint attr, UIForAnySwing<?, T> builder ) {
         return this.add(attr.toString(), new UIForAnySwing[]{builder});
     }
 
@@ -3605,7 +3605,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very instance, which enables builder-style method chaining.
      */
     @SafeVarargs
-    public final <B extends UIForAnySwing<?, ?>> I add(String attr, B... builders ) {
+    public final <B extends UIForAnySwing<?, ?>> I add( String attr, B... builders ) {
         return _with( thisComponent -> {
                    _addBuilders(thisComponent, attr, builders);
                })
@@ -3692,7 +3692,8 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
                ._this();
     }
 
-    private <E extends JComponent> void _addComponents( C thisComponent, String attr, E... components ) {
+    @SafeVarargs
+    private final <E extends JComponent> void _addComponents( C thisComponent, String attr, E... components ) {
         for ( E component : components ) {
             NullUtil.nullArgCheck(component, "component", JComponent.class);
             _addBuilders( thisComponent, attr, new UIForSwing[]{UI.of(component)} );
@@ -3712,7 +3713,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param <E> The type of the {@link JComponent} which is wrapped by the provided builder.
      */
     @SafeVarargs
-    public final <E extends JComponent> I add(AddConstraint attr, E... components ) {
+    public final <E extends JComponent> I add( AddConstraint attr, E... components ) {
         return this.add(attr.toString(), components);
     }
 
@@ -3729,7 +3730,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very instance, which enables builder-style method chaining.
      * @param <M> The type of the value held by the {@link Val} property.
      */
-    public final <M> I add( Val<M> viewable, ViewSupplier<M> viewSupplier) {
+    public final <M> I add( Val<M> viewable, ViewSupplier<M> viewSupplier ) {
         NullUtil.nullArgCheck(viewable, "viewable", Val.class);
         return _with( component -> {
                    _addViewableProp(viewable, null, viewSupplier, component);
@@ -3751,7 +3752,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very instance, which enables builder-style method chaining.
      * @param <M> The type of the items in the {@link Vals} list.
      */
-    public final <M> I add( Vals<M> viewables, ViewSupplier<M> viewSupplier) {
+    public final <M> I add( Vals<M> viewables, ViewSupplier<M> viewSupplier ) {
         NullUtil.nullArgCheck(viewables, "viewables", Vals.class);
         return _with( c -> {
                     _addViewableProps( viewables, null, viewSupplier, c );
@@ -3773,7 +3774,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very instance, which enables builder-style method chaining.
      * @param <M> The type of the value held by the {@link Val} property.
      */
-    public final <M> I add( String attr, Val<M> viewable, ViewSupplier<M> viewSupplier) {
+    public final <M> I add( String attr, Val<M> viewable, ViewSupplier<M> viewSupplier ) {
         NullUtil.nullArgCheck(attr, "attr", Object.class);
         NullUtil.nullArgCheck(viewable, "viewable", Val.class);
         return _with( component -> {
@@ -3797,7 +3798,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very instance, which enables builder-style method chaining.
      * @param <M> The type of the items in the {@link Vals} list.
      */
-    public final <M> I add( String attr, Vals<M> viewables, ViewSupplier<M> viewSupplier) {
+    public final <M> I add( String attr, Vals<M> viewables, ViewSupplier<M> viewSupplier ) {
         NullUtil.nullArgCheck(attr, "attr", Object.class);
         NullUtil.nullArgCheck(viewables, "viewables", Vals.class);
         return _with( c -> {
@@ -3820,7 +3821,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very instance, which enables builder-style method chaining.
      * @param <M> The type of the value held by the {@link Val} property.
      */
-    public final <M> I add(AddConstraint attr, Val<M> viewable, ViewSupplier<M> viewSupplier) {
+    public final <M> I add( AddConstraint attr, Val<M> viewable, ViewSupplier<M> viewSupplier ) {
         return this.add(attr.toString(), viewable, viewSupplier);
     }
 

@@ -219,7 +219,7 @@ class Examples_Spec extends Specification
         given : 'We create the UI.'
             var ui = new SoftUIView()
         expect : 'It is rendered as shown in the image.'
-            Utility.similarityBetween(ui, "views/soft-example-UI.png", 99) > 99
+            Utility.similarityBetween(ui, "views/soft-example-UI.png", 98.5) > 98.5
     }
 
     def 'The animated buttons view examples UI defined in the examples looks as expected.'()

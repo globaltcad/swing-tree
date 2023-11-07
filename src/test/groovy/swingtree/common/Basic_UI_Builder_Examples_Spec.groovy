@@ -320,10 +320,10 @@ class Basic_UI_Builder_Examples_Spec extends Specification
         when : 'We create a panel UI node and attach various kinds of actions to it.'
             def panel =
                     UI.panel().id("Root")
-                    .onKeyPressed(it -> {/*something*/})
+                    .onKeyPress( it -> {/*something*/})
                     .onPressed(Keyboard.Key.H, it -> {/*something*/})
-                    .onKeyReleased(it -> {/*something*/})
-                    .onReleased(Keyboard.Key.X, it -> {/*something*/})
+                    .onKeyRelease( it -> {/*something*/})
+                    .onRelease(Keyboard.Key.X, it -> {/*something*/})
                     .onKeyTyped(it -> {/*something*/})
                     .onTyped(Keyboard.Key.X, it -> {/*something*/})
                     .get(JPanel)
