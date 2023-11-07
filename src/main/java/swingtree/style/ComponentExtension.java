@@ -165,7 +165,7 @@ public final class ComponentExtension<C extends JComponent>
         return belongsToGroup(group.getClass().getSimpleName() + "." + group.name());
     }
 
-    Shape getMainClip() { return _outerBaseClip; }
+    Shape getCurrentOuterBaseClip() { return _outerBaseClip; }
 
     /**
      * @return The current {@link Style} configuration of the component
@@ -230,14 +230,7 @@ public final class ComponentExtension<C extends JComponent>
                 lookAndFeelPaint.run();
             return; // We render ĥere through the custom installed UI!
         }
-
-        if ( _componentIsDeclaredInUI(_owner) )
-            _paintBackground(g, lookAndFeelPaint);
-        else {
-            _stylePainter = _stylePainter.endPainting(); // custom style rendering unfortunately not possible for this component :/
-            if ( lookAndFeelPaint != null )
-                lookAndFeelPaint.run();
-        }
+        _paintBackground(g, lookAndFeelPaint);
     }
 
     /**

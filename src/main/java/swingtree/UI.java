@@ -1160,12 +1160,12 @@ public final class UI extends UILayoutConstants
      *          The default layout manager is a {@link MigLayout}.
      *      </li>
      *      <li>
-     *          The insets (the space between the wrapped component and the box's border)
-     *          are set to zero.
+     *          The insets (the spaces between the wrapped component and the box's border)
+     *          are all set to zero.
      *      </li>
      *      <li>
-     *          There the gap size between the components added to the box is set to zero.
-     *          So they will be tightly packed.
+     *          The gap sizes between the components added to the box is set to zero.
+     *          So the children of this component will be tightly packed.
      *      </li>
      *  </ul>
      *  <b>Please note that the {@link JBox} type is in no way related to the {@link BoxLayout}!
@@ -6281,14 +6281,25 @@ public final class UI extends UILayoutConstants
     }
     /** {inheritDoc} */
     public static class ScrollPane extends JScrollPane {
-        public ScrollPane() {
-            super();
-
+        public ScrollPane() { this(null); }
+        public ScrollPane(Component view) {
+            super(view);
             addMouseWheelListener(new NestedJScrollPanelScrollCorrection(this));
         }
-
         @Override public void paint(Graphics g){ _paintBackground(this, g, ()->super.paint(g)); }
         @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }
+        @Override
+        public void setOpaque( boolean shouldBeOpaque ) {
+            super.setOpaque(shouldBeOpaque);
+            this.getViewport().setOpaque(shouldBeOpaque);
+        }
+
+        @Override
+        public void setBackground( Color newBackgroundColor ) {
+            super.setBackground(newBackgroundColor);
+            this.getViewport().setBackground(newBackgroundColor);
+        }
+
     }
     /** {inheritDoc} */
     public static class TabbedPane extends JTabbedPane {

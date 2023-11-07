@@ -61,8 +61,8 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
 
         Shape former = g.getClip();
 
-        if ( _compExt.getMainClip() != null )
-          g.setClip( _compExt.getMainClip() );
+        if ( _compExt.getCurrentOuterBaseClip() != null )
+          g.setClip( _compExt.getCurrentOuterBaseClip() );
 
         _paintBorderAndBorderLayerStyles( (Graphics2D) g );
         if ( _formerBorder != null && !_borderWasNotPainted ) {

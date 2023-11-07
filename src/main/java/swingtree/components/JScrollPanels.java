@@ -6,8 +6,6 @@ import sprouts.From;
 import swingtree.UI;
 import swingtree.api.mvvm.EntryViewModel;
 import swingtree.api.mvvm.ViewSupplier;
-import swingtree.components.listener.NestedJScrollPanelScrollCorrection;
-import swingtree.style.ComponentExtension;
 
 import javax.swing.*;
 import java.awt.*;
@@ -48,7 +46,7 @@ import java.util.stream.IntStream;
  * 	The second parameter of the {@link swingtree.UIForScrollPanels#add(sprouts.Vals, ViewSupplier)} method is a lambda
  *  which takes a single view model from the list of view models and turns it into a view.
  */
-public class JScrollPanels extends JScrollPane
+public class JScrollPanels extends UI.ScrollPane
 {
 	private static final Logger log = org.slf4j.LoggerFactory.getLogger(JScrollPanels.class);
 
@@ -108,32 +106,6 @@ public class JScrollPanels extends JScrollPane
 	private JScrollPanels(InternalPanel listWrapper) {
 		super(listWrapper);
 		_internal = listWrapper;
-		this.addMouseWheelListener(new NestedJScrollPanelScrollCorrection(this));
-	}
-
-	@Override
-	public void setOpaque( boolean shouldBeOpaque ) {
-		super.setOpaque(shouldBeOpaque);
-		this.getViewport().setOpaque(shouldBeOpaque);
-	}
-
-	@Override
-	public void setBackground( Color newBackgroundColor ) {
-		super.setBackground(newBackgroundColor);
-		this.getViewport().setBackground(newBackgroundColor);
-	}
-
-	/** {@inheritDoc} */
-	@Override public void paint(Graphics g){
-		ComponentExtension.from(this).paintBackgroundStyle( g, ()->{
-			super.paint(g);
-		});
-	}
-
-	/** {@inheritDoc} */
-	@Override public void paintChildren(Graphics g){
-		super.paintChildren(g);
-		ComponentExtension.from(this).paintForegroundStyle( (Graphics2D) g );
 	}
 
 	/**
