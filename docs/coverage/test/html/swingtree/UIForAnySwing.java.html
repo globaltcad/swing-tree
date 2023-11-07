@@ -2648,7 +2648,7 @@ import java.util.function.Function;
 
     private void _setMaxHeight( C component, int height ) {
 <span class="fc" id="L2650">        int currentWidth = component.getMaximumSize().width;</span>
-<span class="pc bpc" id="L2651" title="1 of 4 branches missed.">        if ( !component.isMaximumSizeSet() &amp;&amp; UI.currentLookAndFeel().isOneOf(UI.LookAndFeel.METAL, UI.LookAndFeel.NIMBUS) )</span>
+<span class="fc bfc" id="L2651" title="All 4 branches covered.">        if ( !component.isMaximumSizeSet() &amp;&amp; UI.currentLookAndFeel().isOneOf(UI.LookAndFeel.METAL, UI.LookAndFeel.NIMBUS) )</span>
 <span class="fc" id="L2652">            currentWidth = UI.scale(currentWidth);</span>
 <span class="fc" id="L2653">        component.setMaximumSize(new Dimension(currentWidth, UI.scale(height)));</span>
 <span class="fc" id="L2654">    }</span>

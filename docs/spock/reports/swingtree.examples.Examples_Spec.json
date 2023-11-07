@@ -4,7 +4,7 @@
   "narrative":"This is an overview of the various example UIs\n    in the test suite.\n\n    This specification also ensures that the\n    various UI examples in the test suite, \n    run successfully and also produce\n    UIs with expected state and appearance.",
   "subjects":[],
   "statistics":{
-    "runs":"19",
+    "runs":"1",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -15,10 +15,10 @@
   "features":[ 
     {
       "id":"The advanced UI define in the examples has the expected state.",
-      "result":"PASS",
+      "result":"IGNORED",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            The <a href=\"https://github.com/globaltcad/swing-tree/blob/main/src/test/java/swingtree/examples/advanced/AdvancedUI.java\" target=\"_blank\">advanced UI  example</a> is absolutely packed with things to see.\n            Yet, at the same time, it is not too much code\n            and also not too complicated. \n            It really shows you\n            how boilerplate code can be reduced to a minimum\n            when using SwingTree.\n        "]
+      "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
         {"kind":"given","text":"We create the UI.","code":["var ui = AdvancedUI.of(null)"]},
@@ -36,10 +36,10 @@
   
     {
       "id":"The form UI defined in the examples has the expected state.",
-      "result":"PASS",
+      "result":"IGNORED",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            The form UI looks like this:\n            <img src=\"https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/views/simple-form-UI.png\" alt=\"views/simple-form-UI.png\" style=\"max-width: 50%;\" />\n\n            This is the <a href=\"https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/simple/Form.java\" target=\"_blank\">oldest example in the test suite</a> and also a great\n            first example of how to write declarative UI code with SwingTree.\n        "]
+      "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
         {"kind":"given","text":"We get the UI.","code":["var ui = new Form()"]},
@@ -55,10 +55,10 @@
   
     {
       "id":"The login example UI defined in the examples, a good MVVM demonstration.",
-      "result":"PASS",
+      "result":"IGNORED",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            The <a href=\"https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/mvvm/LoginView.java\" target=\"_blank\">login example view</a>, together\n            with the <a href=\"https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/mvvm/LoginViewModel.java\" target=\"_blank\">login example view model</a>, is\n            a really basic example of how to do MVVM with SwingTree.\n            For a more advanced example, see the <a href=\"https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/mvvm/UserRegistrationView.java\" target=\"_blank\">user registration example</a>.\n        "]
+      "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
         {"kind":"expect","text":"","code":["expect : new LoginView(new LoginViewModel())"]}
@@ -68,10 +68,10 @@
   
     {
       "id":"The user registration example UI defined in the examples, a good MVVM demonstration.",
-      "result":"PASS",
+      "result":"IGNORED",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            The <a href=\"https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/mvvm/UserRegistrationView.java\" target=\"_blank\">user registration example</a>, together\n            with the <a href=\"https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/mvvm/UserRegistrationViewModel.java\" target=\"_blank\">user registration example view model</a>, is\n            a more advanced example of how to do the MVVM design pattern with SwingTree.\n            It involves a lot of input validation that is done in the view model.\n            For a more basic example, see the <a href=\"https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/mvvm/LoginView.java\" target=\"_blank\">login example view</a>.\n        "]
+      "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
         {"kind":"expect","text":"","code":["expect : new UserRegistrationView(new UserRegistrationViewModel())"]}
@@ -81,7 +81,7 @@
   
     {
       "id":"The list examples UI defined in the examples can be created.",
-      "result":"PASS",
+      "result":"IGNORED",
       "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
@@ -94,10 +94,10 @@
   
     {
       "id":"The box shadow picker example UI defined in the examples can be created.",
-      "result":"PASS",
+      "result":"IGNORED",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            Not only is the <a href=\"https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/stylish/BoxShadowPickerView.java\" target=\"_blank\">box shadow picker example</a> \n            an advanced example of how to write MVVM applications with SwingTree,\n            it is also a nice little tool that shows you how to use the \n            SwingTree style API to override the default look and feel of Swing components.\n        "]
+      "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
         {"kind":"expect","text":"","code":["expect : new BoxShadowPickerView(new BoxShadowPickerViewModel())"]}
@@ -107,10 +107,10 @@
   
     {
       "id":"The note guesser example UI defined in the examples can be created.",
-      "result":"PASS",
+      "result":"IGNORED",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            The guesser example view looks like this:\n            <img src=\"https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/views/note-guesser-UI.png\" alt=\"views/note-guesser-UI.png\" style=\"max-width: 50%;\" />\n            This not only demonstrates how to do some custom 2D rendering on a JPanel,\n            it is also a nice little game you can play to test your knowledge of music theory.\n\n            Just <a href=\"https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/games/NoteGuesserView.java\" target=\"_blank\">navigate to the class</a> and run\n            it yourself and play around with it.\n            The <a href=\"https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/games/NoteGuesserViewModel.java\" target=\"_blank\">view model</a> is also a nice example of how to\n            do MVVM with SwingTree.\n        "]
+      "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
         {"kind":"given","text":"We create an instance of the UI.","code":["var ui = new NoteGuesserView(new NoteGuesserViewModel())"]},
@@ -122,7 +122,7 @@
   
     {
       "id":"The symbol guesser example UI defined in the examples can be created.",
-      "result":"PASS",
+      "result":"IGNORED",
       "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
@@ -135,10 +135,10 @@
   
     {
       "id":"The \"Well rounded\" style example UI defined in the examples can be created.",
-      "result":"PASS",
+      "result":"IGNORED",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            The well rounded UI looks like this:\n            <img src=\"https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/views/well-rounded-UI.png\" alt=\"views/well-rounded-UI.png\" style=\"max-width: 50%;\" />\n\n            This is the most basic example of how to use the SwingTree style API to\n            override the default look and feel of Swing components.\n            As you can see, the style engine of SwingTree supports shadows, rounded corners,\n            gradients and much much more out of the box.\n\n            Here we will only test looks of the UI, if you want to see the code, \n            <a href=\"https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/stylish/WellRoundedView.java\" target=\"_blank\">click here</a> to jump to the class.\n            And also feel free to run \n            it yourself, it has a main method for that purpose already.\n        "]
+      "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
         {"kind":"given","text":"We create the UI.","code":["var ui = new WellRoundedView()"]},
@@ -158,17 +158,17 @@
       "blocks":[
         {"kind":"given","text":"We create the UI.","code":["var ui = new SoftUIView()"]},
 
-        {"kind":"expect","text":"It is rendered as shown in the image.","code":["Utility.similarityBetween(ui, \"views/soft-example-UI.png\", 98.7) > 98.7"]}
+        {"kind":"expect","text":"It is rendered as shown in the image.","code":["Utility.similarityBetween(ui, \"views/soft-example-UI.png\", 99) > 99"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
   
     {
       "id":"The animated buttons view examples UI defined in the examples looks as expected.",
-      "result":"PASS",
+      "result":"IGNORED",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            The animated buttons view looks like this:\n            <img src=\"https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/views/animated-buttons-UI.png\" alt=\"views/animated-buttons-UI.png\" style=\"max-width: 50%;\" />\n\n            Unfortunately this is just a snapshot of the UI, so you can't play with \n            the animations right here. But you can run the \n            <a href=\"https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/animated/AnimatedButtonsView.java\" target=\"_blank\">example found in the test suite</a>\n            of SwingTree and try it out yourself.\n            There is a main method in the class, so you can just run it.\n        "]
+      "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
         {"kind":"given","text":"We create the UI.","code":["var ui = new AnimatedButtonsView()","ui.setBackground(new Color(242, 242, 242))"]},
@@ -180,7 +180,7 @@
   
     {
       "id":"The animation example view can be created.",
-      "result":"PASS",
+      "result":"IGNORED",
       "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
@@ -193,10 +193,10 @@
   
     {
       "id":"The settings example UI defined in the examples looks as expected.",
-      "result":"PASS",
+      "result":"IGNORED",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            The vertical settings view from the examples looks like this:\n            <img src=\"https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/views/vertical-settings-UI.png\" alt=\"views/vertical-settings-UI.png\" style=\"max-width: 50%;\" />\n\n            It demonstrates how UI components can easily be placed vertically\n            and with some slight indentation, to indicate a certain grouping\n            which is especially useful for settings dialogs.\n\n            If you want to see the code, just\n            <a href=\"https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/mvvm/SomeSettingsView.java\" target=\"_blank\">navigate to the class</a> and run it yourself, \n            it has a main method for that purpose already.\n\n            Here we will only test the UI.\n        "]
+      "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
         {"kind":"given","text":"","code":["SwingTree.initialiseUsing(SwingTreeTestConfigurator.get())","var view = new SomeSettingsView(new SomeSettingsViewModel())","var speedTextField = new Utility.Query(view).find(JTextField, \"speed-text-field\").orElse(null)"]},
@@ -222,7 +222,7 @@
   
     {
       "id":"The spinners example UI defined in the examples can be created.",
-      "result":"PASS",
+      "result":"IGNORED",
       "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
@@ -235,7 +235,7 @@
   
     {
       "id":"The list rendering example UI defined in the examples can be created.",
-      "result":"PASS",
+      "result":"IGNORED",
       "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
@@ -248,7 +248,7 @@
   
     {
       "id":"The \"MadeWithSwingTree\" example UI defined in the examples can be created.",
-      "result":"PASS",
+      "result":"IGNORED",
       "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]
@@ -261,10 +261,10 @@
   
     {
       "id":"The calculator UI defined in the examples has the expected state and looks.",
-      "result":"PASS",
+      "result":"IGNORED",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            The calculator view looks like this:\n            <img src=\"https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/views/calculator-UI.png\" alt=\"views/calculator-UI.png\" style=\"max-width: 50%;\" />\n\n            Here we only check that it is rendered as expected and we will not go further into detail \n            with respect to its code, if you want to see the code, just \n            <a href=\"https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/Calculator.java\" target=\"_blank\">navigate to the class</a> \n            and run it yourself, it has \n            a main method for that purpose already.\n        "]
+      "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
         {"kind":"given","text":"We create the UI.","code":["var ui = new Calculator()","ui.setBackground(new Color(242, 242, 242))"]},
@@ -278,10 +278,10 @@
   
     {
       "id":"Declare table components using a list of list as data source.",
-      "result":"PASS",
+      "result":"IGNORED",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            The UI declaration in this example demonstrates various ways to declare\n            tables from a list of lists as a data source.\n            The UI looks like this:\n            <img src=\"https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/views/tables-example-view.png\" alt=\"views/tables-example-view.png\" style=\"max-width: 50%;\" />\n\n            As you can see, there are 4 different tables in the UI.\n        "]
+      "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
         {"kind":"given","text":"We declare the UI.","code":["var data = [[\"X\", \"Y\"], [\"1\", \"2\"], [\"3\", \"4\"]]","def ui =","    UI.panel(\"fill\")","    .add(\"grow\",","        UI.panel(\"fill\")","        .add(\"grow, span\", UI.label(\"Row Major\"))","        .add(\"grow, span\", UI.table(UI.ListData.ROW_MAJOR, ()->[[\"A\", \"B\", \"C\"], [\"a\", \"b\", \"c\"]]).id(\"RM\"))","        .add(\"grow, span\", UI.separator())","        .add(\"grow, span\", UI.label(\"Column Major\"))","        .add(\"grow, span\", UI.table(UI.ListData.COLUMN_MAJOR, ()->[[\"A\", \"B\", \"C\"], [\"a\", \"b\", \"c\"]]).id(\"CM\"))","    )","    .add(\"grow\", UI.separator(UI.Align.VERTICAL))","    .add(\"grow\",","        UI.panel(\"fill\")","        .add(\"grow, span\", UI.label(\"Row Major 2\"))","        .add(\"grow, span\",","            UI.table(","               UI.tableModel()","               .colCount( () -> data[0].size() ).rowCount( () -> data.size() )","               .getsEntryAt((col, row) -> data[col][row] )","            )","            .id(\"RM2\")","        )","        .add(\"grow, span\", UI.separator())","        .add(\"grow, span\", UI.label(\"Column Major 2\"))","        .add(\"grow, span\",","            UI.table(","               UI.tableModel()","               .colCount( () -> data.size() )","               .rowCount( () -> data[0].size() )","               .getsEntryAt((col, row) -> data[row][col] )","            )","            .id(\"CM2\")","        )","    )","    .get(JPanel)"]},
@@ -305,7 +305,7 @@
   
     {
       "id":"The todo app UI defined in the examples has the expected state.",
-      "result":"PASS",
+      "result":"IGNORED",
       "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":[]

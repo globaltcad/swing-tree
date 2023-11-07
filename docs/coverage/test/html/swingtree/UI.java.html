@@ -4727,8 +4727,8 @@ public final class UI extends UILayoutConstants
      * @return A builder instance for the provided {@link JProgressBar}, which enables fluent method chaining.
      */
     public static UIForProgressBar&lt;JProgressBar&gt; progressBar( Align align, int min, int max, int value ) {
-<span class="nc" id="L4730">        NullUtil.nullArgCheck(align, &quot;align&quot;, Align.class);</span>
-<span class="nc" id="L4731">        return progressBar().withOrientation(align).withMin(min).withMax(max).withValue(value);</span>
+<span class="fc" id="L4730">        NullUtil.nullArgCheck(align, &quot;align&quot;, Align.class);</span>
+<span class="fc" id="L4731">        return progressBar().withOrientation(align).withMin(min).withMax(max).withValue(value);</span>
     }
 
     /**
@@ -6147,8 +6147,8 @@ public final class UI extends UILayoutConstants
         This is especially important to allow for declarative UI.
     */
 
-    private static &lt;C extends JComponent&gt; void _paintBackground( C comp, Graphics g ) {
-<span class="fc" id="L6151">        ComponentExtension.from(comp).paintBackgroundStyle( g );</span>
+    private static &lt;C extends JComponent&gt; void _paintBackground( C comp, Graphics g, Runnable superPaint ) {
+<span class="fc" id="L6151">        ComponentExtension.from(comp).paintBackgroundStyle( g, superPaint );</span>
 <span class="fc" id="L6152">    }</span>
     private static &lt;C extends JComponent&gt; void _paintForeground( C comp, Graphics g ) {
 <span class="fc" id="L6154">        ComponentExtension.from(comp).paintForegroundStyle( (Graphics2D) g );</span>
@@ -6156,57 +6156,57 @@ public final class UI extends UILayoutConstants
 
     /** {inheritDoc} */
 <span class="fc" id="L6158">    public static class Panel extends JPanel {</span>
-<span class="fc" id="L6159">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="fc" id="L6159">        @Override public void paint(Graphics g){ _paintBackground(this, g, ()-&gt;super.paint(g)); }</span>
 <span class="fc" id="L6160">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
 <span class="fc" id="L6163">    public static class Label extends JLabel {</span>
-<span class="fc" id="L6164">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="fc" id="L6164">        @Override public void paint(Graphics g){ _paintBackground(this, g, ()-&gt;super.paint(g)); }</span>
 <span class="fc" id="L6165">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
 <span class="fc" id="L6168">    public static class TextField extends JTextField {</span>
-<span class="fc" id="L6169">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="fc" id="L6169">        @Override public void paint(Graphics g){ _paintBackground(this, g, ()-&gt;super.paint(g)); }</span>
 <span class="fc" id="L6170">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
 <span class="fc" id="L6173">    public static class TextArea extends JTextArea {</span>
-<span class="fc" id="L6174">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="fc" id="L6174">        @Override public void paint(Graphics g){ _paintBackground(this, g, ()-&gt;super.paint(g)); }</span>
 <span class="fc" id="L6175">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
 <span class="fc" id="L6178">    public static class CheckBox extends JCheckBox {</span>
-<span class="fc" id="L6179">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="fc" id="L6179">        @Override public void paint(Graphics g){ _paintBackground(this, g, ()-&gt;super.paint(g)); }</span>
 <span class="fc" id="L6180">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
 <span class="fc" id="L6183">    public static class Button extends JButton {</span>
-<span class="fc" id="L6184">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="fc" id="L6184">        @Override public void paint(Graphics g){ _paintBackground(this, g, ()-&gt;super.paint(g)); }</span>
 <span class="fc" id="L6185">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
 <span class="fc" id="L6188">    public static class ToggleButton extends JToggleButton {</span>
-<span class="fc" id="L6189">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="fc" id="L6189">        @Override public void paint(Graphics g){ _paintBackground(this, g, ()-&gt;super.paint(g)); }</span>
 <span class="fc" id="L6190">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
 <span class="fc" id="L6193">    public static class RadioButton extends JRadioButton {</span>
-<span class="fc" id="L6194">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="fc" id="L6194">        @Override public void paint(Graphics g){ _paintBackground(this, g, ()-&gt;super.paint(g)); }</span>
 <span class="fc" id="L6195">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
 <span class="fc" id="L6198">    public static class ComboBox&lt;E&gt; extends JComboBox&lt;E&gt; {</span>
-<span class="fc" id="L6199">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="fc" id="L6199">        @Override public void paint(Graphics g){ _paintBackground(this, g, ()-&gt;super.paint(g)); }</span>
 <span class="fc" id="L6200">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
 <span class="fc" id="L6203">    public static class List&lt;E&gt; extends JList&lt;E&gt; {</span>
-<span class="nc" id="L6204">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="nc" id="L6204">        @Override public void paint(Graphics g){ _paintBackground(this, g, ()-&gt;super.paint(g)); }</span>
 <span class="nc" id="L6205">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
 <span class="fc" id="L6208">    public static class Table extends JTable {</span>
-<span class="fc" id="L6209">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="fc" id="L6209">        @Override public void paint(Graphics g){ _paintBackground(this, g, ()-&gt;super.paint(g)); }</span>
 <span class="fc" id="L6210">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
@@ -6229,7 +6229,7 @@ public final class UI extends UILayoutConstants
 <span class="nc" id="L6229">            Objects.requireNonNull(toolTips);</span>
 <span class="nc" id="L6230">            setToolTipsSupplier( i -&gt; toolTips[i] );</span>
 <span class="nc" id="L6231">        }</span>
-<span class="nc" id="L6232">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="nc" id="L6232">        @Override public void paint(Graphics g){ _paintBackground(this, g, ()-&gt;super.paint(g)); }</span>
 <span class="nc" id="L6233">        @Override public void paintComponent(Graphics g) { super.paintComponent(g); _paintForeground(this, g); }</span>
         @Override public String getToolTipText(MouseEvent e) {
 <span class="nc" id="L6235">            int col = columnAtPoint(e.getPoint());</span>
@@ -6246,110 +6246,121 @@ public final class UI extends UILayoutConstants
     }
     /** {inheritDoc} */
 <span class="fc" id="L6248">    public static class Slider extends JSlider {</span>
-<span class="fc" id="L6249">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="fc" id="L6249">        @Override public void paint(Graphics g){ _paintBackground(this, g, ()-&gt;super.paint(g)); }</span>
 <span class="fc" id="L6250">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
 <span class="fc" id="L6253">    public static class PopupMenu extends JPopupMenu {</span>
-<span class="nc" id="L6254">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="nc" id="L6254">        @Override public void paint(Graphics g){ _paintBackground(this, g, ()-&gt;super.paint(g)); }</span>
 <span class="nc" id="L6255">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
 <span class="fc" id="L6258">    public static class MenuItem extends JMenuItem {</span>
-<span class="nc" id="L6259">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="nc" id="L6259">        @Override public void paint(Graphics g){ _paintBackground(this, g, ()-&gt;super.paint(g)); }</span>
 <span class="nc" id="L6260">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
 <span class="nc" id="L6263">    public static class RadioButtonMenuItem extends JRadioButtonMenuItem {</span>
-<span class="nc" id="L6264">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="nc" id="L6264">        @Override public void paint(Graphics g){ _paintBackground(this, g, ()-&gt;super.paint(g)); }</span>
 <span class="nc" id="L6265">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
 <span class="nc" id="L6268">     public static class CheckBoxMenuItem extends JCheckBoxMenuItem {</span>
-<span class="nc" id="L6269">         @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="nc" id="L6269">         @Override public void paint(Graphics g){ _paintBackground(this, g, ()-&gt;super.paint(g)); }</span>
 <span class="nc" id="L6270">         @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
      }
     /** {inheritDoc} */
 <span class="nc" id="L6273">    public static class Menu extends JMenu {</span>
-<span class="nc" id="L6274">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="nc" id="L6274">        @Override public void paint(Graphics g){ _paintBackground(this, g, ()-&gt;super.paint(g)); }</span>
 <span class="nc" id="L6275">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
 <span class="nc" id="L6278">    public static class MenuBar extends JMenuBar {</span>
-<span class="nc" id="L6279">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="nc" id="L6279">        @Override public void paint(Graphics g){ _paintBackground(this, g, ()-&gt;super.paint(g)); }</span>
 <span class="nc" id="L6280">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
     public static class ScrollPane extends JScrollPane {
-        public ScrollPane() {
-<span class="fc" id="L6285">            super();</span>
-
+<span class="fc" id="L6284">        public ScrollPane() { this(null); }</span>
+        public ScrollPane(Component view) {
+<span class="fc" id="L6286">            super(view);</span>
 <span class="fc" id="L6287">            addMouseWheelListener(new NestedJScrollPanelScrollCorrection(this));</span>
 <span class="fc" id="L6288">        }</span>
+<span class="fc" id="L6289">        @Override public void paint(Graphics g){ _paintBackground(this, g, ()-&gt;super.paint(g)); }</span>
+<span class="fc" id="L6290">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
+        @Override
+        public void setOpaque( boolean shouldBeOpaque ) {
+<span class="fc" id="L6293">            super.setOpaque(shouldBeOpaque);</span>
+<span class="fc" id="L6294">            this.getViewport().setOpaque(shouldBeOpaque);</span>
+<span class="fc" id="L6295">        }</span>
 
-<span class="nc" id="L6290">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
-<span class="nc" id="L6291">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
+        @Override
+        public void setBackground( Color newBackgroundColor ) {
+<span class="fc" id="L6299">            super.setBackground(newBackgroundColor);</span>
+<span class="fc" id="L6300">            this.getViewport().setBackground(newBackgroundColor);</span>
+<span class="fc" id="L6301">        }</span>
+
     }
     /** {inheritDoc} */
-<span class="fc" id="L6294">    public static class TabbedPane extends JTabbedPane {</span>
-<span class="nc" id="L6295">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
-<span class="nc" id="L6296">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
+<span class="fc" id="L6305">    public static class TabbedPane extends JTabbedPane {</span>
+<span class="nc" id="L6306">        @Override public void paint(Graphics g){ _paintBackground(this, g, ()-&gt;super.paint(g)); }</span>
+<span class="nc" id="L6307">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L6299">    public static class ToolBar extends JToolBar {</span>
-<span class="nc" id="L6300">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
-<span class="nc" id="L6301">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
+<span class="fc" id="L6310">    public static class ToolBar extends JToolBar {</span>
+<span class="nc" id="L6311">        @Override public void paint(Graphics g){ _paintBackground(this, g, ()-&gt;super.paint(g)); }</span>
+<span class="nc" id="L6312">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
-<span class="nc" id="L6304">    public static class ToolTip extends JToolTip {</span>
-<span class="nc" id="L6305">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
-<span class="nc" id="L6306">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
+<span class="nc" id="L6315">    public static class ToolTip extends JToolTip {</span>
+<span class="nc" id="L6316">        @Override public void paint(Graphics g){ _paintBackground(this, g, ()-&gt;super.paint(g)); }</span>
+<span class="nc" id="L6317">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
-<span class="nc" id="L6309">    public static class Tree extends JTree {</span>
-<span class="nc" id="L6310">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
-<span class="nc" id="L6311">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
+<span class="nc" id="L6320">    public static class Tree extends JTree {</span>
+<span class="nc" id="L6321">        @Override public void paint(Graphics g){ _paintBackground(this, g, ()-&gt;super.paint(g)); }</span>
+<span class="nc" id="L6322">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
-<span class="nc" id="L6314">    public static class TextPane extends JTextPane {</span>
-<span class="nc" id="L6315">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
-<span class="nc" id="L6316">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
-    }
-    /** {inheritDoc} */
-<span class="fc" id="L6319">    public static class Spinner extends JSpinner {</span>
-<span class="fc" id="L6320">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
-<span class="fc" id="L6321">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
-    }
-    /** {inheritDoc} */
-    public static class SplitPane extends JSplitPane {
-<span class="fc" id="L6325">        SplitPane( Align align ) { super(align.forSplitPane()); }</span>
-<span class="nc" id="L6326">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="nc" id="L6325">    public static class TextPane extends JTextPane {</span>
+<span class="nc" id="L6326">        @Override public void paint(Graphics g){ _paintBackground(this, g, ()-&gt;super.paint(g)); }</span>
 <span class="nc" id="L6327">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L6330">    public static class PasswordField extends JPasswordField {</span>
-<span class="fc" id="L6331">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
+<span class="fc" id="L6330">    public static class Spinner extends JSpinner {</span>
+<span class="fc" id="L6331">        @Override public void paint(Graphics g){ _paintBackground(this, g, ()-&gt;super.paint(g)); }</span>
 <span class="fc" id="L6332">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L6335">    public static class ProgressBar extends JProgressBar {</span>
-<span class="fc" id="L6336">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
-<span class="fc" id="L6337">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
+    public static class SplitPane extends JSplitPane {
+<span class="fc" id="L6336">        SplitPane( Align align ) { super(align.forSplitPane()); }</span>
+<span class="nc" id="L6337">        @Override public void paint(Graphics g){ _paintBackground(this, g, ()-&gt;super.paint(g)); }</span>
+<span class="nc" id="L6338">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L6340">    public static class EditorPane extends JEditorPane {</span>
-<span class="nc" id="L6341">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
-<span class="nc" id="L6342">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
-    }
-    /** {@inheritDoc} */
-<span class="nc" id="L6345">    public static class FormattedTextField extends JFormattedTextField {</span>
-<span class="nc" id="L6346">        @Override public void paint(Graphics g){ _paintBackground(this, g); super.paint(g); }</span>
-<span class="nc" id="L6347">        @Override public void paintChildren(Graphics g){ super.paintChildren(g); _paintForeground(this, g); }</span>
+<span class="fc" id="L6341">    public static class PasswordField extends JPasswordField {</span>
+<span class="fc" id="L6342">        @Override public void paint(Graphics g){ _paintBackground(this, g, ()-&gt;super.paint(g)); }</span>
+<span class="fc" id="L6343">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
     }
     /** {inheritDoc} */
-<span class="fc" id="L6350">    public static class Box extends JBox {/* Already implemented */}</span>
+<span class="fc" id="L6346">    public static class ProgressBar extends JProgressBar {</span>
+<span class="fc" id="L6347">        @Override public void paint(Graphics g){ _paintBackground(this, g, ()-&gt;super.paint(g)); }</span>
+<span class="fc" id="L6348">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
+    }
+    /** {inheritDoc} */
+<span class="fc" id="L6351">    public static class EditorPane extends JEditorPane {</span>
+<span class="nc" id="L6352">        @Override public void paint(Graphics g){ _paintBackground(this, g, ()-&gt;super.paint(g)); }</span>
+<span class="nc" id="L6353">        @Override public void paintChildren(Graphics g) { super.paintChildren(g); _paintForeground(this, g); }</span>
+    }
     /** {@inheritDoc} */
-<span class="fc" id="L6352">    public static class SplitButton extends JSplitButton {/* Already implemented */}</span>
+<span class="nc" id="L6356">    public static class FormattedTextField extends JFormattedTextField {</span>
+<span class="nc" id="L6357">        @Override public void paint(Graphics g){ _paintBackground(this, g, ()-&gt;super.paint(g)); }</span>
+<span class="nc" id="L6358">        @Override public void paintChildren(Graphics g){ super.paintChildren(g); _paintForeground(this, g); }</span>
+    }
+    /** {inheritDoc} */
+<span class="fc" id="L6361">    public static class Box extends JBox {/* Already implemented */}</span>
+    /** {@inheritDoc} */
+<span class="fc" id="L6363">    public static class SplitButton extends JSplitButton {/* Already implemented */}</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

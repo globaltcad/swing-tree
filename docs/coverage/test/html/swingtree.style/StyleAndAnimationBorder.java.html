@@ -24,12 +24,12 @@ import java.awt.*;
 final class StyleAndAnimationBorder&lt;C extends JComponent&gt; implements Border
 {
     private final ComponentExtension&lt;C&gt; _compExt;
-    private final Border _formerBorder;
-    private final boolean _borderWasNotPainted;
+    private final Border                _formerBorder;
+    private final boolean               _borderWasNotPainted;
 
     private Insets _insets;
-<span class="fc" id="L31">    private final Insets _marginInsets = new Insets(0, 0, 0, 0);</span>
-<span class="fc" id="L32">    private final Insets _paddingInsets = new Insets(0, 0, 0, 0);</span>
+<span class="fc" id="L31">    private final Insets _marginInsets      = new Insets(0, 0, 0, 0);</span>
+<span class="fc" id="L32">    private final Insets _paddingInsets     = new Insets(0, 0, 0, 0);</span>
 <span class="fc" id="L33">    private final Insets _fullPaddingInsets = new Insets(0, 0, 0, 0);</span>
 
 
@@ -59,38 +59,35 @@ final class StyleAndAnimationBorder&lt;C extends JComponent&gt; implements Borde
     {
 <span class="fc" id="L60">        _compExt.establishStyleAndBeginPainting();</span>
 
-<span class="fc" id="L62">        Shape formerClip = g.getClip();</span>
-<span class="fc" id="L63">        g.setClip(null);</span>
-        /*
-            The border should not be clipped as the current clip may be the inner component area
-            which can produce ugly artifacts between the inner component area
-            and the area around the component (margin), which is not covered by the border.
-            Resetting the clip here is visually especially very important for rounded borders and shadows.
-        */
+<span class="fc" id="L62">        Shape former = g.getClip();</span>
 
-<span class="fc" id="L71">        _paintBorderAndBorderLayerStyles( (Graphics2D) g );</span>
-<span class="fc bfc" id="L72" title="All 4 branches covered.">        if ( _formerBorder != null &amp;&amp; !_borderWasNotPainted ) {</span>
-<span class="fc" id="L73">            BorderStyle borderStyle = _compExt.getStyle().border();</span>
-<span class="fc bfc" id="L74" title="All 2 branches covered.">            if ( !borderStyle.isVisible() )</span>
-<span class="fc" id="L75">                _paintFormerBorder(c, g, x, y, width, height);</span>
+<span class="fc bfc" id="L64" title="All 2 branches covered.">        if ( _compExt.getCurrentOuterBaseClip() != null )</span>
+<span class="fc" id="L65">          g.setClip( _compExt.getCurrentOuterBaseClip() );</span>
+
+<span class="fc" id="L67">        _paintBorderAndBorderLayerStyles( (Graphics2D) g );</span>
+<span class="fc bfc" id="L68" title="All 4 branches covered.">        if ( _formerBorder != null &amp;&amp; !_borderWasNotPainted ) {</span>
+<span class="fc" id="L69">            BorderStyle borderStyle = _compExt.getStyle().border();</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">            if ( !borderStyle.isVisible() )</span>
+<span class="fc" id="L71">                _paintFormerBorder(c, g, x, y, width, height);</span>
         }
-<span class="fc" id="L77">        _compExt._renderAnimations((Graphics2D) g);</span>
+<span class="fc" id="L73">        _compExt._renderAnimations((Graphics2D) g);</span>
 
-<span class="pc bpc" id="L79" title="1 of 2 branches missed.">        if ( formerClip != null )</span>
-<span class="fc" id="L80">            g.setClip(formerClip);</span>
-<span class="fc" id="L81">    }</span>
+<span class="fc" id="L75">        g.setClip(former);</span>
+<span class="fc" id="L76">    }</span>
 
     private void _paintFormerBorder( Component c, Graphics g, int x, int y, int width, int height ) {
         try {
-<span class="fc" id="L85">            _formerBorder.paintBorder(</span>
+<span class="fc" id="L80">            _formerBorder.paintBorder(</span>
                     c, g,
                     x + _marginInsets.left,
                     y + _marginInsets.top,
                     width   - _marginInsets.left - _marginInsets.right,
                     height - _marginInsets.top  - _marginInsets.bottom
                 );
-<span class="nc" id="L92">        } catch (Exception ex) {</span>
-<span class="nc" id="L93">            ex.printStackTrace();</span>
+        }
+<span class="nc" id="L88">        catch (Exception ex)</span>
+        {
+<span class="nc" id="L90">            ex.printStackTrace();</span>
             /*
                  Note that if any exceptions happen in the former Border implementation,
                  then we don't want to mess up the execution of the rest of the component painting...
@@ -101,8 +98,8 @@ final class StyleAndAnimationBorder&lt;C extends JComponent&gt; implements Borde
                  but we don't know which logging framework that is, so we just print
                  the stack trace to the console so that any developers can see what went wrong.
             */
-<span class="fc" id="L104">        }</span>
-<span class="fc" id="L105">    }</span>
+<span class="fc" id="L101">        }</span>
+<span class="fc" id="L102">    }</span>
 
     /**
      *  Not only paints the border but also styles which are configured to be painted
@@ -112,116 +109,116 @@ final class StyleAndAnimationBorder&lt;C extends JComponent&gt; implements Borde
      */
     private void _paintBorderAndBorderLayerStyles( Graphics2D g ) {
         try {
-<span class="fc" id="L115">            _compExt._paintBorderStyle( g, _compExt.getOwner() );</span>
-<span class="nc" id="L116">        } catch ( Exception ex ) {</span>
-<span class="nc" id="L117">            ex.printStackTrace();</span>
+<span class="fc" id="L112">            _compExt._paintBorderStyle( g, _compExt.getOwner() );</span>
+<span class="nc" id="L113">        } catch ( Exception ex ) {</span>
+<span class="nc" id="L114">            ex.printStackTrace();</span>
             /*
                 Note that if any exceptions happen during the border style painting,
                 then we don't want to mess up how the rest of the component is painted...
                 Therefore, we catch any exceptions that happen in the above code.
             */
-<span class="fc" id="L123">        }</span>
-<span class="fc" id="L124">    }</span>
+<span class="fc" id="L120">        }</span>
+<span class="fc" id="L121">    }</span>
 
     @Override
     public Insets getBorderInsets( Component c ) {
-<span class="fc bfc" id="L128" title="All 2 branches covered.">        if ( _insets == null )</span>
-<span class="fc" id="L129">            _compExt.calculateApplyAndInstallStyle(false);</span>
-<span class="fc" id="L130">        return _insets;</span>
+<span class="fc bfc" id="L125" title="All 2 branches covered.">        if ( _insets == null )</span>
+<span class="fc" id="L126">            _compExt.calculateApplyAndInstallStyle(false);</span>
+<span class="fc" id="L127">        return _insets;</span>
     }
 
     void recalculateInsets(Style style)
     {
-<span class="fc" id="L135">        _calculateMarginInsets(style);</span>
-<span class="fc" id="L136">        _calculatePaddingInsets(style);</span>
-<span class="fc" id="L137">        _calculateFullPaddingInsets(style);</span>
-<span class="fc" id="L138">        _calculateBorderInsets(style,</span>
-<span class="fc bfc" id="L139" title="All 2 branches covered.">                _formerBorder == null</span>
-<span class="fc" id="L140">                    ? new Insets(0, 0, 0, 0)</span>
-<span class="fc" id="L141">                    : _formerBorder.getBorderInsets(_compExt.getOwner())</span>
+<span class="fc" id="L132">        _calculateMarginInsets(style);</span>
+<span class="fc" id="L133">        _calculatePaddingInsets(style);</span>
+<span class="fc" id="L134">        _calculateFullPaddingInsets(style);</span>
+<span class="fc" id="L135">        _calculateBorderInsets(style,</span>
+<span class="fc bfc" id="L136" title="All 2 branches covered.">                _formerBorder == null</span>
+<span class="fc" id="L137">                    ? new Insets(0, 0, 0, 0)</span>
+<span class="fc" id="L138">                    : _formerBorder.getBorderInsets(_compExt.getOwner())</span>
             );
-<span class="fc" id="L143">    }</span>
+<span class="fc" id="L140">    }</span>
 
     Insets getFormerBorderInsets() {
-<span class="pc bpc" id="L146" title="1 of 2 branches missed.">        if ( _borderWasNotPainted )</span>
-<span class="nc" id="L147">            return new Insets(0, 0, 0, 0);</span>
+<span class="pc bpc" id="L143" title="1 of 2 branches missed.">        if ( _borderWasNotPainted )</span>
+<span class="nc" id="L144">            return new Insets(0, 0, 0, 0);</span>
         else
-<span class="pc bpc" id="L149" title="1 of 2 branches missed.">            return _formerBorder == null</span>
-<span class="nc" id="L150">                        ? new Insets(0, 0, 0, 0)</span>
-<span class="fc" id="L151">                        : _formerBorder.getBorderInsets(_compExt.getOwner());</span>
+<span class="pc bpc" id="L146" title="1 of 2 branches missed.">            return _formerBorder == null</span>
+<span class="nc" id="L147">                        ? new Insets(0, 0, 0, 0)</span>
+<span class="fc" id="L148">                        : _formerBorder.getBorderInsets(_compExt.getOwner());</span>
     }
 
     @Override
-<span class="nc" id="L155">    public boolean isBorderOpaque() { return false; }</span>
+<span class="nc" id="L152">    public boolean isBorderOpaque() { return false; }</span>
 
 
     private void _calculateBorderInsets( Style style, Insets formerInsets )
     {
-<span class="fc" id="L160">        int left      = style.margin().left().orElse(formerInsets.left);</span>
-<span class="fc" id="L161">        int top       = style.margin().top().orElse(formerInsets.top);</span>
-<span class="fc" id="L162">        int right     = style.margin().right().orElse(formerInsets.right);</span>
-<span class="fc" id="L163">        int bottom    = style.margin().bottom().orElse(formerInsets.bottom);</span>
+<span class="fc" id="L157">        int left      = style.margin().left().orElse(formerInsets.left);</span>
+<span class="fc" id="L158">        int top       = style.margin().top().orElse(formerInsets.top);</span>
+<span class="fc" id="L159">        int right     = style.margin().right().orElse(formerInsets.right);</span>
+<span class="fc" id="L160">        int bottom    = style.margin().bottom().orElse(formerInsets.bottom);</span>
         // Add padding:
-<span class="fc" id="L165">        left   += style.padding().left().orElse(0);</span>
-<span class="fc" id="L166">        top    += style.padding().top().orElse(0);</span>
-<span class="fc" id="L167">        right  += style.padding().right().orElse(0);</span>
-<span class="fc" id="L168">        bottom += style.padding().bottom().orElse(0);</span>
+<span class="fc" id="L162">        left   += style.padding().left().orElse(0);</span>
+<span class="fc" id="L163">        top    += style.padding().top().orElse(0);</span>
+<span class="fc" id="L164">        right  += style.padding().right().orElse(0);</span>
+<span class="fc" id="L165">        bottom += style.padding().bottom().orElse(0);</span>
         // Add border widths:
-<span class="fc" id="L170">        left   += Math.max(style.border().widths().left().orElse(0),   0);</span>
-<span class="fc" id="L171">        top    += Math.max(style.border().widths().top().orElse(0),    0);</span>
-<span class="fc" id="L172">        right  += Math.max(style.border().widths().right().orElse(0),  0);</span>
-<span class="fc" id="L173">        bottom += Math.max(style.border().widths().bottom().orElse(0), 0);</span>
+<span class="fc" id="L167">        left   += Math.max(style.border().widths().left().orElse(0),   0);</span>
+<span class="fc" id="L168">        top    += Math.max(style.border().widths().top().orElse(0),    0);</span>
+<span class="fc" id="L169">        right  += Math.max(style.border().widths().right().orElse(0),  0);</span>
+<span class="fc" id="L170">        bottom += Math.max(style.border().widths().bottom().orElse(0), 0);</span>
 
-<span class="pc bpc" id="L175" title="3 of 10 branches missed.">        if (</span>
+<span class="pc bpc" id="L172" title="3 of 10 branches missed.">        if (</span>
             _insets == null         ||
             _insets.left   != left  ||
             _insets.top    != top   ||
             _insets.right  != right ||
             _insets.bottom != bottom
         ) {
-<span class="fc bfc" id="L182" title="All 2 branches covered.">            if ( _insets == null )</span>
-<span class="fc" id="L183">                _insets = new Insets(top, left, bottom, right);</span>
+<span class="fc bfc" id="L179" title="All 2 branches covered.">            if ( _insets == null )</span>
+<span class="fc" id="L180">                _insets = new Insets(top, left, bottom, right);</span>
             else
-<span class="fc" id="L185">                _insets.set(top, left, bottom, right);</span>
+<span class="fc" id="L182">                _insets.set(top, left, bottom, right);</span>
 
-<span class="fc" id="L187">            _compExt.getOwner().revalidate();</span>
+<span class="fc" id="L184">            _compExt.getOwner().revalidate();</span>
         }
-<span class="fc" id="L189">    }</span>
+<span class="fc" id="L186">    }</span>
 
     private void _calculateMarginInsets( Style style )
     {
-<span class="fc" id="L193">        int left   = style.margin().left().orElse(0);</span>
-<span class="fc" id="L194">        int top    = style.margin().top().orElse(0);</span>
-<span class="fc" id="L195">        int right  = style.margin().right().orElse(0);</span>
-<span class="fc" id="L196">        int bottom = style.margin().bottom().orElse(0);</span>
+<span class="fc" id="L190">        int left   = style.margin().left().orElse(0);</span>
+<span class="fc" id="L191">        int top    = style.margin().top().orElse(0);</span>
+<span class="fc" id="L192">        int right  = style.margin().right().orElse(0);</span>
+<span class="fc" id="L193">        int bottom = style.margin().bottom().orElse(0);</span>
 
         // Add border widths:
-<span class="fc" id="L199">        left   += Math.max(style.border().widths().left().orElse(0),   0);</span>
-<span class="fc" id="L200">        top    += Math.max(style.border().widths().top().orElse(0),    0);</span>
-<span class="fc" id="L201">        right  += Math.max(style.border().widths().right().orElse(0),  0);</span>
-<span class="fc" id="L202">        bottom += Math.max(style.border().widths().bottom().orElse(0), 0);</span>
+<span class="fc" id="L196">        left   += Math.max(style.border().widths().left().orElse(0),   0);</span>
+<span class="fc" id="L197">        top    += Math.max(style.border().widths().top().orElse(0),    0);</span>
+<span class="fc" id="L198">        right  += Math.max(style.border().widths().right().orElse(0),  0);</span>
+<span class="fc" id="L199">        bottom += Math.max(style.border().widths().bottom().orElse(0), 0);</span>
 
-<span class="fc" id="L204">        _marginInsets.top    = top;</span>
-<span class="fc" id="L205">        _marginInsets.left   = left;</span>
-<span class="fc" id="L206">        _marginInsets.right  = right;</span>
-<span class="fc" id="L207">        _marginInsets.bottom = bottom;</span>
-<span class="fc" id="L208">    }</span>
+<span class="fc" id="L201">        _marginInsets.top    = top;</span>
+<span class="fc" id="L202">        _marginInsets.left   = left;</span>
+<span class="fc" id="L203">        _marginInsets.right  = right;</span>
+<span class="fc" id="L204">        _marginInsets.bottom = bottom;</span>
+<span class="fc" id="L205">    }</span>
 
     private void _calculatePaddingInsets( Style style )
     {
-<span class="fc" id="L212">        _paddingInsets.top    = style.padding().left().orElse(0);</span>
-<span class="fc" id="L213">        _paddingInsets.left   = style.padding().top().orElse(0);</span>
-<span class="fc" id="L214">        _paddingInsets.right  = style.padding().right().orElse(0);</span>
-<span class="fc" id="L215">        _paddingInsets.bottom = style.padding().bottom().orElse(0);</span>
-<span class="fc" id="L216">    }</span>
+<span class="fc" id="L209">        _paddingInsets.top    = style.padding().left().orElse(0);</span>
+<span class="fc" id="L210">        _paddingInsets.left   = style.padding().top().orElse(0);</span>
+<span class="fc" id="L211">        _paddingInsets.right  = style.padding().right().orElse(0);</span>
+<span class="fc" id="L212">        _paddingInsets.bottom = style.padding().bottom().orElse(0);</span>
+<span class="fc" id="L213">    }</span>
 
     private void _calculateFullPaddingInsets( Style style )
     {
-<span class="fc" id="L220">        _fullPaddingInsets.top    = style.padding().left().orElse(0)   + style.margin().left().orElse(0);</span>
-<span class="fc" id="L221">        _fullPaddingInsets.left   = style.padding().top().orElse(0)    + style.margin().top().orElse(0);</span>
-<span class="fc" id="L222">        _fullPaddingInsets.right  = style.padding().right().orElse(0)  + style.margin().right().orElse(0);</span>
-<span class="fc" id="L223">        _fullPaddingInsets.bottom = style.padding().bottom().orElse(0) + style.margin().bottom().orElse(0);</span>
-<span class="fc" id="L224">    }</span>
+<span class="fc" id="L217">        _fullPaddingInsets.top    = style.padding().left().orElse(0)   + style.margin().left().orElse(0);</span>
+<span class="fc" id="L218">        _fullPaddingInsets.left   = style.padding().top().orElse(0)    + style.margin().top().orElse(0);</span>
+<span class="fc" id="L219">        _fullPaddingInsets.right  = style.padding().right().orElse(0)  + style.margin().right().orElse(0);</span>
+<span class="fc" id="L220">        _fullPaddingInsets.bottom = style.padding().bottom().orElse(0) + style.margin().bottom().orElse(0);</span>
+<span class="fc" id="L221">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
