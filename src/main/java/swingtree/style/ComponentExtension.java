@@ -52,7 +52,7 @@ public final class ComponentExtension<C extends JComponent>
      * @param comp The component to initialize.
      */
     public static void initializeFor( JComponent comp ) {
-        comp.putClientProperty( ComponentExtension.class, new ComponentExtension<>(comp) );
+        from(comp);
     }
 
     private final C _owner;
