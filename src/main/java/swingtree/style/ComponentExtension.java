@@ -266,7 +266,22 @@ public final class ComponentExtension<C extends JComponent>
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
     }
 
-    Shape getInnerComponentArea() { return _stylePainter._getBaseArea(_owner); }
+    void paintWithContentAreaClip( Graphics g, Runnable painter ) {
+        Shape oldClip = g.getClip();
+        Shape newClip = _stylePainter._getBaseArea(_owner);
+        if ( newClip != null && newClip != oldClip ) {
+            if ( oldClip != null ) {
+                Area common = new Area(oldClip);
+                common.intersect(new Area(newClip));
+                newClip = common;
+            }
+            g.setClip(newClip);
+        }
+
+        painter.run();
+
+        g.setClip(oldClip);
+    }
 
     /**
      *  Adds a {@link Styler} to the component.

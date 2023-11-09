@@ -292,7 +292,10 @@ class DynamicLaF
         @Override protected void paintSafely(Graphics g) {
             if ( !getComponent().isOpaque() )
                 paintBackground(g);
-            super.paintSafely(g);
+
+            ComponentExtension.from(getComponent()).paintWithContentAreaClip(g, ()->{
+                super.paintSafely(g);// Paints the text
+            });
         }
         @Override protected void paintBackground(Graphics g) {
             JComponent c = getComponent();
@@ -345,20 +348,9 @@ class DynamicLaF
                 if ( !hasMargin && !hasBorderRadius )
                     formerUI.update(g, c);
                 else {
-                    Shape oldClip = g.getClip();
-                    Shape newClip = ComponentExtension.from(c).getInnerComponentArea();
-                    if ( newClip != null && newClip != oldClip ) {
-                        if ( oldClip != null ) {
-                            Area common = new Area(oldClip);
-                            common.intersect(new Area(newClip));
-                            newClip = common;
-                        }
-                        g.setClip(newClip);
-                    }
-
-                    formerUI.update(g, c);
-
-                    g.setClip(oldClip);
+                    ComponentExtension.from(c).paintWithContentAreaClip(g, ()->{
+                        formerUI.update(g, c);
+                    });
                 }
             }
         } catch ( Exception ex ) {
