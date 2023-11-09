@@ -242,6 +242,7 @@ public final class ComponentExtension<C extends JComponent>
     public void paintForegroundStyle( Graphics2D g2d, Runnable superPaint )
     {
         try {
+            //_stylePainter._withClip(g2d, _stylePainter.baseAreaFor(_owner).orElse(g2d.getClip()), superPaint);
             superPaint.run();
         } catch (Exception e) {
             e.printStackTrace();
@@ -351,11 +352,7 @@ public final class ComponentExtension<C extends JComponent>
         _stylePainter.renderBackgroundStyle( (Graphics2D) g, _owner );
 
         if ( lookAndFeelPainting != null ) {
-            Shape contentClip = null;
-            if ( _stylePainter._getBaseArea() != null )
-                contentClip = _stylePainter._getBaseArea(_owner);
-            else if ( _stylePainter.getStyle().margin().isPositive() )
-                contentClip = _stylePainter._getBaseArea(_owner);
+            Shape contentClip = _stylePainter.baseAreaFor(_owner).orElse(null);
 
             if ( contentClip == null )
                 contentClip = _outerBaseClip;

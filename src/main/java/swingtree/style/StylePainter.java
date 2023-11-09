@@ -9,10 +9,8 @@ import javax.swing.JComponent;
 import java.awt.*;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -76,6 +74,16 @@ final class StylePainter<C extends JComponent>
     }
 
     Style getStyle() { return _style; }
+
+    Optional<Shape> baseAreaFor( JComponent component ) {
+        Shape contentClip = null;
+        if ( _getBaseArea() != null )
+            contentClip = _getBaseArea(component);
+        else if ( getStyle().margin().isPositive() )
+            contentClip = _getBaseArea(component);
+
+        return Optional.ofNullable(contentClip);
+    }
 
     Area _getBaseArea(JComponent comp)
     {
