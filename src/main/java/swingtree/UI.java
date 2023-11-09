@@ -6230,7 +6230,7 @@ public final class UI extends UILayoutConstants
             setToolTipsSupplier( i -> toolTips[i] );
         }
         @Override public void paint(Graphics g){ _paintBackground(this, g, ()->super.paint(g)); }
-        @Override public void paintComponent(Graphics g) { _paintForeground(this, g, ()->super.paintComponent(g)); }
+        @Override public void paintChildren(Graphics g) { _paintForeground(this, g, ()->super.paintComponent(g)); }
         @Override public String getToolTipText(MouseEvent e) {
             int col = columnAtPoint(e.getPoint());
             int modelCol = Optional.ofNullable(getTable())
