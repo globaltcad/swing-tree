@@ -332,13 +332,6 @@ public final class ComponentExtension<C extends JComponent>
 
     void _paintBackground( Graphics g, Runnable lookAndFeelPainting )
     {
-        // If end the painting of the last painting cycle if it was not already ended:
-        _stylePainter = _stylePainter.endPainting();
-
-        establishStyleAndBeginPainting();
-
-        _stylePainter.renderBackgroundStyle( (Graphics2D) g, _owner );
-
         _outerBaseClip = g.getClip();
 
         if ( _outerBaseClip == null && _owner.getParent() == null ) {
@@ -349,6 +342,13 @@ public final class ComponentExtension<C extends JComponent>
             int h = _owner.getHeight();
             _outerBaseClip = new Rectangle(x,y,w,h);
         }
+
+        // If end the painting of the last painting cycle if it was not already ended:
+        _stylePainter = _stylePainter.endPainting();
+
+        establishStyleAndBeginPainting();
+
+        _stylePainter.renderBackgroundStyle( (Graphics2D) g, _owner );
 
         if ( lookAndFeelPainting != null ) {
             Shape contentClip = null;
@@ -372,7 +372,6 @@ public final class ComponentExtension<C extends JComponent>
                     e.printStackTrace();
                 }
             });
-            _outerBaseClip = null;
         }
     }
 
