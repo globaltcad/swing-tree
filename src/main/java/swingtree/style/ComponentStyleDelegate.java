@@ -387,7 +387,10 @@ public final class ComponentStyleDelegate<C extends JComponent>
 
     /**
      *  Returns a new {@link Style} with the provided border width.
-     *  The border will be rendered with an inset space based on the padding defined by the {@link Style}.
+     *  <p>
+     *  Note that in order for the border to be visible you also
+     *  have to specify it's color, which you can do through
+     *  {@link #borderColor(Color)} or {@link #borderColor(String)}.
      *
      * @param width The border width in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided border width.
@@ -398,7 +401,10 @@ public final class ComponentStyleDelegate<C extends JComponent>
 
     /**
      *  Returns a new {@link Style} with the provided border width for the specified edge.
-     *  The border will be rendered with an inset space based on the padding defined by the {@link Style}.
+     *  <p>
+     *  Note that in order for the border to be visible you also
+     *  have to specify it's color, which you can do through
+     *  {@link #borderColor(Color)} or {@link #borderColor(String)}.
      *
      * @param edge The edge to set the border width for.
      * @param width The border width in pixels.
@@ -410,7 +416,6 @@ public final class ComponentStyleDelegate<C extends JComponent>
 
     /**
      *  Returns a new {@link Style} with the provided top, right, bottom and left border widths.
-     *  The border will be rendered with an inset space based on the padding defined by the {@link Style}.
      *  <p>
      *  The border widths are specified in the following order: top, right, bottom, left.
      *  <p>
@@ -418,6 +423,11 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  <pre>{@code
      *      UI.panel().withStyle( it -> it.borderWidths(1, 2, 3, 4) )
      *  }</pre>
+     *  <p>
+     *  Note that in order for the border to be visible you also
+     *  have to specify it's color, which you can do through
+     *  {@link #borderColor(Color)} or {@link #borderColor(String)}.
+     *
      * @param top The top border width in pixels.
      * @param right The right border width in pixels.
      * @param bottom The bottom border width in pixels.
@@ -432,12 +442,16 @@ public final class ComponentStyleDelegate<C extends JComponent>
 
     /**
      *  Returns a new {@link Style} with the provided top/bottom and left/right border widths.
-     *  The border will be rendered with an inset space based on the padding defined by the {@link Style}.
      *  <p>
      *  Example:
      *  <pre>{@code
      *      UI.panel().withStyle( it -> it.borderWidths(1, 2) )
      *  }</pre>
+     *  <p>
+     *  Note that in order for the border to be visible you also
+     *  have to specify it's color, which you can do through
+     *  {@link #borderColor(Color)} or {@link #borderColor(String)}.
+     *
      * @param topBottom The top and bottom border width in pixels.
      * @param leftRight The left and right border width in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided top/bottom and left/right border widths.
@@ -472,8 +486,9 @@ public final class ComponentStyleDelegate<C extends JComponent>
     }
 
     /**
-     *  Returns a new {@link Style} with the provided border radius.
-     *  This will override both the arc width and arc height of the border.
+     *  Returns a new {@link Style} with the provided border radius
+     *  set for all 4 corners of the target component.
+     *  This will override both the arc width and arc height of each corner.
      *  The border will be rendered with an inset space based on the padding defined by this {@link Style}.
      *
      * @param radius The border radius in pixels.
@@ -484,7 +499,8 @@ public final class ComponentStyleDelegate<C extends JComponent>
     }
 
     /**
-     *  Returns a new {@link Style} with the provided border arc width and arc height.
+     *  Returns a new {@link Style} with the provided border arc width and arc height
+     *  set for all 4 corners of the target component.
      *  Note that the border will be rendered with an inset space based on the padding defined by this {@link Style}.
      *
      * @param arcWidth The border arc width in pixels.
