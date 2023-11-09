@@ -241,12 +241,9 @@ public final class ComponentExtension<C extends JComponent>
      */
     public void paintForegroundStyle( Graphics2D g2d, Runnable superPaint )
     {
-        try {
-            //_stylePainter._withClip(g2d, _stylePainter.baseAreaFor(_owner).orElse(g2d.getClip()), superPaint);
+        _stylePainter._withClip(g2d, _stylePainter.baseAreaFor(_owner).orElse(g2d.getClip()), ()->{
             superPaint.run();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        });
 
         establishStyleAndBeginPainting();
 
