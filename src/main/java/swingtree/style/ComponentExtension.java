@@ -239,8 +239,14 @@ public final class ComponentExtension<C extends JComponent>
      *
      * @param g2d The {@link Graphics2D} object to use for rendering.
      */
-    public void paintForegroundStyle( Graphics2D g2d )
+    public void paintForegroundStyle( Graphics2D g2d, Runnable superPaint )
     {
+        try {
+            superPaint.run();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         establishStyleAndBeginPainting();
 
         // We remember if antialiasing was enabled before we render:
@@ -362,7 +368,6 @@ public final class ComponentExtension<C extends JComponent>
             _stylePainter._withClip((Graphics2D) g, contentClip, () -> {
                 try {
                     lookAndFeelPainting.run();
-                    g.setClip(_outerBaseClip);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
