@@ -241,7 +241,7 @@ public final class ComponentExtension<C extends JComponent>
      */
     public void paintForegroundStyle( Graphics2D g2d, Runnable superPaint )
     {
-        _stylePainter._withClip(g2d, _stylePainter.baseAreaFor(_owner).orElse(g2d.getClip()), ()->{
+        _stylePainter._withClip(g2d, _outerBaseClip != null ? _outerBaseClip : g2d.getClip(), ()->{
             superPaint.run();
         });
 
