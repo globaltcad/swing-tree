@@ -170,25 +170,25 @@ public final class ImageStyle
             throw new IllegalArgumentException("transparency must be between 0.0f and 1.0f");
     }
 
-    public UI.Layer layer() { return _layer; }
+    UI.Layer layer() { return _layer; }
 
-    public Optional<Color> primer() { return Optional.ofNullable(_primer); }
+    Optional<Color> primer() { return Optional.ofNullable(_primer); }
 
-    public Optional<ImageIcon> image() { return Optional.ofNullable(_image); }
+    Optional<ImageIcon> image() { return Optional.ofNullable(_image); }
 
-    public UI.Placement placement() { return _placement; }
+    UI.Placement placement() { return _placement; }
 
-    public boolean repeat() { return _repeat; }
+    boolean repeat() { return _repeat; }
 
-    public UI.FitComponent fitMode() { return _fitMode; }
+    UI.FitComponent fitMode() { return _fitMode; }
 
-    public Optional<Integer> width() { return Optional.ofNullable(_width); }
+    Optional<Integer> width() { return Optional.ofNullable(_width); }
 
-    public Optional<Integer> height() { return Optional.ofNullable(_height); }
+    Optional<Integer> height() { return Optional.ofNullable(_height); }
 
-    public float opacity() { return _opacity; }
+    float opacity() { return _opacity; }
 
-    public Outline padding() { return _padding; }
+    Outline padding() { return _padding; }
 
     /**
      *  This method allows you to specify the layer onto which the image will be drawn.

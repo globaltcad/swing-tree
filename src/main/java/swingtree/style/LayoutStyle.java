@@ -3,7 +3,12 @@ package swingtree.style;
 import java.util.Objects;
 import java.util.Optional;
 
-public final class LayoutStyle
+/**
+ *  A style that defines the layout of a component.
+ *  The layout manager of a component will use this information
+ *  to determine the actual layout of the component in the layout.
+ **/
+final class LayoutStyle
 {
     private static final LayoutStyle _NONE = new LayoutStyle(Layout.unspecific(), null, null, null);
 
@@ -29,13 +34,13 @@ public final class LayoutStyle
         _alignmentY = alignmentY;
     }
 
-    public Layout layout() { return _layout; }
+    Layout layout() { return _layout; }
 
-    public Optional<Object> constraint() { return Optional.ofNullable(_constraint); }
+    Optional<Object> constraint() { return Optional.ofNullable(_constraint); }
 
-    public Optional<Float> alignmentX() { return Optional.ofNullable(_alignmentX); }
+    Optional<Float> alignmentX() { return Optional.ofNullable(_alignmentX); }
 
-    public Optional<Float> alignmentY() { return Optional.ofNullable(_alignmentY); }
+    Optional<Float> alignmentY() { return Optional.ofNullable(_alignmentY); }
 
     LayoutStyle layout( Layout installer ) { return new LayoutStyle(installer, _constraint, _alignmentX, _alignmentY); }
 

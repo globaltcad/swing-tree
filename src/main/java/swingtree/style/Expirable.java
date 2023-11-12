@@ -8,13 +8,13 @@ import java.util.Objects;
  *  A wrapper class for a payload that has a lifetime which
  *  is used to determine if the payload is expired or not.
  **/
-class Expirable<B>
+class Expirable<T>
 {
     private final LifeTime _lifetime;
-    private final B _value;
+    private final T        _value;
 
 
-    Expirable( LifeTime lifetime, B payload ) {
+    Expirable( LifeTime lifetime, T payload ) {
         _lifetime = Objects.requireNonNull(lifetime);
         _value    = Objects.requireNonNull(payload);
     }
@@ -28,7 +28,10 @@ class Expirable<B>
     /**
      *  @return The payload of this instance.
      **/
-    B get() { return _value; }
+    T get() { return _value; }
 
+    /**
+     *  @return The lifetime of this instance.
+     **/
     LifeTime getLifeTime() { return _lifetime; }
 }

@@ -3,6 +3,12 @@ package swingtree.style;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ *  A style that defines the dimensionality of a component
+ *  in the form of a minimum, maximum, preferred and regular size.
+ *  The layout manager of a component will use this information
+ *  to determine the actual size of the component in the layout.
+ **/
 final class DimensionalityStyle
 {
     private static final DimensionalityStyle _NONE = new DimensionalityStyle(
@@ -13,6 +19,7 @@ final class DimensionalityStyle
                                                     );
 
     public static DimensionalityStyle none() { return _NONE; }
+
 
     private final Integer _minWidth;
     private final Integer _minHeight;
