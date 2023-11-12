@@ -142,9 +142,25 @@ public final class ComponentExtension<C extends JComponent>
         for ( int i = 0; i < groupTags.length; i++ ) {
             E group = groupTags[i];
             Objects.requireNonNull(group);
-            stringTags[i] = group.getClass().getSimpleName() + "." + group.name();
+            stringTags[i] = StyleUtility.toString(group);
         }
         setStyleGroups(stringTags);
+    }
+
+    public final void setId( String id ) {
+        _owner.setName(id);
+    }
+
+    public final <E extends Enum<E>> void setId( E id ) {
+        this.setId(StyleUtility.toString(id));
+    }
+
+    public final boolean hasId( String id ) {
+        return Objects.equals(_owner.getName(), id);
+    }
+
+    public final boolean hasId( Enum<?> id ) {
+        return hasId(StyleUtility.toString(id));
     }
 
     /**
@@ -162,7 +178,7 @@ public final class ComponentExtension<C extends JComponent>
      * @return {@code true} if the component belongs to the given group.
      */
     public boolean belongsToGroup( Enum<?> group ) {
-        return belongsToGroup(group.getClass().getSimpleName() + "." + group.name());
+        return belongsToGroup(StyleUtility.toString(group));
     }
 
     Shape getCurrentOuterBaseClip() { return _outerBaseClip; }

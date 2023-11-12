@@ -5,13 +5,20 @@ import swingtree.api.Painter;
 import java.awt.*;
 import java.util.Objects;
 
+/**
+ *  Well, here it is, almost every project seems to have at least one of these, right? <br>
+ *  Although we tries really hard to avoid it, we still ended up with a random utility class.
+ *  <b>But don't worry, it is package-private, so it may not pollute the public API.
+ *  <br><br>
+ *  Dear future maintainer(s): Please keep it private!</b>
+ */
 final class StyleUtility
 {
     static final String DEFAULT_KEY = "default";
     static final Layout UNSPECIFIC_LAYOUT_CONSTANT = new Layout.Unspecific();
     static final Layout NONE_LAYOUT_CONSTANT = new Layout.None();
 
-    private StyleUtility() {}
+    private StyleUtility() {} // No instantiation, just a utility class
 
     static String toString( Color color ) {
         if ( color == null ) return "?";
@@ -29,8 +36,8 @@ final class StyleUtility
         return "Painter@" + Integer.toHexString(Objects.hashCode(painter));
     }
 
-    static String toString( Enum<?> e ) {
-        return e.getClass().getSimpleName() + "." + e.name();
+    static String toString( Enum<?> enumBasedId ) {
+        return enumBasedId.getClass().getSimpleName() + "." + enumBasedId.name();
     }
 
     /**
