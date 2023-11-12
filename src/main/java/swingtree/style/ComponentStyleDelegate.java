@@ -382,7 +382,15 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided border width and border color.
      */
     public ComponentStyleDelegate<C> border( int width, String colorString ) {
-        return _withStyle(_style._withBorder(_style.border().width(width).color(StyleUtility.toColor(colorString))));
+        Objects.requireNonNull(colorString);
+        Color newColor;
+        try {
+            newColor = StyleUtility.toColor(colorString);
+        } catch ( Exception e ) {
+            log.error("Failed to parse color string: '{}'", colorString, e);
+            return this;
+        }
+        return _withStyle(_style._withBorder(_style.border().width(width).color(newColor)));
     }
 
     /**
@@ -482,7 +490,15 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided border color.
      */
     public ComponentStyleDelegate<C> borderColor( String colorString ) {
-        return _withStyle(_style._withBorder(_style.border().color(StyleUtility.toColor(colorString))));
+        Objects.requireNonNull(colorString);
+        Color newColor;
+        try {
+            newColor = StyleUtility.toColor(colorString);
+        } catch ( Exception e ) {
+            log.error("Failed to parse color string: '{}'", colorString, e);
+            return this;
+        }
+        return _withStyle(_style._withBorder(_style.border().color(newColor)));
     }
 
     /**
@@ -668,7 +684,15 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided background color.
      */
     public ComponentStyleDelegate<C> foundationColor( String colorString ) {
-        return _withStyle(_style._withBase(_style.base().foundationColor(StyleUtility.toColor(colorString))));
+        Objects.requireNonNull(colorString);
+        Color newColor;
+        try {
+            newColor = StyleUtility.toColor(colorString);
+        } catch ( Exception e ) {
+            log.error("Failed to parse color string: '{}'", colorString, e);
+            return this;
+        }
+        return _withStyle(_style._withBase(_style.base().foundationColor(newColor)));
     }
 
     /**
@@ -691,7 +715,15 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided inner background color.
      */
     public ComponentStyleDelegate<C> backgroundColor( String colorString ) {
-        return _withStyle(_style._withBase(_style.base().backgroundColor(StyleUtility.toColor(colorString))));
+        Objects.requireNonNull(colorString);
+        Color newColor;
+        try {
+            newColor = StyleUtility.toColor(colorString);
+        } catch ( Exception e ) {
+            log.error("Failed to parse color string: '{}'", colorString, e);
+            return this;
+        }
+        return _withStyle(_style._withBase(_style.base().backgroundColor(newColor)));
     }
 
     /**
@@ -741,7 +773,15 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided foreground color.
      */
     public ComponentStyleDelegate<C> foregroundColor( String colorString ) {
-        return _withStyle(_style._withBase(_style.base().foregroundColo(StyleUtility.toColor(colorString))));
+        Objects.requireNonNull(colorString);
+        Color newColor;
+        try {
+            newColor = StyleUtility.toColor(colorString);
+        } catch ( Exception e ) {
+            log.error("Failed to parse color string: '{}'", colorString, e);
+            return this;
+        }
+        return _withStyle(_style._withBase(_style.base().foregroundColo(newColor)));
     }
 
     /**
@@ -863,7 +903,15 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided shadow color.
      */
     public ComponentStyleDelegate<C> shadowColor( String colorString ) {
-        return _withStyle(_style._withShadow( shadow -> shadow.color(StyleUtility.toColor(colorString))));
+        Objects.requireNonNull(colorString);
+        Color newColor;
+        try {
+            newColor = StyleUtility.toColor(colorString);
+        } catch ( Exception e ) {
+            log.error("Failed to parse color string: '{}'", colorString, e);
+            return this;
+        }
+        return _withStyle(_style._withShadow( shadow -> shadow.color(newColor)));
     }
 
     /**
@@ -1169,7 +1217,15 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided font color.
      */
     public ComponentStyleDelegate<C> fontColor( String colorString ) {
-        return _withStyle(_style._withFont(_style.font().color(StyleUtility.toColor(colorString))));
+        Objects.requireNonNull(colorString);
+        Color newColor;
+        try {
+            newColor = StyleUtility.toColor(colorString);
+        } catch ( Exception e ) {
+            log.error("Failed to parse color string: '{}'", colorString, e);
+            return this;
+        }
+        return _withStyle(_style._withFont(_style.font().color(newColor)));
     }
 
     /**
@@ -1193,7 +1249,15 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided font color.
      */
     public ComponentStyleDelegate<C> fontBackgroundColor( String colorString ) {
-        return _withStyle(_style._withFont(_style.font().backgroundColor(StyleUtility.toColor(colorString))));
+        Objects.requireNonNull(colorString);
+        Color newColor;
+        try {
+            newColor = StyleUtility.toColor(colorString);
+        } catch ( Exception e ) {
+            log.error("Failed to parse color string: '{}'", colorString, e);
+            return this;
+        }
+        return _withStyle(_style._withFont(_style.font().backgroundColor(newColor)));
     }
 
     /**
@@ -1217,7 +1281,15 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided font selection color.
      */
     public ComponentStyleDelegate<C> fontSelectionColor( String colorString ) {
-        return _withStyle(_style._withFont(_style.font().selectionColor(StyleUtility.toColor(colorString))));
+        Objects.requireNonNull(colorString);
+        Color newColor;
+        try {
+            newColor = StyleUtility.toColor(colorString);
+        } catch ( Exception e ) {
+            log.error("Failed to parse color string: '{}'", colorString, e);
+            return this;
+        }
+        return _withStyle(_style._withFont(_style.font().selectionColor(newColor)));
     }
 
     /**
@@ -1563,6 +1635,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided layout constraints set to be later
      */
     public ComponentStyleDelegate<C> layout( String constraints ) {
+        Objects.requireNonNull(constraints);
         if ( _style.layout().layout() instanceof Layout.ForMigLayout ) {
             Layout.ForMigLayout migInstaller = (Layout.ForMigLayout) _style.layout().layout();
             migInstaller = migInstaller.withConstraint(constraints);
@@ -1586,6 +1659,8 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided layout constraints set to be later
      */
     public ComponentStyleDelegate<C> layout( String constraints, String columnConstraints ) {
+        Objects.requireNonNull(constraints);
+        Objects.requireNonNull(columnConstraints);
         if ( _style.layout().layout() instanceof Layout.ForMigLayout) {
             Layout.ForMigLayout migInstaller = (Layout.ForMigLayout) _style.layout().layout();
             migInstaller = migInstaller.withConstraint(constraints).withColumnConstraint(columnConstraints);
@@ -1611,6 +1686,9 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided layout constraints set to be later
      */
     public ComponentStyleDelegate<C> layout( String constraints, String columnConstraints, String rowConstraints ) {
+        Objects.requireNonNull(constraints);
+        Objects.requireNonNull(columnConstraints);
+        Objects.requireNonNull(rowConstraints);
         return _withStyle(_style._withLayout(_style.layout().layout(Layout.mig(constraints, columnConstraints, rowConstraints))));
     }
 

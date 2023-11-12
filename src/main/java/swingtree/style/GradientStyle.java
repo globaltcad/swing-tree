@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import org.slf4j.Logger;
 import swingtree.UI;
 
 import java.awt.*;
@@ -58,6 +59,8 @@ import java.util.function.Function;
  */
 public final class GradientStyle
 {
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(GradientStyle.class);
+
     private static final GradientStyle _NONE = new GradientStyle(
                                                         UI.Transition.TOP_TO_BOTTOM,
                                                         UI.GradientType.LINEAR,
@@ -125,10 +128,16 @@ public final class GradientStyle
      */
     public GradientStyle colors( String... colors ) {
         Objects.requireNonNull(colors);
-        Color[] actualColors = new Color[colors.length];
-        for ( int i = 0; i < colors.length; i++ )
-            actualColors[i] = StyleUtility.toColor(colors[i]);
-        return new GradientStyle(_transition, _type, actualColors, _layer);
+        try {
+            Color[] actualColors = new Color[colors.length];
+            for ( int i = 0; i < colors.length; i++ )
+                actualColors[i] = StyleUtility.toColor(colors[i]);
+
+            return new GradientStyle(_transition, _type, actualColors, _layer);
+        } catch ( Exception e ) {
+            log.error("Failed to parse color strings: " + Arrays.toString(colors), e);
+            return this; // We want to avoid side effects other than a wrong color
+        }
     }
 
     /**

@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import org.slf4j.Logger;
 import swingtree.UI;
 
 import java.awt.*;
@@ -83,6 +84,8 @@ import java.util.Optional;
  */
 public final class ShadowStyle
 {
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(ShadowStyle.class);
+
     private static final ShadowStyle _NONE = new ShadowStyle(
                                                     0,0,0,0,
                                                     null, true, UI.Layer.CONTENT
@@ -218,7 +221,15 @@ public final class ShadowStyle
      * @return A new {@link ShadowStyle} with the specified color.
      */
     public ShadowStyle color( String shadowColor ) {
-        return new ShadowStyle(_horizontalOffset, _verticalOffset, _blurRadius, _spreadRadius, StyleUtility.toColor(shadowColor), _isOutset, _layer);
+        Objects.requireNonNull(shadowColor);
+        Color newColor;
+        try {
+            newColor = StyleUtility.toColor(shadowColor);
+        } catch ( Exception e ) {
+            log.error("Failed to parse color string: '{}'", shadowColor, e);
+            return this; // We want to avoid side effects other than a wrong color
+        }
+        return new ShadowStyle(_horizontalOffset, _verticalOffset, _blurRadius, _spreadRadius, newColor, _isOutset, _layer);
     }
 
     /**

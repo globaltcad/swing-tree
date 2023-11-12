@@ -4,6 +4,7 @@ import swingtree.api.Painter;
 
 import java.awt.*;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 /**
  *  Well, here it is, almost every project seems to have at least one of these, right? <br>
@@ -50,6 +51,7 @@ final class StyleUtility
      */
     static Color toColor( String colorString )
     {
+        Objects.requireNonNull(colorString);
         // First some cleanup
         colorString = colorString.trim();
 
@@ -192,4 +194,5 @@ final class StyleUtility
 
         throw new IllegalArgumentException("Could not parse or find color value: " + colorString);
     }
+
 }
