@@ -8,7 +8,7 @@ import java.util.Optional;
  *  The layout manager of a component will use this information
  *  to determine the actual layout of the component in the layout.
  **/
-final class LayoutStyle
+public final class LayoutStyle
 {
     private static final LayoutStyle _NONE = new LayoutStyle(Layout.unspecific(), null, null, null);
 
@@ -36,7 +36,7 @@ final class LayoutStyle
 
     Layout layout() { return _layout; }
 
-    Optional<Object> constraint() { return Optional.ofNullable(_constraint); }
+    public Optional<Object> constraint() { return Optional.ofNullable(_constraint); }
 
     Optional<Float> alignmentX() { return Optional.ofNullable(_alignmentX); }
 
