@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import org.slf4j.Logger;
 import swingtree.api.Styler;
 
 import javax.swing.AbstractButton;
@@ -23,6 +24,8 @@ import java.awt.*;
  */
 final class StyleAndAnimationBorder<C extends JComponent> implements Border
 {
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(StyleAndAnimationBorder.class);
+
     private final ComponentExtension<C> _compExt;
     private final Border                _formerBorder;
     private final boolean               _borderWasNotPainted;
@@ -87,7 +90,6 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
         }
         catch (Exception ex)
         {
-            ex.printStackTrace();
             /*
                  Note that if any exceptions happen in the former Border implementation,
                  then we don't want to mess up the execution of the rest of the component painting...
@@ -98,6 +100,7 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
                  but we don't know which logging framework that is, so we just print
                  the stack trace to the console so that any developers can see what went wrong.
             */
+            log.error("Exception while painting former border '{}': ", _formerBorder, ex);
         }
     }
 
@@ -111,12 +114,12 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
         try {
             _compExt._paintBorderStyle( g, _compExt.getOwner() );
         } catch ( Exception ex ) {
-            ex.printStackTrace();
             /*
                 Note that if any exceptions happen during the border style painting,
                 then we don't want to mess up how the rest of the component is painted...
                 Therefore, we catch any exceptions that happen in the above code.
             */
+            log.error("Exception while painting border style '{}': ", _compExt.getStyle().border(), ex);
         }
     }
 

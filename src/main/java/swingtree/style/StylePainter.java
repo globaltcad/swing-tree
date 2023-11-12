@@ -1111,11 +1111,11 @@ final class StylePainter<C extends JComponent>
                                             (corner2Y - corner1Y) * (corner2Y - corner1Y)
                                         );
                 g2d.setPaint(new RadialGradientPaint(
-                            new Point2D.Float(corner1X, corner1Y),
-                            radius,
-                            fractions,
-                            colors
-                        ));
+                                new Point2D.Float(corner1X, corner1Y),
+                                radius,
+                                fractions,
+                                colors
+                            ));
             }
             else
                 throw new IllegalArgumentException("Invalid gradient type: " + gradient.type());

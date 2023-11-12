@@ -60,7 +60,11 @@ public final class Style
                                             NamedStyles.empty()
                                         );
 
+    /**
+     * @return The default style instance, representing the absence of a style.
+     */
     public static Style none() { return _NONE; }
+
 
     private final LayoutStyle                _layout;
     private final BorderStyle                _border;
@@ -131,13 +135,14 @@ public final class Style
      */
     List<ShadowStyle> shadows( UI.Layer layer ) {
         return Collections.unmodifiableList(
-                _shadows.namedStyles()
+                        _shadows
+                        .namedStyles()
                         .stream()
                         .sorted(Comparator.comparing(NamedStyle::name))
                         .map(NamedStyle::style)
                         .filter( s -> s.layer() == layer )
                         .collect(Collectors.toList())
-            );
+                    );
     }
 
     NamedStyles<ShadowStyle> shadowsMap() { return _shadows; }
@@ -214,9 +219,11 @@ public final class Style
     Style _withLayout( LayoutStyle layout ) {
         return new Style(layout, _border, _base, _font, _dimensionality, _shadows, _painters, _gradients, _images, _properties);
     }
+
     Style _withBorder( BorderStyle border ) {
         return new Style(_layout, border, _base, _font, _dimensionality, _shadows, _painters, _gradients, _images, _properties);
     }
+
     Style _withBase( BaseStyle background ) {
         return new Style(_layout, _border, background, _font, _dimensionality, _shadows, _painters, _gradients, _images, _properties);
     }
@@ -245,12 +252,6 @@ public final class Style
 
     Style _withImages( NamedStyles<ImageStyle> images ) {
         return new Style(_layout, _border, _base, _font, _dimensionality, _shadows, _painters, _gradients, images, _properties);
-    }
-
-    Style _withImages( Function<ImageStyle, ImageStyle> styler ) {
-        // A new map is created where all the styler is applied to all the values:
-        NamedStyles<ImageStyle> styledGrounds = _images.mapStyles(styler);
-        return _withImages(styledGrounds);
     }
 
     Style _withGradients( NamedStyles<GradientStyle> shades ) {

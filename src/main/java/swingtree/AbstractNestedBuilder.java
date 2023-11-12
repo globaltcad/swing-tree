@@ -15,8 +15,8 @@ import java.util.List;
  *  This is primarily expressed by the "{@link #add(AbstractNestedBuilder[])}" method which takes an arbitrary number of
  *  builder instances to form said GUI tree structure...
  *
- * @param <I> The concrete implementation type of this abstract class, "I" stands for "Implementation".
- * @param <C> The component type parameter which ought to be built in some way.
+ * @param <I> The type parameter representing the concrete subtype of this abstract class, "I" stands for "Implementation".
+ * @param <C> The type parameter representing the concrete component type which this builder is responsible for building.
  * @param <E> The component type parameter which ought to be built in some way.
  */
 abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extends AbstractBuilder<I, C>
@@ -51,7 +51,7 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extend
      * @return This very instance, which enables builder-style method chaining.
      */
     public final <T extends JComponent> I add( UIForAnySwing<?, T> builder ) {
-        return (I) this.add(new AbstractNestedBuilder[]{builder});
+        return (I) this.add( new AbstractNestedBuilder[]{builder} );
     }
 
     /**
