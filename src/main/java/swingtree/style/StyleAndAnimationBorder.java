@@ -1,11 +1,13 @@
 package swingtree.style;
 
 import org.slf4j.Logger;
+import swingtree.UI;
 import swingtree.api.Styler;
 
 import javax.swing.AbstractButton;
 import javax.swing.JComponent;
 import javax.swing.border.Border;
+import javax.swing.text.JTextComponent;
 import java.awt.*;
 
 /**
@@ -134,11 +136,7 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
         _calculateMarginInsets(style);
         _calculatePaddingInsets(style);
         _calculateFullPaddingInsets(style);
-        _calculateBorderInsets(style,
-                _formerBorder == null
-                    ? new Insets(0, 0, 0, 0)
-                    : _formerBorder.getBorderInsets(_compExt.getOwner())
-            );
+        _calculateBorderInsets(style);
     }
 
     Insets getFormerBorderInsets() {
@@ -146,20 +144,68 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
             return new Insets(0, 0, 0, 0);
         else
             return _formerBorder == null
-                        ? new Insets(0, 0, 0, 0)
-                        : _formerBorder.getBorderInsets(_compExt.getOwner());
+                    ? new Insets(0, 0, 0, 0)
+                    : _formerBorder.getBorderInsets(_compExt.getOwner());
     }
-
     @Override
     public boolean isBorderOpaque() { return false; }
 
-
-    private void _calculateBorderInsets( Style style, Insets formerInsets )
+    public Insets getBaseInsets(boolean adjust)
     {
-        int left      = style.margin().left().orElse(formerInsets.left);
-        int top       = style.margin().top().orElse(formerInsets.top);
-        int right     = style.margin().right().orElse(formerInsets.right);
-        int bottom    = style.margin().bottom().orElse(formerInsets.bottom);
+        if ( _formerBorder == null )
+            return new Insets(0, 0, 0, 0);
+
+        boolean usesSwingTreeBorder = _compExt.getStyle().border().isVisible();
+
+        if ( usesSwingTreeBorder )
+            return new Insets(0, 0, 0, 0);
+        else
+        {
+            Insets formerInsets = _formerBorder.getBorderInsets(_compExt.getOwner());
+            int left   = 0;
+            int top    = 0;
+            int right  = 0;
+            int bottom = 0;
+            if (!adjust) {
+                left   += formerInsets.left;
+                top    += formerInsets.top;
+                right  += formerInsets.right;
+                bottom += formerInsets.bottom;
+            }
+            if (
+                UI.currentLookAndFeel().isOneOf(UI.LookAndFeel.NIMBUS) &&
+                _compExt.getOwner() instanceof JTextComponent
+            ) {
+                if (adjust) {
+                    left   += formerInsets.left;
+                    top    += formerInsets.top;
+                    right  += formerInsets.right;
+                    bottom += formerInsets.bottom;
+                }
+                left   = left   / 2;
+                top    = top    / 2;
+                right  = right  / 2;
+                bottom = bottom / 2;
+            }
+
+            return new Insets(top, left, bottom, right);
+        }
+    }
+
+    private void _calculateBorderInsets( Style style )
+    {
+        Insets correction = getBaseInsets(false);
+
+        int left   = correction.left;
+        int top    = correction.top;
+        int right  = correction.right;
+        int bottom = correction.bottom;
+
+        left   = style.margin().left()  .orElse(left  );
+        top    = style.margin().top()   .orElse(top   );
+        right  = style.margin().right() .orElse(right );
+        bottom = style.margin().bottom().orElse(bottom);
+
         // Add padding:
         left   += style.padding().left().orElse(0);
         top    += style.padding().top().orElse(0);
