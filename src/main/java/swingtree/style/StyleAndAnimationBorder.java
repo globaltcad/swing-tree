@@ -65,7 +65,7 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
         Shape former = g.getClip();
 
         if ( _compExt.getCurrentOuterBaseClip() != null )
-          g.setClip( _compExt.getCurrentOuterBaseClip() );
+            g.setClip( _compExt.getCurrentOuterBaseClip() );
 
         _paintBorderAndBorderLayerStyles( (Graphics2D) g );
         if ( _formerBorder != null && !_borderWasNotPainted ) {
@@ -80,13 +80,12 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
 
     private void _paintFormerBorder( Component c, Graphics g, int x, int y, int width, int height ) {
         try {
-            _formerBorder.paintBorder(
-                    c, g,
-                    x + _marginInsets.left,
-                    y + _marginInsets.top,
-                    width   - _marginInsets.left - _marginInsets.right,
-                    height - _marginInsets.top  - _marginInsets.bottom
-                );
+            x = x + _marginInsets.left;
+            y = y + _marginInsets.top;
+            width  = width  - _marginInsets.left - _marginInsets.right;
+            height = height - _marginInsets.top  - _marginInsets.bottom;
+
+            _formerBorder.paintBorder(c, g, x, y, width, height);
         }
         catch (Exception ex)
         {
