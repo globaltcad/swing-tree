@@ -93,6 +93,24 @@ final class StylePainter<C extends JComponent>
         return _baseArea;
     }
 
+    void paintWithContentAreaClip( JComponent c, Graphics g, Runnable painter ) {
+        Shape oldClip = g.getClip();
+        Shape newClip = _getBaseArea(c);
+        if ( newClip != null && newClip != oldClip ) {
+            if ( oldClip != null ) {
+                Area common = new Area(oldClip);
+                common.intersect(new Area(newClip));
+                newClip = common;
+            }
+            g.setClip(newClip);
+        }
+
+        painter.run();
+
+        g.setClip(oldClip);
+    }
+
+
     void renderBackgroundStyle( Graphics2D g2d, JComponent comp )
     {
         _baseArea = null;
@@ -155,10 +173,17 @@ final class StylePainter<C extends JComponent>
             });
 
         // 4. Painters, which are provided by the user and can be anything
-        _style.painters(layer).forEach( backgroundPainter -> {
-            if ( backgroundPainter == Painter.none() ) return;
-            _withClip(g2d, _getBaseArea(comp), () -> {
-                AffineTransform oldTransform = new AffineTransform(g2d.getTransform());
+        paintWithContentAreaClip(comp, g2d, () -> {
+
+            // We remember the current transform and clip so that we can reset them after each painter:
+            AffineTransform currentTransform = new AffineTransform(g2d.getTransform());
+            Shape           currentClip      = g2d.getClip();
+
+            _style.painters(layer).forEach( backgroundPainter -> {
+
+                if ( backgroundPainter == Painter.none() )
+                    return;
+
                 try {
                     backgroundPainter.paint(g2d);
                 } catch (Exception e) {
@@ -178,7 +203,9 @@ final class StylePainter<C extends JComponent>
                     library, thank you for using it! Good luck finding out what went wrong! :)
                 */
                 } finally {
-                    g2d.setTransform(oldTransform);
+                    // We do not know what the painter did to the graphics object, so we reset it:
+                    g2d.setTransform(currentTransform);
+                    g2d.setClip(currentClip);
                 }
             });
         });

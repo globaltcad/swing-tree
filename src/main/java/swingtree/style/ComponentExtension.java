@@ -283,20 +283,7 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     void paintWithContentAreaClip( Graphics g, Runnable painter ) {
-        Shape oldClip = g.getClip();
-        Shape newClip = _stylePainter._getBaseArea(_owner);
-        if ( newClip != null && newClip != oldClip ) {
-            if ( oldClip != null ) {
-                Area common = new Area(oldClip);
-                common.intersect(new Area(newClip));
-                newClip = common;
-            }
-            g.setClip(newClip);
-        }
-
-        painter.run();
-
-        g.setClip(oldClip);
+        _stylePainter.paintWithContentAreaClip(_owner, g, painter);
     }
 
     /**
