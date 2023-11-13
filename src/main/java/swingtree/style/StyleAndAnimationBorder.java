@@ -158,28 +158,24 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
             int top    = 0;
             int right  = 0;
             int bottom = 0;
-            if (!adjust) {
+            if ( !adjust ) {
                 left   += formerInsets.left;
                 top    += formerInsets.top;
                 right  += formerInsets.right;
                 bottom += formerInsets.bottom;
-            }
-            if (
+            } else if (
                 UI.currentLookAndFeel().isOneOf(UI.LookAndFeel.NIMBUS) &&
                 _compExt.getOwner() instanceof JTextComponent
             ) {
-                if (adjust) {
-                    left   += formerInsets.left;
-                    top    += formerInsets.top;
-                    right  += formerInsets.right;
-                    bottom += formerInsets.bottom;
-                }
+                left   += formerInsets.left;
+                top    += formerInsets.top;
+                right  += formerInsets.right;
+                bottom += formerInsets.bottom;
                 left   = left   / 2;
                 top    = top    / 2;
                 right  = right  / 2;
                 bottom = bottom / 2;
             }
-
             return new Insets(top, left, bottom, right);
         }
     }
