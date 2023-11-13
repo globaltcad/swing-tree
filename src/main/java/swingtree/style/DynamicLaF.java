@@ -300,29 +300,37 @@ class DynamicLaF
         @Override protected void paintBackground(Graphics g) {
             JComponent c = getComponent();
             //if ( c.isOpaque() ) {
-                int insetTop    = 0;
-                int insetLeft   = 0;
-                int insetBottom = 0;
-                int insetRight  = 0;
+                int insetTop;
+                int insetLeft;
+                int insetBottom;
+                int insetRight;
                 if ( c.getBorder() instanceof StyleAndAnimationBorder ) {
                     StyleAndAnimationBorder<?> styleBorder = (StyleAndAnimationBorder<?>) c.getBorder();
                     Insets margins = styleBorder.getMarginInsets();
-                    Insets oldLaFBorder = styleBorder.getFormerBorderInsets();
-                    insetTop    = margins.top    + oldLaFBorder.top    / 2;
-                    insetLeft   = margins.left   + oldLaFBorder.left   / 2;
-                    insetBottom = margins.bottom + oldLaFBorder.bottom / 2;
-                    insetRight  = margins.right  + oldLaFBorder.right  / 2; /*
+                    insetTop    = margins.top   ;
+                    insetLeft   = margins.left  ;
+                    insetBottom = margins.bottom;
+                    insetRight  = margins.right ;
+                    /*
                         Here we divide by 2 because in nimbus the border is partially consisting of
                         a shadow going inwards! If we don't divide by 2, the background will
                         not fill the whole inner component area.
                         TODO: investigate how this works in other LaFs.
                     */
+                } else {
+                    insetBottom = 0;
+                    insetRight = 0;
+                    insetTop = 0;
+                    insetLeft = 0;
                 }
+
                 g.setColor(c.getBackground());
-                g.fillRect(
-                        insetLeft, insetTop,
-                        c.getWidth() - insetLeft - insetRight, c.getHeight() - insetTop - insetBottom
-                    );
+                ComponentExtension.from(getComponent()).paintWithContentAreaClip(g, ()->{
+                    g.fillRect(
+                            insetLeft, insetTop,
+                            c.getWidth() - insetLeft - insetRight, c.getHeight() - insetTop - insetBottom
+                        );
+                });
             //}
             boolean shouldPaintFormerUI = ( insetLeft == 0 && insetRight == 0 && insetTop == 0 && insetBottom == 0 );
             ComponentExtension.from(c)._paintBackground(g, ()->{

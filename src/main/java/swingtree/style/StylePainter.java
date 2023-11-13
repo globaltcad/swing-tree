@@ -279,6 +279,14 @@ final class StylePainter<C extends JComponent>
             return new Area(new Rectangle(0, 0, comp.getWidth(), comp.getHeight()));
         }
 
+        if ( comp.getBorder() instanceof StyleAndAnimationBorder ) {
+            Insets base = ((StyleAndAnimationBorder) comp.getBorder()).getBaseInsets(true);
+            insTop    += base.top;
+            insLeft   += base.left;
+            insBottom += base.bottom;
+            insRight  += base.right;
+        }
+
         // The background box is calculated from the margins and border radius:
         int left   = Math.max(_style.margin().left().orElse(0), 0)   + insLeft  ;
         int top    = Math.max(_style.margin().top().orElse(0), 0)    + insTop   ;
