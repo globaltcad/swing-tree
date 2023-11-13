@@ -242,16 +242,16 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
 
     private void _calculatePaddingInsets( Style style )
     {
-        _paddingInsets.top    = style.padding().left().orElse(0);
-        _paddingInsets.left   = style.padding().top().orElse(0);
+        _paddingInsets.top    = style.padding().top().orElse(0);
+        _paddingInsets.left   = style.padding().left().orElse(0);
         _paddingInsets.right  = style.padding().right().orElse(0);
         _paddingInsets.bottom = style.padding().bottom().orElse(0);
     }
 
     private void _calculateFullPaddingInsets( Style style )
     {
-        _fullPaddingInsets.top    = style.padding().left().orElse(0)   + style.margin().left().orElse(0);
-        _fullPaddingInsets.left   = style.padding().top().orElse(0)    + style.margin().top().orElse(0);
+        _fullPaddingInsets.top    = style.padding().top().orElse(0)    + style.margin().top().orElse(0);
+        _fullPaddingInsets.left   = style.padding().left().orElse(0)   + style.margin().left().orElse(0);
         _fullPaddingInsets.right  = style.padding().right().orElse(0)  + style.margin().right().orElse(0);
         _fullPaddingInsets.bottom = style.padding().bottom().orElse(0) + style.margin().bottom().orElse(0);
     }
