@@ -39,14 +39,14 @@ final class BorderStyle
 
 
     private BorderStyle(
-        Arc topLeftArc,
-        Arc topRightArc,
-        Arc bottomLeftArc,
-        Arc bottomRightArc,
+        Arc     topLeftArc,
+        Arc     topRightArc,
+        Arc     bottomLeftArc,
+        Arc     bottomRightArc,
         Outline borderWidths,
         Outline margin,
         Outline padding,
-        Color borderColor,
+        Color   borderColor,
         NamedStyles<GradientStyle> gradients
     ) {
         _topLeftArc      = topLeftArc;
