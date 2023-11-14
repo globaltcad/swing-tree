@@ -774,8 +774,11 @@ public final class UI extends UILayoutConstants
      * Loads an icon from the classpath or from a file.
      * @param path The path to the icon. It can be a classpath resource or a file path.
      * @return The icon.
+     * @throws NullPointerException if {@code path} is {@code null}.
      */
-    public static ImageIcon _loadIcon( String path ) {
+    public static ImageIcon _loadIcon( String path )
+    {
+        Objects.requireNonNull(path, "path");
         path = path.trim();
         if ( path.isEmpty() )
             return null;
