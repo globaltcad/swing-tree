@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import com.github.weisj.jsvg.geometry.size.FloatSize;
 import org.slf4j.Logger;
 import swingtree.UI;
 import swingtree.animation.LifeTime;
@@ -9,8 +10,8 @@ import javax.swing.JComponent;
 import java.awt.*;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 
 /**
@@ -1214,6 +1215,14 @@ final class StylePainter<C extends JComponent>
                 }
                 if ( imgWidth  < 0 ) imgWidth  = componentWidth;
                 if ( imgHeight < 0 ) imgHeight = componentHeight;
+            }
+            if ( imageIcon instanceof SvgIcon ) {
+                SvgIcon svgIcon = (SvgIcon) imageIcon;
+                FloatSize size = svgIcon.getSvgSize();
+                if ( imgWidth  < 0 )
+                    imgWidth  = (int) size.width;
+                if ( imgHeight < 0 )
+                    imgHeight = (int) size.height;
             }
             int x = 0;
             int y = 0;

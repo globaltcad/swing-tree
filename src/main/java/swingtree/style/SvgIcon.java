@@ -134,6 +134,14 @@ public final class SvgIcon extends ImageIcon
     }
 
     /**
+     * @return The size of the SVG document in the form of a {@link FloatSize},
+     *         a subclass of {@link java.awt.geom.Dimension2D}.
+     */
+    public FloatSize getSvgSize() {
+        return _svgDocument.size();
+    }
+
+    /**
      * @return The {@link UI.FitComponent} that determines if and how the icon should be fitted into a
      *         any given component (see {@link #paintIcon(Component, java.awt.Graphics, int, int, int, int)}).
      */
@@ -302,9 +310,9 @@ public final class SvgIcon extends ImageIcon
             viewBox = new ViewBox(boxX, boxY, boxWidth, boxHeight);
 
         if ( _fitComponent == UI.FitComponent.NO ) {
-            width = _width >= 0 ? _width : (int) svgSize.width;
-            height = _height >= 0 ? _height : (int) svgSize.height;
-            viewBox = new ViewBox(x, y, width, height);
+            width   = _width  >= 0 ? _width  : (int) svgSize.width;
+            height  = _height >= 0 ? _height : (int) svgSize.height;
+            viewBox = new ViewBox( x, y, width, height );
         }
 
         // Let's check if the view box exists:
