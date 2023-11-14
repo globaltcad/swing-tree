@@ -91,6 +91,7 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
         }
         catch (Exception ex)
         {
+            ex.printStackTrace();
             /*
                  Note that if any exceptions happen in the former Border implementation,
                  then we don't want to mess up the execution of the rest of the component painting...

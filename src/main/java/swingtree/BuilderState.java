@@ -162,6 +162,7 @@ class BuilderState<C extends Component>
         try {
             componentMutation.accept(_componentFetcher.get());
         } catch ( Exception e ) {
+            e.printStackTrace();
             log.error(
                 "Exception while building component of type '" + _componentType.getSimpleName() + "'.", e
             );

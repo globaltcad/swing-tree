@@ -1330,6 +1330,7 @@ final class StylePainter<C extends JComponent>
                 try {
                     expirablePainter.get().paint(g2d);
                 } catch ( Exception e ) {
+                    e.printStackTrace();
                     log.warn(
                         "Exception while painting animation '" + expirablePainter.get() + "' " +
                         "with lifetime " + expirablePainter.getLifeTime()+ ".",
