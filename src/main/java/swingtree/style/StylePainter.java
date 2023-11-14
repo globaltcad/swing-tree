@@ -1177,14 +1177,6 @@ final class StylePainter<C extends JComponent>
             int componentHeight    = component.getHeight();
             int imgWidth           = style.width().orElse(imageIcon.getIconWidth());
             int imgHeight          = style.height().orElse(imageIcon.getIconHeight());
-            if ( imageIcon instanceof SvgIcon ) {
-                SvgIcon svgIcon = (SvgIcon) imageIcon;
-                if ( imgWidth > -1 && svgIcon.getIconWidth() < 0 )
-                    svgIcon = svgIcon.withIconWidth(imgWidth);
-                if ( imgHeight > -1 && svgIcon.getIconHeight() < 0 )
-                    svgIcon = svgIcon.withIconHeight(imgHeight);
-                imageIcon = svgIcon;
-            }
             if ( style.fitMode() != UI.FitComponent.NO ) {
                 if ( imageIcon instanceof SvgIcon) {
                     imgWidth = style.width().orElse(componentWidth);
@@ -1264,6 +1256,14 @@ final class StylePainter<C extends JComponent>
             y += padding.top().orElse(0);
             imgWidth  -= padding.left().orElse(0) + padding.right().orElse(0);
             imgHeight -= padding.top().orElse(0)  + padding.bottom().orElse(0);
+            if ( imageIcon instanceof SvgIcon ) {
+                SvgIcon svgIcon = (SvgIcon) imageIcon;
+                if ( imgWidth > -1 && svgIcon.getIconWidth() < 0 )
+                    svgIcon = svgIcon.withIconWidth(imgWidth);
+                if ( imgHeight > -1 && svgIcon.getIconHeight() < 0 )
+                    svgIcon = svgIcon.withIconHeight(imgHeight);
+                imageIcon = svgIcon;
+            }
             if ( !repeat && imageIcon instanceof SvgIcon) {
                 SvgIcon svgIcon = ((SvgIcon) imageIcon).withFitComponent(style.fitMode());
                 svgIcon.paintIcon(component, g2d, x, y, imgWidth, imgHeight);
@@ -1291,7 +1291,8 @@ final class StylePainter<C extends JComponent>
                         } finally {
                             g2d.setPaint(oldPaint);
                         }
-                    } else
+                    }
+                    else
                         g2d.drawImage(image, x, y, imgWidth, imgHeight, null);
 
                 } finally {
