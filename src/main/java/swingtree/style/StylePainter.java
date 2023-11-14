@@ -1162,7 +1162,7 @@ final class StylePainter<C extends JComponent>
         ImageStyle style,
         Graphics2D g2d,
         JComponent component,
-        Area specificArea
+        Area       specificArea
     ) {
         if ( style.primer().isPresent() ) {
             g2d.setColor(style.primer().get());
@@ -1212,9 +1212,9 @@ final class StylePainter<C extends JComponent>
                         }
                     }
                 }
+                if ( imgWidth  < 0 ) imgWidth  = componentWidth;
+                if ( imgHeight < 0 ) imgHeight = componentHeight;
             }
-            if ( imgWidth  < 0 ) imgWidth  = componentWidth;
-            if ( imgHeight < 0 ) imgHeight = componentHeight;
             int x = 0;
             int y = 0;
             float opacity = style.opacity();
