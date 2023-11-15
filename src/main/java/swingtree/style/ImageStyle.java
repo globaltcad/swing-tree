@@ -132,23 +132,25 @@ public final class ImageStyle
                                                 Size.none(),
                                                 1.0f,
                                                 Outline.none(),
-                                                Offset.none()
+                                                Offset.none(),
+                                                UI.ComponentArea.ALL
                                             );
 
     static ImageStyle none() { return _NONE; }
 
 
-    private final UI.Layer        _layer;
-    private final Color           _primer;
+    private final UI.Layer         _layer;
+    private final Color            _primer;
 
-    private final ImageIcon       _image;
-    private final UI.Placement    _placement;
-    private final boolean         _repeat;
-    private final UI.FitComponent _fitMode;
-    private final Size            _size;
-    private final float           _opacity;
-    private final Outline         _padding;
-    private final Offset          _offset;
+    private final ImageIcon        _image;
+    private final UI.Placement     _placement;
+    private final boolean          _repeat;
+    private final UI.FitComponent  _fitMode;
+    private final Size             _size;
+    private final float            _opacity;
+    private final Outline          _padding;
+    private final Offset           _offset;
+    private final UI.ComponentArea _clipArea;
 
 
     private ImageStyle(
@@ -161,7 +163,8 @@ public final class ImageStyle
         Size             size,
         float            opacity,
         Outline          padding,
-        Offset           offset
+        Offset           offset,
+        UI.ComponentArea clipArea
     ) {
         _layer     = Objects.requireNonNull(layer);
         _primer    = primer;
@@ -173,6 +176,7 @@ public final class ImageStyle
         _opacity   = opacity;
         _padding   = Objects.requireNonNull(padding);
         _offset    = Objects.requireNonNull(offset);
+        _clipArea  = Objects.requireNonNull(clipArea);
         if ( _opacity < 0.0f || _opacity > 1.0f )
             throw new IllegalArgumentException("transparency must be between 0.0f and 1.0f");
     }
@@ -200,7 +204,9 @@ public final class ImageStyle
     int horizontalOffset() { return _offset.x(); }
     
     int verticalOffset() { return _offset.y(); }
-    
+
+    UI.ComponentArea clipArea() { return _clipArea; }
+
 
     /**
      *  This method allows you to specify the layer onto which the image will be drawn.
@@ -216,7 +222,7 @@ public final class ImageStyle
      * @param layer The layer onto which the image will be drawn.
      * @return A new {@link ImageStyle} instance with the specified layer.
      */
-    public ImageStyle layer( UI.Layer layer ) { return new ImageStyle(layer, _primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset); }
+    public ImageStyle layer( UI.Layer layer ) { return new ImageStyle(layer, _primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea); }
 
     /**
      *  Here you can specify the <b>primer color of the image style</b> which will be used
@@ -226,7 +232,7 @@ public final class ImageStyle
      * @param color The primer color of the image style.
      * @return A new {@link ImageStyle} instance with the specified primer color.
      */
-    public ImageStyle primer( Color color ) { return new ImageStyle(_layer, color, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset); }
+    public ImageStyle primer( Color color ) { return new ImageStyle(_layer, color, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea); }
 
     /**
      *  Here you can specify the <b>image</b> which will be drawn onto the component.
@@ -235,7 +241,7 @@ public final class ImageStyle
      * @param image The image which will be drawn onto the component.
      * @return A new {@link ImageStyle} instance with the specified image.
      */
-    public ImageStyle image( Image image ) { return new ImageStyle(_layer, _primer, image == null ? null : new ImageIcon(image), _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset); }
+    public ImageStyle image( Image image ) { return new ImageStyle(_layer, _primer, image == null ? null : new ImageIcon(image), _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea); }
 
     /**
      *  Here you can specify the <b>image icon</b> which will be drawn onto the component.
@@ -244,7 +250,7 @@ public final class ImageStyle
      * @param image The image icon which will be drawn onto the component.
      * @return A new {@link ImageStyle} instance with the specified image.
      */
-    public ImageStyle image( ImageIcon image ) { return new ImageStyle(_layer, _primer, image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset); }
+    public ImageStyle image( ImageIcon image ) { return new ImageStyle(_layer, _primer, image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea); }
 
     /**
      *  Here you can specify the <b>path to the image in the form of an {@link IconDeclaration}</b>
@@ -302,7 +308,7 @@ public final class ImageStyle
      * @param placement The placement of the image onto the component.
      * @return A new {@link ImageStyle} instance with the specified placement.
      */
-    public ImageStyle placement( UI.Placement placement ) { return new ImageStyle(_layer, _primer, _image, placement, _repeat, _fitMode, _size, _opacity, _padding, _offset); }
+    public ImageStyle placement( UI.Placement placement ) { return new ImageStyle(_layer, _primer, _image, placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea); }
 
     /**
      *  If this flag is set to {@code true}, then the image may be painted
@@ -313,7 +319,7 @@ public final class ImageStyle
      * @param repeat Weather the image should be painted repeatedly across the inner component area.
      * @return A new {@link ImageStyle} instance with the specified {@code repeat} flag value.
      */
-    public ImageStyle repeat( boolean repeat ) { return new ImageStyle(_layer, _primer, _image, _placement, repeat, _fitMode, _size, _opacity, _padding, _offset); }
+    public ImageStyle repeat( boolean repeat ) { return new ImageStyle(_layer, _primer, _image, _placement, repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea); }
 
     /**
      *  If this flag is set to {@code true}, then the image will be stretched or shrunk
@@ -332,7 +338,7 @@ public final class ImageStyle
      */
     public ImageStyle autoFit( boolean autoFit ) { 
         UI.FitComponent fit = autoFit ? UI.FitComponent.WIDTH_AND_HEIGHT : UI.FitComponent.NO;
-        return new ImageStyle(_layer, _primer, _image, _placement, _repeat, fit, _size, _opacity, _padding, _offset); 
+        return new ImageStyle(_layer, _primer, _image, _placement, _repeat, fit, _size, _opacity, _padding, _offset, _clipArea);
     }
 
     /**
@@ -340,7 +346,7 @@ public final class ImageStyle
      * @return A new {@link ImageStyle} instance with the specified {@code fit} mode.
      */
     public ImageStyle fitMode( UI.FitComponent fit ) {
-        return new ImageStyle(_layer, _primer, _image, _placement, _repeat, fit, _size, _opacity, _padding, _offset);
+        return new ImageStyle(_layer, _primer, _image, _placement, _repeat, fit, _size, _opacity, _padding, _offset, _clipArea);
     }
 
     /**
@@ -349,7 +355,7 @@ public final class ImageStyle
      * @param width The width of the image.
      * @return A new {@link ImageStyle} instance with the specified {@code width}.
      */
-    public ImageStyle width( Integer width ) { return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size.width(width), _opacity, _padding, _offset); }
+    public ImageStyle width( Integer width ) { return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size.width(width), _opacity, _padding, _offset, _clipArea); }
 
     /**
      *  Ensures that the image has the specified height.
@@ -357,7 +363,7 @@ public final class ImageStyle
      * @param height The height of the image.
      * @return A new {@link ImageStyle} instance with the specified {@code heiht}.
      */
-    public ImageStyle height( Integer height ) { return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size.height(height), _opacity, _padding, _offset); }
+    public ImageStyle height( Integer height ) { return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size.height(height), _opacity, _padding, _offset, _clipArea); }
 
     /**
      *  Ensures that the image has the specified width and height.
@@ -366,7 +372,7 @@ public final class ImageStyle
      * @param height The height of the image.
      * @return A new {@link ImageStyle} instance with the specified {@code width} and {@code height}.
      */
-    public ImageStyle size( int width, int height ) { return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, Size.of(width, height), _opacity, _padding, _offset); }
+    public ImageStyle size( int width, int height ) { return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, Size.of(width, height), _opacity, _padding, _offset, _clipArea); }
 
     /**
      *  This method allows you to specify the opacity of the image.
@@ -376,7 +382,7 @@ public final class ImageStyle
      * @param opacity The opacity of the image.
      * @return A new {@link ImageStyle} instance with the specified opacity.
      */
-    public ImageStyle opacity( float opacity ) { return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size, opacity, _padding, _offset); }
+    public ImageStyle opacity( float opacity ) { return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size, opacity, _padding, _offset, _clipArea); }
 
     /**
      *  This method allows you to specify the padding of the image.
@@ -385,7 +391,7 @@ public final class ImageStyle
      * @param padding The padding of the image.
      * @return A new {@link ImageStyle} instance with the specified padding.
      */
-    ImageStyle padding( Outline padding ) { return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size, _opacity, padding, _offset); }
+    ImageStyle padding( Outline padding ) { return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size, _opacity, padding, _offset, _clipArea); }
 
     /**
      *  This method allows you to specify the padding of the image.
@@ -426,7 +432,7 @@ public final class ImageStyle
      *  @param y The vertical offset.
      *  @return A new {@link ImageStyle} instance with the specified offset.
      */
-    public ImageStyle offset( int x, int y ) { return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, Offset.of(x, y)); }
+    public ImageStyle offset( int x, int y ) { return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, Offset.of(x, y), _clipArea); }
 
     /**
      *  Use this to specify the horizontal offset by which the image will be moved
@@ -435,7 +441,7 @@ public final class ImageStyle
      *  @param x The horizontal offset.
      *  @return A new {@link ImageStyle} instance with the specified offset.
      */
-    public ImageStyle horizontalOffset( int x ) { return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset.x(x)); }
+    public ImageStyle horizontalOffset( int x ) { return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset.x(x), _clipArea); }
 
     /**
      *  Use this to specify the vertical offset by which the image will be moved
@@ -444,14 +450,41 @@ public final class ImageStyle
      *  @param y The vertical offset.
      *  @return A new {@link ImageStyle} instance with the specified offset.
      */
-    public ImageStyle verticalOffset( int y ) { return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset.y(y)); }
+    public ImageStyle verticalOffset( int y ) { return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset.y(y), _clipArea); }
+
+    /**
+     *  Use this to specify the clip area of the image,
+     *  which determines on which part of the component the image will be drawn.
+     *  The {@link swingtree.UI.ComponentArea} enum defines the following clip areas:
+     *  <ul>
+     *      <li>{@link swingtree.UI.ComponentArea#ALL} -
+     *      The image will be drawn onto the entire component.
+     *      </li>
+     *      <li>{@link swingtree.UI.ComponentArea#INTERIOR} -
+     *      The image will be drawn onto the inner component area.
+     *      </li>
+     *      <li>{@link swingtree.UI.ComponentArea#EXTERIOR} -
+     *      The image will be drawn onto the outer component area.
+     *      </li>
+     *      <li>{@link swingtree.UI.ComponentArea#BORDER} -
+     *      The image will be drawn onto the border of the component.
+     *      </li>
+     *  </ul>
+     *  The default clip area is {@link UI.ComponentArea#ALL},
+     *  which means that the image will be drawn onto the entire component
+     *  even if the image scales beyond the border of the component.
+     *
+     *  @param clipArea The clip area of the image.
+     *  @return A new {@link ImageStyle} instance with the specified clip area.
+     */
+    public ImageStyle clipTo( UI.ComponentArea clipArea ) { return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, clipArea); }
 
     ImageStyle _scale( double scaleFactor ) {
-        return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size.scale(scaleFactor), _opacity, _padding.scale(scaleFactor), _offset.scale(scaleFactor));
+        return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size.scale(scaleFactor), _opacity, _padding.scale(scaleFactor), _offset.scale(scaleFactor), _clipArea);
     }
 
     @Override
-    public int hashCode() { return Objects.hash(_layer, _primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset); }
+    public int hashCode() { return Objects.hash(_layer, _primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea); }
 
     @Override
     public boolean equals( Object obj ) {
@@ -468,7 +501,8 @@ public final class ImageStyle
                Objects.equals(_size,      rhs._size)      &&
                Objects.equals(_opacity,   rhs._opacity)   &&
                Objects.equals(_padding,   rhs._padding)   &&
-               Objects.equals(_offset,    rhs._offset);
+               Objects.equals(_offset,    rhs._offset)    &&
+               Objects.equals(_clipArea,  rhs._clipArea);
     }
 
     @Override
@@ -484,7 +518,8 @@ public final class ImageStyle
                     "height="        + _size.height().map(Objects::toString).orElse("?") + ", " +
                     "opacity="       + _opacity                                                + ", " +
                     "padding="       + _padding                                                + ", " +
-                    "offset="        + _offset                                                 +
+                    "offset="        + _offset                                                 + ", " +
+                    "clipArea="      + _clipArea                                               +
                 "]";
     }
 }

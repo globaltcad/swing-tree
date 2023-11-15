@@ -429,6 +429,11 @@ public final class UI extends UILayoutConstants
         CENTER
     }
 
+    public enum ComponentArea
+    {
+        EXTERIOR, BORDER, INTERIOR, ALL
+    }
+
     public enum Axis {
         /**
          * Specifies that something is laid out left to right.

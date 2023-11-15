@@ -367,7 +367,7 @@ public final class ComponentExtension<C extends JComponent>
         _stylePainter.renderBackgroundStyle( (Graphics2D) g, _owner );
 
         if ( lookAndFeelPainting != null ) {
-            Shape contentClip = _stylePainter.baseAreaFor(_owner).orElse(null);
+            Shape contentClip = _stylePainter.interiorAreaOf(_owner).orElse(null);
 
             if ( contentClip == null )
                 contentClip = _outerBaseClip;

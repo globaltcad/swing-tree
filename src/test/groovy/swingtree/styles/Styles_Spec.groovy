@@ -160,7 +160,8 @@ class Styles_Spec extends Specification
                                             "height=?, " +
                                             "opacity=1.0, " +
                                             "padding=Outline[top=?, right=?, bottom=?, left=?], " +
-                                            "offset=Offset[x=0, y=0]" +
+                                            "offset=Offset[x=0, y=0], " +
+                                            "clipArea=ALL" +
                                         "], " +
                                         "properties=[]" +
                                     "]"
