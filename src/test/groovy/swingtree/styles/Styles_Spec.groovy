@@ -159,7 +159,8 @@ class Styles_Spec extends Specification
                                             "width=?, " +
                                             "height=?, " +
                                             "opacity=1.0, " +
-                                            "padding=Outline[top=?, right=?, bottom=?, left=?]" +
+                                            "padding=Outline[top=?, right=?, bottom=?, left=?], " +
+                                            "offset=Offset[x=0, y=0]" +
                                         "], " +
                                         "properties=[]" +
                                     "]"

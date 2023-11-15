@@ -1224,38 +1224,38 @@ final class StylePainter<C extends JComponent>
                 if ( imgHeight < 0 )
                     imgHeight = (int) size.height;
             }
-            int x = 0;
-            int y = 0;
+            int x = style.horizontalOffset();
+            int y = style.verticalOffset();
             float opacity = style.opacity();
             switch ( placement ) {
                 case TOP:
-                    x = (componentWidth - imgWidth) / 2;
+                    x += (componentWidth - imgWidth) / 2;
                     break;
                 case LEFT:
-                    y = (componentHeight - imgHeight) / 2;
+                    y += (componentHeight - imgHeight) / 2;
                     break;
                 case BOTTOM:
-                    x = (componentWidth - imgWidth) / 2;
-                    y = componentHeight - imgHeight;
+                    x += (componentWidth - imgWidth) / 2;
+                    y += componentHeight - imgHeight;
                     break;
                 case RIGHT:
-                    x = componentWidth - imgWidth;
-                    y = (componentHeight - imgHeight) / 2;
+                    x += componentWidth - imgWidth;
+                    y += (componentHeight - imgHeight) / 2;
                     break;
                 case TOP_LEFT: break;
                 case TOP_RIGHT:
-                    x = componentWidth - imgWidth;
+                    x += componentWidth - imgWidth;
                     break;
                 case BOTTOM_LEFT:
-                    y = componentHeight - imgHeight;
+                    y += componentHeight - imgHeight;
                     break;
                 case BOTTOM_RIGHT:
-                    x = componentWidth - imgWidth;
-                    y = componentHeight - imgHeight;
+                    x += componentWidth - imgWidth;
+                    y += componentHeight - imgHeight;
                     break;
                 case CENTER:
-                    x = (componentWidth - imgWidth) / 2;
-                    y = (componentHeight - imgHeight) / 2;
+                    x += (componentWidth - imgWidth) / 2;
+                    y += (componentHeight - imgHeight) / 2;
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown placement: " + placement);
