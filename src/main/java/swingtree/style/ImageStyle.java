@@ -93,6 +93,21 @@ import java.util.Optional;
  *          This means that after the image has been placed onto the component,
  *          it will be moved by the specified offset in the horizontal and vertical direction.
  *      </li>
+ *      <li><h3>Clip Area:</h3>
+ *          The clip area determines onto which part of the component the image will be drawn.
+ *          The following clip areas are available:
+ *          <ul>
+ *              <li> {@link swingtree.UI.ComponentArea#ALL} </li>
+ *              <li> {@link swingtree.UI.ComponentArea#EXTERIOR} </li>
+ *              <li> {@link swingtree.UI.ComponentArea#INTERIOR} </li>
+ *              <li> {@link swingtree.UI.ComponentArea#BORDER} </li>
+ *          </ul>
+ *          <b>Note that the inner/interior component area is the area enclosed by the border,
+ *          whereas the exterior component area is the area surrounding the border.</b>
+ *          <p>
+ *          The default clip area is {@link swingtree.UI.ComponentArea#INTERIOR}
+ *          as this is the area which is most commonly used.
+ *      </li>
  *  </ol>
  *  <p>
  *  <b>Take a look at the following example:</b>
@@ -133,7 +148,7 @@ public final class ImageStyle
                                                 1.0f,
                                                 Outline.none(),
                                                 Offset.none(),
-                                                UI.ComponentArea.ALL
+                                                UI.ComponentArea.INTERIOR
                                             );
 
     static ImageStyle none() { return _NONE; }
@@ -470,9 +485,11 @@ public final class ImageStyle
      *      The image will be drawn onto the border of the component.
      *      </li>
      *  </ul>
-     *  The default clip area is {@link UI.ComponentArea#ALL},
-     *  which means that the image will be drawn onto the entire component
-     *  even if the image scales beyond the border of the component.
+     *  The default clip area is {@link swingtree.UI.ComponentArea#INTERIOR},
+     *  which means that the image will be drawn onto the inner component area.
+     *  <p>
+     *  Use {@link UI.ComponentArea#ALL} to draw the image without any additional clipping
+     *  onto the entire component, which may also cover the border and margin area of the component.
      *
      *  @param clipArea The clip area of the image.
      *  @return A new {@link ImageStyle} instance with the specified clip area.
