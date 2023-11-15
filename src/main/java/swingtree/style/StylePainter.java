@@ -1310,6 +1310,33 @@ final class StylePainter<C extends JComponent>
                     svgIcon = svgIcon.withIconHeight(imgHeight);
                 imageIcon = svgIcon;
             }
+
+            final Shape oldClip = g2d.getClip();
+
+            Shape newClip = oldClip;
+            switch ( style.clipArea() ) {
+                case INTERIOR:
+                    newClip = _getInteriorAreaOf(component);
+                    break;
+                case BORDER:
+                    newClip = _getBorderAreaOf(component);
+                    break;
+                case EXTERIOR:
+                    newClip = _getExteriorAreaOf(component);
+                    break;
+                case ALL:
+                    break;
+                default:
+                    log.warn("Unknown clip area: " + style.clipArea());
+            }
+            // We merge the new clip with the old one:
+            if ( newClip != null && oldClip != null && !newClip.equals(oldClip) ) {
+                Area area = new Area(newClip);
+                area.intersect(new Area(oldClip));
+                newClip = area;
+            }
+            g2d.setClip(newClip);
+
             if ( !repeat && imageIcon instanceof SvgIcon) {
                 SvgIcon svgIcon = ((SvgIcon) imageIcon).withFitComponent(style.fitMode());
                 svgIcon.paintIcon(component, g2d, x, y, imgWidth, imgHeight);
@@ -1327,22 +1354,7 @@ final class StylePainter<C extends JComponent>
                     image = imageIcon.getImage();
 
                 Composite oldComposite = g2d.getComposite();
-                Shape oldClip = g2d.getClip();
-                switch ( style.clipArea() ) {
-                    case INTERIOR:
-                        g2d.setClip(_getInteriorAreaOf(component));
-                        break;
-                    case BORDER:
-                        g2d.setClip(_getBorderAreaOf(component));
-                        break;
-                    case EXTERIOR:
-                        g2d.setClip(_getExteriorAreaOf(component));
-                        break;
-                    case ALL:
-                        break;
-                    default:
-                        log.warn("Unknown clip area: " + style.clipArea());
-                }
+
                 try {
                     g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
                     if (repeat) {
@@ -1359,9 +1371,9 @@ final class StylePainter<C extends JComponent>
 
                 } finally {
                     g2d.setComposite(oldComposite);
-                    g2d.setClip(oldClip);
                 }
             }
+            g2d.setClip(oldClip);
         });
     }
 
