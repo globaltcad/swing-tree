@@ -165,13 +165,23 @@ public final class SvgIcon extends ImageIcon
      */
     @Override
     public Image getImage() {
+        int width  = getIconWidth();
+        int height = getIconHeight();
+
+        if ( _svgDocument != null ) {
+            if (width < 0)
+                width = (int) _svgDocument.size().width;
+            if (height < 0)
+                height = (int) _svgDocument.size().height;
+        }
+
         // We create a new buffered image, render into it, and then return it.
-        BufferedImage image = new BufferedImage(getIconWidth(), getIconHeight(), BufferedImage.TYPE_INT_ARGB);
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         if ( _svgDocument != null )
             _svgDocument.render(
                     null,
                     image.createGraphics(),
-                    new ViewBox(0, 0, getIconWidth(), getIconHeight())
+                    new ViewBox(0, 0, width, height)
                 );
 
         return image;
