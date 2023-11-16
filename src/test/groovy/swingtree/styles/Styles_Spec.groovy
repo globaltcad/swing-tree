@@ -153,7 +153,7 @@ class Styles_Spec extends Specification
                                             "layer=BACKGROUND, " +
                                             "primer=?, " +
                                             "image=?, " +
-                                            "placement=CENTER, " +
+                                            "placement=?, " +
                                             "repeat=false, " +
                                             "fitComponent=NO, " +
                                             "width=?, " +

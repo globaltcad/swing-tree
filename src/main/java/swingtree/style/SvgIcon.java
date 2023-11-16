@@ -34,22 +34,34 @@ public final class SvgIcon extends ImageIcon
     private final int _height;
 
     private final UI.FitComponent _fitComponent;
+    private final UI.Placement    _preferredPlacement;
 
 
-    private SvgIcon( SVGDocument svgDocument, int width, int height, UI.FitComponent fitComponent ) {
+    private SvgIcon(
+        SVGDocument     svgDocument,
+        int             width,
+        int             height,
+        UI.FitComponent fitComponent,
+        UI.Placement    preferredPlacement
+    ) {
         super();
-        _svgDocument  = svgDocument;
-        _width        = width;
-        _height       = height;
-        _fitComponent = fitComponent;
+        _svgDocument        = svgDocument;
+        _width              = width;
+        _height             = height;
+        _fitComponent       = fitComponent;
+        _preferredPlacement = preferredPlacement;
     }
 
     public SvgIcon( SvgIcon icon ) {
-        this(icon._svgDocument, icon._width, icon._height, icon._fitComponent);
+        this(icon._svgDocument, icon._width, icon._height, icon._fitComponent, icon._preferredPlacement);
+    }
+
+    public SvgIcon( URL svgUrl, int width, int height, UI.FitComponent fitComponent, UI.Placement preferredPlacement ) {
+        this(_loadSvgDocument(svgUrl), width, height, fitComponent, preferredPlacement);
     }
 
     public SvgIcon( URL svgUrl, int width, int height, UI.FitComponent fitComponent ) {
-        this(_loadSvgDocument(svgUrl), width, height, fitComponent);
+        this(_loadSvgDocument(svgUrl), width, height, fitComponent, UI.Placement.CENTER);
     }
 
     public SvgIcon( URL svgUrl, int width, int height ) {
@@ -60,9 +72,13 @@ public final class SvgIcon extends ImageIcon
         this(SvgIcon.class.getResource(path), width, height);
     }
 
-    public SvgIcon( String path ) { this(path, -1, -1); }
+    public SvgIcon( String path ) {
+        this(path, -1, -1);
+    }
 
-    public SvgIcon( URL svgUrl ) { this(svgUrl, -1, -1); }
+    public SvgIcon( URL svgUrl ) {
+        this(svgUrl, -1, -1);
+    }
 
 
     private static SVGDocument _loadSvgDocument( URL svgUrl ) {
@@ -94,7 +110,7 @@ public final class SvgIcon extends ImageIcon
     public SvgIcon withIconWidth( int width ) {
         if ( width == _width )
             return this;
-        return new SvgIcon(_svgDocument, width, _height, _fitComponent);
+        return new SvgIcon(_svgDocument, width, _height, _fitComponent, _preferredPlacement);
     }
 
     /**
@@ -115,7 +131,7 @@ public final class SvgIcon extends ImageIcon
     public SvgIcon withIconHeight( int height ) {
         if ( height == _height )
             return this;
-        return new SvgIcon(_svgDocument, _width, height, _fitComponent);
+        return new SvgIcon(_svgDocument, _width, height, _fitComponent, _preferredPlacement);
     }
 
     /**
@@ -130,7 +146,7 @@ public final class SvgIcon extends ImageIcon
     public SvgIcon withIconSize( int width, int height ) {
         if ( width == _width && height == _height )
             return this;
-        return new SvgIcon(_svgDocument, width, height, _fitComponent);
+        return new SvgIcon(_svgDocument, width, height, _fitComponent, _preferredPlacement);
     }
 
     /**
@@ -156,7 +172,25 @@ public final class SvgIcon extends ImageIcon
         Objects.requireNonNull(fit);
         if ( fit == _fitComponent )
             return this;
-        return new SvgIcon(_svgDocument, _width, _height, fit);
+        return new SvgIcon(_svgDocument, _width, _height, fit, _preferredPlacement);
+    }
+
+    /**
+     * @return The {@link UI.Placement} that determines where the icon should be placed within a component
+     *         (see {@link #paintIcon(Component, java.awt.Graphics, int, int, int, int)}).
+     */
+    public UI.Placement getPreferredPlacement() { return _preferredPlacement; }
+
+    /**
+     * @param placement The {@link UI.Placement} that determines where the icon should be placed within a component
+     *                  (see {@link #paintIcon(Component, java.awt.Graphics, int, int, int, int)}).
+     * @return A new {@link SvgIcon} with the given {@link UI.Placement} policy.
+     */
+    public SvgIcon withPreferredPlacement( UI.Placement placement ) {
+        Objects.requireNonNull(placement);
+        if ( placement == _preferredPlacement )
+            return this;
+        return new SvgIcon(_svgDocument, _width, _height, _fitComponent, placement);
     }
 
     /**
@@ -252,12 +286,24 @@ public final class SvgIcon extends ImageIcon
     }
 
     public void paintIcon(
+            final java.awt.Component c,
+            final java.awt.Graphics g,
+            final int x,
+            final int y,
+            int width,
+            int height
+    ) {
+        paintIcon( c, g, x, y, width, height, _preferredPlacement );
+    }
+
+    void paintIcon(
         final java.awt.Component c,
         final java.awt.Graphics g,
         final int x,
         final int y,
         int width,
-        int height
+        int height,
+        final UI.Placement preferredPlacement
     ) {
         if ( _svgDocument == null )
             return;
@@ -332,6 +378,40 @@ public final class SvgIcon extends ImageIcon
         // Also let's check if the view box has valid values:
         if ( Float.isNaN(viewBox.x) || Float.isNaN(viewBox.y) || Float.isNaN(viewBox.width) || Float.isNaN(viewBox.height) )
             return;
+
+        /*
+            Before we do the actual rendering we first check if there
+            is a preferred placement that is not the center.
+            If that is the case we move the view box accordingly.
+         */
+        if ( preferredPlacement != UI.Placement.CENTER ) {
+            switch ( preferredPlacement ) {
+                case TOP_LEFT:
+                    viewBox = new ViewBox( x, y, viewBox.width, viewBox.height );
+                    break;
+                case TOP_RIGHT:
+                    viewBox = new ViewBox( x + width - viewBox.width, y, viewBox.width, viewBox.height );
+                    break;
+                case BOTTOM_LEFT:
+                    viewBox = new ViewBox( x, y + height - viewBox.height, viewBox.width, viewBox.height );
+                    break;
+                case BOTTOM_RIGHT:
+                    viewBox = new ViewBox( x + width - viewBox.width, y + height - viewBox.height, viewBox.width, viewBox.height );
+                    break;
+                case TOP:
+                    viewBox = new ViewBox( x + (width - viewBox.width) / 2f, y, viewBox.width, viewBox.height );
+                    break;
+                case BOTTOM:
+                    viewBox = new ViewBox( x + (width - viewBox.width) / 2f, y + height - viewBox.height, viewBox.width, viewBox.height );
+                    break;
+                case LEFT:
+                    viewBox = new ViewBox( x, y + (height - viewBox.height) / 2f, viewBox.width, viewBox.height );
+                    break;
+                case RIGHT:
+                    viewBox = new ViewBox( x + width - viewBox.width, y + (height - viewBox.height) / 2f, viewBox.width, viewBox.height );
+                    break;
+            }
+        }
 
         // Now onto the actual rendering:
 

@@ -1339,7 +1339,7 @@ final class StylePainter<C extends JComponent>
 
             if ( !repeat && imageIcon instanceof SvgIcon) {
                 SvgIcon svgIcon = ((SvgIcon) imageIcon).withFitComponent(style.fitMode());
-                svgIcon.paintIcon(component, g2d, x, y, imgWidth, imgHeight);
+                svgIcon.paintIcon(component, g2d, x, y, imgWidth, imgHeight, UI.Placement.CENTER);
             }
             else
             {

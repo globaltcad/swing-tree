@@ -141,7 +141,7 @@ public final class ImageStyle
                                                 UI.Layer.BACKGROUND,
                                                 null,
                                                 null,
-                                                UI.Placement.CENTER,
+                                                null,
                                                 false,
                                                 UI.FitComponent.NO,
                                                 Size.none(),
@@ -184,7 +184,7 @@ public final class ImageStyle
         _layer     = Objects.requireNonNull(layer);
         _primer    = primer;
         _image     = image;
-        _placement = Objects.requireNonNull(placement);
+        _placement = placement;
         _repeat    = repeat;
         _fitMode   = Objects.requireNonNull(fitMode);
         _size      = Objects.requireNonNull(size);
@@ -202,7 +202,15 @@ public final class ImageStyle
 
     Optional<ImageIcon> image() { return Optional.ofNullable(_image); }
 
-    UI.Placement placement() { return _placement; }
+    UI.Placement placement() {
+        if ( _placement != null )
+            return _placement;
+
+        if ( _image instanceof SvgIcon )
+            return ((SvgIcon) _image).getPreferredPlacement();
+
+        return UI.Placement.CENTER;
+    }
 
     boolean repeat() { return _repeat; }
 
@@ -528,7 +536,7 @@ public final class ImageStyle
                     "layer="         + _layer                                                  + ", " +
                     "primer="        + StyleUtility.toString(_primer)                          + ", " +
                     "image="         + ( _image  == null ? "?" : _image.toString() )           + ", " +
-                    "placement="     + _placement                                              + ", " +
+                    "placement="     + ( _placement  == null ? "?" : _placement.toString() )   + ", " +
                     "repeat="        + _repeat                                                 + ", " +
                     "fitComponent="  + _fitMode                                                + ", " +
                     "width="         + _size.width().map(Objects::toString).orElse("?")  + ", " +
