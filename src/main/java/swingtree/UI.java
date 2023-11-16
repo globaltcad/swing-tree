@@ -3843,8 +3843,14 @@ public final class UI extends UILayoutConstants
         width  = (int) (width * scale);
         height = (int) (height * scale);
 
-        Image scaled = ((ImageIcon) icon).getImage().getScaledInstance(width, height, scaleHint);
-        return of(new JIcon(new ImageIcon(scaled)));
+        if ( icon instanceof SvgIcon ) {
+            SvgIcon svgIcon = (SvgIcon) icon;
+            svgIcon = svgIcon.withIconSize(width, height);
+            return UI.icon(svgIcon);
+        } else {
+            Image scaled = ((ImageIcon) icon).getImage().getScaledInstance(width, height, scaleHint);
+            return UI.icon(new ImageIcon(scaled));
+        }
     }
 
     /**
