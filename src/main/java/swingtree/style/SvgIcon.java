@@ -312,8 +312,8 @@ public final class SvgIcon extends ImageIcon
     void paintIcon(
         final java.awt.Component c,
         final java.awt.Graphics g,
-        final int x,
-        final int y,
+        int x,
+        int y,
         int width,
         int height,
         final UI.Placement preferredPlacement
@@ -392,12 +392,34 @@ public final class SvgIcon extends ImageIcon
         if ( Float.isNaN(viewBox.x) || Float.isNaN(viewBox.y) || Float.isNaN(viewBox.width) || Float.isNaN(viewBox.height) )
             return;
 
+        // Let's make sure the view box has the correct dimension ratio:
+        float viewBoxRatio = _svgDocument.size().width / _svgDocument.size().height;
+        float boxRatio     =      viewBox.width        /      viewBox.height;
+        if ( boxRatio > viewBoxRatio ) {
+            // The view box is too wide, we need to make it narrower:
+            float newWidth = viewBox.height * viewBoxRatio;
+            viewBox = new ViewBox( viewBox.x + (viewBox.width - newWidth) / 2f, viewBox.y, newWidth, viewBox.height );
+        }
+        if ( boxRatio < viewBoxRatio ) {
+            // The view box is too tall, we need to make it shorter:
+            float newHeight = viewBox.width / viewBoxRatio;
+            viewBox = new ViewBox( viewBox.x, viewBox.y + (viewBox.height - newHeight) / 2f, viewBox.width, newHeight );
+        }
+
         /*
             Before we do the actual rendering we first check if there
             is a preferred placement that is not the center.
             If that is the case we move the view box accordingly.
          */
         if ( preferredPlacement != UI.Placement.CENTER ) {
+            // First we correct if the component area is smaller than the view box:
+            width += (int) Math.max(0, ( viewBox.x + viewBox.width ) - ( x + width ) );
+            width += (int) Math.max(0, x - viewBox.x );
+            x = (int) Math.min(x, viewBox.x);
+            height += (int) Math.max(0, ( viewBox.y + viewBox.height ) - ( y + height ) );
+            height += (int) Math.max(0, y - viewBox.y );
+            y = (int) Math.min(y, viewBox.y);
+
             switch ( preferredPlacement ) {
                 case TOP_LEFT:
                     viewBox = new ViewBox( x, y, viewBox.width, viewBox.height );
@@ -454,7 +476,9 @@ public final class SvgIcon extends ImageIcon
     }
 
     @Override
-    public int hashCode() { return Objects.hash(_svgDocument, _width, _height, _fitComponent); }
+    public int hashCode() {
+        return Objects.hash(_svgDocument, _width, _height, _fitComponent, _preferredPlacement);
+    }
 
     @Override
     public boolean equals( Object obj ) {
@@ -462,9 +486,10 @@ public final class SvgIcon extends ImageIcon
         if ( obj == this ) return true;
         if ( obj.getClass() != getClass() ) return false;
         SvgIcon rhs = (SvgIcon) obj;
-        return Objects.equals(_svgDocument,  rhs._svgDocument) &&
-               Objects.equals(_width,        rhs._width) &&
-               Objects.equals(_height,       rhs._height) &&
-               Objects.equals(_fitComponent, rhs._fitComponent);
+        return Objects.equals(_svgDocument,        rhs._svgDocument)  &&
+               Objects.equals(_width,              rhs._width)        &&
+               Objects.equals(_height,             rhs._height)       &&
+               Objects.equals(_fitComponent,       rhs._fitComponent) &&
+               Objects.equals(_preferredPlacement, rhs._preferredPlacement);
     }
 }
