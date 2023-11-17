@@ -98,7 +98,9 @@ public final class SvgIcon extends ImageIcon
      *         to the width of a given component or the width of the SVG document itself.
      */
     @Override
-    public int getIconWidth() { return _width; }
+    public int getIconWidth() {
+        return _width;
+    }
 
     /**
      * @param width The width of the icon, or -1 if the icon should be rendered according
@@ -119,7 +121,9 @@ public final class SvgIcon extends ImageIcon
      *        or the width or height of the SVG document itself.
      */
     @Override
-    public int getIconHeight() { return _height; }
+    public int getIconHeight() {
+        return _height;
+    }
 
     /**
      * @param height The height of the icon, or -1 if the icon should be rendered according
@@ -251,14 +255,29 @@ public final class SvgIcon extends ImageIcon
                                     }
                                 })
                                 .orElse(new Insets(0,0,0,0));
-        x = insets.left;
-        y = insets.top;
+
+        int deltaX = 0;
+        int deltaY = 0;
+
+        if ( _width >= 0 ) {
+            deltaX += Math.max(0, x - insets.left);
+            x = Math.max(x, insets.left);
+        }
+        else
+            x = insets.left;
+
+        if ( _height >= 0 ) {
+            deltaY += Math.max(0, y - insets.top);
+            y = Math.max(y, insets.top);
+        }
+        else
+            y = insets.top;
 
         int width  = c.getWidth();
         int height = c.getHeight();
 
-        width  = width  - insets.right  - insets.left;
-        height = height - insets.bottom - insets.top;
+        width  = width  - insets.right  - insets.left - deltaX;
+        height = height - insets.bottom - insets.top  - deltaY;
 
         if ( width  <= 0 ) {
             int smaller = (int) Math.floor( width / 2.0 );
@@ -301,22 +320,10 @@ public final class SvgIcon extends ImageIcon
     public void paintIcon(
         final java.awt.Component c,
         final java.awt.Graphics g,
-        final int x,
-        final int y,
-        int width,
-        int height
-    ) {
-        paintIcon( c, g, x, y, width, height, _preferredPlacement );
-    }
-
-    void paintIcon(
-        final java.awt.Component c,
-        final java.awt.Graphics g,
         int x,
         int y,
         int width,
-        int height,
-        final UI.Placement preferredPlacement
+        int height
     ) {
         if ( _svgDocument == null )
             return;
@@ -411,7 +418,7 @@ public final class SvgIcon extends ImageIcon
             is a preferred placement that is not the center.
             If that is the case we move the view box accordingly.
          */
-        if ( preferredPlacement != UI.Placement.CENTER ) {
+        if ( _preferredPlacement != UI.Placement.CENTER ) {
             // First we correct if the component area is smaller than the view box:
             width += (int) Math.max(0, ( viewBox.x + viewBox.width ) - ( x + width ) );
             width += (int) Math.max(0, x - viewBox.x );
@@ -420,7 +427,7 @@ public final class SvgIcon extends ImageIcon
             height += (int) Math.max(0, y - viewBox.y );
             y = (int) Math.min(y, viewBox.y);
 
-            switch ( preferredPlacement ) {
+            switch ( _preferredPlacement ) {
                 case TOP_LEFT:
                     viewBox = new ViewBox( x, y, viewBox.width, viewBox.height );
                     break;
