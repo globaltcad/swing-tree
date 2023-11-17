@@ -4233,6 +4233,33 @@ public final class UI extends UILayoutConstants
     }
 
     /**
+     *  Use this to create a builder for the {@link JToggleButton} UI component
+     *  with an icon displayed on it scaled according to the provided width and height.
+     *
+     * @param width The width the icon should be scaled to.
+     * @param height The height the icon should be scaled to.
+     * @param icon The {@link IconDeclaration} whose icon ought to be displayed on top of the button.
+     * @return A builder instance for a {@link JToggleButton}, which enables fluent method chaining.
+     */
+    public static UIForToggleButton<JToggleButton> toggleButton( int width, int height, IconDeclaration icon ) {
+        NullUtil.nullArgCheck(icon, "icon", Icon.class);
+        return toggleButton().withIcon(width, height, icon);
+    }
+
+    /**
+     * @param width The width the icon should be scaled to.
+     * @param height The height the icon should be scaled to.
+     * @param icon The {@link IconDeclaration} whose icon ought to be displayed on top of the button.
+     * @param fit The {@link FitComponent} which determines how the icon should be fitted into the button.
+     * @return A builder instance for a {@link JToggleButton}, which enables fluent method chaining.
+     */
+    public static UIForToggleButton<JToggleButton> toggleButton( int width, int height, IconDeclaration icon, FitComponent fit ) {
+        NullUtil.nullArgCheck(icon, "icon", Icon.class);
+        NullUtil.nullArgCheck(fit, "fit", FitComponent.class);
+        return toggleButton().withIcon(width, height, icon, fit);
+    }
+
+    /**
      *  Use this to create a builder for a new {@link JToggleButton} instance with
      *  the icon found at the path provided by the supplied {@link IconDeclaration} displayed on top of it.
      *  Note that the icon will be cached by the {@link JToggleButton} instance, so that it will not be reloaded.
