@@ -10,10 +10,8 @@ import swingtree.UI;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.border.Border;
-import java.awt.Component;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Insets;
+import javax.swing.text.JTextComponent;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.net.URL;
@@ -256,6 +254,20 @@ public final class SvgIcon extends ImageIcon
                                 })
                                 .orElse(new Insets(0,0,0,0));
 
+        UI.Placement preferredPlacement = _preferredPlacement;
+
+        if ( preferredPlacement == UI.Placement.CENTER ) {
+            if ( _hasText(c) )
+                preferredPlacement = UI.Placement.LEFT;
+        }
+
+        if ( !Objects.equals(ComponentOrientation.UNKNOWN, c.getComponentOrientation()) ) {
+            if (  Objects.equals(ComponentOrientation.LEFT_TO_RIGHT, c.getComponentOrientation()) )
+                preferredPlacement = UI.Placement.LEFT;
+            if (  Objects.equals(ComponentOrientation.RIGHT_TO_LEFT, c.getComponentOrientation()) )
+                preferredPlacement = UI.Placement.RIGHT;
+        }
+
         int deltaX = 0;
         int deltaY = 0;
 
@@ -292,7 +304,23 @@ public final class SvgIcon extends ImageIcon
             height = ( larger - smaller );
         }
 
-        paintIcon( c, g, x, y, width, height );
+        _paintIcon( c, g, x, y, width, height, preferredPlacement );
+    }
+
+    private boolean _hasText( Component component ) {
+        return !Optional.ofNullable( _findTextOf(component) ).map( String::isEmpty ).orElse(true);
+    }
+
+    private String _findTextOf( Component component ) {
+        // We go through all the components which can display text and return the first one we find:
+        if ( component instanceof javax.swing.AbstractButton ) // Covers JButton, JToggleButton, JCheckBox, JRadioButton...
+            return ((javax.swing.AbstractButton) component).getText();
+        if ( component instanceof javax.swing.JLabel )
+            return ((javax.swing.JLabel) component).getText();
+        if ( component instanceof JTextComponent )
+            return ((JTextComponent) component).getText();
+
+        return "";
     }
 
     private Insets _determineInsetsForBorder( Border b, Component c )
@@ -318,12 +346,24 @@ public final class SvgIcon extends ImageIcon
     }
 
     public void paintIcon(
+            final java.awt.Component c,
+            final java.awt.Graphics g,
+            int x,
+            int y,
+            int width,
+            int height
+    ) {
+        _paintIcon( c, g, x, y, width, height, _preferredPlacement );
+    }
+
+    private void _paintIcon(
         final java.awt.Component c,
         final java.awt.Graphics g,
         int x,
         int y,
         int width,
-        int height
+        int height,
+        UI.Placement preferredPlacement
     ) {
         if ( _svgDocument == null )
             return;
@@ -418,7 +458,7 @@ public final class SvgIcon extends ImageIcon
             is a preferred placement that is not the center.
             If that is the case we move the view box accordingly.
          */
-        if ( _preferredPlacement != UI.Placement.CENTER ) {
+        if ( preferredPlacement != UI.Placement.CENTER ) {
             // First we correct if the component area is smaller than the view box:
             width += (int) Math.max(0, ( viewBox.x + viewBox.width ) - ( x + width ) );
             width += (int) Math.max(0, x - viewBox.x );
@@ -427,7 +467,7 @@ public final class SvgIcon extends ImageIcon
             height += (int) Math.max(0, y - viewBox.y );
             y = (int) Math.min(y, viewBox.y);
 
-            switch ( _preferredPlacement ) {
+            switch ( preferredPlacement ) {
                 case TOP_LEFT:
                     viewBox = new ViewBox( x, y, viewBox.width, viewBox.height );
                     break;
