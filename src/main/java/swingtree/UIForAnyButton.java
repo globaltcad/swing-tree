@@ -89,6 +89,11 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      */
     public I withIcon( int width, int height, ImageIcon icon ) {
         NullUtil.nullArgCheck(icon,"icon",Icon.class);
+        icon = _fitTo( width, height, icon );
+        return withIcon(icon);
+    }
+
+    private ImageIcon _fitTo( int width, int height, ImageIcon icon ) {
         if ( icon instanceof SvgIcon)
         {
             SvgIcon svgIcon = (SvgIcon) icon;
@@ -108,7 +113,40 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
 
             icon = new ImageIcon(icon.getImage().getScaledInstance(width, height, scaleHint));
         }
-        return withIcon(icon);
+        return icon;
+    }
+
+    /**
+     *  Takes the provided {@link IconDeclaration} and scales it to the provided width and height
+     *  before displaying it on the wrapped button type.
+     *
+     * @param width The width of the icon.
+     * @param height The height of the icon.
+     * @param icon The {@link IconDeclaration} which should be scaled and displayed on the button.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withIcon( int width, int height, IconDeclaration icon ) {
+        NullUtil.nullArgCheck(icon,"icon",IconDeclaration.class);
+        return icon.find()
+                   .map( i -> withIcon(width, height, i) )
+                   .orElseGet( this::_this );
+    }
+
+    /**
+     *  Takes the provided {@link IconDeclaration} and scales the corresponding icon it
+     *  to the provided width and height before displaying it on the wrapped button type.
+     *
+     * @param width The width of the icon.
+     * @param height The height of the icon.
+     * @param icon The {@link Icon} which should be scaled and displayed on the button.
+     * @param fitComponent The {@link UI.FitComponent} which determines how the icon should be scaled relative to the button.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withIcon( int width, int height, IconDeclaration icon, UI.FitComponent fitComponent ) {
+        NullUtil.nullArgCheck(icon,"icon",IconDeclaration.class);
+        return icon.find()
+                .map( i -> withIcon(_fitTo(width, height, i), fitComponent) )
+                .orElseGet( this::_this );
     }
 
     /**
@@ -132,7 +170,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
                            width  = Math.max(width,  thisComponent.getMinimumSize().width);
                            height = Math.max(height, thisComponent.getMinimumSize().height);
                            if ( width > 0 && height > 0 )
-                               withIcon( width, height, icon );
+                               thisComponent.setIcon(_fitTo( width, height, icon ));
                        });
                    })
                    ._this();
