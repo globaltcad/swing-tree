@@ -755,16 +755,20 @@ public final class UI extends UILayoutConstants
     }
 
     /**
-     * Loads an icon from the resource folder, the classpath, a local file
+     * Loads an {@link ImageIcon} from the resource folder, the classpath, a local file
      * or from cache if it has already been loaded.
      * If no icon could be found, an empty optional is returned.
+     * <br><br>
+     * Note that this method will also return {@link SvgIcon} instances, if the icon is an SVG image.
      * <br><br>
      * Also, checkout {@link SwingTree#getIconCache()} to see where the icons are cached.
      *
      * @param path The path to the icon. It can be a classpath resource or a file path.
      * @return An optional containing the icon if it could be found, an empty optional otherwise.
+     * @throws NullPointerException if {@code path} is {@code null}.
      */
     public static Optional<ImageIcon> findIcon( String path ) {
+        Objects.requireNonNull(path, "path");
         Map<String, ImageIcon> cache = SwingTree.get().getIconCache();
         ImageIcon icon = cache.get(path);
         if ( icon == null ) {
@@ -773,6 +777,35 @@ public final class UI extends UILayoutConstants
                 cache.put(path, icon);
         }
         return Optional.ofNullable(icon);
+    }
+
+    /**
+     * Loads an {@link SvgIcon} from the resource folder, the classpath, a local file
+     * or from cache if it has already been loaded.
+     * If no icon could be found, an empty optional is returned.
+     * <br><br>
+     * Also, checkout {@link SwingTree#getIconCache()} to see where the icons are cached.
+     *
+     * @param path The path to the icon. It can be a classpath resource or a file path.
+     * @return An optional containing the {@link SvgIcon} if it could be found, an empty optional otherwise.
+     * @throws NullPointerException if {@code path} is {@code null}.
+     */
+    public static Optional<SvgIcon> findSvgIcon( String path ) {
+        Objects.requireNonNull(path, "path");
+        if ( !path.endsWith(".svg") )
+            return Optional.empty();
+
+        Map<String, ImageIcon> cache = SwingTree.get().getIconCache();
+        ImageIcon icon = cache.get(path);
+        if ( icon == null ) {
+            icon = _loadIcon(path);
+            if ( icon != null )
+                cache.put(path, icon);
+        }
+        if ( !(icon instanceof SvgIcon) )
+            return Optional.empty();
+        else
+            return Optional.of(icon).map(SvgIcon.class::cast);
     }
 
     /**
