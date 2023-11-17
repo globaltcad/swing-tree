@@ -1208,20 +1208,22 @@ final class StylePainter<C extends JComponent>
         }
 
         style.image().ifPresent( imageIcon -> {
-            UI.Placement placement = style.placement();
-            boolean repeat         = style.repeat();
-            Outline padding        = style.padding();
-            int componentWidth     = component.getWidth();
-            int componentHeight    = component.getHeight();
-            int imgWidth           = style.width().orElse(imageIcon.getIconWidth());
-            int imgHeight          = style.height().orElse(imageIcon.getIconHeight());
+            final UI.Placement placement       = style.placement();
+            final boolean      repeat          = style.repeat();
+            final Outline      padding         = style.padding();
+            final int          componentWidth  = component.getWidth();
+            final int          componentHeight = component.getHeight();
+
+            int imgWidth  = style.width().orElse(imageIcon.getIconWidth());
+            int imgHeight = style.height().orElse(imageIcon.getIconHeight());
+
             if ( style.fitMode() != UI.FitComponent.NO ) {
                 if ( imageIcon instanceof SvgIcon) {
-                    imgWidth = style.width().orElse(componentWidth);
+                    imgWidth  = style.width().orElse(componentWidth);
                     imgHeight = style.height().orElse(componentHeight);
                 } else {
                     if ( style.fitMode() == UI.FitComponent.WIDTH_AND_HEIGHT ) {
-                        imgWidth = style.width().orElse(componentWidth);
+                        imgWidth  = style.width().orElse(componentWidth);
                         imgHeight = style.height().orElse(componentHeight);
                     }
                     if ( style.fitMode() == UI.FitComponent.WIDTH )
@@ -1250,20 +1252,20 @@ final class StylePainter<C extends JComponent>
                         }
                     }
                 }
-                if ( imgWidth  < 0 ) imgWidth  = componentWidth;
-                if ( imgHeight < 0 ) imgHeight = componentHeight;
+                imgWidth  = imgWidth  >= 0 ? imgWidth  : componentWidth;
+                imgHeight = imgHeight >= 0 ? imgHeight : componentHeight;
             }
             if ( imageIcon instanceof SvgIcon ) {
-                SvgIcon svgIcon = (SvgIcon) imageIcon;
-                FloatSize size = svgIcon.getSvgSize();
-                if ( imgWidth  < 0 )
-                    imgWidth  = (int) size.width;
-                if ( imgHeight < 0 )
-                    imgHeight = (int) size.height;
+                SvgIcon   svgIcon = (SvgIcon) imageIcon;
+                FloatSize size    = svgIcon.getSvgSize();
+                imgWidth  = imgWidth  >= 0 ? imgWidth  : (int) size.width;
+                imgHeight = imgHeight >= 0 ? imgHeight : (int) size.height;
             }
             int x = style.horizontalOffset();
             int y = style.verticalOffset();
-            float opacity = style.opacity();
+
+            final float opacity = style.opacity();
+
             switch ( placement ) {
                 case TOP:
                     x += (componentWidth - imgWidth) / 2;
@@ -1337,7 +1339,7 @@ final class StylePainter<C extends JComponent>
             }
             g2d.setClip(newClip);
 
-            if ( !repeat && imageIcon instanceof SvgIcon) {
+            if ( !repeat && imageIcon instanceof SvgIcon ) {
                 SvgIcon svgIcon = ((SvgIcon) imageIcon).withFitComponent(style.fitMode());
                 svgIcon.paintIcon(component, g2d, x, y, imgWidth, imgHeight, UI.Placement.CENTER);
             }
@@ -1405,7 +1407,6 @@ final class StylePainter<C extends JComponent>
                     // An exception inside a painter should not prevent everything else from being painted!
                     // Note that we log as warning because exceptions during rendering are not considered
                     // as harmful as elsewhere!
-
                 }
             }
 
