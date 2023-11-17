@@ -260,6 +260,19 @@ public final class SvgIcon extends ImageIcon
         width  = width  - insets.right  - insets.left;
         height = height - insets.bottom - insets.top;
 
+        if ( width  <= 0 ) {
+            int smaller = (int) Math.floor( width / 2.0 );
+            int larger  = (int) Math.ceil(  width / 2.0 );
+            x += smaller;
+            width = ( larger - smaller );
+        }
+        if ( height <= 0 ) {
+            int smaller = (int) Math.floor( height / 2.0 );
+            int larger  = (int) Math.ceil(  height / 2.0 );
+            y += smaller;
+            height = ( larger - smaller );
+        }
+
         paintIcon( c, g, x, y, width, height );
     }
 
@@ -286,12 +299,12 @@ public final class SvgIcon extends ImageIcon
     }
 
     public void paintIcon(
-            final java.awt.Component c,
-            final java.awt.Graphics g,
-            final int x,
-            final int y,
-            int width,
-            int height
+        final java.awt.Component c,
+        final java.awt.Graphics g,
+        final int x,
+        final int y,
+        int width,
+        int height
     ) {
         paintIcon( c, g, x, y, width, height, _preferredPlacement );
     }
