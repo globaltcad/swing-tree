@@ -70,17 +70,21 @@ class DynamicLaF
 
         if ( weNeedToOverrideLaF ) {
             boolean foundationIsTransparent = style.base()
-                    .foundationColor()
-                    .map( c -> c.getAlpha() < 255 )
-                    .orElse(
-                            Optional
-                                    .ofNullable(owner.getBackground())
-                                    .map( c -> c.getAlpha() < 255 )
-                                    .orElse(true)
-                    );
-
-            if ( owner.isOpaque() )
+                                                    .foundationColor()
+                                                    .map( c -> c.getAlpha() < 255 )
+                                                    .orElse(
+                                                        Optional.ofNullable(owner.getBackground())
+                                                            .map( c -> c.getAlpha() < 255 )
+                                                            .orElse(true)
+                                                    );
+            if ( owner.isOpaque() ) {
                 owner.setOpaque( !hasBorderRadius && !hasMargin && !foundationIsTransparent );
+                if ( owner instanceof JScrollPane ) {
+                    JScrollPane scrollPane = (JScrollPane) owner;
+                    if ( scrollPane.getViewport() != null )
+                        scrollPane.getViewport().setOpaque(owner.isOpaque());
+                }
+            }
             /* ^
                 If our style reveals what is behind it, then we need
                 to make the component non-opaque so that the previous rendering get's flushed out!

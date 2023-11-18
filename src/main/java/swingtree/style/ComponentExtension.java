@@ -441,6 +441,11 @@ public final class ComponentExtension<C extends JComponent>
         if ( hasBackground && !Objects.equals( _owner.getBackground(), style.base().backgroundColor().get() ) ) {
             _initialBackgroundColor = _initialBackgroundColor != null ? _initialBackgroundColor :  _owner.getBackground();
             _owner.setBackground( style.base().backgroundColor().get() );
+            if ( _owner instanceof JScrollPane ) {
+                JScrollPane scrollPane = (JScrollPane) _owner;
+                if ( scrollPane.getViewport() != null )
+                    scrollPane.getViewport().setBackground( style.base().backgroundColor().get() );
+            }
         }
 
         // If the style has a border radius set we need to make sure that we have a background color:

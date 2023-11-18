@@ -6362,18 +6362,6 @@ public final class UI extends UILayoutConstants
         }
         @Override public void paint(Graphics g){ _paintBackground(this, g, ()->super.paint(g)); }
         @Override public void paintChildren(Graphics g) { _paintForeground(this, g, ()->super.paintChildren(g)); }
-        @Override
-        public void setOpaque( boolean shouldBeOpaque ) {
-            super.setOpaque(shouldBeOpaque);
-            this.getViewport().setOpaque(shouldBeOpaque);
-        }
-
-        @Override
-        public void setBackground( Color newBackgroundColor ) {
-            super.setBackground(newBackgroundColor);
-            this.getViewport().setBackground(newBackgroundColor);
-        }
-
     }
     /** {inheritDoc} */
     public static class TabbedPane extends JTabbedPane {
