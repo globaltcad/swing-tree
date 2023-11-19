@@ -75,4 +75,13 @@ public interface IconDeclaration
      *         if the icon resource was found, otherwise an empty {@link Optional}.
      */
     default Optional<ImageIcon> find() { return UI.findIcon(path()); }
+
+    /**
+     * @param type The type of icon to find.
+     * @return An {@link Optional} that contains the {@link ImageIcon} of the given type.
+     * @param <T> The type of icon to find.
+     */
+    default <T extends ImageIcon> Optional<T> find( Class<T> type ) {
+        return UI.findIcon(path()).map(type::cast);
+    }
 }
