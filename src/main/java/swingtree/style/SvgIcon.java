@@ -10,8 +10,10 @@ import swingtree.UI;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.border.Border;
-import javax.swing.text.JTextComponent;
-import java.awt.*;
+import java.awt.Component;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.Insets;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.net.URL;
@@ -25,6 +27,8 @@ import java.util.Optional;
 public final class SvgIcon extends ImageIcon
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(SvgIcon.class);
+    private static final UI.FitComponent DEFAULT_FIT_COMPONENT = UI.FitComponent.MIN_DIM;
+    private static final UI.Placement    DEFAULT_PLACEMENT     = UI.Placement.UNDEFINED;
 
     private final SVGDocument _svgDocument;
 
@@ -59,11 +63,11 @@ public final class SvgIcon extends ImageIcon
     }
 
     public SvgIcon( URL svgUrl, int width, int height, UI.FitComponent fitComponent ) {
-        this(_loadSvgDocument(svgUrl), width, height, fitComponent, UI.Placement.CENTER);
+        this(_loadSvgDocument(svgUrl), width, height, fitComponent, DEFAULT_PLACEMENT);
     }
 
     public SvgIcon( URL svgUrl, int width, int height ) {
-        this(svgUrl, width, height, UI.FitComponent.MIN_DIM);
+        this(svgUrl, width, height, DEFAULT_FIT_COMPONENT);
     }
 
     public SvgIcon( String path, int width, int height ) {
@@ -256,17 +260,8 @@ public final class SvgIcon extends ImageIcon
 
         UI.Placement preferredPlacement = _preferredPlacement;
 
-        if ( preferredPlacement == UI.Placement.CENTER ) {
-            if ( _hasText(c) )
-                preferredPlacement = UI.Placement.LEFT;
-        }
-
-        if ( !Objects.equals(ComponentOrientation.UNKNOWN, c.getComponentOrientation()) ) {
-            if (  Objects.equals(ComponentOrientation.LEFT_TO_RIGHT, c.getComponentOrientation()) )
-                preferredPlacement = UI.Placement.LEFT;
-            if (  Objects.equals(ComponentOrientation.RIGHT_TO_LEFT, c.getComponentOrientation()) )
-                preferredPlacement = UI.Placement.RIGHT;
-        }
+        if ( preferredPlacement == UI.Placement.UNDEFINED && c instanceof JComponent )
+            preferredPlacement = ComponentExtension.from((JComponent) c).preferredIconPlacement();
 
         int deltaX = 0;
         int deltaY = 0;
@@ -305,22 +300,6 @@ public final class SvgIcon extends ImageIcon
         }
 
         _paintIcon( c, g, x, y, width, height, preferredPlacement );
-    }
-
-    private boolean _hasText( Component component ) {
-        return !Optional.ofNullable( _findTextOf(component) ).map( String::isEmpty ).orElse(true);
-    }
-
-    private String _findTextOf( Component component ) {
-        // We go through all the components which can display text and return the first one we find:
-        if ( component instanceof javax.swing.AbstractButton ) // Covers JButton, JToggleButton, JCheckBox, JRadioButton...
-            return ((javax.swing.AbstractButton) component).getText();
-        if ( component instanceof javax.swing.JLabel )
-            return ((javax.swing.JLabel) component).getText();
-        if ( component instanceof JTextComponent )
-            return ((JTextComponent) component).getText();
-
-        return "";
     }
 
     private Insets _determineInsetsForBorder( Border b, Component c )
@@ -458,7 +437,7 @@ public final class SvgIcon extends ImageIcon
             is a preferred placement that is not the center.
             If that is the case we move the view box accordingly.
          */
-        if ( preferredPlacement != UI.Placement.CENTER ) {
+        if ( preferredPlacement != UI.Placement.CENTER && preferredPlacement != UI.Placement.UNDEFINED ) {
             // First we correct if the component area is smaller than the view box:
             width += (int) Math.max(0, ( viewBox.x + viewBox.width ) - ( x + width ) );
             width += (int) Math.max(0, x - viewBox.x );

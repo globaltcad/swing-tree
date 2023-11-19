@@ -141,7 +141,7 @@ public final class ImageStyle
                                                 UI.Layer.BACKGROUND,
                                                 null,
                                                 null,
-                                                null,
+                                                UI.Placement.UNDEFINED,
                                                 false,
                                                 UI.FitComponent.NO,
                                                 Size.none(),
@@ -184,7 +184,7 @@ public final class ImageStyle
         _layer     = Objects.requireNonNull(layer);
         _primer    = primer;
         _image     = image;
-        _placement = placement;
+        _placement = Objects.requireNonNull(placement);
         _repeat    = repeat;
         _fitMode   = Objects.requireNonNull(fitMode);
         _size      = Objects.requireNonNull(size);
@@ -203,13 +203,10 @@ public final class ImageStyle
     Optional<ImageIcon> image() { return Optional.ofNullable(_image); }
 
     UI.Placement placement() {
-        if ( _placement != null )
-            return _placement;
-
-        if ( _image instanceof SvgIcon )
+        if ( _placement == UI.Placement.UNDEFINED && _image instanceof SvgIcon )
             return ((SvgIcon) _image).getPreferredPlacement();
 
-        return UI.Placement.CENTER;
+        return _placement;
     }
 
     boolean repeat() { return _repeat; }
@@ -229,7 +226,6 @@ public final class ImageStyle
     int verticalOffset() { return _offset.y(); }
 
     UI.ComponentArea clipArea() { return _clipArea; }
-
 
     /**
      *  This method allows you to specify the layer onto which the image will be drawn.
@@ -326,12 +322,21 @@ public final class ImageStyle
      *          The image will be drawn in the left center of the inner component area.
      *          So the left center of the image will be in the left center of the inner component area.
      *      </li>
+     *      <li>{@link swingtree.UI.Placement#RIGHT} -
+     *          The image will be drawn in the right center of the inner component area.
+     *          So the right center of the image will be in the right center of the inner component area.
+     *      </li>
+     *      <li>{@link swingtree.UI.Placement#UNDEFINED} -
+     *          The image will be drawn at a position which is determined by other
+     *          factors such as the image size and the component size.
      *  </ul>
      *
      * @param placement The placement of the image onto the component.
      * @return A new {@link ImageStyle} instance with the specified placement.
      */
-    public ImageStyle placement( UI.Placement placement ) { return new ImageStyle(_layer, _primer, _image, placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea); }
+    public ImageStyle placement( UI.Placement placement ) {
+        return new ImageStyle(_layer, _primer, _image, placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
+    }
 
     /**
      *  If this flag is set to {@code true}, then the image may be painted
@@ -342,7 +347,9 @@ public final class ImageStyle
      * @param repeat Weather the image should be painted repeatedly across the inner component area.
      * @return A new {@link ImageStyle} instance with the specified {@code repeat} flag value.
      */
-    public ImageStyle repeat( boolean repeat ) { return new ImageStyle(_layer, _primer, _image, _placement, repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea); }
+    public ImageStyle repeat( boolean repeat ) {
+        return new ImageStyle(_layer, _primer, _image, _placement, repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
+    }
 
     /**
      *  If this flag is set to {@code true}, then the image will be stretched or shrunk
@@ -378,7 +385,9 @@ public final class ImageStyle
      * @param width The width of the image.
      * @return A new {@link ImageStyle} instance with the specified {@code width}.
      */
-    public ImageStyle width( Integer width ) { return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size.width(width), _opacity, _padding, _offset, _clipArea); }
+    public ImageStyle width( Integer width ) {
+        return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size.width(width), _opacity, _padding, _offset, _clipArea);
+    }
 
     /**
      *  Ensures that the image has the specified height.
@@ -386,7 +395,9 @@ public final class ImageStyle
      * @param height The height of the image.
      * @return A new {@link ImageStyle} instance with the specified {@code heiht}.
      */
-    public ImageStyle height( Integer height ) { return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size.height(height), _opacity, _padding, _offset, _clipArea); }
+    public ImageStyle height( Integer height ) {
+        return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size.height(height), _opacity, _padding, _offset, _clipArea);
+    }
 
     /**
      *  Ensures that the image has the specified width and height.
@@ -395,7 +406,9 @@ public final class ImageStyle
      * @param height The height of the image.
      * @return A new {@link ImageStyle} instance with the specified {@code width} and {@code height}.
      */
-    public ImageStyle size( int width, int height ) { return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, Size.of(width, height), _opacity, _padding, _offset, _clipArea); }
+    public ImageStyle size( int width, int height ) {
+        return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, Size.of(width, height), _opacity, _padding, _offset, _clipArea);
+    }
 
     /**
      *  This method allows you to specify the opacity of the image.
@@ -405,7 +418,9 @@ public final class ImageStyle
      * @param opacity The opacity of the image.
      * @return A new {@link ImageStyle} instance with the specified opacity.
      */
-    public ImageStyle opacity( float opacity ) { return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size, opacity, _padding, _offset, _clipArea); }
+    public ImageStyle opacity( float opacity ) {
+        return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size, opacity, _padding, _offset, _clipArea);
+    }
 
     /**
      *  This method allows you to specify the padding of the image.
@@ -414,7 +429,9 @@ public final class ImageStyle
      * @param padding The padding of the image.
      * @return A new {@link ImageStyle} instance with the specified padding.
      */
-    ImageStyle padding( Outline padding ) { return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size, _opacity, padding, _offset, _clipArea); }
+    ImageStyle padding( Outline padding ) {
+        return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size, _opacity, padding, _offset, _clipArea);
+    }
 
     /**
      *  This method allows you to specify the padding of the image.
@@ -426,7 +443,9 @@ public final class ImageStyle
      * @param left The left padding of the image.
      * @return A new {@link ImageStyle} instance with the specified padding.
      */
-    public ImageStyle padding( int top, int right, int bottom, int left ) { return padding(Outline.of(top, right, bottom, left)); }
+    public ImageStyle padding( int top, int right, int bottom, int left ) {
+        return padding(Outline.of(top, right, bottom, left));
+    }
 
     /**
      *  This method allows you to specify the padding of the image.
@@ -436,7 +455,9 @@ public final class ImageStyle
      * @param leftRight The left and right padding of the image.
      * @return A new {@link ImageStyle} instance with the specified padding.
      */
-    public ImageStyle padding( int topBottom, int leftRight ) { return padding(Outline.of(topBottom, leftRight, topBottom, leftRight)); }
+    public ImageStyle padding( int topBottom, int leftRight ) {
+        return padding(Outline.of(topBottom, leftRight, topBottom, leftRight));
+    }
 
     /**
      *  This method allows you to specify the padding for all sides of the image.
@@ -445,7 +466,9 @@ public final class ImageStyle
      * @param padding The padding of the image.
      * @return A new {@link ImageStyle} instance with the specified padding.
      */
-    public ImageStyle padding( int padding ) { return padding(Outline.of(padding, padding, padding, padding)); }
+    public ImageStyle padding( int padding ) {
+        return padding(Outline.of(padding, padding, padding, padding));
+    }
 
     /**
      *  Use this to specify the vertical and horizontal offset by which the image will be moved
@@ -455,7 +478,9 @@ public final class ImageStyle
      *  @param y The vertical offset.
      *  @return A new {@link ImageStyle} instance with the specified offset.
      */
-    public ImageStyle offset( int x, int y ) { return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, Offset.of(x, y), _clipArea); }
+    public ImageStyle offset( int x, int y ) {
+        return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, Offset.of(x, y), _clipArea);
+    }
 
     /**
      *  Use this to specify the horizontal offset by which the image will be moved
@@ -464,7 +489,9 @@ public final class ImageStyle
      *  @param x The horizontal offset.
      *  @return A new {@link ImageStyle} instance with the specified offset.
      */
-    public ImageStyle horizontalOffset( int x ) { return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset.x(x), _clipArea); }
+    public ImageStyle horizontalOffset( int x ) {
+        return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset.x(x), _clipArea);
+    }
 
     /**
      *  Use this to specify the vertical offset by which the image will be moved
@@ -473,7 +500,9 @@ public final class ImageStyle
      *  @param y The vertical offset.
      *  @return A new {@link ImageStyle} instance with the specified offset.
      */
-    public ImageStyle verticalOffset( int y ) { return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset.y(y), _clipArea); }
+    public ImageStyle verticalOffset( int y ) {
+        return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset.y(y), _clipArea);
+    }
 
     /**
      *  Use this to specify the clip area of the image,
@@ -502,7 +531,9 @@ public final class ImageStyle
      *  @param clipArea The clip area of the image.
      *  @return A new {@link ImageStyle} instance with the specified clip area.
      */
-    public ImageStyle clipTo( UI.ComponentArea clipArea ) { return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, clipArea); }
+    public ImageStyle clipTo( UI.ComponentArea clipArea ) {
+        return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, clipArea);
+    }
 
     ImageStyle _scale( double scaleFactor ) {
         return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size.scale(scaleFactor), _opacity, _padding.scale(scaleFactor), _offset.scale(scaleFactor), _clipArea);
@@ -535,8 +566,8 @@ public final class ImageStyle
         return this.getClass().getSimpleName() + "[" +
                     "layer="         + _layer                                                  + ", " +
                     "primer="        + StyleUtility.toString(_primer)                          + ", " +
-                    "image="         + ( _image  == null ? "?" : _image.toString() )           + ", " +
-                    "placement="     + ( _placement  == null ? "?" : _placement.toString() )   + ", " +
+                    "image="         + ( _image == null ? "?" : _image.toString() )            + ", " +
+                    "placement="     + _placement                                              + ", " +
                     "repeat="        + _repeat                                                 + ", " +
                     "fitComponent="  + _fitMode                                                + ", " +
                     "width="         + _size.width().map(Objects::toString).orElse("?")  + ", " +

@@ -426,7 +426,8 @@ public final class UI extends UILayoutConstants
         TOP, LEFT, BOTTOM, RIGHT,
         TOP_LEFT, TOP_RIGHT,
         BOTTOM_LEFT, BOTTOM_RIGHT,
-        CENTER
+        CENTER,
+        UNDEFINED
     }
 
     public enum ComponentArea

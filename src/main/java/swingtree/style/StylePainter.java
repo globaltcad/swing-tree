@@ -1293,6 +1293,7 @@ final class StylePainter<C extends JComponent>
                     y += componentHeight - imgHeight;
                     break;
                 case CENTER:
+                case UNDEFINED:
                     x += (componentWidth - imgWidth) / 2;
                     y += (componentHeight - imgHeight) / 2;
                     break;

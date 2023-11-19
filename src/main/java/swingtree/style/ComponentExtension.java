@@ -163,6 +163,35 @@ public final class ComponentExtension<C extends JComponent>
         return hasId(StyleUtility.toString(id));
     }
 
+    final UI.Placement preferredIconPlacement() {
+        UI.Placement preferredPlacement = UI.Placement.UNDEFINED;
+        if ( _hasText(_owner) )
+            preferredPlacement = UI.Placement.LEFT;
+        if ( !Objects.equals(ComponentOrientation.UNKNOWN, _owner.getComponentOrientation()) ) {
+            if (  Objects.equals(ComponentOrientation.LEFT_TO_RIGHT, _owner.getComponentOrientation()) )
+                preferredPlacement = UI.Placement.LEFT;
+            if (  Objects.equals(ComponentOrientation.RIGHT_TO_LEFT, _owner.getComponentOrientation()) )
+                preferredPlacement = UI.Placement.RIGHT;
+        }
+        return preferredPlacement;
+    }
+
+    private boolean _hasText( Component component ) {
+        return !Optional.ofNullable( _findTextOf(component) ).map( String::isEmpty ).orElse(true);
+    }
+
+    private String _findTextOf( Component component ) {
+        // We go through all the components which can display text and return the first one we find:
+        if ( component instanceof javax.swing.AbstractButton ) // Covers JButton, JToggleButton, JCheckBox, JRadioButton...
+            return ((javax.swing.AbstractButton) component).getText();
+        if ( component instanceof javax.swing.JLabel )
+            return ((javax.swing.JLabel) component).getText();
+        if ( component instanceof JTextComponent )
+            return ((JTextComponent) component).getText();
+
+        return "";
+    }
+
     /**
      * @return The group tags associated with the component
      *         in the form of an unmodifiable list of {@link String}s.
