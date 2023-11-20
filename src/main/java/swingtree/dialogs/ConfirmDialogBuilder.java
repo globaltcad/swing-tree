@@ -23,16 +23,16 @@ public final class ConfirmDialogBuilder
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(ConfirmDialogBuilder.class);
 
-    private static final ConfirmDialogBuilder _QUESTION = type(JOptionPane.QUESTION_MESSAGE).title("Confirm");
-    private static final ConfirmDialogBuilder _INFO     = type(JOptionPane.INFORMATION_MESSAGE).title("Info");
-    private static final ConfirmDialogBuilder _WARN     = type(JOptionPane.WARNING_MESSAGE).title("Warning");
-    private static final ConfirmDialogBuilder _ERROR    = type(JOptionPane.ERROR_MESSAGE).title("Error");
-    private static final ConfirmDialogBuilder _PLAIN    = type(JOptionPane.PLAIN_MESSAGE).title("Message");
+    private static final ConfirmDialogBuilder _QUESTION = _type(JOptionPane.QUESTION_MESSAGE).title("Confirm");
+    private static final ConfirmDialogBuilder _INFO     = _type(JOptionPane.INFORMATION_MESSAGE).title("Info");
+    private static final ConfirmDialogBuilder _WARN     = _type(JOptionPane.WARNING_MESSAGE).title("Warning");
+    private static final ConfirmDialogBuilder _ERROR    = _type(JOptionPane.ERROR_MESSAGE).title("Error");
+    private static final ConfirmDialogBuilder _PLAIN    = _type(JOptionPane.PLAIN_MESSAGE).title("Message");
 
     /**
      * @return A {@link ConfirmDialogBuilder} instance that is dedicated for configuring a specific message.
      */
-    private static ConfirmDialogBuilder type( int type ) { 
+    private static ConfirmDialogBuilder _type( int type ) {
         return new ConfirmDialogBuilder(type, "", "", "Yes", "No", "Cancel", "Yes", null, null);
     }
     
@@ -180,7 +180,7 @@ public final class ConfirmDialogBuilder
                 if ( !yes.isEmpty() && no.isEmpty() && !cancel.isEmpty() )
                     optionsType = JOptionPane.OK_CANCEL_OPTION;
 
-                return ConfirmAnswer.from(JOptionPane.showOptionDialog(
+                return ConfirmAnswer.from(Context.summoner.showOptionDialog(
                             _parent, _message, _title, optionsType,
                             _type, _icon, options.toArray(), _defaultOption
                         ));

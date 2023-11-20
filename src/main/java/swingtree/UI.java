@@ -18,6 +18,7 @@ import swingtree.components.listener.NestedJScrollPanelScrollCorrection;
 import swingtree.dialogs.ConfirmAnswer;
 import swingtree.dialogs.ConfirmDialogBuilder;
 import swingtree.dialogs.MessageDialogBuilder;
+import swingtree.dialogs.SelectEnumDialogBuilder;
 import swingtree.layout.LayoutConstraint;
 import swingtree.style.*;
 import swingtree.threading.EventProcessor;
@@ -5988,8 +5989,8 @@ public final class UI extends UILayoutConstants
      * @param selected The enum based property to store the selected value in.
      * @param <E> The enum type.
      */
-    public static <E extends Enum<E>> void select( String message, Var<E> selected ) {
-        select("Select", message, selected );
+    public static <E extends Enum<E>> void askQuestion( String message, Var<E> selected ) {
+        askQuestion("Select", message, selected );
     }
 
     /**
@@ -6003,8 +6004,8 @@ public final class UI extends UILayoutConstants
      * @param selected The enum based property to store the selected value in.
      * @param <E> The enum type.
      */
-    public static <E extends Enum<E>> void select( String title, String message, Var<E> selected ) {
-        select(title, message, null, selected );
+    public static <E extends Enum<E>> void askQuestion(String title, String message, Var<E> selected ) {
+        askQuestion( title, message, null, selected );
     }
 
     /**
@@ -6019,17 +6020,106 @@ public final class UI extends UILayoutConstants
      * @param selected The enum based property to store the selected value in.
      * @param <E> The type parameter defining the concrete enum type.
      */
-    public static <E extends Enum<E>> void select( String title, String message, Icon icon, Var<E> selected ) {
+    public static <E extends Enum<E>> void askQuestion(String title, String message, Icon icon, Var<E> selected ) {
         Objects.requireNonNull( message  );
         Objects.requireNonNull( title    );
         Objects.requireNonNull( selected );
-        E[] options = selected.type().getEnumConstants();
-        String[] asStr = new String[options.length];
-        for ( int i = 0; i < options.length; i++ )
-            asStr[i] = options[i].toString();
+        SelectEnumDialogBuilder.question(selected)
+                                .title(title)
+                                .message(message)
+                                .icon(icon)
+                                .show();
+    }
 
-        int selectedIdx = JOptionPane.showOptionDialog( null, message, title, JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, icon, asStr, asStr[0] );
-        selected.set(From.VIEW,  options[selectedIdx] );
+    /**
+     *  Exposes the {@link SelectEnumDialogBuilder} API for creating a question dialog
+     *  that allows the user to select a value from an array of provided enum values.
+     *
+     * @param options The array of enum values to show in the dialog.
+     * @param <E> The enum type.
+     * @return A builder for creating a question dialog with a set of selectable enum values
+     *         based on the provided array of enum values.
+     */
+    public static <E extends Enum<E>> SelectEnumDialogBuilder<E> askQuestion( E... options ) {
+        return SelectEnumDialogBuilder.question(options);
+    }
+
+    /**
+     *  Exposes the {@link SelectEnumDialogBuilder} API for creating a question dialog
+     *  that allows the user to select and set a value from the provided enum based property.
+     *
+     * @return A builder for creating a question dialog with a set of selectable enum values
+     *         based on the provided array of enum values.
+     */
+    public static <E extends Enum<E>> SelectEnumDialogBuilder<E> askQuestion( Var<E> selectable ) {
+        return SelectEnumDialogBuilder.question(selectable);
+    }
+
+    /**
+     *  Exposes the {@link SelectEnumDialogBuilder} API for creating an error dialog
+     *  that allows the user to select a value from an array of provided enum values.
+     *
+     * @return A builder for creating a question dialog with a set of selectable enum values
+     *         based on the provided array of enum values.
+     */
+    public static <E extends Enum<E>> SelectEnumDialogBuilder<E> askError( E... options ) {
+        return SelectEnumDialogBuilder.error(options);
+    }
+
+    /**
+     *  Exposes the {@link SelectEnumDialogBuilder} API for creating an error dialog
+     *  that allows the user to select and set a value from the provided enum based property.
+     *
+     * @return A builder for creating a question dialog with a set of selectable enum values
+     *         based on the provided array of enum values.
+     */
+    public static <E extends Enum<E>> SelectEnumDialogBuilder<E> askError( Var<E> selectable ) {
+        return SelectEnumDialogBuilder.error(selectable);
+    }
+
+    /**
+     *  Exposes the {@link SelectEnumDialogBuilder} API for creating an info dialog
+     *  that allows the user to select a value from an array of provided enum values.
+     *
+     * @return A builder for creating a question dialog with a set of selectable enum values
+     *         based on the provided array of enum values.
+     */
+    public static <E extends Enum<E>> SelectEnumDialogBuilder<E> askInfo( E... options ) {
+        return SelectEnumDialogBuilder.info(options);
+    }
+
+    /**
+     *  Exposes the {@link SelectEnumDialogBuilder} API for creating an info dialog
+     *  that allows the user to select and set a value from the provided enum based property.
+     *
+     * @return A builder for creating a question dialog with a set of selectable enum values
+     *         based on the provided array of enum values.
+     */
+    public static <E extends Enum<E>> SelectEnumDialogBuilder<E> askInfo( Var<E> selectable ) {
+        return SelectEnumDialogBuilder.info(selectable);
+    }
+
+    /**
+     *  Exposes the {@link SelectEnumDialogBuilder} API for creating a warning dialog
+     *  that allows the user to select a value from an array of provided enum values.
+     *
+     * @return A builder for creating a question dialog with a set of selectable enum values
+     *         based on the provided array of enum values.
+     */
+    public static <E extends Enum<E>> SelectEnumDialogBuilder<E> askWarning( E... options ) {
+        return SelectEnumDialogBuilder.warning(options);
+    }
+
+    public static <E extends Enum<E>> SelectEnumDialogBuilder<E> askWarning( Var<E> selectable ) {
+        return SelectEnumDialogBuilder.warning(selectable);
+    }
+
+    public static <E extends Enum<E>> SelectEnumDialogBuilder<E> askPlain( E... options ) {
+        return SelectEnumDialogBuilder.plain(options);
+    }
+
+    public static <E extends Enum<E>> SelectEnumDialogBuilder<E> askPlain( Var<E> selectable ) {
+        return SelectEnumDialogBuilder.plain(selectable);
     }
 
     /**

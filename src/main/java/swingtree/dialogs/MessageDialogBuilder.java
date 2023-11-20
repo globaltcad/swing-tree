@@ -95,7 +95,7 @@ public final class MessageDialogBuilder
      */
     public void show() {
         UI.run(() -> {
-            JOptionPane.showMessageDialog(
+            Context.summoner.showMessageDialog(
                 _parent,  // parent component, if this is not null then the dialog will be centered on it
                 _message, // message to display
                 _title,   // title of the dialog displayed in the title bar of the dialog window
