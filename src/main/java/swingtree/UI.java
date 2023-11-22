@@ -16,9 +16,9 @@ import swingtree.components.JScrollPanels;
 import swingtree.components.JSplitButton;
 import swingtree.components.listener.NestedJScrollPanelScrollCorrection;
 import swingtree.dialogs.ConfirmAnswer;
-import swingtree.dialogs.ConfirmDialogBuilder;
-import swingtree.dialogs.MessageDialogBuilder;
-import swingtree.dialogs.SelectEnumDialogBuilder;
+import swingtree.dialogs.ConfirmDialog;
+import swingtree.dialogs.MessageDialog;
+import swingtree.dialogs.OptionsDialog;
 import swingtree.layout.LayoutConstraint;
 import swingtree.style.*;
 import swingtree.threading.EventProcessor;
@@ -5857,55 +5857,40 @@ public final class UI extends UILayoutConstants
     public static LifeTime lifeTime( long duration, TimeUnit unit ) { return LifeTime.of(duration, unit); }
 
     /**
-     *  Shows a conformation dialog with the given message.
-     * @param message the message to show
-     * @return {@code Answer.YES} if the user clicked "Yes", {@code Answer.NO} if the user clicked "No", {@code Answer.CANCEL} otherwise.
+     *  Shows an info dialog with the given message.
+     * @param message The message to show in the dialog.
      */
-    public static ConfirmAnswer confirm( String message ) { return confirm("Confirm", message); }
+    public static void info( String message ) { info("Info", message); }
 
     /**
-     * Shows a conformation dialog with the given message.
+     * Shows an info dialog with the given message and dialog title.
      *
-     * @param title   the title of the dialog
-     * @param message the message to show
-     * @return {@code Answer.YES} if the user clicked "Yes", {@code Answer.NO} if the user clicked "No", {@code Answer.CANCEL} otherwise.
+     * @param title   The title of the dialog.
+     * @param message The message to show in the dialog.
      */
-    public static ConfirmAnswer confirm( String title, String message ) {
-        return
-            ConfirmDialogBuilder.question()
-            .title(title)
-            .message(message)
-            .show();
+    public static void info( String title, String message ) {
+        message(message)
+                .titled(title)
+                .asInfo();
     }
 
     /**
-     * @return A builder for creating a confirmation dialog designed to ask a question.
+     *  Shows a warning dialog with the given message.
+     * @param message The warning message to show in the dialog.
      */
-    public static ConfirmDialogBuilder confirm() { return ConfirmDialogBuilder.question(); }
+    public static void warn( String message ) { warn("Warning", message); }
 
     /**
-     * @return A builder for creating a confirmation dialog designed to show an error
-     *         and ask the user to confirm it through yes, no or cancel options.
+     * Shows a warning dialog with the given message and dialog title.
+     *
+     * @param title   The title of the dialog.
+     * @param message The warning message to show in the dialog.
      */
-    public static ConfirmDialogBuilder confirmError() { return ConfirmDialogBuilder.error(); }
-    
-    /**
-     * @return A builder for creating a confirmation dialog designed to show an info
-     *         and ask the user to confirm it through yes, no or cancel options.
-     */
-    public static ConfirmDialogBuilder confirmInfo() { return ConfirmDialogBuilder.info(); }
-    
-    /**
-     * @return A builder for creating a confirmation dialog designed to show a warning
-     *         and ask the user to confirm it through yes, no or cancel options.
-     */
-    public static ConfirmDialogBuilder confirmWarning() { return ConfirmDialogBuilder.warning(); }
-
-    /**
-     * @return A builder for creating a confirmation dialog designed to show a plain message (no icon)
-     *         and ask the user to confirm it through yes, no or cancel options.
-     */
-    public static ConfirmDialogBuilder confirmPlain() { return ConfirmDialogBuilder.plain(); }
+    public static void warn( String title, String message ) {
+        message(message)
+                .titled(title)
+                .asWarning();
+    }
 
     /**
      *  Shows an error dialog with the given message.
@@ -5920,64 +5905,43 @@ public final class UI extends UILayoutConstants
      * @param message The error message to show in the dialog.
      */
     public static void error( String title, String message ) {
-        error()
-            .title(title)
-            .message(message)
-            .show();
+        message(message)
+            .titled(title)
+            .asError();
     }
 
     /**
      * @return A builder for creating an error dialog.
      */
-    public static MessageDialogBuilder error() { return MessageDialogBuilder.error(); }
+    public static MessageDialog message(String text ) { return MessageDialog.saying(text); }
 
     /**
-     *  Shows an info dialog with the given message.
-     * @param message The message to show in the dialog.
+     *  Shows a conformation dialog with the given message.
+     * @param message the message to show
+     * @return {@code Answer.YES} if the user clicked "Yes", {@code Answer.NO} if the user clicked "No", {@code Answer.CANCEL} otherwise.
      */
-    public static void info( String message ) { info("Info", message); }
+    public static ConfirmAnswer confirm( String message ) { return confirm("Confirm", message); }
 
     /**
-     * Shows an info dialog with the given message and dialog title.
+     * Shows a conformation dialog with the given message.
      *
-     * @param title   The title of the dialog.
-     * @param message The message to show in the dialog.
+     * @param title   the title of the dialog
+     * @param message the message to show
+     * @return {@code Answer.YES} if the user clicked "Yes", {@code Answer.NO} if the user clicked "No", {@code Answer.CANCEL} otherwise.
      */
-    public static void info( String title, String message ) {
-        info()
-            .title(title)
-            .message(message)
-            .show();
+    public static ConfirmAnswer confirm( String title, String message ) {
+        return ConfirmDialog.asking(message)
+                            .titled(title)
+                            .asQuestion();
     }
 
     /**
-     * @return A builder for creating an info dialog.
+     * @param toBeConfirmed The question to ask the user.
+     * @return A builder for creating a confirmation dialog designed to ask a question.
      */
-    public static MessageDialogBuilder info() { return MessageDialogBuilder.info(); }
-
-    /**
-     *  Shows a warning dialog with the given message.
-     * @param message The warning message to show in the dialog.
-     */
-     public static void warn( String message ) { warn("Warning", message); }
-
-    /**
-     * Shows a warning dialog with the given message and dialog title.
-     *
-     * @param title   The title of the dialog.
-     * @param message The warning message to show in the dialog.
-     */
-    public static void warn( String title, String message ) {
-        warn()
-            .title(title)
-            .message(message)
-            .show();
+    public static ConfirmDialog confirmation( String toBeConfirmed ) {
+        return ConfirmDialog.asking(toBeConfirmed);
     }
-
-    /**
-     * @return A builder for creating a warning dialog.
-     */
-    public static MessageDialogBuilder warn() { return MessageDialogBuilder.warning(); }
 
     /**
      *  Shows a dialog where the user can select a value from a list of options
@@ -5985,12 +5949,13 @@ public final class UI extends UILayoutConstants
      *  The selected value will be stored in said property after the user has
      *  selected a value.
      *
-     * @param message The message to show in the dialog.
+     * @param question The message to show in the dialog.
      * @param selected The enum based property to store the selected value in.
      * @param <E> The enum type.
+     * @return The selected enum value wrapped in an {@link Optional} or an empty optional if the user cancelled the dialog.
      */
-    public static <E extends Enum<E>> void askQuestion( String message, Var<E> selected ) {
-        askQuestion("Select", message, selected );
+    public static <E extends Enum<E>> Optional<E> ask( String question, Var<E> selected ) {
+        return ask("Select", question, selected );
     }
 
     /**
@@ -6003,9 +5968,15 @@ public final class UI extends UILayoutConstants
      * @param message  The message to show in the dialog.
      * @param selected The enum based property to store the selected value in.
      * @param <E> The enum type.
+     * @return The selected enum value wrapped in an {@link Optional} or an empty optional if the user cancelled the dialog.
      */
-    public static <E extends Enum<E>> void askQuestion(String title, String message, Var<E> selected ) {
-        askQuestion( title, message, null, selected );
+    public static <E extends Enum<E>> Optional<E> ask( String title, String message, Var<E> selected ) {
+        Objects.requireNonNull( message  );
+        Objects.requireNonNull( title    );
+        Objects.requireNonNull( selected );
+        return OptionsDialog.offering(message, selected)
+                            .titled(title)
+                            .asQuestion();
     }
 
     /**
@@ -6020,106 +5991,43 @@ public final class UI extends UILayoutConstants
      * @param selected The enum based property to store the selected value in.
      * @param <E> The type parameter defining the concrete enum type.
      */
-    public static <E extends Enum<E>> void askQuestion(String title, String message, Icon icon, Var<E> selected ) {
+    public static <E extends Enum<E>> void ask( String title, String message, Icon icon, Var<E> selected ) {
         Objects.requireNonNull( message  );
         Objects.requireNonNull( title    );
         Objects.requireNonNull( selected );
-        SelectEnumDialogBuilder.question(selected)
-                                .title(title)
-                                .message(message)
+        OptionsDialog.offering(message, selected)
+                                .titled(title)
                                 .icon(icon)
-                                .show();
+                                .asQuestion();
     }
 
     /**
-     *  Exposes the {@link SelectEnumDialogBuilder} API for creating a question dialog
+     *  Exposes the {@link OptionsDialog} API for creating a question dialog
      *  that allows the user to select a value from an array of provided enum values.
      *
+     * @param offer The message to show in the dialog.
      * @param options The array of enum values to show in the dialog.
      * @param <E> The enum type.
      * @return A builder for creating a question dialog with a set of selectable enum values
      *         based on the provided array of enum values.
      */
-    public static <E extends Enum<E>> SelectEnumDialogBuilder<E> askQuestion( E... options ) {
-        return SelectEnumDialogBuilder.question(options);
+    @SafeVarargs
+    public static <E extends Enum<E>> OptionsDialog<E> choice( String offer, E... options ) {
+        return OptionsDialog.offering(offer, options);
     }
 
     /**
-     *  Exposes the {@link SelectEnumDialogBuilder} API for creating a question dialog
+     *  Exposes the {@link OptionsDialog} API for creating a question dialog
      *  that allows the user to select and set a value from the provided enum based property.
      *
+     * @param offer The message to show in the dialog.
+     * @param selectable The enum based property to store the selected value in.
+     * @param <E> The enum type.
      * @return A builder for creating a question dialog with a set of selectable enum values
      *         based on the provided array of enum values.
      */
-    public static <E extends Enum<E>> SelectEnumDialogBuilder<E> askQuestion( Var<E> selectable ) {
-        return SelectEnumDialogBuilder.question(selectable);
-    }
-
-    /**
-     *  Exposes the {@link SelectEnumDialogBuilder} API for creating an error dialog
-     *  that allows the user to select a value from an array of provided enum values.
-     *
-     * @return A builder for creating a question dialog with a set of selectable enum values
-     *         based on the provided array of enum values.
-     */
-    public static <E extends Enum<E>> SelectEnumDialogBuilder<E> askError( E... options ) {
-        return SelectEnumDialogBuilder.error(options);
-    }
-
-    /**
-     *  Exposes the {@link SelectEnumDialogBuilder} API for creating an error dialog
-     *  that allows the user to select and set a value from the provided enum based property.
-     *
-     * @return A builder for creating a question dialog with a set of selectable enum values
-     *         based on the provided array of enum values.
-     */
-    public static <E extends Enum<E>> SelectEnumDialogBuilder<E> askError( Var<E> selectable ) {
-        return SelectEnumDialogBuilder.error(selectable);
-    }
-
-    /**
-     *  Exposes the {@link SelectEnumDialogBuilder} API for creating an info dialog
-     *  that allows the user to select a value from an array of provided enum values.
-     *
-     * @return A builder for creating a question dialog with a set of selectable enum values
-     *         based on the provided array of enum values.
-     */
-    public static <E extends Enum<E>> SelectEnumDialogBuilder<E> askInfo( E... options ) {
-        return SelectEnumDialogBuilder.info(options);
-    }
-
-    /**
-     *  Exposes the {@link SelectEnumDialogBuilder} API for creating an info dialog
-     *  that allows the user to select and set a value from the provided enum based property.
-     *
-     * @return A builder for creating a question dialog with a set of selectable enum values
-     *         based on the provided array of enum values.
-     */
-    public static <E extends Enum<E>> SelectEnumDialogBuilder<E> askInfo( Var<E> selectable ) {
-        return SelectEnumDialogBuilder.info(selectable);
-    }
-
-    /**
-     *  Exposes the {@link SelectEnumDialogBuilder} API for creating a warning dialog
-     *  that allows the user to select a value from an array of provided enum values.
-     *
-     * @return A builder for creating a question dialog with a set of selectable enum values
-     *         based on the provided array of enum values.
-     */
-    public static <E extends Enum<E>> SelectEnumDialogBuilder<E> askWarning( E... options ) {
-        return SelectEnumDialogBuilder.warning(options);
-    }
-
-    public static <E extends Enum<E>> SelectEnumDialogBuilder<E> askWarning( Var<E> selectable ) {
-        return SelectEnumDialogBuilder.warning(selectable);
-    }
-
-    public static <E extends Enum<E>> SelectEnumDialogBuilder<E> askPlain( E... options ) {
-        return SelectEnumDialogBuilder.plain(options);
-    }
-
-    public static <E extends Enum<E>> SelectEnumDialogBuilder<E> askPlain( Var<E> selectable ) {
-        return SelectEnumDialogBuilder.plain(selectable);
+    public static <E extends Enum<E>> OptionsDialog<E> choice( String offer, Var<E> selectable ) {
+        return OptionsDialog.offering(offer, selectable);
     }
 
     /**

@@ -1,0 +1,234 @@
+package swingtree.dialogs;
+
+import org.slf4j.Logger;
+import swingtree.UI;
+
+import javax.swing.Icon;
+import javax.swing.JOptionPane;
+import java.awt.Component;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+/**
+ *  An immutable builder class for creating simple confirmation dialogs
+ *  based on the {@link JOptionPane} class, more specifically the
+ *  {@link JOptionPane#showOptionDialog(Component, Object, String, int, int, Icon, Object[], Object)}
+ *  method.
+ *  <p>
+ *  This class is intended to be used as part of the {@link UI} API
+ *  by calling the {@link UI#confirmation(String)} factory method.
+ */
+public final class ConfirmDialog
+{
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(ConfirmDialog.class);
+
+
+    public static ConfirmDialog asking(String question ) {
+        Objects.requireNonNull(question);
+        return new ConfirmDialog(
+                    -1,
+                    "",
+                    question,
+                    "Yes",
+                    "No",
+                    "Cancel",
+                    "Yes",
+                    null,
+                    null
+                );
+    }
+
+    private final int      _type;
+    private final String   _title;
+    private final String   _message;
+    private final String   _yesOption;
+    private final String   _noOption;
+    private final String   _cancelOption;
+    private final String   _defaultOption;
+    private final Icon     _icon;
+    private final Component _parent;
+
+
+    private ConfirmDialog(
+        int type,
+        String title,
+        String message,
+        String yesOption,
+        String noOption,
+        String cancelOption,
+        String defaultOption,
+        Icon icon,
+        Component parent
+    ) {
+        _type          = type;
+        _title         = Objects.requireNonNull(title);
+        _message       = Objects.requireNonNull(message);
+        _yesOption     = Objects.requireNonNull(yesOption);
+        _noOption      = Objects.requireNonNull(noOption);
+        _cancelOption  = Objects.requireNonNull(cancelOption);
+        _defaultOption = Objects.requireNonNull(defaultOption);
+        _icon          = icon;
+        _parent        = parent;
+    }
+
+    /**
+     * @param type The type of the dialog, which may be one of the following:
+     *             <ul>
+     *                  <li>{@link JOptionPane#ERROR_MESSAGE}</li>
+     *                  <li>{@link JOptionPane#INFORMATION_MESSAGE}</li>
+     *                  <li>{@link JOptionPane#WARNING_MESSAGE}</li>
+     *                  <li>{@link JOptionPane#PLAIN_MESSAGE}</li>
+     *                  <li>{@link JOptionPane#QUESTION_MESSAGE}</li>
+     *             </ul>
+     * @return A new {@link ConfirmDialog} instance with the specified type.
+     */
+    private ConfirmDialog type(int type ) {
+        return new ConfirmDialog(type, _title, _message, _yesOption, _noOption, _cancelOption, _defaultOption, _icon, _parent);
+    }
+
+    /**
+     * @param title The title of the dialog.
+     * @return A new {@link ConfirmDialog} instance with the specified title.
+     */
+    public ConfirmDialog titled(String title ) {
+        return new ConfirmDialog(_type, title, _message, _yesOption, _noOption, _cancelOption, _defaultOption, _icon, _parent);
+    }
+
+    /**
+     * @param yesOption The text of the "yes" option.
+     * @return A new {@link ConfirmDialog} instance with the specified "yes" option text.
+     */
+    public ConfirmDialog yesOption(String yesOption ) {
+        return new ConfirmDialog(_type, _title, _message, yesOption, _noOption, _cancelOption, _defaultOption, _icon, _parent);
+    }
+
+    /**
+     * @param noOption The text of the "no" option.
+     * @return A new {@link ConfirmDialog} instance with the specified "no" option text.
+     */
+    public ConfirmDialog noOption(String noOption ) {
+        return new ConfirmDialog(_type, _title, _message, _yesOption, noOption, _cancelOption, _defaultOption, _icon, _parent);
+    }
+
+    /**
+     * @param cancelOption The text of the "cancel" option.
+     * @return A new {@link ConfirmDialog} instance with the specified "cancel" option text.
+     */
+    public ConfirmDialog cancelOption(String cancelOption ) {
+        return new ConfirmDialog(_type, _title, _message, _yesOption, _noOption, cancelOption, _defaultOption, _icon, _parent);
+    }
+
+    /**
+     * @param defaultOption The text of the default option.
+     * @return A new {@link ConfirmDialog} instance with the specified default option text.
+     */
+    public ConfirmDialog defaultOption(String defaultOption ) {
+        return new ConfirmDialog(_type, _title, _message, _yesOption, _noOption, _cancelOption, defaultOption, _icon, _parent);
+    }
+
+    /**
+     * @param icon The icon of the dialog.
+     * @return A new {@link ConfirmDialog} instance with the specified icon.
+     */
+    public ConfirmDialog icon(Icon icon ) {
+        return new ConfirmDialog(_type, _title, _message, _yesOption, _noOption, _cancelOption, _defaultOption, icon, _parent);
+    }
+
+    /**
+     * @param path The path to the icon of the dialog.
+     * @return A new {@link ConfirmDialog} instance with the specified icon.
+     */
+    public ConfirmDialog icon(String path ) {
+        return new ConfirmDialog(_type, _title, _message, _yesOption, _noOption, _cancelOption, _defaultOption, UI.findIcon(path).orElse(null), _parent);
+    }
+
+    /**
+     * @param parent The parent component of the dialog.
+     * @return A new {@link ConfirmDialog} instance with the specified parent component.
+     */
+    public ConfirmDialog parent(Component parent ) {
+        return new ConfirmDialog(_type, _title, _message, _yesOption, _noOption, _cancelOption, _defaultOption, _icon, parent);
+    }
+
+    public ConfirmAnswer asQuestion() {
+        return type(JOptionPane.QUESTION_MESSAGE).show();
+    }
+
+    public ConfirmAnswer asError() {
+        return type(JOptionPane.ERROR_MESSAGE).show();
+    }
+
+    public ConfirmAnswer asInfo() {
+        return type(JOptionPane.INFORMATION_MESSAGE).show();
+    }
+
+    public ConfirmAnswer asWarning() {
+        return type(JOptionPane.WARNING_MESSAGE).show();
+    }
+
+    public ConfirmAnswer asPlain() {
+        return type(JOptionPane.PLAIN_MESSAGE).show();
+    }
+
+    /**
+     * @return The {@link ConfirmAnswer} that the user selected in the dialog.
+     */
+    public ConfirmAnswer show() {
+        try {
+            return UI.runAndGet(() -> {
+                String yes    = _yesOption.trim();
+                String no     = _noOption.trim();
+                String cancel = _cancelOption.trim();
+
+                List<Object> options = new ArrayList<>();
+                if ( !yes.isEmpty()    )
+                    options.add(yes);
+                if ( !yes.isEmpty() && !no.isEmpty() )
+                    options.add(no);
+                if ( !cancel.isEmpty() && !options.isEmpty() )
+                    options.add(cancel);
+
+                int optionsType = JOptionPane.DEFAULT_OPTION;
+                if ( !yes.isEmpty() && no.isEmpty() && cancel.isEmpty() )
+                    optionsType = JOptionPane.OK_OPTION;
+                if ( !yes.isEmpty() && !no.isEmpty() && cancel.isEmpty() )
+                    optionsType = JOptionPane.YES_NO_OPTION;
+                if ( !yes.isEmpty() && !no.isEmpty() && !cancel.isEmpty() )
+                    optionsType = JOptionPane.YES_NO_CANCEL_OPTION;
+                if ( !yes.isEmpty() && no.isEmpty() && !cancel.isEmpty() )
+                    optionsType = JOptionPane.OK_CANCEL_OPTION;
+
+                int type = _type;
+                if ( type == -1 ) {
+                    if ( optionsType == JOptionPane.YES_NO_OPTION || optionsType == JOptionPane.YES_NO_CANCEL_OPTION )
+                        type = JOptionPane.QUESTION_MESSAGE;
+                    else
+                        type = JOptionPane.PLAIN_MESSAGE;
+                }
+
+                String title = _title.trim();
+                if ( title.isEmpty() ) {
+                    if ( type == JOptionPane.QUESTION_MESSAGE )
+                        title = "Confirm";
+                    if ( type == JOptionPane.ERROR_MESSAGE )
+                        title = "Error";
+                    if ( type == JOptionPane.INFORMATION_MESSAGE )
+                        title = "Info";
+                    if ( type == JOptionPane.WARNING_MESSAGE )
+                        title = "Warning";
+                    if ( type == JOptionPane.PLAIN_MESSAGE )
+                        title = "Message";
+                }
+
+                return ConfirmAnswer.from(Context.summoner.showOptionDialog(
+                            _parent, _message, title, optionsType,
+                            type, _icon, options.toArray(), _defaultOption
+                        ));
+            });
+        } catch (Exception e) {
+            log.error("Failed to show confirm dialog, returning 'CANCEL' as dialog result!", e);
+            return ConfirmAnswer.CANCEL;
+        }
+    }
+}
