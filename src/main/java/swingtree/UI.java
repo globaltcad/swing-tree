@@ -5871,7 +5871,7 @@ public final class UI extends UILayoutConstants
     public static void info( String title, String message ) {
         message(message)
                 .titled(title)
-                .asInfo();
+                .showAsInfo();
     }
 
     /**
@@ -5889,7 +5889,7 @@ public final class UI extends UILayoutConstants
     public static void warn( String title, String message ) {
         message(message)
                 .titled(title)
-                .asWarning();
+                .showAsWarning();
     }
 
     /**
@@ -5907,7 +5907,7 @@ public final class UI extends UILayoutConstants
     public static void error( String title, String message ) {
         message(message)
             .titled(title)
-            .asError();
+            .showAsError();
     }
 
     /**
