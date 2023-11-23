@@ -235,23 +235,31 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
         NullUtil.nullPropertyCheck( index, "index", "Null is not a valid state for modelling a selected index." );
         return _with( thisComponent -> {
                     ExtraState state = ExtraState.of(thisComponent);
-                    if ( state.selectedTabIndex != null )
-                        log.warn("A selected index property has already been set for this tabbed pane.");
+                    if ( state.selectedTabIndex != null && state.selectedTabIndex != index )
+                        log.warn(
+                            "Trying to bind a new property '"+index+"' " +
+                            "to the index of tabbed pane '"+thisComponent+"' " +
+                            "even though the previously specified property '"+state.selectedTabIndex+"' is " +
+                            "already bound to it. " +
+                            "The previous property will be replaced now!",
+                            new Throwable()
+                        );
+
                     state.selectedTabIndex = index;
                })
-                ._withOnShow( index, (thisComponent,i) -> {
-                    ExtraState state = ExtraState.of(thisComponent);
-                    thisComponent.setSelectedIndex(i);
-                    state.selectionListeners.forEach(l -> l.accept(i) );
-                })
-                ._with( thisComponent -> {
-                    _onChange(thisComponent, e -> _doApp(()->{
-                        ExtraState state = ExtraState.of(thisComponent);
-                        index.set(From.VIEW, thisComponent.getSelectedIndex());
-                        state.selectionListeners.forEach(l -> l.accept(thisComponent.getSelectedIndex()) );
-                    }));
-                    thisComponent.setSelectedIndex(index.get());
-                })
+               ._withOnShow( index, (thisComponent,i) -> {
+                   ExtraState state = ExtraState.of(thisComponent);
+                   thisComponent.setSelectedIndex(i);
+                   state.selectionListeners.forEach(l -> l.accept(i) );
+               })
+               ._with( thisComponent -> {
+                   _onChange(thisComponent, e -> _doApp(()->{
+                       ExtraState state = ExtraState.of(thisComponent);
+                       index.set(From.VIEW, thisComponent.getSelectedIndex());
+                       state.selectionListeners.forEach(l -> l.accept(thisComponent.getSelectedIndex()) );
+                   }));
+                   thisComponent.setSelectedIndex(index.get());
+               })
                ._this();
     }
 
