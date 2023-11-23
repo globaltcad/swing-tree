@@ -1,10 +1,13 @@
 package swingtree.style;
 
+import org.slf4j.Logger;
+import swingtree.UI;
 import swingtree.api.Styler;
 
 import javax.swing.AbstractButton;
 import javax.swing.JComponent;
 import javax.swing.border.Border;
+import javax.swing.text.JTextComponent;
 import java.awt.*;
 
 /**
@@ -23,6 +26,8 @@ import java.awt.*;
  */
 final class StyleAndAnimationBorder<C extends JComponent> implements Border
 {
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(StyleAndAnimationBorder.class);
+
     private final ComponentExtension<C> _compExt;
     private final Border                _formerBorder;
     private final boolean               _borderWasNotPainted;
@@ -62,7 +67,7 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
         Shape former = g.getClip();
 
         if ( _compExt.getCurrentOuterBaseClip() != null )
-          g.setClip( _compExt.getCurrentOuterBaseClip() );
+            g.setClip( _compExt.getCurrentOuterBaseClip() );
 
         _paintBorderAndBorderLayerStyles( (Graphics2D) g );
         if ( _formerBorder != null && !_borderWasNotPainted ) {
@@ -77,13 +82,12 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
 
     private void _paintFormerBorder( Component c, Graphics g, int x, int y, int width, int height ) {
         try {
-            _formerBorder.paintBorder(
-                    c, g,
-                    x + _marginInsets.left,
-                    y + _marginInsets.top,
-                    width   - _marginInsets.left - _marginInsets.right,
-                    height - _marginInsets.top  - _marginInsets.bottom
-                );
+            x = x + _marginInsets.left;
+            y = y + _marginInsets.top;
+            width  = width  - _marginInsets.left - _marginInsets.right;
+            height = height - _marginInsets.top  - _marginInsets.bottom;
+
+            _formerBorder.paintBorder(c, g, x, y, width, height);
         }
         catch (Exception ex)
         {
@@ -98,6 +102,7 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
                  but we don't know which logging framework that is, so we just print
                  the stack trace to the console so that any developers can see what went wrong.
             */
+            log.error("Exception while painting former border '{}': ", _formerBorder, ex);
         }
     }
 
@@ -111,12 +116,12 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
         try {
             _compExt._paintBorderStyle( g, _compExt.getOwner() );
         } catch ( Exception ex ) {
-            ex.printStackTrace();
             /*
                 Note that if any exceptions happen during the border style painting,
                 then we don't want to mess up how the rest of the component is painted...
                 Therefore, we catch any exceptions that happen in the above code.
             */
+            log.error("Exception while painting border style '{}': ", _compExt.getStyle().border(), ex);
         }
     }
 
@@ -132,32 +137,64 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
         _calculateMarginInsets(style);
         _calculatePaddingInsets(style);
         _calculateFullPaddingInsets(style);
-        _calculateBorderInsets(style,
-                _formerBorder == null
-                    ? new Insets(0, 0, 0, 0)
-                    : _formerBorder.getBorderInsets(_compExt.getOwner())
-            );
-    }
-
-    Insets getFormerBorderInsets() {
-        if ( _borderWasNotPainted )
-            return new Insets(0, 0, 0, 0);
-        else
-            return _formerBorder == null
-                        ? new Insets(0, 0, 0, 0)
-                        : _formerBorder.getBorderInsets(_compExt.getOwner());
+        _calculateBorderInsets(style);
     }
 
     @Override
     public boolean isBorderOpaque() { return false; }
 
-
-    private void _calculateBorderInsets( Style style, Insets formerInsets )
+    public Insets getBaseInsets(boolean adjust)
     {
-        int left      = style.margin().left().orElse(formerInsets.left);
-        int top       = style.margin().top().orElse(formerInsets.top);
-        int right     = style.margin().right().orElse(formerInsets.right);
-        int bottom    = style.margin().bottom().orElse(formerInsets.bottom);
+        if ( _formerBorder == null )
+            return new Insets(0, 0, 0, 0);
+
+        boolean usesSwingTreeBorder = _compExt.getStyle().border().isVisible();
+
+        if ( usesSwingTreeBorder )
+            return new Insets(0, 0, 0, 0);
+        else
+        {
+            Insets formerInsets = _formerBorder.getBorderInsets(_compExt.getOwner());
+            int left   = 0;
+            int top    = 0;
+            int right  = 0;
+            int bottom = 0;
+            if ( !adjust ) {
+                left   += formerInsets.left;
+                top    += formerInsets.top;
+                right  += formerInsets.right;
+                bottom += formerInsets.bottom;
+            } else if (
+                UI.currentLookAndFeel().isOneOf(UI.LookAndFeel.NIMBUS) &&
+                _compExt.getOwner() instanceof JTextComponent
+            ) {
+                left   += formerInsets.left;
+                top    += formerInsets.top;
+                right  += formerInsets.right;
+                bottom += formerInsets.bottom;
+                left   = left   / 2;
+                top    = top    / 2;
+                right  = right  / 2;
+                bottom = bottom / 2;
+            }
+            return new Insets(top, left, bottom, right);
+        }
+    }
+
+    private void _calculateBorderInsets( Style style )
+    {
+        Insets correction = getBaseInsets(false);
+
+        int left   = correction.left;
+        int top    = correction.top;
+        int right  = correction.right;
+        int bottom = correction.bottom;
+
+        left   = style.margin().left()  .orElse(left  );
+        top    = style.margin().top()   .orElse(top   );
+        right  = style.margin().right() .orElse(right );
+        bottom = style.margin().bottom().orElse(bottom);
+
         // Add padding:
         left   += style.padding().left().orElse(0);
         top    += style.padding().top().orElse(0);
@@ -206,16 +243,16 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
 
     private void _calculatePaddingInsets( Style style )
     {
-        _paddingInsets.top    = style.padding().left().orElse(0);
-        _paddingInsets.left   = style.padding().top().orElse(0);
+        _paddingInsets.top    = style.padding().top().orElse(0);
+        _paddingInsets.left   = style.padding().left().orElse(0);
         _paddingInsets.right  = style.padding().right().orElse(0);
         _paddingInsets.bottom = style.padding().bottom().orElse(0);
     }
 
     private void _calculateFullPaddingInsets( Style style )
     {
-        _fullPaddingInsets.top    = style.padding().left().orElse(0)   + style.margin().left().orElse(0);
-        _fullPaddingInsets.left   = style.padding().top().orElse(0)    + style.margin().top().orElse(0);
+        _fullPaddingInsets.top    = style.padding().top().orElse(0)    + style.margin().top().orElse(0);
+        _fullPaddingInsets.left   = style.padding().left().orElse(0)   + style.margin().left().orElse(0);
         _fullPaddingInsets.right  = style.padding().right().orElse(0)  + style.margin().right().orElse(0);
         _fullPaddingInsets.bottom = style.padding().bottom().orElse(0) + style.margin().bottom().orElse(0);
     }

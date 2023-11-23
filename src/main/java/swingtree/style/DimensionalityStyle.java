@@ -3,108 +3,96 @@ package swingtree.style;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ *  A style that defines the dimensionality of a component
+ *  in the form of a minimum, maximum, preferred and regular size.
+ *  The layout manager of a component will use this information
+ *  to determine the actual size of the component in the layout.
+ **/
 final class DimensionalityStyle
 {
     private static final DimensionalityStyle _NONE = new DimensionalityStyle(
-                                                    null, null,
-                                                    null, null,
-                                                    null, null,
-                                                    null, null
+                                                        Size.none(),
+                                                        Size.none(),
+                                                        Size.none(),
+                                                        Size.none()
                                                     );
 
     public static DimensionalityStyle none() { return _NONE; }
 
-    private final Integer _minWidth;
-    private final Integer _minHeight;
 
-    private final Integer _maxWidth;
-    private final Integer _maxHeight;
-
-    private final Integer _preferredWidth;
-    private final Integer _preferredHeight;
-
-    private final Integer _width;
-    private final Integer _height;
+    private final Size _minSize;
+    private final Size _maxSize;
+    private final Size _preferredSize;
+    private final Size _size;
 
 
     private DimensionalityStyle(
-        Integer minWidth,
-        Integer minHeight,
-        Integer maxWidth,
-        Integer maxHeight,
-        Integer preferredWidth,
-        Integer preferredHeight,
-        Integer width,
-        Integer height
+        Size minSize,
+        Size maxSize,
+        Size preferredSize,
+        Size size
     ) {
-        _minWidth        = minWidth;
-        _minHeight       = minHeight;
-        _maxWidth        = maxWidth;
-        _maxHeight       = maxHeight;
-        _preferredWidth  = preferredWidth;
-        _preferredHeight = preferredHeight;
-        _width           = width;
-        _height          = height;
+        _minSize       = Objects.requireNonNull(minSize);
+        _maxSize       = Objects.requireNonNull(maxSize);
+        _preferredSize = Objects.requireNonNull(preferredSize);
+        _size          = Objects.requireNonNull(size);
     }
 
     DimensionalityStyle _withMinWidth( Integer minWidth ) {
-        return new DimensionalityStyle(minWidth, _minHeight, _maxWidth, _maxHeight, _preferredWidth, _preferredHeight, _width, _height);
+        return new DimensionalityStyle(_minSize.width(minWidth), _maxSize, _preferredSize, _size);
     }
 
     DimensionalityStyle _withMinHeight( Integer minHeight ) {
-        return new DimensionalityStyle(_minWidth, minHeight, _maxWidth, _maxHeight, _preferredWidth, _preferredHeight, _width, _height);
+        return new DimensionalityStyle(_minSize.height(minHeight), _maxSize, _preferredSize, _size);
     }
 
     DimensionalityStyle _withMaxWidth( Integer maxWidth ) {
-        return new DimensionalityStyle(_minWidth, _minHeight, maxWidth, _maxHeight, _preferredWidth, _preferredHeight, _width, _height);
+        return new DimensionalityStyle(_minSize, _maxSize.width(maxWidth), _preferredSize, _size);
     }
 
     DimensionalityStyle _withMaxHeight( Integer maxHeight ) {
-        return new DimensionalityStyle(_minWidth, _minHeight, _maxWidth, maxHeight, _preferredWidth, _preferredHeight, _width, _height);
+        return new DimensionalityStyle(_minSize, _maxSize.height(maxHeight), _preferredSize, _size);
     }
 
     DimensionalityStyle _withPreferredWidth( Integer preferredWidth ) {
-        return new DimensionalityStyle(_minWidth, _minHeight, _maxWidth, _maxHeight, preferredWidth, _preferredHeight, _width, _height);
+        return new DimensionalityStyle(_minSize, _maxSize, _preferredSize.width(preferredWidth), _size);
     }
 
     DimensionalityStyle _withPreferredHeight( Integer preferredHeight ) {
-        return new DimensionalityStyle(_minWidth, _minHeight, _maxWidth, _maxHeight, _preferredWidth, preferredHeight, _width, _height);
+        return new DimensionalityStyle(_minSize, _maxSize, _preferredSize.height(preferredHeight), _size);
     }
 
     DimensionalityStyle _withWidth( Integer width ) {
-        return new DimensionalityStyle(_minWidth, _minHeight, _maxWidth, _maxHeight, _preferredWidth, _preferredHeight, width, _height);
+        return new DimensionalityStyle(_minSize, _maxSize, _preferredSize, _size.width(width));
     }
 
     DimensionalityStyle _withHeight( Integer height ) {
-        return new DimensionalityStyle(_minWidth, _minHeight, _maxWidth, _maxHeight, _preferredWidth, _preferredHeight, _width, height);
+        return new DimensionalityStyle(_minSize, _maxSize, _preferredSize, _size.height(height));
     }
 
-    public Optional<Integer> minWidth() { return Optional.ofNullable(_minWidth); }
+    public Optional<Integer> minWidth() { return _minSize.width(); }
 
-    public Optional<Integer> minHeight() { return Optional.ofNullable(_minHeight); }
+    public Optional<Integer> minHeight() { return _minSize.height(); }
 
-    public Optional<Integer> maxWidth() { return Optional.ofNullable(_maxWidth); }
+    public Optional<Integer> maxWidth() { return _maxSize.width(); }
 
-    public Optional<Integer> maxHeight() { return Optional.ofNullable(_maxHeight); }
+    public Optional<Integer> maxHeight() { return _maxSize.height(); }
 
-    public Optional<Integer> preferredWidth() { return Optional.ofNullable(_preferredWidth); }
+    public Optional<Integer> preferredWidth() { return _preferredSize.width(); }
 
-    public Optional<Integer> preferredHeight() { return Optional.ofNullable(_preferredHeight); }
+    public Optional<Integer> preferredHeight() { return _preferredSize.height(); }
 
-    public Optional<Integer> width() { return Optional.ofNullable(_width); }
+    public Optional<Integer> width() { return _size.width(); }
 
-    public Optional<Integer> height() { return Optional.ofNullable(_height); }
+    public Optional<Integer> height() { return _size.height(); }
 
     DimensionalityStyle _scale( double scale ) {
         return new DimensionalityStyle(
-                    _minWidth        == null ? null : (int) Math.round( _minWidth        * scale ),
-                    _minHeight       == null ? null : (int) Math.round( _minHeight       * scale ),
-                    _maxWidth        == null ? null : (int) Math.round( _maxWidth        * scale ),
-                    _maxHeight       == null ? null : (int) Math.round( _maxHeight       * scale ),
-                    _preferredWidth  == null ? null : (int) Math.round( _preferredWidth  * scale ),
-                    _preferredHeight == null ? null : (int) Math.round( _preferredHeight * scale ),
-                    _width           == null ? null : (int) Math.round( _width           * scale ),
-                    _height          == null ? null : (int) Math.round( _height          * scale )
+                    _minSize.scale(scale),
+                    _maxSize.scale(scale),
+                    _preferredSize.scale(scale),
+                    _size.scale(scale)
                 );
     }
 
@@ -112,14 +100,14 @@ final class DimensionalityStyle
     public String toString() {
         return
             "DimensionalityStyle[" +
-                    "minWidth="        + (_minWidth        == null ? "?" : _minWidth        ) + ", " +
-                    "minHeight="       + (_minHeight       == null ? "?" : _minHeight       ) + ", " +
-                    "maxWidth="        + (_maxWidth        == null ? "?" : _maxWidth        ) + ", " +
-                    "maxHeight="       + (_maxHeight       == null ? "?" : _maxHeight       ) + ", " +
-                    "preferredWidth="  + (_preferredWidth  == null ? "?" : _preferredWidth  ) + ", " +
-                    "preferredHeight=" + (_preferredHeight == null ? "?" : _preferredHeight ) + ", " +
-                    "width="           + (_width           == null ? "?" : _width           ) + ", " +
-                    "height="          + (_height          == null ? "?" : _height          ) +
+                    "minWidth="        + _minSize.width().map(Objects::toString).orElse("?") + ", " +
+                    "minHeight="       + _minSize.height().map(Objects::toString).orElse("?") + ", " +
+                    "maxWidth="        + _maxSize.height().map(Objects::toString).orElse("?") + ", " +
+                    "maxHeight="       + _maxSize.width().map(Objects::toString).orElse("?") + ", " +
+                    "preferredWidth="  + _preferredSize.width().map(Objects::toString).orElse("?") + ", " +
+                    "preferredHeight=" + _preferredSize.height().map(Objects::toString).orElse("?") + ", " +
+                    "width="           + _size.width().map(Objects::toString).orElse("?") + ", " +
+                    "height="          + _size.height().map(Objects::toString).orElse("?") +
                 "]";
     }
 
@@ -128,17 +116,15 @@ final class DimensionalityStyle
         if ( this == o ) return true;
         if ( !(o instanceof DimensionalityStyle) ) return false;
         DimensionalityStyle that = (DimensionalityStyle) o;
-        return Objects.equals(_minWidth,        that._minWidth       ) &&
-               Objects.equals(_minHeight,       that._minHeight      ) &&
-               Objects.equals(_maxWidth,        that._maxWidth       ) &&
-               Objects.equals(_maxHeight,       that._maxHeight      ) &&
-               Objects.equals(_preferredWidth,  that._preferredWidth ) &&
-               Objects.equals(_preferredHeight, that._preferredHeight);
+        return Objects.equals(_minSize,        that._minSize)       &&
+               Objects.equals(_maxSize,        that._maxSize)       &&
+               Objects.equals(_preferredSize,  that._preferredSize) &&
+               Objects.equals(_size,           that._size);
     }
 
     @Override
     public final int hashCode() {
-        return Objects.hash(_minWidth, _minHeight, _maxWidth, _maxHeight, _preferredWidth, _preferredHeight);
+        return Objects.hash(_minSize, _maxSize, _preferredSize, _size);
     }
 
 }

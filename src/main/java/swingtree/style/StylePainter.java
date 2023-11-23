@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import com.github.weisj.jsvg.geometry.size.FloatSize;
 import org.slf4j.Logger;
 import swingtree.UI;
 import swingtree.animation.LifeTime;
@@ -9,8 +10,8 @@ import javax.swing.JComponent;
 import java.awt.*;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 
 /**
@@ -36,8 +37,11 @@ final class StylePainter<C extends JComponent>
     private final Style                _style;
     private final Expirable<Painter>[] _animationPainters;
 
-    // Cached Area object representing the inner component area:
-    private Area _baseArea = null;
+    // Cached Area objects representing the component areas:
+    private Area _borderArea = null; // == _exteriorComponentArea - _interiorComponentArea
+    private Area _mainComponentArea = null; // == _borderArea + _interiorComponentArea
+    private Area _exteriorComponentArea = null; // == full component bounds - _mainComponentArea
+    private Area _interiorComponentArea = null; // == full component bounds - _borderArea - _exteriorComponentArea
 
 
     private StylePainter(
@@ -49,7 +53,10 @@ final class StylePainter<C extends JComponent>
     }
 
     StylePainter<C> endPainting() {
-        _baseArea = null;
+        _interiorComponentArea = null;
+        _borderArea = null;
+        _mainComponentArea = null;
+        _exteriorComponentArea = null;
         return this;
     }
 
@@ -75,27 +82,70 @@ final class StylePainter<C extends JComponent>
 
     Style getStyle() { return _style; }
 
-    Optional<Shape> baseAreaFor( JComponent component ) {
+    Optional<Shape> interiorAreaOf( JComponent component ) {
         Shape contentClip = null;
-        if ( _getBaseArea() != null )
-            contentClip = _getBaseArea(component);
+        if ( _interiorComponentArea != null )
+            contentClip = _getInteriorAreaOf(component);
         else if ( getStyle().margin().isPositive() )
-            contentClip = _getBaseArea(component);
+            contentClip = _getInteriorAreaOf(component);
 
         return Optional.ofNullable(contentClip);
     }
 
-    Area _getBaseArea(JComponent comp)
+    Area _getInteriorAreaOf( JComponent comp )
     {
-        if ( _baseArea == null )
-            _baseArea = _calculateBaseArea(0, 0, 0, 0, comp);
+        if ( _interiorComponentArea != null )
+            return _interiorComponentArea;
 
-        return _baseArea;
+        _interiorComponentArea = _calculateBaseArea(0, 0, 0, 0, comp);
+        return _interiorComponentArea;
     }
+
+    Area _getExteriorAreaOf( JComponent comp )
+    {
+        if ( _exteriorComponentArea != null )
+            return _exteriorComponentArea;
+
+        Rectangle bounds = comp.getBounds();
+        Area main = _mainAreaOf(comp);
+        _exteriorComponentArea = new Area(bounds);
+        _exteriorComponentArea.subtract(main);
+        return _exteriorComponentArea;
+    }
+
+    private Area _getBorderAreaOf( JComponent comp )
+    {
+        if ( _borderArea != null )
+            return _borderArea;
+
+        Area componentArea = _mainAreaOf(comp);
+
+        _borderArea = new Area(_getInteriorAreaOf(comp));
+        _borderArea.subtract(componentArea);
+        return _borderArea;
+    }
+
+    void paintWithContentAreaClip( JComponent c, Graphics g, Runnable painter ) {
+        Shape oldClip = g.getClip();
+        Shape newClip = _getInteriorAreaOf(c);
+        if ( newClip != null && newClip != oldClip ) {
+            if ( oldClip != null ) {
+                Area common = new Area(oldClip);
+                common.intersect(new Area(newClip));
+                newClip = common;
+            }
+            g.setClip(newClip);
+        }
+
+        painter.run();
+
+        g.setClip(oldClip);
+    }
+
 
     void renderBackgroundStyle( Graphics2D g2d, JComponent comp )
     {
-        _baseArea = null;
+        _interiorComponentArea = null;
 
         // We remember if antialiasing was enabled before we render:
         boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
@@ -114,7 +164,7 @@ final class StylePainter<C extends JComponent>
         _style.base().backgroundColor().ifPresent(color -> {
             if ( color.getAlpha() == 0 ) return;
             g2d.setColor(color);
-            g2d.fill(_getBaseArea(comp));
+            g2d.fill(_getInteriorAreaOf(comp));
         });
 
         _paintStylesOn(UI.Layer.BACKGROUND, g2d, comp);
@@ -123,16 +173,12 @@ final class StylePainter<C extends JComponent>
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
     }
 
-    Area _getBaseArea() {
-        return _baseArea;
-    }
-
     private void _paintStylesOn( UI.Layer layer, Graphics2D g2d , JComponent comp ) {
         // Every layer has 4 things:
         // 1. A grounding serving as a base background, which is a filled color and/or an image:
         for ( ImageStyle imageStyle : _style.images(layer) )
             if ( !imageStyle.equals(ImageStyle.none()) )
-                _renderImage( imageStyle, g2d, comp, _getBaseArea(comp) );
+                _renderImage( imageStyle, g2d, comp );
 
         // 2. Gradients, which are best used to give a component a nice surface lighting effect.
         // They may transition vertically, horizontally or diagonally over various different colors:
@@ -140,12 +186,12 @@ final class StylePainter<C extends JComponent>
             if ( gradient.colors().length > 0 ) {
                 if ( gradient.colors().length == 1 ) {
                     g2d.setColor(gradient.colors()[0]);
-                    g2d.fill(_getBaseArea(comp));
+                    g2d.fill(_getInteriorAreaOf(comp));
                 }
                 else if ( gradient.transition().isDiagonal() )
-                    _renderDiagonalGradient(g2d, comp, _style.margin(), gradient, _getBaseArea(comp));
+                    _renderDiagonalGradient(g2d, comp, _style.margin(), gradient, _getInteriorAreaOf(comp));
                 else
-                    _renderVerticalOrHorizontalGradient(g2d, comp, _style.margin(), gradient, _getBaseArea(comp));
+                    _renderVerticalOrHorizontalGradient(g2d, comp, _style.margin(), gradient, _getInteriorAreaOf(comp));
             }
 
         // 3. Shadows, which are simple gradient based drop shadows that cn go inwards or outwards
@@ -155,10 +201,17 @@ final class StylePainter<C extends JComponent>
             });
 
         // 4. Painters, which are provided by the user and can be anything
-        _style.painters(layer).forEach( backgroundPainter -> {
-            if ( backgroundPainter == Painter.none() ) return;
-            _withClip(g2d, _getBaseArea(comp), () -> {
-                AffineTransform oldTransform = new AffineTransform(g2d.getTransform());
+        paintWithContentAreaClip(comp, g2d, () -> {
+
+            // We remember the current transform and clip so that we can reset them after each painter:
+            AffineTransform currentTransform = new AffineTransform(g2d.getTransform());
+            Shape           currentClip      = g2d.getClip();
+
+            _style.painters(layer).forEach( backgroundPainter -> {
+
+                if ( backgroundPainter == Painter.none() )
+                    return;
+
                 try {
                     backgroundPainter.paint(g2d);
                 } catch (Exception e) {
@@ -178,7 +231,9 @@ final class StylePainter<C extends JComponent>
                     library, thank you for using it! Good luck finding out what went wrong! :)
                 */
                 } finally {
-                    g2d.setTransform(oldTransform);
+                    // We do not know what the painter did to the graphics object, so we reset it:
+                    g2d.setTransform(currentTransform);
+                    g2d.setClip(currentClip);
                 }
             });
         });
@@ -234,18 +289,29 @@ final class StylePainter<C extends JComponent>
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
     }
 
+    private Area _mainAreaOf(JComponent comp )
+    {
+        if ( _mainComponentArea != null )
+            return _mainComponentArea;
+
+        int leftBorderWidth   = _style.border().widths().left().orElse(0);
+        int topBorderWidth    = _style.border().widths().top().orElse(0);
+        int rightBorderWidth  = _style.border().widths().right().orElse(0);
+        int bottomBorderWidth = _style.border().widths().bottom().orElse(0);
+        _mainComponentArea = _calculateBaseArea(
+                                        topBorderWidth,
+                                        leftBorderWidth,
+                                        bottomBorderWidth,
+                                        rightBorderWidth,
+                                        comp
+                                    );
+        return _mainComponentArea;
+    }
+
     private void _drawBorder( Color color, Graphics2D g2d, JComponent comp ) {
         if ( !Outline.none().equals(_style.border().widths()) ) {
             try {
-                int leftBorderWidth   = _style.border().widths().left().orElse(0);
-                int topBorderWidth    = _style.border().widths().top().orElse(0);
-                int rightBorderWidth  = _style.border().widths().right().orElse(0);
-                int bottomBorderWidth = _style.border().widths().bottom().orElse(0);
-
-                Area innerComponentArea = _calculateBaseArea(topBorderWidth, leftBorderWidth, bottomBorderWidth, rightBorderWidth, comp);
-                Area borderArea = new Area(_getBaseArea(comp));
-                borderArea.subtract(innerComponentArea);
-
+                Area borderArea = _getBorderAreaOf(comp);
                 g2d.setColor(color);
                 g2d.fill(borderArea);
 
@@ -277,6 +343,14 @@ final class StylePainter<C extends JComponent>
         if ( _style.equals(Style.none()) ) {
             // If there is no style, we just return the component's bounds:
             return new Area(new Rectangle(0, 0, comp.getWidth(), comp.getHeight()));
+        }
+
+        if ( comp.getBorder() instanceof StyleAndAnimationBorder ) {
+            Insets base = ((StyleAndAnimationBorder) comp.getBorder()).getBaseInsets(true);
+            insTop    += base.top;
+            insLeft   += base.left;
+            insBottom += base.bottom;
+            insRight  += base.right;
         }
 
         // The background box is calculated from the margins and border radius:
@@ -447,7 +521,7 @@ final class StylePainter<C extends JComponent>
         Rectangle2D.Float outerRect = new Rectangle2D.Float(0, 0, width, height);
 
         Area outer = new Area(outerRect);
-        Area inner = _getBaseArea(comp);
+        Area inner = _getInteriorAreaOf(comp);
         outer.subtract(inner);
 
         g2d.setColor(color);
@@ -501,7 +575,7 @@ final class StylePainter<C extends JComponent>
             baseArea = _calculateBaseArea(artifactAdjustment, artifactAdjustment, artifactAdjustment, artifactAdjustment, comp);
         }
         else
-            baseArea = new Area(_getBaseArea(comp));
+            baseArea = new Area(_getInteriorAreaOf(comp));
 
         int shadowInset  = blurRadius;
         int shadowOutset = blurRadius;
@@ -1111,11 +1185,11 @@ final class StylePainter<C extends JComponent>
                                             (corner2Y - corner1Y) * (corner2Y - corner1Y)
                                         );
                 g2d.setPaint(new RadialGradientPaint(
-                            new Point2D.Float(corner1X, corner1Y),
-                            radius,
-                            fractions,
-                            colors
-                        ));
+                                new Point2D.Float(corner1X, corner1Y),
+                                radius,
+                                fractions,
+                                colors
+                            ));
             }
             else
                 throw new IllegalArgumentException("Invalid gradient type: " + gradient.type());
@@ -1126,37 +1200,30 @@ final class StylePainter<C extends JComponent>
     private void _renderImage(
         ImageStyle style,
         Graphics2D g2d,
-        JComponent component,
-        Area specificArea
+        JComponent component
     ) {
         if ( style.primer().isPresent() ) {
             g2d.setColor(style.primer().get());
-            g2d.fill(specificArea);
+            g2d.fill(_getInteriorAreaOf(component));
         }
 
         style.image().ifPresent( imageIcon -> {
-            UI.Placement placement = style.placement();
-            boolean repeat         = style.repeat();
-            Outline padding        = style.padding();
-            int componentWidth     = component.getWidth();
-            int componentHeight    = component.getHeight();
-            int imgWidth           = style.width().orElse(imageIcon.getIconWidth());
-            int imgHeight          = style.height().orElse(imageIcon.getIconHeight());
-            if ( imageIcon instanceof SvgIcon ) {
-                SvgIcon svgIcon = (SvgIcon) imageIcon;
-                if ( imgWidth > -1 && svgIcon.getIconWidth() < 0 )
-                    svgIcon = svgIcon.withIconWidth(imgWidth);
-                if ( imgHeight > -1 && svgIcon.getIconHeight() < 0 )
-                    svgIcon = svgIcon.withIconHeight(imgHeight);
-                imageIcon = svgIcon;
-            }
+            final UI.Placement placement       = style.placement();
+            final boolean      repeat          = style.repeat();
+            final Outline      padding         = style.padding();
+            final int          componentWidth  = component.getWidth();
+            final int          componentHeight = component.getHeight();
+
+            int imgWidth  = style.width().orElse(imageIcon.getIconWidth());
+            int imgHeight = style.height().orElse(imageIcon.getIconHeight());
+
             if ( style.fitMode() != UI.FitComponent.NO ) {
                 if ( imageIcon instanceof SvgIcon) {
-                    imgWidth = style.width().orElse(componentWidth);
+                    imgWidth  = style.width().orElse(componentWidth);
                     imgHeight = style.height().orElse(componentHeight);
                 } else {
                     if ( style.fitMode() == UI.FitComponent.WIDTH_AND_HEIGHT ) {
-                        imgWidth = style.width().orElse(componentWidth);
+                        imgWidth  = style.width().orElse(componentWidth);
                         imgHeight = style.height().orElse(componentHeight);
                     }
                     if ( style.fitMode() == UI.FitComponent.WIDTH )
@@ -1185,41 +1252,50 @@ final class StylePainter<C extends JComponent>
                         }
                     }
                 }
+                imgWidth  = imgWidth  >= 0 ? imgWidth  : componentWidth;
+                imgHeight = imgHeight >= 0 ? imgHeight : componentHeight;
             }
-            if ( imgWidth  < 0 ) imgWidth  = componentWidth;
-            if ( imgHeight < 0 ) imgHeight = componentHeight;
-            int x = 0;
-            int y = 0;
-            float opacity = style.opacity();
+            if ( imageIcon instanceof SvgIcon ) {
+                SvgIcon   svgIcon = (SvgIcon) imageIcon;
+                FloatSize size    = svgIcon.getSvgSize();
+                imgWidth  = imgWidth  >= 0 ? imgWidth  : (int) size.width;
+                imgHeight = imgHeight >= 0 ? imgHeight : (int) size.height;
+            }
+            int x = style.horizontalOffset();
+            int y = style.verticalOffset();
+
+            final float opacity = style.opacity();
+
             switch ( placement ) {
                 case TOP:
-                    x = (componentWidth - imgWidth) / 2;
+                    x += (componentWidth - imgWidth) / 2;
                     break;
                 case LEFT:
-                    y = (componentHeight - imgHeight) / 2;
+                    y += (componentHeight - imgHeight) / 2;
                     break;
                 case BOTTOM:
-                    x = (componentWidth - imgWidth) / 2;
-                    y = componentHeight - imgHeight;
+                    x += (componentWidth - imgWidth) / 2;
+                    y += componentHeight - imgHeight;
                     break;
                 case RIGHT:
-                    x = componentWidth - imgWidth;
-                    y = (componentHeight - imgHeight) / 2;
+                    x += componentWidth - imgWidth;
+                    y += (componentHeight - imgHeight) / 2;
                     break;
                 case TOP_LEFT: break;
                 case TOP_RIGHT:
-                    x = componentWidth - imgWidth;
+                    x += componentWidth - imgWidth;
                     break;
                 case BOTTOM_LEFT:
-                    y = componentHeight - imgHeight;
+                    y += componentHeight - imgHeight;
                     break;
                 case BOTTOM_RIGHT:
-                    x = componentWidth - imgWidth;
-                    y = componentHeight - imgHeight;
+                    x += componentWidth - imgWidth;
+                    y += componentHeight - imgHeight;
                     break;
                 case CENTER:
-                    x = (componentWidth - imgWidth) / 2;
-                    y = (componentHeight - imgHeight) / 2;
+                case UNDEFINED:
+                    x += (componentWidth - imgWidth) / 2;
+                    y += (componentHeight - imgHeight) / 2;
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown placement: " + placement);
@@ -1229,9 +1305,45 @@ final class StylePainter<C extends JComponent>
             y += padding.top().orElse(0);
             imgWidth  -= padding.left().orElse(0) + padding.right().orElse(0);
             imgHeight -= padding.top().orElse(0)  + padding.bottom().orElse(0);
-            if ( !repeat && imageIcon instanceof SvgIcon) {
+            if ( imageIcon instanceof SvgIcon ) {
+                SvgIcon svgIcon = (SvgIcon) imageIcon;
+                if ( imgWidth > -1 && svgIcon.getIconWidth() < 0 )
+                    svgIcon = svgIcon.withIconWidth(imgWidth);
+                if ( imgHeight > -1 && svgIcon.getIconHeight() < 0 )
+                    svgIcon = svgIcon.withIconHeight(imgHeight);
+                imageIcon = svgIcon;
+            }
+
+            final Shape oldClip = g2d.getClip();
+
+            Shape newClip = oldClip;
+            switch ( style.clipArea() ) {
+                case INTERIOR:
+                    newClip = _getInteriorAreaOf(component);
+                    break;
+                case BORDER:
+                    newClip = _getBorderAreaOf(component);
+                    break;
+                case EXTERIOR:
+                    newClip = _getExteriorAreaOf(component);
+                    break;
+                case ALL:
+                    break;
+                default:
+                    log.warn("Unknown clip area: " + style.clipArea());
+            }
+            // We merge the new clip with the old one:
+            if ( newClip != null && oldClip != null && !newClip.equals(oldClip) ) {
+                Area area = new Area(newClip);
+                area.intersect(new Area(oldClip));
+                newClip = area;
+            }
+            g2d.setClip(newClip);
+
+            if ( !repeat && imageIcon instanceof SvgIcon ) {
                 SvgIcon svgIcon = ((SvgIcon) imageIcon).withFitComponent(style.fitMode());
-                svgIcon.paintIcon(component, g2d, x, y, imgWidth, imgHeight);
+                svgIcon.withPreferredPlacement(UI.Placement.CENTER)
+                        .paintIcon(component, g2d, x, y, imgWidth, imgHeight);
             }
             else
             {
@@ -1246,23 +1358,26 @@ final class StylePainter<C extends JComponent>
                     image = imageIcon.getImage();
 
                 Composite oldComposite = g2d.getComposite();
+
                 try {
                     g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
                     if (repeat) {
                         Paint oldPaint = g2d.getPaint();
                         try {
                             g2d.setPaint(new TexturePaint((BufferedImage) image, new Rectangle(x, y, imgWidth, imgHeight)));
-                            g2d.fill(specificArea);
+                            g2d.fill(_getInteriorAreaOf(component));
                         } finally {
                             g2d.setPaint(oldPaint);
                         }
-                    } else
+                    }
+                    else
                         g2d.drawImage(image, x, y, imgWidth, imgHeight, null);
 
                 } finally {
                     g2d.setComposite(oldComposite);
                 }
             }
+            g2d.setClip(oldClip);
         });
     }
 
@@ -1285,6 +1400,7 @@ final class StylePainter<C extends JComponent>
                 try {
                     expirablePainter.get().paint(g2d);
                 } catch ( Exception e ) {
+                    e.printStackTrace();
                     log.warn(
                         "Exception while painting animation '" + expirablePainter.get() + "' " +
                         "with lifetime " + expirablePainter.getLifeTime()+ ".",
@@ -1293,7 +1409,6 @@ final class StylePainter<C extends JComponent>
                     // An exception inside a painter should not prevent everything else from being painted!
                     // Note that we log as warning because exceptions during rendering are not considered
                     // as harmful as elsewhere!
-
                 }
             }
 

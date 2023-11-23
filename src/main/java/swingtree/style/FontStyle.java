@@ -170,6 +170,7 @@ final class FontStyle
 
     public static FontStyle none() { return _NONE; }
 
+
     private final String _familyName;
     private final int     _size;
     private final float   _posture;
@@ -182,7 +183,7 @@ final class FontStyle
     private final Boolean _isStrike;
     private final Paint   _paint;
     private final Paint   _backgroundPaint;
-    private final AffineTransform _transform;
+    private final AffineTransform        _transform;
     private final UI.HorizontalAlignment _horizontalAlignment;
     private final UI.VerticalAlignment   _verticalAlignment;
 
@@ -222,33 +223,33 @@ final class FontStyle
     }
 
 
-    public String family() { return _familyName; }
+    String family() { return _familyName; }
 
-    public int size() { return _size; }
+    int size() { return _size; }
 
-    public float posture() { return _posture; }
+    float posture() { return _posture; }
 
-    public float weight() { return _weight; }
+    float weight() { return _weight; }
 
-    public float spacing() { return _spacing; }
+    float spacing() { return _spacing; }
     
-    public Optional<Color> color() { return Optional.ofNullable(_color); }
+    Optional<Color> color() { return Optional.ofNullable(_color); }
 
-    public Optional<Color> backgroundColor() { return Optional.ofNullable(_backgroundColor); }
+    Optional<Color> backgroundColor() { return Optional.ofNullable(_backgroundColor); }
 
-    public Optional<Color> selectionColor() { return Optional.ofNullable(_selectionColor); }
+    Optional<Color> selectionColor() { return Optional.ofNullable(_selectionColor); }
     
-    public boolean isUnderlined() { return _isUnderlined; }
+    boolean isUnderlined() { return _isUnderlined; }
     
-    public Optional<AffineTransform> transform() { return Optional.ofNullable(_transform); }
+    Optional<AffineTransform> transform() { return Optional.ofNullable(_transform); }
     
-    public Optional<Paint> paint() { return Optional.ofNullable(_paint); }
+    Optional<Paint> paint() { return Optional.ofNullable(_paint); }
 
-    public Optional<Paint> backgroundPaint() { return Optional.ofNullable(_backgroundPaint); }
+    Optional<Paint> backgroundPaint() { return Optional.ofNullable(_backgroundPaint); }
 
-    public Optional<UI.HorizontalAlignment> horizontalAlignment() { return Optional.ofNullable(_horizontalAlignment); }
+    Optional<UI.HorizontalAlignment> horizontalAlignment() { return Optional.ofNullable(_horizontalAlignment); }
 
-    public Optional<UI.VerticalAlignment> verticalAlignment() { return Optional.ofNullable(_verticalAlignment); }
+    Optional<UI.VerticalAlignment> verticalAlignment() { return Optional.ofNullable(_verticalAlignment); }
 
     FontStyle family( String fontFamily ) { return new FontStyle(fontFamily, _size, _posture, _weight, _spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment); }
 
@@ -390,7 +391,7 @@ final class FontStyle
                 );
     }
 
-    public Optional<Font> createDerivedFrom( Font existingFont )
+    Optional<Font> createDerivedFrom( Font existingFont )
     {
         if ( this.equals(_NONE) )
             return Optional.empty();

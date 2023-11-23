@@ -153,13 +153,15 @@ class Styles_Spec extends Specification
                                             "layer=BACKGROUND, " +
                                             "primer=?, " +
                                             "image=?, " +
-                                            "placement=CENTER, " +
+                                            "placement=UNDEFINED, " +
                                             "repeat=false, " +
                                             "fitComponent=NO, " +
                                             "width=?, " +
                                             "height=?, " +
                                             "opacity=1.0, " +
-                                            "padding=Outline[top=?, right=?, bottom=?, left=?]" +
+                                            "padding=Outline[top=?, right=?, bottom=?, left=?], " +
+                                            "offset=Offset[x=0, y=0], " +
+                                            "clipArea=INTERIOR" +
                                         "], " +
                                         "properties=[]" +
                                     "]"

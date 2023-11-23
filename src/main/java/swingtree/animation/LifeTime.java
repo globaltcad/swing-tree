@@ -4,7 +4,9 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
- *  The lifetime object defines when an animation should start and for how long it should run.
+ *  The lifetime defines when an {@link Animation} starts and for how long it should run.
+ *  It consists of a delay, start time and duration as well as a unique id
+ *  which ensures that two instances of this class are never equal.
  */
 public final class LifeTime
 {
@@ -130,7 +132,7 @@ public final class LifeTime
      * @param iteration The iteration for which the end time should be determined and returned.
      * @return The end time of the specified iteration in the given time unit.
      */
-    public long getIterationEndTimeIn( TimeUnit unit, int iteration ) {
+    public long getEndTimeIn( TimeUnit unit, int iteration ) {
         Objects.requireNonNull(unit);
         return unit.convert(_startTime + _duration * iteration, TimeUnit.MILLISECONDS);
     }
@@ -154,6 +156,8 @@ public final class LifeTime
     }
 
     @Override
-    public int hashCode() { return Objects.hash(_id, _delay, _duration, _startTime); }
+    public int hashCode() {
+        return Objects.hash(_id, _delay, _duration, _startTime);
+    }
 
 }

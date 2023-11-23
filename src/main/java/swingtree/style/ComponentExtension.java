@@ -142,9 +142,54 @@ public final class ComponentExtension<C extends JComponent>
         for ( int i = 0; i < groupTags.length; i++ ) {
             E group = groupTags[i];
             Objects.requireNonNull(group);
-            stringTags[i] = group.getClass().getSimpleName() + "." + group.name();
+            stringTags[i] = StyleUtility.toString(group);
         }
         setStyleGroups(stringTags);
+    }
+
+    public final void setId( String id ) {
+        _owner.setName(id);
+    }
+
+    public final <E extends Enum<E>> void setId( E id ) {
+        this.setId(StyleUtility.toString(id));
+    }
+
+    public final boolean hasId( String id ) {
+        return Objects.equals(_owner.getName(), id);
+    }
+
+    public final boolean hasId( Enum<?> id ) {
+        return hasId(StyleUtility.toString(id));
+    }
+
+    final UI.Placement preferredIconPlacement() {
+        UI.Placement preferredPlacement = UI.Placement.UNDEFINED;
+        if ( _hasText(_owner) )
+            preferredPlacement = UI.Placement.LEFT;
+        if ( !Objects.equals(ComponentOrientation.UNKNOWN, _owner.getComponentOrientation()) ) {
+            if (  Objects.equals(ComponentOrientation.LEFT_TO_RIGHT, _owner.getComponentOrientation()) )
+                preferredPlacement = UI.Placement.LEFT;
+            if (  Objects.equals(ComponentOrientation.RIGHT_TO_LEFT, _owner.getComponentOrientation()) )
+                preferredPlacement = UI.Placement.RIGHT;
+        }
+        return preferredPlacement;
+    }
+
+    private boolean _hasText( Component component ) {
+        return !Optional.ofNullable( _findTextOf(component) ).map( String::isEmpty ).orElse(true);
+    }
+
+    private String _findTextOf( Component component ) {
+        // We go through all the components which can display text and return the first one we find:
+        if ( component instanceof javax.swing.AbstractButton ) // Covers JButton, JToggleButton, JCheckBox, JRadioButton...
+            return ((javax.swing.AbstractButton) component).getText();
+        if ( component instanceof javax.swing.JLabel )
+            return ((javax.swing.JLabel) component).getText();
+        if ( component instanceof JTextComponent )
+            return ((JTextComponent) component).getText();
+
+        return "";
     }
 
     /**
@@ -162,7 +207,7 @@ public final class ComponentExtension<C extends JComponent>
      * @return {@code true} if the component belongs to the given group.
      */
     public boolean belongsToGroup( Enum<?> group ) {
-        return belongsToGroup(group.getClass().getSimpleName() + "." + group.name());
+        return belongsToGroup(StyleUtility.toString(group));
     }
 
     Shape getCurrentOuterBaseClip() { return _outerBaseClip; }
@@ -267,20 +312,7 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     void paintWithContentAreaClip( Graphics g, Runnable painter ) {
-        Shape oldClip = g.getClip();
-        Shape newClip = _stylePainter._getBaseArea(_owner);
-        if ( newClip != null && newClip != oldClip ) {
-            if ( oldClip != null ) {
-                Area common = new Area(oldClip);
-                common.intersect(new Area(newClip));
-                newClip = common;
-            }
-            g.setClip(newClip);
-        }
-
-        painter.run();
-
-        g.setClip(oldClip);
+        _stylePainter.paintWithContentAreaClip(_owner, g, painter);
     }
 
     /**
@@ -364,7 +396,7 @@ public final class ComponentExtension<C extends JComponent>
         _stylePainter.renderBackgroundStyle( (Graphics2D) g, _owner );
 
         if ( lookAndFeelPainting != null ) {
-            Shape contentClip = _stylePainter.baseAreaFor(_owner).orElse(null);
+            Shape contentClip = _stylePainter.interiorAreaOf(_owner).orElse(null);
 
             if ( contentClip == null )
                 contentClip = _outerBaseClip;
@@ -438,6 +470,11 @@ public final class ComponentExtension<C extends JComponent>
         if ( hasBackground && !Objects.equals( _owner.getBackground(), style.base().backgroundColor().get() ) ) {
             _initialBackgroundColor = _initialBackgroundColor != null ? _initialBackgroundColor :  _owner.getBackground();
             _owner.setBackground( style.base().backgroundColor().get() );
+            if ( _owner instanceof JScrollPane ) {
+                JScrollPane scrollPane = (JScrollPane) _owner;
+                if ( scrollPane.getViewport() != null )
+                    scrollPane.getViewport().setBackground( style.base().backgroundColor().get() );
+            }
         }
 
         // If the style has a border radius set we need to make sure that we have a background color:

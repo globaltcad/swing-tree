@@ -64,6 +64,12 @@ public abstract class StyleSheet
 
     private static final StyleSheet _NONE = new StyleSheet() { @Override protected void configure() {} };
 
+    /**
+     *  A factory method for getting the empty style sheet representing no style whatsoever.
+     *  It is especially useful instead of null.
+     *
+     * @return A style sheet without any traits and stylers.
+     */
     public static StyleSheet none() { return _NONE; }
 
 

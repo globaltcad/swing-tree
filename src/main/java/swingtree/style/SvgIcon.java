@@ -27,6 +27,8 @@ import java.util.Optional;
 public final class SvgIcon extends ImageIcon
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(SvgIcon.class);
+    private static final UI.FitComponent DEFAULT_FIT_COMPONENT = UI.FitComponent.MIN_DIM;
+    private static final UI.Placement    DEFAULT_PLACEMENT     = UI.Placement.UNDEFINED;
 
     private final SVGDocument _svgDocument;
 
@@ -34,35 +36,51 @@ public final class SvgIcon extends ImageIcon
     private final int _height;
 
     private final UI.FitComponent _fitComponent;
+    private final UI.Placement    _preferredPlacement;
 
 
-    private SvgIcon( SVGDocument svgDocument, int width, int height, UI.FitComponent fitComponent ) {
+    private SvgIcon(
+        SVGDocument     svgDocument,
+        int             width,
+        int             height,
+        UI.FitComponent fitComponent,
+        UI.Placement    preferredPlacement
+    ) {
         super();
-        _svgDocument  = svgDocument;
-        _width        = width;
-        _height       = height;
-        _fitComponent = fitComponent;
+        _svgDocument        = svgDocument;
+        _width              = width;
+        _height             = height;
+        _fitComponent       = fitComponent;
+        _preferredPlacement = preferredPlacement;
     }
 
     public SvgIcon( SvgIcon icon ) {
-        this(icon._svgDocument, icon._width, icon._height, icon._fitComponent);
+        this(icon._svgDocument, icon._width, icon._height, icon._fitComponent, icon._preferredPlacement);
+    }
+
+    public SvgIcon( URL svgUrl, int width, int height, UI.FitComponent fitComponent, UI.Placement preferredPlacement ) {
+        this(_loadSvgDocument(svgUrl), width, height, fitComponent, preferredPlacement);
     }
 
     public SvgIcon( URL svgUrl, int width, int height, UI.FitComponent fitComponent ) {
-        this(_loadSvgDocument(svgUrl), width, height, fitComponent);
+        this(_loadSvgDocument(svgUrl), width, height, fitComponent, DEFAULT_PLACEMENT);
     }
 
     public SvgIcon( URL svgUrl, int width, int height ) {
-        this(svgUrl, width, height, UI.FitComponent.MIN_DIM);
+        this(svgUrl, width, height, DEFAULT_FIT_COMPONENT);
     }
 
     public SvgIcon( String path, int width, int height ) {
         this(SvgIcon.class.getResource(path), width, height);
     }
 
-    public SvgIcon( String path ) { this(path, -1, -1); }
+    public SvgIcon( String path ) {
+        this(path, -1, -1);
+    }
 
-    public SvgIcon( URL svgUrl ) { this(svgUrl, -1, -1); }
+    public SvgIcon( URL svgUrl ) {
+        this(svgUrl, -1, -1);
+    }
 
 
     private static SVGDocument _loadSvgDocument( URL svgUrl ) {
@@ -82,7 +100,9 @@ public final class SvgIcon extends ImageIcon
      *         to the width of a given component or the width of the SVG document itself.
      */
     @Override
-    public int getIconWidth() { return _width; }
+    public int getIconWidth() {
+        return _width;
+    }
 
     /**
      * @param width The width of the icon, or -1 if the icon should be rendered according
@@ -94,7 +114,7 @@ public final class SvgIcon extends ImageIcon
     public SvgIcon withIconWidth( int width ) {
         if ( width == _width )
             return this;
-        return new SvgIcon(_svgDocument, width, _height, _fitComponent);
+        return new SvgIcon(_svgDocument, width, _height, _fitComponent, _preferredPlacement);
     }
 
     /**
@@ -103,7 +123,9 @@ public final class SvgIcon extends ImageIcon
      *        or the width or height of the SVG document itself.
      */
     @Override
-    public int getIconHeight() { return _height; }
+    public int getIconHeight() {
+        return _height;
+    }
 
     /**
      * @param height The height of the icon, or -1 if the icon should be rendered according
@@ -115,7 +137,7 @@ public final class SvgIcon extends ImageIcon
     public SvgIcon withIconHeight( int height ) {
         if ( height == _height )
             return this;
-        return new SvgIcon(_svgDocument, _width, height, _fitComponent);
+        return new SvgIcon(_svgDocument, _width, height, _fitComponent, _preferredPlacement);
     }
 
     /**
@@ -130,7 +152,15 @@ public final class SvgIcon extends ImageIcon
     public SvgIcon withIconSize( int width, int height ) {
         if ( width == _width && height == _height )
             return this;
-        return new SvgIcon(_svgDocument, width, height, _fitComponent);
+        return new SvgIcon(_svgDocument, width, height, _fitComponent, _preferredPlacement);
+    }
+
+    /**
+     * @return The size of the SVG document in the form of a {@link FloatSize},
+     *         a subclass of {@link java.awt.geom.Dimension2D}.
+     */
+    public FloatSize getSvgSize() {
+        return _svgDocument.size();
     }
 
     /**
@@ -148,7 +178,25 @@ public final class SvgIcon extends ImageIcon
         Objects.requireNonNull(fit);
         if ( fit == _fitComponent )
             return this;
-        return new SvgIcon(_svgDocument, _width, _height, fit);
+        return new SvgIcon(_svgDocument, _width, _height, fit, _preferredPlacement);
+    }
+
+    /**
+     * @return The {@link UI.Placement} that determines where the icon should be placed within a component
+     *         (see {@link #paintIcon(Component, java.awt.Graphics, int, int, int, int)}).
+     */
+    public UI.Placement getPreferredPlacement() { return _preferredPlacement; }
+
+    /**
+     * @param placement The {@link UI.Placement} that determines where the icon should be placed within a component
+     *                  (see {@link #paintIcon(Component, java.awt.Graphics, int, int, int, int)}).
+     * @return A new {@link SvgIcon} with the given {@link UI.Placement} policy.
+     */
+    public SvgIcon withPreferredPlacement( UI.Placement placement ) {
+        Objects.requireNonNull(placement);
+        if ( placement == _preferredPlacement )
+            return this;
+        return new SvgIcon(_svgDocument, _width, _height, _fitComponent, placement);
     }
 
     /**
@@ -157,13 +205,23 @@ public final class SvgIcon extends ImageIcon
      */
     @Override
     public Image getImage() {
+        int width  = getIconWidth();
+        int height = getIconHeight();
+
+        if ( _svgDocument != null ) {
+            if (width < 0)
+                width = (int) _svgDocument.size().width;
+            if (height < 0)
+                height = (int) _svgDocument.size().height;
+        }
+
         // We create a new buffered image, render into it, and then return it.
-        BufferedImage image = new BufferedImage(getIconWidth(), getIconHeight(), BufferedImage.TYPE_INT_ARGB);
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         if ( _svgDocument != null )
             _svgDocument.render(
                     null,
                     image.createGraphics(),
-                    new ViewBox(0, 0, getIconWidth(), getIconHeight())
+                    new ViewBox(0, 0, width, height)
                 );
 
         return image;
@@ -199,16 +257,49 @@ public final class SvgIcon extends ImageIcon
                                     }
                                 })
                                 .orElse(new Insets(0,0,0,0));
-        x = insets.left;
-        y = insets.top;
+
+        UI.Placement preferredPlacement = _preferredPlacement;
+
+        if ( preferredPlacement == UI.Placement.UNDEFINED && c instanceof JComponent )
+            preferredPlacement = ComponentExtension.from((JComponent) c).preferredIconPlacement();
+
+        int deltaX = 0;
+        int deltaY = 0;
+
+        if ( _width >= 0 ) {
+            deltaX += Math.max(0, x - insets.left);
+            x = Math.max(x, insets.left);
+        }
+        else
+            x = insets.left;
+
+        if ( _height >= 0 ) {
+            deltaY += Math.max(0, y - insets.top);
+            y = Math.max(y, insets.top);
+        }
+        else
+            y = insets.top;
 
         int width  = c.getWidth();
         int height = c.getHeight();
 
-        width  = width  - insets.right  - insets.left;
-        height = height - insets.bottom - insets.top;
+        width  = width  - insets.right  - insets.left - deltaX;
+        height = height - insets.bottom - insets.top  - deltaY;
 
-        paintIcon( c, g, x, y, width, height );
+        if ( width  <= 0 ) {
+            int smaller = (int) Math.floor( width / 2.0 );
+            int larger  = (int) Math.ceil(  width / 2.0 );
+            x += smaller;
+            width = ( larger - smaller );
+        }
+        if ( height <= 0 ) {
+            int smaller = (int) Math.floor( height / 2.0 );
+            int larger  = (int) Math.ceil(  height / 2.0 );
+            y += smaller;
+            height = ( larger - smaller );
+        }
+
+        _paintIcon( c, g, x, y, width, height, preferredPlacement );
     }
 
     private Insets _determineInsetsForBorder( Border b, Component c )
@@ -234,12 +325,24 @@ public final class SvgIcon extends ImageIcon
     }
 
     public void paintIcon(
+            final java.awt.Component c,
+            final java.awt.Graphics g,
+            int x,
+            int y,
+            int width,
+            int height
+    ) {
+        _paintIcon( c, g, x, y, width, height, _preferredPlacement );
+    }
+
+    private void _paintIcon(
         final java.awt.Component c,
         final java.awt.Graphics g,
-        final int x,
-        final int y,
+        int x,
+        int y,
         int width,
-        int height
+        int height,
+        UI.Placement preferredPlacement
     ) {
         if ( _svgDocument == null )
             return;
@@ -302,9 +405,9 @@ public final class SvgIcon extends ImageIcon
             viewBox = new ViewBox(boxX, boxY, boxWidth, boxHeight);
 
         if ( _fitComponent == UI.FitComponent.NO ) {
-            width = _width >= 0 ? _width : (int) svgSize.width;
-            height = _height >= 0 ? _height : (int) svgSize.height;
-            viewBox = new ViewBox(x, y, width, height);
+            width   = _width  >= 0 ? _width  : (int) svgSize.width;
+            height  = _height >= 0 ? _height : (int) svgSize.height;
+            viewBox = new ViewBox( x, y, width, height );
         }
 
         // Let's check if the view box exists:
@@ -314,6 +417,62 @@ public final class SvgIcon extends ImageIcon
         // Also let's check if the view box has valid values:
         if ( Float.isNaN(viewBox.x) || Float.isNaN(viewBox.y) || Float.isNaN(viewBox.width) || Float.isNaN(viewBox.height) )
             return;
+
+        // Let's make sure the view box has the correct dimension ratio:
+        float viewBoxRatio = _svgDocument.size().width / _svgDocument.size().height;
+        float boxRatio     =      viewBox.width        /      viewBox.height;
+        if ( boxRatio > viewBoxRatio ) {
+            // The view box is too wide, we need to make it narrower:
+            float newWidth = viewBox.height * viewBoxRatio;
+            viewBox = new ViewBox( viewBox.x + (viewBox.width - newWidth) / 2f, viewBox.y, newWidth, viewBox.height );
+        }
+        if ( boxRatio < viewBoxRatio ) {
+            // The view box is too tall, we need to make it shorter:
+            float newHeight = viewBox.width / viewBoxRatio;
+            viewBox = new ViewBox( viewBox.x, viewBox.y + (viewBox.height - newHeight) / 2f, viewBox.width, newHeight );
+        }
+
+        /*
+            Before we do the actual rendering we first check if there
+            is a preferred placement that is not the center.
+            If that is the case we move the view box accordingly.
+         */
+        if ( preferredPlacement != UI.Placement.CENTER && preferredPlacement != UI.Placement.UNDEFINED ) {
+            // First we correct if the component area is smaller than the view box:
+            width += (int) Math.max(0, ( viewBox.x + viewBox.width ) - ( x + width ) );
+            width += (int) Math.max(0, x - viewBox.x );
+            x = (int) Math.min(x, viewBox.x);
+            height += (int) Math.max(0, ( viewBox.y + viewBox.height ) - ( y + height ) );
+            height += (int) Math.max(0, y - viewBox.y );
+            y = (int) Math.min(y, viewBox.y);
+
+            switch ( preferredPlacement ) {
+                case TOP_LEFT:
+                    viewBox = new ViewBox( x, y, viewBox.width, viewBox.height );
+                    break;
+                case TOP_RIGHT:
+                    viewBox = new ViewBox( x + width - viewBox.width, y, viewBox.width, viewBox.height );
+                    break;
+                case BOTTOM_LEFT:
+                    viewBox = new ViewBox( x, y + height - viewBox.height, viewBox.width, viewBox.height );
+                    break;
+                case BOTTOM_RIGHT:
+                    viewBox = new ViewBox( x + width - viewBox.width, y + height - viewBox.height, viewBox.width, viewBox.height );
+                    break;
+                case TOP:
+                    viewBox = new ViewBox( x + (width - viewBox.width) / 2f, y, viewBox.width, viewBox.height );
+                    break;
+                case BOTTOM:
+                    viewBox = new ViewBox( x + (width - viewBox.width) / 2f, y + height - viewBox.height, viewBox.width, viewBox.height );
+                    break;
+                case LEFT:
+                    viewBox = new ViewBox( x, y + (height - viewBox.height) / 2f, viewBox.width, viewBox.height );
+                    break;
+                case RIGHT:
+                    viewBox = new ViewBox( x + width - viewBox.width, y + (height - viewBox.height) / 2f, viewBox.width, viewBox.height );
+                    break;
+            }
+        }
 
         // Now onto the actual rendering:
 
@@ -343,7 +502,9 @@ public final class SvgIcon extends ImageIcon
     }
 
     @Override
-    public int hashCode() { return Objects.hash(_svgDocument, _width, _height, _fitComponent); }
+    public int hashCode() {
+        return Objects.hash(_svgDocument, _width, _height, _fitComponent, _preferredPlacement);
+    }
 
     @Override
     public boolean equals( Object obj ) {
@@ -351,9 +512,10 @@ public final class SvgIcon extends ImageIcon
         if ( obj == this ) return true;
         if ( obj.getClass() != getClass() ) return false;
         SvgIcon rhs = (SvgIcon) obj;
-        return Objects.equals(_svgDocument,  rhs._svgDocument) &&
-               Objects.equals(_width,        rhs._width) &&
-               Objects.equals(_height,       rhs._height) &&
-               Objects.equals(_fitComponent, rhs._fitComponent);
+        return Objects.equals(_svgDocument,        rhs._svgDocument)  &&
+               Objects.equals(_width,              rhs._width)        &&
+               Objects.equals(_height,             rhs._height)       &&
+               Objects.equals(_fitComponent,       rhs._fitComponent) &&
+               Objects.equals(_preferredPlacement, rhs._preferredPlacement);
     }
 }

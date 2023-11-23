@@ -16,8 +16,9 @@ import swingtree.components.JScrollPanels;
 import swingtree.components.JSplitButton;
 import swingtree.components.listener.NestedJScrollPanelScrollCorrection;
 import swingtree.dialogs.ConfirmAnswer;
-import swingtree.dialogs.ConfirmDialogBuilder;
-import swingtree.dialogs.MessageDialogBuilder;
+import swingtree.dialogs.ConfirmDialog;
+import swingtree.dialogs.MessageDialog;
+import swingtree.dialogs.OptionsDialog;
 import swingtree.layout.LayoutConstraint;
 import swingtree.style.*;
 import swingtree.threading.EventProcessor;
@@ -426,7 +427,13 @@ public final class UI extends UILayoutConstants
         TOP, LEFT, BOTTOM, RIGHT,
         TOP_LEFT, TOP_RIGHT,
         BOTTOM_LEFT, BOTTOM_RIGHT,
-        CENTER
+        CENTER,
+        UNDEFINED
+    }
+
+    public enum ComponentArea
+    {
+        EXTERIOR, BORDER, INTERIOR, ALL
     }
 
     public enum Axis {
@@ -750,16 +757,20 @@ public final class UI extends UILayoutConstants
     }
 
     /**
-     * Loads an icon from the resource folder, the classpath, a local file
+     * Loads an {@link ImageIcon} from the resource folder, the classpath, a local file
      * or from cache if it has already been loaded.
      * If no icon could be found, an empty optional is returned.
+     * <br><br>
+     * Note that this method will also return {@link SvgIcon} instances, if the icon is an SVG image.
      * <br><br>
      * Also, checkout {@link SwingTree#getIconCache()} to see where the icons are cached.
      *
      * @param path The path to the icon. It can be a classpath resource or a file path.
      * @return An optional containing the icon if it could be found, an empty optional otherwise.
+     * @throws NullPointerException if {@code path} is {@code null}.
      */
     public static Optional<ImageIcon> findIcon( String path ) {
+        Objects.requireNonNull(path, "path");
         Map<String, ImageIcon> cache = SwingTree.get().getIconCache();
         ImageIcon icon = cache.get(path);
         if ( icon == null ) {
@@ -771,11 +782,43 @@ public final class UI extends UILayoutConstants
     }
 
     /**
+     * Loads an {@link SvgIcon} from the resource folder, the classpath, a local file
+     * or from cache if it has already been loaded.
+     * If no icon could be found, an empty optional is returned.
+     * <br><br>
+     * Also, checkout {@link SwingTree#getIconCache()} to see where the icons are cached.
+     *
+     * @param path The path to the icon. It can be a classpath resource or a file path.
+     * @return An optional containing the {@link SvgIcon} if it could be found, an empty optional otherwise.
+     * @throws NullPointerException if {@code path} is {@code null}.
+     */
+    public static Optional<SvgIcon> findSvgIcon( String path ) {
+        Objects.requireNonNull(path, "path");
+        if ( !path.endsWith(".svg") )
+            return Optional.empty();
+
+        Map<String, ImageIcon> cache = SwingTree.get().getIconCache();
+        ImageIcon icon = cache.get(path);
+        if ( icon == null ) {
+            icon = _loadIcon(path);
+            if ( icon != null )
+                cache.put(path, icon);
+        }
+        if ( !(icon instanceof SvgIcon) )
+            return Optional.empty();
+        else
+            return Optional.of(icon).map(SvgIcon.class::cast);
+    }
+
+    /**
      * Loads an icon from the classpath or from a file.
      * @param path The path to the icon. It can be a classpath resource or a file path.
      * @return The icon.
+     * @throws NullPointerException if {@code path} is {@code null}.
      */
-    public static ImageIcon _loadIcon( String path ) {
+    public static ImageIcon _loadIcon( String path )
+    {
+        Objects.requireNonNull(path, "path");
         path = path.trim();
         if ( path.isEmpty() )
             return null;
@@ -3835,8 +3878,14 @@ public final class UI extends UILayoutConstants
         width  = (int) (width * scale);
         height = (int) (height * scale);
 
-        Image scaled = ((ImageIcon) icon).getImage().getScaledInstance(width, height, scaleHint);
-        return of(new JIcon(new ImageIcon(scaled)));
+        if ( icon instanceof SvgIcon ) {
+            SvgIcon svgIcon = (SvgIcon) icon;
+            svgIcon = svgIcon.withIconSize(width, height);
+            return UI.icon(svgIcon);
+        } else {
+            Image scaled = ((ImageIcon) icon).getImage().getScaledInstance(width, height, scaleHint);
+            return UI.icon(new ImageIcon(scaled));
+        }
     }
 
     /**
@@ -4216,6 +4265,33 @@ public final class UI extends UILayoutConstants
     public static UIForToggleButton<JToggleButton> toggleButton( int width, int height, ImageIcon icon ) {
         NullUtil.nullArgCheck(icon, "icon", Icon.class);
         return toggleButton().withIcon(width, height, icon);
+    }
+
+    /**
+     *  Use this to create a builder for the {@link JToggleButton} UI component
+     *  with an icon displayed on it scaled according to the provided width and height.
+     *
+     * @param width The width the icon should be scaled to.
+     * @param height The height the icon should be scaled to.
+     * @param icon The {@link IconDeclaration} whose icon ought to be displayed on top of the button.
+     * @return A builder instance for a {@link JToggleButton}, which enables fluent method chaining.
+     */
+    public static UIForToggleButton<JToggleButton> toggleButton( int width, int height, IconDeclaration icon ) {
+        NullUtil.nullArgCheck(icon, "icon", Icon.class);
+        return toggleButton().withIcon(width, height, icon);
+    }
+
+    /**
+     * @param width The width the icon should be scaled to.
+     * @param height The height the icon should be scaled to.
+     * @param icon The {@link IconDeclaration} whose icon ought to be displayed on top of the button.
+     * @param fit The {@link FitComponent} which determines how the icon should be fitted into the button.
+     * @return A builder instance for a {@link JToggleButton}, which enables fluent method chaining.
+     */
+    public static UIForToggleButton<JToggleButton> toggleButton( int width, int height, IconDeclaration icon, FitComponent fit ) {
+        NullUtil.nullArgCheck(icon, "icon", Icon.class);
+        NullUtil.nullArgCheck(fit, "fit", FitComponent.class);
+        return toggleButton().withIcon(width, height, icon, fit);
     }
 
     /**
@@ -5781,55 +5857,40 @@ public final class UI extends UILayoutConstants
     public static LifeTime lifeTime( long duration, TimeUnit unit ) { return LifeTime.of(duration, unit); }
 
     /**
-     *  Shows a conformation dialog with the given message.
-     * @param message the message to show
-     * @return {@code Answer.YES} if the user clicked "Yes", {@code Answer.NO} if the user clicked "No", {@code Answer.CANCEL} otherwise.
+     *  Shows an info dialog with the given message.
+     * @param message The message to show in the dialog.
      */
-    public static ConfirmAnswer confirm( String message ) { return confirm("Confirm", message); }
+    public static void info( String message ) { info("Info", message); }
 
     /**
-     * Shows a conformation dialog with the given message.
+     * Shows an info dialog with the given message and dialog title.
      *
-     * @param title   the title of the dialog
-     * @param message the message to show
-     * @return {@code Answer.YES} if the user clicked "Yes", {@code Answer.NO} if the user clicked "No", {@code Answer.CANCEL} otherwise.
+     * @param title   The title of the dialog.
+     * @param message The message to show in the dialog.
      */
-    public static ConfirmAnswer confirm( String title, String message ) {
-        return
-            ConfirmDialogBuilder.question()
-            .title(title)
-            .message(message)
-            .show();
+    public static void info( String title, String message ) {
+        message(message)
+                .titled(title)
+                .asInfo();
     }
 
     /**
-     * @return A builder for creating a confirmation dialog designed to ask a question.
+     *  Shows a warning dialog with the given message.
+     * @param message The warning message to show in the dialog.
      */
-    public static ConfirmDialogBuilder confirm() { return ConfirmDialogBuilder.question(); }
+    public static void warn( String message ) { warn("Warning", message); }
 
     /**
-     * @return A builder for creating a confirmation dialog designed to show an error
-     *         and ask the user to confirm it through yes, no or cancel options.
+     * Shows a warning dialog with the given message and dialog title.
+     *
+     * @param title   The title of the dialog.
+     * @param message The warning message to show in the dialog.
      */
-    public static ConfirmDialogBuilder confirmError() { return ConfirmDialogBuilder.error(); }
-    
-    /**
-     * @return A builder for creating a confirmation dialog designed to show an info
-     *         and ask the user to confirm it through yes, no or cancel options.
-     */
-    public static ConfirmDialogBuilder confirmInfo() { return ConfirmDialogBuilder.info(); }
-    
-    /**
-     * @return A builder for creating a confirmation dialog designed to show a warning
-     *         and ask the user to confirm it through yes, no or cancel options.
-     */
-    public static ConfirmDialogBuilder confirmWarning() { return ConfirmDialogBuilder.warning(); }
-
-    /**
-     * @return A builder for creating a confirmation dialog designed to show a plain message (no icon)
-     *         and ask the user to confirm it through yes, no or cancel options.
-     */
-    public static ConfirmDialogBuilder confirmPlain() { return ConfirmDialogBuilder.plain(); }
+    public static void warn( String title, String message ) {
+        message(message)
+                .titled(title)
+                .asWarning();
+    }
 
     /**
      *  Shows an error dialog with the given message.
@@ -5844,64 +5905,43 @@ public final class UI extends UILayoutConstants
      * @param message The error message to show in the dialog.
      */
     public static void error( String title, String message ) {
-        error()
-            .title(title)
-            .message(message)
-            .show();
+        message(message)
+            .titled(title)
+            .asError();
     }
 
     /**
      * @return A builder for creating an error dialog.
      */
-    public static MessageDialogBuilder error() { return MessageDialogBuilder.error(); }
+    public static MessageDialog message(String text ) { return MessageDialog.saying(text); }
 
     /**
-     *  Shows an info dialog with the given message.
-     * @param message The message to show in the dialog.
+     *  Shows a conformation dialog with the given message.
+     * @param message the message to show
+     * @return {@code Answer.YES} if the user clicked "Yes", {@code Answer.NO} if the user clicked "No", {@code Answer.CANCEL} otherwise.
      */
-    public static void info( String message ) { info("Info", message); }
+    public static ConfirmAnswer confirm( String message ) { return confirm("Confirm", message); }
 
     /**
-     * Shows an info dialog with the given message and dialog title.
+     * Shows a conformation dialog with the given message.
      *
-     * @param title   The title of the dialog.
-     * @param message The message to show in the dialog.
+     * @param title   the title of the dialog
+     * @param message the message to show
+     * @return {@code Answer.YES} if the user clicked "Yes", {@code Answer.NO} if the user clicked "No", {@code Answer.CANCEL} otherwise.
      */
-    public static void info( String title, String message ) {
-        info()
-            .title(title)
-            .message(message)
-            .show();
+    public static ConfirmAnswer confirm( String title, String message ) {
+        return ConfirmDialog.asking(message)
+                            .titled(title)
+                            .asQuestion();
     }
 
     /**
-     * @return A builder for creating an info dialog.
+     * @param toBeConfirmed The question to ask the user.
+     * @return A builder for creating a confirmation dialog designed to ask a question.
      */
-    public static MessageDialogBuilder info() { return MessageDialogBuilder.info(); }
-
-    /**
-     *  Shows a warning dialog with the given message.
-     * @param message The warning message to show in the dialog.
-     */
-     public static void warn( String message ) { warn("Warning", message); }
-
-    /**
-     * Shows a warning dialog with the given message and dialog title.
-     *
-     * @param title   The title of the dialog.
-     * @param message The warning message to show in the dialog.
-     */
-    public static void warn( String title, String message ) {
-        warn()
-            .title(title)
-            .message(message)
-            .show();
+    public static ConfirmDialog confirmation( String toBeConfirmed ) {
+        return ConfirmDialog.asking(toBeConfirmed);
     }
-
-    /**
-     * @return A builder for creating a warning dialog.
-     */
-    public static MessageDialogBuilder warn() { return MessageDialogBuilder.warning(); }
 
     /**
      *  Shows a dialog where the user can select a value from a list of options
@@ -5909,12 +5949,13 @@ public final class UI extends UILayoutConstants
      *  The selected value will be stored in said property after the user has
      *  selected a value.
      *
-     * @param message The message to show in the dialog.
+     * @param question The message to show in the dialog.
      * @param selected The enum based property to store the selected value in.
      * @param <E> The enum type.
+     * @return The selected enum value wrapped in an {@link Optional} or an empty optional if the user cancelled the dialog.
      */
-    public static <E extends Enum<E>> void select( String message, Var<E> selected ) {
-        select("Select", message, selected );
+    public static <E extends Enum<E>> Optional<E> ask( String question, Var<E> selected ) {
+        return ask("Select", question, selected );
     }
 
     /**
@@ -5927,9 +5968,15 @@ public final class UI extends UILayoutConstants
      * @param message  The message to show in the dialog.
      * @param selected The enum based property to store the selected value in.
      * @param <E> The enum type.
+     * @return The selected enum value wrapped in an {@link Optional} or an empty optional if the user cancelled the dialog.
      */
-    public static <E extends Enum<E>> void select( String title, String message, Var<E> selected ) {
-        select(title, message, null, selected );
+    public static <E extends Enum<E>> Optional<E> ask( String title, String message, Var<E> selected ) {
+        Objects.requireNonNull( message  );
+        Objects.requireNonNull( title    );
+        Objects.requireNonNull( selected );
+        return OptionsDialog.offering(message, selected)
+                            .titled(title)
+                            .asQuestion();
     }
 
     /**
@@ -5944,17 +5991,43 @@ public final class UI extends UILayoutConstants
      * @param selected The enum based property to store the selected value in.
      * @param <E> The type parameter defining the concrete enum type.
      */
-    public static <E extends Enum<E>> void select( String title, String message, Icon icon, Var<E> selected ) {
+    public static <E extends Enum<E>> void ask( String title, String message, Icon icon, Var<E> selected ) {
         Objects.requireNonNull( message  );
         Objects.requireNonNull( title    );
         Objects.requireNonNull( selected );
-        E[] options = selected.type().getEnumConstants();
-        String[] asStr = new String[options.length];
-        for ( int i = 0; i < options.length; i++ )
-            asStr[i] = options[i].toString();
+        OptionsDialog.offering(message, selected)
+                                .titled(title)
+                                .icon(icon)
+                                .asQuestion();
+    }
 
-        int selectedIdx = JOptionPane.showOptionDialog( null, message, title, JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, icon, asStr, asStr[0] );
-        selected.set(From.VIEW,  options[selectedIdx] );
+    /**
+     *  Exposes the {@link OptionsDialog} API for creating a question dialog
+     *  that allows the user to select a value from an array of provided enum values.
+     *
+     * @param offer The message to show in the dialog.
+     * @param options The array of enum values to show in the dialog.
+     * @param <E> The enum type.
+     * @return A builder for creating a question dialog with a set of selectable enum values
+     *         based on the provided array of enum values.
+     */
+    @SafeVarargs
+    public static <E extends Enum<E>> OptionsDialog<E> choice( String offer, E... options ) {
+        return OptionsDialog.offering(offer, options);
+    }
+
+    /**
+     *  Exposes the {@link OptionsDialog} API for creating a question dialog
+     *  that allows the user to select and set a value from the provided enum based property.
+     *
+     * @param offer The message to show in the dialog.
+     * @param selectable The enum based property to store the selected value in.
+     * @param <E> The enum type.
+     * @return A builder for creating a question dialog with a set of selectable enum values
+     *         based on the provided array of enum values.
+     */
+    public static <E extends Enum<E>> OptionsDialog<E> choice( String offer, Var<E> selectable ) {
+        return OptionsDialog.offering(offer, selectable);
     }
 
     /**
@@ -6288,18 +6361,6 @@ public final class UI extends UILayoutConstants
         }
         @Override public void paint(Graphics g){ _paintBackground(this, g, ()->super.paint(g)); }
         @Override public void paintChildren(Graphics g) { _paintForeground(this, g, ()->super.paintChildren(g)); }
-        @Override
-        public void setOpaque( boolean shouldBeOpaque ) {
-            super.setOpaque(shouldBeOpaque);
-            this.getViewport().setOpaque(shouldBeOpaque);
-        }
-
-        @Override
-        public void setBackground( Color newBackgroundColor ) {
-            super.setBackground(newBackgroundColor);
-            this.getViewport().setBackground(newBackgroundColor);
-        }
-
     }
     /** {inheritDoc} */
     public static class TabbedPane extends JTabbedPane {

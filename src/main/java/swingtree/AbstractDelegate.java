@@ -1,14 +1,15 @@
 package swingtree;
 
-import swingtree.animation.Animator;
 import swingtree.animation.Animation;
 import swingtree.animation.AnimationState;
+import swingtree.animation.Animator;
 import swingtree.animation.LifeTime;
-import swingtree.style.ComponentExtension;
 import swingtree.api.Painter;
 import swingtree.api.Styler;
+import swingtree.style.ComponentExtension;
 
-import javax.swing.*;
+import javax.swing.Action;
+import javax.swing.JComponent;
 import java.awt.*;
 import java.util.Arrays;
 import java.util.List;
@@ -16,7 +17,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -895,7 +895,7 @@ abstract class AbstractDelegate<C extends JComponent>
      * @param <T> The type parameter of the component which should be found.
      */
     public final <T extends JComponent> OptionalUI<T> find( Class<T> type, String id ) {
-        return this.find( type, c -> Objects.equals(c.getName(), id) );
+        return this.find( type, c -> ComponentExtension.from(c).hasId(id) );
     }
 
     /**
@@ -908,7 +908,7 @@ abstract class AbstractDelegate<C extends JComponent>
      * @param <T> The type parameter of the component which should be found.
      */
     public final <T extends JComponent> OptionalUI<T> find( Class<T> type, Enum<?> id ) {
-        return this.find( type, id.getClass().getSimpleName() + "." + id.name() );
+        return this.find( type, c -> ComponentExtension.from(c).hasId(id) );
     }
 
     /**

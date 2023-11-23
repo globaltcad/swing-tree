@@ -73,7 +73,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return The JComponent type which will be wrapped by this builder node.
      */
     public final I id( String id ) {
-        return _with( c -> c.setName(id) )._this();
+        return _with( c -> ComponentExtension.from(c).setId(id) )._this();
     }
 
     /**
@@ -93,7 +93,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final <E extends Enum<E>> I id( E id ) {
         Objects.requireNonNull(id);
-        return id( id.getClass().getSimpleName() + "." + id.name() );
+        return _with( c -> ComponentExtension.from(c).setId(id) )._this();
     }
 
     /**
