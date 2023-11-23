@@ -10,6 +10,7 @@ import swingtree.UI
 import swingtree.dialogs.ConfirmAnswer
 import swingtree.dialogs.ConfirmDialog
 import swingtree.dialogs.MessageDialog
+import swingtree.dialogs.OptionsDialog
 
 import javax.swing.Icon
 
@@ -23,7 +24,7 @@ import javax.swing.Icon
     This specification demonstrates the use of the `OptionsPane` API.
 
 ''')
-@Subject([ConfirmAnswer, ConfirmDialog, MessageDialog])
+@Subject([ConfirmAnswer, ConfirmDialog, MessageDialog, OptionsDialog])
 class Options_Pane_Spec extends Specification
 {
     def 'Use the `UI.ask(String,Var)` factory method to get answers from the user through a dialog.'()
@@ -225,7 +226,7 @@ class Options_Pane_Spec extends Specification
                         .icon(null)
                         .yesOption("Sure, who hasn't?")
                         .noOption("No, Sorry!")
-                        .defaultOption("Sure, who hasn't?")
+                        .defaultOption(ConfirmAnswer.YES)
                         .show()
 
         then : 'The dialog summoner API is called with the correct arguments exactly once.'
@@ -239,6 +240,8 @@ class Options_Pane_Spec extends Specification
                     ['Sure, who hasn\'t?', 'No, Sorry!', 'Cancel'],
                     'Sure, who hasn\'t?'
             ) >> 1
+        and : 'Due to the mock returning `1` the answer should be the enum value with index `1`, namely `NO`.'
+            answer == ConfirmAnswer.NO
     }
 
     def 'The convenience method `UI.confirm(String,String) summons a confirm dialog right away!'()
@@ -275,6 +278,8 @@ class Options_Pane_Spec extends Specification
                     ['Yes', 'No', 'Cancel'],
                     'Yes'
             ) >> 1
+        and : 'Due to the mock returning `1` the answer should be the enum value with index `1`, namely `NO`.'
+            answer == ConfirmAnswer.NO
     }
 
 }

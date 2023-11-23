@@ -5932,7 +5932,7 @@ public final class UI extends UILayoutConstants
     public static ConfirmAnswer confirm( String title, String message ) {
         return ConfirmDialog.asking(message)
                             .titled(title)
-                            .asQuestion();
+                            .showAsQuestion();
     }
 
     /**
@@ -5976,7 +5976,7 @@ public final class UI extends UILayoutConstants
         Objects.requireNonNull( selected );
         return OptionsDialog.offering(message, selected)
                             .titled(title)
-                            .asQuestion();
+                            .showAsQuestion();
     }
 
     /**
@@ -5998,7 +5998,7 @@ public final class UI extends UILayoutConstants
         OptionsDialog.offering(message, selected)
                                 .titled(title)
                                 .icon(icon)
-                                .asQuestion();
+                                .showAsQuestion();
     }
 
     /**
