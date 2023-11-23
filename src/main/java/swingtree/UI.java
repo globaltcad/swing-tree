@@ -5947,7 +5947,9 @@ public final class UI extends UILayoutConstants
      *  Shows a dialog where the user can select a value from a list of options
      *  based on the enum type implicitly defined by the given enum based property.
      *  The selected value will be stored in said property after the user has
-     *  selected a value.
+     *  selected a value and also returned as an {@link Optional}.
+     *  If no value is selected, the returned {@link Optional} will be empty
+     *  and the property will not be changed.
      *
      * @param question The message to show in the dialog.
      * @param selected The enum based property to store the selected value in.
