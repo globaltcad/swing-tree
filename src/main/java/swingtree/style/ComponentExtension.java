@@ -15,7 +15,6 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
-import java.awt.geom.Area;
 import java.util.List;
 import java.util.*;
 import java.util.function.Supplier;
@@ -286,7 +285,18 @@ public final class ComponentExtension<C extends JComponent>
      */
     public void paintForegroundStyle( Graphics2D g2d, Runnable superPaint )
     {
-        _stylePainter._withClip(g2d, _outerBaseClip != null ? _outerBaseClip : g2d.getClip(), ()->{
+        Shape clip = _outerBaseClip != null ? _outerBaseClip : g2d.getClip();
+        if ( _owner instanceof JScrollPane ) {
+            /*
+                Scroll panes are not like other components, they have a viewport
+                which clips the children.
+                Now if we have a round border for the scroll pane, we want the
+                children to be clipped by the round border (and the viewport).
+                So we use the inner component area as the clip for the children.
+            */
+            clip = StyleUtility.intersect( _stylePainter.interiorAreaOf(_owner).orElse(clip), clip );
+        }
+        _stylePainter._withClip(g2d, clip, ()->{
             superPaint.run();
         });
 
@@ -398,13 +408,7 @@ public final class ComponentExtension<C extends JComponent>
         if ( lookAndFeelPainting != null ) {
             Shape contentClip = _stylePainter.interiorAreaOf(_owner).orElse(null);
 
-            if ( contentClip == null )
-                contentClip = _outerBaseClip;
-            else if ( _outerBaseClip != null ) {
-                Area common = new Area(_outerBaseClip);
-                common.intersect(new Area(contentClip));
-                contentClip = common;
-            }
+            contentClip = StyleUtility.intersect( contentClip, _outerBaseClip );
 
             _stylePainter._withClip((Graphics2D) g, contentClip, () -> {
                 try {

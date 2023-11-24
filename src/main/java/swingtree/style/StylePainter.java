@@ -127,13 +127,10 @@ final class StylePainter<C extends JComponent>
 
     void paintWithContentAreaClip( JComponent c, Graphics g, Runnable painter ) {
         Shape oldClip = g.getClip();
+
         Shape newClip = _getInteriorAreaOf(c);
         if ( newClip != null && newClip != oldClip ) {
-            if ( oldClip != null ) {
-                Area common = new Area(oldClip);
-                common.intersect(new Area(newClip));
-                newClip = common;
-            }
+            newClip = StyleUtility.intersect(newClip, oldClip);
             g.setClip(newClip);
         }
 
@@ -141,7 +138,6 @@ final class StylePainter<C extends JComponent>
 
         g.setClip(oldClip);
     }
-
 
     void renderBackgroundStyle( Graphics2D g2d, JComponent comp )
     {
@@ -194,7 +190,7 @@ final class StylePainter<C extends JComponent>
                     _renderVerticalOrHorizontalGradient(g2d, comp, _style.margin(), gradient, _getInteriorAreaOf(comp));
             }
 
-        // 3. Shadows, which are simple gradient based drop shadows that cn go inwards or outwards
+        // 3. Shadows, which are simple gradient based drop shadows that can go inwards or outwards
         for ( ShadowStyle shadow : _style.shadows(layer) )
             shadow.color().ifPresent(color -> {
                 _renderShadows(_style, shadow, comp, g2d, color);
@@ -1333,11 +1329,9 @@ final class StylePainter<C extends JComponent>
                     log.warn("Unknown clip area: " + style.clipArea());
             }
             // We merge the new clip with the old one:
-            if ( newClip != null && oldClip != null && !newClip.equals(oldClip) ) {
-                Area area = new Area(newClip);
-                area.intersect(new Area(oldClip));
-                newClip = area;
-            }
+            if ( newClip != null && oldClip != null )
+                newClip = StyleUtility.intersect( newClip, oldClip );
+
             g2d.setClip(newClip);
 
             if ( !repeat && imageIcon instanceof SvgIcon ) {
