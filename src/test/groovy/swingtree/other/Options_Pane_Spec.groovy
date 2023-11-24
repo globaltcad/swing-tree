@@ -13,6 +13,7 @@ import swingtree.dialogs.MessageDialog
 import swingtree.dialogs.OptionsDialog
 
 import javax.swing.Icon
+import javax.swing.JOptionPane
 
 @Title("Options Pane")
 @Narrative('''
@@ -44,6 +45,7 @@ class Options_Pane_Spec extends Specification
             which we need for mocking.
             This stuff is package private so you can ignore this little implementation detail.
         """
+            var realSummoner = swingtree.dialogs.Context.summoner
             var summoner = Mock(swingtree.dialogs.OptionsDialogSummoner)
             swingtree.dialogs.Context.summoner = summoner
 
@@ -63,6 +65,9 @@ class Options_Pane_Spec extends Specification
             ) >> 1
         and : 'Because the mock returns `1` the answer should be the enum value with index `1`, which is `NO`.'
             enumProperty.get() == ConfirmAnswer.NO
+
+        cleanup : 'We put back the original summoner.'
+            swingtree.dialogs.Context.summoner = realSummoner
     }
 
     def 'Use the `UI.ask(String,String,Var)` factory method to get answers from the user through a dialog.'() {
@@ -84,6 +89,7 @@ class Options_Pane_Spec extends Specification
             This stuff is package private so please ignore this little implementation detail
             in your own code. 
         """
+            var realSummoner = swingtree.dialogs.Context.summoner
             var summoner = Mock(swingtree.dialogs.OptionsDialogSummoner)
             swingtree.dialogs.Context.summoner = summoner
 
@@ -103,6 +109,9 @@ class Options_Pane_Spec extends Specification
             ) >> 2
         and : 'Due to the mock returning `2` the answer should be the enum value with index `2`, namely `CANCEL`.'
             enumProperty.get() == ConfirmAnswer.CANCEL
+        
+        cleanup : 'We put back the original summoner.'
+            swingtree.dialogs.Context.summoner = realSummoner
     }
 
     def 'Use the `UI.ask(String,String,Icon,Var)` factory method to get answers from the user through a dialog.'() {
@@ -129,6 +138,7 @@ class Options_Pane_Spec extends Specification
             This stuff is package private so please ignore this little implementation detail
             in your own code. 
         """
+            var realSummoner = swingtree.dialogs.Context.summoner
             var summoner = Mock(swingtree.dialogs.OptionsDialogSummoner)
             swingtree.dialogs.Context.summoner = summoner
 
@@ -148,6 +158,9 @@ class Options_Pane_Spec extends Specification
             ) >> 3
         and : 'Due to the mock returning `3` the answer should be the enum value with index `3`, namely `CLOSE`.'
             enumProperty.get() == ConfirmAnswer.CLOSE
+        
+        cleanup : 'We put back the original summoner.'
+            swingtree.dialogs.Context.summoner = realSummoner
     }
 
     def 'Use `UI.choice(String, Var)` for accessing the options dialog builder API.'()
@@ -171,6 +184,7 @@ class Options_Pane_Spec extends Specification
             This stuff is package private so please ignore this little implementation detail
             in your own code. 
         """
+            var realSummoner = swingtree.dialogs.Context.summoner
             var summoner = Mock(swingtree.dialogs.OptionsDialogSummoner)
             swingtree.dialogs.Context.summoner = summoner
 
@@ -195,6 +209,9 @@ class Options_Pane_Spec extends Specification
             ) >> 0
         and : 'Due to the mock returning `0` the answer should be the enum value with index `0`, namely `YES`.'
             enumProperty.get() == ConfirmAnswer.YES
+        
+        cleanup : 'We put back the original summoner.'
+            swingtree.dialogs.Context.summoner = realSummoner
     }
 
     def 'Use `confirmation(String)` to build a simple conformation dialog returning a simple answer enum.'()
@@ -216,6 +233,7 @@ class Options_Pane_Spec extends Specification
             This stuff is package private so please ignore this little implementation detail
             in your own code. 
         """
+            var realSummoner = swingtree.dialogs.Context.summoner
             var summoner = Mock(swingtree.dialogs.OptionsDialogSummoner)
             swingtree.dialogs.Context.summoner = summoner
 
@@ -242,6 +260,9 @@ class Options_Pane_Spec extends Specification
             ) >> 1
         and : 'Due to the mock returning `1` the answer should be the enum value with index `1`, namely `NO`.'
             answer == ConfirmAnswer.NO
+        
+        cleanup : 'We put back the original summoner.'
+            swingtree.dialogs.Context.summoner = realSummoner
     }
 
     def 'The convenience method `UI.confirm(String,String) summons a confirm dialog right away!'()
@@ -261,6 +282,7 @@ class Options_Pane_Spec extends Specification
             This stuff is package private so please ignore this little implementation detail
             in your own code. 
         """
+            var realSummoner = swingtree.dialogs.Context.summoner
             var summoner = Mock(swingtree.dialogs.OptionsDialogSummoner)
             swingtree.dialogs.Context.summoner = summoner
 
@@ -280,6 +302,50 @@ class Options_Pane_Spec extends Specification
             ) >> 1
         and : 'Due to the mock returning `1` the answer should be the enum value with index `1`, namely `NO`.'
             answer == ConfirmAnswer.NO
+        
+        cleanup : 'We put back the original summoner.'
+            swingtree.dialogs.Context.summoner = realSummoner
+    }
+
+    def 'The factory method `UI.message(String)` allows for the configuration and summoning of a message dialog.'()
+    {
+        reportInfo """
+            The `UI.message(String)` method is a factory method
+            for summoning a message dialog right away.
+            
+            You do not need to specify the options as they will automatically be generated from 
+            the enum values for you.
+        """
+        given : """
+            We first mock the `JOptionPane` API through a package private delegate, 
+            the `swingtree.dialogs.OptionsDialogSummoner` API.
+            Note that this is a super simple delegate for the `JOptionPane` factory methods.
+            We do this this for mocking the `JOptionPane` API in this specification.
+            This stuff is package private so please ignore this little implementation detail
+            in your own code. 
+        """
+            var realSummoner = swingtree.dialogs.Context.summoner
+            var summoner = Mock(swingtree.dialogs.OptionsDialogSummoner)
+            swingtree.dialogs.Context.summoner = summoner
+
+        when : 'We invoke the `message` method on the `UI` API.'
+            UI.message("I hope you have a nice day!")
+                .titled("Some Information")
+                .showAsInfo()
+        and : 'Because this is running on the EDT, we need to wait for it...'
+            UI.sync()
+
+        then : 'The dialog summoner API is called with the correct arguments exactly once.'
+            1 * summoner.showMessageDialog(
+                    null,
+                    'I hope you have a nice day!',
+                    'Some Information',
+                    JOptionPane.INFORMATION_MESSAGE,
+                    null
+                )
+        
+        cleanup : 'We put back the original summoner.'
+            swingtree.dialogs.Context.summoner = realSummoner
     }
 
 }
