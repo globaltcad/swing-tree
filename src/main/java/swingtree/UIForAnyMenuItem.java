@@ -4,6 +4,12 @@ import sprouts.Val;
 
 import javax.swing.*;
 
+/**
+ * A builder for {@link JMenuItem}s.
+ *
+ * @param <I> The type of the builder itself. This is used to allow for method chaining.
+ * @param <M> The type of the {@link JMenuItem} being built.
+ */
 public abstract class UIForAnyMenuItem<I, M extends JMenuItem> extends UIForAnyButton<I, M>
 {
     /**

@@ -24,6 +24,7 @@ public final class UIForTextField<F extends JTextField> extends UIForAnyTextComp
 {
     private final BuilderState<F> _state;
 
+
     UIForTextField( BuilderState<F> state ) {
         Objects.requireNonNull(state);
         _state = state;

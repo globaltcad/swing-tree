@@ -40,9 +40,9 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extend
     }
 
     @SafeVarargs
-    final void _addComponentsTo( C thisComponent, E... componentsToBeAdded ) {
+    protected final void _addComponentsTo( C thisComponent, E... componentsToBeAdded ) {
         for ( E other : componentsToBeAdded )
-            _internalAddTo(thisComponent, UI.of((JComponent) other), null);
+            _addBuilderTo(thisComponent, UI.of((JComponent) other), null);
     }
 
     /**
@@ -60,13 +60,13 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extend
      * Implementations of this abstract method ought to enable support for nested building.
      * <br><br>
      *
-     * @param component A component instance which ought to be added to the wrapped component type.
-     * @param conf      The layout constraint which ought to be used to add the component to the wrapped component type.
      * @param thisComponent The component which is wrapped by this builder.
+     * @param component     A component instance which ought to be added to the wrapped component type.
+     * @param conf          The layout constraint which ought to be used to add the component to the wrapped component type.
      */
-    protected abstract void _doAddComponent( E component, Object conf, C thisComponent );
+    protected abstract void _addComponentTo( C thisComponent, E component, Object conf );
 
-    protected final void _internalAddTo( C thisComponent, AbstractNestedBuilder<?, ?, ?> builder, Object conf )
+    protected final void _addBuilderTo( C thisComponent, AbstractNestedBuilder<?, ?, ?> builder, Object conf )
     {
         NullUtil.nullArgCheck(builder, "builder", AbstractNestedBuilder.class);
 
@@ -89,7 +89,7 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extend
             if ( style != null )
                 conf = style.layout().constraint().orElse(null);
 
-            _doAddComponent( childComponent, conf, thisComponent );
+            _addComponentTo(thisComponent, childComponent, conf);
 
             if ( style != null )
                 ComponentExtension.from(child).applyAndInstallStyle(style, true);
@@ -97,7 +97,7 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extend
                 ComponentExtension.from(child).calculateApplyAndInstallStyle(true);
         }
         else
-            _doAddComponent( childComponent, conf, thisComponent );
+            _addComponentTo(thisComponent, childComponent, conf);
 
         builder._detachStrongRef(); // Detach strong reference to the component to allow it to be garbage collected.
     }
@@ -120,14 +120,18 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extend
             throw new IllegalArgumentException("Swing tree builders may not be null!");
 
         return _with( thisComponent -> {
-                    _addBuilders( thisComponent, builders );
+                    _addBuildersTo( thisComponent, builders );
                 })
                 ._this();
     }
 
-    <B extends AbstractNestedBuilder<?, ?, JComponent>> void _addBuilders( C thisComponent, B... builders ) {
+    @SafeVarargs
+    protected final <B extends AbstractNestedBuilder<?, ?, JComponent>> void _addBuildersTo(
+        C thisComponent,
+        B... builders
+    ) {
         for ( AbstractNestedBuilder<?, ?, ?> b : builders )
-            _internalAddTo(thisComponent, b, null);
+            _addBuilderTo(thisComponent, b, null);
     }
 
     /**
@@ -142,8 +146,7 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extend
     public final I add( List<E> components ) {
         return _with( thisComponent -> {
                     for ( E component : components )
-                        _internalAddTo(thisComponent, UI.of((JComponent) component), null);
-
+                        _addBuilderTo(thisComponent, UI.of((JComponent) component), null);
                 })
                 ._this();
     }

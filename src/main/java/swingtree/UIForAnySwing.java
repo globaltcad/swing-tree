@@ -3543,7 +3543,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     }
 
     @Override
-    protected void _doAddComponent( JComponent newComponent, Object conf, C thisComponent ) {
+    protected void _addComponentTo(C thisComponent, JComponent newComponent, Object conf ) {
         NullUtil.nullArgCheck(newComponent, "component", JComponent.class);
         if ( conf == null )
             thisComponent.add(newComponent);
@@ -3615,7 +3615,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
             thisComponent.setLayout(new BorderLayout()); // The UI Maker tries to fill in the blanks!
         }
         for ( UIForAnySwing<?, ?> b : builders )
-            _internalAddTo(thisComponent, b, attr);
+            _addBuilderTo(thisComponent, b, attr);
     }
 
     /**
@@ -3660,7 +3660,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
                        log.warn("Layout ambiguity detected! Mig layout constraint cannot be added to '{}'.", layout.getClass().getSimpleName());
 
                    for ( UIForAnySwing<?, ?> b : builders )
-                       _internalAddTo(thisComponent, b, attr);
+                       _addBuilderTo(thisComponent, b, attr);
                })
                ._this();
     }
@@ -3862,7 +3862,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
             }
         });
         viewables.forEach( v -> {
-            _addBuilders( thisComponent, new AbstractNestedBuilder[]{viewSupplier.createViewFor(v)} );
+            _addBuildersTo( thisComponent, new AbstractNestedBuilder[]{viewSupplier.createViewFor(v)} );
         });
     }
 
@@ -3874,7 +3874,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         // Then we add the component provided by the viewable to the list of children.
         if ( attr == null ) {
             if ( viewable.isPresent() )
-                _addBuilders(thisComponent, viewSupplier.createViewFor(viewable.get()));
+                _addBuildersTo(thisComponent, viewSupplier.createViewFor(viewable.get()));
             else
                 _addComponentsTo(thisComponent, new JPanel()); // We add a dummy component to the list of children.
         } else {

@@ -32,7 +32,7 @@ public final class UIForJDialog<D extends JDialog> extends UIForAnyWindow<UIForJ
 
 
 	@Override
-	protected void _doAddComponent( Component newComponent, Object conf, D thisComponent ) {
+	protected void _addComponentTo(D thisComponent, Component newComponent, Object conf ) {
 		thisComponent.add( conf == null ? null : conf.toString(), newComponent );
 	}
 

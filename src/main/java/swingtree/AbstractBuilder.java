@@ -31,8 +31,15 @@ abstract class AbstractBuilder<I, C extends Component>
 
     protected abstract AbstractBuilder<I,C> _with( BuilderState<C> newState );
 
-    protected final AbstractBuilder<I,C> _with( Consumer<C> action ) {
-        BuilderState<C> newState = _state().with(action);
+    /**
+     *  Creates a new builder with the provided component mutation applied to the wrapped component.
+     *
+     * @param componentMutator A consumer lambda which receives the wrapped component and
+     *                         is then used to apply some builder action to it.
+     * @return A new builder instance with the provided component mutation applied to the wrapped component.
+     */
+    protected final AbstractBuilder<I,C> _with( Consumer<C> componentMutator ) {
+        BuilderState<C> newState = _state().with(componentMutator);
         return _with(newState);
     }
 
@@ -81,7 +88,7 @@ abstract class AbstractBuilder<I, C extends Component>
         return _with( thisComponent -> _onShow( val, thisComponent, displayAction) );
     }
 
-    private  <T> void _onShow( Val<T> property, WeakReference<C> ref, BiConsumer<C, T> displayAction )
+    private <T> void _onShow( Val<T> property, WeakReference<C> ref, BiConsumer<C, T> displayAction )
     {
         Objects.requireNonNull(property);
         Objects.requireNonNull(displayAction);
@@ -253,7 +260,7 @@ abstract class AbstractBuilder<I, C extends Component>
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I peek( Peeker<C> action ) {
-        return _with( c -> action.accept(c) )._this();
+        return _with(action::accept)._this();
     }
 
     /**
@@ -430,17 +437,19 @@ abstract class AbstractBuilder<I, C extends Component>
 
 
     @Override
-    public String toString() {
-        return getClass().getSimpleName() + "[" + _state().componentType().getSimpleName() + "]";
+    public final String toString() {
+        return getClass().getSimpleName() + "[" +
+                    _state().componentType().getSimpleName() +
+                "]";
     }
 
     @Override
-    public int hashCode() {
+    public final int hashCode() {
         return _state().hashCode();
     }
 
     @Override
-    public boolean equals( Object obj ) {
+    public final boolean equals( Object obj ) {
         if ( obj == null ) return false;
         if ( obj == this ) return true;
         if ( obj.getClass() != getClass() ) return false;
