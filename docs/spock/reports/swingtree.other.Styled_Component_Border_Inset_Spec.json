@@ -1,0 +1,60 @@
+{
+  "className":"swingtree.other.Styled_Component_Border_Inset_Spec",
+  "title":"The SwingTree Border Insets",
+  "narrative":"SwingTree uses a custom `Border` implementation to support the styling\n    of components. This includes the definition of the border, margin, padding\n    dimensions which together form the whole border insets of a component.\n\n    The border insets are then used by Swing to determine the size of the component\n    and its children.\n\n    In this specification we will test the border insets of components\n    that are heavily styled through the SwingTree styling API.",
+  "subjects":[],
+  "statistics":{
+    "runs":"2",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"?"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"A heavily styled text field will have the correct border insets!",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"Now we create a text field UI with a custom styler lambda and a button.","code":["var seed = Utility.loadImage(\"img/seed.png\")","var trees = Utility.loadImage(\"img/trees.png\")","var ui =","        UI.textField(\"I am fancy! :)\").withLayout(\"fill, ins 0\").withPrefSize(190, 25)","        .withStyle( it -> it","            .fontSize(16)","            .padding(0, 0, 0, 26)","            .marginRight(25)","            .paddingRight(-20)","            .image(image -> image","                .layer(UI.Layer.BORDER)","                .image(seed)","                .placement(UI.Placement.LEFT)","                .width(30).autoFit(true)","                .padding(3)","            )","        )","        .add(\"right\",","            UI.button(19, 19, new ImageIcon(trees))","            .withStyle( it -> it","                .margin(0)","                .cursor(UI.Cursor.HAND)","            )","            .makePlain()","        );"]},
+
+        {"kind":"and","text":"We unpack the component and its border:","code":["var component = ui.getComponent()","var border = component.getBorder()"]},
+
+        {"kind":"expect","text":"The insets are as expected.","code":["border.getBorderInsets(component) == new Insets(2, 2 + (int)(26*uiScale), 2, (int)(25*uiScale - 20*uiScale))","border.getMarginInsets() == new Insets(0,0,0,(int)(25*uiScale))","border.getPaddingInsets() == new Insets(0, (int)(26*uiScale), 0, (int)(-20*uiScale))","border.getFullPaddingInsets() == new Insets(0, (int)(26*uiScale), 0, (int)(25*uiScale - 20*uiScale))"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","2","3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A heavily styled slider will have the correct border insets!",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"Now we create a slider UI with a custom styler lambda:","code":["var ui =","        UI.slider(UI.Align.HORIZONTAL, 0, 100, 50)","        .withStyle( it -> it","            .size(280, 38)","            .prefSize(280, 38)","            .borderRadius(20)","            .backgroundColor(new Color(0.4f, 0.85f, 1))","            .foundationColor(new Color(0.4f, 0.85f, 1))","            .shadow(\"bright\", s -> s","                .color(new Color(0.7f, 0.95f, 1f, 0.35f))","                .offset(-11)","            )","            .shadow(\"dark\", s -> s","                .color(new Color(0, 0.1f, 0.2f, 0.20f))","                .offset(+4)","            )","            .shadowBlurRadius(4)","            .shadowSpreadRadius(-2)","            .shadowIsInset(true)","            .shadowLayer(UI.Layer.BACKGROUND) // So that the slider track is not affected by the shadow.","            .padding(6)","            .margin(10)","        );"]},
+
+        {"kind":"and","text":"We unpack the component and its border:","code":["var component = ui.getComponent()","var border = component.getBorder()"]},
+
+        {"kind":"expect","text":"The insets are as expected.","code":["border.getBorderInsets(component) == new Insets((int)(16*uiScale), (int)(16*uiScale), (int)(16*uiScale), (int)(16*uiScale))","border.getMarginInsets() == new Insets((int)(10*uiScale),(int)(10*uiScale),(int)(10*uiScale),(int)(10*uiScale))","border.getPaddingInsets() == new Insets((int)(6*uiScale), (int)(6*uiScale), (int)(6*uiScale), (int)(6*uiScale))","border.getFullPaddingInsets() == new Insets((int)(16*uiScale), (int)(16*uiScale), (int)(16*uiScale), (int)(16*uiScale))"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","2","3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}
