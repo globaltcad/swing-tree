@@ -15,14 +15,14 @@ import swingtree.dialogs.OptionsDialog
 import javax.swing.Icon
 import javax.swing.JOptionPane
 
-@Title("Options Pane")
+@Title("Summoning Simple Dialogs")
 @Narrative('''
 
-    In raw Swing a common way to present a set of options to the user is to
-    the `JOptionPane` API to display a dialog with a set of options.
-    SwingTree makes this API more intuitive and declarative.
+    In raw Swing a common way to present a simple message or a set of options to the user is to
+    the static methods of the `JOptionPane` API to summon and display a dialog.
+    SwingTree makes this API more intuitive and declarative through the `UI` API.
     
-    This specification demonstrates the use of the `OptionsPane` API.
+    This specification demonstrates the use of this API.
 
 ''')
 @Subject([ConfirmAnswer, ConfirmDialog, MessageDialog, OptionsDialog])
@@ -55,8 +55,8 @@ class Options_Pane_Spec extends Specification
         then : 'The dialog summoner API should have been called with the correct arguments.'
             1 * summoner.showOptionDialog(
                     null,
-                    'Do you want to continue?',
-                    'Select',
+                    'Do you want to continue?', // message
+                    'Select', // title
                     -1,
                     3,
                     null,
@@ -99,8 +99,8 @@ class Options_Pane_Spec extends Specification
         then : 'The dialog summoner API is called with the correct arguments exactly once.'
             1 * summoner.showOptionDialog(
                     null,
-                    'Do you want to continue?',
-                    'Please select!',
+                    'Do you want to continue?', // message
+                    'Please select!', // title
                     -1,
                     3,
                     null,
@@ -148,8 +148,8 @@ class Options_Pane_Spec extends Specification
         then : 'The dialog summoner API is called with the correct arguments exactly once.'
             1 * summoner.showOptionDialog(
                     null,
-                    'Do you want to continue?',
-                    'Please select!',
+                    'Do you want to continue?', // message
+                    'Please select!', // title
                     -1,
                     3,
                     icon,
@@ -200,7 +200,7 @@ class Options_Pane_Spec extends Specification
             1 * summoner.showOptionDialog(
                     null,
                     'Is the answer to life, the universe and everything really 42?',
-                    'A Question for You!',
+                    'A Question for You!', // title
                     -1,
                     3,
                     null,
@@ -250,8 +250,8 @@ class Options_Pane_Spec extends Specification
         then : 'The dialog summoner API is called with the correct arguments exactly once.'
             1 * summoner.showOptionDialog(
                     null,
-                    'Have you read the terms and conditions?',
-                    'Confirm or Deny',
+                    'Have you read the terms and conditions?', // message
+                    'Confirm or Deny', // title
                     1,
                     3,
                     null,
@@ -292,8 +292,8 @@ class Options_Pane_Spec extends Specification
         then : 'The dialog summoner API is called with the correct arguments exactly once.'
             1 * summoner.showOptionDialog(
                     null,
-                    'Have you read the terms and conditions?',
-                    'Confirm or Deny',
+                    'Have you read the terms and conditions?', // message
+                    'Confirm or Deny', // title
                     1,
                     3,
                     null,
@@ -338,8 +338,8 @@ class Options_Pane_Spec extends Specification
         then : 'The dialog summoner API is called with the correct arguments exactly once.'
             1 * summoner.showMessageDialog(
                     null,
-                    'I hope you have a nice day!',
-                    'Some Information',
+                    'I hope you have a nice day!',  // message
+                    'Some Information', // title
                     JOptionPane.INFORMATION_MESSAGE,
                     null
                 )
@@ -348,4 +348,247 @@ class Options_Pane_Spec extends Specification
             swingtree.dialogs.Context.summoner = realSummoner
     }
 
+    def 'Call `UI.info(String)` to easily summon a message dialog with an information icon.'()
+    {
+        reportInfo """
+            The `UI.info(String)` method is a factory method
+            for summoning a simple message dialog right away,
+            with the provided message displayed on it.
+            
+            This method is a void method and does not return anything.
+        """
+        given : """
+            We first mock the `JOptionPane` API through a package private delegate, 
+            the `swingtree.dialogs.OptionsDialogSummoner` API.
+            Note that this is a super simple delegate for the `JOptionPane` factory methods.
+            We do this this for mocking the `JOptionPane` API in this specification.
+            This stuff is package private so please ignore this little implementation detail
+            in your own code. 
+        """
+            var realSummoner = swingtree.dialogs.Context.summoner
+            var summoner = Mock(swingtree.dialogs.OptionsDialogSummoner)
+            swingtree.dialogs.Context.summoner = summoner
+
+        when : 'We invoke the `info` method on the `UI` API.'
+            UI.info("I hope you have a nice day!")
+
+        and : 'Because this is running on the EDT, we need to wait for it...'
+            UI.sync()
+
+        then : 'The dialog summoner API is called with the correct arguments exactly once.'
+            1 * summoner.showMessageDialog(
+                    null,
+                    'I hope you have a nice day!', // message
+                    'Info', // title
+                    JOptionPane.INFORMATION_MESSAGE,
+                    null
+                )
+
+        cleanup : 'We put back the original summoner.'
+            swingtree.dialogs.Context.summoner = realSummoner
+    }
+
+    def 'Call `UI.info(String, String)` to easily summon a titled info message dialog.'()
+    {
+        reportInfo """
+            The `UI.info(String, String)` method is a factory method
+            for summoning a simple message dialog right away,
+            with the provided message displayed on it.
+            
+            This method is a void method and does not return anything.
+        """
+        given : """
+            We first mock the `JOptionPane` API through a package private delegate, 
+            the `swingtree.dialogs.OptionsDialogSummoner` API.
+            Note that this is a super simple delegate for the `JOptionPane` factory methods.
+            We do this this for mocking the `JOptionPane` API in this specification.
+            This stuff is package private so please ignore this little implementation detail
+            in your own code. 
+        """
+            var realSummoner = swingtree.dialogs.Context.summoner
+            var summoner = Mock(swingtree.dialogs.OptionsDialogSummoner)
+            swingtree.dialogs.Context.summoner = summoner
+
+        when : 'We invoke the `info` method on the `UI` API.'
+            UI.info("Some Information", "I hope you have a nice day!")
+
+        and : 'Because this is running on the EDT, we need to wait for it to process the request...'
+            UI.sync()
+
+        then : 'The dialog summoner API is called with the correct arguments exactly once.'
+            1 * summoner.showMessageDialog(
+                    null,
+                    'I hope you have a nice day!', // message
+                    'Some Information', // title
+                    JOptionPane.INFORMATION_MESSAGE,
+                    null
+                )
+
+        cleanup : 'We put back the original summoner.'
+            swingtree.dialogs.Context.summoner = realSummoner
+    }
+
+    def 'Invoking `UI.warn(String)` summons a warning message dialog.'()
+    {
+        reportInfo """
+            The `UI.warn(String)` method is a factory method
+            for summoning a simple message dialog
+            with the provided message displayed on it.
+            
+            This method is a void method and does not return anything.
+        """
+        given : """
+            We first mock the `JOptionPane` API through a package private delegate, 
+            the `swingtree.dialogs.OptionsDialogSummoner` API.
+            Note that this is a super simple delegate for the `JOptionPane` factory methods.
+            We do this this for mocking the `JOptionPane` API in this specification.
+            This stuff is package private so please ignore this little implementation detail
+            in your own code. 
+        """
+            var realSummoner = swingtree.dialogs.Context.summoner
+            var summoner = Mock(swingtree.dialogs.OptionsDialogSummoner)
+            swingtree.dialogs.Context.summoner = summoner
+
+        when : 'We invoke the `warn` method on the `UI` API.'
+            UI.warn("I hope you have a nice day!")
+
+        and : 'Because this is running on the EDT, we need to wait for it to process the request...'
+            UI.sync()
+
+        then : 'The dialog summoner API is called with the correct arguments exactly once.'
+            1 * summoner.showMessageDialog(
+                    null,
+                    'I hope you have a nice day!', // message
+                    'Warning', // title
+                    JOptionPane.WARNING_MESSAGE,
+                    null
+                )
+
+        cleanup : 'We put back the original summoner.'
+            swingtree.dialogs.Context.summoner = realSummoner
+    }
+
+    def 'Invoking `UI.warn(String, String)` summons a titled warning message dialog.'()
+    {
+        reportInfo """
+            The `UI.warn(String, String)` method is a factory method
+            for summoning a titled message dialog
+            with the provided title and message displayed on it.
+            
+            This method is a void method and does not return anything.
+        """
+        given : """
+            We first mock the `JOptionPane` API through a package private delegate, 
+            the `swingtree.dialogs.OptionsDialogSummoner` API.
+            Note that this is a super simple delegate for the `JOptionPane` factory methods.
+            We do this this for mocking the `JOptionPane` API in this specification.
+            This stuff is package private so please ignore this little implementation detail
+            in your own code. 
+        """
+            var realSummoner = swingtree.dialogs.Context.summoner
+            var summoner = Mock(swingtree.dialogs.OptionsDialogSummoner)
+            swingtree.dialogs.Context.summoner = summoner
+
+        when : 'We invoke the `warn` method on the `UI` API.'
+            UI.warn("Some Warning", "I hope you have a nice day!")
+
+        and : 'Because this is running on the EDT, we need to wait for it to process the request...'
+            UI.sync()
+
+        then : 'The dialog summoner API is called with the correct arguments exactly once.'
+            1 * summoner.showMessageDialog(
+                    null,
+                    'I hope you have a nice day!', // message
+                    'Some Warning',  // title
+                    JOptionPane.WARNING_MESSAGE,
+                    null
+                )
+
+        cleanup : 'We put back the original summoner.'
+            swingtree.dialogs.Context.summoner = realSummoner
+    }
+
+    def 'If you want to summon an error message dialog, use `UI.error(String)`.'()
+    {
+        reportInfo """
+            The `UI.error(String)` method is a factory method
+            for summoning a simple message dialog
+            with the provided message displayed on it.
+            
+            This method is a void method and does not return anything.
+        """
+        given : """
+            We first mock the `JOptionPane` API through a package private delegate, 
+            the `swingtree.dialogs.OptionsDialogSummoner` API.
+            Note that this is a super simple delegate for the `JOptionPane` factory methods.
+            We do this this for mocking the `JOptionPane` API in this specification.
+            This stuff is package private so please ignore this little implementation detail
+            in your own code.
+        """
+            var realSummoner = swingtree.dialogs.Context.summoner
+            var summoner = Mock(swingtree.dialogs.OptionsDialogSummoner)
+
+            swingtree.dialogs.Context.summoner = summoner
+
+        when : 'We invoke the `error` method on the `UI` API.'
+            UI.error("Oh no! Something went wrong!")
+
+        and : 'Because this is running on the EDT, we need to wait for it to process the request...'
+            UI.sync()
+
+        then : 'The dialog summoner API is called with the correct arguments exactly once.'
+            1 * summoner.showMessageDialog(
+                    null,
+                    'Oh no! Something went wrong!', // message
+                    'Error', // title
+                    JOptionPane.ERROR_MESSAGE,
+                    null
+                )
+
+        cleanup : 'We put back the original summoner.'
+            swingtree.dialogs.Context.summoner = realSummoner
+    }
+
+    def 'If you want to present a titled error message dialog, use `UI.error(String, String)`.'()
+    {
+        reportInfo """
+            The `UI.error(String, String)` method is a factory method
+            for summoning a titled message dialog
+            with the provided title and message displayed on it.
+            
+            This method is a void method and does not return anything.
+        """
+        given : """
+            We first mock the `JOptionPane` API through a package private delegate, 
+            the `swingtree.dialogs.OptionsDialogSummoner` API.
+            
+            Note that this is a super simple delegate for the `JOptionPane` factory methods.
+            We do this this for mocking the `JOptionPane` API in this specification.
+            
+            This stuff is package private so please ignore this little implementation detail
+            in your own code.
+        """
+            var realSummoner = swingtree.dialogs.Context.summoner
+            var summoner = Mock(swingtree.dialogs.OptionsDialogSummoner)
+
+            swingtree.dialogs.Context.summoner = summoner
+
+        when : 'We invoke the `error` method on the `UI` API.'
+            UI.error("Some Error", "Oh no! Something went wrong!")
+
+        and : 'Because this is running on the EDT, we need to wait for it to process the request...'
+            UI.sync()
+
+        then : 'The dialog summoner API is called with the correct arguments exactly once.'
+            1 * summoner.showMessageDialog(
+                    null,
+                    'Oh no! Something went wrong!', // message
+                    'Some Error', // title
+                    JOptionPane.ERROR_MESSAGE,
+                    null
+                )
+
+        cleanup : 'We put back the original summoner.'
+            swingtree.dialogs.Context.summoner = realSummoner
+    }
 }
