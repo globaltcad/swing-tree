@@ -40,7 +40,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This very builder to allow for method chaining.
      */
     public final I withText( String text ) {
-        return _with( c -> c.setText(text) )._this();
+        return _with( thisComponent -> thisComponent.setText(text) )._this();
     }
 
     /**
@@ -55,7 +55,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     public final I withText( Val<String> text ) {
         NullUtil.nullArgCheck(text, "val", Val.class);
         NullUtil.nullPropertyCheck(text, "text");
-        return _withOnShow( text, (c,t)->c.setText(t) )
+        return _withOnShow( text, AbstractButton::setText )
                ._with( c -> c.setText(text.orElseThrow()) )
                ._this();
     }
@@ -291,7 +291,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     public final I withFont( Val<Font> font ) {
         NullUtil.nullArgCheck(font, "font", Val.class);
         NullUtil.nullPropertyCheck(font, "font", "Use the default font of this component instead of null!");
-        return _withOnShow( font, (c,v) -> c.setFont(v) )
+        return _withOnShow( font, JComponent::setFont )
                ._with( button -> button.setFont(font.orElseThrow()) )
                ._this();
     }
@@ -303,10 +303,10 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      * @return This builder instance, to allow for method chaining.
      */
     public final I isSelectedIf( boolean isSelected ) {
-        return _with( button -> _setSelectedSilently(isSelected, button) )._this();
+        return _with( button -> _setSelectedSilently(button, isSelected) )._this();
     }
 
-    void _setSelectedSilently( boolean isSelected, B thisButton ) {
+    void _setSelectedSilently( B thisButton, boolean isSelected ) {
         /*
             This is used to change the selection state of the button without triggering
             any action listeners. We need this because we want to construct the
@@ -335,8 +335,8 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     public final I isSelectedIf( Val<Boolean> selected ) {
         NullUtil.nullArgCheck(selected, "selected", Val.class);
         NullUtil.nullPropertyCheck(selected, "selected", "Null can not be used to model the selection state of a button type.");
-        return _withOnShow(selected, (c, v) -> _setSelectedSilently(v, c) )
-               ._with( button -> _setSelectedSilently(selected.get(), button) )._this();
+        return _withOnShow(selected, this::_setSelectedSilently)
+               ._with( button -> _setSelectedSilently(button, selected.get()) )._this();
     }
 
     /**
@@ -352,8 +352,8 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     public final I isSelectedIfNot( Val<Boolean> selected ) {
         NullUtil.nullArgCheck(selected, "selected", Val.class);
         NullUtil.nullPropertyCheck(selected, "selected", "Null can not be used to model the selection state of a button type.");
-        return _withOnShow( selected, (c, v) -> _setSelectedSilently(!v, c) )
-               ._with( button -> _setSelectedSilently(!selected.is(true), button) )._this();
+        return _withOnShow( selected, (c, v) -> _setSelectedSilently(c, !v) )
+               ._with( button -> _setSelectedSilently(button, !selected.is(true)) )._this();
     }
 
     /**
@@ -368,9 +368,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     public final I isSelectedIf( Var<Boolean> selected ) {
         NullUtil.nullArgCheck(selected, "selected", Var.class);
         NullUtil.nullPropertyCheck(selected, "selected", "Null can not be used to model the selection state of a button type.");
-        return _withOnShow( selected, (c, v) -> {
-                    _setSelectedSilently(v, c);
-                })
+        return _withOnShow( selected, this::_setSelectedSilently )
                 ._with( button -> {
                     _onClick(button,
                         e -> _doApp(button.isSelected(), newItem -> selected.set(From.VIEW, newItem) )
@@ -379,7 +377,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
                         v -> _doApp(button.isSelected(), newItem -> selected.set(From.VIEW, newItem) )
                     );
                 })
-                ._with( button -> _setSelectedSilently(selected.get(), button) )
+                ._with( button -> _setSelectedSilently(button, selected.get()) )
                 ._this();
     }
 
@@ -397,7 +395,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
         NullUtil.nullArgCheck(selected, "selected", Var.class);
         NullUtil.nullPropertyCheck(selected, "selected", "Null can not be used to model the selection state of a button type.");
         return _withOnShow( selected, (c, v) -> {
-                    _setSelectedSilently(!v, c);
+                    _setSelectedSilently(c, !v);
                 })
                 ._with( button -> {
                     _onClick(button,
@@ -407,7 +405,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
                         v -> _doApp(!button.isSelected(), newItem -> selected.set(From.VIEW, newItem) )
                     );
                 })
-                ._with( button -> _setSelectedSilently(!selected.is(true), button) )
+                ._with( button -> _setSelectedSilently(button, !selected.is(true)) )
                 ._this();
     }
 
@@ -436,9 +434,9 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     public final <E extends Enum<E>> I isSelectedIf( E enumValue, Val<E> enumProperty ) {
         NullUtil.nullArgCheck(enumValue, "enumValue", Enum.class);
         NullUtil.nullArgCheck(enumProperty, "enumProperty", Val.class);
-        return _withOnShow( enumProperty, (c,v) -> _setSelectedSilently(enumValue.equals(v), c) )
+        return _withOnShow( enumProperty, (c,v) -> _setSelectedSilently(c, enumValue.equals(v)) )
                 ._with( button ->
-                     _setSelectedSilently(enumValue.equals(enumProperty.orElseThrow()), button)
+                     _setSelectedSilently(button, enumValue.equals(enumProperty.orElseThrow()))
                 )
                 ._this();
     }
@@ -457,9 +455,9 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     public final <E extends Enum<E>> I isSelectedIfNot( E enumValue, Val<E> enumProperty ) {
         NullUtil.nullArgCheck(enumValue, "enumValue", Enum.class);
         NullUtil.nullArgCheck(enumProperty, "enumProperty", Val.class);
-        return _withOnShow( enumProperty, (c, v) -> _setSelectedSilently(!enumValue.equals(v), c) )
+        return _withOnShow( enumProperty, (c, v) -> _setSelectedSilently(c, !enumValue.equals(v)) )
                 ._with( button ->
-                     _setSelectedSilently(!enumValue.equals(enumProperty.orElseThrow()), button)
+                     _setSelectedSilently(button, !enumValue.equals(enumProperty.orElseThrow()))
                 )
                 ._this();
     }
@@ -508,7 +506,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     public I isBorderPaintedIf( Val<Boolean> val ) {
         NullUtil.nullArgCheck(val, "val", Val.class);
         NullUtil.nullPropertyCheck(val, "val", "Null is not a valid value for the border painted property.");
-        return _withOnShow( val, (c, v) -> c.setBorderPainted(v) )
+        return _withOnShow( val, AbstractButton::setBorderPainted )
                ._with( button -> button.setBorderPainted(val.orElseThrow()) )
                ._this();
     }
@@ -823,14 +821,29 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
         return _with(group::add)._this();
     }
 
+    /**
+     *  Use this to set the margin of the wrapped button type.
+     *
+     * @param insets The margin of the button.
+     * @return This very builder to allow for method chaining.
+     */
     public final I withMargin( Insets insets ) {
         NullUtil.nullArgCheck(insets, "insets", Insets.class);
-        return _with( c ->
-                    c.setMargin(insets)
+        return _with( thisComponent ->
+                    thisComponent.setMargin(insets)
                 )
                 ._this();
     }
 
+    /**
+     *  Use this to set the margin of the wrapped button type.
+     *
+     * @param top The top margin of the button.
+     * @param left The left margin of the button.
+     * @param bottom The bottom margin of the button.
+     * @param right The right margin of the button.
+     * @return This very builder to allow for method chaining.
+     */
     public final I withMargin( int top, int left, int bottom, int right ) {
         return withMargin( new Insets(top, left, bottom, right) );
     }

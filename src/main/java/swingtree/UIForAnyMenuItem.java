@@ -11,14 +11,17 @@ public abstract class UIForAnyMenuItem<I, M extends JMenuItem> extends UIForAnyB
      * action listeners without navigating the menu hierarchy. It is the
      * UI's responsibility to install the correct action.  Note that
      * when the keyboard accelerator is typed, it will work whether or
-     * not the menu is currently displayed.
+     * whether not the menu is currently displayed.
      *
      * @param keyStroke the <code>KeyStroke</code> which will
      *          serve as an accelerator
      * @return This very builder to allow for method chaining.
      */
     public I withKeyStroke( KeyStroke keyStroke ) {
-        return _with( c -> c.setAccelerator(keyStroke) )._this();
+        return _with( thisComponent ->
+                    thisComponent.setAccelerator(keyStroke)
+               )
+               ._this();
     }
 
     /**
@@ -26,18 +29,18 @@ public abstract class UIForAnyMenuItem<I, M extends JMenuItem> extends UIForAnyB
      * action listeners without navigating the menu hierarchy. It is the
      * UI's responsibility to install the correct action.  Note that
      * when the keyboard accelerator is typed, it will work whether or
-     * not the menu is currently displayed.
+     * whether not the menu is currently displayed.
      *
-     * @param val the dynamically set <code>KeyStroke</code> property which will
+     * @param keyStroke the dynamically set <code>KeyStroke</code> property which will
      *          serve as an accelerator
      * @return This very builder to allow for method chaining.
      */
-    public I withKeyStroke( Val<KeyStroke> val ) {
-        return _withOnShow( val, (c,v) -> {
-                    c.setAccelerator(v);
+    public I withKeyStroke( Val<KeyStroke> keyStroke ) {
+        return _withOnShow( keyStroke, (thisComponent,value) -> {
+                    thisComponent.setAccelerator(value);
                 })
-                ._with( c -> {
-                    c.setAccelerator(val.orElseNull());
+                ._with( thisComponent -> {
+                    thisComponent.setAccelerator(keyStroke.orElseNull());
                 })
                 ._this();
     }
