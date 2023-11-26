@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SelectEnumDialogBuilder.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.dialogs</a> &gt; <span class="el_source">SelectEnumDialogBuilder.java</span></div><h1>SelectEnumDialogBuilder.java</h1><pre class="source lang-java linenums">package swingtree.dialogs;
+
+import org.slf4j.Logger;
+import sprouts.From;
+import sprouts.Var;
+import swingtree.UI;
+
+import javax.swing.Icon;
+import javax.swing.JOptionPane;
+import java.awt.Component;
+import java.util.Objects;
+import java.util.Optional;
+
+public final class SelectEnumDialogBuilder&lt;E extends Enum&lt;E&gt;&gt;
+{
+<span class="fc" id="L16">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(SelectEnumDialogBuilder.class);</span>
+
+<span class="fc" id="L18">    private static SelectEnumDialogBuilder&lt;?&gt; _NONE = new SelectEnumDialogBuilder&lt;&gt;(</span>
+                                                                -1,
+                                                                &quot;&quot;,
+                                                                &quot;&quot;,
+                                                                null,
+                                                                null,
+                                                                null,
+                                                                null,
+                                                                null
+                                                                );
+
+    public static &lt;E extends Enum&lt;E&gt;&gt; SelectEnumDialogBuilder&lt;E&gt; question( E... options ) { 
+<span class="nc" id="L30">        Objects.requireNonNull(options);</span>
+<span class="nc bnc" id="L31" title="All 2 branches missed.">        for ( Enum&lt;?&gt; option : options )</span>
+<span class="nc" id="L32">            Objects.requireNonNull(option);</span>
+        
+<span class="nc" id="L34">        return ((SelectEnumDialogBuilder&lt;E&gt;)_NONE).options(options);</span>
+    }
+
+    public static &lt;E extends Enum&lt;E&gt;&gt; SelectEnumDialogBuilder&lt;E&gt; question( Var&lt;E&gt; property ) { 
+<span class="fc" id="L38">        Objects.requireNonNull(property);</span>
+<span class="fc" id="L39">        return ((SelectEnumDialogBuilder&lt;E&gt;)_NONE).property(property);</span>
+    }
+
+    private final int          _type;
+    private final String       _title;
+    private final String       _message;
+    private final E            _default;
+    private final E[]          _options;
+    private final Icon         _icon;
+    private final Component    _parent;
+    private final Var&lt;E&gt; _property;
+
+
+    private SelectEnumDialogBuilder(
+        int          type,
+        String       title,
+        String       message,
+        E            defaultOption,
+        E[]          options,
+        Icon         icon,
+        Component    parent,
+        Var&lt;E&gt;       property
+<span class="fc" id="L61">    ) {</span>
+<span class="fc" id="L62">        _type     = type;</span>
+<span class="fc" id="L63">        _title    = Objects.requireNonNull(title);</span>
+<span class="fc" id="L64">        _message  = Objects.requireNonNull(message);</span>
+<span class="fc" id="L65">        _default  = defaultOption;</span>
+<span class="fc" id="L66">        _options  = options;</span>
+<span class="fc" id="L67">        _icon     = icon;</span>
+<span class="fc" id="L68">        _parent   = parent;</span>
+<span class="fc" id="L69">        _property = property;</span>
+<span class="fc" id="L70">    }</span>
+
+    /**
+     * @param type The type of the dialog, which may be one of the following:
+     *             &lt;ul&gt;
+     *                  &lt;li&gt;{@link JOptionPane#ERROR_MESSAGE}&lt;/li&gt;
+     *                  &lt;li&gt;{@link JOptionPane#INFORMATION_MESSAGE}&lt;/li&gt;
+     *                  &lt;li&gt;{@link JOptionPane#WARNING_MESSAGE}&lt;/li&gt;
+     *                  &lt;li&gt;{@link JOptionPane#PLAIN_MESSAGE}&lt;/li&gt;
+     *                  &lt;li&gt;{@link JOptionPane#QUESTION_MESSAGE}&lt;/li&gt;
+     *             &lt;/ul&gt;
+     * @return A new {@link SelectEnumDialogBuilder} instance with the specified type.
+     */
+    private SelectEnumDialogBuilder&lt;E&gt; type( int type ) {
+<span class="nc" id="L84">        return new SelectEnumDialogBuilder&lt;&gt;(type, _title, _message, _default, _options, _icon, _parent, _property);</span>
+    }
+
+    /**
+     * @param title The title of the dialog.
+     * @return A new {@link SelectEnumDialogBuilder} instance with the specified title.
+     */
+    public SelectEnumDialogBuilder&lt;E&gt; titled( String title ) {
+<span class="fc" id="L92">        return new SelectEnumDialogBuilder&lt;&gt;(_type, title, _message, _default, _options, _icon, _parent, _property);</span>
+    }
+
+    /**
+     * @param message The message of the dialog.
+     * @return A new {@link SelectEnumDialogBuilder} instance with the specified message.
+     */
+    public SelectEnumDialogBuilder&lt;E&gt; message( String message ) {
+<span class="fc" id="L100">        return new SelectEnumDialogBuilder&lt;&gt;(_type, _title, message, _default, _options, _icon, _parent, _property);</span>
+    }
+
+    /**
+     * @param defaultOption The default option of the dialog.
+     *                      This option will be selected by default.
+     * @return A new {@link SelectEnumDialogBuilder} instance with the specified default option.
+     */
+    public SelectEnumDialogBuilder&lt;E&gt; defaultOption( E defaultOption ) {
+<span class="fc" id="L109">        Objects.requireNonNull(defaultOption);</span>
+<span class="fc" id="L110">        return new SelectEnumDialogBuilder&lt;&gt;(_type, _title, _message, defaultOption, _options, _icon, _parent, _property);</span>
+    }
+
+    /**
+     * @param options The options of the dialog.
+     *                The user will be able to select one of these options.
+     * @return A new {@link SelectEnumDialogBuilder} instance with the specified options.
+     */
+    private SelectEnumDialogBuilder&lt;E&gt; options( E... options ) {
+<span class="nc" id="L119">        Objects.requireNonNull(options);</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">        for ( Enum&lt;?&gt; option : options )</span>
+<span class="nc" id="L121">            Objects.requireNonNull(option);</span>
+<span class="nc" id="L122">        return new SelectEnumDialogBuilder&lt;&gt;(_type, _title, _message, _default, options, _icon, _parent, _property);</span>
+    }
+
+    /**
+     * @param icon The icon of the dialog.
+     * @return A new {@link SelectEnumDialogBuilder} instance with the specified icon.
+     */
+    public SelectEnumDialogBuilder&lt;E&gt; icon( Icon icon ) {
+<span class="fc" id="L130">        return new SelectEnumDialogBuilder&lt;&gt;(_type, _title, _message, _default, _options, icon, _parent, _property);</span>
+    }
+
+    /**
+     * @param path The path to the icon of the dialog.
+     * @return A new {@link SelectEnumDialogBuilder} instance with the specified icon.
+     */
+    public SelectEnumDialogBuilder&lt;E&gt; icon( String path ) {
+<span class="nc" id="L138">        Objects.requireNonNull(path);</span>
+<span class="nc" id="L139">        return new SelectEnumDialogBuilder&lt;&gt;(_type, _title, _message, _default, _options, UI.findIcon(path).orElse(null), _parent, _property);</span>
+    }
+
+    /**
+     * @param parent The parent component of the dialog.
+     * @return A new {@link SelectEnumDialogBuilder} instance with the specified parent component.
+     */
+    public SelectEnumDialogBuilder&lt;E&gt; parent( Component parent ) {
+<span class="nc" id="L147">        Objects.requireNonNull(parent);</span>
+<span class="nc" id="L148">        return new SelectEnumDialogBuilder&lt;&gt;(_type, _title, _message, _default, _options, _icon, parent, _property);</span>
+    }
+    
+    /**
+     * @param property The property to which the selected option will be assigned.
+     * @return A new {@link SelectEnumDialogBuilder} instance with the specified property.
+     */
+    private SelectEnumDialogBuilder&lt;E&gt; property( Var&lt;E&gt; property ) {
+<span class="fc" id="L156">        Objects.requireNonNull(property);</span>
+<span class="fc" id="L157">        E[] options       = _options;</span>
+<span class="fc" id="L158">        E   defaultOption = _default;</span>
+<span class="pc bpc" id="L159" title="1 of 2 branches missed.">        if ( options == null ) </span>
+<span class="fc" id="L160">            options = property.type().getEnumConstants();</span>
+<span class="pc bpc" id="L161" title="1 of 2 branches missed.">        if ( defaultOption == null )</span>
+<span class="fc" id="L162">            defaultOption = property.orElseNull();</span>
+        
+<span class="fc" id="L164">        return new SelectEnumDialogBuilder&lt;&gt;(_type, _title, _message, defaultOption, options, _icon, _parent, property);</span>
+    }
+
+    public Optional&lt;E&gt; asQuestion() {
+<span class="nc" id="L168">        return type(JOptionPane.QUESTION_MESSAGE).show();</span>
+    }
+
+    public Optional&lt;E&gt; asError() {
+<span class="nc" id="L172">        return type(JOptionPane.ERROR_MESSAGE).show();</span>
+    }
+
+    public Optional&lt;E&gt; asWarning() {
+<span class="nc" id="L176">        return type(JOptionPane.WARNING_MESSAGE).show();</span>
+    }
+
+    public Optional&lt;E&gt; asInfo() {
+<span class="nc" id="L180">        return type(JOptionPane.INFORMATION_MESSAGE).show();</span>
+    }
+
+    public Optional&lt;E&gt; asPlain() {
+<span class="nc" id="L184">        return type(JOptionPane.PLAIN_MESSAGE).show();</span>
+    }
+
+    /**
+     * @return The {@link Enum} that the user selected in the dialog wrapped in an {@link Optional}
+     *        or an empty {@link Optional} if the user closed the dialog.
+     */
+    public Optional&lt;E&gt; show() {
+<span class="fc" id="L192">        E[] options = _options;</span>
+<span class="pc bpc" id="L193" title="1 of 2 branches missed.">        if ( options == null ) {</span>
+<span class="nc bnc" id="L194" title="All 2 branches missed.">            if ( _property != null )</span>
+<span class="nc" id="L195">                options = _property.type().getEnumConstants();</span>
+            else {
+<span class="nc" id="L197">                log.warn(&quot;No options were specified for dialog with title '{}' and message '{}'.&quot;, _title, _message);</span>
+            }
+        }
+
+<span class="fc" id="L201">        String[] asStr = new String[options.length];</span>
+<span class="fc bfc" id="L202" title="All 2 branches covered.">        for ( int i = 0; i &lt; options.length; i++ )</span>
+<span class="fc" id="L203">            asStr[i] = options[i].toString();</span>
+
+<span class="pc bpc" id="L205" title="1 of 2 branches missed.">        String defaultOption = _default != null ? _default.toString() : null;</span>
+
+<span class="pc bpc" id="L207" title="1 of 2 branches missed.">        if ( defaultOption == null ) {</span>
+<span class="nc bnc" id="L208" title="All 4 branches missed.">            if ( _property != null &amp;&amp; _property.isPresent() )</span>
+<span class="nc" id="L209">                defaultOption = _property.get().toString();</span>
+<span class="nc bnc" id="L210" title="All 2 branches missed.">            else if ( options.length &gt; 0 )</span>
+<span class="nc" id="L211">                defaultOption = options[0].toString();</span>
+        }
+
+<span class="fc" id="L214">        int type = _type;</span>
+<span class="pc bpc" id="L215" title="1 of 2 branches missed.">        if ( type &lt; 0 ) {</span>
+<span class="pc bpc" id="L216" title="3 of 4 branches missed.">            if ( _property != null || options.length != 0 )</span>
+<span class="fc" id="L217">                type = JOptionPane.QUESTION_MESSAGE;</span>
+            else {
+<span class="nc" id="L219">                type = JOptionPane.PLAIN_MESSAGE;</span>
+            }
+        }
+
+<span class="fc" id="L223">        int selectedIdx = Context.summoner.showOptionDialog(</span>
+                                    _parent,                    // parent component, if this is not null then the dialog will be centered on it
+                                    _message,                   // message to display
+                                    _title,                     // title of the dialog
+                                    JOptionPane.DEFAULT_OPTION, // type of the dialog
+                                    type,                       // type of the dialog
+                                    _icon,                      // icon to display
+                                    asStr,                      // options to display
+                                    defaultOption               // default option
+                                );
+
+<span class="pc bpc" id="L234" title="3 of 6 branches missed.">        if ( _property != null &amp;&amp; selectedIdx &gt;= 0 &amp;&amp; options[selectedIdx] != null )</span>
+<span class="fc" id="L235">            _property.set( From.VIEW,  options[selectedIdx] );</span>
+
+<span class="pc bpc" id="L237" title="1 of 2 branches missed.">        return Optional.ofNullable( selectedIdx &gt;= 0 ? options[selectedIdx] : null );</span>
+    }
+}
+
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

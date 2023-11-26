@@ -72,9 +72,8 @@ public class JGlassPane extends JPanel implements AWTEventListener
 
     /** {@inheritDoc} */
     @Override public void paintChildren(Graphics g){
-<span class="nc" id="L75">        super.paintChildren(g);</span>
-<span class="nc" id="L76">        ComponentExtension.from(this).paintForegroundStyle( (Graphics2D) g );</span>
-<span class="nc" id="L77">    }</span>
+<span class="nc" id="L75">        ComponentExtension.from(this).paintForegroundStyle( (Graphics2D) g, ()-&gt;super.paintChildren(g) );</span>
+<span class="nc" id="L76">    }</span>
 
     /**
      * Resets the UI property with a value from the current look and feel.
@@ -83,121 +82,121 @@ public class JGlassPane extends JPanel implements AWTEventListener
      */
     @Override
     public void updateUI() {
-<span class="nc" id="L86">        ComponentExtension.from(this).installCustomUIIfPossible();</span>
+<span class="nc" id="L85">        ComponentExtension.from(this).installCustomUIIfPossible();</span>
         /*
             The JGlassPane is a SwingTree native type, so it also
             enjoys the perks of having a SwingTree based look and feel!
         */
-<span class="nc" id="L91">    }</span>
+<span class="nc" id="L90">    }</span>
 
     protected void attachToRootPane(JRootPane rootPane) {
-<span class="nc" id="L94">        Objects.requireNonNull(rootPane);</span>
-<span class="nc bnc" id="L95" title="All 2 branches missed.">        if ( this.rootPane != null ) this.detachFromRootPane(this.rootPane);</span>
-<span class="nc" id="L96">        this.setOpaque(false);</span>
-<span class="nc" id="L97">        ( this.rootPane = rootPane ).setGlassPane(this);</span>
-<span class="nc" id="L98">        this.setVisible(true);</span>
-<span class="nc" id="L99">    }</span>
+<span class="nc" id="L93">        Objects.requireNonNull(rootPane);</span>
+<span class="nc bnc" id="L94" title="All 2 branches missed.">        if ( this.rootPane != null ) this.detachFromRootPane(this.rootPane);</span>
+<span class="nc" id="L95">        this.setOpaque(false);</span>
+<span class="nc" id="L96">        ( this.rootPane = rootPane ).setGlassPane(this);</span>
+<span class="nc" id="L97">        this.setVisible(true);</span>
+<span class="nc" id="L98">    }</span>
 
     protected void detachFromRootPane( JRootPane rootPane ) {
-<span class="nc" id="L102">        Objects.requireNonNull(rootPane);</span>
-<span class="nc bnc" id="L103" title="All 2 branches missed.">        if ( rootPane.getGlassPane() == this ) {</span>
-<span class="nc" id="L104">            rootPane.setGlassPane(null);</span>
-<span class="nc" id="L105">            setVisible(false);</span>
+<span class="nc" id="L101">        Objects.requireNonNull(rootPane);</span>
+<span class="nc bnc" id="L102" title="All 2 branches missed.">        if ( rootPane.getGlassPane() == this ) {</span>
+<span class="nc" id="L103">            rootPane.setGlassPane(null);</span>
+<span class="nc" id="L104">            setVisible(false);</span>
         }
-<span class="nc" id="L107">    }</span>
+<span class="nc" id="L106">    }</span>
 
     public void toRootPane(JRootPane pane) {
-<span class="nc bnc" id="L110" title="All 2 branches missed.">        if( pane != null )</span>
-<span class="nc" id="L111">            attachToRootPane(pane);</span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">        if( pane != null )</span>
+<span class="nc" id="L110">            attachToRootPane(pane);</span>
         else
-<span class="nc" id="L113">            detachFromRootPane(rootPane);</span>
-<span class="nc" id="L114">    }</span>
+<span class="nc" id="L112">            detachFromRootPane(rootPane);</span>
+<span class="nc" id="L113">    }</span>
 
     @Override public final synchronized MouseListener[] getMouseListeners() {
-<span class="nc" id="L117">        return listeners.getListeners(MouseListener.class);</span>
+<span class="nc" id="L116">        return listeners.getListeners(MouseListener.class);</span>
     }
     @Override public final synchronized void addMouseListener(MouseListener listener) {
-<span class="nc" id="L120">        listeners.add(MouseListener.class,listener);</span>
-<span class="nc" id="L121">    }</span>
+<span class="nc" id="L119">        listeners.add(MouseListener.class,listener);</span>
+<span class="nc" id="L120">    }</span>
     @Override public final synchronized void removeMouseListener(MouseListener listener) {
-<span class="nc" id="L123">        listeners.remove(MouseListener.class,listener);</span>
-<span class="nc" id="L124">    }</span>
+<span class="nc" id="L122">        listeners.remove(MouseListener.class,listener);</span>
+<span class="nc" id="L123">    }</span>
 
     @Override public final synchronized MouseMotionListener[] getMouseMotionListeners() {
-<span class="nc" id="L127">        return listeners.getListeners(MouseMotionListener.class);</span>
+<span class="nc" id="L126">        return listeners.getListeners(MouseMotionListener.class);</span>
     }
     @Override public final synchronized void addMouseMotionListener(MouseMotionListener listener) {
-<span class="nc" id="L130">        listeners.add(MouseMotionListener.class,listener);</span>
-<span class="nc" id="L131">    }</span>
+<span class="nc" id="L129">        listeners.add(MouseMotionListener.class,listener);</span>
+<span class="nc" id="L130">    }</span>
     @Override public final synchronized void removeMouseMotionListener(MouseMotionListener listener) {
-<span class="nc" id="L133">        listeners.remove(MouseMotionListener.class,listener);</span>
-<span class="nc" id="L134">    }</span>
+<span class="nc" id="L132">        listeners.remove(MouseMotionListener.class,listener);</span>
+<span class="nc" id="L133">    }</span>
 
     @Override public final synchronized MouseWheelListener[] getMouseWheelListeners() {
-<span class="nc" id="L137">        return listeners.getListeners(MouseWheelListener.class);</span>
+<span class="nc" id="L136">        return listeners.getListeners(MouseWheelListener.class);</span>
     }
     @Override public final synchronized void addMouseWheelListener(MouseWheelListener listener) {
-<span class="nc" id="L140">        listeners.add(MouseWheelListener.class,listener);</span>
-<span class="nc" id="L141">    }</span>
+<span class="nc" id="L139">        listeners.add(MouseWheelListener.class,listener);</span>
+<span class="nc" id="L140">    }</span>
     @Override public final synchronized void removeMouseWheelListener(MouseWheelListener listener) {
-<span class="nc" id="L143">        listeners.remove(MouseWheelListener.class,listener);</span>
-<span class="nc" id="L144">    }</span>
+<span class="nc" id="L142">        listeners.remove(MouseWheelListener.class,listener);</span>
+<span class="nc" id="L143">    }</span>
 
     @Override
     public void eventDispatched( AWTEvent event ) {
-<span class="nc bnc" id="L148" title="All 4 branches missed.">        if ( rootPane != null &amp;&amp; event instanceof MouseEvent ) {</span>
-<span class="nc" id="L149">            MouseEvent mouseEvent = (MouseEvent)event, newMouseEvent;</span>
+<span class="nc bnc" id="L147" title="All 4 branches missed.">        if ( rootPane != null &amp;&amp; event instanceof MouseEvent ) {</span>
+<span class="nc" id="L148">            MouseEvent mouseEvent = (MouseEvent)event, newMouseEvent;</span>
 
-<span class="nc" id="L151">            Object source = event.getSource();</span>
-<span class="nc bnc" id="L152" title="All 2 branches missed.">            if ( source instanceof Component ) {</span>
-<span class="nc" id="L153">                Component sourceComponent = (Component) source;</span>
-<span class="nc bnc" id="L154" title="All 2 branches missed.">                if ( SwingUtilities.getRootPane(sourceComponent) != rootPane )</span>
-<span class="nc" id="L155">                    return; //it's not our root pane (e.g. different window)</span>
+<span class="nc" id="L150">            Object source = event.getSource();</span>
+<span class="nc bnc" id="L151" title="All 2 branches missed.">            if ( source instanceof Component ) {</span>
+<span class="nc" id="L152">                Component sourceComponent = (Component) source;</span>
+<span class="nc bnc" id="L153" title="All 2 branches missed.">                if ( SwingUtilities.getRootPane(sourceComponent) != rootPane )</span>
+<span class="nc" id="L154">                    return; //it's not our root pane (e.g. different window)</span>
 
                 /* change source and coordinate system of event to glass pane, DON'T use setSource on AWTEvent's! */
-<span class="nc" id="L158">                newMouseEvent = convertMouseEvent(sourceComponent, mouseEvent, this);</span>
-<span class="nc" id="L159">            } else newMouseEvent = convertMouseEvent(null, mouseEvent, this);</span>
+<span class="nc" id="L157">                newMouseEvent = convertMouseEvent(sourceComponent, mouseEvent, this);</span>
+<span class="nc" id="L158">            } else newMouseEvent = convertMouseEvent(null, mouseEvent, this);</span>
 
-<span class="nc bnc" id="L161" title="All 9 branches missed.">            switch( event.getID() ) {</span>
+<span class="nc bnc" id="L160" title="All 9 branches missed.">            switch( event.getID() ) {</span>
                 case MOUSE_CLICKED:
-<span class="nc bnc" id="L163" title="All 2 branches missed.">                    for(MouseListener listener:listeners.getListeners(MouseListener.class))</span>
-<span class="nc" id="L164">                        listener.mouseClicked(newMouseEvent);</span>
-<span class="nc" id="L165">                    break;</span>
+<span class="nc bnc" id="L162" title="All 2 branches missed.">                    for(MouseListener listener:listeners.getListeners(MouseListener.class))</span>
+<span class="nc" id="L163">                        listener.mouseClicked(newMouseEvent);</span>
+<span class="nc" id="L164">                    break;</span>
                 case MOUSE_PRESSED:
-<span class="nc bnc" id="L167" title="All 2 branches missed.">                    for(MouseListener listener:listeners.getListeners(MouseListener.class))</span>
-<span class="nc" id="L168">                        listener.mousePressed(newMouseEvent);</span>
-<span class="nc" id="L169">                    break;</span>
+<span class="nc bnc" id="L166" title="All 2 branches missed.">                    for(MouseListener listener:listeners.getListeners(MouseListener.class))</span>
+<span class="nc" id="L167">                        listener.mousePressed(newMouseEvent);</span>
+<span class="nc" id="L168">                    break;</span>
                 case MOUSE_RELEASED:
-<span class="nc bnc" id="L171" title="All 2 branches missed.">                    for(MouseListener listener:listeners.getListeners(MouseListener.class))</span>
-<span class="nc" id="L172">                        listener.mouseReleased(newMouseEvent);</span>
-<span class="nc" id="L173">                    break;</span>
+<span class="nc bnc" id="L170" title="All 2 branches missed.">                    for(MouseListener listener:listeners.getListeners(MouseListener.class))</span>
+<span class="nc" id="L171">                        listener.mouseReleased(newMouseEvent);</span>
+<span class="nc" id="L172">                    break;</span>
                 case MOUSE_MOVED:
-<span class="nc bnc" id="L175" title="All 2 branches missed.">                    for(MouseMotionListener listener:listeners.getListeners(MouseMotionListener.class))</span>
-<span class="nc" id="L176">                        listener.mouseMoved(newMouseEvent);</span>
-<span class="nc" id="L177">                    break;</span>
+<span class="nc bnc" id="L174" title="All 2 branches missed.">                    for(MouseMotionListener listener:listeners.getListeners(MouseMotionListener.class))</span>
+<span class="nc" id="L175">                        listener.mouseMoved(newMouseEvent);</span>
+<span class="nc" id="L176">                    break;</span>
                 case MOUSE_ENTERED:
-<span class="nc bnc" id="L179" title="All 2 branches missed.">                    for(MouseListener listener:listeners.getListeners(MouseListener.class))</span>
-<span class="nc" id="L180">                        listener.mouseEntered(newMouseEvent);</span>
-<span class="nc" id="L181">                    break;</span>
+<span class="nc bnc" id="L178" title="All 2 branches missed.">                    for(MouseListener listener:listeners.getListeners(MouseListener.class))</span>
+<span class="nc" id="L179">                        listener.mouseEntered(newMouseEvent);</span>
+<span class="nc" id="L180">                    break;</span>
                 case MOUSE_EXITED:
-<span class="nc bnc" id="L183" title="All 2 branches missed.">                    for(MouseListener listener:listeners.getListeners(MouseListener.class))</span>
-<span class="nc" id="L184">                        listener.mouseExited(newMouseEvent);</span>
-<span class="nc" id="L185">                    break;</span>
+<span class="nc bnc" id="L182" title="All 2 branches missed.">                    for(MouseListener listener:listeners.getListeners(MouseListener.class))</span>
+<span class="nc" id="L183">                        listener.mouseExited(newMouseEvent);</span>
+<span class="nc" id="L184">                    break;</span>
                 case MOUSE_DRAGGED:
-<span class="nc bnc" id="L187" title="All 2 branches missed.">                    for(MouseMotionListener listener:listeners.getListeners(MouseMotionListener.class))</span>
-<span class="nc" id="L188">                        listener.mouseDragged(newMouseEvent);</span>
-<span class="nc" id="L189">                    break;</span>
+<span class="nc bnc" id="L186" title="All 2 branches missed.">                    for(MouseMotionListener listener:listeners.getListeners(MouseMotionListener.class))</span>
+<span class="nc" id="L187">                        listener.mouseDragged(newMouseEvent);</span>
+<span class="nc" id="L188">                    break;</span>
                 case MOUSE_WHEEL:
-<span class="nc bnc" id="L191" title="All 2 branches missed.">                    for(MouseWheelListener listener:listeners.getListeners(MouseWheelListener.class))</span>
-<span class="nc" id="L192">                        listener.mouseWheelMoved((MouseWheelEvent)newMouseEvent);</span>
+<span class="nc bnc" id="L190" title="All 2 branches missed.">                    for(MouseWheelListener listener:listeners.getListeners(MouseWheelListener.class))</span>
+<span class="nc" id="L191">                        listener.mouseWheelMoved((MouseWheelEvent)newMouseEvent);</span>
                     break;
             }
 
             /* consume the original mouse event, if the new mouse event was consumed */
-<span class="nc bnc" id="L197" title="All 2 branches missed.">            if ( newMouseEvent.isConsumed() )</span>
-<span class="nc" id="L198">                mouseEvent.consume();</span>
+<span class="nc bnc" id="L196" title="All 2 branches missed.">            if ( newMouseEvent.isConsumed() )</span>
+<span class="nc" id="L197">                mouseEvent.consume();</span>
         }
-<span class="nc" id="L200">    }</span>
+<span class="nc" id="L199">    }</span>
 
 
     /**
@@ -209,18 +208,18 @@ public class JGlassPane extends JPanel implements AWTEventListener
      */
     @Override
     public boolean contains(int x, int y) {
-<span class="nc" id="L212">        Container container = rootPane.getContentPane();</span>
-<span class="nc" id="L213">        Point containerPoint = convertPoint(this, x, y, container);</span>
-<span class="nc bnc" id="L214" title="All 2 branches missed.">        if ( containerPoint.y &gt; 0 ) {</span>
-<span class="nc" id="L215">            Component component = getDeepestComponentAt(</span>
+<span class="nc" id="L211">        Container container = rootPane.getContentPane();</span>
+<span class="nc" id="L212">        Point containerPoint = convertPoint(this, x, y, container);</span>
+<span class="nc bnc" id="L213" title="All 2 branches missed.">        if ( containerPoint.y &gt; 0 ) {</span>
+<span class="nc" id="L214">            Component component = getDeepestComponentAt(</span>
                                         container,
                                         containerPoint.x,
                                         containerPoint.y
                                     );
 
-<span class="nc bnc" id="L221" title="All 4 branches missed.">            return component == null || component.getCursor() == Cursor.getDefaultCursor();</span>
+<span class="nc bnc" id="L220" title="All 4 branches missed.">            return component == null || component.getCursor() == Cursor.getDefaultCursor();</span>
         }
-<span class="nc" id="L223">        else return true;</span>
+<span class="nc" id="L222">        else return true;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

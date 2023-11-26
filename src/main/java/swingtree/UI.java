@@ -3303,6 +3303,7 @@ public final class UI extends UILayoutConstants
      *  Use this to create a builder for a new {@link JComboBox} UI component.
      *  This is in essence a convenience method for {@code UI.of(new JComboBox())}.
      *
+     * @param <E> The type of the elements in the {@link JComboBox}.
      * @return A builder instance for a new {@link JComboBox}, which enables fluent method chaining.
      */
     public static <E> UIForCombo<E,JComboBox<E>> comboBox() {
@@ -5949,9 +5950,10 @@ public final class UI extends UILayoutConstants
     }
 
     /**
+     * @param text The text to show in the dialog.
      * @return A builder for creating an error dialog.
      */
-    public static MessageDialog message(String text ) { return MessageDialog.saying(text); }
+    public static MessageDialog message( String text ) { return MessageDialog.saying(text); }
 
     /**
      *  Shows a conformation dialog with the given message.

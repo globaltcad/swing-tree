@@ -24,19 +24,20 @@ public final class UIForTextField&lt;F extends JTextField&gt; extends UIForAnyTe
 {
     private final BuilderState&lt;F&gt; _state;
 
-<span class="fc" id="L27">    UIForTextField( BuilderState&lt;F&gt; state ) {</span>
-<span class="fc" id="L28">        Objects.requireNonNull(state);</span>
-<span class="fc" id="L29">        _state = state;</span>
-<span class="fc" id="L30">    }</span>
+
+<span class="fc" id="L28">    UIForTextField( BuilderState&lt;F&gt; state ) {</span>
+<span class="fc" id="L29">        Objects.requireNonNull(state);</span>
+<span class="fc" id="L30">        _state = state;</span>
+<span class="fc" id="L31">    }</span>
 
     @Override
     protected BuilderState&lt;F&gt; _state() {
-<span class="fc" id="L34">        return _state;</span>
+<span class="fc" id="L35">        return _state;</span>
     }
     
     @Override
     protected UIForTextField&lt;F&gt; _with( BuilderState&lt;F&gt; newState ) {
-<span class="fc" id="L39">        return new UIForTextField&lt;&gt;(newState);</span>
+<span class="fc" id="L40">        return new UIForTextField&lt;&gt;(newState);</span>
     }
 
     /**
@@ -46,11 +47,13 @@ public final class UIForTextField&lt;F extends JTextField&gt; extends UIForAnyTe
      * @return This very instance, which enables builder-style method chaining.
      */
     public UIForTextField&lt;F&gt; onEnter( Action&lt;ComponentDelegate&lt;F, ActionEvent&gt;&gt; action ) {
-<span class="fc" id="L49">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
-<span class="fc" id="L50">        return _with( c -&gt; {</span>
-<span class="fc" id="L51">                   _onEnter(c, e -&gt; _doApp( () -&gt; action.accept(new ComponentDelegate&lt;&gt;( c, e )) ) );</span>
-<span class="fc" id="L52">               })</span>
-<span class="fc" id="L53">               ._this();</span>
+<span class="fc" id="L50">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
+<span class="fc" id="L51">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L52">                   _onEnter(thisComponent,</span>
+<span class="fc" id="L53">                       e -&gt; _doApp( () -&gt; action.accept(new ComponentDelegate&lt;&gt;( thisComponent, e )) )</span>
+                   );
+<span class="fc" id="L55">               })</span>
+<span class="fc" id="L56">               ._this();</span>
     }
 
     private void _onEnter( F thisComponent, Consumer&lt;ActionEvent&gt; action ) {
@@ -65,15 +68,15 @@ public final class UIForTextField&lt;F extends JTextField&gt; extends UIForAnyTe
             simply because it was added first.
             This is especially true in the context of declarative UI design.
         */
-<span class="fc" id="L68">        ActionListener[] listeners = thisComponent.getActionListeners();</span>
-<span class="fc bfc" id="L69" title="All 2 branches covered.">        for (ActionListener listener : listeners)</span>
-<span class="fc" id="L70">            thisComponent.removeActionListener(listener);</span>
+<span class="fc" id="L71">        ActionListener[] listeners = thisComponent.getActionListeners();</span>
+<span class="fc bfc" id="L72" title="All 2 branches covered.">        for (ActionListener listener : listeners)</span>
+<span class="fc" id="L73">            thisComponent.removeActionListener(listener);</span>
 
-<span class="fc" id="L72">        thisComponent.addActionListener(action::accept);</span>
+<span class="fc" id="L75">        thisComponent.addActionListener(action::accept);</span>
 
-<span class="fc bfc" id="L74" title="All 2 branches covered.">        for ( int i = listeners.length - 1; i &gt;= 0; i-- ) // reverse order because swing does not give us the listeners in the order they were added!</span>
-<span class="fc" id="L75">            thisComponent.addActionListener(listeners[i]);</span>
-<span class="fc" id="L76">    }</span>
+<span class="fc bfc" id="L77" title="All 2 branches covered.">        for ( int i = listeners.length - 1; i &gt;= 0; i-- ) // reverse order because swing does not give us the listeners in the order they were added!</span>
+<span class="fc" id="L78">            thisComponent.addActionListener(listeners[i]);</span>
+<span class="fc" id="L79">    }</span>
 
     /**
      *  Effectively bind this text field to a numeric {@link Var} property
@@ -84,8 +87,9 @@ public final class UIForTextField&lt;F extends JTextField&gt; extends UIForAnyTe
      * @param &lt;N&gt; The numeric type of the {@link Var} property.
      */
     public final &lt;N extends Number&gt; UIForTextField&lt;F&gt; withNumber( Var&lt;N&gt; number ) {
-<span class="nc" id="L87">        Var&lt;Boolean&gt; isValid = Var.of(true);</span>
-<span class="nc" id="L88">        return this.withNumber( number, isValid );</span>
+<span class="nc" id="L90">        NullUtil.nullArgCheck(number, &quot;number&quot;, Var.class);</span>
+<span class="nc" id="L91">        Var&lt;Boolean&gt; isValid = Var.of(true);</span>
+<span class="nc" id="L92">        return this.withNumber( number, isValid );</span>
     }
 
     /**
@@ -98,45 +102,45 @@ public final class UIForTextField&lt;F extends JTextField&gt; extends UIForAnyTe
      * @param &lt;N&gt; The numeric type of the {@link Var} property.
      */
     public final &lt;N extends Number&gt; UIForTextField&lt;F&gt; withNumber( Var&lt;N&gt; number, Var&lt;Boolean&gt; isValid ) {
-<span class="fc" id="L101">        NullUtil.nullArgCheck(number, &quot;number&quot;, Var.class);</span>
-<span class="fc" id="L102">        NullUtil.nullArgCheck(isValid, &quot;isValid&quot;, Var.class);</span>
-<span class="fc" id="L103">        NullUtil.nullPropertyCheck(number, &quot;number&quot;, &quot;Null is not a valid value for a numeric property.&quot;);</span>
-<span class="fc" id="L104">        NullUtil.nullPropertyCheck(isValid, &quot;isValid&quot;, &quot;Null is not a valid value for a boolean property.&quot;);</span>
-<span class="fc" id="L105">        Var&lt;String&gt; text = Var.of( number.get().toString() );</span>
-<span class="fc" id="L106">        return  ((UIForTextField&lt;F&gt;)_with( thisComponent -&gt; {</span>
-<span class="pc" id="L107">                    _onShow( number, thisComponent, (c,n) -&gt; _setTextSilently( thisComponent, n.toString() ) );</span>
-<span class="fc" id="L108">                    text.onChange(From.VIEW,  s -&gt; {</span>
+<span class="fc" id="L105">        NullUtil.nullArgCheck(number, &quot;number&quot;, Var.class);</span>
+<span class="fc" id="L106">        NullUtil.nullArgCheck(isValid, &quot;isValid&quot;, Var.class);</span>
+<span class="fc" id="L107">        NullUtil.nullPropertyCheck(number, &quot;number&quot;, &quot;Null is not a valid value for a numeric property.&quot;);</span>
+<span class="fc" id="L108">        NullUtil.nullPropertyCheck(isValid, &quot;isValid&quot;, &quot;Null is not a valid value for a boolean property.&quot;);</span>
+<span class="fc" id="L109">        Var&lt;String&gt; text = Var.of( number.get().toString() );</span>
+<span class="fc" id="L110">        return ((UIForTextField&lt;F&gt;)_with( thisComponent -&gt; {</span>
+<span class="pc" id="L111">                    _onShow( number, thisComponent, (c,n) -&gt; _setTextSilently( thisComponent, n.toString() ) );</span>
+<span class="fc" id="L112">                    text.onChange(From.VIEW,  s -&gt; {</span>
                         try {
-<span class="pc bpc" id="L110" title="1 of 2 branches missed.">                            if ( number.type() == Integer.class )</span>
-<span class="nc" id="L111">                                number.set(From.VIEW,  (N) Integer.valueOf(Integer.parseInt(s.get())) );</span>
-<span class="pc bpc" id="L112" title="1 of 2 branches missed.">                            else if ( number.type() == Long.class )</span>
-<span class="nc" id="L113">                                number.set(From.VIEW,  (N) Long.valueOf(Long.parseLong(s.get())) );</span>
-<span class="pc bpc" id="L114" title="1 of 2 branches missed.">                            else if ( number.type() == Float.class )</span>
-<span class="nc" id="L115">                                number.set(From.VIEW,  (N) Float.valueOf(Float.parseFloat(s.get())) );</span>
-<span class="pc bpc" id="L116" title="1 of 2 branches missed.">                            else if ( number.type() == Double.class )</span>
-<span class="nc" id="L117">                                number.set(From.VIEW,  (N) Double.valueOf(Double.parseDouble(s.get())) );</span>
-<span class="nc bnc" id="L118" title="All 2 branches missed.">                            else if ( number.type() == Short.class )</span>
-<span class="nc" id="L119">                                number.set(From.VIEW,  (N) Short.valueOf(Short.parseShort(s.get())) );</span>
-<span class="nc bnc" id="L120" title="All 2 branches missed.">                            else if ( number.type() == Byte.class )</span>
-<span class="nc" id="L121">                                number.set(From.VIEW,  (N) Byte.valueOf(Byte.parseByte(s.get())) );</span>
+<span class="pc bpc" id="L114" title="1 of 2 branches missed.">                            if ( number.type() == Integer.class )</span>
+<span class="nc" id="L115">                                number.set(From.VIEW,  (N) Integer.valueOf(Integer.parseInt(s.get())) );</span>
+<span class="pc bpc" id="L116" title="1 of 2 branches missed.">                            else if ( number.type() == Long.class )</span>
+<span class="nc" id="L117">                                number.set(From.VIEW,  (N) Long.valueOf(Long.parseLong(s.get())) );</span>
+<span class="pc bpc" id="L118" title="1 of 2 branches missed.">                            else if ( number.type() == Float.class )</span>
+<span class="nc" id="L119">                                number.set(From.VIEW,  (N) Float.valueOf(Float.parseFloat(s.get())) );</span>
+<span class="pc bpc" id="L120" title="1 of 2 branches missed.">                            else if ( number.type() == Double.class )</span>
+<span class="nc" id="L121">                                number.set(From.VIEW,  (N) Double.valueOf(Double.parseDouble(s.get())) );</span>
+<span class="nc bnc" id="L122" title="All 2 branches missed.">                            else if ( number.type() == Short.class )</span>
+<span class="nc" id="L123">                                number.set(From.VIEW,  (N) Short.valueOf(Short.parseShort(s.get())) );</span>
+<span class="nc bnc" id="L124" title="All 2 branches missed.">                            else if ( number.type() == Byte.class )</span>
+<span class="nc" id="L125">                                number.set(From.VIEW,  (N) Byte.valueOf(Byte.parseByte(s.get())) );</span>
                             else
-<span class="nc" id="L123">                                throw new IllegalStateException(&quot;Unsupported number type: &quot; + number.type());</span>
+<span class="nc" id="L127">                                throw new IllegalStateException(&quot;Unsupported number type: &quot; + number.type());</span>
 
-<span class="nc bnc" id="L125" title="All 2 branches missed.">                            if ( isValid.is(false) ) {</span>
-<span class="nc" id="L126">                                isValid.set(true);</span>
-<span class="nc" id="L127">                                isValid.fireChange(From.VIEW);</span>
+<span class="nc bnc" id="L129" title="All 2 branches missed.">                            if ( isValid.is(false) ) {</span>
+<span class="nc" id="L130">                                isValid.set(true);</span>
+<span class="nc" id="L131">                                isValid.fireChange(From.VIEW);</span>
                             }
-<span class="fc" id="L129">                        } catch (NumberFormatException e) {</span>
+<span class="fc" id="L133">                        } catch (NumberFormatException e) {</span>
                             // ignore
-<span class="fc bfc" id="L131" title="All 2 branches covered.">                            if ( isValid.is(true) ) {</span>
-<span class="fc" id="L132">                                isValid.set(false);</span>
-<span class="fc" id="L133">                                isValid.fireChange(From.VIEW);</span>
+<span class="fc bfc" id="L135" title="All 2 branches covered.">                            if ( isValid.is(true) ) {</span>
+<span class="fc" id="L136">                                isValid.set(false);</span>
+<span class="fc" id="L137">                                isValid.fireChange(From.VIEW);</span>
                             }
-<span class="nc" id="L135">                        }</span>
-<span class="fc" id="L136">                    });</span>
-<span class="fc" id="L137">                }))</span>
-<span class="fc" id="L138">                .withText( text )</span>
-<span class="fc" id="L139">                ._this();</span>
+<span class="nc" id="L139">                        }</span>
+<span class="fc" id="L140">                    });</span>
+<span class="fc" id="L141">                }))</span>
+<span class="fc" id="L142">                .withText( text )</span>
+<span class="fc" id="L143">                ._this();</span>
     }
 
     /**
@@ -151,11 +155,11 @@ public final class UIForTextField&lt;F extends JTextField&gt; extends UIForAnyTe
      * @param &lt;N&gt; The numeric type of the {@link Val} property.
      */
     public final &lt;N extends Number&gt; UIForTextField&lt;F&gt; withNumber( Val&lt;N&gt; number ) {
-<span class="nc" id="L154">        NullUtil.nullArgCheck(number, &quot;number&quot;, Var.class);</span>
-<span class="nc" id="L155">        return _withOnShow( number, (thisComponent, n) -&gt; {</span>
-<span class="nc" id="L156">                    _setTextSilently( thisComponent, n.toString() );</span>
-<span class="nc" id="L157">               })</span>
-<span class="nc" id="L158">               ._this();</span>
+<span class="nc" id="L158">        NullUtil.nullArgCheck(number, &quot;number&quot;, Var.class);</span>
+<span class="nc" id="L159">        return _withOnShow( number, (thisComponent, n) -&gt; {</span>
+<span class="nc" id="L160">                    _setTextSilently( thisComponent, n.toString() );</span>
+<span class="nc" id="L161">               })</span>
+<span class="nc" id="L162">               ._this();</span>
     }
 
     /**
@@ -172,11 +176,11 @@ public final class UIForTextField&lt;F extends JTextField&gt; extends UIForAnyTe
      * @return This very builder to allow for method chaining.
      */
     public final UIForTextField&lt;F&gt; withTextOrientation( UI.HorizontalAlignment direction ) {
-<span class="fc" id="L175">        NullUtil.nullArgCheck(direction, &quot;direction&quot;, UI.HorizontalAlignment.class);</span>
-<span class="fc" id="L176">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L177">                   thisComponent.setHorizontalAlignment(direction.forSwing());</span>
-<span class="fc" id="L178">               })</span>
-<span class="fc" id="L179">               ._this();</span>
+<span class="fc" id="L179">        NullUtil.nullArgCheck(direction, &quot;direction&quot;, UI.HorizontalAlignment.class);</span>
+<span class="fc" id="L180">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L181">                   thisComponent.setHorizontalAlignment(direction.forSwing());</span>
+<span class="fc" id="L182">               })</span>
+<span class="fc" id="L183">               ._this();</span>
     }
 
 }

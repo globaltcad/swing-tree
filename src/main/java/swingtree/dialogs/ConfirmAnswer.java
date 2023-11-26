@@ -8,7 +8,7 @@ import javax.swing.JOptionPane;
  *  An enum representing the possible answers to a confirmation dialog.
  *  <p>
  *  This enum is intended to be used as part of the {@link ConfirmDialog} API
- *  which can be accessed by calling the {@link UI#confirmation()} factory method.
+ *  which can be accessed by calling the {@link UI#confirmation(String)} factory method.
  */
 public enum ConfirmAnswer
 {

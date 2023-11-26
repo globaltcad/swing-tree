@@ -198,11 +198,13 @@ public final class ComponentExtension<C extends JComponent>
     public List<String> getStyleGroups() { return Collections.unmodifiableList(_styleGroups); }
 
     /**
+     * @param group The group to check.
      * @return {@code true} if the component belongs to the given group.
      */
     public boolean belongsToGroup( String group ) { return _styleGroups.contains(group); }
 
     /**
+     * @param group The group to check.
      * @return {@code true} if the component belongs to the given group.
      */
     public boolean belongsToGroup( Enum<?> group ) {
@@ -266,6 +268,7 @@ public final class ComponentExtension<C extends JComponent>
      *  overrides, before calling the super implementation.
      *
      * @param g The {@link Graphics} object to use for rendering.
+     * @param lookAndFeelPaint A {@link Runnable} which is used to paint the look and feel of the component.
      */
     public void paintBackgroundStyle( Graphics g, Runnable lookAndFeelPaint )
     {
@@ -282,6 +285,7 @@ public final class ComponentExtension<C extends JComponent>
      *  using the provided {@link Graphics2D} object.
      *
      * @param g2d The {@link Graphics2D} object to use for rendering.
+     * @param superPaint A {@link Runnable} which is used to paint the look and feel of the component.
      */
     public void paintForegroundStyle( Graphics2D g2d, Runnable superPaint )
     {

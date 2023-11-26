@@ -1,13 +1,13 @@
 {
   "project": "Swing-Tree",
   "version": "0.2.0",
-  "created": "Sun Nov 26 01:26:27 CET 2023",
+  "created": "Sun Nov 26 12:56:47 CET 2023",
   "statistics":{
     "runs":"44",
-    "passed":"43",
-    "failed":"1",
-    "featureFailures":"1",
-    "successRate":"0.9772727272727273",
+    "passed":"44",
+    "failed":"0",
+    "featureFailures":"0",
+    "successRate":"1.0",
     "duration":"?"
   },
   "specifications": [{
@@ -423,10 +423,10 @@
       "title":"Style Properties",
       "narrative":"This specification demonstrates how the `Style` type\n    can be used to define how Swing components ought to be\n    rendered.",
       "featureCount":"3",
-      "failures":"1",
+      "failures":"0",
       "errors":"0",
       "skipped":"0" ,
-      "successRate":"0.6666666666666666",
+      "successRate":"1.0",
       "duration":"?",
       "executedFeatures":[{"id":"Style objects are value based (with respect to equality and hash code).","extraInfo":[]},{"id":"The String representation of a Style will tell you everything about it!","extraInfo":[]},{"id":"Various kinds of String expressions can be parsed as colors by various style properties.","extraInfo":[]}],
       "ignoredFeatures":[]

@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AbstractDelegate.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">AbstractDelegate.java</span></div><h1>AbstractDelegate.java</h1><pre class="source lang-java linenums">package swingtree;
 
-import swingtree.animation.Animator;
 import swingtree.animation.Animation;
 import swingtree.animation.AnimationState;
+import swingtree.animation.Animator;
 import swingtree.animation.LifeTime;
-import swingtree.style.ComponentExtension;
 import swingtree.api.Painter;
 import swingtree.api.Styler;
+import swingtree.style.ComponentExtension;
 
-import javax.swing.*;
+import javax.swing.Action;
+import javax.swing.JComponent;
 import java.awt.*;
 import java.util.Arrays;
 import java.util.List;
@@ -16,7 +17,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -895,7 +895,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      * @param &lt;T&gt; The type parameter of the component which should be found.
      */
     public final &lt;T extends JComponent&gt; OptionalUI&lt;T&gt; find( Class&lt;T&gt; type, String id ) {
-<span class="fc" id="L898">        return this.find( type, c -&gt; Objects.equals(c.getName(), id) );</span>
+<span class="fc" id="L898">        return this.find( type, c -&gt; ComponentExtension.from(c).hasId(id) );</span>
     }
 
     /**
@@ -908,7 +908,7 @@ abstract class AbstractDelegate&lt;C extends JComponent&gt;
      * @param &lt;T&gt; The type parameter of the component which should be found.
      */
     public final &lt;T extends JComponent&gt; OptionalUI&lt;T&gt; find( Class&lt;T&gt; type, Enum&lt;?&gt; id ) {
-<span class="nc" id="L911">        return this.find( type, id.getClass().getSimpleName() + &quot;.&quot; + id.name() );</span>
+<span class="nc" id="L911">        return this.find( type, c -&gt; ComponentExtension.from(c).hasId(id) );</span>
     }
 
     /**
