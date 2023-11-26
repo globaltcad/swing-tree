@@ -487,13 +487,32 @@ public final class ComponentExtension<C extends JComponent>
             style = style.backgroundColor(_initialBackgroundColor);
         }
 
-        if ( style.base().foregroundColo().isPresent() && !Objects.equals( _owner.getForeground(), style.base().foregroundColo().get() ) )
-            _owner.setForeground( style.base().foregroundColo().get() );
+        if ( style.base().foregroundColor().isPresent() && !Objects.equals( _owner.getForeground(), style.base().foregroundColor().get() ) )
+            _owner.setForeground( style.base().foregroundColor().get() );
 
         style.base().cursor().ifPresent( cursor -> {
             if ( !Objects.equals( _owner.getCursor(), cursor ) )
                 _owner.setCursor( cursor );
         });
+
+        if ( style.base().orientation() != UI.ComponentOrientation.UNKNOWN ) {
+            ComponentOrientation currentOrientation = _owner.getComponentOrientation();
+            UI.ComponentOrientation newOrientation = style.base().orientation();
+            switch ( newOrientation ) {
+                case LEFT_TO_RIGHT:
+                    if ( !Objects.equals( currentOrientation, ComponentOrientation.LEFT_TO_RIGHT ) )
+                        _owner.applyComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
+                    break;
+                case RIGHT_TO_LEFT:
+                    if ( !Objects.equals( currentOrientation, ComponentOrientation.RIGHT_TO_LEFT ) )
+                        _owner.applyComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+                    break;
+                default:
+                    if ( !Objects.equals( currentOrientation, ComponentOrientation.UNKNOWN ) )
+                        _owner.applyComponentOrientation(ComponentOrientation.UNKNOWN);
+                    break;
+            }
+        }
 
         UI.FitComponent fit = style.base().fit();
         style.base().icon().ifPresent( icon -> {

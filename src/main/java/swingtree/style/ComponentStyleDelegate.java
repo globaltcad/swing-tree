@@ -762,7 +762,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided foreground color.
      */
     public ComponentStyleDelegate<C> foregroundColor( Color color ) {
-        return _withStyle(_style._withBase(_style.base().foregroundColo(color)));
+        return _withStyle(_style._withBase(_style.base().foregroundColor(color)));
     }
 
     /**
@@ -781,7 +781,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
             log.error("Failed to parse color string: '{}'", colorString, e);
             return this;
         }
-        return _withStyle(_style._withBase(_style.base().foregroundColo(newColor)));
+        return _withStyle(_style._withBase(_style.base().foregroundColor(newColor)));
     }
 
     /**
@@ -1612,6 +1612,25 @@ public final class ComponentStyleDelegate<C extends JComponent>
     public ComponentStyleDelegate<C> cursor( Cursor cursor ) {
         Objects.requireNonNull(cursor);
         return _withStyle(_style._withBase(_style.base().cursor(cursor)));
+    }
+
+    /**
+     *  Determines how the component is oriented, typically with respect to
+     *  the text direction and where content originates. <br>
+     *  This translates to {@link JComponent#setComponentOrientation(ComponentOrientation)}
+     *  on the underlying component. <br>
+     *  <br>
+     *  Note that although all components support this property, it may not always
+     *  have a noticeable effect on the component. <br>
+     *  How this property is interpreted depends heavily on the component, it's layout manager
+     *  and the look and feel implementation. <br>
+     * @param orientation The {@link UI.ComponentOrientation}, which maps 1:1 to the AWT {@link ComponentOrientation} constants.
+     * @return A new {@link ComponentStyleDelegate} with the provided {@link UI.ComponentOrientation} set to be later
+     *         applied to the underlying component when the final {@link Style} is applied.
+     */
+    public ComponentStyleDelegate<C> orientation( UI.ComponentOrientation orientation ) {
+        Objects.requireNonNull(orientation);
+        return _withStyle(_style._withBase(_style.base().orientation(orientation)));
     }
 
     /**

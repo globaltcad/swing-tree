@@ -431,12 +431,30 @@ public final class UI extends UILayoutConstants
         UNDEFINED
     }
 
+    /**
+     *  Defines the areas of a component, which is used
+     *  to by the {@link ImageStyle} to determine if and how an image should be clipped.
+     *  Pass instances of this to {@link ImageStyle#clipTo(ComponentArea)} to configure the clipping behaviour
+     *  as part of the style API (see {@link UIForAnySwing#withStyle(Styler)}).
+     */
     public enum ComponentArea
     {
         EXTERIOR, BORDER, INTERIOR, ALL
     }
 
-    public enum Axis {
+    /**
+     *  Use this to specify the orientation of a component.
+     *  This is especially important for components that display text.
+     *  <br>
+     *  See {@link UIForAnySwing#withStyle(Styler)} and {@link ComponentStyleDelegate#orientation(ComponentOrientation)}.
+     */
+    public enum ComponentOrientation
+    {
+        UNKNOWN, LEFT_TO_RIGHT, RIGHT_TO_LEFT
+    }
+
+    public enum Axis
+    {
         /**
          * Specifies that something is laid out left to right.
          */

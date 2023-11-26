@@ -21,7 +21,8 @@ final class BaseStyle
                                                     null,
                                                     null,
                                                     null,
-                                                    null
+                                                    null,
+                                                    UI.ComponentOrientation.UNKNOWN
                                                  );
 
     /**
@@ -31,21 +32,23 @@ final class BaseStyle
      */
     public static BaseStyle none() { return _NONE; }
 
-    private final ImageIcon       _icon;
-    private final UI.FitComponent _fit;
-    private final Color           _foundationColor;
-    private final Color           _backgroundColor;
-    private final Color           _foregroundColor;
-    private final Cursor          _cursor;
+    private final ImageIcon               _icon;
+    private final UI.FitComponent         _fit;
+    private final Color                   _foundationColor;
+    private final Color                   _backgroundColor;
+    private final Color                   _foregroundColor;
+    private final Cursor                  _cursor;
+    private final UI.ComponentOrientation _orientation;
 
 
     private BaseStyle(
-        ImageIcon       icon, 
-        UI.FitComponent fit, 
-        Color           foundation,
-        Color           background,
-        Color           foregroundColor,
-        Cursor          cursor
+        ImageIcon               icon,
+        UI.FitComponent         fit,
+        Color                   foundation,
+        Color                   background,
+        Color                   foregroundColor,
+        Cursor                  cursor,
+        UI.ComponentOrientation orientation
     ) {
         _icon            = icon;
         _fit             = Objects.requireNonNull(fit);
@@ -53,6 +56,7 @@ final class BaseStyle
         _backgroundColor = background;
         _foregroundColor = foregroundColor;
         _cursor          = cursor;
+        _orientation     = orientation;
     }
 
     public Optional<ImageIcon> icon() { return Optional.ofNullable(_icon); }
@@ -63,24 +67,28 @@ final class BaseStyle
 
     public Optional<Color> backgroundColor() { return Optional.ofNullable(_backgroundColor); }
 
-    public Optional<Color> foregroundColo() { return Optional.ofNullable(_foregroundColor); }
+    public Optional<Color> foregroundColor() { return Optional.ofNullable(_foregroundColor); }
 
     public Optional<Cursor> cursor() { return Optional.ofNullable(_cursor); }
 
-    BaseStyle icon( ImageIcon icon ) { return new BaseStyle(icon, _fit, _foundationColor, _backgroundColor, _foregroundColor, _cursor); }
+    public UI.ComponentOrientation orientation() { return _orientation; }
 
-    BaseStyle fit( UI.FitComponent fit ) { return new BaseStyle(_icon, fit, _foundationColor, _backgroundColor, _foregroundColor, _cursor); }
+    BaseStyle icon( ImageIcon icon ) { return new BaseStyle(icon, _fit, _foundationColor, _backgroundColor, _foregroundColor, _cursor, _orientation); }
 
-    BaseStyle foundationColor( Color foundation ) { return new BaseStyle(_icon, _fit, foundation, _backgroundColor, _foregroundColor, _cursor); }
+    BaseStyle fit( UI.FitComponent fit ) { return new BaseStyle(_icon, fit, _foundationColor, _backgroundColor, _foregroundColor, _cursor, _orientation); }
 
-    BaseStyle backgroundColor( Color color ) { return new BaseStyle(_icon, _fit, _foundationColor, color, _foregroundColor, _cursor); }
+    BaseStyle foundationColor( Color foundation ) { return new BaseStyle(_icon, _fit, foundation, _backgroundColor, _foregroundColor, _cursor, _orientation); }
 
-    BaseStyle foregroundColo( Color color ) { return new BaseStyle(_icon, _fit, _foundationColor, _backgroundColor, color, _cursor); }
+    BaseStyle backgroundColor( Color color ) { return new BaseStyle(_icon, _fit, _foundationColor, color, _foregroundColor, _cursor, _orientation); }
 
-    BaseStyle cursor( Cursor cursor ) { return new BaseStyle(_icon, _fit, _foundationColor, _backgroundColor, _foregroundColor, cursor); }
+    BaseStyle foregroundColor(Color color ) { return new BaseStyle(_icon, _fit, _foundationColor, _backgroundColor, color, _cursor, _orientation); }
+
+    BaseStyle cursor( Cursor cursor ) { return new BaseStyle(_icon, _fit, _foundationColor, _backgroundColor, _foregroundColor, cursor, _orientation); }
+
+    BaseStyle orientation( UI.ComponentOrientation orientation ) { return new BaseStyle(_icon, _fit, _foundationColor, _backgroundColor, _foregroundColor, _cursor, orientation); }
 
     @Override
-    public int hashCode() { return Objects.hash(_icon, _fit, _backgroundColor, _foundationColor, _foregroundColor, _cursor); }
+    public int hashCode() { return Objects.hash(_icon, _fit, _backgroundColor, _foundationColor, _foregroundColor, _cursor, _orientation); }
 
     @Override
     public boolean equals( Object obj ) {
@@ -93,7 +101,8 @@ final class BaseStyle
                Objects.equals(_backgroundColor, rhs._backgroundColor) &&
                Objects.equals(_foundationColor, rhs._foundationColor) &&
                Objects.equals(_foregroundColor, rhs._foregroundColor) &&
-               Objects.equals(_cursor,          rhs._cursor         );
+               Objects.equals(_cursor,          rhs._cursor         ) &&
+               Objects.equals(_orientation,     rhs._orientation    );
     }
 
     @Override
@@ -104,7 +113,8 @@ final class BaseStyle
                     "backgroundColor=" + StyleUtility.toString(_backgroundColor)           + ", " +
                     "foundationColor=" + StyleUtility.toString(_foundationColor)           + ", " +
                     "foregroundColor=" + StyleUtility.toString(_foregroundColor)           + ", " +
-                    "cursor="          + ( _cursor     == null ? "?" : _cursor.toString() ) +
+                    "cursor="          + ( _cursor == null ? "?" : _cursor.toString() )    + ", " +
+                    "orientation="     + _orientation                                      +
                 "]";
     }
 }
