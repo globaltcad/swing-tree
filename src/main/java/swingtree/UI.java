@@ -299,6 +299,12 @@ public final class UI extends UILayoutConstants
         }
     }
 
+    /**
+     *  Defines whether the list based data model of a {@link JTable} is row or column major
+     *  and whether it is editable or not.
+     *  See {@link UI#table(ListData, TableListDataSource)}  or {@link UIForTable#withModel(ListData, TableListDataSource)}
+     *  for more information about the usage of this enum.
+     */
     public enum ListData {
         COLUMN_MAJOR,
         ROW_MAJOR,
@@ -330,6 +336,11 @@ public final class UI extends UILayoutConstants
         }
     }
 
+    /**
+     *  Defines whether the data model of a {@link JTable} should be editable or not.
+     *  See {@link UI#table(MapData, TableMapDataSource)} or {@link UIForTable#withModel(MapData, TableMapDataSource)}
+     *  for more information about the usage of this enum.
+     */
     public enum MapData {
         EDITABLE, READ_ONLY;
 
@@ -383,7 +394,7 @@ public final class UI extends UILayoutConstants
      *  Use these enum instances to specify the gradient alignment for various sub styles,
      *  like for example the gradient style API exposed by {@link ComponentStyleDelegate#borderGradient(Function)}
      *  or {@link ComponentStyleDelegate#gradient(Function)} methods (see {@link UIForAnySwing#withStyle(Styler)}).
-     *
+     * <p>
      *  {@link GradientStyle#transition(Transition)} method exposed by methods like
      *  {@link ComponentStyleDelegate#gradient(String, Function)} or {@link ComponentStyleDelegate#borderGradient(String, Function)}.
      */
@@ -453,6 +464,15 @@ public final class UI extends UILayoutConstants
         UNKNOWN, LEFT_TO_RIGHT, RIGHT_TO_LEFT
     }
 
+    /**
+     *  Used to define how a layout manager (typically the {@link BoxLayout})
+     *  will lay out components along the given axis. <br>
+     *  Create a simple box layout for your components
+     *  by calling the {@link UIForAnySwing#withBoxLayout(Axis)} method,
+     *  or use {@link Layout#box(Axis)} factory method returning a {@link Layout} config
+     *  object which can be passed to the style API (see {@link UIForAnySwing#withStyle(Styler)}
+     *  and {@link ComponentStyleDelegate#layout(Layout)}).
+     */
     public enum Axis
     {
         /**
@@ -507,9 +527,9 @@ public final class UI extends UILayoutConstants
     public static LookAndFeel currentLookAndFeel() {
         try {
             String laf = UIManager.getLookAndFeel().getClass().getName();
-            if (laf.contains("FlatLaf")) return LookAndFeel.FLAT_LAF;
-            if (laf.contains("Nimbus")) return LookAndFeel.NIMBUS;
-            if (laf.contains("Metal")) return LookAndFeel.METAL;
+            if ( laf.contains("FlatLaf") ) return LookAndFeel.FLAT_LAF;
+            if ( laf.contains("Nimbus")  ) return LookAndFeel.NIMBUS;
+            if ( laf.contains("Metal")   ) return LookAndFeel.METAL;
         }
         catch (Exception ignored) {}
 
@@ -530,7 +550,7 @@ public final class UI extends UILayoutConstants
      */
     public static float scale( float value ) {
         float scaleFactor = SwingTree.get().getUiScaleFactor();
-        return (scaleFactor == 1) ? value : (value * scaleFactor);
+        return ( scaleFactor == 1 ? value : (value * scaleFactor) );
     }
 
     /**
@@ -542,7 +562,7 @@ public final class UI extends UILayoutConstants
      */
     public static double scale( double value ) {
         float scaleFactor = SwingTree.get().getUiScaleFactor();
-        return (scaleFactor == 1) ? value : (value * scaleFactor);
+        return ( scaleFactor == 1 ? value : (value * scaleFactor) );
     }
 
     /**
@@ -578,7 +598,7 @@ public final class UI extends UILayoutConstants
      */
     public static float unscale( float value ) {
         float scaleFactor = SwingTree.get().getUiScaleFactor();
-        return (scaleFactor == 1f) ? value : (value / scaleFactor);
+        return ( scaleFactor == 1f ? value : (value / scaleFactor) );
     }
 
     /**
@@ -589,7 +609,7 @@ public final class UI extends UILayoutConstants
      */
     public static int unscale( int value ) {
         float scaleFactor = SwingTree.get().getUiScaleFactor();
-        return (scaleFactor == 1f) ? value : Math.round( value / scaleFactor );
+        return ( scaleFactor == 1f ? value : Math.round( value / scaleFactor ) );
     }
 
     /**
@@ -601,7 +621,7 @@ public final class UI extends UILayoutConstants
      */
     public static void scale( Graphics2D g ) {
         float scaleFactor = SwingTree.get().getUiScaleFactor();
-        if( scaleFactor != 1f )
+        if ( scaleFactor != 1f )
             g.scale( scaleFactor, scaleFactor );
     }
 

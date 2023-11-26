@@ -18,6 +18,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
 {
     private final BuilderState<T> _state;
 
+
     /**
      * Extensions of the {@link  UIForAnySwing} always wrap
      * a single component for which they are responsible.
@@ -183,7 +184,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
     }
 
     /**
-     * Use this to set a table model.
+     * Use this to set a basic table model for this table.
      * @param model The model for the table model.
      * @return This builder object.
      */
@@ -196,7 +197,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
     }
 
     /**
-     *  Use this instead of {@link JTable#setModel(TableModel)} if your table data can be represented through
+     *  Use this instead of {@link JTable#setModel(TableModel)} if your table data can be represented by
      *  either a row major {@link List} of {@link List}s of entry {@link Object}s (a list of rows)      <br>
      *  or a columns major {@link List} of {@link List}s of entry {@link Object}s (a list of columns).  <br>
      *  This method will automatically create a {@link AbstractTableModel} instance for you.
