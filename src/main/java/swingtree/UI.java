@@ -854,7 +854,7 @@ public final class UI extends UILayoutConstants
      * @return The icon.
      * @throws NullPointerException if {@code path} is {@code null}.
      */
-    public static ImageIcon _loadIcon( String path )
+    private static ImageIcon _loadIcon( String path )
     {
         Objects.requireNonNull(path, "path");
         path = path.trim();
@@ -6176,7 +6176,7 @@ public final class UI extends UILayoutConstants
      *  This enum is used to specify how an image or icon (usually a {@link SvgIcon})
      *  should be scaled to fit the
      *  dimensions of the component that it is being rendered into, like for example
-     *  using the {@link SvgIcon#paintIcon(Component, Graphics, int, int, int, int)} method.
+     *  through the {@link SvgIcon#paintIcon(Component, Graphics, int, int)} method.
      */
     public enum FitComponent {
         /**
