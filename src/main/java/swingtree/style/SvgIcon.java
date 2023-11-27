@@ -351,8 +351,8 @@ public final class SvgIcon extends ImageIcon
         else
             y = insets.top;
 
-        int width  = Math.max(_width,  c.getWidth());
-        int height = Math.max(_height, c.getHeight());
+        int width  = Math.max(_width,  c == null ? -1 : c.getWidth());
+        int height = Math.max(_height, c == null ? -1 : c.getHeight());
 
         width  = _width  >= 0 ? _width  : width  - insets.right  - insets.left - deltaX;
         height = _height >= 0 ? _height : height - insets.bottom - insets.top  - deltaY;
@@ -418,8 +418,8 @@ public final class SvgIcon extends ImageIcon
         if ( _svgDocument == null )
             return;
 
-        width  = ( width  < 0 ? getIconWidth()  : width  );
-        height = ( height < 0 ? getIconHeight() : height );
+        width  = ( width  < 0 ? _width  : width  );
+        height = ( height < 0 ? _height : height );
 
         Graphics2D g2d = (Graphics2D) g.create();
 
