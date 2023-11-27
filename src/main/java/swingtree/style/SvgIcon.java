@@ -10,25 +10,46 @@ import swingtree.UI;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.border.Border;
-import java.awt.Component;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Insets;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.Objects;
 import java.util.Optional;
 
 /**
- *   A specialized {@link ImageIcon} subclass that allows you to use SVG based icon images in your UI.
- *   This in essence just a wrapper around the JSVG library, which renders SVG images into Java2D graphics API.
+ *   A specialized {@link ImageIcon} subclass that allows you to use SVG based icon images in your GUI.
+ *   This in essence just a wrapper around the <a href="https://github.com/weisJ/jsvg">JSVG library</a>,
+ *   which renders SVG images using the Java2D graphics API.
+ *   <p>
+ *   You may use this like a regular {@link ImageIcon}, but have to keep in mind that SVG documents
+ *   do not really have a fixed size, meaning that the {@link #getIconWidth()} and {@link #getIconHeight()}
+ *   on a freshly loaded {@link SvgIcon} will return -1 which causes the icon to be rendered according to the
+ *   width and height of the component it is rendered into (see {@link #paintIcon(Component, java.awt.Graphics, int, int)}).
+ *   <p>
+ *   If you want to render the icon with a fixed size, you can use the {@link #withIconWidth(int)} and
+ *   {@link #withIconHeight(int)} or {@link #withIconSize(int, int)} methods to create a new {@link SvgIcon}
+ *   with the given width and height.
+ *   <p>
+ *   An {@link SvgIcon} with an undefined width or height will also be using the {@link UI.FitComponent}
+ *   and {@link UI.Placement} policies to determine how the icon should be placed and sized within a component.
+ *   Use the {@link #withFitComponent(UI.FitComponent)} and {@link #withPreferredPlacement(UI.Placement)}
+ *   methods to create a new {@link SvgIcon} with the given policies and use the {@link #getFitComponent()}
+ *   and {@link #getPreferredPlacement()} methods to retrieve the current policies
+ *   (Not that these will not have any effect if the width and height are both defined).
+ *   <p>
+ *   <b>Also note that the direct use of this class and it's API is discouraged in favour of simply
+ *   calling the {@link UI#findIcon(String)} or {@link UI#findSvgIcon(String)} methods, which
+ *   will automatically load and cache all of the icons for you.</b>
  */
 public final class SvgIcon extends ImageIcon
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(SvgIcon.class);
     private static final UI.FitComponent DEFAULT_FIT_COMPONENT = UI.FitComponent.MIN_DIM;
     private static final UI.Placement    DEFAULT_PLACEMENT     = UI.Placement.UNDEFINED;
+    private static final int             NO_SIZE               = -1;
+
 
     private final SVGDocument _svgDocument;
 
@@ -40,7 +61,7 @@ public final class SvgIcon extends ImageIcon
 
 
     private SvgIcon(
-        SVGDocument     svgDocument,
+        SVGDocument     svgDocument, // nullable
         int             width,
         int             height,
         UI.FitComponent fitComponent,
@@ -50,36 +71,68 @@ public final class SvgIcon extends ImageIcon
         _svgDocument        = svgDocument;
         _width              = width;
         _height             = height;
-        _fitComponent       = fitComponent;
-        _preferredPlacement = preferredPlacement;
+        _fitComponent       = Objects.requireNonNull(fitComponent);
+        _preferredPlacement = Objects.requireNonNull(preferredPlacement);
     }
 
-    public SvgIcon( SvgIcon icon ) {
-        this(icon._svgDocument, icon._width, icon._height, icon._fitComponent, icon._preferredPlacement);
-    }
-
-    public SvgIcon( URL svgUrl, int width, int height, UI.FitComponent fitComponent, UI.Placement preferredPlacement ) {
-        this(_loadSvgDocument(svgUrl), width, height, fitComponent, preferredPlacement);
-    }
-
-    public SvgIcon( URL svgUrl, int width, int height, UI.FitComponent fitComponent ) {
-        this(_loadSvgDocument(svgUrl), width, height, fitComponent, DEFAULT_PLACEMENT);
-    }
-
-    public SvgIcon( URL svgUrl, int width, int height ) {
-        this(svgUrl, width, height, DEFAULT_FIT_COMPONENT);
-    }
-
-    public SvgIcon( String path, int width, int height ) {
-        this(SvgIcon.class.getResource(path), width, height);
-    }
-
+    /**
+     * @param path The path to the SVG document.
+     */
     public SvgIcon( String path ) {
-        this(path, -1, -1);
+        this(_loadSvgDocument(SvgIcon.class.getResource(path)), NO_SIZE, NO_SIZE, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
     }
 
+    /**
+     * @param svgUrl The URL to the SVG document.
+     */
     public SvgIcon( URL svgUrl ) {
-        this(svgUrl, -1, -1);
+        this(_loadSvgDocument(svgUrl), NO_SIZE, NO_SIZE, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+    }
+
+    /**
+     * @param stream The input stream supplying the text data of the SVG document.
+     */
+    public SvgIcon( InputStream stream ) {
+        this(_loadSvgDocument(stream), NO_SIZE, NO_SIZE, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+    }
+
+    /**
+     * @param svgDocument The already loaded SVG document, which will be used to render the icon.
+     */
+    public SvgIcon( SVGDocument svgDocument ) {
+        this(svgDocument, NO_SIZE, NO_SIZE, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+    }
+
+    /**
+     * @param path The path to the SVG document.
+     * @param size The size of the icon in the form of a {@link Dimension}.
+     */
+    public SvgIcon( String path, Dimension size ) {
+        this(_loadSvgDocument(SvgIcon.class.getResource(path)), size.width, size.height, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+    }
+
+    /**
+     * @param svgUrl The URL to the SVG document.
+     * @param size The size of the icon in the form of a {@link Dimension}.
+     */
+    public SvgIcon( URL svgUrl, Dimension size ) {
+        this(_loadSvgDocument(svgUrl), size.width, size.height, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+    }
+
+    /**
+     * @param stream The input stream supplying the text data of the SVG document.
+     * @param size The size of the icon in the form of a {@link Dimension}.
+     */
+    public SvgIcon( InputStream stream, Dimension size ) {
+        this(_loadSvgDocument(stream), size.width, size.height, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
+    }
+
+    /**
+     * @param svgDocument The already loaded SVG document, which will be used to render the icon.
+     * @param size The size of the icon in the form of a {@link Dimension}.
+     */
+    public SvgIcon( SVGDocument svgDocument, Dimension size ) {
+        this(svgDocument, size.width, size.height, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT);
     }
 
 
@@ -90,6 +143,17 @@ public final class SvgIcon extends ImageIcon
             tempSVGDocument = loader.load(svgUrl);
         } catch (Exception e) {
             log.error("Failed to load SVG document from URL: " + svgUrl, e);
+        }
+        return tempSVGDocument;
+    }
+
+    private static SVGDocument _loadSvgDocument( InputStream stream ) {
+        SVGDocument tempSVGDocument = null;
+        try {
+            SVGLoader loader = new SVGLoader();
+            tempSVGDocument = loader.load(stream);
+        } catch (Exception e) {
+            log.error("Failed to load SVG document from stream: " + stream, e);
         }
         return tempSVGDocument;
     }
@@ -161,6 +225,13 @@ public final class SvgIcon extends ImageIcon
      */
     public FloatSize getSvgSize() {
         return _svgDocument.size();
+    }
+
+    /**
+     * @return The underlying {@link SVGDocument} that is used to render the icon.
+     */
+    public SVGDocument getSvgDocument() {
+        return _svgDocument;
     }
 
     /**
@@ -324,7 +395,7 @@ public final class SvgIcon extends ImageIcon
         return new Insets(0,0,0,0);
     }
 
-    public void paintIcon(
+    void paintIcon(
             final java.awt.Component c,
             final java.awt.Graphics g,
             int x,
