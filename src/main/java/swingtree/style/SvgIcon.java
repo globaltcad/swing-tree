@@ -280,11 +280,11 @@ public final class SvgIcon extends ImageIcon
         else
             y = insets.top;
 
-        int width  = c.getWidth();
-        int height = c.getHeight();
+        int width  = Math.max(_width,  c.getWidth());
+        int height = Math.max(_height, c.getHeight());
 
-        width  = width  - insets.right  - insets.left - deltaX;
-        height = height - insets.bottom - insets.top  - deltaY;
+        width  = _width  >= 0 ? _width  : width  - insets.right  - insets.left - deltaX;
+        height = _height >= 0 ? _height : height - insets.bottom - insets.top  - deltaY;
 
         if ( width  <= 0 ) {
             int smaller = (int) Math.floor( width / 2.0 );
