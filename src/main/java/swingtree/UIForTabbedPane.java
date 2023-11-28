@@ -8,10 +8,7 @@ import sprouts.Val;
 import sprouts.Var;
 import swingtree.style.ComponentExtension;
 
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.plaf.TabbedPaneUI;
@@ -45,7 +42,9 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
      */
     UIForTabbedPane( BuilderState<P> state ) {
         Objects.requireNonNull(state);
-        _state = state;
+        _state = state.with( thisComponent -> {
+            thisComponent.setModel(ExtraState.of(thisComponent));
+        });
     }
 
     @Override
@@ -300,8 +299,9 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
     }
 
     /**
-     *  Dynamically sets the selected tab based on the given index property.
-     *  So when the index property changes, the selected tab will change accordingly.
+     *  Binds the given index property to the selection index of the tabbed pane,
+     *  which means that when the index property changes, the selected tab will change accordingly
+     *  and when the user selects a different tab, the index property will be updated accordingly.
      * @param index The index property of the tab to select.
      * @return This builder node.
      */
@@ -325,7 +325,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                ._withOnShow( index, (thisComponent,i) -> {
                    ExtraState state = ExtraState.of(thisComponent);
                    thisComponent.setSelectedIndex(i);
-                   state.selectionListeners.forEach(l -> l.accept(i) );
+                   state.selectionListeners.forEach( l -> l.accept(i) );
                })
                ._with( thisComponent -> {
                    _onChange(thisComponent, e -> _doApp(()->{
@@ -621,7 +621,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
         thisComponent.addChangeListener(action::accept);
     }
 
-    private static class ExtraState
+    private static class ExtraState extends DefaultSingleSelectionModel
     {
         static ExtraState of( JTabbedPane pane ) {
             return ComponentExtension.from(pane)
@@ -632,6 +632,17 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
         Var<Integer> selectedTabIndex = null;
         MouseTabHoverSenser mouseTabHoverSenser = null;
         int lastHoveredTabIndex = -1;
+
+        @Override public void setSelectedIndex(int index) {
+            super.setSelectedIndex(index);
+            if ( selectedTabIndex != null )
+                selectedTabIndex.set(From.VIEW, index);
+        }
+        @Override public void clearSelection() {
+            super.clearSelection();
+            if ( selectedTabIndex != null )
+                selectedTabIndex.set(From.VIEW, -1);
+        }
     }
 
     private static class MouseTabHoverSenser extends MouseMotionAdapter {
