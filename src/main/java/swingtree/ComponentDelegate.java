@@ -52,7 +52,7 @@ public class ComponentDelegate<C extends JComponent, E> extends AbstractDelegate
     public ComponentDelegate(
             C component, E event
     ) {
-        super(component, component);
+        super(false, component, component);
         this.event = Objects.requireNonNull(event);
     }
 

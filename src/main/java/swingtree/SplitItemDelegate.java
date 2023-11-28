@@ -30,7 +30,7 @@ public final class SplitItemDelegate<I extends JMenuItem> extends AbstractDelega
             Supplier<List<I>> siblingsSource,
             I currentItem
     ) {
-        super(currentItem, splitButton);
+        super(true, currentItem, splitButton);
         this.event = Objects.requireNonNull(event);
         this.splitButton = Objects.requireNonNull(splitButton);
         this.siblingsSource = Objects.requireNonNull(siblingsSource);
