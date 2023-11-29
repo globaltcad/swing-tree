@@ -37,13 +37,17 @@ public abstract class AbstractTextComponentDelegate
 
     public JTextComponent getComponent() {
         // We make sure that only the Swing thread can access the component:
-        if (UI.thisIsUIThread()) return textComponent;
+        if (UI.thisIsUIThread())
+            return textComponent;
         else
             throw new IllegalStateException(
                     "Text component can only be accessed by the Swing thread."
             );
     }
 
+    /**
+     * @return The {@link DocumentFilter.FilterBypass} object that can be used to modify the document.
+     */
     public DocumentFilter.FilterBypass getFilterBypass() {
         return filterBypass;
     }

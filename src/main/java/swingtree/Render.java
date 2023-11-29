@@ -16,7 +16,7 @@ import java.util.function.*;
  * 	An API for building extensions of the {@link DefaultTableCellRenderer} in a functional style.
  * 	<p>
  * 	<b>Please take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
- * 	where you can browse a large collection of examples demonstrating how to use the API of this class.</b>
+ * 	where you can browse a collection of examples demonstrating how to use the API of this class.</b>
  */
 public final class Render<C extends JComponent,E>
 {

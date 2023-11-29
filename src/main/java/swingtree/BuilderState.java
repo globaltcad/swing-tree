@@ -17,7 +17,7 @@ import java.util.function.Supplier;
  *
  * @param <C> The type of the component wrapped by the builder node.
  */
-class BuilderState<C extends Component>
+final class BuilderState<C extends Component>
 {
     private static final Logger log = LoggerFactory.getLogger(BuilderState.class);
 
@@ -46,7 +46,7 @@ class BuilderState<C extends Component>
      */
     private final Mode _mode;
     /**
-     * The thread processor determines the thread execution mode of the component.
+     * The event processor determines the thread execution mode of the component and view model events.
      * And also which type of thread can access the component.
      */
     private final EventProcessor _eventProcessor;
@@ -115,14 +115,16 @@ class BuilderState<C extends Component>
 
     /**
      * The thread mode determines how events are dispatched to the component.
-     * And also which type of thread can access the component.
+     * And also which type of thread can access the component. <br>
+     * <b>This will never return null.</b>
      */
     public EventProcessor eventProcessor() {
         return _eventProcessor;
     }
 
     /**
-     *  The type class of the component wrapped by this builder node.
+     *  The type class of the component wrapped by this builder node. <br>
+     *  <b>This will never return null.</b>
      */
     public Class<C> componentType() {
         return _componentType;

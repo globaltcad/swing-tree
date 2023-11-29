@@ -23,20 +23,21 @@ public final class TextInsertDelegate extends AbstractTextComponentDelegate
 
 
     TextInsertDelegate(
-        JTextComponent textComponent,
+        JTextComponent              textComponent,
         DocumentFilter.FilterBypass filterBypass,
-        int offset,
-        int length,
-        String text,
-        AttributeSet attributeSet
+        int                         offset,
+        int                         length,
+        String                      text,
+        AttributeSet                attributeSet
     ) {
         super(textComponent, filterBypass, offset, length);
-        this.text = text;
+        this.text         = ( text == null ? "" : text );
         this.attributeSet = attributeSet;
     }
 
     /**
-     * @return The text to be inserted.
+     * @return The text to be inserted or an empty {@link String} if no text is to be inserted.
+     *         Null is never returned.
      */
     public String getTextToBeInserted() {
         return text;

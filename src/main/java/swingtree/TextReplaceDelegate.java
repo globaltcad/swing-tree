@@ -1,5 +1,6 @@
 package swingtree;
 
+import org.slf4j.Logger;
 import sprouts.Action;
 
 import javax.swing.text.AttributeSet;
@@ -19,25 +20,28 @@ import javax.swing.text.JTextComponent;
  */
 public final class TextReplaceDelegate extends AbstractTextComponentDelegate
 {
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(TextReplaceDelegate.class);
+
     private final String text;
     private final AttributeSet attributeSet;
 
 
     TextReplaceDelegate(
-        JTextComponent textComponent,
+        JTextComponent              textComponent,
         DocumentFilter.FilterBypass filterBypass,
-        int offset,
-        int length,
-        String text,
-        AttributeSet attributeSet
+        int                         offset,
+        int                         length,
+        String                      text,
+        AttributeSet                attributeSet
     ) {
         super(textComponent, filterBypass, offset, length);
-        this.text = text;
+        this.text         = ( text == null ? "" : text );
         this.attributeSet = attributeSet;
     }
 
     /**
-     * @return The text to be inserted. Null indicates no text to insert
+     * @return The text to be inserted or an empty {@link String} indicating that no text is to be inserted.
+     *         Null is never returned.
      */
     public String getText() {
         return text;
@@ -50,8 +54,13 @@ public final class TextReplaceDelegate extends AbstractTextComponentDelegate
         try {
             return getComponent().getDocument().getText(getOffset(), getLength());
         } catch (BadLocationException e) {
-            throw new IllegalStateException("Could not get text to be removed!", e);
+            log.error(
+                    "Failed to read the replacement text from the document " +
+                    "at offset "+ getOffset() + " and using length " + getLength() + "!",
+                    e
+                );
         }
+        return "";
     }
 
     /**

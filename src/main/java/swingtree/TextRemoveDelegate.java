@@ -1,5 +1,6 @@
 package swingtree;
 
+import org.slf4j.Logger;
 import sprouts.Action;
 
 import javax.swing.text.BadLocationException;
@@ -18,23 +19,33 @@ import javax.swing.text.JTextComponent;
  */
 public final class TextRemoveDelegate extends AbstractTextComponentDelegate
 {
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(TextRemoveDelegate.class);
+
+
     TextRemoveDelegate(
-        JTextComponent textComponent,
+        JTextComponent              textComponent,
         DocumentFilter.FilterBypass filterBypass,
-        int offset,
-        int length
+        int                         offset,
+        int                         length
     ) {
         super(textComponent, filterBypass, offset, length);
     }
 
     /**
-     * @return The text to be removed.
+     * @return The text to be removed or an empty {@link String} if no text is to be removed.
+     *         Null is never returned.
+     *
      */
     public String getTextToBeRemoved() {
         try {
             return getComponent().getDocument().getText(getOffset(), getLength());
         } catch (BadLocationException e) {
-            throw new IllegalStateException("Could not get text to be removed!", e);
+            log.error(
+                    "Failed to read the text to be removed from the document " +
+                    "at offset "+ getOffset() + " and using length " + getLength() + "!",
+                    e
+                );
+            return "";
         }
     }
 }
