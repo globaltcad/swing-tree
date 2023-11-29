@@ -82,19 +82,31 @@ public final class MessageDialog
      *  @param parent The parent of the dialog.
      *  @return A new {@link MessageDialog} instance with the specified parent.
      */
-    public MessageDialog parent(Component parent ) {
+    public MessageDialog parent( Component parent ) {
         return new MessageDialog(_type, _title, _message, _icon, parent);
     }
 
-    public void asError() {
+    /**
+     *  Show the dialog with the specified configuration
+     *  as an error dialog.
+     */
+    public void showAsError() {
         type(JOptionPane.ERROR_MESSAGE).show();
     }
 
-    public void asWarning() {
+    /**
+     *  Show the dialog with the specified configuration
+     *  as a warning dialog.
+     */
+    public void showAsWarning() {
         type(JOptionPane.WARNING_MESSAGE).show();
     }
 
-    public void asInfo() {
+    /**
+     *  Show the dialog with the specified configuration
+     *  as an info dialog.
+     */
+    public void showAsInfo() {
         type(JOptionPane.INFORMATION_MESSAGE).show();
     }
 

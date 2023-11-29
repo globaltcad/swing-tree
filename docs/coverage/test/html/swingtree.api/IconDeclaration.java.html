@@ -75,5 +75,14 @@ public interface IconDeclaration
      *         if the icon resource was found, otherwise an empty {@link Optional}.
      */
 <span class="fc" id="L77">    default Optional&lt;ImageIcon&gt; find() { return UI.findIcon(path()); }</span>
+
+    /**
+     * @param type The type of icon to find.
+     * @return An {@link Optional} that contains the {@link ImageIcon} of the given type.
+     * @param &lt;T&gt; The type of icon to find.
+     */
+    default &lt;T extends ImageIcon&gt; Optional&lt;T&gt; find( Class&lt;T&gt; type ) {
+<span class="nc" id="L85">        return UI.findIcon(path()).map(type::cast);</span>
+    }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

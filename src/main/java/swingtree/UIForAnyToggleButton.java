@@ -32,10 +32,10 @@ public abstract class UIForAnyToggleButton<I, B extends JToggleButton> extends U
         NullUtil.nullArgCheck(selection, "selection", Var.class);
         NullUtil.nullPropertyCheck(selection, "selection", "Null is not a valid selection state.");
         return _withOnShow( selection, (button,s) -> {
-                   _setSelectedSilently( state.equals(s), button );
+                   _setSelectedSilently(button, state.equals(s));
                })
                ._with( button -> {
-                   _setSelectedSilently(state.equals(selection.get()), button);
+                   _setSelectedSilently(button, state.equals(selection.get()));
                    String currentText = button.getText();
                    if ( currentText == null || currentText.isEmpty() )
                        button.setText( state.toString() );

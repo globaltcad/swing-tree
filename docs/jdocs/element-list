@@ -5,6 +5,7 @@ swingtree.api.model
 swingtree.api.mvvm
 swingtree.components
 swingtree.components.action
+swingtree.components.listener
 swingtree.dialogs
 swingtree.input
 swingtree.layout

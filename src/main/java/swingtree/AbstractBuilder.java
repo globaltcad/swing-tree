@@ -31,8 +31,15 @@ abstract class AbstractBuilder<I, C extends Component>
 
     protected abstract AbstractBuilder<I,C> _with( BuilderState<C> newState );
 
-    protected final AbstractBuilder<I,C> _with( Consumer<C> action ) {
-        BuilderState<C> newState = _state().with(action);
+    /**
+     *  Creates a new builder with the provided component mutation applied to the wrapped component.
+     *
+     * @param componentMutator A consumer lambda which receives the wrapped component and
+     *                         is then used to apply some builder action to it.
+     * @return A new builder instance with the provided component mutation applied to the wrapped component.
+     */
+    protected final AbstractBuilder<I,C> _with( Consumer<C> componentMutator ) {
+        BuilderState<C> newState = _state().with(componentMutator);
         return _with(newState);
     }
 
@@ -71,7 +78,7 @@ abstract class AbstractBuilder<I, C extends Component>
     {
         Objects.requireNonNull(val);
         Objects.requireNonNull(displayAction);
-        _onShow( val, new WeakReference<>(c), displayAction );
+        _onShow( new WeakReference<>(val), new WeakReference<>(c), displayAction );
     }
 
     protected final <T> AbstractBuilder<I,C> _withOnShow( Val<T> val, BiConsumer<C, T> displayAction )
@@ -81,17 +88,24 @@ abstract class AbstractBuilder<I, C extends Component>
         return _with( thisComponent -> _onShow( val, thisComponent, displayAction) );
     }
 
-    private  <T> void _onShow( Val<T> property, WeakReference<C> ref, BiConsumer<C, T> displayAction )
-    {
-        Objects.requireNonNull(property);
+    private <T> void _onShow(
+        WeakReference<Val<T>> propertyRef,
+        WeakReference<C>      componentRef,
+        BiConsumer<C, T>      displayAction
+    ) {
+        Objects.requireNonNull(propertyRef);
+        Objects.requireNonNull(componentRef);
         Objects.requireNonNull(displayAction);
         Action<Val<T>> action = new Action<Val<T>>() {
             @Override
             public void accept( Val<T> value )
             {
-                C thisComponent = ref.get();
+                C thisComponent = componentRef.get();
                 if ( thisComponent == null ) {
-                    property.unsubscribe(this); // We unsubscribe from the property if the component is disposed.
+                    Val<T> property = propertyRef.get();
+                    if ( property != null )
+                        property.unsubscribe(this);
+                        // ^ We unsubscribe from the property because the component is disposed.
                     return;
                 }
 
@@ -101,30 +115,37 @@ abstract class AbstractBuilder<I, C extends Component>
                         We make sure that the action is only executed if the component
                         is not disposed. This is important because the action may
                         access the component, and we don't want to get a NPE.
-                     */
-                        UI.run( () -> {
-                            try {
-                                displayAction.accept(thisComponent, v); // Here the captured value is used. This is extremely important!
-                                /*
-                                     Since this is happening in another thread we are using the captured property item/value.
-                                     The property might have changed in the meantime, but we don't care about that,
-                                     we want things to happen in the order they were triggered.
-                                 */
-                            } catch ( Exception e ) {
-                                throw new RuntimeException(
-                                        "Failed to apply state of property '" + property + "' to component '" + thisComponent + "'.",
-                                        e
-                                );
-                            }
-                        })
+                    */
+                    UI.run( () -> {
+                        try {
+                            displayAction.accept(thisComponent, v); // Here the captured value is used. This is extremely important!
+                            /*
+                                 Since this is happening in another thread we are using the captured property item/value.
+                                 The property might have changed in the meantime, but we don't care about that,
+                                 we want things to happen in the order they were triggered.
+                             */
+                        } catch ( Exception e ) {
+                            throw new RuntimeException(
+                                "Failed to apply state of property '" + propertyRef.get() + "' to " +
+                                "component '" + thisComponent + "'.",
+                                e
+                            );
+                        }
+                    })
                 );
             }
         };
-        property.onChange(From.ALL, action);
+        Optional.ofNullable(propertyRef.get()).ifPresent(
+            property -> property.onChange(From.ALL, action)
+        );
         CustomCleaner
             .getInstance()
-            .register(ref.get(),
-                () -> property.unsubscribe(action)
+            .register(componentRef.get(),
+                () -> {
+                    Val<T> property = propertyRef.get();
+                    if ( property != null )
+                        property.unsubscribe(action);
+                }
             );
     }
 
@@ -253,7 +274,7 @@ abstract class AbstractBuilder<I, C extends Component>
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I peek( Peeker<C> action ) {
-        return _with( c -> action.accept(c) )._this();
+        return _with(action::accept)._this();
     }
 
     /**
@@ -430,17 +451,19 @@ abstract class AbstractBuilder<I, C extends Component>
 
 
     @Override
-    public String toString() {
-        return getClass().getSimpleName() + "[" + _state().componentType().getSimpleName() + "]";
+    public final String toString() {
+        return getClass().getSimpleName() + "[" +
+                    _state().componentType().getSimpleName() +
+                "]";
     }
 
     @Override
-    public int hashCode() {
+    public final int hashCode() {
         return _state().hashCode();
     }
 
     @Override
-    public boolean equals( Object obj ) {
+    public final boolean equals( Object obj ) {
         if ( obj == null ) return false;
         if ( obj == this ) return true;
         if ( obj.getClass() != getClass() ) return false;

@@ -10,7 +10,7 @@ import java.util.Objects;
 public abstract class UIForAnyScrollPane<I, P extends JScrollPane> extends UIForAnySwing<I, P>
 {
     @Override
-    protected void _doAddComponent( JComponent newComponent, Object conf, P thisComponent ) {
+    protected void _addComponentTo(P thisComponent, JComponent newComponent, Object conf ) {
         if ( conf != null ) {
             // The user wants to add a component to the scroll pane with a specific constraint.
             // Swing does not support any constraints for scroll panes, but we are not Swing, we are SwingTree!

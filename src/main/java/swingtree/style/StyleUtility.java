@@ -3,8 +3,8 @@ package swingtree.style;
 import swingtree.api.Painter;
 
 import java.awt.*;
+import java.awt.geom.Area;
 import java.util.Objects;
-import java.util.function.Supplier;
 
 /**
  *  Well, here it is, almost every project seems to have at least one of these, right? <br>
@@ -20,6 +20,28 @@ final class StyleUtility
     static final Layout NONE_LAYOUT_CONSTANT = new Layout.None();
 
     private StyleUtility() {} // No instantiation, just a utility class
+
+
+    static Shape intersect( Shape clipA, Shape clipB )
+    {
+        if ( Objects.equals(clipA, clipB) )
+            return clipA;
+
+        Shape finalClip = null;
+
+        if ( clipA == null && clipB != null )
+            finalClip = clipB;
+
+        if ( clipA != null && clipB == null )
+            finalClip = clipA;
+
+        if ( clipA != null && clipB != null ) {
+            Area intersected = new Area(clipB);
+            intersected.intersect(new Area(clipA));
+            finalClip = intersected;
+        }
+        return finalClip;
+    }
 
     static String toString( Color color ) {
         if ( color == null ) return "?";

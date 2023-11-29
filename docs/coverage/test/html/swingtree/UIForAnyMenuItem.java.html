@@ -4,21 +4,30 @@ import sprouts.Val;
 
 import javax.swing.*;
 
-<span class="fc" id="L7">public abstract class UIForAnyMenuItem&lt;I, M extends JMenuItem&gt; extends UIForAnyButton&lt;I, M&gt;</span>
+/**
+ * A builder for {@link JMenuItem}s.
+ *
+ * @param &lt;I&gt; The type of the builder itself. This is used to allow for method chaining.
+ * @param &lt;M&gt; The type of the {@link JMenuItem} being built.
+ */
+<span class="fc" id="L13">public abstract class UIForAnyMenuItem&lt;I, M extends JMenuItem&gt; extends UIForAnyButton&lt;I, M&gt;</span>
 {
     /**
      * Sets the key combination which invokes the wrapped {@link JMenuItem}'s
      * action listeners without navigating the menu hierarchy. It is the
      * UI's responsibility to install the correct action.  Note that
      * when the keyboard accelerator is typed, it will work whether or
-     * not the menu is currently displayed.
+     * whether not the menu is currently displayed.
      *
      * @param keyStroke the &lt;code&gt;KeyStroke&lt;/code&gt; which will
      *          serve as an accelerator
      * @return This very builder to allow for method chaining.
      */
     public I withKeyStroke( KeyStroke keyStroke ) {
-<span class="nc" id="L21">        return _with( c -&gt; c.setAccelerator(keyStroke) )._this();</span>
+<span class="nc" id="L27">        return _with( thisComponent -&gt;</span>
+<span class="nc" id="L28">                    thisComponent.setAccelerator(keyStroke)</span>
+               )
+<span class="nc" id="L30">               ._this();</span>
     }
 
     /**
@@ -26,20 +35,20 @@ import javax.swing.*;
      * action listeners without navigating the menu hierarchy. It is the
      * UI's responsibility to install the correct action.  Note that
      * when the keyboard accelerator is typed, it will work whether or
-     * not the menu is currently displayed.
+     * whether not the menu is currently displayed.
      *
-     * @param val the dynamically set &lt;code&gt;KeyStroke&lt;/code&gt; property which will
+     * @param keyStroke the dynamically set &lt;code&gt;KeyStroke&lt;/code&gt; property which will
      *          serve as an accelerator
      * @return This very builder to allow for method chaining.
      */
-    public I withKeyStroke( Val&lt;KeyStroke&gt; val ) {
-<span class="nc" id="L36">        return _withOnShow( val, (c,v) -&gt; {</span>
-<span class="nc" id="L37">                    c.setAccelerator(v);</span>
-<span class="nc" id="L38">                })</span>
-<span class="nc" id="L39">                ._with( c -&gt; {</span>
-<span class="nc" id="L40">                    c.setAccelerator(val.orElseNull());</span>
-<span class="nc" id="L41">                })</span>
-<span class="nc" id="L42">                ._this();</span>
+    public I withKeyStroke( Val&lt;KeyStroke&gt; keyStroke ) {
+<span class="nc" id="L45">        return _withOnShow( keyStroke, (thisComponent,value) -&gt; {</span>
+<span class="nc" id="L46">                    thisComponent.setAccelerator(value);</span>
+<span class="nc" id="L47">                })</span>
+<span class="nc" id="L48">                ._with( thisComponent -&gt; {</span>
+<span class="nc" id="L49">                    thisComponent.setAccelerator(keyStroke.orElseNull());</span>
+<span class="nc" id="L50">                })</span>
+<span class="nc" id="L51">                ._this();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

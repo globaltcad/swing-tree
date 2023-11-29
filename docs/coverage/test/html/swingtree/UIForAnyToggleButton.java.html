@@ -32,10 +32,10 @@ import javax.swing.JToggleButton;
 <span class="nc" id="L32">        NullUtil.nullArgCheck(selection, &quot;selection&quot;, Var.class);</span>
 <span class="nc" id="L33">        NullUtil.nullPropertyCheck(selection, &quot;selection&quot;, &quot;Null is not a valid selection state.&quot;);</span>
 <span class="nc" id="L34">        return _withOnShow( selection, (button,s) -&gt; {</span>
-<span class="nc" id="L35">                   _setSelectedSilently( state.equals(s), button );</span>
+<span class="nc" id="L35">                   _setSelectedSilently(button, state.equals(s));</span>
 <span class="nc" id="L36">               })</span>
 <span class="nc" id="L37">               ._with( button -&gt; {</span>
-<span class="nc" id="L38">                   _setSelectedSilently(state.equals(selection.get()), button);</span>
+<span class="nc" id="L38">                   _setSelectedSilently(button, state.equals(selection.get()));</span>
 <span class="nc" id="L39">                   String currentText = button.getText();</span>
 <span class="nc bnc" id="L40" title="All 4 branches missed.">                   if ( currentText == null || currentText.isEmpty() )</span>
 <span class="nc" id="L41">                       button.setText( state.toString() );</span>

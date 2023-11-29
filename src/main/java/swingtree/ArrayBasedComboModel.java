@@ -8,6 +8,7 @@ final class ArrayBasedComboModel<E> extends AbstractComboModel<E>
 {
 	private final E[] _items;
 
+
 	ArrayBasedComboModel(E[] items) {
 		this(Var.ofNullable(_findCommonType( items ), null), items);
 	}
@@ -17,6 +18,7 @@ final class ArrayBasedComboModel<E> extends AbstractComboModel<E>
 		_items = Objects.requireNonNull(items);
 		_selectedIndex = _indexOf(_selectedItem.orElseNull());
 	}
+
 
 	@Override
 	public AbstractComboModel<E> withVar( Var<E> newVar ) {

@@ -7,15 +7,15 @@ import javax.swing.JOptionPane;
 /**
  *  An enum representing the possible answers to a confirmation dialog.
  *  &lt;p&gt;
- *  This enum is intended to be used as part of the {@link ConfirmDialogBuilder} API
- *  which can be accessed by calling the {@link UI#confirm()} factory method.
+ *  This enum is intended to be used as part of the {@link ConfirmDialog} API
+ *  which can be accessed by calling the {@link UI#confirmation(String)} factory method.
  */
-<span class="nc" id="L13">public enum ConfirmAnswer</span>
+<span class="fc" id="L13">public enum ConfirmAnswer</span>
 {
-<span class="nc" id="L15">    YES,</span>
-<span class="nc" id="L16">    NO,</span>
-<span class="nc" id="L17">    CANCEL,</span>
-<span class="nc" id="L18">    CLOSE;</span>
+<span class="fc" id="L15">    YES,</span>
+<span class="fc" id="L16">    NO,</span>
+<span class="fc" id="L17">    CANCEL,</span>
+<span class="fc" id="L18">    CLOSE;</span>
 
     /**
      * @return {@code true} if the user selected the &quot;yes&quot; option, {@code false} otherwise.
@@ -46,9 +46,9 @@ import javax.swing.JOptionPane;
      * @return The {@link JOptionPane} constant corresponding to this answer.
      */
     static ConfirmAnswer from( int option ) {
-<span class="nc bnc" id="L49" title="All 4 branches missed.">        switch ( option ) {</span>
+<span class="pc bpc" id="L49" title="3 of 4 branches missed.">        switch ( option ) {</span>
 <span class="nc" id="L50">            case JOptionPane.YES_OPTION:    return YES;</span>
-<span class="nc" id="L51">            case JOptionPane.NO_OPTION:     return NO;</span>
+<span class="fc" id="L51">            case JOptionPane.NO_OPTION:     return NO;</span>
 <span class="nc" id="L52">            case JOptionPane.CLOSED_OPTION: return CLOSE;</span>
             default:
 <span class="nc" id="L54">                return CANCEL;</span>

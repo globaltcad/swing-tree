@@ -193,4 +193,48 @@ class Layout_Styling extends Specification
         expect : 'The layout manager of the panel is null:'
             panel.layout == null
     }
+
+    def 'Configure the `ComponentOrientation` of a component, through the style API.'()
+    {
+        reportInfo """
+            The style API allows you to configure the `ComponentOrientation` of a component.
+            We do this by passing one of the `UI.ComponentOrientation` enum constants to the `orientation` method.
+            These constants directly map to the `java.awt.ComponentOrientation` constants
+            of the same name.
+        """
+        given :
+            var ui =
+                    UI.panel("fill, wrap 1")
+                    .add(
+                        UI.menuItem("Right to left").withStyle( it -> it
+                            .orientation(UI.ComponentOrientation.RIGHT_TO_LEFT)
+                        )
+                    )
+                    .add(
+                        UI.menuItem("Left to right").withStyle( it -> it
+                            .orientation(UI.ComponentOrientation.LEFT_TO_RIGHT)
+                        )
+                    )
+                    .add(
+                        UI.menuItem("Unknown").withStyle( it -> it
+                            .orientation(UI.ComponentOrientation.UNKNOWN)
+                        )
+                    )
+                    .add(
+                        UI.menuItem("Default")
+                    )
+
+        and : 'We unpack the Swing tree:'
+            var panel = ui.component
+            var menuItem1 = panel.getComponent(0)
+            var menuItem2 = panel.getComponent(1)
+            var menuItem3 = panel.getComponent(2)
+            var menuItem4 = panel.getComponent(3)
+
+        expect : 'The component orientation of the menu items is set to the values we specified in the styling API:'
+            menuItem1.componentOrientation == ComponentOrientation.RIGHT_TO_LEFT
+            menuItem2.componentOrientation == ComponentOrientation.LEFT_TO_RIGHT
+            menuItem3.componentOrientation == ComponentOrientation.UNKNOWN
+            menuItem4.componentOrientation == ComponentOrientation.UNKNOWN
+    }
 }

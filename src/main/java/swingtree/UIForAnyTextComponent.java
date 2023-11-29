@@ -7,7 +7,6 @@ import sprouts.Val;
 import sprouts.Var;
 import swingtree.style.ComponentExtension;
 
-import javax.swing.JTabbedPane;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.*;
@@ -18,7 +17,10 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
- *  A SwingTree builder node designed for configuring {@link JTextComponent} instances.
+ *  A SwingTree builder node designed for configuring various kinds of {@link JTextComponent} instances
+ *  in a fluent and declarative way. It also allows for the binding of text properties to the text component
+ *  so that the text of the text component is dynamically updated whenever the value of the property changes
+ *  and conversely, the value of the property is dynamically updated whenever the text of the text component changes.
  * 	<p>
  * 	<b>Please take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
  * 	where you can browse a large collection of examples demonstrating how to use the API of this class.</b>
@@ -35,7 +37,7 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
      * <p>
      * Note that text is not a bound property, so no {@link java.beans.PropertyChangeEvent}
      * is fired when it changes. To listen for changes to the text,
-     * register action lambdas through {@link #onTextChange(Consumer)} or
+     * register action lambdas through {@link #onTextChange(Action)} or
      * use {@link DocumentListener} directly.
      * </p>
      *
@@ -137,7 +139,9 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
             DocumentListener[] listeners = abstractDoc.getListeners(DocumentListener.class);
             for ( DocumentListener listener : listeners )
                 abstractDoc.removeDocumentListener(listener);
+
             thisComponent.setText(text);
+
             for ( DocumentListener listener : listeners )
                 abstractDoc.addDocumentListener(listener);
 
@@ -206,8 +210,8 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
      * @param action An action which will be executed when the text or its attributes in the underlying {@link JTextComponent} changes.
      * @return This very builder to allow for method chaining.
      */
-    public final I onContentChange( Consumer<ComponentDelegate<JTextComponent, DocumentEvent>> action ) {
-        NullUtil.nullArgCheck(action, "action", Consumer.class);
+    public final I onContentChange( Action<ComponentDelegate<JTextComponent, DocumentEvent>> action ) {
+        NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
                     thisComponent.getDocument().addDocumentListener(new DocumentListener() {
                         @Override public void insertUpdate(DocumentEvent e)  {
@@ -228,8 +232,8 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
      * @param action An action which will be executed when the text string in the underlying {@link JTextComponent} changes.
      * @return This very builder to allow for method chaining.
      */
-    public final I onTextChange( Consumer<ComponentDelegate<JTextComponent, DocumentEvent>> action ) {
-        NullUtil.nullArgCheck(action, "action", Consumer.class);
+    public final I onTextChange( Action<ComponentDelegate<JTextComponent, DocumentEvent>> action ) {
+        NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
                     _onTextChange(thisComponent, e -> _doApp( () -> action.accept(new ComponentDelegate<>(thisComponent, e ))) );
                 })
@@ -259,21 +263,21 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
                  * See documentation in {@link DocumentFilter}!
                  */
                 public void remove(FilterBypass fb, int offset, int length) throws BadLocationException {
-                    state.removes.forEach(action -> action.accept( new RemoveDelegate(thisComponent, fb, offset, length) ) );
+                    state.removes.forEach(action -> action.accept( new TextRemoveDelegate(thisComponent, fb, offset, length) ) );
                     if ( state.removes.isEmpty() ) fb.remove(offset, length);
                 }
                 /**
                  * See documentation in {@link DocumentFilter}!
                  */
                 public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
-                    state.inserts.forEach(action -> action.accept( new InsertDelegate(thisComponent, fb, offset, string.length(), string, attr) ) );
+                    state.inserts.forEach(action -> action.accept( new TextInsertDelegate(thisComponent, fb, offset, string.length(), string, attr) ) );
                     if ( state.inserts.isEmpty() ) fb.insertString(offset, string, attr);
                 }
                 /**
                  * See documentation in {@link DocumentFilter}!
                  */
                 public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
-                    state.replaces.forEach(action -> action.accept(new ReplaceDelegate(thisComponent, fb, offset, length, text, attrs)) );
+                    state.replaces.forEach(action -> action.accept(new TextReplaceDelegate(thisComponent, fb, offset, length, text, attrs)) );
                     if ( state.replaces.isEmpty() ) fb.replace(offset, length, text, attrs);
                 }
             });
@@ -286,7 +290,7 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
      *
      * @return This very builder to allow for method chaining.
      */
-    public final I onTextRemove( Action<RemoveDelegate> action ) {
+    public final I onTextRemove( Action<TextRemoveDelegate> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
                     ExtraState state = ExtraState.of( thisComponent );
@@ -301,7 +305,7 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
      *
      * @return This very builder to allow for method chaining.
      */
-    public final I onTextInsert( Action<InsertDelegate> action ) {
+    public final I onTextInsert( Action<TextInsertDelegate> action ) {
         return _with( thisComponent -> {
                     ExtraState state = ExtraState.of( thisComponent );
                     _ifFilterable(thisComponent, () -> state.inserts.add(action));
@@ -315,7 +319,7 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
      *
      * @return This very builder to allow for method chaining.
      */
-    public final I onTextReplace( Action<ReplaceDelegate> action ) {
+    public final I onTextReplace( Action<TextReplaceDelegate> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
                     ExtraState state = ExtraState.of( thisComponent );
@@ -325,84 +329,6 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
     }
 
 
-    public static abstract class AbstractDelegate
-    {
-        private final JTextComponent textComponent;
-        private final DocumentFilter.FilterBypass filterBypass;
-        private final int offset;
-        private final int length;
-
-        protected AbstractDelegate(JTextComponent textComponent, DocumentFilter.FilterBypass filterBypass, int offset, int length) {
-            this.textComponent = textComponent;
-            this.filterBypass = filterBypass;
-            this.offset = offset;
-            this.length = length;
-        }
-
-        public JTextComponent getComponent() {
-            // We make sure that only the Swing thread can access the component:
-            if ( UI.thisIsUIThread() ) return textComponent;
-            else
-                throw new IllegalStateException(
-                        "Text component can only be accessed by the Swing thread."
-                    );
-        }
-        public DocumentFilter.FilterBypass getFilterBypass() { return filterBypass; }
-        public int getOffset() { return offset; }
-        public int getLength() { return length; }
-
-    }
-
-    public static final class RemoveDelegate extends AbstractDelegate
-    {
-        private RemoveDelegate(JTextComponent textComponent, DocumentFilter.FilterBypass filterBypass, int offset, int length) {
-            super(textComponent, filterBypass, offset, length);
-        }
-
-        public String getTextToBeRemoved() {
-            try {
-                return getComponent().getDocument().getText(getOffset(), getLength());
-            } catch (BadLocationException e) {
-                throw new IllegalStateException("Could not get text to be removed!", e);
-            }
-        }
-    }
-
-    public static final class InsertDelegate extends AbstractDelegate
-    {
-        private final String text;
-        private final AttributeSet attributeSet;
-
-        private InsertDelegate(JTextComponent textComponent, DocumentFilter.FilterBypass filterBypass, int offset, int length, String text, AttributeSet attributeSet) {
-            super(textComponent, filterBypass, offset, length);
-            this.text = text;
-            this.attributeSet = attributeSet;
-        }
-        public String getTextToBeInserted() { return text; }
-        public AttributeSet attributeSet() { return attributeSet; }
-    }
-
-    public static final class ReplaceDelegate extends AbstractDelegate
-    {
-        private final String text;
-        private final AttributeSet attributeSet;
-
-        private ReplaceDelegate(JTextComponent textComponent, DocumentFilter.FilterBypass filterBypass, int offset, int length, String text, AttributeSet attributeSet) {
-            super(textComponent, filterBypass, offset, length);
-            this.text = text;
-            this.attributeSet = attributeSet;
-        }
-        public String getText() { return text; }
-        public String getReplacementText() {
-            try {
-                return getComponent().getDocument().getText(getOffset(), getLength());
-            } catch (BadLocationException e) {
-                throw new IllegalStateException("Could not get text to be removed!", e);
-            }
-        }
-        public AttributeSet getAttributeSet() { return attributeSet; }
-    }
-
     private static class ExtraState
     {
         static ExtraState of( JTextComponent textComponent ) {
@@ -410,9 +336,9 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
                                      .getOrSet(ExtraState.class, ExtraState::new);
         }
 
-        final java.util.List<Action<RemoveDelegate>>   removes = new ArrayList<>();
-        final java.util.List<Action<InsertDelegate>>   inserts = new ArrayList<>();
-        final java.util.List<Action<ReplaceDelegate>>  replaces = new ArrayList<>();
+        final java.util.List<Action<TextRemoveDelegate>>   removes = new ArrayList<>();
+        final java.util.List<Action<TextInsertDelegate>>   inserts = new ArrayList<>();
+        final java.util.List<Action<TextReplaceDelegate>>  replaces = new ArrayList<>();
     }
 
 }

@@ -23,7 +23,11 @@ public final class ConfirmDialog
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(ConfirmDialog.class);
 
-
+    /**
+     *  Creates a new {@link ConfirmDialog} instance with the specified question.
+     *  @param question The question to ask the user.
+     *  @return A new {@link ConfirmDialog} instance with the specified question.
+     */
     public static ConfirmDialog asking(String question ) {
         Objects.requireNonNull(question);
         return new ConfirmDialog(
@@ -33,33 +37,33 @@ public final class ConfirmDialog
                     "Yes",
                     "No",
                     "Cancel",
-                    "Yes",
+                    ConfirmAnswer.YES,
                     null,
                     null
                 );
     }
 
-    private final int      _type;
-    private final String   _title;
-    private final String   _message;
-    private final String   _yesOption;
-    private final String   _noOption;
-    private final String   _cancelOption;
-    private final String   _defaultOption;
-    private final Icon     _icon;
-    private final Component _parent;
+    private final int           _type;
+    private final String        _title;
+    private final String        _message;
+    private final String        _yesOption;
+    private final String        _noOption;
+    private final String        _cancelOption;
+    private final ConfirmAnswer _defaultOption;
+    private final Icon          _icon;
+    private final Component     _parent;
 
 
     private ConfirmDialog(
         int type,
-        String title,
-        String message,
-        String yesOption,
-        String noOption,
-        String cancelOption,
-        String defaultOption,
-        Icon icon,
-        Component parent
+        String        title,
+        String        message,
+        String        yesOption,
+        String        noOption,
+        String        cancelOption,
+        ConfirmAnswer defaultOption,
+        Icon          icon,
+        Component     parent
     ) {
         _type          = type;
         _title         = Objects.requireNonNull(title);
@@ -70,21 +74,6 @@ public final class ConfirmDialog
         _defaultOption = Objects.requireNonNull(defaultOption);
         _icon          = icon;
         _parent        = parent;
-    }
-
-    /**
-     * @param type The type of the dialog, which may be one of the following:
-     *             <ul>
-     *                  <li>{@link JOptionPane#ERROR_MESSAGE}</li>
-     *                  <li>{@link JOptionPane#INFORMATION_MESSAGE}</li>
-     *                  <li>{@link JOptionPane#WARNING_MESSAGE}</li>
-     *                  <li>{@link JOptionPane#PLAIN_MESSAGE}</li>
-     *                  <li>{@link JOptionPane#QUESTION_MESSAGE}</li>
-     *             </ul>
-     * @return A new {@link ConfirmDialog} instance with the specified type.
-     */
-    private ConfirmDialog type(int type ) {
-        return new ConfirmDialog(type, _title, _message, _yesOption, _noOption, _cancelOption, _defaultOption, _icon, _parent);
     }
 
     /**
@@ -115,7 +104,7 @@ public final class ConfirmDialog
      * @param cancelOption The text of the "cancel" option.
      * @return A new {@link ConfirmDialog} instance with the specified "cancel" option text.
      */
-    public ConfirmDialog cancelOption(String cancelOption ) {
+    public ConfirmDialog cancelOption( String cancelOption ) {
         return new ConfirmDialog(_type, _title, _message, _yesOption, _noOption, cancelOption, _defaultOption, _icon, _parent);
     }
 
@@ -123,7 +112,7 @@ public final class ConfirmDialog
      * @param defaultOption The text of the default option.
      * @return A new {@link ConfirmDialog} instance with the specified default option text.
      */
-    public ConfirmDialog defaultOption(String defaultOption ) {
+    public ConfirmDialog defaultOption( ConfirmAnswer defaultOption ) {
         return new ConfirmDialog(_type, _title, _message, _yesOption, _noOption, _cancelOption, defaultOption, _icon, _parent);
     }
 
@@ -131,7 +120,7 @@ public final class ConfirmDialog
      * @param icon The icon of the dialog.
      * @return A new {@link ConfirmDialog} instance with the specified icon.
      */
-    public ConfirmDialog icon(Icon icon ) {
+    public ConfirmDialog icon( Icon icon ) {
         return new ConfirmDialog(_type, _title, _message, _yesOption, _noOption, _cancelOption, _defaultOption, icon, _parent);
     }
 
@@ -151,24 +140,79 @@ public final class ConfirmDialog
         return new ConfirmDialog(_type, _title, _message, _yesOption, _noOption, _cancelOption, _defaultOption, _icon, parent);
     }
 
-    public ConfirmAnswer asQuestion() {
-        return type(JOptionPane.QUESTION_MESSAGE).show();
+    /**
+     * @param type The type of the dialog, which may be one of the following:
+     *             <ul>
+     *                  <li>{@link JOptionPane#ERROR_MESSAGE}</li>
+     *                  <li>{@link JOptionPane#INFORMATION_MESSAGE}</li>
+     *                  <li>{@link JOptionPane#WARNING_MESSAGE}</li>
+     *                  <li>{@link JOptionPane#PLAIN_MESSAGE}</li>
+     *                  <li>{@link JOptionPane#QUESTION_MESSAGE}</li>
+     *             </ul>
+     * @return A new {@link ConfirmDialog} instance with the specified type.
+     */
+    private ConfirmDialog _type( int type ) {
+        return new ConfirmDialog(type, _title, _message, _yesOption, _noOption, _cancelOption, _defaultOption, _icon, _parent);
     }
 
-    public ConfirmAnswer asError() {
-        return type(JOptionPane.ERROR_MESSAGE).show();
+    /**
+     *  Shows the confirmation dialog as a question dialog (see {@link JOptionPane#QUESTION_MESSAGE}) and returns the
+     *  {@link ConfirmAnswer} that the user selected in the dialog. <br>
+     *  Note that this method is blocking and will only return when the user has selected
+     *  an option in the dialog.
+     *
+     * @return The {@link ConfirmAnswer} that the user selected in the dialog.
+     */
+    public ConfirmAnswer showAsQuestion() {
+        return _type(JOptionPane.QUESTION_MESSAGE).show();
     }
 
-    public ConfirmAnswer asInfo() {
-        return type(JOptionPane.INFORMATION_MESSAGE).show();
+    /**
+     *  Shows the confirmation dialog as an error dialog (see {@link JOptionPane#ERROR_MESSAGE}) and returns the
+     *  {@link ConfirmAnswer} that the user selected in the dialog. <br>
+     *  Note that this method is blocking and will only return when the user has selected
+     *  an option in the dialog.
+     *
+     * @return The {@link ConfirmAnswer} that the user selected in the dialog.
+     */
+    public ConfirmAnswer showAsError() {
+        return _type(JOptionPane.ERROR_MESSAGE).show();
     }
 
-    public ConfirmAnswer asWarning() {
-        return type(JOptionPane.WARNING_MESSAGE).show();
+    /**
+     *  Shows the confirmation dialog as an info dialog (see {@link JOptionPane#INFORMATION_MESSAGE}) and returns the
+     *  {@link ConfirmAnswer} that the user selected in the dialog. <br>
+     *  Note that this method is blocking and will only return when the user has selected
+     *  an option in the dialog.
+     *
+     * @return The {@link ConfirmAnswer} that the user selected in the dialog.
+     */
+    public ConfirmAnswer showAsInfo() {
+        return _type(JOptionPane.INFORMATION_MESSAGE).show();
     }
 
-    public ConfirmAnswer asPlain() {
-        return type(JOptionPane.PLAIN_MESSAGE).show();
+    /**
+     *  Shows the confirmation dialog as a warning dialog (see {@link JOptionPane#WARNING_MESSAGE}) and returns the
+     *  {@link ConfirmAnswer} that the user selected in the dialog. <br>
+     *  Note that this method is blocking and will only return when the user has selected
+     *  an option in the dialog.
+     *
+     * @return The {@link ConfirmAnswer} that the user selected in the dialog.
+     */
+    public ConfirmAnswer showAsWarning() {
+        return _type(JOptionPane.WARNING_MESSAGE).show();
+    }
+
+    /**
+     *  Shows the confirmation dialog as a plain dialog (see {@link JOptionPane#PLAIN_MESSAGE}) and returns the
+     *  {@link ConfirmAnswer} that the user selected in the dialog. <br>
+     *  Note that this method is blocking and will only return when the user has selected
+     *  an option in the dialog.
+     *
+     * @return The {@link ConfirmAnswer} that the user selected in the dialog.
+     */
+    public ConfirmAnswer showPlain() {
+        return _type(JOptionPane.PLAIN_MESSAGE).show();
     }
 
     /**
@@ -221,9 +265,22 @@ public final class ConfirmDialog
                         title = "Message";
                 }
 
+                String defaultOption = "";
+                switch ( _defaultOption ) {
+                    case YES:
+                        defaultOption = yes;
+                        break;
+                    case NO:
+                        defaultOption = no;
+                        break;
+                    case CANCEL:
+                        defaultOption = cancel;
+                        break;
+                }
+
                 return ConfirmAnswer.from(Context.summoner.showOptionDialog(
                             _parent, _message, title, optionsType,
-                            type, _icon, options.toArray(), _defaultOption
+                            type, _icon, options.toArray(), defaultOption
                         ));
             });
         } catch (Exception e) {

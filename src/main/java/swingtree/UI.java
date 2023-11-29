@@ -299,6 +299,12 @@ public final class UI extends UILayoutConstants
         }
     }
 
+    /**
+     *  Defines whether the list based data model of a {@link JTable} is row or column major
+     *  and whether it is editable or not.
+     *  See {@link UI#table(ListData, TableListDataSource)}  or {@link UIForTable#withModel(ListData, TableListDataSource)}
+     *  for more information about the usage of this enum.
+     */
     public enum ListData {
         COLUMN_MAJOR,
         ROW_MAJOR,
@@ -330,6 +336,11 @@ public final class UI extends UILayoutConstants
         }
     }
 
+    /**
+     *  Defines whether the data model of a {@link JTable} should be editable or not.
+     *  See {@link UI#table(MapData, TableMapDataSource)} or {@link UIForTable#withModel(MapData, TableMapDataSource)}
+     *  for more information about the usage of this enum.
+     */
     public enum MapData {
         EDITABLE, READ_ONLY;
 
@@ -383,7 +394,7 @@ public final class UI extends UILayoutConstants
      *  Use these enum instances to specify the gradient alignment for various sub styles,
      *  like for example the gradient style API exposed by {@link ComponentStyleDelegate#borderGradient(Function)}
      *  or {@link ComponentStyleDelegate#gradient(Function)} methods (see {@link UIForAnySwing#withStyle(Styler)}).
-     *
+     * <p>
      *  {@link GradientStyle#transition(Transition)} method exposed by methods like
      *  {@link ComponentStyleDelegate#gradient(String, Function)} or {@link ComponentStyleDelegate#borderGradient(String, Function)}.
      */
@@ -431,12 +442,39 @@ public final class UI extends UILayoutConstants
         UNDEFINED
     }
 
+    /**
+     *  Defines the areas of a component, which is used
+     *  to by the {@link ImageStyle} to determine if and how an image should be clipped.
+     *  Pass instances of this to {@link ImageStyle#clipTo(ComponentArea)} to configure the clipping behaviour
+     *  as part of the style API (see {@link UIForAnySwing#withStyle(Styler)}).
+     */
     public enum ComponentArea
     {
         EXTERIOR, BORDER, INTERIOR, ALL
     }
 
-    public enum Axis {
+    /**
+     *  Use this to specify the orientation of a component.
+     *  This is especially important for components that display text.
+     *  <br>
+     *  See {@link UIForAnySwing#withStyle(Styler)} and {@link ComponentStyleDelegate#orientation(ComponentOrientation)}.
+     */
+    public enum ComponentOrientation
+    {
+        UNKNOWN, LEFT_TO_RIGHT, RIGHT_TO_LEFT
+    }
+
+    /**
+     *  Used to define how a layout manager (typically the {@link BoxLayout})
+     *  will lay out components along the given axis. <br>
+     *  Create a simple box layout for your components
+     *  by calling the {@link UIForAnySwing#withBoxLayout(Axis)} method,
+     *  or use {@link Layout#box(Axis)} factory method returning a {@link Layout} config
+     *  object which can be passed to the style API (see {@link UIForAnySwing#withStyle(Styler)}
+     *  and {@link ComponentStyleDelegate#layout(Layout)}).
+     */
+    public enum Axis
+    {
         /**
          * Specifies that something is laid out left to right.
          */
@@ -489,9 +527,9 @@ public final class UI extends UILayoutConstants
     public static LookAndFeel currentLookAndFeel() {
         try {
             String laf = UIManager.getLookAndFeel().getClass().getName();
-            if (laf.contains("FlatLaf")) return LookAndFeel.FLAT_LAF;
-            if (laf.contains("Nimbus")) return LookAndFeel.NIMBUS;
-            if (laf.contains("Metal")) return LookAndFeel.METAL;
+            if ( laf.contains("FlatLaf") ) return LookAndFeel.FLAT_LAF;
+            if ( laf.contains("Nimbus")  ) return LookAndFeel.NIMBUS;
+            if ( laf.contains("Metal")   ) return LookAndFeel.METAL;
         }
         catch (Exception ignored) {}
 
@@ -512,7 +550,7 @@ public final class UI extends UILayoutConstants
      */
     public static float scale( float value ) {
         float scaleFactor = SwingTree.get().getUiScaleFactor();
-        return (scaleFactor == 1) ? value : (value * scaleFactor);
+        return ( scaleFactor == 1 ? value : (value * scaleFactor) );
     }
 
     /**
@@ -524,7 +562,7 @@ public final class UI extends UILayoutConstants
      */
     public static double scale( double value ) {
         float scaleFactor = SwingTree.get().getUiScaleFactor();
-        return (scaleFactor == 1) ? value : (value * scaleFactor);
+        return ( scaleFactor == 1 ? value : (value * scaleFactor) );
     }
 
     /**
@@ -560,7 +598,7 @@ public final class UI extends UILayoutConstants
      */
     public static float unscale( float value ) {
         float scaleFactor = SwingTree.get().getUiScaleFactor();
-        return (scaleFactor == 1f) ? value : (value / scaleFactor);
+        return ( scaleFactor == 1f ? value : (value / scaleFactor) );
     }
 
     /**
@@ -571,7 +609,7 @@ public final class UI extends UILayoutConstants
      */
     public static int unscale( int value ) {
         float scaleFactor = SwingTree.get().getUiScaleFactor();
-        return (scaleFactor == 1f) ? value : Math.round( value / scaleFactor );
+        return ( scaleFactor == 1f ? value : Math.round( value / scaleFactor ) );
     }
 
     /**
@@ -583,7 +621,7 @@ public final class UI extends UILayoutConstants
      */
     public static void scale( Graphics2D g ) {
         float scaleFactor = SwingTree.get().getUiScaleFactor();
-        if( scaleFactor != 1f )
+        if ( scaleFactor != 1f )
             g.scale( scaleFactor, scaleFactor );
     }
 
@@ -816,7 +854,7 @@ public final class UI extends UILayoutConstants
      * @return The icon.
      * @throws NullPointerException if {@code path} is {@code null}.
      */
-    public static ImageIcon _loadIcon( String path )
+    private static ImageIcon _loadIcon( String path )
     {
         Objects.requireNonNull(path, "path");
         path = path.trim();
@@ -3265,6 +3303,7 @@ public final class UI extends UILayoutConstants
      *  Use this to create a builder for a new {@link JComboBox} UI component.
      *  This is in essence a convenience method for {@code UI.of(new JComboBox())}.
      *
+     * @param <E> The type of the elements in the {@link JComboBox}.
      * @return A builder instance for a new {@link JComboBox}, which enables fluent method chaining.
      */
     public static <E> UIForCombo<E,JComboBox<E>> comboBox() {
@@ -5871,7 +5910,7 @@ public final class UI extends UILayoutConstants
     public static void info( String title, String message ) {
         message(message)
                 .titled(title)
-                .asInfo();
+                .showAsInfo();
     }
 
     /**
@@ -5889,7 +5928,7 @@ public final class UI extends UILayoutConstants
     public static void warn( String title, String message ) {
         message(message)
                 .titled(title)
-                .asWarning();
+                .showAsWarning();
     }
 
     /**
@@ -5907,13 +5946,14 @@ public final class UI extends UILayoutConstants
     public static void error( String title, String message ) {
         message(message)
             .titled(title)
-            .asError();
+            .showAsError();
     }
 
     /**
+     * @param text The text to show in the dialog.
      * @return A builder for creating an error dialog.
      */
-    public static MessageDialog message(String text ) { return MessageDialog.saying(text); }
+    public static MessageDialog message( String text ) { return MessageDialog.saying(text); }
 
     /**
      *  Shows a conformation dialog with the given message.
@@ -5932,7 +5972,7 @@ public final class UI extends UILayoutConstants
     public static ConfirmAnswer confirm( String title, String message ) {
         return ConfirmDialog.asking(message)
                             .titled(title)
-                            .asQuestion();
+                            .showAsQuestion();
     }
 
     /**
@@ -5947,7 +5987,9 @@ public final class UI extends UILayoutConstants
      *  Shows a dialog where the user can select a value from a list of options
      *  based on the enum type implicitly defined by the given enum based property.
      *  The selected value will be stored in said property after the user has
-     *  selected a value.
+     *  selected a value and also returned as an {@link Optional}.
+     *  If no value is selected, the returned {@link Optional} will be empty
+     *  and the property will not be changed.
      *
      * @param question The message to show in the dialog.
      * @param selected The enum based property to store the selected value in.
@@ -5976,7 +6018,7 @@ public final class UI extends UILayoutConstants
         Objects.requireNonNull( selected );
         return OptionsDialog.offering(message, selected)
                             .titled(title)
-                            .asQuestion();
+                            .showAsQuestion();
     }
 
     /**
@@ -5998,7 +6040,7 @@ public final class UI extends UILayoutConstants
         OptionsDialog.offering(message, selected)
                                 .titled(title)
                                 .icon(icon)
-                                .asQuestion();
+                                .showAsQuestion();
     }
 
     /**
@@ -6134,7 +6176,7 @@ public final class UI extends UILayoutConstants
      *  This enum is used to specify how an image or icon (usually a {@link SvgIcon})
      *  should be scaled to fit the
      *  dimensions of the component that it is being rendered into, like for example
-     *  using the {@link SvgIcon#paintIcon(Component, Graphics, int, int, int, int)} method.
+     *  through the {@link SvgIcon#paintIcon(Component, Graphics, int, int)} method.
      */
     public enum FitComponent {
         /**

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Size.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">Size.java</span></div><h1>Size.java</h1><pre class="source lang-java linenums">package swingtree.style;
+
+import java.util.Objects;
+import java.util.Optional;
+
+/**
+ *  An immutable value object that represents a size
+ *  in the form of a width and height or lack thereof.
+ */
+final class Size
+{
+<span class="fc" id="L12">    private static final Size EMPTY = new Size(null, null);</span>
+
+    public static Size none() {
+<span class="fc" id="L15">        return EMPTY;</span>
+    }
+
+    public static Size of( int width, int height ) {
+<span class="fc" id="L19">        return new Size(width, height);</span>
+    }
+
+    private final Integer _width;
+    private final Integer _height;
+
+
+<span class="fc" id="L26">    public Size( Integer width, Integer height ) {</span>
+<span class="fc" id="L27">        _width  = width;</span>
+<span class="fc" id="L28">        _height = height;</span>
+<span class="fc" id="L29">    }</span>
+
+    Optional&lt;Integer&gt; width() {
+<span class="fc" id="L32">        return Optional.ofNullable(_width);</span>
+    }
+
+    Optional&lt;Integer&gt; height() {
+<span class="fc" id="L36">        return Optional.ofNullable(_height);</span>
+    }
+
+    Size width( Integer width ) {
+<span class="fc" id="L40">        Objects.requireNonNull(width);</span>
+<span class="fc" id="L41">        return new Size(width, _height);</span>
+    }
+
+    Size height( Integer height ) {
+<span class="fc" id="L45">        Objects.requireNonNull(height);</span>
+<span class="fc" id="L46">        return new Size(_width, height);</span>
+    }
+
+    Size scale( double scaleFactor ) {
+<span class="fc bfc" id="L50" title="All 4 branches covered.">        if ( _width == null &amp;&amp; _height == null ) return this;</span>
+<span class="fc bfc" id="L51" title="All 2 branches covered.">        Integer width  = _width  == null ? null : (int) Math.round(_width  * scaleFactor);</span>
+<span class="fc bfc" id="L52" title="All 2 branches covered.">        Integer height = _height == null ? null : (int) Math.round(_height * scaleFactor);</span>
+<span class="fc" id="L53">        return new Size(width, height);</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L58">        return this.getClass().getSimpleName()+&quot;[&quot; +</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">                    &quot;width=&quot;  + ( _width  == null ? &quot;?&quot; : _width  ) +&quot;, &quot;+</span>
+<span class="nc bnc" id="L60" title="All 2 branches missed.">                    &quot;height=&quot; + ( _height == null ? &quot;?&quot; : _height ) +</span>
+                &quot;]&quot;;
+    }
+
+    @Override
+    public boolean equals( Object o ) {
+<span class="pc bpc" id="L66" title="1 of 2 branches missed.">        if ( o == this ) return true;</span>
+<span class="pc bpc" id="L67" title="1 of 2 branches missed.">        if ( o == null ) return false;</span>
+<span class="pc bpc" id="L68" title="1 of 2 branches missed.">        if ( o.getClass() != this.getClass() ) return false;</span>
+<span class="fc" id="L69">        Size that = (Size)o;</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">        return Objects.equals(this._width,  that._width) &amp;&amp;</span>
+<span class="fc bfc" id="L71" title="All 2 branches covered.">               Objects.equals(this._height, that._height);</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="fc" id="L76">        return Objects.hash(_width, _height);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

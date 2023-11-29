@@ -28,7 +28,7 @@ public final class UIForJFrame<F extends JFrame> extends UIForAnyWindow<UIForJFr
 	}
 
 	@Override
-	protected void _doAddComponent( Component component, Object conf, F thisComponent ) {
+	protected void _addComponentTo(F thisComponent, Component component, Object conf ) {
 		thisComponent.add(conf == null ? null : conf.toString(), component);
 	}
 

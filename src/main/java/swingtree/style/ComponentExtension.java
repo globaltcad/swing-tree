@@ -15,7 +15,6 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
-import java.awt.geom.Area;
 import java.util.List;
 import java.util.*;
 import java.util.function.Supplier;
@@ -199,11 +198,13 @@ public final class ComponentExtension<C extends JComponent>
     public List<String> getStyleGroups() { return Collections.unmodifiableList(_styleGroups); }
 
     /**
+     * @param group The group to check.
      * @return {@code true} if the component belongs to the given group.
      */
     public boolean belongsToGroup( String group ) { return _styleGroups.contains(group); }
 
     /**
+     * @param group The group to check.
      * @return {@code true} if the component belongs to the given group.
      */
     public boolean belongsToGroup( Enum<?> group ) {
@@ -267,6 +268,7 @@ public final class ComponentExtension<C extends JComponent>
      *  overrides, before calling the super implementation.
      *
      * @param g The {@link Graphics} object to use for rendering.
+     * @param lookAndFeelPaint A {@link Runnable} which is used to paint the look and feel of the component.
      */
     public void paintBackgroundStyle( Graphics g, Runnable lookAndFeelPaint )
     {
@@ -283,10 +285,22 @@ public final class ComponentExtension<C extends JComponent>
      *  using the provided {@link Graphics2D} object.
      *
      * @param g2d The {@link Graphics2D} object to use for rendering.
+     * @param superPaint A {@link Runnable} which is used to paint the look and feel of the component.
      */
     public void paintForegroundStyle( Graphics2D g2d, Runnable superPaint )
     {
-        _stylePainter._withClip(g2d, _outerBaseClip != null ? _outerBaseClip : g2d.getClip(), ()->{
+        Shape clip = _outerBaseClip != null ? _outerBaseClip : g2d.getClip();
+        if ( _owner instanceof JScrollPane ) {
+            /*
+                Scroll panes are not like other components, they have a viewport
+                which clips the children.
+                Now if we have a round border for the scroll pane, we want the
+                children to be clipped by the round border (and the viewport).
+                So we use the inner component area as the clip for the children.
+            */
+            clip = StyleUtility.intersect( _stylePainter.interiorAreaOf(_owner).orElse(clip), clip );
+        }
+        _stylePainter._withClip(g2d, clip, ()->{
             superPaint.run();
         });
 
@@ -398,13 +412,7 @@ public final class ComponentExtension<C extends JComponent>
         if ( lookAndFeelPainting != null ) {
             Shape contentClip = _stylePainter.interiorAreaOf(_owner).orElse(null);
 
-            if ( contentClip == null )
-                contentClip = _outerBaseClip;
-            else if ( _outerBaseClip != null ) {
-                Area common = new Area(_outerBaseClip);
-                common.intersect(new Area(contentClip));
-                contentClip = common;
-            }
+            contentClip = StyleUtility.intersect( contentClip, _outerBaseClip );
 
             _stylePainter._withClip((Graphics2D) g, contentClip, () -> {
                 try {
@@ -483,13 +491,32 @@ public final class ComponentExtension<C extends JComponent>
             style = style.backgroundColor(_initialBackgroundColor);
         }
 
-        if ( style.base().foregroundColo().isPresent() && !Objects.equals( _owner.getForeground(), style.base().foregroundColo().get() ) )
-            _owner.setForeground( style.base().foregroundColo().get() );
+        if ( style.base().foregroundColor().isPresent() && !Objects.equals( _owner.getForeground(), style.base().foregroundColor().get() ) )
+            _owner.setForeground( style.base().foregroundColor().get() );
 
         style.base().cursor().ifPresent( cursor -> {
             if ( !Objects.equals( _owner.getCursor(), cursor ) )
                 _owner.setCursor( cursor );
         });
+
+        if ( style.base().orientation() != UI.ComponentOrientation.UNKNOWN ) {
+            ComponentOrientation currentOrientation = _owner.getComponentOrientation();
+            UI.ComponentOrientation newOrientation = style.base().orientation();
+            switch ( newOrientation ) {
+                case LEFT_TO_RIGHT:
+                    if ( !Objects.equals( currentOrientation, ComponentOrientation.LEFT_TO_RIGHT ) )
+                        _owner.applyComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
+                    break;
+                case RIGHT_TO_LEFT:
+                    if ( !Objects.equals( currentOrientation, ComponentOrientation.RIGHT_TO_LEFT ) )
+                        _owner.applyComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+                    break;
+                default:
+                    if ( !Objects.equals( currentOrientation, ComponentOrientation.UNKNOWN ) )
+                        _owner.applyComponentOrientation(ComponentOrientation.UNKNOWN);
+                    break;
+            }
+        }
 
         UI.FitComponent fit = style.base().fit();
         style.base().icon().ifPresent( icon -> {

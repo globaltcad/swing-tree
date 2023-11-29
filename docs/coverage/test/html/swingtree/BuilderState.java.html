@@ -162,23 +162,24 @@ class BuilderState&lt;C extends Component&gt;
         try {
 <span class="fc" id="L163">            componentMutation.accept(_componentFetcher.get());</span>
 <span class="nc" id="L164">        } catch ( Exception e ) {</span>
-<span class="nc" id="L165">            log.error(</span>
-<span class="nc" id="L166">                &quot;Exception while building component of type '&quot; + _componentType.getSimpleName() + &quot;'.&quot;, e</span>
+<span class="nc" id="L165">            e.printStackTrace();</span>
+<span class="nc" id="L166">            log.error(</span>
+<span class="nc" id="L167">                &quot;Exception while building component of type '&quot; + _componentType.getSimpleName() + &quot;'.&quot;, e</span>
             );
             /*
                 If individual steps in the builder chain throw exceptions,
                 we do not want the entire GUI declaration to fail
                 so that only the GUI of the failing component is not built.
             */
-<span class="fc" id="L173">        }</span>
+<span class="fc" id="L174">        }</span>
 
-<span class="pc bpc" id="L175" title="1 of 3 branches missed.">        switch ( _mode) </span>
+<span class="pc bpc" id="L176" title="1 of 3 branches missed.">        switch ( _mode) </span>
         {
             case DECLARATIVE :
             {
-<span class="fc" id="L179">                Supplier&lt;C&gt; componentFactory = _componentFetcher;</span>
-<span class="fc" id="L180">                this.dispose(); // detach strong reference to the component to allow it to be garbage collected.</span>
-<span class="fc" id="L181">                return new BuilderState&lt;&gt;(</span>
+<span class="fc" id="L180">                Supplier&lt;C&gt; componentFactory = _componentFetcher;</span>
+<span class="fc" id="L181">                this.dispose(); // detach strong reference to the component to allow it to be garbage collected.</span>
+<span class="fc" id="L182">                return new BuilderState&lt;&gt;(</span>
                         _eventProcessor,
                         _mode,
                         _componentType,
@@ -187,21 +188,21 @@ class BuilderState&lt;C extends Component&gt;
             }
             case PROCEDURAL :
             {
-<span class="fc" id="L190">                return this;</span>
+<span class="fc" id="L191">                return this;</span>
             }
             default:
-<span class="nc" id="L193">                throw new IllegalStateException(&quot;Unknown mode: &quot; + _mode);</span>
+<span class="nc" id="L194">                throw new IllegalStateException(&quot;Unknown mode: &quot; + _mode);</span>
         }
     }
 
     BuilderState&lt;C&gt; procedural()
     {
-<span class="pc bpc" id="L199" title="1 of 2 branches missed.">        if ( this.isDisposed() )</span>
-<span class="nc" id="L200">            throw new IllegalStateException(</span>
+<span class="pc bpc" id="L200" title="1 of 2 branches missed.">        if ( this.isDisposed() )</span>
+<span class="nc" id="L201">            throw new IllegalStateException(</span>
                     &quot;Trying to build using a builder which is already spent and disposed!&quot; +
                     WHY_A_BUILDER_IS_DISPOSED
                 );
-<span class="fc" id="L204">        return new BuilderState&lt;&gt;(</span>
+<span class="fc" id="L205">        return new BuilderState&lt;&gt;(</span>
             _eventProcessor,
             Mode.PROCEDURAL,
             _componentType,
@@ -211,13 +212,13 @@ class BuilderState&lt;C extends Component&gt;
 
     BuilderState&lt;C&gt; supersede( BuilderState&lt;C&gt; other )
     {
-<span class="pc bpc" id="L214" title="1 of 2 branches missed.">        if ( this.isDisposed() )</span>
-<span class="nc" id="L215">            throw new IllegalStateException(</span>
+<span class="pc bpc" id="L215" title="1 of 2 branches missed.">        if ( this.isDisposed() )</span>
+<span class="nc" id="L216">            throw new IllegalStateException(</span>
                     &quot;Trying to build using a builder which has already been spent and disposed!\n&quot; +
                     WHY_A_BUILDER_IS_DISPOSED
                 );
-<span class="fc" id="L219">        other.dispose();</span>
-<span class="fc" id="L220">        return new BuilderState&lt;&gt;(</span>
+<span class="fc" id="L220">        other.dispose();</span>
+<span class="fc" id="L221">        return new BuilderState&lt;&gt;(</span>
                 _eventProcessor,
                 _mode,
                 _componentType,
@@ -227,22 +228,22 @@ class BuilderState&lt;C extends Component&gt;
 
     @Override
     public String toString() {
-<span class="nc" id="L230">        return this.getClass().getSimpleName() + &quot;[&quot; + _componentType.getSimpleName() + &quot;]&quot;;</span>
+<span class="nc" id="L231">        return this.getClass().getSimpleName() + &quot;[&quot; + _componentType.getSimpleName() + &quot;]&quot;;</span>
     }
 
     @Override
     public boolean equals( Object o ) {
-<span class="pc bpc" id="L235" title="1 of 2 branches missed.">        if ( this == o ) return true;</span>
-<span class="pc bpc" id="L236" title="2 of 4 branches missed.">        if ( o == null || getClass() != o.getClass() ) return false;</span>
+<span class="pc bpc" id="L236" title="1 of 2 branches missed.">        if ( this == o ) return true;</span>
+<span class="pc bpc" id="L237" title="2 of 4 branches missed.">        if ( o == null || getClass() != o.getClass() ) return false;</span>
 
-<span class="fc" id="L238">        BuilderState&lt;?&gt; that = (BuilderState&lt;?&gt;) o;</span>
+<span class="fc" id="L239">        BuilderState&lt;?&gt; that = (BuilderState&lt;?&gt;) o;</span>
 
-<span class="pc bpc" id="L240" title="2 of 4 branches missed.">        return _componentType.equals(that._componentType) &amp;&amp; _mode == that._mode;</span>
+<span class="pc bpc" id="L241" title="2 of 4 branches missed.">        return _componentType.equals(that._componentType) &amp;&amp; _mode == that._mode;</span>
     }
 
     @Override
     public int hashCode() {
-<span class="nc" id="L245">        return _componentType.hashCode();</span>
+<span class="nc" id="L246">        return _componentType.hashCode();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

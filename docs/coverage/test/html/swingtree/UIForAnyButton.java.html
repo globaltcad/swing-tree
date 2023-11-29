@@ -40,7 +40,7 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      */
     public final I withText( String text ) {
-<span class="fc" id="L43">        return _with( c -&gt; c.setText(text) )._this();</span>
+<span class="fc" id="L43">        return _with( thisComponent -&gt; thisComponent.setText(text) )._this();</span>
     }
 
     /**
@@ -55,7 +55,7 @@ import java.util.function.Consumer;
     public final I withText( Val&lt;String&gt; text ) {
 <span class="fc" id="L56">        NullUtil.nullArgCheck(text, &quot;val&quot;, Val.class);</span>
 <span class="fc" id="L57">        NullUtil.nullPropertyCheck(text, &quot;text&quot;);</span>
-<span class="fc" id="L58">        return _withOnShow( text, (c,t)-&gt;c.setText(t) )</span>
+<span class="fc" id="L58">        return _withOnShow( text, AbstractButton::setText )</span>
 <span class="fc" id="L59">               ._with( c -&gt; c.setText(text.orElseThrow()) )</span>
 <span class="fc" id="L60">               ._this();</span>
     }
@@ -89,26 +89,64 @@ import java.util.function.Consumer;
      */
     public I withIcon( int width, int height, ImageIcon icon ) {
 <span class="fc" id="L91">        NullUtil.nullArgCheck(icon,&quot;icon&quot;,Icon.class);</span>
-<span class="fc bfc" id="L92" title="All 2 branches covered.">        if ( icon instanceof SvgIcon)</span>
+<span class="fc" id="L92">        icon = _fitTo( width, height, icon );</span>
+<span class="fc" id="L93">        return withIcon(icon);</span>
+    }
+
+    private ImageIcon _fitTo( int width, int height, ImageIcon icon ) {
+<span class="fc bfc" id="L97" title="All 2 branches covered.">        if ( icon instanceof SvgIcon)</span>
         {
-<span class="fc" id="L94">            SvgIcon svgIcon = (SvgIcon) icon;</span>
-<span class="fc" id="L95">            svgIcon = svgIcon.withIconWidth(width);</span>
-<span class="fc" id="L96">            icon    = svgIcon.withIconHeight(height);</span>
-<span class="fc" id="L97">        }</span>
-<span class="pc bpc" id="L98" title="3 of 4 branches missed.">        else if ( width != icon.getIconWidth() || height != icon.getIconHeight() )</span>
+<span class="fc" id="L99">            SvgIcon svgIcon = (SvgIcon) icon;</span>
+<span class="fc" id="L100">            svgIcon = svgIcon.withIconWidth(width);</span>
+<span class="fc" id="L101">            icon    = svgIcon.withIconHeight(height);</span>
+<span class="fc" id="L102">        }</span>
+<span class="pc bpc" id="L103" title="3 of 4 branches missed.">        else if ( width != icon.getIconWidth() || height != icon.getIconHeight() )</span>
         {
-<span class="fc" id="L100">            float scale = UI.scale();</span>
+<span class="fc" id="L105">            float scale = UI.scale();</span>
 
-<span class="fc" id="L102">            int scaleHint = Image.SCALE_SMOOTH;</span>
-<span class="pc bpc" id="L103" title="1 of 2 branches missed.">            if (scale &gt; 1.5f)</span>
-<span class="fc" id="L104">                scaleHint = Image.SCALE_FAST;</span>
+<span class="fc" id="L107">            int scaleHint = Image.SCALE_SMOOTH;</span>
+<span class="fc bfc" id="L108" title="All 2 branches covered.">            if (scale &gt; 1.5f)</span>
+<span class="fc" id="L109">                scaleHint = Image.SCALE_FAST;</span>
 
-<span class="fc" id="L106">            width = (int) (width * scale);</span>
-<span class="fc" id="L107">            height = (int) (height * scale);</span>
+<span class="fc" id="L111">            width = (int) (width * scale);</span>
+<span class="fc" id="L112">            height = (int) (height * scale);</span>
 
-<span class="fc" id="L109">            icon = new ImageIcon(icon.getImage().getScaledInstance(width, height, scaleHint));</span>
+<span class="fc" id="L114">            icon = new ImageIcon(icon.getImage().getScaledInstance(width, height, scaleHint));</span>
         }
-<span class="fc" id="L111">        return withIcon(icon);</span>
+<span class="fc" id="L116">        return icon;</span>
+    }
+
+    /**
+     *  Takes the provided {@link IconDeclaration} and scales it to the provided width and height
+     *  before displaying it on the wrapped button type.
+     *
+     * @param width The width of the icon.
+     * @param height The height of the icon.
+     * @param icon The {@link IconDeclaration} which should be scaled and displayed on the button.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withIcon( int width, int height, IconDeclaration icon ) {
+<span class="nc" id="L129">        NullUtil.nullArgCheck(icon,&quot;icon&quot;,IconDeclaration.class);</span>
+<span class="nc" id="L130">        return icon.find()</span>
+<span class="nc" id="L131">                   .map( i -&gt; withIcon(width, height, i) )</span>
+<span class="nc" id="L132">                   .orElseGet( this::_this );</span>
+    }
+
+    /**
+     *  Takes the provided {@link IconDeclaration} and scales the corresponding icon it
+     *  to the provided width and height before displaying it on the wrapped button type.
+     *
+     * @param width The width of the icon.
+     * @param height The height of the icon.
+     * @param icon The {@link Icon} which should be scaled and displayed on the button.
+     * @param fitComponent The {@link UI.FitComponent} which determines how the icon should be scaled relative to the button.
+     * @return This very builder to allow for method chaining.
+     */
+    public I withIcon( int width, int height, IconDeclaration icon, UI.FitComponent fitComponent ) {
+<span class="nc" id="L146">        NullUtil.nullArgCheck(icon,&quot;icon&quot;,IconDeclaration.class);</span>
+<span class="nc" id="L147">        return icon.find()</span>
+<span class="nc" id="L148">                .map( i -&gt; withIcon(_fitTo(width, height, i), fitComponent) )</span>
+<span class="nc" id="L149">                .orElseGet( this::_this );</span>
     }
 
     /**
@@ -117,34 +155,34 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      */
     public I withIcon( ImageIcon icon, UI.FitComponent fitComponent ) {
-<span class="nc" id="L120">        NullUtil.nullArgCheck(icon,&quot;svgIcon&quot;, ImageIcon.class);</span>
-<span class="nc" id="L121">        NullUtil.nullArgCheck(fitComponent,&quot;fitComponent&quot;, UI.FitComponent.class);</span>
-<span class="nc bnc" id="L122" title="All 2 branches missed.">        if ( icon instanceof SvgIcon)</span>
+<span class="nc" id="L158">        NullUtil.nullArgCheck(icon,&quot;svgIcon&quot;, ImageIcon.class);</span>
+<span class="nc" id="L159">        NullUtil.nullArgCheck(fitComponent,&quot;fitComponent&quot;, UI.FitComponent.class);</span>
+<span class="nc bnc" id="L160" title="All 2 branches missed.">        if ( icon instanceof SvgIcon)</span>
         {
-<span class="nc" id="L124">            SvgIcon svgIcon = (SvgIcon) icon;</span>
-<span class="nc" id="L125">            return withIcon( svgIcon.withFitComponent(fitComponent) );</span>
+<span class="nc" id="L162">            SvgIcon svgIcon = (SvgIcon) icon;</span>
+<span class="nc" id="L163">            return withIcon( svgIcon.withFitComponent(fitComponent) );</span>
         }
         else
-<span class="nc" id="L128">            return _with( thisComponent -&gt; {</span>
-<span class="nc" id="L129">                       UI.runLater(()-&gt;{</span>
-<span class="nc" id="L130">                           int width  = thisComponent.getWidth();</span>
-<span class="nc" id="L131">                           int height = thisComponent.getHeight();</span>
-<span class="nc" id="L132">                           width  = Math.max(width,  thisComponent.getMinimumSize().width);</span>
-<span class="nc" id="L133">                           height = Math.max(height, thisComponent.getMinimumSize().height);</span>
-<span class="nc bnc" id="L134" title="All 4 branches missed.">                           if ( width &gt; 0 &amp;&amp; height &gt; 0 )</span>
-<span class="nc" id="L135">                               withIcon( width, height, icon );</span>
-<span class="nc" id="L136">                       });</span>
-<span class="nc" id="L137">                   })</span>
-<span class="nc" id="L138">                   ._this();</span>
+<span class="nc" id="L166">            return _with( thisComponent -&gt; {</span>
+<span class="nc" id="L167">                       UI.runLater(()-&gt;{</span>
+<span class="nc" id="L168">                           int width  = thisComponent.getWidth();</span>
+<span class="nc" id="L169">                           int height = thisComponent.getHeight();</span>
+<span class="nc" id="L170">                           width  = Math.max(width,  thisComponent.getMinimumSize().width);</span>
+<span class="nc" id="L171">                           height = Math.max(height, thisComponent.getMinimumSize().height);</span>
+<span class="nc bnc" id="L172" title="All 4 branches missed.">                           if ( width &gt; 0 &amp;&amp; height &gt; 0 )</span>
+<span class="nc" id="L173">                               thisComponent.setIcon(_fitTo( width, height, icon ));</span>
+<span class="nc" id="L174">                       });</span>
+<span class="nc" id="L175">                   })</span>
+<span class="nc" id="L176">                   ._this();</span>
 
     }
 
     public I withIcon( IconDeclaration icon, UI.FitComponent fitComponent ) {
-<span class="nc" id="L143">        NullUtil.nullArgCheck(icon,&quot;icon&quot;, IconDeclaration.class);</span>
-<span class="nc" id="L144">        NullUtil.nullArgCheck(fitComponent,&quot;fitComponent&quot;, UI.FitComponent.class);</span>
-<span class="nc" id="L145">        return icon.find()</span>
-<span class="nc" id="L146">                   .map( i -&gt; withIcon(i, fitComponent) )</span>
-<span class="nc" id="L147">                   .orElseGet( this::_this );</span>
+<span class="nc" id="L181">        NullUtil.nullArgCheck(icon,&quot;icon&quot;, IconDeclaration.class);</span>
+<span class="nc" id="L182">        NullUtil.nullArgCheck(fitComponent,&quot;fitComponent&quot;, UI.FitComponent.class);</span>
+<span class="nc" id="L183">        return icon.find()</span>
+<span class="nc" id="L184">                   .map( i -&gt; withIcon(i, fitComponent) )</span>
+<span class="nc" id="L185">                   .orElseGet( this::_this );</span>
     }
 
     /**
@@ -156,8 +194,8 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      */
     public I withIcon( IconDeclaration icon ) {
-<span class="nc" id="L159">        NullUtil.nullArgCheck(icon,&quot;icon&quot;, IconDeclaration.class);</span>
-<span class="nc" id="L160">        return _with( c -&gt; icon.find().ifPresent(c::setIcon) )._this();</span>
+<span class="nc" id="L197">        NullUtil.nullArgCheck(icon,&quot;icon&quot;, IconDeclaration.class);</span>
+<span class="nc" id="L198">        return _with( c -&gt; icon.find().ifPresent(c::setIcon) )._this();</span>
     }
 
     /**
@@ -186,11 +224,11 @@ import java.util.function.Consumer;
      * @throws IllegalArgumentException if {@code icon} is {@code null}.
      */
     public I withIcon( Val&lt;IconDeclaration&gt; icon ) {
-<span class="nc" id="L189">        NullUtil.nullArgCheck(icon, &quot;icon&quot;, Val.class);</span>
-<span class="nc" id="L190">        NullUtil.nullPropertyCheck(icon, &quot;icon&quot;);</span>
-<span class="nc" id="L191">        return _withOnShow( icon, (c, v) -&gt; v.find().ifPresent(c::setIcon) )</span>
-<span class="nc" id="L192">               ._with( c -&gt; icon.orElseThrow().find().ifPresent(c::setIcon) )</span>
-<span class="nc" id="L193">               ._this();</span>
+<span class="nc" id="L227">        NullUtil.nullArgCheck(icon, &quot;icon&quot;, Val.class);</span>
+<span class="nc" id="L228">        NullUtil.nullPropertyCheck(icon, &quot;icon&quot;);</span>
+<span class="nc" id="L229">        return _withOnShow( icon, (c, v) -&gt; v.find().ifPresent(c::setIcon) )</span>
+<span class="nc" id="L230">               ._with( c -&gt; icon.orElseThrow().find().ifPresent(c::setIcon) )</span>
+<span class="nc" id="L231">               ._this();</span>
     }
 
     /**
@@ -199,11 +237,11 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      */
     public I withFontSize( int size ) {
-<span class="fc" id="L202">        return _with( button -&gt; {</span>
-<span class="fc" id="L203">                   Font old = button.getFont();</span>
-<span class="fc" id="L204">                   button.setFont(old.deriveFont(UI.scale((float)size)));</span>
-<span class="fc" id="L205">               })</span>
-<span class="fc" id="L206">               ._this();</span>
+<span class="fc" id="L240">        return _with( button -&gt; {</span>
+<span class="fc" id="L241">                   Font old = button.getFont();</span>
+<span class="fc" id="L242">                   button.setFont(old.deriveFont(UI.scale((float)size)));</span>
+<span class="fc" id="L243">               })</span>
+<span class="fc" id="L244">               ._this();</span>
     }
 
     /**
@@ -217,15 +255,15 @@ import java.util.function.Consumer;
      * @throws IllegalArgumentException if {@code size} is {@code null}.
      */
     public I withFontSize( Val&lt;Integer&gt; size ) {
-<span class="nc" id="L220">        NullUtil.nullArgCheck(size, &quot;val&quot;, Val.class);</span>
-<span class="nc" id="L221">        NullUtil.nullPropertyCheck(size, &quot;size&quot;, &quot;Null is not a sensible value for a font size.&quot;);</span>
-<span class="nc" id="L222">        return _withOnShow( size, (c,v)-&gt;{</span>
-<span class="nc" id="L223">                    c.setFont(c.getFont().deriveFont(UI.scale((float)v)));</span>
-<span class="nc" id="L224">                })</span>
-<span class="nc" id="L225">                ._with( c -&gt; {</span>
-<span class="nc" id="L226">                    c.setFont(c.getFont().deriveFont(UI.scale((float)size.orElseThrow())));</span>
-<span class="nc" id="L227">                })</span>
-<span class="nc" id="L228">                ._this();</span>
+<span class="nc" id="L258">        NullUtil.nullArgCheck(size, &quot;val&quot;, Val.class);</span>
+<span class="nc" id="L259">        NullUtil.nullPropertyCheck(size, &quot;size&quot;, &quot;Null is not a sensible value for a font size.&quot;);</span>
+<span class="nc" id="L260">        return _withOnShow( size, (c,v)-&gt;{</span>
+<span class="nc" id="L261">                    c.setFont(c.getFont().deriveFont(UI.scale((float)v)));</span>
+<span class="nc" id="L262">                })</span>
+<span class="nc" id="L263">                ._with( c -&gt; {</span>
+<span class="nc" id="L264">                    c.setFont(c.getFont().deriveFont(UI.scale((float)size.orElseThrow())));</span>
+<span class="nc" id="L265">                })</span>
+<span class="nc" id="L266">                ._this();</span>
     }
 
     /**
@@ -235,8 +273,8 @@ import java.util.function.Consumer;
      * @throws IllegalArgumentException if {@code font} is {@code null}.
      */
     public final I withFont( Font font ) {
-<span class="nc" id="L238">        NullUtil.nullArgCheck(font, &quot;font&quot;, Font.class);</span>
-<span class="nc" id="L239">        return _with( button -&gt; button.setFont(font) )._this();</span>
+<span class="nc" id="L276">        NullUtil.nullArgCheck(font, &quot;font&quot;, Font.class);</span>
+<span class="nc" id="L277">        return _with( button -&gt; button.setFont(font) )._this();</span>
     }
 
     /**
@@ -251,11 +289,11 @@ import java.util.function.Consumer;
      * @throws IllegalArgumentException if {@code font} is a property which can wrap {@code null}.
      */
     public final I withFont( Val&lt;Font&gt; font ) {
-<span class="nc" id="L254">        NullUtil.nullArgCheck(font, &quot;font&quot;, Val.class);</span>
-<span class="nc" id="L255">        NullUtil.nullPropertyCheck(font, &quot;font&quot;, &quot;Use the default font of this component instead of null!&quot;);</span>
-<span class="nc" id="L256">        return _withOnShow( font, (c,v) -&gt; c.setFont(v) )</span>
-<span class="nc" id="L257">               ._with( button -&gt; button.setFont(font.orElseThrow()) )</span>
-<span class="nc" id="L258">               ._this();</span>
+<span class="nc" id="L292">        NullUtil.nullArgCheck(font, &quot;font&quot;, Val.class);</span>
+<span class="nc" id="L293">        NullUtil.nullPropertyCheck(font, &quot;font&quot;, &quot;Use the default font of this component instead of null!&quot;);</span>
+<span class="nc" id="L294">        return _withOnShow( font, JComponent::setFont )</span>
+<span class="nc" id="L295">               ._with( button -&gt; button.setFont(font.orElseThrow()) )</span>
+<span class="nc" id="L296">               ._this();</span>
     }
 
     /**
@@ -265,25 +303,25 @@ import java.util.function.Consumer;
      * @return This builder instance, to allow for method chaining.
      */
     public final I isSelectedIf( boolean isSelected ) {
-<span class="nc" id="L268">        return _with( button -&gt; _setSelectedSilently(isSelected, button) )._this();</span>
+<span class="nc" id="L306">        return _with( button -&gt; _setSelectedSilently(button, isSelected) )._this();</span>
     }
 
-    void _setSelectedSilently( boolean isSelected, B thisButton ) {
+    void _setSelectedSilently( B thisButton, boolean isSelected ) {
         /*
             This is used to change the selection state of the button without triggering
             any action listeners. We need this because we want to construct the
             GUI and the state of its properties without side effects.
          */
-<span class="fc" id="L277">        ItemListener[] listeners = thisButton.getItemListeners();</span>
-<span class="fc bfc" id="L278" title="All 2 branches covered.">        for ( ItemListener l : listeners )</span>
-<span class="fc" id="L279">            thisButton.removeItemListener(l);</span>
+<span class="fc" id="L315">        ItemListener[] listeners = thisButton.getItemListeners();</span>
+<span class="fc bfc" id="L316" title="All 2 branches covered.">        for ( ItemListener l : listeners )</span>
+<span class="fc" id="L317">            thisButton.removeItemListener(l);</span>
 
-<span class="fc" id="L281">        thisButton.setSelected(isSelected);</span>
+<span class="fc" id="L319">        thisButton.setSelected(isSelected);</span>
 
-<span class="fc bfc" id="L283" title="All 2 branches covered.">        for ( ItemListener l : listeners )</span>
-<span class="fc" id="L284">            thisButton.addItemListener(l);</span>
+<span class="fc bfc" id="L321" title="All 2 branches covered.">        for ( ItemListener l : listeners )</span>
+<span class="fc" id="L322">            thisButton.addItemListener(l);</span>
 
-<span class="fc" id="L286">    }</span>
+<span class="fc" id="L324">    }</span>
 
     /**
      *  Use this to bind to a {@link sprouts.Var}
@@ -295,10 +333,10 @@ import java.util.function.Consumer;
      * @throws IllegalArgumentException if {@code selected} is {@code null}.
      */
     public final I isSelectedIf( Val&lt;Boolean&gt; selected ) {
-<span class="nc" id="L298">        NullUtil.nullArgCheck(selected, &quot;selected&quot;, Val.class);</span>
-<span class="nc" id="L299">        NullUtil.nullPropertyCheck(selected, &quot;selected&quot;, &quot;Null can not be used to model the selection state of a button type.&quot;);</span>
-<span class="nc" id="L300">        return _withOnShow(selected, (c, v) -&gt; _setSelectedSilently(v, c) )</span>
-<span class="nc" id="L301">               ._with( button -&gt; _setSelectedSilently(selected.get(), button) )._this();</span>
+<span class="nc" id="L336">        NullUtil.nullArgCheck(selected, &quot;selected&quot;, Val.class);</span>
+<span class="nc" id="L337">        NullUtil.nullPropertyCheck(selected, &quot;selected&quot;, &quot;Null can not be used to model the selection state of a button type.&quot;);</span>
+<span class="nc" id="L338">        return _withOnShow(selected, this::_setSelectedSilently)</span>
+<span class="nc" id="L339">               ._with( button -&gt; _setSelectedSilently(button, selected.get()) )._this();</span>
     }
 
     /**
@@ -312,10 +350,10 @@ import java.util.function.Consumer;
      * @throws IllegalArgumentException if {@code selected} is {@code null}.
      */
     public final I isSelectedIfNot( Val&lt;Boolean&gt; selected ) {
-<span class="nc" id="L315">        NullUtil.nullArgCheck(selected, &quot;selected&quot;, Val.class);</span>
-<span class="nc" id="L316">        NullUtil.nullPropertyCheck(selected, &quot;selected&quot;, &quot;Null can not be used to model the selection state of a button type.&quot;);</span>
-<span class="nc bnc" id="L317" title="All 2 branches missed.">        return _withOnShow( selected, (c, v) -&gt; _setSelectedSilently(!v, c) )</span>
-<span class="nc bnc" id="L318" title="All 2 branches missed.">               ._with( button -&gt; _setSelectedSilently(!selected.is(true), button) )._this();</span>
+<span class="nc" id="L353">        NullUtil.nullArgCheck(selected, &quot;selected&quot;, Val.class);</span>
+<span class="nc" id="L354">        NullUtil.nullPropertyCheck(selected, &quot;selected&quot;, &quot;Null can not be used to model the selection state of a button type.&quot;);</span>
+<span class="nc bnc" id="L355" title="All 2 branches missed.">        return _withOnShow( selected, (c, v) -&gt; _setSelectedSilently(c, !v) )</span>
+<span class="nc bnc" id="L356" title="All 2 branches missed.">               ._with( button -&gt; _setSelectedSilently(button, !selected.is(true)) )._this();</span>
     }
 
     /**
@@ -328,21 +366,19 @@ import java.util.function.Consumer;
      * @throws IllegalArgumentException if {@code selected} is {@code null}.
      */
     public final I isSelectedIf( Var&lt;Boolean&gt; selected ) {
-<span class="fc" id="L331">        NullUtil.nullArgCheck(selected, &quot;selected&quot;, Var.class);</span>
-<span class="fc" id="L332">        NullUtil.nullPropertyCheck(selected, &quot;selected&quot;, &quot;Null can not be used to model the selection state of a button type.&quot;);</span>
-<span class="fc" id="L333">        return _withOnShow( selected, (c, v) -&gt; {</span>
-<span class="fc" id="L334">                    _setSelectedSilently(v, c);</span>
-<span class="fc" id="L335">                })</span>
-<span class="fc" id="L336">                ._with( button -&gt; {</span>
-<span class="fc" id="L337">                    _onClick(button,</span>
-<span class="fc" id="L338">                        e -&gt; _doApp(button.isSelected(), newItem -&gt; selected.set(From.VIEW, newItem) )</span>
+<span class="fc" id="L369">        NullUtil.nullArgCheck(selected, &quot;selected&quot;, Var.class);</span>
+<span class="fc" id="L370">        NullUtil.nullPropertyCheck(selected, &quot;selected&quot;, &quot;Null can not be used to model the selection state of a button type.&quot;);</span>
+<span class="fc" id="L371">        return _withOnShow( selected, this::_setSelectedSilently )</span>
+<span class="fc" id="L372">                ._with( button -&gt; {</span>
+<span class="fc" id="L373">                    _onClick(button,</span>
+<span class="fc" id="L374">                        e -&gt; _doApp(button.isSelected(), newItem -&gt; selected.set(From.VIEW, newItem) )</span>
                     );
-<span class="fc" id="L340">                    _onChange(button,</span>
-<span class="fc" id="L341">                        v -&gt; _doApp(button.isSelected(), newItem -&gt; selected.set(From.VIEW, newItem) )</span>
+<span class="fc" id="L376">                    _onChange(button,</span>
+<span class="fc" id="L377">                        v -&gt; _doApp(button.isSelected(), newItem -&gt; selected.set(From.VIEW, newItem) )</span>
                     );
-<span class="fc" id="L343">                })</span>
-<span class="fc" id="L344">                ._with( button -&gt; _setSelectedSilently(selected.get(), button) )</span>
-<span class="fc" id="L345">                ._this();</span>
+<span class="fc" id="L379">                })</span>
+<span class="fc" id="L380">                ._with( button -&gt; _setSelectedSilently(button, selected.get()) )</span>
+<span class="fc" id="L381">                ._this();</span>
     }
 
     /**
@@ -356,21 +392,21 @@ import java.util.function.Consumer;
      * @throws IllegalArgumentException if {@code selected} is {@code null}.
      */
     public final I isSelectedIfNot( Var&lt;Boolean&gt; selected ) {
-<span class="fc" id="L359">        NullUtil.nullArgCheck(selected, &quot;selected&quot;, Var.class);</span>
-<span class="nc" id="L360">        NullUtil.nullPropertyCheck(selected, &quot;selected&quot;, &quot;Null can not be used to model the selection state of a button type.&quot;);</span>
-<span class="nc" id="L361">        return _withOnShow( selected, (c, v) -&gt; {</span>
-<span class="nc bnc" id="L362" title="All 2 branches missed.">                    _setSelectedSilently(!v, c);</span>
-<span class="nc" id="L363">                })</span>
-<span class="nc" id="L364">                ._with( button -&gt; {</span>
-<span class="nc" id="L365">                    _onClick(button,</span>
-<span class="nc bnc" id="L366" title="All 2 branches missed.">                        e -&gt; _doApp(!button.isSelected(), newItem -&gt; selected.set(From.VIEW, newItem) )</span>
+<span class="fc" id="L395">        NullUtil.nullArgCheck(selected, &quot;selected&quot;, Var.class);</span>
+<span class="nc" id="L396">        NullUtil.nullPropertyCheck(selected, &quot;selected&quot;, &quot;Null can not be used to model the selection state of a button type.&quot;);</span>
+<span class="nc" id="L397">        return _withOnShow( selected, (c, v) -&gt; {</span>
+<span class="nc bnc" id="L398" title="All 2 branches missed.">                    _setSelectedSilently(c, !v);</span>
+<span class="nc" id="L399">                })</span>
+<span class="nc" id="L400">                ._with( button -&gt; {</span>
+<span class="nc" id="L401">                    _onClick(button,</span>
+<span class="nc bnc" id="L402" title="All 2 branches missed.">                        e -&gt; _doApp(!button.isSelected(), newItem -&gt; selected.set(From.VIEW, newItem) )</span>
                     );
-<span class="nc" id="L368">                    _onChange(button,</span>
-<span class="nc bnc" id="L369" title="All 2 branches missed.">                        v -&gt; _doApp(!button.isSelected(), newItem -&gt; selected.set(From.VIEW, newItem) )</span>
+<span class="nc" id="L404">                    _onChange(button,</span>
+<span class="nc bnc" id="L405" title="All 2 branches missed.">                        v -&gt; _doApp(!button.isSelected(), newItem -&gt; selected.set(From.VIEW, newItem) )</span>
                     );
-<span class="nc" id="L371">                })</span>
-<span class="nc bnc" id="L372" title="All 2 branches missed.">                ._with( button -&gt; _setSelectedSilently(!selected.is(true), button) )</span>
-<span class="nc" id="L373">                ._this();</span>
+<span class="nc" id="L407">                })</span>
+<span class="nc bnc" id="L408" title="All 2 branches missed.">                ._with( button -&gt; _setSelectedSilently(button, !selected.is(true)) )</span>
+<span class="nc" id="L409">                ._this();</span>
     }
 
     /**
@@ -396,13 +432,13 @@ import java.util.function.Consumer;
      * @return This very instance, which enables builder-style method chaining.
      */
     public final &lt;E extends Enum&lt;E&gt;&gt; I isSelectedIf( E enumValue, Val&lt;E&gt; enumProperty ) {
-<span class="fc" id="L399">        NullUtil.nullArgCheck(enumValue, &quot;enumValue&quot;, Enum.class);</span>
-<span class="fc" id="L400">        NullUtil.nullArgCheck(enumProperty, &quot;enumProperty&quot;, Val.class);</span>
-<span class="fc" id="L401">        return _withOnShow( enumProperty, (c,v) -&gt; _setSelectedSilently(enumValue.equals(v), c) )</span>
-<span class="fc" id="L402">                ._with( button -&gt;</span>
-<span class="fc" id="L403">                     _setSelectedSilently(enumValue.equals(enumProperty.orElseThrow()), button)</span>
+<span class="fc" id="L435">        NullUtil.nullArgCheck(enumValue, &quot;enumValue&quot;, Enum.class);</span>
+<span class="fc" id="L436">        NullUtil.nullArgCheck(enumProperty, &quot;enumProperty&quot;, Val.class);</span>
+<span class="fc" id="L437">        return _withOnShow( enumProperty, (c,v) -&gt; _setSelectedSilently(c, enumValue.equals(v)) )</span>
+<span class="fc" id="L438">                ._with( button -&gt;</span>
+<span class="fc" id="L439">                     _setSelectedSilently(button, enumValue.equals(enumProperty.orElseThrow()))</span>
                 )
-<span class="fc" id="L405">                ._this();</span>
+<span class="fc" id="L441">                ._this();</span>
     }
 
     /**
@@ -417,13 +453,13 @@ import java.util.function.Consumer;
      * @return This very instance, which enables builder-style method chaining.
      */
     public final &lt;E extends Enum&lt;E&gt;&gt; I isSelectedIfNot( E enumValue, Val&lt;E&gt; enumProperty ) {
-<span class="fc" id="L420">        NullUtil.nullArgCheck(enumValue, &quot;enumValue&quot;, Enum.class);</span>
-<span class="fc" id="L421">        NullUtil.nullArgCheck(enumProperty, &quot;enumProperty&quot;, Val.class);</span>
-<span class="pc bpc" id="L422" title="1 of 2 branches missed.">        return _withOnShow( enumProperty, (c, v) -&gt; _setSelectedSilently(!enumValue.equals(v), c) )</span>
-<span class="fc" id="L423">                ._with( button -&gt;</span>
-<span class="pc bpc" id="L424" title="1 of 2 branches missed.">                     _setSelectedSilently(!enumValue.equals(enumProperty.orElseThrow()), button)</span>
+<span class="fc" id="L456">        NullUtil.nullArgCheck(enumValue, &quot;enumValue&quot;, Enum.class);</span>
+<span class="fc" id="L457">        NullUtil.nullArgCheck(enumProperty, &quot;enumProperty&quot;, Val.class);</span>
+<span class="pc bpc" id="L458" title="1 of 2 branches missed.">        return _withOnShow( enumProperty, (c, v) -&gt; _setSelectedSilently(c, !enumValue.equals(v)) )</span>
+<span class="fc" id="L459">                ._with( button -&gt;</span>
+<span class="pc bpc" id="L460" title="1 of 2 branches missed.">                     _setSelectedSilently(button, !enumValue.equals(enumProperty.orElseThrow()))</span>
                 )
-<span class="fc" id="L426">                ._this();</span>
+<span class="fc" id="L462">                ._this();</span>
     }
 
     /**
@@ -436,23 +472,23 @@ import java.util.function.Consumer;
      * @throws IllegalArgumentException if {@code var} is {@code null}.
      */
     public final I isPressedIf( Var&lt;Boolean&gt; var ) {
-<span class="fc" id="L439">        NullUtil.nullArgCheck(var, &quot;var&quot;, Var.class);</span>
-<span class="fc" id="L440">        return _withOnShow( var, (c,v) -&gt; {</span>
-<span class="fc" id="L441">                    c.getModel().setPressed(v);</span>
-<span class="fc" id="L442">                })</span>
-<span class="fc" id="L443">                ._with( button -&gt; {</span>
-<span class="fc" id="L444">                    _onClick(button, e -&gt;</span>
-<span class="fc" id="L445">                        _doApp(button.getModel().isPressed(), pressed-&gt;{</span>
-<span class="fc" id="L446">                            var.set(From.VIEW, true);</span>
-<span class="fc" id="L447">                            var.set(From.VIEW, pressed);</span>
-<span class="fc" id="L448">                        })</span>
+<span class="fc" id="L475">        NullUtil.nullArgCheck(var, &quot;var&quot;, Var.class);</span>
+<span class="fc" id="L476">        return _withOnShow( var, (c,v) -&gt; {</span>
+<span class="fc" id="L477">                    c.getModel().setPressed(v);</span>
+<span class="fc" id="L478">                })</span>
+<span class="fc" id="L479">                ._with( button -&gt; {</span>
+<span class="fc" id="L480">                    _onClick(button, e -&gt;</span>
+<span class="fc" id="L481">                        _doApp(button.getModel().isPressed(), pressed-&gt;{</span>
+<span class="fc" id="L482">                            var.set(From.VIEW, true);</span>
+<span class="fc" id="L483">                            var.set(From.VIEW, pressed);</span>
+<span class="fc" id="L484">                        })</span>
                     );
-<span class="fc" id="L450">                })</span>
+<span class="fc" id="L486">                })</span>
                 // on change is not needed because the pressed state is only changed by the user.
-<span class="fc" id="L452">                ._with( button -&gt;</span>
-<span class="fc" id="L453">                    button.setSelected(var.orElseThrow())</span>
+<span class="fc" id="L488">                ._with( button -&gt;</span>
+<span class="fc" id="L489">                    button.setSelected(var.orElseThrow())</span>
                 )
-<span class="fc" id="L455">                ._this();</span>
+<span class="fc" id="L491">                ._this();</span>
     }
 
     /**
@@ -460,7 +496,7 @@ import java.util.function.Consumer;
      * @return This very instance, which enables builder-style method chaining.
      */
     public I isBorderPaintedIf( boolean borderPainted ) {
-<span class="fc" id="L463">        return _with( button -&gt; button.setBorderPainted(borderPainted) )._this();</span>
+<span class="fc" id="L499">        return _with( button -&gt; button.setBorderPainted(borderPainted) )._this();</span>
     }
 
     /**
@@ -468,11 +504,11 @@ import java.util.function.Consumer;
      * @return This very instance, which enables builder-style method chaining.
      */
     public I isBorderPaintedIf( Val&lt;Boolean&gt; val ) {
-<span class="nc" id="L471">        NullUtil.nullArgCheck(val, &quot;val&quot;, Val.class);</span>
-<span class="nc" id="L472">        NullUtil.nullPropertyCheck(val, &quot;val&quot;, &quot;Null is not a valid value for the border painted property.&quot;);</span>
-<span class="nc" id="L473">        return _withOnShow( val, (c, v) -&gt; c.setBorderPainted(v) )</span>
-<span class="nc" id="L474">               ._with( button -&gt; button.setBorderPainted(val.orElseThrow()) )</span>
-<span class="nc" id="L475">               ._this();</span>
+<span class="nc" id="L507">        NullUtil.nullArgCheck(val, &quot;val&quot;, Val.class);</span>
+<span class="nc" id="L508">        NullUtil.nullPropertyCheck(val, &quot;val&quot;, &quot;Null is not a valid value for the border painted property.&quot;);</span>
+<span class="nc" id="L509">        return _withOnShow( val, AbstractButton::setBorderPainted )</span>
+<span class="nc" id="L510">               ._with( button -&gt; button.setBorderPainted(val.orElseThrow()) )</span>
+<span class="nc" id="L511">               ._this();</span>
     }
 
     /**
@@ -483,13 +519,13 @@ import java.util.function.Consumer;
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I makePlain() {
-<span class="fc" id="L486">        return peek( it -&gt; {</span>
-<span class="fc" id="L487">                    it.setBorderPainted(false);</span>
-<span class="fc" id="L488">                    it.setContentAreaFilled(false);</span>
-<span class="fc" id="L489">                    it.setOpaque(false);</span>
-<span class="fc" id="L490">                    it.setFocusPainted(false);</span>
-<span class="fc" id="L491">                    it.setMargin(new Insets(0,0,0,0));</span>
-<span class="fc" id="L492">                });</span>
+<span class="fc" id="L522">        return peek( it -&gt; {</span>
+<span class="fc" id="L523">                    it.setBorderPainted(false);</span>
+<span class="fc" id="L524">                    it.setContentAreaFilled(false);</span>
+<span class="fc" id="L525">                    it.setOpaque(false);</span>
+<span class="fc" id="L526">                    it.setFocusPainted(false);</span>
+<span class="fc" id="L527">                    it.setMargin(new Insets(0,0,0,0));</span>
+<span class="fc" id="L528">                });</span>
     }
 
     /**
@@ -502,13 +538,13 @@ import java.util.function.Consumer;
      * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public final I onChange( Action&lt;ComponentDelegate&lt;B, ItemEvent&gt;&gt; action ) {
-<span class="fc" id="L505">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
-<span class="fc" id="L506">        return _with( button -&gt; {</span>
-<span class="fc" id="L507">                    _onChange(button, e -&gt;</span>
-<span class="fc" id="L508">                        _doApp(()-&gt;action.accept(new ComponentDelegate&lt;&gt;(button, e)))</span>
+<span class="fc" id="L541">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
+<span class="fc" id="L542">        return _with( button -&gt; {</span>
+<span class="fc" id="L543">                    _onChange(button, e -&gt;</span>
+<span class="fc" id="L544">                        _doApp(()-&gt;action.accept(new ComponentDelegate&lt;&gt;(button, e)))</span>
                     );
-<span class="fc" id="L510">                })</span>
-<span class="fc" id="L511">                ._this();</span>
+<span class="fc" id="L546">                })</span>
+<span class="fc" id="L547">                ._this();</span>
     }
 
     protected final void _onChange( B button, Consumer&lt;ItemEvent&gt; action ) {
@@ -523,14 +559,14 @@ import java.util.function.Consumer;
             To solve this problem, we do the revers by making sure that our listener is added
             at the first position in the list of listeners inside the button.
         */
-<span class="fc" id="L526">        ItemListener[] listeners = button.getItemListeners();</span>
-<span class="fc bfc" id="L527" title="All 2 branches covered.">        for (ItemListener listener : listeners)</span>
-<span class="fc" id="L528">            button.removeItemListener(listener);</span>
+<span class="fc" id="L562">        ItemListener[] listeners = button.getItemListeners();</span>
+<span class="fc bfc" id="L563" title="All 2 branches covered.">        for (ItemListener listener : listeners)</span>
+<span class="fc" id="L564">            button.removeItemListener(listener);</span>
 
-<span class="fc" id="L530">        button.addItemListener(action::accept);</span>
+<span class="fc" id="L566">        button.addItemListener(action::accept);</span>
 
-<span class="fc bfc" id="L532" title="All 2 branches covered.">        for ( int i = listeners.length - 1; i &gt;= 0; i-- ) // reverse order because swing does not give us the listeners in the order they were added!</span>
-<span class="fc" id="L533">            button.addItemListener(listeners[i]);</span>
+<span class="fc bfc" id="L568" title="All 2 branches covered.">        for ( int i = listeners.length - 1; i &gt;= 0; i-- ) // reverse order because swing does not give us the listeners in the order they were added!</span>
+<span class="fc" id="L569">            button.addItemListener(listeners[i]);</span>
         /*
             The reasoning behind why Swing calls item listeners from last to first is
             the assumption that the last listener added is more interested in the event
@@ -540,7 +576,7 @@ import java.util.function.Consumer;
             simply because it was added first.
             This is especially true in the context of declarative UI design.
          */
-<span class="fc" id="L543">    }</span>
+<span class="fc" id="L579">    }</span>
 
     /**
      *  This method enables a more readable way of adding
@@ -555,15 +591,15 @@ import java.util.function.Consumer;
      * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public I onClick( Action&lt;ComponentDelegate&lt;B, ActionEvent&gt;&gt; action ) {
-<span class="fc" id="L558">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
-<span class="fc" id="L559">        return _with( button -&gt; {</span>
-<span class="fc" id="L560">                    _onClick(button, e -&gt;</span>
-<span class="fc" id="L561">                        _doApp(() -&gt;</span>
-<span class="fc" id="L562">                            action.accept(new ComponentDelegate&lt;&gt;(button, e))</span>
+<span class="fc" id="L594">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
+<span class="fc" id="L595">        return _with( button -&gt; {</span>
+<span class="fc" id="L596">                    _onClick(button, e -&gt;</span>
+<span class="fc" id="L597">                        _doApp(() -&gt;</span>
+<span class="fc" id="L598">                            action.accept(new ComponentDelegate&lt;&gt;(button, e))</span>
                         )
                     );
-<span class="fc" id="L565">                })</span>
-<span class="fc" id="L566">                ._this();</span>
+<span class="fc" id="L601">                })</span>
+<span class="fc" id="L602">                ._this();</span>
     }
 
     protected final void _onClick( B button, Consumer&lt;ActionEvent&gt; action ) {
@@ -578,15 +614,15 @@ import java.util.function.Consumer;
             simply because it was added first.
             This is especially true in the context of declarative UI design.
         */
-<span class="fc" id="L581">        ActionListener[] listeners = button.getActionListeners();</span>
-<span class="fc bfc" id="L582" title="All 2 branches covered.">        for (ActionListener listener : listeners)</span>
-<span class="fc" id="L583">            button.removeActionListener(listener);</span>
+<span class="fc" id="L617">        ActionListener[] listeners = button.getActionListeners();</span>
+<span class="fc bfc" id="L618" title="All 2 branches covered.">        for (ActionListener listener : listeners)</span>
+<span class="fc" id="L619">            button.removeActionListener(listener);</span>
 
-<span class="fc" id="L585">        button.addActionListener(action::accept);</span>
+<span class="fc" id="L621">        button.addActionListener(action::accept);</span>
 
-<span class="fc bfc" id="L587" title="All 2 branches covered.">        for ( int i = listeners.length - 1; i &gt;= 0; i-- ) // reverse order because swing does not give us the listeners in the order they were added!</span>
-<span class="fc" id="L588">            button.addActionListener(listeners[i]);</span>
-<span class="fc" id="L589">    }</span>
+<span class="fc bfc" id="L623" title="All 2 branches covered.">        for ( int i = listeners.length - 1; i &gt;= 0; i-- ) // reverse order because swing does not give us the listeners in the order they were added!</span>
+<span class="fc" id="L624">            button.addActionListener(listeners[i]);</span>
+<span class="fc" id="L625">    }</span>
 
     /**
      *  A convenience method to avoid peeking into this builder like so:
@@ -601,11 +637,11 @@ import java.util.function.Consumer;
      * @throws IllegalArgumentException if {@code horizontalAlign} is {@code null}.
      */
     public final I withHorizontalAlignment( UI.HorizontalAlignment horizontalAlign ) {
-<span class="nc" id="L604">        NullUtil.nullArgCheck(horizontalAlign, &quot;horizontalAlign&quot;, UI.HorizontalAlignment.class);</span>
-<span class="nc" id="L605">        return _with( c -&gt;</span>
-<span class="nc" id="L606">                    c.setHorizontalAlignment(horizontalAlign.forSwing())</span>
+<span class="nc" id="L640">        NullUtil.nullArgCheck(horizontalAlign, &quot;horizontalAlign&quot;, UI.HorizontalAlignment.class);</span>
+<span class="nc" id="L641">        return _with( c -&gt;</span>
+<span class="nc" id="L642">                    c.setHorizontalAlignment(horizontalAlign.forSwing())</span>
                 )
-<span class="nc" id="L608">                ._this();</span>
+<span class="nc" id="L644">                ._this();</span>
     }
 
     /**
@@ -626,13 +662,13 @@ import java.util.function.Consumer;
      * @throws IllegalArgumentException if {@code horizontalAlign} is {@code null}.
      */
     public final I withHorizontalAlignment( Val&lt;UI.HorizontalAlignment&gt; horizontalAlign ) {
-<span class="nc" id="L629">        NullUtil.nullArgCheck(horizontalAlign, &quot;horizontalAlign&quot;, Val.class);</span>
-<span class="nc" id="L630">        NullUtil.nullPropertyCheck(horizontalAlign, &quot;horizontalAlign&quot;);</span>
-<span class="nc" id="L631">        return _withOnShow( horizontalAlign, (c, align) -&gt; c.setHorizontalAlignment(align.forSwing()) )</span>
-<span class="nc" id="L632">               ._with( c -&gt;</span>
-<span class="nc" id="L633">                   c.setHorizontalAlignment(horizontalAlign.orElseThrow().forSwing())</span>
+<span class="nc" id="L665">        NullUtil.nullArgCheck(horizontalAlign, &quot;horizontalAlign&quot;, Val.class);</span>
+<span class="nc" id="L666">        NullUtil.nullPropertyCheck(horizontalAlign, &quot;horizontalAlign&quot;);</span>
+<span class="nc" id="L667">        return _withOnShow( horizontalAlign, (c, align) -&gt; c.setHorizontalAlignment(align.forSwing()) )</span>
+<span class="nc" id="L668">               ._with( c -&gt;</span>
+<span class="nc" id="L669">                   c.setHorizontalAlignment(horizontalAlign.orElseThrow().forSwing())</span>
                )
-<span class="nc" id="L635">               ._this();</span>
+<span class="nc" id="L671">               ._this();</span>
     }
 
     /**
@@ -648,11 +684,11 @@ import java.util.function.Consumer;
      * @throws IllegalArgumentException if {@code verticalAlign} is {@code null}.
      */
     public final I withVerticalAlignment( UI.VerticalAlignment verticalAlign ) {
-<span class="nc" id="L651">        NullUtil.nullArgCheck(verticalAlign, &quot;verticalAlign&quot;, UI.VerticalAlignment.class);</span>
-<span class="nc" id="L652">        return _with( c -&gt;</span>
-<span class="nc" id="L653">                    c.setVerticalAlignment(verticalAlign.forSwing())</span>
+<span class="nc" id="L687">        NullUtil.nullArgCheck(verticalAlign, &quot;verticalAlign&quot;, UI.VerticalAlignment.class);</span>
+<span class="nc" id="L688">        return _with( c -&gt;</span>
+<span class="nc" id="L689">                    c.setVerticalAlignment(verticalAlign.forSwing())</span>
                 )
-<span class="nc" id="L655">                ._this();</span>
+<span class="nc" id="L691">                ._this();</span>
     }
 
     /**
@@ -673,13 +709,13 @@ import java.util.function.Consumer;
      * @throws IllegalArgumentException if {@code verticalAlign} is {@code null}.
      */
     public final I withVerticalAlignment( Val&lt;UI.VerticalAlignment&gt; verticalAlign ) {
-<span class="nc" id="L676">        NullUtil.nullArgCheck(verticalAlign, &quot;verticalAlign&quot;, Val.class);</span>
-<span class="nc" id="L677">        NullUtil.nullPropertyCheck(verticalAlign, &quot;verticalAlign&quot;);</span>
-<span class="nc" id="L678">        return _withOnShow( verticalAlign, (c, align) -&gt; c.setVerticalAlignment(align.forSwing()) )</span>
-<span class="nc" id="L679">               ._with( c -&gt;</span>
-<span class="nc" id="L680">                   c.setVerticalAlignment(verticalAlign.orElseThrow().forSwing())</span>
+<span class="nc" id="L712">        NullUtil.nullArgCheck(verticalAlign, &quot;verticalAlign&quot;, Val.class);</span>
+<span class="nc" id="L713">        NullUtil.nullPropertyCheck(verticalAlign, &quot;verticalAlign&quot;);</span>
+<span class="nc" id="L714">        return _withOnShow( verticalAlign, (c, align) -&gt; c.setVerticalAlignment(align.forSwing()) )</span>
+<span class="nc" id="L715">               ._with( c -&gt;</span>
+<span class="nc" id="L716">                   c.setVerticalAlignment(verticalAlign.orElseThrow().forSwing())</span>
                )
-<span class="nc" id="L682">               ._this();</span>
+<span class="nc" id="L718">               ._this();</span>
     }
 
     /**
@@ -695,11 +731,11 @@ import java.util.function.Consumer;
      * @throws IllegalArgumentException if {@code horizontalAlign} is {@code null}.
      */
     public final I withHorizontalTextAlignment( UI.HorizontalAlignment horizontalAlign ) {
-<span class="nc" id="L698">        NullUtil.nullArgCheck(horizontalAlign, &quot;horizontalAlign&quot;, UI.HorizontalAlignment.class);</span>
-<span class="nc" id="L699">        return _with( c -&gt;</span>
-<span class="nc" id="L700">                    c.setHorizontalTextPosition(horizontalAlign.forSwing())</span>
+<span class="nc" id="L734">        NullUtil.nullArgCheck(horizontalAlign, &quot;horizontalAlign&quot;, UI.HorizontalAlignment.class);</span>
+<span class="nc" id="L735">        return _with( c -&gt;</span>
+<span class="nc" id="L736">                    c.setHorizontalTextPosition(horizontalAlign.forSwing())</span>
                 )
-<span class="nc" id="L702">                ._this();</span>
+<span class="nc" id="L738">                ._this();</span>
     }
 
     /**
@@ -720,12 +756,12 @@ import java.util.function.Consumer;
      * @throws IllegalArgumentException if {@code horizontalAlign} is {@code null}.
      */
     public final I withHorizontalTextAlignment( Val&lt;UI.HorizontalAlignment&gt; horizontalAlign ) {
-<span class="nc" id="L723">        NullUtil.nullArgCheck(horizontalAlign, &quot;horizontalAlign&quot;, Val.class);</span>
-<span class="nc" id="L724">        return _withOnShow( horizontalAlign, (c, align) -&gt; c.setHorizontalTextPosition(align.forSwing()) )</span>
-<span class="nc" id="L725">                ._with( c -&gt;</span>
-<span class="nc" id="L726">                    c.setHorizontalTextPosition(horizontalAlign.orElseThrow().forSwing())</span>
+<span class="nc" id="L759">        NullUtil.nullArgCheck(horizontalAlign, &quot;horizontalAlign&quot;, Val.class);</span>
+<span class="nc" id="L760">        return _withOnShow( horizontalAlign, (c, align) -&gt; c.setHorizontalTextPosition(align.forSwing()) )</span>
+<span class="nc" id="L761">                ._with( c -&gt;</span>
+<span class="nc" id="L762">                    c.setHorizontalTextPosition(horizontalAlign.orElseThrow().forSwing())</span>
                 )
-<span class="nc" id="L728">                ._this();</span>
+<span class="nc" id="L764">                ._this();</span>
     }
 
     /**
@@ -741,11 +777,11 @@ import java.util.function.Consumer;
      * @throws IllegalArgumentException if {@code verticalAlign} is {@code null}.
      */
     public final I withVerticalTextAlignment( UI.VerticalAlignment verticalAlign ) {
-<span class="nc" id="L744">        NullUtil.nullArgCheck(verticalAlign, &quot;verticalAlign&quot;, UI.VerticalAlignment.class);</span>
-<span class="nc" id="L745">        return _with( c -&gt;</span>
-<span class="nc" id="L746">                    c.setVerticalTextPosition(verticalAlign.forSwing())</span>
+<span class="nc" id="L780">        NullUtil.nullArgCheck(verticalAlign, &quot;verticalAlign&quot;, UI.VerticalAlignment.class);</span>
+<span class="nc" id="L781">        return _with( c -&gt;</span>
+<span class="nc" id="L782">                    c.setVerticalTextPosition(verticalAlign.forSwing())</span>
                 )
-<span class="nc" id="L748">                ._this();</span>
+<span class="nc" id="L784">                ._this();</span>
     }
 
     /**
@@ -766,12 +802,12 @@ import java.util.function.Consumer;
      * @throws IllegalArgumentException if {@code verticalAlign} is {@code null}.
      */
     public final I withVerticalTextAlignment( Val&lt;UI.VerticalAlignment&gt; verticalAlign ) {
-<span class="nc" id="L769">        NullUtil.nullArgCheck(verticalAlign, &quot;verticalAlign&quot;, Val.class);</span>
-<span class="nc" id="L770">        return _withOnShow( verticalAlign, (c, align) -&gt; c.setVerticalTextPosition(align.forSwing()) )</span>
-<span class="nc" id="L771">                ._with( c -&gt;</span>
-<span class="nc" id="L772">                    c.setVerticalTextPosition(verticalAlign.orElseThrow().forSwing())</span>
+<span class="nc" id="L805">        NullUtil.nullArgCheck(verticalAlign, &quot;verticalAlign&quot;, Val.class);</span>
+<span class="nc" id="L806">        return _withOnShow( verticalAlign, (c, align) -&gt; c.setVerticalTextPosition(align.forSwing()) )</span>
+<span class="nc" id="L807">                ._with( c -&gt;</span>
+<span class="nc" id="L808">                    c.setVerticalTextPosition(verticalAlign.orElseThrow().forSwing())</span>
                 )
-<span class="nc" id="L774">                ._this();</span>
+<span class="nc" id="L810">                ._this();</span>
     }
 
     /**
@@ -781,20 +817,35 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      */
     public final I withButtonGroup( ButtonGroup group ) {
-<span class="fc" id="L784">        NullUtil.nullArgCheck(group, &quot;group&quot;, ButtonGroup.class);</span>
-<span class="fc" id="L785">        return _with(group::add)._this();</span>
+<span class="fc" id="L820">        NullUtil.nullArgCheck(group, &quot;group&quot;, ButtonGroup.class);</span>
+<span class="fc" id="L821">        return _with(group::add)._this();</span>
     }
 
+    /**
+     *  Use this to set the margin of the wrapped button type.
+     *
+     * @param insets The margin of the button.
+     * @return This very builder to allow for method chaining.
+     */
     public final I withMargin( Insets insets ) {
-<span class="nc" id="L789">        NullUtil.nullArgCheck(insets, &quot;insets&quot;, Insets.class);</span>
-<span class="nc" id="L790">        return _with( c -&gt;</span>
-<span class="nc" id="L791">                    c.setMargin(insets)</span>
+<span class="nc" id="L831">        NullUtil.nullArgCheck(insets, &quot;insets&quot;, Insets.class);</span>
+<span class="nc" id="L832">        return _with( thisComponent -&gt;</span>
+<span class="nc" id="L833">                    thisComponent.setMargin(insets)</span>
                 )
-<span class="nc" id="L793">                ._this();</span>
+<span class="nc" id="L835">                ._this();</span>
     }
 
+    /**
+     *  Use this to set the margin of the wrapped button type.
+     *
+     * @param top The top margin of the button.
+     * @param left The left margin of the button.
+     * @param bottom The bottom margin of the button.
+     * @param right The right margin of the button.
+     * @return This very builder to allow for method chaining.
+     */
     public final I withMargin( int top, int left, int bottom, int right ) {
-<span class="nc" id="L797">        return withMargin( new Insets(top, left, bottom, right) );</span>
+<span class="nc" id="L848">        return withMargin( new Insets(top, left, bottom, right) );</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -24,6 +24,7 @@ public final class UIForTextField<F extends JTextField> extends UIForAnyTextComp
 {
     private final BuilderState<F> _state;
 
+
     UIForTextField( BuilderState<F> state ) {
         Objects.requireNonNull(state);
         _state = state;
@@ -47,8 +48,10 @@ public final class UIForTextField<F extends JTextField> extends UIForAnyTextComp
      */
     public UIForTextField<F> onEnter( Action<ComponentDelegate<F, ActionEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
-        return _with( c -> {
-                   _onEnter(c, e -> _doApp( () -> action.accept(new ComponentDelegate<>( c, e )) ) );
+        return _with( thisComponent -> {
+                   _onEnter(thisComponent,
+                       e -> _doApp( () -> action.accept(new ComponentDelegate<>( thisComponent, e )) )
+                   );
                })
                ._this();
     }
@@ -84,6 +87,7 @@ public final class UIForTextField<F extends JTextField> extends UIForAnyTextComp
      * @param <N> The numeric type of the {@link Var} property.
      */
     public final <N extends Number> UIForTextField<F> withNumber( Var<N> number ) {
+        NullUtil.nullArgCheck(number, "number", Var.class);
         Var<Boolean> isValid = Var.of(true);
         return this.withNumber( number, isValid );
     }
@@ -103,7 +107,7 @@ public final class UIForTextField<F extends JTextField> extends UIForAnyTextComp
         NullUtil.nullPropertyCheck(number, "number", "Null is not a valid value for a numeric property.");
         NullUtil.nullPropertyCheck(isValid, "isValid", "Null is not a valid value for a boolean property.");
         Var<String> text = Var.of( number.get().toString() );
-        return  ((UIForTextField<F>)_with( thisComponent -> {
+        return ((UIForTextField<F>)_with( thisComponent -> {
                     _onShow( number, thisComponent, (c,n) -> _setTextSilently( thisComponent, n.toString() ) );
                     text.onChange(From.VIEW,  s -> {
                         try {

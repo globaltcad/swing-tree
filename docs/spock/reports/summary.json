@@ -1,13 +1,13 @@
 {
   "project": "Swing-Tree",
   "version": "0.2.0",
-  "created": "Tue Nov 07 17:36:53 CET 2023",
+  "created": "Sun Nov 26 12:56:47 CET 2023",
   "statistics":{
-    "runs":"42",
-    "passed":"40",
-    "failed":"2",
-    "featureFailures":"2",
-    "successRate":"0.9523809523809523",
+    "runs":"44",
+    "passed":"44",
+    "failed":"0",
+    "featureFailures":"0",
+    "successRate":"1.0",
     "duration":"?"
   },
   "specifications": [{
@@ -123,10 +123,10 @@
       "title":"Examples UIs",
       "narrative":"This is an overview of the various example UIs\n    in the test suite.\n\n    This specification also ensures that the\n    various UI examples in the test suite, \n    run successfully and also produce\n    UIs with expected state and appearance.",
       "featureCount":"19",
-      "failures":"1",
+      "failures":"0",
       "errors":"0",
       "skipped":"0" ,
-      "successRate":"0.9473684210526315",
+      "successRate":"1.0",
       "duration":"?",
       "executedFeatures":[{"id":"Declare table components using a list of list as data source.","extraInfo":[]},{"id":"How SwingTree compares to a GUI Editor based implementation.","extraInfo":[]},{"id":"The \"Well rounded\" style example UI defined in the examples can be created.","extraInfo":[]},{"id":"The advanced UI define in the examples has the expected state.","extraInfo":[]},{"id":"The animated buttons view examples UI defined in the examples looks as expected.","extraInfo":[]},{"id":"The animation example view can be created.","extraInfo":[]},{"id":"The box shadow picker example UI defined in the examples can be created.","extraInfo":[]},{"id":"The calculator UI defined in the examples has the expected state and looks.","extraInfo":[]},{"id":"The form UI defined in the examples has the expected state.","extraInfo":[]},{"id":"The list examples UI defined in the examples can be created.","extraInfo":[]},{"id":"The list rendering example UI defined in the examples can be created.","extraInfo":[]},{"id":"The login example UI defined in the examples, a good MVVM demonstration.","extraInfo":[]},{"id":"The note guesser example UI defined in the examples can be created.","extraInfo":[]},{"id":"The settings example UI defined in the examples looks as expected.","extraInfo":[]},{"id":"The soft example UI is rendered as expected.","extraInfo":[]},{"id":"The spinners example UI defined in the examples can be created.","extraInfo":[]},{"id":"The symbol guesser example UI defined in the examples can be created.","extraInfo":[]},{"id":"The todo app UI defined in the examples has the expected state.","extraInfo":[]},{"id":"The user registration example UI defined in the examples, a good MVVM demonstration.","extraInfo":[]}],
       "ignoredFeatures":[]
@@ -375,10 +375,10 @@
       "title":"Styling Components",
       "narrative":"This specification demonstrates how the style API can be used to style \n    individual components declaratively.\n    You may access it on any SwingTree builder by passing a `Styler` lambda\n    to the `withStyle` method.\n    A `Styler` lambda applies style rules to a component\n    by receiving a `ComponentStyleDelegate` and returning\n    an updated version with the desired style rules applied.\n\n    Here a typical example of how to style a button\n    using the style API:\n    ```java\n        UI.button(\"Click Me!\")\n        .withStyle( it -> it\n            .borderColor(Color.CYAN)\n            .borderWidthAt(Edge.BOTTOM, 3)\n            .borderRadius(10)\n        )\n    ```\n\n    Here the `it` variable is the `ComponentStyleDelegate` which exposes\n    an extensive API for configuring how a particular component\n    looks and behaves.",
       "featureCount":"31",
-      "failures":"1",
+      "failures":"0",
       "errors":"0",
       "skipped":"0" ,
-      "successRate":"0.967741935483871",
+      "successRate":"1.0",
       "duration":"?",
       "executedFeatures":[{"id":"A single image can be painted repeatedly in a panel.","extraInfo":[]},{"id":"A text area background can be shaded from left to right with any number of colors.","extraInfo":[]},{"id":"Adjust how text is styled through the API exposed in your `Styler` lambdas","extraInfo":[]},{"id":"Configure the background, foreground and selection color of a text field through the API exposed in your `Styler` lambdas","extraInfo":[]},{"id":"Create a button with a SVG icon based toggle mode.","extraInfo":[]},{"id":"Create a soft UI slider that sinks into the background if you wish.","extraInfo":[]},{"id":"Create a soft progress bar that looks like it is raised from the background.","extraInfo":[]},{"id":"Create fancy text fields with custom icons and a button.","extraInfo":[]},{"id":"For full styling freedom, we can add custom painters to a component on various layers.","extraInfo":[]},{"id":"Make a text area look like it is sunken in the background using a shadow going inwards.","extraInfo":[]},{"id":"Paint SVG based images as a component background through the style API.","extraInfo":[]},{"id":"Paint automatically stretched images as component background through the style API.","extraInfo":[]},{"id":"Paint images as component background through the style API.","extraInfo":[]},{"id":"Styling components is based on a functional styler lambda.","extraInfo":[]},{"id":"SwingTree will re-install any borders overridden by the style API.","extraInfo":[]},{"id":"SwingTree will un-install any custom border if no styles are found.","extraInfo":[]},{"id":"The Styling API will make sure that the layout manager accounts for the border width!","extraInfo":[]},{"id":"The background color of any component can be configured through the style API.","extraInfo":[]},{"id":"The cursor of any component can be configured through the style API.","extraInfo":[]},{"id":"The font style of a parent component will be inherited by its children.","extraInfo":[]},{"id":"The foreground color of any component can be configured through the style API.","extraInfo":[]},{"id":"The horizontal text alignment of many text based components can be configured through the style API.","extraInfo":[]},{"id":"The insets of the layout manager are based on the sum of the margin and padding for a given edge of the component bounds.","extraInfo":[]},{"id":"The look of a component, like a button for example, will be preserved if possible, when doing custom styling.","extraInfo":[]},{"id":"The margins defined in the style API will be applied to the layout manager through the border insets.","extraInfo":[]},{"id":"This is how you can create a JPanel with a shaded border.","extraInfo":[]},{"id":"This is how you can create a rounded green label with a border at the bottom.","extraInfo":[]},{"id":"Turn a panel into a card like looking panel by giving it a round border, background color and some margins.","extraInfo":[]},{"id":"Use the style API to design custom tabbed panes from scratch.","extraInfo":[]},{"id":"You can style a toggle button to have a custom selection shading.","extraInfo":[]},{"id":"You can use the style API to configure client properties for components.","extraInfo":[]}],
       "ignoredFeatures":[]
@@ -386,13 +386,13 @@
       "className":"swingtree.styles.Layout_Styling",
       "title":"Layout Styling",
       "narrative":"SwingTree allows you to define the layout of your components \n    through the styling API, which is a functional DSL\n    that not only allows you to define how a component should be painted,\n    like for example the background color, the font, the border widths, etc.\n    but also allows you to define the miglayout constraints for the component.\n\n    The examples defined in this specification will demonstrate how to use the styling API\n    to define the layout of your components.",
-      "featureCount":"5",
+      "featureCount":"6",
       "failures":"0",
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
       "duration":"?",
-      "executedFeatures":[{"id":"Define a border layout for a parent component and the corresponding constraints for their child components through the style API.","extraInfo":[]},{"id":"If you do not want a component to be managed by a layout manager, you can set the layout manager to `Layout.none()`.","extraInfo":[]},{"id":"The style Allows you to configure the flow layout as layout manager for components.","extraInfo":[]},{"id":"The x and y alignment values of a component can be configured through the styling API","extraInfo":[]},{"id":"Use the style API to configure the MigLayout manager for your components.","extraInfo":[]}],
+      "executedFeatures":[{"id":"Configure the `ComponentOrientation` of a component, through the style API.","extraInfo":[]},{"id":"Define a border layout for a parent component and the corresponding constraints for their child components through the style API.","extraInfo":[]},{"id":"If you do not want a component to be managed by a layout manager, you can set the layout manager to `Layout.none()`.","extraInfo":[]},{"id":"The style Allows you to configure the flow layout as layout manager for components.","extraInfo":[]},{"id":"The x and y alignment values of a component can be configured through the styling API","extraInfo":[]},{"id":"Use the style API to configure the MigLayout manager for your components.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"swingtree.styles.Style_Animations_Spec",
@@ -513,6 +513,30 @@
       "successRate":"1.0",
       "duration":"?",
       "executedFeatures":[{"id":"The \"show\" method causes a JDialog to be displayed to the user.","extraInfo":[]},{"id":"The \"show\" method causes a JFrame to be displayed to the user.","extraInfo":[]},{"id":"Use the \"dialog()\" factory method to build a JDialog.","extraInfo":[]},{"id":"Use the \"frame()\" factory method to build a JFrame.","extraInfo":[]}],
+      "ignoredFeatures":[]
+    },{
+      "className":"swingtree.other.Styled_Component_Border_Inset_Spec",
+      "title":"The SwingTree Border Insets",
+      "narrative":"SwingTree uses a custom `Border` implementation to support the styling\n    of components. This includes the definition of the border, margin, padding\n    dimensions which together form the whole border insets of a component.\n\n    The border insets are then used by Swing to determine the size of the component\n    and its children.\n\n    In this specification we will test the border insets of components\n    that are heavily styled through the SwingTree styling API.",
+      "featureCount":"2",
+      "failures":"0",
+      "errors":"0",
+      "skipped":"0" ,
+      "successRate":"1.0",
+      "duration":"?",
+      "executedFeatures":[{"id":"A heavily styled slider will have the correct border insets!","extraInfo":[]},{"id":"A heavily styled text field will have the correct border insets!","extraInfo":[]}],
+      "ignoredFeatures":[]
+    },{
+      "className":"swingtree.other.Options_Pane_Spec",
+      "title":"Summoning Simple Dialogs",
+      "narrative":"In raw Swing a common way to present a simple message or a set of options to the user is to\n    the static methods of the `JOptionPane` API to summon and display a dialog.\n    SwingTree makes this API more intuitive and declarative through the `UI` API.\n\n    This specification demonstrates the use of this API.",
+      "featureCount":"13",
+      "failures":"0",
+      "errors":"0",
+      "skipped":"0" ,
+      "successRate":"1.0",
+      "duration":"?",
+      "executedFeatures":[{"id":"Call `UI.info(String)` to easily summon a message dialog with an information icon.","extraInfo":[]},{"id":"Call `UI.info(String, String)` to easily summon a titled info message dialog.","extraInfo":[]},{"id":"If you want to present a titled error message dialog, use `UI.error(String, String)`.","extraInfo":[]},{"id":"If you want to summon an error message dialog, use `UI.error(String)`.","extraInfo":[]},{"id":"Invoking `UI.warn(String)` summons a warning message dialog.","extraInfo":[]},{"id":"Invoking `UI.warn(String, String)` summons a titled warning message dialog.","extraInfo":[]},{"id":"The convenience method `UI.confirm(String,String) summons a confirm dialog right away!","extraInfo":[]},{"id":"The factory method `UI.message(String)` allows for the configuration and summoning of a message dialog.","extraInfo":[]},{"id":"Use `UI.choice(String, Var)` for accessing the options dialog builder API.","extraInfo":[]},{"id":"Use `confirmation(String)` to build a simple conformation dialog returning a simple answer enum.","extraInfo":[]},{"id":"Use the `UI.ask(String,String,Icon,Var)` factory method to get answers from the user through a dialog.","extraInfo":[]},{"id":"Use the `UI.ask(String,String,Var)` factory method to get answers from the user through a dialog.","extraInfo":[]},{"id":"Use the `UI.ask(String,Var)` factory method to get answers from the user through a dialog.","extraInfo":[]}],
       "ignoredFeatures":[]
     }
   ],

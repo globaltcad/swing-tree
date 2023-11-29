@@ -40,9 +40,9 @@ abstract class AbstractDelegate<C extends JComponent>
      * @param handle A component that is used as a starting point for traversing the component tree,
      *               usually the same component as the one that is delegated.
      */
-    AbstractDelegate( C component, JComponent handle ) {
+    AbstractDelegate( boolean nullable, C component, JComponent handle ) {
         _guiTraverser = new GuiTraverser(Objects.requireNonNull(handle));
-        _component    = Objects.requireNonNull(component);
+        _component    = nullable ? component : Objects.requireNonNull(component);
     }
 
     protected C _component() { return _component; }

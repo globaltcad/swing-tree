@@ -164,6 +164,77 @@ class Tab_Event_Handling_Spec extends Specification
             trace == ["T2, released", "T1, released"]
     }
 
+
+    def 'The "TabMouse-Events" will not receive events if the mouse is outside of the tab bounds!'()
+    {
+
+        reportInfo """
+            The "TabMouse-Events" will not receive events if the mouse is outside of the tab bounds!
+            This includes the "onTabMouseClick", "onTabMousePress" and "onTabMouseRelease" event handlers.
+        """
+        given : 'A list we use to record some event information.'
+            var trace = []
+        and : 'A tabbed pane with 2 tabs and the 3 event listeners:'
+            JTabbedPane ui =
+                            UI.tabbedPane().withSize(280,120)
+                            .onTabMouseClick( it -> trace << "T${it.tabIndex()+1}, clicked ${it.clickCount()} times" )
+                            .onTabMouseRelease( it -> trace << "T${it.tabIndex()+1}, released" )
+                            .onTabMousePress( it -> trace << "T${it.tabIndex()+1}, pressed" )
+                            .add(UI.tab("T1"))
+                            .add(UI.tab("T2"))
+                            .add(UI.tab("T3"))
+                            .get(JTabbedPane)
+
+        when : """
+            We now dispatch a whole lot of mouse events to the tabbed pane
+            with nonsense coordinates that are outside of the tab bounds.
+        """
+            ui.dispatchEvent(new MouseEvent(ui, MouseEvent.MOUSE_CLICKED, 0, 0, -10, -1, 1, false))
+            ui.dispatchEvent(new MouseEvent(ui, MouseEvent.MOUSE_CLICKED, 0, 0, -33, 42, 1, false))
+
+            ui.dispatchEvent(new MouseEvent(ui, MouseEvent.MOUSE_PRESSED, 0, 0, -1, -10, 1, false))
+            ui.dispatchEvent(new MouseEvent(ui, MouseEvent.MOUSE_PRESSED, 0, 0, 9000, -400, 1, false))
+
+            ui.dispatchEvent(new MouseEvent(ui, MouseEvent.MOUSE_RELEASED, 0, 0, -12, 0, 1, false))
+            ui.dispatchEvent(new MouseEvent(ui, MouseEvent.MOUSE_RELEASED, 0, 0, 666, 999, 1, false))
+        and : 'We wait for the AWT thread to do its thing.'
+            UI.sync()
+
+        then : 'The event handlers are not called.'
+            trace == []
+
+        when : """
+            We now get the bounding boxes of the 3 tab buttons
+            and simulate valid mouse events in the middle of each tab...
+        """
+            Rectangle tab1Bounds = ui.getBoundsAt(0)
+            Rectangle tab2Bounds = ui.getBoundsAt(1)
+            Rectangle tab3Bounds = ui.getBoundsAt(2)
+            int x = tab1Bounds.x + tab1Bounds.width / 2
+            int y = tab1Bounds.y + tab1Bounds.height / 2
+            ui.dispatchEvent(new MouseEvent(ui, MouseEvent.MOUSE_CLICKED, 0, 0, x, y, 1, false))
+            ui.dispatchEvent(new MouseEvent(ui, MouseEvent.MOUSE_PRESSED, 0, 0, x, y, 1, false))
+            ui.dispatchEvent(new MouseEvent(ui, MouseEvent.MOUSE_RELEASED, 0, 0, x, y, 1, false))
+            x = tab2Bounds.x + tab2Bounds.width / 2
+            y = tab2Bounds.y + tab2Bounds.height / 2
+            ui.dispatchEvent(new MouseEvent(ui, MouseEvent.MOUSE_CLICKED, 0, 0, x, y, 1, false))
+            ui.dispatchEvent(new MouseEvent(ui, MouseEvent.MOUSE_PRESSED, 0, 0, x, y, 1, false))
+            ui.dispatchEvent(new MouseEvent(ui, MouseEvent.MOUSE_RELEASED, 0, 0, x, y, 1, false))
+            x = tab3Bounds.x + tab3Bounds.width / 2
+            y = tab3Bounds.y + tab3Bounds.height / 2
+            ui.dispatchEvent(new MouseEvent(ui, MouseEvent.MOUSE_CLICKED, 0, 0, x, y, 1, false))
+            ui.dispatchEvent(new MouseEvent(ui, MouseEvent.MOUSE_PRESSED, 0, 0, x, y, 1, false))
+            ui.dispatchEvent(new MouseEvent(ui, MouseEvent.MOUSE_RELEASED, 0, 0, x, y, 1, false))
+            UI.sync() // Note that all of this has to be done on the AWT thread!
+
+        then : 'The event handlers are called.'
+            trace == [
+                "T1, clicked 1 times", "T1, pressed", "T1, released",
+                "T2, clicked 1 times", "T2, pressed", "T2, released",
+                "T3, clicked 1 times", "T3, pressed", "T3, released"
+            ]
+    }
+
     def 'Notice when the mouse enters a tab using the "onTabMouseEnter" event handler.'()
     {
         reportInfo """

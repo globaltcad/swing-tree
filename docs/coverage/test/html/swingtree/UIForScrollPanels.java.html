@@ -47,7 +47,7 @@ public class UIForScrollPanels&lt;P extends JScrollPanels&gt; extends UIForAnySc
 	}
 
 	@Override
-	protected void _doAddComponent(JComponent newComponent, Object conf, P thisComponent ) {
+	protected void _addComponentTo(P thisComponent, JComponent newComponent, Object conf ) {
 <span class="fc" id="L51">		Objects.requireNonNull(newComponent);</span>
 
 <span class="fc" id="L53">		EntryViewModel entry = _entryModel();</span>

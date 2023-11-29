@@ -15,7 +15,7 @@ plugins {
 
 String GROUP_ID = "io.github.globaltcad"
 String PROJECT  = "swing-tree"
-String VERSION  = "0.9.0"
+String VERSION  = "0.10.0"
 
 group GROUP_ID
 version VERSION
@@ -32,7 +32,7 @@ dependencies {
 
     // Main dependencies:
     api group: 'com.miglayout',        name: 'miglayout-swing', version: '5.3' // https://mvnrepository.com/artifact/com.miglayout/miglayout-swing
-    api group: 'io.github.globaltcad', name: 'sprouts',         version: '772f68a'
+    api group: 'io.github.globaltcad', name: 'sprouts',         version: '1.0.0'
     api group: 'com.github.weisj',     name: 'jsvg',            version: '1.2.0'
 
     // Logging :
