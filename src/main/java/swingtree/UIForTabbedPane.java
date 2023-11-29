@@ -72,7 +72,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
         return _with( thisComponent -> {
                     thisComponent.addMouseListener(new MouseAdapter() {
                         @Override public void mouseClicked(MouseEvent e) {
-                            int indexOfTab = ExtraState.of(thisComponent).lastSelection;
+                            int indexOfTab = thisComponent.getModel().getSelectedIndex();
                             /*                                             ^?
                                 The reason why we do not use `ui.tabForCoordinate(thisComponent, e.getX(), e.getY());`
                                 here is because when this mouse listener is called the TabbedPaneUI will
@@ -121,7 +121,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
         return _with( thisComponent -> {
                     thisComponent.addMouseListener(new MouseAdapter() {
                         @Override public void mousePressed(MouseEvent e) {
-                            int indexOfTab = ExtraState.of(thisComponent).lastSelection;
+                            int indexOfTab = thisComponent.getModel().getSelectedIndex();
                             /*                                             ^?
                                 The reason why we do not use `ui.tabForCoordinate(thisComponent, e.getX(), e.getY());`
                                 here is because when this mouse listener is called the TabbedPaneUI will
@@ -170,7 +170,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
         return _with( thisComponent -> {
                     thisComponent.addMouseListener(new MouseAdapter() {
                         @Override public void mouseReleased(MouseEvent e) {
-                            int indexOfTab = ExtraState.of(thisComponent).lastSelection;
+                            int indexOfTab = thisComponent.getModel().getSelectedIndex();
                             /*                                             ^?
                                 The reason why we do not use `ui.tabForCoordinate(thisComponent, e.getX(), e.getY());`
                                 here is because when this mouse listener is called the TabbedPaneUI will
@@ -620,10 +620,8 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
 
         final List<Consumer<Integer>> selectionListeners = new ArrayList<>();
         Var<Integer> selectedTabIndex = null;
-        int lastSelection = -1;
-
+        
         @Override public void setSelectedIndex(int index) {
-            lastSelection = this.getSelectedIndex();
             super.setSelectedIndex(index);
             if ( selectedTabIndex != null )
                 selectedTabIndex.set(From.VIEW, index);
