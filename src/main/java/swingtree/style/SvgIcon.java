@@ -156,6 +156,64 @@ public final class SvgIcon extends ImageIcon
     }
 
     /**
+     *  Determines the size of the icon (both width and height) using the provided width
+     *  and the aspect ratio of the SVG document.
+     *  If the width is -1, the icon will lose its fixed width and will
+     *  be rendered according to the width of a given component.
+     *  <p>
+     *  For example, if the SVG document has an aspect ratio of 2:1, and the width is 200,
+     *  then the height will be 100.
+     *  <p>
+     *  Also see {@link #withIconSizeFromHeight(int)}.
+     *
+     * @param width The width of the icon, or -1 if the icon should be rendered according
+     *              to the width of a given component or the width of the SVG document itself.
+     * @return A new {@link SvgIcon} with the given width and a logical height that is
+     *         determined by the aspect ratio of the SVG document.
+     */
+    public SvgIcon withIconSizeFromWidth( int width ) {
+        if ( width < 0 )
+            return this.withIconSize(-1, -1);
+
+        double ratio = (double) _svgDocument.size().height / (double) _svgDocument.size().width;
+        int logicalHeight = (int) Math.ceil( width * ratio );
+
+        if ( width == _width && logicalHeight == _height )
+            return this;
+
+        return new SvgIcon(_svgDocument, width, logicalHeight, _fitComponent, _preferredPlacement);
+    }
+
+    /**
+     *  Determines the size of the icon (both width and height) using the provided height
+     *  and the aspect ratio of the SVG document.
+     *  If the height is -1, the icon will lose its fixed height and will
+     *  be rendered according to the height of a given component.
+     *  <p>
+     *  For example, if the SVG document has an aspect ratio of 2:1, and the height is 100,
+     *  then the width will be 200.
+     *  <p>
+     *  Also see {@link #withIconSizeFromWidth(int)}.
+     *
+     * @param height The height of the icon, or -1 if the icon should be rendered according
+     *               to the height of a given component or the height of the SVG document itself.
+     * @return A new {@link SvgIcon} with the given height and a logical width that is
+     *         determined by the aspect ratio of the SVG document.
+     */
+    public SvgIcon withIconSizeFromHeight( int height ) {
+        if ( height < 0 )
+            return this.withIconSize(-1, -1);
+
+        double ratio = (double) _svgDocument.size().width / (double) _svgDocument.size().height;
+        int logicalWidth = (int) Math.ceil( height * ratio );
+
+        if ( logicalWidth == _width && height == _height )
+            return this;
+
+        return new SvgIcon(_svgDocument, logicalWidth, height, _fitComponent, _preferredPlacement);
+    }
+
+    /**
      * @return The size of the SVG document in the form of a {@link FloatSize},
      *         a subclass of {@link java.awt.geom.Dimension2D}.
      */
