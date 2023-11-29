@@ -49,6 +49,7 @@ public final class SvgIcon extends ImageIcon
     private static final UI.FitComponent DEFAULT_FIT_COMPONENT = UI.FitComponent.MIN_DIM;
     private static final UI.Placement    DEFAULT_PLACEMENT     = UI.Placement.UNDEFINED;
     private static final int             NO_SIZE               = -1;
+    private static final Insets          ZERO_INSETS           = new Insets(0,0,0,0);
 
 
     private final SVGDocument _svgDocument;
@@ -377,40 +378,48 @@ public final class SvgIcon extends ImageIcon
         if ( _svgDocument == null )
             return;
 
-        Insets insets = Optional.ofNullable( c instanceof JComponent ? ((JComponent)c).getBorder() : null )
-                                .map( b -> {
-                                    try {
-                                        return _determineInsetsForBorder(b, c);
-                                    } catch (Exception e) {
-                                        return new Insets(0,0,0,0);
-                                    }
-                                })
-                                .orElse(new Insets(0,0,0,0));
-
         UI.Placement preferredPlacement = _preferredPlacement;
 
         if ( preferredPlacement == UI.Placement.UNDEFINED && c instanceof JComponent )
             preferredPlacement = ComponentExtension.from((JComponent) c).preferredIconPlacement();
 
+        Insets insets = ZERO_INSETS;
         int deltaX = 0;
         int deltaY = 0;
 
-        if ( _width >= 0 ) {
-            deltaX += Math.max(0, x - insets.left);
-            x = Math.max(x, insets.left);
-        }
-        else
-            x = insets.left;
+        if ( c != null ) {
+            /*
+                If the component exists we want to account for its (border) insets.
+                This is to avoid the icon colliding with the component border
+                and also to make sure the icon is centered properly.
+            */
+            insets = Optional.ofNullable( c instanceof JComponent ? ((JComponent)c).getBorder() : null )
+                                .map( b -> {
+                                    try {
+                                        return _determineInsetsForBorder(b, c);
+                                    } catch (Exception e) {
+                                        return ZERO_INSETS;
+                                    }
+                                })
+                                .orElse(ZERO_INSETS);
 
-        if ( _height >= 0 ) {
-            deltaY += Math.max(0, y - insets.top);
-            y = Math.max(y, insets.top);
-        }
-        else
-            y = insets.top;
+            if ( _width >= 0 ) {
+                deltaX += Math.max(0, x - insets.left);
+                x = Math.max(x, insets.left);
+            }
+            else
+                x = insets.left;
 
-        int width  = Math.max(_width,  c == null ? -1 : c.getWidth());
-        int height = Math.max(_height, c == null ? -1 : c.getHeight());
+            if ( _height >= 0 ) {
+                deltaY += Math.max(0, y - insets.top);
+                y = Math.max(y, insets.top);
+            }
+            else
+                y = insets.top;
+        }
+
+        int width  = Math.max( _width,  c == null ? -1 : c.getWidth()  );
+        int height = Math.max( _height, c == null ? -1 : c.getHeight() );
 
         width  = _width  >= 0 ? _width  : width  - insets.right  - insets.left - deltaX;
         height = _height >= 0 ? _height : height - insets.bottom - insets.top  - deltaY;
@@ -434,7 +443,7 @@ public final class SvgIcon extends ImageIcon
     private Insets _determineInsetsForBorder( Border b, Component c )
     {
         if ( b == null )
-            return new Insets(0,0,0,0);
+            return ZERO_INSETS;
 
         if ( b instanceof StyleAndAnimationBorder )
             return ((StyleAndAnimationBorder<?>)b).getFullPaddingInsets();
@@ -450,7 +459,7 @@ public final class SvgIcon extends ImageIcon
         } catch (Exception e) {
             // Ignore
         }
-        return new Insets(0,0,0,0);
+        return ZERO_INSETS;
     }
 
     void paintIcon(
@@ -484,7 +493,7 @@ public final class SvgIcon extends ImageIcon
         FloatSize svgSize = _svgDocument.size();
         float svgRefWidth  = ( svgSize.width  > svgSize.height ? 1f : svgSize.width  / svgSize.height );
         float svgRefHeight = ( svgSize.height > svgSize.width  ? 1f : svgSize.height / svgSize.width  );
-        float imgRefWidth  = (     width      >=   height      ? 1f :  (float) width /   height       );
+        float imgRefWidth  = (     width      >=   height      ? 1f : (float) width  /   height       );
         float imgRefHeight = (     height     >=   width       ? 1f : (float) height /   width        );
 
         float scaleX = imgRefWidth  / svgRefWidth;
@@ -566,7 +575,7 @@ public final class SvgIcon extends ImageIcon
             is a preferred placement that is not the center.
             If that is the case we move the view box accordingly.
          */
-        if ( preferredPlacement != UI.Placement.CENTER && preferredPlacement != UI.Placement.UNDEFINED ) {
+        if ( preferredPlacement != UI.Placement.UNDEFINED && preferredPlacement != UI.Placement.CENTER ) {
             // First we correct if the component area is smaller than the view box:
             width += (int) Math.max(0, ( viewBox.x + viewBox.width ) - ( x + width ) );
             width += (int) Math.max(0, x - viewBox.x );
@@ -610,11 +619,14 @@ public final class SvgIcon extends ImageIcon
         if ( doAntiAliasing && !wasAntiAliasing )
             g2d.setRenderingHint( java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_ON );
 
+        boolean needsScaling = ( scaleX != 1 || scaleY != 1 );
         AffineTransform oldTransform = g2d.getTransform();
-        AffineTransform newTransform = new AffineTransform(oldTransform);
-        newTransform.scale(scaleX, scaleY);
 
-        g2d.setTransform(newTransform);
+        if ( needsScaling ) {
+            AffineTransform newTransform = new AffineTransform(oldTransform);
+            newTransform.scale(scaleX, scaleY);
+            g2d.setTransform(newTransform);
+        }
 
         try {
             // We also have to scale x and y, this is because the SVGDocument does not
@@ -624,7 +636,8 @@ public final class SvgIcon extends ImageIcon
             log.warn("Failed to render SVG document: " + _svgDocument, e);
         }
 
-        g2d.setTransform(oldTransform);
+        if ( needsScaling )
+            g2d.setTransform(oldTransform); // back to the previous scaling!
 
         if ( doAntiAliasing && !wasAntiAliasing )
             g2d.setRenderingHint( java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_OFF );
