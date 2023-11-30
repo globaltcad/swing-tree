@@ -72,7 +72,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
         return _with( thisComponent -> {
                     thisComponent.addMouseListener(new MouseAdapter() {
                         @Override public void mouseClicked(MouseEvent e) {
-                            int indexOfTab = ExtraState.of(thisComponent).lastHoveredTabIndex;
+                            int indexOfTab = thisComponent.getModel().getSelectedIndex();
                             /*                                             ^?
                                 The reason why we do not use `ui.tabForCoordinate(thisComponent, e.getX(), e.getY());`
                                 here is because when this mouse listener is called the TabbedPaneUI will
@@ -92,19 +92,16 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                                 ...so that the UI can not rearrange the tabs.
                                 But good luck trying to do that!
                             */
+                            int outdated = thisComponent.indexAtLocation(e.getX(), e.getY());
                             if ( indexOfTab < 0 )
-                                indexOfTab = _tabIndexOfPosition(thisComponent, e.getPoint());
+                                indexOfTab = outdated;
                             int tabCount = thisComponent.getTabCount();
-                            if ( indexOfTab >= 0 && indexOfTab < tabCount ) {
+                            if ( outdated >= 0 && indexOfTab >= 0 && indexOfTab < tabCount ) {
                                 int finalIndexOfTab = indexOfTab;
                                 _doApp(() -> onClick.accept(new TabDelegate(thisComponent, e, finalIndexOfTab)));
                             }
                         }
                     });
-                    if ( ExtraState.of(thisComponent).mouseTabHoverSenser == null ) {
-                        ExtraState.of(thisComponent).mouseTabHoverSenser = new MouseTabHoverSenser();
-                        thisComponent.addMouseMotionListener(ExtraState.of(thisComponent).mouseTabHoverSenser);
-                    }
                })
                ._this();
     }
@@ -124,7 +121,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
         return _with( thisComponent -> {
                     thisComponent.addMouseListener(new MouseAdapter() {
                         @Override public void mousePressed(MouseEvent e) {
-                            int indexOfTab = ExtraState.of(thisComponent).lastHoveredTabIndex;
+                            int indexOfTab = thisComponent.getModel().getSelectedIndex();
                             /*                                             ^?
                                 The reason why we do not use `ui.tabForCoordinate(thisComponent, e.getX(), e.getY());`
                                 here is because when this mouse listener is called the TabbedPaneUI will
@@ -144,19 +141,16 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                                 ...so that the UI can not rearrange the tabs.
                                 But good luck trying to do that!
                             */
+                            int outdated = thisComponent.indexAtLocation(e.getX(), e.getY());
                             if ( indexOfTab < 0 )
-                                indexOfTab = _tabIndexOfPosition(thisComponent, e.getPoint());
+                                indexOfTab = outdated;
                             int tabCount = thisComponent.getTabCount();
-                            if ( indexOfTab >= 0 && indexOfTab < tabCount ) {
+                            if ( outdated >= 0 && indexOfTab >= 0 && indexOfTab < tabCount ) {
                                 int finalIndexOfTab = indexOfTab;
                                 _doApp(() -> onPress.accept(new TabDelegate(thisComponent, e, finalIndexOfTab)));
                             }
                         }
                     });
-                    if ( ExtraState.of(thisComponent).mouseTabHoverSenser == null ) {
-                        ExtraState.of(thisComponent).mouseTabHoverSenser = new MouseTabHoverSenser();
-                        thisComponent.addMouseMotionListener(ExtraState.of(thisComponent).mouseTabHoverSenser);
-                    }
                })
                ._this();
     }
@@ -176,7 +170,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
         return _with( thisComponent -> {
                     thisComponent.addMouseListener(new MouseAdapter() {
                         @Override public void mouseReleased(MouseEvent e) {
-                            int indexOfTab = ExtraState.of(thisComponent).lastHoveredTabIndex;
+                            int indexOfTab = thisComponent.getModel().getSelectedIndex();
                             /*                                             ^?
                                 The reason why we do not use `ui.tabForCoordinate(thisComponent, e.getX(), e.getY());`
                                 here is because when this mouse listener is called the TabbedPaneUI will
@@ -196,19 +190,16 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                                 ...so that the UI can not rearrange the tabs.
                                 But good luck trying to do that!
                             */
+                            int outdated = thisComponent.indexAtLocation(e.getX(), e.getY());
                             if ( indexOfTab < 0 )
-                                indexOfTab = _tabIndexOfPosition(thisComponent, e.getPoint());
+                                indexOfTab = outdated;
                             int tabCount = thisComponent.getTabCount();
-                            if ( indexOfTab >= 0 && indexOfTab < tabCount ) {
+                            if ( outdated >= 0 && indexOfTab >= 0 && indexOfTab < tabCount ) {
                                 int finalIndexOfTab = indexOfTab;
                                 _doApp(() -> onRelease.accept(new TabDelegate(thisComponent, e, finalIndexOfTab)));
                             }
                         }
                     });
-                    if ( ExtraState.of(thisComponent).mouseTabHoverSenser == null ) {
-                        ExtraState.of(thisComponent).mouseTabHoverSenser = new MouseTabHoverSenser();
-                        thisComponent.addMouseMotionListener(ExtraState.of(thisComponent).mouseTabHoverSenser);
-                    }
                })
                ._this();
     }
@@ -264,8 +255,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
     }
 
     private static int _tabIndexOfPosition(JTabbedPane pane, Point p ) {
-        TabbedPaneUI ui = pane.getUI();
-        return ui.tabForCoordinate(pane, p.x, p.y);
+        return pane.indexAtLocation(p.x, p.y);
     }
 
     /**
@@ -630,9 +620,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
 
         final List<Consumer<Integer>> selectionListeners = new ArrayList<>();
         Var<Integer> selectedTabIndex = null;
-        MouseTabHoverSenser mouseTabHoverSenser = null;
-        int lastHoveredTabIndex = -1;
-
+        
         @Override public void setSelectedIndex(int index) {
             super.setSelectedIndex(index);
             if ( selectedTabIndex != null )
@@ -642,17 +630,6 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
             super.clearSelection();
             if ( selectedTabIndex != null )
                 selectedTabIndex.set(From.VIEW, -1);
-        }
-    }
-
-    private static class MouseTabHoverSenser extends MouseMotionAdapter {
-        @Override public void mouseMoved(MouseEvent e) {
-            JTabbedPane pane = (JTabbedPane) e.getSource();
-            int index = _tabIndexOfPosition(pane, e.getPoint());
-            ExtraState state = ExtraState.of(pane);
-            if ( index != state.lastHoveredTabIndex ) {
-                state.lastHoveredTabIndex = index;
-            }
         }
     }
 
