@@ -47,7 +47,7 @@ public final class TextReplaceDelegate extends AbstractTextComponentDelegate
         return text;
     }
 
-    /**
+    /**mr
      * @return The text to be removed.
      */
     public String getReplacementText() {
