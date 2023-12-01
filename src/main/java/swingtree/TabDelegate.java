@@ -18,29 +18,36 @@ import java.util.function.Supplier;
  */
 public final class TabDelegate extends ComponentMouseEventDelegate<JTabbedPane>
 {
-    private final int _clickedTab;
+    private final int _selectedTabIndex = _component().getSelectedIndex();
+    private final int _tabIndex = _component().indexAtLocation(mouseX(), mouseY());
+
 
     public TabDelegate(
         JTabbedPane component,
-        MouseEvent event,
-        int clickedTab
+        MouseEvent  event
     ) {
         super(component, event);
-        _clickedTab = clickedTab;
+    }
+
+    /**
+     * @return The index of the clicked tab.
+     */
+    public final int selectedTabIndex() {
+        return _selectedTabIndex;
     }
 
     /**
      * @return The index of the clicked tab.
      */
     public final int tabIndex() {
-        return _clickedTab;
+        return _tabIndex;
     }
 
     /**
      * @return The component of the clicked tab.
      */
     public final boolean tabIsSelected() {
-        return tabIndex() == get().getSelectedIndex();
+        return selectedTabIndex() == tabIndex();
     }
 
     /**
