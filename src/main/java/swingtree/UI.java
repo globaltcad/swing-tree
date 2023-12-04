@@ -71,22 +71,24 @@ public final class UI extends UILayoutConstants
      */
     public enum Cursor
     {
-        HAND(java.awt.Cursor.HAND_CURSOR),
-        MOVE(java.awt.Cursor.MOVE_CURSOR),
-        CROSS(java.awt.Cursor.CROSSHAIR_CURSOR),
         DEFAULT(java.awt.Cursor.DEFAULT_CURSOR),
-        WAIT(java.awt.Cursor.WAIT_CURSOR),
+        CROSS(java.awt.Cursor.CROSSHAIR_CURSOR),
         TEXT(java.awt.Cursor.TEXT_CURSOR),
-        RESIZE_EAST(java.awt.Cursor.E_RESIZE_CURSOR),
-        RESIZE_WEST(java.awt.Cursor.W_RESIZE_CURSOR),
-        RESIZE_SOUTH(java.awt.Cursor.S_RESIZE_CURSOR),
-        RESIZE_NORTH(java.awt.Cursor.N_RESIZE_CURSOR),
+        WAIT(java.awt.Cursor.WAIT_CURSOR),
+        RESIZE_SOUTH_WEST(java.awt.Cursor.SW_RESIZE_CURSOR),
+        RESIZE_SOUTH_EAST(java.awt.Cursor.SE_RESIZE_CURSOR),
         RESIZE_NORTH_WEST(java.awt.Cursor.NW_RESIZE_CURSOR),
         RESIZE_NORTH_EAST(java.awt.Cursor.NE_RESIZE_CURSOR),
-        RESIZE_SOUTH_WEST(java.awt.Cursor.SE_RESIZE_CURSOR),
-        RESIZE_SOUTH_EAST(java.awt.Cursor.SE_RESIZE_CURSOR);
+        RESIZE_NORTH(java.awt.Cursor.N_RESIZE_CURSOR),
+        RESIZE_SOUTH(java.awt.Cursor.S_RESIZE_CURSOR),
+        RESIZE_WEST(java.awt.Cursor.W_RESIZE_CURSOR),
+        RESIZE_EAST(java.awt.Cursor.E_RESIZE_CURSOR),
+        HAND(java.awt.Cursor.HAND_CURSOR),
+        MOVE(java.awt.Cursor.MOVE_CURSOR);
+
 
         final int type;
+
 
         Cursor( int type ) { this.type = type; }
 
@@ -346,8 +348,8 @@ public final class UI extends UILayoutConstants
 
         final boolean isEditable() {
             switch ( this ) {
-                case EDITABLE: return true;
-                case READ_ONLY: return false;
+                case EDITABLE :  return true;
+                case READ_ONLY : return false;
             }
             throw new RuntimeException();
         }
@@ -360,9 +362,9 @@ public final class UI extends UILayoutConstants
      */
     public enum Edge
     {
+        EVERY,
         TOP,    RIGHT,
-        BOTTOM, LEFT,
-        EVERY
+        BOTTOM, LEFT
     }
 
     /**
@@ -381,7 +383,7 @@ public final class UI extends UILayoutConstants
      *  Use these enum instances to specify the gradient type for various sub styles,
      *  like for example the gradient style API exposed by {@link ComponentStyleDelegate#borderGradient(Function)}
      *  or {@link ComponentStyleDelegate#gradient(Function)} methods (see {@link UIForAnySwing#withStyle(Styler)}).
-     *
+     *  <p>
      *  {@link GradientStyle#type(GradientType)} method exposed by methods like
      *  {@link ComponentStyleDelegate#gradient(String, Function)} or {@link ComponentStyleDelegate#borderGradient(String, Function)}.
      */
@@ -424,9 +426,9 @@ public final class UI extends UILayoutConstants
      */
     public enum Corner
     {
+        EVERY,
         TOP_LEFT,    TOP_RIGHT,
-        BOTTOM_LEFT, BOTTOM_RIGHT,
-        EVERY
+        BOTTOM_LEFT, BOTTOM_RIGHT
     }
 
     /**
@@ -435,11 +437,11 @@ public final class UI extends UILayoutConstants
      */
     public enum Placement
     {
+        UNDEFINED,
         TOP, LEFT, BOTTOM, RIGHT,
         TOP_LEFT, TOP_RIGHT,
         BOTTOM_LEFT, BOTTOM_RIGHT,
-        CENTER,
-        UNDEFINED
+        CENTER
     }
 
     /**
@@ -450,7 +452,7 @@ public final class UI extends UILayoutConstants
      */
     public enum ComponentArea
     {
-        EXTERIOR, BORDER, INTERIOR, ALL
+        ALL, EXTERIOR, BORDER, INTERIOR
     }
 
     /**
@@ -512,10 +514,10 @@ public final class UI extends UILayoutConstants
      *  Use {@link UI#currentLookAndFeel()} to check which look and feel is currently active.
      */
     public enum LookAndFeel {
+        OTHER,
         METAL,
         FLAT_LAF,
-        NIMBUS,
-        OTHER;
+        NIMBUS;
 
         public boolean isOneOf( LookAndFeel... lafs ) {
             for ( LookAndFeel laf : lafs )
