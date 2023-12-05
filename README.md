@@ -19,14 +19,16 @@ Think [Jetpack Compose](https://developer.android.com/jetpack/compose), [SwiftUI
 <tr>
 <td> 
 
-- lightweight, intuitive nested UI building in a HTML like fashion
+- lightweight and intuitive HTML like GUI code  
 - advanced styling through a CSS like DSL API
 - powerful layout declaration based on `MigLayout`
-- lambda friendly API for peeking into the underlying UI tree and manipulating swing components directly
-- boilerplate free event registration through `onClick`, `onChange` methods...
+- a functional lambda friendly API for peeking into the underlying UI tree and manipulating swing components freely
+- concise event registration through `onClick`, `onChange` methods...
 - compatible with custom swing components and legacy Swing code
 - built-in [MVVM property](https://github.com/globaltcad/sprouts) support for dynamic [UI design decoupled from business logic](docs/markdown/Advanced-MVVM.md) 
-	
+- user friendly [stability oriented error handling](docs/markdown/Sane-Error-Handling.md)
+- tried, tested and used extensively in production
+
 </td>
 <td>
 	
