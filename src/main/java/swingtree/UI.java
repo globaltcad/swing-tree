@@ -69,7 +69,7 @@ public final class UI extends UILayoutConstants
      *  map to the cursor type id.
      *  This exists simply because swing was created before enums were added to Java.
      */
-    public enum Cursor
+    public enum Cursor implements UIEnum<Cursor>
     {
         DEFAULT(java.awt.Cursor.DEFAULT_CURSOR),
         CROSS(java.awt.Cursor.CROSSHAIR_CURSOR),
@@ -99,7 +99,9 @@ public final class UI extends UILayoutConstants
      *  A general purpose enum describing if something is never, always or sometimes active.
      *  This is mostly used to configure the scroll bar policy for UI components with scroll behaviour.
      */
-    public enum Active { NEVER, AS_NEEDED, ALWAYS }
+    public enum Active implements UIEnum<Active>{
+        NEVER, AS_NEEDED, ALWAYS
+    }
 
     /**
      *  All UI components are at their core rectangular, meaning they
@@ -108,8 +110,10 @@ public final class UI extends UILayoutConstants
      *  in various API methods like for example {@link UIForTabbedPane#withTabPlacementAt(Side)}
      *  or the tapped pane factory method {@link UI#tabbedPane(Side)}.
      */
-    public enum Side {
+    public enum Side implements UIEnum<Side>
+    {
         TOP, LEFT, BOTTOM, RIGHT;
+
         int forTabbedPane() {
             switch ( this ) {
                 case TOP   : return JTabbedPane.TOP;
@@ -144,7 +148,8 @@ public final class UI extends UILayoutConstants
     /**
      *  Overflow policy of UI components.
      */
-    public enum OverflowPolicy {
+    public enum OverflowPolicy implements UIEnum<OverflowPolicy>
+    {
         WRAP, SCROLL;
 
         int forTabbedPane() {
@@ -159,7 +164,8 @@ public final class UI extends UILayoutConstants
     /**
      *  Vertical or horizontal alignment.
      */
-    public enum Align {
+    public enum Align implements UIEnum<Align>
+    {
         HORIZONTAL, VERTICAL;
 
         int forSlider() {
@@ -202,7 +208,7 @@ public final class UI extends UILayoutConstants
     /**
      *  Different positions along a vertically aligned UI component.
      */
-    public enum VerticalAlignment {
+    public enum VerticalAlignment implements UIEnum<VerticalAlignment>{
         TOP, CENTER, BOTTOM;
 
         public int forSwing() {
@@ -226,7 +232,7 @@ public final class UI extends UILayoutConstants
     /**
      *  Different positions along a horizontally aligned UI component.
      */
-    public enum HorizontalAlignment
+    public enum HorizontalAlignment implements UIEnum<HorizontalAlignment>
     {
         LEFT, CENTER, RIGHT, LEADING, TRAILING;
 
@@ -267,7 +273,8 @@ public final class UI extends UILayoutConstants
     /**
      *  The logical combination of a vertical and horizontal alignment.
      */
-    public enum Alignment {
+    public enum Alignment implements UIEnum<Alignment>
+    {
         TOP_LEFT,    TOP_CENTER, TOP_RIGHT, TOP_LEADING, TOP_TRAILING,
         CENTER_LEFT, CENTER, CENTER_RIGHT, CENTER_LEADING, CENTER_TRAILING,
         BOTTOM_LEFT, BOTTOM_CENTER, BOTTOM_RIGHT, BOTTOM_LEADING, BOTTOM_TRAILING;
@@ -307,7 +314,8 @@ public final class UI extends UILayoutConstants
      *  See {@link UI#table(ListData, TableListDataSource)}  or {@link UIForTable#withModel(ListData, TableListDataSource)}
      *  for more information about the usage of this enum.
      */
-    public enum ListData {
+    public enum ListData implements UIEnum<ListData>
+    {
         COLUMN_MAJOR,
         ROW_MAJOR,
         COLUMN_MAJOR_EDITABLE,
@@ -343,7 +351,8 @@ public final class UI extends UILayoutConstants
      *  See {@link UI#table(MapData, TableMapDataSource)} or {@link UIForTable#withModel(MapData, TableMapDataSource)}
      *  for more information about the usage of this enum.
      */
-    public enum MapData {
+    public enum MapData implements UIEnum<MapData>
+    {
         EDITABLE, READ_ONLY;
 
         final boolean isEditable() {
@@ -360,7 +369,7 @@ public final class UI extends UILayoutConstants
      *  <br>
      *  See {@link ComponentStyleDelegate#borderWidthAt(Edge, int)}
      */
-    public enum Edge
+    public enum Edge implements UIEnum<Edge>
     {
         EVERY,
         TOP,    RIGHT,
@@ -371,7 +380,7 @@ public final class UI extends UILayoutConstants
      *  Instances of this enum are used to configure onto which
      *  layer a particular style configuration should be applied.
      */
-    public enum Layer
+    public enum Layer implements UIEnum<Layer>
     {
         BACKGROUND,
         CONTENT,
@@ -387,7 +396,7 @@ public final class UI extends UILayoutConstants
      *  {@link GradientStyle#type(GradientType)} method exposed by methods like
      *  {@link ComponentStyleDelegate#gradient(String, Function)} or {@link ComponentStyleDelegate#borderGradient(String, Function)}.
      */
-    public enum GradientType
+    public enum GradientType implements UIEnum<GradientType>
     {
         LINEAR, RADIAL
     }
@@ -400,7 +409,7 @@ public final class UI extends UILayoutConstants
      *  {@link GradientStyle#transition(Transition)} method exposed by methods like
      *  {@link ComponentStyleDelegate#gradient(String, Function)} or {@link ComponentStyleDelegate#borderGradient(String, Function)}.
      */
-    public enum Transition
+    public enum Transition implements UIEnum<Transition>
     {
         TOP_LEFT_TO_BOTTOM_RIGHT, BOTTOM_LEFT_TO_TOP_RIGHT,
         TOP_RIGHT_TO_BOTTOM_LEFT, BOTTOM_RIGHT_TO_TOP_LEFT,
@@ -424,7 +433,7 @@ public final class UI extends UILayoutConstants
      *  <br>
      *  See {@link ComponentStyleDelegate#borderRadiusAt(Corner, int, int)}.
      */
-    public enum Corner
+    public enum Corner implements UIEnum<Corner>
     {
         EVERY,
         TOP_LEFT,    TOP_RIGHT,
@@ -435,7 +444,7 @@ public final class UI extends UILayoutConstants
      *  Use this to specify the placement of an image as part of the {@link ImageStyle} through
      *  the {@link ImageStyle#placement(Placement)} method exposed by the style API (see {@link UIForAnySwing#withStyle(Styler)}).
      */
-    public enum Placement
+    public enum Placement implements UIEnum<Placement>
     {
         UNDEFINED,
         TOP, LEFT, BOTTOM, RIGHT,
@@ -450,7 +459,7 @@ public final class UI extends UILayoutConstants
      *  Pass instances of this to {@link ImageStyle#clipTo(ComponentArea)} to configure the clipping behaviour
      *  as part of the style API (see {@link UIForAnySwing#withStyle(Styler)}).
      */
-    public enum ComponentArea
+    public enum ComponentArea implements UIEnum<ComponentArea>
     {
         ALL, EXTERIOR, BORDER, INTERIOR
     }
@@ -461,7 +470,7 @@ public final class UI extends UILayoutConstants
      *  <br>
      *  See {@link UIForAnySwing#withStyle(Styler)} and {@link ComponentStyleDelegate#orientation(ComponentOrientation)}.
      */
-    public enum ComponentOrientation
+    public enum ComponentOrientation implements UIEnum<ComponentOrientation>
     {
         UNKNOWN, LEFT_TO_RIGHT, RIGHT_TO_LEFT
     }
@@ -475,7 +484,7 @@ public final class UI extends UILayoutConstants
      *  object which can be passed to the style API (see {@link UIForAnySwing#withStyle(Styler)}
      *  and {@link ComponentStyleDelegate#layout(Layout)}).
      */
-    public enum Axis
+    public enum Axis implements UIEnum<Axis>
     {
         /**
          * Specifies that something is laid out left to right.
@@ -513,19 +522,24 @@ public final class UI extends UILayoutConstants
      *  Set of enum instances defining common types of Swing look and feels.
      *  Use {@link UI#currentLookAndFeel()} to check which look and feel is currently active.
      */
-    public enum LookAndFeel {
+    public enum LookAndFeel implements UIEnum<LookAndFeel> {
         OTHER,
         METAL,
         FLAT_LAF,
         NIMBUS;
-
-        public boolean isOneOf( LookAndFeel... lafs ) {
-            for ( LookAndFeel laf : lafs )
-                if ( laf == this ) return true;
-            return false;
-        }
     }
 
+    /**
+     * @return One of
+     *            <ul>
+     *                <li>{@link LookAndFeel#FLAT_LAF}</li>
+     *                <li>{@link LookAndFeel#NIMBUS}</li>
+     *                <li>{@link LookAndFeel#METAL}</li>
+     *            </ul>
+     *            or {@link LookAndFeel#OTHER} if none of the above
+     *            was recognized.
+     *
+     */
     public static LookAndFeel currentLookAndFeel() {
         try {
             String laf = UIManager.getLookAndFeel().getClass().getName();
@@ -1158,7 +1172,7 @@ public final class UI extends UILayoutConstants
 
     /**
      *  Use this to create a builder for the {@link JPanel} UI component with a
-     *  dynamically updated set of {@link MigLayout} attributes.
+     *  dynamically updated set of {@link MigLayout} constraints/attributes.
      *  This is in essence a convenience method for {@code UI.of(new JPanel()).withLayout(attr)}.
      *
      * @param attr The layout attributes property which will be passed to the {@link MigLayout} constructor as first argument.
