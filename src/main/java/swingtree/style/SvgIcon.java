@@ -384,8 +384,6 @@ public final class SvgIcon extends ImageIcon
             preferredPlacement = ComponentExtension.from((JComponent) c).preferredIconPlacement();
 
         Insets insets = ZERO_INSETS;
-        int deltaX = 0;
-        int deltaY = 0;
 
         if ( c != null ) {
             /*
@@ -403,26 +401,18 @@ public final class SvgIcon extends ImageIcon
                                 })
                                 .orElse(ZERO_INSETS);
 
-            if ( _width >= 0 ) {
-                deltaX += Math.max(0, x - insets.left);
-                x = Math.max(x, insets.left);
-            }
-            else
+            if ( _width < 0 )
                 x = insets.left;
 
-            if ( _height >= 0 ) {
-                deltaY += Math.max(0, y - insets.top);
-                y = Math.max(y, insets.top);
-            }
-            else
+            if ( _height < 0 )
                 y = insets.top;
         }
 
         int width  = Math.max( _width,  c == null ? -1 : c.getWidth()  );
         int height = Math.max( _height, c == null ? -1 : c.getHeight() );
 
-        width  = _width  >= 0 ? _width  : width  - insets.right  - insets.left - deltaX;
-        height = _height >= 0 ? _height : height - insets.bottom - insets.top  - deltaY;
+        width  = _width  >= 0 ? _width  : width  - insets.right  - insets.left;
+        height = _height >= 0 ? _height : height - insets.bottom - insets.top ;
 
         if ( width  <= 0 ) {
             int smaller = (int) Math.floor( width / 2.0 );
