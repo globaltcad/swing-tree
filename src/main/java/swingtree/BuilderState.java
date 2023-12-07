@@ -132,9 +132,23 @@ final class BuilderState<C extends Component>
 
     /**
      *  Cut off the strong reference to the component wrapped by this builder node
-     *  and dispose this builder node, meaning it is no longer usable for building.
+     *  and dispose this builder node, meaning it is no longer usable for building. <br>
+     *  <b>Only call this method from the UI thread (AWT's EDT thread) as builder states are not thread safe.</b>
      */
     public void dispose() {
+        if ( !UI.thisIsUIThread() ) {
+            Thread currentThread = Thread.currentThread();
+            if ( !currentThread.getName().startsWith("Test worker") )
+                log.warn(
+                    "The builder state for component type '" + _componentType.getSimpleName() + "' " +
+                    "is being disposed from thread '" + currentThread.getName() + "', which is problematic!" +
+                    "Builder states should only be disposed by the UI thread (AWT's EDT thread) because " +
+                    "they lack thread safety. Furthermore, it is important to note that GUI components " +
+                    "should only be assembled in the frontend layer of the application, and not in the backend layer " +
+                    "and one of its threads.",
+                    new Throwable()
+                );
+        }
         _componentFetcher = null;
     }
 

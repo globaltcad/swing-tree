@@ -238,7 +238,7 @@ public final class SvgIcon extends ImageIcon
      */
     public SvgIcon withIconSizeFromWidth( int width ) {
         if ( width < 0 )
-            return this.withIconSize(-1, -1);
+            return this.withIconSize(NO_SIZE, NO_SIZE);
 
         double ratio = (double) _svgDocument.size().height / (double) _svgDocument.size().width;
         int logicalHeight = (int) Math.ceil( width * ratio );
@@ -267,7 +267,7 @@ public final class SvgIcon extends ImageIcon
      */
     public SvgIcon withIconSizeFromHeight( int height ) {
         if ( height < 0 )
-            return this.withIconSize(-1, -1);
+            return this.withIconSize(NO_SIZE, NO_SIZE);
 
         double ratio = (double) _svgDocument.size().width / (double) _svgDocument.size().height;
         int logicalWidth = (int) Math.ceil( height * ratio );
@@ -408,8 +408,8 @@ public final class SvgIcon extends ImageIcon
                 y = insets.top;
         }
 
-        int width  = Math.max( _width,  c == null ? -1 : c.getWidth()  );
-        int height = Math.max( _height, c == null ? -1 : c.getHeight() );
+        int width  = Math.max( _width,  c == null ? NO_SIZE : c.getWidth()  );
+        int height = Math.max( _height, c == null ? NO_SIZE : c.getHeight() );
 
         width  = _width  >= 0 ? _width  : width  - insets.right  - insets.left;
         height = _height >= 0 ? _height : height - insets.bottom - insets.top ;
