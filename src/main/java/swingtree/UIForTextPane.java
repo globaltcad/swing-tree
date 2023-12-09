@@ -27,7 +27,7 @@ public final class UIForTextPane<P extends JTextPane> extends UIForAnyEditorPane
     }
     
     @Override
-    protected UIForTextPane<P> _with( BuilderState<P> newState ) {
+    protected UIForTextPane<P> _newBuilderWithState(BuilderState<P> newState ) {
         return new UIForTextPane<>(newState);
     }
 }

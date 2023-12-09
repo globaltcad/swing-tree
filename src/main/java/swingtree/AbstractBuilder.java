@@ -13,9 +13,14 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
- *  This is the root builder type for all other builder subtypes.
+ *  This is the root builder type for all other SwingTree builder subtypes.
  *  It is a generic builder which may wrap anything to allow for method chaining based building
  *  in SwingTree. <br>
+ *  Note that a builder is immutable, which means that every method call on a builder
+ *  returns a new builder instance with the new state. <br>
+ *  The state of the previous builder is disposed of, which means that the wrapped component
+ *  is no longer referenced by the previous builder instance and can be garbage collected.<br>
+ *  <b>Spent builder nodes may not be reused!</b>
  *
  * @param <I> The concrete implementation type of this builder, "I" stands for "Implementation".
  * @param <C> The component type parameter.
@@ -29,31 +34,49 @@ abstract class AbstractBuilder<I, C extends Component>
      */
     protected abstract BuilderState<C> _state();
 
-    protected abstract AbstractBuilder<I,C> _with( BuilderState<C> newState );
+    /**
+     *  An internal wither method which creates a new builder instance with the provided
+     *  {@link BuilderState} stored inside it.
+     *
+     * @param newState The new state which should be stored inside the new builder instance.
+     * @return A new builder instance with the provided state stored inside it.
+     */
+    protected abstract AbstractBuilder<I,C> _newBuilderWithState( BuilderState<C> newState );
 
     /**
-     *  Creates a new builder with the provided component mutation applied to the wrapped component.
+     *  Creates a new builder with the provided component mutation applied to the wrapped component. <br>
+     *  Note that the SwingTree builders are immutable, which means that this method
+     *  does not mutate the current builder instance, but instead creates a new builder instance
+     *  with a new {@link BuilderState} which contains the provided component mutation (see {@link BuilderState#withMutator(Consumer)}).
+     *  Also see {@link #_newBuilderWithState(BuilderState)}.
      *
      * @param componentMutator A consumer lambda which receives the wrapped component and
      *                         is then used to apply some builder action to it.
      * @return A new builder instance with the provided component mutation applied to the wrapped component.
      */
     protected final AbstractBuilder<I,C> _with( Consumer<C> componentMutator ) {
-        BuilderState<C> newState = _state().with(componentMutator);
-        return _with(newState);
+        BuilderState<C> newState = _state().withMutator(componentMutator);
+        return _newBuilderWithState(newState);
     }
 
     /**
-     * @param action An action which should be executed by the UI thread (EDT).
+     * @param action An action which should be executed by the UI thread,
+     *               which is determined by implementations of the {@link EventProcessor},
+     *               also see {@link UI#use(EventProcessor, Supplier)}. <b>
+     *               Usually the UI thread is AWT's Event Dispatch Thread (EDT).
      */
-    protected final void _doUI( Runnable action ) { _state().eventProcessor().registerUIEvent( action ); }
+    protected final void _runInUI( Runnable action ) {
+        _state().eventProcessor().registerUIEvent( action );
+    }
 
     /**
      * @param action An action which should be executed by the application thread,
      *               which is determined by implementations of the {@link EventProcessor},
      *               also see {@link UI#use(EventProcessor, Supplier)}.
      */
-    protected final void _doApp( Runnable action ) { _state().eventProcessor().registerAppEvent(action); }
+    protected final void _runInApp( Runnable action ) {
+        _state().eventProcessor().registerAppEvent(action);
+    }
 
     /**
      * @param value A value which should be captured and then passed to the provided action
@@ -62,7 +85,9 @@ abstract class AbstractBuilder<I, C extends Component>
      *               and receives the provided value.
      * @param <T> The type of the value.
      */
-    protected final <T> void _doApp( T value, Consumer<T> action ) { _doApp(()->action.accept(value)); }
+    protected final <T> void _runInApp( T value, Consumer<T> action ) {
+        _runInApp(()->action.accept(value));
+    }
 
     /**
      *  Use this to register a state change listener for the provided property
@@ -110,7 +135,7 @@ abstract class AbstractBuilder<I, C extends Component>
                 }
 
                 T v = value.orElseNull(); // IMPORTANT! We first capture the value and then execute the action in the app thread.
-                _doUI(() ->
+                _runInUI(() ->
                     /*
                         We make sure that the action is only executed if the component
                         is not disposed. This is important because the action may
@@ -188,7 +213,7 @@ abstract class AbstractBuilder<I, C extends Component>
                     properties.unsubscribe(this); // We unsubscribe from the property if the component is disposed.
                     return;
                 }
-                _doUI(() ->{
+                _runInUI(() ->{
                     displayAction.accept(thisComponent, delegate);
                     /*
                         We make sure that the action is only executed if the component
@@ -289,12 +314,12 @@ abstract class AbstractBuilder<I, C extends Component>
      *  Here a simple usage example:
      *  <pre>{@code
      *      UI.panel()
-     *      .applyIf( userIsLoggedIn, it -> it
+     *      .applyIf( userIsLoggedIn, ui -> ui
      *          .add( UI.label("Welcome back!") )
      *          .add( UI.button("Logout")).onClick( () -> logout() )
      *          .add( UI.button("Settings")).onClick( () -> showSettings() )
      *      )
-     *      .applyIf( !userIsLoggedIn, it -> it
+     *      .applyIf( !userIsLoggedIn, ui -> ui
      *          .add( UI.label("Please login to continue.") )
      *          .add( UI.button("Login")).onClick( () -> login() );
      *      );
@@ -314,9 +339,9 @@ abstract class AbstractBuilder<I, C extends Component>
             return _this();
 
         BuilderState<C> proceduralBuilder = _state().procedural();
-        building.accept(_with(proceduralBuilder)._this());
+        building.accept(_newBuilderWithState(proceduralBuilder)._this());
 
-        return _with(_state().supersede(proceduralBuilder))._this();
+        return _newBuilderWithState(_state().supersede(proceduralBuilder))._this();
     }
 
 
@@ -383,9 +408,9 @@ abstract class AbstractBuilder<I, C extends Component>
      *  with a variable amount of images displayed in a grid:
      *  <pre>{@code
      *      UI.panel("wrap 3")
-     *      .apply( it -> {
+     *      .apply( ui -> {
      *          for ( String path : imagePaths )
-     *              it.add( UI.label(UI.icon(path)) );
+     *              ui.add( UI.label(UI.icon(path)) );
      *      });
      *  }</pre>
      *  <br><br>
@@ -393,9 +418,9 @@ abstract class AbstractBuilder<I, C extends Component>
      *  with a variable amount of buttons displayed in a grid:
      *  <pre>{@code
      *    UI.panel("wrap 4")
-     *    .apply( it -> {
+     *    .apply( ui -> {
      *      for ( int i = 0; i < numOfButtons; i++ )
-     *          it.add( UI.button("Button " + i)
+     *          ui.add( UI.button("Button " + i)
      *          .onClick( () -> {...} );
      *    });
      *  }</pre>
@@ -452,9 +477,19 @@ abstract class AbstractBuilder<I, C extends Component>
 
     @Override
     public final String toString() {
-        return getClass().getSimpleName() + "[" +
-                    _state().componentType().getSimpleName() +
-                "]";
+        String componentTypeName = _state().componentType().getName();
+        String builderTypeName   = getClass().getSimpleName();
+        String asString          = builderTypeName + "[" + componentTypeName + "]";
+
+        if ( _state().isDisposed() ) {
+            // We make the whole string strikethrough if the builder is disposed.
+            StringBuilder sb = new StringBuilder();
+            for ( int i = 0; i < asString.length(); i++ )
+                sb.append(asString.charAt(i)).append("\u0336");
+            asString = sb.toString();
+        }
+
+        return asString;
     }
 
     @Override

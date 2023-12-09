@@ -33,7 +33,7 @@ public final class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UI
     }
     
     @Override
-    protected UIForSplitPane<P> _with( BuilderState<P> newState ) {
+    protected UIForSplitPane<P> _newBuilderWithState(BuilderState<P> newState ) {
         return new UIForSplitPane<>(newState);
     }
 

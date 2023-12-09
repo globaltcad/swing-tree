@@ -23,7 +23,7 @@ public final class UIForJFrame<F extends JFrame> extends UIForAnyWindow<UIForJFr
 	}
 
 	@Override
-	protected UIForJFrame<F> _with( BuilderState<F> newState ) {
+	protected UIForJFrame<F> _newBuilderWithState(BuilderState<F> newState ) {
 		return new UIForJFrame<>(newState);
 	}
 

@@ -31,7 +31,7 @@ public final class UIForTableHeader<H extends UI.TableHeader> extends UIForAnySw
     }
     
     @Override
-    protected UIForTableHeader<H> _with( BuilderState<H> newState ) {
+    protected UIForTableHeader<H> _newBuilderWithState(BuilderState<H> newState ) {
         return new UIForTableHeader<>(newState);
     }
 

@@ -160,13 +160,13 @@ final class BuilderState<C extends Component>
     }
 
     /**
-     * @param componentMutation A consumer which mutates the component wrapped by this builder node.
+     * @param componentMutator A consumer which mutates the component wrapped by this builder node.
      * @return In procedural mode, this very builder node is returned.
      *         In declarative mode, a new builder node is returned which is a copy of this builder node,
      *         and this builder node is disposed.
      *         Either way, the component wrapped by this builder node is mutated by the provided consumer.
      */
-    BuilderState<C> with( Consumer<C> componentMutation )
+    BuilderState<C> withMutator( Consumer<C> componentMutator )
     {
         if ( this.isDisposed() )
             throw new IllegalStateException(
@@ -176,7 +176,7 @@ final class BuilderState<C extends Component>
                 );
 
         try {
-            componentMutation.accept(_componentFetcher.get());
+            componentMutator.accept(_componentFetcher.get());
         } catch ( Exception e ) {
             e.printStackTrace();
             log.error(

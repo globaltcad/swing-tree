@@ -36,7 +36,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
     }
     
     @Override
-    protected UIForTable<T> _with( BuilderState<T> newState ) {
+    protected UIForTable<T> _newBuilderWithState(BuilderState<T> newState ) {
         return new UIForTable<>(newState);
     }
 
@@ -293,7 +293,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
         NullUtil.nullArgCheck(event, "event", Event.class);
         return _with( thisComponent -> {
                     event.subscribe(()->
-                        _doUI(()->{
+                        _runInUI(()->{
                             TableModel model = thisComponent.getModel();
                             if ( model instanceof AbstractTableModel ) {
                                 // We want the table model update to be as thorough as possible, so we

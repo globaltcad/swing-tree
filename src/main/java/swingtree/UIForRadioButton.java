@@ -21,7 +21,7 @@ public final class UIForRadioButton<R extends JRadioButton> extends UIForAnyTogg
     }
     
     @Override
-    protected UIForRadioButton<R> _with( BuilderState<R> newState ) {
+    protected UIForRadioButton<R> _newBuilderWithState(BuilderState<R> newState ) {
         return new UIForRadioButton<>(newState);
     }
 }

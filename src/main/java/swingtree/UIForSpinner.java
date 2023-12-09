@@ -31,7 +31,7 @@ public final class UIForSpinner<S extends JSpinner> extends UIForAnySwing<UIForS
      */
     UIForSpinner( BuilderState<S> state ) {
         Objects.requireNonNull(state);
-        _state = state.with(this::_initialize);
+        _state = state.withMutator(this::_initialize);
     }
 
     private void _initialize( S thisComponent )
@@ -110,7 +110,7 @@ public final class UIForSpinner<S extends JSpinner> extends UIForAnySwing<UIForS
     }
     
     @Override
-    protected UIForSpinner<S> _with( BuilderState<S> newState ) {
+    protected UIForSpinner<S> _newBuilderWithState(BuilderState<S> newState ) {
         return new UIForSpinner<>(newState);
     }
 
@@ -155,7 +155,7 @@ public final class UIForSpinner<S extends JSpinner> extends UIForAnySwing<UIForS
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent ->
                     _onChange(thisComponent,
-                        e -> _doApp(()->action.accept(new ComponentDelegate<>(thisComponent, e)))
+                        e -> _runInApp(()->action.accept(new ComponentDelegate<>(thisComponent, e)))
                     )
                 )
                 ._this();
@@ -217,7 +217,7 @@ public final class UIForSpinner<S extends JSpinner> extends UIForAnySwing<UIForS
                         // Get access the current component while still in the EDT. (getComponent() is only allowed in the EDT)
                         final Object current = thisComponent.getValue();
                         // Now let's do the actual work in the application thread:
-                        _doApp(() -> {
+                        _runInApp(() -> {
                             Object interpreted = current;
                             if (current != null && Number.class.isAssignableFrom(value.type())) {
                                 if (Number.class.isAssignableFrom(current.getClass())) {

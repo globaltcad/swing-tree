@@ -100,7 +100,7 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
                     _onTextChange(thisComponent, e -> {
                         try {
                             String newText = e.getDocument().getText(0, e.getDocument().getLength());
-                            _doApp(newText, t -> {
+                            _runInApp(newText, t -> {
                                 if ( UI.thisIsUIThread() )
                                     UI.runLater( () -> {
                                         try {
@@ -215,11 +215,11 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
         return _with( thisComponent -> {
                     thisComponent.getDocument().addDocumentListener(new DocumentListener() {
                         @Override public void insertUpdate(DocumentEvent e)  {
-                            _doApp(()->action.accept(new ComponentDelegate<>(thisComponent, e )));}
+                            _runInApp(()->action.accept(new ComponentDelegate<>(thisComponent, e )));}
                         @Override public void removeUpdate(DocumentEvent e)  {
-                            _doApp(()->action.accept(new ComponentDelegate<>(thisComponent, e )));}
+                            _runInApp(()->action.accept(new ComponentDelegate<>(thisComponent, e )));}
                         @Override public void changedUpdate(DocumentEvent e) {
-                            _doApp(()->action.accept(new ComponentDelegate<>(thisComponent, e )));}
+                            _runInApp(()->action.accept(new ComponentDelegate<>(thisComponent, e )));}
                     });
                 })
                 ._this();
@@ -235,7 +235,7 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
     public final I onTextChange( Action<ComponentDelegate<JTextComponent, DocumentEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
-                    _onTextChange(thisComponent, e -> _doApp( () -> action.accept(new ComponentDelegate<>(thisComponent, e ))) );
+                    _onTextChange(thisComponent, e -> _runInApp( () -> action.accept(new ComponentDelegate<>(thisComponent, e ))) );
                 })
                 ._this();
     }

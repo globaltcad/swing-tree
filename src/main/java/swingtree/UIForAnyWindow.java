@@ -101,7 +101,7 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 		return _with( thisWindow -> {
 					thisWindow.addFocusListener(new FocusAdapter() {
 						@Override public void focusGained(FocusEvent e) {
-							_doApp(()->onFocus.accept(_createDelegate(thisWindow, e)));
+							_runInApp(()->onFocus.accept(_createDelegate(thisWindow, e)));
 						}
 					});
 		       })
@@ -120,7 +120,7 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 		return _with( thisWindow -> {
 					thisWindow.addFocusListener(new FocusAdapter() {
 						@Override public void focusLost(FocusEvent e) {
-							_doApp(()->onFocus.accept(_createDelegate(thisWindow, e)));
+							_runInApp(()->onFocus.accept(_createDelegate(thisWindow, e)));
 						}
 					});
 		       })
@@ -143,7 +143,7 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 		return _with( thisWindow -> {
 					thisWindow.addWindowListener(new WindowAdapter() {
 						@Override public void windowClosing( WindowEvent e ) {
-							_doApp(()->onClose.accept(_createDelegate(thisWindow, e)));
+							_runInApp(()->onClose.accept(_createDelegate(thisWindow, e)));
 						}
 					});
 		       })
@@ -165,7 +165,7 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 		return _with( thisWindow -> {
 					thisWindow.addWindowListener(new WindowAdapter() {
 						@Override public void windowClosed( WindowEvent e ) {
-							_doApp(()->onClose.accept(_createDelegate(thisWindow, e)));
+							_runInApp(()->onClose.accept(_createDelegate(thisWindow, e)));
 						}
 					});
 		       })
@@ -187,7 +187,7 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 		return _with( thisWindow -> {
 					thisWindow.addWindowListener(new WindowAdapter() {
 						@Override public void windowOpened( WindowEvent e ) {
-							_doApp(()->onOpen.accept(_createDelegate(thisWindow, e)));
+							_runInApp(()->onOpen.accept(_createDelegate(thisWindow, e)));
 						}
 					});
 		       })
@@ -212,7 +212,7 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 		return _with( thisWindow -> {
 					thisWindow.addWindowListener(new WindowAdapter() {
 						@Override public void windowIconified( WindowEvent e ) {
-							_doApp(()->onIconify.accept(_createDelegate(thisWindow, e)));
+							_runInApp(()->onIconify.accept(_createDelegate(thisWindow, e)));
 						}
 					});
 		       })
@@ -233,7 +233,7 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 		return _with( thisWindow -> {
 					thisWindow.addWindowListener(new WindowAdapter() {
 						@Override public void windowDeiconified( WindowEvent e ) {
-							_doApp(()->onDeiconify.accept(_createDelegate(thisWindow, e)));
+							_runInApp(()->onDeiconify.accept(_createDelegate(thisWindow, e)));
 						}
 					});
 		       })
@@ -260,7 +260,7 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 		return _with( thisWindow -> {
 					thisWindow.addWindowListener(new WindowAdapter() {
 						@Override public void windowActivated( WindowEvent e ) {
-							_doApp(()->onActivate.accept(_createDelegate(thisWindow, e)));
+							_runInApp(()->onActivate.accept(_createDelegate(thisWindow, e)));
 						}
 					});
 		       })
@@ -287,7 +287,7 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 		return _with( thisWindow -> {
 					thisWindow.addWindowListener(new WindowAdapter() {
 						@Override public void windowDeactivated( WindowEvent e ) {
-							_doApp(()->onDeactivate.accept(_createDelegate(thisWindow, e)));
+							_runInApp(()->onDeactivate.accept(_createDelegate(thisWindow, e)));
 						}
 					});
 		       })
@@ -309,7 +309,7 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 		return _with( thisWindow -> {
 					thisWindow.addWindowListener(new WindowAdapter() {
 						@Override public void windowStateChanged( WindowEvent e ) {
-							_doApp(()->onStateChanged.accept(_createDelegate(thisWindow, e)));
+							_runInApp(()->onStateChanged.accept(_createDelegate(thisWindow, e)));
 						}
 					});
 		       })
@@ -332,7 +332,7 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 		return _with( thisWindow -> {
 					thisWindow.addWindowFocusListener(new WindowFocusListener() {
 						@Override public void windowGainedFocus( WindowEvent e ) {
-							_doApp(()->onFocusGained.accept(_createDelegate(thisWindow, e)));
+							_runInApp(()->onFocusGained.accept(_createDelegate(thisWindow, e)));
 						}
 						@Override public void windowLostFocus( WindowEvent e ) {}
 					});
@@ -357,7 +357,7 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 					thisWindow.addWindowFocusListener(new WindowFocusListener() {
 						@Override public void windowGainedFocus( WindowEvent e ) {}
 						@Override public void windowLostFocus( WindowEvent e ) {
-							_doApp(()->onFocusLost.accept(_createDelegate(thisWindow, e)));
+							_runInApp(()->onFocusLost.accept(_createDelegate(thisWindow, e)));
 						}
 					});
 		       })

@@ -371,10 +371,10 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
         return _withOnShow( selected, this::_setSelectedSilently )
                 ._with( button -> {
                     _onClick(button,
-                        e -> _doApp(button.isSelected(), newItem -> selected.set(From.VIEW, newItem) )
+                        e -> _runInApp(button.isSelected(), newItem -> selected.set(From.VIEW, newItem) )
                     );
                     _onChange(button,
-                        v -> _doApp(button.isSelected(), newItem -> selected.set(From.VIEW, newItem) )
+                        v -> _runInApp(button.isSelected(), newItem -> selected.set(From.VIEW, newItem) )
                     );
                 })
                 ._with( button -> _setSelectedSilently(button, selected.get()) )
@@ -399,10 +399,10 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
                 })
                 ._with( button -> {
                     _onClick(button,
-                        e -> _doApp(!button.isSelected(), newItem -> selected.set(From.VIEW, newItem) )
+                        e -> _runInApp(!button.isSelected(), newItem -> selected.set(From.VIEW, newItem) )
                     );
                     _onChange(button,
-                        v -> _doApp(!button.isSelected(), newItem -> selected.set(From.VIEW, newItem) )
+                        v -> _runInApp(!button.isSelected(), newItem -> selected.set(From.VIEW, newItem) )
                     );
                 })
                 ._with( button -> _setSelectedSilently(button, !selected.is(true)) )
@@ -478,7 +478,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
                 })
                 ._with( button -> {
                     _onClick(button, e ->
-                        _doApp(button.getModel().isPressed(), pressed->{
+                        _runInApp(button.getModel().isPressed(), pressed->{
                             var.set(From.VIEW, true);
                             var.set(From.VIEW, pressed);
                         })
@@ -541,7 +541,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( button -> {
                     _onChange(button, e ->
-                        _doApp(()->action.accept(new ComponentDelegate<>(button, e)))
+                        _runInApp(()->action.accept(new ComponentDelegate<>(button, e)))
                     );
                 })
                 ._this();
@@ -594,7 +594,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( button -> {
                     _onClick(button, e ->
-                        _doApp(() ->
+                        _runInApp(() ->
                             action.accept(new ComponentDelegate<>(button, e))
                         )
                     );

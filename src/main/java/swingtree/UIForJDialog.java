@@ -26,7 +26,7 @@ public final class UIForJDialog<D extends JDialog> extends UIForAnyWindow<UIForJ
 	}
 
 	@Override
-	protected UIForJDialog<D> _with( BuilderState<D> newState ) {
+	protected UIForJDialog<D> _newBuilderWithState(BuilderState<D> newState ) {
 		return new UIForJDialog<>(newState);
 	}
 

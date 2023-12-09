@@ -23,7 +23,7 @@ public final class UIForCheckBox<B extends JCheckBox> extends UIForAnyButton<UIF
     }
     
     @Override
-    protected UIForCheckBox<B> _with( BuilderState<B> newState ) {
+    protected UIForCheckBox<B> _newBuilderWithState(BuilderState<B> newState ) {
         return new UIForCheckBox<>(newState);
     }
 

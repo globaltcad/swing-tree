@@ -38,7 +38,7 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
     }
     
     @Override
-    protected UIForCombo<E,C> _with( BuilderState<JComboBox<E>> newState ) {
+    protected UIForCombo<E,C> _newBuilderWithState(BuilderState<JComboBox<E>> newState ) {
         return new UIForCombo<>(newState);
     }
 
@@ -91,7 +91,7 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
     public UIForCombo<E,C> onOpen( Action<ComponentDelegate<C, PopupMenuEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
-                    _onPopupOpen(thisComponent, e -> _doApp(()->action.accept(new ComponentDelegate<>( (C) thisComponent, e )) ) );
+                    _onPopupOpen(thisComponent, e -> _runInApp(()->action.accept(new ComponentDelegate<>( (C) thisComponent, e )) ) );
                 })
                 ._this();
     }
@@ -118,7 +118,7 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
                     _onPopupClose(thisComponent,
-                        e -> _doApp(()->action.accept(new ComponentDelegate<>( (C) thisComponent, e )) )
+                        e -> _runInApp(()->action.accept(new ComponentDelegate<>( (C) thisComponent, e )) )
                     );
                 })
                 ._this();
@@ -146,7 +146,7 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
                     _onPopupCancel(thisComponent,
-                        e -> _doApp(()->action.accept(new ComponentDelegate<>( (C) thisComponent, e )) )
+                        e -> _runInApp(()->action.accept(new ComponentDelegate<>( (C) thisComponent, e )) )
                     );
                 })
                 ._this();
@@ -177,7 +177,7 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
                    _onSelection(thisComponent,
-                       e -> _doApp(()->action.accept(new ComponentDelegate<>( thisComponent, e )))
+                       e -> _runInApp(()->action.accept(new ComponentDelegate<>( thisComponent, e )))
                    );
                })
                ._this();
@@ -217,7 +217,7 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
     public UIForCombo<E,C> onEnter( Action<ComponentDelegate<C, ActionEvent>> action ) {
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
-                   _onEnter(thisComponent, e -> _doApp(()->action.accept(new ComponentDelegate<>( (C) thisComponent, e ))) );
+                   _onEnter(thisComponent, e -> _runInApp(()->action.accept(new ComponentDelegate<>( (C) thisComponent, e ))) );
                })
                ._this();
     }
@@ -336,7 +336,7 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
                         // The user has a custom model AND wants to bind to a property:
                         _onShow( item, thisComponent, (c,v) -> _setSelectedItem(c, v) );
                         _onSelection(thisComponent,
-                            e -> _doApp( (E)thisComponent.getSelectedItem(), newItem -> item.set(From.VIEW, newItem)  )
+                            e -> _runInApp( (E)thisComponent.getSelectedItem(), newItem -> item.set(From.VIEW, newItem)  )
                         );
                     }
                     _setSelectedItem(thisComponent, item.get());

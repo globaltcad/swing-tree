@@ -26,7 +26,7 @@ public final class UIForPanel<P extends JPanel> extends UIForAnySwing<UIForPanel
     }
     
     @Override
-    protected UIForPanel<P> _with( BuilderState<P> newState ) {
+    protected UIForPanel<P> _newBuilderWithState(BuilderState<P> newState ) {
         return new UIForPanel<>(newState);
     }
 

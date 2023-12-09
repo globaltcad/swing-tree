@@ -27,7 +27,7 @@ public class UIForButton<B extends AbstractButton> extends UIForAnyButton<UIForB
     }
     
     @Override
-    protected UIForButton<B> _with( BuilderState<B> newState ) {
+    protected UIForButton<B> _newBuilderWithState(BuilderState<B> newState ) {
         return new UIForButton<>(newState);
     }
 

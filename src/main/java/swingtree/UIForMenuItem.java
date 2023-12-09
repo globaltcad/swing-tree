@@ -22,7 +22,7 @@ public final class UIForMenuItem<M extends JMenuItem> extends UIForAnyMenuItem<U
     }
     
     @Override
-    protected UIForMenuItem<M> _with( BuilderState<M> newState ) {
+    protected UIForMenuItem<M> _newBuilderWithState(BuilderState<M> newState ) {
         return new UIForMenuItem<>(newState);
     }
 }

@@ -36,7 +36,7 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
     }
     
     @Override
-    protected UIForLabel<L> _with( BuilderState<L> newState ) {
+    protected UIForLabel<L> _newBuilderWithState(BuilderState<L> newState ) {
         return new UIForLabel<>(newState);
     }
 

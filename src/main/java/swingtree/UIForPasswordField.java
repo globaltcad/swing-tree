@@ -23,7 +23,7 @@ public class UIForPasswordField<F extends JPasswordField> extends UIForAnyTextCo
     }
     
     @Override
-    protected UIForPasswordField<F> _with( BuilderState<F> newState ) {
+    protected UIForPasswordField<F> _newBuilderWithState(BuilderState<F> newState ) {
         return new UIForPasswordField<>(newState);
     }
 

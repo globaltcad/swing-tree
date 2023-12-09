@@ -28,7 +28,7 @@ public class UIForAnything<T extends Component> extends AbstractBuilder<UIForAny
     }
     
     @Override
-    protected UIForAnything<T> _with( BuilderState<T> newState ) {
+    protected UIForAnything<T> _newBuilderWithState(BuilderState<T> newState ) {
         return new UIForAnything<>(newState);
     }
 }

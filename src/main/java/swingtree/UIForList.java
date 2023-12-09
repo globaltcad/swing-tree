@@ -43,7 +43,7 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
     }
     
     @Override
-    protected UIForList<E, L> _with( BuilderState<L> newState ) {
+    protected UIForList<E, L> _newBuilderWithState(BuilderState<L> newState ) {
         return new UIForList<>(newState);
     }
 
@@ -220,7 +220,7 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
                     thisComponent.addListSelectionListener(
-                        e -> _doApp(()->action.accept(new ComponentDelegate<>( thisComponent, e)))
+                        e -> _runInApp(()->action.accept(new ComponentDelegate<>( thisComponent, e)))
                     );
                 })
                 ._this();

@@ -32,7 +32,7 @@ public final class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSli
     }
     
     @Override
-    protected UIForSlider<S> _with( BuilderState<S> newState ) {
+    protected UIForSlider<S> _newBuilderWithState(BuilderState<S> newState ) {
         return new UIForSlider<>(newState);
     }
 
@@ -86,7 +86,7 @@ public final class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSli
         NullUtil.nullArgCheck( action, "action", Action.class );
         return _with( thisComponent -> {
                     _onChange(thisComponent,
-                        e -> _doApp(()->action.accept(new ComponentDelegate<>(thisComponent, e)))
+                        e -> _runInApp(()->action.accept(new ComponentDelegate<>(thisComponent, e)))
                     );
                 })
                 ._this();
@@ -210,7 +210,7 @@ public final class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSli
                 })
                 ._with( thisComponent -> {
                     _onChange(thisComponent,
-                        e -> _doApp(thisComponent.getValue(), newItem -> var.set(From.VIEW, newItem) )
+                        e -> _runInApp(thisComponent.getValue(), newItem -> var.set(From.VIEW, newItem) )
                     );
                     _setValue(thisComponent, var.orElseThrow());
                 })

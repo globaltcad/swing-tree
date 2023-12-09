@@ -21,7 +21,7 @@ public final class UIForTextArea<A extends JTextArea> extends UIForAnyTextCompon
     }
     
     @Override
-    protected UIForTextArea<A> _with( BuilderState<A> newState ) {
+    protected UIForTextArea<A> _newBuilderWithState(BuilderState<A> newState ) {
         return new UIForTextArea<>(newState);
     }
 }

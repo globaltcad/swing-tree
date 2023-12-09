@@ -36,7 +36,7 @@ public final class UIForTextField<F extends JTextField> extends UIForAnyTextComp
     }
     
     @Override
-    protected UIForTextField<F> _with( BuilderState<F> newState ) {
+    protected UIForTextField<F> _newBuilderWithState(BuilderState<F> newState ) {
         return new UIForTextField<>(newState);
     }
 
@@ -50,7 +50,7 @@ public final class UIForTextField<F extends JTextField> extends UIForAnyTextComp
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
                    _onEnter(thisComponent,
-                       e -> _doApp( () -> action.accept(new ComponentDelegate<>( thisComponent, e )) )
+                       e -> _runInApp( () -> action.accept(new ComponentDelegate<>( thisComponent, e )) )
                    );
                })
                ._this();

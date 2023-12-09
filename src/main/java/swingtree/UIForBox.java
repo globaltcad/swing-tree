@@ -32,7 +32,7 @@ public class UIForBox<B extends JBox> extends UIForAnySwing<UIForBox<B>, B>
     }
     
     @Override
-    protected UIForBox<B> _with( BuilderState<B> newState ) {
+    protected UIForBox<B> _newBuilderWithState(BuilderState<B> newState ) {
         return new UIForBox<>(newState);
     }
 

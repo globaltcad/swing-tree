@@ -33,7 +33,7 @@ public final class UIForSeparator<S extends JSeparator> extends UIForAnySwing<UI
     }
     
     @Override
-    protected UIForSeparator<S> _with( BuilderState<S> newState ) {
+    protected UIForSeparator<S> _newBuilderWithState(BuilderState<S> newState ) {
         return new UIForSeparator<>(newState);
     }
 

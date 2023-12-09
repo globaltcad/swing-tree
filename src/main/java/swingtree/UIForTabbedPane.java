@@ -40,7 +40,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
      */
     UIForTabbedPane( BuilderState<P> state ) {
         Objects.requireNonNull(state);
-        _state = state.with( thisComponent -> {
+        _state = state.withMutator(thisComponent -> {
             thisComponent.setModel(ExtraState.of(thisComponent));
         });
     }
@@ -51,7 +51,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
     }
     
     @Override
-    protected UIForTabbedPane<P> _with( BuilderState<P> newState ) {
+    protected UIForTabbedPane<P> _newBuilderWithState(BuilderState<P> newState ) {
         return new UIForTabbedPane<>(newState);
     }
 
@@ -73,7 +73,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                             int indexOfTab = thisComponent.indexAtLocation(e.getX(), e.getY());
                             int tabCount = thisComponent.getTabCount();
                             if ( indexOfTab >= 0 && indexOfTab < tabCount )
-                                _doApp(() -> onClick.accept(new TabDelegate(thisComponent, e)));
+                                _runInApp(() -> onClick.accept(new TabDelegate(thisComponent, e)));
                         }
                     });
                })
@@ -98,7 +98,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                             int indexOfTab = thisComponent.indexAtLocation(e.getX(), e.getY());
                             int tabCount = thisComponent.getTabCount();
                             if ( indexOfTab >= 0 && indexOfTab < tabCount )
-                                _doApp(() -> onPress.accept(new TabDelegate(thisComponent, e)));
+                                _runInApp(() -> onPress.accept(new TabDelegate(thisComponent, e)));
                         }
                     });
                })
@@ -123,7 +123,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                             int indexOfTab = thisComponent.indexAtLocation(e.getX(), e.getY());
                             int tabCount = thisComponent.getTabCount();
                             if ( indexOfTab >= 0 && indexOfTab < tabCount )
-                                _doApp(() -> onRelease.accept(new TabDelegate(thisComponent, e)));
+                                _runInApp(() -> onRelease.accept(new TabDelegate(thisComponent, e)));
                         }
                     });
                })
@@ -148,7 +148,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                             int indexOfTab = thisComponent.indexAtLocation(e.getX(), e.getY());
                             int tabCount = thisComponent.getTabCount();
                             if ( indexOfTab >= 0 && indexOfTab < tabCount )
-                                _doApp(() -> onEnter.accept(new TabDelegate(thisComponent, e)));
+                                _runInApp(() -> onEnter.accept(new TabDelegate(thisComponent, e)));
                         }
                     });
                })
@@ -173,7 +173,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                             int indexOfTab = thisComponent.indexAtLocation(e.getX(), e.getY());
                             int tabCount = thisComponent.getTabCount();
                             if ( indexOfTab >= 0 && indexOfTab < tabCount )
-                                _doApp(() -> onExit.accept(new TabDelegate(thisComponent, e)));
+                                _runInApp(() -> onExit.accept(new TabDelegate(thisComponent, e)));
                         }
                     });
                })
@@ -240,7 +240,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                    state.selectionListeners.forEach( l -> l.accept(i) );
                })
                ._with( thisComponent -> {
-                   _onChange(thisComponent, e -> _doApp(()->{
+                   _onChange(thisComponent, e -> _runInApp(()->{
                        ExtraState state = ExtraState.of(thisComponent);
                        index.set(From.VIEW, thisComponent.getSelectedIndex());
                        state.selectionListeners.forEach(l -> l.accept(thisComponent.getSelectedIndex()) );
@@ -334,7 +334,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                        if ( tabbedPane == null ) return;
                        int index = indexFinder.get();
                        if ( index >= 0 && index == tabbedPane.getSelectedIndex() )
-                           _doApp(()->onSelection.accept(new ComponentDelegate<>(tabbedPane, e )));
+                           _runInApp(()->onSelection.accept(new ComponentDelegate<>(tabbedPane, e )));
                    })
                );
 
@@ -453,7 +453,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                         int indexClicked = pane.indexAtLocation(e.getX(), e.getY());
                         if ( indexClicked < 0 ) return;
                         if ( indexOfThis == indexClicked )
-                            _doApp(()-> mouseClickAction.accept(new ComponentDelegate<>(pane, e )));
+                            _runInApp(()-> mouseClickAction.accept(new ComponentDelegate<>(pane, e )));
                     }
                 });
             }
@@ -470,7 +470,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
             int indexClicked = pane.indexAtLocation(p.x, p.y);
             if ( indexClicked < 0 ) return;
             if ( indexOfThis == indexClicked && mouseClickAction != null )
-                _doApp(()-> { mouseClickAction.accept(new ComponentDelegate<>(pane, e)); });
+                _runInApp(()-> { mouseClickAction.accept(new ComponentDelegate<>(pane, e)); });
             if ( indexOfThis < pane.getTabCount() )
                 pane.setSelectedIndex(indexOfThis);
         }
@@ -524,7 +524,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
     public final UIForTabbedPane<P> onChange( Action<ComponentDelegate<P, ChangeEvent>> onChange ) {
         NullUtil.nullArgCheck(onChange, "onChange", Action.class);
         return _with( thisComponent -> {
-                    _onChange(thisComponent, e -> _doApp(()->onChange.accept(new ComponentDelegate<>(thisComponent, e))));
+                    _onChange(thisComponent, e -> _runInApp(()->onChange.accept(new ComponentDelegate<>(thisComponent, e))));
                 })
                 ._this();
     }

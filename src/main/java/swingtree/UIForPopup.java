@@ -31,7 +31,7 @@ public final class UIForPopup<P extends JPopupMenu> extends UIForAnySwing<UIForP
     }
     
     @Override
-    protected UIForPopup<P> _with( BuilderState<P> newState ) {
+    protected UIForPopup<P> _newBuilderWithState(BuilderState<P> newState ) {
         return new UIForPopup<>(newState);
     }
 
@@ -77,7 +77,7 @@ public final class UIForPopup<P extends JPopupMenu> extends UIForAnySwing<UIForP
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
                     _onPopupOpen(thisComponent,
-                        e -> _doApp(()->action.accept(new ComponentDelegate<>( thisComponent, e )) )
+                        e -> _runInApp(()->action.accept(new ComponentDelegate<>( thisComponent, e )) )
                     );
                 })
                 ._this();
@@ -105,7 +105,7 @@ public final class UIForPopup<P extends JPopupMenu> extends UIForAnySwing<UIForP
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
                     _onPopupClose(thisComponent,
-                        e -> _doApp(()->action.accept(new ComponentDelegate<>( (P) thisComponent, e )) )
+                        e -> _runInApp(()->action.accept(new ComponentDelegate<>( (P) thisComponent, e )) )
                     );
                 })
                 ._this();
@@ -132,7 +132,7 @@ public final class UIForPopup<P extends JPopupMenu> extends UIForAnySwing<UIForP
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
                     _onPopupCancel(thisComponent,
-                        e -> _doApp(()->action.accept(new ComponentDelegate<>( thisComponent, e )) )
+                        e -> _runInApp(()->action.accept(new ComponentDelegate<>( thisComponent, e )) )
                     );
                 })
                 ._this();

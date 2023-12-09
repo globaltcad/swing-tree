@@ -28,7 +28,7 @@ public final class UIForIcon<I extends JIcon> extends UIForAnySwing<UIForIcon<I>
     }
     
     @Override
-    protected UIForIcon<I> _with( BuilderState<I> newState ) {
+    protected UIForIcon<I> _newBuilderWithState(BuilderState<I> newState ) {
         return new UIForIcon<>(newState);
     }
 }

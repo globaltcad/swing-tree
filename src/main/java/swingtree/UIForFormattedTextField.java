@@ -23,7 +23,7 @@ public final class UIForFormattedTextField extends UIForAnyTextComponent<UIForFo
     }
     
     @Override
-    protected UIForFormattedTextField _with( BuilderState<JFormattedTextField> newState ) {
+    protected UIForFormattedTextField _newBuilderWithState(BuilderState<JFormattedTextField> newState ) {
         return new UIForFormattedTextField(newState);
     }
 
@@ -31,7 +31,7 @@ public final class UIForFormattedTextField extends UIForAnyTextComponent<UIForFo
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
                     _onEnter(thisComponent,
-                        e -> _doApp(()->action.accept(new ComponentDelegate<>( thisComponent, e )) )
+                        e -> _runInApp(()->action.accept(new ComponentDelegate<>( thisComponent, e )) )
                     );
                 })
                 ._this();

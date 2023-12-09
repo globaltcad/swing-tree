@@ -18,6 +18,7 @@ import javax.swing.*
 import javax.swing.text.JTextComponent
 import java.awt.Color
 import java.awt.Component
+import java.awt.Font
 
 @Title("How Not To Use")
 @Narrative('''
@@ -181,6 +182,50 @@ class Basic_UI_Exception_Spec extends Specification
                     { UI.passwordField(Val.ofNullable(String, "")) },
                     { UI.passwordField(Var.ofNullable(String, "")) }
                 ]
+    }
+
+    def 'A builder node may not be reused to ensure that SwingTree code remains declarative.'() {
+        reportInfo """
+            SwingTree is a library specifically designed to create UIs using declarative code.
+            Using its API in procedural code is messy and error prone, which
+            is why SwingTree will try to prevent you from doing so.
+            
+            One way to do this is to throw an exception if you try to reuse a builder node.
+            SwingTree will also mark the state of used builder nodes as as disposed and
+            cut off any reference to the underlying Swing component.
+        """
+        given : 'We create a simple UI builder node for a panel.'
+            var ui = UI.panel()
+        when : 'We use the builder node once.'
+            var ui2 = ui.add(UI.label("Hello World!"))
+        then : 'No exception is thrown.'
+            noExceptionThrown()
+        when : 'We try to use the builder node again.'
+            ui.add(UI.label("Hello World!"))
+        then : 'An exception is thrown.'
+            thrown(IllegalStateException)
+    }
+
+    def 'A disposed builder node will indicate that it should not be used in its String representation.'()
+    {
+        reportInfo """
+            A SwingTree builder node is considered disposed when one of
+            its builder methods has been called (which returns a new builder node).
+        """
+        given : 'We create a simple UI builder node for a panel.'
+            var ui = UI.panel()
+        when : 'We use the builder node once.'
+            var ui2 = ui.add(UI.label("Hello World!"))
+        then : 'One builder node has a normal String representation and the other one is striked through.'
+            ui.toString() == "U̶I̶F̶o̶r̶P̶a̶n̶e̶l̶[̶s̶w̶i̶n̶g̶t̶r̶e̶e̶.̶U̶I̶\$̶P̶a̶n̶e̶l̶]̶"
+            ui2.toString() == "UIForPanel[swingtree.UI\$Panel]"
+
+        when : 'We use another type of builder node and do the same thing.'
+            ui = UI.label("Hello World!")
+            ui2 = ui.withFont(new Font("Arial", Font.BOLD, 12))
+        then : 'One builder node has a normal String representation and the other one is striked through.'
+            ui.toString() == "U̶I̶F̶o̶r̶L̶a̶b̶e̶l̶[̶s̶w̶i̶n̶g̶t̶r̶e̶e̶.̶U̶I̶\$̶L̶a̶b̶e̶l̶]̶"
+            ui2.toString() == "UIForLabel[swingtree.UI\$Label]"
     }
 
 }

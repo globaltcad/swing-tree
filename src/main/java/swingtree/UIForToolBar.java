@@ -26,7 +26,7 @@ public final class UIForToolBar<T extends JToolBar> extends UIForAnySwing<UIForT
     }
     
     @Override
-    protected UIForToolBar<T> _with( BuilderState<T> newState ) {
+    protected UIForToolBar<T> _newBuilderWithState(BuilderState<T> newState ) {
         return new UIForToolBar<>(newState);
     }
 

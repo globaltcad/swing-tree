@@ -27,7 +27,7 @@ public final class UIForProgressBar<P extends JProgressBar> extends UIForAnySwin
     }
     
     @Override
-    protected UIForProgressBar<P> _with( BuilderState<P> newState ) {
+    protected UIForProgressBar<P> _newBuilderWithState(BuilderState<P> newState ) {
         return new UIForProgressBar<>(newState);
     }
 

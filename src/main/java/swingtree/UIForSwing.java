@@ -28,7 +28,7 @@ public class UIForSwing<C extends JComponent> extends UIForAnySwing<UIForSwing<C
     }
     
     @Override
-    protected UIForSwing<C> _with( BuilderState<C> newState ) {
+    protected UIForSwing<C> _newBuilderWithState(BuilderState<C> newState ) {
         return new UIForSwing<>(newState);
     }
 }

@@ -31,13 +31,13 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
      */
     UIForSplitButton( BuilderState<B> state ) {
         Objects.requireNonNull(state);
-        _state = state.with(this::_initialize);
+        _state = state.withMutator(this::_initialize);
     }
 
     private void _initialize( B thisComponent ) {
         ExtraState.of( thisComponent, extraState -> {
             thisComponent.setPopupMenu(extraState.popupMenu);
-            thisComponent.addButtonClickedActionListener(e -> _doApp(()->{
+            thisComponent.addButtonClickedActionListener(e -> _runInApp(()->{
                 List<JMenuItem> selected = _getSelected(thisComponent);
                 for ( JMenuItem item : selected ) {
                     Action<SplitItemDelegate<JMenuItem>> action = extraState.options.get(item);
@@ -61,7 +61,7 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
     }
     
     @Override
-    protected UIForSplitButton<B> _with( BuilderState<B> newState ) {
+    protected UIForSplitButton<B> _newBuilderWithState(BuilderState<B> newState ) {
         return new UIForSplitButton<>(newState);
     }
 
@@ -152,7 +152,7 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
         return _with( thisComponent -> {
                     ExtraState state = ExtraState.of(thisComponent);
                     thisComponent.addSplitButtonClickedActionListener(
-                        e -> _doApp(()->action.accept(
+                        e -> _runInApp(()->action.accept(
                                 new SplitButtonDelegate<>(
                                      thisComponent,
                                      new SplitItemDelegate<>(
@@ -214,7 +214,7 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
         return _with( thisComponent -> {
                     ExtraState state = ExtraState.of(thisComponent);
                     thisComponent.addButtonClickedActionListener(
-                        e -> _doApp(()->action.accept(
+                        e -> _runInApp(()->action.accept(
                                 new SplitItemDelegate<>(
                                    e,
                                    thisComponent,
@@ -241,7 +241,7 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent ->
                     thisComponent.addButtonClickedActionListener(
-                        e -> _doApp(()->action.accept(
+                        e -> _runInApp(()->action.accept(
                              new ComponentDelegate<>( thisComponent, e )
                         ))
                     )
@@ -261,7 +261,7 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
                     _onPopupOpen(thisComponent, e ->
-                        _doApp(()->action.accept(new ComponentDelegate<>( thisComponent, e )) )
+                        _runInApp(()->action.accept(new ComponentDelegate<>( thisComponent, e )) )
                     );
                 })
                 ._this();
@@ -290,7 +290,7 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
                     _onPopupClose(thisComponent,
-                        e -> _doApp(()->action.accept(new ComponentDelegate<>( thisComponent, e )) )
+                        e -> _runInApp(()->action.accept(new ComponentDelegate<>( thisComponent, e )) )
                     );
                 })
                 ._this();
@@ -318,7 +318,7 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
                     _onPopupCancel(thisComponent,
-                        e -> _doApp(()->action.accept(new ComponentDelegate<>( thisComponent, e )) )
+                        e -> _runInApp(()->action.accept(new ComponentDelegate<>( thisComponent, e )) )
                     );
                 })
                 ._this();
@@ -383,7 +383,7 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
         state.popupMenu.add(item);
         state.options.put(item, ( (SplitItem<JMenuItem>) splitItem).getOnClick());
         item.addActionListener(
-            e -> _doApp(()->{
+            e -> _runInApp(()->{
                 state.lastSelected[0] = item;
                 item.setSelected(true);
                 SplitItemDelegate<I> delegate =
