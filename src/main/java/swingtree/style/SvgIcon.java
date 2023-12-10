@@ -650,4 +650,21 @@ public final class SvgIcon extends ImageIcon
                Objects.equals(_fitComponent,       rhs._fitComponent) &&
                Objects.equals(_preferredPlacement, rhs._preferredPlacement);
     }
+
+    @Override
+    public String toString() {
+        String typeName           = getClass().getSimpleName();
+        String svgDocument        = _svgDocument == null ? "?" : _svgDocument.toString();
+        String width              = _width  < 0 ? "?" : String.valueOf(_width);
+        String height             = _height < 0 ? "?" : String.valueOf(_height);
+        String fitComponent       = _fitComponent.toString();
+        String preferredPlacement = _preferredPlacement.toString();
+        return typeName + "[" +
+                    "width=" + width + ", " +
+                    "height=" + height + ", " +
+                    "fitComponent=" + fitComponent + ", " +
+                    "preferredPlacement=" + preferredPlacement + ", " +
+                    "doc=" + svgDocument +
+                "]";
+    }
 }

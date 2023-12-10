@@ -4,7 +4,7 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
-
+import swingtree.UI
 import swingtree.style.SvgIcon
 
 @Title("SVG Support through SvgIcon")
@@ -62,5 +62,38 @@ class SvgIcon_Spec extends Specification
             icon4.getIconHeight() == 24
             icon5.getIconWidth()  == 31
             icon5.getIconHeight() == 31
+    }
+
+    def 'The `String` representation of the `SvgIcon` shows its properties.'()
+    {
+        reportInfo """
+            The `SvgIcon` consists of various properties,
+            which are shown in the `String` representation of the icon.
+            This includes the size of the icon and how it is scaled
+            and preferably placed.
+        """
+        given : 'We create a set of various `SvgIcon`s.'
+            var icon  = new SvgIcon("/img/funnel.svg")
+            var icon1 = icon.withIconHeight(13)
+            var icon2 = icon.withIconWidth(12).withFitComponent(UI.FitComponent.NO)
+            var icon3 = icon.withIconSize(27, 16)
+            var icon4 = icon.withIconSizeFromWidth(31).withPreferredPlacement(UI.Placement.BOTTOM_RIGHT)
+            var icon5 = icon.withIconSizeFromHeight(24)
+        and : 'We turn each icon into its String representation:'
+            icon  = icon .toString()
+            icon1 = icon1.toString()
+            icon2 = icon2.toString()
+            icon3 = icon3.toString()
+            icon4 = icon4.toString()
+            icon5 = icon5.toString()
+
+        expect : 'They all have the expected String representations:'
+            icon.matches( /SvgIcon\[width=\?, height=\?, fitComponent=MIN_DIM, preferredPlacement=UNDEFINED, doc=.*\]/ )
+            icon1.matches( /SvgIcon\[width=\?, height=13, fitComponent=MIN_DIM, preferredPlacement=UNDEFINED, doc=.*\]/ )
+            icon2.matches( /SvgIcon\[width=12, height=\?, fitComponent=NO, preferredPlacement=UNDEFINED, doc=.*\]/ )
+            icon3.matches( /SvgIcon\[width=27, height=16, fitComponent=MIN_DIM, preferredPlacement=UNDEFINED, doc=.*\]/ )
+            icon4.matches( /SvgIcon\[width=31, height=31, fitComponent=MIN_DIM, preferredPlacement=BOTTOM_RIGHT, doc=.*\]/ )
+            icon5.matches( /SvgIcon\[width=24, height=24, fitComponent=MIN_DIM, preferredPlacement=UNDEFINED, doc=.*\]/ )
+
     }
 }
