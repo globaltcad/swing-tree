@@ -248,7 +248,7 @@ UI.of(this/*JPanel subtype*/).withLayout("fill, insets 10")
    UI.panel("fill, ins 0")
    .add("shrink", UI.label("Result:"))
    .add("grow, wrap",
-      UI.label("42.0").with(UI.HorizontalAlignment.RIGHT)
+      UI.label("42.0", UI.HorizontalAlignment.RIGHT)
       .withProperty("FlatLaf.styleClass", "large")
    )
    .add("grow, span, wrap", UI.textArea(UI.HorizontalDirection.RIGHT_TO_LEFT, "13 - 73"))
