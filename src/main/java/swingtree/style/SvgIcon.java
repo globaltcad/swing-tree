@@ -60,6 +60,8 @@ public final class SvgIcon extends ImageIcon
     private final UI.FitComponent _fitComponent;
     private final UI.Placement    _preferredPlacement;
 
+    private BufferedImage _cache = null;
+
 
     private SvgIcon(
         SVGDocument     svgDocument, // nullable
@@ -427,7 +429,17 @@ public final class SvgIcon extends ImageIcon
             height = ( larger - smaller );
         }
 
-        _paintIcon( c, g, x, y, width, height, preferredPlacement );
+        if ( _width > 0 && _height > 0 ) {
+            if ( _cache != null && _cache.getWidth() == width && _cache.getHeight() == height )
+                g.drawImage(_cache, x, y, width, height, null);
+            else {
+                _cache = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+                paintIcon(c, _cache.getGraphics(), 0, 0, width, height);
+                g.drawImage(_cache, x, y, width, height, null);
+            }
+        }
+        else
+            _paintIcon( c, g, x, y, width, height, preferredPlacement );
     }
 
     private Insets _determineInsetsForBorder( Border b, Component c )
