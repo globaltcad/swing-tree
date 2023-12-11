@@ -378,7 +378,7 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     void establishStyleAndBeginPainting() {
-        _stylePainter = _stylePainter.update( _calculateAndApplyStyle(false) );
+        _stylePainter = _stylePainter.update( _calculateAndApplyStyle(false), _owner );
     }
 
     private Style _calculateAndApplyStyle( boolean force ) {
@@ -386,7 +386,7 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     private void _installStylePainterFor( Style style ) {
-        _stylePainter = _stylePainter.update(style);
+        _stylePainter = _stylePainter.update(style, _owner);
     }
 
     void _paintBackground( Graphics g, Runnable lookAndFeelPainting )

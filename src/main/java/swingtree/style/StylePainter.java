@@ -54,13 +54,13 @@ final class StylePainter<C extends JComponent>
 
     StylePainter<C> endPainting() {
         _interiorComponentArea = null;
-        _borderArea = null;
-        _mainComponentArea = null;
+        _borderArea            = null;
+        _mainComponentArea     = null;
         _exteriorComponentArea = null;
         return this;
     }
 
-    StylePainter<C> update( Style style ) {
+    StylePainter<C> update( Style style, C _component ) {
         return new StylePainter<>( style, _animationPainters );
     }
 
@@ -557,7 +557,7 @@ final class StylePainter<C extends JComponent>
         int xOffset = shadow.horizontalOffset();
         int yOffset = shadow.verticalOffset();
         int x = left + xOffset;
-        int y = top + yOffset;
+        int y = top  + yOffset;
         int w = width  - left - right  - borderWidth;
         int h = height - top  - bottom - borderWidth;
 
@@ -654,12 +654,12 @@ final class StylePainter<C extends JComponent>
 
     private static void _renderCornerShadow(
         ShadowStyle shadowStyle,
-        UI.Corner corner,
-        Area areaWhereShadowIsAllowed,
-        Rectangle innerShadowRect,
-        Rectangle outerShadowRect,
-        int gradientStartOffset,
-        Graphics2D g2d
+        UI.Corner   corner,
+        Area        areaWhereShadowIsAllowed,
+        Rectangle   innerShadowRect,
+        Rectangle   outerShadowRect,
+        int         gradientStartOffset,
+        Graphics2D  g2d
     ) {
         // We define a clipping box so that corners don't overlap
         float clipBoxWidth   = outerShadowRect.width / 2f;
@@ -1111,11 +1111,11 @@ final class StylePainter<C extends JComponent>
     }
 
     private static void _renderVerticalOrHorizontalGradient(
-        Graphics2D g2d,
-        JComponent component,
-        Outline margin,
+        Graphics2D    g2d,
+        JComponent    component,
+        Outline       margin,
         GradientStyle gradient,
-        Area specificArea
+        Area          specificArea
     ) {
         UI.Transition type = gradient.transition();
         Color[] colors = gradient.colors();
