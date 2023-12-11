@@ -402,9 +402,6 @@ public final class ComponentExtension<C extends JComponent>
             _outerBaseClip = new Rectangle(x,y,w,h);
         }
 
-        // If end the painting of the last painting cycle if it was not already ended:
-        _stylePainter = _stylePainter.endPainting();
-
         establishStyleAndBeginPainting();
 
         _stylePainter.renderBackgroundStyle( (Graphics2D) g, _owner );

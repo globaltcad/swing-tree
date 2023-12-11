@@ -25,7 +25,7 @@ final class StylePainter<C extends JComponent>
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(StylePainter.class);
 
-    private static final StylePainter<?> _NONE = new StylePainter<>(Style.none(), new Expirable[0]);
+    private static final StylePainter<?> _NONE = new StylePainter<>(StyleRenderState.none(), new Expirable[0]);
 
     public static <C extends JComponent> StylePainter<C> none() { return (StylePainter<C>) _NONE; }
 
@@ -34,7 +34,7 @@ final class StylePainter<C extends JComponent>
     }
 
 
-    private final Style                _style;
+    private final StyleRenderState _state;
     private final Expirable<Painter>[] _animationPainters;
 
     // Cached Area objects representing the component areas:
@@ -45,42 +45,41 @@ final class StylePainter<C extends JComponent>
 
 
     private StylePainter(
-        Style style,
+        StyleRenderState state,
         Expirable<Painter>[] animationPainters
     ) {
-        _style             = Objects.requireNonNull(style);
+        _state             = Objects.requireNonNull(state);
         _animationPainters = Objects.requireNonNull(animationPainters);
     }
 
-    StylePainter<C> endPainting() {
-        _interiorComponentArea = null;
-        _borderArea            = null;
-        _mainComponentArea     = null;
-        _exteriorComponentArea = null;
-        return this;
-    }
-
-    StylePainter<C> update( Style style, C _component ) {
-        return new StylePainter<>( style, _animationPainters );
+    StylePainter<C> update( Style style, C component ) {
+        StyleRenderState newState = _state.with(style, component);
+        if ( !_state.equals(newState) ) {
+            _interiorComponentArea = null;
+            _borderArea            = null;
+            _mainComponentArea     = null;
+            _exteriorComponentArea = null;
+        }
+        return new StylePainter<>( newState, _animationPainters );
     }
 
     StylePainter<C> withAnimationPainter( LifeTime lifeTime, Painter animationPainter ) {
         java.util.List<Expirable<Painter>> animationPainters = new ArrayList<>(Arrays.asList(_animationPainters));
         animationPainters.add(new Expirable<>(lifeTime, animationPainter));
-        return new StylePainter<>( _style, animationPainters.toArray(new Expirable[0]) );
+        return new StylePainter<>( _state, animationPainters.toArray(new Expirable[0]) );
     }
 
     StylePainter<C> withoutAnimationPainters() {
-        return new StylePainter<>( _style, new Expirable[0] );
+        return new StylePainter<>( _state, new Expirable[0] );
     }
 
     StylePainter<C> withoutExpiredAnimationPainters() {
         List<Expirable<Painter>> animationPainters = new ArrayList<>(Arrays.asList(_animationPainters));
         animationPainters.removeIf(Expirable::isExpired);
-        return new StylePainter<>( _style, animationPainters.toArray(new Expirable[0]) );
+        return new StylePainter<>( _state, animationPainters.toArray(new Expirable[0]) );
     }
 
-    Style getStyle() { return _style; }
+    Style getStyle() { return _state.style(); }
 
     Optional<Shape> interiorAreaOf( JComponent component ) {
         Shape contentClip = null;
@@ -154,10 +153,10 @@ final class StylePainter<C extends JComponent>
         if ( componentFont != null && !componentFont.equals(g2d.getFont()) )
             g2d.setFont( componentFont );
 
-        _style.base().foundationColor().ifPresent(outerColor -> {
+        _state.style().base().foundationColor().ifPresent(outerColor -> {
             _fillOuterFoundationBackground(outerColor, g2d, comp);
         });
-        _style.base().backgroundColor().ifPresent(color -> {
+        _state.style().base().backgroundColor().ifPresent(color -> {
             if ( color.getAlpha() == 0 ) return;
             g2d.setColor(color);
             g2d.fill(_getInteriorAreaOf(comp));
@@ -172,28 +171,28 @@ final class StylePainter<C extends JComponent>
     private void _paintStylesOn( UI.Layer layer, Graphics2D g2d , JComponent comp ) {
         // Every layer has 4 things:
         // 1. A grounding serving as a base background, which is a filled color and/or an image:
-        for ( ImageStyle imageStyle : _style.images(layer) )
+        for ( ImageStyle imageStyle : _state.style().images(layer) )
             if ( !imageStyle.equals(ImageStyle.none()) )
                 _renderImage( imageStyle, g2d, comp );
 
         // 2. Gradients, which are best used to give a component a nice surface lighting effect.
         // They may transition vertically, horizontally or diagonally over various different colors:
-        for ( GradientStyle gradient : _style.gradients(layer) )
+        for ( GradientStyle gradient : _state.style().gradients(layer) )
             if ( gradient.colors().length > 0 ) {
                 if ( gradient.colors().length == 1 ) {
                     g2d.setColor(gradient.colors()[0]);
                     g2d.fill(_getInteriorAreaOf(comp));
                 }
                 else if ( gradient.transition().isDiagonal() )
-                    _renderDiagonalGradient(g2d, comp, _style.margin(), gradient, _getInteriorAreaOf(comp));
+                    _renderDiagonalGradient(g2d, comp, _state.style().margin(), gradient, _getInteriorAreaOf(comp));
                 else
-                    _renderVerticalOrHorizontalGradient(g2d, comp, _style.margin(), gradient, _getInteriorAreaOf(comp));
+                    _renderVerticalOrHorizontalGradient(g2d, comp, _state.style().margin(), gradient, _getInteriorAreaOf(comp));
             }
 
         // 3. Shadows, which are simple gradient based drop shadows that can go inwards or outwards
-        for ( ShadowStyle shadow : _style.shadows(layer) )
+        for ( ShadowStyle shadow : _state.style().shadows(layer) )
             shadow.color().ifPresent(color -> {
-                _renderShadows(_style, shadow, comp, g2d, color);
+                _renderShadows(shadow, comp, g2d, color);
             });
 
         // 4. Painters, which are provided by the user and can be anything
@@ -203,7 +202,7 @@ final class StylePainter<C extends JComponent>
             AffineTransform currentTransform = new AffineTransform(g2d.getTransform());
             Shape           currentClip      = g2d.getClip();
 
-            _style.painters(layer).forEach( backgroundPainter -> {
+            _state.style().painters(layer).forEach( backgroundPainter -> {
 
                 if ( backgroundPainter == Painter.none() )
                     return;
@@ -256,7 +255,7 @@ final class StylePainter<C extends JComponent>
 
         _paintStylesOn(UI.Layer.CONTENT, g2d, component);
 
-        _style.border().color().ifPresent(color -> {
+        _state.style().border().color().ifPresent(color -> {
             _drawBorder( color, g2d, component );
         });
 
@@ -290,10 +289,10 @@ final class StylePainter<C extends JComponent>
         if ( _mainComponentArea != null )
             return _mainComponentArea;
 
-        int leftBorderWidth   = _style.border().widths().left().orElse(0);
-        int topBorderWidth    = _style.border().widths().top().orElse(0);
-        int rightBorderWidth  = _style.border().widths().right().orElse(0);
-        int bottomBorderWidth = _style.border().widths().bottom().orElse(0);
+        int leftBorderWidth   = _state.style().border().widths().left().orElse(0);
+        int topBorderWidth    = _state.style().border().widths().top().orElse(0);
+        int rightBorderWidth  = _state.style().border().widths().right().orElse(0);
+        int bottomBorderWidth = _state.style().border().widths().bottom().orElse(0);
         _mainComponentArea = _calculateBaseArea(
                                         topBorderWidth,
                                         leftBorderWidth,
@@ -305,19 +304,19 @@ final class StylePainter<C extends JComponent>
     }
 
     private void _drawBorder( Color color, Graphics2D g2d, JComponent comp ) {
-        if ( !Outline.none().equals(_style.border().widths()) ) {
+        if ( !Outline.none().equals(_state.style().border().widths()) ) {
             try {
                 Area borderArea = _getBorderAreaOf(comp);
                 g2d.setColor(color);
                 g2d.fill(borderArea);
 
-                if (!_style.border().gradients().isEmpty()) {
-                    for ( GradientStyle gradient : _style.border().gradients() ) {
+                if (!_state.style().border().gradients().isEmpty()) {
+                    for ( GradientStyle gradient : _state.style().border().gradients() ) {
                         if ( gradient.colors().length > 0 ) {
                             if ( gradient.transition().isDiagonal() )
-                                _renderDiagonalGradient(g2d, comp, _style.margin(), gradient, borderArea);
+                                _renderDiagonalGradient(g2d, comp, _state.style().margin(), gradient, borderArea);
                             else
-                                _renderVerticalOrHorizontalGradient(g2d, comp, _style.margin(), gradient, borderArea);
+                                _renderVerticalOrHorizontalGradient(g2d, comp, _state.style().margin(), gradient, borderArea);
                         }
                     }
                 }
@@ -336,7 +335,7 @@ final class StylePainter<C extends JComponent>
 
     private Area _calculateBaseArea( int insTop, int insLeft, int insBottom, int insRight, JComponent comp )
     {
-        if ( _style.equals(Style.none()) ) {
+        if ( _state.style().equals(Style.none()) ) {
             // If there is no style, we just return the component's bounds:
             return new Area(new Rectangle(0, 0, comp.getWidth(), comp.getHeight()));
         }
@@ -350,18 +349,18 @@ final class StylePainter<C extends JComponent>
         }
 
         // The background box is calculated from the margins and border radius:
-        int left   = Math.max(_style.margin().left().orElse(0), 0)   + insLeft  ;
-        int top    = Math.max(_style.margin().top().orElse(0), 0)    + insTop   ;
-        int right  = Math.max(_style.margin().right().orElse(0), 0)  + insRight ;
-        int bottom = Math.max(_style.margin().bottom().orElse(0), 0) + insBottom;
+        int left   = Math.max(_state.style().margin().left().orElse(0), 0)   + insLeft  ;
+        int top    = Math.max(_state.style().margin().top().orElse(0), 0)    + insTop   ;
+        int right  = Math.max(_state.style().margin().right().orElse(0), 0)  + insRight ;
+        int bottom = Math.max(_state.style().margin().bottom().orElse(0), 0) + insBottom;
         int width  = comp.getWidth() ;
         int height = comp.getHeight();
 
         boolean insAllTheSame = insTop == insLeft && insLeft == insBottom && insBottom == insRight;
 
-        if ( _style.border().allCornersShareTheSameArc() && insAllTheSame ) {
-            int arcWidth  = _style.border().topLeftArc().map( a -> Math.max(0,a.width() ) ).orElse(0);
-            int arcHeight = _style.border().topLeftArc().map( a -> Math.max(0,a.height()) ).orElse(0);
+        if ( _state.style().border().allCornersShareTheSameArc() && insAllTheSame ) {
+            int arcWidth  = _state.style().border().topLeftArc().map( a -> Math.max(0,a.width() ) ).orElse(0);
+            int arcHeight = _state.style().border().topLeftArc().map( a -> Math.max(0,a.height()) ).orElse(0);
             arcWidth  = Math.max(0, arcWidth  - insTop);
             arcHeight = Math.max(0, arcHeight - insTop);
             if ( arcWidth == 0 || arcHeight == 0 )
@@ -374,10 +373,10 @@ final class StylePainter<C extends JComponent>
                                 arcWidth, arcHeight
                             ));
         } else {
-            Arc topLeftArc     = _style.border().topLeftArc().orElse(null);
-            Arc topRightArc    = _style.border().topRightArc().orElse(null);
-            Arc bottomRightArc = _style.border().bottomRightArc().orElse(null);
-            Arc bottomLeftArc  = _style.border().bottomLeftArc().orElse(null);
+            Arc topLeftArc     = _state.style().border().topLeftArc().orElse(null);
+            Arc topRightArc    = _state.style().border().topRightArc().orElse(null);
+            Arc bottomRightArc = _state.style().border().bottomRightArc().orElse(null);
+            Arc bottomLeftArc  = _state.style().border().bottomLeftArc().orElse(null);
             Area area = new Area();
 
             int topLeftRoundnessAdjustment     = Math.min(insLeft,   insTop  );
@@ -525,7 +524,6 @@ final class StylePainter<C extends JComponent>
     }
 
     private void _renderShadows(
-        Style style,
         ShadowStyle shadow,
         JComponent comp,
         Graphics2D g2d,
@@ -537,18 +535,18 @@ final class StylePainter<C extends JComponent>
             return;
 
         // The background box is calculated from the margins and border radius:
-        int leftBorderWidth   = style.border().widths().left().orElse(0);
-        int topBorderWidth    = style.border().widths().top().orElse(0);
-        int rightBorderWidth  = style.border().widths().right().orElse(0);
-        int bottomBorderWidth = style.border().widths().bottom().orElse(0);
-        int left   = Math.max(style.margin().left().orElse(0),   0) + ( shadow.isInset() ? leftBorderWidth   : 0 );
-        int top    = Math.max(style.margin().top().orElse(0),    0) + ( shadow.isInset() ? topBorderWidth    : 0 );
-        int right  = Math.max(style.margin().right().orElse(0),  0) + ( shadow.isInset() ? rightBorderWidth  : 0 );
-        int bottom = Math.max(style.margin().bottom().orElse(0), 0) + ( shadow.isInset() ? bottomBorderWidth : 0 );
-        int topLeftRadius     = Math.max(style.border().topLeftRadius(), 0);
-        int topRightRadius    = Math.max(style.border().topRightRadius(), 0);
-        int bottomRightRadius = Math.max(style.border().bottomRightRadius(), 0);
-        int bottomLeftRadius  = Math.max(style.border().bottomLeftRadius(), 0);
+        int leftBorderWidth   = _state.style().border().widths().left().orElse(0);
+        int topBorderWidth    = _state.style().border().widths().top().orElse(0);
+        int rightBorderWidth  = _state.style().border().widths().right().orElse(0);
+        int bottomBorderWidth = _state.style().border().widths().bottom().orElse(0);
+        int left   = Math.max(_state.style().margin().left().orElse(0),   0) + ( shadow.isInset() ? leftBorderWidth   : 0 );
+        int top    = Math.max(_state.style().margin().top().orElse(0),    0) + ( shadow.isInset() ? topBorderWidth    : 0 );
+        int right  = Math.max(_state.style().margin().right().orElse(0),  0) + ( shadow.isInset() ? rightBorderWidth  : 0 );
+        int bottom = Math.max(_state.style().margin().bottom().orElse(0), 0) + ( shadow.isInset() ? bottomBorderWidth : 0 );
+        int topLeftRadius     = Math.max(_state.style().border().topLeftRadius(), 0);
+        int topRightRadius    = Math.max(_state.style().border().topRightRadius(), 0);
+        int bottomRightRadius = Math.max(_state.style().border().bottomRightRadius(), 0);
+        int bottomLeftRadius  = Math.max(_state.style().border().bottomLeftRadius(), 0);
         int width     = comp.getWidth();
         int height    = comp.getHeight();
         int borderWidth = 0;
