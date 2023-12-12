@@ -41,7 +41,19 @@ final class StylePainter<C extends JComponent>
     private Area _borderArea = null; // == _exteriorComponentArea - _interiorComponentArea
     private Area _mainComponentArea = null; // == _borderArea + _interiorComponentArea
     private Area _exteriorComponentArea = null; // == full component bounds - _mainComponentArea
-    private Area _interiorComponentArea = null; // == full component bounds - _borderArea - _exteriorComponentArea
+
+    // == full component bounds - _borderArea - _exteriorComponentArea
+    private final Cached<Area> _interiorComponentArea = new Cached<Area>() {
+        @Override
+        protected boolean isValid(StyleRenderState oldState, StyleRenderState newState) {
+            return AreaCalculator._testWouldLeadToSameBaseArea(oldState, newState);
+        }
+
+        @Override
+        protected Area produce(StyleRenderState currentState) {
+            return AreaCalculator._calculateBaseArea(currentState, 0, 0, 0, 0);
+        }
+    };
 
 
     private StylePainter(
@@ -55,7 +67,7 @@ final class StylePainter<C extends JComponent>
     StylePainter<C> update( Style style, C component ) {
         StyleRenderState newState = _state.with(style, component);
         if ( !_state.equals(newState) ) {
-            _interiorComponentArea = null;
+            _interiorComponentArea.update(_state, newState);
             _borderArea            = null;
             _mainComponentArea     = null;
             _exteriorComponentArea = null;
@@ -83,7 +95,7 @@ final class StylePainter<C extends JComponent>
 
     Optional<Shape> interiorArea( ) {
         Shape contentClip = null;
-        if ( _interiorComponentArea != null )
+        if ( _interiorComponentArea.exists() )
             contentClip = _getInteriorArea();
         else if ( getStyle().margin().isPositive() )
             contentClip = _getInteriorArea();
@@ -93,11 +105,7 @@ final class StylePainter<C extends JComponent>
 
     Area _getInteriorArea()
     {
-        if ( _interiorComponentArea != null )
-            return _interiorComponentArea;
-
-        _interiorComponentArea = _calculateBaseArea(0, 0, 0, 0);
-        return _interiorComponentArea;
+        return _interiorComponentArea.getFor(_state);
     }
 
     Area _getExteriorArea()
@@ -140,8 +148,6 @@ final class StylePainter<C extends JComponent>
 
     void renderBackgroundStyle( Graphics2D g2d, JComponent comp )
     {
-        _interiorComponentArea = null;
-
         // We remember if antialiasing was enabled before we render:
         boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
 
@@ -293,7 +299,8 @@ final class StylePainter<C extends JComponent>
         int topBorderWidth    = _state.style().border().widths().top().orElse(0);
         int rightBorderWidth  = _state.style().border().widths().right().orElse(0);
         int bottomBorderWidth = _state.style().border().widths().bottom().orElse(0);
-        _mainComponentArea = _calculateBaseArea(
+        _mainComponentArea = AreaCalculator._calculateBaseArea(
+                                        _state,
                                         topBorderWidth,
                                         leftBorderWidth,
                                         bottomBorderWidth,
@@ -329,175 +336,6 @@ final class StylePainter<C extends JComponent>
                     mess up the rendering of the rest of the component, so we catch them here!
                 */
             }
-        }
-    }
-
-    private Area _calculateBaseArea( int insTop, int insLeft, int insBottom, int insRight )
-    {
-        if ( _state.style().equals(Style.none()) ) {
-            // If there is no style, we just return the component's bounds:
-            return new Area(new Rectangle(0, 0, _state.currentBounds().width(), _state.currentBounds().height()));
-        }
-
-        insTop    += _state.baseOutline().top().orElse(0);
-        insLeft   += _state.baseOutline().left().orElse(0);
-        insBottom += _state.baseOutline().bottom().orElse(0);
-        insRight  += _state.baseOutline().right().orElse(0);
-
-        // The background box is calculated from the margins and border radius:
-        int left   = Math.max(_state.style().margin().left().orElse(0), 0)   + insLeft  ;
-        int top    = Math.max(_state.style().margin().top().orElse(0), 0)    + insTop   ;
-        int right  = Math.max(_state.style().margin().right().orElse(0), 0)  + insRight ;
-        int bottom = Math.max(_state.style().margin().bottom().orElse(0), 0) + insBottom;
-        int width  = _state.currentBounds().width();
-        int height = _state.currentBounds().height();
-
-        boolean insAllTheSame = insTop == insLeft && insLeft == insBottom && insBottom == insRight;
-
-        if ( _state.style().border().allCornersShareTheSameArc() && insAllTheSame ) {
-            int arcWidth  = _state.style().border().topLeftArc().map( a -> Math.max(0,a.width() ) ).orElse(0);
-            int arcHeight = _state.style().border().topLeftArc().map( a -> Math.max(0,a.height()) ).orElse(0);
-            arcWidth  = Math.max(0, arcWidth  - insTop);
-            arcHeight = Math.max(0, arcHeight - insTop);
-            if ( arcWidth == 0 || arcHeight == 0 )
-                return new Area(new Rectangle(left, top, width - left - right, height - top - bottom));
-
-            // We can return a simple round rectangle:
-            return new Area(new RoundRectangle2D.Float(
-                                left, top,
-                                width - left - right, height - top - bottom,
-                                arcWidth, arcHeight
-                            ));
-        } else {
-            Arc topLeftArc     = _state.style().border().topLeftArc().orElse(null);
-            Arc topRightArc    = _state.style().border().topRightArc().orElse(null);
-            Arc bottomRightArc = _state.style().border().bottomRightArc().orElse(null);
-            Arc bottomLeftArc  = _state.style().border().bottomLeftArc().orElse(null);
-            Area area = new Area();
-
-            int topLeftRoundnessAdjustment     = Math.min(insLeft,   insTop  );
-            int topRightRoundnessAdjustment    = Math.min(insTop,    insRight);
-            int bottomRightRoundnessAdjustment = Math.min(insBottom, insRight);
-            int bottomLeftRoundnessAdjustment  = Math.min(insBottom, insLeft );
-
-            int arcWidthTL  = Math.max(0, topLeftArc     == null ? 0 : topLeftArc.width()      - topLeftRoundnessAdjustment);
-            int arcHeightTL = Math.max(0, topLeftArc     == null ? 0 : topLeftArc.height()     - topLeftRoundnessAdjustment);
-            int arcWidthTR  = Math.max(0, topRightArc    == null ? 0 : topRightArc.width()     - topRightRoundnessAdjustment);
-            int arcHeightTR = Math.max(0, topRightArc    == null ? 0 : topRightArc.height()    - topRightRoundnessAdjustment);
-            int arcWidthBR  = Math.max(0, bottomRightArc == null ? 0 : bottomRightArc.width()  - bottomRightRoundnessAdjustment);
-            int arcHeightBR = Math.max(0, bottomRightArc == null ? 0 : bottomRightArc.height() - bottomRightRoundnessAdjustment);
-            int arcWidthBL  = Math.max(0, bottomLeftArc  == null ? 0 : bottomLeftArc.width()   - bottomLeftRoundnessAdjustment);
-            int arcHeightBL = Math.max(0, bottomLeftArc  == null ? 0 : bottomLeftArc.height()  - bottomLeftRoundnessAdjustment);
-
-            // Top left:
-            if ( topLeftArc != null ) {
-                area.add(new Area(new Arc2D.Float(
-                        left, top,
-                        arcWidthTL, arcHeightTL,
-                        90, 90, Arc2D.PIE
-                )));
-            }
-            // Top right:
-            if ( topRightArc != null ) {
-                area.add(new Area(new Arc2D.Float(
-                        width - right - topRightArc.width() + topRightRoundnessAdjustment,
-                        top,
-                        arcWidthTR, arcHeightTR,
-                        0, 90, Arc2D.PIE
-                )));
-            }
-            // Bottom right:
-            if ( bottomRightArc != null ) {
-                area.add(new Area(new Arc2D.Float(
-                        width  - right  - bottomRightArc.width()  + bottomRightRoundnessAdjustment,
-                        height - bottom - bottomRightArc.height() + bottomRightRoundnessAdjustment,
-                        arcWidthBR, arcHeightBR,
-                        270, 90, Arc2D.PIE
-                )));
-            }
-            // Bottom left:
-            if ( bottomLeftArc != null ) {
-                area.add(new Area(new Arc2D.Float(
-                        left,
-                        height - bottom - bottomLeftArc.height() + bottomLeftRoundnessAdjustment,
-                        arcWidthBL, arcHeightBL,
-                        180, 90, Arc2D.PIE
-                )));
-            }
-            /*
-                Now we are going to have to fill four rectangles for each side of the partially rounded background box
-                and then a single rectangle for the center.
-                The four outer rectangles are calculated from the arcs and the margins.
-             */
-            int topDistance    = 0;
-            int rightDistance  = 0;
-            int bottomDistance = 0;
-            int leftDistance   = 0;
-            // top:
-            if ( topLeftArc != null || topRightArc != null ) {
-                int arcWidthLeft   = (int) Math.floor(arcWidthTL  / 2.0);
-                int arcHeightLeft  = (int) Math.floor(arcHeightTL / 2.0);
-                int arcWidthRight  = (int) Math.floor(arcWidthTR  / 2.0);
-                int arcHeightRight = (int) Math.floor(arcHeightTR / 2.0);
-                topDistance = Math.max(arcHeightLeft, arcHeightRight);// This is where the center rectangle will start!
-                int innerLeft   = left + arcWidthLeft;
-                int innerRight  = width - right - arcWidthRight;
-                int edgeRectangleHeight = topDistance;
-                area.add(new Area(new Rectangle2D.Float(
-                        innerLeft, top, innerRight - innerLeft, edgeRectangleHeight
-                    )));
-            }
-            // right:
-            if ( topRightArc != null || bottomRightArc != null ) {
-                int arcWidthTop    = (int) Math.floor(arcWidthTR  / 2.0);
-                int arcHeightTop   = (int) Math.floor(arcHeightTR / 2.0);
-                int arcWidthBottom = (int) Math.floor(arcWidthBR  / 2.0);
-                int arcHeightBottom= (int) Math.floor(arcHeightBR / 2.0);
-                rightDistance = Math.max(arcWidthTop, arcWidthBottom);// This is where the center rectangle will start!
-                int innerTop    = top + arcHeightTop;
-                int innerBottom = height - bottom - arcHeightBottom;
-                int edgeRectangleWidth = rightDistance;
-                area.add(new Area(new Rectangle2D.Float(
-                        width - right - edgeRectangleWidth, innerTop, edgeRectangleWidth, innerBottom - innerTop
-                    )));
-            }
-            // bottom:
-            if ( bottomRightArc != null || bottomLeftArc != null ) {
-                int arcWidthRight  = (int) Math.floor(arcWidthBR  / 2.0);
-                int arcHeightRight = (int) Math.floor(arcHeightBR / 2.0);
-                int arcWidthLeft   = (int) Math.floor(arcWidthBL  / 2.0);
-                int arcHeightLeft  = (int) Math.floor(arcHeightBL / 2.0);
-                bottomDistance = Math.max(arcHeightRight, arcHeightLeft);// This is where the center rectangle will start!
-                int innerLeft   = left + arcWidthLeft;
-                int innerRight  = width - right - arcWidthRight;
-                int edgeRectangleHeight = bottomDistance;
-                area.add(new Area(new Rectangle2D.Float(
-                        innerLeft, height - bottom - edgeRectangleHeight, innerRight - innerLeft, edgeRectangleHeight
-                    )));
-            }
-            // left:
-            if ( bottomLeftArc != null || topLeftArc != null ) {
-                int arcWidthBottom = (int) Math.floor(arcWidthBL  / 2.0);
-                int arcHeightBottom= (int) Math.floor(arcHeightBL / 2.0);
-                int arcWidthTop    = (int) Math.floor(arcWidthTL  / 2.0);
-                int arcHeightTop   = (int) Math.floor(arcHeightTL / 2.0);
-                leftDistance = Math.max(arcWidthBottom, arcWidthTop);// This is where the center rectangle will start!
-                int innerTop    = top + arcHeightTop;
-                int innerBottom = height - bottom - arcHeightBottom;
-                int edgeRectangleWidth = leftDistance;
-                area.add(new Area(new Rectangle2D.Float(
-                        left, innerTop, edgeRectangleWidth, innerBottom - innerTop
-                    )));
-            }
-            // Now we add the center:
-            area.add(new Area(
-                        new Rectangle2D.Float(
-                            left + leftDistance, top + topDistance,
-                            width - left - leftDistance - right - rightDistance,
-                            height - top - topDistance - bottom - bottomDistance
-                        )
-                    ));
-            return area;
         }
     }
 
@@ -561,7 +399,7 @@ final class StylePainter<C extends JComponent>
 
         if ( shadow.isOutset() ) {
             int artifactAdjustment = 1;
-            baseArea = _calculateBaseArea(artifactAdjustment, artifactAdjustment, artifactAdjustment, artifactAdjustment);
+            baseArea = AreaCalculator._calculateBaseArea(_state, artifactAdjustment, artifactAdjustment, artifactAdjustment, artifactAdjustment);
         }
         else
             baseArea = new Area(_getInteriorArea());
