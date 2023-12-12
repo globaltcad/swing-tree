@@ -62,7 +62,7 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
     @Override
     public void paintBorder( Component c, Graphics g, int x, int y, int width, int height )
     {
-        _compExt.establishStyleAndBeginPainting();
+        _compExt.establishStyleStateForRendering();
 
         Shape former = g.getClip();
 

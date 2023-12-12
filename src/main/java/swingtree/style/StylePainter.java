@@ -134,7 +134,7 @@ final class StylePainter<C extends JComponent>
         _animationPainters = Objects.requireNonNull(animationPainters);
     }
 
-    StylePainter<C> update( Style style, C component ) {
+    StylePainter<C> withNewStyleAndComponent(Style style, C component ) {
         StyleRenderState newState = _state.with(style, component);
         if ( !_state.equals(newState) ) {
             _borderArea.validate(_state, newState);
@@ -163,11 +163,9 @@ final class StylePainter<C extends JComponent>
 
     Style getStyle() { return _state.style(); }
 
-    Optional<Shape> interiorArea( ) {
+    Optional<Shape> interiorArea() {
         Shape contentClip = null;
-        if ( _interiorComponentArea.exists() )
-            contentClip = _getInteriorArea();
-        else if ( getStyle().margin().isPositive() )
+        if ( _interiorComponentArea.exists() || getStyle().margin().isPositive() )
             contentClip = _getInteriorArea();
 
         return Optional.ofNullable(contentClip);

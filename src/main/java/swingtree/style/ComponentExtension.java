@@ -304,7 +304,7 @@ public final class ComponentExtension<C extends JComponent>
             superPaint.run();
         });
 
-        establishStyleAndBeginPainting();
+        establishStyleStateForRendering();
 
         // We remember if antialiasing was enabled before we render:
         boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
@@ -326,7 +326,7 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     void paintWithContentAreaClip( Graphics g, Runnable painter ) {
-        establishStyleAndBeginPainting();
+        establishStyleStateForRendering();
         _stylePainter.paintWithContentAreaClip(g, painter);
     }
 
@@ -362,7 +362,7 @@ public final class ComponentExtension<C extends JComponent>
      * @param force If set to <code>true</code>, the style will be applied even if it is the same as the current style.
      */
     public void calculateApplyAndInstallStyle( boolean force ) {
-        _installStylePainterFor( _calculateAndApplyStyle(force) );
+        _installStyle( _calculateAndApplyStyle(force) );
     }
 
     /**
@@ -375,19 +375,19 @@ public final class ComponentExtension<C extends JComponent>
      * @param force If set to <code>true</code>, the style will be applied even if it is the same as the current style.
      */
     public void applyAndInstallStyle( Style style, boolean force ) {
-        _installStylePainterFor( _applyStyleToComponentState(style, force) );
+        _installStyle( _applyStyleToComponentState(style, force) );
     }
 
-    void establishStyleAndBeginPainting() {
-        _stylePainter = _stylePainter.update( _calculateAndApplyStyle(false), _owner );
+    void establishStyleStateForRendering() {
+        _stylePainter = _stylePainter.withNewStyleAndComponent( _calculateAndApplyStyle(false), _owner );
+    }
+
+    private void _installStyle( Style style ) {
+        _stylePainter = _stylePainter.withNewStyleAndComponent(style, _owner);
     }
 
     private Style _calculateAndApplyStyle( boolean force ) {
         return _applyStyleToComponentState(calculateStyle(), force);
-    }
-
-    private void _installStylePainterFor( Style style ) {
-        _stylePainter = _stylePainter.update(style, _owner);
     }
 
     void _paintBackground( Graphics g, Runnable lookAndFeelPainting )
@@ -403,7 +403,7 @@ public final class ComponentExtension<C extends JComponent>
             _outerBaseClip = new Rectangle(x,y,w,h);
         }
 
-        establishStyleAndBeginPainting();
+        establishStyleStateForRendering();
 
         _stylePainter.renderBackgroundStyle( (Graphics2D) g, _owner );
 
