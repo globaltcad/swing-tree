@@ -337,6 +337,10 @@ public final class SvgIcon extends ImageIcon
      */
     @Override
     public Image getImage() {
+
+        if ( _cache != null )
+            return _cache;
+
         int width  = getIconWidth();
         int height = getIconHeight();
 
