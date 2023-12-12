@@ -25,7 +25,7 @@ final class StylePainter
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(StylePainter.class);
 
-    private static final StylePainter _NONE = new StylePainter(StyleRenderState.none(), new Expirable[0]);
+    private static final StylePainter _NONE = new StylePainter(StyleRenderState.none(), new Expirable[0], new CachedShapeCalculator());
 
     public static <C extends JComponent> StylePainter none() { return _NONE; }
 
@@ -36,47 +36,49 @@ final class StylePainter
 
     private final StyleRenderState _state;
     private final Expirable<Painter>[] _animationPainters;
-    private final CachedShapeCalculator _shapes = new CachedShapeCalculator();
+    private final CachedShapeCalculator _shapes;
 
 
     private StylePainter(
         StyleRenderState state,
-        Expirable<Painter>[] animationPainters
+        Expirable<Painter>[] animationPainters,
+        CachedShapeCalculator shapes
     ) {
         _state             = Objects.requireNonNull(state);
         _animationPainters = Objects.requireNonNull(animationPainters);
+        _shapes            = Objects.requireNonNull(shapes);
     }
 
     StylePainter withNewStyleAndComponent(Style style, JComponent component ) {
         StyleRenderState newState = _state.with(style, component);
         _shapes.validate(_state, newState);
-        return new StylePainter( newState, _animationPainters );
+        return new StylePainter( newState, _animationPainters, _shapes );
     }
 
     StylePainter withAnimationPainter( LifeTime lifeTime, Painter animationPainter ) {
         java.util.List<Expirable<Painter>> animationPainters = new ArrayList<>(Arrays.asList(_animationPainters));
         animationPainters.add(new Expirable<>(lifeTime, animationPainter));
-        return new StylePainter( _state, animationPainters.toArray(new Expirable[0]) );
+        return new StylePainter( _state, animationPainters.toArray(new Expirable[0]), _shapes );
     }
 
     StylePainter withoutAnimationPainters() {
-        return new StylePainter( _state, new Expirable[0] );
+        return new StylePainter( _state, new Expirable[0], _shapes );
     }
 
     StylePainter withoutExpiredAnimationPainters() {
         List<Expirable<Painter>> animationPainters = new ArrayList<>(Arrays.asList(_animationPainters));
         animationPainters.removeIf(Expirable::isExpired);
-        return new StylePainter( _state, animationPainters.toArray(new Expirable[0]) );
+        return new StylePainter( _state, animationPainters.toArray(new Expirable[0]), _shapes );
     }
 
     Style getStyle() { return _state.style(); }
 
     Optional<Shape> interiorArea() {
         Shape contentClip = null;
-        if ( _shapes.interiorComponentArea().exists() || getStyle().margin().isPositive() )
-            contentClip = _getInteriorArea();
+        //if ( _shapes.interiorComponentArea().exists() || getStyle().margin().isPositive() )
+        //    contentClip = _getInteriorArea();
 
-        return Optional.ofNullable(contentClip);
+        return Optional.ofNullable(_getInteriorArea());
     }
 
     Area _getInteriorArea()

@@ -30,7 +30,7 @@ final class CachedShapeCalculator
             if ( !_interiorComponentArea.leadsToSameValue(oldState, newState) )
                 return false;
 
-            return false;
+            return true;
         }
     };
 
@@ -79,9 +79,10 @@ final class CachedShapeCalculator
             if ( mainIsSame ) {
                 Bounds oldBounds = oldState.currentBounds();
                 Bounds newBounds = newState.currentBounds();
-                return oldBounds.equals(newBounds);
+                if ( !oldBounds.equals(newBounds) )
+                    return false;
             }
-            return false;
+            return true;
         }
     };
 
@@ -108,9 +109,9 @@ final class CachedShapeCalculator
 
     public void validate( StyleRenderState oldState, StyleRenderState newState )
     {
-        if ( oldState.equals(newState) )
-            return;
-
+        //if ( oldState.equals(newState) )
+        //    return;
+        _borderArea.validate(oldState, newState);
         _mainComponentArea.validate(oldState, newState);
         _exteriorComponentArea.validate(oldState, newState);
         _interiorComponentArea.validate(oldState, newState);

@@ -18,12 +18,10 @@ abstract class Cached<T>
 
     public Cached() {}
 
-    public final boolean validate(StyleRenderState oldState, StyleRenderState newState ) {
-        if ( leadsToSameValue(oldState, newState) ) {
+    public final void validate( StyleRenderState oldState, StyleRenderState newState ) {
+        //if ( _value != null && !leadsToSameValue(oldState, newState) ) {
             _value = null;
-            return true;
-        }
-        return false;
+        //}
     }
 
     public final T getFor(StyleRenderState currentState ) {
