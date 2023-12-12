@@ -19,9 +19,9 @@ abstract class Cached<T>
     public Cached() {}
 
     public final void validate( StyleRenderState oldState, StyleRenderState newState ) {
-        //if ( _value != null && !leadsToSameValue(oldState, newState) ) {
+        if ( _value != null && !leadsToSameValue(oldState, newState) ) {
             _value = null;
-        //}
+        }
     }
 
     public final T getFor(StyleRenderState currentState ) {
