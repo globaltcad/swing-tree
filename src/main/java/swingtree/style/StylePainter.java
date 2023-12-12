@@ -21,13 +21,13 @@ import java.util.function.Function;
  *  This is a pretty long class, but it is not very complex, it just has a lot of methods
  *  that are used to render the various style configurations like gradients, images, shadows, etc...
  */
-final class StylePainter<C extends JComponent>
+final class StylePainter
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(StylePainter.class);
 
-    private static final StylePainter<?> _NONE = new StylePainter<>(StyleRenderState.none(), new Expirable[0]);
+    private static final StylePainter _NONE = new StylePainter(StyleRenderState.none(), new Expirable[0]);
 
-    public static <C extends JComponent> StylePainter<C> none() { return (StylePainter<C>) _NONE; }
+    public static <C extends JComponent> StylePainter none() { return _NONE; }
 
     static boolean DO_ANTIALIASING(){
         return UI.scale() < 1.5;
@@ -47,26 +47,26 @@ final class StylePainter<C extends JComponent>
         _animationPainters = Objects.requireNonNull(animationPainters);
     }
 
-    StylePainter<C> withNewStyleAndComponent(Style style, C component ) {
+    StylePainter withNewStyleAndComponent(Style style, JComponent component ) {
         StyleRenderState newState = _state.with(style, component);
         _shapes.validate(_state, newState);
-        return new StylePainter<>( newState, _animationPainters );
+        return new StylePainter( newState, _animationPainters );
     }
 
-    StylePainter<C> withAnimationPainter( LifeTime lifeTime, Painter animationPainter ) {
+    StylePainter withAnimationPainter( LifeTime lifeTime, Painter animationPainter ) {
         java.util.List<Expirable<Painter>> animationPainters = new ArrayList<>(Arrays.asList(_animationPainters));
         animationPainters.add(new Expirable<>(lifeTime, animationPainter));
-        return new StylePainter<>( _state, animationPainters.toArray(new Expirable[0]) );
+        return new StylePainter( _state, animationPainters.toArray(new Expirable[0]) );
     }
 
-    StylePainter<C> withoutAnimationPainters() {
-        return new StylePainter<>( _state, new Expirable[0] );
+    StylePainter withoutAnimationPainters() {
+        return new StylePainter( _state, new Expirable[0] );
     }
 
-    StylePainter<C> withoutExpiredAnimationPainters() {
+    StylePainter withoutExpiredAnimationPainters() {
         List<Expirable<Painter>> animationPainters = new ArrayList<>(Arrays.asList(_animationPainters));
         animationPainters.removeIf(Expirable::isExpired);
-        return new StylePainter<>( _state, animationPainters.toArray(new Expirable[0]) );
+        return new StylePainter( _state, animationPainters.toArray(new Expirable[0]) );
     }
 
     Style getStyle() { return _state.style(); }
@@ -108,7 +108,7 @@ final class StylePainter<C extends JComponent>
         g.setClip(oldClip);
     }
 
-    void renderBackgroundStyle( Graphics2D g2d, JComponent comp )
+    void renderBackgroundStyle( Graphics2D g2d )
     {
         // We remember if antialiasing was enabled before we render:
         boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
@@ -117,31 +117,28 @@ final class StylePainter<C extends JComponent>
         if ( DO_ANTIALIASING() )
             g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
-        Font componentFont = comp.getFont();
-        if ( componentFont != null && !componentFont.equals(g2d.getFont()) )
-            g2d.setFont( componentFont );
-
         _state.style().base().foundationColor().ifPresent(outerColor -> {
             _fillOuterFoundationBackground(outerColor, g2d);
         });
+
         _state.style().base().backgroundColor().ifPresent(color -> {
             if ( color.getAlpha() == 0 ) return;
             g2d.setColor(color);
             g2d.fill(_getInteriorArea());
         });
 
-        _paintStylesOn(UI.Layer.BACKGROUND, g2d, comp);
+        _paintStylesOn(UI.Layer.BACKGROUND, g2d);
 
         // Reset antialiasing to its previous state:
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
     }
 
-    private void _paintStylesOn( UI.Layer layer, Graphics2D g2d , JComponent comp ) {
+    private void _paintStylesOn( UI.Layer layer, Graphics2D g2d ) {
         // Every layer has 4 things:
         // 1. A grounding serving as a base background, which is a filled color and/or an image:
         for ( ImageStyle imageStyle : _state.style().images(layer) )
             if ( !imageStyle.equals(ImageStyle.none()) )
-                _renderImage( imageStyle, g2d, comp );
+                _renderImage( imageStyle, g2d);
 
         // 2. Gradients, which are best used to give a component a nice surface lighting effect.
         // They may transition vertically, horizontally or diagonally over various different colors:
@@ -152,9 +149,9 @@ final class StylePainter<C extends JComponent>
                     g2d.fill(_getInteriorArea());
                 }
                 else if ( gradient.transition().isDiagonal() )
-                    _renderDiagonalGradient(g2d, comp, _state.style().margin(), gradient, _getInteriorArea());
+                    _renderDiagonalGradient(g2d, _state.currentBounds(), _state.style().margin(), gradient, _getInteriorArea());
                 else
-                    _renderVerticalOrHorizontalGradient(g2d, comp, _state.style().margin(), gradient, _getInteriorArea());
+                    _renderVerticalOrHorizontalGradient(g2d, _state.currentBounds(), _state.style().margin(), gradient, _getInteriorArea());
             }
 
         // 3. Shadows, which are simple gradient based drop shadows that can go inwards or outwards
@@ -180,7 +177,7 @@ final class StylePainter<C extends JComponent>
                 } catch (Exception e) {
                     log.warn(
                             "An exception occurred while executing painter '" + backgroundPainter + "' " +
-                                    "on layer '" + layer + "' of component '" + comp + "'!",
+                            "on layer '" + layer + "' for style '" + _state.style() + "' ",
                             e
                     );
                 /*
@@ -212,7 +209,7 @@ final class StylePainter<C extends JComponent>
         }
     }
 
-    void paintBorderStyle( Graphics2D g2d, JComponent component )
+    void paintBorderStyle( Graphics2D g2d )
     {
         // We remember if antialiasing was enabled before we render:
         boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
@@ -221,19 +218,19 @@ final class StylePainter<C extends JComponent>
         if ( DO_ANTIALIASING() )
             g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
-        _paintStylesOn(UI.Layer.CONTENT, g2d, component);
+        _paintStylesOn(UI.Layer.CONTENT, g2d);
 
         _state.style().border().color().ifPresent(color -> {
-            _drawBorder( color, g2d, component );
+            _drawBorder( color, g2d);
         });
 
-        _paintStylesOn(UI.Layer.BORDER, g2d, component);
+        _paintStylesOn(UI.Layer.BORDER, g2d);
 
         // Reset antialiasing to its previous state:
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
     }
 
-    public void paintForegroundStyle( Graphics2D g2d, JComponent component )
+    public void paintForegroundStyle( Graphics2D g2d )
     {
         // We remember if antialiasing was enabled before we render:
         boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
@@ -242,17 +239,13 @@ final class StylePainter<C extends JComponent>
         if ( DO_ANTIALIASING() )
             g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
-        Font componentFont = component.getFont();
-        if ( componentFont != null && !componentFont.equals(g2d.getFont()) )
-            g2d.setFont( componentFont );
-
-        _paintStylesOn(UI.Layer.FOREGROUND, g2d, component);
+        _paintStylesOn(UI.Layer.FOREGROUND, g2d);
 
         // Reset antialiasing to its previous state:
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
     }
 
-    private void _drawBorder( Color color, Graphics2D g2d, JComponent comp ) {
+    private void _drawBorder( Color color, Graphics2D g2d ) {
         if ( !Outline.none().equals(_state.style().border().widths()) ) {
             try {
                 Area borderArea = _getBorderArea();
@@ -263,15 +256,15 @@ final class StylePainter<C extends JComponent>
                     for ( GradientStyle gradient : _state.style().border().gradients() ) {
                         if ( gradient.colors().length > 0 ) {
                             if ( gradient.transition().isDiagonal() )
-                                _renderDiagonalGradient(g2d, comp, _state.style().margin(), gradient, borderArea);
+                                _renderDiagonalGradient(g2d, _state.currentBounds(), _state.style().margin(), gradient, borderArea);
                             else
-                                _renderVerticalOrHorizontalGradient(g2d, comp, _state.style().margin(), gradient, borderArea);
+                                _renderVerticalOrHorizontalGradient(g2d, _state.currentBounds(), _state.style().margin(), gradient, borderArea);
                         }
                     }
                 }
             } catch ( Exception e ) {
                 log.warn(
-                    "An exception occurred while drawing the border of component '" + comp + "'!",
+                    "An exception occurred while drawing the border of border style '" + _state.style().border() + "' ",
                     e
                 );
                 /*
@@ -730,20 +723,20 @@ final class StylePainter<C extends JComponent>
      *  Renders a shade from the top left corner to the bottom right corner.
      *
      * @param g2d The graphics object to render to.
-     * @param component The component to render the shade for.
+     * @param bounds The bounds of the component.
      * @param margin The margin of the component.
      * @param gradient The shade to render.
      */
     private static void _renderDiagonalGradient(
         Graphics2D g2d,
-        JComponent component,
+        Bounds bounds,
         Outline margin,
         GradientStyle gradient,
         Area specificArea
     ) {
         Color[] colors = gradient.colors();
         UI.Transition type = gradient.transition();
-        Dimension size = component.getSize();
+        Dimension size = new Dimension(bounds.width(), bounds.height());
         size.width  -= (margin.right().orElse(0) + margin.left().orElse(0));
         size.height -= (margin.bottom().orElse(0) + margin.top().orElse(0));
         int width  = size.width;
@@ -886,14 +879,14 @@ final class StylePainter<C extends JComponent>
 
     private static void _renderVerticalOrHorizontalGradient(
         Graphics2D    g2d,
-        JComponent    component,
+        Bounds        bounds,
         Outline       margin,
         GradientStyle gradient,
         Area          specificArea
     ) {
         UI.Transition type = gradient.transition();
         Color[] colors = gradient.colors();
-        Dimension size = component.getSize();
+        Dimension size = new Dimension(bounds.width(), bounds.height());
         size.width  -= (margin.right().orElse(0) + margin.left().orElse(0));
         size.height -= (margin.bottom().orElse(0) + margin.top().orElse(0));
         int width  = size.width;
@@ -969,8 +962,7 @@ final class StylePainter<C extends JComponent>
 
     private void _renderImage(
         ImageStyle style,
-        Graphics2D g2d,
-        JComponent component
+        Graphics2D g2d
     ) {
         if ( style.primer().isPresent() ) {
             g2d.setColor(style.primer().get());
@@ -1111,7 +1103,7 @@ final class StylePainter<C extends JComponent>
             if ( !repeat && imageIcon instanceof SvgIcon ) {
                 SvgIcon svgIcon = ((SvgIcon) imageIcon).withFitComponent(style.fitMode());
                 svgIcon.withPreferredPlacement(UI.Placement.CENTER)
-                        .paintIcon(component, g2d, x, y, imgWidth, imgHeight);
+                        .paintIcon(null, g2d, x, y, imgWidth, imgHeight);
             }
             else
             {

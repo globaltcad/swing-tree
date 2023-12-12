@@ -61,7 +61,7 @@ public final class ComponentExtension<C extends JComponent>
     private final List<String> _styleGroups = new ArrayList<>(0);
 
 
-    private StylePainter<C> _stylePainter = StylePainter.none();
+    private StylePainter    _stylePainter = StylePainter.none();
     private DynamicLaF      _dynamicLaF   = DynamicLaF.none();
     private StyleSource<C>  _styleSource  = StyleSource.create();
 
@@ -315,7 +315,11 @@ public final class ComponentExtension<C extends JComponent>
         // We remember the clip:
         Shape formerClip = g2d.getClip();
 
-        _stylePainter.paintForegroundStyle(g2d, _owner);
+        Font componentFont = _owner.getFont();
+        if ( componentFont != null && !componentFont.equals(g2d.getFont()) )
+            g2d.setFont( componentFont );
+
+        _stylePainter.paintForegroundStyle(g2d);
 
         // We restore the clip:
         if ( g2d.getClip() != formerClip )
@@ -405,7 +409,11 @@ public final class ComponentExtension<C extends JComponent>
 
         establishStyleStateForRendering();
 
-        _stylePainter.renderBackgroundStyle( (Graphics2D) g, _owner );
+        Font componentFont = _owner.getFont();
+        if ( componentFont != null && !componentFont.equals(g.getFont()) )
+            g.setFont( componentFont );
+
+        _stylePainter.renderBackgroundStyle( (Graphics2D) g);
 
         if ( lookAndFeelPainting != null ) {
             Shape contentClip = _stylePainter.interiorArea().orElse(null);
@@ -423,7 +431,7 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     void _paintBorderStyle( Graphics2D g2d, JComponent component ) {
-        _stylePainter.paintBorderStyle(g2d, component);
+        _stylePainter.paintBorderStyle(g2d);
     }
 
     void _renderAnimations( Graphics2D g2d )
