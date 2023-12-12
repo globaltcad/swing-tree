@@ -40,18 +40,33 @@ final class StylePainter<C extends JComponent>
     // Cached Area objects representing the component areas:
     private Area _borderArea = null; // == _exteriorComponentArea - _interiorComponentArea
     private Area _mainComponentArea = null; // == _borderArea + _interiorComponentArea
-    private Area _exteriorComponentArea = null; // == full component bounds - _mainComponentArea
 
-    // == full component bounds - _borderArea - _exteriorComponentArea
-    private final Cached<Area> _interiorComponentArea = new Cached<Area>() {
+    // == full component bounds - _mainComponentArea
+    private final Cached<Area> _exteriorComponentArea = new Cached<Area>() {
         @Override
-        protected boolean isValid(StyleRenderState oldState, StyleRenderState newState) {
-            return AreaCalculator._testWouldLeadToSameBaseArea(oldState, newState);
+        protected Area produce(StyleRenderState currentState) {
+            Bounds bounds = currentState.currentBounds();
+            Area main = _mainArea();
+            Area exteriorComponentArea = new Area(new Rectangle(bounds.x(), bounds.y(), bounds.width(), bounds.height()));
+            exteriorComponentArea.subtract(main);
+            return exteriorComponentArea;
         }
 
         @Override
+        protected boolean isValid(StyleRenderState oldState, StyleRenderState newState) {
+            return false;
+        }
+    };
+
+
+    private final Cached<Area> _interiorComponentArea = new Cached<Area>() {
+        @Override
         protected Area produce(StyleRenderState currentState) {
             return AreaCalculator._calculateBaseArea(currentState, 0, 0, 0, 0);
+        }
+        @Override
+        protected boolean isValid(StyleRenderState oldState, StyleRenderState newState) {
+            return AreaCalculator._testWouldLeadToSameBaseArea(oldState, newState);
         }
     };
 
@@ -70,7 +85,7 @@ final class StylePainter<C extends JComponent>
             _interiorComponentArea.update(_state, newState);
             _borderArea            = null;
             _mainComponentArea     = null;
-            _exteriorComponentArea = null;
+            _exteriorComponentArea.update(_state, newState);
         }
         return new StylePainter<>( newState, _animationPainters );
     }
@@ -110,14 +125,7 @@ final class StylePainter<C extends JComponent>
 
     Area _getExteriorArea()
     {
-        if ( _exteriorComponentArea != null )
-            return _exteriorComponentArea;
-
-        Bounds bounds = _state.currentBounds();
-        Area main = _mainArea();
-        _exteriorComponentArea = new Area(new Rectangle(bounds.x(), bounds.y(), bounds.width(), bounds.height()));
-        _exteriorComponentArea.subtract(main);
-        return _exteriorComponentArea;
+        return _exteriorComponentArea.getFor(_state);
     }
 
     private Area _getBorderArea()
