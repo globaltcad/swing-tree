@@ -24,14 +24,13 @@ final class CachedShapeCalculator
 
         @Override
         public boolean leadsToSameValue(StyleRenderState oldState, StyleRenderState newState) {
-            return false;
-            //if ( !_mainComponentArea.leadsToSameValue(oldState, newState) )
-            //    return false;
-//
-            //if ( !_interiorComponentArea.leadsToSameValue(oldState, newState) )
-            //    return false;
-//
-            //return true;
+            if ( !_mainComponentArea.leadsToSameValue(oldState, newState) )
+                return false;
+
+            if ( !_interiorComponentArea.leadsToSameValue(oldState, newState) )
+                return false;
+
+            return true;
         }
     };
 
@@ -56,11 +55,10 @@ final class CachedShapeCalculator
 
         @Override
         public boolean leadsToSameValue(StyleRenderState oldState, StyleRenderState newState) {
-            return false;
-            //Outline oldWidths = oldState.style().border().widths();
-            //Outline newWidths = newState.style().border().widths();
-            //boolean sameWidths = oldWidths.equals(newWidths);
-            //return sameWidths && _testWouldLeadToSameBaseArea(oldState, newState);
+            Outline oldWidths = oldState.style().border().widths();
+            Outline newWidths = newState.style().border().widths();
+            boolean sameWidths = oldWidths.equals(newWidths);
+            return sameWidths && _testWouldLeadToSameBaseArea(oldState, newState);
         }
     };
 
@@ -77,15 +75,14 @@ final class CachedShapeCalculator
 
         @Override
         public boolean leadsToSameValue(StyleRenderState oldState, StyleRenderState newState) {
-            return false;
-            //boolean mainIsSame = _mainComponentArea.leadsToSameValue(oldState, newState);
-            //if ( mainIsSame ) {
-            //    Bounds oldBounds = oldState.currentBounds();
-            //    Bounds newBounds = newState.currentBounds();
-            //    if ( !oldBounds.equals(newBounds) )
-            //        return false;
-            //}
-            //return true;
+            boolean mainIsSame = _mainComponentArea.leadsToSameValue(oldState, newState);
+            if ( mainIsSame ) {
+                Bounds oldBounds = oldState.currentBounds();
+                Bounds newBounds = newState.currentBounds();
+                if ( !oldBounds.equals(newBounds) )
+                    return false;
+            }
+            return true;
         }
     };
 
@@ -96,8 +93,7 @@ final class CachedShapeCalculator
         }
         @Override
         public boolean leadsToSameValue(StyleRenderState oldState, StyleRenderState newState) {
-            return false;
-            //return _testWouldLeadToSameBaseArea(oldState, newState);
+            return _testWouldLeadToSameBaseArea(oldState, newState);
         }
     };
 
@@ -113,8 +109,9 @@ final class CachedShapeCalculator
 
     public void validate( StyleRenderState oldState, StyleRenderState newState )
     {
-        //if ( oldState.equals(newState) )
-        //    return;
+        if ( oldState.equals(newState) )
+            return;
+
         _borderArea.validate(oldState, newState);
         _mainComponentArea.validate(oldState, newState);
         _exteriorComponentArea.validate(oldState, newState);

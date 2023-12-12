@@ -25,9 +25,9 @@ final class StylePainter
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(StylePainter.class);
 
-    private static final StylePainter _NONE = new StylePainter(StyleRenderState.none(), new Expirable[0], new CachedShapeCalculator());
-
-    public static <C extends JComponent> StylePainter none() { return _NONE; }
+    public static StylePainter none() {
+        return new StylePainter(StyleRenderState.none(), new Expirable[0], new CachedShapeCalculator());
+    }
 
     static boolean DO_ANTIALIASING(){
         return UI.scale() < 1.5;
@@ -75,10 +75,10 @@ final class StylePainter
 
     Optional<Shape> interiorArea() {
         Shape contentClip = null;
-        //if ( _shapes.interiorComponentArea().exists() || getStyle().margin().isPositive() )
-        //    contentClip = _getInteriorArea();
+        if ( _shapes.interiorComponentArea().exists() || getStyle().margin().isPositive() )
+            contentClip = _getInteriorArea();
 
-        return Optional.ofNullable(_getInteriorArea());
+        return Optional.ofNullable(contentClip);
     }
 
     Area _getInteriorArea()
