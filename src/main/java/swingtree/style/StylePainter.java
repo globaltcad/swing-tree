@@ -81,53 +81,53 @@ final class StylePainter<C extends JComponent>
 
     Style getStyle() { return _state.style(); }
 
-    Optional<Shape> interiorAreaOf( JComponent component ) {
+    Optional<Shape> interiorArea( ) {
         Shape contentClip = null;
         if ( _interiorComponentArea != null )
-            contentClip = _getInteriorAreaOf(component);
+            contentClip = _getInteriorArea();
         else if ( getStyle().margin().isPositive() )
-            contentClip = _getInteriorAreaOf(component);
+            contentClip = _getInteriorArea();
 
         return Optional.ofNullable(contentClip);
     }
 
-    Area _getInteriorAreaOf( JComponent comp )
+    Area _getInteriorArea()
     {
         if ( _interiorComponentArea != null )
             return _interiorComponentArea;
 
-        _interiorComponentArea = _calculateBaseArea(0, 0, 0, 0, comp);
+        _interiorComponentArea = _calculateBaseArea(0, 0, 0, 0);
         return _interiorComponentArea;
     }
 
-    Area _getExteriorAreaOf( JComponent comp )
+    Area _getExteriorArea()
     {
         if ( _exteriorComponentArea != null )
             return _exteriorComponentArea;
 
-        Rectangle bounds = comp.getBounds();
-        Area main = _mainAreaOf(comp);
-        _exteriorComponentArea = new Area(bounds);
+        Bounds bounds = _state.currentBounds();
+        Area main = _mainArea();
+        _exteriorComponentArea = new Area(new Rectangle(bounds.x(), bounds.y(), bounds.width(), bounds.height()));
         _exteriorComponentArea.subtract(main);
         return _exteriorComponentArea;
     }
 
-    private Area _getBorderAreaOf( JComponent comp )
+    private Area _getBorderArea()
     {
         if ( _borderArea != null )
             return _borderArea;
 
-        Area componentArea = _mainAreaOf(comp);
+        Area componentArea = _mainArea();
 
-        _borderArea = new Area(_getInteriorAreaOf(comp));
+        _borderArea = new Area(_getInteriorArea());
         _borderArea.subtract(componentArea);
         return _borderArea;
     }
 
-    void paintWithContentAreaClip( JComponent c, Graphics g, Runnable painter ) {
+    void paintWithContentAreaClip( Graphics g, Runnable painter ) {
         Shape oldClip = g.getClip();
 
-        Shape newClip = _getInteriorAreaOf(c);
+        Shape newClip = _getInteriorArea();
         if ( newClip != null && newClip != oldClip ) {
             newClip = StyleUtility.intersect(newClip, oldClip);
             g.setClip(newClip);
@@ -154,12 +154,12 @@ final class StylePainter<C extends JComponent>
             g2d.setFont( componentFont );
 
         _state.style().base().foundationColor().ifPresent(outerColor -> {
-            _fillOuterFoundationBackground(outerColor, g2d, comp);
+            _fillOuterFoundationBackground(outerColor, g2d);
         });
         _state.style().base().backgroundColor().ifPresent(color -> {
             if ( color.getAlpha() == 0 ) return;
             g2d.setColor(color);
-            g2d.fill(_getInteriorAreaOf(comp));
+            g2d.fill(_getInteriorArea());
         });
 
         _paintStylesOn(UI.Layer.BACKGROUND, g2d, comp);
@@ -181,22 +181,22 @@ final class StylePainter<C extends JComponent>
             if ( gradient.colors().length > 0 ) {
                 if ( gradient.colors().length == 1 ) {
                     g2d.setColor(gradient.colors()[0]);
-                    g2d.fill(_getInteriorAreaOf(comp));
+                    g2d.fill(_getInteriorArea());
                 }
                 else if ( gradient.transition().isDiagonal() )
-                    _renderDiagonalGradient(g2d, comp, _state.style().margin(), gradient, _getInteriorAreaOf(comp));
+                    _renderDiagonalGradient(g2d, comp, _state.style().margin(), gradient, _getInteriorArea());
                 else
-                    _renderVerticalOrHorizontalGradient(g2d, comp, _state.style().margin(), gradient, _getInteriorAreaOf(comp));
+                    _renderVerticalOrHorizontalGradient(g2d, comp, _state.style().margin(), gradient, _getInteriorArea());
             }
 
         // 3. Shadows, which are simple gradient based drop shadows that can go inwards or outwards
         for ( ShadowStyle shadow : _state.style().shadows(layer) )
             shadow.color().ifPresent(color -> {
-                _renderShadows(shadow, comp, g2d, color);
+                _renderShadows(shadow, g2d, color);
             });
 
         // 4. Painters, which are provided by the user and can be anything
-        paintWithContentAreaClip(comp, g2d, () -> {
+        paintWithContentAreaClip(g2d, () -> {
 
             // We remember the current transform and clip so that we can reset them after each painter:
             AffineTransform currentTransform = new AffineTransform(g2d.getTransform());
@@ -284,7 +284,7 @@ final class StylePainter<C extends JComponent>
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
     }
 
-    private Area _mainAreaOf(JComponent comp )
+    private Area _mainArea()
     {
         if ( _mainComponentArea != null )
             return _mainComponentArea;
@@ -297,8 +297,7 @@ final class StylePainter<C extends JComponent>
                                         topBorderWidth,
                                         leftBorderWidth,
                                         bottomBorderWidth,
-                                        rightBorderWidth,
-                                        comp
+                                        rightBorderWidth
                                     );
         return _mainComponentArea;
     }
@@ -306,7 +305,7 @@ final class StylePainter<C extends JComponent>
     private void _drawBorder( Color color, Graphics2D g2d, JComponent comp ) {
         if ( !Outline.none().equals(_state.style().border().widths()) ) {
             try {
-                Area borderArea = _getBorderAreaOf(comp);
+                Area borderArea = _getBorderArea();
                 g2d.setColor(color);
                 g2d.fill(borderArea);
 
@@ -333,28 +332,25 @@ final class StylePainter<C extends JComponent>
         }
     }
 
-    private Area _calculateBaseArea( int insTop, int insLeft, int insBottom, int insRight, JComponent comp )
+    private Area _calculateBaseArea( int insTop, int insLeft, int insBottom, int insRight )
     {
         if ( _state.style().equals(Style.none()) ) {
             // If there is no style, we just return the component's bounds:
-            return new Area(new Rectangle(0, 0, comp.getWidth(), comp.getHeight()));
+            return new Area(new Rectangle(0, 0, _state.currentBounds().width(), _state.currentBounds().height()));
         }
 
-        if ( comp.getBorder() instanceof StyleAndAnimationBorder ) {
-            Insets base = ((StyleAndAnimationBorder) comp.getBorder()).getBaseInsets(true);
-            insTop    += base.top;
-            insLeft   += base.left;
-            insBottom += base.bottom;
-            insRight  += base.right;
-        }
+        insTop    += _state.baseOutline().top().orElse(0);
+        insLeft   += _state.baseOutline().left().orElse(0);
+        insBottom += _state.baseOutline().bottom().orElse(0);
+        insRight  += _state.baseOutline().right().orElse(0);
 
         // The background box is calculated from the margins and border radius:
         int left   = Math.max(_state.style().margin().left().orElse(0), 0)   + insLeft  ;
         int top    = Math.max(_state.style().margin().top().orElse(0), 0)    + insTop   ;
         int right  = Math.max(_state.style().margin().right().orElse(0), 0)  + insRight ;
         int bottom = Math.max(_state.style().margin().bottom().orElse(0), 0) + insBottom;
-        int width  = comp.getWidth() ;
-        int height = comp.getHeight();
+        int width  = _state.currentBounds().width();
+        int height = _state.currentBounds().height();
 
         boolean insAllTheSame = insTop == insLeft && insLeft == insBottom && insBottom == insRight;
 
@@ -505,18 +501,18 @@ final class StylePainter<C extends JComponent>
         }
     }
 
-    private void _fillOuterFoundationBackground( Color color, Graphics2D g2d, JComponent comp ) {
+    private void _fillOuterFoundationBackground( Color color, Graphics2D g2d ) {
         // Check if the color is transparent
         if ( color.getAlpha() == 0 )
             return;
 
-        int width     = comp.getWidth();
-        int height    = comp.getHeight();
+        int width     = _state.currentBounds().width();
+        int height    = _state.currentBounds().height();
 
         Rectangle2D.Float outerRect = new Rectangle2D.Float(0, 0, width, height);
 
         Area outer = new Area(outerRect);
-        Area inner = _getInteriorAreaOf(comp);
+        Area inner = _getInteriorArea();
         outer.subtract(inner);
 
         g2d.setColor(color);
@@ -525,7 +521,6 @@ final class StylePainter<C extends JComponent>
 
     private void _renderShadows(
         ShadowStyle shadow,
-        JComponent comp,
         Graphics2D g2d,
         Color shadowColor
     ) {
@@ -547,8 +542,8 @@ final class StylePainter<C extends JComponent>
         int topRightRadius    = Math.max(_state.style().border().topRightRadius(), 0);
         int bottomRightRadius = Math.max(_state.style().border().bottomRightRadius(), 0);
         int bottomLeftRadius  = Math.max(_state.style().border().bottomLeftRadius(), 0);
-        int width     = comp.getWidth();
-        int height    = comp.getHeight();
+        int width     = _state.currentBounds().width();
+        int height    = _state.currentBounds().height();
         int borderWidth = 0;
 
         // Calculate the shadow box bounds based on the padding and border thickness
@@ -566,10 +561,10 @@ final class StylePainter<C extends JComponent>
 
         if ( shadow.isOutset() ) {
             int artifactAdjustment = 1;
-            baseArea = _calculateBaseArea(artifactAdjustment, artifactAdjustment, artifactAdjustment, artifactAdjustment, comp);
+            baseArea = _calculateBaseArea(artifactAdjustment, artifactAdjustment, artifactAdjustment, artifactAdjustment);
         }
         else
-            baseArea = new Area(_getInteriorAreaOf(comp));
+            baseArea = new Area(_getInteriorArea());
 
         int shadowInset  = blurRadius;
         int shadowOutset = blurRadius;
@@ -1198,15 +1193,15 @@ final class StylePainter<C extends JComponent>
     ) {
         if ( style.primer().isPresent() ) {
             g2d.setColor(style.primer().get());
-            g2d.fill(_getInteriorAreaOf(component));
+            g2d.fill(_getInteriorArea());
         }
 
         style.image().ifPresent( imageIcon -> {
             final UI.Placement placement       = style.placement();
             final boolean      repeat          = style.repeat();
             final Outline      padding         = style.padding();
-            final int          componentWidth  = component.getWidth();
-            final int          componentHeight = component.getHeight();
+            final int          componentWidth  = _state.currentBounds().width();
+            final int          componentHeight = _state.currentBounds().height();
 
             int imgWidth  = style.width().orElse(imageIcon.getIconWidth());
             int imgHeight = style.height().orElse(imageIcon.getIconHeight());
@@ -1313,13 +1308,13 @@ final class StylePainter<C extends JComponent>
             Shape newClip = oldClip;
             switch ( style.clipArea() ) {
                 case INTERIOR:
-                    newClip = _getInteriorAreaOf(component);
+                    newClip = _getInteriorArea();
                     break;
                 case BORDER:
-                    newClip = _getBorderAreaOf(component);
+                    newClip = _getBorderArea();
                     break;
                 case EXTERIOR:
-                    newClip = _getExteriorAreaOf(component);
+                    newClip = _getExteriorArea();
                     break;
                 case ALL:
                     break;
@@ -1357,7 +1352,7 @@ final class StylePainter<C extends JComponent>
                         Paint oldPaint = g2d.getPaint();
                         try {
                             g2d.setPaint(new TexturePaint((BufferedImage) image, new Rectangle(x, y, imgWidth, imgHeight)));
-                            g2d.fill(_getInteriorAreaOf(component));
+                            g2d.fill(_getInteriorArea());
                         } finally {
                             g2d.setPaint(oldPaint);
                         }

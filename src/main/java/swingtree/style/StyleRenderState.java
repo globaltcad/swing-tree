@@ -1,6 +1,8 @@
 package swingtree.style;
 
 import javax.swing.JComponent;
+import javax.swing.border.Border;
+import java.awt.Insets;
 import java.util.Objects;
 
 /**
@@ -14,79 +16,52 @@ public class StyleRenderState
 {
     private static final StyleRenderState EMPTY = new StyleRenderState(
                                                         Style.none(),
-                                                        Size.none(),
-                                                        Size.none(),
-                                                        Size.none(),
-                                                        Size.none()
+                                                        Bounds.none(),
+                                                        Outline.none()
                                                     );
 
     public static StyleRenderState none() { return EMPTY; }
 
-    private final Style _style;
-    private final Size  _currentSize;
-    private final Size  _preferredSize;
-    private final Size  _minimumSize;
-    private final Size  _maximumSize;
+    private final Style   _style;
+    private final Bounds  _currentBounds;
+    private final Outline _baseOutline;
 
 
     private StyleRenderState(
-        Style style,
-        Size currentSize,
-        Size preferredSize,
-        Size minimumSize,
-        Size maximumSize
+            Style style,
+            Bounds currentBounds,
+            Outline baseOutline
     ) {
-        _style        = Objects.requireNonNull(style);
-        _currentSize  = Objects.requireNonNull(currentSize);
-        _preferredSize= Objects.requireNonNull(preferredSize);
-        _minimumSize  = Objects.requireNonNull(minimumSize);
-        _maximumSize  = Objects.requireNonNull(maximumSize);
+        _style         = Objects.requireNonNull(style);
+        _currentBounds = Objects.requireNonNull(currentBounds);
+        _baseOutline   = Objects.requireNonNull(baseOutline);
     }
 
     Style style() { return _style; }
 
-    Size currentSize() { return _currentSize; }
+    Bounds currentBounds() { return _currentBounds; }
 
-    Size preferredSize() { return _preferredSize; }
+    Outline baseOutline() { return _baseOutline; }
 
-    Size minimumSize() { return _minimumSize; }
+    StyleRenderState with( Style style, JComponent component )
+    {
+        Outline outline = Outline.none();
+        Border border = component.getBorder();
+        if ( border instanceof StyleAndAnimationBorder ) {
+            Insets base = ((StyleAndAnimationBorder<?>) border).getBaseInsets(true);
+            outline = Outline.of(base.top, base.left, base.bottom, base.right);
+        }
 
-    Size maximumSize() { return _maximumSize; }
-
-    StyleRenderState style(Style style ) {
-        return new StyleRenderState(style, _currentSize, _preferredSize, _minimumSize, _maximumSize);
-    }
-
-    StyleRenderState currentSize(Size currentSize ) {
-        return new StyleRenderState(_style, currentSize, _preferredSize, _minimumSize, _maximumSize);
-    }
-
-    StyleRenderState preferredSize(Size preferredSize ) {
-        return new StyleRenderState(_style, _currentSize, preferredSize, _minimumSize, _maximumSize);
-    }
-
-    StyleRenderState minimumSize(Size minimumSize ) {
-        return new StyleRenderState(_style, _currentSize, _preferredSize, minimumSize, _maximumSize);
-    }
-
-    StyleRenderState maximumSize(Size maximumSize ) {
-        return new StyleRenderState(_style, _currentSize, _preferredSize, _minimumSize, maximumSize);
-    }
-
-    StyleRenderState with(Style style, JComponent component ) {
-        boolean sameStyle = _style.equals(style);
-        boolean sameSize  = _currentSize.equals(Size.of(component.getWidth(), component.getHeight()));
-        boolean samePref  = _preferredSize.equals(Size.of(component.getPreferredSize().width, component.getPreferredSize().height));
-        boolean sameMin   = _minimumSize.equals(Size.of(component.getMinimumSize().width, component.getMinimumSize().height));
-        boolean sameMax   = _maximumSize.equals(Size.of(component.getMaximumSize().width, component.getMaximumSize().height));
-        if ( sameStyle && sameSize && samePref && sameMin && sameMax )
+        boolean sameStyle   = _style.equals(style);
+        boolean sameBounds  = _currentBounds.equals(component.getX(), component.getY(), component.getWidth(), component.getHeight());
+        boolean sameOutline = _baseOutline.equals(outline);
+        if ( sameStyle && sameBounds && sameOutline )
             return this;
+
         return new StyleRenderState(
             style,
-            Size.of(component.getWidth(), component.getHeight()),
-            Size.of(component.getPreferredSize().width, component.getPreferredSize().height),
-            Size.of(component.getMinimumSize().width, component.getMinimumSize().height),
-            Size.of(component.getMaximumSize().width, component.getMaximumSize().height)
+            Bounds.of(component.getX(), component.getY(), component.getWidth(), component.getHeight()),
+            outline
         );
     }
 
@@ -94,10 +69,8 @@ public class StyleRenderState
     public String toString() {
         return this.getClass().getSimpleName()+"[" +
                     "style="         + _style         +", "+
-                    "currentSize="   + _currentSize   +", "+
-                    "preferredSize=" + _preferredSize +", "+
-                    "minimumSize="   + _minimumSize   +", "+
-                    "maximumSize="   + _maximumSize   +
+                    "bounds="        + _currentBounds +", "+
+                    "baseOutline="   + _baseOutline   +
                 "]";
     }
 
@@ -106,16 +79,14 @@ public class StyleRenderState
         if ( o == this ) return true;
         if ( o == null ) return false;
         if ( o.getClass() != this.getClass() ) return false;
-        StyleRenderState that = (StyleRenderState)o;
-        return Objects.equals(this._style,         that._style)         &&
-               Objects.equals(this._currentSize,   that._currentSize)   &&
-               Objects.equals(this._preferredSize, that._preferredSize) &&
-               Objects.equals(this._minimumSize,   that._minimumSize)   &&
-               Objects.equals(this._maximumSize,   that._maximumSize);
+        StyleRenderState other = (StyleRenderState) o;
+        return Objects.equals(_style, other._style)
+            && Objects.equals(_currentBounds, other._currentBounds)
+            && Objects.equals(_baseOutline, other._baseOutline);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(_style, _currentSize, _preferredSize, _minimumSize, _maximumSize);
+        return Objects.hash(_style, _currentBounds, _baseOutline);
     }
 }
