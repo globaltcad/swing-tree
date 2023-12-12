@@ -36,94 +36,7 @@ final class StylePainter<C extends JComponent>
 
     private final StyleRenderState _state;
     private final Expirable<Painter>[] _animationPainters;
-
-    // Cached Area objects representing the component areas:
-
-    // == _exteriorComponentArea - _interiorComponentArea
-    private final Cached<Area> _borderArea = new Cached<Area>() {
-
-        @Override
-        protected Area produce(StyleRenderState currentState) {
-            Area componentArea = _mainComponentArea.getFor(currentState);
-            Area borderArea = new Area(_interiorComponentArea.getFor(_state));
-            borderArea.subtract(componentArea);
-            return borderArea;
-        }
-
-        @Override
-        public boolean leadsToSameValue(StyleRenderState oldState, StyleRenderState newState) {
-            if ( !_mainComponentArea.leadsToSameValue(oldState, newState) )
-                return false;
-
-            if ( !_interiorComponentArea.leadsToSameValue(oldState, newState) )
-                return false;
-
-            return false;
-        }
-    };
-
-    // == _borderArea + _interiorComponentArea
-    private final Cached<Area> _mainComponentArea = new Cached<Area>() {
-
-        @Override
-        protected Area produce(StyleRenderState currentState) {
-            Outline widths = currentState.style().border().widths();
-            int leftBorderWidth   = widths.left().orElse(0);
-            int topBorderWidth    = widths.top().orElse(0);
-            int rightBorderWidth  = widths.right().orElse(0);
-            int bottomBorderWidth = widths.bottom().orElse(0);
-            return AreaCalculator._calculateBaseArea(
-                                            currentState,
-                                            topBorderWidth,
-                                            leftBorderWidth,
-                                            bottomBorderWidth,
-                                            rightBorderWidth
-                                        );
-        }
-
-        @Override
-        public boolean leadsToSameValue(StyleRenderState oldState, StyleRenderState newState) {
-            Outline oldWidths = oldState.style().border().widths();
-            Outline newWidths = newState.style().border().widths();
-            boolean sameWidths = oldWidths.equals(newWidths);
-            return sameWidths && AreaCalculator._testWouldLeadToSameBaseArea(oldState, newState);
-        }
-    };
-
-    // == full component bounds - _mainComponentArea
-    private final Cached<Area> _exteriorComponentArea = new Cached<Area>() {
-        @Override
-        protected Area produce(StyleRenderState currentState) {
-            Area main = _mainComponentArea.getFor(currentState);
-            Bounds bounds = currentState.currentBounds();
-            Area exteriorComponentArea = new Area(new Rectangle(bounds.x(), bounds.y(), bounds.width(), bounds.height()));
-            exteriorComponentArea.subtract(main);
-            return exteriorComponentArea;
-        }
-
-        @Override
-        public boolean leadsToSameValue(StyleRenderState oldState, StyleRenderState newState) {
-            boolean mainIsSame = _mainComponentArea.leadsToSameValue(oldState, newState);
-            if ( mainIsSame ) {
-                Bounds oldBounds = oldState.currentBounds();
-                Bounds newBounds = newState.currentBounds();
-                return oldBounds.equals(newBounds);
-            }
-            return false;
-        }
-    };
-
-
-    private final Cached<Area> _interiorComponentArea = new Cached<Area>() {
-        @Override
-        protected Area produce(StyleRenderState currentState) {
-            return AreaCalculator._calculateBaseArea(currentState, 0, 0, 0, 0);
-        }
-        @Override
-        public boolean leadsToSameValue(StyleRenderState oldState, StyleRenderState newState) {
-            return AreaCalculator._testWouldLeadToSameBaseArea(oldState, newState);
-        }
-    };
+    private final CachedShapeCalculator _shapes = new CachedShapeCalculator();
 
 
     private StylePainter(
@@ -136,12 +49,7 @@ final class StylePainter<C extends JComponent>
 
     StylePainter<C> withNewStyleAndComponent(Style style, C component ) {
         StyleRenderState newState = _state.with(style, component);
-        if ( !_state.equals(newState) ) {
-            _borderArea.validate(_state, newState);
-            _interiorComponentArea.validate(_state, newState);
-            _mainComponentArea.validate(_state, newState);
-            _exteriorComponentArea.validate(_state, newState);
-        }
+        _shapes.validate(_state, newState);
         return new StylePainter<>( newState, _animationPainters );
     }
 
@@ -165,7 +73,7 @@ final class StylePainter<C extends JComponent>
 
     Optional<Shape> interiorArea() {
         Shape contentClip = null;
-        if ( _interiorComponentArea.exists() || getStyle().margin().isPositive() )
+        if ( _shapes.interiorComponentArea().exists() || getStyle().margin().isPositive() )
             contentClip = _getInteriorArea();
 
         return Optional.ofNullable(contentClip);
@@ -173,17 +81,17 @@ final class StylePainter<C extends JComponent>
 
     Area _getInteriorArea()
     {
-        return _interiorComponentArea.getFor(_state);
+        return _shapes.interiorComponentArea().getFor(_state);
     }
 
     Area _getExteriorArea()
     {
-        return _exteriorComponentArea.getFor(_state);
+        return _shapes.exteriorComponentArea().getFor(_state);
     }
 
     private Area _getBorderArea()
     {
-        return _borderArea.getFor(_state);
+        return _shapes.borderArea().getFor(_state);
     }
 
     void paintWithContentAreaClip( Graphics g, Runnable painter ) {
@@ -344,11 +252,6 @@ final class StylePainter<C extends JComponent>
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
     }
 
-    private Area _mainArea()
-    {
-        return _mainComponentArea.getFor(_state);
-    }
-
     private void _drawBorder( Color color, Graphics2D g2d, JComponent comp ) {
         if ( !Outline.none().equals(_state.style().border().widths()) ) {
             try {
@@ -439,7 +342,7 @@ final class StylePainter<C extends JComponent>
 
         if ( shadow.isOutset() ) {
             int artifactAdjustment = 1;
-            baseArea = AreaCalculator._calculateBaseArea(_state, artifactAdjustment, artifactAdjustment, artifactAdjustment, artifactAdjustment);
+            baseArea = CachedShapeCalculator.calculateBaseArea(_state, artifactAdjustment, artifactAdjustment, artifactAdjustment, artifactAdjustment);
         }
         else
             baseArea = new Area(_getInteriorArea());
