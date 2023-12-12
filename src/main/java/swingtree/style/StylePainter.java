@@ -39,21 +39,54 @@ final class StylePainter<C extends JComponent>
 
     // Cached Area objects representing the component areas:
     private Area _borderArea = null; // == _exteriorComponentArea - _interiorComponentArea
-    private Area _mainComponentArea = null; // == _borderArea + _interiorComponentArea
+
+    // == _borderArea + _interiorComponentArea
+    private final Cached<Area> _mainComponentArea = new Cached<Area>() {
+
+        @Override
+        protected Area produce(StyleRenderState currentState) {
+            Outline widths = currentState.style().border().widths();
+            int leftBorderWidth   = widths.left().orElse(0);
+            int topBorderWidth    = widths.top().orElse(0);
+            int rightBorderWidth  = widths.right().orElse(0);
+            int bottomBorderWidth = widths.bottom().orElse(0);
+            return AreaCalculator._calculateBaseArea(
+                                            currentState,
+                                            topBorderWidth,
+                                            leftBorderWidth,
+                                            bottomBorderWidth,
+                                            rightBorderWidth
+                                        );
+        }
+
+        @Override
+        public boolean leadsToSameValue(StyleRenderState oldState, StyleRenderState newState) {
+            Outline oldWidths = oldState.style().border().widths();
+            Outline newWidths = newState.style().border().widths();
+            boolean sameWidths = oldWidths.equals(newWidths);
+            return sameWidths && AreaCalculator._testWouldLeadToSameBaseArea(oldState, newState);
+        }
+    };
 
     // == full component bounds - _mainComponentArea
     private final Cached<Area> _exteriorComponentArea = new Cached<Area>() {
         @Override
         protected Area produce(StyleRenderState currentState) {
+            Area main = _mainComponentArea.getFor(currentState);
             Bounds bounds = currentState.currentBounds();
-            Area main = _mainArea();
             Area exteriorComponentArea = new Area(new Rectangle(bounds.x(), bounds.y(), bounds.width(), bounds.height()));
             exteriorComponentArea.subtract(main);
             return exteriorComponentArea;
         }
 
         @Override
-        protected boolean isValid(StyleRenderState oldState, StyleRenderState newState) {
+        public boolean leadsToSameValue(StyleRenderState oldState, StyleRenderState newState) {
+            boolean mainIsSame = _mainComponentArea.leadsToSameValue(oldState, newState);
+            if ( mainIsSame ) {
+                Bounds oldBounds = oldState.currentBounds();
+                Bounds newBounds = newState.currentBounds();
+                return oldBounds.equals(newBounds);
+            }
             return false;
         }
     };
@@ -65,7 +98,7 @@ final class StylePainter<C extends JComponent>
             return AreaCalculator._calculateBaseArea(currentState, 0, 0, 0, 0);
         }
         @Override
-        protected boolean isValid(StyleRenderState oldState, StyleRenderState newState) {
+        public boolean leadsToSameValue(StyleRenderState oldState, StyleRenderState newState) {
             return AreaCalculator._testWouldLeadToSameBaseArea(oldState, newState);
         }
     };
@@ -82,9 +115,9 @@ final class StylePainter<C extends JComponent>
     StylePainter<C> update( Style style, C component ) {
         StyleRenderState newState = _state.with(style, component);
         if ( !_state.equals(newState) ) {
-            _interiorComponentArea.update(_state, newState);
             _borderArea            = null;
-            _mainComponentArea     = null;
+            _interiorComponentArea.update(_state, newState);
+            _mainComponentArea.update(_state, newState);
             _exteriorComponentArea.update(_state, newState);
         }
         return new StylePainter<>( newState, _animationPainters );
@@ -300,21 +333,7 @@ final class StylePainter<C extends JComponent>
 
     private Area _mainArea()
     {
-        if ( _mainComponentArea != null )
-            return _mainComponentArea;
-
-        int leftBorderWidth   = _state.style().border().widths().left().orElse(0);
-        int topBorderWidth    = _state.style().border().widths().top().orElse(0);
-        int rightBorderWidth  = _state.style().border().widths().right().orElse(0);
-        int bottomBorderWidth = _state.style().border().widths().bottom().orElse(0);
-        _mainComponentArea = AreaCalculator._calculateBaseArea(
-                                        _state,
-                                        topBorderWidth,
-                                        leftBorderWidth,
-                                        bottomBorderWidth,
-                                        rightBorderWidth
-                                    );
-        return _mainComponentArea;
+        return _mainComponentArea.getFor(_state);
     }
 
     private void _drawBorder( Color color, Graphics2D g2d, JComponent comp ) {

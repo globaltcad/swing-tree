@@ -7,22 +7,25 @@ abstract class Cached<T>
 
     public Cached() {}
 
-    public void update( StyleRenderState oldState, StyleRenderState newState ) {
-        if ( isValid(oldState, newState) )
+    public final boolean update( StyleRenderState oldState, StyleRenderState newState ) {
+        if ( leadsToSameValue(oldState, newState) ) {
             _value = null;
+            return true;
+        }
+        return false;
     }
 
-    public T getFor(StyleRenderState currentState ) {
+    public final T getFor(StyleRenderState currentState ) {
         if ( _value == null )
             _value = produce(currentState);
         return _value;
     }
 
-    public boolean exists() {
+    public final boolean exists() {
         return _value != null;
     }
 
-    protected abstract boolean isValid( StyleRenderState oldState, StyleRenderState newState );
-
     protected abstract T produce( StyleRenderState currentState );
+
+    public abstract boolean leadsToSameValue(StyleRenderState oldState, StyleRenderState newState );
 }
