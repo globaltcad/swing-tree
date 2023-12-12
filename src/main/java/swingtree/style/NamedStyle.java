@@ -39,4 +39,12 @@ class NamedStyle<S>
         return Objects.equals(_name, rhs._name) &&
                Objects.equals(_style, rhs._style);
     }
+
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName()+"[" +
+                    "name="  + _name  +", "+
+                    "style=" + _style +
+                "]";
+    }
 }
