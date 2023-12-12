@@ -163,42 +163,43 @@ final class StylePainter
             });
 
         // 4. Painters, which are provided by the user and can be anything
-        paintWithContentAreaClip(g2d, () -> {
+        List<Painter> painters = _state.style().painters(layer);
+        if ( !painters.isEmpty() )
+            paintWithContentAreaClip( g2d, () -> {
+                // We remember the current transform and clip so that we can reset them after each painter:
+                AffineTransform currentTransform = new AffineTransform(g2d.getTransform());
+                Shape           currentClip      = g2d.getClip();
 
-            // We remember the current transform and clip so that we can reset them after each painter:
-            AffineTransform currentTransform = new AffineTransform(g2d.getTransform());
-            Shape           currentClip      = g2d.getClip();
+                painters.forEach( backgroundPainter -> {
 
-            _state.style().painters(layer).forEach( backgroundPainter -> {
+                    if ( backgroundPainter == Painter.none() )
+                        return;
 
-                if ( backgroundPainter == Painter.none() )
-                    return;
+                    try {
+                        backgroundPainter.paint(g2d);
+                    } catch (Exception e) {
+                        log.warn(
+                                "An exception occurred while executing painter '" + backgroundPainter + "' " +
+                                "on layer '" + layer + "' for style '" + _state.style() + "' ",
+                                e
+                        );
+                    /*
+                        If exceptions happen in user provided painters, we don't want to
+                        mess up the rendering of the rest of the component, so we catch them here!
 
-                try {
-                    backgroundPainter.paint(g2d);
-                } catch (Exception e) {
-                    log.warn(
-                            "An exception occurred while executing painter '" + backgroundPainter + "' " +
-                            "on layer '" + layer + "' for style '" + _state.style() + "' ",
-                            e
-                    );
-                /*
-                    If exceptions happen in user provided painters, we don't want to
-                    mess up the rendering of the rest of the component, so we catch them here!
+                        We log as warning because exceptions during rendering are not considered
+                        as harmful as elsewhere!
 
-				    We log as warning because exceptions during rendering are not considered
-				    as harmful as elsewhere!
-
-                    Hi there! If you are reading this, you are probably a developer using the SwingTree
-                    library, thank you for using it! Good luck finding out what went wrong! :)
-                */
-                } finally {
-                    // We do not know what the painter did to the graphics object, so we reset it:
-                    g2d.setTransform(currentTransform);
-                    g2d.setClip(currentClip);
-                }
+                        Hi there! If you are reading this, you are probably a developer using the SwingTree
+                        library, thank you for using it! Good luck finding out what went wrong! :)
+                    */
+                    } finally {
+                        // We do not know what the painter did to the graphics object, so we reset it:
+                        g2d.setTransform(currentTransform);
+                        g2d.setClip(currentClip);
+                    }
+                });
             });
-        });
     }
 
     void _withClip( Graphics2D g2d, Shape clip, Runnable paintTask ) {
