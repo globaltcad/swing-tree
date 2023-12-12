@@ -44,4 +44,13 @@ final class Offset
 
     @Override
     public int hashCode() { return _x ^ _y; }
+
+    @Override
+    public boolean equals( Object obj ) {
+        if ( obj == null ) return false;
+        if ( obj == this ) return true;
+        if ( obj.getClass() != getClass() ) return false;
+        Offset rhs = (Offset) obj;
+        return _x == rhs._x && _y == rhs._y;
+    }
 }
