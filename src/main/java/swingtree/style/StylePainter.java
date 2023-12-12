@@ -38,7 +38,29 @@ final class StylePainter<C extends JComponent>
     private final Expirable<Painter>[] _animationPainters;
 
     // Cached Area objects representing the component areas:
-    private Area _borderArea = null; // == _exteriorComponentArea - _interiorComponentArea
+
+    // == _exteriorComponentArea - _interiorComponentArea
+    private final Cached<Area> _borderArea = new Cached<Area>() {
+
+        @Override
+        protected Area produce(StyleRenderState currentState) {
+            Area componentArea = _mainComponentArea.getFor(currentState);
+            Area borderArea = new Area(_interiorComponentArea.getFor(_state));
+            borderArea.subtract(componentArea);
+            return borderArea;
+        }
+
+        @Override
+        public boolean leadsToSameValue(StyleRenderState oldState, StyleRenderState newState) {
+            if ( !_mainComponentArea.leadsToSameValue(oldState, newState) )
+                return false;
+
+            if ( !_interiorComponentArea.leadsToSameValue(oldState, newState) )
+                return false;
+
+            return false;
+        }
+    };
 
     // == _borderArea + _interiorComponentArea
     private final Cached<Area> _mainComponentArea = new Cached<Area>() {
@@ -115,10 +137,10 @@ final class StylePainter<C extends JComponent>
     StylePainter<C> update( Style style, C component ) {
         StyleRenderState newState = _state.with(style, component);
         if ( !_state.equals(newState) ) {
-            _borderArea            = null;
-            _interiorComponentArea.update(_state, newState);
-            _mainComponentArea.update(_state, newState);
-            _exteriorComponentArea.update(_state, newState);
+            _borderArea.validate(_state, newState);
+            _interiorComponentArea.validate(_state, newState);
+            _mainComponentArea.validate(_state, newState);
+            _exteriorComponentArea.validate(_state, newState);
         }
         return new StylePainter<>( newState, _animationPainters );
     }
@@ -163,14 +185,7 @@ final class StylePainter<C extends JComponent>
 
     private Area _getBorderArea()
     {
-        if ( _borderArea != null )
-            return _borderArea;
-
-        Area componentArea = _mainArea();
-
-        _borderArea = new Area(_getInteriorArea());
-        _borderArea.subtract(componentArea);
-        return _borderArea;
+        return _borderArea.getFor(_state);
     }
 
     void paintWithContentAreaClip( Graphics g, Runnable painter ) {

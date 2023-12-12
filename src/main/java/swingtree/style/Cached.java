@@ -1,5 +1,16 @@
 package swingtree.style;
 
+/**
+ *  A wrapper for a value that is produced from a {@link StyleRenderState} through
+ *  a {@link #produce(StyleRenderState)} implementation and validated against
+ *  a previous {@link StyleRenderState} through a {@link #leadsToSameValue(StyleRenderState, StyleRenderState)}
+ *  implementation.
+ *  <p>
+ *  This design is possible due to the fact that the {@link StyleRenderState} is deeply immutable
+ *  and can be used as a key data structure for caching.
+ *
+ * @param <T> The type of the cached value.
+ */
 abstract class Cached<T>
 {
     private T _value;
@@ -7,7 +18,7 @@ abstract class Cached<T>
 
     public Cached() {}
 
-    public final boolean update( StyleRenderState oldState, StyleRenderState newState ) {
+    public final boolean validate(StyleRenderState oldState, StyleRenderState newState ) {
         if ( leadsToSameValue(oldState, newState) ) {
             _value = null;
             return true;
