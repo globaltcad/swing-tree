@@ -185,40 +185,83 @@ final class StylePainter
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
     }
 
+    boolean hasNoPainters() {
+        return _animationPainters.length == 0;
+    }
+
+    void renderAnimations(Graphics2D g2d )
+    {
+        // We remember if antialiasing was enabled before we render:
+        boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
+
+        // We enable antialiasing:
+        if ( StylePainter.DO_ANTIALIASING() )
+            g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
+
+        // Animations are last: they are rendered on top of everything else:
+        for ( Expirable<Painter> expirablePainter : _animationPainters )
+            if ( !expirablePainter.isExpired() ) {
+                try {
+                    expirablePainter.get().paint(g2d);
+                } catch ( Exception e ) {
+                    e.printStackTrace();
+                    log.warn(
+                        "Exception while painting animation '" + expirablePainter.get() + "' " +
+                        "with lifetime " + expirablePainter.getLifeTime()+ ".",
+                        e
+                    );
+                    // An exception inside a painter should not prevent everything else from being painted!
+                    // Note that we log as warning because exceptions during rendering are not considered
+                    // as harmful as elsewhere!
+                }
+            }
+
+        // Reset antialiasing to its previous state:
+        g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
+    }
+
     private void _paintStylesOn( UI.Layer layer, Graphics2D g2d ) {
         _layerCache[layer.ordinal()].paint(this, g2d);
     }
 
-    private static void _actualPaintStylesOn( StylePainter painter, UI.Layer layer, Graphics2D g2d ) {
-        StyleRenderState _state = painter.getState();
+    private static void _actualPaintStylesOn( StylePainter painter, UI.Layer layer, Graphics2D g2d )
+    {
+        StyleRenderState state = painter.getState();
+
+        if ( layer == UI.Layer.BORDER ) {
+            state.style().border().color().ifPresent(color -> {
+                _drawBorder( painter, color, g2d);
+            });
+        }
+
         // Every layer has 4 things:
         // 1. A grounding serving as a base background, which is a filled color and/or an image:
-        for ( ImageStyle imageStyle : _state.style().images(layer) )
+        for ( ImageStyle imageStyle : state.style().images(layer) )
             if ( !imageStyle.equals(ImageStyle.none()) )
-                _renderImage( imageStyle, _state.currentBounds(), painter, g2d);
+                _renderImage( imageStyle, state.currentBounds(), painter, g2d);
 
         // 2. Gradients, which are best used to give a component a nice surface lighting effect.
         // They may transition vertically, horizontally or diagonally over various different colors:
-        for ( GradientStyle gradient : _state.style().gradients(layer) )
+        for ( GradientStyle gradient : state.style().gradients(layer) )
             if ( gradient.colors().length > 0 ) {
                 if ( gradient.colors().length == 1 ) {
                     g2d.setColor(gradient.colors()[0]);
                     g2d.fill(painter._getInteriorArea());
                 }
                 else if ( gradient.transition().isDiagonal() )
-                    _renderDiagonalGradient(g2d, _state.currentBounds(), _state.style().margin(), gradient, painter._getInteriorArea());
+                    _renderDiagonalGradient(g2d, state.currentBounds(), state.style().margin(), gradient, painter._getInteriorArea());
                 else
-                    _renderVerticalOrHorizontalGradient(g2d, _state.currentBounds(), _state.style().margin(), gradient, painter._getInteriorArea());
+                    _renderVerticalOrHorizontalGradient(g2d, state.currentBounds(), state.style().margin(), gradient, painter._getInteriorArea());
             }
 
         // 3. Shadows, which are simple gradient based drop shadows that can go inwards or outwards
-        for ( ShadowStyle shadow : _state.style().shadows(layer) )
+        for ( ShadowStyle shadow : state.style().shadows(layer) )
             shadow.color().ifPresent(color -> {
                 _renderShadows(shadow, painter, g2d, color);
             });
 
         // 4. Painters, which are provided by the user and can be anything
-        List<Painter> painters = _state.style().painters(layer);
+        List<Painter> painters = state.style().painters(layer);
         if ( !painters.isEmpty() )
             painter.paintWithContentAreaClip( g2d, () -> {
                 // We remember the current transform and clip so that we can reset them after each painter:
@@ -235,7 +278,7 @@ final class StylePainter
                     } catch (Exception e) {
                         log.warn(
                                 "An exception occurred while executing painter '" + backgroundPainter + "' " +
-                                "on layer '" + layer + "' for style '" + _state.style() + "' ",
+                                "on layer '" + layer + "' for style '" + state.style() + "' ",
                                 e
                         );
                     /*
@@ -278,10 +321,6 @@ final class StylePainter
 
         _paintStylesOn(UI.Layer.CONTENT, g2d);
 
-        _state.style().border().color().ifPresent(color -> {
-            _drawBorder( color, g2d);
-        });
-
         _paintStylesOn(UI.Layer.BORDER, g2d);
 
         // Reset antialiasing to its previous state:
@@ -303,36 +342,6 @@ final class StylePainter
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
     }
 
-    private void _drawBorder( Color color, Graphics2D g2d ) {
-        if ( !Outline.none().equals(_state.style().border().widths()) ) {
-            try {
-                Area borderArea = _getBorderArea();
-                g2d.setColor(color);
-                g2d.fill(borderArea);
-
-                if (!_state.style().border().gradients().isEmpty()) {
-                    for ( GradientStyle gradient : _state.style().border().gradients() ) {
-                        if ( gradient.colors().length > 0 ) {
-                            if ( gradient.transition().isDiagonal() )
-                                _renderDiagonalGradient(g2d, _state.currentBounds(), _state.style().margin(), gradient, borderArea);
-                            else
-                                _renderVerticalOrHorizontalGradient(g2d, _state.currentBounds(), _state.style().margin(), gradient, borderArea);
-                        }
-                    }
-                }
-            } catch ( Exception e ) {
-                log.warn(
-                    "An exception occurred while drawing the border of border style '" + _state.style().border() + "' ",
-                    e
-                );
-                /*
-                    If exceptions happen in user provided painters, we don't want to
-                    mess up the rendering of the rest of the component, so we catch them here!
-                */
-            }
-        }
-    }
-
     private void _fillOuterFoundationBackground( Color color, Graphics2D g2d ) {
         // Check if the color is transparent
         if ( color.getAlpha() == 0 )
@@ -349,6 +358,37 @@ final class StylePainter
 
         g2d.setColor(color);
         g2d.fill(outer);
+    }
+
+    private static void _drawBorder( StylePainter painter, Color color, Graphics2D g2d ) {
+        StyleRenderState state = painter.getState();
+        if ( !Outline.none().equals(state.style().border().widths()) ) {
+            try {
+                Area borderArea = painter._getBorderArea();
+                g2d.setColor(color);
+                g2d.fill(borderArea);
+
+                if (!state.style().border().gradients().isEmpty()) {
+                    for ( GradientStyle gradient : state.style().border().gradients() ) {
+                        if ( gradient.colors().length > 0 ) {
+                            if ( gradient.transition().isDiagonal() )
+                                _renderDiagonalGradient(g2d, state.currentBounds(), state.style().margin(), gradient, borderArea);
+                            else
+                                _renderVerticalOrHorizontalGradient(g2d, state.currentBounds(), state.style().margin(), gradient, borderArea);
+                        }
+                    }
+                }
+            } catch ( Exception e ) {
+                log.warn(
+                    "An exception occurred while drawing the border of border style '" + state.style().border() + "' ",
+                    e
+                );
+                /*
+                    If exceptions happen in user provided painters, we don't want to
+                    mess up the rendering of the rest of the component, so we catch them here!
+                */
+            }
+        }
     }
 
     private static void _renderShadows(
@@ -1203,41 +1243,6 @@ final class StylePainter
             }
             g2d.setClip(oldClip);
         });
-    }
-
-    boolean hasNoPainters() {
-        return _animationPainters.length == 0;
-    }
-
-    void renderAnimations(Graphics2D g2d )
-    {
-        // We remember if antialiasing was enabled before we render:
-        boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
-
-        // We enable antialiasing:
-        if ( StylePainter.DO_ANTIALIASING() )
-            g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
-
-        // Animations are last: they are rendered on top of everything else:
-        for ( Expirable<Painter> expirablePainter : _animationPainters )
-            if ( !expirablePainter.isExpired() ) {
-                try {
-                    expirablePainter.get().paint(g2d);
-                } catch ( Exception e ) {
-                    e.printStackTrace();
-                    log.warn(
-                        "Exception while painting animation '" + expirablePainter.get() + "' " +
-                        "with lifetime " + expirablePainter.getLifeTime()+ ".",
-                        e
-                    );
-                    // An exception inside a painter should not prevent everything else from being painted!
-                    // Note that we log as warning because exceptions during rendering are not considered
-                    // as harmful as elsewhere!
-                }
-            }
-
-        // Reset antialiasing to its previous state:
-        g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
     }
 
 }
