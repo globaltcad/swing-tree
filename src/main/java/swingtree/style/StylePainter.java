@@ -55,7 +55,7 @@ final class StylePainter
             _layerCache[i] = new CachedPainter(UI.Layer.values()[i]) {
                 @Override
                 protected void produce(StylePainter painter, Graphics2D g) {
-                    painter._actualPaintStylesOn( _layer, g);
+                    _actualPaintStylesOn( painter, _layer, g);
                 }
                 @Override
                 public boolean leadsToSameValue(StyleRenderState oldState, StyleRenderState newState) {
@@ -94,6 +94,8 @@ final class StylePainter
             };
 
     }
+
+    StyleRenderState getState() { return _state; }
 
     StylePainter withNewStyleAndComponent(Style style, JComponent component ) {
         StyleRenderState newState = _state.with(style, component);
@@ -187,12 +189,13 @@ final class StylePainter
         _layerCache[layer.ordinal()].paint(this, g2d);
     }
 
-    private void _actualPaintStylesOn( UI.Layer layer, Graphics2D g2d ) {
+    private static void _actualPaintStylesOn( StylePainter painter, UI.Layer layer, Graphics2D g2d ) {
+        StyleRenderState _state = painter.getState();
         // Every layer has 4 things:
         // 1. A grounding serving as a base background, which is a filled color and/or an image:
         for ( ImageStyle imageStyle : _state.style().images(layer) )
             if ( !imageStyle.equals(ImageStyle.none()) )
-                _renderImage( imageStyle, g2d);
+                _renderImage( imageStyle, _state.currentBounds(), painter, g2d);
 
         // 2. Gradients, which are best used to give a component a nice surface lighting effect.
         // They may transition vertically, horizontally or diagonally over various different colors:
@@ -200,24 +203,24 @@ final class StylePainter
             if ( gradient.colors().length > 0 ) {
                 if ( gradient.colors().length == 1 ) {
                     g2d.setColor(gradient.colors()[0]);
-                    g2d.fill(_getInteriorArea());
+                    g2d.fill(painter._getInteriorArea());
                 }
                 else if ( gradient.transition().isDiagonal() )
-                    _renderDiagonalGradient(g2d, _state.currentBounds(), _state.style().margin(), gradient, _getInteriorArea());
+                    _renderDiagonalGradient(g2d, _state.currentBounds(), _state.style().margin(), gradient, painter._getInteriorArea());
                 else
-                    _renderVerticalOrHorizontalGradient(g2d, _state.currentBounds(), _state.style().margin(), gradient, _getInteriorArea());
+                    _renderVerticalOrHorizontalGradient(g2d, _state.currentBounds(), _state.style().margin(), gradient, painter._getInteriorArea());
             }
 
         // 3. Shadows, which are simple gradient based drop shadows that can go inwards or outwards
         for ( ShadowStyle shadow : _state.style().shadows(layer) )
             shadow.color().ifPresent(color -> {
-                _renderShadows(shadow, g2d, color);
+                _renderShadows(shadow, painter, g2d, color);
             });
 
         // 4. Painters, which are provided by the user and can be anything
         List<Painter> painters = _state.style().painters(layer);
         if ( !painters.isEmpty() )
-            paintWithContentAreaClip( g2d, () -> {
+            painter.paintWithContentAreaClip( g2d, () -> {
                 // We remember the current transform and clip so that we can reset them after each painter:
                 AffineTransform currentTransform = new AffineTransform(g2d.getTransform());
                 Shape           currentClip      = g2d.getClip();
@@ -348,31 +351,35 @@ final class StylePainter
         g2d.fill(outer);
     }
 
-    private void _renderShadows(
+    private static void _renderShadows(
         ShadowStyle shadow,
+        StylePainter painter,
         Graphics2D g2d,
         Color shadowColor
     ) {
+        Style style = painter.getState().style();
+        Bounds bounds = painter.getState().currentBounds();
+
         // First let's check if we need to render any shadows at all
         // Is the shadow color transparent?
         if ( shadowColor.getAlpha() == 0 )
             return;
 
         // The background box is calculated from the margins and border radius:
-        int leftBorderWidth   = _state.style().border().widths().left().orElse(0);
-        int topBorderWidth    = _state.style().border().widths().top().orElse(0);
-        int rightBorderWidth  = _state.style().border().widths().right().orElse(0);
-        int bottomBorderWidth = _state.style().border().widths().bottom().orElse(0);
-        int left   = Math.max(_state.style().margin().left().orElse(0),   0) + ( shadow.isInset() ? leftBorderWidth   : 0 );
-        int top    = Math.max(_state.style().margin().top().orElse(0),    0) + ( shadow.isInset() ? topBorderWidth    : 0 );
-        int right  = Math.max(_state.style().margin().right().orElse(0),  0) + ( shadow.isInset() ? rightBorderWidth  : 0 );
-        int bottom = Math.max(_state.style().margin().bottom().orElse(0), 0) + ( shadow.isInset() ? bottomBorderWidth : 0 );
-        int topLeftRadius     = Math.max(_state.style().border().topLeftRadius(), 0);
-        int topRightRadius    = Math.max(_state.style().border().topRightRadius(), 0);
-        int bottomRightRadius = Math.max(_state.style().border().bottomRightRadius(), 0);
-        int bottomLeftRadius  = Math.max(_state.style().border().bottomLeftRadius(), 0);
-        int width     = _state.currentBounds().width();
-        int height    = _state.currentBounds().height();
+        int leftBorderWidth   = style.border().widths().left().orElse(0);
+        int topBorderWidth    = style.border().widths().top().orElse(0);
+        int rightBorderWidth  = style.border().widths().right().orElse(0);
+        int bottomBorderWidth = style.border().widths().bottom().orElse(0);
+        int left   = Math.max(style.margin().left().orElse(0),   0) + ( shadow.isInset() ? leftBorderWidth   : 0 );
+        int top    = Math.max(style.margin().top().orElse(0),    0) + ( shadow.isInset() ? topBorderWidth    : 0 );
+        int right  = Math.max(style.margin().right().orElse(0),  0) + ( shadow.isInset() ? rightBorderWidth  : 0 );
+        int bottom = Math.max(style.margin().bottom().orElse(0), 0) + ( shadow.isInset() ? bottomBorderWidth : 0 );
+        int topLeftRadius     = Math.max(style.border().topLeftRadius(), 0);
+        int topRightRadius    = Math.max(style.border().topRightRadius(), 0);
+        int bottomRightRadius = Math.max(style.border().bottomRightRadius(), 0);
+        int bottomLeftRadius  = Math.max(style.border().bottomLeftRadius(), 0);
+        int width     = bounds.width();
+        int height    = bounds.height();
         int borderWidth = 0;
 
         // Calculate the shadow box bounds based on the padding and border thickness
@@ -390,10 +397,10 @@ final class StylePainter
 
         if ( shadow.isOutset() ) {
             int artifactAdjustment = 1;
-            baseArea = CachedShapeCalculator.calculateBaseArea(_state, artifactAdjustment, artifactAdjustment, artifactAdjustment, artifactAdjustment);
+            baseArea = CachedShapeCalculator.calculateBaseArea(painter.getState(), artifactAdjustment, artifactAdjustment, artifactAdjustment, artifactAdjustment);
         }
         else
-            baseArea = new Area(_getInteriorArea());
+            baseArea = new Area(painter._getInteriorArea());
 
         int shadowInset  = blurRadius;
         int shadowOutset = blurRadius;
@@ -1015,21 +1022,23 @@ final class StylePainter
         g2d.fill(specificArea);
     }
 
-    private void _renderImage(
+    private static void _renderImage(
         ImageStyle style,
+        Bounds     bounds,
+        StylePainter painter,
         Graphics2D g2d
     ) {
         if ( style.primer().isPresent() ) {
             g2d.setColor(style.primer().get());
-            g2d.fill(_getInteriorArea());
+            g2d.fill(painter._getInteriorArea());
         }
 
         style.image().ifPresent( imageIcon -> {
             final UI.Placement placement       = style.placement();
             final boolean      repeat          = style.repeat();
             final Outline      padding         = style.padding();
-            final int          componentWidth  = _state.currentBounds().width();
-            final int          componentHeight = _state.currentBounds().height();
+            final int          componentWidth  = bounds.width();
+            final int          componentHeight = bounds.height();
 
             int imgWidth  = style.width().orElse(imageIcon.getIconWidth());
             int imgHeight = style.height().orElse(imageIcon.getIconHeight());
@@ -1136,13 +1145,13 @@ final class StylePainter
             Shape newClip = oldClip;
             switch ( style.clipArea() ) {
                 case INTERIOR:
-                    newClip = _getInteriorArea();
+                    newClip = painter._getInteriorArea();
                     break;
                 case BORDER:
-                    newClip = _getBorderArea();
+                    newClip = painter._getBorderArea();
                     break;
                 case EXTERIOR:
-                    newClip = _getExteriorArea();
+                    newClip = painter._getExteriorArea();
                     break;
                 case ALL:
                     break;
@@ -1180,7 +1189,7 @@ final class StylePainter
                         Paint oldPaint = g2d.getPaint();
                         try {
                             g2d.setPaint(new TexturePaint((BufferedImage) image, new Rectangle(x, y, imgWidth, imgHeight)));
-                            g2d.fill(_getInteriorArea());
+                            g2d.fill(painter._getInteriorArea());
                         } finally {
                             g2d.setPaint(oldPaint);
                         }
