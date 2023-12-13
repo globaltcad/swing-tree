@@ -169,16 +169,6 @@ final class StylePainter
         if ( DO_ANTIALIASING() )
             g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
-        _state.style().base().foundationColor().ifPresent(outerColor -> {
-            _fillOuterFoundationBackground(outerColor, g2d);
-        });
-
-        _state.style().base().backgroundColor().ifPresent(color -> {
-            if ( color.getAlpha() == 0 ) return;
-            g2d.setColor(color);
-            g2d.fill(_getInteriorArea());
-        });
-
         _paintStylesOn(UI.Layer.BACKGROUND, g2d);
 
         // Reset antialiasing to its previous state:
@@ -227,6 +217,18 @@ final class StylePainter
     private static void _actualPaintStylesOn( StylePainter painter, UI.Layer layer, Graphics2D g2d )
     {
         StyleRenderState state = painter.getState();
+
+        if ( layer == UI.Layer.BACKGROUND ) {
+            state.style().base().foundationColor().ifPresent(outerColor -> {
+                _fillOuterFoundationBackground(painter, outerColor, g2d);
+            });
+
+            state.style().base().backgroundColor().ifPresent(color -> {
+                if ( color.getAlpha() == 0 ) return;
+                g2d.setColor(color);
+                g2d.fill(painter._getInteriorArea());
+            });
+        }
 
         if ( layer == UI.Layer.BORDER ) {
             state.style().border().color().ifPresent(color -> {
@@ -342,18 +344,21 @@ final class StylePainter
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
     }
 
-    private void _fillOuterFoundationBackground( Color color, Graphics2D g2d ) {
+    private static void _fillOuterFoundationBackground( StylePainter painter, Color color, Graphics2D g2d )
+    {
+        StyleRenderState state = painter.getState();
+
         // Check if the color is transparent
         if ( color.getAlpha() == 0 )
             return;
 
-        int width     = _state.currentBounds().width();
-        int height    = _state.currentBounds().height();
+        int width     = state.currentBounds().width();
+        int height    = state.currentBounds().height();
 
         Rectangle2D.Float outerRect = new Rectangle2D.Float(0, 0, width, height);
 
         Area outer = new Area(outerRect);
-        Area inner = _getInteriorArea();
+        Area inner = painter._getInteriorArea();
         outer.subtract(inner);
 
         g2d.setColor(color);
