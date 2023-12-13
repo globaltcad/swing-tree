@@ -15,7 +15,6 @@ abstract class CachedPainter
     protected final UI.Layer _layer;
     private BufferedImage _value;
     private boolean _renderIntoCache = true;
-    private boolean _foundSomethingInGlobalCache = false;
     private boolean _cachingMakesSense = true;
 
 
@@ -23,7 +22,7 @@ abstract class CachedPainter
         _layer = layer;
     }
 
-    private BufferedImage allocateOrGetCachedBuffer( StyleRenderState state )
+    private boolean allocateOrGetCachedBuffer( StyleRenderState state )
     {
         BufferedImage[] buffers = _globalCache.get(state);
         if ( buffers == null )
@@ -36,17 +35,21 @@ abstract class CachedPainter
             whereas the old state may no longer be referenced by anything else.
         */
 
+        boolean foundSomethingInGlobalCache = false;
+
         BufferedImage buffer = buffers[_layer.ordinal()];
         if ( buffer == null ) {
             Bounds bounds = state.currentBounds();
             buffer = new BufferedImage(bounds.width(), bounds.height(), BufferedImage.TYPE_INT_ARGB);
             buffers[_layer.ordinal()] = buffer;
-            _foundSomethingInGlobalCache = false;
+            foundSomethingInGlobalCache = false;
         }
         else
-            _foundSomethingInGlobalCache = true;
+            foundSomethingInGlobalCache = true;
 
-        return buffer;
+        _value = buffer;
+
+        return foundSomethingInGlobalCache;
     }
 
     public final void validate( StyleRenderState oldState, StyleRenderState newState )
@@ -68,14 +71,14 @@ abstract class CachedPainter
         if ( _value != null ) {
             boolean sizeChanged = bounds.width() != _value.getWidth() || bounds.height() != _value.getHeight();
             if ( sizeChanged ) {
-                _value = allocateOrGetCachedBuffer(newState);
-                newBufferAllocated = !_foundSomethingInGlobalCache;
+                boolean foundSomethingInGlobalCache = allocateOrGetCachedBuffer(newState);
+                newBufferAllocated = !foundSomethingInGlobalCache;
             }
         }
         else
         {
-            _value = allocateOrGetCachedBuffer(newState);
-            newBufferAllocated = !_foundSomethingInGlobalCache;
+            boolean foundSomethingInGlobalCache = allocateOrGetCachedBuffer(newState);
+            newBufferAllocated = !foundSomethingInGlobalCache;
         }
 
         if ( newBufferAllocated || !leadsToSameValue(oldState, newState) ) {
