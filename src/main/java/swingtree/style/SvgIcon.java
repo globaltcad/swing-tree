@@ -620,7 +620,7 @@ public final class SvgIcon extends ImageIcon
 
         // Now onto the actual rendering:
 
-        boolean doAntiAliasing  = StylePainter.DO_ANTIALIASING();
+        boolean doAntiAliasing  = StyleEngine.IS_ANTIALIASING_ENABLED();
         boolean wasAntiAliasing = g2d.getRenderingHint( java.awt.RenderingHints.KEY_ANTIALIASING ) == java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
         if ( doAntiAliasing && !wasAntiAliasing )
             g2d.setRenderingHint( java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_ON );

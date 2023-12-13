@@ -9,23 +9,34 @@ import java.awt.*;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.util.List;
-import java.util.*;
+import java.util.Map;
+import java.util.Objects;
+import java.util.WeakHashMap;
 import java.util.function.Function;
 
-class CachedPainter
+/**
+ *  The render core class of the SwingTree style engine, which is responsible for painting
+ *  the various style configurations hosted by the {@link Style} class onto a component.
+ *  <p>
+ *  This is a pretty long class, but it is not very complex, it just has a lot of methods
+ *  that are used to render the various style configurations like gradients, images, shadows, etc...
+ */
+final class CachedStylePainter
 {
-    private static final Logger log = org.slf4j.LoggerFactory.getLogger(StylePainter.class);
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(StyleEngine.class);
 
     private static final Map<StyleRenderState, BufferedImage[]> _globalCache = new WeakHashMap<>();
 
-    protected final UI.Layer _layer;
-    private BufferedImage _value;
-    private boolean _renderIntoCache = true;
-    private boolean _cachingMakesSense = true;
+
+    private final UI.Layer _layer;
+    private BufferedImage    _cache;
+    private boolean          _renderIntoCache = true;
+    private boolean          _cachingMakesSense = true;
 
 
-    public CachedPainter(UI.Layer layer) {
-        _layer = layer;
+
+    public CachedStylePainter( UI.Layer layer ) {
+        _layer = Objects.requireNonNull(layer);
     }
 
     private boolean allocateOrGetCachedBuffer( StyleRenderState state )
@@ -53,16 +64,16 @@ class CachedPainter
         else
             foundSomethingInGlobalCache = true;
 
-        _value = buffer;
+        _cache = buffer;
 
         return foundSomethingInGlobalCache;
     }
 
     public final void validate( StyleRenderState oldState, StyleRenderState newState )
     {
-        _cachingMakesSense = cachingMakesSenseFor(newState);
+        _cachingMakesSense = _cachingMakesSenseFor(newState);
         if ( !_cachingMakesSense ) {
-            _value = null;
+            _cache = null;
             _renderIntoCache = false;
             return;
         }
@@ -74,8 +85,8 @@ class CachedPainter
 
         boolean newBufferAllocated = false;
         Bounds bounds = newState.currentBounds();
-        if ( _value != null ) {
-            boolean sizeChanged = bounds.width() != _value.getWidth() || bounds.height() != _value.getHeight();
+        if ( _cache != null ) {
+            boolean sizeChanged = bounds.width() != _cache.getWidth() || bounds.height() != _cache.getHeight();
             if ( sizeChanged ) {
                 boolean foundSomethingInGlobalCache = allocateOrGetCachedBuffer(newState);
                 newBufferAllocated = !foundSomethingInGlobalCache;
@@ -87,30 +98,30 @@ class CachedPainter
             newBufferAllocated = !foundSomethingInGlobalCache;
         }
 
-        if ( newBufferAllocated || !leadsToSameValue(oldState, newState) ) {
+        if ( newBufferAllocated || !_leadsToSameValue(oldState, newState) ) {
             _renderIntoCache = true;
             if ( !newBufferAllocated ) {
                 // We clear the image manually so that the alpha channel is cleared to 0.
-                Graphics2D g = _value.createGraphics();
+                Graphics2D g = _cache.createGraphics();
                 g.setBackground(new Color(0, 0, 0, 0));
-                g.clearRect(0, 0, _value.getWidth(), _value.getHeight());
+                g.clearRect(0, 0, _cache.getWidth(), _cache.getHeight());
                 g.dispose();
             }
         }
     }
 
-    public final void paint( StylePainter painter, Graphics2D g )
+    public final void paint( StyleEngine painter, Graphics2D g )
     {
         if ( !_cachingMakesSense ) {
             produce(painter, g);
             return;
         }
 
-        if ( _value == null )
+        if ( _cache == null )
             return;
 
         if ( _renderIntoCache ) {
-            Graphics2D g2 = _value.createGraphics();
+            Graphics2D g2 = _cache.createGraphics();
             g2.setBackground(g.getBackground());
             g2.setClip(null);
             g2.setComposite(g.getComposite());
@@ -121,20 +132,20 @@ class CachedPainter
             _renderIntoCache = false;
         }
 
-        g.drawImage(_value, 0, 0, null);
+        g.drawImage(_cache, 0, 0, null);
     }
 
 
-    protected void produce(StylePainter painter, Graphics2D g) {
-        _actualPaintStylesOn( painter, _layer, g);
+    protected void produce(StyleEngine painter, Graphics2D g) {
+        _renderStyleFor( painter, _layer, g);
     }
 
-    public boolean leadsToSameValue(StyleRenderState oldState, StyleRenderState newState) {
+    private boolean _leadsToSameValue(StyleRenderState oldState, StyleRenderState newState) {
         return oldState.equals(newState);
     }
 
 
-    public boolean cachingMakesSenseFor(StyleRenderState state)
+    public boolean _cachingMakesSenseFor(StyleRenderState state)
     {
         Bounds bounds = state.currentBounds();
         if ( bounds.width() <= 0 || bounds.height() <= 0 )
@@ -179,25 +190,25 @@ class CachedPainter
     }
 
 
-    private static void _actualPaintStylesOn( StylePainter painter, UI.Layer layer, Graphics2D g2d )
+    private static void _renderStyleFor( StyleEngine engine, UI.Layer layer, Graphics2D g2d )
     {
-        StyleRenderState state = painter.getState();
+        StyleRenderState state = engine.getState();
 
         if ( layer == UI.Layer.BACKGROUND ) {
             state.style().base().foundationColor().ifPresent(outerColor -> {
-                _fillOuterFoundationBackground(painter, outerColor, g2d);
+                _fillOuterFoundationBackground(engine, outerColor, g2d);
             });
 
             state.style().base().backgroundColor().ifPresent(color -> {
                 if ( color.getAlpha() == 0 ) return;
                 g2d.setColor(color);
-                g2d.fill(painter._getInteriorArea());
+                g2d.fill(engine.getInteriorArea());
             });
         }
 
         if ( layer == UI.Layer.BORDER ) {
             state.style().border().color().ifPresent(color -> {
-                _drawBorder( painter, color, g2d);
+                _drawBorder( engine, color, g2d);
             });
         }
 
@@ -205,7 +216,7 @@ class CachedPainter
         // 1. A grounding serving as a base background, which is a filled color and/or an image:
         for ( ImageStyle imageStyle : state.style().images(layer) )
             if ( !imageStyle.equals(ImageStyle.none()) )
-                _renderImage( imageStyle, state.currentBounds(), painter, g2d);
+                _renderImage( imageStyle, state.currentBounds(), engine, g2d);
 
         // 2. Gradients, which are best used to give a component a nice surface lighting effect.
         // They may transition vertically, horizontally or diagonally over various different colors:
@@ -213,24 +224,22 @@ class CachedPainter
             if ( gradient.colors().length > 0 ) {
                 if ( gradient.colors().length == 1 ) {
                     g2d.setColor(gradient.colors()[0]);
-                    g2d.fill(painter._getInteriorArea());
+                    g2d.fill(engine.getInteriorArea());
                 }
                 else if ( gradient.transition().isDiagonal() )
-                    _renderDiagonalGradient(g2d, state.currentBounds(), state.style().margin(), gradient, painter._getInteriorArea());
+                    _renderDiagonalGradient(g2d, state.currentBounds(), state.style().margin(), gradient, engine.getInteriorArea());
                 else
-                    _renderVerticalOrHorizontalGradient(g2d, state.currentBounds(), state.style().margin(), gradient, painter._getInteriorArea());
+                    _renderVerticalOrHorizontalGradient(g2d, state.currentBounds(), state.style().margin(), gradient, engine.getInteriorArea());
             }
 
         // 3. Shadows, which are simple gradient based drop shadows that can go inwards or outwards
         for ( ShadowStyle shadow : state.style().shadows(layer) )
-            shadow.color().ifPresent(color -> {
-                _renderShadows(shadow, painter, g2d, color);
-            });
+            _renderShadows(shadow, engine, g2d);
 
         // 4. Painters, which are provided by the user and can be anything
         List<Painter> painters = state.style().painters(layer);
         if ( !painters.isEmpty() )
-            painter.paintWithContentAreaClip( g2d, () -> {
+            engine.paintWithContentAreaClip( g2d, () -> {
                 // We remember the current transform and clip so that we can reset them after each painter:
                 AffineTransform currentTransform = new AffineTransform(g2d.getTransform());
                 Shape           currentClip      = g2d.getClip();
@@ -267,9 +276,9 @@ class CachedPainter
             });
     }
 
-    private static void _fillOuterFoundationBackground( StylePainter painter, Color color, Graphics2D g2d )
+    private static void _fillOuterFoundationBackground( StyleEngine engine, Color color, Graphics2D g2d )
     {
-        StyleRenderState state = painter.getState();
+        StyleRenderState state = engine.getState();
 
         // Check if the color is transparent
         if ( color.getAlpha() == 0 )
@@ -281,18 +290,18 @@ class CachedPainter
         Rectangle2D.Float outerRect = new Rectangle2D.Float(0, 0, width, height);
 
         Area outer = new Area(outerRect);
-        Area inner = painter._getInteriorArea();
+        Area inner = engine.getInteriorArea();
         outer.subtract(inner);
 
         g2d.setColor(color);
         g2d.fill(outer);
     }
 
-    private static void _drawBorder( StylePainter painter, Color color, Graphics2D g2d ) {
-        StyleRenderState state = painter.getState();
+    private static void _drawBorder( StyleEngine engine, Color color, Graphics2D g2d ) {
+        StyleRenderState state = engine.getState();
         if ( !Outline.none().equals(state.style().border().widths()) ) {
             try {
-                Area borderArea = painter._getBorderArea();
+                Area borderArea = engine.getBorderArea();
                 g2d.setColor(color);
                 g2d.fill(borderArea);
 
@@ -321,12 +330,15 @@ class CachedPainter
 
     private static void _renderShadows(
         ShadowStyle shadow,
-        StylePainter painter,
-        Graphics2D g2d,
-        Color shadowColor
+        StyleEngine engine,
+        Graphics2D g2d
     ) {
-        Style style = painter.getState().style();
-        Bounds bounds = painter.getState().currentBounds();
+        if ( !shadow.color().isPresent() )
+            return;
+
+        Color shadowColor = shadow.color().orElse(Color.BLACK);
+        Style style = engine.getState().style();
+        Bounds bounds = engine.getState().currentBounds();
 
         // First let's check if we need to render any shadows at all
         // Is the shadow color transparent?
@@ -365,10 +377,10 @@ class CachedPainter
 
         if ( shadow.isOutset() ) {
             int artifactAdjustment = 1;
-            baseArea = CachedShapeCalculator.calculateBaseArea(painter.getState(), artifactAdjustment, artifactAdjustment, artifactAdjustment, artifactAdjustment);
+            baseArea = CachedShapeCalculator.calculateBaseArea(engine.getState(), artifactAdjustment, artifactAdjustment, artifactAdjustment, artifactAdjustment);
         }
         else
-            baseArea = new Area(painter._getInteriorArea());
+            baseArea = new Area(engine.getInteriorArea());
 
         int shadowInset  = blurRadius;
         int shadowOutset = blurRadius;
@@ -593,13 +605,13 @@ class CachedPainter
     }
 
     private static void _renderEdgeShadow(
-            ShadowStyle shadowStyle,
-            UI.Edge edge,
-            Area contentArea,
-            Rectangle innerShadowRect,
-            Rectangle outerShadowRect,
-            int gradientStartOffset,
-            Graphics2D g2d
+        ShadowStyle shadowStyle,
+        UI.Edge     edge,
+        Area        contentArea,
+        Rectangle   innerShadowRect,
+        Rectangle   outerShadowRect,
+        int         gradientStartOffset,
+        Graphics2D  g2d
     ) {
         // We define a boundary center point and a clipping box so that edges don't overlap
         float clipBoundaryX = outerShadowRect.x + outerShadowRect.width / 2f;
@@ -758,11 +770,11 @@ class CachedPainter
      * @param gradient The shade to render.
      */
     private static void _renderDiagonalGradient(
-        Graphics2D g2d,
-        Bounds bounds,
-        Outline margin,
+        Graphics2D    g2d,
+        Bounds        bounds,
+        Outline       margin,
         GradientStyle gradient,
-        Area specificArea
+        Area          specificArea
     ) {
         Color[] colors = gradient.colors();
         UI.Transition type = gradient.transition();
@@ -991,14 +1003,14 @@ class CachedPainter
     }
 
     private static void _renderImage(
-        ImageStyle style,
-        Bounds     bounds,
-        StylePainter painter,
-        Graphics2D g2d
+        ImageStyle  style,
+        Bounds      bounds,
+        StyleEngine engine,
+        Graphics2D  g2d
     ) {
         if ( style.primer().isPresent() ) {
             g2d.setColor(style.primer().get());
-            g2d.fill(painter._getInteriorArea());
+            g2d.fill(engine.getInteriorArea());
         }
 
         style.image().ifPresent( imageIcon -> {
@@ -1113,13 +1125,13 @@ class CachedPainter
             Shape newClip = oldClip;
             switch ( style.clipArea() ) {
                 case INTERIOR:
-                    newClip = painter._getInteriorArea();
+                    newClip = engine.getInteriorArea();
                     break;
                 case BORDER:
-                    newClip = painter._getBorderArea();
+                    newClip = engine.getBorderArea();
                     break;
                 case EXTERIOR:
-                    newClip = painter._getExteriorArea();
+                    newClip = engine.getExteriorArea();
                     break;
                 case ALL:
                     break;
@@ -1157,7 +1169,7 @@ class CachedPainter
                         Paint oldPaint = g2d.getPaint();
                         try {
                             g2d.setPaint(new TexturePaint((BufferedImage) image, new Rectangle(x, y, imgWidth, imgHeight)));
-                            g2d.fill(painter._getInteriorArea());
+                            g2d.fill(engine.getInteriorArea());
                         } finally {
                             g2d.setPaint(oldPaint);
                         }

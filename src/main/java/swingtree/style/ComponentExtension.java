@@ -61,7 +61,7 @@ public final class ComponentExtension<C extends JComponent>
     private final List<String> _styleGroups = new ArrayList<>(0);
 
 
-    private StylePainter    _stylePainter = StylePainter.none();
+    private StyleEngine _styleEngine = StyleEngine.none();
     private DynamicLaF      _dynamicLaF   = DynamicLaF.none();
     private StyleSource<C>  _styleSource  = StyleSource.create();
 
@@ -218,7 +218,7 @@ public final class ComponentExtension<C extends JComponent>
      *         which is calculated based on the {@link Styler} lambdas
      *         associated with the component.
      */
-    public Style getStyle() { return _stylePainter.getStyle(); }
+    public Style getStyle() { return _styleEngine.getStyle(); }
 
     /**
      *  Removes all animations from the component.
@@ -226,7 +226,7 @@ public final class ComponentExtension<C extends JComponent>
      *  as well as {@link Styler} based animations.
      */
     public void clearAnimations() {
-        _stylePainter = _stylePainter.withoutAnimationPainters();
+        _styleEngine = _styleEngine.withoutAnimationPainters();
         _styleSource  = _styleSource.withoutAnimationStylers();
     }
 
@@ -237,7 +237,7 @@ public final class ComponentExtension<C extends JComponent>
      * @param painter The {@link Painter} which defines how the animation is rendered.
      */
     public void addAnimationPainter( AnimationState state, swingtree.api.Painter painter ) {
-        _stylePainter = _stylePainter.withAnimationPainter(state.lifetime(), Objects.requireNonNull(painter));
+        _styleEngine = _styleEngine.withAnimationPainter(state.lifetime(), Objects.requireNonNull(painter));
         _installCustomBorderBasedStyleAndAnimationRenderer();
     }
 
@@ -307,9 +307,9 @@ public final class ComponentExtension<C extends JComponent>
                 children to be clipped by the round border (and the viewport).
                 So we use the inner component area as the clip for the children.
             */
-            clip = StyleUtility.intersect( _stylePainter.interiorArea().orElse(clip), clip );
+            clip = StyleUtility.intersect( _styleEngine.interiorArea().orElse(clip), clip );
         }
-        _stylePainter._withClip(g2d, clip, ()->{
+        _styleEngine._withClip(g2d, clip, ()->{
             superPaint.run();
         });
 
@@ -318,7 +318,7 @@ public final class ComponentExtension<C extends JComponent>
         // We remember if antialiasing was enabled before we render:
         boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
         // Reset antialiasing to its previous state:
-        if ( StylePainter.DO_ANTIALIASING() )
+        if ( StyleEngine.IS_ANTIALIASING_ENABLED() )
             g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
         // We remember the clip:
@@ -328,7 +328,7 @@ public final class ComponentExtension<C extends JComponent>
         if ( componentFont != null && !componentFont.equals(g2d.getFont()) )
             g2d.setFont( componentFont );
 
-        _stylePainter.paintForegroundStyle(g2d);
+        _styleEngine.paintForegroundStyle(g2d);
 
         // We restore the clip:
         if ( g2d.getClip() != formerClip )
@@ -340,7 +340,7 @@ public final class ComponentExtension<C extends JComponent>
 
     void paintWithContentAreaClip( Graphics g, Runnable painter ) {
         establishStyleStateForRendering();
-        _stylePainter.paintWithContentAreaClip(g, painter);
+        _styleEngine.paintWithContentAreaClip(g, painter);
     }
 
     /**
@@ -368,7 +368,7 @@ public final class ComponentExtension<C extends JComponent>
     /**
      *  Calculates a new {@link Style} object based on the {@link Styler} lambdas associated
      *  with the component and then applies it to the component after which
-     *  a new {@link StylePainter} is installed for the component.
+     *  a new {@link StyleEngine} is installed for the component.
      *  If the calculated style is the same as the current style, nothing happens
      *  except in case the <code>force</code> parameter is set to <code>true</code>.
      *
@@ -380,7 +380,7 @@ public final class ComponentExtension<C extends JComponent>
 
     /**
      *  Applies the given {@link Style} to the component after which
-     *  a new {@link StylePainter} is installed for the component.
+     *  a new {@link StyleEngine} is installed for the component.
      *  If the given style is the same as the current style, nothing happens
      *  except in case the <code>force</code> parameter is set to <code>true</code>.
      *
@@ -392,11 +392,11 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     void establishStyleStateForRendering() {
-        _stylePainter = _stylePainter.withNewStyleAndComponent( _calculateAndApplyStyle(false), _owner );
+        _styleEngine = _styleEngine.withNewStyleAndComponent( _calculateAndApplyStyle(false), _owner );
     }
 
     private void _installStyle( Style style ) {
-        _stylePainter = _stylePainter.withNewStyleAndComponent(style, _owner);
+        _styleEngine = _styleEngine.withNewStyleAndComponent(style, _owner);
     }
 
     private Style _calculateAndApplyStyle( boolean force ) {
@@ -422,14 +422,14 @@ public final class ComponentExtension<C extends JComponent>
         if ( componentFont != null && !componentFont.equals(g.getFont()) )
             g.setFont( componentFont );
 
-        _stylePainter.renderBackgroundStyle( (Graphics2D) g);
+        _styleEngine.renderBackgroundStyle( (Graphics2D) g);
 
         if ( lookAndFeelPainting != null ) {
-            Shape contentClip = _stylePainter.interiorArea().orElse(null);
+            Shape contentClip = _styleEngine.interiorArea().orElse(null);
 
             contentClip = StyleUtility.intersect( contentClip, _outerBaseClip );
 
-            _stylePainter._withClip((Graphics2D) g, contentClip, () -> {
+            _styleEngine._withClip((Graphics2D) g, contentClip, () -> {
                 try {
                     lookAndFeelPainting.run();
                 } catch (Exception e) {
@@ -440,13 +440,13 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     void _paintBorderStyle( Graphics2D g2d, JComponent component ) {
-        _stylePainter.paintBorderStyle(g2d);
+        _styleEngine.paintBorderStyle(g2d);
     }
 
     void _renderAnimations( Graphics2D g2d )
     {
-        _stylePainter.renderAnimations(g2d);
-        _stylePainter = _stylePainter.withoutExpiredAnimationPainters();
+        _styleEngine.renderAnimations(g2d);
+        _styleEngine = _styleEngine.withoutExpiredAnimationPainters();
     }
 
     private Style _applyStyleToComponentState( Style style, boolean force )
@@ -460,7 +460,7 @@ public final class ComponentExtension<C extends JComponent>
             border.recalculateInsets(style);
         }
 
-        if ( _stylePainter.getStyle().equals(style) && !force )
+        if ( _styleEngine.getStyle().equals(style) && !force )
             return style;
 
         final Style.Report styleReport = style.getReport();
@@ -477,7 +477,7 @@ public final class ComponentExtension<C extends JComponent>
 
         if ( isNotStyled || onlyDimensionalityIsStyled ) {
             _dynamicLaF = _dynamicLaF._uninstallCustomLaF(_owner);
-            if ( _styleSource.hasNoAnimationStylers() && _stylePainter.hasNoPainters() )
+            if ( _styleSource.hasNoAnimationStylers() && _styleEngine.hasNoPainters() )
                 _uninstallCustomBorderBasedStyleAndAnimationRenderer();
             if ( _initialBackgroundColor != null ) {
                 _owner.setBackground(_initialBackgroundColor);

@@ -14,70 +14,66 @@ import java.awt.geom.Area;
 import java.util.*;
 
 /**
- *  The core class of the SwingTree style engine, which is responsible for painting
- *  the various style configurations hosted by the {@link Style} class onto a component.
- *  <p>
- *  This is a pretty long class, but it is not very complex, it just has a lot of methods
- *  that are used to render the various style configurations like gradients, images, shadows, etc...
+ *  Orchestrates the rendering of a component's style and animations.
  */
-final class StylePainter
+final class StyleEngine
 {
-    private static final Logger log = org.slf4j.LoggerFactory.getLogger(StylePainter.class);
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(StyleEngine.class);
 
-    public static StylePainter none() {
-        CachedPainter[] layerCaches = new CachedPainter[UI.Layer.values().length];
-        return new StylePainter(StyleRenderState.none(), new Expirable[0], new CachedShapeCalculator(), layerCaches);
+    public static StyleEngine none() {
+        CachedStylePainter[] layerCaches = new CachedStylePainter[UI.Layer.values().length];
+        return new StyleEngine(StyleRenderState.none(), new Expirable[0], new CachedShapeCalculator(), layerCaches);
     }
 
-    static boolean DO_ANTIALIASING(){
+    static boolean IS_ANTIALIASING_ENABLED(){
         return UI.scale() < 1.5;
     }
 
 
-    private final StyleRenderState _state;
-    private final Expirable<Painter>[] _animationPainters;
-    private final CachedShapeCalculator _shapes;
-    private final CachedPainter[] _layerCache;
+    private final StyleRenderState       _state;
+    private final Expirable<Painter>[]   _animationPainters;
+    private final CachedShapeCalculator  _shapes;
+    private final CachedStylePainter[]   _layerPainters;
 
 
-    private StylePainter(
-        StyleRenderState state,
-        Expirable<Painter>[] animationPainters,
+    private StyleEngine(
+        StyleRenderState      state,
+        Expirable<Painter>[]  animationPainters,
         CachedShapeCalculator shapes,
-        CachedPainter[] layerCache
+        CachedStylePainter[]  layerCache
     ) {
         _state             = Objects.requireNonNull(state);
         _animationPainters = Objects.requireNonNull(animationPainters);
         _shapes            = Objects.requireNonNull(shapes);
-        _layerCache        = Objects.requireNonNull(layerCache);
-        for ( int i = 0; i < _layerCache.length && _layerCache[i] == null; i++ )
-            _layerCache[i] = new CachedPainter(UI.Layer.values()[i]);
+        _layerPainters     = Objects.requireNonNull(layerCache);
+        for ( int i = 0; i < _layerPainters.length && _layerPainters[i] == null; i++ )
+            _layerPainters[i] = new CachedStylePainter(UI.Layer.values()[i]);
     }
 
     StyleRenderState getState() { return _state; }
 
-    StylePainter withNewStyleAndComponent(Style style, JComponent component ) {
+    StyleEngine withNewStyleAndComponent( Style style, JComponent component ) {
         StyleRenderState newState = _state.with(style, component);
         _shapes.validate(_state, newState);
-        for ( CachedPainter layerCache : _layerCache )
+        for ( CachedStylePainter layerCache : _layerPainters)
             layerCache.validate(_state, newState);
-        return new StylePainter( newState, _animationPainters, _shapes, _layerCache );
+        return new StyleEngine( newState, _animationPainters, _shapes, _layerPainters);
     }
 
-    StylePainter withAnimationPainter( LifeTime lifeTime, Painter animationPainter ) {
+    StyleEngine withAnimationPainter(LifeTime lifeTime, Painter animationPainter ) {
         java.util.List<Expirable<Painter>> animationPainters = new ArrayList<>(Arrays.asList(_animationPainters));
         animationPainters.add(new Expirable<>(lifeTime, animationPainter));
-        return new StylePainter( _state, animationPainters.toArray(new Expirable[0]), _shapes, _layerCache );
+        return new StyleEngine( _state, animationPainters.toArray(new Expirable[0]), _shapes, _layerPainters);
     }
 
-    StylePainter withoutAnimationPainters() {
-        return new StylePainter( _state, new Expirable[0], _shapes, _layerCache );
+    StyleEngine withoutAnimationPainters() {
+        return new StyleEngine( _state, new Expirable[0], _shapes, _layerPainters);
     }
 
-    StylePainter withoutExpiredAnimationPainters() {
+    StyleEngine withoutExpiredAnimationPainters() {
         List<Expirable<Painter>> animationPainters = new ArrayList<>(Arrays.asList(_animationPainters));
         animationPainters.removeIf(Expirable::isExpired);
-        return new StylePainter( _state, animationPainters.toArray(new Expirable[0]), _shapes, _layerCache );
+        return new StyleEngine( _state, animationPainters.toArray(new Expirable[0]), _shapes, _layerPainters);
     }
 
     Style getStyle() { return _state.style(); }
@@ -85,22 +81,22 @@ final class StylePainter
     Optional<Shape> interiorArea() {
         Shape contentClip = null;
         if ( _shapes.interiorComponentArea().exists() || getStyle().margin().isPositive() )
-            contentClip = _getInteriorArea();
+            contentClip = getInteriorArea();
 
         return Optional.ofNullable(contentClip);
     }
 
-    Area _getInteriorArea()
+    Area getInteriorArea()
     {
         return _shapes.interiorComponentArea().getFor(_state);
     }
 
-    Area _getExteriorArea()
+    Area getExteriorArea()
     {
         return _shapes.exteriorComponentArea().getFor(_state);
     }
 
-    Area _getBorderArea()
+    Area getBorderArea()
     {
         return _shapes.borderArea().getFor(_state);
     }
@@ -108,7 +104,7 @@ final class StylePainter
     void paintWithContentAreaClip( Graphics g, Runnable painter ) {
         Shape oldClip = g.getClip();
 
-        Shape newClip = _getInteriorArea();
+        Shape newClip = getInteriorArea();
         if ( newClip != null && newClip != oldClip ) {
             newClip = StyleUtility.intersect(newClip, oldClip);
             g.setClip(newClip);
@@ -125,7 +121,7 @@ final class StylePainter
         boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
 
         // We enable antialiasing:
-        if ( DO_ANTIALIASING() )
+        if ( IS_ANTIALIASING_ENABLED() )
             g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
         _render(UI.Layer.BACKGROUND, g2d);
@@ -144,7 +140,7 @@ final class StylePainter
         boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
 
         // We enable antialiasing:
-        if ( StylePainter.DO_ANTIALIASING() )
+        if ( StyleEngine.IS_ANTIALIASING_ENABLED() )
             g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
         // Animations are last: they are rendered on top of everything else:
@@ -170,7 +166,7 @@ final class StylePainter
     }
 
     private void _render( UI.Layer layer, Graphics2D g2d ) {
-        _layerCache[layer.ordinal()].paint(this, g2d);
+        _layerPainters[layer.ordinal()].paint(this, g2d);
     }
 
     void _withClip( Graphics2D g2d, Shape clip, Runnable paintTask ) {
@@ -189,7 +185,7 @@ final class StylePainter
         boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
 
         // We enable antialiasing:
-        if ( DO_ANTIALIASING() )
+        if ( IS_ANTIALIASING_ENABLED() )
             g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
         _render(UI.Layer.CONTENT, g2d);
@@ -206,7 +202,7 @@ final class StylePainter
         boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
 
         // We enable antialiasing:
-        if ( DO_ANTIALIASING() )
+        if ( IS_ANTIALIASING_ENABLED() )
             g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
         _render(UI.Layer.FOREGROUND, g2d);
