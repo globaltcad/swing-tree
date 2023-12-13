@@ -214,6 +214,48 @@ final class StylePainter
         _layerCache[layer.ordinal()].paint(this, g2d);
     }
 
+    void _withClip( Graphics2D g2d, Shape clip, Runnable paintTask ) {
+        Shape formerClip = g2d.getClip();
+        g2d.setClip(clip);
+        try {
+            paintTask.run();
+        } finally {
+            g2d.setClip(formerClip);
+        }
+    }
+
+    void paintBorderStyle( Graphics2D g2d )
+    {
+        // We remember if antialiasing was enabled before we render:
+        boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
+
+        // We enable antialiasing:
+        if ( DO_ANTIALIASING() )
+            g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
+
+        _paintStylesOn(UI.Layer.CONTENT, g2d);
+
+        _paintStylesOn(UI.Layer.BORDER, g2d);
+
+        // Reset antialiasing to its previous state:
+        g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
+    }
+
+    public void paintForegroundStyle( Graphics2D g2d )
+    {
+        // We remember if antialiasing was enabled before we render:
+        boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
+
+        // We enable antialiasing:
+        if ( DO_ANTIALIASING() )
+            g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
+
+        _paintStylesOn(UI.Layer.FOREGROUND, g2d);
+
+        // Reset antialiasing to its previous state:
+        g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
+    }
+
     private static void _actualPaintStylesOn( StylePainter painter, UI.Layer layer, Graphics2D g2d )
     {
         StyleRenderState state = painter.getState();
@@ -300,48 +342,6 @@ final class StylePainter
                     }
                 });
             });
-    }
-
-    void _withClip( Graphics2D g2d, Shape clip, Runnable paintTask ) {
-        Shape formerClip = g2d.getClip();
-        g2d.setClip(clip);
-        try {
-            paintTask.run();
-        } finally {
-            g2d.setClip(formerClip);
-        }
-    }
-
-    void paintBorderStyle( Graphics2D g2d )
-    {
-        // We remember if antialiasing was enabled before we render:
-        boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
-
-        // We enable antialiasing:
-        if ( DO_ANTIALIASING() )
-            g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
-
-        _paintStylesOn(UI.Layer.CONTENT, g2d);
-
-        _paintStylesOn(UI.Layer.BORDER, g2d);
-
-        // Reset antialiasing to its previous state:
-        g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
-    }
-
-    public void paintForegroundStyle( Graphics2D g2d )
-    {
-        // We remember if antialiasing was enabled before we render:
-        boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
-
-        // We enable antialiasing:
-        if ( DO_ANTIALIASING() )
-            g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
-
-        _paintStylesOn(UI.Layer.FOREGROUND, g2d);
-
-        // Reset antialiasing to its previous state:
-        g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
     }
 
     private static void _fillOuterFoundationBackground( StylePainter painter, Color color, Graphics2D g2d )
