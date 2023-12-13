@@ -26,7 +26,8 @@ final class StylePainter
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(StylePainter.class);
 
     public static StylePainter none() {
-        return new StylePainter(StyleRenderState.none(), new Expirable[0], new CachedShapeCalculator());
+        CachedPainter[] layerCaches = new CachedPainter[UI.Layer.values().length];
+        return new StylePainter(StyleRenderState.none(), new Expirable[0], new CachedShapeCalculator(), layerCaches);
     }
 
     static boolean DO_ANTIALIASING(){
@@ -37,38 +38,85 @@ final class StylePainter
     private final StyleRenderState _state;
     private final Expirable<Painter>[] _animationPainters;
     private final CachedShapeCalculator _shapes;
+    private final CachedPainter[] _layerCache;
 
 
     private StylePainter(
         StyleRenderState state,
         Expirable<Painter>[] animationPainters,
-        CachedShapeCalculator shapes
+        CachedShapeCalculator shapes,
+        CachedPainter[] layerCache
     ) {
         _state             = Objects.requireNonNull(state);
         _animationPainters = Objects.requireNonNull(animationPainters);
         _shapes            = Objects.requireNonNull(shapes);
+        _layerCache        = Objects.requireNonNull(layerCache);
+        for ( int i = 0; i < _layerCache.length && _layerCache[i] == null; i++ )
+            _layerCache[i] = new CachedPainter(UI.Layer.values()[i]) {
+                @Override
+                protected void produce(StylePainter painter, Graphics2D g) {
+                    painter._actualPaintStylesOn( _layer, g);
+                }
+                @Override
+                public boolean leadsToSameValue(StyleRenderState oldState, StyleRenderState newState) {
+                    return oldState.equals(newState);
+                }
+
+                @Override
+                public boolean cachingMakesSenseFor(StyleRenderState state)
+                {
+                    Bounds bounds = state.currentBounds();
+                    if ( bounds.width() <= 0 || bounds.height() <= 0 )
+                        return false;
+                    boolean hasPainters = !state.style().painters(_layer).isEmpty();
+                    if ( hasPainters )
+                        return false; // We don't know what the painters will do, so we don't cache their painting!
+                    int heavyStyleCount = 0;
+                    for ( ImageStyle imageStyle : state.style().images(_layer) )
+                        if ( !imageStyle.equals(ImageStyle.none()) )
+                            heavyStyleCount++;
+                    for ( GradientStyle gradient : state.style().gradients(_layer) )
+                        if ( !gradient.equals(GradientStyle.none()) )
+                            heavyStyleCount++;
+                    for ( ShadowStyle shadow : state.style().shadows(_layer) )
+                        if ( !shadow.equals(ShadowStyle.none()) )
+                            heavyStyleCount++;
+
+                    if ( heavyStyleCount < 1 )
+                        return false;
+
+                    int pixelCount = bounds.width() * bounds.height();
+                    if ( pixelCount > 256 * 256 * (heavyStyleCount+1) )
+                        return false;
+
+                    return true;
+                }
+            };
+
     }
 
     StylePainter withNewStyleAndComponent(Style style, JComponent component ) {
         StyleRenderState newState = _state.with(style, component);
         _shapes.validate(_state, newState);
-        return new StylePainter( newState, _animationPainters, _shapes );
+        for ( CachedPainter layerCache : _layerCache )
+            layerCache.validate(_state, newState);
+        return new StylePainter( newState, _animationPainters, _shapes, _layerCache );
     }
 
     StylePainter withAnimationPainter( LifeTime lifeTime, Painter animationPainter ) {
         java.util.List<Expirable<Painter>> animationPainters = new ArrayList<>(Arrays.asList(_animationPainters));
         animationPainters.add(new Expirable<>(lifeTime, animationPainter));
-        return new StylePainter( _state, animationPainters.toArray(new Expirable[0]), _shapes );
+        return new StylePainter( _state, animationPainters.toArray(new Expirable[0]), _shapes, _layerCache );
     }
 
     StylePainter withoutAnimationPainters() {
-        return new StylePainter( _state, new Expirable[0], _shapes );
+        return new StylePainter( _state, new Expirable[0], _shapes, _layerCache );
     }
 
     StylePainter withoutExpiredAnimationPainters() {
         List<Expirable<Painter>> animationPainters = new ArrayList<>(Arrays.asList(_animationPainters));
         animationPainters.removeIf(Expirable::isExpired);
-        return new StylePainter( _state, animationPainters.toArray(new Expirable[0]), _shapes );
+        return new StylePainter( _state, animationPainters.toArray(new Expirable[0]), _shapes, _layerCache );
     }
 
     Style getStyle() { return _state.style(); }
@@ -136,6 +184,10 @@ final class StylePainter
     }
 
     private void _paintStylesOn( UI.Layer layer, Graphics2D g2d ) {
+        _layerCache[layer.ordinal()].paint(this, g2d);
+    }
+
+    private void _actualPaintStylesOn( UI.Layer layer, Graphics2D g2d ) {
         // Every layer has 4 things:
         // 1. A grounding serving as a base background, which is a filled color and/or an image:
         for ( ImageStyle imageStyle : _state.style().images(layer) )
