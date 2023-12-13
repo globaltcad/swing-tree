@@ -6,12 +6,8 @@ import swingtree.components.JIcon;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.plaf.*;
-import javax.swing.plaf.basic.BasicButtonUI;
-import javax.swing.plaf.basic.BasicLabelUI;
-import javax.swing.plaf.basic.BasicPanelUI;
-import javax.swing.plaf.basic.BasicTextFieldUI;
+import javax.swing.plaf.basic.*;
 import java.awt.*;
-import java.awt.geom.Area;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -261,7 +257,7 @@ class DynamicLaF
 
         @Override public void paint( Graphics g, JComponent c ) {
             ComponentExtension.from(c)._paintBackground(g, ()->{
-                _paintComponentThroughFormerIU(_formerUI, g, c);
+                _paintComponentThroughFormerUI(_formerUI, g, c);
             });
         }
         @Override public void update( Graphics g, JComponent c ) { paint(g, c); }
@@ -278,7 +274,7 @@ class DynamicLaF
         @Override public void paint( Graphics g, JComponent c ) {
             ComponentExtension.from(c)._paintBackground(g, ()->{
                 if ( _formerUI != null )
-                    _paintComponentThroughFormerIU(_formerUI, g, c);
+                    _paintComponentThroughFormerUI(_formerUI, g, c);
                 else
                     super.paint(g, c);
             });
@@ -303,43 +299,25 @@ class DynamicLaF
         }
         @Override protected void paintBackground(Graphics g) {
             JComponent c = getComponent();
-            //if ( c.isOpaque() ) {
-                int insetTop;
-                int insetLeft;
-                int insetBottom;
-                int insetRight;
-                if ( c.getBorder() instanceof StyleAndAnimationBorder ) {
-                    StyleAndAnimationBorder<?> styleBorder = (StyleAndAnimationBorder<?>) c.getBorder();
-                    Insets margins = styleBorder.getMarginInsets();
-                    insetTop    = margins.top   ;
-                    insetLeft   = margins.left  ;
-                    insetBottom = margins.bottom;
-                    insetRight  = margins.right ;
-                    /*
-                        Here we divide by 2 because in nimbus the border is partially consisting of
-                        a shadow going inwards! If we don't divide by 2, the background will
-                        not fill the whole inner component area.
-                        TODO: investigate how this works in other LaFs.
-                    */
-                } else {
-                    insetBottom = 0;
-                    insetRight = 0;
-                    insetTop = 0;
-                    insetLeft = 0;
-                }
 
-                g.setColor(c.getBackground());
-                ComponentExtension.from(getComponent()).paintWithContentAreaClip(g, ()->{
-                    g.fillRect(
-                            insetLeft, insetTop,
-                            c.getWidth() - insetLeft - insetRight, c.getHeight() - insetTop - insetBottom
-                        );
-                });
-            //}
+            Insets margins = ComponentExtension.from(c).getMarginInsets();
+            int insetTop    = margins.top   ;
+            int insetLeft   = margins.left  ;
+            int insetBottom = margins.bottom;
+            int insetRight  = margins.right ;
+
+            g.setColor(c.getBackground());
+            ComponentExtension.from(getComponent()).paintWithContentAreaClip(g, ()->{
+                g.fillRect(
+                        insetLeft, insetTop,
+                        c.getWidth() - insetLeft - insetRight, c.getHeight() - insetTop - insetBottom
+                    );
+            });
+
             boolean shouldPaintFormerUI = ( insetLeft == 0 && insetRight == 0 && insetTop == 0 && insetBottom == 0 );
             ComponentExtension.from(c)._paintBackground(g, ()->{
                 if ( shouldPaintFormerUI )
-                    _paintComponentThroughFormerIU(_formerUI, g, c);
+                    _paintComponentThroughFormerUI(_formerUI, g, c);
             });
         }
 
@@ -348,8 +326,7 @@ class DynamicLaF
         public boolean contains(JComponent c, int x, int y) { return _contains(c, x, y, ()->super.contains(c, x, y)); }
     }
 
-
-    private static void _paintComponentThroughFormerIU(
+    private static void _paintComponentThroughFormerUI(
         ComponentUI formerUI, Graphics g, JComponent c
     ) {
         try {

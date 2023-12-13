@@ -260,6 +260,15 @@ public final class ComponentExtension<C extends JComponent>
      */
     public void installCustomUIIfPossible() { _dynamicLaF.installCustomUIFor(_owner); }
 
+    Insets getMarginInsets() {
+        if ( _owner.getBorder() instanceof StyleAndAnimationBorder ) {
+            StyleAndAnimationBorder<?> styleBorder = (StyleAndAnimationBorder<?>) _owner.getBorder();
+            return styleBorder.getMarginInsets();
+        }
+        else
+            return new Insets(0,0,0,0);
+    }
+
     /**
      *  This method is used to paint the background style of the component
      *  using the provided {@link Graphics} object.
