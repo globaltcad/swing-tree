@@ -191,11 +191,15 @@ public final class Style
 
 
     boolean hasCustomBackgroundPainters() {
-        return _painters.stylesStream().anyMatch(p -> p.layer() == UI.Layer.BACKGROUND && !Painter.none().equals(p.painter()));
+        return hasCustomPaintersOnLayer(UI.Layer.BACKGROUND);
     }
 
     boolean hasCustomForegroundPainters() {
-        return _painters.stylesStream().anyMatch(p -> p.layer() == UI.Layer.FOREGROUND && !Painter.none().equals(p.painter()));
+        return hasCustomPaintersOnLayer(UI.Layer.FOREGROUND);
+    }
+
+    boolean hasCustomPaintersOnLayer( UI.Layer layer ) {
+        return _painters.stylesStream().anyMatch(p -> p.layer() == layer && !Painter.none().equals(p.painter()));
     }
 
     List<GradientStyle> gradients(UI.Layer layer) {

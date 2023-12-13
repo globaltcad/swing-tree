@@ -68,28 +68,43 @@ final class StylePainter
                     Bounds bounds = state.currentBounds();
                     if ( bounds.width() <= 0 || bounds.height() <= 0 )
                         return false;
-                    boolean hasPainters = !state.style().painters(_layer).isEmpty();
-                    if ( hasPainters )
+
+                    if ( state.style().hasCustomPaintersOnLayer(_layer) )
                         return false; // We don't know what the painters will do, so we don't cache their painting!
+
                     int heavyStyleCount = 0;
                     for ( ImageStyle imageStyle : state.style().images(_layer) )
-                        if ( !imageStyle.equals(ImageStyle.none()) )
+                        if ( !imageStyle.equals(ImageStyle.none()) && imageStyle.image().isPresent() )
                             heavyStyleCount++;
                     for ( GradientStyle gradient : state.style().gradients(_layer) )
-                        if ( !gradient.equals(GradientStyle.none()) )
+                        if ( !gradient.equals(GradientStyle.none()) && gradient.colors().length > 0 )
                             heavyStyleCount++;
                     for ( ShadowStyle shadow : state.style().shadows(_layer) )
                         if ( !shadow.equals(ShadowStyle.none()) )
                             heavyStyleCount++;
 
+                    BorderStyle border = state.style().border();
+                    boolean rounded = border.hasAnyNonZeroArcs();
+
+                    if ( _layer == UI.Layer.BORDER ) {
+                        boolean hasWidth = !Outline.none().equals(border.widths());
+                        if ( hasWidth && border.color().isPresent() )
+                            heavyStyleCount++;
+                    }
+                    if ( _layer == UI.Layer.BACKGROUND ) {
+                        BaseStyle base = state.style().base();
+                        boolean roundedOrHasMargin = rounded || !state.style().margin().equals(Outline.none());
+                        if ( base.backgroundColor().isPresent() && roundedOrHasMargin )
+                            heavyStyleCount++;
+                    }
+
                     if ( heavyStyleCount < 1 )
                         return false;
 
+                    int threshold = 256 * 256 * Math.min(heavyStyleCount, 5);
                     int pixelCount = bounds.width() * bounds.height();
-                    if ( pixelCount > 256 * 256 * (heavyStyleCount+1) )
-                        return false;
 
-                    return true;
+                    return pixelCount <= threshold;
                 }
             };
 
