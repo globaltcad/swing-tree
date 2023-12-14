@@ -189,6 +189,26 @@ public final class Style
         return painter(newPainters);
     }
 
+    /**
+     *  Returns a new {@link Style} instance which only contains style information relevant
+     *  to the provided {@link UI.Layer}.
+     * @param layer The layer to retain.
+     * @return A new {@link Style} instance which only contains style information relevant
+     */
+    public Style retainingOnlyLayer( UI.Layer layer ) {
+        return new Style(
+                    _layout,
+                    _border,
+                    _base,
+                    _font,
+                    _dimensionality,
+                    _shadows.mapStyles( s -> s.layer() == layer ? s : ShadowStyle.none() ),
+                    _painters.mapStyles( s -> s.layer() == layer ? s : PainterStyle.none() ),
+                    _gradients.mapStyles( s -> s.layer() == layer ? s : GradientStyle.none() ),
+                    _images.mapStyles( s -> s.layer() == layer ? s : ImageStyle.none() ),
+                    _properties
+                );
+    }
 
     boolean hasCustomBackgroundPainters() {
         return hasCustomPaintersOnLayer(UI.Layer.BACKGROUND);

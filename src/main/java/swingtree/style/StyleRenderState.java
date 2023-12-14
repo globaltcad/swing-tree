@@ -1,5 +1,7 @@
 package swingtree.style;
 
+import swingtree.UI;
+
 import javax.swing.JComponent;
 import javax.swing.border.Border;
 import java.awt.Insets;
@@ -63,6 +65,14 @@ public class StyleRenderState
             Bounds.of(component.getX(), component.getY(), component.getWidth(), component.getHeight()),
             outline
         );
+    }
+
+    public StyleRenderState retainingOnlyLayer( UI.Layer layer ) {
+        return new StyleRenderState(
+                    _style.retainingOnlyLayer(layer),
+                    _currentBounds,
+                    _baseOutline
+                );
     }
 
     @Override

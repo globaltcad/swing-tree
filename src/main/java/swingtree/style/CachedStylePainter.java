@@ -25,14 +25,14 @@ final class CachedStylePainter
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(StyleEngine.class);
 
-    private static final Map<StyleRenderState, BufferedImage[]> _globalCache = new WeakHashMap<>();
+    private static final Map<StyleRenderState, BufferedImage> _GLOBAL_CACHE = new WeakHashMap<>();
 
 
-    private final UI.Layer _layer;
+    private final UI.Layer   _layer;
     private BufferedImage    _cache;
+    private StyleRenderState _strongRef; // The key must be referenced strongly so that the value is not garbage collected (the cached image)
     private boolean          _renderIntoCache = true;
     private boolean          _cachingMakesSense = true;
-
 
 
     public CachedStylePainter( UI.Layer layer ) {
@@ -41,39 +41,37 @@ final class CachedStylePainter
 
     private boolean allocateOrGetCachedBuffer( StyleRenderState state )
     {
-        BufferedImage[] buffers = _globalCache.get(state);
-        if ( buffers == null )
-            buffers = new BufferedImage[UI.Layer.values().length];
+        boolean foundSomethingInGlobalCache = false;
 
-        _globalCache.put(state, buffers);
+        BufferedImage buffer = _GLOBAL_CACHE.get(state);
+        if ( buffer == null ) {
+            Bounds bounds = state.currentBounds();
+            buffer = new BufferedImage(bounds.width(), bounds.height(), BufferedImage.TYPE_INT_ARGB);
+        }
+        else
+            foundSomethingInGlobalCache = true;
+
+        _cache = buffer;
+        _strongRef = state; // We keep a strong reference to the state so that the cached image is not garbage collected
+        _GLOBAL_CACHE.put(state, buffer);
         /*
             Note that we refresh the key in the map using the above put() call.
             This is necessary because the most recent state is always strongly referenced
             whereas the old state may no longer be referenced by anything else.
         */
 
-        boolean foundSomethingInGlobalCache = false;
-
-        BufferedImage buffer = buffers[_layer.ordinal()];
-        if ( buffer == null ) {
-            Bounds bounds = state.currentBounds();
-            buffer = new BufferedImage(bounds.width(), bounds.height(), BufferedImage.TYPE_INT_ARGB);
-            buffers[_layer.ordinal()] = buffer;
-            foundSomethingInGlobalCache = false;
-        }
-        else
-            foundSomethingInGlobalCache = true;
-
-        _cache = buffer;
-
         return foundSomethingInGlobalCache;
     }
 
     public final void validate( StyleRenderState oldState, StyleRenderState newState )
     {
+        oldState = oldState.retainingOnlyLayer(_layer);
+        newState = newState.retainingOnlyLayer(_layer);
+
         _cachingMakesSense = _cachingMakesSenseFor(newState);
         if ( !_cachingMakesSense ) {
             _cache = null;
+            _strongRef = null;
             _renderIntoCache = false;
             return;
         }
@@ -140,12 +138,25 @@ final class CachedStylePainter
         _renderStyleFor( engine, _layer, g );
     }
 
-    private boolean _leadsToSameValue(StyleRenderState oldState, StyleRenderState newState) {
+    /**
+     *  This method is responsible for providing the crucial insight needed to perform
+     *  the cache invalidation. So it checks wether 2 style render states lead to the same
+     *  rendered value for the current layer.
+     *
+     * @param oldState The old style render state
+     * @param newState The new style render state
+     * @return true if the 2 states lead to the same rendered value for the current layer, false otherwise.
+     */
+    private boolean _leadsToSameValue(StyleRenderState oldState, StyleRenderState newState)
+    {
         return oldState.equals(newState);
     }
 
-    public boolean _cachingMakesSenseFor(StyleRenderState state)
+    public boolean _cachingMakesSenseFor( StyleRenderState state )
     {
+        if ( _GLOBAL_CACHE.size() > 128 )
+            return false;
+
         Bounds bounds = state.currentBounds();
         if ( bounds.width() <= 0 || bounds.height() <= 0 )
             return false;
