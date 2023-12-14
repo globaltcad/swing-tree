@@ -110,10 +110,10 @@ final class CachedStylePainter
         }
     }
 
-    public final void paint( StyleEngine painter, Graphics2D g )
+    public final void paint( StyleEngine engine, Graphics2D g )
     {
         if ( !_cachingMakesSense ) {
-            produce(painter, g);
+            _renderThisLayer(engine, g);
             return;
         }
 
@@ -128,7 +128,7 @@ final class CachedStylePainter
             g2.setPaint(g.getPaint());
             g2.setRenderingHints(g.getRenderingHints());
             g2.setStroke(g.getStroke());
-            produce(painter, g2);
+            _renderThisLayer(engine, g2);
             _renderIntoCache = false;
         }
 
@@ -136,14 +136,13 @@ final class CachedStylePainter
     }
 
 
-    protected void produce(StyleEngine painter, Graphics2D g) {
-        _renderStyleFor( painter, _layer, g);
+    private void _renderThisLayer( StyleEngine engine, Graphics2D g) {
+        _renderStyleFor( engine, _layer, g );
     }
 
     private boolean _leadsToSameValue(StyleRenderState oldState, StyleRenderState newState) {
         return oldState.equals(newState);
     }
-
 
     public boolean _cachingMakesSenseFor(StyleRenderState state)
     {
@@ -189,6 +188,14 @@ final class CachedStylePainter
         return pixelCount <= threshold;
     }
 
+    /*
+
+        What now follows is a lot of long static methods that are
+        used to render the immutable style configurations passed to them.
+        Although they look somewhat daunting, they are easy to reason about
+        as they are all pure and side effect free (except for the Graphics2D object passed to them of course).
+
+    */
 
     private static void _renderStyleFor( StyleEngine engine, UI.Layer layer, Graphics2D g2d )
     {
