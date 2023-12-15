@@ -405,6 +405,8 @@ public final class ComponentExtension<C extends JComponent>
 
     void paintBackground( Graphics g, Runnable lookAndFeelPainting )
     {
+        establishStyleStateForRendering();
+
         _outerBaseClip = g.getClip();
 
         if ( _outerBaseClip == null && _owner.getParent() == null ) {
@@ -415,8 +417,6 @@ public final class ComponentExtension<C extends JComponent>
             int h = _owner.getHeight();
             _outerBaseClip = new Rectangle(x,y,w,h);
         }
-
-        establishStyleStateForRendering();
 
         Font componentFont = _owner.getFont();
         if ( componentFont != null && !componentFont.equals(g.getFont()) )
