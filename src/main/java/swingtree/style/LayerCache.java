@@ -104,8 +104,8 @@ final class LayerCache
         if ( _cache != null ) {
             boolean sizeChanged = bounds.width() != _cache.getWidth() || bounds.height() != _cache.getHeight();
             if ( sizeChanged || (cacheIsInvalid && _cacheBufferIsShared) ) {
+                _freeLocalCache();
                 if ( cacheIsFull ) {
-                    _freeLocalCache();
                     return;
                 }
                 boolean foundSomethingInGlobalCache = allocateOrGetCachedBuffer(newState);
