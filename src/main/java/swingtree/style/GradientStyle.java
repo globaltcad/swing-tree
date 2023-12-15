@@ -218,11 +218,7 @@ public final class GradientStyle
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(_transition);
-        result = 31 * result + Objects.hash(_type);
-        result = 31 * result + Arrays.hashCode(_colors);
-        result = 31 * result + Objects.hash(_layer);
-        return result;
+        return Objects.hash(_transition, _type, Arrays.hashCode(_colors), _layer);
     }
 
 }

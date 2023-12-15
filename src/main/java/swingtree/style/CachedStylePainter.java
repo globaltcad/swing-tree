@@ -33,6 +33,7 @@ final class CachedStylePainter
     private StyleRenderState _strongRef; // The key must be referenced strongly so that the value is not garbage collected (the cached image)
     private boolean          _renderIntoCache = true;
     private boolean          _cachingMakesSense = true;
+    private boolean          _cacheBufferIsShared = false;
 
 
     public CachedStylePainter( UI.Layer layer ) {
@@ -73,6 +74,7 @@ final class CachedStylePainter
 
         _cache = buffer;
         _strongRef = state; // We keep a strong reference to the state so that the cached image is not garbage collected
+        _cacheBufferIsShared = foundSomethingInGlobalCache;
         _GLOBAL_CACHE.put(state, layerBuffers);
         /*
             Note that we refresh the key in the map using the above put() call.
@@ -105,12 +107,14 @@ final class CachedStylePainter
             return;
         }
 
+        boolean cacheIsInvalid = !_leadsToSameCache(oldState, newState);
+
         boolean cacheIsFull = ( _GLOBAL_CACHE.size() > 128 );
         boolean newBufferAllocated = false;
         Bounds bounds = newState.currentBounds();
         if ( _cache != null ) {
             boolean sizeChanged = bounds.width() != _cache.getWidth() || bounds.height() != _cache.getHeight();
-            if ( sizeChanged ) {
+            if ( sizeChanged || (cacheIsInvalid && _cacheBufferIsShared) ) {
                 if ( cacheIsFull ) {
                     _freeLocalCache();
                     return;
@@ -128,15 +132,16 @@ final class CachedStylePainter
             newBufferAllocated = !foundSomethingInGlobalCache;
         }
 
-        if ( newBufferAllocated || !_leadsToSameValue(oldState, newState) ) {
+        if ( newBufferAllocated )
             _renderIntoCache = true;
-            if ( !newBufferAllocated ) {
-                // We clear the image manually so that the alpha channel is cleared to 0.
-                Graphics2D g = _cache.createGraphics();
-                g.setBackground(new Color(0, 0, 0, 0));
-                g.clearRect(0, 0, _cache.getWidth(), _cache.getHeight());
-                g.dispose();
-            }
+
+        if ( cacheIsInvalid && !newBufferAllocated ) {
+            _renderIntoCache = true;
+            // We clear the image manually so that the alpha channel is cleared to 0.
+            Graphics2D g = _cache.createGraphics();
+            g.setBackground(new Color(0, 0, 0, 0));
+            g.clearRect(0, 0, _cache.getWidth(), _cache.getHeight());
+            g.dispose();
         }
     }
 
@@ -179,7 +184,7 @@ final class CachedStylePainter
      * @param newState The new style render state
      * @return true if the 2 states lead to the same rendered value for the current layer, false otherwise.
      */
-    private boolean _leadsToSameValue(StyleRenderState oldState, StyleRenderState newState)
+    private boolean _leadsToSameCache(StyleRenderState oldState, StyleRenderState newState)
     {
         return oldState.equals(newState);
     }
