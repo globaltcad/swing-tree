@@ -90,7 +90,7 @@ final class LayerCache
         oldState = oldState.retainingOnlyLayer(_layer);
         newState = newState.retainingOnlyLayer(_layer);
 
-        _cachingMakesSense = false && _cachingMakesSenseFor(newState);
+        _cachingMakesSense = _cachingMakesSenseFor(newState);
         if ( !_cachingMakesSense ) {
             _freeLocalCache();
             return;
