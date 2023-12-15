@@ -25,7 +25,7 @@ final class CachedStylePainter
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(StyleEngine.class);
 
-    private static final Map<StyleRenderState, BufferedImage> _GLOBAL_CACHE = new WeakHashMap<>();
+    private static final Map<StyleRenderState, BufferedImage[]> _GLOBAL_CACHE = new WeakHashMap<>();
 
 
     private final UI.Layer   _layer;
@@ -39,21 +39,41 @@ final class CachedStylePainter
         _layer = Objects.requireNonNull(layer);
     }
 
+    private int _idOfLayer() {
+        switch (_layer) {
+            case BACKGROUND: return 0;
+            case BORDER: return 1;
+            case CONTENT:
+            case FOREGROUND:
+                return 2; // We allow them to share a buffer because they do not have unique styles
+        }
+        return 2;
+    }
+
     private boolean allocateOrGetCachedBuffer( StyleRenderState state )
     {
         boolean foundSomethingInGlobalCache = false;
 
-        BufferedImage buffer = _GLOBAL_CACHE.get(state);
+        BufferedImage[] layerBuffers = _GLOBAL_CACHE.get(state);
+        BufferedImage buffer = null;
+        if ( layerBuffers != null ) {
+            buffer = layerBuffers[_idOfLayer()];
+        }
+        else {
+            layerBuffers = new BufferedImage[3];
+        }
+
         if ( buffer == null ) {
             Bounds bounds = state.currentBounds();
             buffer = new BufferedImage(bounds.width(), bounds.height(), BufferedImage.TYPE_INT_ARGB);
+            layerBuffers[_idOfLayer()] = buffer;
         }
         else
             foundSomethingInGlobalCache = true;
 
         _cache = buffer;
         _strongRef = state; // We keep a strong reference to the state so that the cached image is not garbage collected
-        _GLOBAL_CACHE.put(state, buffer);
+        _GLOBAL_CACHE.put(state, layerBuffers);
         /*
             Note that we refresh the key in the map using the above put() call.
             This is necessary because the most recent state is always strongly referenced
