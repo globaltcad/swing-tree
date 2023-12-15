@@ -439,14 +439,20 @@ public final class ComponentExtension<C extends JComponent>
         }
     }
 
-    void paintBorder( Graphics2D g2d ) {
-        _styleEngine.paintBorder(g2d);
-    }
-
-    void paintAnimations( Graphics2D g2d )
+    void paintBorderAndAnimations( Graphics2D g2d, Runnable formerBorderPainter )
     {
+        establishStyleStateForRendering();
+
+        Shape former = g2d.getClip();
+
+        if ( getCurrentOuterBaseClip() != null )
+            g2d.setClip( getCurrentOuterBaseClip() );
+
+        _styleEngine.paintBorder(g2d, formerBorderPainter);
         _styleEngine.paintAnimations(g2d);
         _styleEngine = _styleEngine.withoutExpiredAnimationPainters();
+
+        g2d.setClip(former);
     }
 
     private Style _applyStyleToComponentState( Style style, boolean force )

@@ -62,22 +62,22 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
     @Override
     public void paintBorder( Component c, Graphics g, int x, int y, int width, int height )
     {
-        _compExt.establishStyleStateForRendering();
-
-        Shape former = g.getClip();
-
-        if ( _compExt.getCurrentOuterBaseClip() != null )
-            g.setClip( _compExt.getCurrentOuterBaseClip() );
-
-        _paintBorderAndBorderLayerStyles( (Graphics2D) g );
-        if ( _formerBorder != null && !_borderWasNotPainted ) {
-            BorderStyle borderStyle = _compExt.getStyle().border();
-            if ( !borderStyle.isVisible() )
-                _paintFormerBorder(c, g, x, y, width, height);
+        try {
+            _compExt.paintBorderAndAnimations((Graphics2D) g, ()->{
+                if ( _formerBorder != null && !_borderWasNotPainted ) {
+                    BorderStyle borderStyle = _compExt.getStyle().border();
+                    if ( !borderStyle.isVisible() )
+                        _paintFormerBorder(c, g, x, y, width, height);
+                }
+            });
+        } catch ( Exception ex ) {
+            /*
+                Note that if any exceptions happen during the border style painting,
+                then we don't want to mess up how the rest of the component is painted...
+                Therefore, we catch any exceptions that happen in the above code.
+            */
+            log.error("Exception while painting border style '{}': ", _compExt.getStyle().border(), ex);
         }
-        _compExt.paintAnimations( (Graphics2D) g );
-
-        g.setClip(former);
     }
 
     private void _paintFormerBorder( Component c, Graphics g, int x, int y, int width, int height ) {
@@ -103,25 +103,6 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
                  the stack trace to the console so that any developers can see what went wrong.
             */
             log.error("Exception while painting former border '{}': ", _formerBorder, ex);
-        }
-    }
-
-    /**
-     *  Not only paints the border but also styles which are configured to be painted
-     *  on the border layer (see {@link swingtree.UI.Layer#BORDER}).
-     *
-     * @param g The graphics context that is used for painting.
-     */
-    private void _paintBorderAndBorderLayerStyles( Graphics2D g ) {
-        try {
-            _compExt.paintBorder( g );
-        } catch ( Exception ex ) {
-            /*
-                Note that if any exceptions happen during the border style painting,
-                then we don't want to mess up how the rest of the component is painted...
-                Therefore, we catch any exceptions that happen in the above code.
-            */
-            log.error("Exception while painting border style '{}': ", _compExt.getStyle().border(), ex);
         }
     }
 

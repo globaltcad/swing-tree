@@ -165,7 +165,7 @@ final class StyleEngine
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
     }
 
-    void paintBorder( Graphics2D g2d )
+    void paintBorder( Graphics2D g2d, Runnable formerBorderPainter )
     {
         // We remember if antialiasing was enabled before we render:
         boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
@@ -179,6 +179,17 @@ final class StyleEngine
 
         // Reset antialiasing to its previous state:
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
+
+        try {
+            formerBorderPainter.run();
+        } catch ( Exception ex ) {
+            /*
+                Note that if any exceptions happen during the border style painting,
+                then we don't want to mess up how the rest of the component is painted...
+                Therefore, we catch any exceptions that happen in the above code.
+            */
+            log.error("Exception while painting former border!", ex);
+        }
     }
 
     public void paintForeground( Graphics2D g2d )
