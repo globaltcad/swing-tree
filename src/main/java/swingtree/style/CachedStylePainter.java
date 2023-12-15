@@ -244,11 +244,16 @@ final class CachedStylePainter
     {
         StyleRenderState state = engine.getState();
 
+        // First up, we render things unique to certain layers:
+
         if ( layer == UI.Layer.BACKGROUND ) {
             state.style().base().foundationColor().ifPresent(outerColor -> {
-                _fillOuterFoundationBackground(engine, outerColor, g2d);
+                // Check if the color is transparent
+                if ( outerColor.getAlpha() > 0 ) {
+                    g2d.setColor(outerColor);
+                    g2d.fill(engine.getExteriorArea());
+                }
             });
-
             state.style().base().backgroundColor().ifPresent(color -> {
                 if ( color.getAlpha() == 0 ) return;
                 g2d.setColor(color);
@@ -261,6 +266,8 @@ final class CachedStylePainter
                 _drawBorder( engine, color, g2d);
             });
         }
+
+        // Now onto things every layer has in common:
 
         // Every layer has 4 things:
         // 1. A grounding serving as a base background, which is a filled color and/or an image:
@@ -324,27 +331,6 @@ final class CachedStylePainter
                     }
                 });
             });
-    }
-
-    private static void _fillOuterFoundationBackground( StyleEngine engine, Color color, Graphics2D g2d )
-    {
-        StyleRenderState state = engine.getState();
-
-        // Check if the color is transparent
-        if ( color.getAlpha() == 0 )
-            return;
-
-        int width     = state.currentBounds().width();
-        int height    = state.currentBounds().height();
-
-        Rectangle2D.Float outerRect = new Rectangle2D.Float(0, 0, width, height);
-
-        Area outer = new Area(outerRect);
-        Area inner = engine.getInteriorArea();
-        outer.subtract(inner);
-
-        g2d.setColor(color);
-        g2d.fill(outer);
     }
 
     private static void _drawBorder( StyleEngine engine, Color color, Graphics2D g2d ) {
