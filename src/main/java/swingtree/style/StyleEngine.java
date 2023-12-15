@@ -14,15 +14,15 @@ import java.awt.geom.Area;
 import java.util.*;
 
 /**
- *  Orchestrates the rendering of a component's style and animations.
+ *  Orchestrates the rendering of a component's style and animations. <br>
+ *  Note that this class is immutable so that it is easier to reason about...
  */
 final class StyleEngine
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(StyleEngine.class);
 
-    public static StyleEngine none() {
-        LayerCache[] layerCaches = new LayerCache[UI.Layer.values().length];
-        return new StyleEngine(StyleRenderState.none(), new Expirable[0], new AreasCache(), layerCaches);
+    public static StyleEngine create() {
+        return new StyleEngine(StyleRenderState.none(), new Expirable[0], new AreasCache(), null);
     }
 
     static boolean IS_ANTIALIASING_ENABLED(){
@@ -40,14 +40,17 @@ final class StyleEngine
         StyleRenderState      state,
         Expirable<Painter>[]  animationPainters,
         AreasCache            areasCache,
-        LayerCache[]          layerCaches
+        LayerCache[]          layerCaches // Null when the style engine is freshly created
     ) {
         _state             = Objects.requireNonNull(state);
         _animationPainters = Objects.requireNonNull(animationPainters);
         _areasCache        = Objects.requireNonNull(areasCache);
+        if ( layerCaches == null ) {
+            layerCaches = new LayerCache[UI.Layer.values().length];
+            for ( int i = 0; i < layerCaches.length; i++ )
+                layerCaches[i] = new LayerCache(UI.Layer.values()[i]);
+        }
         _layerCaches       = Objects.requireNonNull(layerCaches);
-        for (int i = 0; i < _layerCaches.length && _layerCaches[i] == null; i++ )
-            _layerCaches[i] = new LayerCache(UI.Layer.values()[i]);
     }
 
     StyleRenderState getState() { return _state; }

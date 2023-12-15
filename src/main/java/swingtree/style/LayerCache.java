@@ -11,11 +11,11 @@ import java.util.WeakHashMap;
 import java.util.function.Consumer;
 
 /**
- *  The render core class of the SwingTree style engine, which is responsible for painting
- *  the various style configurations hosted by the {@link Style} class onto a component.
- *  <p>
- *  This is a pretty long class, but it is not very complex, it just has a lot of methods
- *  that are used to render the various style configurations like gradients, images, shadows, etc...
+ *  A {@link BufferedImage} based cache for the rendering of a particular layer of a component's style. <br>
+ *  So if the {@link StyleRenderState} of a component changes, the cache is invalidated and the layer
+ *  is rendered again. <br>
+ *  This is made possible by the fact that the {@link StyleRenderState} is deeply immutable and can be used
+ *  as a key data structure for caching.
  */
 final class LayerCache
 {

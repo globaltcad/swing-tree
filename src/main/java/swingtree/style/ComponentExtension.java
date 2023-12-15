@@ -61,7 +61,7 @@ public final class ComponentExtension<C extends JComponent>
     private final List<String> _styleGroups = new ArrayList<>(0);
 
 
-    private StyleEngine     _styleEngine = StyleEngine.none();
+    private StyleEngine     _styleEngine = StyleEngine.create();
     private DynamicLaF      _dynamicLaF   = DynamicLaF.none();
     private StyleSource<C>  _styleSource  = StyleSource.create();
 
