@@ -298,6 +298,8 @@ public final class ComponentExtension<C extends JComponent>
      */
     public void paintForeground( Graphics2D g2d, Runnable superPaint )
     {
+        establishStyleStateForRendering();
+
         Shape clip = _outerBaseClip != null ? _outerBaseClip : g2d.getClip();
         if ( _owner instanceof JScrollPane ) {
             /*
@@ -313,8 +315,6 @@ public final class ComponentExtension<C extends JComponent>
             superPaint.run();
         });
 
-        establishStyleStateForRendering();
-
         // We remember if antialiasing was enabled before we render:
         boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
         // Reset antialiasing to its previous state:
@@ -328,7 +328,7 @@ public final class ComponentExtension<C extends JComponent>
         if ( componentFont != null && !componentFont.equals(g2d.getFont()) )
             g2d.setFont( componentFont );
 
-        _styleEngine.paintForegroundStyle(g2d);
+        _styleEngine.paintForeground(g2d);
 
         // We restore the clip:
         if ( g2d.getClip() != formerClip )
