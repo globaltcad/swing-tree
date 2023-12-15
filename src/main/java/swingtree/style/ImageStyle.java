@@ -540,7 +540,9 @@ public final class ImageStyle
     }
 
     @Override
-    public int hashCode() { return Objects.hash(_layer, _primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea); }
+    public int hashCode() {
+        return Objects.hash(_layer, _primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
+    }
 
     @Override
     public boolean equals( Object obj ) {

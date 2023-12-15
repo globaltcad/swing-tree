@@ -202,10 +202,10 @@ public final class Style
                     _base,
                     _font,
                     _dimensionality,
-                    _shadows.mapStyles( s -> s.layer() == layer ? s : ShadowStyle.none() ),
-                    _painters.mapStyles( s -> s.layer() == layer ? s : PainterStyle.none() ),
-                    _gradients.mapStyles( s -> s.layer() == layer ? s : GradientStyle.none() ),
-                    _images.mapStyles( s -> s.layer() == layer ? s : ImageStyle.none() ),
+                    _shadows.filterStyles( s -> s.layer() == layer ),
+                    _painters.filterStyles( s -> s.layer() == layer ),
+                    _gradients.filterStyles( s -> s.layer() == layer ),
+                    _images.filterStyles( s -> s.layer() == layer ),
                     _properties
                 );
     }

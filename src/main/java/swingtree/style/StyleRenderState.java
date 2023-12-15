@@ -19,7 +19,8 @@ public class StyleRenderState
     private static final StyleRenderState EMPTY = new StyleRenderState(
                                                         Style.none(),
                                                         Bounds.none(),
-                                                        Outline.none()
+                                                        Outline.none(),
+                                                        1f
                                                     );
 
     public static StyleRenderState none() { return EMPTY; }
@@ -27,16 +28,19 @@ public class StyleRenderState
     private final Style   _style;
     private final Bounds  _currentBounds;
     private final Outline _baseOutline;
+    private final float   _scale;
 
 
     private StyleRenderState(
             Style style,
             Bounds currentBounds,
-            Outline baseOutline
+            Outline baseOutline,
+            float scale
     ) {
         _style         = Objects.requireNonNull(style);
         _currentBounds = Objects.requireNonNull(currentBounds);
         _baseOutline   = Objects.requireNonNull(baseOutline);
+        _scale         = scale;
     }
 
     Style style() { return _style; }
@@ -61,26 +65,29 @@ public class StyleRenderState
             return this;
 
         return new StyleRenderState(
-            style,
-            Bounds.of(component.getX(), component.getY(), component.getWidth(), component.getHeight()),
-            outline
-        );
+                        style,
+                        Bounds.of(component.getX(), component.getY(), component.getWidth(), component.getHeight()),
+                        outline,
+                        UI.scale()
+                    );
     }
 
     public StyleRenderState retainingOnlyLayer( UI.Layer layer ) {
         return new StyleRenderState(
                     _style.retainingOnlyLayer(layer),
                     _currentBounds,
-                    _baseOutline
+                    _baseOutline,
+                    _scale
                 );
     }
 
     @Override
     public String toString() {
         return this.getClass().getSimpleName()+"[" +
-                    "style="         + _style         +", "+
-                    "bounds="        + _currentBounds +", "+
-                    "baseOutline="   + _baseOutline   +
+                    "style="         + _style         + ", "+
+                    "bounds="        + _currentBounds + ", "+
+                    "baseOutline="   + _baseOutline   + ", "+
+                    "scale="         + _scale         +
                 "]";
     }
 
@@ -92,11 +99,12 @@ public class StyleRenderState
         StyleRenderState other = (StyleRenderState) o;
         return Objects.equals(_style, other._style)
             && Objects.equals(_currentBounds, other._currentBounds)
-            && Objects.equals(_baseOutline, other._baseOutline);
+            && Objects.equals(_baseOutline, other._baseOutline)
+            && Objects.equals(_scale, other._scale);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(_style, _currentBounds, _baseOutline);
+        return Objects.hash(_style, _currentBounds, _baseOutline, _scale);
     }
 }

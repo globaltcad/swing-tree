@@ -29,6 +29,7 @@ class NamedStyles<S>
 
     private final NamedStyle<S>[] _styles;
 
+
     @SafeVarargs
     private NamedStyles( NamedStyle<S>... styles ) {
         _styles = Objects.requireNonNull(styles);
@@ -78,6 +79,15 @@ class NamedStyles<S>
             styles[i] = NamedStyle.of(styles[i].name(), f.apply(styles[i].style()));
 
         return new NamedStyles<>(styles);
+    }
+
+    NamedStyles<S> filterStyles( Predicate<S> filter ) {
+        Objects.requireNonNull(filter);
+        return new NamedStyles<>(
+                        namedStyles()
+                        .stream()
+                        .filter(e -> filter.test(e.style())).toArray(NamedStyle[]::new)
+                    );
     }
 
     private int _findNamedStyle( String name ) {
