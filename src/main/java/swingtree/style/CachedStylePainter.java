@@ -90,17 +90,15 @@ final class CachedStylePainter
 
     public final void validate( StyleRenderState oldState, StyleRenderState newState )
     {
+        if ( newState.currentBounds().width() == 0 || newState.currentBounds().height() == 0 )
+            return;
+
         oldState = oldState.retainingOnlyLayer(_layer);
         newState = newState.retainingOnlyLayer(_layer);
 
         _cachingMakesSense = _cachingMakesSenseFor(newState);
         if ( !_cachingMakesSense ) {
             _freeLocalCache();
-            return;
-        }
-
-        if ( newState.currentBounds().width() == 0 || newState.currentBounds().height() == 0 ) {
-            _renderIntoCache = true;
             return;
         }
 
@@ -144,6 +142,9 @@ final class CachedStylePainter
 
     public final void paint( StyleEngine engine, Graphics2D g )
     {
+        if ( engine.getState().currentBounds().width() == 0 || engine.getState().currentBounds().height() == 0 )
+            return;
+
         if ( !_cachingMakesSense ) {
             _renderThisLayer(engine, g);
             return;
@@ -155,7 +156,7 @@ final class CachedStylePainter
         if ( _renderIntoCache ) {
             Graphics2D g2 = _cache.createGraphics();
             g2.setBackground(g.getBackground());
-            g2.setClip(null);
+            g2.setClip(null); // We want to capture the full style and clip it later (see g.drawImage(_cache, 0, 0, null); below.
             g2.setComposite(g.getComposite());
             g2.setPaint(g.getPaint());
             g2.setRenderingHints(g.getRenderingHints());
