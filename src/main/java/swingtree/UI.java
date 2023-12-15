@@ -6282,7 +6282,7 @@ public final class UI extends UILayoutConstants
         ComponentExtension.from(comp).paintBackgroundStyle( g, superPaint );
     }
     private static <C extends JComponent> void _paintForeground( C comp, Graphics g, Runnable superPaint ) {
-        ComponentExtension.from(comp).paintForegroundStyle( (Graphics2D) g, superPaint );
+        ComponentExtension.from(comp).paintForeground( (Graphics2D) g, superPaint );
     }
 
     /** {inheritDoc} */

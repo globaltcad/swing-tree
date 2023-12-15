@@ -243,7 +243,7 @@ class DynamicLaF
 
         PanelStyler() {}
 
-        @Override public void paint(Graphics g, JComponent c ) { ComponentExtension.from(c)._paintBackground(g, null); }
+        @Override public void paint(Graphics g, JComponent c ) { ComponentExtension.from(c).paintBackground(g, null); }
         @Override public void update( Graphics g, JComponent c ) { paint(g, c); }
         @Override
         public boolean contains(JComponent c, int x, int y) { return _contains(c, x, y, ()->super.contains(c, x, y)); }
@@ -256,7 +256,7 @@ class DynamicLaF
         ButtonStyler(ButtonUI formerUI) { _formerUI = formerUI; }
 
         @Override public void paint( Graphics g, JComponent c ) {
-            ComponentExtension.from(c)._paintBackground(g, ()->{
+            ComponentExtension.from(c).paintBackground(g, ()->{
                 _paintComponentThroughFormerUI(_formerUI, g, c);
             });
         }
@@ -272,7 +272,7 @@ class DynamicLaF
         LabelStyler(LabelUI formerUI) { _formerUI = formerUI; }
 
         @Override public void paint( Graphics g, JComponent c ) {
-            ComponentExtension.from(c)._paintBackground(g, ()->{
+            ComponentExtension.from(c).paintBackground(g, ()->{
                 if ( _formerUI != null )
                     _paintComponentThroughFormerUI(_formerUI, g, c);
                 else
@@ -315,7 +315,7 @@ class DynamicLaF
             });
 
             boolean shouldPaintFormerUI = ( insetLeft == 0 && insetRight == 0 && insetTop == 0 && insetBottom == 0 );
-            ComponentExtension.from(c)._paintBackground(g, ()->{
+            ComponentExtension.from(c).paintBackground(g, ()->{
                 if ( shouldPaintFormerUI )
                     _paintComponentThroughFormerUI(_formerUI, g, c);
             });

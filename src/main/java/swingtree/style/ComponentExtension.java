@@ -61,7 +61,7 @@ public final class ComponentExtension<C extends JComponent>
     private final List<String> _styleGroups = new ArrayList<>(0);
 
 
-    private StyleEngine _styleEngine = StyleEngine.none();
+    private StyleEngine     _styleEngine = StyleEngine.none();
     private DynamicLaF      _dynamicLaF   = DynamicLaF.none();
     private StyleSource<C>  _styleSource  = StyleSource.create();
 
@@ -227,7 +227,7 @@ public final class ComponentExtension<C extends JComponent>
      */
     public void clearAnimations() {
         _styleEngine = _styleEngine.withoutAnimationPainters();
-        _styleSource  = _styleSource.withoutAnimationStylers();
+        _styleSource = _styleSource.withoutAnimationStylers();
     }
 
     /**
@@ -286,7 +286,7 @@ public final class ComponentExtension<C extends JComponent>
                 lookAndFeelPaint.run();
             return; // We render ĥere through the custom installed UI!
         }
-        _paintBackground(g, lookAndFeelPaint);
+        paintBackground(g, lookAndFeelPaint);
     }
 
     /**
@@ -296,7 +296,7 @@ public final class ComponentExtension<C extends JComponent>
      * @param g2d The {@link Graphics2D} object to use for rendering.
      * @param superPaint A {@link Runnable} which is used to paint the look and feel of the component.
      */
-    public void paintForegroundStyle( Graphics2D g2d, Runnable superPaint )
+    public void paintForeground( Graphics2D g2d, Runnable superPaint )
     {
         Shape clip = _outerBaseClip != null ? _outerBaseClip : g2d.getClip();
         if ( _owner instanceof JScrollPane ) {
@@ -309,7 +309,7 @@ public final class ComponentExtension<C extends JComponent>
             */
             clip = StyleUtility.intersect( _styleEngine.interiorArea().orElse(clip), clip );
         }
-        _styleEngine._withClip(g2d, clip, ()->{
+        paintWithClip(g2d, clip, ()->{
             superPaint.run();
         });
 
@@ -403,7 +403,7 @@ public final class ComponentExtension<C extends JComponent>
         return _applyStyleToComponentState(calculateStyle(), force);
     }
 
-    void _paintBackground( Graphics g, Runnable lookAndFeelPainting )
+    void paintBackground( Graphics g, Runnable lookAndFeelPainting )
     {
         _outerBaseClip = g.getClip();
 
@@ -429,7 +429,7 @@ public final class ComponentExtension<C extends JComponent>
 
             contentClip = StyleUtility.intersect( contentClip, _outerBaseClip );
 
-            _styleEngine._withClip((Graphics2D) g, contentClip, () -> {
+            paintWithClip((Graphics2D) g, contentClip, () -> {
                 try {
                     lookAndFeelPainting.run();
                 } catch (Exception e) {
@@ -439,13 +439,13 @@ public final class ComponentExtension<C extends JComponent>
         }
     }
 
-    void _paintBorderStyle( Graphics2D g2d, JComponent component ) {
-        _styleEngine.paintBorderStyle(g2d);
+    void paintBorder( Graphics2D g2d ) {
+        _styleEngine.paintBorder(g2d);
     }
 
-    void _renderAnimations( Graphics2D g2d )
+    void paintAnimations( Graphics2D g2d )
     {
-        _styleEngine.renderAnimations(g2d);
+        _styleEngine.paintAnimations(g2d);
         _styleEngine = _styleEngine.withoutExpiredAnimationPainters();
     }
 
@@ -796,23 +796,15 @@ public final class ComponentExtension<C extends JComponent>
         }
     }
 
-    static boolean _componentIsDeclaredInUI(JComponent comp ) {
-        // The component must be a subtype of one of the classes enclosed in this UI class!
-        // Let's get all the classes declared in UI:
-        Class<?>[] declaredInUI = UI.class.getDeclaredClasses();
-        // We want to ensure that the component is a sub-type of any of the classes declared in UI.
-        Class<?> clazz = comp.getClass();
-        boolean isSwingTreeComponent = false;
-        while ( clazz != null ) {
-            for ( Class<?> c : declaredInUI )
-                if ( c.isAssignableFrom(clazz) ) {
-                    isSwingTreeComponent = true;
-                    break;
-                }
 
-            clazz = clazz.getSuperclass();
+    static void paintWithClip( Graphics2D g2d, Shape clip, Runnable paintTask ) {
+        Shape formerClip = g2d.getClip();
+        g2d.setClip(clip);
+        try {
+            paintTask.run();
+        } finally {
+            g2d.setClip(formerClip);
         }
-        return isSwingTreeComponent;
     }
 
 }

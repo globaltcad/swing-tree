@@ -75,7 +75,7 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
             if ( !borderStyle.isVisible() )
                 _paintFormerBorder(c, g, x, y, width, height);
         }
-        _compExt._renderAnimations((Graphics2D) g);
+        _compExt.paintAnimations( (Graphics2D) g );
 
         g.setClip(former);
     }
@@ -114,7 +114,7 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
      */
     private void _paintBorderAndBorderLayerStyles( Graphics2D g ) {
         try {
-            _compExt._paintBorderStyle( g, _compExt.getOwner() );
+            _compExt.paintBorder( g );
         } catch ( Exception ex ) {
             /*
                 Note that if any exceptions happen during the border style painting,

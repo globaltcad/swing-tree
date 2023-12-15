@@ -6,7 +6,7 @@ import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 
-final class CachedShapeCalculator
+final class AreasCache
 {
 
     // Cached Area objects representing the component areas:
@@ -98,7 +98,7 @@ final class CachedShapeCalculator
     };
 
 
-    public CachedShapeCalculator() {}
+    public AreasCache() {}
 
 
     public Cached<Area> borderArea() { return _borderArea; }
