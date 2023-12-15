@@ -25,7 +25,9 @@ final class CachedStylePainter
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(StyleEngine.class);
 
-    private static final Map<StyleRenderState, BufferedImage[]> _GLOBAL_CACHE = new WeakHashMap<>();
+    private static final Map<StyleRenderState, BufferedImage> _BACKGROUND_CACHE = new WeakHashMap<>();
+    private static final Map<StyleRenderState, BufferedImage> _BORDER_CACHE = new WeakHashMap<>();
+    private static final Map<StyleRenderState, BufferedImage> _CONTENT_AND_FOREGROUND_CACHE = new WeakHashMap<>();
 
 
     private final UI.Layer   _layer;
@@ -40,34 +42,29 @@ final class CachedStylePainter
         _layer = Objects.requireNonNull(layer);
     }
 
-    private int _idOfLayer() {
+    private Map<StyleRenderState, BufferedImage> _getGlobalCacheForThisLayer() {
         switch (_layer) {
-            case BACKGROUND: return 0;
-            case BORDER: return 1;
+            case BACKGROUND: return _BACKGROUND_CACHE;
+            case BORDER: return _BORDER_CACHE;
             case CONTENT:
             case FOREGROUND:
-                return 2; // We allow them to share a buffer because they do not have unique styles
+                return _CONTENT_AND_FOREGROUND_CACHE;
+                // We allow them to share a buffer because they do not have unique styles
         }
-        return 2;
+        return _CONTENT_AND_FOREGROUND_CACHE;
     }
 
     private boolean allocateOrGetCachedBuffer( StyleRenderState state )
     {
         boolean foundSomethingInGlobalCache = false;
 
-        BufferedImage[] layerBuffers = _GLOBAL_CACHE.get(state);
-        BufferedImage buffer = null;
-        if ( layerBuffers != null ) {
-            buffer = layerBuffers[_idOfLayer()];
-        }
-        else {
-            layerBuffers = new BufferedImage[3];
-        }
+        Map<StyleRenderState, BufferedImage> _CACHE = _getGlobalCacheForThisLayer();
+
+        BufferedImage buffer = _CACHE.get(state);
 
         if ( buffer == null ) {
             Bounds bounds = state.currentBounds();
             buffer = new BufferedImage(bounds.width(), bounds.height(), BufferedImage.TYPE_INT_ARGB);
-            layerBuffers[_idOfLayer()] = buffer;
         }
         else
             foundSomethingInGlobalCache = true;
@@ -75,7 +72,7 @@ final class CachedStylePainter
         _cache = buffer;
         _strongRef = state; // We keep a strong reference to the state so that the cached image is not garbage collected
         _cacheBufferIsShared = foundSomethingInGlobalCache;
-        _GLOBAL_CACHE.put(state, layerBuffers);
+        _CACHE.put(state, buffer);
         /*
             Note that we refresh the key in the map using the above put() call.
             This is necessary because the most recent state is always strongly referenced
@@ -109,7 +106,7 @@ final class CachedStylePainter
 
         boolean cacheIsInvalid = !_leadsToSameCache(oldState, newState);
 
-        boolean cacheIsFull = ( _GLOBAL_CACHE.size() > 128 );
+        boolean cacheIsFull = ( _getGlobalCacheForThisLayer().size() > 128 );
         boolean newBufferAllocated = false;
         Bounds bounds = newState.currentBounds();
         if ( _cache != null ) {
