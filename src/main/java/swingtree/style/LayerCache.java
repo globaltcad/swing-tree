@@ -29,7 +29,6 @@ final class LayerCache
     private StyleRenderState _strongRef; // The key must be referenced strongly so that the value is not garbage collected (the cached image)
     private boolean          _renderIntoCache = true;
     private boolean          _cachingMakesSense = true;
-    private boolean          _cacheBufferIsShared = false;
 
 
     public LayerCache(UI.Layer layer ) {
@@ -65,7 +64,6 @@ final class LayerCache
 
         _cache = buffer;
         _strongRef = state; // We keep a strong reference to the state so that the cached image is not garbage collected
-        _cacheBufferIsShared = foundSomethingInGlobalCache;
         _CACHE.put(state, buffer);
         /*
             Note that we refresh the key in the map using the above put() call.
@@ -103,11 +101,11 @@ final class LayerCache
         Bounds bounds = newState.currentBounds();
         if ( _cache != null ) {
             boolean sizeChanged = bounds.width() != _cache.getWidth() || bounds.height() != _cache.getHeight();
-            if ( sizeChanged || (cacheIsInvalid && _cacheBufferIsShared) ) {
+            if ( sizeChanged || cacheIsInvalid ) {
                 _freeLocalCache();
-                if ( cacheIsFull ) {
+                if ( cacheIsFull )
                     return;
-                }
+
                 boolean foundSomethingInGlobalCache = allocateOrGetCachedBuffer(newState);
                 newBufferAllocated = !foundSomethingInGlobalCache;
             }
@@ -124,14 +122,8 @@ final class LayerCache
         if ( newBufferAllocated )
             _renderIntoCache = true;
 
-        if ( cacheIsInvalid && !newBufferAllocated ) {
-            _renderIntoCache = true;
-            // We clear the image manually so that the alpha channel is cleared to 0.
-            Graphics2D g = _cache.createGraphics();
-            g.setBackground(new Color(0, 0, 0, 0));
-            g.clearRect(0, 0, _cache.getWidth(), _cache.getHeight());
-            g.dispose();
-        }
+        if ( cacheIsInvalid && !newBufferAllocated )
+            _renderIntoCache = false;
     }
 
     public final void paint( StyleEngine engine, Graphics2D g, Consumer<Graphics2D> renderer )
