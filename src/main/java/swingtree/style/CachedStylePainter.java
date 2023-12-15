@@ -63,6 +63,12 @@ final class CachedStylePainter
         return foundSomethingInGlobalCache;
     }
 
+    private void _freeLocalCache() {
+        _cache = null;
+        _strongRef = null;
+        _renderIntoCache = false;
+    }
+
     public final void validate( StyleRenderState oldState, StyleRenderState newState )
     {
         oldState = oldState.retainingOnlyLayer(_layer);
@@ -70,9 +76,7 @@ final class CachedStylePainter
 
         _cachingMakesSense = _cachingMakesSenseFor(newState);
         if ( !_cachingMakesSense ) {
-            _cache = null;
-            _strongRef = null;
-            _renderIntoCache = false;
+            _freeLocalCache();
             return;
         }
 
@@ -81,17 +85,25 @@ final class CachedStylePainter
             return;
         }
 
+        boolean cacheIsFull = ( _GLOBAL_CACHE.size() > 128 );
         boolean newBufferAllocated = false;
         Bounds bounds = newState.currentBounds();
         if ( _cache != null ) {
             boolean sizeChanged = bounds.width() != _cache.getWidth() || bounds.height() != _cache.getHeight();
             if ( sizeChanged ) {
+                if ( cacheIsFull ) {
+                    _freeLocalCache();
+                    return;
+                }
                 boolean foundSomethingInGlobalCache = allocateOrGetCachedBuffer(newState);
                 newBufferAllocated = !foundSomethingInGlobalCache;
             }
         }
         else
         {
+            if ( cacheIsFull )
+                return;
+
             boolean foundSomethingInGlobalCache = allocateOrGetCachedBuffer(newState);
             newBufferAllocated = !foundSomethingInGlobalCache;
         }
@@ -154,9 +166,6 @@ final class CachedStylePainter
 
     public boolean _cachingMakesSenseFor( StyleRenderState state )
     {
-        if ( _GLOBAL_CACHE.size() > 128 )
-            return false;
-
         Bounds bounds = state.currentBounds();
         if ( bounds.width() <= 0 || bounds.height() <= 0 )
             return false;
