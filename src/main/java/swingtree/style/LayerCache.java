@@ -28,6 +28,7 @@ final class LayerCache
     private StyleRenderState _strongRef; // The key must be referenced strongly so that the value is not garbage collected (the cached image)
     private boolean          _renderIntoCache = true;
     private boolean          _cachingMakesSense = true;
+    private boolean          _cacheBufferIsShared = false;
 
 
     public LayerCache(UI.Layer layer ) {
@@ -63,6 +64,7 @@ final class LayerCache
 
         _localCache = bufferedImage;
         _strongRef  = styleConf; // We keep a strong reference to the state so that the cached image is not garbage collected
+        _cacheBufferIsShared = foundSomethingInGlobalCache;
         _CACHE.put(styleConf, bufferedImage);
         /*
             Note that we refresh the key in the map using the above put() call.
@@ -104,7 +106,7 @@ final class LayerCache
         {
             Bounds bounds = newState.currentBounds();
             boolean sizeChanged = !bounds.hasSize( _localCache.getWidth(), _localCache.getHeight() );
-            if ( sizeChanged || cacheIsInvalid ) {
+            if ( sizeChanged || cacheIsInvalid && _cacheBufferIsShared ) {
                 _freeLocalCache();
                 newBufferNeeded = true;
             }
@@ -122,9 +124,10 @@ final class LayerCache
             justAllocatedANewBuffer = !foundSomethingInGlobalCache;
         }
 
-        if ( foundSomethingInGlobalCache )
-            _renderIntoCache = false;
-        else if ( justAllocatedANewBuffer )
+        if ( justAllocatedANewBuffer )
+            _renderIntoCache = true;
+
+        if ( cacheIsInvalid && !justAllocatedANewBuffer )
             _renderIntoCache = true;
     }
 
