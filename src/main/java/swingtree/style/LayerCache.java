@@ -2,7 +2,6 @@ package swingtree.style;
 
 import swingtree.UI;
 
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.Map;
@@ -25,7 +24,7 @@ final class LayerCache
 
 
     private final UI.Layer   _layer;
-    private BufferedImage    _cache;
+    private BufferedImage _localCache;
     private StyleRenderState _strongRef; // The key must be referenced strongly so that the value is not garbage collected (the cached image)
     private boolean          _renderIntoCache = true;
     private boolean          _cachingMakesSense = true;
@@ -47,24 +46,24 @@ final class LayerCache
         return _CONTENT_AND_FOREGROUND_CACHE;
     }
 
-    private boolean allocateOrGetCachedBuffer( StyleRenderState state )
+    private boolean allocateOrGetCachedBuffer( StyleRenderState styleConf )
     {
         boolean foundSomethingInGlobalCache = false;
 
         Map<StyleRenderState, BufferedImage> _CACHE = _getGlobalCacheForThisLayer();
 
-        BufferedImage buffer = _CACHE.get(state);
+        BufferedImage bufferedImage = _CACHE.get(styleConf);
 
-        if ( buffer == null ) {
-            Bounds bounds = state.currentBounds();
-            buffer = new BufferedImage(bounds.width(), bounds.height(), BufferedImage.TYPE_INT_ARGB);
+        if ( bufferedImage == null ) {
+            Bounds bounds = styleConf.currentBounds();
+            bufferedImage = new BufferedImage(bounds.width(), bounds.height(), BufferedImage.TYPE_INT_ARGB);
         }
         else
             foundSomethingInGlobalCache = true;
 
-        _cache = buffer;
-        _strongRef = state; // We keep a strong reference to the state so that the cached image is not garbage collected
-        _CACHE.put(state, buffer);
+        _localCache = bufferedImage;
+        _strongRef  = styleConf; // We keep a strong reference to the state so that the cached image is not garbage collected
+        _CACHE.put(styleConf, bufferedImage);
         /*
             Note that we refresh the key in the map using the above put() call.
             This is necessary because the most recent state is always strongly referenced
@@ -75,8 +74,8 @@ final class LayerCache
     }
 
     private void _freeLocalCache() {
-        _cache = null;
-        _strongRef = null;
+        _strongRef       = null;
+        _localCache      = null;
         _renderIntoCache = false;
     }
 
@@ -95,35 +94,38 @@ final class LayerCache
         }
 
         boolean cacheIsInvalid = !oldState.equals(newState);
+        boolean cacheIsFull    = _getGlobalCacheForThisLayer().size() > 128;
 
-        boolean cacheIsFull = ( _getGlobalCacheForThisLayer().size() > 128 );
-        boolean newBufferAllocated = false;
-        Bounds bounds = newState.currentBounds();
-        if ( _cache != null ) {
-            boolean sizeChanged = bounds.width() != _cache.getWidth() || bounds.height() != _cache.getHeight();
-            if ( sizeChanged || cacheIsInvalid ) {
-                _freeLocalCache();
-                if ( cacheIsFull )
-                    return;
+        boolean newBufferNeeded = false;
 
-                boolean foundSomethingInGlobalCache = allocateOrGetCachedBuffer(newState);
-                newBufferAllocated = !foundSomethingInGlobalCache;
-            }
-        }
+        if ( _localCache == null )
+            newBufferNeeded = true;
         else
         {
+            Bounds bounds = newState.currentBounds();
+            boolean sizeChanged = !bounds.hasSize( _localCache.getWidth(), _localCache.getHeight() );
+            if ( sizeChanged || cacheIsInvalid ) {
+                _freeLocalCache();
+                newBufferNeeded = true;
+            }
+        }
+
+        boolean justAllocatedANewBuffer = false;
+        boolean foundSomethingInGlobalCache = false;
+
+        if ( newBufferNeeded ) {
             if ( cacheIsFull )
                 return;
 
-            boolean foundSomethingInGlobalCache = allocateOrGetCachedBuffer(newState);
-            newBufferAllocated = !foundSomethingInGlobalCache;
+            foundSomethingInGlobalCache = allocateOrGetCachedBuffer(newState);
+
+            justAllocatedANewBuffer = !foundSomethingInGlobalCache;
         }
 
-        if ( newBufferAllocated )
-            _renderIntoCache = true;
-
-        if ( cacheIsInvalid && !newBufferAllocated )
+        if ( foundSomethingInGlobalCache )
             _renderIntoCache = false;
+        else if ( justAllocatedANewBuffer )
+            _renderIntoCache = true;
     }
 
     public final void paint( StyleEngine engine, Graphics2D g, Consumer<Graphics2D> renderer )
@@ -136,11 +138,11 @@ final class LayerCache
             return;
         }
 
-        if ( _cache == null )
+        if ( _localCache == null )
             return;
 
         if ( _renderIntoCache ) {
-            Graphics2D g2 = _cache.createGraphics();
+            Graphics2D g2 = _localCache.createGraphics();
             g2.setBackground(g.getBackground());
             g2.setClip(null); // We want to capture the full style and clip it later (see g.drawImage(_cache, 0, 0, null); below.
             g2.setComposite(g.getComposite());
@@ -151,7 +153,7 @@ final class LayerCache
             _renderIntoCache = false;
         }
 
-        g.drawImage(_cache, 0, 0, null);
+        g.drawImage(_localCache, 0, 0, null);
     }
 
     public boolean _cachingMakesSenseFor( StyleRenderState state )

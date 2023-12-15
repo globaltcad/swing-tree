@@ -44,6 +44,9 @@ class Bounds
 
     Bounds height( int height ) { return new Bounds(x, y, width, height); }
 
+    boolean hasSize( int width, int height ) {
+        return this.width == width && this.height == height;
+    }
 
     @Override
     public String toString() {
