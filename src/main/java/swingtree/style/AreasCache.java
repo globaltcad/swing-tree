@@ -76,13 +76,13 @@ final class AreasCache
         @Override
         public boolean leadsToSameValue(StyleRenderState oldState, StyleRenderState newState) {
             boolean mainIsSame = _mainComponentArea.leadsToSameValue(oldState, newState);
-            if ( mainIsSame ) {
-                Bounds oldBounds = oldState.currentBounds();
-                Bounds newBounds = newState.currentBounds();
-                if ( !oldBounds.equals(newBounds) )
-                    return false;
-            }
-            return true;
+            if ( !mainIsSame )
+                return false;
+            
+            Bounds oldBounds = oldState.currentBounds();
+            Bounds newBounds = newState.currentBounds();
+
+            return oldBounds.equals(newBounds);
         }
     };
 
