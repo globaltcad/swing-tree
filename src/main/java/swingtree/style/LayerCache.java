@@ -28,7 +28,6 @@ final class LayerCache
     private StyleRenderState _strongRef; // The key must be referenced strongly so that the value is not garbage collected (the cached image)
     private boolean          _renderIntoCache = true;
     private boolean          _cachingMakesSense = true;
-    private boolean          _cacheBufferIsShared = false;
 
 
     public LayerCache(UI.Layer layer ) {
@@ -64,7 +63,6 @@ final class LayerCache
 
         _localCache = bufferedImage;
         _strongRef  = styleConf; // We keep a strong reference to the state so that the cached image is not garbage collected
-        _cacheBufferIsShared = foundSomethingInGlobalCache;
         _CACHE.put(styleConf, bufferedImage);
         /*
             Note that we refresh the key in the map using the above put() call.
@@ -95,7 +93,7 @@ final class LayerCache
             return;
         }
 
-        boolean cacheIsInvalid = !oldState.equals(newState);
+        boolean cacheIsInvalid = true;
         boolean cacheIsFull    = _getGlobalCacheForThisLayer().size() > 128;
 
         boolean newBufferNeeded = false;
@@ -103,13 +101,11 @@ final class LayerCache
         if ( _localCache == null )
             newBufferNeeded = true;
         else
-        {
-            Bounds bounds = newState.currentBounds();
-            boolean sizeChanged = !bounds.hasSize( _localCache.getWidth(), _localCache.getHeight() );
-            if ( sizeChanged || cacheIsInvalid && _cacheBufferIsShared ) {
-                _freeLocalCache();
-                newBufferNeeded = true;
-            }
+            cacheIsInvalid = !oldState.equals(newState);
+
+        if ( cacheIsInvalid ) {
+            //_freeLocalCache();
+            //newBufferNeeded = true;
         }
 
         boolean justAllocatedANewBuffer = false;
@@ -124,10 +120,9 @@ final class LayerCache
             justAllocatedANewBuffer = !foundSomethingInGlobalCache;
         }
 
-        if ( justAllocatedANewBuffer )
-            _renderIntoCache = true;
-
-        if ( cacheIsInvalid && !justAllocatedANewBuffer )
+        if ( foundSomethingInGlobalCache )
+            _renderIntoCache = false;
+        else if ( justAllocatedANewBuffer || cacheIsInvalid )
             _renderIntoCache = true;
     }
 
