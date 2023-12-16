@@ -22,7 +22,7 @@ final class LayerCache
     private static final Map<StyleRenderState, CachedImage> _BORDER_CACHE = new WeakHashMap<>();
     private static final Map<StyleRenderState, CachedImage> _CONTENT_AND_FOREGROUND_CACHE = new WeakHashMap<>();
 
-    private final class CachedImage extends BufferedImage
+    private static final class CachedImage extends BufferedImage
     {
         private boolean _isRendered = false;
 
