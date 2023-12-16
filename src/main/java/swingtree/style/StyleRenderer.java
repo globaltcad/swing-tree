@@ -11,28 +11,34 @@ import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.function.Function;
 
+/**
+ *  A stateless un-instantiable utility class that renders the style of a component
+ *  using the immutable {@link ComponentConf} object containing the essential state
+ *  needed for rendering, like for example the current {@link Bounds} and {@link Style}
+ *  of a particular component.
+ */
 final class StyleRenderer
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(StyleRenderer.class);
 
-    private StyleRenderer() {}
+    private StyleRenderer() {} // Un-instantiable!
 
 
     public static void renderStyleFor( StyleEngine engine, UI.Layer layer, Graphics2D g2d )
     {
-        StyleRenderState state = engine.getState();
+        ComponentConf conf = engine.getComponentConf();
 
         // First up, we render things unique to certain layers:
 
         if ( layer == UI.Layer.BACKGROUND ) {
-            state.style().base().foundationColor().ifPresent(outerColor -> {
+            conf.style().base().foundationColor().ifPresent(outerColor -> {
                 // Check if the color is transparent
                 if ( outerColor.getAlpha() > 0 ) {
                     g2d.setColor(outerColor);
                     g2d.fill(engine.getExteriorArea());
                 }
             });
-            state.style().base().backgroundColor().ifPresent(color -> {
+            conf.style().base().backgroundColor().ifPresent(color -> {
                 if ( color.getAlpha() == 0 ) return;
                 g2d.setColor(color);
                 g2d.fill(engine.getInteriorArea());
@@ -40,7 +46,7 @@ final class StyleRenderer
         }
 
         if ( layer == UI.Layer.BORDER ) {
-            state.style().border().color().ifPresent(color -> {
+            conf.style().border().color().ifPresent(color -> {
                 _drawBorder( engine, color, g2d);
             });
         }
@@ -49,30 +55,30 @@ final class StyleRenderer
 
         // Every layer has 4 things:
         // 1. A grounding serving as a base background, which is a filled color and/or an image:
-        for ( ImageStyle imageStyle : state.style().images(layer) )
+        for ( ImageStyle imageStyle : conf.style().images(layer) )
             if ( !imageStyle.equals(ImageStyle.none()) )
-                _renderImage( imageStyle, state.currentBounds(), engine, g2d);
+                _renderImage( imageStyle, conf.currentBounds(), engine, g2d);
 
         // 2. Gradients, which are best used to give a component a nice surface lighting effect.
         // They may transition vertically, horizontally or diagonally over various different colors:
-        for ( GradientStyle gradient : state.style().gradients(layer) )
+        for ( GradientStyle gradient : conf.style().gradients(layer) )
             if ( gradient.colors().length > 0 ) {
                 if ( gradient.colors().length == 1 ) {
                     g2d.setColor(gradient.colors()[0]);
                     g2d.fill(engine.getInteriorArea());
                 }
                 else if ( gradient.transition().isDiagonal() )
-                    _renderDiagonalGradient(g2d, state.currentBounds(), state.style().margin(), gradient, engine.getInteriorArea());
+                    _renderDiagonalGradient(g2d, conf.currentBounds(), conf.style().margin(), gradient, engine.getInteriorArea());
                 else
-                    _renderVerticalOrHorizontalGradient(g2d, state.currentBounds(), state.style().margin(), gradient, engine.getInteriorArea());
+                    _renderVerticalOrHorizontalGradient(g2d, conf.currentBounds(), conf.style().margin(), gradient, engine.getInteriorArea());
             }
 
         // 3. Shadows, which are simple gradient based drop shadows that can go inwards or outwards
-        for ( ShadowStyle shadow : state.style().shadows(layer) )
+        for ( ShadowStyle shadow : conf.style().shadows(layer) )
             _renderShadows(shadow, engine, g2d);
 
         // 4. Painters, which are provided by the user and can be anything
-        List<Painter> painters = state.style().painters(layer);
+        List<Painter> painters = conf.style().painters(layer);
         if ( !painters.isEmpty() )
             engine.paintWithContentAreaClip( g2d, () -> {
                 // We remember the current transform and clip so that we can reset them after each painter:
@@ -88,9 +94,9 @@ final class StyleRenderer
                         backgroundPainter.paint(g2d);
                     } catch (Exception e) {
                         log.warn(
-                                "An exception occurred while executing painter '" + backgroundPainter + "' " +
-                                "on layer '" + layer + "' for style '" + state.style() + "' ",
-                                e
+                            "An exception occurred while executing painter '" + backgroundPainter + "' " +
+                            "on layer '" + layer + "' for style '" + conf.style() + "' ",
+                            e
                         );
                     /*
                         If exceptions happen in user provided painters, we don't want to
@@ -112,26 +118,26 @@ final class StyleRenderer
     }
 
     private static void _drawBorder( StyleEngine engine, Color color, Graphics2D g2d ) {
-        StyleRenderState state = engine.getState();
-        if ( !Outline.none().equals(state.style().border().widths()) ) {
+        ComponentConf conf = engine.getComponentConf();
+        if ( !Outline.none().equals(conf.style().border().widths()) ) {
             try {
                 Area borderArea = engine.getBorderArea();
                 g2d.setColor(color);
                 g2d.fill(borderArea);
 
-                if (!state.style().border().gradients().isEmpty()) {
-                    for ( GradientStyle gradient : state.style().border().gradients() ) {
+                if (!conf.style().border().gradients().isEmpty()) {
+                    for ( GradientStyle gradient : conf.style().border().gradients() ) {
                         if ( gradient.colors().length > 0 ) {
                             if ( gradient.transition().isDiagonal() )
-                                _renderDiagonalGradient(g2d, state.currentBounds(), state.style().margin(), gradient, borderArea);
+                                _renderDiagonalGradient(g2d, conf.currentBounds(), conf.style().margin(), gradient, borderArea);
                             else
-                                _renderVerticalOrHorizontalGradient(g2d, state.currentBounds(), state.style().margin(), gradient, borderArea);
+                                _renderVerticalOrHorizontalGradient(g2d, conf.currentBounds(), conf.style().margin(), gradient, borderArea);
                         }
                     }
                 }
             } catch ( Exception e ) {
                 log.warn(
-                    "An exception occurred while drawing the border of border style '" + state.style().border() + "' ",
+                    "An exception occurred while drawing the border of border style '" + conf.style().border() + "' ",
                     e
                 );
                 /*
@@ -151,8 +157,8 @@ final class StyleRenderer
             return;
 
         Color shadowColor = shadow.color().orElse(Color.BLACK);
-        Style style = engine.getState().style();
-        Bounds bounds = engine.getState().currentBounds();
+        Style style = engine.getComponentConf().style();
+        Bounds bounds = engine.getComponentConf().currentBounds();
 
         // First let's check if we need to render any shadows at all
         // Is the shadow color transparent?
@@ -191,7 +197,7 @@ final class StyleRenderer
 
         if ( shadow.isOutset() ) {
             int artifactAdjustment = 1;
-            baseArea = AreasCache.calculateBaseArea(engine.getState(), artifactAdjustment, artifactAdjustment, artifactAdjustment, artifactAdjustment);
+            baseArea = AreasCache.calculateBaseArea(engine.getComponentConf(), artifactAdjustment, artifactAdjustment, artifactAdjustment, artifactAdjustment);
         }
         else
             baseArea = new Area(engine.getInteriorArea());
@@ -257,10 +263,10 @@ final class StyleRenderer
 
     private static void _renderShadowBody(
         ShadowStyle shadowStyle,
-        Area baseArea,
-        Rectangle innerShadowRect,
-        Area outerShadowBox,
-        Graphics2D g2d
+        Area        baseArea,
+        Rectangle   innerShadowRect,
+        Area        outerShadowBox,
+        Graphics2D  g2d
     ) {
         Graphics2D g2d2 = (Graphics2D) g2d.create();
         g2d2.setColor(shadowStyle.color().orElse(Color.BLACK));

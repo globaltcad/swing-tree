@@ -759,9 +759,9 @@ public final class UI extends UILayoutConstants
         try {
             T result = scope.get();
             if ( result instanceof JComponent )
-                ComponentExtension.from((JComponent) result).calculateApplyAndInstallStyle(true);
+                ComponentExtension.from((JComponent) result).gatherApplyAndInstallStyle(true);
             if ( result instanceof UIForAnySwing )
-                ComponentExtension.from(((UIForAnySwing<?,?>) result).getComponent()).calculateApplyAndInstallStyle(true);
+                ComponentExtension.from(((UIForAnySwing<?,?>) result).getComponent()).gatherApplyAndInstallStyle(true);
 
             return result;
         } finally {

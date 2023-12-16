@@ -72,7 +72,7 @@ final class StyleSource<C extends JComponent>
     }
 
 
-    Style calculateStyleFor( C owner ) {
+    Style gatherStyleFor( C owner ) {
         Style starterStyle = Optional.ofNullable(owner.getParent())
                               .map( p -> p instanceof JComponent ? (JComponent) p : null )
                               .map(ComponentExtension::from)

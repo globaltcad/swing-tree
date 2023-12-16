@@ -85,7 +85,7 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extend
         if ( childComponent instanceof JComponent ) {
             JComponent child = (JComponent) childComponent;
 
-            Style style = ( conf != null ? null : ComponentExtension.from(child).calculateStyle() );
+            Style style = ( conf != null ? null : ComponentExtension.from(child).gatherStyle() );
             if ( style != null )
                 conf = style.layout().constraint().orElse(null);
 
@@ -94,7 +94,7 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extend
             if ( style != null )
                 ComponentExtension.from(child).applyAndInstallStyle(style, true);
             else
-                ComponentExtension.from(child).calculateApplyAndInstallStyle(true);
+                ComponentExtension.from(child).gatherApplyAndInstallStyle(true);
         }
         else
             _addComponentTo(thisComponent, childComponent, conf);

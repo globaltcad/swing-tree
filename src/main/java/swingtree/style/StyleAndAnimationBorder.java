@@ -109,7 +109,7 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
     @Override
     public Insets getBorderInsets( Component c ) {
         if ( _insets == null )
-            _compExt.calculateApplyAndInstallStyle(false);
+            _compExt.gatherApplyAndInstallStyle(false);
         return _insets;
     }
 

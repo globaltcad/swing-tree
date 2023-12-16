@@ -1,12 +1,12 @@
 package swingtree.style;
 
 /**
- *  A wrapper for a value that is produced from a {@link StyleRenderState} through
- *  a {@link #produce(StyleRenderState)} implementation and validated against
- *  a previous {@link StyleRenderState} through a {@link #leadsToSameValue(StyleRenderState, StyleRenderState)}
+ *  A wrapper for a value that is produced from a {@link ComponentConf} through
+ *  a {@link #produce(ComponentConf)} implementation and validated against
+ *  a previous {@link ComponentConf} through a {@link #leadsToSameValue(ComponentConf, ComponentConf)}
  *  implementation.
  *  <p>
- *  This design is possible due to the fact that the {@link StyleRenderState} is deeply immutable
+ *  This design is possible due to the fact that the {@link ComponentConf} is deeply immutable
  *  and can be used as a key data structure for caching.
  *
  * @param <T> The type of the cached value.
@@ -18,13 +18,13 @@ abstract class Cached<T>
 
     public Cached() {}
 
-    public final void validate( StyleRenderState oldState, StyleRenderState newState ) {
+    public final void validate(ComponentConf oldState, ComponentConf newState ) {
         if ( _value != null && !leadsToSameValue(oldState, newState) ) {
             _value = null;
         }
     }
 
-    public final T getFor(StyleRenderState currentState ) {
+    public final T getFor(ComponentConf currentState ) {
         if ( _value == null )
             _value = produce(currentState);
         return _value;
@@ -34,7 +34,7 @@ abstract class Cached<T>
         return _value != null;
     }
 
-    protected abstract T produce( StyleRenderState currentState );
+    protected abstract T produce( ComponentConf currentState );
 
-    public abstract boolean leadsToSameValue(StyleRenderState oldState, StyleRenderState newState );
+    public abstract boolean leadsToSameValue(ComponentConf oldState, ComponentConf newState );
 }

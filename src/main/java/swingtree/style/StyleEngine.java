@@ -22,7 +22,7 @@ final class StyleEngine
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(StyleEngine.class);
 
     public static StyleEngine create() {
-        return new StyleEngine(StyleRenderState.none(), new Expirable[0], new AreasCache(), null);
+        return new StyleEngine(ComponentConf.none(), new Expirable[0], new AreasCache(), null);
     }
 
     static boolean IS_ANTIALIASING_ENABLED(){
@@ -30,19 +30,19 @@ final class StyleEngine
     }
 
 
-    private final StyleRenderState       _state;
-    private final Expirable<Painter>[]   _animationPainters;
-    private final AreasCache             _areasCache;
-    private final LayerCache[]           _layerCaches;
+    private final ComponentConf        _componentConf;
+    private final Expirable<Painter>[] _animationPainters;
+    private final AreasCache           _areasCache;
+    private final LayerCache[]         _layerCaches;
 
 
     private StyleEngine(
-        StyleRenderState      state,
+        ComponentConf         componentConf,
         Expirable<Painter>[]  animationPainters,
         AreasCache            areasCache,
         LayerCache[]          layerCaches // Null when the style engine is freshly created
     ) {
-        _state             = Objects.requireNonNull(state);
+        _componentConf = Objects.requireNonNull(componentConf);
         _animationPainters = Objects.requireNonNull(animationPainters);
         _areasCache        = Objects.requireNonNull(areasCache);
         if ( layerCaches == null ) {
@@ -53,33 +53,33 @@ final class StyleEngine
         _layerCaches       = Objects.requireNonNull(layerCaches);
     }
 
-    StyleRenderState getState() { return _state; }
+    ComponentConf getComponentConf() { return _componentConf; }
 
     StyleEngine withNewStyleAndComponent( Style style, JComponent component ) {
-        StyleRenderState newState = _state.with(style, component);
-        _areasCache.validate(_state, newState);
+        ComponentConf newState = _componentConf.with(style, component);
+        _areasCache.validate(_componentConf, newState);
         for ( LayerCache layerCache : _layerCaches )
-            layerCache.validate(_state, newState);
+            layerCache.validate(_componentConf, newState);
         return new StyleEngine( newState, _animationPainters, _areasCache, _layerCaches);
     }
 
     StyleEngine withAnimationPainter(LifeTime lifeTime, Painter animationPainter ) {
         java.util.List<Expirable<Painter>> animationPainters = new ArrayList<>(Arrays.asList(_animationPainters));
         animationPainters.add(new Expirable<>(lifeTime, animationPainter));
-        return new StyleEngine( _state, animationPainters.toArray(new Expirable[0]), _areasCache, _layerCaches);
+        return new StyleEngine(_componentConf, animationPainters.toArray(new Expirable[0]), _areasCache, _layerCaches);
     }
 
     StyleEngine withoutAnimationPainters() {
-        return new StyleEngine( _state, new Expirable[0], _areasCache, _layerCaches);
+        return new StyleEngine(_componentConf, new Expirable[0], _areasCache, _layerCaches);
     }
 
     StyleEngine withoutExpiredAnimationPainters() {
         List<Expirable<Painter>> animationPainters = new ArrayList<>(Arrays.asList(_animationPainters));
         animationPainters.removeIf(Expirable::isExpired);
-        return new StyleEngine( _state, animationPainters.toArray(new Expirable[0]), _areasCache, _layerCaches);
+        return new StyleEngine(_componentConf, animationPainters.toArray(new Expirable[0]), _areasCache, _layerCaches);
     }
 
-    Style getStyle() { return _state.style(); }
+    Style getStyle() { return _componentConf.style(); }
 
     Optional<Shape> interiorArea() {
         Shape contentClip = null;
@@ -91,17 +91,17 @@ final class StyleEngine
 
     Area getInteriorArea()
     {
-        return _areasCache.interiorComponentArea().getFor(_state);
+        return _areasCache.interiorComponentArea().getFor(_componentConf);
     }
 
     Area getExteriorArea()
     {
-        return _areasCache.exteriorComponentArea().getFor(_state);
+        return _areasCache.exteriorComponentArea().getFor(_componentConf);
     }
 
     Area getBorderArea()
     {
-        return _areasCache.borderArea().getFor(_state);
+        return _areasCache.borderArea().getFor(_componentConf);
     }
 
     void paintWithContentAreaClip( Graphics g, Runnable painter ) {

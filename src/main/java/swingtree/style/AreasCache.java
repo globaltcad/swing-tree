@@ -15,7 +15,7 @@ final class AreasCache
     private final Cached<Area> _borderArea = new Cached<Area>() {
 
         @Override
-        protected Area produce(StyleRenderState currentState) {
+        protected Area produce(ComponentConf currentState) {
             Area componentArea = _mainComponentArea.getFor(currentState);
             Area borderArea = new Area(_interiorComponentArea.getFor(currentState));
             borderArea.subtract(componentArea);
@@ -23,7 +23,7 @@ final class AreasCache
         }
 
         @Override
-        public boolean leadsToSameValue(StyleRenderState oldState, StyleRenderState newState) {
+        public boolean leadsToSameValue(ComponentConf oldState, ComponentConf newState) {
             if ( !_mainComponentArea.leadsToSameValue(oldState, newState) )
                 return false;
 
@@ -38,7 +38,7 @@ final class AreasCache
     private final Cached<Area> _mainComponentArea = new Cached<Area>() {
 
         @Override
-        protected Area produce(StyleRenderState currentState) {
+        protected Area produce(ComponentConf currentState) {
             Outline widths = currentState.style().border().widths();
             int leftBorderWidth   = widths.left().orElse(0);
             int topBorderWidth    = widths.top().orElse(0);
@@ -54,7 +54,7 @@ final class AreasCache
         }
 
         @Override
-        public boolean leadsToSameValue(StyleRenderState oldState, StyleRenderState newState) {
+        public boolean leadsToSameValue(ComponentConf oldState, ComponentConf newState) {
             Outline oldWidths = oldState.style().border().widths();
             Outline newWidths = newState.style().border().widths();
             boolean sameWidths = oldWidths.equals(newWidths);
@@ -65,7 +65,7 @@ final class AreasCache
     // == full component bounds - _mainComponentArea
     private final Cached<Area> _exteriorComponentArea = new Cached<Area>() {
         @Override
-        protected Area produce(StyleRenderState currentState) {
+        protected Area produce(ComponentConf currentState) {
             Area main = _mainComponentArea.getFor(currentState);
             Bounds bounds = currentState.currentBounds();
             Area exteriorComponentArea = new Area(new Rectangle(bounds.x(), bounds.y(), bounds.width(), bounds.height()));
@@ -74,7 +74,7 @@ final class AreasCache
         }
 
         @Override
-        public boolean leadsToSameValue(StyleRenderState oldState, StyleRenderState newState) {
+        public boolean leadsToSameValue(ComponentConf oldState, ComponentConf newState) {
             boolean mainIsSame = _mainComponentArea.leadsToSameValue(oldState, newState);
             if ( !mainIsSame )
                 return false;
@@ -88,11 +88,11 @@ final class AreasCache
 
     private final Cached<Area> _interiorComponentArea = new Cached<Area>() {
         @Override
-        protected Area produce(StyleRenderState currentState) {
+        protected Area produce(ComponentConf currentState) {
             return calculateBaseArea(currentState, 0, 0, 0, 0);
         }
         @Override
-        public boolean leadsToSameValue(StyleRenderState oldState, StyleRenderState newState) {
+        public boolean leadsToSameValue(ComponentConf oldState, ComponentConf newState) {
             return _testWouldLeadToSameBaseArea(oldState, newState);
         }
     };
@@ -107,7 +107,7 @@ final class AreasCache
 
     public Cached<Area> interiorComponentArea() { return _interiorComponentArea; }
 
-    public void validate( StyleRenderState oldState, StyleRenderState newState )
+    public void validate(ComponentConf oldState, ComponentConf newState )
     {
         if ( oldState.equals(newState) )
             return;
@@ -118,7 +118,7 @@ final class AreasCache
         _interiorComponentArea.validate(oldState, newState);
     }
 
-    static Area calculateBaseArea(StyleRenderState state, int insTop, int insLeft, int insBottom, int insRight )
+    static Area calculateBaseArea(ComponentConf state, int insTop, int insLeft, int insBottom, int insRight )
     {
         return _calculateBaseArea(
                     state.baseOutline(),
@@ -316,7 +316,7 @@ final class AreasCache
      *  So we check the various properties of the states that are used to calculate the base area
      *  and if they are all the same, we return true.
      */
-    private static boolean _testWouldLeadToSameBaseArea( StyleRenderState state1, StyleRenderState state2 ) {
+    private static boolean _testWouldLeadToSameBaseArea(ComponentConf state1, ComponentConf state2 ) {
         if ( state1 == state2 ) return true;
         if ( state1 == null || state2 == null ) return false;
         boolean sameStyle   = state1.style().equals(state2.style());

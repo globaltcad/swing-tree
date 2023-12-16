@@ -11,16 +11,16 @@ import java.util.function.Consumer;
 
 /**
  *  A {@link BufferedImage} based cache for the rendering of a particular layer of a component's style. <br>
- *  So if the {@link StyleRenderState} of a component changes, the cache is invalidated and the layer
+ *  So if the {@link ComponentConf} of a component changes, the cache is invalidated and the layer
  *  is rendered again. <br>
- *  This is made possible by the fact that the {@link StyleRenderState} is deeply immutable and can be used
+ *  This is made possible by the fact that the {@link ComponentConf} is deeply immutable and can be used
  *  as a key data structure for caching.
  */
 final class LayerCache
 {
-    private static final Map<StyleRenderState, CachedImage> _BACKGROUND_CACHE = new WeakHashMap<>();
-    private static final Map<StyleRenderState, CachedImage> _BORDER_CACHE = new WeakHashMap<>();
-    private static final Map<StyleRenderState, CachedImage> _CONTENT_AND_FOREGROUND_CACHE = new WeakHashMap<>();
+    private static final Map<ComponentConf, CachedImage> _BACKGROUND_CACHE = new WeakHashMap<>();
+    private static final Map<ComponentConf, CachedImage> _BORDER_CACHE = new WeakHashMap<>();
+    private static final Map<ComponentConf, CachedImage> _CONTENT_AND_FOREGROUND_CACHE = new WeakHashMap<>();
 
     private static final class CachedImage extends BufferedImage
     {
@@ -43,17 +43,17 @@ final class LayerCache
         }
     }
 
-    private final UI.Layer      _layer;
-    private CachedImage         _localCache;
-    private StyleRenderState    _strongRef; // The key must be referenced strongly so that the value is not garbage collected (the cached image)
-    private boolean             _cachingMakesSense = true;
+    private final UI.Layer   _layer;
+    private CachedImage      _localCache;
+    private ComponentConf _strongRef; // The key must be referenced strongly so that the value is not garbage collected (the cached image)
+    private boolean          _cachingMakesSense = true;
 
 
-    public LayerCache(UI.Layer layer ) {
+    public LayerCache( UI.Layer layer ) {
         _layer = Objects.requireNonNull(layer);
     }
 
-    private Map<StyleRenderState, CachedImage> _getGlobalCacheForThisLayer() {
+    private Map<ComponentConf, CachedImage> _getGlobalCacheForThisLayer() {
         switch (_layer) {
             case BACKGROUND: return _BACKGROUND_CACHE;
             case BORDER:     return _BORDER_CACHE;
@@ -65,11 +65,9 @@ final class LayerCache
         return _CONTENT_AND_FOREGROUND_CACHE;
     }
 
-    private boolean allocateOrGetCachedBuffer( StyleRenderState styleConf )
+    private void _allocateOrGetCachedBuffer( ComponentConf styleConf )
     {
-        boolean foundSomethingInGlobalCache = false;
-
-        Map<StyleRenderState, CachedImage> _CACHE = _getGlobalCacheForThisLayer();
+        Map<ComponentConf, CachedImage> _CACHE = _getGlobalCacheForThisLayer();
 
         CachedImage bufferedImage = _CACHE.get(styleConf);
 
@@ -77,8 +75,6 @@ final class LayerCache
             Bounds bounds = styleConf.currentBounds();
             bufferedImage = new CachedImage(bounds.width(), bounds.height(), BufferedImage.TYPE_INT_ARGB);
         }
-        else
-            foundSomethingInGlobalCache = true;
 
         _localCache = bufferedImage;
         _strongRef  = styleConf; // We keep a strong reference to the state so that the cached image is not garbage collected
@@ -88,8 +84,6 @@ final class LayerCache
             This is necessary because the most recent state is always strongly referenced
             whereas the old state may no longer be referenced by anything else.
         */
-
-        return foundSomethingInGlobalCache;
     }
 
     private void _freeLocalCache() {
@@ -98,13 +92,13 @@ final class LayerCache
         _cachingMakesSense = false;
     }
 
-    public final void validate( StyleRenderState oldState, StyleRenderState newState )
+    public final void validate(ComponentConf oldState, ComponentConf newState )
     {
         if ( newState.currentBounds().width() == 0 || newState.currentBounds().height() == 0 )
             return;
 
-        oldState = oldState.retainingOnlyLayer(_layer);
-        newState = newState.retainingOnlyLayer(_layer);
+        oldState = oldState.onlyRetainingLayer(_layer);
+        newState = newState.onlyRetainingLayer(_layer);
 
         _cachingMakesSense = _cachingMakesSenseFor(newState);
         if ( !_cachingMakesSense ) {
@@ -131,13 +125,13 @@ final class LayerCache
             if ( cacheIsFull )
                 return;
 
-            allocateOrGetCachedBuffer(newState);
+            _allocateOrGetCachedBuffer(newState);
         }
     }
 
     public final void paint( StyleEngine engine, Graphics2D g, Consumer<Graphics2D> renderer )
     {
-        if ( engine.getState().currentBounds().width() == 0 || engine.getState().currentBounds().height() == 0 )
+        if ( engine.getComponentConf().currentBounds().width() == 0 || engine.getComponentConf().currentBounds().height() == 0 )
             return;
 
         if ( !_cachingMakesSense ) {
@@ -162,7 +156,7 @@ final class LayerCache
         g.drawImage(_localCache, 0, 0, null);
     }
 
-    public boolean _cachingMakesSenseFor( StyleRenderState state )
+    public boolean _cachingMakesSenseFor( ComponentConf state )
     {
         Bounds bounds = state.currentBounds();
         if ( bounds.width() <= 0 || bounds.height() <= 0 )

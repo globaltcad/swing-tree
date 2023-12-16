@@ -119,7 +119,7 @@ public final class ComponentExtension<C extends JComponent>
         _styleGroups.addAll( java.util.Arrays.asList(groupTags) );
 
         if ( alreadyHasGroupTags )
-            calculateApplyAndInstallStyle(false);
+            gatherApplyAndInstallStyle(false);
     }
 
     /**
@@ -298,7 +298,7 @@ public final class ComponentExtension<C extends JComponent>
      */
     public void paintForeground( Graphics2D g2d, Runnable superPaint )
     {
-        establishStyleStateForRendering();
+        gatherApplyAndInstallStyleConfig();
 
         Shape clip = _outerBaseClip != null ? _outerBaseClip : g2d.getClip();
         if ( _owner instanceof JScrollPane ) {
@@ -339,7 +339,7 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     void paintWithContentAreaClip( Graphics g, Runnable painter ) {
-        establishStyleStateForRendering();
+        gatherApplyAndInstallStyleConfig();
         _styleEngine.paintWithContentAreaClip(g, painter);
     }
 
@@ -352,7 +352,7 @@ public final class ComponentExtension<C extends JComponent>
     public void addStyler( Styler<C> styler ) {
         Objects.requireNonNull(styler);
         _styleSource = _styleSource.withLocalStyler(styler, _owner);
-        calculateApplyAndInstallStyle(false);
+        gatherApplyAndInstallStyle(false);
     }
 
     /**
@@ -361,8 +361,8 @@ public final class ComponentExtension<C extends JComponent>
      *
      * @return A new immutable {@link Style} configuration.
      */
-    public Style calculateStyle() {
-        return _styleSource.calculateStyleFor(_owner);
+    public Style gatherStyle() {
+        return _styleSource.gatherStyleFor(_owner);
     }
 
     /**
@@ -374,8 +374,8 @@ public final class ComponentExtension<C extends JComponent>
      *
      * @param force If set to <code>true</code>, the style will be applied even if it is the same as the current style.
      */
-    public void calculateApplyAndInstallStyle( boolean force ) {
-        _installStyle( _calculateAndApplyStyle(force) );
+    public void gatherApplyAndInstallStyle( boolean force ) {
+        _installStyle( _applyStyleToComponentState(gatherStyle(), force) );
     }
 
     /**
@@ -391,21 +391,17 @@ public final class ComponentExtension<C extends JComponent>
         _installStyle( _applyStyleToComponentState(style, force) );
     }
 
-    void establishStyleStateForRendering() {
-        _styleEngine = _styleEngine.withNewStyleAndComponent( _calculateAndApplyStyle(false), _owner );
+    void gatherApplyAndInstallStyleConfig() {
+        _installStyle( _applyStyleToComponentState(gatherStyle(), false) );
     }
 
     private void _installStyle( Style style ) {
         _styleEngine = _styleEngine.withNewStyleAndComponent(style, _owner);
     }
 
-    private Style _calculateAndApplyStyle( boolean force ) {
-        return _applyStyleToComponentState(calculateStyle(), force);
-    }
-
     void paintBackground( Graphics g, Runnable lookAndFeelPainting )
     {
-        establishStyleStateForRendering();
+        gatherApplyAndInstallStyleConfig();
 
         _outerBaseClip = g.getClip();
 
@@ -441,7 +437,7 @@ public final class ComponentExtension<C extends JComponent>
 
     void paintBorderAndAnimations( Graphics2D g2d, Runnable formerBorderPainter )
     {
-        establishStyleStateForRendering();
+        gatherApplyAndInstallStyleConfig();
 
         Shape former = g2d.getClip();
 

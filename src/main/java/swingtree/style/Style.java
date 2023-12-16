@@ -191,11 +191,11 @@ public final class Style
 
     /**
      *  Returns a new {@link Style} instance which only contains style information relevant
-     *  to the provided {@link UI.Layer}.
+     *  to the provided {@link UI.Layer}. Style information on other layers is discarded.
      * @param layer The layer to retain.
-     * @return A new {@link Style} instance which only contains style information relevant
+     * @return A new {@link Style} instance which only contains style information relevant to the provided {@link UI.Layer}.
      */
-    public Style retainingOnlyLayer( UI.Layer layer ) {
+    public Style onlyRetainingLayer(UI.Layer layer ) {
         return new Style(
                     _layout,
                     _border,
