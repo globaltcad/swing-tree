@@ -101,6 +101,7 @@ final class LayerCache
         newState = newState.onlyRetainingLayer(_layer);
 
         _cachingMakesSense = _cachingMakesSenseFor(newState);
+
         if ( !_cachingMakesSense ) {
             _freeLocalCache();
             return;
@@ -121,12 +122,11 @@ final class LayerCache
             newBufferNeeded = true;
         }
 
-        if ( newBufferNeeded ) {
-            if ( cacheIsFull )
-                return;
+        if ( cacheIsFull )
+            return;
 
+        if ( newBufferNeeded )
             _allocateOrGetCachedBuffer(newState);
-        }
     }
 
     public final void paint( StyleEngine engine, Graphics2D g, Consumer<Graphics2D> renderer )
