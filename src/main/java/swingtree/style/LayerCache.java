@@ -18,26 +18,45 @@ import java.util.function.Consumer;
  */
 final class LayerCache
 {
-    private static final Map<StyleRenderState, BufferedImage> _BACKGROUND_CACHE = new WeakHashMap<>();
-    private static final Map<StyleRenderState, BufferedImage> _BORDER_CACHE = new WeakHashMap<>();
-    private static final Map<StyleRenderState, BufferedImage> _CONTENT_AND_FOREGROUND_CACHE = new WeakHashMap<>();
+    private static final Map<StyleRenderState, CachedImage> _BACKGROUND_CACHE = new WeakHashMap<>();
+    private static final Map<StyleRenderState, CachedImage> _BORDER_CACHE = new WeakHashMap<>();
+    private static final Map<StyleRenderState, CachedImage> _CONTENT_AND_FOREGROUND_CACHE = new WeakHashMap<>();
 
+    private final class CachedImage extends BufferedImage
+    {
+        private boolean _isRendered = false;
 
-    private final UI.Layer   _layer;
-    private BufferedImage _localCache;
-    private StyleRenderState _strongRef; // The key must be referenced strongly so that the value is not garbage collected (the cached image)
-    private boolean          _renderIntoCache = true;
-    private boolean          _cachingMakesSense = true;
+        CachedImage(int width, int height, int imageType) {
+            super(width, height, imageType);
+        }
+
+        @Override
+        public Graphics2D createGraphics() {
+            if ( _isRendered )
+                throw new IllegalStateException("This image has already been rendered into!");
+            _isRendered = true;
+            return super.createGraphics();
+        }
+
+        public boolean isRendered() {
+            return _isRendered;
+        }
+    }
+
+    private final UI.Layer      _layer;
+    private CachedImage         _localCache;
+    private StyleRenderState    _strongRef; // The key must be referenced strongly so that the value is not garbage collected (the cached image)
+    private boolean             _cachingMakesSense = true;
 
 
     public LayerCache(UI.Layer layer ) {
         _layer = Objects.requireNonNull(layer);
     }
 
-    private Map<StyleRenderState, BufferedImage> _getGlobalCacheForThisLayer() {
+    private Map<StyleRenderState, CachedImage> _getGlobalCacheForThisLayer() {
         switch (_layer) {
             case BACKGROUND: return _BACKGROUND_CACHE;
-            case BORDER: return _BORDER_CACHE;
+            case BORDER:     return _BORDER_CACHE;
             case CONTENT:
             case FOREGROUND:
                 return _CONTENT_AND_FOREGROUND_CACHE;
@@ -50,13 +69,13 @@ final class LayerCache
     {
         boolean foundSomethingInGlobalCache = false;
 
-        Map<StyleRenderState, BufferedImage> _CACHE = _getGlobalCacheForThisLayer();
+        Map<StyleRenderState, CachedImage> _CACHE = _getGlobalCacheForThisLayer();
 
-        BufferedImage bufferedImage = _CACHE.get(styleConf);
+        CachedImage bufferedImage = _CACHE.get(styleConf);
 
         if ( bufferedImage == null ) {
             Bounds bounds = styleConf.currentBounds();
-            bufferedImage = new BufferedImage(bounds.width(), bounds.height(), BufferedImage.TYPE_INT_ARGB);
+            bufferedImage = new CachedImage(bounds.width(), bounds.height(), BufferedImage.TYPE_INT_ARGB);
         }
         else
             foundSomethingInGlobalCache = true;
@@ -76,7 +95,6 @@ final class LayerCache
     private void _freeLocalCache() {
         _strongRef       = null;
         _localCache      = null;
-        _renderIntoCache = false;
     }
 
     public final void validate( StyleRenderState oldState, StyleRenderState newState )
@@ -108,22 +126,12 @@ final class LayerCache
             //newBufferNeeded = true;
         }
 
-        boolean justAllocatedANewBuffer = false;
-        boolean foundSomethingInGlobalCache = false;
-
         if ( newBufferNeeded ) {
             if ( cacheIsFull )
                 return;
 
-            foundSomethingInGlobalCache = allocateOrGetCachedBuffer(newState);
-
-            justAllocatedANewBuffer = !foundSomethingInGlobalCache;
+            allocateOrGetCachedBuffer(newState);
         }
-
-        if ( foundSomethingInGlobalCache )
-            _renderIntoCache = false;
-        else if ( justAllocatedANewBuffer || cacheIsInvalid )
-            _renderIntoCache = true;
     }
 
     public final void paint( StyleEngine engine, Graphics2D g, Consumer<Graphics2D> renderer )
@@ -139,7 +147,7 @@ final class LayerCache
         if ( _localCache == null )
             return;
 
-        if ( _renderIntoCache ) {
+        if ( !_localCache.isRendered() ) {
             Graphics2D g2 = _localCache.createGraphics();
             g2.setBackground(g.getBackground());
             g2.setClip(null); // We want to capture the full style and clip it later (see g.drawImage(_cache, 0, 0, null); below.
@@ -148,7 +156,6 @@ final class LayerCache
             g2.setRenderingHints(g.getRenderingHints());
             g2.setStroke(g.getStroke());
             renderer.accept(g2);
-            _renderIntoCache = false;
         }
 
         g.drawImage(_localCache, 0, 0, null);
