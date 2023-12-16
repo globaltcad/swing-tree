@@ -283,7 +283,24 @@ public final class ImageStyle
      */
     public ImageStyle image( IconDeclaration image ) {
         Objects.requireNonNull(image);
-        return image.find().map(this::image).orElse(this); }
+        return image.find().map(this::image).orElse(this);
+    }
+
+    /**
+     *  Here you can specify the <b>path to the image</b> for which the icon will be loaded,
+     *  cached and drawn onto the component.
+     *  If the icon could not be found, then the image will not be drawn.
+     *  The path is relative to the classpath or may be an absolute path.
+     *  (see {@link swingtree.UI#findIcon(String)}).
+     *
+     * @param path The path to the (icon) image.
+     * @return A new {@link ImageStyle} instance with the specified image.
+     * @throws NullPointerException If the specified {@code path} is null.
+     */
+    public ImageStyle image( String path ) {
+        Objects.requireNonNull(path);
+        return image(() -> path);
+    }
 
     /**
      *  Here you can specify the <b>placement</b> of the image onto the component.
