@@ -93,8 +93,9 @@ final class LayerCache
     }
 
     private void _freeLocalCache() {
-        _strongRef       = null;
-        _localCache      = null;
+        _strongRef         = null;
+        _localCache        = null;
+        _cachingMakesSense = false;
     }
 
     public final void validate( StyleRenderState oldState, StyleRenderState newState )
@@ -122,8 +123,8 @@ final class LayerCache
             cacheIsInvalid = !oldState.equals(newState);
 
         if ( cacheIsInvalid ) {
-            //_freeLocalCache();
-            //newBufferNeeded = true;
+            _freeLocalCache();
+            newBufferNeeded = true;
         }
 
         if ( newBufferNeeded ) {
