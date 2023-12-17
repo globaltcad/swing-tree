@@ -4,8 +4,10 @@ import swingtree.UI;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.lang.ref.WeakReference;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.WeakHashMap;
 import java.util.function.Consumer;
 
@@ -24,10 +26,12 @@ final class LayerCache
 
     private static final class CachedImage extends BufferedImage
     {
+        private final WeakReference<ComponentConf> _key;
         private boolean _isRendered = false;
 
-        CachedImage(int width, int height, int imageType) {
-            super(width, height, imageType);
+        CachedImage(int width, int height, ComponentConf cacheKey) {
+            super(width, height, BufferedImage.TYPE_INT_ARGB);
+            _key = new WeakReference<>(cacheKey);
         }
 
         @Override
@@ -38,6 +42,10 @@ final class LayerCache
             return super.createGraphics();
         }
 
+        public Optional<ComponentConf> getKey() {
+            return Optional.ofNullable(_key.get());
+        }
+
         public boolean isRendered() {
             return _isRendered;
         }
@@ -45,7 +53,7 @@ final class LayerCache
 
     private final UI.Layer   _layer;
     private CachedImage      _localCache;
-    private ComponentConf _strongRef; // The key must be referenced strongly so that the value is not garbage collected (the cached image)
+    private ComponentConf    _strongRef; // The key must be referenced strongly so that the value is not garbage collected (the cached image)
     private boolean          _cachingMakesSense = true;
 
 
@@ -73,17 +81,14 @@ final class LayerCache
 
         if ( bufferedImage == null ) {
             Bounds bounds = styleConf.currentBounds();
-            bufferedImage = new CachedImage(bounds.width(), bounds.height(), BufferedImage.TYPE_INT_ARGB);
+            bufferedImage = new CachedImage(bounds.width(), bounds.height(), styleConf);
+            _CACHE.put(styleConf, bufferedImage);
+            _strongRef = styleConf;
         }
+        else // We keep a strong reference to the state so that the cached image is not garbage collected
+            _strongRef = bufferedImage.getKey().orElse(styleConf);
 
         _localCache = bufferedImage;
-        _strongRef  = styleConf; // We keep a strong reference to the state so that the cached image is not garbage collected
-        _CACHE.put(styleConf, bufferedImage);
-        /*
-            Note that we refresh the key in the map using the above put() call.
-            This is necessary because the most recent state is always strongly referenced
-            whereas the old state may no longer be referenced by anything else.
-        */
     }
 
     private void _freeLocalCache() {
