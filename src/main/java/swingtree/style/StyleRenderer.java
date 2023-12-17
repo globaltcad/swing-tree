@@ -157,8 +157,8 @@ final class StyleRenderer
             return;
 
         Color shadowColor = shadow.color().orElse(Color.BLACK);
-        Style style = engine.getComponentConf().style();
-        Bounds bounds = engine.getComponentConf().currentBounds();
+        Style style       = engine.getComponentConf().style();
+        Bounds bounds     = engine.getComponentConf().currentBounds();
 
         // First let's check if we need to render any shadows at all
         // Is the shadow color transparent?
@@ -166,34 +166,53 @@ final class StyleRenderer
             return;
 
         // The background box is calculated from the margins and border radius:
-        int leftBorderWidth   = style.border().widths().left().orElse(0);
-        int topBorderWidth    = style.border().widths().top().orElse(0);
-        int rightBorderWidth  = style.border().widths().right().orElse(0);
-        int bottomBorderWidth = style.border().widths().bottom().orElse(0);
-        int left   = Math.max(style.margin().left().orElse(0),   0) + ( shadow.isInset() ? leftBorderWidth   : 0 );
-        int top    = Math.max(style.margin().top().orElse(0),    0) + ( shadow.isInset() ? topBorderWidth    : 0 );
-        int right  = Math.max(style.margin().right().orElse(0),  0) + ( shadow.isInset() ? rightBorderWidth  : 0 );
-        int bottom = Math.max(style.margin().bottom().orElse(0), 0) + ( shadow.isInset() ? bottomBorderWidth : 0 );
-        int topLeftRadius     = Math.max(style.border().topLeftRadius(), 0);
-        int topRightRadius    = Math.max(style.border().topRightRadius(), 0);
-        int bottomRightRadius = Math.max(style.border().bottomRightRadius(), 0);
-        int bottomLeftRadius  = Math.max(style.border().bottomLeftRadius(), 0);
-        int width     = bounds.width();
-        int height    = bounds.height();
-        int borderWidth = 0;
+        final int leftBorderWidth   = style.border().widths().left().orElse(0);
+        final int topBorderWidth    = style.border().widths().top().orElse(0);
+        final int rightBorderWidth  = style.border().widths().right().orElse(0);
+        final int bottomBorderWidth = style.border().widths().bottom().orElse(0);
+        final int left   = Math.max(style.margin().left().orElse(0),   0) + ( shadow.isInset() ? leftBorderWidth   : 0 );
+        final int top    = Math.max(style.margin().top().orElse(0),    0) + ( shadow.isInset() ? topBorderWidth    : 0 );
+        final int right  = Math.max(style.margin().right().orElse(0),  0) + ( shadow.isInset() ? rightBorderWidth  : 0 );
+        final int bottom = Math.max(style.margin().bottom().orElse(0), 0) + ( shadow.isInset() ? bottomBorderWidth : 0 );
+        final int topLeftRadius     = Math.max(style.border().topLeftRadius(), 0);
+        final int topRightRadius    = Math.max(style.border().topRightRadius(), 0);
+        final int bottomRightRadius = Math.max(style.border().bottomRightRadius(), 0);
+        final int bottomLeftRadius  = Math.max(style.border().bottomLeftRadius(), 0);
+
+        final int width     = bounds.width();
+        final int height    = bounds.height();
 
         // Calculate the shadow box bounds based on the padding and border thickness
-        int xOffset = shadow.horizontalOffset();
-        int yOffset = shadow.verticalOffset();
-        int x = left + xOffset;
-        int y = top  + yOffset;
-        int w = width  - left - right  - borderWidth;
-        int h = height - top  - bottom - borderWidth;
+        final int x = left + shadow.horizontalOffset();
+        final int y = top  + shadow.verticalOffset();
+        final int w = width  - left - right;
+        final int h = height - top  - bottom;
 
-        int blurRadius   = Math.max(shadow.blurRadius(), 0);
-        int spreadRadius = !shadow.isOutset() ? shadow.spreadRadius() : -shadow.spreadRadius();
+        final int blurRadius   = Math.max(shadow.blurRadius(), 0);
+        final int spreadRadius = !shadow.isOutset() ? shadow.spreadRadius() : -shadow.spreadRadius();
 
-        Area baseArea;
+        Rectangle outerShadowRect = new Rectangle(
+                                        x - blurRadius + spreadRadius,
+                                        y - blurRadius + spreadRadius,
+                                        w + blurRadius * 2 - spreadRadius * 2,
+                                        h + blurRadius * 2 - spreadRadius * 2
+                                    );
+
+        Function<Integer, Integer> offsetFunction = (radius) -> (int)((radius * 2) / ( shadow.isInset() ? 4.5 : 3.79) );
+
+        final int averageCornerRadius = ( topLeftRadius + topRightRadius + bottomRightRadius + bottomLeftRadius ) / 4;
+        final int averageBorderWidth  = ( leftBorderWidth + topBorderWidth + rightBorderWidth +  bottomBorderWidth ) / 4;
+        final int shadowCornerRadius  = Math.max( 0, averageCornerRadius - averageBorderWidth );
+        final int gradientStartOffset = 1 + offsetFunction.apply(shadowCornerRadius);
+
+        Rectangle innerShadowRect = new Rectangle(
+                                        x + blurRadius + gradientStartOffset + spreadRadius,
+                                        y + blurRadius + gradientStartOffset + spreadRadius,
+                                        w - blurRadius * 2 - gradientStartOffset * 2 - spreadRadius * 2,
+                                        h - blurRadius * 2 - gradientStartOffset * 2 - spreadRadius * 2
+                                    );
+
+        final Area baseArea;
 
         if ( shadow.isOutset() ) {
             int artifactAdjustment = 1;
@@ -202,41 +221,8 @@ final class StyleRenderer
         else
             baseArea = new Area(engine.getInteriorArea());
 
-        int shadowInset  = blurRadius;
-        int shadowOutset = blurRadius;
-        int borderWidthOffset = 0;
-
-        Rectangle outerShadowRect = new Rectangle(
-                                        x - shadowOutset + spreadRadius + borderWidthOffset,
-                                        y - shadowOutset + spreadRadius + borderWidthOffset,
-                                     w + shadowOutset * 2 - spreadRadius * 2,
-                                        h + shadowOutset * 2 - spreadRadius * 2
-                                    );
-
-        Function<Integer, Integer> offsetFunction = (radius) -> (int)((radius * 2) / ( shadow.isInset() ? 4.5 : 3.79) + ( shadow.isInset() ? 0 : borderWidth ));
-
-        int averageCornerRadius = ( topLeftRadius + topRightRadius + bottomRightRadius + bottomLeftRadius ) / 4;
-        int averageBorderWidth  = ( leftBorderWidth + topBorderWidth + rightBorderWidth +  bottomBorderWidth ) / 4;
-        int shadowCornerRadius  = Math.max( 0, averageCornerRadius - averageBorderWidth );
-        int gradientStartOffset = 1 + offsetFunction.apply(shadowCornerRadius);
-
-        Rectangle innerShadowRect = new Rectangle(
-                                        x + shadowInset + gradientStartOffset + spreadRadius + borderWidthOffset,
-                                        y + shadowInset + gradientStartOffset + spreadRadius + borderWidthOffset,
-                                        w - shadowInset * 2 - gradientStartOffset * 2 - spreadRadius * 2,
-                                        h - shadowInset * 2 - gradientStartOffset * 2 - spreadRadius * 2
-                                    );
-
-        // Create the shadow shape based on the box bounds and corner arc widths/heights
-        Rectangle outerShadowBox = new Rectangle(
-                                        outerShadowRect.x,
-                                        outerShadowRect.y,
-                                        outerShadowRect.width,
-                                        outerShadowRect.height
-                                    );
-
         // Apply the clipping to avoid overlapping the shadow and the box
-        Area shadowArea = new Area(outerShadowBox);
+        Area shadowArea = new Area(outerShadowRect);
 
         if ( shadow.isOutset() )
             shadowArea.subtract(baseArea);
@@ -255,7 +241,7 @@ final class StyleRenderer
         _renderEdgeShadow(shadow, UI.Edge.BOTTOM, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
         _renderEdgeShadow(shadow, UI.Edge.LEFT,   shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);
 
-        Area outerMostArea = new Area(outerShadowBox);
+        Area outerMostArea = new Area(outerShadowRect);
         // If the base rectangle and the outer shadow box are not equal, then we need to fill the area of the base rectangle that is not covered by the outer shadow box!
         _renderShadowBody(shadow, baseArea, innerShadowRect, outerMostArea, g2d);
 
