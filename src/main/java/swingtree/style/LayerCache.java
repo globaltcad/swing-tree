@@ -26,10 +26,10 @@ final class LayerCache
 
     private static final class CachedImage extends BufferedImage
     {
-        private final WeakReference<ComponentConf> _key;
+        private WeakReference<ComponentConf> _key;
         private boolean _isRendered = false;
 
-        CachedImage(int width, int height, ComponentConf cacheKey) {
+        CachedImage( int width, int height, ComponentConf cacheKey ) {
             super(width, height, BufferedImage.TYPE_INT_ARGB);
             _key = new WeakReference<>(cacheKey);
         }
@@ -42,14 +42,20 @@ final class LayerCache
             return super.createGraphics();
         }
 
-        public Optional<ComponentConf> getKey() {
-            return Optional.ofNullable(_key.get());
+        public ComponentConf getKeyOrElse( ComponentConf newFallbackKey ) {
+            ComponentConf key = _key.get();
+            if ( key == null ) {
+                _key = new WeakReference<>(newFallbackKey);
+                key = newFallbackKey;
+            }
+            return key;
         }
 
         public boolean isRendered() {
             return _isRendered;
         }
     }
+
 
     private final UI.Layer   _layer;
     private CachedImage      _localCache;
@@ -60,6 +66,7 @@ final class LayerCache
     public LayerCache( UI.Layer layer ) {
         _layer = Objects.requireNonNull(layer);
     }
+
 
     private Map<ComponentConf, CachedImage> _getGlobalCacheForThisLayer() {
         switch (_layer) {
@@ -85,8 +92,18 @@ final class LayerCache
             _CACHE.put(styleConf, bufferedImage);
             _strongRef = styleConf;
         }
-        else // We keep a strong reference to the state so that the cached image is not garbage collected
-            _strongRef = bufferedImage.getKey().orElse(styleConf);
+        else {
+            // We keep a strong reference to the state so that the cached image is not garbage collected
+            _strongRef = bufferedImage.getKeyOrElse(styleConf);
+            /*
+                The reason why we take the key stored in the cached image as a strong reference is because this
+                key object is also the key in the global (weak) hash map based cache
+                whose reachability determines if the cached image is garbage collected or not!
+                So in order to avoid the cache being freed too early, we need to keep a strong
+                reference to the key object for all LayerCache instances that make use of the
+                corresponding cached image (the value of a particular key in the global cache).
+            */
+        }
 
         _localCache = bufferedImage;
     }
@@ -97,7 +114,7 @@ final class LayerCache
         _cachingMakesSense = false;
     }
 
-    public final void validate(ComponentConf oldState, ComponentConf newState )
+    public final void validate( ComponentConf oldState, ComponentConf newState )
     {
         if ( newState.currentBounds().width() == 0 || newState.currentBounds().height() == 0 )
             return;
