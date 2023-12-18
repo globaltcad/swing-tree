@@ -816,7 +816,7 @@ final class StyleRenderer
     ) {
         if ( style.primer().isPresent() ) {
             g2d.setColor(style.primer().get());
-            g2d.fill(engine.getInteriorArea());
+            g2d.fill(_areaFrom(style.clipArea(), engine));
         }
 
         style.image().ifPresent( imageIcon -> {
@@ -928,22 +928,7 @@ final class StyleRenderer
 
             final Shape oldClip = g2d.getClip();
 
-            Shape newClip = oldClip;
-            switch ( style.clipArea() ) {
-                case INTERIOR:
-                    newClip = engine.getInteriorArea();
-                    break;
-                case BORDER:
-                    newClip = engine.getBorderArea();
-                    break;
-                case EXTERIOR:
-                    newClip = engine.getExteriorArea();
-                    break;
-                case ALL:
-                    break;
-                default:
-                    log.warn("Unknown clip area: " + style.clipArea());
-            }
+            Shape newClip = _areaFrom(style.clipArea(), engine);
             // We merge the new clip with the old one:
             if ( newClip != null && oldClip != null )
                 newClip = StyleUtility.intersect( newClip, oldClip );
@@ -989,6 +974,22 @@ final class StyleRenderer
             }
             g2d.setClip(oldClip);
         });
+    }
+
+    private static Area _areaFrom( UI.ComponentArea areaType, StyleEngine engine ) {
+            switch ( areaType ) {
+                case INTERIOR:
+                    return engine.getInteriorArea();
+                case BORDER:
+                    return engine.getBorderArea();
+                case EXTERIOR:
+                    return engine.getExteriorArea();
+                case ALL:
+                    return null;
+                default:
+                    log.warn("Unknown clip area: " + areaType);
+                    return null;
+            }
     }
 
 }
