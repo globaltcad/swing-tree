@@ -12,10 +12,10 @@ import java.util.Optional;
 final class DimensionalityStyle
 {
     private static final DimensionalityStyle _NONE = new DimensionalityStyle(
-                                                        Size.none(),
-                                                        Size.none(),
-                                                        Size.none(),
-                                                        Size.none()
+                                                        Size.unknown(),
+                                                        Size.unknown(),
+                                                        Size.unknown(),
+                                                        Size.unknown()
                                                     );
 
     public static DimensionalityStyle none() { return _NONE; }
@@ -39,35 +39,35 @@ final class DimensionalityStyle
         _size          = Objects.requireNonNull(size);
     }
 
-    DimensionalityStyle _withMinWidth( Integer minWidth ) {
+    DimensionalityStyle _withMinWidth( int minWidth ) {
         return new DimensionalityStyle(_minSize.width(minWidth), _maxSize, _preferredSize, _size);
     }
 
-    DimensionalityStyle _withMinHeight( Integer minHeight ) {
+    DimensionalityStyle _withMinHeight( int minHeight ) {
         return new DimensionalityStyle(_minSize.height(minHeight), _maxSize, _preferredSize, _size);
     }
 
-    DimensionalityStyle _withMaxWidth( Integer maxWidth ) {
+    DimensionalityStyle _withMaxWidth( int maxWidth ) {
         return new DimensionalityStyle(_minSize, _maxSize.width(maxWidth), _preferredSize, _size);
     }
 
-    DimensionalityStyle _withMaxHeight( Integer maxHeight ) {
+    DimensionalityStyle _withMaxHeight( int maxHeight ) {
         return new DimensionalityStyle(_minSize, _maxSize.height(maxHeight), _preferredSize, _size);
     }
 
-    DimensionalityStyle _withPreferredWidth( Integer preferredWidth ) {
+    DimensionalityStyle _withPreferredWidth( int preferredWidth ) {
         return new DimensionalityStyle(_minSize, _maxSize, _preferredSize.width(preferredWidth), _size);
     }
 
-    DimensionalityStyle _withPreferredHeight( Integer preferredHeight ) {
+    DimensionalityStyle _withPreferredHeight( int preferredHeight ) {
         return new DimensionalityStyle(_minSize, _maxSize, _preferredSize.height(preferredHeight), _size);
     }
 
-    DimensionalityStyle _withWidth( Integer width ) {
+    DimensionalityStyle _withWidth( int width ) {
         return new DimensionalityStyle(_minSize, _maxSize, _preferredSize, _size.width(width));
     }
 
-    DimensionalityStyle _withHeight( Integer height ) {
+    DimensionalityStyle _withHeight( int height ) {
         return new DimensionalityStyle(_minSize, _maxSize, _preferredSize, _size.height(height));
     }
 

@@ -217,9 +217,19 @@ public final class SvgIcon extends ImageIcon
      *        or the width or height of the SVG document itself.
      */
     public SvgIcon withIconSize( int width, int height ) {
+        width  = width  < 0 ? NO_SIZE : width;
+        height = height < 0 ? NO_SIZE : height;
         if ( width == _width && height == _height )
             return this;
         return new SvgIcon(_svgDocument, width, height, _fitComponent, _preferredPlacement);
+    }
+
+    /**
+     * @param size The size of the icon in the form of a {@link Size}.
+     * @return A new {@link SvgIcon} with the given width and height.
+     */
+    public SvgIcon withIconSize( Size size ) {
+        return withIconSize( size.width().orElse(NO_SIZE), size.height().orElse(NO_SIZE) );
     }
 
     /**

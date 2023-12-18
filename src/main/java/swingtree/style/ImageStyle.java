@@ -144,7 +144,7 @@ public final class ImageStyle
                                                 UI.Placement.UNDEFINED,
                                                 false,
                                                 UI.FitComponent.NO,
-                                                Size.none(),
+                                                Size.unknown(),
                                                 1.0f,
                                                 Outline.none(),
                                                 Offset.none(),
@@ -424,7 +424,17 @@ public final class ImageStyle
      * @return A new {@link ImageStyle} instance with the specified {@code width} and {@code height}.
      */
     public ImageStyle size( int width, int height ) {
-        return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, Size.of(width, height), _opacity, _padding, _offset, _clipArea);
+        return size(Size.of(width, height));
+    }
+
+    /**
+     *  Ensures that the image has the specified width and height.
+     *
+     * @param size The size of the image.
+     * @return A new {@link ImageStyle} instance with the specified {@code size}.
+     */
+    public ImageStyle size( Size size ) {
+        return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, size, _opacity, _padding, _offset, _clipArea);
     }
 
     /**

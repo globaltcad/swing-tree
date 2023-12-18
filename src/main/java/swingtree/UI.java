@@ -824,13 +824,30 @@ public final class UI extends UILayoutConstants
      * @throws NullPointerException if {@code path} is {@code null}.
      */
     public static Optional<ImageIcon> findIcon( String path ) {
-        Objects.requireNonNull(path, "path");
-        Map<String, ImageIcon> cache = SwingTree.get().getIconCache();
-        ImageIcon icon = cache.get(path);
+        return findIcon(IconDeclaration.of(path));
+    }
+
+    /**
+     * Loads an {@link ImageIcon} from the resource folder, the classpath, a local file
+     * or from cache if it has already been loaded.
+     * If no icon could be found, an empty optional is returned.
+     * <br><br>
+     * Note that this method will also return {@link SvgIcon} instances, if the icon is an SVG image.
+     * <br><br>
+     * Also, checkout {@link SwingTree#getIconCache()} to see where the icons are cached.
+     *
+     * @param declaration The icon declaration, a value object defining the path to the icon.
+     * @return An optional containing the icon if it could be found, an empty optional otherwise.
+     * @throws NullPointerException if {@code declaration} is {@code null}.
+     */
+    public static Optional<ImageIcon> findIcon( IconDeclaration declaration ) {
+        Objects.requireNonNull(declaration, "declaration");
+        Map<IconDeclaration, ImageIcon> cache = SwingTree.get().getIconCache();
+        ImageIcon icon = cache.get(declaration);
         if ( icon == null ) {
-            icon = _loadIcon(path);
+            icon = _loadIcon(declaration);
             if ( icon != null )
-                cache.put(path, icon);
+                cache.put(declaration, icon);
         }
         return Optional.ofNullable(icon);
     }
@@ -848,15 +865,31 @@ public final class UI extends UILayoutConstants
      */
     public static Optional<SvgIcon> findSvgIcon( String path ) {
         Objects.requireNonNull(path, "path");
-        if ( !path.endsWith(".svg") )
+        return findSvgIcon(IconDeclaration.of(path));
+    }
+
+    /**
+     * Loads an {@link SvgIcon} from the resource folder, the classpath, a local file
+     * or from cache if it has already been loaded.
+     * If no icon could be found, an empty optional is returned.
+     * <br><br>
+     * Also, checkout {@link SwingTree#getIconCache()} to see where the icons are cached.
+     *
+     * @param declaration The icon declaration, a value object defining the path to the icon.
+     * @return An optional containing the {@link SvgIcon} if it could be found, an empty optional otherwise.
+     * @throws NullPointerException if {@code declaration} is {@code null}.
+     */
+    public static Optional<SvgIcon> findSvgIcon( IconDeclaration declaration ) {
+        Objects.requireNonNull(declaration, "declaration");
+        if ( !declaration.path().endsWith(".svg") )
             return Optional.empty();
 
-        Map<String, ImageIcon> cache = SwingTree.get().getIconCache();
-        ImageIcon icon = cache.get(path);
+        Map<IconDeclaration, ImageIcon> cache = SwingTree.get().getIconCache();
+        ImageIcon icon = cache.get(declaration);
         if ( icon == null ) {
-            icon = _loadIcon(path);
+            icon = _loadIcon(declaration);
             if ( icon != null )
-                cache.put(path, icon);
+                cache.put(declaration, icon);
         }
         if ( !(icon instanceof SvgIcon) )
             return Optional.empty();
@@ -866,12 +899,15 @@ public final class UI extends UILayoutConstants
 
     /**
      * Loads an icon from the classpath or from a file.
-     * @param path The path to the icon. It can be a classpath resource or a file path.
+     * @param declaration The icon declaration, a value object defining the path to the icon.
+     *          The path can be a classpath resource or a file path.
      * @return The icon.
      * @throws NullPointerException if {@code path} is {@code null}.
      */
-    private static ImageIcon _loadIcon( String path )
+    private static ImageIcon _loadIcon( IconDeclaration declaration )
     {
+        Objects.requireNonNull(declaration, "declaration");
+        String path = declaration.path();
         Objects.requireNonNull(path, "path");
         path = path.trim();
         if ( path.isEmpty() )
@@ -893,10 +929,18 @@ public final class UI extends UILayoutConstants
                     throw new RuntimeException(e);
                 }
         }
-        if ( path.endsWith(".svg") )
-            return new SvgIcon(url);
-        else
-            return new ImageIcon(Toolkit.getDefaultToolkit().createImage(url), url.toExternalForm());
+        Optional<Integer> width  = declaration.size().width();
+        Optional<Integer> height = declaration.size().height();
+        if ( path.endsWith(".svg") ) {
+            SvgIcon icon = new SvgIcon(url).withIconSize(declaration.size());
+            if ( width.isPresent() && height.isPresent() )
+                return icon.withIconSize(width.get(), height.get());
+            if ( width.isPresent() )
+                return icon.withIconSizeFromWidth(width.get());
+            if ( height.isPresent() )
+                return icon.withIconSizeFromHeight(height.get());
+            return icon;
+        } else {
         /*
             Not that we explicitly use the "createImage" method of the toolkit here.
             This is because otherwise the image might get cached inside the toolkit,
@@ -904,6 +948,16 @@ public final class UI extends UILayoutConstants
             (The internal caching of the toolkit is somewhat limited and we have no control over it,
             which is why we use our own cache.)
         */
+            ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().createImage(url), url.toExternalForm());
+            double ratio = (double) icon.getIconWidth() / (double) icon.getIconHeight();
+            if ( width.isPresent() && height.isPresent() )
+                return new ImageIcon(icon.getImage().getScaledInstance(width.get(), height.get(), Image.SCALE_SMOOTH));
+            if ( width.isPresent() )
+                return new ImageIcon(icon.getImage().getScaledInstance(width.get(), (int) (width.get() / ratio), Image.SCALE_SMOOTH));
+            if ( height.isPresent() )
+                return new ImageIcon(icon.getImage().getScaledInstance((int) (height.get() * ratio), height.get(), Image.SCALE_SMOOTH));
+            return icon;
+        }
     }
 
     private UI(){ super(); } // This is a static API

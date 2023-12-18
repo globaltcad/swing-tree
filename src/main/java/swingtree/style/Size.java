@@ -1,63 +1,88 @@
 package swingtree.style;
 
+import swingtree.api.Styler;
+
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 
 /**
  *  An immutable value object that represents a size
  *  in the form of a width and height or lack thereof.
+ *  This is used to represent the size of icons
+ *  as part of {@link swingtree.api.IconDeclaration}s
+ *  and the SwingTree style API, see {@link swingtree.UIForAnySwing#withStyle(Styler)},
+ *  {@link ComponentStyleDelegate#image(Function)} and
+ *  {@link ImageStyle#size(int, int)}.
  */
-final class Size
+public final class Size
 {
-    private static final Size EMPTY = new Size(null, null);
+    private static final Size UNKNOWN = new Size(-1, -1);
 
-    public static Size none() {
-        return EMPTY;
+    /**
+     * @return A {@link Size} instance that represents an unknown size.
+     */
+    public static Size unknown() {
+        return UNKNOWN;
     }
 
+    /**
+     * @return A {@link Size} instance that represents the given width and height.
+     */
     public static Size of( int width, int height ) {
-        return new Size(width, height);
+        if ( width < 0 && height < 0 )
+            return UNKNOWN;
+        return new Size( width, height );
     }
 
-    private final Integer _width;
-    private final Integer _height;
+    private final int _width;
+    private final int _height;
 
 
-    public Size( Integer width, Integer height ) {
-        _width  = width;
-        _height = height;
+    private Size( int width, int height ) {
+        _width  = Math.max(-1, width);
+        _height = Math.max(-1, height);
     }
 
-    Optional<Integer> width() {
-        return Optional.ofNullable(_width);
+    /**
+     * @return The width of this {@link Size} instance or {@link Optional#empty()} if unknown.
+     */
+    public Optional<Integer> width() {
+        return ( _width < 0 ? Optional.empty() : Optional.of(_width) );
     }
 
-    Optional<Integer> height() {
-        return Optional.ofNullable(_height);
+    /**
+     * @return The height of this {@link Size} instance or {@link Optional#empty()} if unknown.
+     */
+    public Optional<Integer> height() {
+        return ( _height < 0 ? Optional.empty() : Optional.of(_height) );
     }
 
-    Size width( Integer width ) {
-        Objects.requireNonNull(width);
+    /**
+     * @return A new {@link Size} instance with the given width.
+     */
+    public Size width(int width) {
         return new Size(width, _height);
     }
 
-    Size height( Integer height ) {
-        Objects.requireNonNull(height);
+    /**
+     * @return A new {@link Size} instance with the given height.
+     */
+    public Size height(int height) {
         return new Size(_width, height);
     }
 
     Size scale( double scaleFactor ) {
-        if ( _width == null && _height == null ) return this;
-        Integer width  = _width  == null ? null : (int) Math.round(_width  * scaleFactor);
-        Integer height = _height == null ? null : (int) Math.round(_height * scaleFactor);
-        return new Size(width, height);
+        int width  = _width  < 0 ? -1 : (int) Math.round(_width  * scaleFactor);
+        int height = _height < 0 ? -1 : (int) Math.round(_height * scaleFactor);
+        return of(width, height);
     }
 
     @Override
     public String toString() {
         return this.getClass().getSimpleName()+"[" +
-                    "width="  + ( _width  == null ? "?" : _width  ) +", "+
-                    "height=" + ( _height == null ? "?" : _height ) +
+                    "width="  + ( _width  < 0 ? "?" : _width  ) + ", "+
+                    "height=" + ( _height < 0 ? "?" : _height ) +
                 "]";
     }
 

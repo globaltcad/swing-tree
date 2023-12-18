@@ -1,6 +1,7 @@
 package swingtree;
 
 import org.slf4j.Logger;
+import swingtree.api.IconDeclaration;
 import swingtree.api.Painter;
 import swingtree.style.StyleSheet;
 import swingtree.threading.EventProcessor;
@@ -89,7 +90,7 @@ public final class SwingTree
     private SwingTreeInitConfig _config;
 
     private final LazyRef<UiScale> uiScale;
-    private final Map<String, ImageIcon> _iconCache = new HashMap<>();
+    private final Map<IconDeclaration, ImageIcon> _iconCache = new HashMap<>();
 
 
     private SwingTree() { this(config -> config); }
@@ -142,7 +143,7 @@ public final class SwingTree
      * @return The icon cache of this context, which is used to cache icons
      *         that are loaded from the file system.
      */
-    public Map<String, ImageIcon> getIconCache() { return _iconCache; }
+    public Map<IconDeclaration, ImageIcon> getIconCache() { return _iconCache; }
 
     /**
      * Returns the user scale factor is a scaling factor is used by SwingTree's

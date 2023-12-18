@@ -19,12 +19,12 @@ import java.util.Map;
 public class JIcon extends JLabel
 {
     public JIcon(String path) {
-        super(_getFromCacheOrLoadFrom(path));
+        super(_getFromCacheOrLoadFrom(IconDeclaration.of(path)));
         updateUI();
     }
 
     public JIcon(IconDeclaration declaration) {
-        super(_getFromCacheOrLoadFrom(declaration.path()));
+        super(_getFromCacheOrLoadFrom(declaration));
     }
 
     public JIcon(Icon icon) {
@@ -43,7 +43,7 @@ public class JIcon extends JLabel
     }
 
     public JIcon(String path, String text) {
-        super(text, _getFromCacheOrLoadFrom(path), CENTER);
+        super(text, _getFromCacheOrLoadFrom(IconDeclaration.of(path)), CENTER);
         updateUI();
     }
 
@@ -73,13 +73,13 @@ public class JIcon extends JLabel
         */
     }
 
-    private static ImageIcon _getFromCacheOrLoadFrom( String path ) {
-        Map<String, ImageIcon> cache = SwingTree.get().getIconCache();
-        ImageIcon icon = cache.get(path);
+    private static ImageIcon _getFromCacheOrLoadFrom( IconDeclaration declaration ) {
+        Map<IconDeclaration, ImageIcon> cache = SwingTree.get().getIconCache();
+        ImageIcon icon = cache.get(declaration);
         if ( icon == null ) {
-            icon = UI.findIcon(path).orElse(null);
+            icon = UI.findIcon(declaration).orElse(null);
             if ( icon != null )
-                cache.put(path, icon);
+                cache.put(declaration, icon);
         }
         return icon;
     }
