@@ -7,7 +7,6 @@ import java.awt.image.BufferedImage;
 import java.lang.ref.WeakReference;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.WeakHashMap;
 import java.util.function.Consumer;
 
