@@ -821,7 +821,6 @@ final class StyleRenderer
 
         style.image().ifPresent( imageIcon -> {
             final UI.Placement placement       = style.placement();
-            final boolean      repeat          = style.repeat();
             final Outline      padding         = style.padding();
             final int          componentWidth  = bounds.width();
             final int          componentHeight = bounds.height();
@@ -876,8 +875,6 @@ final class StyleRenderer
             int x = style.horizontalOffset();
             int y = style.verticalOffset();
 
-            final float opacity = style.opacity();
-
             switch ( placement ) {
                 case TOP:
                     x += (componentWidth - imgWidth) / 2;
@@ -925,6 +922,9 @@ final class StyleRenderer
                     svgIcon = svgIcon.withIconHeight(imgHeight);
                 imageIcon = svgIcon;
             }
+
+            final boolean repeat  = style.repeat();
+            final float   opacity = style.opacity();
 
             final Shape oldClip = g2d.getClip();
 
