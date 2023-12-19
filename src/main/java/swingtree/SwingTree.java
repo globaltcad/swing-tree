@@ -8,6 +8,7 @@ import swingtree.threading.EventProcessor;
 
 import javax.swing.ImageIcon;
 import javax.swing.LookAndFeel;
+import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.plaf.FontUIResource;
 import javax.swing.plaf.UIResource;
@@ -359,10 +360,15 @@ public final class SwingTree
         private boolean initialized;
 
 
-        private UiScale(SwingTreeInitConfig config ) // private to prevent instantiation from outside
+        private UiScale( SwingTreeInitConfig config ) // private to prevent instantiation from outside
         {
             this.config = config;
             try {
+                // add user scale factor to allow layout managers (e.g. MigLayout) to use it
+                UIManager.put( "laf.scaleFactor", (UIDefaults.ActiveValue) t -> {
+                    return this.scaleFactor;
+                });
+
                 if ( config.scalingStrategy() == SwingTreeInitConfig.Scaling.NONE ) {
                     this.scaleFactor = 1;
                     this.initialized = true;
@@ -758,11 +764,6 @@ public final class SwingTree
 
             float oldScaleFactor = this.scaleFactor;
             this.scaleFactor = scaleFactor;
-
-            // We set the "laf.scaleFactor" property in the UIManager to allow
-            // MigLayout to scale its pixel values.
-            UIManager.put( "laf.scaleFactor", scaleFactor );
-            log.debug("Setting 'laf.scaleFactor' in UIManager to {}", scaleFactor);
 
             if ( changeSupport != null )
                 changeSupport.firePropertyChange( "userScaleFactor", oldScaleFactor, scaleFactor );
