@@ -61,14 +61,14 @@ public final class Size
     /**
      * @return A new {@link Size} instance with the given width.
      */
-    public Size width(int width) {
+    public Size width( int width ) {
         return new Size(width, _height);
     }
 
     /**
      * @return A new {@link Size} instance with the given height.
      */
-    public Size height(int height) {
+    public Size height( int height ) {
         return new Size(_width, height);
     }
 

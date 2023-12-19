@@ -1,8 +1,7 @@
 package swingtree;
 
 import sprouts.Action;
-import sprouts.From;
-import sprouts.Var;
+import sprouts.*;
 
 import javax.swing.*;
 import javax.swing.event.DocumentListener;
@@ -292,6 +291,151 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
         if ( model instanceof AbstractComboModel )
             _bindComboModelToEditor(thisComponent, (AbstractComboModel<E>) model );
         thisComponent.setModel(model);
+    }
+
+    /**
+     *  Uses the given list of elements as a basis for a new combo box model
+     *  and sets it as the model for the combo box.
+     *  This means that whenever the list of elements changes,
+     *  and the combo box is rendered, the combo box will be updated accordingly.
+     *
+     * @param options The list of elements to be used as the basis for the combo box model.
+     * @return This builder node, which enables builder-style method chaining.
+     * @throws NullPointerException if {@code options} is {@code null}.
+     */
+    public final UIForCombo<E,C> withItems( java.util.List<E> options ) {
+        Objects.requireNonNull(options, "options");
+        return this.withModel(new ListBasedComboModel<>(options));
+    }
+
+    /**
+     *  Uses the provided selection property as well as a list of elements as a basis for a new combo box model.
+     *  Whenever the selection or the list of elements changes,
+     *  and the combo box is rendered, the combo box will be updated accordingly.
+     *  Note that the use of the {@link Var} type for the selection property
+     *  allows the combo box to listen for changes to the selection property,
+     *  which ensures that the combo box is updated whenever the selection property changes.
+     *
+     * @param selection The selection property to be used as the basis for modelling the currently selected item in a new combo box model.
+     * @param options The list of elements to be used as the basis for modelling the available options in a new combo box model.
+     * @return This builder node, which enables builder-style method chaining.
+     * @throws NullPointerException if {@code selection} or {@code options} is {@code null}.
+     */
+    public final UIForCombo<E,C> withItems( Var<E> selection, java.util.List<E> options ) {
+        Objects.requireNonNull(selection, "selection");
+        Objects.requireNonNull(options, "options");
+        return this.withModel(new ListBasedComboModel<>(selection, options));
+    }
+
+    /**
+     *  Uses the given property list of elements as a basis for a new combo box model
+     *  and sets it as the model for the combo box.
+     *  The combo box will register a change listener and update itself whenever the list of elements changes.
+     *
+     * @param options The property list of elements to be used as the basis for a new combo box model.
+     * @return This builder node, which enables builder-style method chaining.
+     * @throws NullPointerException if {@code options} is {@code null}.
+     */
+    public final UIForCombo<E,C> withItems( Vars<E> options ) {
+        Objects.requireNonNull(options, "options");
+        return this.withModel(new VarsBasedComboModel<>(options));
+    }
+
+    /**
+     *  Uses a read only property list of elements as a basis for a new combo box model
+     *  and sets it as the model for the combo box.
+     *  The combo box will register a change listener and update itself whenever the list of elements changes.
+     *  Due to the fact that the list of elements is read only,
+     *  changes to the list of elements can only come from the view model.
+     *
+     * @param options The read only property list of elements to be used as the basis for a new combo box model.
+     * @return This builder node, which enables builder-style method chaining.
+     * @throws NullPointerException if {@code options} is {@code null}.
+     */
+    public final UIForCombo<E,C> withItems( Vals<E> options ) {
+        Objects.requireNonNull(options, "options");
+        return this.withModel(new ValsBasedComboModel<>(options));
+    }
+
+    /**
+     *  Uses the given selection property as well as a property list of elements as a basis
+     *  for a new combo box model and sets it as the new model for the combo box state.
+     *  This means that whenever the state of the selection property or the property list of elements changes,
+     *  then combo box will be updated and rendered accordingly.
+     *
+     * @param selection The selection property to be used as the basis for modelling the currently selected item in a new combo box model.
+     * @param options The property list of elements to be used as the basis for modelling the available options in a new combo box model.
+     * @return This builder node instance, which allows for builder-style method chaining.
+     * @throws NullPointerException if either one of {@code selection} or {@code options} is {@code null}.
+     */
+    public final UIForCombo<E,C> withItems( Var<E> selection, Vars<E> options ) {
+        return this.withModel(new VarsBasedComboModel<>(selection, options));
+    }
+
+    /**
+     *  Uses the given selection property as well as a read only property list of elements as a basis
+     *  for a new combo box model and sets it as the new model for the combo box state.
+     *  This means that whenever the state of the selection property or the read only property list of elements changes,
+     *  then combo box will be updated and rendered according to said changes.
+     *  Due to the list of options being read only, changes to it can only come from the view model.
+     *
+     * @param selection The selection property to be used as the basis for modelling the currently selected item in a new combo box model.
+     * @param options The read only property list of elements to be used as the basis for modelling the available options in a new combo box model.
+     * @return This builder node, which allows for builder-style method chaining.
+     * @throws NullPointerException if either one of {@code selection} or {@code options} is {@code null}.
+     */
+    public final UIForCombo<E,C> withItems( Var<E> selection, Vals<E> options ) {
+        return this.withModel(new ValsBasedComboModel<>(selection, options));
+    }
+
+    /**
+     *  Uses the given selection property as well as an array of elements as a basis
+     *  for a new combo box model and sets it as the new model for the combo box state.
+     *  This means that whenever the state of the selection property or the array of elements changes,
+     *  then combo box will be updated and rendered according to said changes.
+     *  Note that the combo box can not register change listeners on the array of elements,
+     *  which means that for the combo box to be updated whenever the array of elements changes,
+     *  you must trigger the update manually.
+     *
+     * @param selection The selection property to be used as the basis for modelling the currently selected item in a new combo box model.
+     * @param options The array of elements to be used as the basis for modelling the available options in a new combo box model.
+     * @return This builder node, which allows for builder-style method chaining.
+     * @throws NullPointerException if either one of {@code selection} or {@code options} is {@code null}.
+     */
+    @SafeVarargs
+    public final UIForCombo<E,C> withItems(Var<E> selection, E... options ) {
+        return this.withModel(new ArrayBasedComboModel<>(selection, options));
+    }
+
+    /**
+     *  Uses the given selection property as well as a property of an array of elements as a basis
+     *  for a new combo box model and sets it as the new model for the combo box state.
+     *  This means that whenever the state of the selection property or the property of an array of elements changes,
+     *  then combo box will be updated and rendered according to said changes.
+     *
+     * @param selection The selection property to be used as the basis for modelling the currently selected item in a new combo box model.
+     * @param options The property of an array of elements to be used as the basis for modelling the available options in a new combo box model.
+     * @return This builder node, which allows for builder-style method chaining.
+     * @throws NullPointerException if either one of {@code selection} or {@code options} is {@code null}.
+     */
+    public final UIForCombo<E,C> withItems( Var<E> selection, Var<E[]> options ) {
+        return this.withModel(new ArrayPropertyComboModel<>(selection, options));
+    }
+
+    /**
+     *  Uses the given selection property as well as a read only property of an array of elements as a basis
+     *  for a new combo box model and sets it as the new model for the combo box state.
+     *  This means that whenever the state of the selection property or the read only property of an array of elements changes,
+     *  then combo box will be updated and rendered according to said changes.
+     *  Due to the list of options being read only, changes to it can only come from the view model.
+     *
+     * @param selection The selection property to be used as the basis for modelling the currently selected item in a new combo box model.
+     * @param options The read only property of an array of elements to be used as the basis for modelling the available options in a new combo box model.
+     * @return This builder node, which allows for builder-style method chaining.
+     * @throws NullPointerException if either one of {@code selection} or {@code options} is {@code null}.
+     */
+    public final UIForCombo<E,C> withItems( Var<E> selection, Val<E[]> options ) {
+        return this.withModel(new ArrayPropertyComboModel<>(selection, options));
     }
 
     /**
