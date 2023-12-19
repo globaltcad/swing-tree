@@ -184,6 +184,7 @@ public final class SwingTree
      * @param scaleFactor The user scale factor.
      */
     public void setUiScaleFactor( float scaleFactor ) {
+        log.debug("Changing UI scale factor from {} to {} now.", uiScale.get().getUserScaleFactor(), scaleFactor);
         uiScale.get().setUserScaleFactor(scaleFactor);
     }
 
@@ -370,16 +371,20 @@ public final class SwingTree
 
                 if ( config.scalingStrategy() == SwingTreeInitConfig.Scaling.FROM_DEFAULT_FONT ) {
                     Font uiScaleReferenceFont = config.defaultFont().orElse(null);
-                    if (uiScaleReferenceFont != null)
+                    if ( uiScaleReferenceFont != null ) {
                         UIManager.getDefaults().put(_DEFAULT_FONT, uiScaleReferenceFont);
+                        log.debug("Setting default font ('{}') to in UIManager to {}", _DEFAULT_FONT, uiScaleReferenceFont);
+                    }
                 }
 
                 if ( config.scalingStrategy() == SwingTreeInitConfig.Scaling.FROM_SYSTEM_FONT ) {
                     float defaultScale = this.scaleFactor;
                     Font highDPIFont = _calculateDPIAwarePlatformFont();
                     boolean updated = _initialize( highDPIFont );
-                    if ( this.scaleFactor != defaultScale )
+                    if ( this.scaleFactor != defaultScale ) {
                         UIManager.getDefaults().put(_DEFAULT_FONT, highDPIFont);
+                        log.debug("Setting default font ('{}') to in UIManager to {}", _DEFAULT_FONT, highDPIFont);
+                    }
                     if ( updated )
                         _setScalePropertyListeners();
                 }
@@ -757,6 +762,7 @@ public final class SwingTree
             // We set the "laf.scaleFactor" property in the UIManager to allow
             // MigLayout to scale its pixel values.
             UIManager.put( "laf.scaleFactor", scaleFactor );
+            log.debug("Setting 'laf.scaleFactor' in UIManager to {}", scaleFactor);
 
             if ( changeSupport != null )
                 changeSupport.firePropertyChange( "userScaleFactor", oldScaleFactor, scaleFactor );
