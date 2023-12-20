@@ -81,25 +81,30 @@ final class StyleEngine
 
     Style getStyle() { return _componentConf.style(); }
 
-    Optional<Shape> interiorArea() {
+    Optional<Shape> componentArea() {
         Shape contentClip = null;
-        if ( _areasCache.interiorComponentArea().exists() || getStyle().margin().isPositive() )
-            contentClip = getInteriorArea();
+        if ( _areasCache.mainArea().exists() || getStyle().margin().isPositive() )
+            contentClip = getMainComponentArea();
 
         return Optional.ofNullable(contentClip);
     }
 
-    Area getInteriorArea()
+    Area getMainComponentArea()
     {
-        return _areasCache.interiorComponentArea().getFor(_componentConf);
+        return _areasCache.mainArea().getFor(_componentConf);
     }
 
-    Area getExteriorArea()
+    Area getExteriorComponentArea()
     {
-        return _areasCache.exteriorComponentArea().getFor(_componentConf);
+        return _areasCache.exteriorArea().getFor(_componentConf);
     }
 
-    Area getBorderArea()
+    Area getInteriorComponentArea()
+    {
+        return _areasCache.interiorArea().getFor(_componentConf);
+    }
+
+    Area getComponentBorderArea()
     {
         return _areasCache.borderArea().getFor(_componentConf);
     }
@@ -107,7 +112,7 @@ final class StyleEngine
     void paintWithContentAreaClip( Graphics g, Runnable painter ) {
         Shape oldClip = g.getClip();
 
-        Shape newClip = getInteriorArea();
+        Shape newClip = getMainComponentArea();
         if ( newClip != null && newClip != oldClip ) {
             newClip = StyleUtility.intersect(newClip, oldClip);
             g.setClip(newClip);

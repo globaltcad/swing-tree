@@ -11,31 +11,29 @@ final class AreasCache
 
     // Cached Area objects representing the component areas:
 
-    // == _exteriorComponentArea - _interiorComponentArea
     private final Cached<Area> _borderArea = new Cached<Area>() {
 
         @Override
         protected Area produce(ComponentConf currentState) {
-            Area componentArea = _mainComponentArea.getFor(currentState);
-            Area borderArea = new Area(_interiorComponentArea.getFor(currentState));
+            Area componentArea = _interiorComponentArea.getFor(currentState);
+            Area borderArea = new Area(_mainComponentArea.getFor(currentState));
             borderArea.subtract(componentArea);
             return borderArea;
         }
 
         @Override
         public boolean leadsToSameValue(ComponentConf oldState, ComponentConf newState) {
-            if ( !_mainComponentArea.leadsToSameValue(oldState, newState) )
+            if ( !_interiorComponentArea.leadsToSameValue(oldState, newState) )
                 return false;
 
-            if ( !_interiorComponentArea.leadsToSameValue(oldState, newState) )
+            if ( !_mainComponentArea.leadsToSameValue(oldState, newState) )
                 return false;
 
             return true;
         }
     };
 
-    // == _borderArea + _interiorComponentArea
-    private final Cached<Area> _mainComponentArea = new Cached<Area>() {
+    private final Cached<Area> _interiorComponentArea = new Cached<Area>() {
 
         @Override
         protected Area produce(ComponentConf currentState) {
@@ -62,14 +60,12 @@ final class AreasCache
         }
     };
 
-    // == full component bounds - _mainComponentArea
     private final Cached<Area> _exteriorComponentArea = new Cached<Area>() {
         @Override
         protected Area produce(ComponentConf currentState) {
-            Area main = _mainComponentArea.getFor(currentState);
             Bounds bounds = currentState.currentBounds();
             Area exteriorComponentArea = new Area(new Rectangle(bounds.x(), bounds.y(), bounds.width(), bounds.height()));
-            exteriorComponentArea.subtract(main);
+            exteriorComponentArea.subtract(_mainComponentArea.getFor(currentState));
             return exteriorComponentArea;
         }
 
@@ -86,7 +82,7 @@ final class AreasCache
         }
     };
 
-    private final Cached<Area> _interiorComponentArea = new Cached<Area>() {
+    private final Cached<Area> _mainComponentArea = new Cached<Area>() {
         @Override
         protected Area produce(ComponentConf currentState) {
             return calculateBaseArea(currentState, 0, 0, 0, 0);
@@ -103,19 +99,22 @@ final class AreasCache
 
     public Cached<Area> borderArea() { return _borderArea; }
 
-    public Cached<Area> exteriorComponentArea() { return _exteriorComponentArea; }
+    public Cached<Area> exteriorArea() { return _exteriorComponentArea; }
 
-    public Cached<Area> interiorComponentArea() { return _interiorComponentArea; }
+    public Cached<Area> interiorArea() { return _interiorComponentArea; }
 
-    public void validate(ComponentConf oldState, ComponentConf newState )
+    public Cached<Area> mainArea() { return _mainComponentArea; }
+
+
+    public void validate( ComponentConf oldState, ComponentConf newState )
     {
         if ( oldState.equals(newState) )
             return;
 
         _borderArea.validate(oldState, newState);
-        _mainComponentArea.validate(oldState, newState);
-        _exteriorComponentArea.validate(oldState, newState);
         _interiorComponentArea.validate(oldState, newState);
+        _exteriorComponentArea.validate(oldState, newState);
+        _mainComponentArea.validate(oldState, newState);
     }
 
     static Area calculateBaseArea(ComponentConf state, int insTop, int insLeft, int insBottom, int insRight )

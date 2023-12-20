@@ -35,13 +35,13 @@ final class StyleRenderer
                 // Check if the color is transparent
                 if ( outerColor.getAlpha() > 0 ) {
                     g2d.setColor(outerColor);
-                    g2d.fill(engine.getExteriorArea());
+                    g2d.fill(engine.getExteriorComponentArea());
                 }
             });
             conf.style().base().backgroundColor().ifPresent(color -> {
                 if ( color.getAlpha() == 0 ) return;
                 g2d.setColor(color);
-                g2d.fill(engine.getInteriorArea());
+                g2d.fill(engine.getMainComponentArea());
             });
         }
 
@@ -65,12 +65,12 @@ final class StyleRenderer
             if ( gradient.colors().length > 0 ) {
                 if ( gradient.colors().length == 1 ) {
                     g2d.setColor(gradient.colors()[0]);
-                    g2d.fill(engine.getInteriorArea());
+                    g2d.fill(engine.getMainComponentArea());
                 }
                 else if ( gradient.transition().isDiagonal() )
-                    _renderDiagonalGradient(g2d, conf.currentBounds(), conf.style().margin(), gradient, engine.getInteriorArea());
+                    _renderDiagonalGradient(g2d, conf.currentBounds(), conf.style().margin(), gradient, engine.getMainComponentArea());
                 else
-                    _renderVerticalOrHorizontalGradient(g2d, conf.currentBounds(), conf.style().margin(), gradient, engine.getInteriorArea());
+                    _renderVerticalOrHorizontalGradient(g2d, conf.currentBounds(), conf.style().margin(), gradient, engine.getMainComponentArea());
             }
 
         // 3. Shadows, which are simple gradient based drop shadows that can go inwards or outwards
@@ -121,7 +121,7 @@ final class StyleRenderer
         ComponentConf conf = engine.getComponentConf();
         if ( !Outline.none().equals(conf.style().border().widths()) ) {
             try {
-                Area borderArea = engine.getBorderArea();
+                Area borderArea = engine.getComponentBorderArea();
                 g2d.setColor(color);
                 g2d.fill(borderArea);
 
@@ -219,7 +219,7 @@ final class StyleRenderer
             baseArea = AreasCache.calculateBaseArea(engine.getComponentConf(), artifactAdjustment, artifactAdjustment, artifactAdjustment, artifactAdjustment);
         }
         else
-            baseArea = new Area(engine.getInteriorArea());
+            baseArea = new Area(engine.getMainComponentArea());
 
         // Apply the clipping to avoid overlapping the shadow and the box
         Area shadowArea = new Area(outerShadowRect);
@@ -960,7 +960,7 @@ final class StyleRenderer
                         Paint oldPaint = g2d.getPaint();
                         try {
                             g2d.setPaint(new TexturePaint((BufferedImage) image, new Rectangle(x, y, imgWidth, imgHeight)));
-                            g2d.fill(engine.getInteriorArea());
+                            g2d.fill(engine.getMainComponentArea());
                         } finally {
                             g2d.setPaint(oldPaint);
                         }
@@ -979,11 +979,11 @@ final class StyleRenderer
     private static Area _areaFrom( UI.ComponentArea areaType, StyleEngine engine ) {
             switch ( areaType ) {
                 case INTERIOR:
-                    return engine.getInteriorArea();
+                    return engine.getMainComponentArea();
                 case BORDER:
-                    return engine.getBorderArea();
+                    return engine.getComponentBorderArea();
                 case EXTERIOR:
-                    return engine.getExteriorArea();
+                    return engine.getExteriorComponentArea();
                 case ALL:
                     return null;
                 default:
