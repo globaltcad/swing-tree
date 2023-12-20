@@ -2,6 +2,7 @@ package swingtree.style;
 
 import swingtree.UI;
 
+import javax.swing.ImageIcon;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.lang.ref.WeakReference;
@@ -188,8 +189,13 @@ final class LayerCache
 
         int heavyStyleCount = 0;
         for ( ImageStyle imageStyle : state.style().images(_layer) )
-            if ( !imageStyle.equals(ImageStyle.none()) && imageStyle.image().isPresent() )
-                heavyStyleCount++;
+            if ( !imageStyle.equals(ImageStyle.none()) && imageStyle.image().isPresent() ) {
+                ImageIcon icon = imageStyle.image().get();
+                boolean isSpecialIcon = ( icon.getClass() != ImageIcon.class );
+                boolean hasSize = ( icon.getIconHeight() > 0 || icon.getIconWidth() > 0 );
+                if ( isSpecialIcon || hasSize )
+                    heavyStyleCount++;
+            }
         for ( GradientStyle gradient : state.style().gradients(_layer) )
             if ( !gradient.equals(GradientStyle.none()) && gradient.colors().length > 0 )
                 heavyStyleCount++;
