@@ -15,7 +15,7 @@ import java.util.Objects;
  *  render cache is being invalidated and the component is rendered again
  *  (potentially with a new cached image buffer).
  */
-public class ComponentConf
+class ComponentConf
 {
     private static final ComponentConf EMPTY = new ComponentConf(
                                                         Style.none(),
@@ -46,7 +46,7 @@ public class ComponentConf
 
     Outline baseOutline() { return _baseOutline; }
 
-    ComponentConf with(Style style, JComponent component )
+    ComponentConf with( Style style, JComponent component )
     {
         Outline outline = Outline.none();
         Border border = component.getBorder();

@@ -3495,8 +3495,6 @@ public final class UI extends UILayoutConstants
         return ((UIForCombo)comboBox()).withItems(selection, items);
     }
 
-    //___
-
     /**
      *  Use this to create a builder for a new  {@link JComboBox} instance
      *  with the provided properties list object as selectable (and mutable) items.

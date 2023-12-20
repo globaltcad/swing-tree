@@ -72,6 +72,10 @@ public interface IconDeclaration
     String path();
 
     /**
+     *  The preferred size of the icon, which is not necessarily the actual size
+     *  of the icon that is being loaded but rather the size that the icon should
+     *  be scaled to when it is being loaded.
+     *
      * @return The preferred size of the icon or {@link Size#unknown()} if the size is unspecified,
      *          which means that the icon should be loaded in its original size.
      */
