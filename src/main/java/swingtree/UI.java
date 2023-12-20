@@ -457,11 +457,33 @@ public final class UI extends UILayoutConstants
      *  Defines the areas of a component, which is used
      *  to by the {@link ImageStyle} to determine if and how an image should be clipped.
      *  Pass instances of this to {@link ImageStyle#clipTo(ComponentArea)} to configure the clipping behaviour
-     *  as part of the style API (see {@link UIForAnySwing#withStyle(Styler)}).
+     *  as part of the style API (see {@link UIForAnySwing#withStyle(Styler)}). <br>
+     *  The following list describes what each enum instance represents:
+     *  <ul>
+     *      <li>{@link swingtree.UI.ComponentArea#ALL} -
+     *      The entire component, which is the union of all other clip
+     *      areas ({@code INTERIOR + EXTERIOR + BORDER + CONTENT}).
+     *      </li>
+     *      <li>{@link swingtree.UI.ComponentArea#INTERIOR} -
+     *      The inner component area, which is defined as {@code ALL - EXTERIOR - BORDER}.
+     *      </li>
+     *      <li>{@link swingtree.UI.ComponentArea#EXTERIOR} -
+     *      The outer component area, which can be expressed as {@code ALL - INTERIOR - BORDER},
+     *      or {@code ALL - CONTENT}.
+     *      </li>
+     *      <li>{@link swingtree.UI.ComponentArea#BORDER} -
+     *      The border of the component, which is the area between the inner and outer component area
+     *      and which can be expressed as {@code ALL - INTERIOR - EXTERIOR}.
+     *      </li>
+     *      <li>{@link swingtree.UI.ComponentArea#CONTENT} -
+     *      The main content area of the component, which is the inner component area including the border.
+     *      It can be expressed as {@code ALL - EXTERIOR}, or {@code INTERIOR + BORDER}.
+     *      </li>
+     *  </ul>
      */
     public enum ComponentArea implements UIEnum<ComponentArea>
     {
-        ALL, EXTERIOR, BORDER, INTERIOR
+        ALL, EXTERIOR, BORDER, INTERIOR, CONTENT
     }
 
     /**

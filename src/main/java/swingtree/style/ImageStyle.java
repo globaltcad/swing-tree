@@ -97,15 +97,32 @@ import java.util.Optional;
  *          The clip area determines onto which part of the component the image will be drawn.
  *          The following clip areas are available:
  *          <ul>
- *              <li> {@link swingtree.UI.ComponentArea#ALL} </li>
- *              <li> {@link swingtree.UI.ComponentArea#EXTERIOR} </li>
- *              <li> {@link swingtree.UI.ComponentArea#INTERIOR} </li>
- *              <li> {@link swingtree.UI.ComponentArea#BORDER} </li>
+ *              <li>{@link swingtree.UI.ComponentArea#ALL} -
+ *              The entire component, which is the union of all other clip
+ *              areas ({@code INTERIOR + EXTERIOR + BORDER + CONTENT}).
+ *              </li>
+ *              <li>{@link swingtree.UI.ComponentArea#INTERIOR} -
+ *              The inner component area, which is defined as {@code ALL - EXTERIOR - BORDER}.
+ *              </li>
+ *              <li>{@link swingtree.UI.ComponentArea#EXTERIOR} -
+ *              The outer component area, which can be expressed as {@code ALL - INTERIOR - BORDER},
+ *              or {@code ALL - CONTENT}.
+ *              </li>
+ *              <li>{@link swingtree.UI.ComponentArea#BORDER} -
+ *              The border of the component, which is the area between the inner and outer component area
+ *              and which can be expressed as {@code ALL - INTERIOR - EXTERIOR}.
+ *              </li>
+ *              <li>{@link swingtree.UI.ComponentArea#CONTENT} -
+ *              The main content area of the component, which is the inner component area including the border.
+ *              It can be expressed as {@code ALL - EXTERIOR}, or {@code INTERIOR + BORDER}.
+ *              </li>
  *          </ul>
- *          <b>Note that the inner/interior component area is the area enclosed by the border,
- *          whereas the exterior component area is the area surrounding the border.</b>
+ *          <b>Note that the inner/interior component area is the area enclosed by (and excluding) the border,
+ *          whereas the exterior component area is the area surrounding the border.
+ *          The content area is the inner component area including the border.</b>
+ *          </b>
  *          <p>
- *          The default clip area is {@link swingtree.UI.ComponentArea#INTERIOR}
+ *          The default clip area is {@link swingtree.UI.ComponentArea#CONTENT}
  *          as this is the area which is most commonly used.
  *      </li>
  *  </ol>
@@ -148,7 +165,7 @@ public final class ImageStyle
                                                 1.0f,
                                                 Outline.none(),
                                                 Offset.none(),
-                                                UI.ComponentArea.INTERIOR
+                                                UI.ComponentArea.CONTENT
                                             );
 
     static ImageStyle none() { return _NONE; }
@@ -537,16 +554,27 @@ public final class ImageStyle
      *  The {@link swingtree.UI.ComponentArea} enum defines the following clip areas:
      *  <ul>
      *      <li>{@link swingtree.UI.ComponentArea#ALL} -
-     *      The image will be drawn onto the entire component.
+     *      The image will be drawn onto the entire component, which
+     *      is the union of all other clip areas ({@code INTERIOR + EXTERIOR + BORDER + CONTENT}).
      *      </li>
      *      <li>{@link swingtree.UI.ComponentArea#INTERIOR} -
-     *      The image will be drawn onto the inner component area.
+     *      The image will be drawn onto the inner component area,
+     *      which is defined as {@code ALL - EXTERIOR - BORDER}.
      *      </li>
      *      <li>{@link swingtree.UI.ComponentArea#EXTERIOR} -
-     *      The image will be drawn onto the outer component area.
+     *      The image will be drawn onto the outer component area,
+     *      which can be expressed as {@code ALL - INTERIOR - BORDER},
+     *      or {@code ALL - CONTENT}.
      *      </li>
      *      <li>{@link swingtree.UI.ComponentArea#BORDER} -
-     *      The image will be drawn onto the border of the component.
+     *      The image will be drawn onto the border of the component,
+     *      which is the area between the inner and outer component area
+     *      and which can be expressed as {@code ALL - INTERIOR - EXTERIOR}.
+     *      </li>
+     *      <li>{@link swingtree.UI.ComponentArea#CONTENT} -
+     *      The image will be drawn onto the content of the component,
+     *      which is the inner component area including the border area.
+     *      It can be expressed as {@code ALL - EXTERIOR}, or {@code INTERIOR + BORDER}.
      *      </li>
      *  </ul>
      *  The default clip area is {@link swingtree.UI.ComponentArea#INTERIOR},

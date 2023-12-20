@@ -978,14 +978,16 @@ final class StyleRenderer
 
     private static Area _areaFrom( UI.ComponentArea areaType, StyleEngine engine ) {
             switch ( areaType ) {
-                case INTERIOR:
-                    return engine.getMainComponentArea();
-                case BORDER:
-                    return engine.getComponentBorderArea();
-                case EXTERIOR:
-                    return engine.getExteriorComponentArea();
                 case ALL:
-                    return null;
+                    return null; // No clipping
+                case CONTENT:
+                    return engine.getMainComponentArea(); // all - exterior == interior + border
+                case INTERIOR:
+                    return engine.getInteriorComponentArea(); // all - exterior - border == content - border
+                case BORDER:
+                    return engine.getComponentBorderArea(); // all - exterior - interior
+                case EXTERIOR:
+                    return engine.getExteriorComponentArea(); // all - border - interior
                 default:
                     log.warn("Unknown clip area: " + areaType);
                     return null;
