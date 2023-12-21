@@ -6,10 +6,12 @@ import swingtree.animation.Animator;
 import swingtree.animation.LifeTime;
 import swingtree.api.Painter;
 import swingtree.api.Styler;
+import swingtree.layout.Size;
 import swingtree.style.ComponentExtension;
 
 import javax.swing.Action;
 import javax.swing.JComponent;
+import javax.swing.border.Border;
 import java.awt.*;
 import java.util.Arrays;
 import java.util.List;
@@ -349,6 +351,37 @@ abstract class AbstractDelegate<C extends JComponent>
 
     /**
      *  As a delegate to the underlying component, you can use this method to
+     *  conveniently set the border of the component.
+     *  This method returns the delegate itself, so you can chain calls to this method.
+     *  <p>
+     *  Note that this method is a delegate to {@link JComponent#setBorder(Border)}.
+     *  </p>
+     *
+     * @param border The border that should be used to paint the border of the component.
+     *               If this parameter is <code>null</code> then this component will inherit
+     *               the border of its parent.
+     * @return The delegate itself.
+     */
+    public final AbstractDelegate<C> setBorder( Border border ) {
+        _component().setBorder(border);
+        return this;
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently get the border of the component.
+     *  <p>
+     *  Note that this method is a delegate to {@link JComponent#getBorder()}.
+     *  </p>
+     *
+     * @return The border of the component.
+     */
+    public final Border getBorder() {
+        return _component().getBorder();
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
      *  conveniently set the bounds of the component.
      *  This method returns the delegate itself, so you can chain calls to this method.
      *  <p>
@@ -475,8 +508,8 @@ abstract class AbstractDelegate<C extends JComponent>
      *  </p>
      *  @return The preferred size of the component.
      */
-    public final Dimension getPrefSize() {
-        return _component().getPreferredSize();
+    public final Size getPrefSize() {
+        return Size.of(_component().getPreferredSize());
     }
 
     /**
@@ -555,8 +588,8 @@ abstract class AbstractDelegate<C extends JComponent>
      *  </p>
      *  @return The minimum size of the component.
      */
-    public final Dimension getMinSize() {
-        return _component().getMinimumSize();
+    public final Size getMinSize() {
+        return Size.of(_component().getMinimumSize());
     }
 
     /**
@@ -635,8 +668,8 @@ abstract class AbstractDelegate<C extends JComponent>
      *  </p>
      *  @return The maximum size of the component.
      */
-    public final Dimension getMaxSize() {
-        return _component().getMaximumSize();
+    public final Size getMaxSize() {
+        return Size.of(_component().getMaximumSize());
     }
 
     /**
@@ -715,8 +748,8 @@ abstract class AbstractDelegate<C extends JComponent>
      *  </p>
      *  @return The size of the component.
      */
-    public final Dimension getSize() {
-        return _component().getSize();
+    public final Size getSize() {
+        return Size.of(_component().getSize());
     }
 
     /**

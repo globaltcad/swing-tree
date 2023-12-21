@@ -88,11 +88,11 @@ public class AnimatedButtonsView extends Panel
             )
             .add(
                 button("I shake when you hover over me").apply( ui -> {
-                    Dimension prefSize = ui.getComponent().getPreferredSize();
                     ui.onMouseEnter(it -> it
                         .animateFor(0.25, TimeUnit.SECONDS)
                         .asLongAs( state -> state.repeats() <= 1 )
                         .go(new Animation() {
+                            final Dimension prefSize = it.get().getPreferredSize();
                             @Override public void run(AnimationState state) {
                                 double centerX = it.getWidth() / 2.0;
                                 double phase = (state.pulse()*2 - 1);
@@ -172,12 +172,12 @@ public class AnimatedButtonsView extends Panel
                     ui.onMouseEnter( it -> it.animateFor(0.2, TimeUnit.SECONDS, state -> {
                         float scale = (float) (1 + state.progress() * 0.5);
                         AffineTransform at = AffineTransform.getScaleInstance(scale, scale);
-                        ui.withFont(f.deriveFont(at));
+                        it.setFont(f.deriveFont(at));
                     }))
                     .onMouseExit( it -> it.animateFor(0.2, TimeUnit.SECONDS, state -> {
                         float scale = (float) (1 + (1-state.progress()) * 0.5);
                         AffineTransform at = AffineTransform.getScaleInstance(scale, scale);
-                        ui.withFont(f.deriveFont(at));
+                        it.setFont(f.deriveFont(at));
                     }));
                 })
             )
@@ -187,11 +187,11 @@ public class AnimatedButtonsView extends Panel
                 .apply( ui ->
                     ui.onMouseEnter( it -> it.animateFor(0.2, TimeUnit.SECONDS, state -> {
                         int bump = (int) (state.progress() * 15);
-                        ui.withBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, bump));
+                        it.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, bump));
                     }))
                     .onMouseExit( it -> it.animateFor(0.2, TimeUnit.SECONDS, state -> {
                         int bump = (int) ((1-state.progress()) * 15);
-                        ui.withBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, bump));
+                        it.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, bump));
                     }))
                 )
             )
@@ -244,5 +244,5 @@ public class AnimatedButtonsView extends Panel
         );
     }
 
-    public static void main(String... args) { UI.show(new AnimatedButtonsView()); }
+    public static void main(String... args) { UI.show(f->new AnimatedButtonsView()); }
 }
