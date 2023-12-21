@@ -7,6 +7,7 @@ import swingtree.api.Painter;
 import swingtree.api.Peeker;
 import swingtree.api.Styler;
 import swingtree.layout.LayoutConstraint;
+import swingtree.layout.Size;
 
 import javax.swing.*;
 import java.awt.*;
@@ -1383,18 +1384,6 @@ public final class ComponentStyleDelegate<C extends JComponent>
     }
 
     /**
-     *  Defines the minimum {@link Dimension} of this {@link JComponent}. <br>
-     *  This ultimately translates to {@link JComponent#setMinimumSize(Dimension)} on the underlying component. <br>
-     * @param minSize The minimum {@link Dimension}.
-     * @return A new {@link ComponentStyleDelegate} with the provided minimum {@link Dimension} set to be later
-     *          applied to the underlying component when the final {@link Style} is applied.
-     */
-    public ComponentStyleDelegate<C> minSize( Dimension minSize ) {
-        Objects.requireNonNull(minSize);
-        return _withStyle(_style._withDimensionality(_style.dimensionality()._withMinWidth(minSize.width)._withMinHeight(minSize.height)));
-    }
-
-    /**
      *  Defines the minimum {@link Dimension} for this {@link JComponent}. <br>
      *  This ultimately translates to {@link JComponent#setMinimumSize(Dimension)} on the underlying component,
      *  which will be called when all the other styles are applied and rendered. <br>
@@ -1405,6 +1394,18 @@ public final class ComponentStyleDelegate<C extends JComponent>
      */
     public ComponentStyleDelegate<C> minSize( int width, int height ) {
         return _withStyle(_style._withDimensionality(_style.dimensionality()._withMinWidth(width)._withMinHeight(height)));
+    }
+
+    /**
+     *  Defines the minimum size for this {@link JComponent} in the form of a {@link Size} object. <br>
+     *  This ultimately translates to {@link JComponent#setMinimumSize(Dimension)} on the underlying component,
+     *  which will be called when all the other styles are applied and rendered. <br>
+     * @param size The minimum {@link Size}.
+     * @return A new {@link ComponentStyleDelegate} with the provided minimum {@link Size} set to be later
+     *          applied to the underlying component when the final {@link Style} is applied.
+     */
+    public ComponentStyleDelegate<C> minSize( Size size ) {
+        return _withStyle(_style._withDimensionality(_style.dimensionality()._withMinSize(size)));
     }
 
     /**
@@ -1436,19 +1437,6 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  This ultimately translates to {@link JComponent#setMaximumSize(Dimension)} on the underlying component. <br>
      *  The passed {@link Dimension} will be applied when all the other styles are applied and rendered. <br>
      *
-     * @param maxSize The maximum {@link Dimension}.
-     * @return A new {@link ComponentStyleDelegate} with the provided maximum {@link Dimension} set to be later
-     *          applied to the underlying component when the final {@link Style} is applied.
-     */
-    public ComponentStyleDelegate<C> maxSize( Dimension maxSize ) {
-        return _withStyle(_style._withDimensionality(_style.dimensionality()._withMaxWidth(maxSize.width)._withMaxHeight(maxSize.height)));
-    }
-
-    /**
-     *  Defines the maximum {@link Dimension} for this {@link JComponent}. <br>
-     *  This ultimately translates to {@link JComponent#setMaximumSize(Dimension)} on the underlying component. <br>
-     *  The passed {@link Dimension} will be applied when all the other styles are applied and rendered. <br>
-     *
      * @param width The maximum width.
      * @param height The maximum height.
      * @return A new {@link ComponentStyleDelegate} with the provided maximum {@link Dimension} set to be later
@@ -1456,6 +1444,19 @@ public final class ComponentStyleDelegate<C extends JComponent>
      */
     public ComponentStyleDelegate<C> maxSize( int width, int height ) {
         return _withStyle(_style._withDimensionality(_style.dimensionality()._withMaxWidth(width)._withMaxHeight(height)));
+    }
+
+    /**
+     *  Defines the maximum {@link Size} for this {@link JComponent}. <br>
+     *  This ultimately translates to {@link JComponent#setMaximumSize(Dimension)} on the underlying component. <br>
+     *  The passed {@link Size} will be applied when all the other styles are applied and rendered. <br>
+     *
+     * @param maxSize The maximum {@link Size}.
+     * @return A new {@link ComponentStyleDelegate} with the provided maximum {@link Size} set to be later
+     *          applied to the underlying component when the final {@link Style} is applied.
+     */
+    public ComponentStyleDelegate<C> maxSize( Size maxSize ) {
+        return _withStyle(_style._withDimensionality(_style.dimensionality()._withMaxSize(maxSize)));
     }
 
     /**
@@ -1485,17 +1486,17 @@ public final class ComponentStyleDelegate<C extends JComponent>
     }
 
     /**
-     *  Defines the preferred {@link Dimension} for this {@link JComponent}. <br>
+     *  Defines the preferred {@link Size} for this {@link JComponent}. <br>
      *  This ultimately translates to {@link JComponent#setPreferredSize(Dimension)} on the underlying component. <br>
-     *  The passed {@link Dimension} will be applied when all the other styles are applied and rendered. <br>
+     *  The passed {@link Size} will be applied when all the other styles are applied and rendered. <br>
      *
-     * @param preferredSize The preferred {@link Dimension}.
-     * @return A new {@link ComponentStyleDelegate} with the provided preferred {@link Dimension} set to be later
+     * @param preferredSize The preferred {@link Size}.
+     * @return A new {@link ComponentStyleDelegate} with the provided preferred {@link Size} set to be later
      *          applied to the underlying component when the final {@link Style} is applied.
      */
-    public ComponentStyleDelegate<C> prefSize( Dimension preferredSize ) {
+    public ComponentStyleDelegate<C> prefSize( Size preferredSize ) {
         Objects.requireNonNull(preferredSize);
-        return _withStyle(_style._withDimensionality(_style.dimensionality()._withPreferredWidth(preferredSize.width)._withPreferredHeight(preferredSize.height)));
+        return _withStyle(_style._withDimensionality(_style.dimensionality()._withPreferredSize(preferredSize)));
     }
 
     /**
@@ -1542,12 +1543,12 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  Defines the size of this {@link JComponent}. <br>
      *  This ultimately translates to {@link JComponent#setSize(Dimension)} on the underlying component. <br>
      * @param size The width and height size {@link Dimension}.
-     * @return A new {@link ComponentStyleDelegate} with the provided size (width and height) {@link Dimension} set to be later
+     * @return A new {@link ComponentStyleDelegate} with the provided {@link Size} (width and height) set to be later
      *          applied to the underlying component when the final {@link Style} is applied.
      */
-    public ComponentStyleDelegate<C> size( Dimension size ) {
+    public ComponentStyleDelegate<C> size( Size size ) {
         Objects.requireNonNull(size);
-        return _withStyle(_style._withDimensionality(_style.dimensionality()._withWidth(size.width)._withHeight(size.height)));
+        return _withStyle(_style._withDimensionality(_style.dimensionality()._withSize(size)));
     }
 
     /**

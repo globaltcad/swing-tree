@@ -38,6 +38,10 @@ public final class Size
         return new Size( width, height );
     }
 
+    public static Size of( Dimension dimension ) {
+        return of(dimension.width, dimension.height);
+    }
+
     final int _width;
     final int _height;
 

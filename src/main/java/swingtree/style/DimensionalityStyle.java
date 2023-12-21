@@ -49,12 +49,20 @@ final class DimensionalityStyle
         return new DimensionalityStyle(_minSize.withHeight(minHeight), _maxSize, _preferredSize, _size);
     }
 
+    DimensionalityStyle _withMinSize( Size minSize ) {
+        return new DimensionalityStyle(minSize, _maxSize, _preferredSize, _size);
+    }
+
     DimensionalityStyle _withMaxWidth( int maxWidth ) {
         return new DimensionalityStyle(_minSize, _maxSize.withWidth(maxWidth), _preferredSize, _size);
     }
 
     DimensionalityStyle _withMaxHeight( int maxHeight ) {
         return new DimensionalityStyle(_minSize, _maxSize.withHeight(maxHeight), _preferredSize, _size);
+    }
+
+    DimensionalityStyle _withMaxSize( Size maxSize ) {
+        return new DimensionalityStyle(_minSize, maxSize, _preferredSize, _size);
     }
 
     DimensionalityStyle _withPreferredWidth( int preferredWidth ) {
@@ -65,12 +73,20 @@ final class DimensionalityStyle
         return new DimensionalityStyle(_minSize, _maxSize, _preferredSize.withHeight(preferredHeight), _size);
     }
 
+    DimensionalityStyle _withPreferredSize( Size preferredSize ) {
+        return new DimensionalityStyle(_minSize, _maxSize, preferredSize, _size);
+    }
+
     DimensionalityStyle _withWidth( int width ) {
         return new DimensionalityStyle(_minSize, _maxSize, _preferredSize, _size.withWidth(width));
     }
 
     DimensionalityStyle _withHeight( int height ) {
         return new DimensionalityStyle(_minSize, _maxSize, _preferredSize, _size.withHeight(height));
+    }
+
+    DimensionalityStyle _withSize( Size size ) {
+        return new DimensionalityStyle(_minSize, _maxSize, _preferredSize, size);
     }
 
     public Optional<Integer> minWidth() { return _minSize.width(); }
