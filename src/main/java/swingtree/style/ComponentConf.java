@@ -30,6 +30,9 @@ class ComponentConf
     private final Bounds  _currentBounds;
     private final Outline _baseOutline;
 
+    private boolean _wasAlreadyHashed = false;
+    private int     _hashCode         = 0; // cached hash code
+
 
     private ComponentConf(
         Style style,
@@ -105,6 +108,11 @@ class ComponentConf
 
     @Override
     public int hashCode() {
-        return Objects.hash(_style, _currentBounds, _baseOutline);
+        if ( _wasAlreadyHashed )
+            return _hashCode;
+
+        _hashCode = Objects.hash(_style, _currentBounds, _baseOutline);
+        _wasAlreadyHashed = true;
+        return _hashCode;
     }
 }
