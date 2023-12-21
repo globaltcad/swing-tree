@@ -6,6 +6,7 @@ import swingtree.animation.Animator;
 import swingtree.animation.LifeTime;
 import swingtree.api.Painter;
 import swingtree.api.Styler;
+import swingtree.layout.Bounds;
 import swingtree.layout.Size;
 import swingtree.style.ComponentExtension;
 
@@ -402,6 +403,20 @@ abstract class AbstractDelegate<C extends JComponent>
     }
 
     /**
+     * @param bounds The new bounds of the component.
+     *                This is relative to the component's parent.
+     * @return The delegate itself, so you can chain calls to this method.
+     */
+    public final AbstractDelegate<C> setBounds( Bounds bounds ) {
+        return setBounds(
+                bounds.location().x(),
+                bounds.location().y(),
+                bounds.size().width().orElse(0),
+                bounds.size().height().orElse(0)
+            );
+    }
+
+    /**
      *  As a delegate to the underlying component, you can use this method to
      *  conveniently set the bounds of the component.
      *  This method returns the delegate itself, so you can chain calls to this method.
@@ -446,6 +461,21 @@ abstract class AbstractDelegate<C extends JComponent>
     public final AbstractDelegate<C> setPrefSize( Dimension size ) {
         _component().setPreferredSize(size);
         return this;
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently set the preferred size of the component.
+     *  This method returns the delegate itself, so you can chain calls to this method.
+     *  The preferred size is used by the layout manager to determine the size of the component.
+     *  <p>
+     *  See {@link Component#setPreferredSize(Dimension)} for more information.
+     *  </p>
+     *  @param size The preferred size of the component.
+     *  @return The delegate itself.
+     */
+    public final AbstractDelegate<C> setPrefSize( Size size ) {
+        return setPrefSize(size.toDimension());
     }
 
     /**
@@ -536,6 +566,21 @@ abstract class AbstractDelegate<C extends JComponent>
      *  <p>
      *  See {@link Component#setMinimumSize(Dimension)} for more information.
      *  </p>
+     *  @param size The minimum size of the component.
+     *  @return The delegate itself.
+     */
+    public final AbstractDelegate<C> setMinSize( Size size ) {
+        return setMinSize(size.toDimension());
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently set the minimum size of the component.
+     *  This method returns the delegate itself, so you can chain calls to this method.
+     *  The minimum size is used by the layout manager to determine the size of the component.
+     *  <p>
+     *  See {@link Component#setMinimumSize(Dimension)} for more information.
+     *  </p>
      *  @param width The minimum width of the component.
      *  @param height The minimum height of the component.
      *  @return The delegate itself.
@@ -616,6 +661,21 @@ abstract class AbstractDelegate<C extends JComponent>
      *  <p>
      *  See {@link Component#setMaximumSize(Dimension)} for more information.
      *  </p>
+     *  @param size The maximum size of the component.
+     *  @return The delegate itself.
+     */
+    public final AbstractDelegate<C> setMaxSize( Size size ) {
+        return setMaxSize(size.toDimension());
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently set the maximum size of the component.
+     *  This method returns the delegate itself, so you can chain calls to this method.
+     *  The maximum size is used by the layout manager to determine the size of the component.
+     *  <p>
+     *  See {@link Component#setMaximumSize(Dimension)} for more information.
+     *  </p>
      *  @param width The maximum width of the component.
      *  @param height The maximum height of the component.
      *  @return The delegate itself.
@@ -686,6 +746,21 @@ abstract class AbstractDelegate<C extends JComponent>
     public final AbstractDelegate<C> setSize( Dimension size ) {
         _component().setSize(size);
         return this;
+    }
+
+    /**
+     *  As a delegate to the underlying component, you can use this method to
+     *  conveniently set the size of the component.
+     *  This method returns the delegate itself, so you can chain calls to this method.
+     *  The size is used by the layout manager to determine the size of the component.
+     *  <p>
+     *  See {@link Component#setSize(Dimension)} for more information.
+     *  </p>
+     *  @param size The size of the component.
+     *  @return The delegate itself.
+     */
+    public final AbstractDelegate<C> setSize( Size size ) {
+        return setSize(size.toDimension());
     }
 
     /**
