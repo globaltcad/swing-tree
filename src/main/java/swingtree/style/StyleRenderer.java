@@ -981,7 +981,7 @@ final class StyleRenderer
             switch ( areaType ) {
                 case ALL:
                     return null; // No clipping
-                case CONTENT:
+                case BODY:
                     return engine.getMainComponentArea(); // all - exterior == interior + border
                 case INTERIOR:
                     return engine.getInteriorComponentArea(); // all - exterior - border == content - border

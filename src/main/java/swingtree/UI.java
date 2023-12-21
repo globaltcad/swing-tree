@@ -475,15 +475,15 @@ public final class UI extends UILayoutConstants
      *      The border of the component, which is the area between the inner and outer component area
      *      and which can be expressed as {@code ALL - INTERIOR - EXTERIOR}.
      *      </li>
-     *      <li>{@link swingtree.UI.ComponentArea#CONTENT} -
-     *      The main content area of the component, which is the inner component area including the border.
+     *      <li>{@link swingtree.UI.ComponentArea#BODY} -
+     *      The body of the component is the inner component area including the border area.
      *      It can be expressed as {@code ALL - EXTERIOR}, or {@code INTERIOR + BORDER}.
      *      </li>
      *  </ul>
      */
     public enum ComponentArea implements UIEnum<ComponentArea>
     {
-        ALL, EXTERIOR, BORDER, INTERIOR, CONTENT
+        ALL, EXTERIOR, BORDER, INTERIOR, BODY
     }
 
     /**

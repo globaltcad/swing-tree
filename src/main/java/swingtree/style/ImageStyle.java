@@ -113,17 +113,17 @@ import java.util.Optional;
  *              The border of the component, which is the area between the inner and outer component area
  *              and which can be expressed as {@code ALL - INTERIOR - EXTERIOR}.
  *              </li>
- *              <li>{@link swingtree.UI.ComponentArea#CONTENT} -
- *              The main content area of the component, which is the inner component area including the border.
+ *              <li>{@link swingtree.UI.ComponentArea#BODY} -
+ *              The body of the component is the inner component area including the border area.
  *              It can be expressed as {@code ALL - EXTERIOR}, or {@code INTERIOR + BORDER}.
  *              </li>
  *          </ul>
  *          <b>Note that the inner/interior component area is the area enclosed by (and excluding) the border,
  *          whereas the exterior component area is the area surrounding the border.
- *          The content area is the inner component area including the border.</b>
+ *          The component body area is the interior/inner component area plus the border.</b>
  *          </b>
  *          <p>
- *          The default clip area is {@link swingtree.UI.ComponentArea#CONTENT}
+ *          The default clip area is {@link swingtree.UI.ComponentArea#BODY}
  *          as this is the area which is most commonly used.
  *      </li>
  *  </ol>
@@ -166,7 +166,7 @@ public final class ImageStyle
                                                 1.0f,
                                                 Outline.none(),
                                                 Offset.none(),
-                                                UI.ComponentArea.CONTENT
+                                                UI.ComponentArea.BODY
                                             );
 
     static ImageStyle none() { return _NONE; }
@@ -572,8 +572,8 @@ public final class ImageStyle
      *      which is the area between the inner and outer component area
      *      and which can be expressed as {@code ALL - INTERIOR - EXTERIOR}.
      *      </li>
-     *      <li>{@link swingtree.UI.ComponentArea#CONTENT} -
-     *      The image will be drawn onto the content of the component,
+     *      <li>{@link swingtree.UI.ComponentArea#BODY} -
+     *      The image will be drawn onto the component body,
      *      which is the inner component area including the border area.
      *      It can be expressed as {@code ALL - EXTERIOR}, or {@code INTERIOR + BORDER}.
      *      </li>
