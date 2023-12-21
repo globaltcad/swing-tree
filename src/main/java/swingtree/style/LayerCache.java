@@ -1,6 +1,8 @@
 package swingtree.style;
 
 import swingtree.UI;
+import swingtree.layout.Bounds;
+import swingtree.layout.Size;
 
 import javax.swing.ImageIcon;
 import java.awt.Graphics2D;
@@ -87,8 +89,8 @@ final class LayerCache
         CachedImage bufferedImage = _CACHE.get(styleConf);
 
         if ( bufferedImage == null ) {
-            Bounds bounds = styleConf.currentBounds();
-            bufferedImage = new CachedImage(bounds.width(), bounds.height(), styleConf);
+            Size size = styleConf.currentBounds().size();
+            bufferedImage = new CachedImage(size.width().orElse(1), size.height().orElse(1), styleConf);
             _CACHE.put(styleConf, bufferedImage);
             _strongRef = styleConf;
         }
@@ -116,7 +118,7 @@ final class LayerCache
 
     public final void validate( ComponentConf oldState, ComponentConf newState )
     {
-        if ( newState.currentBounds().width() == 0 || newState.currentBounds().height() == 0 )
+        if ( newState.currentBounds().hasWidth(0) || newState.currentBounds().hasHeight(0) )
             return;
 
         oldState = oldState.onlyRetainingLayer(_layer);
@@ -153,7 +155,9 @@ final class LayerCache
 
     public final void paint( StyleEngine engine, Graphics2D g, Consumer<Graphics2D> renderer )
     {
-        if ( engine.getComponentConf().currentBounds().width() == 0 || engine.getComponentConf().currentBounds().height() == 0 )
+        Bounds componentBounds = engine.getComponentConf().currentBounds();
+
+        if ( componentBounds.hasWidth(0) || componentBounds.hasHeight(0) )
             return;
 
         if ( !_cachingMakesSense ) {
@@ -181,7 +185,7 @@ final class LayerCache
     public boolean _cachingMakesSenseFor( ComponentConf state )
     {
         Bounds bounds = state.currentBounds();
-        if ( bounds.width() <= 0 || bounds.height() <= 0 )
+        if ( !bounds.hasWidth() || !bounds.hasHeight() )
             return false;
 
         if ( state.style().hasCustomPaintersOnLayer(_layer) )
@@ -222,7 +226,7 @@ final class LayerCache
             return false;
 
         int threshold = 256 * 256 * Math.min(heavyStyleCount, 5);
-        int pixelCount = bounds.width() * bounds.height();
+        int pixelCount = bounds.area();
 
         return pixelCount <= threshold;
     }

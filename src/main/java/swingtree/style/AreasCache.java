@@ -1,5 +1,7 @@
 package swingtree.style;
 
+import swingtree.layout.Bounds;
+
 import java.awt.Rectangle;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Area;
@@ -64,7 +66,7 @@ final class AreasCache
         @Override
         protected Area produce(ComponentConf currentState) {
             Bounds bounds = currentState.currentBounds();
-            Area exteriorComponentArea = new Area(new Rectangle(bounds.x(), bounds.y(), bounds.width(), bounds.height()));
+            Area exteriorComponentArea = new Area(bounds.toRectangle());
             exteriorComponentArea.subtract(_mainComponentArea.getFor(currentState));
             return exteriorComponentArea;
         }
@@ -133,19 +135,19 @@ final class AreasCache
     }
 
     private static Area _calculateBaseArea(
-            Outline outline,
-            Outline margin,
+            Outline     outline,
+            Outline     margin,
             BorderStyle border,
-            Bounds currentBounds,
-            Style style,
-            int insTop,
-            int insLeft,
-            int insBottom,
-            int insRight
+            Bounds      currentBounds,
+            Style       style,
+            int         insTop,
+            int         insLeft,
+            int         insBottom,
+            int         insRight
     ) {
         if ( style.equals(Style.none()) ) {
             // If there is no style, we just return the component's bounds:
-            return new Area(new Rectangle(0, 0, currentBounds.width(), currentBounds.height()));
+            return new Area(new Rectangle(0, 0, currentBounds.size().width().orElse(0), currentBounds.size().height().orElse(0)));
         }
 
         insTop    += outline.top().orElse(0);
@@ -158,8 +160,8 @@ final class AreasCache
         int top    = Math.max(margin.top().orElse(0), 0)    + insTop   ;
         int right  = Math.max(margin.right().orElse(0), 0)  + insRight ;
         int bottom = Math.max(margin.bottom().orElse(0), 0) + insBottom;
-        int width  = currentBounds.width();
-        int height = currentBounds.height();
+        int width  = currentBounds.size().width().orElse(0);
+        int height = currentBounds.size().height().orElse(0);
 
         boolean insAllTheSame = insTop == insLeft && insLeft == insBottom && insBottom == insRight;
 

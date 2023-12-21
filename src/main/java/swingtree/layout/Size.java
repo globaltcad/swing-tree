@@ -1,7 +1,10 @@
-package swingtree.style;
+package swingtree.layout;
 
 import swingtree.api.Styler;
+import swingtree.style.ComponentStyleDelegate;
+import swingtree.style.ImageStyle;
 
+import java.awt.Dimension;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
@@ -35,8 +38,8 @@ public final class Size
         return new Size( width, height );
     }
 
-    private final int _width;
-    private final int _height;
+    final int _width;
+    final int _height;
 
 
     private Size( int width, int height ) {
@@ -61,18 +64,22 @@ public final class Size
     /**
      * @return A new {@link Size} instance with the given width.
      */
-    public Size width( int width ) {
+    public Size withWidth( int width ) {
         return new Size(width, _height);
     }
 
     /**
      * @return A new {@link Size} instance with the given height.
      */
-    public Size height( int height ) {
+    public Size withHeight(int height ) {
         return new Size(_width, height);
     }
 
-    Size scale( double scaleFactor ) {
+    public Dimension toDimension() {
+        return new Dimension(_width, _height);
+    }
+
+    public Size scale( double scaleFactor ) {
         int width  = _width  < 0 ? -1 : (int) Math.round(_width  * scaleFactor);
         int height = _height < 0 ? -1 : (int) Math.round(_height * scaleFactor);
         return of(width, height);

@@ -1,5 +1,7 @@
 package swingtree.style;
 
+import swingtree.layout.Size;
+
 import java.util.Objects;
 import java.util.Optional;
 
@@ -40,35 +42,35 @@ final class DimensionalityStyle
     }
 
     DimensionalityStyle _withMinWidth( int minWidth ) {
-        return new DimensionalityStyle(_minSize.width(minWidth), _maxSize, _preferredSize, _size);
+        return new DimensionalityStyle(_minSize.withWidth(minWidth), _maxSize, _preferredSize, _size);
     }
 
     DimensionalityStyle _withMinHeight( int minHeight ) {
-        return new DimensionalityStyle(_minSize.height(minHeight), _maxSize, _preferredSize, _size);
+        return new DimensionalityStyle(_minSize.withHeight(minHeight), _maxSize, _preferredSize, _size);
     }
 
     DimensionalityStyle _withMaxWidth( int maxWidth ) {
-        return new DimensionalityStyle(_minSize, _maxSize.width(maxWidth), _preferredSize, _size);
+        return new DimensionalityStyle(_minSize, _maxSize.withWidth(maxWidth), _preferredSize, _size);
     }
 
     DimensionalityStyle _withMaxHeight( int maxHeight ) {
-        return new DimensionalityStyle(_minSize, _maxSize.height(maxHeight), _preferredSize, _size);
+        return new DimensionalityStyle(_minSize, _maxSize.withHeight(maxHeight), _preferredSize, _size);
     }
 
     DimensionalityStyle _withPreferredWidth( int preferredWidth ) {
-        return new DimensionalityStyle(_minSize, _maxSize, _preferredSize.width(preferredWidth), _size);
+        return new DimensionalityStyle(_minSize, _maxSize, _preferredSize.withWidth(preferredWidth), _size);
     }
 
     DimensionalityStyle _withPreferredHeight( int preferredHeight ) {
-        return new DimensionalityStyle(_minSize, _maxSize, _preferredSize.height(preferredHeight), _size);
+        return new DimensionalityStyle(_minSize, _maxSize, _preferredSize.withHeight(preferredHeight), _size);
     }
 
     DimensionalityStyle _withWidth( int width ) {
-        return new DimensionalityStyle(_minSize, _maxSize, _preferredSize, _size.width(width));
+        return new DimensionalityStyle(_minSize, _maxSize, _preferredSize, _size.withWidth(width));
     }
 
     DimensionalityStyle _withHeight( int height ) {
-        return new DimensionalityStyle(_minSize, _maxSize, _preferredSize, _size.height(height));
+        return new DimensionalityStyle(_minSize, _maxSize, _preferredSize, _size.withHeight(height));
     }
 
     public Optional<Integer> minWidth() { return _minSize.width(); }

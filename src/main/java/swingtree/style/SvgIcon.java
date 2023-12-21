@@ -6,6 +6,7 @@ import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.parser.SVGLoader;
 import org.slf4j.Logger;
 import swingtree.UI;
+import swingtree.layout.Size;
 
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;

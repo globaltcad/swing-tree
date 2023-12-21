@@ -4,6 +4,7 @@ import com.github.weisj.jsvg.geometry.size.FloatSize;
 import org.slf4j.Logger;
 import swingtree.UI;
 import swingtree.api.Painter;
+import swingtree.layout.Bounds;
 
 import java.awt.*;
 import java.awt.geom.*;
@@ -179,8 +180,8 @@ final class StyleRenderer
         final int bottomRightRadius = Math.max(style.border().bottomRightRadius(), 0);
         final int bottomLeftRadius  = Math.max(style.border().bottomLeftRadius(), 0);
 
-        final int width     = bounds.width();
-        final int height    = bounds.height();
+        final int width     = bounds.size().width().orElse(0);
+        final int height    = bounds.size().height().orElse(0);
 
         // Calculate the shadow box bounds based on the padding and border thickness
         final int x = left + shadow.horizontalOffset();
@@ -584,7 +585,7 @@ final class StyleRenderer
     ) {
         Color[] colors = gradient.colors();
         UI.Transition type = gradient.transition();
-        Dimension size = new Dimension(bounds.width(), bounds.height());
+        Dimension size = bounds.size().toDimension();
         size.width  -= (margin.right().orElse(0) + margin.left().orElse(0));
         size.height -= (margin.bottom().orElse(0) + margin.top().orElse(0));
         int width  = size.width;
@@ -734,7 +735,7 @@ final class StyleRenderer
     ) {
         UI.Transition type = gradient.transition();
         Color[] colors = gradient.colors();
-        Dimension size = new Dimension(bounds.width(), bounds.height());
+        Dimension size = bounds.size().toDimension();
         size.width  -= (margin.right().orElse(0) + margin.left().orElse(0));
         size.height -= (margin.bottom().orElse(0) + margin.top().orElse(0));
         int width  = size.width;
@@ -822,8 +823,8 @@ final class StyleRenderer
         style.image().ifPresent( imageIcon -> {
             final UI.Placement placement       = style.placement();
             final Outline      padding         = style.padding();
-            final int          componentWidth  = bounds.width();
-            final int          componentHeight = bounds.height();
+            final int          componentWidth  = bounds.size().width().orElse(0);
+            final int          componentHeight = bounds.size().height().orElse(0);
 
             int imgWidth  = style.width().orElse(imageIcon.getIconWidth());
             int imgHeight = style.height().orElse(imageIcon.getIconHeight());

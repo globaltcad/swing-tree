@@ -1,7 +1,7 @@
 package swingtree.api;
 
 import swingtree.UI;
-import swingtree.style.Size;
+import swingtree.layout.Size;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -112,7 +112,7 @@ public interface IconDeclaration
      *        but with the specified width as preferred width.
      */
     default IconDeclaration withWidth( int width ) {
-        return IconDeclaration.of(size().width(width), path());
+        return IconDeclaration.of(size().withWidth(width), path());
     }
 
     /**
@@ -120,7 +120,7 @@ public interface IconDeclaration
      *        but with the specified height as preferred height.
      */
     default IconDeclaration withHeight( int height ) {
-        return IconDeclaration.of(size().height(height), path());
+        return IconDeclaration.of(size().withHeight(height), path());
     }
 
     /**

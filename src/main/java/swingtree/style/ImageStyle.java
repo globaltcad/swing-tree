@@ -2,6 +2,7 @@ package swingtree.style;
 
 import swingtree.UI;
 import swingtree.api.IconDeclaration;
+import swingtree.layout.Size;
 
 import javax.swing.ImageIcon;
 import java.awt.*;
@@ -420,7 +421,7 @@ public final class ImageStyle
      * @return A new {@link ImageStyle} instance with the specified {@code width}.
      */
     public ImageStyle width( Integer width ) {
-        return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size.width(width), _opacity, _padding, _offset, _clipArea);
+        return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size.withWidth(width), _opacity, _padding, _offset, _clipArea);
     }
 
     /**
@@ -430,7 +431,7 @@ public final class ImageStyle
      * @return A new {@link ImageStyle} instance with the specified {@code heiht}.
      */
     public ImageStyle height( Integer height ) {
-        return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size.height(height), _opacity, _padding, _offset, _clipArea);
+        return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size.withHeight(height), _opacity, _padding, _offset, _clipArea);
     }
 
     /**

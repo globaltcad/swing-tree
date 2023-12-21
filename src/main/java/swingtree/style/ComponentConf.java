@@ -1,6 +1,7 @@
 package swingtree.style;
 
 import swingtree.UI;
+import swingtree.layout.Bounds;
 
 import javax.swing.JComponent;
 import javax.swing.border.Border;
