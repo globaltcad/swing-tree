@@ -7,6 +7,7 @@ import spock.lang.Title
 import sprouts.Var
 import swingtree.SwingTree
 import swingtree.UI
+import swingtree.layout.Size
 import swingtree.threading.EventProcessor
 
 import javax.swing.*
@@ -133,10 +134,10 @@ class UI_Scaling_Spec extends Specification
                 )
                 .add(
                     UI.toggleButton("ToggleButton").withStyle( it -> it
-                        .prefSize(new Dimension(60, 20))
-                        .minSize(new Dimension(70, 80))
-                        .maxSize(new Dimension(80, 42))
-                        .size(new Dimension(120, 40))
+                        .prefSize(Size.of(60, 20))
+                        .minSize(Size.of(70, 80))
+                        .maxSize(Size.of(80, 42))
+                        .size(Size.of(120, 40))
                     )
                 )
                 .add(
