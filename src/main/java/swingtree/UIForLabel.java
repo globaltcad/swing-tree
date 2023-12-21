@@ -116,10 +116,10 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
      * @return This very builder to allow for method chaining.
      */
     public UIForLabel<L> makePlain() {
-        this.peek( label -> {
-            _makePlain(label);
-        });
-        return this;
+        return _with( label -> {
+                    _makePlain(label);
+                })
+                ._this();
     }
 
     /**
@@ -129,11 +129,11 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
      * @return This very builder to allow for method chaining.
      */
     public final UIForLabel<L> toggleBold() {
-        this.peek(label -> {
-            Font f = label.getFont();
-            label.setFont(f.deriveFont(f.getStyle() ^ Font.BOLD));
-        });
-        return this;
+        return _with( label -> {
+                    Font f = label.getFont();
+                    label.setFont(f.deriveFont(f.getStyle() ^ Font.BOLD));
+                })
+                ._this();
     }
 
     /**
