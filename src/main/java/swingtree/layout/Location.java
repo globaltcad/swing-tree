@@ -86,4 +86,26 @@ public final class Location
         return new Point( _x, _y );
     }
 
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName()+"[" +
+                    "x=" + _x + ", "+
+                    "y=" + _y +
+                "]";
+    }
+
+    @Override
+    public boolean equals( Object o ) {
+        if ( o == this ) return true;
+        if ( o == null ) return false;
+        if ( o.getClass() != this.getClass() ) return false;
+        Location other = (Location) o;
+        return _x == other._x && _y == other._y;
+    }
+
+    @Override
+    public int hashCode() {
+        return _x ^ _y;
+    }
+
 }
