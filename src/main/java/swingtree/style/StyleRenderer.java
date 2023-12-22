@@ -36,13 +36,13 @@ final class StyleRenderer
                 // Check if the color is transparent
                 if ( outerColor.getAlpha() > 0 ) {
                     g2d.setColor(outerColor);
-                    g2d.fill(engine.getExteriorComponentArea());
+                    g2d.fill(conf.getExteriorComponentArea());
                 }
             });
             conf.style().base().backgroundColor().ifPresent(color -> {
                 if ( color.getAlpha() == 0 ) return;
                 g2d.setColor(color);
-                g2d.fill(engine.getMainComponentArea());
+                g2d.fill(conf.getMainComponentArea());
             });
         }
 
@@ -66,12 +66,12 @@ final class StyleRenderer
             if ( gradient.colors().length > 0 ) {
                 if ( gradient.colors().length == 1 ) {
                     g2d.setColor(gradient.colors()[0]);
-                    g2d.fill(engine.getMainComponentArea());
+                    g2d.fill(conf.getMainComponentArea());
                 }
                 else if ( gradient.transition().isDiagonal() )
-                    _renderDiagonalGradient(g2d, conf.currentBounds(), conf.style().margin(), gradient, engine.getMainComponentArea());
+                    _renderDiagonalGradient(g2d, conf.currentBounds(), conf.style().margin(), gradient, conf.getMainComponentArea());
                 else
-                    _renderVerticalOrHorizontalGradient(g2d, conf.currentBounds(), conf.style().margin(), gradient, engine.getMainComponentArea());
+                    _renderVerticalOrHorizontalGradient(g2d, conf.currentBounds(), conf.style().margin(), gradient, conf.getMainComponentArea());
             }
 
         // 3. Shadows, which are simple gradient based drop shadows that can go inwards or outwards
@@ -122,7 +122,7 @@ final class StyleRenderer
         ComponentConf conf = engine.getComponentConf();
         if ( !Outline.none().equals(conf.style().border().widths()) ) {
             try {
-                Area borderArea = engine.getComponentBorderArea();
+                Area borderArea = conf.getComponentBorderArea();
                 g2d.setColor(color);
                 g2d.fill(borderArea);
 
@@ -157,9 +157,10 @@ final class StyleRenderer
         if ( !shadow.color().isPresent() )
             return;
 
+        ComponentConf conf = engine.getComponentConf();
         Color shadowColor = shadow.color().orElse(Color.BLACK);
-        Style style       = engine.getComponentConf().style();
-        Bounds bounds     = engine.getComponentConf().currentBounds();
+        Style style       = conf.style();
+        Bounds bounds     = conf.currentBounds();
 
         // First let's check if we need to render any shadows at all
         // Is the shadow color transparent?
@@ -217,10 +218,10 @@ final class StyleRenderer
 
         if ( shadow.isOutset() ) {
             int artifactAdjustment = 1;
-            baseArea = AreasCache.calculateBaseArea(engine.getComponentConf(), artifactAdjustment, artifactAdjustment, artifactAdjustment, artifactAdjustment);
+            baseArea = AreasCache.calculateBaseArea(conf, artifactAdjustment, artifactAdjustment, artifactAdjustment, artifactAdjustment);
         }
         else
-            baseArea = new Area(engine.getMainComponentArea());
+            baseArea = new Area(conf.getMainComponentArea());
 
         // Apply the clipping to avoid overlapping the shadow and the box
         Area shadowArea = new Area(outerShadowRect);
@@ -815,9 +816,11 @@ final class StyleRenderer
         StyleEngine engine,
         Graphics2D  g2d
     ) {
+        ComponentConf conf = engine.getComponentConf();
+
         if ( style.primer().isPresent() ) {
             g2d.setColor(style.primer().get());
-            g2d.fill(_areaFrom(style.clipArea(), engine));
+            g2d.fill(_areaFrom(style.clipArea(), conf));
         }
 
         style.image().ifPresent( imageIcon -> {
@@ -929,7 +932,7 @@ final class StyleRenderer
 
             final Shape oldClip = g2d.getClip();
 
-            Shape newClip = _areaFrom(style.clipArea(), engine);
+            Shape newClip = _areaFrom(style.clipArea(), conf);
             // We merge the new clip with the old one:
             if ( newClip != null && oldClip != null )
                 newClip = StyleUtility.intersect( newClip, oldClip );
@@ -961,7 +964,7 @@ final class StyleRenderer
                         Paint oldPaint = g2d.getPaint();
                         try {
                             g2d.setPaint(new TexturePaint((BufferedImage) image, new Rectangle(x, y, imgWidth, imgHeight)));
-                            g2d.fill(engine.getMainComponentArea());
+                            g2d.fill(conf.getMainComponentArea());
                         } finally {
                             g2d.setPaint(oldPaint);
                         }
@@ -977,18 +980,18 @@ final class StyleRenderer
         });
     }
 
-    private static Area _areaFrom( UI.ComponentArea areaType, StyleEngine engine ) {
+    private static Area _areaFrom( UI.ComponentArea areaType, ComponentConf conf ) {
             switch ( areaType ) {
                 case ALL:
                     return null; // No clipping
                 case BODY:
-                    return engine.getMainComponentArea(); // all - exterior == interior + border
+                    return conf.getMainComponentArea(); // all - exterior == interior + border
                 case INTERIOR:
-                    return engine.getInteriorComponentArea(); // all - exterior - border == content - border
+                    return conf.getInteriorComponentArea(); // all - exterior - border == content - border
                 case BORDER:
-                    return engine.getComponentBorderArea(); // all - exterior - interior
+                    return conf.getComponentBorderArea(); // all - exterior - interior
                 case EXTERIOR:
-                    return engine.getExteriorComponentArea(); // all - border - interior
+                    return conf.getExteriorComponentArea(); // all - border - interior
                 default:
                     log.warn("Unknown clip area: " + areaType);
                     return null;

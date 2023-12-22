@@ -6,7 +6,10 @@ import swingtree.layout.Bounds;
 import javax.swing.JComponent;
 import javax.swing.border.Border;
 import java.awt.Insets;
+import java.awt.Shape;
+import java.awt.geom.Area;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  *  An immutable snapshot of essential component state needed for rendering
@@ -18,17 +21,20 @@ import java.util.Objects;
  */
 class ComponentConf
 {
-    private static final ComponentConf EMPTY = new ComponentConf(
-                                                        Style.none(),
-                                                        Bounds.none(),
-                                                        Outline.none()
-                                                    );
-
-    public static ComponentConf none() { return EMPTY; }
+    public static ComponentConf none() {
+        return new ComponentConf(
+                    Style.none(),
+                    Bounds.none(),
+                    Outline.none(),
+                    new AreasCache()
+                );
+    }
 
     private final Style   _style;
     private final Bounds  _currentBounds;
     private final Outline _baseOutline;
+
+    private final AreasCache _areasCache;
 
     private boolean _wasAlreadyHashed = false;
     private int     _hashCode         = 0; // cached hash code
@@ -37,11 +43,13 @@ class ComponentConf
     private ComponentConf(
         Style style,
         Bounds currentBounds,
-        Outline baseOutline
+        Outline baseOutline,
+        AreasCache areasCache
     ) {
         _style         = Objects.requireNonNull(style);
         _currentBounds = Objects.requireNonNull(currentBounds);
         _baseOutline   = Objects.requireNonNull(baseOutline);
+        _areasCache    = Objects.requireNonNull(areasCache);
     }
 
     Style style() { return _style; }
@@ -49,6 +57,35 @@ class ComponentConf
     Bounds currentBounds() { return _currentBounds; }
 
     Outline baseOutline() { return _baseOutline; }
+
+    Optional<Shape> componentArea() {
+        Shape contentClip = null;
+        if ( _areasCache.mainArea().exists() || _style.margin().isPositive() )
+            contentClip = getMainComponentArea();
+
+        return Optional.ofNullable(contentClip);
+    }
+
+    Area getMainComponentArea()
+    {
+        return _areasCache.mainArea().getFor(this, _areasCache);
+    }
+
+    Area getExteriorComponentArea()
+    {
+        return _areasCache.exteriorArea().getFor(this, _areasCache);
+    }
+
+    Area getInteriorComponentArea()
+    {
+        return _areasCache.interiorArea().getFor(this, _areasCache);
+    }
+
+    Area getComponentBorderArea()
+    {
+        return _areasCache.borderArea().getFor(this, _areasCache);
+    }
+
 
     ComponentConf with( Style style, JComponent component )
     {
@@ -65,11 +102,19 @@ class ComponentConf
         if ( sameStyle && sameBounds && sameOutline )
             return this;
 
+        ComponentConf newConf = new ComponentConf(
+                                    style,
+                                    Bounds.of(component.getX(), component.getY(), component.getWidth(), component.getHeight()),
+                                    outline,
+                                    _areasCache
+                                );
+
         return new ComponentConf(
-                        style,
-                        Bounds.of(component.getX(), component.getY(), component.getWidth(), component.getHeight()),
-                        outline
-                    );
+                        newConf._style,
+                        newConf._currentBounds,
+                        newConf._baseOutline,
+                        _areasCache.validate(this, newConf)
+                );
     }
 
     /**
@@ -82,7 +127,8 @@ class ComponentConf
         return new ComponentConf(
                     _style.onlyRetainingLayer(layer),
                     _currentBounds,
-                    _baseOutline
+                    _baseOutline,
+                    _areasCache
                 );
     }
 
