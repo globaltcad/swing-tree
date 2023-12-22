@@ -10,45 +10,40 @@ import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.util.Objects;
 
-final class AreasCache
+final class ComponentAreas
 {
     private final Cached<Area> _borderArea;
-    private final Cached<Area> _interiorComponentArea;
-    private final Cached<Area> _exteriorComponentArea;
-    private final Cached<Area> _mainComponentArea;
+    private final Cached<Area> _interiorArea;
+    private final Cached<Area> _exteriorArea;
+    private final Cached<Area> _bodyArea;
 
-    interface CacheLogic<T> {
-        T produce(ComponentConf currentState, AreasCache context);
-        boolean leadsToSameValue(ComponentConf oldState, ComponentConf newState, AreasCache context);
-    }
-
-    public AreasCache() {
+    public ComponentAreas() {
         this(
-            new Cached<>(new CacheLogic<Area>(){
+            new Cached<>(new CacheProducerAndValidator<Area>(){
         
                 @Override
-                public Area produce(ComponentConf currentState, AreasCache context) {
-                    Area componentArea = context._interiorComponentArea.getFor(currentState, context);
-                    Area borderArea = new Area(context._mainComponentArea.getFor(currentState, context));
+                public Area produce(ComponentConf currentState, ComponentAreas context) {
+                    Area componentArea = context._interiorArea.getFor(currentState, context);
+                    Area borderArea = new Area(context._bodyArea.getFor(currentState, context));
                     borderArea.subtract(componentArea);
                     return borderArea;
                 }
         
                 @Override
-                public boolean leadsToSameValue(ComponentConf oldState, ComponentConf newState, AreasCache context) {
-                    if ( !context._interiorComponentArea.leadsToSameValue(oldState, newState, context) )
+                public boolean leadsToSameValue(ComponentConf oldState, ComponentConf newState, ComponentAreas context) {
+                    if ( !context._interiorArea.leadsToSameValue(oldState, newState, context) )
                         return false;
         
-                    if ( !context._mainComponentArea.leadsToSameValue(oldState, newState, context) )
+                    if ( !context._bodyArea.leadsToSameValue(oldState, newState, context) )
                         return false;
         
                     return true;
                 }
             }) ,
-            new Cached<>(new CacheLogic<Area>(){
+            new Cached<>(new CacheProducerAndValidator<Area>(){
         
                 @Override
-                public Area produce(ComponentConf currentState, AreasCache context) {
+                public Area produce(ComponentConf currentState, ComponentAreas context) {
                     Outline widths = currentState.style().border().widths();
                     int leftBorderWidth   = widths.left().orElse(0);
                     int topBorderWidth    = widths.top().orElse(0);
@@ -64,25 +59,25 @@ final class AreasCache
                 }
         
                 @Override
-                public boolean leadsToSameValue(ComponentConf oldState, ComponentConf newState, AreasCache context) {
+                public boolean leadsToSameValue(ComponentConf oldState, ComponentConf newState, ComponentAreas context) {
                     Outline oldWidths = oldState.style().border().widths();
                     Outline newWidths = newState.style().border().widths();
                     boolean sameWidths = oldWidths.equals(newWidths);
                     return sameWidths && _testWouldLeadToSameBaseArea(oldState, newState);
                 }
             }),
-            new Cached<>(new CacheLogic<Area>(){
+            new Cached<>(new CacheProducerAndValidator<Area>(){
                 @Override
-                public Area produce(ComponentConf currentState, AreasCache context) {
+                public Area produce(ComponentConf currentState, ComponentAreas context) {
                     Bounds bounds = currentState.currentBounds();
                     Area exteriorComponentArea = new Area(bounds.toRectangle());
-                    exteriorComponentArea.subtract(context._mainComponentArea.getFor(currentState, context));
+                    exteriorComponentArea.subtract(context._bodyArea.getFor(currentState, context));
                     return exteriorComponentArea;
                 }
         
                 @Override
-                public boolean leadsToSameValue(ComponentConf oldState, ComponentConf newState, AreasCache context) {
-                    boolean mainIsSame = context._mainComponentArea.leadsToSameValue(oldState, newState, context);
+                public boolean leadsToSameValue(ComponentConf oldState, ComponentConf newState, ComponentAreas context) {
+                    boolean mainIsSame = context._bodyArea.leadsToSameValue(oldState, newState, context);
                     if ( !mainIsSame )
                         return false;
                     
@@ -92,58 +87,58 @@ final class AreasCache
                     return oldBounds.equals(newBounds);
                 }
             }),
-            new Cached<>(new CacheLogic<Area>(){
+            new Cached<>(new CacheProducerAndValidator<Area>(){
                 @Override
-                public Area produce(ComponentConf currentState, AreasCache context) {
+                public Area produce(ComponentConf currentState, ComponentAreas context) {
                     return calculateBaseArea(currentState, 0, 0, 0, 0);
                 }
                 @Override
-                public boolean leadsToSameValue(ComponentConf oldState, ComponentConf newState, AreasCache context) {
+                public boolean leadsToSameValue(ComponentConf oldState, ComponentConf newState, ComponentAreas context) {
                     return _testWouldLeadToSameBaseArea(oldState, newState);
                 }
             })
         );
     }
     
-    public AreasCache(
+    public ComponentAreas(
         Cached<Area> borderArea, 
         Cached<Area> interiorComponentArea, 
         Cached<Area> exteriorComponentArea, 
         Cached<Area> mainComponentArea
     ) {
         _borderArea            = Objects.requireNonNull(borderArea);
-        _interiorComponentArea = Objects.requireNonNull(interiorComponentArea);
-        _exteriorComponentArea = Objects.requireNonNull(exteriorComponentArea);
-        _mainComponentArea     = Objects.requireNonNull(mainComponentArea);
+        _interiorArea = Objects.requireNonNull(interiorComponentArea);
+        _exteriorArea = Objects.requireNonNull(exteriorComponentArea);
+        _bodyArea = Objects.requireNonNull(mainComponentArea);
     }
 
 
     public Cached<Area> borderArea() { return _borderArea; }
 
-    public Cached<Area> exteriorArea() { return _exteriorComponentArea; }
+    public Cached<Area> exteriorArea() { return _exteriorArea; }
 
-    public Cached<Area> interiorArea() { return _interiorComponentArea; }
+    public Cached<Area> interiorArea() { return _interiorArea; }
 
-    public Cached<Area> mainArea() { return _mainComponentArea; }
+    public Cached<Area> bodyArea() { return _bodyArea; }
 
 
-    public AreasCache validate( ComponentConf oldConf, ComponentConf newConf )
+    public ComponentAreas validate(ComponentConf oldConf, ComponentConf newConf )
     {
         if ( oldConf.equals(newConf) )
             return this;
 
         Cached<Area> newBorderArea = _borderArea.validate(oldConf, newConf, this);
-        Cached<Area> newInterior   = _interiorComponentArea.validate(oldConf, newConf, this);
-        Cached<Area> newExterior   = _exteriorComponentArea.validate(oldConf, newConf, this);
-        Cached<Area> newBody       = _mainComponentArea.validate(oldConf, newConf, this);
+        Cached<Area> newInterior   = _interiorArea.validate(oldConf, newConf, this);
+        Cached<Area> newExterior   = _exteriorArea.validate(oldConf, newConf, this);
+        Cached<Area> newBody       = _bodyArea.validate(oldConf, newConf, this);
         
         if (
             newBorderArea != _borderArea ||
-            newInterior   != _interiorComponentArea ||
-            newExterior   != _exteriorComponentArea ||
-            newBody       != _mainComponentArea
+            newInterior   != _interiorArea ||
+            newExterior   != _exteriorArea ||
+            newBody       != _bodyArea
         ) {
-            return new AreasCache(newBorderArea, newInterior, newExterior, newBody);
+            return new ComponentAreas(newBorderArea, newInterior, newExterior, newBody);
         }
         return this;
     }

@@ -218,7 +218,7 @@ final class StyleRenderer
 
         if ( shadow.isOutset() ) {
             int artifactAdjustment = 1;
-            baseArea = AreasCache.calculateBaseArea(conf, artifactAdjustment, artifactAdjustment, artifactAdjustment, artifactAdjustment);
+            baseArea = ComponentAreas.calculateBaseArea(conf, artifactAdjustment, artifactAdjustment, artifactAdjustment, artifactAdjustment);
         }
         else
             baseArea = new Area(conf.getMainComponentArea());

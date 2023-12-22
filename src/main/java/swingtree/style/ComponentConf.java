@@ -26,7 +26,7 @@ class ComponentConf
                     Style.none(),
                     Bounds.none(),
                     Outline.none(),
-                    new AreasCache()
+                    new ComponentAreas()
                 );
     }
 
@@ -34,22 +34,22 @@ class ComponentConf
     private final Bounds  _currentBounds;
     private final Outline _baseOutline;
 
-    private final AreasCache _areasCache;
+    private final ComponentAreas _areas;
 
     private boolean _wasAlreadyHashed = false;
     private int     _hashCode         = 0; // cached hash code
 
 
     private ComponentConf(
-        Style style,
-        Bounds currentBounds,
-        Outline baseOutline,
-        AreasCache areasCache
+        Style          style,
+        Bounds         currentBounds,
+        Outline        baseOutline,
+        ComponentAreas componentAreas
     ) {
         _style         = Objects.requireNonNull(style);
         _currentBounds = Objects.requireNonNull(currentBounds);
         _baseOutline   = Objects.requireNonNull(baseOutline);
-        _areasCache    = Objects.requireNonNull(areasCache);
+        _areas         = Objects.requireNonNull(componentAreas);
     }
 
     Style style() { return _style; }
@@ -60,7 +60,7 @@ class ComponentConf
 
     Optional<Shape> componentArea() {
         Shape contentClip = null;
-        if ( _areasCache.mainArea().exists() || _style.margin().isPositive() )
+        if ( _areas.bodyArea().exists() || _style.margin().isPositive() )
             contentClip = getMainComponentArea();
 
         return Optional.ofNullable(contentClip);
@@ -68,22 +68,22 @@ class ComponentConf
 
     Area getMainComponentArea()
     {
-        return _areasCache.mainArea().getFor(this, _areasCache);
+        return _areas.bodyArea().getFor(this, _areas);
     }
 
     Area getExteriorComponentArea()
     {
-        return _areasCache.exteriorArea().getFor(this, _areasCache);
+        return _areas.exteriorArea().getFor(this, _areas);
     }
 
     Area getInteriorComponentArea()
     {
-        return _areasCache.interiorArea().getFor(this, _areasCache);
+        return _areas.interiorArea().getFor(this, _areas);
     }
 
     Area getComponentBorderArea()
     {
-        return _areasCache.borderArea().getFor(this, _areasCache);
+        return _areas.borderArea().getFor(this, _areas);
     }
 
 
@@ -106,14 +106,14 @@ class ComponentConf
                                     style,
                                     Bounds.of(component.getX(), component.getY(), component.getWidth(), component.getHeight()),
                                     outline,
-                                    _areasCache
+                _areas
                                 );
 
         return new ComponentConf(
                         newConf._style,
                         newConf._currentBounds,
                         newConf._baseOutline,
-                        _areasCache.validate(this, newConf)
+                        _areas.validate(this, newConf)
                 );
     }
 
@@ -128,7 +128,7 @@ class ComponentConf
                     _style.onlyRetainingLayer(layer),
                     _currentBounds,
                     _baseOutline,
-                    _areasCache
+                _areas
                 );
     }
 
