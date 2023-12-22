@@ -10,6 +10,10 @@ import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.util.Objects;
 
+/**
+ *  A wrapper object for transient reference based caching of the various areas of a component.
+ *  This is used to avoid recalculating the areas of a component over and over again.
+ */
 final class ComponentAreas
 {
     private final Cached<Area> _borderArea;
@@ -17,33 +21,34 @@ final class ComponentAreas
     private final Cached<Area> _exteriorArea;
     private final Cached<Area> _bodyArea;
 
+
     public ComponentAreas() {
         this(
             new Cached<>(new CacheProducerAndValidator<Area>(){
-        
+
                 @Override
-                public Area produce(ComponentConf currentState, ComponentAreas context) {
-                    Area componentArea = context._interiorArea.getFor(currentState, context);
-                    Area borderArea = new Area(context._bodyArea.getFor(currentState, context));
+                public Area produce(ComponentConf currentState, ComponentAreas currentAreas) {
+                    Area componentArea = currentAreas._interiorArea.getFor(currentState, currentAreas);
+                    Area borderArea = new Area(currentAreas._bodyArea.getFor(currentState, currentAreas));
                     borderArea.subtract(componentArea);
                     return borderArea;
                 }
-        
+
                 @Override
-                public boolean leadsToSameValue(ComponentConf oldState, ComponentConf newState, ComponentAreas context) {
-                    if ( !context._interiorArea.leadsToSameValue(oldState, newState, context) )
+                public boolean leadsToSameValue(ComponentConf oldState, ComponentConf newState, ComponentAreas currentAreas) {
+                    if ( !currentAreas._interiorArea.leadsToSameValue(oldState, newState, currentAreas) )
                         return false;
-        
-                    if ( !context._bodyArea.leadsToSameValue(oldState, newState, context) )
+
+                    if ( !currentAreas._bodyArea.leadsToSameValue(oldState, newState, currentAreas) )
                         return false;
-        
+
                     return true;
                 }
             }) ,
             new Cached<>(new CacheProducerAndValidator<Area>(){
         
                 @Override
-                public Area produce(ComponentConf currentState, ComponentAreas context) {
+                public Area produce(ComponentConf currentState, ComponentAreas currentAreas) {
                     Outline widths = currentState.style().border().widths();
                     int leftBorderWidth   = widths.left().orElse(0);
                     int topBorderWidth    = widths.top().orElse(0);
@@ -59,7 +64,7 @@ final class ComponentAreas
                 }
         
                 @Override
-                public boolean leadsToSameValue(ComponentConf oldState, ComponentConf newState, ComponentAreas context) {
+                public boolean leadsToSameValue(ComponentConf oldState, ComponentConf newState, ComponentAreas currentAreas) {
                     Outline oldWidths = oldState.style().border().widths();
                     Outline newWidths = newState.style().border().widths();
                     boolean sameWidths = oldWidths.equals(newWidths);
@@ -68,16 +73,16 @@ final class ComponentAreas
             }),
             new Cached<>(new CacheProducerAndValidator<Area>(){
                 @Override
-                public Area produce(ComponentConf currentState, ComponentAreas context) {
+                public Area produce(ComponentConf currentState, ComponentAreas currentAreas) {
                     Bounds bounds = currentState.currentBounds();
                     Area exteriorComponentArea = new Area(bounds.toRectangle());
-                    exteriorComponentArea.subtract(context._bodyArea.getFor(currentState, context));
+                    exteriorComponentArea.subtract(currentAreas._bodyArea.getFor(currentState, currentAreas));
                     return exteriorComponentArea;
                 }
         
                 @Override
-                public boolean leadsToSameValue(ComponentConf oldState, ComponentConf newState, ComponentAreas context) {
-                    boolean mainIsSame = context._bodyArea.leadsToSameValue(oldState, newState, context);
+                public boolean leadsToSameValue(ComponentConf oldState, ComponentConf newState, ComponentAreas currentAreas) {
+                    boolean mainIsSame = currentAreas._bodyArea.leadsToSameValue(oldState, newState, currentAreas);
                     if ( !mainIsSame )
                         return false;
                     
@@ -89,11 +94,11 @@ final class ComponentAreas
             }),
             new Cached<>(new CacheProducerAndValidator<Area>(){
                 @Override
-                public Area produce(ComponentConf currentState, ComponentAreas context) {
+                public Area produce(ComponentConf currentState, ComponentAreas currentAreas) {
                     return calculateBaseArea(currentState, 0, 0, 0, 0);
                 }
                 @Override
-                public boolean leadsToSameValue(ComponentConf oldState, ComponentConf newState, ComponentAreas context) {
+                public boolean leadsToSameValue(ComponentConf oldState, ComponentConf newState, ComponentAreas currentAreas) {
                     return _testWouldLeadToSameBaseArea(oldState, newState);
                 }
             })
@@ -106,10 +111,10 @@ final class ComponentAreas
         Cached<Area> exteriorComponentArea, 
         Cached<Area> mainComponentArea
     ) {
-        _borderArea            = Objects.requireNonNull(borderArea);
+        _borderArea   = Objects.requireNonNull(borderArea);
         _interiorArea = Objects.requireNonNull(interiorComponentArea);
         _exteriorArea = Objects.requireNonNull(exteriorComponentArea);
-        _bodyArea = Objects.requireNonNull(mainComponentArea);
+        _bodyArea     = Objects.requireNonNull(mainComponentArea);
     }
 
 
