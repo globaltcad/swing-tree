@@ -15,22 +15,14 @@ import static swingtree.UI.*;
  */
 public final class FancyTextField extends TextField
 {
-    private Image seed = null;
-
     public FancyTextField() {
-        try {
-            seed = ImageIO.read(FancyTextField.class.getResourceAsStream("/img/seed.png"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         of(this).withLayout("fill, ins 0").withPrefWidth(220)
         .withStyle( it -> it
             .padding(0, 0, 0, 18)
             .marginRight(25)
             .paddingRight(-20)
-            .image(image -> image
-                .layer(Layer.BORDER)
-                .image(seed)
+            .image(Layer.BORDER, image -> image
+                .image("/img/seed.png")
                 .placement(Placement.LEFT)
                 .height(it.component().getHeight())
                 .width(30)
