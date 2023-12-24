@@ -204,7 +204,7 @@ final class LayerCache
             if ( !gradient.equals(GradientStyle.none()) && gradient.colors().length > 0 )
                 heavyStyleCount++;
         for ( ShadowStyle shadow : state.style().shadows(_layer) )
-            if ( !shadow.equals(ShadowStyle.none()) )
+            if ( !shadow.equals(ShadowStyle.none()) && shadow.color().isPresent() )
                 heavyStyleCount++;
 
         BorderStyle border = state.style().border();
