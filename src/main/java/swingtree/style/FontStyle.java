@@ -542,6 +542,8 @@ final class FontStyle
     @Override
     public String toString()
     {
+        if ( this == _NONE )
+            return this.getClass().getSimpleName() + "[NONE]";
         String underline       = ( _isUnderlined        == null ? "?" : String.valueOf(_isUnderlined)   );
         String strike          = ( _isStrike            == null ? "?" : String.valueOf(_isStrike)       );
         String transform       = ( _transform           == null ? "?" : _transform.toString()           );
@@ -549,7 +551,7 @@ final class FontStyle
         String backgroundPaint = ( _backgroundPaint     == null ? "?" : _backgroundPaint.toString()     );
         String horizontalAlign = ( _horizontalAlignment == null ? "?" : _horizontalAlignment.toString() );
         String verticalAlign   = ( _verticalAlignment   == null ? "?" : _verticalAlignment.toString()   );
-        return "FontStyle[" +
+        return this.getClass().getSimpleName() + "[" +
                     "family="              + _familyName + ", " +
                     "size="                + _size                                   + ", " +
                     "posture="             + _posture                                + ", " +

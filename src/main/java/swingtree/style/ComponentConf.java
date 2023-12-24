@@ -128,7 +128,7 @@ class ComponentConf
                     _style.onlyRetainingLayer(layer),
                     _currentBounds,
                     _baseOutline,
-                _areas
+                    _areas
                 );
     }
 

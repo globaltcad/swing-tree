@@ -5,12 +5,14 @@ import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
 import swingtree.SwingTree
+import swingtree.UI
 import swingtree.threading.EventProcessor
 import swingtree.style.Style
 import swingtree.style.ComponentStyleDelegate
 
 import javax.swing.JPanel
 import java.awt.*
+import java.awt.geom.AffineTransform
 
 @Title("Style Properties")
 @Narrative('''
@@ -100,12 +102,7 @@ class Styles_Spec extends Specification
 
         expect :
                 style.toString() == "Style[" +
-                                        "LayoutStyle[" +
-                                            "layout=Unspecific[], " +
-                                            "constraint=?, " +
-                                            "alignmentX=?, " +
-                                            "alignmentY=?" +
-                                        "], " +
+                                        "LayoutStyle[NONE], " +
                                         "BorderStyle[" +
                                             "arcWidth=12, " +
                                             "arcHeight=18, " +
@@ -113,7 +110,7 @@ class Styles_Spec extends Specification
                                             "margin=Outline[top=?, right=?, bottom=?, left=?], " +
                                             "padding=Outline[top=?, right=?, bottom=?, left=?], " +
                                             "color=rgba(0,0,255,255), " +
-                                            "GradientStyle[transition=TOP_TO_BOTTOM, type=LINEAR, colors=[], layer=BACKGROUND]" +
+                                            "GradientStyle[NONE]" +
                                         "], " +
                                         "BaseStyle[" +
                                             "icon=?, " +
@@ -125,44 +122,114 @@ class Styles_Spec extends Specification
                                             "orientation=UNKNOWN" +
                                         "], " +
                                         "FontStyle[" +
-                                            "family=Times New Roman, size=12, posture=0.0, weight=2.0, spacing=0.0, underlined=true, " +
-                                            "strikeThrough=true, color=rgba(255,0,255,255), backgroundColor=?, " +
-                                            "selectionColor=rgba(0,255,255,255), transform=?, paint=?, backgroundPaint=?, " +
-                                            "horizontalAlignment=?, verticalAlignment=?" +
+                                            "family=Times New Roman, " +
+                                            "size=12, " +
+                                            "posture=0.0, " +
+                                            "weight=2.0, " +
+                                            "spacing=0.0, " +
+                                            "underlined=true, " +
+                                            "strikeThrough=true, " +
+                                            "color=rgba(255,0,255,255), " +
+                                            "backgroundColor=?, " +
+                                            "selectionColor=rgba(0,255,255,255), " +
+                                            "transform=?, " +
+                                            "paint=?, " +
+                                            "backgroundPaint=?, " +
+                                            "horizontalAlignment=?, " +
+                                            "verticalAlignment=?" +
                                         "], " +
-                                        "DimensionalityStyle[" +
-                                            "minWidth=?, minHeight=?, " +
-                                            "maxWidth=?, maxHeight=?, " +
-                                            "preferredWidth=?, preferredHeight=?, " +
-                                            "width=?, height=?" +
+                                        "DimensionalityStyle[NONE], " +
+                                        "NamedStyles[" +
+                                            "BACKGROUND=StyleLayer[EMPTY], " +
+                                            "CONTENT=StyleLayer[" +
+                                                "shadows=ShadowStyle[" +
+                                                    "horizontalOffset=0, " +
+                                                    "verticalOffset=0, " +
+                                                    "blurRadius=0, " +
+                                                    "spreadRadius=0, " +
+                                                    "color=rgba(255,255,0,255), " +
+                                                    "isInset=false" +
+                                                "], " +
+                                                "painters=PainterStyle[NONE], " +
+                                                "gradients=GradientStyle[NONE], " +
+                                                "images=ImageStyle[NONE]" +
+                                            "], " +
+                                            "BORDER=StyleLayer[EMPTY], " +
+                                            "FOREGROUND=StyleLayer[EMPTY]" +
                                         "], " +
-                                        "ShadowStyle[" +
-                                            "horizontalOffset=0, " +
-                                            "verticalOffset=0, " +
-                                            "blurRadius=0, " +
-                                            "spreadRadius=0, " +
-                                            "color=rgba(255,255,0,255), " +
-                                            "isInset=false, " +
-                                            "layer=CONTENT" +
+                                        "properties=[]" +
+                                    "]"
+
+        when : 'We create another style with some other properties:'
+            var paint1 = new GradientPaint(0, 0, Color.RED, 100, 100, Color.BLUE)
+            var paint2 = new GradientPaint(0, 0, Color.BLACK, 100, 100, Color.GREEN)
+            var transform = AffineTransform.getRotateInstance(0.5)
+            style = new ComponentStyleDelegate<>(new JPanel(), Style.none())
+                                .fontAlignment(UI.Alignment.CENTER)
+                                .fontBackgroundPaint(paint1)
+                                .fontPaint(paint2)
+                                .fontTransform(transform)
+                                .fontBackgroundColor("cyan")
+                                .fontBackgroundColor(new Color(0, 42, 42, 42))
+                                .image(UI.Layer.FOREGROUND, "bubbles", conf -> conf
+                                    .fitMode(UI.FitComponent.WIDTH)
+                                    .repeat(true)
+                                    .image("/images/bubbles.svg")
+                                )
+                                .style()
+
+        then :
+                style.toString() == "Style[" +
+                                        "LayoutStyle[NONE], " +
+                                        "BorderStyle[NONE], " +
+                                        "BaseStyle[NONE], " +
+                                        "FontStyle[" +
+                                            "family=, " +
+                                            "size=0, " +
+                                            "posture=0.0, " +
+                                            "weight=0.0, " +
+                                            "spacing=0.0, " +
+                                            "underlined=?, " +
+                                            "strikeThrough=?, " +
+                                            "color=?, " +
+                                            "backgroundColor=rgba(0,42,42,42), " +
+                                            "selectionColor=?, " +
+                                            "transform=$transform, " +
+                                            "paint=$paint2, " +
+                                            "backgroundPaint=$paint1, " +
+                                            "horizontalAlignment=CENTER, " +
+                                            "verticalAlignment=CENTER" +
                                         "], " +
-                                        "PainterStyle[" +
-                                            "painter=none, " +
-                                            "layer=BACKGROUND" +
-                                        "], " +
-                                        "GradientStyle[transition=TOP_TO_BOTTOM, type=LINEAR, colors=[], layer=BACKGROUND], " +
-                                        "ImageStyle[" +
-                                            "layer=BACKGROUND, " +
-                                            "primer=?, " +
-                                            "image=?, " +
-                                            "placement=UNDEFINED, " +
-                                            "repeat=false, " +
-                                            "fitComponent=NO, " +
-                                            "width=?, " +
-                                            "height=?, " +
-                                            "opacity=1.0, " +
-                                            "padding=Outline[top=?, right=?, bottom=?, left=?], " +
-                                            "offset=Offset[x=0, y=0], " +
-                                            "clipArea=BODY" +
+                                        "DimensionalityStyle[NONE], " +
+                                        "NamedStyles[" +
+                                            "BACKGROUND=StyleLayer[EMPTY], " +
+                                            "CONTENT=StyleLayer[EMPTY], " +
+                                            "BORDER=StyleLayer[EMPTY], " +
+                                            "FOREGROUND=StyleLayer[" +
+                                                "shadows=ShadowStyle[NONE], " +
+                                                "painters=PainterStyle[NONE], " +
+                                                "gradients=GradientStyle[NONE], " +
+                                                "images=NamedStyles[" +
+                                                    "default=ImageStyle[NONE], " +
+                                                    "bubbles=ImageStyle[" +
+                                                        "primer=?, " +
+                                                        "image=SvgIcon[" +
+                                                            "width=?, height=?, " +
+                                                            "fitComponent=MIN_DIM, " +
+                                                            "preferredPlacement=UNDEFINED, " +
+                                                            "doc=?" +
+                                                        "], " +
+                                                        "placement=UNDEFINED, " +
+                                                        "repeat=true, " +
+                                                        "fitComponent=WIDTH, " +
+                                                        "width=?, height=?, " +
+                                                        "opacity=1.0, " +
+                                                        "padding=Outline[top=?, right=?, bottom=?, left=?], " +
+                                                        "offset=Offset[x=0, y=0], " +
+                                                        "clipArea=BODY" +
+                                                    "]" +
+                                                "]" +
+                                            "]" +
                                         "], " +
                                         "properties=[]" +
                                     "]"

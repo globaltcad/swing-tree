@@ -23,7 +23,15 @@ class NamedStyles<S>
 {
     private static final NamedStyles<?> EMPTY = new NamedStyles<>();
 
-    static <S> NamedStyles<S> of( NamedStyle<S> defaultStyle ) { return new NamedStyles<>( defaultStyle ); }
+    static <S> NamedStyles<S> of( NamedStyle<S> defaultStyle ) {
+        return new NamedStyles<>( defaultStyle );
+    }
+
+    @SafeVarargs
+    static <S> NamedStyles<S> of( NamedStyle<S>... defaultStyle ) {
+        return new NamedStyles<>( defaultStyle );
+    }
+
 
     static <S> NamedStyles<S> empty() { return (NamedStyles<S>) EMPTY; }
 
@@ -81,12 +89,12 @@ class NamedStyles<S>
         return new NamedStyles<>(styles);
     }
 
-    NamedStyles<S> filterStyles( Predicate<S> filter ) {
+    NamedStyles<S> filterByName( Predicate<String> filter ) {
         Objects.requireNonNull(filter);
         return new NamedStyles<>(
                         namedStyles()
                         .stream()
-                        .filter(e -> filter.test(e.style())).toArray(NamedStyle[]::new)
+                        .filter(e -> filter.test(e.name())).toArray(NamedStyle[]::new)
                     );
     }
 
@@ -114,25 +122,45 @@ class NamedStyles<S>
         return Optional.ofNullable(get(name));
     }
 
-    public List<S> sortedByNamesAndFilteredBy( Predicate<S> filter ) {
+    public List<S> sortedByNamesAndFilteredBy() {
         return Collections.unmodifiableList(
                     namedStyles()
                     .stream()
                     .sorted(Comparator.comparing(NamedStyle::name))
                     .map(NamedStyle::style)
-                    .filter( filter )
                     .collect(Collectors.toList())
                 );
     }
 
+    public boolean everyNamedStyle( Predicate<NamedStyle<S>> namedStyleTester ) {
+        return Arrays.stream(_styles).allMatch(namedStyleTester);
+    }
+
     public String toString( String defaultName, String styleType ) {
+        if ( styleType.isEmpty() )
+            styleType = this.getClass().getSimpleName();
+        else
+            styleType += "=";
         if ( this.size() == 1 )
             return this.get(defaultName).toString();
         else
             return this.namedStyles()
                     .stream()
-                    .map(e -> e.name() + ": " + e.style())
-                    .collect(Collectors.joining(", ", styleType+"=[", "]"));
+                    .map(e -> e.name() + "=" + e.style())
+                    .collect(Collectors.joining(", ", styleType+"[", "]"));
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getClass().getSimpleName()+"[");
+        for ( int i = 0; i < _styles.length; i++ ) {
+            sb.append(_styles[i].name()).append("=").append(_styles[i].style());
+            if ( i < _styles.length - 1 )
+                sb.append(", ");
+        }
+        sb.append("]");
+        return sb.toString();
     }
 
     @Override

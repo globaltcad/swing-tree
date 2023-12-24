@@ -76,7 +76,7 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
                 then we don't want to mess up how the rest of the component is painted...
                 Therefore, we catch any exceptions that happen in the above code.
             */
-            log.error("Exception while painting border style '{}': ", _compExt.getStyle().border(), ex);
+            log.error("Exception while painting border style '"+_compExt.getStyle().border()+"': ", ex);
         }
     }
 

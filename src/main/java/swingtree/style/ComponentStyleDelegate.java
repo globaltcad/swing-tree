@@ -388,7 +388,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
         try {
             newColor = StyleUtility.toColor(colorString);
         } catch ( Exception e ) {
-            log.error("Failed to parse color string: '{}'", colorString, e);
+            log.error("Failed to parse color string: '"+colorString+"'", e);
             return this;
         }
         return _withStyle(_style._withBorder(_style.border().width(width).color(newColor)));
@@ -690,7 +690,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
         try {
             newColor = StyleUtility.toColor(colorString);
         } catch ( Exception e ) {
-            log.error("Failed to parse color string: '{}'", colorString, e);
+            log.error("Failed to parse color string: '"+colorString+"'", e);
             return this;
         }
         return _withStyle(_style._withBase(_style.base().foundationColor(newColor)));
@@ -721,7 +721,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
         try {
             newColor = StyleUtility.toColor(colorString);
         } catch ( Exception e ) {
-            log.error("Failed to parse color string: '{}'", colorString, e);
+            log.error("Failed to parse color string: '"+colorString+"'", e);
             return this;
         }
         return _withStyle(_style._withBase(_style.base().backgroundColor(newColor)));
@@ -736,7 +736,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided background renderer.
      */
     public ComponentStyleDelegate<C> painter( UI.Layer layer, swingtree.api.Painter renderer ) {
-        return _withStyle(_style.painter(StyleUtility.DEFAULT_KEY, layer, renderer));
+        return _withStyle(_style.painter(layer, StyleUtility.DEFAULT_KEY, renderer));
     }
 
     /**
@@ -748,12 +748,24 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  This allows you to attach an arbitrary number of custom painters to a component.
      *
      * @param layer The layer on which the painter should do its work.
+     *              It is an enum instance which
+     *              gives the painter a particular rank in the painting order.
+     *              So the {@link swingtree.UI.Layer#BACKGROUND} will be painted first,
+     *              followed by the {@link swingtree.UI.Layer#CONTENT} and so on...
+     *              <br>
+     *              The following layers are available:
+     *              <ul>
+     *                  <li>{@link UI.Layer#BACKGROUND}</li>
+     *                  <li>{@link UI.Layer#CONTENT}</li>
+     *                  <li>{@link UI.Layer#BORDER}</li>
+     *                  <li>{@link UI.Layer#FOREGROUND}</li>
+     *              </ul>
      * @param painterName The name of the painter.
      * @param renderer The background renderer.
      * @return A new {@link ComponentStyleDelegate} with the provided background renderer.
      */
     public ComponentStyleDelegate<C> painter( UI.Layer layer, String painterName, swingtree.api.Painter renderer ) {
-        return _withStyle(_style.painter(painterName, layer, renderer));
+        return _withStyle(_style.painter(layer, painterName, renderer));
     }
 
     /**
@@ -779,14 +791,14 @@ public final class ComponentStyleDelegate<C extends JComponent>
         try {
             newColor = StyleUtility.toColor(colorString);
         } catch ( Exception e ) {
-            log.error("Failed to parse color string: '{}'", colorString, e);
+            log.error("Failed to parse color string: '"+colorString+"'", e);
             return this;
         }
         return _withStyle(_style._withBase(_style.base().foregroundColor(newColor)));
     }
 
     /**
-     *  Returns a new {@link Style} with the provided horizontal shadow offset.
+     *  Returns a new {@link Style} with the provided horizontal shadow offset applied to all shadow configs.
      *  The shadow will be rendered with an inset space based on the padding defined by this {@link Style}.
      *  Note that in order to see the shadow, you may also need to call {@link #shadowSpreadRadius(int)},
      *  {@link #shadowBlurRadius(int)} and {@link #shadowColor(Color)}. <br>
@@ -801,7 +813,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
     }
 
     /**
-     *  Returns a new {@link Style} with the provided vertical shadow offset.
+     *  Returns a new {@link Style} with the provided vertical shadow offset applied to all shadow configs.
      *  The shadow will be rendered with an inset space based on the padding defined by this {@link Style}.
      *  Note that in order to see the shadow, you may also need to call {@link #shadowSpreadRadius(int)},
      *  {@link #shadowBlurRadius(int)} and {@link #shadowColor(Color)}. <br>
@@ -816,7 +828,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
     }
 
     /**
-     *  Returns a new {@link Style} with the provided shadow offset.
+     *  Returns a new {@link Style} with the provided shadow offset applied to all shadow configs.
      *  The shadow will be rendered with an inset space based on the padding defined by this {@link Style}.
      *  Note that in order to see the shadow, you may also need to call {@link #shadowSpreadRadius(int)},
      *  {@link #shadowBlurRadius(int)} and {@link #shadowColor(Color)}. <br>
@@ -847,7 +859,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
     }
 
     /**
-     *  Returns a new {@link Style} with the provided shadow blur radius.
+     *  Returns a new {@link Style} with the provided shadow blur radius applied to all shadow configs.
      *  The shadow will be rendered with an inset space based on the padding defined by this {@link Style}.
      *  Note that in order to see the shadow, you may also need to call
      *  {@link #shadowSpreadRadius(int)} and {@link #shadowColor(Color)}. <br>
@@ -862,7 +874,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
     }
 
     /**
-     *  Returns a new {@link Style} with the provided shadow spread radius.
+     *  Returns a new {@link Style} with the provided shadow spread radius applied to all shadow configs.
      *  The shadow will be rendered with an inset space based on the padding defined by this {@link Style}.
      *  Note that in order to see the shadow, you may also need to call
      *  {@link #shadowBlurRadius(int)} and {@link #shadowColor(Color)}. <br>
@@ -877,7 +889,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
     }
 
     /**
-     *  Returns a new {@link Style} with the provided shadow color.
+     *  Returns a new {@link Style} with the provided shadow color applied to the default shadow.
      *  The shadow will be rendered with an inset space based on the padding defined by this {@link Style}.
      *  Note that in order to see the shadow, you may also need to call
      *  {@link #shadowBlurRadius(int)} and {@link #shadowSpreadRadius(int)}. <br>
@@ -888,7 +900,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided shadow color.
      */
     public ComponentStyleDelegate<C> shadowColor( Color color ) {
-        return _withStyle(_style._withShadow( shadow -> shadow.color(color)));
+        return _withStyle(_style._withShadow(ShadowStyle.DEFAULT_LAYER, shadow -> shadow.color(color)));
     }
 
     /**
@@ -909,38 +921,28 @@ public final class ComponentStyleDelegate<C extends JComponent>
         try {
             newColor = StyleUtility.toColor(colorString);
         } catch ( Exception e ) {
-            log.error("Failed to parse color string: '{}'", colorString, e);
+            log.error("Failed to parse color string: '"+colorString+"'", e);
             return this;
         }
-        return _withStyle(_style._withShadow( shadow -> shadow.color(newColor)));
+        return _withStyle(_style._withShadow(ShadowStyle.DEFAULT_LAYER,  shadow -> shadow.color(newColor)));
     }
 
     /**
-     *  Use this to control whether the shadow should be rendered inwards or outwards. <br>
-     *  Note that this property will not only be applied to the default shadow, but also any
-     *  other named shadow that you may have defined using {@link #shadow(String, Function)}. <br>
-     *  (see {@link #shadow(String, Function)} for an example of how to use named shadows)
+     *  Use this to control whether your shadows should be rendered inwards or outwards. <br>
+     *  Note that this property will be applied to all shadow effects of all layers, including
+     *  the default shadow and named shadows defined using {@link #shadow(String, Function)}. <br>
+     *  The default value is {@code false}.
      *
      * @param inwards Whether the shadow should be rendered inwards or outwards.
      * @return A new {@link ComponentStyleDelegate} with the provided shadow inset flag.
      */
     public ComponentStyleDelegate<C> shadowIsInset( boolean inwards ) {
-        return _withStyle(_style._withShadow( shadow -> shadow.isInset(inwards)));
-    }
-
-    /**
-     *  Use this to configure on which layer the shadow should be rendered. <br>
-     *  The default layer is {@link UI.Layer#CONTENT}. <br>
-     * @param layer The layer on which the shadow should be rendered.
-     * @return A new {@link ComponentStyleDelegate} with the provided shadow layer.
-     */
-    public ComponentStyleDelegate<C> shadowLayer( UI.Layer layer ) {
-        return _withStyle(_style._withShadow( shadow -> shadow.layer(layer)));
+        return _withStyle(_style._withShadow(shadow -> shadow.isInset(inwards)));
     }
 
     /**
      *  This method makes it possible to define multiple shadows for a single component
-     *  through a unique name.
+     *  on the {@link UI.Layer#CONTENT} layer, by giving the shadow config a unique name.
      *  This is useful when you want to do advanced shadow effects, such as neumorphism a.k.a. soft UI. <br>
      *  Here is an example of how to use this method:
      *  <pre>{@code
@@ -961,24 +963,75 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *              .spreadRadius(0)
      *          )
      *  }</pre>
-     *  Note that shadows will be rendered in alphabetical order based on their name.
+     *  Note that the shadows will be rendered in
+     *  alphabetical order based on their name (within a particular layer).
      *
      * @param shadowName The name of the shadow.
      * @param styler A function that takes a {@link ShadowStyle} and returns a new {@link ShadowStyle}.
      * @return A new {@link ComponentStyleDelegate} with a named shadow defined by the provided styler lambda.
      */
     public ComponentStyleDelegate<C> shadow( String shadowName, Function<ShadowStyle, ShadowStyle> styler ) {
-        Objects.requireNonNull(shadowName);
-        Objects.requireNonNull(styler);
-        ShadowStyle shadow = Optional.ofNullable(_style.shadow(shadowName)).orElse(ShadowStyle.none());
-        // We clone the shadow map:
-        NamedStyles<ShadowStyle> newShadows = _style.shadowsMap().withNamedStyle(shadowName, styler.apply(shadow));
-        return _withStyle(_style._withShadow(newShadows));
+        return shadow(ShadowStyle.DEFAULT_LAYER, shadowName, styler);
     }
 
     /**
-     *  This method makes it possible to define multiple background shades for a single component
-     *  through a unique name for said shading effect.
+     *  This method makes it possible to define multiple shadows for a single component
+     *  on a custom layer, by giving the shadow config a unique name.
+     *  This is useful when you want to do advanced shadow effects, such as neumorphism a.k.a. soft UI. <br>
+     *  Here is an example of how to use this method:
+     *  <pre>{@code
+     *      UI.panel()
+     *      .withStyle( it -> it
+     *          .shadow(UI.Layer.CONTENT, "dark shading", shadow -> shadow
+     *              .color("#000000")
+     *              .horizontalOffset(5)
+     *              .verticalOffset(5)
+     *              .blurRadius(10)
+     *              .spreadRadius(0)
+     *          )
+     *          .shadow(UI.Layer.CONTENT, "light shading", shadow -> shadow
+     *              .color("#ffffff")
+     *              .horizontalOffset(-5)
+     *              .verticalOffset(-5)
+     *              .blurRadius(10)
+     *              .spreadRadius(0)
+     *          )
+     *  }</pre>
+     *  Note that the shadows will be rendered in
+     *  alphabetical order based on their name (within a particular layer).
+     *
+     * @param layer The layer of the shadow is an enum instance which
+     *              gives the shadow effect a rank in the painting order.
+     *              So the {@link swingtree.UI.Layer#BACKGROUND} will be painted first,
+     *              followed by the {@link swingtree.UI.Layer#CONTENT} and so on...
+     *              <br>
+     *              The following layers are available:
+     *              <ul>
+     *                  <li>{@link UI.Layer#BACKGROUND}</li>
+     *                  <li>{@link UI.Layer#CONTENT}</li>
+     *                  <li>{@link UI.Layer#BORDER}</li>
+     *                  <li>{@link UI.Layer#FOREGROUND}</li>
+     *              </ul>
+     * @param shadowName The name of the shadow.
+     * @param styler A function that takes a {@link ShadowStyle} and returns a new {@link ShadowStyle}.
+     * @return A new {@link ComponentStyleDelegate} with a named shadow defined by the provided styler lambda.
+     */
+    public ComponentStyleDelegate<C> shadow(
+        UI.Layer layer,
+        String shadowName,
+        Function<ShadowStyle, ShadowStyle> styler
+    ) {
+        Objects.requireNonNull(shadowName);
+        Objects.requireNonNull(styler);
+        ShadowStyle shadow = Optional.ofNullable(_style.shadow(layer, shadowName)).orElse(ShadowStyle.none());
+        // We clone the shadow map:
+        NamedStyles<ShadowStyle> newShadows = _style.shadowsMap(layer).withNamedStyle(shadowName, styler.apply(shadow));
+        return _withStyle(_style._withShadow(layer, newShadows));
+    }
+
+    /**
+     *  This method makes it possible to define multiple background gradient for a single component
+     *  on the {@link UI.Layer#BACKGROUND} layer, by giving the gradient config a unique name.
      *  This is useful when you want to do advanced background effects, such as neumorphism a.k.a. soft UI. <br>
      *  Here is an example of how to use this method:
      *  <pre>{@code
@@ -994,16 +1047,52 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *      )
      *    )
      * }</pre>
-     * Note that the background shades will be rendered in alphabetical order based on the name of the shade.
+     * Note that the background shades will be rendered in alphabetical order based on the name of the shade.<br>
+     * This method translates to {@link #gradient(UI.Layer, String, Function)} but with the
+     * layer set to {@link UI.Layer#BACKGROUND}.
      *
      * @param shadeName The name of the background shade.
      * @param styler A function that takes a {@link GradientStyle} and returns a new {@link GradientStyle}.
      * @return A new {@link ComponentStyleDelegate} with a named background shade defined by the provided styler lambda.
      */
     public ComponentStyleDelegate<C> gradient( String shadeName, Function<GradientStyle, GradientStyle> styler ) {
+        return gradient(GradientStyle.DEFAULT_LAYER, shadeName, styler);
+    }
+
+    /**
+     *  This method makes it possible to define multiple background gradient for a single component
+     *  on a particular layer, by giving the gradient config a unique name.
+     *  This is useful when you want to do advanced background effects, such as neumorphism a.k.a. soft UI. <br>
+     *  Here is an example of how to use this method:
+     *  <pre>{@code
+     *    UI.panel()
+     *    .withStyle( it -> it
+     *      .gradient(UI.Layer.BACKGROUND, "dark shading", grad -> grad
+     *        .colors("#000000", "#000000")
+     *        .transition(UI.Transition.TOP_TO_BOTTOM)
+     *      )
+     *      .gradient(UI.Layer.BACKGROUND, "light shading", grad -> grad
+     *        .colors("#ffffff", "#ffffff")
+     *        .transition(UI.Transition.TOP_TO_BOTTOM))
+     *      )
+     *    )
+     * }</pre>
+     * Note that within a particular layer the gradients will be rendered in alphabetical order
+     * based on the provided name.
+     *
+     * @param layer The layer on which the gradient should be rendered.
+     * @param shadeName The name of the background shade.
+     * @param styler A function that takes a {@link GradientStyle} and returns a new {@link GradientStyle}.
+     * @return A new {@link ComponentStyleDelegate} with a named background shade defined by the provided styler lambda.
+     */
+    public ComponentStyleDelegate<C> gradient(
+        UI.Layer layer,
+        String shadeName,
+        Function<GradientStyle, GradientStyle> styler
+    ) {
         Objects.requireNonNull(shadeName);
         Objects.requireNonNull(styler);
-        return _withStyle(_style.gradient(shadeName, styler));
+        return _withStyle(_style.gradient(layer, shadeName, styler));
     }
 
     /**
@@ -1019,18 +1108,44 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *        )
      *    )
      * }</pre>
+     * This method translates to {@link #gradient(UI.Layer, String, Function)} but with the
+     * layer set to {@link UI.Layer#BACKGROUND} and the name being the "default" style name
      *
      * @param styler A function that takes a {@link GradientStyle} and returns a new {@link GradientStyle}.
      * @return A new {@link ComponentStyleDelegate} with a background shade defined by the provided styler lambda.
      */
     public ComponentStyleDelegate<C> gradient( Function<GradientStyle, GradientStyle> styler ) {
+        return gradient(GradientStyle.DEFAULT_LAYER, StyleUtility.DEFAULT_KEY, styler);
+    }
+
+    /**
+     *  This method makes it possible to define a gradient effect on a particular layer for your components.
+     *  This is useful when you want to do advanced background effects, such as neumorphism a.k.a. soft UI. <br>
+     *  Here is an example of how to use this method:
+     *  <pre>{@code
+     *    UI.panel()
+     *    .withStyle( it -> it
+     *        .gradient(UI.Layer.BACKGROUND, grad -> grad
+     *            .colors("#000000", "#000000")
+     *            .transition(UI.Transition.TOP_TO_BOTTOM)
+     *        )
+     *    )
+     * }</pre>
+     * Note that this method translates to {@link #gradient(UI.Layer, String, Function)} but with the
+     * name being the "default" style name
+     *
+     * @param layer The layer on which the gradient should be rendered.
+     * @param styler A function that takes a {@link GradientStyle} and returns a new {@link GradientStyle}.
+     * @return A new {@link ComponentStyleDelegate} with a background shade defined by the provided styler lambda.
+     */
+    public ComponentStyleDelegate<C> gradient( UI.Layer layer, Function<GradientStyle, GradientStyle> styler ) {
         Objects.requireNonNull(styler);
-        return _withStyle(_style.gradient(StyleUtility.DEFAULT_KEY, styler));
+        return _withStyle(_style.gradient(layer, StyleUtility.DEFAULT_KEY, styler));
     }
 
     /**
      *  This method makes it possible to define multiple background styles for a single component
-     *  through a unique name for said image.
+     *  rendered on the {@link UI.Layer#BACKGROUND} layer, by giving the background config a unique name.
      *  This is useful when you want to do advanced backgrounds
      *  displaying multiple images on top of each other. <br>
      *  Here is an example of how to use this method:
@@ -1052,13 +1167,49 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with a named background image defined by the provided styler lambda.
      */
     public ComponentStyleDelegate<C> image( String imageName, Function<ImageStyle, ImageStyle> styler ) {
-        Objects.requireNonNull(imageName);
-        Objects.requireNonNull(styler);
-        return _withStyle(_style.images(imageName, styler));
+        return image(ImageStyle.DEFAULT_LAYER, imageName, styler);
     }
 
     /**
-     *  This method makes it possible to define a background image for your components.
+     *  This method makes it possible to define multiple background styles for a single component
+     *  rendered on a particular layer, by giving the background config a unique name.
+     *  This is useful when you want to do advanced layer backgrounds
+     *  displaying multiple images on top of each other. <br>
+     *  Here is an example of how to use this method:
+     *  <pre>{@code
+     *    UI.panel()
+     *    .withStyle( it -> it
+     *      .image(UI.Layer.BACKGROUND, "ground 1", image -> image
+     *        .image(loadImageFrom("my/path/to/image1.png"))
+     *      )
+     *      .ground(UI.Layer.BACKGROUND, "ground 2", ground -> ground
+     *        .color("blue")
+     *      )
+     *    )
+     * }</pre>
+     * Note that the background images will be rendered in alphabetical order based on the name of the image.
+     *
+     * @param layer The layer defines at which step in the rendering process the image should be rendered.
+     *              The default layer is the background layer, which will be rendered first.
+     *              Here a list of available layers:
+     *              <ul>
+     *                  <li>{@link swingtree.UI.Layer#BACKGROUND}</li>
+     *                  <li>{@link swingtree.UI.Layer#CONTENT}</li>
+     *                  <li>{@link swingtree.UI.Layer#BORDER}</li>
+     *                  <li>{@link swingtree.UI.Layer#FOREGROUND}</li>
+     *              </ul>
+     * @param imageName The name of the background image.
+     * @param styler A function that takes a {@link ImageStyle} and returns a new {@link ImageStyle}.
+     * @return A new {@link ComponentStyleDelegate} with a named background image defined by the provided styler lambda.
+     */
+    public ComponentStyleDelegate<C> image( UI.Layer layer, String imageName, Function<ImageStyle, ImageStyle> styler ) {
+        Objects.requireNonNull(imageName);
+        Objects.requireNonNull(styler);
+        return _withStyle(_style.images(layer, imageName, styler));
+    }
+
+    /**
+     *  Allows for the rendering of a background image on your components.
      *  This is useful when you want to do advanced backgrounds
      *  displaying multiple images on top of each other. <br>
      *  Here is an example of how to use this method:
@@ -1071,13 +1222,40 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *        )
      *    )
      * }</pre>
+     * Note that this method translates to {@link #image(UI.Layer, String, Function)} but with the
+     * layer set to {@link UI.Layer#BACKGROUND} and the name being the "default" style name.
      *
      * @param styler A function that takes a {@link ImageStyle} and returns a new {@link ImageStyle}.
      * @return A new {@link ComponentStyleDelegate} with a background image defined by the provided styler lambda.
      */
     public ComponentStyleDelegate<C> image( Function<ImageStyle, ImageStyle> styler ) {
+        return image(ImageStyle.DEFAULT_LAYER, StyleUtility.DEFAULT_KEY, styler);
+    }
+
+    /**
+     *  Allows for the rendering of an image on a particular component layer.
+     *  This is useful when you want to do advanced layer backgrounds
+     *  displaying multiple images on top of each other. <br>
+     *  Here is an example of how to use this method:
+     *  <pre>{@code
+     *    UI.panel()
+     *    .withStyle( it -> it
+     *        .image(UI.Layer.CONTENT, image -> image
+     *            .image(loadImageFrom("my/path/to/image1.png"))
+     *            .color("green")
+     *        )
+     *    )
+     * }</pre>
+     * Note that this method translates to {@link #image(UI.Layer, String, Function)} but with the
+     * name being the "default" style name.
+     *
+     * @param layer The layer on which the image should be rendered.
+     * @param styler A function that takes a {@link ImageStyle} and returns a new {@link ImageStyle}.
+     * @return A new {@link ComponentStyleDelegate} with a background image defined by the provided styler lambda.
+     */
+    public ComponentStyleDelegate<C> image( UI.Layer layer, Function<ImageStyle, ImageStyle> styler ) {
         Objects.requireNonNull(styler);
-        return _withStyle(_style.images(StyleUtility.DEFAULT_KEY, styler));
+        return _withStyle(_style.images(layer, StyleUtility.DEFAULT_KEY, styler));
     }
 
     /**
@@ -1223,7 +1401,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
         try {
             newColor = StyleUtility.toColor(colorString);
         } catch ( Exception e ) {
-            log.error("Failed to parse color string: '{}'", colorString, e);
+            log.error("Failed to parse color string: '"+colorString+"'", e);
             return this;
         }
         return _withStyle(_style._withFont(_style.font().color(newColor)));
@@ -1287,7 +1465,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
         try {
             newColor = StyleUtility.toColor(colorString);
         } catch ( Exception e ) {
-            log.error("Failed to parse color string: '{}'", colorString, e);
+            log.error("Failed to parse color string: '"+colorString+"'", e);
             return this;
         }
         return _withStyle(_style._withFont(_style.font().selectionColor(newColor)));

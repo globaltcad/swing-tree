@@ -12,7 +12,7 @@ public final class LayoutStyle
 {
     private static final LayoutStyle _NONE = new LayoutStyle(Layout.unspecific(), null, null, null);
 
-    public static LayoutStyle none() { return _NONE; }
+    static LayoutStyle none() { return _NONE; }
 
 
     private final Layout _layout;
@@ -67,6 +67,8 @@ public final class LayoutStyle
 
     @Override
     public String toString() {
+        if ( this == _NONE )
+            return this.getClass().getSimpleName() + "[NONE]";
         return this.getClass().getSimpleName() + "[" +
                     "layout="     + _layout                                   + ", " +
                     "constraint=" + (_constraint == null ? "?" : _constraint) + ", " +

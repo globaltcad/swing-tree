@@ -107,6 +107,8 @@ final class BaseStyle
 
     @Override
     public String toString() {
+        if ( this == _NONE )
+            return this.getClass().getSimpleName() + "[NONE]";
         return this.getClass().getSimpleName() + "[" +
                     "icon="            + ( _icon       == null ? "?" : _icon.toString()  ) + ", " +
                     "fitComponent="    + _fit                                              + ", " +

@@ -18,22 +18,6 @@ import java.util.Objects;
  *              which is used to paint onto the inner area of a component.
  *          </p>
  *      </li>
- *      <li><h3>Layer</h3>
- *          <p>
- *              In essence the layer is an enum instance which
- *              gives the painter a particular rank in the painting order.
- *              So the {@link swingtree.UI.Layer#BACKGROUND} will be painted first,
- *              followed by the {@link swingtree.UI.Layer#CONTENT} and so on...
- *              <br>
- *              The following layers are available:
- *          </p>
- *          <ul>
- *              <li>{@link UI.Layer#BACKGROUND}</li>
- *              <li>{@link UI.Layer#CONTENT}</li>
- *              <li>{@link UI.Layer#BORDER}</li>
- *              <li>{@link UI.Layer#FOREGROUND}</li>
- *          </ul>
- *      </li>
  *  </ol>
  *  <p>
  *  Note that you can use the {@link #none()} method to specify that no painter should be used,
@@ -43,37 +27,34 @@ import java.util.Objects;
  */
 final class PainterStyle
 {
-    private static final PainterStyle _NONE = new PainterStyle(Painter.none(), UI.Layer.BACKGROUND);
+    static final UI.Layer DEFAULT_LAYER = UI.Layer.BACKGROUND;
+    private static final PainterStyle _NONE = new PainterStyle(Painter.none());
 
 
     public static PainterStyle none() { return _NONE; }
 
 
     private final Painter _painter;
-    private final UI.Layer _layer;
 
 
-    private PainterStyle( Painter painter, UI.Layer layer )
+    private PainterStyle( Painter painter )
     {
         _painter = painter;
-        _layer   = layer;
     }
 
 
     public Painter painter() { return _painter; }
 
-    public PainterStyle painter(Painter painter) { return new PainterStyle(painter, _layer); }
-
-    public UI.Layer layer() { return _layer; }
-
-    public PainterStyle layer( UI.Layer layer ) { return new PainterStyle(_painter, layer); }
+    public PainterStyle painter(Painter painter) { return new PainterStyle(painter); }
 
 
     @Override
     public String toString() {
-        return "PainterStyle[" +
-                    "painter=" + StyleUtility.toString(_painter) + ", " +
-                    "layer="   + _layer   +
+        if ( _painter == Painter.none() )
+            return this.getClass().getSimpleName() + "[NONE]";
+        else
+            return this.getClass().getSimpleName() + "[" +
+                    "painter=" + StyleUtility.toString(_painter) +
                 ']';
     }
 
@@ -82,12 +63,11 @@ final class PainterStyle
         if ( this == o ) return true;
         if ( !(o instanceof PainterStyle) ) return false;
         PainterStyle that = (PainterStyle) o;
-        return _painter == that._painter &&
-               _layer == that._layer;
+        return _painter == that._painter;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(_painter, _layer);
+        return Objects.hash(_painter);
     }
 }

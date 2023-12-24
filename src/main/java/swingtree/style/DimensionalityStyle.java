@@ -116,8 +116,11 @@ final class DimensionalityStyle
 
     @Override
     public String toString() {
+        if ( this == _NONE )
+            return this.getClass().getSimpleName() + "[NONE]";
+
         return
-            "DimensionalityStyle[" +
+            this.getClass().getSimpleName() + "[" +
                     "minWidth="        + _minSize.width().map(Objects::toString).orElse("?") + ", " +
                     "minHeight="       + _minSize.height().map(Objects::toString).orElse("?") + ", " +
                     "maxWidth="        + _maxSize.height().map(Objects::toString).orElse("?") + ", " +

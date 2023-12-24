@@ -50,8 +50,7 @@ class Styled_Component_Border_Inset_Spec extends Specification
                         .padding(0, 0, 0, 26)
                         .marginRight(25)
                         .paddingRight(-20)
-                        .image(image -> image
-                            .layer(UI.Layer.BORDER)
+                        .image(UI.Layer.BORDER, image -> image
                             .image(seed)
                             .placement(UI.Placement.LEFT)
                             .width(30).autoFit(true)
@@ -103,18 +102,17 @@ class Styled_Component_Border_Inset_Spec extends Specification
                         .borderRadius(20)
                         .backgroundColor(new Color(0.4f, 0.85f, 1))
                         .foundationColor(new Color(0.4f, 0.85f, 1))
-                        .shadow("bright", s -> s
+                        .shadow(UI.Layer.BACKGROUND, "bright", s -> s
                             .color(new Color(0.7f, 0.95f, 1f, 0.35f))
                             .offset(-11)
                         )
-                        .shadow("dark", s -> s
+                        .shadow(UI.Layer.BACKGROUND, "dark", s -> s
                             .color(new Color(0, 0.1f, 0.2f, 0.20f))
                             .offset(+4)
                         )
                         .shadowBlurRadius(4)
                         .shadowSpreadRadius(-2)
                         .shadowIsInset(true)
-                        .shadowLayer(UI.Layer.BACKGROUND) // So that the slider track is not affected by the shadow.
                         .padding(6)
                         .margin(10)
                     );

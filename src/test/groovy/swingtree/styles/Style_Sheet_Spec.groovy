@@ -550,9 +550,15 @@ class Style_Sheet_Spec extends Specification
             var s2 = ss.applyTo(label2.component)
         then : '...and we check the results'
             s1.hasCustomBackgroundPainters()
-            s1.painters().size() == 1
+            s1.painters(UI.Layer.BACKGROUND).size() == 1
+            s1.painters(UI.Layer.CONTENT).size() == 1
+            s1.painters(UI.Layer.BORDER).size() == 1
+            s1.painters(UI.Layer.FOREGROUND).size() == 1
             s2.hasCustomBackgroundPainters()
-            s2.painters().size() == 1
+            s2.painters(UI.Layer.BACKGROUND).size() == 1
+            s2.painters(UI.Layer.CONTENT).size() == 1
+            s2.painters(UI.Layer.BORDER).size() == 1
+            s2.painters(UI.Layer.FOREGROUND).size() == 1
     }
 
     def 'The order of inherited style traits determines the order in which they are applied.'()
@@ -692,9 +698,12 @@ class Style_Sheet_Spec extends Specification
             s.base().backgroundColor().get() == Color.RED
             s.border().gradient().transition() == UI.Transition.BOTTOM_TO_TOP
             s.border().gradient().colors() as java.util.List == [Color.RED, Color.BLUE]
-            s.shadow("named shadow").spreadRadius() == 42
-            s.shadow("named shadow").color().get() == Color.CYAN
-            s.shadow("named shadow").isInset() == false
+            s.shadow(UI.Layer.BACKGROUND, "named shadow") == null
+            s.shadow(UI.Layer.CONTENT, "named shadow").spreadRadius() == 42
+            s.shadow(UI.Layer.CONTENT, "named shadow").color().get() == Color.CYAN
+            s.shadow(UI.Layer.CONTENT, "named shadow").isInset() == false
+            s.shadow(UI.Layer.BORDER, "named shadow") == null
+            s.shadow(UI.Layer.FOREGROUND, "named shadow") == null
             s.font().family() == "Arial"
             s.font().size() == 12
             s.font().posture() == 0

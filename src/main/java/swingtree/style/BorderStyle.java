@@ -287,6 +287,9 @@ final class BorderStyle
     @Override
     public String toString()
     {
+        if ( this == _NONE )
+            return this.getClass().getSimpleName() + "[NONE]";
+
         String arcsString;
         if ( allCornersShareTheSameArc() ) {
             boolean arcWidthEqualsHeight = _topLeftArc == null || _topLeftArc.width() == _topLeftArc.height();
@@ -316,7 +319,7 @@ final class BorderStyle
 
         String shadesString = _gradients.toString(StyleUtility.DEFAULT_KEY, "gradients");
 
-        return "BorderStyle[" +
+        return this.getClass().getSimpleName() + "[" +
                     arcsString + ", " +
                     borderWidthsString + ", " +
                     "margin=" + _margin + ", " +

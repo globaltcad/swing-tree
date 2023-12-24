@@ -60,22 +60,6 @@ import java.util.Optional;
  *              whereas outset shadows go outward, starting from the outer edge of the box's border.
  *          </p>
  *      </li>
- *      <li><h3>Layer</h3>
- *          <p>
- *              The layer of the shadow is an enum instance which
- *              gives the shadow effect a rank in the painting order.
- *              So the {@link swingtree.UI.Layer#BACKGROUND} will be painted first,
- *              followed by the {@link swingtree.UI.Layer#CONTENT} and so on...
- *              <br>
- *              The following layers are available:
- *          </p>
- *          <ul>
- *              <li>{@link UI.Layer#BACKGROUND}</li>
- *              <li>{@link UI.Layer#CONTENT}</li>
- *              <li>{@link UI.Layer#BORDER}</li>
- *              <li>{@link UI.Layer#FOREGROUND}</li>
- *          </ul>
- *      </li>
  *  </ol>
  *  <p>
  *  Note that you can use the {@link #none()} method to specify that no shadow should be used,
@@ -85,10 +69,11 @@ import java.util.Optional;
 public final class ShadowStyle
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(ShadowStyle.class);
+    static final UI.Layer DEFAULT_LAYER = UI.Layer.CONTENT;
 
     private static final ShadowStyle _NONE = new ShadowStyle(
                                                     Offset.none(),0, 0,
-                                                    null, true, UI.Layer.CONTENT
+                                                    null, true
                                                 );
 
     public static ShadowStyle none() { return _NONE; }
@@ -98,7 +83,6 @@ public final class ShadowStyle
     private final int     _spreadRadius;
     private final Color   _color;
     private final boolean _isOutset;
-    private final UI.Layer _layer;
 
 
     private ShadowStyle(
@@ -106,15 +90,13 @@ public final class ShadowStyle
         int     shadowBlurRadius,
         int     shadowSpreadRadius,
         Color   shadowColor,
-        boolean isOutset,
-        UI.Layer layer
+        boolean isOutset
     ) {
         _offset           = Objects.requireNonNull(offset);
         _blurRadius       = shadowBlurRadius;
         _spreadRadius     = shadowSpreadRadius;
         _color            = shadowColor;
         _isOutset         = isOutset;
-        _layer            = layer;
     }
 
     public int horizontalOffset() { return _offset.x(); }
@@ -131,15 +113,13 @@ public final class ShadowStyle
 
     public boolean isInset() { return !_isOutset; }
 
-    public UI.Layer layer() { return _layer; }
-
     /**
      * @param horizontalShadowOffset The horizontal shadow offset, if positive the shadow will move to the right,
      *                               if negative the shadow will move to the left.
      * @return A new {@link ShadowStyle} with the specified horizontal shadow offset.
      */
     public ShadowStyle horizontalOffset( int horizontalShadowOffset ) {
-        return new ShadowStyle(_offset.x(horizontalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset, _layer);
+        return new ShadowStyle(_offset.x(horizontalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);
     }
 
     /**
@@ -148,7 +128,7 @@ public final class ShadowStyle
      * @return A new {@link ShadowStyle} with the specified vertical shadow offset.
      */
     public ShadowStyle verticalOffset( int verticalShadowOffset ) {
-        return new ShadowStyle(_offset.y(verticalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset, _layer);
+        return new ShadowStyle(_offset.y(verticalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);
     }
 
     /**
@@ -159,7 +139,7 @@ public final class ShadowStyle
      * @return A new {@link ShadowStyle} with the specified horizontal and vertical shadow offsets.
      */
     public ShadowStyle offset( int horizontalShadowOffset, int verticalShadowOffset ) {
-        return new ShadowStyle(Offset.of(horizontalShadowOffset, verticalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset, _layer);
+        return new ShadowStyle(Offset.of(horizontalShadowOffset, verticalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);
     }
 
     /**
@@ -170,7 +150,7 @@ public final class ShadowStyle
      * @return A new {@link ShadowStyle} with the specified horizontal and vertical shadow offsets.
      */
     public ShadowStyle offset( int shadowOffset ) {
-        return new ShadowStyle(Offset.of(shadowOffset, shadowOffset), _blurRadius, _spreadRadius, _color, _isOutset, _layer);
+        return new ShadowStyle(Offset.of(shadowOffset, shadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);
     }
 
     /**
@@ -180,7 +160,7 @@ public final class ShadowStyle
      * @return A new {@link ShadowStyle} with the specified blur radius.
      */
     public ShadowStyle blurRadius( int shadowBlurRadius ) {
-        return new ShadowStyle(_offset, shadowBlurRadius, _spreadRadius, _color, _isOutset, _layer);
+        return new ShadowStyle(_offset, shadowBlurRadius, _spreadRadius, _color, _isOutset);
     }
 
     /**
@@ -192,7 +172,7 @@ public final class ShadowStyle
      * @return A new {@link ShadowStyle} with the specified spread radius.
      */
     public ShadowStyle spreadRadius( int shadowSpreadRadius ) {
-        return new ShadowStyle(_offset, _blurRadius, shadowSpreadRadius, _color, _isOutset, _layer);
+        return new ShadowStyle(_offset, _blurRadius, shadowSpreadRadius, _color, _isOutset);
     }
 
     /**
@@ -200,7 +180,7 @@ public final class ShadowStyle
      * @return A new {@link ShadowStyle} with the specified color.
      */
     public ShadowStyle color( Color shadowColor ) {
-        return new ShadowStyle(_offset, _blurRadius, _spreadRadius, shadowColor, _isOutset, _layer);
+        return new ShadowStyle(_offset, _blurRadius, _spreadRadius, shadowColor, _isOutset);
     }
 
     /**
@@ -226,7 +206,7 @@ public final class ShadowStyle
             log.error("Failed to parse color string: '{}'", shadowColor, e);
             return this; // We want to avoid side effects other than a wrong color
         }
-        return new ShadowStyle(_offset, _blurRadius, _spreadRadius, newColor, _isOutset, _layer);
+        return new ShadowStyle(_offset, _blurRadius, _spreadRadius, newColor, _isOutset);
     }
 
     /**
@@ -237,7 +217,7 @@ public final class ShadowStyle
      * @return A new {@link ShadowStyle} with the specified inset/outset state.
      */
     public ShadowStyle isInset( boolean shadowInset ) {
-        return new ShadowStyle(_offset, _blurRadius, _spreadRadius, _color, !shadowInset, _layer);
+        return new ShadowStyle(_offset, _blurRadius, _spreadRadius, _color, !shadowInset);
     }
 
     /**
@@ -248,22 +228,14 @@ public final class ShadowStyle
      * @return A new {@link ShadowStyle} with the specified outset/inset state.
      */
     public ShadowStyle isOutset( boolean shadowOutset ) {
-        return new ShadowStyle(_offset, _blurRadius, _spreadRadius, _color, shadowOutset, _layer);
-    }
-
-    /**
-     * @param shadowLayer The layer of the shadow, by default the shadow is drawn on the border layer.
-     * @return A new {@link ShadowStyle} with the specified layer.
-     */
-    public ShadowStyle layer( UI.Layer shadowLayer ) {
-        return new ShadowStyle(_offset, _blurRadius, _spreadRadius, _color, _isOutset, shadowLayer);
+        return new ShadowStyle(_offset, _blurRadius, _spreadRadius, _color, shadowOutset);
     }
 
     ShadowStyle _scale( double scaleFactor ) {
         return new ShadowStyle(_offset.scale(scaleFactor),
                                (int) Math.round(_blurRadius       * scaleFactor),
                                (int) Math.round(_spreadRadius     * scaleFactor),
-                               _color, _isOutset, _layer);
+                               _color, _isOutset);
     }
 
     @Override
@@ -274,7 +246,6 @@ public final class ShadowStyle
         hash = 31 * hash + _spreadRadius;
         hash = 31 * hash + Objects.hashCode(_color);
         hash = 31 * hash + (_isOutset ? 1 : 0);
-        hash = 31 * hash + _layer.hashCode();
         return hash;
     }
 
@@ -288,20 +259,20 @@ public final class ShadowStyle
                _blurRadius       == rhs._blurRadius       &&
                _spreadRadius     == rhs._spreadRadius     &&
                Objects.equals(_color, rhs._color)         &&
-               _isOutset         == rhs._isOutset         &&
-               _layer.equals(rhs._layer);
+               _isOutset         == rhs._isOutset;
     }
 
     @Override
     public String toString() {
+        if ( this == _NONE )
+            return "ShadowStyle[NONE]";
         return "ShadowStyle[" +
                     "horizontalOffset=" + _offset.x()       + ", " +
                     "verticalOffset="   + _offset.y()       + ", " +
                     "blurRadius="       + _blurRadius       + ", " +
                     "spreadRadius="     + _spreadRadius     + ", " +
                     "color="            + StyleUtility.toString(_color) + ", " +
-                    "isInset="          + !_isOutset + ", " +
-                    "layer="            + _layer +
+                    "isInset="          + !_isOutset +
                 "]";
     }
 

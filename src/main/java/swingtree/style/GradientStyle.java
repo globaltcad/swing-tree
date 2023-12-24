@@ -47,10 +47,6 @@ import java.util.function.Function;
  *          An array of colors that will be used
  *          as a basis for the gradient transition.
  *      </li>
- *      <li><h3>Layer</h3>
- *          The layer defines if the gradient should be applied
- *          to the background or the border of a component.
- *      </li>
  *  </ul>
  *  <p>
  *  You can also use the {@link #none()} method to specify that no gradient should be used,
@@ -60,12 +56,12 @@ import java.util.function.Function;
 public final class GradientStyle
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(GradientStyle.class);
+    static final UI.Layer DEFAULT_LAYER = UI.Layer.BACKGROUND;
 
     private static final GradientStyle _NONE = new GradientStyle(
                                                         UI.Transition.TOP_TO_BOTTOM,
                                                         UI.GradientType.LINEAR,
-                                                        new Color[0],
-                                                        UI.Layer.BACKGROUND
+                                                        new Color[0]
                                                     );
 
     /**
@@ -80,15 +76,13 @@ public final class GradientStyle
     private final UI.Transition   _transition;
     private final UI.GradientType _type;
     private final Color[]         _colors;
-    private final UI.Layer        _layer;
 
 
-    private GradientStyle( UI.Transition transition, UI.GradientType type, Color[] colors, UI.Layer layer )
+    private GradientStyle( UI.Transition transition, UI.GradientType type, Color[] colors )
     {
         _transition = Objects.requireNonNull(transition);
         _type       = Objects.requireNonNull(type);
         _colors     = Objects.requireNonNull(colors);
-        _layer      = Objects.requireNonNull(layer);
     }
 
     UI.Transition transition() { return _transition; }
@@ -96,8 +90,6 @@ public final class GradientStyle
     UI.GradientType type() { return _type; }
 
     Color[] colors() { return _colors; }
-
-    UI.Layer layer() { return _layer; }
 
     /**
      *  Define a list of colors which will, as part of the gradient, transition from one
@@ -113,7 +105,7 @@ public final class GradientStyle
         Objects.requireNonNull(colors);
         for ( Color color : colors )
             Objects.requireNonNull(color);
-        return new GradientStyle(_transition, _type, colors, _layer);
+        return new GradientStyle(_transition, _type, colors);
     }
 
     /**
@@ -133,7 +125,7 @@ public final class GradientStyle
             for ( int i = 0; i < colors.length; i++ )
                 actualColors[i] = StyleUtility.toColor(colors[i]);
 
-            return new GradientStyle(_transition, _type, actualColors, _layer);
+            return new GradientStyle(_transition, _type, actualColors);
         } catch ( Exception e ) {
             log.error("Failed to parse color strings: " + Arrays.toString(colors), e);
             return this; // We want to avoid side effects other than a wrong color
@@ -159,7 +151,7 @@ public final class GradientStyle
      */
     public GradientStyle transition( UI.Transition transition ) {
         Objects.requireNonNull(transition);
-        return new GradientStyle(transition, _type, _colors, _layer);
+        return new GradientStyle(transition, _type, _colors);
     }
 
     /**
@@ -175,33 +167,17 @@ public final class GradientStyle
      */
     public GradientStyle type( UI.GradientType type ) {
         Objects.requireNonNull(type);
-        return new GradientStyle(_transition, type, _colors, _layer);
+        return new GradientStyle(_transition, type, _colors);
     }
-
-    /**
-     *  Define the layer of the gradient which is one of the following:
-     *  <ul>
-     *     <li>{@link UI.Layer#BACKGROUND}</li>
-     *     <li>{@link UI.Layer#BORDER}</li>
-     *  </ul>
-     *
-     * @param layer The layer of the gradient.
-     * @return A new gradient style with the specified layer.
-     * @throws NullPointerException if the layer is {@code null}.
-     */
-    public GradientStyle layer( UI.Layer layer ) {
-        Objects.requireNonNull(layer);
-        return new GradientStyle(_transition, _type, _colors, layer);
-    }
-
 
     @Override
     public String toString() {
+        if ( this == _NONE )
+            return getClass().getSimpleName() + "[NONE]";
         return getClass().getSimpleName() + "[" +
                     "transition=" + _transition + ", " +
                     "type="       + _type + ", " +
-                    "colors="     + Arrays.toString(_colors) + ", " +
-                    "layer="      + _layer                   +
+                    "colors="     + Arrays.toString(_colors) +
                 ']';
     }
 
@@ -212,13 +188,12 @@ public final class GradientStyle
         GradientStyle that = (GradientStyle) o;
         return _transition == that._transition       &&
                _type       == that._type             &&
-               Arrays.equals(_colors, that._colors)  &&
-               _layer      == that._layer;
+               Arrays.equals(_colors, that._colors);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(_transition, _type, Arrays.hashCode(_colors), _layer);
+        return Objects.hash(_transition, _type, Arrays.hashCode(_colors));
     }
 
 }
