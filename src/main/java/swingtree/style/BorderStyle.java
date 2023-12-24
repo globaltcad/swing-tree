@@ -15,7 +15,10 @@ import java.util.stream.Collectors;
 final class BorderStyle
 {
     private static final BorderStyle _NONE = new BorderStyle(
-                                                null, null, null, null,
+                                                Arc.none(),
+                                                Arc.none(),
+                                                Arc.none(),
+                                                Arc.none(),
                                                 Outline.none(),
                                                 Outline.none(),
                                                 Outline.none(),
@@ -60,28 +63,28 @@ final class BorderStyle
         _gradients       = Objects.requireNonNull(gradients);
     }
 
-    public Optional<Arc> topLeftArc() { return Optional.ofNullable(_topLeftArc); }
+    public Optional<Arc> topLeftArc() { return _topLeftArc == Arc.none() ? Optional.empty() : Optional.of(_topLeftArc); }
 
-    public Optional<Arc> topRightArc() { return Optional.ofNullable(_topRightArc); }
+    public Optional<Arc> topRightArc() { return _topRightArc == Arc.none() ? Optional.empty() : Optional.of(_topRightArc); }
 
-    public Optional<Arc> bottomLeftArc() { return Optional.ofNullable(_bottomLeftArc); }
+    public Optional<Arc> bottomLeftArc() { return _bottomLeftArc == Arc.none() ? Optional.empty() : Optional.of(_bottomLeftArc); }
 
-    public Optional<Arc> bottomRightArc() { return Optional.ofNullable(_bottomRightArc); }
+    public Optional<Arc> bottomRightArc() { return _bottomRightArc == Arc.none() ? Optional.empty() : Optional.of(_bottomRightArc); }
 
     public boolean hasAnyNonZeroArcs() {
-        return _topLeftArc     != null && _topLeftArc.width()     > 0 && _topLeftArc.height()     > 0 ||
-               _topRightArc    != null && _topRightArc.width()    > 0 && _topRightArc.height()    > 0 ||
-               _bottomLeftArc  != null && _bottomLeftArc.width()  > 0 && _bottomLeftArc.height()  > 0 ||
-               _bottomRightArc != null && _bottomRightArc.width() > 0 && _bottomRightArc.height() > 0;
+        return _topLeftArc     != Arc.none() && _topLeftArc.width()     > 0 && _topLeftArc.height()     > 0 ||
+               _topRightArc    != Arc.none() && _topRightArc.width()    > 0 && _topRightArc.height()    > 0 ||
+               _bottomLeftArc  != Arc.none() && _bottomLeftArc.width()  > 0 && _bottomLeftArc.height()  > 0 ||
+               _bottomRightArc != Arc.none() && _bottomRightArc.width() > 0 && _bottomRightArc.height() > 0;
     }
 
-    public int topLeftRadius() { return _topLeftArc != null ? (_topLeftArc.width() + _topLeftArc.height()) / 2 : 0; }
+    public int topLeftRadius() { return _topLeftArc != Arc.none() ? (_topLeftArc.width() + _topLeftArc.height()) / 2 : 0; }
 
-    public int topRightRadius() { return _topRightArc != null ? (_topRightArc.width() + _topRightArc.height()) / 2 : 0; }
+    public int topRightRadius() { return _topRightArc != Arc.none() ? (_topRightArc.width() + _topRightArc.height()) / 2 : 0; }
 
-    public int bottomLeftRadius() { return _bottomLeftArc != null ? (_bottomLeftArc.width() + _bottomLeftArc.height()) / 2 : 0; }
+    public int bottomLeftRadius() { return _bottomLeftArc != Arc.none() ? (_bottomLeftArc.width() + _bottomLeftArc.height()) / 2 : 0; }
 
-    public int bottomRightRadius() { return _bottomRightArc != null ? (_bottomRightArc.width() + _bottomRightArc.height()) / 2 : 0; }
+    public int bottomRightRadius() { return _bottomRightArc != Arc.none() ? (_bottomRightArc.width() + _bottomRightArc.height()) / 2 : 0; }
 
     public Outline widths() { return _borderWidths; }
 
@@ -143,16 +146,16 @@ final class BorderStyle
         int arcHeight;
         switch ( corner ) {
             case TOP_LEFT:
-                arcHeight = _topLeftArc != null ? _topLeftArc.height() : 0;
+                arcHeight = _topLeftArc != Arc.none() ? _topLeftArc.height() : 0;
                 return new BorderStyle(Arc.of(borderArcWidth, arcHeight), _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _borderColor, _gradients);
             case TOP_RIGHT:
-                arcHeight = _topRightArc != null ? _topRightArc.height() : 0;
+                arcHeight = _topRightArc != Arc.none() ? _topRightArc.height() : 0;
                 return new BorderStyle(_topLeftArc, Arc.of(borderArcWidth, arcHeight), _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _borderColor, _gradients);
             case BOTTOM_LEFT:
-                arcHeight = _bottomLeftArc != null ? _bottomLeftArc.height() : 0;
+                arcHeight = _bottomLeftArc != Arc.none() ? _bottomLeftArc.height() : 0;
                 return new BorderStyle(_topLeftArc, _topRightArc, Arc.of(borderArcWidth, arcHeight), _bottomRightArc, _borderWidths, _margin, _padding, _borderColor, _gradients);
             case BOTTOM_RIGHT:
-                arcHeight = _bottomRightArc != null ? _bottomRightArc.height() : 0;
+                arcHeight = _bottomRightArc != Arc.none() ? _bottomRightArc.height() : 0;
                 return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, Arc.of(borderArcWidth, arcHeight), _borderWidths, _margin, _padding, _borderColor, _gradients);
             default:
                 throw new IllegalArgumentException("Unknown corner: " + corner);
@@ -172,16 +175,16 @@ final class BorderStyle
         int arcWidth;
         switch ( corner ) {
             case TOP_LEFT:
-                arcWidth = _topLeftArc != null ? _topLeftArc.width() : 0;
+                arcWidth = _topLeftArc != Arc.none() ? _topLeftArc.width() : 0;
                 return new BorderStyle(Arc.of(arcWidth, borderArcHeight), _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _borderColor, _gradients);
             case TOP_RIGHT:
-                arcWidth = _topRightArc != null ? _topRightArc.width() : 0;
+                arcWidth = _topRightArc != Arc.none() ? _topRightArc.width() : 0;
                 return new BorderStyle(_topLeftArc, Arc.of(arcWidth, borderArcHeight), _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _borderColor, _gradients);
             case BOTTOM_LEFT:
-                arcWidth = _bottomLeftArc != null ? _bottomLeftArc.width() : 0;
+                arcWidth = _bottomLeftArc != Arc.none() ? _bottomLeftArc.width() : 0;
                 return new BorderStyle(_topLeftArc, _topRightArc, Arc.of(arcWidth, borderArcHeight), _bottomRightArc, _borderWidths, _margin, _padding, _borderColor, _gradients);
             case BOTTOM_RIGHT:
-                arcWidth = _bottomRightArc != null ? _bottomRightArc.width() : 0;
+                arcWidth = _bottomRightArc != Arc.none() ? _bottomRightArc.width() : 0;
                 return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, Arc.of(arcWidth, borderArcHeight), _borderWidths, _margin, _padding, _borderColor, _gradients);
             default:
                 throw new IllegalArgumentException("Unknown corner: " + corner);
@@ -239,25 +242,25 @@ final class BorderStyle
 
     BorderStyle _scale( double scale ) {
         return new BorderStyle(
-                    _topLeftArc     == null ? null : _topLeftArc.scale(scale),
-                    _topRightArc    == null ? null : _topRightArc.scale(scale),
-                    _bottomLeftArc  == null ? null : _bottomLeftArc.scale(scale),
-                    _bottomRightArc == null ? null : _bottomRightArc.scale(scale),
+                    _topLeftArc.scale(scale),
+                    _topRightArc.scale(scale),
+                    _bottomLeftArc.scale(scale),
+                    _bottomRightArc.scale(scale),
                     _borderWidths.scale(scale),
                     _margin.scale(scale),
                     _padding.scale(scale),
                     _borderColor,
-                _gradients
-            );
+                    _gradients
+                );
     }
 
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 97 * hash + ( _topLeftArc     != null ? _topLeftArc.hashCode()     : 0 );
-        hash = 97 * hash + ( _topRightArc    != null ? _topRightArc.hashCode()    : 0 );
-        hash = 97 * hash + ( _bottomLeftArc  != null ? _bottomLeftArc.hashCode()  : 0 );
-        hash = 97 * hash + ( _bottomRightArc != null ? _bottomRightArc.hashCode() : 0 );
+        hash = 97 * hash + _topLeftArc.hashCode();
+        hash = 97 * hash + _topRightArc.hashCode();
+        hash = 97 * hash + _bottomLeftArc.hashCode();
+        hash = 97 * hash + _bottomRightArc.hashCode();
         hash = 97 * hash + ( _borderColor    != null ? _borderColor.hashCode()    : 0 );
         hash = 97 * hash + _borderWidths.hashCode();
         hash = 97 * hash + _margin.hashCode();
@@ -292,10 +295,10 @@ final class BorderStyle
 
         String arcsString;
         if ( allCornersShareTheSameArc() ) {
-            boolean arcWidthEqualsHeight = _topLeftArc == null || _topLeftArc.width() == _topLeftArc.height();
+            boolean arcWidthEqualsHeight = _topLeftArc == Arc.none() || _topLeftArc.width() == _topLeftArc.height();
             arcsString = (
                         arcWidthEqualsHeight
-                            ? "radius="   + ( _topLeftArc == null ? "?" : _topLeftArc.width() )
+                            ? "radius="   + ( _topLeftArc == Arc.none() ? "?" : _topLeftArc.width() )
                             : "arcWidth=" + _topLeftArc.width() + ", arcHeight=" + _topLeftArc.height()
                     );
         } else {

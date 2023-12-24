@@ -10,6 +10,13 @@ import java.awt.*;
  */
 final class Arc
 {
+    private static final Arc _NONE = new Arc(-1, -1);
+
+    /**
+     * @return An {@link Arc} with width and height of -1.
+     */
+    static Arc none() { return _NONE; }
+
     /**
      *  A factory method for creating an {@link Arc} from the provided width and height values.
      *
@@ -25,8 +32,8 @@ final class Arc
 
 
     private Arc( int arcWidth, int arcHeight ) {
-        _arcWidth  = arcWidth;
-        _arcHeight = arcHeight;
+        _arcWidth  = Math.max(-1, arcWidth);
+        _arcHeight = Math.max(-1, arcHeight);
     }
 
     /**
@@ -51,6 +58,9 @@ final class Arc
      * @return A new scaled {@link Arc}.
      */
     Arc scale( double scale ) {
+        if ( this == _NONE )
+            return _NONE;
+
         return Arc.of(
                     (int) Math.round( _arcWidth  * scale ),
                     (int) Math.round( _arcHeight * scale )
