@@ -6,6 +6,7 @@ import spock.lang.Subject
 import spock.lang.Title
 import swingtree.SwingTree
 import swingtree.UI
+import swingtree.style.Layout
 import swingtree.threading.EventProcessor
 import swingtree.style.Style
 import swingtree.style.ComponentStyleDelegate
@@ -233,6 +234,66 @@ class Styles_Spec extends Specification
                                         "], " +
                                         "properties=[]" +
                                     "]"
+
+        when : 'We create another style with some other properties:'
+            style = new ComponentStyleDelegate<>(new JPanel(), Style.none())
+                                .layout(Layout.border(2, 4))
+                                .size(100, 200)
+                                .minSize(50, 100)
+                                .maxHeight(300)
+                                .prefWidth(400)
+                                .gradient(UI.Layer.BORDER, "gradient", conf -> conf
+                                    .colors(Color.RED, Color.GREEN, Color.BLUE)
+                                    .transition(UI.Transition.BOTTOM_TO_TOP)
+                                    .type(UI.GradientType.RADIAL)
+                                )
+                                .style()
+
+        then :
+                style.toString() == "Style[" +
+                                        "LayoutStyle[" +
+                                            "layout=BorderLayoutInstaller[hgap=2, vgap=4], " +
+                                            "constraint=?, " +
+                                            "alignmentX=?, " +
+                                            "alignmentY=?" +
+                                        "], " +
+                                        "BorderStyle[NONE], " +
+                                        "BaseStyle[NONE], " +
+                                        "FontStyle[NONE], " +
+                                        "DimensionalityStyle[" +
+                                            "minWidth=50, " +
+                                            "minHeight=100, " +
+                                            "maxWidth=300, " +
+                                            "maxHeight=?, " +
+                                            "preferredWidth=400, " +
+                                            "preferredHeight=?, " +
+                                            "width=100, " +
+                                            "height=200" +
+                                        "], " +
+                                        "NamedStyles[" +
+                                            "BACKGROUND=StyleLayer[EMPTY], " +
+                                            "CONTENT=StyleLayer[EMPTY], " +
+                                            "BORDER=StyleLayer[" +
+                                                "shadows=ShadowStyle[NONE], " +
+                                                "painters=PainterStyle[NONE], " +
+                                                "gradients=NamedStyles[" +
+                                                    "default=GradientStyle[NONE], " +
+                                                    "gradient=GradientStyle[" +
+                                                        "transition=BOTTOM_TO_TOP, " +
+                                                        "type=RADIAL, " +
+                                                        "colors=[java.awt.Color[r=255,g=0,b=0], " +
+                                                        "java.awt.Color[r=0,g=255,b=0], " +
+                                                        "java.awt.Color[r=0,g=0,b=255]" +
+                                                    "]" +
+                                                "]" +
+                                            "], " +
+                                            "images=ImageStyle[NONE]" +
+                                        "], " +
+                                        "FOREGROUND=StyleLayer[EMPTY]" +
+                                    "], " +
+                                    "properties=[]" +
+                                "]"
+
     }
 
     def 'Style objects are value based (with respect to equality and hash code).'()

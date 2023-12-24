@@ -377,6 +377,15 @@ public interface Layout
                 }
             }
         }
+
+
+        @Override public String toString() {
+            return getClass().getSimpleName() + "[" +
+                        "constr=" + _constr + ", " +
+                        "colConstr=" + _colConstr + ", " +
+                        "rowConstr=" + _rowConstr +
+                    "]";
+        }
     }
 
     /**
@@ -435,7 +444,15 @@ public interface Layout
                 component.revalidate();
             }
         }
-    }
+
+        @Override public String toString() {
+            return getClass().getSimpleName() + "[" +
+                        "align=" + _align + ", " +
+                        "hgap=" + _hgap + ", " +
+                        "vgap=" + _vgap +
+                    "]";
+            }
+        }
 
     /**
      *  The {@link BorderLayoutInstaller} layout is a layout that represents
@@ -487,6 +504,13 @@ public interface Layout
                 borderLayout.setVgap(verticalGap);
                 component.revalidate();
             }
+        }
+
+        @Override public String toString() {
+            return getClass().getSimpleName() + "[" +
+                        "hgap=" + _hgap + ", " +
+                        "vgap=" + _vgap +
+                    "]";
         }
     }
 
@@ -551,6 +575,15 @@ public interface Layout
                 component.revalidate();
             }
         }
+
+        @Override public String toString() {
+            return getClass().getSimpleName() + "[" +
+                        "rows=" + _rows + ", " +
+                        "cols=" + _cols + ", " +
+                        "hgap=" + _hgap + ", " +
+                        "vgap=" + _vgap +
+                    "]";
+        }
     }
 
     /**
@@ -601,6 +634,12 @@ public interface Layout
                 component.setLayout(newLayout);
                 component.revalidate();
             }
+        }
+
+        @Override public String toString() {
+            return getClass().getSimpleName() + "[" +
+                        "axis=" + _axis +
+                    "]";
         }
     }
 
