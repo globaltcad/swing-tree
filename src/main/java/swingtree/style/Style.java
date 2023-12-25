@@ -179,7 +179,7 @@ public final class Style
         painterName = painterName + "_" + layer.name();
         // We clone the painter map:
         NamedStyles<PainterStyle> newPainters = _layers.get(layer.name())
-                                                     .painters()
+                                                    .painters()
                                                     .withNamedStyle(
                                                         painterName, // Existing painters are overwritten if they have the same name.
                                                         PainterStyle.none().painter(painter)
@@ -248,22 +248,37 @@ public final class Style
     public Style backgroundColor( Color color ) { return _withBase(base().backgroundColor(color)); }
 
     Style _withLayout( LayoutStyle layout ) {
+        if ( layout == _layout )
+            return this;
+
         return new Style(layout, _border, _base, _font, _dimensionality, _layers, _properties);
     }
 
     Style _withBorder( BorderStyle border ) {
+        if ( border == _border )
+            return this;
+
         return new Style(_layout, border, _base, _font, _dimensionality, _layers, _properties);
     }
 
     Style _withBase( BaseStyle background ) {
+        if ( background == _base )
+            return this;
+
         return new Style(_layout, _border, background, _font, _dimensionality, _layers, _properties);
     }
 
     Style _withFont( FontStyle font ) {
+        if ( font == _font )
+            return this;
+
         return new Style(_layout, _border, _base, font, _dimensionality, _layers, _properties);
     }
 
     Style _withDimensionality( DimensionalityStyle dimensionality ) {
+        if ( dimensionality == _dimensionality )
+            return this;
+
         return new Style(_layout, _border, _base, _font, dimensionality, _layers, _properties);
     }
 
@@ -272,6 +287,9 @@ public final class Style
     }
 
     Style _withProperties( NamedStyles<String> properties ) {
+        if ( properties == _properties )
+            return this;
+
         return new Style(_layout, _border, _base, _font, _dimensionality, _layers, properties);
     }
 
@@ -295,6 +313,9 @@ public final class Style
     }
 
     Style _withLayers( NamedStyles<StyleLayer> layers ) {
+        if ( layers == _layers )
+            return this;
+
         return new Style(_layout, _border, _base, _font, _dimensionality, layers, _properties);
     }
 
@@ -348,6 +369,12 @@ public final class Style
                     _layers.mapStyles( layer -> layer._scale(scale) ),
                     _properties
                 );
+    }
+
+    Style simplified() {
+        return _withBorder(_border.simplified())
+               ._withDimensionality(_dimensionality.simplified())
+               ._withLayers(_layers.simplified());
     }
 
     boolean hasEqualLayoutAs( Style otherStyle ) {

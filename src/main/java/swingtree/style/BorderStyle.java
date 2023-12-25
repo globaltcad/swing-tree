@@ -254,6 +254,44 @@ final class BorderStyle
                 );
     }
 
+    BorderStyle simplified() {
+        if ( this == _NONE )
+            return _NONE;
+        Color simplifiedBorderColor    = _borderColor != null && _borderColor.getAlpha() > 0 ? _borderColor : null;
+        Arc simplifiedTopLeftArc       = _topLeftArc.simplified();
+        Arc simplifiedTopRightArc      = _topRightArc.simplified();
+        Arc simplifiedBottomLeftArc    = _bottomLeftArc.simplified();
+        Arc simplifiedBottomRightArc   = _bottomRightArc.simplified();
+        Outline simplifiedBorderWidths = _borderWidths.simplified();
+        Outline simplifiedMargin       = _margin.simplified();
+        Outline simplifiedPadding      = _padding.simplified();
+        NamedStyles<GradientStyle> simplifiedGradients = _gradients.simplified();
+        if (
+             simplifiedBorderColor    == null &&
+             simplifiedTopLeftArc     == Arc.none() &&
+             simplifiedTopRightArc    == Arc.none() &&
+             simplifiedBottomLeftArc  == Arc.none() &&
+             simplifiedBottomRightArc == Arc.none() &&
+             simplifiedBorderWidths   == Outline.none() &&
+             simplifiedMargin         == Outline.none() &&
+             simplifiedPadding        == Outline.none() &&
+             simplifiedGradients.equals(NamedStyles.of(NamedStyle.of(StyleUtility.DEFAULT_KEY, GradientStyle.none())))
+        )
+            return _NONE;
+        else
+            return new BorderStyle(
+                        simplifiedTopLeftArc,
+                        simplifiedTopRightArc,
+                        simplifiedBottomLeftArc,
+                        simplifiedBottomRightArc,
+                        simplifiedBorderWidths,
+                        simplifiedMargin,
+                        simplifiedPadding,
+                        simplifiedBorderColor,
+                        simplifiedGradients
+                    );
+    }
+
     @Override
     public int hashCode() {
         int hash = 7;

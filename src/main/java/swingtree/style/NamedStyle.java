@@ -9,9 +9,11 @@ import java.util.Objects;
  *
  * @param <S> The type of the style.
  */
-class NamedStyle<S>
+class NamedStyle<S> implements Simplifiable<NamedStyle<S>>
 {
-    static <S> NamedStyle<S> of( String name, S style ) { return new NamedStyle<>( name, style ); }
+    static <S> NamedStyle<S> of( String name, S style ) {
+        return new NamedStyle<>( name, style );
+    }
 
     private final String _name;
     private final S _style;
@@ -46,5 +48,16 @@ class NamedStyle<S>
                     "name="  + _name  +", "+
                     "style=" + _style +
                 "]";
+    }
+
+    @Override
+    public NamedStyle<S> simplified() {
+        if ( _style instanceof Simplifiable ) {
+            S simplifiedStyle = ((Simplifiable<S>)_style).simplified();
+            if (simplifiedStyle == _style)
+                return this;
+            return new NamedStyle<>(_name, simplifiedStyle);
+        }
+        return this;
     }
 }

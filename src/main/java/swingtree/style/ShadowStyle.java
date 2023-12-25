@@ -66,7 +66,7 @@ import java.util.Optional;
  *  as the instance returned by that method is a shadow with no offset, no blur, no spread and no color,
  *  effectively making it a representation of the absence of a shadow.
  */
-public final class ShadowStyle
+public final class ShadowStyle implements Simplifiable<ShadowStyle>
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(ShadowStyle.class);
     static final UI.Layer DEFAULT_LAYER = UI.Layer.CONTENT;
@@ -276,4 +276,14 @@ public final class ShadowStyle
                 "]";
     }
 
+    @Override
+    public ShadowStyle simplified() {
+        if ( this == _NONE )
+            return _NONE;
+
+        if ( _color == null || _color.getAlpha() == 0 )
+            return _NONE;
+
+        return this;
+    }
 }

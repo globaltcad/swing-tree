@@ -19,7 +19,7 @@ import java.util.stream.Stream;
  *
  * @param <S> The type of the style.
  */
-class NamedStyles<S>
+class NamedStyles<S> implements Simplifiable<NamedStyles<S>>
 {
     private static final NamedStyles<?> EMPTY = new NamedStyles<>();
 
@@ -175,5 +175,13 @@ class NamedStyles<S>
         if ( obj.getClass() != getClass() ) return false;
         NamedStyles<?> rhs = (NamedStyles<?>) obj;
         return Arrays.equals(_styles, rhs._styles);
+    }
+
+    @Override
+    public NamedStyles<S> simplified() {
+        NamedStyle<S>[] simplifiedStyles = Arrays.copyOf(_styles, _styles.length);
+        for ( int i = 0; i < simplifiedStyles.length; i++ )
+            simplifiedStyles[i] = simplifiedStyles[i].simplified();
+        return new NamedStyles<>(simplifiedStyles);
     }
 }

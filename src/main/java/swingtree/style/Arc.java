@@ -67,6 +67,16 @@ final class Arc
                 );
     }
 
+    Arc simplified() {
+        if ( this == _NONE )
+            return _NONE;
+
+        if ( _arcWidth < 1 || _arcHeight < 1 )
+            return _NONE;
+
+        return this;
+    }
+
     @Override
     public int hashCode() {
         int hash = 7;

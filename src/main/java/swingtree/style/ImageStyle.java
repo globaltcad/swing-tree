@@ -153,7 +153,7 @@ import java.util.Optional;
  *      are transparent.
  *  </p>
  **/
-public final class ImageStyle
+public final class ImageStyle implements Simplifiable<ImageStyle>
 {
     static final UI.Layer DEFAULT_LAYER = UI.Layer.BACKGROUND;
     private static final ImageStyle _NONE = new ImageStyle(
@@ -613,5 +613,30 @@ public final class ImageStyle
                     "offset="        + _offset                                                 + ", " +
                     "clipArea="      + _clipArea                                               +
                 "]";
+    }
+
+    @Override
+    public ImageStyle simplified() {
+        if ( this == _NONE )
+            return _NONE;
+
+        ImageIcon simplifiedImage = _opacity == 0.0f ? null : _image;
+        Color simplifiedPrimer = _primer == null || _primer.getAlpha() == 0 ? null : _primer;
+
+        if ( simplifiedImage == null && simplifiedPrimer == null )
+            return none();
+
+        return new ImageStyle(
+                    simplifiedPrimer,
+                    simplifiedImage,
+                    _placement,
+                    _repeat,
+                    _fitMode,
+                    _size,
+                    _opacity,
+                    _padding.simplified(),
+                    _offset,
+                    _clipArea
+                );
     }
 }

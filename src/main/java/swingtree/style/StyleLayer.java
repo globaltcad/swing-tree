@@ -2,7 +2,7 @@ package swingtree.style;
 
 import java.util.Objects;
 
-final class StyleLayer
+final class StyleLayer implements Simplifiable<StyleLayer>
 {
     private static final StyleLayer _EMPTY = new StyleLayer(
         NamedStyles.of(NamedStyle.of(StyleUtility.DEFAULT_KEY,ShadowStyle.none())),
@@ -118,5 +118,28 @@ final class StyleLayer
                     "gradients=" + gradientString + ", " +
                     "images="    + imagesString   +
                 "]";
+    }
+
+    @Override
+    public StyleLayer simplified() {
+        NamedStyles<ShadowStyle>   simplifiedShadows   = _shadows.simplified();
+        NamedStyles<PainterStyle>  simplifiedPainters  = _painters.simplified();
+        NamedStyles<GradientStyle> simplifiedGradients = _gradients.simplified();
+        NamedStyles<ImageStyle>    simplifiedImages    = _images.simplified();
+
+        if (
+            simplifiedShadows   == _shadows   &&
+            simplifiedPainters  == _painters  &&
+            simplifiedGradients == _gradients &&
+            simplifiedImages    == _images
+        )
+            return this;
+
+        return new StyleLayer(
+                    simplifiedShadows,
+                    simplifiedPainters,
+                    simplifiedGradients,
+                    simplifiedImages
+                );
     }
 }

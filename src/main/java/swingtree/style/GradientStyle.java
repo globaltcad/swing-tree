@@ -53,7 +53,7 @@ import java.util.function.Function;
  *  as the instance returned by that method is a gradient without any colors, effectively
  *  making it a representation of the absence of a gradient style.
  */
-public final class GradientStyle
+public final class GradientStyle implements Simplifiable<GradientStyle>
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(GradientStyle.class);
     static final UI.Layer DEFAULT_LAYER = UI.Layer.BACKGROUND;
@@ -196,4 +196,17 @@ public final class GradientStyle
         return Objects.hash(_transition, _type, Arrays.hashCode(_colors));
     }
 
+    @Override
+    public GradientStyle simplified() {
+        if ( this == _NONE )
+            return _NONE;
+
+        if ( _colors.length == 0 )
+            return _NONE;
+
+        if ( Arrays.stream(_colors).allMatch( color -> color.getAlpha() == 0 ) )
+            return _NONE;
+
+        return this;
+    }
 }

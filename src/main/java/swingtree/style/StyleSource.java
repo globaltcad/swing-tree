@@ -105,7 +105,9 @@ final class StyleSource<C extends JComponent>
                     */
                 }
 
-        return _applyDPIScaling(style);
+        Style scaled = _applyDPIScaling(style);
+
+        return scaled.simplified();
     }
 
     private static Style _applyDPIScaling( Style style ) {

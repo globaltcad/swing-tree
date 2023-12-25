@@ -100,6 +100,21 @@ final class Outline
                 );
     }
 
+    Outline simplified() {
+        if ( this == _NONE )
+            return _NONE;
+
+        Integer top    = Objects.equals(this.top   , 0) ? null : this.top;
+        Integer right  = Objects.equals(this.right , 0) ? null : this.right;
+        Integer bottom = Objects.equals(this.bottom, 0) ? null : this.bottom;
+        Integer left   = Objects.equals(this.left  , 0) ? null : this.left;
+
+        if ( top == null && right == null && bottom == null && left == null )
+            return _NONE;
+
+        return new Outline(top, right, bottom, left);
+    }
+
     /**
      * @return {@code true} if any of the outline values are not null and positive,
      *         {@code false} otherwise.

@@ -32,6 +32,7 @@ final class BaseStyle
      */
     public static BaseStyle none() { return _NONE; }
 
+
     private final ImageIcon               _icon;
     private final UI.FitComponent         _fit;
     private final Color                   _foundationColor;

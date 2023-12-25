@@ -114,6 +114,31 @@ final class DimensionalityStyle
                 );
     }
 
+    DimensionalityStyle simplified() {
+        if ( this == _NONE )
+            return _NONE;
+
+        Size simplifiedMinSize       = _minSize.width().orElse(0) == 0 && _minSize.height().orElse(0) == 0 ? _NONE._minSize : _minSize;
+        Size simplifiedMaxSize       = _maxSize.width().orElse(0) == 0 && _maxSize.height().orElse(0) == 0 ? _NONE._maxSize : _maxSize;
+        Size simplifiedPreferredSize = _preferredSize.width().orElse(0) == 0 && _preferredSize.height().orElse(0) == 0 ? _NONE._preferredSize : _preferredSize;
+        Size simplifiedSize          = _size.width().orElse(0) == 0 && _size.height().orElse(0) == 0 ? _NONE._size : _size;
+
+        if (
+            simplifiedMinSize       == _NONE._minSize &&
+            simplifiedMaxSize       == _NONE._maxSize &&
+            simplifiedPreferredSize == _NONE._preferredSize &&
+            simplifiedSize          == _NONE._size
+        )
+            return _NONE;
+
+        return new DimensionalityStyle(
+                    simplifiedMinSize,
+                    simplifiedMaxSize,
+                    simplifiedPreferredSize,
+                    simplifiedSize
+                );
+    }
+
     @Override
     public String toString() {
         if ( this == _NONE )
