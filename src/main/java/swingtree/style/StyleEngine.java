@@ -61,7 +61,7 @@ final class StyleEngine
         return new StyleEngine( newConf, _animationPainters, _layerCaches);
     }
 
-    StyleEngine withAnimationPainter(LifeTime lifeTime, Painter animationPainter ) {
+    StyleEngine withAnimationPainter( LifeTime lifeTime, Painter animationPainter ) {
         java.util.List<Expirable<Painter>> animationPainters = new ArrayList<>(Arrays.asList(_animationPainters));
         animationPainters.add(new Expirable<>(lifeTime, animationPainter));
         return new StyleEngine(_componentConf, animationPainters.toArray(new Expirable[0]), _layerCaches);

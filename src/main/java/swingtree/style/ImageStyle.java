@@ -514,7 +514,7 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
      *  @return A new {@link ImageStyle} instance with the specified offset.
      */
     public ImageStyle horizontalOffset( int x ) {
-        return new ImageStyle(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset.x(x), _clipArea);
+        return new ImageStyle(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset.withX(x), _clipArea);
     }
 
     /**
@@ -525,7 +525,7 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
      *  @return A new {@link ImageStyle} instance with the specified offset.
      */
     public ImageStyle verticalOffset( int y ) {
-        return new ImageStyle(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset.y(y), _clipArea);
+        return new ImageStyle(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset.withY(y), _clipArea);
     }
 
     /**

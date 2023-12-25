@@ -26,9 +26,9 @@ final class Offset
 
     int y() { return _y; }
 
-    Offset x( int x ) { return new Offset(x, _y); }
+    Offset withX( int x ) { return new Offset(x, _y); }
 
-    Offset y( int y ) { return new Offset(_x, y); }
+    Offset withY( int y ) { return new Offset(_x, y); }
 
     Offset scale( double scaleFactor ) {
         return new Offset((int) Math.round(_x * scaleFactor), (int) Math.round(_y * scaleFactor));

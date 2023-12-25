@@ -15,7 +15,7 @@ import java.util.function.Supplier;
  *   This class is responsible for installing and uninstalling custom look and feel
  *   implementations so that SwingTree can apply custom styles to components.
  */
-class DynamicLaF
+final class DynamicLaF
 {
     private static final DynamicLaF _NONE = new DynamicLaF(null, null);
 

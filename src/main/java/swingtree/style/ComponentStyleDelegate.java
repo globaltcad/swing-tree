@@ -144,7 +144,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided padding distances.
      */
     public ComponentStyleDelegate<C> margin( int top, int right, int bottom, int left ) {
-        return _withStyle(_style._withBorder(_style.border().margin(Outline.of(top, right, bottom, left))));
+        return _withStyle(_style._withBorder(_style.border().withMargin(Outline.of(top, right, bottom, left))));
     }
 
     /**
@@ -157,7 +157,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
      */
     public ComponentStyleDelegate<C> margin( int margin ) {
-        return _withStyle(_style._withBorder(_style.border().margin(Outline.of(margin))));
+        return _withStyle(_style._withBorder(_style.border().withMargin(Outline.of(margin))));
     }
 
     /**
@@ -170,7 +170,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
      */
     public ComponentStyleDelegate<C> marginTop( int margin ) {
-        return _withStyle(_style._withBorder(_style.border().margin(_style.border().margin().top(margin))));
+        return _withStyle(_style._withBorder(_style.border().withMargin(_style.border().margin().withTop(margin))));
     }
 
     /**
@@ -183,7 +183,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
      */
     public ComponentStyleDelegate<C> marginRight( int margin ) {
-        return _withStyle(_style._withBorder(_style.border().margin(_style.border().margin().right(margin))));
+        return _withStyle(_style._withBorder(_style.border().withMargin(_style.border().margin().withRight(margin))));
     }
 
     /**
@@ -196,7 +196,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
      */
     public ComponentStyleDelegate<C> marginBottom( int margin ) {
-        return _withStyle(_style._withBorder(_style.border().margin(_style.border().margin().bottom(margin))));
+        return _withStyle(_style._withBorder(_style.border().withMargin(_style.border().margin().withBottom(margin))));
     }
 
     /**
@@ -209,7 +209,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
      */
     public ComponentStyleDelegate<C> marginLeft( int margin ) {
-        return _withStyle(_style._withBorder(_style.border().margin(_style.border().margin().left(margin))));
+        return _withStyle(_style._withBorder(_style.border().withMargin(_style.border().margin().withLeft(margin))));
     }
 
     /**
@@ -222,7 +222,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
      */
     public ComponentStyleDelegate<C> marginVertical( int margin ) {
-        return _withStyle(_style._withBorder(_style.border().margin(_style.border().margin().top(margin).bottom(margin))));
+        return _withStyle(_style._withBorder(_style.border().withMargin(_style.border().margin().withTop(margin).withBottom(margin))));
     }
 
     /**
@@ -235,7 +235,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
      */
     public ComponentStyleDelegate<C> marginHorizontal( int margin ) {
-        return _withStyle(_style._withBorder(_style.border().margin(_style.border().margin().left(margin).right(margin))));
+        return _withStyle(_style._withBorder(_style.border().withMargin(_style.border().margin().withLeft(margin).withRight(margin))));
     }
 
     /**
@@ -251,7 +251,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided padding distances.
      */
     public ComponentStyleDelegate<C> padding( int top, int right, int bottom, int left ) {
-        return _withStyle(_style._withBorder(_style.border().padding(Outline.of(top, right, bottom, left))));
+        return _withStyle(_style._withBorder(_style.border().withPadding(Outline.of(top, right, bottom, left))));
     }
 
     /**
@@ -264,7 +264,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
      */
     public ComponentStyleDelegate<C> padding( int padding ) {
-        return _withStyle(_style._withBorder(_style.border().padding(Outline.of(padding))));
+        return _withStyle(_style._withBorder(_style.border().withPadding(Outline.of(padding))));
     }
 
     /**
@@ -277,7 +277,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
      */
     public ComponentStyleDelegate<C> paddingTop( int padding ) {
-        return _withStyle(_style._withBorder(_style.border().padding(_style.border().padding().top(padding))));
+        return _withStyle(_style._withBorder(_style.border().withPadding(_style.border().padding().withTop(padding))));
     }
 
     /**
@@ -291,7 +291,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
      */
     public ComponentStyleDelegate<C> paddingRight( int padding ) {
-        return _withStyle(_style._withBorder(_style.border().padding(_style.border().padding().right(padding))));
+        return _withStyle(_style._withBorder(_style.border().withPadding(_style.border().padding().withRight(padding))));
     }
 
     /**
@@ -304,7 +304,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
      */
     public ComponentStyleDelegate<C> paddingBottom( int padding ) {
-        return _withStyle(_style._withBorder(_style.border().padding(_style.border().padding().bottom(padding))));
+        return _withStyle(_style._withBorder(_style.border().withPadding(_style.border().padding().withBottom(padding))));
     }
 
     /**
@@ -317,7 +317,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
      */
     public ComponentStyleDelegate<C> paddingLeft( int padding ) {
-        return _withStyle(_style._withBorder(_style.border().padding(_style.border().padding().left(padding))));
+        return _withStyle(_style._withBorder(_style.border().withPadding(_style.border().padding().withLeft(padding))));
     }
 
     /**
@@ -330,7 +330,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
      */
     public ComponentStyleDelegate<C> paddingVertical( int padding ) {
-        return _withStyle(_style._withBorder(_style.border().padding(_style.border().padding().top(padding).bottom(padding))));
+        return _withStyle(_style._withBorder(_style.border().withPadding(_style.border().padding().withTop(padding).withBottom(padding))));
     }
 
     /**
@@ -343,7 +343,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
      */
     public ComponentStyleDelegate<C> paddingHorizontal( int padding ) {
-        return _withStyle(_style._withBorder(_style.border().padding(_style.border().padding().left(padding).right(padding))));
+        return _withStyle(_style._withBorder(_style.border().withPadding(_style.border().padding().withLeft(padding).withRight(padding))));
     }
 
     /**
@@ -355,7 +355,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided border width and border color.
      */
     public ComponentStyleDelegate<C> border( int width, Color color ) {
-        return _withStyle(_style._withBorder(_style.border().width(width).color(color)));
+        return _withStyle(_style._withBorder(_style.border().withWidth(width).withColor(color)));
     }
 
     /**
@@ -370,7 +370,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided border widths and border color.
      */
     public ComponentStyleDelegate<C> border( int top, int right, int bottom, int left, Color color ) {
-        return _withStyle(_style._withBorder(_style.border().widths(Outline.of(top, right, bottom, left)).color(color)));
+        return _withStyle(_style._withBorder(_style.border().withWidths(Outline.of(top, right, bottom, left)).withColor(color)));
     }
 
     /**
@@ -391,7 +391,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
             log.error("Failed to parse color string: '"+colorString+"'", e);
             return this;
         }
-        return _withStyle(_style._withBorder(_style.border().width(width).color(newColor)));
+        return _withStyle(_style._withBorder(_style.border().withWidth(width).withColor(newColor)));
     }
 
     /**
@@ -405,7 +405,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided border width.
      */
     public ComponentStyleDelegate<C> borderWidth( int width ) {
-        return _withStyle(_style._withBorder(_style.border().width(width)));
+        return _withStyle(_style._withBorder(_style.border().withWidth(width)));
     }
 
     /**
@@ -420,7 +420,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided border width for the specified edge.
      */
     public ComponentStyleDelegate<C> borderWidthAt( UI.Edge edge, int width ) {
-        return _withStyle(_style._withBorder(_style.border().widthAt(edge, width)));
+        return _withStyle(_style._withBorder(_style.border().withWidthAt(edge, width)));
     }
 
     /**
@@ -446,7 +446,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @see #borderWidthAt(UI.Edge, int)
      */
     public ComponentStyleDelegate<C> borderWidths( int top, int right, int bottom, int left ) {
-        return _withStyle(_style._withBorder(_style.border().widths(Outline.of(top, right, bottom, left))));
+        return _withStyle(_style._withBorder(_style.border().withWidths(Outline.of(top, right, bottom, left))));
     }
 
     /**
@@ -468,7 +468,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @see #borderWidthAt(UI.Edge, int)
      */
     public ComponentStyleDelegate<C> borderWidths( int topBottom, int leftRight ) {
-        return _withStyle(_style._withBorder(_style.border().widths(Outline.of(topBottom, leftRight, topBottom, leftRight))));
+        return _withStyle(_style._withBorder(_style.border().withWidths(Outline.of(topBottom, leftRight, topBottom, leftRight))));
     }
 
     /**
@@ -479,7 +479,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided border color.
      */
     public ComponentStyleDelegate<C> borderColor( Color color ) {
-        return _withStyle(_style._withBorder(_style.border().color(color)));
+        return _withStyle(_style._withBorder(_style.border().withColor(color)));
     }
 
     /**
@@ -499,7 +499,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
             log.error("Failed to parse color string: '{}'", colorString, e);
             return this;
         }
-        return _withStyle(_style._withBorder(_style.border().color(newColor)));
+        return _withStyle(_style._withBorder(_style.border().withColor(newColor)));
     }
 
     /**
@@ -512,7 +512,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided border radius.
      */
     public ComponentStyleDelegate<C> borderRadius( int radius ) {
-        return _withStyle(_style._withBorder(_style.border().arcWidth(radius).arcHeight(radius)));
+        return _withStyle(_style._withBorder(_style.border().withArcWidth(radius).withArcHeight(radius)));
     }
 
     /**
@@ -525,7 +525,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided border arc width and arc height.
      */
     public ComponentStyleDelegate<C> borderRadius( int arcWidth, int arcHeight ) {
-        return _withStyle(_style._withBorder(_style.border().arcWidth(arcWidth).arcHeight(arcHeight)));
+        return _withStyle(_style._withBorder(_style.border().withArcWidth(arcWidth).withArcHeight(arcHeight)));
     }
 
     /**
@@ -538,7 +538,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided border arc width and arc height for the specified corner.
      */
     public ComponentStyleDelegate<C> borderRadiusAt( UI.Corner corner, int arcWidth, int arcHeight ) {
-        return _withStyle(_style._withBorder(_style.border().arcWidthAt(corner, arcWidth).arcHeightAt(corner, arcHeight)));
+        return _withStyle(_style._withBorder(_style.border().withArcWidthAt(corner, arcWidth).withArcHeightAt(corner, arcHeight)));
     }
 
     /**
@@ -573,7 +573,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      */
     public ComponentStyleDelegate<C> borderGradient( Function<GradientStyle, GradientStyle> styler ) {
         Objects.requireNonNull(styler);
-        return _withStyle(_style._withBorder(_style.border().gradient(StyleUtility.DEFAULT_KEY, styler)));
+        return _withStyle(_style._withBorder(_style.border().withGradient(StyleUtility.DEFAULT_KEY, styler)));
     }
 
     /**
@@ -602,7 +602,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
     public ComponentStyleDelegate<C> borderGradient( String shadeName, Function<GradientStyle, GradientStyle> styler ) {
         Objects.requireNonNull(shadeName);
         Objects.requireNonNull(styler);
-        return _withStyle(_style._withBorder(_style.border().gradient(shadeName, styler)));
+        return _withStyle(_style._withBorder(_style.border().withGradient(shadeName, styler)));
     }
 
     /**
@@ -1288,7 +1288,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided font name and size.
      */
     public ComponentStyleDelegate<C> font( String name, int size ) {
-        return _withStyle(_style._withFont(_style.font().family(name).size(size)));
+        return _withStyle(_style._withFont(_style.font().withFamily(name).withSize(size)));
     }
 
     /**
@@ -1300,7 +1300,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided font name.
      */
     public ComponentStyleDelegate<C> fontFamily( String name ) {
-        return _withStyle(_style._withFont(_style.font().family(name)));
+        return _withStyle(_style._withFont(_style.font().withFamily(name)));
     }
 
     /**
@@ -1312,7 +1312,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided {@link Font}.
      */
     public ComponentStyleDelegate<C> font( Font font ) {
-        return _withStyle(_style._withFont(_style.font().font(font)));
+        return _withStyle(_style._withFont(_style.font().withPropertiesFromFont(font)));
     }
 
     /**
@@ -1324,7 +1324,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided font size.
      */
     public ComponentStyleDelegate<C> fontSize( int size ) {
-        return _withStyle(_style._withFont(_style.font().size(size)));
+        return _withStyle(_style._withFont(_style.font().withSize(size)));
     }
 
     /**
@@ -1336,7 +1336,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided font boldness.
      */
     public ComponentStyleDelegate<C> fontBold( boolean bold ) {
-        return _withStyle(_style._withFont(_style.font().weight( bold ? 2 : 1 )));
+        return _withStyle(_style._withFont(_style.font().withWeight( bold ? 2 : 1 )));
     }
 
     /**
@@ -1348,7 +1348,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided font italicness.
      */
     public ComponentStyleDelegate<C> fontItalic( boolean italic ) {
-        return _withStyle(_style._withFont(_style.font().posture( italic ? 0.2f : 0f )));
+        return _withStyle(_style._withFont(_style.font().withPosture( italic ? 0.2f : 0f )));
     }
 
     /**
@@ -1360,7 +1360,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided font underlinedness.
      */
     public ComponentStyleDelegate<C> fontUnderline( boolean underline ) {
-        return _withStyle(_style._withFont(_style.font().isUnderlined(underline)));
+        return _withStyle(_style._withFont(_style.font().withIsUnderlined(underline)));
     }
 
     /**
@@ -1372,7 +1372,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided font struck throughness.
      */
     public ComponentStyleDelegate<C> fontStrikeThrough( boolean strikeThrough ) {
-        return _withStyle(_style._withFont(_style.font().isStrike(strikeThrough)));
+        return _withStyle(_style._withFont(_style.font().withIsStrikeThrough(strikeThrough)));
     }
 
     /**
@@ -1384,7 +1384,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided font color.
      */
     public ComponentStyleDelegate<C> fontColor( Color color ) {
-        return _withStyle(_style._withFont(_style.font().color(color)));
+        return _withStyle(_style._withFont(_style.font().withColor(color)));
     }
 
     /**
@@ -1404,7 +1404,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
             log.error("Failed to parse color string: '"+colorString+"'", e);
             return this;
         }
-        return _withStyle(_style._withFont(_style.font().color(newColor)));
+        return _withStyle(_style._withFont(_style.font().withColor(newColor)));
     }
 
     /**
@@ -1416,7 +1416,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided font background color.
      */
     public ComponentStyleDelegate<C> fontBackgroundColor( Color color ) {
-        return _withStyle(_style._withFont(_style.font().backgroundColor(color)));
+        return _withStyle(_style._withFont(_style.font().withBackgroundColor(color)));
     }
 
     /**
@@ -1436,7 +1436,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
             log.error("Failed to parse color string: '{}'", colorString, e);
             return this;
         }
-        return _withStyle(_style._withFont(_style.font().backgroundColor(newColor)));
+        return _withStyle(_style._withFont(_style.font().withBackgroundColor(newColor)));
     }
 
     /**
@@ -1448,7 +1448,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided font selection color.
      */
     public ComponentStyleDelegate<C> fontSelectionColor( Color color ) {
-        return _withStyle(_style._withFont(_style.font().selectionColor(color)));
+        return _withStyle(_style._withFont(_style.font().withSelectionColor(color)));
     }
 
     /**
@@ -1468,7 +1468,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
             log.error("Failed to parse color string: '"+colorString+"'", e);
             return this;
         }
-        return _withStyle(_style._withFont(_style.font().selectionColor(newColor)));
+        return _withStyle(_style._withFont(_style.font().withSelectionColor(newColor)));
     }
 
     /**
@@ -1476,7 +1476,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided font transform.
      */
     public ComponentStyleDelegate<C> fontTransform( AffineTransform transform ) {
-        return _withStyle(_style._withFont(_style.font().transform(transform)));
+        return _withStyle(_style._withFont(_style.font().withTransform(transform)));
     }
 
     /**
@@ -1485,7 +1485,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided font paint.
      */
     public ComponentStyleDelegate<C> fontPaint( Paint paint ) {
-        return _withStyle(_style._withFont(_style.font().paint(paint)));
+        return _withStyle(_style._withFont(_style.font().withPaint(paint)));
     }
 
     /**
@@ -1494,7 +1494,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided font background paint.
      */
     public ComponentStyleDelegate<C> fontBackgroundPaint( Paint paint ) {
-        return _withStyle(_style._withFont(_style.font().backgroundPaint(paint)));
+        return _withStyle(_style._withFont(_style.font().withBackgroundPaint(paint)));
     }
 
 
@@ -1510,7 +1510,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided font weight.
      */
     public ComponentStyleDelegate<C> fontWeight( float weight ) {
-        return _withStyle(_style._withFont(_style.font().weight(weight))); 
+        return _withStyle(_style._withFont(_style.font().withWeight(weight)));
     }
 
     /**
@@ -1519,7 +1519,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided font spacing.
      */
     public ComponentStyleDelegate<C> fontSpacing( float spacing ) {
-        return _withStyle(_style._withFont(_style.font().spacing(spacing)));
+        return _withStyle(_style._withFont(_style.font().withSpacing(spacing)));
     }
 
     /**
@@ -1532,7 +1532,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  @return A new {@link ComponentStyleDelegate} with the provided font alignment.
      */
     public ComponentStyleDelegate<C> fontAlignment( UI.HorizontalAlignment alignment ) {
-        return _withStyle(_style._withFont(_style.font().horizontalAlignment(alignment)));
+        return _withStyle(_style._withFont(_style.font().withHorizontalAlignment(alignment)));
     }
 
     /**
@@ -1545,7 +1545,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  @return A new {@link ComponentStyleDelegate} with the provided font alignment.
      */
     public ComponentStyleDelegate<C> fontAlignment( UI.VerticalAlignment alignment ) {
-        return _withStyle(_style._withFont(_style.font().verticalAlignment(alignment)));
+        return _withStyle(_style._withFont(_style.font().withVerticalAlignment(alignment)));
     }
 
     /**

@@ -12,7 +12,7 @@ import java.awt.*;
 
 /**
  *  A custom {@link Border} implementation which is capable of painting large parts of
- *  the styles defined by SwingTree user through the style API (see {@link swingtree.UIForAnySwing#withStyle(Styler)})
+ *  the styles exposed by the style API (see {@link swingtree.UIForAnySwing#withStyle(Styler)})
  *  as well as the previously installed {@link Border} of a component,
  *  to which it delegates the painting of the border if the current {@link Style}
  *  does not override the looks of the former border.

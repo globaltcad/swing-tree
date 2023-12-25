@@ -19,7 +19,7 @@ import java.util.Optional;
  *  render cache is being invalidated and the component is rendered again
  *  (potentially with a new cached image buffer).
  */
-class ComponentConf
+final class ComponentConf
 {
     public static ComponentConf none() {
         return new ComponentConf(

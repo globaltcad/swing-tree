@@ -9,12 +9,15 @@ import java.util.Objects;
 import java.util.function.Function;
 
 /**
- *  An immutable, wither-like copy method based config API
- *  for specifying a gradient style as a sub-style of various other styles,
+ *  An immutable config API for specifying a gradient style.
+ *  as a sub-style of various other styles,
  *  like for example {@link BaseStyle} or {@link BorderStyle} accessed through the
  *  {@link ComponentStyleDelegate#gradient(String, Function)} or
  *  {@link ComponentStyleDelegate#borderGradient(String, Function)}
  *  methods.
+ *  The state of a gradient style is immutable and can only be updated by
+ *  wither like methods that return a new instance of the gradient style
+ *  with the specified property updated.
  *  <p>
  *  The following properties with their respective purpose are available:
  *  <br>

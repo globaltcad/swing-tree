@@ -9,8 +9,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- *  An immutable, wither-like copy method based config container for border styles that is part of
+ *  An immutable config container for border styles that is part of
  *  a {@link Style} configuration object.
+ *  The state of this object is updated through with-methods that return
+ *  a new instance of this class with the updated state.
  */
 final class BorderStyle
 {
@@ -107,42 +109,33 @@ final class BorderStyle
             );
     }
 
-    BorderStyle gradient( NamedStyles<GradientStyle> shades ) {
-        Objects.requireNonNull(shades);
-        return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _borderColor, shades);
+    BorderStyle withGradients( NamedStyles<GradientStyle> gradients ) {
+        Objects.requireNonNull(gradients);
+        return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _borderColor, gradients);
     }
 
-    public BorderStyle gradient( String shadeName, Function<GradientStyle, GradientStyle> styler ) {
-        Objects.requireNonNull(shadeName);
+    public BorderStyle withGradient( String gradientName, Function<GradientStyle, GradientStyle> styler ) {
+        Objects.requireNonNull(gradientName);
         Objects.requireNonNull(styler);
-        GradientStyle shadow = Optional.ofNullable(_gradients.get(shadeName)).orElse(GradientStyle.none());
-        return gradient(_gradients.withNamedStyle(shadeName, styler.apply(shadow)));
+        GradientStyle shadow = Optional.ofNullable(_gradients.get(gradientName)).orElse(GradientStyle.none());
+        return withGradients(_gradients.withNamedStyle(gradientName, styler.apply(shadow)));
     }
 
-    public GradientStyle gradient( String shadeName ) {
-        Objects.requireNonNull(shadeName);
-        return Optional.ofNullable(_gradients.get(shadeName)).orElse(GradientStyle.none());
-    }
-
-    public GradientStyle gradient() {
-        return gradient(StyleUtility.DEFAULT_KEY);
-    }
-
-    BorderStyle widths( Outline borderWidths ) {
+    BorderStyle withWidths( Outline borderWidths ) {
         return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, borderWidths, _margin, _padding, _borderColor, _gradients);
     }
 
-    BorderStyle margin( Outline margin ) {
+    BorderStyle withMargin( Outline margin ) {
         return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, margin, _padding, _borderColor, _gradients);
     }
 
-    BorderStyle padding( Outline padding ) {
+    BorderStyle withPadding( Outline padding ) {
         return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, padding, _borderColor, _gradients);
     }
 
-    BorderStyle arcWidthAt(UI.Corner corner, int borderArcWidth ) {
+    BorderStyle withArcWidthAt( UI.Corner corner, int borderArcWidth ) {
         if ( corner == UI.Corner.EVERY )
-            return this.arcWidth(borderArcWidth);
+            return this.withArcWidth(borderArcWidth);
         int arcHeight;
         switch ( corner ) {
             case TOP_LEFT:
@@ -162,16 +155,16 @@ final class BorderStyle
         }
     }
 
-    BorderStyle arcWidth( int borderArcWidth ) {
-        return this.arcWidthAt(UI.Corner.TOP_LEFT,     borderArcWidth)
-                   .arcWidthAt(UI.Corner.TOP_RIGHT,    borderArcWidth)
-                   .arcWidthAt(UI.Corner.BOTTOM_LEFT,  borderArcWidth)
-                   .arcWidthAt(UI.Corner.BOTTOM_RIGHT, borderArcWidth);
+    BorderStyle withArcWidth( int borderArcWidth ) {
+        return this.withArcWidthAt(UI.Corner.TOP_LEFT,     borderArcWidth)
+                   .withArcWidthAt(UI.Corner.TOP_RIGHT,    borderArcWidth)
+                   .withArcWidthAt(UI.Corner.BOTTOM_LEFT,  borderArcWidth)
+                   .withArcWidthAt(UI.Corner.BOTTOM_RIGHT, borderArcWidth);
     }
 
-    BorderStyle arcHeightAt(UI.Corner corner, int borderArcHeight ) {
+    BorderStyle withArcHeightAt( UI.Corner corner, int borderArcHeight ) {
         if ( corner == UI.Corner.EVERY )
-            return this.arcHeight(borderArcHeight);
+            return this.withArcHeight(borderArcHeight);
         int arcWidth;
         switch ( corner ) {
             case TOP_LEFT:
@@ -191,34 +184,34 @@ final class BorderStyle
         }
     }
 
-    BorderStyle arcHeight( int borderArcHeight ) {
-        return this.arcHeightAt(UI.Corner.TOP_LEFT,     borderArcHeight)
-                   .arcHeightAt(UI.Corner.TOP_RIGHT,    borderArcHeight)
-                   .arcHeightAt(UI.Corner.BOTTOM_LEFT,  borderArcHeight)
-                   .arcHeightAt(UI.Corner.BOTTOM_RIGHT, borderArcHeight);
+    BorderStyle withArcHeight( int borderArcHeight ) {
+        return this.withArcHeightAt(UI.Corner.TOP_LEFT,     borderArcHeight)
+                   .withArcHeightAt(UI.Corner.TOP_RIGHT,    borderArcHeight)
+                   .withArcHeightAt(UI.Corner.BOTTOM_LEFT,  borderArcHeight)
+                   .withArcHeightAt(UI.Corner.BOTTOM_RIGHT, borderArcHeight);
     }
 
-    BorderStyle widthAt(UI.Edge edge, int borderWidth ) {
+    BorderStyle withWidthAt( UI.Edge edge, int borderWidth ) {
         if ( edge == UI.Edge.EVERY )
-            return this.width(borderWidth);
+            return this.withWidth(borderWidth);
         switch (edge) {
-            case TOP:    return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths.top(borderWidth), _margin, _padding, _borderColor, _gradients);
-            case RIGHT:  return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths.right(borderWidth), _margin, _padding, _borderColor, _gradients);
-            case BOTTOM: return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths.bottom(borderWidth), _margin, _padding, _borderColor, _gradients);
-            case LEFT:   return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths.left(borderWidth), _margin, _padding, _borderColor, _gradients);
+            case TOP:    return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths.withTop(borderWidth), _margin, _padding, _borderColor, _gradients);
+            case RIGHT:  return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths.withRight(borderWidth), _margin, _padding, _borderColor, _gradients);
+            case BOTTOM: return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths.withBottom(borderWidth), _margin, _padding, _borderColor, _gradients);
+            case LEFT:   return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths.withLeft(borderWidth), _margin, _padding, _borderColor, _gradients);
             default:
                 throw new IllegalArgumentException("Unknown side: " + edge);
         }
     }
 
-    BorderStyle width( int borderWidth ) {
-        return this.widthAt(UI.Edge.TOP,    borderWidth)
-                   .widthAt(UI.Edge.RIGHT,  borderWidth)
-                   .widthAt(UI.Edge.BOTTOM, borderWidth)
-                   .widthAt(UI.Edge.LEFT,   borderWidth);
+    BorderStyle withWidth( int borderWidth ) {
+        return this.withWidthAt(UI.Edge.TOP,    borderWidth)
+                   .withWidthAt(UI.Edge.RIGHT,  borderWidth)
+                   .withWidthAt(UI.Edge.BOTTOM, borderWidth)
+                   .withWidthAt(UI.Edge.LEFT,   borderWidth);
     }
 
-    BorderStyle color( Color borderColor ) { return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, borderColor, _gradients); }
+    BorderStyle withColor( Color borderColor ) { return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, borderColor, _gradients); }
 
     boolean allCornersShareTheSameArc() {
         return Objects.equals(_topLeftArc, _topRightArc) &&

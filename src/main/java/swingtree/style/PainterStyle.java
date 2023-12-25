@@ -6,7 +6,7 @@ import swingtree.api.Painter;
 import java.util.Objects;
 
 /**
- *  An immutable, wither-like method chaining based config API for specifying a painter
+ *  An immutable config API for specifying a painter
  *  style for custom {@link Painter} implementations that are used to paint
  *  the inner area of a component on a specific layer.
  *  The following properties with their respective purpose are available:

@@ -8,7 +8,7 @@ import java.util.Objects;
  *  A wrapper class for a payload that has a lifetime which
  *  is used to determine if the payload is expired or not.
  **/
-class Expirable<T>
+final class Expirable<T>
 {
     private final LifeTime _lifetime;
     private final T        _value;

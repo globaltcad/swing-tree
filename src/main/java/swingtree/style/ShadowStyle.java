@@ -8,9 +8,12 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- *  An immutable, wither-like method chaining based config API
+ *  An immutable config API
  *  designed for defining shadow styles
  *  as part of the full {@link Style} configuration object.
+ *  The state of this object can only be updated by using wither like update methods,
+ *  like {@link #horizontalOffset(int)}, {@link #verticalOffset(int)}, {@link #blurRadius(int)}...
+ *  which return a new instance of this class with the updated state.
  *  <p>
  *  The following properties with their respective purpose are available:
  *  <br>
@@ -99,19 +102,19 @@ public final class ShadowStyle implements Simplifiable<ShadowStyle>
         _isOutset         = isOutset;
     }
 
-    public int horizontalOffset() { return _offset.x(); }
+    int horizontalOffset() { return _offset.x(); }
 
-    public int verticalOffset() { return _offset.y(); }
+    int verticalOffset() { return _offset.y(); }
 
-    public int blurRadius() { return _blurRadius; }
+    int blurRadius() { return _blurRadius; }
 
     public int spreadRadius() { return _spreadRadius; }
 
-    public Optional<Color> color() { return Optional.ofNullable(_color); }
+    Optional<Color> color() { return Optional.ofNullable(_color); }
 
-    public boolean isOutset() { return _isOutset; }
+    boolean isOutset() { return _isOutset; }
 
-    public boolean isInset() { return !_isOutset; }
+    boolean isInset() { return !_isOutset; }
 
     /**
      * @param horizontalShadowOffset The horizontal shadow offset, if positive the shadow will move to the right,
@@ -119,7 +122,7 @@ public final class ShadowStyle implements Simplifiable<ShadowStyle>
      * @return A new {@link ShadowStyle} with the specified horizontal shadow offset.
      */
     public ShadowStyle horizontalOffset( int horizontalShadowOffset ) {
-        return new ShadowStyle(_offset.x(horizontalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);
+        return new ShadowStyle(_offset.withX(horizontalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);
     }
 
     /**
@@ -128,7 +131,7 @@ public final class ShadowStyle implements Simplifiable<ShadowStyle>
      * @return A new {@link ShadowStyle} with the specified vertical shadow offset.
      */
     public ShadowStyle verticalOffset( int verticalShadowOffset ) {
-        return new ShadowStyle(_offset.y(verticalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);
+        return new ShadowStyle(_offset.withY(verticalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);
     }
 
     /**

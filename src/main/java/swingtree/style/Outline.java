@@ -43,49 +43,49 @@ final class Outline
      * @return An {@link Optional} containing the top outline value if it was specified,
      *        {@link Optional#empty()} otherwise.
      */
-    public Optional<Integer> top() { return Optional.ofNullable(top); }
+    Optional<Integer> top() { return Optional.ofNullable(top); }
 
     /**
      * @return An {@link Optional} containing the right outline value if it was specified,
      *        {@link Optional#empty()} otherwise.
      */
-    public Optional<Integer> right() { return Optional.ofNullable(right); }
+    Optional<Integer> right() { return Optional.ofNullable(right); }
 
     /**
      * @return An {@link Optional} containing the bottom outline value if it was specified,
      *        {@link Optional#empty()} otherwise.
      */
-    public Optional<Integer> bottom() { return Optional.ofNullable(bottom); }
+    Optional<Integer> bottom() { return Optional.ofNullable(bottom); }
 
     /**
      * @return An {@link Optional} containing the left outline value if it was specified,
      *        {@link Optional#empty()} otherwise.
      */
-    public Optional<Integer> left() { return Optional.ofNullable(left); }
+    Optional<Integer> left() { return Optional.ofNullable(left); }
 
     /**
      * @param top The top outline value.
      * @return A new {@link Outline} with the specified top outline value.
      */
-    Outline top( int top ) { return new Outline(top, right, bottom, left); }
+    Outline withTop( int top ) { return new Outline(top, right, bottom, left); }
 
     /**
      * @param right The right outline value.
      * @return A new {@link Outline} with the specified right outline value.
      */
-    Outline right( int right ) { return new Outline(top, right, bottom, left); }
+    Outline withRight( int right ) { return new Outline(top, right, bottom, left); }
 
     /**
      * @param bottom The bottom outline value.
      * @return A new {@link Outline} with the specified bottom outline value.
      */
-    Outline bottom( int bottom ) { return new Outline(top, right, bottom, left); }
+    Outline withBottom( int bottom ) { return new Outline(top, right, bottom, left); }
 
     /**
      * @param left The left outline value.
      * @return A new {@link Outline} with the specified left outline value.
      */
-    Outline left( int left ) { return new Outline(top, right, bottom, left); }
+    Outline withLeft( int left ) { return new Outline(top, right, bottom, left); }
 
     /**
      * @param scale The scale factor.
@@ -126,17 +126,6 @@ final class Outline
                left   != null && left   > 0;
     }
 
-    /**
-     * @return {@code true} if any of the outline values are not null and positive,
-     *         {@code false} otherwise.
-     */
-    public boolean isAbsPositive() {
-        return top    != null && Math.abs(top   ) > 0 ||
-                right  != null && Math.abs(right ) > 0 ||
-                bottom != null && Math.abs(bottom) > 0 ||
-                left   != null && Math.abs(left  ) > 0;
-    }
-
     @Override
     public int hashCode() {
         int hash = 7;
@@ -161,7 +150,7 @@ final class Outline
 
     @Override
     public String toString() {
-        return "Outline[" +
+        return this.getClass().getSimpleName() + "[" +
                     "top="    + ( top    == null ? "?" : top    ) + ", " +
                     "right="  + ( right  == null ? "?" : right  ) + ", " +
                     "bottom=" + ( bottom == null ? "?" : bottom ) + ", " +
