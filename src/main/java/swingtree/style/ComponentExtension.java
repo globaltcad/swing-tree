@@ -220,6 +220,10 @@ public final class ComponentExtension<C extends JComponent>
      */
     public Style getStyle() { return _styleEngine.getStyle(); }
 
+    ComponentConf getConf() {
+        return _styleEngine.getComponentConf();
+    }
+
     /**
      *  Removes all animations from the component.
      *  This includes both {@link Painter} based animations

@@ -117,6 +117,18 @@ final class ComponentConf
                 );
     }
 
+    ComponentConf withStyle( Style style ) {
+        if ( _style.equals(style) )
+            return this;
+
+        return new ComponentConf(
+                    style,
+                    _currentBounds,
+                    _baseOutline,
+                    _areas
+                );
+    }
+
     /**
      *  Returns a new {@link ComponentConf} instance which only contains style information relevant
      *  to the provided {@link UI.Layer}. Style information on other layers is discarded.

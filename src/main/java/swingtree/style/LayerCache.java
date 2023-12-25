@@ -69,6 +69,9 @@ final class LayerCache
         _layer = Objects.requireNonNull(layer);
     }
 
+    public boolean hasBufferedImage() {
+        return _localCache != null;
+    }
 
     private Map<ComponentConf, CachedImage> _getGlobalCacheForThisLayer() {
         switch (_layer) {
@@ -153,9 +156,9 @@ final class LayerCache
             _allocateOrGetCachedBuffer(newState);
     }
 
-    public final void paint( StyleEngine engine, Graphics2D g, Consumer<Graphics2D> renderer )
+    public final void paint( ComponentConf conf, Graphics2D g, Consumer<Graphics2D> renderer )
     {
-        Bounds componentBounds = engine.getComponentConf().currentBounds();
+        Bounds componentBounds = conf.currentBounds();
 
         if ( componentBounds.hasWidth(0) || componentBounds.hasHeight(0) )
             return;
@@ -170,13 +173,19 @@ final class LayerCache
 
         if ( !_localCache.isRendered() ) {
             Graphics2D g2 = _localCache.createGraphics();
-            g2.setBackground(g.getBackground());
-            g2.setClip(null); // We want to capture the full style and clip it later (see g.drawImage(_cache, 0, 0, null); below.
-            g2.setComposite(g.getComposite());
-            g2.setPaint(g.getPaint());
-            g2.setRenderingHints(g.getRenderingHints());
-            g2.setStroke(g.getStroke());
-            renderer.accept(g2);
+            try {
+                g2.setBackground(g.getBackground());
+                g2.setClip(null); // We want to capture the full style and clip it later (see g.drawImage(_cache, 0, 0, null); below.
+                g2.setComposite(g.getComposite());
+                g2.setPaint(g.getPaint());
+                g2.setRenderingHints(g.getRenderingHints());
+                g2.setStroke(g.getStroke());
+            }
+            catch (Exception ignored) {}
+            finally {
+                renderer.accept(g2);
+                g2.dispose();
+            }
         }
 
         g.drawImage(_localCache, 0, 0, null);

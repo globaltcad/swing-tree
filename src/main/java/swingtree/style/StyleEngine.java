@@ -186,7 +186,7 @@ final class StyleEngine
     }
 
     private void _render( UI.Layer layer, Graphics2D g2d ) {
-        _layerCaches[layer.ordinal()].paint(this, g2d, graphics -> {
+        _layerCaches[layer.ordinal()].paint(this._componentConf, g2d, graphics -> {
             StyleRenderer.renderStyleFor(this, layer, graphics);
         });
     }
