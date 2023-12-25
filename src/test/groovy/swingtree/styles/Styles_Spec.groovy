@@ -6,6 +6,7 @@ import spock.lang.Subject
 import spock.lang.Title
 import swingtree.SwingTree
 import swingtree.UI
+import swingtree.style.ComponentExtension
 import swingtree.style.Layout
 import swingtree.threading.EventProcessor
 import swingtree.style.Style
@@ -353,5 +354,108 @@ class Styles_Spec extends Specification
                 styler(style2).shadowSpreadRadius(1).style().hashCode() == styler(style2).shadowSpreadRadius(1).style().hashCode()
                 styler(style2).shadowBlurRadius(1).style()              == styler(style2).shadowBlurRadius(1).style()
                 styler(style2).shadowBlurRadius(1).style().hashCode()   == styler(style2).shadowBlurRadius(1).style().hashCode()
+    }
+
+    def 'SwingTree will simplify the style configuration of a component if possible.'()
+    {
+        reportInfo """
+            Simplifying a style configuration means that if the properties of a style
+            a configured in such a way that they are effectively the same as the default
+            in terms of how they will be rendered, then the style configuration will be
+            simplified to the default style.
+            
+            This optimization is important to improve cache hit rates, as the immutable
+            style configuration objects are used as cache keys.
+            Simplifying the style configurations will ensure that style configurations
+            which effectively render the same thing will also share the same cache buffer
+            for rendering.
+            
+            It is also memory efficient, as the default style objects are global null objects.
+        """
+        given : 'We create a highly simplifiable style through the style API.'
+            var ui = UI.panel().withStyle(conf -> conf
+                                .borderColor(new Color(0,0,0,0))
+                                .borderRadius(0)
+                                .borderWidths(0,0,0,0)
+                                .shadowColor(new Color(50,150,200,0))
+                                .shadowBlurRadius(4)
+                                .shadowSpreadRadius(2)
+                                .image(UI.Layer.CONTENT, i -> i
+                                    .primer(new Color(100,100,100,0))
+                                    .size(100, 100)
+                                    .fitMode(UI.FitComponent.WIDTH)
+                                    .image("/images/bubbles.svg")
+                                    .opacity(0.0f) // You can't see me!
+                                )
+                                .gradient(UI.Layer.BACKGROUND, g -> g
+                                    .colors(new Color(100, 50, 200, 0), new Color(255, 00, 250, 0))
+                                    .transition(UI.Transition.TOP_TO_BOTTOM)
+                                    .type(UI.GradientType.LINEAR)
+                                )
+                        )
+                        .getComponent()
+        expect : 'The style config has the expected string representation.'
+            ComponentExtension.from(ui).getStyle().toString() == "Style[" +
+                    "LayoutStyle[NONE], " +
+                    "BorderStyle[NONE], " +
+                    "BaseStyle[NONE], " +
+                    "FontStyle[NONE], " +
+                    "DimensionalityStyle[NONE], " +
+                    "StyleLayers[" +
+                        "background=StyleLayer[EMPTY], " +
+                        "content=StyleLayer[EMPTY], " +
+                        "border=StyleLayer[EMPTY], " +
+                        "foreground=StyleLayer[EMPTY]" +
+                    "], " +
+                    "properties=[]" +
+                "]"
+
+        when : 'We create a not so simplifiable style for a component through the style API...'
+            ui = UI.button("Hello World").withStyle(conf -> conf
+                            .backgroundColor(Color.BLACK)
+                            .foregroundColor(Color.WHITE)
+                            .size(120, 80)
+                            .borderRadius(40)
+                        )
+                        .getComponent()
+        then : 'The style config has the expected string representation.'
+            ComponentExtension.from(ui).getStyle().toString() == "Style[" +
+                    "LayoutStyle[NONE], " +
+                    "BorderStyle[" +
+                        "radius=40, " +
+                        "width=?, " +
+                        "margin=Outline[top=?, right=?, bottom=?, left=?], " +
+                        "padding=Outline[top=?, right=?, bottom=?, left=?], " +
+                        "color=?, " +
+                        "GradientStyle[NONE]" +
+                    "], " +
+                    "BaseStyle[" +
+                        "icon=?, " +
+                        "fitComponent=NO, " +
+                        "backgroundColor=rgba(0,0,0,255), " +
+                        "foundationColor=?, " +
+                        "foregroundColor=rgba(255,255,255,255), " +
+                        "cursor=?, " +
+                        "orientation=UNKNOWN" +
+                    "], " +
+                    "FontStyle[NONE], " +
+                    "DimensionalityStyle[" +
+                        "minWidth=?, " +
+                        "minHeight=?, " +
+                        "maxWidth=?, " +
+                        "maxHeight=?, " +
+                        "preferredWidth=?, " +
+                        "preferredHeight=?, " +
+                        "width=120, " +
+                        "height=80" +
+                    "], " +
+                    "StyleLayers[" +
+                        "background=StyleLayer[EMPTY], " +
+                        "content=StyleLayer[EMPTY], " +
+                        "border=StyleLayer[EMPTY], " +
+                        "foreground=StyleLayer[EMPTY]" +
+                    "], " +
+                    "properties=[]" +
+                "]"
     }
 }

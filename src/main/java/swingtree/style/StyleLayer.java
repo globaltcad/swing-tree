@@ -4,12 +4,17 @@ import java.util.Objects;
 
 final class StyleLayer implements Simplifiable<StyleLayer>
 {
+    private static final NamedStyles<ShadowStyle>   _NO_SHADOWS   = NamedStyles.of(NamedStyle.of(StyleUtility.DEFAULT_KEY,ShadowStyle.none()));
+    private static final NamedStyles<PainterStyle>  _NO_PAINTERS  = NamedStyles.of(NamedStyle.of(StyleUtility.DEFAULT_KEY + "_" + PainterStyle.DEFAULT_LAYER.name(),PainterStyle.none()));
+    private static final NamedStyles<GradientStyle> _NO_GRADIENTS = NamedStyles.of(NamedStyle.of(StyleUtility.DEFAULT_KEY, GradientStyle.none()));
+    private static final NamedStyles<ImageStyle>    _NO_IMAGES    = NamedStyles.of(NamedStyle.of(StyleUtility.DEFAULT_KEY, ImageStyle.none()));
+
     private static final StyleLayer _EMPTY = new StyleLayer(
-        NamedStyles.of(NamedStyle.of(StyleUtility.DEFAULT_KEY,ShadowStyle.none())),
-        NamedStyles.of(NamedStyle.of(StyleUtility.DEFAULT_KEY + "_" + PainterStyle.DEFAULT_LAYER.name(),PainterStyle.none())),
-        NamedStyles.of(NamedStyle.of(StyleUtility.DEFAULT_KEY, GradientStyle.none())),
-        NamedStyles.of(NamedStyle.of(StyleUtility.DEFAULT_KEY, ImageStyle.none()))
-    );
+                                                    _NO_SHADOWS,
+                                                    _NO_PAINTERS,
+                                                    _NO_GRADIENTS,
+                                                    _NO_IMAGES
+                                                );
 
     static final StyleLayer empty() {
         return _EMPTY;
@@ -135,6 +140,19 @@ final class StyleLayer implements Simplifiable<StyleLayer>
             simplifiedImages    == _images
         )
             return this;
+
+        simplifiedShadows   = ( simplifiedShadows.equals(_NO_SHADOWS)     ? _NO_SHADOWS   : simplifiedShadows );
+        simplifiedPainters  = ( simplifiedPainters.equals(_NO_PAINTERS)   ? _NO_PAINTERS  : simplifiedPainters );
+        simplifiedGradients = ( simplifiedGradients.equals(_NO_GRADIENTS) ? _NO_GRADIENTS : simplifiedGradients );
+        simplifiedImages    = ( simplifiedImages.equals(_NO_IMAGES)       ? _NO_IMAGES    : simplifiedImages );
+
+        if (
+            simplifiedShadows   == _NO_SHADOWS   &&
+            simplifiedPainters  == _NO_PAINTERS  &&
+            simplifiedGradients == _NO_GRADIENTS &&
+            simplifiedImages    == _NO_IMAGES
+        )
+            return _EMPTY;
 
         return new StyleLayer(
                     simplifiedShadows,
