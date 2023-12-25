@@ -278,7 +278,7 @@ public final class Style
     }
 
     Style _withShadow( UI.Layer layer, NamedStyles<ShadowStyle> shadows ) {
-        return new Style(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).shadows(shadows)), _properties);
+        return new Style(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withShadows(shadows)), _properties);
     }
 
     Style _withProperties( NamedStyles<String> properties ) {
@@ -295,16 +295,16 @@ public final class Style
     }
 
     Style _withShadow( Function<ShadowStyle, ShadowStyle> styler ) {
-        return _withLayers(_layers.map( layer -> layer.shadows(layer.shadows().mapStyles(styler::apply)) ));
+        return _withLayers(_layers.map( layer -> layer.withShadows(layer.shadows().mapStyles(styler::apply)) ));
     }
 
     Style _withImages( UI.Layer layer, NamedStyles<ImageStyle> images ) {
-        return new Style(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).images(images)), _properties);
+        return new Style(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withImages(images)), _properties);
     }
 
     Style _withGradients( UI.Layer layer, NamedStyles<GradientStyle> shades ) {
         Objects.requireNonNull(shades);
-        return new Style(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).gradients(shades)), _properties);
+        return new Style(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withGradients(shades)), _properties);
     }
 
     Style _withLayers( StyleLayers layers ) {
@@ -316,7 +316,7 @@ public final class Style
 
     Style painter( UI.Layer layer, NamedStyles<PainterStyle> painters ) {
         Objects.requireNonNull(painters);
-        return new Style(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).painters(painters)), _properties);
+        return new Style(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withPainters(painters)), _properties);
     }
 
     Style property( String key, String value ) {

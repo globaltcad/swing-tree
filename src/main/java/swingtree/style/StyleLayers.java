@@ -121,8 +121,8 @@ final class StyleLayers
 
         StyleLayers other = (StyleLayers) obj;
         return Objects.equals(_background, other._background)
-            && Objects.equals(_content, other._content)
-            && Objects.equals(_border, other._border)
+            && Objects.equals(_content,    other._content)
+            && Objects.equals(_border,     other._border)
             && Objects.equals(_foreground, other._foreground);
     }
 }

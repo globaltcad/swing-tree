@@ -78,6 +78,16 @@ final class Arc
     }
 
     @Override
+    public String toString() {
+        if ( this == _NONE )
+            return "Arc[NONE]";
+        return this.getClass().getSimpleName()+"[" +
+                    "arcWidth="  + _arcWidth  +", "+
+                    "arcHeight=" + _arcHeight +
+                "]";
+    }
+
+    @Override
     public int hashCode() {
         int hash = 7;
         hash = 31 * hash + _arcWidth;

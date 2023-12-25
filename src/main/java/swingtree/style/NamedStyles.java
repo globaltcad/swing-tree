@@ -19,19 +19,13 @@ import java.util.stream.Stream;
  *
  * @param <S> The type of the style.
  */
-class NamedStyles<S> implements Simplifiable<NamedStyles<S>>
+final class NamedStyles<S> implements Simplifiable<NamedStyles<S>>
 {
     private static final NamedStyles<?> EMPTY = new NamedStyles<>();
 
     static <S> NamedStyles<S> of( NamedStyle<S> defaultStyle ) {
         return new NamedStyles<>( defaultStyle );
     }
-
-    @SafeVarargs
-    static <S> NamedStyles<S> of( NamedStyle<S>... defaultStyle ) {
-        return new NamedStyles<>( defaultStyle );
-    }
-
 
     static <S> NamedStyles<S> empty() { return (NamedStyles<S>) EMPTY; }
 
@@ -81,21 +75,26 @@ class NamedStyles<S> implements Simplifiable<NamedStyles<S>>
 
     public NamedStyles<S> mapStyles( Function<S,S> f ) {
         Objects.requireNonNull(f);
-
-        NamedStyle<S>[] styles = Arrays.copyOf(_styles, _styles.length);
-        for ( int i = 0; i < styles.length; i++ )
-            styles[i] = NamedStyle.of(styles[i].name(), f.apply(styles[i].style()));
-
-        return new NamedStyles<>(styles);
+        return mapNamedStyles( ns -> NamedStyle.of(ns.name(), f.apply(ns.style())) );
     }
 
-    NamedStyles<S> filterByName( Predicate<String> filter ) {
-        Objects.requireNonNull(filter);
-        return new NamedStyles<>(
-                        namedStyles()
-                        .stream()
-                        .filter(e -> filter.test(e.name())).toArray(NamedStyle[]::new)
-                    );
+    public NamedStyles<S> mapNamedStyles( Function<NamedStyle<S>,NamedStyle<S>> f ) {
+        Objects.requireNonNull(f);
+
+        NamedStyle<S>[] newStyles = null;
+        for ( int i = 0; i < _styles.length; i++ ) {
+            NamedStyle<S> mapped = f.apply(_styles[i]);
+            if ( newStyles == null && mapped != _styles[i] ) {
+                newStyles = Arrays.copyOf(_styles, _styles.length);
+                // We avoid heap allocation if possible!
+            }
+            if ( newStyles != null )
+                newStyles[i] = mapped;
+        }
+        if ( newStyles == null )
+            return this;
+
+        return new NamedStyles<>(newStyles);
     }
 
     private int _findNamedStyle( String name ) {
@@ -142,7 +141,7 @@ class NamedStyles<S> implements Simplifiable<NamedStyles<S>>
         else
             styleType += "=";
         if ( this.size() == 1 )
-            return this.get(defaultName).toString();
+            return String.valueOf(this.get(defaultName));
         else
             return this.namedStyles()
                     .stream()
@@ -153,7 +152,7 @@ class NamedStyles<S> implements Simplifiable<NamedStyles<S>>
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(getClass().getSimpleName()+"[");
+        sb.append(getClass().getSimpleName()).append("[");
         for ( int i = 0; i < _styles.length; i++ ) {
             sb.append(_styles[i].name()).append("=").append(_styles[i].style());
             if ( i < _styles.length - 1 )
@@ -179,9 +178,6 @@ class NamedStyles<S> implements Simplifiable<NamedStyles<S>>
 
     @Override
     public NamedStyles<S> simplified() {
-        NamedStyle<S>[] simplifiedStyles = Arrays.copyOf(_styles, _styles.length);
-        for ( int i = 0; i < simplifiedStyles.length; i++ )
-            simplifiedStyles[i] = simplifiedStyles[i].simplified();
-        return new NamedStyles<>(simplifiedStyles);
+        return mapNamedStyles(NamedStyle::simplified);
     }
 }

@@ -257,7 +257,7 @@ final class BorderStyle
     BorderStyle simplified() {
         if ( this == _NONE )
             return _NONE;
-        Color simplifiedBorderColor    = _borderColor != null && _borderColor.getAlpha() > 0 ? _borderColor : null;
+
         Arc simplifiedTopLeftArc       = _topLeftArc.simplified();
         Arc simplifiedTopRightArc      = _topRightArc.simplified();
         Arc simplifiedBottomLeftArc    = _bottomLeftArc.simplified();
@@ -265,9 +265,9 @@ final class BorderStyle
         Outline simplifiedBorderWidths = _borderWidths.simplified();
         Outline simplifiedMargin       = _margin.simplified();
         Outline simplifiedPadding      = _padding.simplified();
+        Color simplifiedBorderColor    = _borderColor != null && _borderColor.getAlpha() > 0 ? _borderColor : null;
         NamedStyles<GradientStyle> simplifiedGradients = _gradients.simplified();
         if (
-             simplifiedBorderColor    == null &&
              simplifiedTopLeftArc     == Arc.none() &&
              simplifiedTopRightArc    == Arc.none() &&
              simplifiedBottomLeftArc  == Arc.none() &&
@@ -275,9 +275,22 @@ final class BorderStyle
              simplifiedBorderWidths   == Outline.none() &&
              simplifiedMargin         == Outline.none() &&
              simplifiedPadding        == Outline.none() &&
+             simplifiedBorderColor    == null &&
              simplifiedGradients.equals(NamedStyles.of(NamedStyle.of(StyleUtility.DEFAULT_KEY, GradientStyle.none())))
         )
             return _NONE;
+        else if (
+            simplifiedTopLeftArc     == _topLeftArc &&
+            simplifiedTopRightArc    == _topRightArc &&
+            simplifiedBottomLeftArc  == _bottomLeftArc &&
+            simplifiedBottomRightArc == _bottomRightArc &&
+            simplifiedBorderWidths   == _borderWidths &&
+            simplifiedMargin         == _margin &&
+            simplifiedPadding        == _padding &&
+            simplifiedBorderColor    == _borderColor &&
+            simplifiedGradients      == _gradients
+        )
+            return this;
         else
             return new BorderStyle(
                         simplifiedTopLeftArc,
@@ -299,10 +312,10 @@ final class BorderStyle
         hash = 97 * hash + _topRightArc.hashCode();
         hash = 97 * hash + _bottomLeftArc.hashCode();
         hash = 97 * hash + _bottomRightArc.hashCode();
-        hash = 97 * hash + ( _borderColor    != null ? _borderColor.hashCode()    : 0 );
         hash = 97 * hash + _borderWidths.hashCode();
         hash = 97 * hash + _margin.hashCode();
         hash = 97 * hash + _padding.hashCode();
+        hash = 97 * hash + ( _borderColor != null ? _borderColor.hashCode()    : 0 );
         hash = 97 * hash + _gradients.hashCode();
         return hash;
     }

@@ -33,6 +33,7 @@ final class StyleLayer implements Simplifiable<StyleLayer>
         _images    = images;
     }
 
+
     NamedStyles<ShadowStyle>   shadows() {
         return _shadows;
     }
@@ -46,16 +47,16 @@ final class StyleLayer implements Simplifiable<StyleLayer>
         return _images;
     }
 
-    StyleLayer   shadows( NamedStyles<ShadowStyle> shadows ) {
+    StyleLayer withShadows( NamedStyles<ShadowStyle> shadows ) {
         return new StyleLayer(shadows, _painters, _gradients, _images);
     }
-    StyleLayer  painters( NamedStyles<PainterStyle> painters ) {
+    StyleLayer withPainters( NamedStyles<PainterStyle> painters ) {
         return new StyleLayer(_shadows, painters, _gradients, _images);
     }
-    StyleLayer gradients( NamedStyles<GradientStyle> gradients ) {
+    StyleLayer withGradients( NamedStyles<GradientStyle> gradients ) {
         return new StyleLayer(_shadows, _painters, gradients, _images);
     }
-    StyleLayer    images( NamedStyles<ImageStyle> images ) {
+    StyleLayer withImages( NamedStyles<ImageStyle> images ) {
         return new StyleLayer(_shadows, _painters, _gradients, images);
     }
 

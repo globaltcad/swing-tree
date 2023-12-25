@@ -9,14 +9,14 @@ import java.util.Objects;
  *
  * @param <S> The type of the style.
  */
-class NamedStyle<S> implements Simplifiable<NamedStyle<S>>
+final class NamedStyle<S> implements Simplifiable<NamedStyle<S>>
 {
     static <S> NamedStyle<S> of( String name, S style ) {
         return new NamedStyle<>( name, style );
     }
 
     private final String _name;
-    private final S _style;
+    private final S      _style;
 
 
     private NamedStyle( String name, S style ) {
