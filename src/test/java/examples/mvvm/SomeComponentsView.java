@@ -7,7 +7,7 @@ import swingtree.UI;
 import swingtree.threading.EventProcessor;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -151,7 +151,7 @@ public class SomeComponentsView extends Panel
 			@Override public void mousePressed(MouseEvent e) { dropdown.setPopupVisible(false); }
 		};
 		dropdown.addMouseListener(comboHideOwnPopupMouseAdapter);
-		for ( Component c : dropdown.getComponents() )
+		for ( java.awt.Component c : dropdown.getComponents() )
 			c.addMouseListener(comboHideOwnPopupMouseAdapter);
 
 		dropdown.addPopupMenuListener(new javax.swing.event.PopupMenuListener() {
