@@ -11,7 +11,7 @@ final class StyleLayer implements Simplifiable<StyleLayer>
         NamedStyles.of(NamedStyle.of(StyleUtility.DEFAULT_KEY, ImageStyle.none()))
     );
 
-    public static final StyleLayer empty() {
+    static final StyleLayer empty() {
         return _EMPTY;
     }
 

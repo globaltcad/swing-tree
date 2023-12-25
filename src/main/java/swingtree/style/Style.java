@@ -53,12 +53,7 @@ public final class Style
                                             BaseStyle.none(),
                                             FontStyle.none(),
                                             DimensionalityStyle.none(),
-                                            NamedStyles.of(
-                                                NamedStyle.of(UI.Layer.BACKGROUND.name(), StyleLayer.empty()),
-                                                NamedStyle.of(UI.Layer.CONTENT.name(), StyleLayer.empty()),
-                                                NamedStyle.of(UI.Layer.BORDER.name(), StyleLayer.empty()),
-                                                NamedStyle.of(UI.Layer.FOREGROUND.name(), StyleLayer.empty())
-                                            ),
+                                            StyleLayers.empty(),
                                             NamedStyles.empty()
                                         );
 
@@ -73,18 +68,18 @@ public final class Style
     private final BaseStyle                  _base;
     private final FontStyle                  _font;
     private final DimensionalityStyle        _dimensionality;
-    private final NamedStyles<StyleLayer>    _layers;
+    private final StyleLayers                _layers;
     private final NamedStyles<String>        _properties;
 
 
     private Style(
-        LayoutStyle                layout,
-        BorderStyle                border,
-        BaseStyle                  base,
-        FontStyle                  font,
-        DimensionalityStyle        dimensionality,
-        NamedStyles<StyleLayer>    layers,
-        NamedStyles<String>        properties
+        LayoutStyle         layout,
+        BorderStyle         border,
+        BaseStyle           base,
+        FontStyle           font,
+        DimensionalityStyle dimensionality,
+        StyleLayers         layers,
+        NamedStyles<String> properties
     ) {
         _layout         = Objects.requireNonNull(layout);
         _border         = Objects.requireNonNull(border);
@@ -113,7 +108,7 @@ public final class Style
      * @return The default shadow style.
      */
     public ShadowStyle shadow() {
-        return _layers.get(ShadowStyle.DEFAULT_LAYER.name())
+        return _layers.get(ShadowStyle.DEFAULT_LAYER)
                         .shadows()
                         .get(StyleUtility.DEFAULT_KEY);
     }
@@ -124,7 +119,7 @@ public final class Style
      */
     public ShadowStyle shadow( UI.Layer layer, String shadowName ) {
         Objects.requireNonNull(shadowName);
-        return _layers.get(layer.name()).shadows().get(shadowName);
+        return _layers.get(layer).shadows().get(shadowName);
     }
 
     /**
@@ -132,7 +127,7 @@ public final class Style
      */
     List<ShadowStyle> shadows( UI.Layer layer ) {
         return Collections.unmodifiableList(
-                        _layers.get(layer.name())
+                        _layers.get(layer)
                         .shadows()
                         .namedStyles()
                         .stream()
@@ -143,7 +138,7 @@ public final class Style
     }
 
     NamedStyles<ShadowStyle> shadowsMap(UI.Layer layer) {
-        return _layers.get(layer.name()).shadows();
+        return _layers.get(layer).shadows();
     }
 
     boolean anyVisibleShadows() {
@@ -151,7 +146,7 @@ public final class Style
     }
 
     boolean anyVisibleShadows(UI.Layer layer) {
-        return _layers.get(layer.name())
+        return _layers.get(layer)
                 .shadows()
                 .stylesStream()
                 .anyMatch(s -> s.color().isPresent() && s.color().get().getAlpha() > 0 );
@@ -164,7 +159,7 @@ public final class Style
      */
     List<Painter> painters( UI.Layer layer ) {
         return Collections.unmodifiableList(
-                        _layers.get(layer.name())
+                        _layers.get(layer)
                         .painters()
                         .sortedByNamesAndFilteredBy()
                         .stream()
@@ -178,7 +173,7 @@ public final class Style
         Objects.requireNonNull(painter);
         painterName = painterName + "_" + layer.name();
         // We clone the painter map:
-        NamedStyles<PainterStyle> newPainters = _layers.get(layer.name())
+        NamedStyles<PainterStyle> newPainters = _layers.get(layer)
                                                     .painters()
                                                     .withNamedStyle(
                                                         painterName, // Existing painters are overwritten if they have the same name.
@@ -200,7 +195,7 @@ public final class Style
                     _base,
                     _font,
                     _dimensionality,
-                    _layers.filterByName( n -> n.equals(layer.name())),
+                    _layers.onlyRetainingLayer(layer),
                     _properties
                 );
     }
@@ -214,11 +209,11 @@ public final class Style
     }
 
     boolean hasCustomPaintersOnLayer( UI.Layer layer ) {
-        return _layers.get(layer.name()).painters().stylesStream().anyMatch(p -> !Painter.none().equals(p.painter()));
+        return _layers.get(layer).painters().stylesStream().anyMatch(p -> !Painter.none().equals(p.painter()));
     }
 
     List<GradientStyle> gradients( UI.Layer layer ) {
-        return _layers.get(layer.name()).gradients().sortedByNamesAndFilteredBy();
+        return _layers.get(layer).gradients().sortedByNamesAndFilteredBy();
     }
 
     boolean hasCustomGradients() {
@@ -233,7 +228,7 @@ public final class Style
     }
 
     boolean hasCustomGradients( UI.Layer layer ) {
-        NamedStyles<GradientStyle> gradients = _layers.get(layer.name()).gradients();
+        NamedStyles<GradientStyle> gradients = _layers.get(layer).gradients();
         return !( gradients.size() == 1 && GradientStyle.none().equals(gradients.get(StyleUtility.DEFAULT_KEY)) );
     }
 
@@ -283,7 +278,7 @@ public final class Style
     }
 
     Style _withShadow( UI.Layer layer, NamedStyles<ShadowStyle> shadows ) {
-        return new Style(_layout, _border, _base, _font, _dimensionality, _layers.withNamedStyle(layer.name(), _layers.get(layer.name()).shadows(shadows)), _properties);
+        return new Style(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).shadows(shadows)), _properties);
     }
 
     Style _withProperties( NamedStyles<String> properties ) {
@@ -295,24 +290,24 @@ public final class Style
 
     Style _withShadow( UI.Layer layer, Function<ShadowStyle, ShadowStyle> styler ) {
         // A new map is created where all the styler is applied to all the values:
-        NamedStyles<ShadowStyle> styledShadows = _layers.get(layer.name()).shadows().mapStyles(styler::apply);
+        NamedStyles<ShadowStyle> styledShadows = _layers.get(layer).shadows().mapStyles(styler::apply);
         return _withShadow(layer, styledShadows);
     }
 
     Style _withShadow( Function<ShadowStyle, ShadowStyle> styler ) {
-        return _withLayers(_layers.mapStyles( layer -> layer.shadows(layer.shadows().mapStyles(styler::apply)) ));
+        return _withLayers(_layers.map( layer -> layer.shadows(layer.shadows().mapStyles(styler::apply)) ));
     }
 
     Style _withImages( UI.Layer layer, NamedStyles<ImageStyle> images ) {
-        return new Style(_layout, _border, _base, _font, _dimensionality, _layers.withNamedStyle(layer.name(), _layers.get(layer.name()).images(images)), _properties);
+        return new Style(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).images(images)), _properties);
     }
 
     Style _withGradients( UI.Layer layer, NamedStyles<GradientStyle> shades ) {
         Objects.requireNonNull(shades);
-        return new Style(_layout, _border, _base, _font, _dimensionality, _layers.withNamedStyle(layer.name(), _layers.get(layer.name()).gradients(shades)), _properties);
+        return new Style(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).gradients(shades)), _properties);
     }
 
-    Style _withLayers( NamedStyles<StyleLayer> layers ) {
+    Style _withLayers( StyleLayers layers ) {
         if ( layers == _layers )
             return this;
 
@@ -321,7 +316,7 @@ public final class Style
 
     Style painter( UI.Layer layer, NamedStyles<PainterStyle> painters ) {
         Objects.requireNonNull(painters);
-        return new Style(_layout, _border, _base, _font, _dimensionality, _layers.withNamedStyle(layer.name(), _layers.get(layer.name()).painters(painters)), _properties);
+        return new Style(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).painters(painters)), _properties);
     }
 
     Style property( String key, String value ) {
@@ -340,23 +335,23 @@ public final class Style
     Style gradient( UI.Layer layer, String shadeName, Function<GradientStyle, GradientStyle> styler ) {
         Objects.requireNonNull(shadeName);
         Objects.requireNonNull(styler);
-        GradientStyle shadow = Optional.ofNullable(_layers.get(layer.name()).gradients().get(shadeName)).orElse(GradientStyle.none());
+        GradientStyle shadow = Optional.ofNullable(_layers.get(layer).gradients().get(shadeName)).orElse(GradientStyle.none());
         // We clone the shadow map:
-        NamedStyles<GradientStyle> newShadows = _layers.get(layer.name()).gradients().withNamedStyle(shadeName, styler.apply(shadow));
+        NamedStyles<GradientStyle> newShadows = _layers.get(layer).gradients().withNamedStyle(shadeName, styler.apply(shadow));
         return _withGradients(layer, newShadows);
     }
 
     Style images( UI.Layer layer, String imageName, Function<ImageStyle, ImageStyle> styler ) {
         Objects.requireNonNull(imageName);
         Objects.requireNonNull(styler);
-        ImageStyle ground = _layers.get(layer.name()).images().style(imageName).orElse(ImageStyle.none());
+        ImageStyle ground = _layers.get(layer).images().style(imageName).orElse(ImageStyle.none());
         // We clone the ground map:
-        NamedStyles<ImageStyle> newImages = _layers.get(layer.name()).images().withNamedStyle(imageName, styler.apply(ground));
+        NamedStyles<ImageStyle> newImages = _layers.get(layer).images().withNamedStyle(imageName, styler.apply(ground));
         return _withImages( layer, newImages );
     }
 
     List<ImageStyle> images( UI.Layer layer ) {
-        return _layers.get(layer.name()).images().sortedByNamesAndFilteredBy();
+        return _layers.get(layer).images().sortedByNamesAndFilteredBy();
     }
 
     Style scale( double scale ) {
@@ -366,7 +361,7 @@ public final class Style
                     _base, // Just colors and the cursor
                     _font._scale(scale),
                     _dimensionality._scale(scale),
-                    _layers.mapStyles( layer -> layer._scale(scale) ),
+                    _layers.map( layer -> layer._scale(scale) ),
                     _properties
                 );
     }
@@ -414,8 +409,8 @@ public final class Style
     }
 
     boolean hasEqualShadowsAs( UI.Layer layer, Style otherStyle ) {
-        StyleLayer thisLayer = _layers.get(layer.name());
-        StyleLayer otherLayer = otherStyle._layers.get(layer.name());
+        StyleLayer thisLayer = _layers.get(layer);
+        StyleLayer otherLayer = otherStyle._layers.get(layer);
         if ( thisLayer == null && otherLayer == null )
             return true;
         if ( thisLayer == null || otherLayer == null )
@@ -435,8 +430,8 @@ public final class Style
     }
 
     boolean hasEqualPaintersAs( UI.Layer layer, Style otherStyle ) {
-        StyleLayer thisLayer = _layers.get(layer.name());
-        StyleLayer otherLayer = otherStyle._layers.get(layer.name());
+        StyleLayer thisLayer = _layers.get(layer);
+        StyleLayer otherLayer = otherStyle._layers.get(layer);
         if ( thisLayer == null && otherLayer == null )
             return true;
         if ( thisLayer == null || otherLayer == null )
@@ -456,8 +451,8 @@ public final class Style
     }
 
     boolean hasEqualGradientsAs( UI.Layer layer, Style otherStyle ) {
-        StyleLayer thisLayer = _layers.get(layer.name());
-        StyleLayer otherLayer = otherStyle._layers.get(layer.name());
+        StyleLayer thisLayer = _layers.get(layer);
+        StyleLayer otherLayer = otherStyle._layers.get(layer);
         if ( thisLayer == null && otherLayer == null )
             return true;
         if ( thisLayer == null || otherLayer == null )
@@ -477,8 +472,8 @@ public final class Style
     }
 
     boolean hasEqualImagesAs( UI.Layer layer, Style otherStyle ) {
-        StyleLayer thisLayer = _layers.get(layer.name());
-        StyleLayer otherLayer = otherStyle._layers.get(layer.name());
+        StyleLayer thisLayer = _layers.get(layer);
+        StyleLayer otherLayer = otherStyle._layers.get(layer);
         if ( thisLayer == null && otherLayer == null )
             return true;
         if ( thisLayer == null || otherLayer == null )
@@ -570,10 +565,10 @@ public final class Style
 
             this.borderIsVisible = style.border().isVisible();
 
-            this.allShadowsAreBorderShadows     = style._layers.everyNamedStyle( layer -> layer.name().equals(UI.Layer.BORDER.name()) || layer.style().shadows().everyNamedStyle(   ns -> !ns.style().color().isPresent() ) );
-            this.allGradientsAreBorderGradients = style._layers.everyNamedStyle( layer -> layer.name().equals(UI.Layer.BORDER.name()) || layer.style().gradients().everyNamedStyle( ns -> ns.style().colors().length == 0 ) );
-            this.allPaintersAreBorderPainters   = style._layers.everyNamedStyle( layer -> layer.name().equals(UI.Layer.BORDER.name()) || layer.style().painters().everyNamedStyle(  ns -> Painter.none().equals(ns.style().painter()) ) );
-            this.allImagesAreBorderImages       = style._layers.everyNamedStyle( layer -> layer.name().equals(UI.Layer.BORDER.name()) || layer.style().images().everyNamedStyle(    ns -> !ns.style().image().isPresent() && !ns.style().primer().isPresent() ) );
+            this.allShadowsAreBorderShadows     = style._layers.everyNamedStyle( (layer, styleLayer) -> layer == UI.Layer.BORDER || styleLayer.shadows().everyNamedStyle(   ns -> !ns.style().color().isPresent() ) );
+            this.allGradientsAreBorderGradients = style._layers.everyNamedStyle( (layer, styleLayer) -> layer == UI.Layer.BORDER || styleLayer.gradients().everyNamedStyle( ns -> ns.style().colors().length == 0 ) );
+            this.allPaintersAreBorderPainters   = style._layers.everyNamedStyle( (layer, styleLayer) -> layer == UI.Layer.BORDER || styleLayer.painters().everyNamedStyle(  ns -> Painter.none().equals(ns.style().painter()) ) );
+            this.allImagesAreBorderImages       = style._layers.everyNamedStyle( (layer, styleLayer) -> layer == UI.Layer.BORDER || styleLayer.images().everyNamedStyle(    ns -> !ns.style().image().isPresent() && !ns.style().primer().isPresent() ) );
         }
 
         public boolean isNotStyled() {
