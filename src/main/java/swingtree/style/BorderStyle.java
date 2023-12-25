@@ -96,6 +96,15 @@ final class BorderStyle
 
     public Optional<Color> color() { return Optional.ofNullable(_borderColor); }
 
+    public GradientStyle gradient() {
+        return gradient(StyleUtility.DEFAULT_KEY);
+    }
+
+    public GradientStyle gradient( String shadeName ) {
+        Objects.requireNonNull(shadeName);
+        return Optional.ofNullable(_gradients.get(shadeName)).orElse(GradientStyle.none());
+    }
+
     /**
      * @return A list of all named gradient styles sorted by their name.
      */

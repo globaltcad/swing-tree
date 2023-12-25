@@ -222,7 +222,29 @@ final class FontStyle
         _verticalAlignment   = verticalAlignment;
     }
 
+    String family() { return _familyName; }
+
+    int size() { return _size; }
+
+    float posture() { return _posture; }
+
+    float weight() { return _weight; }
+
+    float spacing() { return _spacing; }
+
+    Optional<Color> color() { return Optional.ofNullable(_color); }
+
+    Optional<Color> backgroundColor() { return Optional.ofNullable(_backgroundColor); }
+
     Optional<Color> selectionColor() { return Optional.ofNullable(_selectionColor); }
+
+    boolean isUnderlined() { return _isUnderlined; }
+
+    Optional<AffineTransform> transform() { return Optional.ofNullable(_transform); }
+
+    Optional<Paint> paint() { return Optional.ofNullable(_paint); }
+
+    Optional<Paint> backgroundPaint() { return Optional.ofNullable(_backgroundPaint); }
 
     Optional<UI.HorizontalAlignment> horizontalAlignment() { return Optional.ofNullable(_horizontalAlignment); }
 
