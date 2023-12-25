@@ -140,9 +140,9 @@ class Styles_Spec extends Specification
                                             "verticalAlignment=?" +
                                         "], " +
                                         "DimensionalityStyle[NONE], " +
-                                        "NamedStyles[" +
-                                            "BACKGROUND=StyleLayer[EMPTY], " +
-                                            "CONTENT=StyleLayer[" +
+                                        "StyleLayers[" +
+                                            "background=StyleLayer[EMPTY], " +
+                                            "content=StyleLayer[" +
                                                 "shadows=ShadowStyle[" +
                                                     "horizontalOffset=0, " +
                                                     "verticalOffset=0, " +
@@ -155,8 +155,8 @@ class Styles_Spec extends Specification
                                                 "gradients=GradientStyle[NONE], " +
                                                 "images=ImageStyle[NONE]" +
                                             "], " +
-                                            "BORDER=StyleLayer[EMPTY], " +
-                                            "FOREGROUND=StyleLayer[EMPTY]" +
+                                            "border=StyleLayer[EMPTY], " +
+                                            "foreground=StyleLayer[EMPTY]" +
                                         "], " +
                                         "properties=[]" +
                                     "]"
@@ -202,11 +202,11 @@ class Styles_Spec extends Specification
                                             "verticalAlignment=CENTER" +
                                         "], " +
                                         "DimensionalityStyle[NONE], " +
-                                        "NamedStyles[" +
-                                            "BACKGROUND=StyleLayer[EMPTY], " +
-                                            "CONTENT=StyleLayer[EMPTY], " +
-                                            "BORDER=StyleLayer[EMPTY], " +
-                                            "FOREGROUND=StyleLayer[" +
+                                        "StyleLayers[" +
+                                            "background=StyleLayer[EMPTY], " +
+                                            "content=StyleLayer[EMPTY], " +
+                                            "border=StyleLayer[EMPTY], " +
+                                            "foreground=StyleLayer[" +
                                                 "shadows=ShadowStyle[NONE], " +
                                                 "painters=PainterStyle[NONE], " +
                                                 "gradients=GradientStyle[NONE], " +
@@ -270,10 +270,10 @@ class Styles_Spec extends Specification
                                             "width=100, " +
                                             "height=200" +
                                         "], " +
-                                        "NamedStyles[" +
-                                            "BACKGROUND=StyleLayer[EMPTY], " +
-                                            "CONTENT=StyleLayer[EMPTY], " +
-                                            "BORDER=StyleLayer[" +
+                                        "StyleLayers[" +
+                                            "background=StyleLayer[EMPTY], " +
+                                            "content=StyleLayer[EMPTY], " +
+                                            "border=StyleLayer[" +
                                                 "shadows=ShadowStyle[NONE], " +
                                                 "painters=PainterStyle[NONE], " +
                                                 "gradients=NamedStyles[" +
@@ -289,7 +289,7 @@ class Styles_Spec extends Specification
                                             "], " +
                                             "images=ImageStyle[NONE]" +
                                         "], " +
-                                        "FOREGROUND=StyleLayer[EMPTY]" +
+                                        "foreground=StyleLayer[EMPTY]" +
                                     "], " +
                                     "properties=[]" +
                                 "]"
