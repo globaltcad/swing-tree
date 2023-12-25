@@ -79,20 +79,6 @@ final class StyleEngine
 
     Style getStyle() { return _componentConf.style(); }
 
-    void paintWithContentAreaClip( Graphics g, Runnable painter ) {
-        Shape oldClip = g.getClip();
-
-        Shape newClip = _componentConf.getMainComponentArea();
-        if ( newClip != null && newClip != oldClip ) {
-            newClip = StyleUtility.intersect(newClip, oldClip);
-            g.setClip(newClip);
-        }
-
-        painter.run();
-
-        g.setClip(oldClip);
-    }
-
     void renderBackgroundStyle( Graphics2D g2d )
     {
         // We remember if antialiasing was enabled before we render:
@@ -187,7 +173,7 @@ final class StyleEngine
 
     private void _render( UI.Layer layer, Graphics2D g2d ) {
         _layerCaches[layer.ordinal()].paint(this._componentConf, g2d, graphics -> {
-            StyleRenderer.renderStyleFor(this, layer, graphics);
+            StyleRenderer.renderStyleFor(this._componentConf, layer, graphics);
         });
     }
 

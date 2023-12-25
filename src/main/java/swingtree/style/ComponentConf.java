@@ -5,6 +5,7 @@ import swingtree.layout.Bounds;
 
 import javax.swing.JComponent;
 import javax.swing.border.Border;
+import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.Shape;
 import java.awt.geom.Area;
@@ -86,6 +87,20 @@ final class ComponentConf
         return _areas.borderArea().getFor(this, _areas);
     }
 
+
+    void paintWithContentAreaClip(Graphics g, Runnable painter ) {
+        Shape oldClip = g.getClip();
+
+        Shape newClip = getMainComponentArea();
+        if ( newClip != null && newClip != oldClip ) {
+            newClip = StyleUtility.intersect(newClip, oldClip);
+            g.setClip(newClip);
+        }
+
+        painter.run();
+
+        g.setClip(oldClip);
+    }
 
     ComponentConf with( Style style, JComponent component )
     {

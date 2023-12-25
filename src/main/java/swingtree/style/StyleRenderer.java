@@ -25,10 +25,8 @@ final class StyleRenderer
     private StyleRenderer() {} // Un-instantiable!
 
 
-    public static void renderStyleFor( StyleEngine engine, UI.Layer layer, Graphics2D g2d )
+    public static void renderStyleFor( ComponentConf conf, UI.Layer layer, Graphics2D g2d )
     {
-        ComponentConf conf = engine.getComponentConf();
-
         // First up, we render things unique to certain layers:
 
         if ( layer == UI.Layer.BACKGROUND ) {
@@ -48,7 +46,7 @@ final class StyleRenderer
 
         if ( layer == UI.Layer.BORDER ) {
             conf.style().border().color().ifPresent(color -> {
-                _drawBorder( engine, color, g2d);
+                _drawBorder( conf, color, g2d);
             });
         }
 
@@ -58,7 +56,7 @@ final class StyleRenderer
         // 1. A grounding serving as a base background, which is a filled color and/or an image:
         for ( ImageStyle imageStyle : conf.style().images(layer) )
             if ( !imageStyle.equals(ImageStyle.none()) )
-                _renderImage( imageStyle, conf.currentBounds(), engine, g2d);
+                _renderImage( conf, imageStyle, conf.currentBounds(), g2d);
 
         // 2. Gradients, which are best used to give a component a nice surface lighting effect.
         // They may transition vertically, horizontally or diagonally over various different colors:
@@ -76,12 +74,12 @@ final class StyleRenderer
 
         // 3. Shadows, which are simple gradient based drop shadows that can go inwards or outwards
         for ( ShadowStyle shadow : conf.style().shadows(layer) )
-            _renderShadows(shadow, engine, g2d);
+            _renderShadows(conf, shadow, g2d);
 
         // 4. Painters, which are provided by the user and can be anything
         List<Painter> painters = conf.style().painters(layer);
         if ( !painters.isEmpty() )
-            engine.paintWithContentAreaClip( g2d, () -> {
+            conf.paintWithContentAreaClip( g2d, () -> {
                 // We remember the current transform and clip so that we can reset them after each painter:
                 AffineTransform currentTransform = new AffineTransform(g2d.getTransform());
                 Shape           currentClip      = g2d.getClip();
@@ -118,8 +116,8 @@ final class StyleRenderer
             });
     }
 
-    private static void _drawBorder( StyleEngine engine, Color color, Graphics2D g2d ) {
-        ComponentConf conf = engine.getComponentConf();
+    private static void _drawBorder( ComponentConf conf, Color color, Graphics2D g2d )
+    {
         if ( !Outline.none().equals(conf.style().border().widths()) ) {
             try {
                 Area borderArea = conf.getComponentBorderArea();
@@ -150,14 +148,13 @@ final class StyleRenderer
     }
 
     private static void _renderShadows(
+        ComponentConf conf,
         ShadowStyle shadow,
-        StyleEngine engine,
         Graphics2D  g2d
     ) {
         if ( !shadow.color().isPresent() )
             return;
 
-        ComponentConf conf = engine.getComponentConf();
         Color shadowColor = shadow.color().orElse(Color.BLACK);
         Style style       = conf.style();
         Bounds bounds     = conf.currentBounds();
@@ -811,13 +808,11 @@ final class StyleRenderer
     }
 
     private static void _renderImage(
+        ComponentConf conf,
         ImageStyle  style,
         Bounds      bounds,
-        StyleEngine engine,
         Graphics2D  g2d
     ) {
-        ComponentConf conf = engine.getComponentConf();
-
         if ( style.primer().isPresent() ) {
             g2d.setColor(style.primer().get());
             g2d.fill(_areaFrom(style.clipArea(), conf));
