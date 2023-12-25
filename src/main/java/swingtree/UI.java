@@ -991,8 +991,8 @@ public final class UI extends UILayoutConstants
      * @param <T> The type parameter defining the concrete type of the component.
      * @return A builder instance for the provided object, which enables fluent method chaining.
      */
-    public static <T extends Component> UIForAnything<T> of( T component ) {
-        NullUtil.nullArgCheck(component, "component", Component.class);
+    public static <T extends java.awt.Component> UIForAnything<T> of( T component ) {
+        NullUtil.nullArgCheck(component, "component", java.awt.Component.class);
         return new UIForAnything<>(new BuilderState<>(component));
     }
 
@@ -2380,7 +2380,7 @@ public final class UI extends UILayoutConstants
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
     public static Tab tab( JComponent component ) {
-        NullUtil.nullArgCheck(component, "component", Component.class);
+        NullUtil.nullArgCheck(component, "component", JComponent.class);
         return new Tab(null, component, null, null, null, null, null, null, null);
     }
 
@@ -5939,7 +5939,7 @@ public final class UI extends UILayoutConstants
 
     /**
      * Exposes an API for scheduling periodic animation updates
-     * for a specific component whose {@link Component#repaint()}
+     * for a specific component whose {@link java.awt.Component#repaint()}
      * method should be called after every animation update.
      * This is a convenience method for {@link Animator#animateFor(LifeTime)}. <br>
      * A typical usage would be:
@@ -5957,7 +5957,7 @@ public final class UI extends UILayoutConstants
      * @param component The component which should be repainted after every animation update.
      * @return An {@link Animator} instance which allows you to configure the animation.
      */
-    public static Animator animateFor( LifeTime duration, Component component ) {
+    public static Animator animateFor( LifeTime duration, java.awt.Component component ) {
         return Animator.animateFor( duration, component );
     }
 
@@ -5969,7 +5969,7 @@ public final class UI extends UILayoutConstants
      *  which is used for scheduling animations, usually through
      *  {@link Animator#animateFor(LifeTime)} or the convenience methods
      *  {@link UI#animateFor(long, TimeUnit)}, {@link UI#animateFor(double, TimeUnit)},
-     *  {@link UI#animateFor(LifeTime)} or {@link UI#animateFor(LifeTime, Component)}.
+     *  {@link UI#animateFor(LifeTime)} or {@link UI#animateFor(LifeTime, java.awt.Component)}.
      *  A typical usage would be:
      *  <pre>{@code
      *      UI.animateFor( UI.lifeTime(0.1, TimeUnit.MINUTES) )
@@ -6168,7 +6168,7 @@ public final class UI extends UILayoutConstants
      *
      * @param component The component to show in the window.
      */
-    public static void show( Component component ) {
+    public static void show( java.awt.Component component ) {
         Objects.requireNonNull( component );
         new UI.TestWindow( "", f -> component );
     }
@@ -6180,7 +6180,7 @@ public final class UI extends UILayoutConstants
      * @param title The title of the window.
      * @param component The component to show in the window.
      */
-    public static void show( String title, Component component ) {
+    public static void show( String title, java.awt.Component component ) {
         Objects.requireNonNull( component );
         new UI.TestWindow( title, f -> component );
     }
@@ -6216,7 +6216,7 @@ public final class UI extends UILayoutConstants
      * @param uiSupplier The component supplier which receives the current {@link JFrame}
      *                   and returns the component to be shown.
      */
-    public static void show( Function<JFrame, Component> uiSupplier ) {
+    public static void show( Function<JFrame, java.awt.Component> uiSupplier ) {
         Objects.requireNonNull( uiSupplier );
         new UI.TestWindow( "", frame -> uiSupplier.apply(frame) );
     }
@@ -6230,7 +6230,7 @@ public final class UI extends UILayoutConstants
      * @param uiSupplier The component supplier which receives the current {@link JFrame}
      *                   and returns the component to be shown.
      */
-    public static void show( String title, Function<JFrame, Component> uiSupplier ) {
+    public static void show( String title, Function<JFrame, java.awt.Component> uiSupplier ) {
         Objects.requireNonNull( uiSupplier );
         new UI.TestWindow( title, frame -> uiSupplier.apply(frame) );
     }
@@ -6242,7 +6242,7 @@ public final class UI extends UILayoutConstants
      * @param eventProcessor the event processor to use for the UI built inside the {@link Supplier} lambda.
      * @param uiSupplier The component supplier which builds the UI and supplies the component to be shown.
      */
-    public static void showUsing( EventProcessor eventProcessor, Function<JFrame, Component> uiSupplier ) {
+    public static void showUsing( EventProcessor eventProcessor, Function<JFrame, java.awt.Component> uiSupplier ) {
         Objects.requireNonNull( eventProcessor );
         Objects.requireNonNull( uiSupplier );
         show(frame -> use(eventProcessor, () -> uiSupplier.apply(frame)));
@@ -6256,7 +6256,11 @@ public final class UI extends UILayoutConstants
      * @param title The title of the window.
      * @param uiSupplier The component supplier which builds the UI and supplies the component to be shown.
      */
-    public static void showUsing( EventProcessor eventProcessor, String title, Function<JFrame, Component> uiSupplier ) {
+    public static void showUsing(
+        EventProcessor eventProcessor,
+        String title,
+        Function<JFrame, java.awt.Component> uiSupplier
+    ) {
         Objects.requireNonNull( eventProcessor );
         Objects.requireNonNull( uiSupplier );
         show(title, frame -> use(eventProcessor, () -> uiSupplier.apply(frame)));
@@ -6266,7 +6270,7 @@ public final class UI extends UILayoutConstants
      *  This enum is used to specify how an image or icon (usually a {@link SvgIcon})
      *  should be scaled to fit the
      *  dimensions of the component that it is being rendered into, like for example
-     *  through the {@link SvgIcon#paintIcon(Component, Graphics, int, int)} method.
+     *  through the {@link SvgIcon#paintIcon(java.awt.Component, Graphics, int, int)} method.
      */
     public enum FitComponent {
         /**
@@ -6301,15 +6305,15 @@ public final class UI extends UILayoutConstants
     private static class TestWindow
     {
         private final JFrame frame;
-        private final Component component;
+        private final java.awt.Component component;
 
-        private TestWindow( String title, Function<JFrame, Component> uiSupplier ) {
+        private TestWindow( String title, Function<JFrame, java.awt.Component> uiSupplier ) {
             Objects.requireNonNull( title );
             Objects.requireNonNull( uiSupplier );
             this.frame = new JFrame();
             if ( !title.isEmpty() ) this.frame.setTitle(title);
             frame.setLocationRelativeTo(null); // Initial centering!
-            Component c = null;
+            java.awt.Component c = null;
             if ( !UI.thisIsUIThread() ) {
                 try {
                     c = UI.runAndGet(() -> uiSupplier.apply(frame));
@@ -6344,12 +6348,15 @@ public final class UI extends UILayoutConstants
         }
     }
 
-
     /*
-        The following method and subsequent classes are used to smoothly render
-        custom graphics on top of Swing components without requiring
-        the user to override the paint method of the component.
-        This is especially important to allow for declarative UI.
+        The following methods and subsequent class definitions have 2 purposes:
+
+         1. The nested classes are all bundled into the UI class to
+            avoid having to import them from different packages.
+
+         2. Their paint methods are overridden to allow SwingTree to perform
+            rendering of the style configuration of a component
+            without requiring the user to override the paint methods.
     */
 
     private static <C extends JComponent> void _paintBackground( C comp, Graphics g, Runnable superPaint ) {
@@ -6359,6 +6366,11 @@ public final class UI extends UILayoutConstants
         ComponentExtension.from(comp).paintForeground( (Graphics2D) g, superPaint );
     }
 
+    /** {inheritDoc} */
+    public static class Component extends JComponent {
+        @Override public void paint(Graphics g){ _paintBackground(this, g, ()->super.paint(g)); }
+        @Override public void paintChildren(Graphics g) { _paintForeground(this, g, ()->super.paintChildren(g)); }
+    }
     /** {inheritDoc} */
     public static class Panel extends JPanel {
         @Override public void paint(Graphics g){ _paintBackground(this, g, ()->super.paint(g)); }
@@ -6487,7 +6499,7 @@ public final class UI extends UILayoutConstants
     /** {inheritDoc} */
     public static class ScrollPane extends JScrollPane {
         public ScrollPane() { this(null); }
-        public ScrollPane(Component view) {
+        public ScrollPane(java.awt.Component view) {
             super(view);
             addMouseWheelListener(new NestedJScrollPanelScrollCorrection(this));
         }
