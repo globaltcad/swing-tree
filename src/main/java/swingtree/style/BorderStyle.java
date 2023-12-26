@@ -25,7 +25,7 @@ final class BorderStyle
                                                 Outline.none(),
                                                 Outline.none(),
                                                 null,
-                                                NamedStyles.of(NamedStyle.of(StyleUtility.DEFAULT_KEY, GradientStyle.none()))
+                                                StyleLayer._NO_GRADIENTS
                                             );
 
     public static BorderStyle none() { return _NONE; }
@@ -265,23 +265,28 @@ final class BorderStyle
         Arc simplifiedBottomLeftArc    = _bottomLeftArc.simplified();
         Arc simplifiedBottomRightArc   = _bottomRightArc.simplified();
         Outline simplifiedBorderWidths = _borderWidths.simplified();
-        Outline simplifiedMargin       = _margin; // Explicitly setting an all 0 margin is needed for overriding the default margin (from former border!)
+        Outline simplifiedMargin       = _margin; // Allowing the user to set an all 0 margin is needed for overriding the default margin (from former border!)
         Outline simplifiedPadding      = _padding.simplified();
         Color simplifiedBorderColor    = _borderColor != null && _borderColor.getAlpha() > 0 ? _borderColor : null;
-        if ( simplifiedBorderWidths.equals(Outline.none()) )
-            simplifiedBorderColor = null;
-
         NamedStyles<GradientStyle> simplifiedGradients = _gradients.simplified();
+
+        boolean hasNoBorderWidths = simplifiedBorderWidths.equals(Outline.none());
+
+        if ( hasNoBorderWidths ) {
+            simplifiedBorderColor = null;
+            simplifiedGradients   = StyleLayer._NO_GRADIENTS;
+        }
+
         if (
-             simplifiedTopLeftArc     == Arc.none() &&
-             simplifiedTopRightArc    == Arc.none() &&
-             simplifiedBottomLeftArc  == Arc.none() &&
-             simplifiedBottomRightArc == Arc.none() &&
+             simplifiedTopLeftArc     == Arc.none()     &&
+             simplifiedTopRightArc    == Arc.none()     &&
+             simplifiedBottomLeftArc  == Arc.none()     &&
+             simplifiedBottomRightArc == Arc.none()     &&
              simplifiedBorderWidths   == Outline.none() &&
              simplifiedMargin         == Outline.none() &&
              simplifiedPadding        == Outline.none() &&
-             simplifiedBorderColor    == null &&
-             simplifiedGradients.equals(NamedStyles.of(NamedStyle.of(StyleUtility.DEFAULT_KEY, GradientStyle.none())))
+             simplifiedBorderColor    == null           &&
+             simplifiedGradients.equals(StyleLayer._NO_GRADIENTS)
         )
             return _NONE;
         else if (

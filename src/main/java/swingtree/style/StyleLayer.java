@@ -4,10 +4,10 @@ import java.util.Objects;
 
 final class StyleLayer implements Simplifiable<StyleLayer>
 {
-    private static final NamedStyles<ShadowStyle>   _NO_SHADOWS   = NamedStyles.of(NamedStyle.of(StyleUtility.DEFAULT_KEY,ShadowStyle.none()));
-    private static final NamedStyles<PainterStyle>  _NO_PAINTERS  = NamedStyles.of(NamedStyle.of(StyleUtility.DEFAULT_KEY + "_" + PainterStyle.DEFAULT_LAYER.name(),PainterStyle.none()));
-    private static final NamedStyles<GradientStyle> _NO_GRADIENTS = NamedStyles.of(NamedStyle.of(StyleUtility.DEFAULT_KEY, GradientStyle.none()));
-    private static final NamedStyles<ImageStyle>    _NO_IMAGES    = NamedStyles.of(NamedStyle.of(StyleUtility.DEFAULT_KEY, ImageStyle.none()));
+    static final NamedStyles<ShadowStyle>   _NO_SHADOWS   = NamedStyles.of(NamedStyle.of(StyleUtility.DEFAULT_KEY,ShadowStyle.none()));
+    static final NamedStyles<PainterStyle>  _NO_PAINTERS  = NamedStyles.of(NamedStyle.of(StyleUtility.DEFAULT_KEY + "_" + PainterStyle.DEFAULT_LAYER.name(),PainterStyle.none()));
+    static final NamedStyles<GradientStyle> _NO_GRADIENTS = NamedStyles.of(NamedStyle.of(StyleUtility.DEFAULT_KEY, GradientStyle.none()));
+    static final NamedStyles<ImageStyle>    _NO_IMAGES    = NamedStyles.of(NamedStyle.of(StyleUtility.DEFAULT_KEY, ImageStyle.none()));
 
     private static final StyleLayer _EMPTY = new StyleLayer(
                                                     _NO_SHADOWS,
