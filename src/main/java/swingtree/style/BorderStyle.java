@@ -268,6 +268,9 @@ final class BorderStyle
         Outline simplifiedMargin       = _margin; // Explicitly setting an all 0 margin is needed for overriding the default margin (from former border!)
         Outline simplifiedPadding      = _padding.simplified();
         Color simplifiedBorderColor    = _borderColor != null && _borderColor.getAlpha() > 0 ? _borderColor : null;
+        if ( simplifiedBorderWidths.equals(Outline.none()) )
+            simplifiedBorderColor = null;
+
         NamedStyles<GradientStyle> simplifiedGradients = _gradients.simplified();
         if (
              simplifiedTopLeftArc     == Arc.none() &&

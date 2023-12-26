@@ -458,4 +458,94 @@ class Styles_Spec extends Specification
                     "properties=[]" +
                 "]"
     }
+
+    def 'The border style will be simplified if padding and widths are all 0.'()
+    {
+        reportInfo """
+            Simplifying a style configuration means that if the properties of a style
+            a configured in such a way that they are effectively the same as the default
+            in terms of how they will be rendered, then the style configuration will be
+            simplified to the default style.
+            
+            This optimization is important to improve cache hit rates, as the immutable
+            style configuration objects are used as cache keys.
+            Simplifying the style configurations will ensure that style configurations
+            which effectively render the same thing will also share the same cache buffer
+            for rendering.
+            
+            It is also memory efficient, as the default style objects are global null objects.
+        """
+        given : 'We create a highly simplifiable style through the style API.'
+            var ui = UI.panel().withStyle(conf -> conf
+                                .borderColor(Color.GREEN)
+                                .borderWidths(0,0,0,0)
+                                .padding(0,0,0,0)
+                                .borderRadiusAt(UI.Corner.TOP_LEFT, 0, 20)
+                                .borderRadiusAt(UI.Corner.BOTTOM_LEFT, 10, 0)
+                        )
+                        .getComponent()
+        expect : """
+            The style config has the expected string representation,
+            despite the fact that a visible border color was specified.
+            This is because the border width is 0, so the border is invisible
+            and the border color is irrelevant.
+        """
+            ComponentExtension.from(ui).getStyle().toString() == "Style[" +
+                    "LayoutStyle[NONE], " +
+                    "BorderStyle[NONE], " +
+                    "BaseStyle[NONE], " +
+                    "FontStyle[NONE], " +
+                    "DimensionalityStyle[NONE], " +
+                    "StyleLayers[" +
+                        "background=StyleLayer[EMPTY], " +
+                        "content=StyleLayer[EMPTY], " +
+                        "border=StyleLayer[EMPTY], " +
+                        "foreground=StyleLayer[EMPTY]" +
+                    "], " +
+                    "properties=[]" +
+                "]"
+
+        when : """
+            We now define the exact same style, but with a visible border width
+            of 1 px at the right edge.
+        """
+            ui = UI.panel().withStyle(conf -> conf
+                            .borderColor(Color.GREEN)
+                            .borderWidths(0,0,0,1)
+                            .padding(0,0,0,0)
+                            .borderRadiusAt(UI.Corner.TOP_LEFT, 0, 20)
+                            .borderRadiusAt(UI.Corner.BOTTOM_LEFT, 10, 0)
+                        )
+                        .getComponent()
+        then : """
+            The style config has the expected string representation,
+            despite the fact that a visible border color was specified.
+            This is because the border width is 0, so the border is invisible
+            and the border color is irrelevant.
+        """
+            ComponentExtension.from(ui).getStyle().toString() == "Style[" +
+                    "LayoutStyle[NONE], " +
+                    "BorderStyle[" +
+                        "radius=?, " +
+                        "topWidth=?, " +
+                        "rightWidth=?, " +
+                        "bottomWidth=?, " +
+                        "leftWidth=1, " +
+                        "margin=Outline[top=?, right=?, bottom=?, left=?], " +
+                        "padding=Outline[top=?, right=?, bottom=?, left=?], " +
+                        "color=rgba(0,255,0,255), " +
+                        "GradientStyle[NONE]" +
+                    "], " +
+                    "BaseStyle[NONE], " +
+                    "FontStyle[NONE], " +
+                    "DimensionalityStyle[NONE], " +
+                    "StyleLayers[" +
+                        "background=StyleLayer[EMPTY], " +
+                        "content=StyleLayer[EMPTY], " +
+                        "border=StyleLayer[EMPTY], " +
+                        "foreground=StyleLayer[EMPTY]" +
+                    "], " +
+                    "properties=[]" +
+                "]"
+    }
 }
