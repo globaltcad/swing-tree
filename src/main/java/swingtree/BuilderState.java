@@ -6,7 +6,6 @@ import swingtree.style.ComponentExtension;
 import swingtree.threading.EventProcessor;
 
 import javax.swing.JComponent;
-import java.awt.Component;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -17,7 +16,7 @@ import java.util.function.Supplier;
  *
  * @param <C> The type of the component wrapped by the builder node.
  */
-final class BuilderState<C extends Component>
+final class BuilderState<C extends java.awt.Component>
 {
     private static final Logger log = LoggerFactory.getLogger(BuilderState.class);
 
