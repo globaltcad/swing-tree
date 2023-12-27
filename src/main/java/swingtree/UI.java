@@ -1,7 +1,11 @@
 package swingtree;
 
+import com.github.weisj.jsvg.SVGDocument;
+import com.github.weisj.jsvg.parser.SVGLoader;
 import net.miginfocom.layout.LC;
 import net.miginfocom.swing.MigLayout;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sprouts.Event;
 import sprouts.*;
 import swingtree.animation.Animator;
@@ -64,6 +68,7 @@ import java.util.function.Supplier;
  */
 public final class UI extends UILayoutConstants
 {
+    private static final Logger log = LoggerFactory.getLogger(UI.class);
     /**
      *  An enum set of all the available swing cursors which
      *  map to the cursor type id.
@@ -867,7 +872,7 @@ public final class UI extends UILayoutConstants
         Map<IconDeclaration, ImageIcon> cache = SwingTree.get().getIconCache();
         ImageIcon icon = cache.get(declaration);
         if ( icon == null ) {
-            icon = _loadIcon(declaration);
+            icon = _tryLoadIcon(declaration);
             if ( icon != null )
                 cache.put(declaration, icon);
         }
@@ -909,7 +914,7 @@ public final class UI extends UILayoutConstants
         Map<IconDeclaration, ImageIcon> cache = SwingTree.get().getIconCache();
         ImageIcon icon = cache.get(declaration);
         if ( icon == null ) {
-            icon = _loadIcon(declaration);
+            icon = _tryLoadIcon(declaration);
             if ( icon != null )
                 cache.put(declaration, icon);
         }
@@ -917,6 +922,24 @@ public final class UI extends UILayoutConstants
             return Optional.empty();
         else
             return Optional.of(icon).map(SvgIcon.class::cast);
+    }
+
+    /**
+     * Loads an icon from the classpath or from a file.
+     * @param declaration The icon declaration, a value object defining the path to the icon.
+     *          The path can be a classpath resource or a file path.
+     * @return The icon.
+     * @throws NullPointerException if {@code path} is {@code null}.
+     */
+    private static ImageIcon _tryLoadIcon( IconDeclaration declaration )
+    {
+        ImageIcon icon = null;
+        try {
+            icon = _loadIcon(declaration);
+        } catch (Exception e) {
+            log.error("Failed to load icon from declaration: " + declaration, e);
+        }
+        return icon;
     }
 
     /**
@@ -954,7 +977,15 @@ public final class UI extends UILayoutConstants
         Optional<Integer> width  = declaration.size().width();
         Optional<Integer> height = declaration.size().height();
         if ( path.endsWith(".svg") ) {
-            SvgIcon icon = new SvgIcon(url).withIconSize(declaration.size());
+            SVGDocument tempSVGDocument = null;
+            try {
+                SVGLoader loader = new SVGLoader();
+                tempSVGDocument = Objects.requireNonNull(loader.load(url));
+            } catch (Exception e) {
+                log.error("Failed to load SVG document from URL: " + url, e);
+                return null;
+            }
+            SvgIcon icon = new SvgIcon(tempSVGDocument).withIconSize(declaration.size());
             if ( width.isPresent() && height.isPresent() )
                 return icon.withIconSize(width.get(), height.get());
             if ( width.isPresent() )

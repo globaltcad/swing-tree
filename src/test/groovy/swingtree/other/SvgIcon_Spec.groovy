@@ -5,6 +5,7 @@ import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
 import swingtree.UI
+import swingtree.api.IconDeclaration
 import swingtree.style.SvgIcon
 
 @Title("SVG Support through SvgIcon")
@@ -95,5 +96,56 @@ class SvgIcon_Spec extends Specification
             icon4.matches( /SvgIcon\[width=31, height=31, fitComponent=MIN_DIM, preferredPlacement=BOTTOM_RIGHT, doc=.*\]/ )
             icon5.matches( /SvgIcon\[width=24, height=24, fitComponent=MIN_DIM, preferredPlacement=UNDEFINED, doc=.*\]/ )
 
+    }
+
+    def 'Use `UI.findSvgIcon(IconDeclaration)` to load an SVG icon from a file.'()
+    {
+        reportInfo """
+            The `UI.findSvgIcon(IconDeclaration)` method is a convenience method
+            that allows you to load an icon from a file in the form of an `SvgIcon`.
+        """
+        given : 'We load an icon from a icon declaration.'
+            var declaration = IconDeclaration.of("/img/bubble-tree.svg")
+            var icon = UI.findSvgIcon(declaration)
+        expect : 'The icon is loaded correctly.'
+            icon.isPresent()
+        and : 'The icon has the expected size.'
+            icon.get().getIconWidth()  == -1
+            icon.get().getIconHeight() == -1
+    }
+
+    def 'The `UI.findSvgIcon(IconDeclaration)` method will not fail when the icon is not found.'()
+    {
+        reportInfo """
+            The `UI.findSvgIcon(IconDeclaration)` method is a convenience method
+            that allows you to load an icon from a file in the form of an `SvgIcon`.
+            When it fails to load the icon, it will return an empty `Optional`.
+            Any errors that occur during loading are logged.
+            This behaviour ensures that the frontend of the application
+            will not crash when an icon is not found.
+        """
+        given : 'We load an icon from a file.'
+            var declaration = IconDeclaration.of("/img/my-name-is-so-idiotic-that-it-will-probably-never-exist.svg")
+            var icon = UI.findSvgIcon(declaration)
+        expect : 'The icon is not loaded.'
+            icon.isEmpty()
+    }
+
+    def 'The `UI.findIcon(IconDeclaration)` method will not fail when the icon is not found.'()
+    {
+        reportInfo """
+            The `UI.findIcon(IconDeclaration)` method is a convenience method
+            that allows you to load an icon from a file in the form of an `SvgIcon`
+            if the file is an SVG file.
+            When it fails to load the icon, it will return an empty `Optional`.
+            Any errors that occur during loading are logged.
+            This behaviour ensures that the frontend of the application
+            will not crash when an icon is not found.
+        """
+        given : 'We load an icon from a file.'
+            var declaration = IconDeclaration.of("/img/my-name-is-so-idiotic-that-it-will-probably-never-exist.svg")
+            var icon = UI.findIcon(declaration)
+        expect : 'The icon is not loaded.'
+            icon.isEmpty()
     }
 }

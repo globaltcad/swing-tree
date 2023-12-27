@@ -176,7 +176,7 @@ class Styles_Spec extends Specification
                                 .image(UI.Layer.FOREGROUND, "bubbles", conf -> conf
                                     .fitMode(UI.FitComponent.WIDTH)
                                     .repeat(true)
-                                    .image("/images/bubbles.svg")
+                                    .image("/img/bubbles.svg")
                                 )
                                 .style()
 
@@ -215,12 +215,7 @@ class Styles_Spec extends Specification
                                                     "default=ImageStyle[NONE], " +
                                                     "bubbles=ImageStyle[" +
                                                         "primer=?, " +
-                                                        "image=SvgIcon[" +
-                                                            "width=?, height=?, " +
-                                                            "fitComponent=MIN_DIM, " +
-                                                            "preferredPlacement=UNDEFINED, " +
-                                                            "doc=?" +
-                                                        "], " +
+                                                        "image=?, " +
                                                         "placement=UNDEFINED, " +
                                                         "repeat=true, " +
                                                         "fitComponent=WIDTH, " +
