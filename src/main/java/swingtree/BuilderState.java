@@ -31,10 +31,11 @@ final class BuilderState<C extends java.awt.Component>
                     "This is a similar design choice as in Java's Stream API,\n" +
                     "where an exception is thrown when trying to reuse a stream after it has already been consumed.\n";
 
-    enum Mode
+    private enum Mode
     {
         DECLARATIVE, // Builder states get disposed after being used for building.
-        PROCEDURAL   // Builder states do not get disposed after being used for building.
+        PROCEDURAL,  // Builder states do not get disposed after being used for building.
+        FUNCTIONAL   // The component mutations are composed into a factory pipeline and executed when the component is fetched.
     }
 
     /**
@@ -61,21 +62,25 @@ final class BuilderState<C extends java.awt.Component>
     private Supplier<C> _componentFetcher; // Is null when the builder is disposed.
 
 
-    BuilderState( C component )
-    {
-        Objects.requireNonNull(component, "component");
-        if ( component instanceof JComponent)
-            ComponentExtension.initializeFor( (JComponent) component );
-
-        _eventProcessor   = SwingTree.get().getEventProcessor();
-        _mode             = Mode.DECLARATIVE;
-        _componentType    = (Class<C>) component.getClass();
-        _componentFetcher = () -> component;
-    }
-
     BuilderState( Class<C> type, Supplier<C> componentSource )
     {
         this(type.cast(componentSource.get()));
+        //this(
+        //    SwingTree.get().getEventProcessor(),
+        //    Mode.FUNCTIONAL,
+        //    type,
+        //    ()->initializeComponent(componentSource.get()).get()
+        //);
+    }
+
+    BuilderState( C component )
+    {
+        this(
+            SwingTree.get().getEventProcessor(),
+            Mode.DECLARATIVE,
+            (Class<C>) component.getClass(),
+            initializeComponent(component)
+        );
     }
 
     private BuilderState(
@@ -95,6 +100,15 @@ final class BuilderState<C extends java.awt.Component>
         _componentFetcher = componentFetcher;
     }
 
+    private static <C extends java.awt.Component> Supplier<C> initializeComponent( C component )
+    {
+        Objects.requireNonNull(component, "component");
+        if ( component instanceof JComponent)
+            ComponentExtension.initializeFor( (JComponent) component );
+
+        return () -> component;
+    }
+
     /**
      *  @return The component wrapped by this builder node.
      *  @throws IllegalStateException If this builder state is disposed (it's reference to the component is null).
@@ -108,6 +122,17 @@ final class BuilderState<C extends java.awt.Component>
                     "If you need to access the component of a builder node, " +
                     "you may only do so through the builder instance returned by the most recent builder method call."
                 );
+
+        if ( _mode == Mode.FUNCTIONAL ) {
+            C component = _componentFetcher.get();
+            _componentFetcher = () -> component;
+            /*
+                   The component is fetched and stored in a local variable,
+                    and then the component is wrapped in a new supplier which returns the component from the local variable.
+                    This is done to ensure that the component is only built and fetched once,
+                    and that the component is not built again when the component is fetched.
+            */
+        }
 
         return _componentType.cast(_componentFetcher.get());
     }
@@ -174,19 +199,20 @@ final class BuilderState<C extends java.awt.Component>
                     "Make sure to only use the builder instance returned by the most recent builder method call."
                 );
 
-        try {
-            componentMutator.accept(_componentFetcher.get());
-        } catch ( Exception e ) {
-            e.printStackTrace();
-            log.error(
-                "Exception while building component of type '" + _componentType.getSimpleName() + "'.", e
-            );
-            /*
-                If individual steps in the builder chain throw exceptions,
-                we do not want the entire GUI declaration to fail
-                so that only the GUI of the failing component is not built.
-            */
-        }
+        if ( _mode != Mode.FUNCTIONAL )
+            try {
+                componentMutator.accept(_componentFetcher.get());
+            } catch ( Exception e ) {
+                e.printStackTrace();
+                log.error(
+                    "Exception while building component of type '" + _componentType.getSimpleName() + "'.", e
+                );
+                /*
+                    If individual steps in the builder chain throw exceptions,
+                    we do not want the entire GUI declaration to fail
+                    so that only the GUI of the failing component is not built.
+                */
+            }
 
         switch ( _mode) 
         {
@@ -199,6 +225,21 @@ final class BuilderState<C extends java.awt.Component>
                         _mode,
                         _componentType,
                         componentFactory
+                    );
+            }
+            case FUNCTIONAL:
+            {
+                Supplier<C> componentFactory = _componentFetcher;
+                this.dispose(); // detach strong reference to the component to allow it to be garbage collected.
+                return new BuilderState<>(
+                        _eventProcessor,
+                        _mode,
+                        _componentType,
+                        () -> {
+                            C newComponent = componentFactory.get();
+                            componentMutator.accept(newComponent);
+                            return newComponent;
+                        }
                     );
             }
             case PROCEDURAL :
