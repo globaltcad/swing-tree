@@ -90,7 +90,9 @@ public final class Style
         _properties     = Objects.requireNonNull(properties);
     }
 
-    public LayoutStyle layout() { return _layout; }
+    public Optional<Object> layoutConstraint() { return _layout.constraint(); }
+
+    LayoutStyle layout() { return _layout; }
 
     Outline padding() { return _border.padding(); }
 

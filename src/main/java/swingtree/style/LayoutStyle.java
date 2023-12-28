@@ -8,7 +8,7 @@ import java.util.Optional;
  *  The layout manager of a component will use this information
  *  to determine the actual layout of the component in the layout.
  **/
-public final class LayoutStyle
+final class LayoutStyle
 {
     private static final LayoutStyle _NONE = new LayoutStyle(Layout.unspecific(), null, null, null);
 

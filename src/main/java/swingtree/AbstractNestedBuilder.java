@@ -87,7 +87,7 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extend
 
             Style style = ( conf != null ? null : ComponentExtension.from(child).gatherStyle() );
             if ( style != null )
-                conf = style.layout().constraint().orElse(null);
+                conf = style.layoutConstraint().orElse(null);
 
             _addComponentTo(thisComponent, childComponent, conf);
 

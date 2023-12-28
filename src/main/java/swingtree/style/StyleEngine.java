@@ -23,7 +23,7 @@ final class StyleEngine
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(StyleEngine.class);
 
-    public static StyleEngine create() {
+    static StyleEngine create() {
         return new StyleEngine(ComponentConf.none(), new Expirable[0], null);
     }
 
@@ -76,8 +76,6 @@ final class StyleEngine
         animationPainters.removeIf(Expirable::isExpired);
         return new StyleEngine(_componentConf, animationPainters.toArray(new Expirable[0]), _layerCaches);
     }
-
-    Style getStyle() { return _componentConf.style(); }
 
     void renderBackgroundStyle( Graphics2D g2d )
     {
@@ -156,7 +154,7 @@ final class StyleEngine
         }
     }
 
-    public void paintForeground( Graphics2D g2d )
+    void paintForeground( Graphics2D g2d )
     {
         // We remember if antialiasing was enabled before we render:
         boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;

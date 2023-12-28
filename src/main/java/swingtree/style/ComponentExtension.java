@@ -218,7 +218,7 @@ public final class ComponentExtension<C extends JComponent>
      *         which is calculated based on the {@link Styler} lambdas
      *         associated with the component.
      */
-    public Style getStyle() { return _styleEngine.getStyle(); }
+    public Style getStyle() { return _styleEngine.getComponentConf().style(); }
 
     ComponentConf getConf() {
         return _styleEngine.getComponentConf();
@@ -455,21 +455,21 @@ public final class ComponentExtension<C extends JComponent>
         g2d.setClip(former);
     }
 
-    private Style _applyStyleToComponentState( Style style, boolean force )
+    private Style _applyStyleToComponentState( Style newStyle, boolean force )
     {
         _styleSource = _styleSource.withoutExpiredAnimationStylers(); // Clean up expired animation stylers!
 
-        Objects.requireNonNull(style);
+        Objects.requireNonNull(newStyle);
 
         if ( _owner.getBorder() instanceof StyleAndAnimationBorder<?> ) {
             StyleAndAnimationBorder<C> border = (StyleAndAnimationBorder<C>) _owner.getBorder();
-            border.recalculateInsets(style);
+            border.recalculateInsets(newStyle);
         }
 
-        if ( _styleEngine.getStyle().equals(style) && !force )
-            return style;
+        if ( _styleEngine.getComponentConf().style().equals(newStyle) && !force )
+            return newStyle;
 
-        final Style.Report styleReport = style.getReport();
+        final Style.Report styleReport = newStyle.getReport();
 
         boolean isNotStyled                     = styleReport.isNotStyled();
         boolean onlyDimensionalityIsStyled      = styleReport.onlyDimensionalityIsStyled();
@@ -490,39 +490,39 @@ public final class ComponentExtension<C extends JComponent>
                 _initialBackgroundColor = null;
             }
             if ( isNotStyled )
-                return style;
+                return newStyle;
         }
 
-        boolean hasBorderRadius = style.border().hasAnyNonZeroArcs();
-        boolean hasBackground   = style.base().backgroundColor().isPresent();
+        boolean hasBorderRadius = newStyle.border().hasAnyNonZeroArcs();
+        boolean hasBackground   = newStyle.base().backgroundColor().isPresent();
 
-        if ( hasBackground && !Objects.equals( _owner.getBackground(), style.base().backgroundColor().get() ) ) {
+        if ( hasBackground && !Objects.equals( _owner.getBackground(), newStyle.base().backgroundColor().get() ) ) {
             _initialBackgroundColor = _initialBackgroundColor != null ? _initialBackgroundColor :  _owner.getBackground();
-            _owner.setBackground( style.base().backgroundColor().get() );
+            _owner.setBackground( newStyle.base().backgroundColor().get() );
             if ( _owner instanceof JScrollPane ) {
                 JScrollPane scrollPane = (JScrollPane) _owner;
                 if ( scrollPane.getViewport() != null )
-                    scrollPane.getViewport().setBackground( style.base().backgroundColor().get() );
+                    scrollPane.getViewport().setBackground( newStyle.base().backgroundColor().get() );
             }
         }
 
         // If the style has a border radius set we need to make sure that we have a background color:
         if ( hasBorderRadius && !hasBackground ) {
             _initialBackgroundColor = _initialBackgroundColor != null ? _initialBackgroundColor :  _owner.getBackground();
-            style = style.backgroundColor(_initialBackgroundColor);
+            newStyle = newStyle.backgroundColor(_initialBackgroundColor);
         }
 
-        if ( style.base().foregroundColor().isPresent() && !Objects.equals( _owner.getForeground(), style.base().foregroundColor().get() ) )
-            _owner.setForeground( style.base().foregroundColor().get() );
+        if ( newStyle.base().foregroundColor().isPresent() && !Objects.equals( _owner.getForeground(), newStyle.base().foregroundColor().get() ) )
+            _owner.setForeground( newStyle.base().foregroundColor().get() );
 
-        style.base().cursor().ifPresent( cursor -> {
+        newStyle.base().cursor().ifPresent( cursor -> {
             if ( !Objects.equals( _owner.getCursor(), cursor ) )
                 _owner.setCursor( cursor );
         });
 
-        if ( style.base().orientation() != UI.ComponentOrientation.UNKNOWN ) {
+        if ( newStyle.base().orientation() != UI.ComponentOrientation.UNKNOWN ) {
             ComponentOrientation currentOrientation = _owner.getComponentOrientation();
-            UI.ComponentOrientation newOrientation = style.base().orientation();
+            UI.ComponentOrientation newOrientation = newStyle.base().orientation();
             switch ( newOrientation ) {
                 case LEFT_TO_RIGHT:
                     if ( !Objects.equals( currentOrientation, ComponentOrientation.LEFT_TO_RIGHT ) )
@@ -539,8 +539,8 @@ public final class ComponentExtension<C extends JComponent>
             }
         }
 
-        UI.FitComponent fit = style.base().fit();
-        style.base().icon().ifPresent( icon -> {
+        UI.FitComponent fit = newStyle.base().fit();
+        newStyle.base().icon().ifPresent( icon -> {
             if ( icon instanceof SvgIcon) {
                 SvgIcon svgIcon = (SvgIcon) icon;
                 icon = svgIcon.withFitComponent(fit);
@@ -562,25 +562,25 @@ public final class ComponentExtension<C extends JComponent>
             }
         });
 
-        style.layout().alignmentX().ifPresent( alignmentX -> {
+        newStyle.layout().alignmentX().ifPresent( alignmentX -> {
             if ( !Objects.equals( _owner.getAlignmentX(), alignmentX ) )
                 _owner.setAlignmentX( alignmentX );
         });
 
-        style.layout().alignmentY().ifPresent( alignmentY -> {
+        newStyle.layout().alignmentY().ifPresent( alignmentY -> {
             if ( !Objects.equals( _owner.getAlignmentY(), alignmentY ) )
                 _owner.setAlignmentY( alignmentY );
         });
 
-        style.layout().layout().installFor( _owner );
+        newStyle.layout().layout().installFor( _owner );
 
-        _applyAlignmentToMigLayoutIfItExists(style.layout());
+        _applyAlignmentToMigLayoutIfItExists(newStyle.layout());
 
-        if ( style.dimensionality().minWidth().isPresent() || style.dimensionality().minHeight().isPresent() ) {
+        if ( newStyle.dimensionality().minWidth().isPresent() || newStyle.dimensionality().minHeight().isPresent() ) {
             Dimension minSize = _owner.getMinimumSize();
 
-            int minWidth  = style.dimensionality().minWidth().orElse(minSize == null ? 0 : minSize.width);
-            int minHeight = style.dimensionality().minHeight().orElse(minSize == null ? 0 : minSize.height);
+            int minWidth  = newStyle.dimensionality().minWidth().orElse(minSize == null ? 0 : minSize.width);
+            int minHeight = newStyle.dimensionality().minHeight().orElse(minSize == null ? 0 : minSize.height);
 
             Dimension newMinSize = new Dimension(minWidth, minHeight);
 
@@ -588,11 +588,11 @@ public final class ComponentExtension<C extends JComponent>
                 _owner.setMinimumSize(newMinSize);
         }
 
-        if ( style.dimensionality().maxWidth().isPresent() || style.dimensionality().maxHeight().isPresent() ) {
+        if ( newStyle.dimensionality().maxWidth().isPresent() || newStyle.dimensionality().maxHeight().isPresent() ) {
             Dimension maxSize = _owner.getMaximumSize();
 
-            int maxWidth  = style.dimensionality().maxWidth().orElse(maxSize == null  ? Integer.MAX_VALUE : maxSize.width);
-            int maxHeight = style.dimensionality().maxHeight().orElse(maxSize == null ? Integer.MAX_VALUE : maxSize.height);
+            int maxWidth  = newStyle.dimensionality().maxWidth().orElse(maxSize == null  ? Integer.MAX_VALUE : maxSize.width);
+            int maxHeight = newStyle.dimensionality().maxHeight().orElse(maxSize == null ? Integer.MAX_VALUE : maxSize.height);
 
             Dimension newMaxSize = new Dimension(maxWidth, maxHeight);
 
@@ -600,11 +600,11 @@ public final class ComponentExtension<C extends JComponent>
                 _owner.setMaximumSize(newMaxSize);
         }
 
-        if ( style.dimensionality().preferredWidth().isPresent() || style.dimensionality().preferredHeight().isPresent() ) {
+        if ( newStyle.dimensionality().preferredWidth().isPresent() || newStyle.dimensionality().preferredHeight().isPresent() ) {
             Dimension prefSize = _owner.getPreferredSize();
 
-            int prefWidth  = style.dimensionality().preferredWidth().orElse(prefSize == null ? 0 : prefSize.width);
-            int prefHeight = style.dimensionality().preferredHeight().orElse(prefSize == null ? 0 : prefSize.height);
+            int prefWidth  = newStyle.dimensionality().preferredWidth().orElse(prefSize == null ? 0 : prefSize.width);
+            int prefHeight = newStyle.dimensionality().preferredHeight().orElse(prefSize == null ? 0 : prefSize.height);
 
             Dimension newPrefSize = new Dimension(prefWidth, prefHeight);
 
@@ -612,11 +612,11 @@ public final class ComponentExtension<C extends JComponent>
                 _owner.setPreferredSize(newPrefSize);
         }
 
-        if ( style.dimensionality().width().isPresent() || style.dimensionality().height().isPresent() ) {
+        if ( newStyle.dimensionality().width().isPresent() || newStyle.dimensionality().height().isPresent() ) {
             Dimension size = _owner.getSize();
 
-            int width  = style.dimensionality().width().orElse(size == null ? 0 : size.width);
-            int height = style.dimensionality().height().orElse(size == null ? 0 : size.height);
+            int width  = newStyle.dimensionality().width().orElse(size == null ? 0 : size.width);
+            int height = newStyle.dimensionality().height().orElse(size == null ? 0 : size.height);
 
             Dimension newSize = new Dimension(width, height);
 
@@ -626,12 +626,12 @@ public final class ComponentExtension<C extends JComponent>
 
         if ( _owner instanceof JTextComponent ) {
             JTextComponent tc = (JTextComponent) _owner;
-            if ( style.font().selectionColor().isPresent() && ! Objects.equals( tc.getSelectionColor(), style.font().selectionColor().get() ) )
-                tc.setSelectionColor(style.font().selectionColor().get());
+            if ( newStyle.font().selectionColor().isPresent() && ! Objects.equals( tc.getSelectionColor(), newStyle.font().selectionColor().get() ) )
+                tc.setSelectionColor(newStyle.font().selectionColor().get());
         }
 
         if ( _owner instanceof JComboBox ) {
-            int bottom = style.margin().bottom().orElse(0);
+            int bottom = newStyle.margin().bottom().orElse(0);
             // We adjust the position of the popup menu:
             try {
                 Point location = _owner.getLocationOnScreen();
@@ -647,14 +647,14 @@ public final class ComponentExtension<C extends JComponent>
             }
         }
 
-        style.font()
+        newStyle.font()
              .createDerivedFrom(_owner.getFont())
              .ifPresent( newFont -> {
                     if ( !newFont.equals(_owner.getFont()) )
                         _owner.setFont( newFont );
                 });
 
-        style.font().horizontalAlignment().ifPresent( alignment -> {
+        newStyle.font().horizontalAlignment().ifPresent( alignment -> {
             if ( _owner instanceof JLabel ) {
                 JLabel label = (JLabel) _owner;
                 if ( !Objects.equals( label.getHorizontalAlignment(), alignment.forSwing() ) )
@@ -671,7 +671,7 @@ public final class ComponentExtension<C extends JComponent>
                     textField.setHorizontalAlignment( alignment.forSwing() );
             }
         });
-        style.font().verticalAlignment().ifPresent( alignment -> {
+        newStyle.font().verticalAlignment().ifPresent( alignment -> {
             if ( _owner instanceof JLabel ) {
                 JLabel label = (JLabel) _owner;
                 if ( !Objects.equals( label.getVerticalAlignment(), alignment.forSwing() ) )
@@ -687,16 +687,16 @@ public final class ComponentExtension<C extends JComponent>
         if ( !onlyDimensionalityIsStyled ) {
             _installCustomBorderBasedStyleAndAnimationRenderer();
             if ( !styleCanBeRenderedThroughBorder )
-                _dynamicLaF = _dynamicLaF.establishLookAndFeelFor(style, _owner);
+                _dynamicLaF = _dynamicLaF.establishLookAndFeelFor(newStyle, _owner);
         }
 
-        if ( style.hasCustomForegroundPainters() )
+        if ( newStyle.hasCustomForegroundPainters() )
             _makeAllChildrenTransparent(_owner);
 
-        if ( style.hasActiveBackgroundGradients() && _owner.isOpaque() )
+        if ( newStyle.hasActiveBackgroundGradients() && _owner.isOpaque() )
             _owner.setOpaque(false);
 
-        style.properties().forEach( property -> {
+        newStyle.properties().forEach( property -> {
 
             Object oldValue = _owner.getClientProperty(property.name());
             if ( property.style().equals(oldValue) )
@@ -708,7 +708,7 @@ public final class ComponentExtension<C extends JComponent>
                 _owner.putClientProperty(property.name(), property.style());
         });
 
-        return style;
+        return newStyle;
     }
 
     private void _applyAlignmentToMigLayoutIfItExists(LayoutStyle style)
