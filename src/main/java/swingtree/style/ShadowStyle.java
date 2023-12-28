@@ -204,7 +204,7 @@ public final class ShadowStyle implements Simplifiable<ShadowStyle>
         Objects.requireNonNull(shadowColor);
         Color newColor;
         try {
-            newColor = StyleUtility.toColor(shadowColor);
+            newColor = UI.color(shadowColor);
         } catch ( Exception e ) {
             log.error("Failed to parse color string: '{}'", shadowColor, e);
             return this; // We want to avoid side effects other than a wrong color

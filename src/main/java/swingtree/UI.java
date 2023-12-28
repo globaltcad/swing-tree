@@ -66,7 +66,7 @@ import java.util.function.Supplier;
  * 	<b>Please take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
  * 	where you can browse a large collection of examples demonstrating how to use the API of this class.</b>
  */
-public final class UI extends UILayoutConstants
+public final class UI extends UINamespaceUtilities
 {
     private static final Logger log = LoggerFactory.getLogger(UI.class);
     /**

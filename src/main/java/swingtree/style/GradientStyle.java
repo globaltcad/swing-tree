@@ -126,7 +126,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
         try {
             Color[] actualColors = new Color[colors.length];
             for ( int i = 0; i < colors.length; i++ )
-                actualColors[i] = StyleUtility.toColor(colors[i]);
+                actualColors[i] = UI.color(colors[i]);
 
             return new GradientStyle(_transition, _type, actualColors);
         } catch ( Exception e ) {

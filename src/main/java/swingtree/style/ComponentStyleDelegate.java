@@ -386,7 +386,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
         Objects.requireNonNull(colorString);
         Color newColor;
         try {
-            newColor = StyleUtility.toColor(colorString);
+            newColor = UI.color(colorString);
         } catch ( Exception e ) {
             log.error("Failed to parse color string: '"+colorString+"'", e);
             return this;
@@ -494,7 +494,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
         Objects.requireNonNull(colorString);
         Color newColor;
         try {
-            newColor = StyleUtility.toColor(colorString);
+            newColor = UI.color(colorString);
         } catch ( Exception e ) {
             log.error("Failed to parse color string: '{}'", colorString, e);
             return this;
@@ -688,7 +688,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
         Objects.requireNonNull(colorString);
         Color newColor;
         try {
-            newColor = StyleUtility.toColor(colorString);
+            newColor = UI.color(colorString);
         } catch ( Exception e ) {
             log.error("Failed to parse color string: '"+colorString+"'", e);
             return this;
@@ -719,7 +719,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
         Objects.requireNonNull(colorString);
         Color newColor;
         try {
-            newColor = StyleUtility.toColor(colorString);
+            newColor = UI.color(colorString);
         } catch ( Exception e ) {
             log.error("Failed to parse color string: '"+colorString+"'", e);
             return this;
@@ -789,7 +789,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
         Objects.requireNonNull(colorString);
         Color newColor;
         try {
-            newColor = StyleUtility.toColor(colorString);
+            newColor = UI.color(colorString);
         } catch ( Exception e ) {
             log.error("Failed to parse color string: '"+colorString+"'", e);
             return this;
@@ -919,7 +919,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
         Objects.requireNonNull(colorString);
         Color newColor;
         try {
-            newColor = StyleUtility.toColor(colorString);
+            newColor = UI.color(colorString);
         } catch ( Exception e ) {
             log.error("Failed to parse color string: '"+colorString+"'", e);
             return this;
@@ -1399,7 +1399,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
         Objects.requireNonNull(colorString);
         Color newColor;
         try {
-            newColor = StyleUtility.toColor(colorString);
+            newColor = UI.color(colorString);
         } catch ( Exception e ) {
             log.error("Failed to parse color string: '"+colorString+"'", e);
             return this;
@@ -1431,7 +1431,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
         Objects.requireNonNull(colorString);
         Color newColor;
         try {
-            newColor = StyleUtility.toColor(colorString);
+            newColor = UI.color(colorString);
         } catch ( Exception e ) {
             log.error("Failed to parse color string: '{}'", colorString, e);
             return this;
@@ -1463,7 +1463,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
         Objects.requireNonNull(colorString);
         Color newColor;
         try {
-            newColor = StyleUtility.toColor(colorString);
+            newColor = UI.color(colorString);
         } catch ( Exception e ) {
             log.error("Failed to parse color string: '"+colorString+"'", e);
             return this;
