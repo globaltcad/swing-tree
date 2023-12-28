@@ -53,11 +53,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *  {@link JComponent#repaint()} method of the component wrapped by this {@link UI}!
      *  This means that the component will be repainted whenever the event is fired.
      *  <p>
-     * @param noticeable The event to which the repaint method of the component will be bound.
+     * @param event The event to which the repaint method of the component will be bound.
      * @return The JComponent type which will be wrapped by this builder node.
      */
-    public final I withRepaintIf( Observable noticeable ) {
-        return _with( c -> noticeable.subscribe( () -> _runInUI(c::repaint) ) )._this();
+    public final I withRepaintIf( Observable event ) {
+        return _with( c -> event.subscribe( () -> _runInUI(c::repaint) ) )._this();
     }
 
     /**

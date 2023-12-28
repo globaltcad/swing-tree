@@ -9,12 +9,13 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
- *  An immutable configuration object for {@link SwingTree},
+ *  An immutable configuration object for the {@link SwingTree} library,
  *  which can be configured using a functional {@link SwingTreeConfigurator} lambda
  *  passed to {@link SwingTree#initialiseUsing(SwingTreeConfigurator)}.
  *  <p>
  *  It allows for the configuration of the default
- *  font, font installation, scaling, event processing and stylesheet.
+ *  font, font installation, scaling, event processing and
+ *  application wide {@link StyleSheet}.
  */
 public final class SwingTreeInitConfig
 {
@@ -29,12 +30,14 @@ public final class SwingTreeInitConfig
          *  of the {@link javax.swing.UIManager}.
          */
         SOFT,
+
         /**
          *  A hard installation will install the font as the "defaultFont" property
          *  of the {@link javax.swing.UIManager} and as the default font of all
          *  {@link javax.swing.UIManager} components.
          */
         HARD,
+
         /**
          *  No installation will be performed.
          */
@@ -47,18 +50,30 @@ public final class SwingTreeInitConfig
     public enum Scaling
     {
         /**
-         *  The scaling will be derived from the default font size.
-         */
-        FROM_DEFAULT_FONT,
-        /**
-         *  The scaling will be derived from the system font size.
-         */
-        FROM_SYSTEM_FONT,
-        FROM_SCALING_FACTOR,
-        /**
          *  No scaling will be performed.
          */
-        NONE
+        NONE,
+
+        /**
+         *  The scaling will be derived from the supplied scaling factor.
+         *  (see {@link SwingTreeInitConfig#uiScaleFactor(float)} as well as
+         *  system property {@code "swingtree.uiScale"}).
+         */
+        FROM_SCALING_FACTOR,
+
+        /**
+         *  The scaling will be derived from the default font size,
+         *  if a default font was specified. (see {@link SwingTreeInitConfig#defaultFont(Font)})
+         */
+        FROM_DEFAULT_FONT,
+
+        /**
+         *  The scaling will be derived from the system font size.
+         *  This scaling policy is chosen if no default font was specified,
+         *  no scaling factor was specified and the scaling mode is enabled
+         *  (see {@link SwingTreeInitConfig#isUiScaleFactorEnabled()}).
+         */
+        FROM_SYSTEM_FONT
     }
 
     public static SwingTreeInitConfig standard() {
@@ -84,13 +99,13 @@ public final class SwingTreeInitConfig
 
 
     private SwingTreeInitConfig(
-            Font             defaultFont,
-            FontInstallation fontInstallation,
-            EventProcessor   eventProcessor,
-            StyleSheet       styleSheet,
-            float            uiScale,
-            boolean          uiScaleEnabled,
-            boolean          uiScaleAllowScaleDown
+        Font             defaultFont,
+        FontInstallation fontInstallation,
+        EventProcessor   eventProcessor,
+        StyleSheet       styleSheet,
+        float            uiScale,
+        boolean          uiScaleEnabled,
+        boolean          uiScaleAllowScaleDown
     ) {
         _defaultFont           = defaultFont;
         _fontInstallation      = Objects.requireNonNull(fontInstallation);
@@ -117,7 +132,24 @@ public final class SwingTreeInitConfig
     }
 
     /**
-     *  Returns the {@link Scaling} mode.
+     *  Returns the {@link Scaling} mode
+     *  which is determined based on the configuration.
+     *  <ul>
+     *      <li>
+     *          If {@code false} was passed to {@link #isUiScaleFactorEnabled(boolean)},
+     *          then {@link Scaling#NONE} is returned.
+     *      </li>
+     *      <li>
+     *          Otherwise, if a scaling factor greater than 0 was passed to {@link #uiScaleFactor(float)},
+     *          then {@link Scaling#FROM_SCALING_FACTOR} is returned.
+     *      </li>
+     *      <li>
+     *          Otherwise, if a default font was passed to {@link #defaultFont(Font)}, <br>
+     *          then {@link Scaling#FROM_DEFAULT_FONT} is returned. <br>
+     *      </li>
+     *  </ul>
+     *  <p>
+     *  If none of the above applies, then {@link Scaling#FROM_SYSTEM_FONT} is returned. <br>
      */
     Scaling scalingStrategy() {
         if ( !_uiScaleEnabled )
@@ -131,7 +163,8 @@ public final class SwingTreeInitConfig
     }
 
     /**
-     *  Returns the {@link EventProcessor}.
+     *  Returns the {@link EventProcessor},
+     *  which is used to process both UI and application events.
      */
     EventProcessor eventProcessor() {
         return _eventProcessor;
@@ -224,7 +257,8 @@ public final class SwingTreeInitConfig
     }
 
     /**
-     *  Used to configure the UI scaling factor as is specified by the system property {@code swingtree.uiScale}.
+     *  Use this to configure the UI scaling factor.
+     *  The default factor determined by the system property {@code "swingtree.uiScale"}.
      *  <p>
      *  If Java runtime scales (Java 9 or later), this scale factor is applied on top
      *  of the Java system scale factor. Java 8 does not scale and this scale factor
@@ -242,7 +276,8 @@ public final class SwingTreeInitConfig
     }
 
     /**
-     *  Used to configure whether the UI scaling mode is enabled as is specified by the system property {@code swingtree.uiScale.enabled}.
+     *  Used to configure whether the UI scaling mode is enabled as is specified by the
+     *  system property {@code swingtree.uiScale.enabled}.
      *  <p>
      *  <strong>Allowed Values</strong> {@code false} and {@code true}<br>
      *  <strong>Default</strong> {@code true}
@@ -250,7 +285,7 @@ public final class SwingTreeInitConfig
      * @param newUiScaleEnabled The new UI scaling mode.
      * @return A new {@link SwingTreeInitConfig} instance with the new UI scaling mode.
      */
-    public SwingTreeInitConfig isUiScaleFactorEnabled(boolean newUiScaleEnabled ) {
+    public SwingTreeInitConfig isUiScaleFactorEnabled( boolean newUiScaleEnabled ) {
         return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, newUiScaleEnabled, _uiScaleAllowScaleDown);
     }
 
@@ -264,7 +299,7 @@ public final class SwingTreeInitConfig
      * @param newUiScaleAllowScaleDown The new UI scaling mode.
      * @return A new {@link SwingTreeInitConfig} instance with the new UI scaling mode.
      */
-    public SwingTreeInitConfig isUiScaleDownAllowed(boolean newUiScaleAllowScaleDown ) {
+    public SwingTreeInitConfig isUiScaleDownAllowed( boolean newUiScaleAllowScaleDown ) {
         return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, newUiScaleAllowScaleDown);
     }
 
@@ -316,7 +351,6 @@ public final class SwingTreeInitConfig
             return (value != null) ? Boolean.parseBoolean( value ) : defaultValue;
         }
 
-
         /**
          * Similar to sun.java2d.SunGraphicsEnvironment.getScaleFactor(String)
          */
@@ -342,6 +376,5 @@ public final class SwingTreeInitConfig
                 return -1;
             }
         }
-
     }
 }

@@ -89,7 +89,7 @@ public interface BasicTableModel extends TableModel
         private ColumnClass<E> columnClass;
         private CellEditable cellEditable;
         private ColumnName columnName;
-        private Observable noticeableEvent;
+        private Observable observableEvent;
 
          public Builder( Class<E> commonEntryType ) {
              this.commonEntryType = Objects.requireNonNull(commonEntryType);
@@ -198,8 +198,8 @@ public interface BasicTableModel extends TableModel
          */
         public Builder<E> updateOn( Observable updateEvent ) {
             if ( updateEvent == null ) throw new IllegalArgumentException("updateEvent cannot be null");
-            if ( this.noticeableEvent != null ) throw new IllegalStateException(Event.class.getSimpleName()+" already set");
-            this.noticeableEvent = updateEvent;
+            if ( this.observableEvent != null ) throw new IllegalStateException(Event.class.getSimpleName()+" already set");
+            this.observableEvent = updateEvent;
             return this;
         }
         /**
@@ -208,8 +208,8 @@ public interface BasicTableModel extends TableModel
          */
         @Override public BasicTableModel build() {
             FunTableModel tm = new FunTableModel();
-            if ( noticeableEvent != null )
-                noticeableEvent.subscribe(()-> UI.run(()->{
+            if ( observableEvent != null )
+                observableEvent.subscribe(()-> UI.run(()->{
                     // We want the table model update to be as thorough as possible, so we
                     // will fire a table structure changed event, followed by a table data
                     // changed event.
