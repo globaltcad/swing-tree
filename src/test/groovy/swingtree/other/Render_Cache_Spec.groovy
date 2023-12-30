@@ -70,7 +70,7 @@ class Render_Cache_Spec extends Specification
 
         when : 'We try to do it a second time...'
             cache.validate(key, key)
-            cache.paint(key, g,  g2 -> {g2.fillRect(0,0,10,10) })
+            cache.paint(key, g,  (conf, g2) -> {g2.fillRect(0,0,10,10) })
         then : 'Still, we just painted eagerly!'
             1 * g.fillRect(0,0,10,10)
         and :
@@ -90,7 +90,7 @@ class Render_Cache_Spec extends Specification
 
         and : 'Then we do another round of validation and painting...'
             cache.validate(key, key)
-            cache.paint(key, g,  g2 -> {g2.fillRect(0,0,10,10) })
+            cache.paint(key, g,  (conf, g2) -> {g2.fillRect(0,0,10,10) })
         then : 'We painted into the cache!'
             1 * g.fillRect(0,0,10,10)
         and :
@@ -98,18 +98,18 @@ class Render_Cache_Spec extends Specification
 
         when : 'We do it again...'
             cache.validate(key, key)
-            cache.paint(key, g,  g2 -> {g2.fillRect(0,0,10,10) })
+            cache.paint(key, g,  (conf, g2) -> {g2.fillRect(0,0,10,10) })
         then : 'Instead of the painter lambda being called, the buffer was used!'
             0 * g.fillRect(0,0,10,10)
             1 * g.drawImage({it instanceof BufferedImage},0,0,null)
 
         when : 'We repeat this process then the buffer will be used every time!'
             cache.validate(key, key)
-            cache.paint(key, g,  g2 -> {g2.fillRect(0,0,10,10) })
+            cache.paint(key, g,  (conf, g2) -> {g2.fillRect(0,0,10,10) })
             cache.validate(key, key)
-            cache.paint(key, g,  g2 -> {g2.fillRect(0,0,10,10) })
+            cache.paint(key, g,  (conf, g2) -> {g2.fillRect(0,0,10,10) })
             cache.validate(key, key)
-            cache.paint(key, g,  g2 -> {g2.fillRect(0,0,10,10) })
+            cache.paint(key, g,  (conf, g2) -> {g2.fillRect(0,0,10,10) })
         then : 'Instead of the painter lambda being called, the buffer was used!'
             0 * g.fillRect(0,0,10,10)
             3 * g.drawImage({it instanceof BufferedImage},0,0,null)
@@ -128,7 +128,7 @@ class Render_Cache_Spec extends Specification
                     .getConf();
         and : 'And we revalidate the cache...'
             cache.validate(key, key2)
-            cache.paint(key2, g,  g2 -> {g2.fillRect(0,0,10,10) })
+            cache.paint(key2, g,  (conf, g2) -> {g2.fillRect(0,0,10,10) })
         then : 'The painting lambda was used to rerender the cache!'
             1 * g.fillRect(0,0,10,10)
             0 * g.drawImage({it instanceof BufferedImage},0,0,null)
@@ -137,11 +137,11 @@ class Render_Cache_Spec extends Specification
 
         when : 'We now repeat the process using the successor config...'
             cache.validate(key2, key2)
-            cache.paint(key2, g,  g2 -> {g2.fillRect(0,0,10,10) })
+            cache.paint(key2, g,  (conf, g2) -> {g2.fillRect(0,0,10,10) })
             cache.validate(key2, key2)
-            cache.paint(key2, g,  g2 -> {g2.fillRect(0,0,10,10) })
+            cache.paint(key2, g,  (conf, g2) -> {g2.fillRect(0,0,10,10) })
             cache.validate(key2, key2)
-            cache.paint(key2, g,  g2 -> {g2.fillRect(0,0,10,10) })
+            cache.paint(key2, g,  (conf, g2) -> {g2.fillRect(0,0,10,10) })
         then : 'Instead of the painter lambda being called, the buffer was used again!'
             0 * g.fillRect(0,0,10,10)
             3 * g.drawImage({it instanceof BufferedImage},0,0,null)
