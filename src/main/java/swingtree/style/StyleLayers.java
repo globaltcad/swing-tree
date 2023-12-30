@@ -12,7 +12,8 @@ final class StyleLayers
                                                     StyleLayer.empty(),
                                                     StyleLayer.empty(),
                                                     StyleLayer.empty(),
-                                                    StyleLayer.empty()
+                                                    StyleLayer.empty(),
+                                                    null
                                                 );
 
     static StyleLayers empty() {
@@ -24,20 +25,27 @@ final class StyleLayers
     private final StyleLayer _border;
     private final StyleLayer _foreground;
 
+    private final StyleLayer _any;
+
 
     StyleLayers(
         StyleLayer background,
         StyleLayer content,
         StyleLayer border,
-        StyleLayer foreground
+        StyleLayer foreground,
+        StyleLayer any
     ) {
         _background = Objects.requireNonNull(background);
         _content    = Objects.requireNonNull(content);
         _border     = Objects.requireNonNull(border);
         _foreground = Objects.requireNonNull(foreground);
+        _any        = any;
     }
 
-    StyleLayer get(UI.Layer layer) {
+    StyleLayer get( UI.Layer layer ) {
+        if ( _any != null )
+            return _any;
+
         switch (layer) {
             case BACKGROUND: return _background;
             case CONTENT:    return _content;
@@ -50,35 +58,41 @@ final class StyleLayers
 
     StyleLayers with(UI.Layer layer, StyleLayer style) {
         switch (layer) {
-            case BACKGROUND: return new StyleLayers(style, _content, _border, _foreground);
-            case CONTENT:    return new StyleLayers(_background, style, _border, _foreground);
-            case BORDER:     return new StyleLayers(_background, _content, style, _foreground);
-            case FOREGROUND: return new StyleLayers(_background, _content, _border, style);
+            case BACKGROUND: return new StyleLayers(style,       _content, _border,  _foreground, _any);
+            case CONTENT:    return new StyleLayers(_background,  style,    _border, _foreground, _any);
+            case BORDER:     return new StyleLayers(_background, _content,  style,   _foreground, _any);
+            case FOREGROUND: return new StyleLayers(_background, _content, _border,   style,      _any);
             default:
                 throw new IllegalArgumentException("Unknown layer: " + layer);
         }
     }
 
     boolean everyNamedStyle( BiPredicate<UI.Layer, StyleLayer> predicate ) {
+        if ( _any != null )
+            return  predicate.test(UI.Layer.BACKGROUND,    _any)
+                    && predicate.test(UI.Layer.CONTENT,    _any)
+                    && predicate.test(UI.Layer.BORDER,     _any)
+                    && predicate.test(UI.Layer.FOREGROUND, _any);
+
         return predicate.test(UI.Layer.BACKGROUND, _background)
             && predicate.test(UI.Layer.CONTENT,    _content)
             && predicate.test(UI.Layer.BORDER,     _border)
             && predicate.test(UI.Layer.FOREGROUND, _foreground);
     }
 
-    public StyleLayers onlyRetainingLayer( UI.Layer layer ){
+    public StyleLayers onlyRetainingAsUnnamedLayer( UI.Layer layer ){
         switch (layer) {
-            case BACKGROUND: return new StyleLayers(_background, StyleLayer.empty(), StyleLayer.empty(), StyleLayer.empty());
-            case CONTENT:    return new StyleLayers(StyleLayer.empty(), _content, StyleLayer.empty(), StyleLayer.empty());
-            case BORDER:     return new StyleLayers(StyleLayer.empty(), StyleLayer.empty(), _border, StyleLayer.empty());
-            case FOREGROUND: return new StyleLayers(StyleLayer.empty(), StyleLayer.empty(), StyleLayer.empty(), _foreground);
+            case BACKGROUND: return new StyleLayers(StyleLayer.empty(), StyleLayer.empty(), StyleLayer.empty(), StyleLayer.empty(), _background);
+            case CONTENT:    return new StyleLayers(StyleLayer.empty(), StyleLayer.empty(), StyleLayer.empty(), StyleLayer.empty(), _content);
+            case BORDER:     return new StyleLayers(StyleLayer.empty(), StyleLayer.empty(), StyleLayer.empty(), StyleLayer.empty(), _border);
+            case FOREGROUND: return new StyleLayers(StyleLayer.empty(), StyleLayer.empty(), StyleLayer.empty(), StyleLayer.empty(), _foreground);
             default:
                 throw new IllegalArgumentException("Unknown layer: " + layer);
         }
     }
 
     StyleLayers map( Function<StyleLayer, StyleLayer> f ) {
-        return new StyleLayers(f.apply(_background), f.apply(_content), f.apply(_border), f.apply(_foreground));
+        return new StyleLayers(f.apply(_background), f.apply(_content), f.apply(_border), f.apply(_foreground), _any == null ? null : f.apply(_any));
     }
 
     StyleLayers simplified() {
@@ -89,20 +103,27 @@ final class StyleLayers
         StyleLayer content    = _content.simplified();
         StyleLayer border     = _border.simplified();
         StyleLayer foreground = _foreground.simplified();
+        StyleLayer any        = ( _any == null ? null : _any.simplified() );
 
         if (
              background == _background &&
              content    == _content    &&
              border     == _border     &&
-             foreground == _foreground
+             foreground == _foreground &&
+             any        == _any
         )
             return this;
 
-        return new StyleLayers(background, content, border, foreground);
+        return new StyleLayers(background, content, border, foreground, any);
     }
 
     @Override
     public String toString() {
+        if ( _any != null )
+            return String.format(
+                this.getClass().getSimpleName() + "[any=%s]",
+                _any
+            );
         return String.format(
             this.getClass().getSimpleName() + "[background=%s, content=%s, border=%s, foreground=%s]",
             _background, _content, _border, _foreground
@@ -111,7 +132,7 @@ final class StyleLayers
 
     @Override
     public int hashCode() {
-        return Objects.hash(_background, _content, _border, _foreground);
+        return Objects.hash(_background, _content, _border, _foreground, _any);
     }
 
     @Override
@@ -123,6 +144,7 @@ final class StyleLayers
         return Objects.equals(_background, other._background)
             && Objects.equals(_content,    other._content)
             && Objects.equals(_border,     other._border)
-            && Objects.equals(_foreground, other._foreground);
+            && Objects.equals(_foreground, other._foreground)
+            && Objects.equals(_any,        other._any);
     }
 }

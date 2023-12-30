@@ -197,7 +197,7 @@ public final class Style
                     _base,
                     _font,
                     _dimensionality,
-                    _layers.onlyRetainingLayer(layer),
+                    _layers.onlyRetainingAsUnnamedLayer(layer),
                     _properties
                 );
     }
