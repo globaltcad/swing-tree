@@ -193,7 +193,7 @@ public final class Style
     public Style onlyRetainingRenderCacheRelevantConfForLayer( UI.Layer layer ) {
         return new Style(
                     LayoutStyle.none(),
-                    _border, //( layer == UI.Layer.BORDER ? _border : BorderStyle.none() ),
+                    ( layer == UI.Layer.BORDER ? _border : _border.withColor(null) ),
                     ( layer == UI.Layer.BACKGROUND ? _base : BaseStyle.none() ),
                     FontStyle.none(),
                     DimensionalityStyle.none(),

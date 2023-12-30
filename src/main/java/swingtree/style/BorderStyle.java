@@ -220,7 +220,9 @@ final class BorderStyle
                    .withWidthAt(UI.Edge.LEFT,   borderWidth);
     }
 
-    BorderStyle withColor( Color borderColor ) { return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, borderColor, _gradients); }
+    BorderStyle withColor( Color borderColor ) {
+        return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, borderColor, _gradients);
+    }
 
     boolean allCornersShareTheSameArc() {
         return Objects.equals(_topLeftArc, _topRightArc) &&
