@@ -121,7 +121,7 @@ final class ComponentConf
                                     style,
                                     Bounds.of(component.getX(), component.getY(), component.getWidth(), component.getHeight()),
                                     outline,
-                _areas
+                                    _areas
                                 );
 
         return new ComponentConf(
