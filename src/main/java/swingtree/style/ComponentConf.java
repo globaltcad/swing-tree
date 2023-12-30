@@ -152,7 +152,7 @@ final class ComponentConf
      */
     ComponentConf onlyRetainingLayer( UI.Layer layer ) {
         return new ComponentConf(
-                    _style.onlyRetainingLayer(layer),
+                    _style.onlyRetainingRenderCacheRelevantConfForLayer(layer),
                     _currentBounds,
                     _baseOutline,
                     _areas

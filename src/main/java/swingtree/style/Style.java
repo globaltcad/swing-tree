@@ -186,19 +186,19 @@ public final class Style
 
     /**
      *  Returns a new {@link Style} instance which only contains style information relevant
-     *  to the provided {@link UI.Layer}. Style information on other layers is discarded.
+     *  for rendering the provided {@link UI.Layer}. Style information on other layers is discarded.
      * @param layer The layer to retain.
      * @return A new {@link Style} instance which only contains style information relevant to the provided {@link UI.Layer}.
      */
-    public Style onlyRetainingLayer( UI.Layer layer ) {
+    public Style onlyRetainingRenderCacheRelevantConfForLayer( UI.Layer layer ) {
         return new Style(
-                    _layout,
-                    _border,
-                    _base,
-                    _font,
-                    _dimensionality,
+                    LayoutStyle.none(),
+                    _border, //( layer == UI.Layer.BORDER ? _border : BorderStyle.none() ),
+                    _base, //( layer == UI.Layer.BACKGROUND ? _base : BaseStyle.none() ),
+                    FontStyle.none(),
+                    DimensionalityStyle.none(),
                     _layers.onlyRetainingAsUnnamedLayer(layer),
-                    _properties
+                    NamedStyles.empty()
                 );
     }
 
