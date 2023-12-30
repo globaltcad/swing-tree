@@ -194,7 +194,7 @@ public final class Style
         return new Style(
                     LayoutStyle.none(),
                     _border, //( layer == UI.Layer.BORDER ? _border : BorderStyle.none() ),
-                    _base, //( layer == UI.Layer.BACKGROUND ? _base : BaseStyle.none() ),
+                    ( layer == UI.Layer.BACKGROUND ? _base : BaseStyle.none() ),
                     FontStyle.none(),
                     DimensionalityStyle.none(),
                     _layers.onlyRetainingAsUnnamedLayer(layer),
