@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.WeakHashMap;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 /**
  *  A {@link BufferedImage} based cache for the rendering of a particular layer of a component's style. <br>
@@ -23,9 +22,8 @@ import java.util.function.Consumer;
  */
 final class LayerCache
 {
-    private static final Map<ComponentConf, CachedImage> _BACKGROUND_CACHE = new WeakHashMap<>();
-    private static final Map<ComponentConf, CachedImage> _BORDER_CACHE = new WeakHashMap<>();
-    private static final Map<ComponentConf, CachedImage> _CONTENT_AND_FOREGROUND_CACHE = new WeakHashMap<>();
+    private static final Map<ComponentConf, CachedImage> _CACHE = new WeakHashMap<>();
+
 
     private static final class CachedImage extends BufferedImage
     {
@@ -74,28 +72,16 @@ final class LayerCache
         return _localCache != null;
     }
 
-    private Map<ComponentConf, CachedImage> _getGlobalCacheForThisLayer() {
-        switch (_layer) {
-            case BACKGROUND: return _BACKGROUND_CACHE;
-            case BORDER:     return _BORDER_CACHE;
-            case CONTENT:
-            case FOREGROUND:
-                return _CONTENT_AND_FOREGROUND_CACHE;
-                // We allow them to share a buffer because they do not have unique styles
-        }
-        return _CONTENT_AND_FOREGROUND_CACHE;
-    }
-
     private void _allocateOrGetCachedBuffer( ComponentConf styleConf )
     {
-        Map<ComponentConf, CachedImage> _CACHE = _getGlobalCacheForThisLayer();
+        Map<ComponentConf, CachedImage> CACHE = _CACHE;
 
-        CachedImage bufferedImage = _CACHE.get(styleConf);
+        CachedImage bufferedImage = CACHE.get(styleConf);
 
         if ( bufferedImage == null ) {
             Size size = styleConf.currentBounds().size();
             bufferedImage = new CachedImage(size.width().orElse(1), size.height().orElse(1), styleConf);
-            _CACHE.put(styleConf, bufferedImage);
+            CACHE.put(styleConf, bufferedImage);
             _strongRef = styleConf;
         }
         else {
@@ -136,7 +122,7 @@ final class LayerCache
         }
 
         boolean cacheIsInvalid = true;
-        boolean cacheIsFull    = _getGlobalCacheForThisLayer().size() > 128;
+        boolean cacheIsFull    = _CACHE.size() > 128;
 
         boolean newBufferNeeded = false;
 
