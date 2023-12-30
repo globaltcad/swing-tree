@@ -12,6 +12,12 @@ import static swingtree.UI.*;
 
 /**
  * A text field with optional icon and a plain icon based button.
+ * Although SwingTree encourages the use of composition over inheritance,
+ * it is still easily possible to create custom components by extending
+ * one of the many regular component types, like for example, a text field.
+ * This example class demonstrates how the SwingTree API can be used
+ * to create a heavily modified {@link javax.swing.JTextField} with
+ * a custom button and an icon displayed in the text area.
  */
 public final class FancyTextField extends TextField
 {
@@ -38,7 +44,7 @@ public final class FancyTextField extends TextField
                     boolean isHovered = it.component().getModel().isRollover();
                     boolean isPressed = it.component().getModel().isPressed();
                     if ( isPressed ) {
-                        g2d.setColor(new Color(0,100,200));
+                        g2d.setColor(Color.GREEN);
                         g2d.fillRoundRect(0, 0, it.component().getWidth(), it.component().getHeight(), 5, 5);
                     }
                     else if ( isHovered ) {
@@ -74,15 +80,12 @@ public final class FancyTextField extends TextField
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        UI.show(
-            panel(FILL).withPrefSize(500,500)
+        UI.show( f ->
+            panel(FILL)
             .add(GROW_X,
                 UI.of(new FancyTextField()).withMaxWidth(80)
-                .withStyle( it -> it
-                    .alignmentX(0.8f)
-                    .alignmentY(0.25f)
-                )
             )
+            .getComponent()
         );
     }
 }
