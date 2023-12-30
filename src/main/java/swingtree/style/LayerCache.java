@@ -11,6 +11,7 @@ import java.lang.ref.WeakReference;
 import java.util.Map;
 import java.util.Objects;
 import java.util.WeakHashMap;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
@@ -156,7 +157,7 @@ final class LayerCache
             _allocateOrGetCachedBuffer(newState);
     }
 
-    public final void paint( ComponentConf conf, Graphics2D g, Consumer<Graphics2D> renderer )
+    public final void paint( ComponentConf conf, Graphics2D g, BiConsumer<ComponentConf, Graphics2D> renderer )
     {
         Bounds componentBounds = conf.currentBounds();
 
@@ -164,7 +165,7 @@ final class LayerCache
             return;
 
         if ( !_cachingMakesSense ) {
-            renderer.accept(g);
+            renderer.accept(_strongRef == null ? conf : _strongRef, g);
             return;
         }
 
@@ -183,7 +184,7 @@ final class LayerCache
             }
             catch (Exception ignored) {}
             finally {
-                renderer.accept(g2);
+                renderer.accept(_strongRef == null ? conf : _strongRef, g2);
                 g2.dispose();
             }
         }

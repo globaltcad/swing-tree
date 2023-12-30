@@ -62,7 +62,7 @@ class Render_Cache_Spec extends Specification
 
         when : 'We try to do an initial paint into the cache...'
             cache.validate(key, key)
-            cache.paint(key, g,  g2 -> {g2.fillRect(0,0,10,10) })
+            cache.paint(key, g,  (conf, g2) -> {g2.fillRect(0,0,10,10) })
         then : 'We did not render into the cache, instead we just painted eagerly!'
             1 * g.fillRect(0,0,10,10)
         and :
