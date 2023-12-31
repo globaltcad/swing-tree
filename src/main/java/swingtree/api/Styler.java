@@ -28,7 +28,9 @@ public interface Styler<C extends JComponent>
      * @param <C> The type of the {@link JComponent} that the {@link ComponentStyleDelegate} is delegating to.
      * @return A {@link Styler} that does nothing.
      */
-    static <C extends JComponent> Styler<C> none() { return (Styler<C>) Constants.STYLER_NONE; }
+    static <C extends JComponent> Styler<C> none() {
+        return (Styler<C>) Constants.STYLER_NONE;
+    }
 
     /**
      * Applies some style to the given {@link ComponentStyleDelegate} and returns a new {@link ComponentStyleDelegate}
@@ -50,6 +52,11 @@ public interface Styler<C extends JComponent>
      */
     default Styler<C> andThen( Styler<C> other ) {
         Objects.requireNonNull(other);
+        if ( this == none() )
+            return other;
+        if ( other == none() )
+            return this;
+
         return delegate -> {
             ComponentStyleDelegate<C> result = delegate;
             try {
