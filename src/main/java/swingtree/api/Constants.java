@@ -5,6 +5,7 @@ import java.awt.*;
 class Constants
 {
     static final Styler<?> STYLER_NONE = delegate -> delegate;
+    static final AnimatedStyler<?> ANIMATED_STYLER_NONE = (state, delegate) -> delegate;
 
     static final Painter PAINTER_NONE = new Painter() {
                                             @Override

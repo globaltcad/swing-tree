@@ -89,6 +89,57 @@ class Style_Animations_Spec extends Specification
     }
 
 
+    def 'An `onMouseClick` event style animation dispatched using the `animateStyleFor` method is only temporary.'()
+    {
+        reportInfo """
+            The event delegate passed to the `onMouseClick` lambda exposes
+            a useful API for interacting with the component.
+            This includes the `animateStyleFor` method which allows you
+            to animate the style of the component for a given duration.
+            Once you apply a style animation to it, it will append the provided styler lambda
+            to the end of the style chain and then when the component is repainted,
+            it will temporarily change the component to support your animated style.
+        """
+        given : 'We create a simple `JLabel` UI component with a style animation.'
+            var label = UI.label("Click me!")
+                        .onMouseClick(it ->
+                            it.animateStyleFor(1, TimeUnit.MINUTES, (state, style) -> style
+                                .borderWidthAt(UI.Edge.BOTTOM, (int) (12 * state.cycle()))
+                                .borderColor(Color.BLACK)
+                                .shadowColor(new Color(0, 100,200, (int) (255 * state.cycle())))
+                                .shadowBlurRadius((int) (12 * state.cycle()))
+                                .shadowIsInset(false)
+                                .fontSize((int) (12 + 24 * state.cycle()))
+                            )
+                        )
+
+        expect : """
+            When the user clicks on the label, the border width of the label
+            will be animated from 0 to 10 over the course of 100 milliseconds
+            and the background color will be animated from transparent to orange.
+            But initially the label will not have any border or background color.
+            So let's check that.
+        """
+            label.component.border == null
+            label.component.font.size == 12
+            label.component.getUI() instanceof MetalLabelUI
+
+        when : 'We simulate a user click event programmatically'
+            // Note that there is no "onMouseClick()" method on the label.
+            // Instead we need to do this:
+            label.component.dispatchEvent(new MouseEvent(label.component, MouseEvent.MOUSE_CLICKED, System.currentTimeMillis(), 0, 0, 0, 1, false))
+            Thread.sleep(2000)
+            UI.sync()
+            label.component.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+
+        then : 'The label will have a border and a background color.'
+            label.component.border != null
+            label.component.font.size > 12
+        and : 'SwingTree will haver overridden the default label UI in order to support the shadow.'
+            !(label.component.getUI() instanceof MetalLabelUI)
+    }
+
+
     def 'SwingTree will uninstall any custom border after an animation has completed.'()
     {
         reportInfo """

@@ -4,6 +4,7 @@ import swingtree.animation.Animation;
 import swingtree.animation.AnimationState;
 import swingtree.animation.Animator;
 import swingtree.animation.LifeTime;
+import swingtree.api.AnimatedStyler;
 import swingtree.api.Painter;
 import swingtree.api.Styler;
 import swingtree.layout.Bounds;
@@ -1128,6 +1129,95 @@ abstract class AbstractDelegate<C extends JComponent>
         UI.run(()->{ // This method might be called by the application thread, so we need to run on the EDT!
             // We do the rendering later in the paint method of a custom border implementation!
             ComponentExtension.from(_component).addAnimationPainter(state, painter);
+        });
+    }
+
+    /**
+     *  A common use case is to animate the style of a component when a user event occurs.
+     *  This method allows you to dispatch a styling animation to the EDT
+     *  which will cause the component style to updated repeatedly until the animation expires.
+     *  Because animation styles are applied last, it is guaranteed not to be overwritten by
+     *  other {@link Styler} lambdas.
+     *  Note that the provided styling will be removed automatically when the animation expires,
+     *  so no manual cleanup is required.
+     *  <p>
+     *  Here is an example of how to use this method as part of a fancy styling animation:
+     *  <pre>{@code
+     *    UI.button("Click me").withPrefSize(400, 400)
+     *    .onMouseClick( it -> it.animateStyleFor(2, TimeUnit.SECONDS, (state, style) ->
+     *        .borderWidthAt(UI.Edge.BOTTOM, (int)(6 * state.progress()) )
+     *        .borderColor( new Color(0f, 1f, 1f, (float) (1 - state.progress())) )
+     *        .borderRadius( (int)(60 * state.progress()) )
+     *    ))
+     *  }</pre>
+     *  <b>Not that the effect of this method can also be modelled using {@link #animateFor(LifeTime, Animation)}
+     *  and {@link #style(AnimationState, Styler)} as follows:</b>
+     *  <pre>{@code
+     *    UI.button("Click me").withPrefSize(400, 400)
+     *    .onMouseClick( it -> it.animateFor(2, TimeUnit.SECONDS, state -> {
+     *        it.style(state, style -> style
+     *            // This is the same as the animateStyleFor() method above!
+     *        );
+     *    }))
+     *  }</pre>
+     *
+     *
+     * @param duration The duration of the animation.
+     * @param unit The time unit of the duration.
+     * @param styler The styling animation task which should be executed on the EDT at the end of the current event cycle.
+     *               It receives both the current animation state and the {@link swingtree.style.ComponentStyleDelegate}
+     *               for which you can define the style properties.
+     */
+    public final void animateStyleFor( double duration, TimeUnit unit, AnimatedStyler<C> styler ) {
+        UI.run(()->{ // This method might be called by the application thread, so we need to run on the EDT!
+            // We do the styling later in the paint method of a custom border implementation!
+            this.animateFor(duration, unit, state ->
+                ComponentExtension.from(_component).addAnimationStyler(state, conf -> styler.style(state, conf))
+            );
+        });
+    }
+
+    /**
+     *  A common use case is to animate the style of a component when a user event occurs.
+     *  This method allows you to dispatch a styling animation to the EDT
+     *  which will cause the component style to updated repeatedly until the animation expires.
+     *  Because animation styles are applied last, it is guaranteed not to be overwritten by
+     *  other {@link Styler} lambdas.
+     *  Note that the provided styling will be removed automatically when the animation expires,
+     *  so no manual cleanup is required.
+     *  <p>
+     *  Here is an example of how to use this method as part of a fancy styling animation:
+     *  <pre>{@code
+     *    UI.button("Click me").withPrefSize(400, 400)
+     *    .onMouseClick( it -> it.animateStyleFor(UI.lifetime(2, TimeUnit.SECONDS), (state, style) ->
+     *        .borderWidthAt(UI.Edge.BOTTOM, (int)(6 * state.progress()) )
+     *        .borderColor( new Color(0f, 1f, 1f, (float) (1 - state.progress())) )
+     *        .borderRadius( (int)(60 * state.progress()) )
+     *    ))
+     *  }</pre>
+     *  <b>Not that the effect of this method can also be modelled using {@link #animateFor(LifeTime, Animation)}
+     *  and {@link #style(AnimationState, Styler)} as follows:</b>
+     *  <pre>{@code
+     *    UI.button("Click me").withPrefSize(400, 400)
+     *    .onMouseClick( it -> it.animateFor(UI.lifetime(2, TimeUnit.SECONDS), state -> {
+     *        it.style(state, style -> style
+     *            // This is the same as the animateStyleFor() method above!
+     *        );
+     *    }))
+     *  }</pre>
+     *
+     * @param lifetime The lifetime of the animation.
+     *                 The animation will be removed automatically when the lifetime expires.
+     * @param styler The styling animation task which should be executed on the EDT at the end of the current event cycle.
+     *               It receives both the current animation state and the {@link swingtree.style.ComponentStyleDelegate}
+     *               for which you can define the style properties.
+     */
+    public final void animateStyleFor( LifeTime lifetime, AnimatedStyler<C> styler ) {
+        UI.run(()->{ // This method might be called by the application thread, so we need to run on the EDT!
+            // We do the styling later in the paint method of a custom border implementation!
+            this.animateFor(lifetime, state ->
+                ComponentExtension.from(_component).addAnimationStyler(state, conf -> styler.style(state, conf))
+            );
         });
     }
 
