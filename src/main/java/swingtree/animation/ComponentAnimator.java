@@ -19,6 +19,7 @@ class ComponentAnimator
 
     private final WeakReference<Component> _compRef;
     private final LifeTime      _lifeTime;
+    private final Stride        _stride;
     private final RunCondition _condition;
     private final Animation     _animation;
 
@@ -26,11 +27,13 @@ class ComponentAnimator
     ComponentAnimator(
         Component     component, // may be null if the animation is not associated with a specific component
         LifeTime      lifeTime,
+        Stride        stride,
         RunCondition condition,
         Animation     animation
     ) {
         _compRef   = component == null ? null : new WeakReference<>(component);
         _lifeTime  = Objects.requireNonNull(lifeTime);
+        _stride    = Objects.requireNonNull(stride);
         _condition = Objects.requireNonNull(condition);
         _animation = Objects.requireNonNull(animation);
     }
@@ -46,7 +49,18 @@ class ComponentAnimator
         long howLongIsRunning = Math.max(0, now - _lifeTime.getStartTimeIn(TimeUnit.MILLISECONDS));
         long howLongCurrentLoop = howLongIsRunning % duration;
         long howManyLoops       = howLongIsRunning / duration;
-        double progress         = howLongCurrentLoop / (double) duration;
+        double progress;
+        switch ( _stride ) {
+            case PROGRESSIVE:
+                progress = howLongCurrentLoop / (double) duration;
+                break;
+            case REGRESSIVE:
+                progress = 1 - howLongCurrentLoop / (double) duration;
+                break;
+            default:
+                progress = howLongCurrentLoop / (double) duration;
+                log.warn("Unknown stride: {}", _stride);
+        }
         return new AnimationState() {
             @Override public double     progress()  { return progress;     }
             @Override public long        repeats()  { return howManyLoops; }

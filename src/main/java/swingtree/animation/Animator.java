@@ -37,8 +37,10 @@ import java.util.function.Predicate;
 public class Animator
 {
     private final LifeTime      _lifeTime;  // Never null
+    private final Stride        _stride;    // Never null
     private final Component     _component; // may be null
     private final RunCondition _condition; // may be null
+
 
     /**
      * Creates an {@link Animator} instance which allows you to define the stop condition
@@ -49,7 +51,20 @@ public class Animator
      * @return An {@link Animator} instance that can be used to define how the animation should be executed.
      */
     public static Animator animateFor( LifeTime lifeTime ) {
-        return new Animator( lifeTime, null, null );
+        return animateFor( lifeTime, Stride.PROGRESSIVE );
+    }
+
+    /**
+     * Creates an {@link Animator} instance which allows you to define the stop condition
+     * for an animation as well as an {@link Animation} that will be executed
+     * when passed to the {@link #go(Animation)} method.
+     *
+     * @param lifeTime The schedule that defines when the animation should be executed and for how long.
+     * @param stride   The stride of the animation, i.e. whether it should be executed progressively or regressively.
+     * @return An {@link Animator} instance that can be used to define how the animation should be executed.
+     */
+    public static Animator animateFor( LifeTime lifeTime, Stride stride ) {
+        return new Animator( lifeTime, stride, null, null );
     }
 
     /**
@@ -62,11 +77,26 @@ public class Animator
      * @return An {@link Animator} instance that can be used to define how the animation should be executed.
      */
     public static Animator animateFor( LifeTime lifeTime, Component component ) {
-        return new Animator( lifeTime, component, null );
+        return animateFor( lifeTime, Stride.PROGRESSIVE, component );
     }
 
-    private Animator( LifeTime lifeTime, Component component, RunCondition animation ) {
+    /**
+     * Creates an {@link Animator} instance which allows you to define the stop condition
+     * for an animation as well as an {@link Animation} that will be executed
+     * when passed to the {@link #go(Animation)} method.
+     *
+     * @param lifeTime The schedule that defines when the animation should be executed and for how long.
+     * @param stride   The stride of the animation, i.e. whether it should be executed progressively or regressively.
+     * @return An {@link Animator} instance that can be used to define how the animation should be executed.
+     */
+    public static Animator animateFor( LifeTime lifeTime, Stride stride, Component component ) {
+        return new Animator( lifeTime, stride, component, null );
+    }
+
+
+    private Animator( LifeTime lifeTime, Stride stride, Component component, RunCondition animation ) {
         _lifeTime  = Objects.requireNonNull(lifeTime);
+        _stride    = Objects.requireNonNull(stride);
         _component = component; // may be null
         _condition = animation; // may be null
     }
@@ -90,7 +120,7 @@ public class Animator
      * @return A new {@link Animator} instance that will be executed as long as the given running condition is true.
      */
     public Animator asLongAs( Predicate<AnimationState> shouldRun ) {
-        return new Animator(_lifeTime, _component, state -> {
+        return new Animator(_lifeTime, _stride, _component, state -> {
                     if ( shouldRun.test(state) )
                         return _condition == null || _condition.shouldContinue(state);
 
@@ -108,7 +138,7 @@ public class Animator
      */
     public void go( Animation animation ) {
         RunCondition shouldRun = Optional.ofNullable(_condition).orElse( state -> state.repeats() == 0 );
-        AnimationRunner.add( new ComponentAnimator( _component, _lifeTime, shouldRun, animation ) );
+        AnimationRunner.add( new ComponentAnimator( _component, _lifeTime, _stride, shouldRun, animation ) );
     }
 
 }

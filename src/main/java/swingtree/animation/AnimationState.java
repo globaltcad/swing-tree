@@ -3,7 +3,10 @@ package swingtree.animation;
 import java.awt.event.ActionEvent;
 
 /**
- * The state of an animation at a given point in time.
+ * The state of an animation at a given point in time describing how far the animation has progressed
+ * using a number between 0 and 1 (see {@link #progress()}).
+ * Use the numbers exposed by the methods of this interface to define how
+ * your animation should progress over time.
  */
 public interface AnimationState
 {
