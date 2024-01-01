@@ -72,8 +72,9 @@ final class StyleSource<C extends JComponent>
     }
 
 
-    Style gatherStyleFor( C owner ) {
-        Style starterStyle = Optional.ofNullable(owner.getParent())
+    Style gatherStyleFor( C owner )
+    {
+        Style styleConf = Optional.ofNullable(owner.getParent())
                               .map( p -> p instanceof JComponent ? (JComponent) p : null )
                               .map(ComponentExtension::from)
                               .map(ComponentExtension::getStyle)
@@ -82,14 +83,33 @@ final class StyleSource<C extends JComponent>
                               .map( f -> Style.none()._withFont(f) )
                               .orElse(Style.none());
 
-        Style style = _styleSheet.applyTo( owner, starterStyle );
-        style = _localStyler.style(new ComponentStyleDelegate<>(owner, style)).style();
+        try {
+            styleConf = _styleSheet.applyTo( owner, styleConf );
+        } catch (Exception e) {
+            log.warn("An exception occurred while applying the style sheet for component '"+owner+"'.", e);
+            /*
+                 If any exceptions happen in a StyleSheet implementation provided by a user,
+                 then we don't want to prevent the other Stylers from doing their job,
+                 which is why we catch any exceptions immediately!
+            */
+        }
+
+        try {
+            styleConf = _localStyler.style(new ComponentStyleDelegate<>(owner, styleConf)).style();
+        } catch (Exception e) {
+            log.warn("An exception occurred while applying the local styler for component '"+owner+"'.", e);
+            /*
+                 If any exceptions happen in a Styler implementation provided by a user,
+                 then we don't want to prevent the other Stylers from doing their job,
+                 which is why we catch any exceptions immediately!
+            */
+        }
 
         // Animation styles are last: they override everything else:
         for ( Expirable<Styler<C>> expirableStyler : _animationStylers )
             if ( !expirableStyler.isExpired() )
                 try {
-                    style = expirableStyler.get().style(new ComponentStyleDelegate<>(owner, style)).style();
+                    styleConf = expirableStyler.get().style(new ComponentStyleDelegate<>(owner, styleConf)).style();
                 } catch ( Exception e ) {
                     log.warn("An exception occurred while applying an animation styler!", e);
                     /*
@@ -105,9 +125,11 @@ final class StyleSource<C extends JComponent>
                     */
                 }
 
-        Style scaled = _applyDPIScaling(style);
+        styleConf = styleConf.simplified();
 
-        return scaled.simplified();
+        styleConf = _applyDPIScaling(styleConf);
+
+        return styleConf;
     }
 
     private static Style _applyDPIScaling( Style style ) {
