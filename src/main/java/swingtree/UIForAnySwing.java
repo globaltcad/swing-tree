@@ -9,6 +9,9 @@ import net.miginfocom.swing.MigLayout;
 import org.slf4j.Logger;
 import sprouts.Action;
 import sprouts.*;
+import swingtree.animation.AnimationState;
+import swingtree.animation.LifeTime;
+import swingtree.api.AnimatedStyler;
 import swingtree.api.Peeker;
 import swingtree.api.Styler;
 import swingtree.api.UIVerifier;
@@ -2185,9 +2188,55 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withStyle( Styler<C> styler ) {
-        NullUtil.nullArgCheck(styler, "styler", Function.class);
+        NullUtil.nullArgCheck(styler, "styler", Styler.class);
         return _with( c -> {
                     ComponentExtension.from(c).addStyler( styler );
+                })
+                ._this();
+    }
+
+    /**
+     *    Here an example demonstrating how a transitional style can be applied
+     *    to make a border which can transition between 2 colors based on a boolean property:
+     *    <pre>{@code
+     *      UI.button("Click Me!")
+     *      .withTransitionalStyle(vm.isError(), LifeTime.of(1, TimeUnit.SECONDS), (state, it) -> it
+     *          .backgroundColor(Color.CYAN)
+     *          .border(3, new Color((int)(state.progress() * 255), 0, 0))
+     *      )
+     *    }</pre>
+     *
+     *
+     * @param transitionToggle The boolean {@link Val} property which determines the state to which the style should transition.
+     *                         When the value of this property is {@code true}, the style will transition to a {@link AnimationState#progress()}
+     *                         of {@code 1.0} over the provided {@link LifeTime}.
+     *                         And when the value of this property is {@code false}, the style will transition to a {@link AnimationState#progress()}
+     *                         of {@code 0.0} over the provided {@link LifeTime}.
+     *
+     * @param transitionLifeTime The {@link LifeTime} of the transition animation.
+     *                           It defines for ow long the {@link AnimationState#progress()} will transition from {@code 0} to {@code 1} or vice versa.
+     *
+     * @param styler An {@link AnimatedStyler} lambda can define a set of style rules for the component wrapped by this builder
+     *               by receiving an {@link AnimationState} and a {@link swingtree.style.ComponentStyleDelegate} and returning
+     *               an updated version with the desired style rules applied.
+     *               The {@link AnimatedStyler} may apply the style properties according to the {@link AnimationState}
+     *               and its {@link AnimationState#progress()} method (or other methods) to create a smooth
+     *               transition between the 2 states.
+     *
+     * @return This builder instance, which enables fluent method chaining.
+     */
+    public final I withTransitionalStyle(
+        Val<Boolean> transitionToggle,
+        LifeTime transitionLifeTime,
+        AnimatedStyler<C> styler
+    ) {
+        NullUtil.nullArgCheck(transitionToggle, "transitionToggle", Val.class);
+        NullUtil.nullArgCheck(transitionLifeTime, "transitionLifeTime", LifeTime.class);
+        NullUtil.nullArgCheck(styler, "styler", AnimatedStyler.class);
+        return _with( c -> {
+                    FlipFlopStyler<C> flipFlopStyler = new FlipFlopStyler<>(c, transitionLifeTime, styler);
+                    ComponentExtension.from(c).addStyler(flipFlopStyler::style);
+                    _onShow( transitionToggle, c, (comp, v) -> flipFlopStyler.set(v) );
                 })
                 ._this();
     }

@@ -3,7 +3,7 @@ package swingtree.style;
 import org.slf4j.Logger;
 import swingtree.SwingTree;
 import swingtree.UI;
-import swingtree.animation.LifeTime;
+import swingtree.animation.LifeSpan;
 import swingtree.api.Styler;
 
 import javax.swing.*;
@@ -55,9 +55,9 @@ final class StyleSource<C extends JComponent>
         return new StyleSource<>(compositeStyler, _animationStylers, _styleSheet);
     }
 
-    StyleSource<C> withAnimationStyler( LifeTime lifeTime, Styler<C> animationStyler ) {
+    StyleSource<C> withAnimationStyler(LifeSpan lifeSpan, Styler<C> animationStyler ) {
         List<Expirable<Styler<C>>> animationStylers = new ArrayList<>(Arrays.asList(_animationStylers));
-        animationStylers.add(new Expirable<>(lifeTime, animationStyler));
+        animationStylers.add(new Expirable<>(lifeSpan, animationStyler));
         return new StyleSource<>(_localStyler, animationStylers.toArray(new Expirable[0]), _styleSheet);
     }
 

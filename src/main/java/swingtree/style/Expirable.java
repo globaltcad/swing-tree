@@ -1,6 +1,6 @@
 package swingtree.style;
 
-import swingtree.animation.LifeTime;
+import swingtree.animation.LifeSpan;
 
 import java.util.Objects;
 
@@ -10,12 +10,12 @@ import java.util.Objects;
  **/
 final class Expirable<T>
 {
-    private final LifeTime _lifetime;
+    private final LifeSpan _lifeSpan;
     private final T        _value;
 
 
-    Expirable( LifeTime lifetime, T payload ) {
-        _lifetime = Objects.requireNonNull(lifetime);
+    Expirable( LifeSpan lifeSpan, T payload ) {
+        _lifeSpan = Objects.requireNonNull(lifeSpan);
         _value    = Objects.requireNonNull(payload);
     }
 
@@ -23,7 +23,7 @@ final class Expirable<T>
      *  @return True if the lifetime of this instance is expired,
      *          false otherwise.
      **/
-    boolean isExpired() { return _lifetime.isExpired(); }
+    boolean isExpired() { return _lifeSpan.isExpired(); }
 
     /**
      *  @return The payload of this instance.
@@ -31,7 +31,7 @@ final class Expirable<T>
     T get() { return _value; }
 
     /**
-     *  @return The lifetime of this instance.
+     *  @return The time span of this instance.
      **/
-    LifeTime getLifeTime() { return _lifetime; }
+    LifeSpan getLifeSpan() { return _lifeSpan; }
 }

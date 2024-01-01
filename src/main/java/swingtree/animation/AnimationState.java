@@ -262,9 +262,9 @@ public interface AnimationState
      */
     long repeats();
     /**
-     * @return The schedule of the animation, i.e. the time when the animation started and how long it should run.
+     * @return The {@link LifeSpan} of the animation, i.e. the time when the animation started and how long it should run.
      */
-    LifeTime lifetime();
+    LifeSpan lifeSpan();
     /**
      * @return The timer event that triggered the animation.
      */

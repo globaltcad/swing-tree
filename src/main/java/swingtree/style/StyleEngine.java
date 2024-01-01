@@ -2,14 +2,13 @@ package swingtree.style;
 
 import org.slf4j.Logger;
 import swingtree.UI;
+import swingtree.animation.LifeSpan;
 import swingtree.animation.LifeTime;
 import swingtree.api.Painter;
 
 import javax.swing.JComponent;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
-import java.awt.Shape;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -61,9 +60,9 @@ final class StyleEngine
         return new StyleEngine( newConf, _animationPainters, _layerCaches);
     }
 
-    StyleEngine withAnimationPainter( LifeTime lifeTime, Painter animationPainter ) {
+    StyleEngine withAnimationPainter( LifeSpan lifeSpan, Painter animationPainter ) {
         java.util.List<Expirable<Painter>> animationPainters = new ArrayList<>(Arrays.asList(_animationPainters));
-        animationPainters.add(new Expirable<>(lifeTime, animationPainter));
+        animationPainters.add(new Expirable<>(lifeSpan, animationPainter));
         return new StyleEngine(_componentConf, animationPainters.toArray(new Expirable[0]), _layerCaches);
     }
 
@@ -114,7 +113,7 @@ final class StyleEngine
                     e.printStackTrace();
                     log.warn(
                         "Exception while painting animation '" + expirablePainter.get() + "' " +
-                        "with lifetime " + expirablePainter.getLifeTime()+ ".",
+                        "with lifetime " + expirablePainter.getLifeSpan()+ ".",
                         e
                     );
                     // An exception inside a painter should not prevent everything else from being painted!

@@ -18,7 +18,7 @@ class ComponentAnimator
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(ComponentAnimator.class);
 
     private final WeakReference<Component> _compRef;
-    private final LifeTime      _lifeTime;
+    private final LifeSpan      _lifeSpan;
     private final Stride        _stride;
     private final RunCondition _condition;
     private final Animation     _animation;
@@ -28,11 +28,11 @@ class ComponentAnimator
         Component     component, // may be null if the animation is not associated with a specific component
         LifeTime      lifeTime,
         Stride        stride,
-        RunCondition condition,
+        RunCondition  condition,
         Animation     animation
     ) {
         _compRef   = component == null ? null : new WeakReference<>(component);
-        _lifeTime  = Objects.requireNonNull(lifeTime);
+        _lifeSpan  = LifeSpan.startingNowWith(Objects.requireNonNull(lifeTime));
         _stride    = Objects.requireNonNull(stride);
         _condition = Objects.requireNonNull(condition);
         _animation = Objects.requireNonNull(animation);
@@ -45,8 +45,8 @@ class ComponentAnimator
     }
 
     private AnimationState _createState( long now, ActionEvent event ) {
-        long duration = _lifeTime.getDurationIn(TimeUnit.MILLISECONDS);
-        long howLongIsRunning = Math.max(0, now - _lifeTime.getStartTimeIn(TimeUnit.MILLISECONDS));
+        long duration = _lifeSpan.lifeTime().getDurationIn(TimeUnit.MILLISECONDS);
+        long howLongIsRunning = Math.max(0, now - _lifeSpan.getStartTimeIn(TimeUnit.MILLISECONDS));
         long howLongCurrentLoop = howLongIsRunning % duration;
         long howManyLoops       = howLongIsRunning / duration;
         double progress;
@@ -64,14 +64,14 @@ class ComponentAnimator
         return new AnimationState() {
             @Override public double     progress()  { return progress;     }
             @Override public long        repeats()  { return howManyLoops; }
-            @Override public LifeTime    lifetime() { return _lifeTime;    }
+            @Override public LifeSpan lifeSpan() { return _lifeSpan;    }
             @Override public ActionEvent event()    { return event;        }
         };
     }
 
     boolean run( long now, ActionEvent event )
     {
-        if ( now < _lifeTime.getStartTimeIn(TimeUnit.MILLISECONDS) )
+        if ( now < _lifeSpan.getStartTimeIn(TimeUnit.MILLISECONDS) )
             return true;
 
         AnimationState state = _createState(now, event);

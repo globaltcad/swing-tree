@@ -4,8 +4,8 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
- *  The lifetime defines when an {@link Animation} starts and for how long it should run.
- *  It consists of a delay, start time and duration as well as a unique id
+ *  The lifetime defines for how long an {@link Animation} should run.
+ *  It consists of a delay time and duration as well as a unique id
  *  which ensures that two instances of this class are never equal.
  */
 public final class LifeTime
@@ -15,7 +15,6 @@ public final class LifeTime
     private final long _id = _instances++;
     private final long _delay; // in milliseconds
     private final long _duration;
-    private final long _startTime;
 
     /**
      *  Creates a new schedule that will start immediately and run for the given duration.
@@ -75,7 +74,6 @@ public final class LifeTime
     private LifeTime( long delay, long duration ) {
         _delay     = delay;
         _duration  = duration;
-        _startTime = System.currentTimeMillis() + _delay;
     }
 
     /**
@@ -112,38 +110,6 @@ public final class LifeTime
         return unit.convert(_delay, TimeUnit.MILLISECONDS);
     }
 
-    /**
-     *  Returns the time when the animation should start in the given time unit.
-     * @param unit The time unit in which the start time should be returned.
-     * @return The time when the animation should start.
-     */
-    public long getStartTimeIn( TimeUnit unit ) {
-        Objects.requireNonNull(unit);
-        return unit.convert(_startTime, TimeUnit.MILLISECONDS);
-    }
-
-    /**
-     *   Returns the end time of the specified iteration in the given time unit.
-     *   The end time is the time when the animation is scheduled to be finished.
-     *   This is essentially the start time plus the duration of the
-     *   animation times the provided iteration number.
-     *
-     * @param unit The time unit in which the end time should be returned.
-     * @param iteration The iteration for which the end time should be determined and returned.
-     * @return The end time of the specified iteration in the given time unit.
-     */
-    public long getEndTimeIn( TimeUnit unit, int iteration ) {
-        Objects.requireNonNull(unit);
-        return unit.convert(_startTime + _duration * iteration, TimeUnit.MILLISECONDS);
-    }
-
-    /**
-     * @return {@code true} if the animation is expired, {@code false} otherwise.
-     */
-    public boolean isExpired() {
-        return System.currentTimeMillis() >= _startTime + _duration;
-    }
-
     @Override
     public boolean equals( Object o ) {
         if ( this == o ) return true;
@@ -151,13 +117,12 @@ public final class LifeTime
         LifeTime lifeTime = (LifeTime) o;
         return _id        == lifeTime._id       &&
                _delay     == lifeTime._delay    &&
-               _duration  == lifeTime._duration &&
-               _startTime == lifeTime._startTime;
+               _duration  == lifeTime._duration;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(_id, _delay, _duration, _startTime);
+        return Objects.hash(_id, _delay, _duration);
     }
 
 }

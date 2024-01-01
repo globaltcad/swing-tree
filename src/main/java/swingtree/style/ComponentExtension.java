@@ -241,7 +241,7 @@ public final class ComponentExtension<C extends JComponent>
      * @param painter The {@link Painter} which defines how the animation is rendered.
      */
     public void addAnimationPainter( AnimationState state, swingtree.api.Painter painter ) {
-        _styleEngine = _styleEngine.withAnimationPainter(state.lifetime(), Objects.requireNonNull(painter));
+        _styleEngine = _styleEngine.withAnimationPainter(state.lifeSpan(), Objects.requireNonNull(painter));
         _installCustomBorderBasedStyleAndAnimationRenderer();
     }
 
@@ -252,7 +252,7 @@ public final class ComponentExtension<C extends JComponent>
      * @param styler The {@link Styler} which defines how the style of the component is changed during the animation.
      */
     public void addAnimationStyler( AnimationState state, Styler<C> styler ) {
-        _styleSource = _styleSource.withAnimationStyler(state.lifetime(), styler);
+        _styleSource = _styleSource.withAnimationStyler(state.lifeSpan(), styler);
         _installCustomBorderBasedStyleAndAnimationRenderer();
     }
 
