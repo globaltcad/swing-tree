@@ -355,7 +355,7 @@ public final class ComponentExtension<C extends JComponent>
      */
     public void addStyler( Styler<C> styler ) {
         Objects.requireNonNull(styler);
-        _styleSource = _styleSource.withLocalStyler(styler, _owner);
+        _styleSource = _styleSource.withLocalStyler(styler);
         gatherApplyAndInstallStyle(false);
     }
 

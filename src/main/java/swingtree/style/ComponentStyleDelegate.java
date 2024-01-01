@@ -41,7 +41,9 @@ public final class ComponentStyleDelegate<C extends JComponent>
         _style     = Objects.requireNonNull(style);
     }
 
-    ComponentStyleDelegate<C> _withStyle( Style style ) { return new ComponentStyleDelegate<>(_component, style); }
+    ComponentStyleDelegate<C> _withStyle( Style style ) {
+        return new ComponentStyleDelegate<>(_component, style);
+    }
 
     /**
      *  Returns the {@link JComponent} this {@link ComponentStyleDelegate} is defining a {@link Style} for.

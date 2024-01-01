@@ -50,8 +50,8 @@ final class StyleSource<C extends JComponent>
         return _animationStylers.length == 0;
     }
 
-    StyleSource<C> withLocalStyler( Styler<C> styler, C owner ) {
-        Styler<C> compositeStyler = _localStyler.andThen( s -> styler.style(new ComponentStyleDelegate<>(owner, s.style())) );
+    StyleSource<C> withLocalStyler( Styler<C> styler ) {
+        Styler<C> compositeStyler = _localStyler.andThen(styler);
         return new StyleSource<>(compositeStyler, _animationStylers, _styleSheet);
     }
 
