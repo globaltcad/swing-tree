@@ -89,21 +89,21 @@ final class DimensionalityStyle
         return new DimensionalityStyle(_minSize, _maxSize, _preferredSize, size);
     }
 
-    public Optional<Integer> minWidth() { return _minSize.width(); }
+    public Optional<Integer> minWidth() { return _minSize.width().map(Number::intValue); }
 
-    public Optional<Integer> minHeight() { return _minSize.height(); }
+    public Optional<Integer> minHeight() { return _minSize.height().map(Number::intValue); }
 
-    public Optional<Integer> maxWidth() { return _maxSize.width(); }
+    public Optional<Integer> maxWidth() { return _maxSize.width().map(Number::intValue); }
 
-    public Optional<Integer> maxHeight() { return _maxSize.height(); }
+    public Optional<Integer> maxHeight() { return _maxSize.height().map(Number::intValue); }
 
-    public Optional<Integer> preferredWidth() { return _preferredSize.width(); }
+    public Optional<Integer> preferredWidth() { return _preferredSize.width().map(Number::intValue); }
 
-    public Optional<Integer> preferredHeight() { return _preferredSize.height(); }
+    public Optional<Integer> preferredHeight() { return _preferredSize.height().map(Number::intValue); }
 
-    public Optional<Integer> width() { return _size.width(); }
+    public Optional<Integer> width() { return _size.width().map(Number::intValue); }
 
-    public Optional<Integer> height() { return _size.height(); }
+    public Optional<Integer> height() { return _size.height().map(Number::intValue); }
 
     DimensionalityStyle _scale( double scale ) {
         return new DimensionalityStyle(
@@ -118,10 +118,10 @@ final class DimensionalityStyle
         if ( this == _NONE )
             return _NONE;
 
-        Size simplifiedMinSize       = _minSize.width().orElse(0) == 0 && _minSize.height().orElse(0) == 0 ? _NONE._minSize : _minSize;
-        Size simplifiedMaxSize       = _maxSize.width().orElse(0) == 0 && _maxSize.height().orElse(0) == 0 ? _NONE._maxSize : _maxSize;
-        Size simplifiedPreferredSize = _preferredSize.width().orElse(0) == 0 && _preferredSize.height().orElse(0) == 0 ? _NONE._preferredSize : _preferredSize;
-        Size simplifiedSize          = _size.width().orElse(0) == 0 && _size.height().orElse(0) == 0 ? _NONE._size : _size;
+        Size simplifiedMinSize       = _minSize.width().orElse(0f) == 0f && _minSize.height().orElse(0f) == 0f ? _NONE._minSize : _minSize;
+        Size simplifiedMaxSize       = _maxSize.width().orElse(0f) == 0f && _maxSize.height().orElse(0f) == 0f ? _NONE._maxSize : _maxSize;
+        Size simplifiedPreferredSize = _preferredSize.width().orElse(0f) == 0 && _preferredSize.height().orElse(0f) == 0 ? _NONE._preferredSize : _preferredSize;
+        Size simplifiedSize          = _size.width().orElse(0f) == 0 && _size.height().orElse(0f) == 0 ? _NONE._size : _size;
 
         if (
             simplifiedMinSize       == _NONE._minSize &&
@@ -146,15 +146,19 @@ final class DimensionalityStyle
 
         return
             this.getClass().getSimpleName() + "[" +
-                    "minWidth="        + _minSize.width().map(Objects::toString).orElse("?") + ", " +
-                    "minHeight="       + _minSize.height().map(Objects::toString).orElse("?") + ", " +
-                    "maxWidth="        + _maxSize.height().map(Objects::toString).orElse("?") + ", " +
-                    "maxHeight="       + _maxSize.width().map(Objects::toString).orElse("?") + ", " +
-                    "preferredWidth="  + _preferredSize.width().map(Objects::toString).orElse("?") + ", " +
-                    "preferredHeight=" + _preferredSize.height().map(Objects::toString).orElse("?") + ", " +
-                    "width="           + _size.width().map(Objects::toString).orElse("?") + ", " +
-                    "height="          + _size.height().map(Objects::toString).orElse("?") +
+                    "minWidth="        + _minSize.width().map(this::_toString).orElse("?") + ", " +
+                    "minHeight="       + _minSize.height().map(this::_toString).orElse("?") + ", " +
+                    "maxWidth="        + _maxSize.height().map(this::_toString).orElse("?") + ", " +
+                    "maxHeight="       + _maxSize.width().map(this::_toString).orElse("?") + ", " +
+                    "preferredWidth="  + _preferredSize.width().map(this::_toString).orElse("?") + ", " +
+                    "preferredHeight=" + _preferredSize.height().map(this::_toString).orElse("?") + ", " +
+                    "width="           + _size.width().map(this::_toString).orElse("?") + ", " +
+                    "height="          + _size.height().map(this::_toString).orElse("?") +
                 "]";
+    }
+
+    private String _toString( Float value ) {
+        return String.valueOf(value).replace(".0", "");
     }
 
     @Override

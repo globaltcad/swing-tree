@@ -137,7 +137,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  Creates a new {@link Style} with the provided top, right, left and bottom margin distances.
      *  It determines the amount of space between the component's outer bounds and the beginning
      *  of the inner border, background region and shadow frame
-     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
+     *  (see {@link #borderWidth(double)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
      * <p>
      * @param top The top padding distance in pixels.
      * @param right The right padding distance in pixels.
@@ -153,7 +153,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  Creates a new {@link Style} with the provided margin distance for all sides of the component.
      *  The margin determines the amount of space between the component's outer bounds and the beginning
      *  of the inner border, background region and shadow frame
-     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
+     *  (see {@link #borderWidth(double)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
      * <p>
      * @param margin The margin distance in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
@@ -166,7 +166,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  Creates a new {@link Style} with the provided margin distance for the top side of the component.
      *  The margin determines the amount of space between the component's outer bounds and the beginning
      *  of the inner border, background region and shadow frame
-     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
+     *  (see {@link #borderWidth(double)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
      * <p>
      * @param margin The margin distance in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
@@ -179,7 +179,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  Creates a new {@link Style} with the provided margin distance for the right side of the component.
      *  The margin determines the amount of space between the component's outer bounds and the beginning
      *  of the inner border, background region and shadow frame
-     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
+     *  (see {@link #borderWidth(double)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
      * <p>
      * @param margin The margin distance in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
@@ -192,7 +192,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  Creates a new {@link Style} with the provided margin distance for the bottom side of the component.
      *  The margin determines the amount of space between the component's outer bounds and the beginning
      *  of the inner border, background region and shadow frame
-     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
+     *  (see {@link #borderWidth(double)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
      * <p>
      * @param margin The margin distance in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
@@ -205,7 +205,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  Creates a new {@link Style} with the provided margin distance for the left side of the component.
      *  The margin determines the amount of space between the component's outer bounds and the beginning
      *  of the inner border, background region and shadow frame
-     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
+     *  (see {@link #borderWidth(double)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
      * <p>
      * @param margin The margin distance in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
@@ -218,7 +218,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  Creates a new {@link Style} with the provided margin distance for the top and bottom sides of the component.
      *  The margin determines the amount of space between the component's outer bounds and the beginning
      *  of the inner border, background region and shadow frame
-     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
+     *  (see {@link #borderWidth(double)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
      * <p>
      * @param margin The margin distance in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
@@ -231,7 +231,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  Creates a new {@link Style} with the provided margin distance for the left and right sides of the component.
      *  The margin determines the amount of space between the component's outer bounds and the beginning
      *  of the inner border, background region and shadow frame
-     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
+     *  (see {@link #borderWidth(double)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
      * <p>
      * @param margin The margin distance in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
@@ -244,7 +244,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  Creates a new {@link Style} with the provided top, right, left and bottom pad distances.
      *  It determines the amount of space between the inner bounds (the inner border, background region and shadow frame)
      *  and the component's content.
-     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
+     *  (see {@link #borderWidth(double)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
      * <p>
      * @param top The top padding distance in pixels.
      * @param right The right padding distance in pixels.
@@ -260,7 +260,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  Creates a new {@link Style} with the provided padding distance for all sides of the component.
      *  It determines the amount of space between the inner bounds (the inner border, background region and shadow frame)
      *  and the component's content.
-     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
+     *  (see {@link #borderWidth(double)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
      * <p>
      * @param padding The padding distance in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
@@ -273,7 +273,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  Creates a new {@link Style} with the provided padding distance for the top side of the component.
      *  The padding determines the amount of space between the inner bounds (the inner border, background region and shadow frame)
      *  and the component's content.
-     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
+     *  (see {@link #borderWidth(double)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
      * <p>
      * @param padding The padding distance in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
@@ -287,7 +287,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  The padding determines the amount of space between the inner bounds (the inner border, background region and shadow frame)
      *  and the component's content.
      *  of the inner border, background region and shadow frame
-     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
+     *  (see {@link #borderWidth(double)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
      * <p>
      * @param padding The padding distance in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
@@ -300,7 +300,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  Creates a new {@link Style} with the provided padding distance for the bottom side of the component.
      *  The padding determines the amount of space between the inner bounds (the inner border, background region and shadow frame)
      *  and the component's content.
-     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
+     *  (see {@link #borderWidth(double)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
      * <p>
      * @param padding The padding distance in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
@@ -313,7 +313,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  Creates a new {@link Style} with the provided padding distance for the left side of the component.
      *  The padding determines the amount of space between the inner bounds (the inner border, background region and shadow frame)
      *  and the component's content.
-     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
+     *  (see {@link #borderWidth(double)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
      * <p>
      * @param padding The padding distance in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
@@ -326,7 +326,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  Creates a new {@link Style} with the provided padding distance for the top and bottom sides of the component.
      *  The padding determines the amount of space between the inner bounds (the inner border, background region and shadow frame)
      *  and the component's content.
-     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
+     *  (see {@link #borderWidth(double)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
      * <p>
      * @param padding The padding distance in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
@@ -339,7 +339,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  Creates a new {@link Style} with the provided padding distance for the left and right sides of the component.
      *  The padding determines the amount of space between the inner bounds (the inner border, background region and shadow frame)
      *  and the component's content.
-     *  (see {@link #borderWidth(int)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
+     *  (see {@link #borderWidth(double)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
      * <p>
      * @param padding The padding distance in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
@@ -356,7 +356,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param color The border color.
      * @return A new {@link ComponentStyleDelegate} with the provided border width and border color.
      */
-    public ComponentStyleDelegate<C> border( int width, Color color ) {
+    public ComponentStyleDelegate<C> border( double width, Color color ) {
         return _withStyle(_style._withBorder(_style.border().withWidth(width).withColor(color)));
     }
 
@@ -371,7 +371,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param color The border color.
      * @return A new {@link ComponentStyleDelegate} with the provided border widths and border color.
      */
-    public ComponentStyleDelegate<C> border( int top, int right, int bottom, int left, Color color ) {
+    public ComponentStyleDelegate<C> border( double top, double right, double bottom, double left, Color color ) {
         return _withStyle(_style._withBorder(_style.border().withWidths(Outline.of(top, right, bottom, left)).withColor(color)));
     }
 
@@ -384,7 +384,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param colorString The border color.
      * @return A new {@link ComponentStyleDelegate} with the provided border width and border color.
      */
-    public ComponentStyleDelegate<C> border( int width, String colorString ) {
+    public ComponentStyleDelegate<C> border( double width, String colorString ) {
         Objects.requireNonNull(colorString);
         Color newColor;
         try {
@@ -406,7 +406,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param width The border width in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided border width.
      */
-    public ComponentStyleDelegate<C> borderWidth( int width ) {
+    public ComponentStyleDelegate<C> borderWidth( double width ) {
         return _withStyle(_style._withBorder(_style.border().withWidth(width)));
     }
 
@@ -421,8 +421,8 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param width The border width in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided border width for the specified edge.
      */
-    public ComponentStyleDelegate<C> borderWidthAt( UI.Edge edge, int width ) {
-        return _withStyle(_style._withBorder(_style.border().withWidthAt(edge, width)));
+    public ComponentStyleDelegate<C> borderWidthAt( UI.Edge edge, double width ) {
+        return _withStyle(_style._withBorder(_style.border().withWidthAt(edge, (float) width)));
     }
 
     /**
@@ -444,10 +444,10 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param bottom The bottom border width in pixels.
      * @param left The left border width in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided top, right, bottom and left border widths.
-     * @see #borderWidth(int)
-     * @see #borderWidthAt(UI.Edge, int)
+     * @see #borderWidth(double)
+     * @see #borderWidthAt(UI.Edge, double)
      */
-    public ComponentStyleDelegate<C> borderWidths( int top, int right, int bottom, int left ) {
+    public ComponentStyleDelegate<C> borderWidths( double top, double right, double bottom, double left ) {
         return _withStyle(_style._withBorder(_style.border().withWidths(Outline.of(top, right, bottom, left))));
     }
 
@@ -466,10 +466,10 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param topBottom The top and bottom border width in pixels.
      * @param leftRight The left and right border width in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided top/bottom and left/right border widths.
-     * @see #borderWidth(int)
-     * @see #borderWidthAt(UI.Edge, int)
+     * @see #borderWidth(double)
+     * @see #borderWidthAt(UI.Edge, double)
      */
-    public ComponentStyleDelegate<C> borderWidths( int topBottom, int leftRight ) {
+    public ComponentStyleDelegate<C> borderWidths( double topBottom, double leftRight ) {
         return _withStyle(_style._withBorder(_style.border().withWidths(Outline.of(topBottom, leftRight, topBottom, leftRight))));
     }
 

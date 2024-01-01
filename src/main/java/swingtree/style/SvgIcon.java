@@ -230,7 +230,10 @@ public final class SvgIcon extends ImageIcon
      * @return A new {@link SvgIcon} with the given width and height.
      */
     public SvgIcon withIconSize( Size size ) {
-        return withIconSize( size.width().orElse(NO_SIZE), size.height().orElse(NO_SIZE) );
+        return withIconSize(
+                    size.width().map(Number::intValue).orElse(NO_SIZE),
+                    size.height().map(Number::intValue).orElse(NO_SIZE)
+                );
     }
 
     /**

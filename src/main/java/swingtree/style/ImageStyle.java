@@ -226,9 +226,9 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
 
     UI.FitComponent fitMode() { return _fitMode; }
 
-    Optional<Integer> width() { return _size.width(); }
+    Optional<Integer> width() { return _size.width().map(Number::intValue); }
 
-    Optional<Integer> height() { return _size.height(); }
+    Optional<Integer> height() { return _size.height().map(Number::intValue); }
 
     float opacity() { return _opacity; }
 

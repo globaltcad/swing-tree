@@ -974,8 +974,8 @@ public final class UI extends UINamespaceUtilities
                     throw new RuntimeException(e);
                 }
         }
-        Optional<Integer> width  = declaration.size().width();
-        Optional<Integer> height = declaration.size().height();
+        Optional<Integer> width  = declaration.size().width().map(Number::intValue);
+        Optional<Integer> height = declaration.size().height().map(Number::intValue);
         if ( path.endsWith(".svg") ) {
             SVGDocument tempSVGDocument = null;
             try {

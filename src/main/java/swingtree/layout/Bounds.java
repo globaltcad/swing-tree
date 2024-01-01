@@ -166,7 +166,7 @@ public final class Bounds
     /**
      * @return The area of this bounds object, which is the width multiplied by the height.
      */
-    public int area() {
+    public float area() {
         return _size._width * _size._height;
     }
 
@@ -174,7 +174,7 @@ public final class Bounds
      * @return A {@link Rectangle} object with the same location and size as this bounds object.
      */
     public Rectangle toRectangle() {
-        return new Rectangle(_location.x(), _location.y(), _size._width, _size._height);
+        return new Rectangle((int) _location.x(), (int) _location.y(), (int) _size._width, (int) _size._height);
     }
 
     @Override

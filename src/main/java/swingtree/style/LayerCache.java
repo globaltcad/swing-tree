@@ -80,7 +80,11 @@ final class LayerCache
 
         if ( bufferedImage == null ) {
             Size size = styleConf.currentBounds().size();
-            bufferedImage = new CachedImage(size.width().orElse(1), size.height().orElse(1), styleConf);
+            bufferedImage = new CachedImage(
+                                size.width().map(Number::intValue).orElse(1),
+                                size.height().map(Number::intValue).orElse(1),
+                                styleConf
+                            );
             CACHE.put(styleConf, bufferedImage);
             _strongRef = styleConf;
         }
@@ -222,7 +226,7 @@ final class LayerCache
             return false;
 
         int threshold = 256 * 256 * Math.min(heavyStyleCount, 5);
-        int pixelCount = bounds.area();
+        int pixelCount = (int) bounds.area();
 
         return pixelCount <= threshold;
     }

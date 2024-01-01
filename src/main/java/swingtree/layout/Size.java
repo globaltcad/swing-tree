@@ -32,7 +32,7 @@ public final class Size
     /**
      * @return A {@link Size} instance that represents the given width and height.
      */
-    public static Size of( int width, int height ) {
+    public static Size of( float width, float height ) {
         if ( width < 0 && height < 0 )
             return UNKNOWN;
         return new Size( width, height );
@@ -42,11 +42,11 @@ public final class Size
         return of(dimension.width, dimension.height);
     }
 
-    final int _width;
-    final int _height;
+    final float _width;
+    final float _height;
 
 
-    private Size( int width, int height ) {
+    private Size( float width, float height ) {
         _width  = Math.max(-1, width);
         _height = Math.max(-1, height);
     }
@@ -54,14 +54,14 @@ public final class Size
     /**
      * @return The width of this {@link Size} instance or {@link Optional#empty()} if unknown.
      */
-    public Optional<Integer> width() {
+    public Optional<Float> width() {
         return ( _width < 0 ? Optional.empty() : Optional.of(_width) );
     }
 
     /**
      * @return The height of this {@link Size} instance or {@link Optional#empty()} if unknown.
      */
-    public Optional<Integer> height() {
+    public Optional<Float> height() {
         return ( _height < 0 ? Optional.empty() : Optional.of(_height) );
     }
 
@@ -80,21 +80,25 @@ public final class Size
     }
 
     public Dimension toDimension() {
-        return new Dimension(_width, _height);
+        return new Dimension((int) _width, (int) _height);
     }
 
     public Size scale( double scaleFactor ) {
-        int width  = _width  < 0 ? -1 : (int) Math.round(_width  * scaleFactor);
-        int height = _height < 0 ? -1 : (int) Math.round(_height * scaleFactor);
+        float width  = _width  < 0 ? -1 : Math.round(_width  * scaleFactor);
+        float height = _height < 0 ? -1 : Math.round(_height * scaleFactor);
         return of(width, height);
     }
 
     @Override
     public String toString() {
         return this.getClass().getSimpleName()+"[" +
-                    "width="  + ( _width  < 0 ? "?" : _width  ) + ", "+
-                    "height=" + ( _height < 0 ? "?" : _height ) +
+                    "width="  + _toString( _width  ) + ", "+
+                    "height=" + _toString( _height ) +
                 "]";
+    }
+
+    private static String _toString( float value ) {
+        return value < 0 ? "?" : String.valueOf(value).replace(".0", "");
     }
 
     @Override

@@ -200,7 +200,7 @@ final class BorderStyle
                    .withArcHeightAt(UI.Corner.BOTTOM_RIGHT, borderArcHeight);
     }
 
-    BorderStyle withWidthAt( UI.Edge edge, int borderWidth ) {
+    BorderStyle withWidthAt( UI.Edge edge, float borderWidth ) {
         if ( edge == UI.Edge.EVERY )
             return this.withWidth(borderWidth);
         switch (edge) {
@@ -213,11 +213,11 @@ final class BorderStyle
         }
     }
 
-    BorderStyle withWidth( int borderWidth ) {
-        return this.withWidthAt(UI.Edge.TOP,    borderWidth)
-                   .withWidthAt(UI.Edge.RIGHT,  borderWidth)
-                   .withWidthAt(UI.Edge.BOTTOM, borderWidth)
-                   .withWidthAt(UI.Edge.LEFT,   borderWidth);
+    BorderStyle withWidth( double borderWidth ) {
+        return this.withWidthAt(UI.Edge.TOP,    (float) borderWidth)
+                   .withWidthAt(UI.Edge.RIGHT,  (float) borderWidth)
+                   .withWidthAt(UI.Edge.BOTTOM, (float) borderWidth)
+                   .withWidthAt(UI.Edge.LEFT,   (float) borderWidth);
     }
 
     BorderStyle withColor( Color borderColor ) {
@@ -374,13 +374,13 @@ final class BorderStyle
 
         String borderWidthsString;
         if ( allSidesShareTheSameWidth() ) {
-            borderWidthsString = "width=" + _borderWidths.top().map(Objects::toString).orElse("?");
+            borderWidthsString = "width=" + _borderWidths.top().map(this::_toString).orElse("?");
         } else {
             borderWidthsString =
-                    "topWidth="      + _borderWidths.top().map(Objects::toString).orElse("?")    +
-                    ", rightWidth="  + _borderWidths.right().map(Objects::toString).orElse("?")  +
-                    ", bottomWidth=" + _borderWidths.bottom().map(Objects::toString).orElse("?") +
-                    ", leftWidth="   + _borderWidths.left().map(Objects::toString).orElse("?");
+                    "topWidth="      + _borderWidths.top().map(this::_toString).orElse("?")    +
+                    ", rightWidth="  + _borderWidths.right().map(this::_toString).orElse("?")  +
+                    ", bottomWidth=" + _borderWidths.bottom().map(this::_toString).orElse("?") +
+                    ", leftWidth="   + _borderWidths.left().map(this::_toString).orElse("?");
         }
 
         String shadesString = _gradients.toString(StyleUtility.DEFAULT_KEY, "gradients");
@@ -393,5 +393,9 @@ final class BorderStyle
                     "color=" + StyleUtility.toString(_borderColor) + ", " +
                     shadesString +
                 "]";
+    }
+
+    private String _toString( Float value ) {
+        return String.valueOf(value).replace(".0", "");
     }
 }

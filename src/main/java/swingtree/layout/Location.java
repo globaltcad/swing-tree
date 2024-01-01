@@ -9,7 +9,7 @@ import java.awt.Point;
  *  It can be used as an alternative to the AWT {@link Point} class,
  *  but in situations where immutability is desired.
  *  <p>
- *  Use the {@link #of(int, int)} factory method to create a new instance
+ *  Use the {@link #of(float, float)} factory method to create a new instance
  *  or {@link #withX(int)} and {@link #withY(int)} to create a new instance
  *  with a modified value.
  */
@@ -21,7 +21,7 @@ public final class Location
      * @return A new location with the specified x- and y-coordinates.
      *         If both coordinates are zero, the {@link #origin()} is returned.
      */
-    public static Location of( int x, int y ) {
+    public static Location of( float x, float y ) {
         if ( x == 0 && y == 0 )
             return ORIGIN;
 
@@ -40,11 +40,11 @@ public final class Location
         return ORIGIN;
     }
 
-    final int _x;
-    final int _y;
+    final float _x;
+    final float _y;
 
 
-    private Location( int x, int y ) {
+    private Location( float x, float y ) {
         _x = x;
         _y = y;
     }
@@ -52,14 +52,14 @@ public final class Location
     /**
      * @return The x-coordinate of this location.
      */
-    public int x() {
+    public float x() {
         return _x;
     }
 
     /**
      * @return The y-coordinate of this location.
      */
-    public int y() {
+    public float y() {
         return _y;
     }
 
@@ -83,7 +83,7 @@ public final class Location
      * @return A new AWT {@link Point} with the same x- and y-coordinates as this location.
      */
     public Point toPoint() {
-        return new Point( _x, _y );
+        return new Point( (int) _x, (int) _y);
     }
 
     @Override
@@ -105,7 +105,7 @@ public final class Location
 
     @Override
     public int hashCode() {
-        return _x ^ _y;
+        return Float.hashCode(_x) ^ Float.hashCode(_y);
     }
 
 }

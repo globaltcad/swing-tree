@@ -165,21 +165,21 @@ final class StyleRenderer
             return;
 
         // The background box is calculated from the margins and border radius:
-        final int leftBorderWidth   = style.border().widths().left().orElse(0);
-        final int topBorderWidth    = style.border().widths().top().orElse(0);
-        final int rightBorderWidth  = style.border().widths().right().orElse(0);
-        final int bottomBorderWidth = style.border().widths().bottom().orElse(0);
-        final int left   = Math.max(style.margin().left().orElse(0),   0) + ( shadow.isInset() ? leftBorderWidth   : 0 );
-        final int top    = Math.max(style.margin().top().orElse(0),    0) + ( shadow.isInset() ? topBorderWidth    : 0 );
-        final int right  = Math.max(style.margin().right().orElse(0),  0) + ( shadow.isInset() ? rightBorderWidth  : 0 );
-        final int bottom = Math.max(style.margin().bottom().orElse(0), 0) + ( shadow.isInset() ? bottomBorderWidth : 0 );
+        final int leftBorderWidth   = style.border().widths().left().orElse(0f).intValue();
+        final int topBorderWidth    = style.border().widths().top().orElse(0f).intValue();
+        final int rightBorderWidth  = style.border().widths().right().orElse(0f).intValue();
+        final int bottomBorderWidth = style.border().widths().bottom().orElse(0f).intValue();
+        final int left   = Math.max(style.margin().left().orElse(0f).intValue(),   0) + ( shadow.isInset() ? leftBorderWidth   : 0 );
+        final int top    = Math.max(style.margin().top().orElse(0f).intValue(),    0) + ( shadow.isInset() ? topBorderWidth    : 0 );
+        final int right  = Math.max(style.margin().right().orElse(0f).intValue(),  0) + ( shadow.isInset() ? rightBorderWidth  : 0 );
+        final int bottom = Math.max(style.margin().bottom().orElse(0f).intValue(), 0) + ( shadow.isInset() ? bottomBorderWidth : 0 );
         final int topLeftRadius     = Math.max(style.border().topLeftRadius(), 0);
         final int topRightRadius    = Math.max(style.border().topRightRadius(), 0);
         final int bottomRightRadius = Math.max(style.border().bottomRightRadius(), 0);
         final int bottomLeftRadius  = Math.max(style.border().bottomLeftRadius(), 0);
 
-        final int width     = bounds.size().width().orElse(0);
-        final int height    = bounds.size().height().orElse(0);
+        final int width     = bounds.size().width().orElse(0f).intValue();
+        final int height    = bounds.size().height().orElse(0f).intValue();
 
         // Calculate the shadow box bounds based on the padding and border thickness
         final int x = left + shadow.horizontalOffset();
@@ -584,12 +584,12 @@ final class StyleRenderer
         Color[] colors = gradient.colors();
         UI.Transition type = gradient.transition();
         Dimension size = bounds.size().toDimension();
-        size.width  -= (margin.right().orElse(0) + margin.left().orElse(0));
-        size.height -= (margin.bottom().orElse(0) + margin.top().orElse(0));
+        size.width  -= (margin.right().orElse(0f).intValue() + margin.left().orElse(0f).intValue());
+        size.height -= (margin.bottom().orElse(0f).intValue() + margin.top().orElse(0f).intValue());
         int width  = size.width;
         int height = size.height;
-        int realX = margin.left().orElse(0);
-        int realY = margin.top().orElse(0);
+        int realX = margin.left().orElse(0f).intValue();
+        int realY = margin.top().orElse(0f).intValue();
 
         int corner1X;
         int corner1Y;
@@ -734,12 +734,12 @@ final class StyleRenderer
         UI.Transition type = gradient.transition();
         Color[] colors = gradient.colors();
         Dimension size = bounds.size().toDimension();
-        size.width  -= (margin.right().orElse(0) + margin.left().orElse(0));
-        size.height -= (margin.bottom().orElse(0) + margin.top().orElse(0));
+        size.width  -= (margin.right().orElse(0f).intValue() + margin.left().orElse(0f).intValue());
+        size.height -= (margin.bottom().orElse(0f).intValue() + margin.top().orElse(0f).intValue());
         int width  = size.width;
         int height = size.height;
-        int realX = margin.left().orElse(0);
-        int realY = margin.top().orElse(0);
+        int realX = margin.left().orElse(0f).intValue();
+        int realY = margin.top().orElse(0f).intValue();
 
         int corner1X;
         int corner1Y;
@@ -821,8 +821,8 @@ final class StyleRenderer
         style.image().ifPresent( imageIcon -> {
             final UI.Placement placement       = style.placement();
             final Outline      padding         = style.padding();
-            final int          componentWidth  = bounds.size().width().orElse(0);
-            final int          componentHeight = bounds.size().height().orElse(0);
+            final int          componentWidth  = bounds.size().width().orElse(0f).intValue();
+            final int          componentHeight = bounds.size().height().orElse(0f).intValue();
 
             int imgWidth  = style.width().orElse(imageIcon.getIconWidth());
             int imgHeight = style.height().orElse(imageIcon.getIconHeight());
@@ -909,10 +909,10 @@ final class StyleRenderer
                     throw new IllegalArgumentException("Unknown placement: " + placement);
             }
             // We apply the padding:
-            x += padding.left().orElse(0);
-            y += padding.top().orElse(0);
-            imgWidth  -= padding.left().orElse(0) + padding.right().orElse(0);
-            imgHeight -= padding.top().orElse(0)  + padding.bottom().orElse(0);
+            x += padding.left().orElse(0f).intValue();
+            y += padding.top().orElse(0f).intValue();
+            imgWidth  -= padding.left().orElse(0f).intValue() + padding.right().orElse(0f).intValue();
+            imgHeight -= padding.top().orElse(0f).intValue()  + padding.bottom().orElse(0f).intValue();
             if ( imageIcon instanceof SvgIcon ) {
                 SvgIcon svgIcon = (SvgIcon) imageIcon;
                 if ( imgWidth > -1 && svgIcon.getIconWidth() < 0 )

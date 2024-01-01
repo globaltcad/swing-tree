@@ -18,21 +18,26 @@ final class Outline
 
     public static Outline none() { return _NONE; }
 
-    public static Outline of( int top, int right, int bottom, int left ) {
+    public static Outline of( float top, float right, float bottom, float left ) {
         return new Outline(top, right, bottom, left);
     }
 
-    public static Outline of( int allSides ) {
+    public static Outline of( double top, double right, double bottom, double left ) {
+        return new Outline((float) top, (float) right, (float) bottom, (float) left);
+    }
+
+    public static Outline of( float allSides ) {
         return new Outline(allSides, allSides, allSides, allSides);
     }
 
 
-    private final Integer top;
-    private final Integer right;
-    private final Integer bottom;
-    private final Integer left;
+    private final Float top;
+    private final Float right;
+    private final Float bottom;
+    private final Float left;
 
-    private Outline( Integer top, Integer right, Integer bottom, Integer left ) {
+    
+    private Outline( Float top, Float right, Float bottom, Float left ) {
         this.top    = top;
         this.right  = right;
         this.bottom = bottom;
@@ -43,49 +48,49 @@ final class Outline
      * @return An {@link Optional} containing the top outline value if it was specified,
      *        {@link Optional#empty()} otherwise.
      */
-    Optional<Integer> top() { return Optional.ofNullable(top); }
+    Optional<Float> top() { return Optional.ofNullable(top); }
 
     /**
      * @return An {@link Optional} containing the right outline value if it was specified,
      *        {@link Optional#empty()} otherwise.
      */
-    Optional<Integer> right() { return Optional.ofNullable(right); }
+    Optional<Float> right() { return Optional.ofNullable(right); }
 
     /**
      * @return An {@link Optional} containing the bottom outline value if it was specified,
      *        {@link Optional#empty()} otherwise.
      */
-    Optional<Integer> bottom() { return Optional.ofNullable(bottom); }
+    Optional<Float> bottom() { return Optional.ofNullable(bottom); }
 
     /**
      * @return An {@link Optional} containing the left outline value if it was specified,
      *        {@link Optional#empty()} otherwise.
      */
-    Optional<Integer> left() { return Optional.ofNullable(left); }
+    Optional<Float> left() { return Optional.ofNullable(left); }
 
     /**
      * @param top The top outline value.
      * @return A new {@link Outline} with the specified top outline value.
      */
-    Outline withTop( int top ) { return new Outline(top, right, bottom, left); }
+    Outline withTop( float top ) { return new Outline(top, right, bottom, left); }
 
     /**
      * @param right The right outline value.
      * @return A new {@link Outline} with the specified right outline value.
      */
-    Outline withRight( int right ) { return new Outline(top, right, bottom, left); }
+    Outline withRight( float right ) { return new Outline(top, right, bottom, left); }
 
     /**
      * @param bottom The bottom outline value.
      * @return A new {@link Outline} with the specified bottom outline value.
      */
-    Outline withBottom( int bottom ) { return new Outline(top, right, bottom, left); }
+    Outline withBottom( float bottom ) { return new Outline(top, right, bottom, left); }
 
     /**
      * @param left The left outline value.
      * @return A new {@link Outline} with the specified left outline value.
      */
-    Outline withLeft( int left ) { return new Outline(top, right, bottom, left); }
+    Outline withLeft( float left ) { return new Outline(top, right, bottom, left); }
 
     /**
      * @param scale The scale factor.
@@ -93,10 +98,10 @@ final class Outline
      */
     Outline scale( double scale ) {
         return new Outline(
-                    top    == null ? null : (int) Math.round( top    * scale ),
-                    right  == null ? null : (int) Math.round( right  * scale ),
-                    bottom == null ? null : (int) Math.round( bottom * scale ),
-                    left   == null ? null : (int) Math.round( left   * scale )
+                    top    == null ? null : (float) Math.round( top    * scale ),
+                    right  == null ? null : (float) Math.round( right  * scale ),
+                    bottom == null ? null : (float) Math.round( bottom * scale ),
+                    left   == null ? null : (float) Math.round( left   * scale )
                 );
     }
 
@@ -104,10 +109,10 @@ final class Outline
         if ( this == _NONE )
             return _NONE;
 
-        Integer top    = Objects.equals(this.top   , 0) ? null : this.top;
-        Integer right  = Objects.equals(this.right , 0) ? null : this.right;
-        Integer bottom = Objects.equals(this.bottom, 0) ? null : this.bottom;
-        Integer left   = Objects.equals(this.left  , 0) ? null : this.left;
+        Float top    = Objects.equals(this.top   , 0f) ? null : this.top;
+        Float right  = Objects.equals(this.right , 0f) ? null : this.right;
+        Float bottom = Objects.equals(this.bottom, 0f) ? null : this.bottom;
+        Float left   = Objects.equals(this.left  , 0f) ? null : this.left;
 
         if ( top == null && right == null && bottom == null && left == null )
             return _NONE;
@@ -129,10 +134,10 @@ final class Outline
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 31 * hash + ( top    == null ? 1 : top    );
-        hash = 31 * hash + ( right  == null ? 2 : right  );
-        hash = 31 * hash + ( bottom == null ? 3 : bottom );
-        hash = 31 * hash + ( left   == null ? 4 : left   );
+        hash = 97 * hash + Objects.hashCode(this.top);
+        hash = 97 * hash + Objects.hashCode(this.right);
+        hash = 97 * hash + Objects.hashCode(this.bottom);
+        hash = 97 * hash + Objects.hashCode(this.left);
         return hash;
     }
 
@@ -151,11 +156,15 @@ final class Outline
     @Override
     public String toString() {
         return this.getClass().getSimpleName() + "[" +
-                    "top="    + ( top    == null ? "?" : top    ) + ", " +
-                    "right="  + ( right  == null ? "?" : right  ) + ", " +
-                    "bottom=" + ( bottom == null ? "?" : bottom ) + ", " +
-                    "left="   + ( left   == null ? "?" : left   ) +
+                    "top="    + _toString( top    ) + ", " +
+                    "right="  + _toString( right  ) + ", " +
+                    "bottom=" + _toString( bottom ) + ", " +
+                    "left="   + _toString( left   ) +
                 "]";
+    }
+
+    private static String _toString( Float value ) {
+        return value == null ? "?" : value.toString().replace(".0", "");
     }
 
 }

@@ -410,10 +410,10 @@ abstract class AbstractDelegate<C extends JComponent>
      */
     public final AbstractDelegate<C> setBounds( Bounds bounds ) {
         return setBounds(
-                bounds.location().x(),
-                bounds.location().y(),
-                bounds.size().width().orElse(0),
-                bounds.size().height().orElse(0)
+                (int) bounds.location().x(),
+                (int) bounds.location().y(),
+                bounds.size().width().map(Number::intValue).orElse(0),
+                bounds.size().height().map(Number::intValue).orElse(0)
             );
     }
 
