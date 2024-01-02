@@ -74,6 +74,13 @@ class ComponentAnimator
         if ( _compRef != null && component == null )
             return false; // There was a component but it has been garbage collected.
 
+        Runnable requestComponentRepaint = () -> {
+                                                if ( component != null ) {
+                                                    component.revalidate();
+                                                    component.repaint();
+                                                }
+                                            };
+
         if ( !shouldContinue ) {
             try {
                 _animation.finish(state); // An animation may want to do something when it is finished (e.g. reset the component to its original state).
@@ -91,6 +98,7 @@ class ComponentAnimator
                      library, thank you for using it! Good luck finding out what went wrong! :)
                 */
             }
+            requestComponentRepaint.run();
             return false;
         }
 
@@ -111,11 +119,7 @@ class ComponentAnimator
             */
         }
 
-        if ( component != null ) {
-            component.revalidate();
-            component.repaint();
-        }
-
+        requestComponentRepaint.run();
         return true;
     }
 }
