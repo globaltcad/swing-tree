@@ -145,7 +145,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param left The left padding distance in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided padding distances.
      */
-    public ComponentStyleDelegate<C> margin( int top, int right, int bottom, int left ) {
+    public ComponentStyleDelegate<C> margin( double top, double right, double bottom, double left ) {
         return _withStyle(_style._withBorder(_style.border().withMargin(Outline.of(top, right, bottom, left))));
     }
 
@@ -158,8 +158,8 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param margin The margin distance in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
      */
-    public ComponentStyleDelegate<C> margin( int margin ) {
-        return _withStyle(_style._withBorder(_style.border().withMargin(Outline.of(margin))));
+    public ComponentStyleDelegate<C> margin( double margin ) {
+        return _withStyle(_style._withBorder(_style.border().withMargin(Outline.of((float) margin))));
     }
 
     /**
@@ -171,8 +171,8 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param margin The margin distance in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
      */
-    public ComponentStyleDelegate<C> marginTop( int margin ) {
-        return _withStyle(_style._withBorder(_style.border().withMargin(_style.border().margin().withTop(margin))));
+    public ComponentStyleDelegate<C> marginTop( double margin ) {
+        return _withStyle(_style._withBorder(_style.border().withMargin(_style.border().margin().withTop((float) margin))));
     }
 
     /**
@@ -184,8 +184,8 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param margin The margin distance in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
      */
-    public ComponentStyleDelegate<C> marginRight( int margin ) {
-        return _withStyle(_style._withBorder(_style.border().withMargin(_style.border().margin().withRight(margin))));
+    public ComponentStyleDelegate<C> marginRight( double margin ) {
+        return _withStyle(_style._withBorder(_style.border().withMargin(_style.border().margin().withRight((float) margin))));
     }
 
     /**
@@ -197,8 +197,8 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param margin The margin distance in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
      */
-    public ComponentStyleDelegate<C> marginBottom( int margin ) {
-        return _withStyle(_style._withBorder(_style.border().withMargin(_style.border().margin().withBottom(margin))));
+    public ComponentStyleDelegate<C> marginBottom( double margin ) {
+        return _withStyle(_style._withBorder(_style.border().withMargin(_style.border().margin().withBottom((float) margin))));
     }
 
     /**
@@ -210,8 +210,8 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param margin The margin distance in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
      */
-    public ComponentStyleDelegate<C> marginLeft( int margin ) {
-        return _withStyle(_style._withBorder(_style.border().withMargin(_style.border().margin().withLeft(margin))));
+    public ComponentStyleDelegate<C> marginLeft( double margin ) {
+        return _withStyle(_style._withBorder(_style.border().withMargin(_style.border().margin().withLeft((float) margin))));
     }
 
     /**
@@ -223,8 +223,8 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param margin The margin distance in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
      */
-    public ComponentStyleDelegate<C> marginVertical( int margin ) {
-        return _withStyle(_style._withBorder(_style.border().withMargin(_style.border().margin().withTop(margin).withBottom(margin))));
+    public ComponentStyleDelegate<C> marginVertical( double margin ) {
+        return _withStyle(_style._withBorder(_style.border().withMargin(_style.border().margin().withTop((float) margin).withBottom((float) margin))));
     }
 
     /**
@@ -236,8 +236,8 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param margin The margin distance in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
      */
-    public ComponentStyleDelegate<C> marginHorizontal( int margin ) {
-        return _withStyle(_style._withBorder(_style.border().withMargin(_style.border().margin().withLeft(margin).withRight(margin))));
+    public ComponentStyleDelegate<C> marginHorizontal( double margin ) {
+        return _withStyle(_style._withBorder(_style.border().withMargin(_style.border().margin().withLeft((float) margin).withRight((float) margin))));
     }
 
     /**
@@ -252,7 +252,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param left The left padding distance in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided padding distances.
      */
-    public ComponentStyleDelegate<C> padding( int top, int right, int bottom, int left ) {
+    public ComponentStyleDelegate<C> padding( double top, double right, double bottom, double left ) {
         return _withStyle(_style._withBorder(_style.border().withPadding(Outline.of(top, right, bottom, left))));
     }
 
@@ -265,8 +265,8 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param padding The padding distance in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
      */
-    public ComponentStyleDelegate<C> padding( int padding ) {
-        return _withStyle(_style._withBorder(_style.border().withPadding(Outline.of(padding))));
+    public ComponentStyleDelegate<C> padding( double padding ) {
+        return _withStyle(_style._withBorder(_style.border().withPadding(Outline.of((float) padding))));
     }
 
     /**
@@ -278,8 +278,8 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param padding The padding distance in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
      */
-    public ComponentStyleDelegate<C> paddingTop( int padding ) {
-        return _withStyle(_style._withBorder(_style.border().withPadding(_style.border().padding().withTop(padding))));
+    public ComponentStyleDelegate<C> paddingTop( double padding ) {
+        return _withStyle(_style._withBorder(_style.border().withPadding(_style.border().padding().withTop((float) padding))));
     }
 
     /**
@@ -292,8 +292,8 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param padding The padding distance in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
      */
-    public ComponentStyleDelegate<C> paddingRight( int padding ) {
-        return _withStyle(_style._withBorder(_style.border().withPadding(_style.border().padding().withRight(padding))));
+    public ComponentStyleDelegate<C> paddingRight( double padding ) {
+        return _withStyle(_style._withBorder(_style.border().withPadding(_style.border().padding().withRight((float) padding))));
     }
 
     /**
@@ -305,8 +305,8 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param padding The padding distance in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
      */
-    public ComponentStyleDelegate<C> paddingBottom( int padding ) {
-        return _withStyle(_style._withBorder(_style.border().withPadding(_style.border().padding().withBottom(padding))));
+    public ComponentStyleDelegate<C> paddingBottom( double padding ) {
+        return _withStyle(_style._withBorder(_style.border().withPadding(_style.border().padding().withBottom((float) padding))));
     }
 
     /**
@@ -318,8 +318,8 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param padding The padding distance in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
      */
-    public ComponentStyleDelegate<C> paddingLeft( int padding ) {
-        return _withStyle(_style._withBorder(_style.border().withPadding(_style.border().padding().withLeft(padding))));
+    public ComponentStyleDelegate<C> paddingLeft( double padding ) {
+        return _withStyle(_style._withBorder(_style.border().withPadding(_style.border().padding().withLeft((float) padding))));
     }
 
     /**
@@ -331,8 +331,8 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param padding The padding distance in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
      */
-    public ComponentStyleDelegate<C> paddingVertical( int padding ) {
-        return _withStyle(_style._withBorder(_style.border().withPadding(_style.border().padding().withTop(padding).withBottom(padding))));
+    public ComponentStyleDelegate<C> paddingVertical( double padding ) {
+        return _withStyle(_style._withBorder(_style.border().withPadding(_style.border().padding().withTop((float) padding).withBottom((float) padding))));
     }
 
     /**
@@ -344,8 +344,8 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param padding The padding distance in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
      */
-    public ComponentStyleDelegate<C> paddingHorizontal( int padding ) {
-        return _withStyle(_style._withBorder(_style.border().withPadding(_style.border().padding().withLeft(padding).withRight(padding))));
+    public ComponentStyleDelegate<C> paddingHorizontal( double padding ) {
+        return _withStyle(_style._withBorder(_style.border().withPadding(_style.border().padding().withLeft((float) padding).withRight((float) padding))));
     }
 
     /**
@@ -810,8 +810,8 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param offset The shadow offset in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided horizontal shadow offset.
      */
-    public ComponentStyleDelegate<C> shadowHorizontalOffset( int offset ) {
-        return _withStyle(_style._withShadow( shadow -> shadow.horizontalOffset(offset)));
+    public ComponentStyleDelegate<C> shadowHorizontalOffset( double offset ) {
+        return _withStyle(_style._withShadow( shadow -> shadow.horizontalOffset((float) offset)));
     }
 
     /**
