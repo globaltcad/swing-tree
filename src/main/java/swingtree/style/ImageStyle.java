@@ -234,9 +234,9 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
 
     Outline padding() { return _padding; }
     
-    int horizontalOffset() { return _offset.x(); }
+    int horizontalOffset() { return (int) _offset.x(); }
     
-    int verticalOffset() { return _offset.y(); }
+    int verticalOffset() { return (int) _offset.y(); }
 
     UI.ComponentArea clipArea() { return _clipArea; }
 

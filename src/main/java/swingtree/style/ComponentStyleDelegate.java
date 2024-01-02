@@ -825,8 +825,8 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param offset The shadow offset in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided vertical shadow offset.
      */
-    public ComponentStyleDelegate<C> shadowVerticalOffset( int offset ) {
-        return _withStyle(_style._withShadow( shadow -> shadow.verticalOffset(offset)));
+    public ComponentStyleDelegate<C> shadowVerticalOffset( double offset ) {
+        return _withStyle(_style._withShadow( shadow -> shadow.verticalOffset((float) offset)));
     }
 
     /**
@@ -841,8 +841,8 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param verticalOffset The vertical shadow offset in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided shadow offset.
      */
-    public ComponentStyleDelegate<C> shadowOffset( int horizontalOffset, int verticalOffset ) {
-        return _withStyle(_style._withShadow( shadow -> shadow.horizontalOffset(horizontalOffset).verticalOffset(verticalOffset)));
+    public ComponentStyleDelegate<C> shadowOffset( double horizontalOffset, double verticalOffset ) {
+        return _withStyle(_style._withShadow( shadow -> shadow.horizontalOffset((float) horizontalOffset).verticalOffset((float) verticalOffset)));
     }
 
     /**
@@ -856,8 +856,8 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param horizontalAndVerticalOffset The horizontal and vertical shadow offset in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided shadow offset.
      */
-    public ComponentStyleDelegate<C> shadowOffset( int horizontalAndVerticalOffset ) {
-        return _withStyle(_style._withShadow( shadow -> shadow.horizontalOffset(horizontalAndVerticalOffset).verticalOffset(horizontalAndVerticalOffset)));
+    public ComponentStyleDelegate<C> shadowOffset( double horizontalAndVerticalOffset ) {
+        return _withStyle(_style._withShadow( shadow -> shadow.horizontalOffset((float) horizontalAndVerticalOffset).verticalOffset((float) horizontalAndVerticalOffset)));
     }
 
     /**

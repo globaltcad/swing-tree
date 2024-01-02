@@ -12,7 +12,7 @@ import java.util.Optional;
  *  designed for defining shadow styles
  *  as part of the full {@link Style} configuration object.
  *  The state of this object can only be updated by using wither like update methods,
- *  like {@link #horizontalOffset(int)}, {@link #verticalOffset(int)}, {@link #blurRadius(int)}...
+ *  like {@link #horizontalOffset(float)}, {@link #verticalOffset(float)}, {@link #blurRadius(float)}...
  *  which return a new instance of this class with the updated state.
  *  <p>
  *  The following properties with their respective purpose are available:
@@ -102,9 +102,9 @@ public final class ShadowStyle implements Simplifiable<ShadowStyle>
         _isOutset         = isOutset;
     }
 
-    int horizontalOffset() { return _offset.x(); }
+    float horizontalOffset() { return _offset.x(); }
 
-    int verticalOffset() { return _offset.y(); }
+    float verticalOffset() { return _offset.y(); }
 
     float blurRadius() { return _blurRadius; }
 
@@ -121,7 +121,7 @@ public final class ShadowStyle implements Simplifiable<ShadowStyle>
      *                               if negative the shadow will move to the left.
      * @return A new {@link ShadowStyle} with the specified horizontal shadow offset.
      */
-    public ShadowStyle horizontalOffset( int horizontalShadowOffset ) {
+    public ShadowStyle horizontalOffset( float horizontalShadowOffset ) {
         return new ShadowStyle(_offset.withX(horizontalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);
     }
 
@@ -130,7 +130,7 @@ public final class ShadowStyle implements Simplifiable<ShadowStyle>
      *                             if negative the shadow will move up.
      * @return A new {@link ShadowStyle} with the specified vertical shadow offset.
      */
-    public ShadowStyle verticalOffset( int verticalShadowOffset ) {
+    public ShadowStyle verticalOffset( float verticalShadowOffset ) {
         return new ShadowStyle(_offset.withY(verticalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);
     }
 

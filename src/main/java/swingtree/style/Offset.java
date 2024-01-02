@@ -1,5 +1,7 @@
 package swingtree.style;
 
+import java.util.Objects;
+
 /**
  *  An immutable value object that represents an offset from a position
  *  in the form of an x and y offset or lack thereof (0, 0).
@@ -10,25 +12,25 @@ final class Offset
 
     public static Offset none() { return _NONE; }
 
-    public static Offset of( int x, int y ) { return new Offset(x, y); }
+    public static Offset of( float x, float y ) { return new Offset(x, y); }
 
 
-    private final int _x;
-    private final int _y;
+    private final float _x;
+    private final float _y;
 
 
-    private Offset( int x, int y ) {
+    private Offset( float x, float y ) {
         _x = x;
         _y = y;
     }
 
-    int x() { return _x; }
+    float x() { return _x; }
 
-    int y() { return _y; }
+    float y() { return _y; }
 
-    Offset withX( int x ) { return new Offset(x, _y); }
+    Offset withX( float x ) { return new Offset(x, _y); }
 
-    Offset withY( int y ) { return new Offset(_x, y); }
+    Offset withY( float y ) { return new Offset(_x, y); }
 
     Offset scale( double scaleFactor ) {
         return new Offset((int) Math.round(_x * scaleFactor), (int) Math.round(_y * scaleFactor));
@@ -43,7 +45,9 @@ final class Offset
     }
 
     @Override
-    public int hashCode() { return _x ^ _y; }
+    public int hashCode() {
+        return Objects.hash(_x, _y);
+    }
 
     @Override
     public boolean equals( Object obj ) {

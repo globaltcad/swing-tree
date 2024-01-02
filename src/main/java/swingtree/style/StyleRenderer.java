@@ -165,27 +165,27 @@ final class StyleRenderer
             return;
 
         // The background box is calculated from the margins and border radius:
-        final int leftBorderWidth   = style.border().widths().left().orElse(0f).intValue();
-        final int topBorderWidth    = style.border().widths().top().orElse(0f).intValue();
-        final int rightBorderWidth  = style.border().widths().right().orElse(0f).intValue();
-        final int bottomBorderWidth = style.border().widths().bottom().orElse(0f).intValue();
-        final int left   = Math.max(style.margin().left().orElse(0f).intValue(),   0) + ( shadow.isInset() ? leftBorderWidth   : 0 );
-        final int top    = Math.max(style.margin().top().orElse(0f).intValue(),    0) + ( shadow.isInset() ? topBorderWidth    : 0 );
-        final int right  = Math.max(style.margin().right().orElse(0f).intValue(),  0) + ( shadow.isInset() ? rightBorderWidth  : 0 );
-        final int bottom = Math.max(style.margin().bottom().orElse(0f).intValue(), 0) + ( shadow.isInset() ? bottomBorderWidth : 0 );
-        final int topLeftRadius     = Math.max(style.border().topLeftRadius(), 0);
-        final int topRightRadius    = Math.max(style.border().topRightRadius(), 0);
-        final int bottomRightRadius = Math.max(style.border().bottomRightRadius(), 0);
-        final int bottomLeftRadius  = Math.max(style.border().bottomLeftRadius(), 0);
+        final float leftBorderWidth   = style.border().widths().left().orElse(0f);
+        final float topBorderWidth    = style.border().widths().top().orElse(0f);
+        final float rightBorderWidth  = style.border().widths().right().orElse(0f);
+        final float bottomBorderWidth = style.border().widths().bottom().orElse(0f);
+        final float left   = Math.max(style.margin().left().orElse(0f),   0) + ( shadow.isInset() ? leftBorderWidth   : 0 );
+        final float top    = Math.max(style.margin().top().orElse(0f),    0) + ( shadow.isInset() ? topBorderWidth    : 0 );
+        final float right  = Math.max(style.margin().right().orElse(0f),  0) + ( shadow.isInset() ? rightBorderWidth  : 0 );
+        final float bottom = Math.max(style.margin().bottom().orElse(0f), 0) + ( shadow.isInset() ? bottomBorderWidth : 0 );
+        final float topLeftRadius     = Math.max(style.border().topLeftRadius(), 0);
+        final float topRightRadius    = Math.max(style.border().topRightRadius(), 0);
+        final float bottomRightRadius = Math.max(style.border().bottomRightRadius(), 0);
+        final float bottomLeftRadius  = Math.max(style.border().bottomLeftRadius(), 0);
 
-        final int width     = bounds.size().width().orElse(0f).intValue();
-        final int height    = bounds.size().height().orElse(0f).intValue();
+        final float width     = bounds.size().width().orElse(0f);
+        final float height    = bounds.size().height().orElse(0f);
 
         // Calculate the shadow box bounds based on the padding and border thickness
-        final int x = left + shadow.horizontalOffset();
-        final int y = top  + shadow.verticalOffset();
-        final int w = width  - left - right;
-        final int h = height - top  - bottom;
+        final float x = left + shadow.horizontalOffset();
+        final float y = top  + shadow.verticalOffset();
+        final float w = width  - left - right;
+        final float h = height - top  - bottom;
 
         final float blurRadius   = Math.max(shadow.blurRadius(), 0);
         final float spreadRadius = !shadow.isOutset() ? shadow.spreadRadius() : -shadow.spreadRadius();
@@ -197,12 +197,12 @@ final class StyleRenderer
                                         h + blurRadius * 2 - spreadRadius * 2
                                     );
 
-        Function<Integer, Integer> offsetFunction = (radius) -> (int)((radius * 2) / ( shadow.isInset() ? 4.5 : 3.79) );
+        Function<Float, Float> offsetFunction = (radius) -> ((radius * 2) / ( shadow.isInset() ? 4.5f : 3.79f) );
 
-        final int averageCornerRadius = ( topLeftRadius + topRightRadius + bottomRightRadius + bottomLeftRadius ) / 4;
-        final int averageBorderWidth  = ( leftBorderWidth + topBorderWidth + rightBorderWidth +  bottomBorderWidth ) / 4;
-        final int shadowCornerRadius  = Math.max( 0, averageCornerRadius - averageBorderWidth );
-        final int gradientStartOffset = 1 + offsetFunction.apply(shadowCornerRadius);
+        final float averageCornerRadius = ( topLeftRadius + topRightRadius + bottomRightRadius + bottomLeftRadius ) / 4;
+        final float averageBorderWidth  = ( leftBorderWidth + topBorderWidth + rightBorderWidth +  bottomBorderWidth ) / 4;
+        final float shadowCornerRadius  = Math.max( 0, averageCornerRadius - averageBorderWidth );
+        final float gradientStartOffset = 1 + offsetFunction.apply(shadowCornerRadius);
 
         Rectangle2D.Float innerShadowRect = new Rectangle2D.Float(
                                         x + blurRadius + gradientStartOffset + spreadRadius,
@@ -272,7 +272,7 @@ final class StyleRenderer
         Area              areaWhereShadowIsAllowed,
         Rectangle2D.Float innerShadowRect,
         Rectangle2D.Float outerShadowRect,
-        int               gradientStartOffset,
+        float             gradientStartOffset,
         Graphics2D        g2d
     ) {
         // We define a clipping box so that corners don't overlap
@@ -415,7 +415,7 @@ final class StyleRenderer
         Area              contentArea,
         Rectangle2D.Float innerShadowRect,
         Rectangle2D.Float outerShadowRect,
-        int               gradientStartOffset,
+        float             gradientStartOffset,
         Graphics2D        g2d
     ) {
         // We define a boundary center point and a clipping box so that edges don't overlap
