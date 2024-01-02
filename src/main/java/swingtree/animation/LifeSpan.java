@@ -11,15 +11,19 @@ import java.util.concurrent.TimeUnit;
 public final class LifeSpan
 {
     public static LifeSpan startingNowWith( LifeTime lifeTime ) {
-        return new LifeSpan(lifeTime);
+        return new LifeSpan(lifeTime, System.currentTimeMillis() + lifeTime.getDelayIn(TimeUnit.MILLISECONDS));
+    }
+
+    public static LifeSpan endingNowWith( LifeTime lifeTime ) {
+        return new LifeSpan(lifeTime, System.currentTimeMillis() - lifeTime.getDurationIn(TimeUnit.MILLISECONDS));
     }
 
     private final LifeTime _lifeTime;
     private final long _startTime;
 
-    LifeSpan( LifeTime lifeTime ) {
+    LifeSpan( LifeTime lifeTime, long startTime ) {
         _lifeTime = Objects.requireNonNull(lifeTime);
-        _startTime = System.currentTimeMillis() + _lifeTime.getDelayIn(TimeUnit.MILLISECONDS);
+        _startTime = startTime;
     }
 
     public LifeTime lifeTime() {

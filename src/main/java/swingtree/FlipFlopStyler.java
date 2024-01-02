@@ -28,26 +28,13 @@ public class FlipFlopStyler<C extends JComponent>
 
     ComponentStyleDelegate<C> style(ComponentStyleDelegate<C> delegate ) {
         AnimationState state = _state;
-        if ( state == null ) {
-            state = new AnimationState() {
-                        @Override
-                        public double progress() {
-                            return 0;
-                        }
-                        @Override
-                        public long repeats() {
-                            return 0;
-                        }
-                        @Override
-                        public LifeSpan lifeSpan() {
-                            return LifeSpan.startingNowWith(_lifetime);
-                        }
-                        @Override
-                        public ActionEvent event() {
-                            return null;
-                        }
-                    };
-        }
+        if ( state == null )
+            state = AnimationState.startOf(
+                                LifeSpan.startingNowWith(_lifetime),
+                                Stride.PROGRESSIVE,
+                                new ActionEvent(this, 0, null)
+                            );
+
         _state = state;
         return _styler.style(state, delegate);
     }
@@ -67,7 +54,7 @@ public class FlipFlopStyler<C extends JComponent>
                         }
                         @Override
                         public void finish( AnimationState state ) {
-                            _state = state;
+                            _state = AnimationState.endOf(state.lifeSpan(), Stride.REGRESSIVE, state.event());
                         }
                     });
         } else {
@@ -80,7 +67,7 @@ public class FlipFlopStyler<C extends JComponent>
                         }
                         @Override
                         public void finish( AnimationState state ) {
-                            _state = state;
+                            _state = AnimationState.endOf(state.lifeSpan(), Stride.PROGRESSIVE, state.event());
                         }
                     });
         }

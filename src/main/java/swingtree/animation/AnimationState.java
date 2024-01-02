@@ -1,6 +1,9 @@
 package swingtree.animation;
 
+import org.slf4j.Logger;
+
 import java.awt.event.ActionEvent;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The state of an animation at a given point in time describing how far the animation has progressed
@@ -10,6 +13,42 @@ import java.awt.event.ActionEvent;
  */
 public interface AnimationState
 {
+    Logger log = org.slf4j.LoggerFactory.getLogger(AnimationState.class);
+
+    static AnimationState of( LifeSpan lifeSpan, Stride stride, ActionEvent event, long now ) {
+        long duration = lifeSpan.lifeTime().getDurationIn(TimeUnit.MILLISECONDS);
+        long howLongIsRunning = Math.max(0, now - lifeSpan.getStartTimeIn(TimeUnit.MILLISECONDS));
+        long howLongCurrentLoop = howLongIsRunning % duration;
+        long howManyLoops       = howLongIsRunning / duration;
+        double progress;
+        switch ( stride ) {
+            case PROGRESSIVE:
+                progress = howLongCurrentLoop / (double) duration;
+                break;
+            case REGRESSIVE:
+                progress = 1 - howLongCurrentLoop / (double) duration;
+                break;
+            default:
+                progress = howLongCurrentLoop / (double) duration;
+                log.warn("Unknown stride: {}", stride);
+        }
+        return new AnimationState() {
+            @Override public double     progress()  { return progress;     }
+            @Override public long       repeats()   { return howManyLoops; }
+            @Override public LifeSpan   lifeSpan()  { return  lifeSpan;    }
+            @Override public ActionEvent event()    { return event;        }
+        };
+    }
+
+    static AnimationState endOf( LifeSpan lifeSpan, Stride stride, ActionEvent event ) {
+        return of(lifeSpan, stride, event, lifeSpan.getEndTimeIn(TimeUnit.MILLISECONDS, 1));
+    }
+
+    static AnimationState startOf( LifeSpan lifeSpan, Stride stride, ActionEvent event ) {
+        return of(lifeSpan, stride, event, lifeSpan.getStartTimeIn(TimeUnit.MILLISECONDS));
+    }
+
+
     /**
      * @return The animation progress in terms of a number between 0 and 1,
      *         where 0.5 means the animation is halfway through, and 1 means the animation completed.

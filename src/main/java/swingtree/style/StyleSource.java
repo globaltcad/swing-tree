@@ -129,6 +129,8 @@ final class StyleSource<C extends JComponent>
 
         styleConf = _applyDPIScaling(styleConf);
 
+        styleConf = styleConf.correctedForRounding();
+
         return styleConf;
     }
 

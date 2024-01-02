@@ -2,6 +2,7 @@ package swingtree.style;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 
 /**
  *  Outline is an immutable value object that represents the outline of a UI component
@@ -106,7 +107,7 @@ final class Outline
     }
 
     Outline simplified() {
-        if ( this == _NONE )
+        if ( this.equals(_NONE) )
             return _NONE;
 
         Float top    = Objects.equals(this.top   , 0f) ? null : this.top;
@@ -129,6 +130,35 @@ final class Outline
                right  != null && right  > 0 ||
                bottom != null && bottom > 0 ||
                left   != null && left   > 0;
+    }
+
+    private static Float _plus( Float a, Float b ) {
+        if ( a == null && b == null )
+            return null;
+        return a == null ? b : b == null ? a : a + b;
+    }
+
+    public Outline plus( Outline other ) {
+        if ( this == _NONE )
+            return other;
+        if ( other == _NONE )
+            return this;
+
+        return new Outline(
+                    _plus(top,    other.top   ),
+                    _plus(right,  other.right ),
+                    _plus(bottom, other.bottom),
+                    _plus(left,   other.left  )
+                );
+    }
+
+    public Outline map( Function<Float, Float> mapper ) {
+        return new Outline(
+                    top    == null ? null : mapper.apply(top),
+                    right  == null ? null : mapper.apply(right),
+                    bottom == null ? null : mapper.apply(bottom),
+                    left   == null ? null : mapper.apply(left)
+                );
     }
 
     @Override

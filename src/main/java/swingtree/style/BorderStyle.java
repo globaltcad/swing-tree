@@ -131,14 +131,20 @@ final class BorderStyle
     }
 
     BorderStyle withWidths( Outline borderWidths ) {
+        if ( borderWidths == _borderWidths )
+            return this;
         return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, borderWidths, _margin, _padding, _borderColor, _gradients);
     }
 
     BorderStyle withMargin( Outline margin ) {
+        if ( margin == _margin )
+            return this;
         return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, margin, _padding, _borderColor, _gradients);
     }
 
     BorderStyle withPadding( Outline padding ) {
+        if ( padding == _padding )
+            return this;
         return new BorderStyle(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, padding, _borderColor, _gradients);
     }
 
@@ -315,6 +321,16 @@ final class BorderStyle
                         simplifiedBorderColor,
                         simplifiedGradients
                     );
+    }
+
+    BorderStyle correctedForRounding() {
+        Outline correction = _borderWidths.plus(_padding)
+                                .map( v -> v % 1 )
+                                .map( v -> v > 0f ? 1f - v : 0f )
+                                .map( v -> v == 0f ? null : v )
+                                .simplified();
+
+        return this.withMargin(_margin.plus(correction));
     }
 
     @Override

@@ -44,37 +44,12 @@ class ComponentAnimator
         return Optional.ofNullable( _component instanceof JComponent ? (JComponent) _component : null );
     }
 
-    private AnimationState _createState( long now, ActionEvent event ) {
-        long duration = _lifeSpan.lifeTime().getDurationIn(TimeUnit.MILLISECONDS);
-        long howLongIsRunning = Math.max(0, now - _lifeSpan.getStartTimeIn(TimeUnit.MILLISECONDS));
-        long howLongCurrentLoop = howLongIsRunning % duration;
-        long howManyLoops       = howLongIsRunning / duration;
-        double progress;
-        switch ( _stride ) {
-            case PROGRESSIVE:
-                progress = howLongCurrentLoop / (double) duration;
-                break;
-            case REGRESSIVE:
-                progress = 1 - howLongCurrentLoop / (double) duration;
-                break;
-            default:
-                progress = howLongCurrentLoop / (double) duration;
-                log.warn("Unknown stride: {}", _stride);
-        }
-        return new AnimationState() {
-            @Override public double     progress()  { return progress;     }
-            @Override public long        repeats()  { return howManyLoops; }
-            @Override public LifeSpan lifeSpan() { return _lifeSpan;    }
-            @Override public ActionEvent event()    { return event;        }
-        };
-    }
-
     boolean run( long now, ActionEvent event )
     {
         if ( now < _lifeSpan.getStartTimeIn(TimeUnit.MILLISECONDS) )
             return true;
 
-        AnimationState state = _createState(now, event);
+        AnimationState state = AnimationState.of(_lifeSpan, _stride, event, now);
         boolean shouldContinue = false;
 
         try {

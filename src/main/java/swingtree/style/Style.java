@@ -374,6 +374,10 @@ public final class Style
                ._withLayers(_layers.simplified());
     }
 
+    Style correctedForRounding() {
+        return _withBorder(_border.correctedForRounding());
+    }
+
     boolean hasEqualLayoutAs( Style otherStyle ) {
         return Objects.equals(_layout, otherStyle._layout);
     }

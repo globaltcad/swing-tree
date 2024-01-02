@@ -148,7 +148,7 @@ final class ComponentAreas
         return this;
     }
 
-    static Area calculateBaseArea(ComponentConf state, float insTop, float insLeft, float insBottom, float insRight )
+    static Area calculateBaseArea( ComponentConf state, float insTop, float insLeft, float insBottom, float insRight )
     {
         return _calculateBaseArea(
                     state.baseOutline(),
@@ -176,7 +176,11 @@ final class ComponentAreas
     ) {
         if ( style.equals(Style.none()) ) {
             // If there is no style, we just return the component's bounds:
-            return new Area(new Rectangle2D.Float(0, 0, size.width().orElse(0f), size.height().orElse(0f)));
+            return new Area(new Rectangle2D.Float(
+                            insLeft, insTop,
+                            size.width().orElse(0f) - insLeft - insRight,
+                            size.height().orElse(0f) - insTop - insBottom
+                        ));
         }
 
         insTop    += outline.top().orElse(0f);
