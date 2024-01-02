@@ -72,7 +72,7 @@ class ComponentAnimator
         Component component = _compRef == null ? null : _compRef.get();
 
         if ( _compRef != null && component == null )
-            return false; // There was a component but it has been garbage collected.
+            return false; // There was a component, but it has been garbage collected.
 
         Runnable requestComponentRepaint = () -> {
                                                 if ( component != null ) {
@@ -83,7 +83,8 @@ class ComponentAnimator
 
         if ( !shouldContinue ) {
             try {
-                _animation.finish(state); // An animation may want to do something when it is finished (e.g. reset the component to its original state).
+                _animation.finish(AnimationState.endOf(state.lifeSpan(), _stride, state.event()));
+                // An animation may want to do something when it is finished (e.g. reset the component to its original state).
             } catch ( Exception e ) {
                 log.warn("An exception occurred while executing the finish procedure of an animation!", e);
                 /*
