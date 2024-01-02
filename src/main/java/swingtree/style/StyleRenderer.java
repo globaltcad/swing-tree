@@ -197,12 +197,12 @@ final class StyleRenderer
                                         h + blurRadius * 2 - spreadRadius * 2
                                     );
 
-        Function<Float, Float> offsetFunction = (radius) -> ((radius * 2) / ( shadow.isInset() ? 4.5f : 3.79f) );
+        Function<Integer, Integer> offsetFunction = (radius) -> (int)((radius * 2) / ( shadow.isInset() ? 4.5 : 3.79) );
 
-        final float averageCornerRadius = ( topLeftRadius + topRightRadius + bottomRightRadius + bottomLeftRadius ) / 4;
-        final float averageBorderWidth  = ( leftBorderWidth + topBorderWidth + rightBorderWidth +  bottomBorderWidth ) / 4;
-        final float shadowCornerRadius  = Math.max( 0, averageCornerRadius - averageBorderWidth );
-        final float gradientStartOffset = 1 + offsetFunction.apply(shadowCornerRadius);
+        final int averageCornerRadius = ((int) ( topLeftRadius + topRightRadius + bottomRightRadius + bottomLeftRadius )) / 4;
+        final int averageBorderWidth  = (int) (( leftBorderWidth + topBorderWidth + rightBorderWidth +  bottomBorderWidth ) / 4);
+        final int shadowCornerRadius  = Math.max( 0, averageCornerRadius - averageBorderWidth );
+        final int gradientStartOffset = 1 + offsetFunction.apply(shadowCornerRadius);
 
         Rectangle2D.Float innerShadowRect = new Rectangle2D.Float(
                                         x + blurRadius + gradientStartOffset + spreadRadius,
@@ -272,7 +272,7 @@ final class StyleRenderer
         Area              areaWhereShadowIsAllowed,
         Rectangle2D.Float innerShadowRect,
         Rectangle2D.Float outerShadowRect,
-        float             gradientStartOffset,
+        int               gradientStartOffset,
         Graphics2D        g2d
     ) {
         // We define a clipping box so that corners don't overlap
@@ -415,7 +415,7 @@ final class StyleRenderer
         Area              contentArea,
         Rectangle2D.Float innerShadowRect,
         Rectangle2D.Float outerShadowRect,
-        float             gradientStartOffset,
+        int               gradientStartOffset,
         Graphics2D        g2d
     ) {
         // We define a boundary center point and a clipping box so that edges don't overlap
