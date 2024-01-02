@@ -39,9 +39,13 @@ final class Offset
     @Override
     public String toString() {
         return this.getClass().getSimpleName()+"[" +
-                    "x=" + _x +", "+
-                    "y=" + _y +
+                    "x=" + _toString(_x) + ", "+
+                    "y=" + _toString(_y) +
                 "]";
+    }
+
+    private static String _toString( float value ) {
+        return String.valueOf(value).replace(".0", "");
     }
 
     @Override

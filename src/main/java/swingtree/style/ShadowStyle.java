@@ -270,13 +270,17 @@ public final class ShadowStyle implements Simplifiable<ShadowStyle>
         if ( this == _NONE )
             return "ShadowStyle[NONE]";
         return "ShadowStyle[" +
-                    "horizontalOffset=" + _offset.x()       + ", " +
-                    "verticalOffset="   + _offset.y()       + ", " +
-                    "blurRadius="       + _blurRadius       + ", " +
-                    "spreadRadius="     + _spreadRadius     + ", " +
+                    "horizontalOffset=" + _toString(_offset.x()  ) + ", " +
+                    "verticalOffset="   + _toString(_offset.y()  ) + ", " +
+                    "blurRadius="       + _toString(_blurRadius  ) + ", " +
+                    "spreadRadius="     + _toString(_spreadRadius) + ", " +
                     "color="            + StyleUtility.toString(_color) + ", " +
                     "isInset="          + !_isOutset +
                 "]";
+    }
+
+    private static String _toString( float value ) {
+        return value == 0 ? "0" : String.valueOf(value).replace(".0", "");
     }
 
     @Override
