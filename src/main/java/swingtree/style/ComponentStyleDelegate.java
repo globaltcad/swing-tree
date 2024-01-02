@@ -802,8 +802,8 @@ public final class ComponentStyleDelegate<C extends JComponent>
     /**
      *  Returns a new {@link Style} with the provided horizontal shadow offset applied to all shadow configs.
      *  The shadow will be rendered with an inset space based on the padding defined by this {@link Style}.
-     *  Note that in order to see the shadow, you may also need to call {@link #shadowSpreadRadius(int)},
-     *  {@link #shadowBlurRadius(int)} and {@link #shadowColor(Color)}. <br>
+     *  Note that in order to see the shadow, you may also need to call {@link #shadowSpreadRadius(double)},
+     *  {@link #shadowBlurRadius(double)} and {@link #shadowColor(Color)}. <br>
      *  Note that this property will not only be applied to the default shadow, but also any
      *  other named shadow that you may have defined using {@link #shadow(String, Function)}.
      *
@@ -817,8 +817,8 @@ public final class ComponentStyleDelegate<C extends JComponent>
     /**
      *  Returns a new {@link Style} with the provided vertical shadow offset applied to all shadow configs.
      *  The shadow will be rendered with an inset space based on the padding defined by this {@link Style}.
-     *  Note that in order to see the shadow, you may also need to call {@link #shadowSpreadRadius(int)},
-     *  {@link #shadowBlurRadius(int)} and {@link #shadowColor(Color)}. <br>
+     *  Note that in order to see the shadow, you may also need to call {@link #shadowSpreadRadius(double)},
+     *  {@link #shadowBlurRadius(double)} and {@link #shadowColor(Color)}. <br>
      *  Note that this property will not only be applied to the default shadow, but also any
      *  other named shadow that you may have defined using {@link #shadow(String, Function)}.
      *
@@ -832,8 +832,8 @@ public final class ComponentStyleDelegate<C extends JComponent>
     /**
      *  Returns a new {@link Style} with the provided shadow offset applied to all shadow configs.
      *  The shadow will be rendered with an inset space based on the padding defined by this {@link Style}.
-     *  Note that in order to see the shadow, you may also need to call {@link #shadowSpreadRadius(int)},
-     *  {@link #shadowBlurRadius(int)} and {@link #shadowColor(Color)}. <br>
+     *  Note that in order to see the shadow, you may also need to call {@link #shadowSpreadRadius(double)},
+     *  {@link #shadowBlurRadius(double)} and {@link #shadowColor(Color)}. <br>
      *  Note that this property will not only be applied to the default shadow, but also any
      *  other named shadow that you may have defined using {@link #shadow(String, Function)}.
      *
@@ -848,8 +848,8 @@ public final class ComponentStyleDelegate<C extends JComponent>
     /**
      *  Returns a new {@link Style} with the provided horizontal and vertical shadow offset.
      *  The shadow will be rendered with an inset space based on the padding defined by this {@link Style}.
-     *  Note that in order to see the shadow, you may also need to call {@link #shadowSpreadRadius(int)},
-     *  {@link #shadowBlurRadius(int)} and {@link #shadowColor(Color)}. <br>
+     *  Note that in order to see the shadow, you may also need to call {@link #shadowSpreadRadius(double)},
+     *  {@link #shadowBlurRadius(double)} and {@link #shadowColor(Color)}. <br>
      *  Note that this property will not only be applied to the default shadow, but also any
      *  other named shadow that you may have defined using {@link #shadow(String, Function)}.
      *
@@ -864,37 +864,37 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  Returns a new {@link Style} with the provided shadow blur radius applied to all shadow configs.
      *  The shadow will be rendered with an inset space based on the padding defined by this {@link Style}.
      *  Note that in order to see the shadow, you may also need to call
-     *  {@link #shadowSpreadRadius(int)} and {@link #shadowColor(Color)}. <br>
+     *  {@link #shadowSpreadRadius(double)} and {@link #shadowColor(Color)}. <br>
      *  Note that this property will not only be applied to the default shadow, but also any
      *  other named shadow that you may have defined using {@link #shadow(String, Function)}.
      *
      * @param radius The shadow blur radius in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided shadow blur radius.
      */
-    public ComponentStyleDelegate<C> shadowBlurRadius( int radius ) {
-        return _withStyle(_style._withShadow( shadow -> shadow.blurRadius(radius)));
+    public ComponentStyleDelegate<C> shadowBlurRadius( double radius ) {
+        return _withStyle(_style._withShadow( shadow -> shadow.blurRadius((float) radius)));
     }
 
     /**
      *  Returns a new {@link Style} with the provided shadow spread radius applied to all shadow configs.
      *  The shadow will be rendered with an inset space based on the padding defined by this {@link Style}.
      *  Note that in order to see the shadow, you may also need to call
-     *  {@link #shadowBlurRadius(int)} and {@link #shadowColor(Color)}. <br>
+     *  {@link #shadowBlurRadius(double)} and {@link #shadowColor(Color)}. <br>
      *  Note that this property will not only be applied to the default shadow, but also any
      *  other named shadow that you may have defined using {@link #shadow(String, Function)}.
      *
      * @param radius The shadow spread radius in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided shadow spread radius.
      */
-    public ComponentStyleDelegate<C> shadowSpreadRadius( int radius ) {
-        return _withStyle(_style._withShadow( shadow -> shadow.spreadRadius(radius)));
+    public ComponentStyleDelegate<C> shadowSpreadRadius( double radius ) {
+        return _withStyle(_style._withShadow( shadow -> shadow.spreadRadius((float) radius)));
     }
 
     /**
      *  Returns a new {@link Style} with the provided shadow color applied to the default shadow.
      *  The shadow will be rendered with an inset space based on the padding defined by this {@link Style}.
      *  Note that in order to see the shadow, you may also need to call
-     *  {@link #shadowBlurRadius(int)} and {@link #shadowSpreadRadius(int)}. <br>
+     *  {@link #shadowBlurRadius(double)} and {@link #shadowSpreadRadius(double)}. <br>
      *  Note that this property will not only be applied to the default shadow, but also any
      *  other named shadow that you may have defined using {@link #shadow(String, Function)}.
      *
@@ -910,7 +910,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  The string can be either a hex color string, a color name or a color constant from the system properties.
      *  The shadow will be rendered with an inset space based on the padding defined by this {@link Style}.
      *  Note that in order to see the shadow, you may also need to call
-     *  {@link #shadowBlurRadius(int)} and {@link #shadowSpreadRadius(int)}. <br>
+     *  {@link #shadowBlurRadius(double)} and {@link #shadowSpreadRadius(double)}. <br>
      *  Note that this property will not only be applied to the default shadow, but also any
      *  other named shadow that you may have defined using {@link #shadow(String, Function)}.
      *

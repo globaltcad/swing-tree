@@ -82,16 +82,16 @@ public final class ShadowStyle implements Simplifiable<ShadowStyle>
     public static ShadowStyle none() { return _NONE; }
 
     private final Offset  _offset;
-    private final int     _blurRadius;
-    private final int     _spreadRadius;
+    private final float   _blurRadius;
+    private final float   _spreadRadius;
     private final Color   _color;
     private final boolean _isOutset;
 
 
     private ShadowStyle(
         Offset  offset,
-        int     shadowBlurRadius,
-        int     shadowSpreadRadius,
+        float   shadowBlurRadius,
+        float   shadowSpreadRadius,
         Color   shadowColor,
         boolean isOutset
     ) {
@@ -106,9 +106,9 @@ public final class ShadowStyle implements Simplifiable<ShadowStyle>
 
     int verticalOffset() { return _offset.y(); }
 
-    int blurRadius() { return _blurRadius; }
+    float blurRadius() { return _blurRadius; }
 
-    public int spreadRadius() { return _spreadRadius; }
+    public float spreadRadius() { return _spreadRadius; }
 
     Optional<Color> color() { return Optional.ofNullable(_color); }
 
@@ -162,7 +162,7 @@ public final class ShadowStyle implements Simplifiable<ShadowStyle>
      *                         stretched over a wider area.
      * @return A new {@link ShadowStyle} with the specified blur radius.
      */
-    public ShadowStyle blurRadius( int shadowBlurRadius ) {
+    public ShadowStyle blurRadius( float shadowBlurRadius ) {
         return new ShadowStyle(_offset, shadowBlurRadius, _spreadRadius, _color, _isOutset);
     }
 
@@ -174,7 +174,7 @@ public final class ShadowStyle implements Simplifiable<ShadowStyle>
      *                           so that it either grows or shrinks in size.
      * @return A new {@link ShadowStyle} with the specified spread radius.
      */
-    public ShadowStyle spreadRadius( int shadowSpreadRadius ) {
+    public ShadowStyle spreadRadius( float shadowSpreadRadius ) {
         return new ShadowStyle(_offset, _blurRadius, shadowSpreadRadius, _color, _isOutset);
     }
 
@@ -245,8 +245,8 @@ public final class ShadowStyle implements Simplifiable<ShadowStyle>
     public int hashCode() {
         int hash = 7;
         hash = 31 * hash + _offset.hashCode();
-        hash = 31 * hash + _blurRadius;
-        hash = 31 * hash + _spreadRadius;
+        hash = 31 * hash + Float.hashCode(_blurRadius);
+        hash = 31 * hash + Float.hashCode(_spreadRadius);
         hash = 31 * hash + Objects.hashCode(_color);
         hash = 31 * hash + (_isOutset ? 1 : 0);
         return hash;

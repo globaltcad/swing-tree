@@ -187,10 +187,10 @@ final class StyleRenderer
         final int w = width  - left - right;
         final int h = height - top  - bottom;
 
-        final int blurRadius   = Math.max(shadow.blurRadius(), 0);
-        final int spreadRadius = !shadow.isOutset() ? shadow.spreadRadius() : -shadow.spreadRadius();
+        final float blurRadius   = Math.max(shadow.blurRadius(), 0);
+        final float spreadRadius = !shadow.isOutset() ? shadow.spreadRadius() : -shadow.spreadRadius();
 
-        Rectangle outerShadowRect = new Rectangle(
+        Rectangle2D.Float outerShadowRect = new Rectangle2D.Float(
                                         x - blurRadius + spreadRadius,
                                         y - blurRadius + spreadRadius,
                                         w + blurRadius * 2 - spreadRadius * 2,
@@ -204,7 +204,7 @@ final class StyleRenderer
         final int shadowCornerRadius  = Math.max( 0, averageCornerRadius - averageBorderWidth );
         final int gradientStartOffset = 1 + offsetFunction.apply(shadowCornerRadius);
 
-        Rectangle innerShadowRect = new Rectangle(
+        Rectangle2D.Float innerShadowRect = new Rectangle2D.Float(
                                         x + blurRadius + gradientStartOffset + spreadRadius,
                                         y + blurRadius + gradientStartOffset + spreadRadius,
                                         w - blurRadius * 2 - gradientStartOffset * 2 - spreadRadius * 2,
@@ -247,11 +247,11 @@ final class StyleRenderer
     }
 
     private static void _renderShadowBody(
-        ShadowStyle shadowStyle,
-        Area        baseArea,
-        Rectangle   innerShadowRect,
-        Area        outerShadowBox,
-        Graphics2D  g2d
+        ShadowStyle       shadowStyle,
+        Area              baseArea,
+        Rectangle2D.Float innerShadowRect,
+        Area              outerShadowBox,
+        Graphics2D        g2d
     ) {
         Graphics2D g2d2 = (Graphics2D) g2d.create();
         g2d2.setColor(shadowStyle.color().orElse(Color.BLACK));
@@ -267,13 +267,13 @@ final class StyleRenderer
     }
 
     private static void _renderCornerShadow(
-        ShadowStyle shadowStyle,
-        UI.Corner   corner,
-        Area        areaWhereShadowIsAllowed,
-        Rectangle   innerShadowRect,
-        Rectangle   outerShadowRect,
-        int         gradientStartOffset,
-        Graphics2D  g2d
+        ShadowStyle       shadowStyle,
+        UI.Corner         corner,
+        Area              areaWhereShadowIsAllowed,
+        Rectangle2D.Float innerShadowRect,
+        Rectangle2D.Float outerShadowRect,
+        int               gradientStartOffset,
+        Graphics2D        g2d
     ) {
         // We define a clipping box so that corners don't overlap
         float clipBoxWidth   = outerShadowRect.width / 2f;
@@ -410,13 +410,13 @@ final class StyleRenderer
     }
 
     private static void _renderEdgeShadow(
-        ShadowStyle shadowStyle,
-        UI.Edge     edge,
-        Area        contentArea,
-        Rectangle   innerShadowRect,
-        Rectangle   outerShadowRect,
-        int         gradientStartOffset,
-        Graphics2D  g2d
+        ShadowStyle       shadowStyle,
+        UI.Edge           edge,
+        Area              contentArea,
+        Rectangle2D.Float innerShadowRect,
+        Rectangle2D.Float outerShadowRect,
+        int               gradientStartOffset,
+        Graphics2D        g2d
     ) {
         // We define a boundary center point and a clipping box so that edges don't overlap
         float clipBoundaryX = outerShadowRect.x + outerShadowRect.width / 2f;
