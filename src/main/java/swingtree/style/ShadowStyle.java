@@ -183,6 +183,11 @@ public final class ShadowStyle implements Simplifiable<ShadowStyle>
      * @return A new {@link ShadowStyle} with the specified color.
      */
     public ShadowStyle color( Color shadowColor ) {
+        Objects.requireNonNull(shadowColor, "Use UI.NO_COLOR to specify no color instead of null");
+        if ( shadowColor == UI.NO_COLOR )
+            shadowColor = null;
+        if ( shadowColor == _color )
+            return this;
         return new ShadowStyle(_offset, _blurRadius, _spreadRadius, shadowColor, _isOutset);
     }
 
@@ -289,6 +294,9 @@ public final class ShadowStyle implements Simplifiable<ShadowStyle>
             return _NONE;
 
         if ( _color == null || _color.getAlpha() == 0 )
+            return _NONE;
+
+        if ( _color == UI.NO_COLOR )
             return _NONE;
 
         return this;

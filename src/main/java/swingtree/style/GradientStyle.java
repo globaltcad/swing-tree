@@ -107,7 +107,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
     public GradientStyle colors( Color... colors ) {
         Objects.requireNonNull(colors);
         for ( Color color : colors )
-            Objects.requireNonNull(color);
+            Objects.requireNonNull(color, "Use UI.NO_COLOR instead of null to represent the absence of a color.");
         return new GradientStyle(_transition, _type, colors);
     }
 
@@ -207,8 +207,23 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
         if ( _colors.length == 0 )
             return _NONE;
 
-        if ( Arrays.stream(_colors).allMatch( color -> color.getAlpha() == 0 ) )
+        if ( Arrays.stream(_colors).allMatch( color -> color.getAlpha() == 0 || color == UI.NO_COLOR ) )
             return _NONE;
+
+        int numberOfRealColors = Arrays.stream(_colors).mapToInt( color -> color == UI.NO_COLOR ? 0 : 1 ).sum();
+
+        if ( numberOfRealColors == 0 )
+            return _NONE;
+
+        if ( numberOfRealColors != _colors.length ) {
+            Color[] realColors = new Color[numberOfRealColors];
+            int index = 0;
+            for ( Color color : _colors )
+                if ( color != UI.NO_COLOR )
+                    realColors[index++] = color;
+
+            return new GradientStyle(_transition, _type, realColors);
+        }
 
         return this;
     }

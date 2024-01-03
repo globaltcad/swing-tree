@@ -498,11 +498,18 @@ public final class ComponentExtension<C extends JComponent>
 
         if ( hasBackground && !Objects.equals( _owner.getBackground(), newStyle.base().backgroundColor().get() ) ) {
             _initialBackgroundColor = _initialBackgroundColor != null ? _initialBackgroundColor :  _owner.getBackground();
-            _owner.setBackground( newStyle.base().backgroundColor().get() );
+            Color newColor =  newStyle.base().backgroundColor().get();
+            if ( newColor == UI.NO_COLOR )
+                newColor = null;
+            _owner.setBackground( newColor );
             if ( _owner instanceof JScrollPane ) {
                 JScrollPane scrollPane = (JScrollPane) _owner;
-                if ( scrollPane.getViewport() != null )
-                    scrollPane.getViewport().setBackground( newStyle.base().backgroundColor().get() );
+                if ( scrollPane.getViewport() != null ) {
+                    newColor = newStyle.base().backgroundColor().get();
+                    if ( newColor == UI.NO_COLOR )
+                        newColor = null;
+                    scrollPane.getViewport().setBackground( newColor );
+                }
             }
         }
 
@@ -512,8 +519,13 @@ public final class ComponentExtension<C extends JComponent>
             newStyle = newStyle.backgroundColor(_initialBackgroundColor);
         }
 
-        if ( newStyle.base().foregroundColor().isPresent() && !Objects.equals( _owner.getForeground(), newStyle.base().foregroundColor().get() ) )
-            _owner.setForeground( newStyle.base().foregroundColor().get() );
+        if ( newStyle.base().foregroundColor().isPresent() && !Objects.equals( _owner.getForeground(), newStyle.base().foregroundColor().get() ) ) {
+            Color newColor = newStyle.base().foregroundColor().get();
+            if ( newColor == UI.NO_COLOR )
+                newColor = null;
+            _owner.setForeground( newColor );
+        }
+
 
         newStyle.base().cursor().ifPresent( cursor -> {
             if ( !Objects.equals( _owner.getCursor(), cursor ) )

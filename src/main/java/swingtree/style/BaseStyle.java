@@ -88,6 +88,16 @@ final class BaseStyle
 
     BaseStyle orientation( UI.ComponentOrientation orientation ) { return new BaseStyle(_icon, _fit, _foundationColor, _backgroundColor, _foregroundColor, _cursor, orientation); }
 
+    BaseStyle simplified() {
+        Color simplifiedFoundation = _foundationColor == UI.NO_COLOR ? null : _foundationColor;
+        Color simplifiedBackground = _backgroundColor == UI.NO_COLOR ? null : _backgroundColor;
+
+        if ( simplifiedFoundation == _foundationColor && simplifiedBackground == _backgroundColor )
+            return this;
+
+        return new BaseStyle(_icon, _fit, simplifiedFoundation, simplifiedBackground, _foregroundColor, _cursor, _orientation);
+    }
+
     @Override
     public int hashCode() { return Objects.hash(_icon, _fit, _backgroundColor, _foundationColor, _foregroundColor, _cursor, _orientation); }
 

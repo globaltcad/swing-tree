@@ -248,7 +248,14 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
      * @param color The primer color of the image style.
      * @return A new {@link ImageStyle} instance with the specified primer color.
      */
-    public ImageStyle primer( Color color ) { return new ImageStyle(color, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea); }
+    public ImageStyle primer( Color color ) {
+        Objects.requireNonNull(color, "Use UI.NO_COLOR instead of null to represent the absence of a color.");
+        if ( color == UI.NO_COLOR )
+            color = null;
+        if ( color == _primer )
+            return this;
+        return new ImageStyle(color, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
+    }
 
     /**
      *  Here you can specify the <b>image</b> which will be drawn onto the component.
@@ -257,7 +264,9 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
      * @param image The image which will be drawn onto the component.
      * @return A new {@link ImageStyle} instance with the specified image.
      */
-    public ImageStyle image( Image image ) { return new ImageStyle(_primer, image == null ? null : new ImageIcon(image), _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea); }
+    public ImageStyle image( Image image ) {
+        return new ImageStyle(_primer, image == null ? null : new ImageIcon(image), _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
+    }
 
     /**
      *  Here you can specify the <b>image icon</b> which will be drawn onto the component.
@@ -266,7 +275,9 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
      * @param image The image icon which will be drawn onto the component.
      * @return A new {@link ImageStyle} instance with the specified image.
      */
-    public ImageStyle image( ImageIcon image ) { return new ImageStyle(_primer, image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea); }
+    public ImageStyle image( ImageIcon image ) {
+        return new ImageStyle(_primer, image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
+    }
 
     /**
      *  Here you can specify the <b>path to the image in the form of an {@link IconDeclaration}</b>
@@ -622,6 +633,9 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
 
         ImageIcon simplifiedImage = _opacity == 0.0f ? null : _image;
         Color simplifiedPrimer = _primer == null || _primer.getAlpha() == 0 ? null : _primer;
+
+        if ( simplifiedPrimer == UI.NO_COLOR )
+            simplifiedPrimer = null;
 
         if ( simplifiedImage == null && simplifiedPrimer == null )
             return none();

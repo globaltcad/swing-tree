@@ -254,8 +254,8 @@ public final class Render<C extends JComponent,E>
 					fg = new Color( fg.getRGB() );
 
 				if (cell.isSelected()) {
-					if ( bg != null ) l.setBackground( bg );
-					if ( fg != null ) l.setForeground( fg );
+					if ( bg != null ) l.setBackground(bg);
+					if ( fg != null ) l.setForeground(fg);
 				}
 				else {
 					Color normalBg = Color.WHITE;

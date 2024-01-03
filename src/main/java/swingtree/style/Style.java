@@ -369,7 +369,8 @@ public final class Style
     }
 
     Style simplified() {
-        return _withBorder(_border.simplified())
+        return _withBase(_base.simplified())
+                ._withBorder(_border.simplified())
                ._withDimensionality(_dimensionality.simplified())
                ._withLayers(_layers.simplified());
     }

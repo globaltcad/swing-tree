@@ -271,14 +271,30 @@ final class FontStyle
     }
 
     FontStyle withColor( Color color ) {
+        Objects.requireNonNull(color);
+        if ( color == UI.NO_COLOR )
+            color = null;
+        if ( color == _color )
+            return this;
+
         return new FontStyle(_familyName, _size, _posture, _weight, _spacing, color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);
     }
 
     FontStyle withBackgroundColor( Color backgroundColor ) {
+        Objects.requireNonNull(backgroundColor);
+        if ( backgroundColor == UI.NO_COLOR )
+            backgroundColor = null;
+        if ( backgroundColor == _backgroundColor )
+            return this;
         return new FontStyle(_familyName, _size, _posture, _weight, _spacing, _color, backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);
     }
 
     FontStyle withSelectionColor( Color selectionColor ) {
+        Objects.requireNonNull(selectionColor);
+        if ( selectionColor == UI.NO_COLOR )
+            selectionColor = null;
+        if ( selectionColor == _selectionColor )
+            return this;
         return new FontStyle(_familyName, _size, _posture, _weight, _spacing, _color, _backgroundColor, selectionColor, _isUnderlined, _isStrike, _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);
     }
 
