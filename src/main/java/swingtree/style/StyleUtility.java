@@ -45,6 +45,7 @@ final class StyleUtility
     }
 
     static String toString( Color color ) {
+        if ( color == UI.NO_COLOR ) return "DEFAULT";
         if ( color == null ) return "?";
         return "rgba(" + color.getRed() + "," + color.getGreen() + "," + color.getBlue() + "," + color.getAlpha() + ")";
     }

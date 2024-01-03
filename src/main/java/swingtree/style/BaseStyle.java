@@ -74,28 +74,41 @@ final class BaseStyle
 
     public UI.ComponentOrientation orientation() { return _orientation; }
 
-    BaseStyle icon( ImageIcon icon ) { return new BaseStyle(icon, _fit, _foundationColor, _backgroundColor, _foregroundColor, _cursor, _orientation); }
+    BaseStyle icon( ImageIcon icon ) {
+        return new BaseStyle(icon, _fit, _foundationColor, _backgroundColor, _foregroundColor, _cursor, _orientation);
+    }
 
-    BaseStyle fit( UI.FitComponent fit ) { return new BaseStyle(_icon, fit, _foundationColor, _backgroundColor, _foregroundColor, _cursor, _orientation); }
+    BaseStyle fit( UI.FitComponent fit ) {
+        return new BaseStyle(_icon, fit, _foundationColor, _backgroundColor, _foregroundColor, _cursor, _orientation);
+    }
 
-    BaseStyle foundationColor( Color foundation ) { return new BaseStyle(_icon, _fit, foundation, _backgroundColor, _foregroundColor, _cursor, _orientation); }
+    BaseStyle foundationColor( Color foundation ) {
+        return new BaseStyle(_icon, _fit, foundation, _backgroundColor, _foregroundColor, _cursor, _orientation);
+    }
 
-    BaseStyle backgroundColor( Color color ) { return new BaseStyle(_icon, _fit, _foundationColor, color, _foregroundColor, _cursor, _orientation); }
+    BaseStyle backgroundColor( Color color ) {
+        return new BaseStyle(_icon, _fit, _foundationColor, color, _foregroundColor, _cursor, _orientation);
+    }
 
-    BaseStyle foregroundColor(Color color ) { return new BaseStyle(_icon, _fit, _foundationColor, _backgroundColor, color, _cursor, _orientation); }
+    BaseStyle foregroundColor( Color color ) {
+        return new BaseStyle(_icon, _fit, _foundationColor, _backgroundColor, color, _cursor, _orientation);
+    }
 
-    BaseStyle cursor( Cursor cursor ) { return new BaseStyle(_icon, _fit, _foundationColor, _backgroundColor, _foregroundColor, cursor, _orientation); }
+    BaseStyle cursor( Cursor cursor ) {
+        return new BaseStyle(_icon, _fit, _foundationColor, _backgroundColor, _foregroundColor, cursor, _orientation);
+    }
 
-    BaseStyle orientation( UI.ComponentOrientation orientation ) { return new BaseStyle(_icon, _fit, _foundationColor, _backgroundColor, _foregroundColor, _cursor, orientation); }
+    BaseStyle orientation( UI.ComponentOrientation orientation ) {
+        return new BaseStyle(_icon, _fit, _foundationColor, _backgroundColor, _foregroundColor, _cursor, orientation);
+    }
 
     BaseStyle simplified() {
         Color simplifiedFoundation = _foundationColor == UI.NO_COLOR ? null : _foundationColor;
-        Color simplifiedBackground = _backgroundColor == UI.NO_COLOR ? null : _backgroundColor;
 
-        if ( simplifiedFoundation == _foundationColor && simplifiedBackground == _backgroundColor )
+        if ( simplifiedFoundation == _foundationColor )
             return this;
 
-        return new BaseStyle(_icon, _fit, simplifiedFoundation, simplifiedBackground, _foregroundColor, _cursor, _orientation);
+        return new BaseStyle(_icon, _fit, simplifiedFoundation, _backgroundColor, _foregroundColor, _cursor, _orientation);
     }
 
     @Override

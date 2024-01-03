@@ -675,6 +675,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided background color.
      */
     public ComponentStyleDelegate<C> foundationColor( Color color ) {
+        Objects.requireNonNull(color, "Use 'UI.NO_COLOR' instead of 'null'.");
         return _withStyle(_style._withBase(_style.base().foundationColor(color)));
     }
 
@@ -706,6 +707,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided inner background color.
      */
     public ComponentStyleDelegate<C> backgroundColor( Color color ) {
+        Objects.requireNonNull(color, "Use 'UI.NO_COLOR' instead of 'null'.");
         return _withStyle(_style._withBase(_style.base().backgroundColor(color)));
     }
 
@@ -777,6 +779,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided foreground color.
      */
     public ComponentStyleDelegate<C> foregroundColor( Color color ) {
+        Objects.requireNonNull(color, "Use 'UI.NO_COLOR' instead of 'null'.");
         return _withStyle(_style._withBase(_style.base().foregroundColor(color)));
     }
 

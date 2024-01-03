@@ -13,6 +13,7 @@ import swingtree.style.Style
 import swingtree.style.ComponentStyleDelegate
 
 import javax.swing.JPanel
+import javax.swing.JToggleButton
 import java.awt.*
 import java.awt.geom.AffineTransform
 
@@ -532,6 +533,66 @@ class Styles_Spec extends Specification
                         "GradientStyle[NONE]" +
                     "], " +
                     "BaseStyle[NONE], " +
+                    "FontStyle[NONE], " +
+                    "DimensionalityStyle[NONE], " +
+                    "StyleLayers[" +
+                        "background=StyleLayer[EMPTY], " +
+                        "content=StyleLayer[EMPTY], " +
+                        "border=StyleLayer[EMPTY], " +
+                        "foreground=StyleLayer[EMPTY]" +
+                    "], " +
+                    "properties=[]" +
+                "]"
+    }
+
+    def 'The `UI.NO_COLOR` constant can be used as a safe shorthand for null for the background and foreground properties of the style API'()
+    {
+        reportInfo """
+            The `UI.NO_COLOR` constant is a java.awt.Color object with all of its rgba values set to 0.
+            Its identity is used to represent the absence of a color, and is used as a safe shorthand for null,
+            meaning that when the style engine of a component encounters it, it will pass it onto
+            the `Component::setBackground` and `Component::setForeground` methods as null.
+        """
+        given : 'We have a new Swing component with a custom foreground and background color.'
+            var aToggleButton = new JToggleButton("Hello World")
+            aToggleButton.setBackground(Color.ORANGE)
+            aToggleButton.setForeground(Color.DARK_GRAY)
+        when : """
+            We now wrap the component in the SwingTree builder API and apply a style to it... 
+        """
+            var ui = UI.of(aToggleButton).withStyle(conf -> conf
+                            .backgroundColor(UI.NO_COLOR)
+                            .foregroundColor(UI.NO_COLOR)
+                            .foundationColor(UI.NO_COLOR)
+                        )
+                        .getComponent()
+        then : """
+            The component will have its background and foreground color set to null,
+            which will cause it to use the default colors of the Look and Feel.
+        """
+            ui.getBackground() == null
+            ui.getForeground() == null
+        and : """
+            The style config has the expected string representation!
+            Note that only the background and foreground colors are now set to "DEFAULT",
+            whereas the foundation color is represented by a question mark.
+            This is because the foundation color is not something that is used by the look and feel,
+            which means there is no default value for it.
+            The foundation color is used by the SwingTree style engine only, which does not impose
+            any default value for it (defaults may come from `StyleSheet` objects, but that is a different story).
+        """
+            ComponentExtension.from(ui).getStyle().toString() == "Style[" +
+                    "LayoutStyle[NONE], " +
+                    "BorderStyle[NONE], " +
+                    "BaseStyle[" +
+                        "icon=?, " +
+                        "fitComponent=NO, " +
+                        "backgroundColor=DEFAULT, " +
+                        "foundationColor=?, " +
+                        "foregroundColor=DEFAULT, " +
+                        "cursor=?, " +
+                        "orientation=UNKNOWN" +
+                    "], " +
                     "FontStyle[NONE], " +
                     "DimensionalityStyle[NONE], " +
                     "StyleLayers[" +
