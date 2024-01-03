@@ -25,6 +25,15 @@ public abstract class UINamespaceUtilities extends UILayoutConstants
 {
     private static final Logger log = LoggerFactory.getLogger(UINamespaceUtilities.class);
 
+    /**
+     *  This constant is a {@link java.awt.Color} object with all of its rgba values set to 0.
+     *  Its identity is used to represent the absence of a color being specified,
+     *  and it is used as a safe replacement for null,
+     *  meaning that when the style engine of a component encounters it, it will pass it onto
+     *  the {@link java.awt.Component#setBackground(Color)} and
+     *  {@link java.awt.Component#setForeground(Color)} methods as null.
+     *  Passing null to these methods means that the look and feel determines the coloring.
+     */
     public static final Color COLOR_UNDEFINED = new Color(0, 0, 0, 0);
 
     /**

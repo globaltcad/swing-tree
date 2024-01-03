@@ -550,9 +550,11 @@ class Styles_Spec extends Specification
     {
         reportInfo """
             The `UI.COLOR_UNDEFINED` constant is a java.awt.Color object with all of its rgba values set to 0.
-            Its identity is used to represent the absence of a color, and is used as a safe shorthand for null,
-            meaning that when the style engine of a component encounters it, it will pass it onto
+            Its identity is used to represent the absence of a color being specified, 
+            and is used as a safe replacement for null, meaning that when the style engine of a 
+            component encounters it, it will pass it onto
             the `Component::setBackground` and `Component::setForeground` methods as null.
+            Passing null to these methods means that the look and feel determines the coloring.
         """
         given : 'We have a new Swing component with a custom foreground and background color.'
             var aToggleButton = new JToggleButton("Hello World")
