@@ -94,16 +94,16 @@ public abstract class UINamespaceUtilities extends UILayoutConstants
      *  Tries to parse the supplied string as a color value
      *  based on various formats.
      *
-     * @param colorString The string to parse.
+     * @param colorAsString The string to parse.
      * @return The parsed color.
      * @throws IllegalArgumentException If the string could not be parsed.
      * @throws NullPointerException If the string is null.
      */
-    public static Color color( String colorString )
+    public static Color color( final String colorAsString )
     {
-        Objects.requireNonNull(colorString);
+        Objects.requireNonNull(colorAsString);
         // First some cleanup
-        colorString = colorString.trim();
+        final String colorString = colorAsString.trim();
 
         if ( colorString.startsWith("#") )
             return Color.decode(colorString);
@@ -202,34 +202,50 @@ public abstract class UINamespaceUtilities extends UILayoutConstants
         }
 
         {
+            String maybeWord = colorString.toLowerCase();
             boolean transparent = false;
 
-            if ( colorString.trim().startsWith("transparent ") ) {
+            if ( maybeWord.startsWith("transparent") ) {
                 transparent = true;
-                colorString = colorString.substring(12);
+                maybeWord = maybeWord.substring(12).trim();
             }
 
-            Color color = null;
-
             // Let's try a few common color names
-            if ( colorString.equalsIgnoreCase("black")       ) color = Color.BLACK;
-            if ( colorString.equalsIgnoreCase("blue")        ) color = Color.BLUE;
-            if ( colorString.equalsIgnoreCase("cyan")        ) color = Color.CYAN;
-            if ( colorString.equalsIgnoreCase("darkGray")    ) color = Color.DARK_GRAY;
-            if ( colorString.equalsIgnoreCase("gray")        ) color = Color.GRAY;
-            if ( colorString.equalsIgnoreCase("green")       ) color = Color.GREEN;
-            if ( colorString.equalsIgnoreCase("lightGray")   ) color = Color.LIGHT_GRAY;
-            if ( colorString.equalsIgnoreCase("magenta")     ) color = Color.MAGENTA;
-            if ( colorString.equalsIgnoreCase("orange")      ) color = Color.ORANGE;
-            if ( colorString.equalsIgnoreCase("pink")        ) color = Color.PINK;
-            if ( colorString.equalsIgnoreCase("red")         ) color = Color.RED;
-            if ( colorString.equalsIgnoreCase("white")       ) color = Color.WHITE;
-            if ( colorString.equalsIgnoreCase("yellow")      ) color = Color.YELLOW;
-            if ( colorString.equalsIgnoreCase("transparent") ) color = new Color(0, 0, 0, 0);
+            Color color = _tryFromName(maybeWord);
+            if ( color == null && maybeWord.startsWith("darker") ) {
+                color = _tryFromName(maybeWord.substring(6).trim());
+                if ( color != null )
+                    color = color.darker();
+            }
+            if ( color == null && maybeWord.startsWith("dark") ) {
+                color = _tryFromName(maybeWord.substring(4).trim());
+                if ( color != null )
+                    color = color.darker();
+            }
+            if ( color == null && maybeWord.startsWith("lighter") ) {
+                color = _tryFromName(maybeWord.substring(7).trim());
+                if ( color != null )
+                    color = color.brighter();
+            }
+            if ( color == null && maybeWord.startsWith("light") ) {
+                color = _tryFromName(maybeWord.substring(5).trim());
+                if ( color != null )
+                    color = color.brighter();
+            }
+            if ( color == null && maybeWord.startsWith("brighter") ) {
+                color = _tryFromName(maybeWord.substring(8).trim());
+                if ( color != null )
+                    color = color.brighter();
+            }
+            if ( color == null && maybeWord.startsWith("bright") ) {
+                color = _tryFromName(maybeWord.substring(6).trim());
+                if ( color != null )
+                    color = color.brighter();
+            }
 
             if ( color != null ) {
                 if ( transparent )
-                    return new Color(color.getRed(), color.getGreen(), color.getBlue(), 0);
+                    return new Color(color.getRed(), color.getGreen(), color.getBlue(), 255/2);
                 else
                     return color;
             }
@@ -243,6 +259,38 @@ public abstract class UINamespaceUtilities extends UILayoutConstants
         }
 
         throw new IllegalArgumentException("Could not parse or find color value: " + colorString);
+    }
+
+    private static Color _tryFromName( String maybeColorName ) {
+        if ( maybeColorName.equalsIgnoreCase("white")       ) return Color.WHITE;
+        if ( maybeColorName.equalsIgnoreCase("black")       ) return Color.BLACK;
+        if ( maybeColorName.equalsIgnoreCase("gray")        ) return Color.GRAY;
+        if ( maybeColorName.equalsIgnoreCase("grey")        ) return Color.GRAY;
+        if ( maybeColorName.equalsIgnoreCase("lightGray")   ) return Color.LIGHT_GRAY;
+        if ( maybeColorName.equalsIgnoreCase("lightGrey")   ) return Color.LIGHT_GRAY;
+        if ( maybeColorName.equalsIgnoreCase("darkGray")    ) return Color.DARK_GRAY;
+        if ( maybeColorName.equalsIgnoreCase("darkGrey")    ) return Color.DARK_GRAY;
+        if ( maybeColorName.equalsIgnoreCase("red")         ) return Color.RED;
+        if ( maybeColorName.equalsIgnoreCase("pink")        ) return Color.PINK;
+        if ( maybeColorName.equalsIgnoreCase("orange")      ) return Color.ORANGE;
+        if ( maybeColorName.equalsIgnoreCase("yellow")      ) return Color.YELLOW;
+        if ( maybeColorName.equalsIgnoreCase("green")       ) return Color.GREEN;
+        if ( maybeColorName.equalsIgnoreCase("lime")        ) return Color.GREEN;
+        if ( maybeColorName.equalsIgnoreCase("magenta")     ) return Color.MAGENTA;
+        if ( maybeColorName.equalsIgnoreCase("cyan")        ) return Color.CYAN;
+        if ( maybeColorName.equalsIgnoreCase("blue")        ) return Color.BLUE;
+        if ( maybeColorName.equalsIgnoreCase("purple")      ) return new Color(128, 0, 128);
+        if ( maybeColorName.equalsIgnoreCase("salmon")      ) return new Color(250, 128, 114);
+        if ( maybeColorName.equalsIgnoreCase("gold")        ) return new Color(255, 215, 0);
+        if ( maybeColorName.equalsIgnoreCase("crimson")     ) return new Color(220, 20, 60);
+        if ( maybeColorName.equalsIgnoreCase("lavender")    ) return new Color(230, 230, 250);
+        if ( maybeColorName.equalsIgnoreCase("navy")        ) return new Color(0, 0, 128);
+        if ( maybeColorName.equalsIgnoreCase("olive")       ) return new Color(128, 128, 0);
+        if ( maybeColorName.equalsIgnoreCase("maroon")      ) return new Color(128, 0, 0);
+        if ( maybeColorName.equalsIgnoreCase("peach")       ) return new Color(255, 218, 185);
+        if ( maybeColorName.equalsIgnoreCase("indigo")      ) return new Color(75, 0, 130);
+        if ( maybeColorName.equalsIgnoreCase("transparent") ) return new Color(0, 0, 0, 0);
+        return null;
     }
 
     /**
