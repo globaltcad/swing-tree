@@ -249,8 +249,8 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
      * @return A new {@link ImageStyle} instance with the specified primer color.
      */
     public ImageStyle primer( Color color ) {
-        Objects.requireNonNull(color, "Use UI.NO_COLOR instead of null to represent the absence of a color.");
-        if ( color == UI.NO_COLOR )
+        Objects.requireNonNull(color, "Use UI.COLOR_UNDEFINED instead of null to represent the absence of a color.");
+        if ( color == UI.COLOR_UNDEFINED)
             color = null;
         if ( color == _primer )
             return this;
@@ -634,7 +634,7 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
         ImageIcon simplifiedImage = _opacity == 0.0f ? null : _image;
         Color simplifiedPrimer = _primer == null || _primer.getAlpha() == 0 ? null : _primer;
 
-        if ( simplifiedPrimer == UI.NO_COLOR )
+        if ( simplifiedPrimer == UI.COLOR_UNDEFINED)
             simplifiedPrimer = null;
 
         if ( simplifiedImage == null && simplifiedPrimer == null )

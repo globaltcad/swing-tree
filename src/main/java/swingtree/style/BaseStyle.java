@@ -103,7 +103,7 @@ final class BaseStyle
     }
 
     BaseStyle simplified() {
-        Color simplifiedFoundation = _foundationColor == UI.NO_COLOR ? null : _foundationColor;
+        Color simplifiedFoundation = _foundationColor == UI.COLOR_UNDEFINED ? null : _foundationColor;
 
         if ( simplifiedFoundation == _foundationColor )
             return this;

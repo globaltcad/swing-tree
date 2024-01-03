@@ -278,7 +278,7 @@ final class BorderStyle
         Color simplifiedBorderColor    = _borderColor != null && _borderColor.getAlpha() > 0 ? _borderColor : null;
         NamedStyles<GradientStyle> simplifiedGradients = _gradients.simplified();
 
-        if ( simplifiedBorderColor == UI.NO_COLOR )
+        if ( simplifiedBorderColor == UI.COLOR_UNDEFINED)
             simplifiedBorderColor = null;
 
         boolean hasNoBorderWidths = simplifiedBorderWidths.equals(Outline.none());

@@ -25,7 +25,7 @@ public abstract class UINamespaceUtilities extends UILayoutConstants
 {
     private static final Logger log = LoggerFactory.getLogger(UINamespaceUtilities.class);
 
-    public static final Color NO_COLOR = new Color(0, 0, 0, 0);
+    public static final Color COLOR_UNDEFINED = new Color(0, 0, 0, 0);
 
     /**
      *  Creates a new {@link Color} object from the specified

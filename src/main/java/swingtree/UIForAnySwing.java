@@ -2030,7 +2030,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final I withBackground( Color color ) {
         NullUtil.nullArgCheck(color, "color", Color.class);
-        return _with( c -> c.setBackground( color == UI.NO_COLOR ? null : color) )._this();
+        return _with( c -> c.setBackground( color == UI.COLOR_UNDEFINED ? null : color) )._this();
     }
 
     /**
@@ -2054,10 +2054,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck(bg, "bg", Val.class);
         NullUtil.nullPropertyCheck(bg, "bg", "Please use the default color of this component instead of null!");
         return _withOnShow( bg, (c,v) -> {
-                    c.setBackground( v == UI.NO_COLOR ? null : v );
+                    c.setBackground( v == UI.COLOR_UNDEFINED ? null : v );
                 })
                 ._with( c -> {
-                    c.setBackground( bg.get() == UI.NO_COLOR ? null : bg.get() );
+                    c.setBackground( bg.get() == UI.COLOR_UNDEFINED ? null : bg.get() );
                 })
                 ._this();
     }
@@ -2082,7 +2082,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
                 })
                 ._with( c -> {
                     Color newColor =  condition.get() ? colorIfTrue : c.getBackground();
-                    c.setBackground( newColor == UI.NO_COLOR ? null : newColor );
+                    c.setBackground( newColor == UI.COLOR_UNDEFINED ? null : newColor );
                 })
                 ._this();
     }
@@ -2108,7 +2108,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
                 })
                 ._with( c -> {
                     Color newColor = condition.get() ? color.get() : c.getBackground();
-                    c.setBackground( newColor == UI.NO_COLOR ? null : newColor );
+                    c.setBackground( newColor == UI.COLOR_UNDEFINED ? null : newColor );
                 })
                 ._this();
     }
@@ -2153,7 +2153,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
                })
                ._with( c -> {
                    Color newColor = condition.get() ? colorIfTrue.get() : colorIfFalse.get();
-                   c.setBackground( newColor == UI.NO_COLOR ? null : newColor );
+                   c.setBackground( newColor == UI.COLOR_UNDEFINED ? null : newColor );
                })
                ._this();
     }
@@ -2258,7 +2258,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      */
     public final I withForeground( Color color ) {
         NullUtil.nullArgCheck(color, "color", Color.class);
-        return _with( c -> c.setForeground( color == UI.NO_COLOR ? null : color ) )._this();
+        return _with( c -> c.setForeground( color == UI.COLOR_UNDEFINED ? null : color ) )._this();
     }
 
     /**
@@ -2282,11 +2282,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck(fg, "fg", Val.class);
         NullUtil.nullPropertyCheck(fg, "fg", "Please use the default color of this component instead of null!");
         return _withOnShow( fg, (c,v) -> {
-                    c.setForeground( v == UI.NO_COLOR ? null : v );
+                    c.setForeground( v == UI.COLOR_UNDEFINED ? null : v );
                 })
                 ._with( c -> {
                     Color newColor = fg.get();
-                    if ( newColor == UI.NO_COLOR )
+                    if ( newColor == UI.COLOR_UNDEFINED)
                         newColor = null;
                     c.setForeground( newColor );
                 })
@@ -2313,7 +2313,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
                 })
                 ._with( c -> {
                     Color newColor = condition.get() ? fg : c.getForeground();
-                    if ( newColor == UI.NO_COLOR )
+                    if ( newColor == UI.COLOR_UNDEFINED)
                         newColor = null;
                     c.setForeground( newColor );
                 })
@@ -2341,7 +2341,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
                 })
                 ._with( c -> {
                     Color newColor = condition.get() ? color.get() : c.getForeground();
-                    if ( newColor == UI.NO_COLOR )
+                    if ( newColor == UI.COLOR_UNDEFINED)
                         newColor = null;
                     c.setForeground( newColor );
                 })
@@ -2368,7 +2368,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
                 })
                 ._with( c -> {
                     Color newColor = condition.get() ? colorIfTrue : colorIfFalse;
-                    if ( newColor == UI.NO_COLOR )
+                    if ( newColor == UI.COLOR_UNDEFINED)
                         newColor = null;
                     c.setForeground( newColor );
                 })
@@ -2403,7 +2403,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
                 })
                 ._with( c -> {
                     Color newColor = condition.get() ? colorIfTrue.get() : colorIfFalse.get();
-                    if ( newColor == UI.NO_COLOR )
+                    if ( newColor == UI.COLOR_UNDEFINED)
                         newColor = null;
                     c.setForeground( newColor );
                 })
@@ -2417,7 +2417,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         Val<Color>   baseColor
     ) {
         Color newColor = condition.is(true) ? color.get() : baseColor.get();
-        if ( newColor == UI.NO_COLOR )
+        if ( newColor == UI.COLOR_UNDEFINED)
             newColor = null;
 
         component.setForeground(newColor);
@@ -2430,7 +2430,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
             Val<Color> baseColor
     ) {
         Color newColor =  condition.is(true) ? color.get() : baseColor.get();
-        if ( newColor == UI.NO_COLOR )
+        if ( newColor == UI.COLOR_UNDEFINED)
             newColor = null;
 
         component.setBackground(newColor);

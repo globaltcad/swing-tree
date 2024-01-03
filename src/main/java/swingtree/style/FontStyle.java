@@ -272,7 +272,7 @@ final class FontStyle
 
     FontStyle withColor( Color color ) {
         Objects.requireNonNull(color);
-        if ( color == UI.NO_COLOR )
+        if ( color == UI.COLOR_UNDEFINED)
             color = null;
         if ( color == _color )
             return this;
@@ -282,7 +282,7 @@ final class FontStyle
 
     FontStyle withBackgroundColor( Color backgroundColor ) {
         Objects.requireNonNull(backgroundColor);
-        if ( backgroundColor == UI.NO_COLOR )
+        if ( backgroundColor == UI.COLOR_UNDEFINED)
             backgroundColor = null;
         if ( backgroundColor == _backgroundColor )
             return this;
@@ -291,7 +291,7 @@ final class FontStyle
 
     FontStyle withSelectionColor( Color selectionColor ) {
         Objects.requireNonNull(selectionColor);
-        if ( selectionColor == UI.NO_COLOR )
+        if ( selectionColor == UI.COLOR_UNDEFINED)
             selectionColor = null;
         if ( selectionColor == _selectionColor )
             return this;

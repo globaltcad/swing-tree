@@ -499,14 +499,14 @@ public final class ComponentExtension<C extends JComponent>
         if ( hasBackground && !Objects.equals( _owner.getBackground(), newStyle.base().backgroundColor().get() ) ) {
             _initialBackgroundColor = _initialBackgroundColor != null ? _initialBackgroundColor :  _owner.getBackground();
             Color newColor =  newStyle.base().backgroundColor().get();
-            if ( newColor == UI.NO_COLOR )
+            if ( newColor == UI.COLOR_UNDEFINED)
                 newColor = null;
             _owner.setBackground( newColor );
             if ( _owner instanceof JScrollPane ) {
                 JScrollPane scrollPane = (JScrollPane) _owner;
                 if ( scrollPane.getViewport() != null ) {
                     newColor = newStyle.base().backgroundColor().get();
-                    if ( newColor == UI.NO_COLOR )
+                    if ( newColor == UI.COLOR_UNDEFINED)
                         newColor = null;
                     scrollPane.getViewport().setBackground( newColor );
                 }
@@ -521,7 +521,7 @@ public final class ComponentExtension<C extends JComponent>
 
         if ( newStyle.base().foregroundColor().isPresent() && !Objects.equals( _owner.getForeground(), newStyle.base().foregroundColor().get() ) ) {
             Color newColor = newStyle.base().foregroundColor().get();
-            if ( newColor == UI.NO_COLOR )
+            if ( newColor == UI.COLOR_UNDEFINED)
                 newColor = null;
             _owner.setForeground( newColor );
         }

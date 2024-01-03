@@ -562,9 +562,9 @@ class Styles_Spec extends Specification
             We now wrap the component in the SwingTree builder API and apply a style to it... 
         """
             var ui = UI.of(aToggleButton).withStyle(conf -> conf
-                            .backgroundColor(UI.NO_COLOR)
-                            .foregroundColor(UI.NO_COLOR)
-                            .foundationColor(UI.NO_COLOR)
+                            .backgroundColor(UI.COLOR_UNDEFINED)
+                            .foregroundColor(UI.COLOR_UNDEFINED)
+                            .foundationColor(UI.COLOR_UNDEFINED)
                         )
                         .getComponent()
         then : """
@@ -622,16 +622,16 @@ class Styles_Spec extends Specification
             We now wrap the component in the SwingTree builder API and apply a style to it... 
         """
             var ui = UI.of(aComboBox).withStyle( conf -> conf
-                            .shadowColor(UI.NO_COLOR)
+                            .shadowColor(UI.COLOR_UNDEFINED)
                             .gradient(UI.Layer.BACKGROUND, g -> g
-                                .colors(UI.NO_COLOR, UI.NO_COLOR, UI.NO_COLOR)
+                                .colors(UI.COLOR_UNDEFINED, UI.COLOR_UNDEFINED, UI.COLOR_UNDEFINED)
                             )
                             .image(UI.Layer.FOREGROUND, i -> i
-                                .primer(UI.NO_COLOR)
+                                .primer(UI.COLOR_UNDEFINED)
                             )
-                            .fontColor(UI.NO_COLOR)
-                            .fontSelectionColor(UI.NO_COLOR)
-                            .fontBackgroundColor(UI.NO_COLOR)
+                            .fontColor(UI.COLOR_UNDEFINED)
+                            .fontSelectionColor(UI.COLOR_UNDEFINED)
+                            .fontBackgroundColor(UI.COLOR_UNDEFINED)
                         )
                         .getComponent()
         then : """

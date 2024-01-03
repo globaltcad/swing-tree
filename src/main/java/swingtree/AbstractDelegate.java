@@ -132,7 +132,7 @@ abstract class AbstractDelegate<C extends JComponent>
      * @return The delegate itself.
      */
     public final AbstractDelegate<C> setBackground( Color color ) {
-        if ( color == UI.NO_COLOR )
+        if ( color == UI.COLOR_UNDEFINED)
             _component().setBackground(null);
         else
             _component().setBackground(color);
@@ -237,7 +237,7 @@ abstract class AbstractDelegate<C extends JComponent>
      * @return The delegate itself.
      */
     public final AbstractDelegate<C> setForeground( Color color ) {
-        if ( color == UI.NO_COLOR )
+        if ( color == UI.COLOR_UNDEFINED)
             _component().setForeground( null );
         else
             _component().setForeground( color );
