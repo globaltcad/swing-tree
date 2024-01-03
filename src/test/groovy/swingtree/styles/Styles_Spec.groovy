@@ -13,6 +13,7 @@ import swingtree.style.Style
 import swingtree.style.ComponentStyleDelegate
 
 import javax.swing.JComboBox
+import javax.swing.JComponent
 import javax.swing.JPanel
 import javax.swing.JToggleButton
 import java.awt.*
@@ -39,21 +40,38 @@ class Styles_Spec extends Specification
         String colorString, Color expectedColor
     ) {
         given : 'We use method chaining to build a colorful style:'
-            var style = new ComponentStyleDelegate<>(new JPanel(), Style.none())
-                                .foundationColor(colorString)
-                                .backgroundColor(colorString)
-                                .borderColor(colorString)
-                                .shadowColor(colorString)
-                                .fontSelectionColor(colorString)
-                                .fontColor(colorString)
-                                .style()
+            var style =
+                            ComponentExtension.from(
+                                UI.of(new JComponent(){})
+                                .withStyle(conf -> conf
+                                    .foundationColor(colorString)
+                                    .backgroundColor(colorString)
+                                    .foregroundColor(colorString)
+                                    .border(1, colorString)
+                                    .shadowColor(colorString)
+                                    .fontSelectionColor(colorString)
+                                    .fontColor(colorString)
+                                )
+                                .get(JComponent)
+                            )
+                            .getStyle()
+        and : 'We unpack everything:'
+            var foundationColor = style.base().foundationColor()
+            var backgroundColor = style.base().backgroundColor()
+            var foregroundColor = style.base().foregroundColor()
+            var borderColor = style.border().color()
+            var shadowColor = style.shadow().color()
+            var fontSelectionColor = style.font().selectionColor()
+            var fontColor = style.font().color()
         expect :
-            style.base().foundationColor().get() == expectedColor
-            style.base().backgroundColor().get() == expectedColor
-            style.border().color().get() == expectedColor
-            style.shadow().color().get() == expectedColor
-            style.font().selectionColor().get() == expectedColor
-            style.font().color().get() == expectedColor
+            backgroundColor.get() == expectedColor
+            foregroundColor.get() == expectedColor
+        and :
+            !foundationColor.isPresent() && expectedColor == UI.COLOR_UNDEFINED || foundationColor.get() == expectedColor
+            !borderColor.isPresent() && expectedColor == UI.COLOR_UNDEFINED || borderColor.get() == expectedColor
+            !shadowColor.isPresent() && expectedColor == UI.COLOR_UNDEFINED || shadowColor.get() == expectedColor
+            !fontSelectionColor.isPresent() && expectedColor == UI.COLOR_UNDEFINED || fontSelectionColor.get() == expectedColor
+            !fontColor.isPresent() && expectedColor == UI.COLOR_UNDEFINED || fontColor.get() == expectedColor
 
         where :
             colorString                    | expectedColor
@@ -84,6 +102,16 @@ class Styles_Spec extends Specification
             "transparent"                  | new Color(0, 0, 0, 0)
             "yellow"                       | Color.YELLOW
             "black"                        | Color.BLACK
+            "indigo"                       | new Color(75, 0, 130)
+            "transparent purple"           | new Color(128, 0, 128, 127)
+            "transparent red"              | new Color(255, 0, 0, 127)
+            "transparent green"            | new Color(0, 255, 0, 127)
+            "transparent blue"             | new Color(0, 0, 255, 127)
+            "light indigo"                 | new Color(107, 0, 185)
+            "dark navy"                    | new Color(0, 0, 89)
+            "I make no sense!"             | UI.COLOR_UNDEFINED
+            "I make no sense! at all!"     | UI.COLOR_UNDEFINED
+            "Hold my b(0/&/§H%,1fu3s98s"   | UI.COLOR_UNDEFINED
     }
 
     def 'The String representation of a Style will tell you everything about it!'()

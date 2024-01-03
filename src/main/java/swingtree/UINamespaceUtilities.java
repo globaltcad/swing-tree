@@ -207,7 +207,7 @@ public abstract class UINamespaceUtilities extends UILayoutConstants
 
             if ( maybeWord.startsWith("transparent") ) {
                 transparent = true;
-                maybeWord = maybeWord.substring(12).trim();
+                maybeWord = maybeWord.substring(11).trim();
             }
 
             // Let's try a few common color names
@@ -249,16 +249,21 @@ public abstract class UINamespaceUtilities extends UILayoutConstants
                 else
                     return color;
             }
+            else if ( transparent )
+                return new Color(0,0,0, 0);
         }
 
         // Let's try to find it as a system property
+        Color foundInSystemProperties = null;
         try {
-            return Color.getColor(colorString);
+            foundInSystemProperties = Color.getColor(colorString);
         } catch ( IllegalArgumentException e ) {
             // Ignore
         }
+        if ( foundInSystemProperties != null )
+            return foundInSystemProperties;
 
-        throw new IllegalArgumentException("Could not parse or find color value: " + colorString);
+        return UI.COLOR_UNDEFINED;
     }
 
     private static Color _tryFromName( String maybeColorName ) {
