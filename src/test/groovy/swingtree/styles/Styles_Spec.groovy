@@ -546,10 +546,10 @@ class Styles_Spec extends Specification
                 "]"
     }
 
-    def 'The `UI.NO_COLOR` constant can be used as a safe shorthand for null for the background and foreground properties of the style API'()
+    def 'The `UI.COLOR_UNDEFINED` constant can be used as a safe shorthand for null for the background and foreground properties of the style API'()
     {
         reportInfo """
-            The `UI.NO_COLOR` constant is a java.awt.Color object with all of its rgba values set to 0.
+            The `UI.COLOR_UNDEFINED` constant is a java.awt.Color object with all of its rgba values set to 0.
             Its identity is used to represent the absence of a color, and is used as a safe shorthand for null,
             meaning that when the style engine of a component encounters it, it will pass it onto
             the `Component::setBackground` and `Component::setForeground` methods as null.
@@ -607,10 +607,10 @@ class Styles_Spec extends Specification
     }
 
 
-    def 'The `UI.NO_COLOR` constant can be used as a safe shorthand for null for various properties in the style API'()
+    def 'The `UI.COLOR_UNDEFINED` constant can be used as a safe shorthand for null for various properties in the style API'()
     {
         reportInfo """
-            The `UI.NO_COLOR` constant is a java.awt.Color object with all of its rgba values set to 0.
+            The `UI.COLOR_UNDEFINED` constant is a java.awt.Color object with all of its rgba values set to 0.
             Its identity is used to represent the absence of a color, and is used as a safe shorthand for null,
             meaning that when the style engine of a component encounters it, it will treat it as if no
             color was specified for the property.
