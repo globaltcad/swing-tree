@@ -26,6 +26,24 @@ final class StyleLayer implements Simplifiable<StyleLayer>
     private final NamedStyles<ImageStyle>    _images;
 
 
+    static StyleLayer of(
+        NamedStyles<ShadowStyle>   shadows,
+        NamedStyles<PainterStyle>  painters,
+        NamedStyles<GradientStyle> gradients,
+        NamedStyles<ImageStyle>    images
+    ) {
+        StyleLayer empty = StyleLayer.empty();
+        if (
+            shadows  .equals(_NO_SHADOWS  ) &&
+            painters .equals(_NO_PAINTERS ) &&
+            gradients.equals(_NO_GRADIENTS) &&
+            images   .equals(_NO_IMAGES   )
+        )
+            return empty;
+
+        return new StyleLayer(shadows, painters, gradients, images);
+    }
+
     StyleLayer(
         NamedStyles<ShadowStyle>   shadows,
         NamedStyles<PainterStyle>  painters,
@@ -53,20 +71,20 @@ final class StyleLayer implements Simplifiable<StyleLayer>
     }
 
     StyleLayer withShadows( NamedStyles<ShadowStyle> shadows ) {
-        return new StyleLayer(shadows, _painters, _gradients, _images);
+        return of(shadows, _painters, _gradients, _images);
     }
     StyleLayer withPainters( NamedStyles<PainterStyle> painters ) {
-        return new StyleLayer(_shadows, painters, _gradients, _images);
+        return of(_shadows, painters, _gradients, _images);
     }
     StyleLayer withGradients( NamedStyles<GradientStyle> gradients ) {
-        return new StyleLayer(_shadows, _painters, gradients, _images);
+        return of(_shadows, _painters, gradients, _images);
     }
     StyleLayer withImages( NamedStyles<ImageStyle> images ) {
-        return new StyleLayer(_shadows, _painters, _gradients, images);
+        return of(_shadows, _painters, _gradients, images);
     }
 
     StyleLayer _scale( double scale ) {
-        return new StyleLayer(
+        return of(
                     _shadows.mapStyles( s -> s._scale(scale) ),
                     _painters, // This is the users problem...
                     _gradients, // Scaling does not make sense
@@ -154,7 +172,7 @@ final class StyleLayer implements Simplifiable<StyleLayer>
         )
             return _EMPTY;
 
-        return new StyleLayer(
+        return of(
                     simplifiedShadows,
                     simplifiedPainters,
                     simplifiedGradients,

@@ -28,6 +28,26 @@ final class StyleLayers
     private final StyleLayer _any;
 
 
+    static StyleLayers of(
+        StyleLayer background,
+        StyleLayer content,
+        StyleLayer border,
+        StyleLayer foreground,
+        StyleLayer any
+    ) {
+        StyleLayer empty = StyleLayer.empty();
+        if (
+            background == empty &&
+            content    == empty &&
+            border     == empty &&
+            foreground == empty &&
+            any        == null
+        )
+            return _EMPTY;
+
+        return new StyleLayers( background, content, border, foreground, any );
+    }
+
     StyleLayers(
         StyleLayer background,
         StyleLayer content,
@@ -58,10 +78,10 @@ final class StyleLayers
 
     StyleLayers with(UI.Layer layer, StyleLayer style) {
         switch (layer) {
-            case BACKGROUND: return new StyleLayers(style,       _content, _border,  _foreground, _any);
-            case CONTENT:    return new StyleLayers(_background,  style,    _border, _foreground, _any);
-            case BORDER:     return new StyleLayers(_background, _content,  style,   _foreground, _any);
-            case FOREGROUND: return new StyleLayers(_background, _content, _border,   style,      _any);
+            case BACKGROUND: return of(style,       _content, _border,  _foreground, _any);
+            case CONTENT:    return of(_background,  style,    _border, _foreground, _any);
+            case BORDER:     return of(_background, _content,  style,   _foreground, _any);
+            case FOREGROUND: return of(_background, _content, _border,   style,      _any);
             default:
                 throw new IllegalArgumentException("Unknown layer: " + layer);
         }
@@ -82,17 +102,17 @@ final class StyleLayers
 
     public StyleLayers onlyRetainingAsUnnamedLayer( UI.Layer layer ){
         switch (layer) {
-            case BACKGROUND: return new StyleLayers(StyleLayer.empty(), StyleLayer.empty(), StyleLayer.empty(), StyleLayer.empty(), _background);
-            case CONTENT:    return new StyleLayers(StyleLayer.empty(), StyleLayer.empty(), StyleLayer.empty(), StyleLayer.empty(), _content);
-            case BORDER:     return new StyleLayers(StyleLayer.empty(), StyleLayer.empty(), StyleLayer.empty(), StyleLayer.empty(), _border);
-            case FOREGROUND: return new StyleLayers(StyleLayer.empty(), StyleLayer.empty(), StyleLayer.empty(), StyleLayer.empty(), _foreground);
+            case BACKGROUND: return of(StyleLayer.empty(), StyleLayer.empty(), StyleLayer.empty(), StyleLayer.empty(), _background);
+            case CONTENT:    return of(StyleLayer.empty(), StyleLayer.empty(), StyleLayer.empty(), StyleLayer.empty(), _content);
+            case BORDER:     return of(StyleLayer.empty(), StyleLayer.empty(), StyleLayer.empty(), StyleLayer.empty(), _border);
+            case FOREGROUND: return of(StyleLayer.empty(), StyleLayer.empty(), StyleLayer.empty(), StyleLayer.empty(), _foreground);
             default:
                 throw new IllegalArgumentException("Unknown layer: " + layer);
         }
     }
 
     StyleLayers map( Function<StyleLayer, StyleLayer> f ) {
-        return new StyleLayers(f.apply(_background), f.apply(_content), f.apply(_border), f.apply(_foreground), _any == null ? null : f.apply(_any));
+        return of(f.apply(_background), f.apply(_content), f.apply(_border), f.apply(_foreground), _any == null ? null : f.apply(_any));
     }
 
     StyleLayers simplified() {
@@ -114,7 +134,7 @@ final class StyleLayers
         )
             return this;
 
-        return new StyleLayers(background, content, border, foreground, any);
+        return of(background, content, border, foreground, any);
     }
 
     @Override

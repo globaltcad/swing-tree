@@ -12,6 +12,7 @@ import swingtree.threading.EventProcessor
 import swingtree.style.Style
 import swingtree.style.ComponentStyleDelegate
 
+import javax.swing.JComboBox
 import javax.swing.JPanel
 import javax.swing.JToggleButton
 import java.awt.*
@@ -593,6 +594,54 @@ class Styles_Spec extends Specification
                         "cursor=?, " +
                         "orientation=UNKNOWN" +
                     "], " +
+                    "FontStyle[NONE], " +
+                    "DimensionalityStyle[NONE], " +
+                    "StyleLayers[" +
+                        "background=StyleLayer[EMPTY], " +
+                        "content=StyleLayer[EMPTY], " +
+                        "border=StyleLayer[EMPTY], " +
+                        "foreground=StyleLayer[EMPTY]" +
+                    "], " +
+                    "properties=[]" +
+                "]"
+    }
+
+
+    def 'The `UI.NO_COLOR` constant can be used as a safe shorthand for null for various properties in the style API'()
+    {
+        reportInfo """
+            The `UI.NO_COLOR` constant is a java.awt.Color object with all of its rgba values set to 0.
+            Its identity is used to represent the absence of a color, and is used as a safe shorthand for null,
+            meaning that when the style engine of a component encounters it, it will treat it as if no
+            color was specified for the property.
+            This is true for the shadow color, gradient colors, image primer color, and font colors...
+        """
+        given : 'We have a simple Swing component.'
+            var aComboBox = new JComboBox<String>()
+        when : """
+            We now wrap the component in the SwingTree builder API and apply a style to it... 
+        """
+            var ui = UI.of(aComboBox).withStyle( conf -> conf
+                            .shadowColor(UI.NO_COLOR)
+                            .gradient(UI.Layer.BACKGROUND, g -> g
+                                .colors(UI.NO_COLOR, UI.NO_COLOR, UI.NO_COLOR)
+                            )
+                            .image(UI.Layer.FOREGROUND, i -> i
+                                .primer(UI.NO_COLOR)
+                            )
+                            .fontColor(UI.NO_COLOR)
+                            .fontSelectionColor(UI.NO_COLOR)
+                            .fontBackgroundColor(UI.NO_COLOR)
+                        )
+                        .getComponent()
+        then : """
+            The style configuration of the component will be simplified heavily, to
+            the point where it is effectively considered to have no style at all.
+        """
+            ComponentExtension.from(ui).getStyle().toString() == "Style[" +
+                    "LayoutStyle[NONE], " +
+                    "BorderStyle[NONE], " +
+                    "BaseStyle[NONE], " +
                     "FontStyle[NONE], " +
                     "DimensionalityStyle[NONE], " +
                     "StyleLayers[" +
