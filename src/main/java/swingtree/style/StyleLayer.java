@@ -5,7 +5,7 @@ import java.util.Objects;
 final class StyleLayer implements Simplifiable<StyleLayer>
 {
     static final NamedStyles<ShadowStyle>   _NO_SHADOWS   = NamedStyles.of(NamedStyle.of(StyleUtility.DEFAULT_KEY,ShadowStyle.none()));
-    static final NamedStyles<PainterStyle>  _NO_PAINTERS  = NamedStyles.of(NamedStyle.of(StyleUtility.DEFAULT_KEY + "_" + PainterStyle.DEFAULT_LAYER.name(),PainterStyle.none()));
+    static final NamedStyles<PainterStyle>  _NO_PAINTERS  = NamedStyles.of(NamedStyle.of(StyleUtility.DEFAULT_KEY,PainterStyle.none()));
     static final NamedStyles<GradientStyle> _NO_GRADIENTS = NamedStyles.of(NamedStyle.of(StyleUtility.DEFAULT_KEY, GradientStyle.none()));
     static final NamedStyles<ImageStyle>    _NO_IMAGES    = NamedStyles.of(NamedStyle.of(StyleUtility.DEFAULT_KEY, ImageStyle.none()));
 
@@ -133,7 +133,7 @@ final class StyleLayer implements Simplifiable<StyleLayer>
         if ( this == _EMPTY )
             return "StyleLayer[EMPTY]";
         String shadowString     = _shadows.toString(StyleUtility.DEFAULT_KEY, "");
-        String painterString    = _painters.toString(StyleUtility.DEFAULT_KEY + "_" + PainterStyle.DEFAULT_LAYER.name(), "");
+        String painterString    = _painters.toString(StyleUtility.DEFAULT_KEY, "");
         String gradientString   = _gradients.toString(StyleUtility.DEFAULT_KEY, "");
         String imagesString     = _images.toString(StyleUtility.DEFAULT_KEY, "");
         return this.getClass().getSimpleName() + "[" +

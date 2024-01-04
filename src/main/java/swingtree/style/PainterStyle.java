@@ -27,7 +27,6 @@ import java.util.Objects;
  */
 final class PainterStyle
 {
-    static final UI.Layer DEFAULT_LAYER = UI.Layer.BACKGROUND;
     private static final PainterStyle _NONE = new PainterStyle(Painter.none());
 
 
