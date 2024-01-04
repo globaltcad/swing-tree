@@ -274,7 +274,12 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      */
     public final I withFont( Font font ) {
         NullUtil.nullArgCheck(font, "font", Font.class);
-        return _with( button -> button.setFont(font) )._this();
+        return _with( button -> {
+                        if ( font == UI.FONT_UNDEFINED )
+                            button.setFont(null);
+                        else
+                            button.setFont(font);
+                    })._this();
     }
 
     /**
@@ -291,8 +296,19 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     public final I withFont( Val<Font> font ) {
         NullUtil.nullArgCheck(font, "font", Val.class);
         NullUtil.nullPropertyCheck(font, "font", "Use the default font of this component instead of null!");
-        return _withOnShow( font, JComponent::setFont )
-               ._with( button -> button.setFont(font.orElseThrow()) )
+        return _withOnShow( font, (c,v) -> {
+                    if ( v == UI.FONT_UNDEFINED )
+                        c.setFont(null);
+                    else
+                        c.setFont(v);
+                })
+               ._with( thisComponent -> {
+                   Font newFont = font.orElseThrow();
+                   if ( newFont == UI.FONT_UNDEFINED )
+                       thisComponent.setFont( null );
+                   else
+                       thisComponent.setFont( newFont );
+               } )
                ._this();
     }
 

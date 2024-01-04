@@ -565,9 +565,12 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
      * @throws IllegalArgumentException if {@code font} is {@code null}.
      */
     public final UIForLabel<L> withFont( Font font ) {
-        NullUtil.nullArgCheck(font, "font", Font.class);
+        NullUtil.nullArgCheck(font, "font", Font.class, "Use 'UI.FONT_UNDEFINED' instead of null!");
         return _with( thisComponent -> {
-                    thisComponent.setFont(font);
+                    if ( font == UI.FONT_UNDEFINED )
+                        thisComponent.setFont(null);
+                    else
+                        thisComponent.setFont(font);
                 })
                 ._this();
     }
@@ -587,7 +590,10 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
         NullUtil.nullArgCheck(font, "font", Val.class);
         NullUtil.nullPropertyCheck(font, "font", "Use the default font of this component instead of null!");
         return _withOnShow( font, (thisComponent,v) -> {
-                    thisComponent.setFont(v);
+                    if ( v == UI.FONT_UNDEFINED )
+                        thisComponent.setFont(null);
+                    else
+                        thisComponent.setFont(v);
                 })
                 ._with( thisComponent -> {
                     thisComponent.setFont(font.orElseThrow());

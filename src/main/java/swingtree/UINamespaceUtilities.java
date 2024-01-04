@@ -38,6 +38,17 @@ public abstract class UINamespaceUtilities extends UILayoutConstants
     public static final Color COLOR_UNDEFINED = new Color(0, 0, 0, 0);
 
     /**
+     *  This constant is a {@link java.awt.Font} object with a font name of "" (empty string),
+     *  a font style of -1 (undefined) and a font size of 0.
+     *  Its identity is used to represent the absence of a font being specified,
+     *  and it is used as a safe replacement for null,
+     *  meaning that when the style engine of a component encounters it, it will pass it onto
+     *  the {@link java.awt.Component#setFont(Font)} method as null.
+     *  Passing null to this method means that the look and feel determines the font.
+     */
+    public static final Font FONT_UNDEFINED = new Font("", -1, 0);
+
+    /**
      *  Creates a new {@link Color} object from the specified
      *  red, green and blue values.
      *

@@ -350,12 +350,16 @@ abstract class AbstractDelegate<C extends JComponent>
      *  </p>
      *
      * @param font The font that should be used to paint the text of the component.
-     *             If this parameter is <code>null</code> then this component will inherit
-     *             the font of its parent.
+     *             If this parameter is {@link UI#FONT_UNDEFINED} then this component will inherit
+     *             the font of its parent. Null is not allowed.
      * @return The delegate itself.
      */
     public final AbstractDelegate<C> setFont( Font font ) {
-        _component().setFont(font);
+        Objects.requireNonNull(font, "Use UI.FONT_UNDEFINED instead of null to represent the absence of a font.");
+        if ( font == UI.FONT_UNDEFINED )
+            _component().setFont(null);
+        else
+            _component().setFont(font);
         return this;
     }
 
@@ -369,7 +373,11 @@ abstract class AbstractDelegate<C extends JComponent>
      * @return The font of the component.
      */
     public final Font getFont() {
-        return _component().getFont();
+        Font font = _component().getFont();
+        if ( font == null )
+            return UI.FONT_UNDEFINED;
+        else
+            return font;
     }
 
     /**

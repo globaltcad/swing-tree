@@ -326,7 +326,11 @@ final class FontStyle
         return new FontStyle(_familyName, _size, _posture, _weight, _spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, _horizontalAlignment, verticalAlignment);
     }
 
-    FontStyle withPropertiesFromFont( Font font ) {
+    FontStyle withPropertiesFromFont( Font font )
+    {
+        if ( font == UI.FONT_UNDEFINED )
+            return this;
+
         Map<TextAttribute, ?> attributeMap = font.getAttributes();
 
         String family = font.getFamily();
