@@ -132,6 +132,7 @@ abstract class AbstractDelegate<C extends JComponent>
      * @return The delegate itself.
      */
     public final AbstractDelegate<C> setBackground( Color color ) {
+        Objects.requireNonNull(color, "Use UI.COLOR_UNDEFINED instead of null to represent the absence of a color.");
         if ( color == UI.COLOR_UNDEFINED)
             _component().setBackground(null);
         else
@@ -217,10 +218,16 @@ abstract class AbstractDelegate<C extends JComponent>
      *  See {@link Component#getBackground()} for more information.
      *  </p>
      *
-     * @return The background color of the component.
+     * @return The background color of the component, or {@link UI#COLOR_UNDEFINED} if the component
+     *         does not have a background color (i.e. {@link Component#getBackground()} returns <code>null</code>).
+     *         The return value will never be <code>null</code>.
      */
     public final Color getBackground() {
-        return _component().getBackground();
+        Color backgroundColor = _component().getBackground();
+        if ( backgroundColor == null )
+            return UI.COLOR_UNDEFINED;
+        else
+            return backgroundColor;
     }
 
     /**
@@ -237,6 +244,7 @@ abstract class AbstractDelegate<C extends JComponent>
      * @return The delegate itself.
      */
     public final AbstractDelegate<C> setForeground( Color color ) {
+        Objects.requireNonNull(color, "Use UI.COLOR_UNDEFINED instead of null to represent the absence of a color.");
         if ( color == UI.COLOR_UNDEFINED)
             _component().setForeground( null );
         else
@@ -251,10 +259,16 @@ abstract class AbstractDelegate<C extends JComponent>
      *  See {@link Component#getForeground()} for more information.
      *  </p>
      *
-     * @return The foreground color of the component.
+     * @return The foreground color of the component, or {@link UI#COLOR_UNDEFINED} if the component
+     *        does not have a foreground color (i.e. {@link Component#getForeground()} returns <code>null</code>).
+     *        The return value will never be <code>null</code>.
      */
     public final Color getForeground() {
-        return _component().getForeground();
+        Color foregroundColor = _component().getForeground();
+        if ( foregroundColor == null )
+            return UI.COLOR_UNDEFINED;
+        else
+            return foregroundColor;
     }
 
     /**
@@ -578,7 +592,12 @@ abstract class AbstractDelegate<C extends JComponent>
      *  @return The delegate itself.
      */
     public final AbstractDelegate<C> setMinSize( Size size ) {
-        return setMinSize(size.toDimension());
+        Objects.requireNonNull(size, "Use Size.unknown() instead of null to represent the absence of a size.");
+        if ( size.equals(Size.unknown()) )
+            _component().setMinimumSize(null);
+        else
+            _component().setMinimumSize(size.toDimension());
+        return this;
     }
 
     /**
@@ -673,7 +692,12 @@ abstract class AbstractDelegate<C extends JComponent>
      *  @return The delegate itself.
      */
     public final AbstractDelegate<C> setMaxSize( Size size ) {
-        return setMaxSize(size.toDimension());
+        Objects.requireNonNull(size, "Use Size.unknown() instead of null to represent the absence of a size.");
+        if ( size.equals(Size.unknown()) )
+            _component().setMaximumSize(null);
+        else
+            _component().setMaximumSize(size.toDimension());
+        return this;
     }
 
     /**
@@ -768,7 +792,9 @@ abstract class AbstractDelegate<C extends JComponent>
      *  @return The delegate itself.
      */
     public final AbstractDelegate<C> setSize( Size size ) {
-        return setSize(size.toDimension());
+        Objects.requireNonNull(size);
+        _component().setSize(size.toDimension());
+        return this;
     }
 
     /**
@@ -869,6 +895,7 @@ abstract class AbstractDelegate<C extends JComponent>
      * @return The delegate itself.
      */
     public final AbstractDelegate<C> setCursor( UI.Cursor cursor ) {
+        Objects.requireNonNull(cursor);
         _component().setCursor(Cursor.getPredefinedCursor(cursor.type));
         return this;
     }
@@ -902,9 +929,11 @@ abstract class AbstractDelegate<C extends JComponent>
      *  </p>
      * @param text  The tooltip text.
      * @return The delegate itself.
+     * @throws NullPointerException If the text is null, use an empty string to model the absence of a tooltip.
      */
     public final AbstractDelegate<C> setTooltip( String text ) {
-        _component().setToolTipText(text);
+        Objects.requireNonNull(text, "Use an empty string instead of null to represent the absence of a tooltip.");
+        _component().setToolTipText( text.isEmpty() ? null : text );
         return this;
     }
 
@@ -1011,6 +1040,8 @@ abstract class AbstractDelegate<C extends JComponent>
      * @param <T> The type parameter of the component which should be found.
      */
     public final <T extends JComponent> OptionalUI<T> find( Class<T> type, String id ) {
+        Objects.requireNonNull(type);
+        Objects.requireNonNull(id);
         return this.find( type, c -> ComponentExtension.from(c).hasId(id) );
     }
 
@@ -1024,6 +1055,8 @@ abstract class AbstractDelegate<C extends JComponent>
      * @param <T> The type parameter of the component which should be found.
      */
     public final <T extends JComponent> OptionalUI<T> find( Class<T> type, Enum<?> id ) {
+        Objects.requireNonNull(type);
+        Objects.requireNonNull(id);
         return this.find( type, c -> ComponentExtension.from(c).hasId(id) );
     }
 
@@ -1038,6 +1071,8 @@ abstract class AbstractDelegate<C extends JComponent>
      * @param <T> The type parameter of the component which should be found.
      */
     public final <T extends JComponent> OptionalUI<T> find( Class<T> type, Predicate<T> predicate ) {
+        Objects.requireNonNull(type);
+        Objects.requireNonNull(predicate);
         return _guiTraverser.find(type, predicate)
                 .findFirst()
                 .map(OptionalUI::ofNullable)
@@ -1055,6 +1090,8 @@ abstract class AbstractDelegate<C extends JComponent>
      * @param <T> The type parameter of the component which should be found.
      */
     public final <T extends JComponent> List<T> findAll( Class<T> type, Predicate<T> predicate ) {
+        Objects.requireNonNull(type);
+        Objects.requireNonNull(predicate);
         return _guiTraverser.find(type, predicate).collect(Collectors.toList());
     }
 
@@ -1068,6 +1105,8 @@ abstract class AbstractDelegate<C extends JComponent>
      * @param <T> The type parameter of the component which should be found.
      */
     public final <T extends JComponent> List<T> findAllByGroup( Class<T> type, String group ) {
+        Objects.requireNonNull(type);
+        Objects.requireNonNull(group);
         return this.findAll( type, c -> ComponentExtension.from(c).belongsToGroup(group) );
     }
 
@@ -1077,8 +1116,10 @@ abstract class AbstractDelegate<C extends JComponent>
      *
      * @param group The style group which should be used to check if a particular {@link JComponent} belongs to it.
      * @return A list of {@link JComponent} instances which all have the given style group.
+     * @throws NullPointerException If the group is null.
      */
     public final List<JComponent> findAllByGroup( String group ) {
+        Objects.requireNonNull(group);
         return this.findAll( JComponent.class, c -> ComponentExtension.from(c).belongsToGroup(group) );
     }
 
@@ -1093,6 +1134,8 @@ abstract class AbstractDelegate<C extends JComponent>
      * @param <T> The type parameter of the component which should be found.
      */
     public final <T extends JComponent> List<T> findAllByGroup( Class<T> type, Enum<?> group ) {
+        Objects.requireNonNull(type);
+        Objects.requireNonNull(group);
         return this.findAll( type, c -> ComponentExtension.from(c).belongsToGroup(group) );
     }
 
@@ -1104,6 +1147,7 @@ abstract class AbstractDelegate<C extends JComponent>
      * @return A list of {@link JComponent} instances which all have the given style group.
      */
     public final List<JComponent> findAllByGroup( Enum<?> group ) {
+        Objects.requireNonNull(group);
         return this.findAll( JComponent.class, c -> ComponentExtension.from(c).belongsToGroup(group) );
     }
 
@@ -1133,6 +1177,8 @@ abstract class AbstractDelegate<C extends JComponent>
      * @param painter The rendering task which should be executed on the EDT at the end of the current event cycle.
      */
     public final void paint( AnimationState state, Painter painter ) {
+        Objects.requireNonNull(state);
+        Objects.requireNonNull(painter);
         UI.run(()->{ // This method might be called by the application thread, so we need to run on the EDT!
             // We do the rendering later in the paint method of a custom border implementation!
             ComponentExtension.from(_component).addAnimationPainter(state, painter);
@@ -1176,6 +1222,8 @@ abstract class AbstractDelegate<C extends JComponent>
      *               for which you can define the style properties.
      */
     public final void animateStyleFor( double duration, TimeUnit unit, AnimatedStyler<C> styler ) {
+        Objects.requireNonNull(unit);
+        Objects.requireNonNull(styler);
         UI.run(()->{ // This method might be called by the application thread, so we need to run on the EDT!
             // We do the styling later in the paint method of a custom border implementation!
             this.animateFor(duration, unit, state ->
@@ -1220,6 +1268,8 @@ abstract class AbstractDelegate<C extends JComponent>
      *               for which you can define the style properties.
      */
     public final void animateStyleFor( LifeTime lifetime, AnimatedStyler<C> styler ) {
+        Objects.requireNonNull(lifetime);
+        Objects.requireNonNull(styler);
         UI.run(()->{ // This method might be called by the application thread, so we need to run on the EDT!
             // We do the styling later in the paint method of a custom border implementation!
             this.animateFor(lifetime, state ->
@@ -1252,6 +1302,8 @@ abstract class AbstractDelegate<C extends JComponent>
      * @param styler The styling task which should be executed on the EDT at the end of the current event cycle.
      */
     public final void style( AnimationState state, Styler<C> styler ) {
+        Objects.requireNonNull(state);
+        Objects.requireNonNull(styler);
         UI.run(()->{ // This method might be called by the application thread, so we need to run on the EDT!
             // We do the styling later in the paint method of a custom border implementation!
             ComponentExtension.from(_component).addAnimationStyler(state, styler);
@@ -1268,6 +1320,7 @@ abstract class AbstractDelegate<C extends JComponent>
      *  @return An {@link Animator} instance which can be used to define how the animation should be executed.
      */
     public final Animator animateFor( double duration, TimeUnit unit ) {
+        Objects.requireNonNull(unit);
         return Animator.animateFor(LifeTime.of(duration, unit), _component());
     }
 
@@ -1280,6 +1333,7 @@ abstract class AbstractDelegate<C extends JComponent>
      *  @return An {@link Animator} instance which can be used to define how the animation should be executed.
      */
     public final Animator animateFor( LifeTime lifeTime ) {
+        Objects.requireNonNull(lifeTime);
         return Animator.animateFor(lifeTime, _component());
     }
 
@@ -1306,6 +1360,8 @@ abstract class AbstractDelegate<C extends JComponent>
      *  @param animation The animation that should be executed.
      */
     public final void animateFor( LifeTime lifeTime, Animation animation ) {
+        Objects.requireNonNull(lifeTime);
+        Objects.requireNonNull(animation);
         Animator.animateFor(lifeTime, _component()).go(animation);
     }
 
@@ -1320,6 +1376,8 @@ abstract class AbstractDelegate<C extends JComponent>
      *  @param animation The animation that should be executed.
      */
     public final void animateFor( double duration, TimeUnit unit, Animation animation ) {
+        Objects.requireNonNull(unit);
+        Objects.requireNonNull(animation);
         this.animateFor(duration, unit).go(animation);
     }
 

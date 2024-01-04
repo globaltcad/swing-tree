@@ -39,6 +39,8 @@ public final class Size
     }
 
     public static Size of( Dimension dimension ) {
+        if ( dimension == null )
+            return UNKNOWN;
         return of(dimension.width, dimension.height);
     }
 
