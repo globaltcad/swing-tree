@@ -9,8 +9,9 @@ import java.awt.GraphicsEnvironment;
 import java.util.Objects;
 
 /**
- *  A namespace for useful factory methods and
- *  layout constants (see {@link UILayoutConstants}).
+ *  A namespace for useful factory methods like
+ *  {@link #color(String)} and {@link #font(String)},
+ *  and layout constants (see {@link UILayoutConstants}).
  *  <br>
  *  <b>
  *      This class is intended to be used
@@ -102,6 +103,16 @@ public abstract class UINamespaceUtilities extends UILayoutConstants
     public static Color color( final String colorAsString )
     {
         Objects.requireNonNull(colorAsString);
+        try {
+            return _parseColor(colorAsString);
+        } catch ( Exception e ) {
+            log.error("Could not parse color '" + colorAsString + "'.", e);
+            return UI.COLOR_UNDEFINED;
+        }
+    }
+
+    private static Color _parseColor( final String colorAsString )
+    {
         // First some cleanup
         final String colorString = colorAsString.trim();
 
@@ -115,12 +126,16 @@ public abstract class UINamespaceUtilities extends UILayoutConstants
             // We have an rgb() or rgba() color
             int start = colorString.indexOf('(');
             int end = colorString.indexOf(')');
-            if ( start < 0 || end < 0 || end < start )
-                throw new IllegalArgumentException("Invalid rgb() or rgba() color: " + colorString);
+            if ( start < 0 || end < 0 || end < start ) {
+                log.error("Invalid rgb() or rgba() color: " + colorString, new Throwable());
+                return UI.COLOR_UNDEFINED;
+            }
 
             String[] parts = colorString.substring(start + 1, end).split(",");
-            if ( parts.length < 3 || parts.length > 4 )
-                throw new IllegalArgumentException("Invalid rgb() or rgba() color: " + colorString);
+            if ( parts.length < 3 || parts.length > 4 ) {
+                log.error("Invalid rgb() or rgba() color: " + colorString, new Throwable());
+                return UI.COLOR_UNDEFINED;
+            }
 
             for ( int i = 0; i < parts.length; i++ )
                 parts[i] = parts[i].trim();
@@ -132,8 +147,10 @@ public abstract class UINamespaceUtilities extends UILayoutConstants
                 if ( part.endsWith("%") ) {
                     part = part.substring(0, part.length() - 1);
                     values[i] = Integer.parseInt(part);
-                    if ( values[i] < 0 || values[i] > 100 )
-                        throw new IllegalArgumentException("Invalid rgb() or rgba() color: " + colorString);
+                    if ( values[i] < 0 || values[i] > 100 ) {
+                        log.error("Invalid rgb() or rgba() color: " + colorString, new Throwable());
+                        return UI.COLOR_UNDEFINED;
+                    }
                     values[i] = (int) Math.ceil(values[i] * 2.55);
                 }
                 else if ( part.matches("[0-9]+((\\.[0-9]+[fF]?)|[fF])") )
@@ -152,12 +169,16 @@ public abstract class UINamespaceUtilities extends UILayoutConstants
             // We have an hsb() or hsba() color
             int start = colorString.indexOf('(');
             int end = colorString.indexOf(')');
-            if ( start < 0 || end < 0 || end < start )
-                throw new IllegalArgumentException("Invalid hsb() or hsba() color: " + colorString);
+            if ( start < 0 || end < 0 || end < start ) {
+                log.error("Invalid hsb() or hsba() color: " + colorString, new Throwable());
+                return UI.COLOR_UNDEFINED;
+            }
 
             String[] parts = colorString.substring(start + 1, end).split(",");
-            if ( parts.length < 3 || parts.length > 4 )
-                throw new IllegalArgumentException("Invalid hsb() or hsba() color: " + colorString);
+            if ( parts.length < 3 || parts.length > 4 ) {
+                log.error("Invalid hsb() or hsba() color: " + colorString, new Throwable());
+                return UI.COLOR_UNDEFINED;
+            }
 
             for ( int i = 0; i < parts.length; i++ )
                 parts[i] = parts[i].trim();
@@ -169,23 +190,35 @@ public abstract class UINamespaceUtilities extends UILayoutConstants
                 if ( part.endsWith("%") ) {
                     part = part.substring(0, part.length() - 1);
                     values[i] = Float.parseFloat(part);
-                    if ( values[i] < 0 || values[i] > 100 )
-                        throw new IllegalArgumentException(
-                                "Invalid hsb() or hsba() string '" + colorString + "', value '" + part + "' out of range."
-                        );
+                    if ( values[i] < 0 || values[i] > 100 ) {
+                        log.error(
+                                "Invalid hsb() or hsba() string '" + colorString + "', " +
+                                "value '" + part + "' out of range.",
+                                new Throwable()
+                            );
+                        return UI.COLOR_UNDEFINED;
+                    }
                     values[i] = values[i] / 100.0f;
                 } else if ( part.endsWith("°") ) {
-                    if ( i > 0 )
-                        throw new IllegalArgumentException(
-                                "Invalid hsb() or hsba() string '" + colorString + "', unexpected degree symbol in '" + part + "' (only allowed for hue)"
+                    if ( i > 0 ) {
+                        log.error(
+                            "Invalid hsb() or hsba() string '" + colorString + "', " +
+                            "unexpected degree symbol in '" + part + "' (only allowed for hue)",
+                            new Throwable()
                         );
+                        return UI.COLOR_UNDEFINED;
+                    }
 
                     part = part.substring(0, part.length() - 1);
                     values[i] = Float.parseFloat(part);
-                    if ( values[i] < 0 || values[i] > 360 )
-                        throw new IllegalArgumentException(
-                                "Invalid hsb() or hsba() string '" + colorString + "', hue value '" + part + "' out of range."
+                    if ( values[i] < 0 || values[i] > 360 ) {
+                        log.error(
+                            "Invalid hsb() or hsba() string '" + colorString + "', " +
+                            "hue value '" + part + "' out of range.",
+                            new Throwable()
                         );
+                        return UI.COLOR_UNDEFINED;
+                    }
                     values[i] = values[i] / 360.0f;
                 } else if ( part.matches("[0-9]+((\\.[0-9]+[fF]?)|[fF])") )
                     values[i] = Float.parseFloat(part);
@@ -299,10 +332,10 @@ public abstract class UINamespaceUtilities extends UILayoutConstants
     }
 
     /**
-     * Returns the {@code Font} that the {@code str}
+     * Returns the {@code Font} that the {@code fontString}
      * argument describes.
      * To ensure that this method returns the desired Font,
-     * format the {@code str} parameter in
+     * format the {@code fontString} parameter in
      * one of these ways
      *
      * <ul>
@@ -342,9 +375,9 @@ public abstract class UINamespaceUtilities extends UILayoutConstants
      * as valid fields with the default value for that field.
      *<p>
      * Some font names may include the separator characters ' ' or '-'.
-     * If {@code str} is not formed with 3 components, e.g. such that
+     * If {@code fontString} is not formed with 3 components, e.g. such that
      * {@code style} or {@code pointsize} fields are not present in
-     * {@code str}, and {@code fontname} also contains a
+     * {@code fontString}, and {@code fontname} also contains a
      * character determined to be the separator character
      * then these characters where they appear as intended to be part of
      * {@code fontname} may instead be interpreted as separators
@@ -353,20 +386,20 @@ public abstract class UINamespaceUtilities extends UILayoutConstants
      * <p>
      * The default size is 12 and the default style is PLAIN.
      * If {@code str} does not specify a valid size, the returned
-     * {@code Font} has a size of 12.  If {@code str} does not
+     * {@code Font} has a size of 12.  If {@code fontString} does not
      * specify a valid style, the returned Font has a style of PLAIN.
      * If you do not specify a valid font name in
-     * the {@code str} argument, this method will return
+     * the {@code fontString} argument, this method will return
      * a font with the family name "Dialog".
      * To determine what font family names are available on
      * your system, use the
      * {@link GraphicsEnvironment#getAvailableFontFamilyNames()} method.
-     * If {@code str} is {@code null}, a new {@code Font}
+     * If {@code fontString} is {@code null}, a new {@code Font}
      * is returned with the family name "Dialog", a size of 12 and a
      * PLAIN style.
      * @param fontString the name of the font, or {@code null}
-     * @return the {@code Font} object that {@code str} describes.
-     * @throws NullPointerException if {@code str} is {@code null}
+     * @return the {@code Font} object that {@code fontString} describes.
+     * @throws NullPointerException if {@code fontString} is {@code null}
      */
     public static Font font( String fontString ) {
         Objects.requireNonNull(fontString);
