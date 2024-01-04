@@ -116,6 +116,9 @@ public abstract class UINamespaceUtilities extends UILayoutConstants
         // First some cleanup
         final String colorString = colorAsString.trim();
 
+        if ( colorAsString.isEmpty() )
+            return UI.COLOR_UNDEFINED;
+
         if ( colorString.startsWith("#") )
             return Color.decode(colorString);
 

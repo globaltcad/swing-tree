@@ -109,6 +109,7 @@ class Styles_Spec extends Specification
             "transparent blue"             | new Color(0, 0, 255, 127)
             "light indigo"                 | new Color(107, 0, 185)
             "dark navy"                    | new Color(0, 0, 89)
+            ""                             | UI.COLOR_UNDEFINED
             "I make no sense!"             | UI.COLOR_UNDEFINED
             "I make no sense! at all!"     | UI.COLOR_UNDEFINED
             "Hold my b(0/&/§H%,1fu3s98s"   | UI.COLOR_UNDEFINED
