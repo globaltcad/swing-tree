@@ -27,25 +27,35 @@ import java.util.Objects;
  */
 final class PainterStyle
 {
-    private static final PainterStyle _NONE = new PainterStyle(Painter.none());
+    private static final PainterStyle _NONE = new PainterStyle(Painter.none(), UI.ComponentArea.BODY);
 
 
     public static PainterStyle none() { return _NONE; }
 
+    public static PainterStyle of( Painter painter, UI.ComponentArea area ) {
+        if ( painter == Painter.none() )
+            return none();
+        else
+            return new PainterStyle(painter, area);
+    }
+
 
     private final Painter _painter;
+    private final UI.ComponentArea _clipArea;
 
 
-    private PainterStyle( Painter painter )
+    private PainterStyle( Painter painter, UI.ComponentArea area )
     {
-        _painter = painter;
+        _painter = Objects.requireNonNull(painter);
+        _clipArea = Objects.requireNonNull(area);
     }
 
 
     public Painter painter() { return _painter; }
 
-    public PainterStyle painter(Painter painter) { return new PainterStyle(painter); }
-
+    public UI.ComponentArea clipArea() {
+        return _clipArea;
+    }
 
     @Override
     public String toString() {
@@ -53,7 +63,8 @@ final class PainterStyle
             return this.getClass().getSimpleName() + "[NONE]";
         else
             return this.getClass().getSimpleName() + "[" +
-                    "painter=" + StyleUtility.toString(_painter) +
+                    "painter=" + StyleUtility.toString(_painter) + ", " +
+                    "clipArea=" + _clipArea +
                 ']';
     }
 

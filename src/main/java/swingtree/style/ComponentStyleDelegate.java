@@ -736,12 +736,63 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  will be called using the {@link Graphics2D} of the current component.
      *  You may use this to render a custom background for the component.
      * @param layer The layer on which the painter should do its work.
-     * @param renderer The background renderer.
+     *              It is an enum instance which
+     *              gives the painter a particular rank in the painting order.
+     *              So the {@link swingtree.UI.Layer#BACKGROUND} will be painted first,
+     *              followed by the {@link swingtree.UI.Layer#CONTENT} and so on...
+     *              <br>
+     *              The following layers are available:
+     *              <ul>
+     *                  <li>{@link UI.Layer#BACKGROUND}</li>
+     *                  <li>{@link UI.Layer#CONTENT}</li>
+     *                  <li>{@link UI.Layer#BORDER}</li>
+     *                  <li>{@link UI.Layer#FOREGROUND}</li>
+     *              </ul>
+     * @param painter A custom painter, which receives the {@link Graphics2D} instance of the current component.
      * @return A new {@link ComponentStyleDelegate} with the provided background renderer.
      */
-    public ComponentStyleDelegate<C> painter( UI.Layer layer, swingtree.api.Painter renderer ) {
-        return _withStyle(_style.painter(layer, StyleUtility.DEFAULT_KEY, renderer));
+    public ComponentStyleDelegate<C> painter( UI.Layer layer, swingtree.api.Painter painter ) {
+        return _withStyle(_style.painter(layer, UI.ComponentArea.BODY, StyleUtility.DEFAULT_KEY, painter));
     }
+
+    /**
+     *  Returns a new {@link Style} with the provided custom {@link swingtree.api.Painter}, which
+     *  will be called using the {@link Graphics2D} of the current component.
+     *  You may use this to render a custom background for the component on the specified {@link swingtree.UI.Layer}
+     *  and {@link swingtree.UI.ComponentArea}.
+     * @param layer The layer on which the painter should do its work.
+     *              It is an enum instance which
+     *              gives the painter a particular rank in the painting order.
+     *              So the {@link swingtree.UI.Layer#BACKGROUND} will be painted first,
+     *              followed by the {@link swingtree.UI.Layer#CONTENT} and so on...
+     *              <br>
+     *              The following layers are available:
+     *              <ul>
+     *                  <li>{@link UI.Layer#BACKGROUND}</li>
+     *                  <li>{@link UI.Layer#CONTENT}</li>
+     *                  <li>{@link UI.Layer#BORDER}</li>
+     *                  <li>{@link UI.Layer#FOREGROUND}</li>
+     *              </ul>
+     * @param clipArea The area to which the painting should be confined. Paint operations outside of this area will be clipped away.
+     *                 The following areas are available:
+     *                 <ul>
+     *                      <li>{@link UI.ComponentArea#ALL}</li>
+     *                      <li>{@link UI.ComponentArea#EXTERIOR}</li>
+     *                      <li>{@link UI.ComponentArea#BORDER}</li>
+     *                      <li>{@link UI.ComponentArea#INTERIOR}</li>
+     *                      <li>{@link UI.ComponentArea#BODY}</li>
+     *                 </ul>
+     * @param painter A custom painter, which receives the {@link Graphics2D} instance of the current component.
+     * @return A new {@link ComponentStyleDelegate} with the provided background renderer.
+     */
+    public ComponentStyleDelegate<C> painter(
+        UI.Layer              layer,
+        UI.ComponentArea      clipArea,
+        swingtree.api.Painter painter
+    ) {
+        return _withStyle(_style.painter(layer, clipArea, StyleUtility.DEFAULT_KEY, painter));
+    }
+
 
     /**
      *  Returns a new {@link Style} with the provided named {@link swingtree.api.Painter}, which
@@ -765,11 +816,54 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *                  <li>{@link UI.Layer#FOREGROUND}</li>
      *              </ul>
      * @param painterName The name of the painter.
-     * @param renderer The background renderer.
+     * @param painter The custom painter lambda to which the {@link Graphics2D} instance of the current component will be passed.
      * @return A new {@link ComponentStyleDelegate} with the provided background renderer.
      */
-    public ComponentStyleDelegate<C> painter( UI.Layer layer, String painterName, swingtree.api.Painter renderer ) {
-        return _withStyle(_style.painter(layer, painterName, renderer));
+    public ComponentStyleDelegate<C> painter( UI.Layer layer, String painterName, swingtree.api.Painter painter ) {
+        return _withStyle(_style.painter(layer, UI.ComponentArea.BODY, painterName, painter));
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided named {@link swingtree.api.Painter}, which
+     *  will be called using the {@link Graphics2D} instance of the current component.
+     *  You may use this to render custom styles for the component... <br>
+     *  The name can be used to override {@link swingtree.api.Painter} instances with that same name
+     *  or use a unique name to ensure that you style is not overridden by another style.
+     *  This allows you to attach an arbitrary number of custom painters to a component.
+     *
+     * @param layer The layer on which the painter should do its work.
+     *              It is an enum instance which
+     *              gives the painter a particular rank in the painting order.
+     *              So the {@link swingtree.UI.Layer#BACKGROUND} will be painted first,
+     *              followed by the {@link swingtree.UI.Layer#CONTENT} and so on...
+     *              <br>
+     *              The following layers are available:
+     *              <ul>
+     *                  <li>{@link UI.Layer#BACKGROUND}</li>
+     *                  <li>{@link UI.Layer#CONTENT}</li>
+     *                  <li>{@link UI.Layer#BORDER}</li>
+     *                  <li>{@link UI.Layer#FOREGROUND}</li>
+     *              </ul>
+     * @param clipArea The area to which the painting should be confined. Paint operations outside of this area will be clipped away.
+     *                 The following areas are available:
+     *                 <ul>
+     *                      <li>{@link UI.ComponentArea#ALL}</li>
+     *                      <li>{@link UI.ComponentArea#EXTERIOR}</li>
+     *                      <li>{@link UI.ComponentArea#BORDER}</li>
+     *                      <li>{@link UI.ComponentArea#INTERIOR}</li>
+     *                      <li>{@link UI.ComponentArea#BODY}</li>
+     *                 </ul>
+     * @param painterName The name of the painter.
+     * @param painter The custom painter lambda to which the {@link Graphics2D} instance of the current component will be passed.
+     * @return A new {@link ComponentStyleDelegate} with the provided background renderer.
+     */
+    public ComponentStyleDelegate<C> painter(
+        UI.Layer              layer,
+        UI.ComponentArea      clipArea,
+        String                painterName,
+        swingtree.api.Painter painter
+    ) {
+        return _withStyle(_style.painter(layer, clipArea, painterName, painter));
     }
 
     /**

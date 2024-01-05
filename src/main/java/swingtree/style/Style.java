@@ -159,29 +159,26 @@ public final class Style
     /**
      * @return An unmodifiable list of painters sorted by their names in ascending alphabetical order.
      */
-    List<Painter> painters( UI.Layer layer ) {
+    List<PainterStyle> painters( UI.Layer layer ) {
         return Collections.unmodifiableList(
-                        _layers.get(layer)
-                        .painters()
-                        .sortedByNamesAndFilteredBy()
-                        .stream()
-                        .map(PainterStyle::painter)
-                        .collect(Collectors.toList())
-                    );
+                            new ArrayList<>(_layers.get(layer)
+                                .painters()
+                                .sortedByNamesAndFilteredBy()
+                            )
+                        );
     }
 
-    Style painter( UI.Layer layer, String painterName, Painter painter ) {
+    Style painter( UI.Layer layer, UI.ComponentArea area, String painterName, Painter painter ) {
         Objects.requireNonNull(painterName);
         Objects.requireNonNull(painter);
-        painterName = painterName + "_" + layer.name();
         // We clone the painter map:
         NamedStyles<PainterStyle> newPainters = _layers.get(layer)
                                                     .painters()
                                                     .withNamedStyle(
                                                         painterName, // Existing painters are overwritten if they have the same name.
-                                                        PainterStyle.none().painter(painter)
+                                                        PainterStyle.of(painter, area)
                                                     ); 
-        return painter(layer, newPainters);
+        return _withPainters(layer, newPainters);
     }
 
     /**
@@ -193,8 +190,8 @@ public final class Style
     public Style onlyRetainingRenderCacheRelevantConfForLayer( UI.Layer layer ) {
         return new Style(
                     LayoutStyle.none(),
-                    ( layer == UI.Layer.BORDER ? _border : _border.withColor(null) ),
-                    ( layer == UI.Layer.BACKGROUND ? _base : BaseStyle.none() ),
+                    ( layer == UI.Layer.BORDER     ? _border : _border.withColor(null) ),
+                    ( layer == UI.Layer.BACKGROUND ? _base   : BaseStyle.none() ),
                     FontStyle.none(),
                     DimensionalityStyle.none(),
                     _layers.onlyRetainingAsUnnamedLayer(layer),
@@ -316,7 +313,7 @@ public final class Style
         return new Style(_layout, _border, _base, _font, _dimensionality, layers, _properties);
     }
 
-    Style painter( UI.Layer layer, NamedStyles<PainterStyle> painters ) {
+    Style _withPainters( UI.Layer layer, NamedStyles<PainterStyle> painters ) {
         Objects.requireNonNull(painters);
         return new Style(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withPainters(painters)), _properties);
     }
