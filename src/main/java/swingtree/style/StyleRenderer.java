@@ -34,13 +34,13 @@ final class StyleRenderer
                 // Check if the color is transparent
                 if ( outerColor.getAlpha() > 0 ) {
                     g2d.setColor(outerColor);
-                    g2d.fill(conf.getExteriorComponentArea());
+                    g2d.fill(conf.get(UI.ComponentArea.EXTERIOR));
                 }
             });
             conf.style().base().backgroundColor().ifPresent(color -> {
                 if ( color.getAlpha() == 0 ) return;
                 g2d.setColor(color);
-                g2d.fill(conf.getMainComponentArea());
+                g2d.fill(conf.get(UI.ComponentArea.BODY));
             });
         }
 
@@ -64,12 +64,12 @@ final class StyleRenderer
             if ( gradient.colors().length > 0 ) {
                 if ( gradient.colors().length == 1 ) {
                     g2d.setColor(gradient.colors()[0]);
-                    g2d.fill(conf.getMainComponentArea());
+                    g2d.fill(conf.get(UI.ComponentArea.BODY));
                 }
                 else if ( gradient.transition().isDiagonal() )
-                    _renderDiagonalGradient(g2d, conf.currentBounds(), conf.style().margin(), gradient, conf.getMainComponentArea());
+                    _renderDiagonalGradient(g2d, conf.currentBounds(), conf.style().margin(), gradient, conf.get(UI.ComponentArea.BODY));
                 else
-                    _renderVerticalOrHorizontalGradient(g2d, conf.currentBounds(), conf.style().margin(), gradient, conf.getMainComponentArea());
+                    _renderVerticalOrHorizontalGradient(g2d, conf.currentBounds(), conf.style().margin(), gradient, conf.get(UI.ComponentArea.BODY));
             }
 
         // 3. Shadows, which are simple gradient based drop shadows that can go inwards or outwards
@@ -122,7 +122,7 @@ final class StyleRenderer
     {
         if ( !Outline.none().equals(conf.style().border().widths()) ) {
             try {
-                Area borderArea = conf.getComponentBorderArea();
+                Area borderArea = conf.get(UI.ComponentArea.BORDER);
                 g2d.setColor(color);
                 g2d.fill(borderArea);
 
@@ -220,7 +220,7 @@ final class StyleRenderer
             baseArea = ComponentAreas.calculateBaseArea(conf, artifactAdjustment, artifactAdjustment, artifactAdjustment, artifactAdjustment);
         }
         else
-            baseArea = new Area(conf.getMainComponentArea());
+            baseArea = new Area(conf.get(UI.ComponentArea.BODY));
 
         // Apply the clipping to avoid overlapping the shadow and the box
         Area shadowArea = new Area(outerShadowRect);
@@ -817,7 +817,7 @@ final class StyleRenderer
     ) {
         if ( style.primer().isPresent() ) {
             g2d.setColor(style.primer().get());
-            g2d.fill(_areaFrom(style.clipArea(), conf));
+            g2d.fill(conf.get(style.clipArea()));
         }
 
         style.image().ifPresent( imageIcon -> {
@@ -929,7 +929,7 @@ final class StyleRenderer
 
             final Shape oldClip = g2d.getClip();
 
-            Shape newClip = _areaFrom(style.clipArea(), conf);
+            Shape newClip = conf.get(style.clipArea());
             // We merge the new clip with the old one:
             if ( newClip != null && oldClip != null )
                 newClip = StyleUtility.intersect( newClip, oldClip );
@@ -961,7 +961,7 @@ final class StyleRenderer
                         Paint oldPaint = g2d.getPaint();
                         try {
                             g2d.setPaint(new TexturePaint((BufferedImage) image, new Rectangle(x, y, imgWidth, imgHeight)));
-                            g2d.fill(conf.getMainComponentArea());
+                            g2d.fill(conf.get(UI.ComponentArea.BODY));
                         } finally {
                             g2d.setPaint(oldPaint);
                         }
@@ -975,24 +975,6 @@ final class StyleRenderer
             }
             g2d.setClip(oldClip);
         });
-    }
-
-    private static Area _areaFrom( UI.ComponentArea areaType, ComponentConf conf ) {
-            switch ( areaType ) {
-                case ALL:
-                    return null; // No clipping
-                case BODY:
-                    return conf.getMainComponentArea(); // all - exterior == interior + border
-                case INTERIOR:
-                    return conf.getInteriorComponentArea(); // all - exterior - border == content - border
-                case BORDER:
-                    return conf.getComponentBorderArea(); // all - exterior - interior
-                case EXTERIOR:
-                    return conf.getExteriorComponentArea(); // all - border - interior
-                default:
-                    log.warn("Unknown clip area: " + areaType);
-                    return null;
-            }
     }
 
 }

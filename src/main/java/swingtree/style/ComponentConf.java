@@ -62,36 +62,33 @@ final class ComponentConf
     Optional<Shape> componentArea() {
         Shape contentClip = null;
         if ( _areas.bodyArea().exists() || _style.margin().isPositive() )
-            contentClip = getMainComponentArea();
+            contentClip = get(UI.ComponentArea.BODY);
 
         return Optional.ofNullable(contentClip);
     }
 
-    Area getMainComponentArea()
-    {
-        return _areas.bodyArea().getFor(this, _areas);
-    }
-
-    Area getExteriorComponentArea()
-    {
-        return _areas.exteriorArea().getFor(this, _areas);
-    }
-
-    Area getInteriorComponentArea()
-    {
-        return _areas.interiorArea().getFor(this, _areas);
-    }
-
-    Area getComponentBorderArea()
-    {
-        return _areas.borderArea().getFor(this, _areas);
+    public Area get( UI.ComponentArea areaType ) {
+        switch ( areaType ) {
+            case ALL:
+                return null; // No clipping
+            case BODY:
+                return _areas.bodyArea().getFor(this, _areas); // all - exterior == interior + border
+            case INTERIOR:
+                return _areas.interiorArea().getFor(this, _areas); // all - exterior - border == content - border
+            case BORDER:
+                return _areas.borderArea().getFor(this, _areas); // all - exterior - interior
+            case EXTERIOR:
+                return _areas.exteriorArea().getFor(this, _areas); // all - border - interior
+            default:
+                return null;
+        }
     }
 
 
     void paintWithContentAreaClip(Graphics g, Runnable painter ) {
         Shape oldClip = g.getClip();
 
-        Shape newClip = getMainComponentArea();
+        Shape newClip = get(UI.ComponentArea.BODY);
         if ( newClip != null && newClip != oldClip ) {
             newClip = StyleUtility.intersect(newClip, oldClip);
             g.setClip(newClip);
