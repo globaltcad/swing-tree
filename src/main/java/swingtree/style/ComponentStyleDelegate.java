@@ -36,7 +36,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
     private final Style _style;
 
 
-    public ComponentStyleDelegate( C component, Style style ) {
+    ComponentStyleDelegate( C component, Style style ) {
         _component = Objects.requireNonNull(component);
         _style     = Objects.requireNonNull(style);
     }
@@ -68,7 +68,9 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param peeker A {@link Peeker} that takes the {@link JComponent} of this {@link ComponentStyleDelegate}
      * @return This {@link ComponentStyleDelegate} instance.
      */
-    public ComponentStyleDelegate<C> peek( Peeker<C> peeker ) {
+    public ComponentStyleDelegate<C> peek( Peeker<C> peeker )
+    {
+        Objects.requireNonNull(peeker);
         try {
             peeker.accept(_component);
         } catch( Exception e ) {
@@ -113,6 +115,8 @@ public final class ComponentStyleDelegate<C extends JComponent>
         boolean condition,
         Styler<C> styler
     ) {
+        Objects.requireNonNull(styler);
+
         if ( !condition )
             return this;
 
@@ -422,6 +426,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided border width for the specified edge.
      */
     public ComponentStyleDelegate<C> borderWidthAt( UI.Edge edge, double width ) {
+        Objects.requireNonNull(edge);
         return _withStyle(_style._withBorder(_style.border().withWidthAt(edge, (float) width)));
     }
 
@@ -1631,6 +1636,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  @return A new {@link ComponentStyleDelegate} with the provided font alignment.
      */
     public ComponentStyleDelegate<C> fontAlignment( UI.HorizontalAlignment alignment ) {
+        Objects.requireNonNull(alignment);
         return _withStyle(_style._withFont(_style.font().withHorizontalAlignment(alignment)));
     }
 
@@ -1644,6 +1650,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  @return A new {@link ComponentStyleDelegate} with the provided font alignment.
      */
     public ComponentStyleDelegate<C> fontAlignment( UI.VerticalAlignment alignment ) {
+        Objects.requireNonNull(alignment);
         return _withStyle(_style._withFont(_style.font().withVerticalAlignment(alignment)));
     }
 
@@ -1657,6 +1664,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  @return A new {@link ComponentStyleDelegate} with the provided font alignment.
      */
     public ComponentStyleDelegate<C> fontAlignment( UI.Alignment alignment ) {
+        Objects.requireNonNull(alignment);
         return fontAlignment(alignment.getHorizontal()).fontAlignment(alignment.getVertical());
     }
 
@@ -1682,6 +1690,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *          applied to the underlying component when the final {@link Style} is applied.
      */
     public ComponentStyleDelegate<C> minSize( Size size ) {
+        Objects.requireNonNull(size);
         return _withStyle(_style._withDimensionality(_style.dimensionality()._withMinSize(size)));
     }
 
@@ -1733,6 +1742,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *          applied to the underlying component when the final {@link Style} is applied.
      */
     public ComponentStyleDelegate<C> maxSize( Size maxSize ) {
+        Objects.requireNonNull(maxSize);
         return _withStyle(_style._withDimensionality(_style.dimensionality()._withMaxSize(maxSize)));
     }
 
@@ -2019,6 +2029,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided layout constraints set to be later
      */
     public ComponentStyleDelegate<C> layout( LayoutConstraint constraintAttr ) {
+        Objects.requireNonNull(constraintAttr);
         return layout(constraintAttr.toString());
     }
 
