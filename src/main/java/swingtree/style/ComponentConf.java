@@ -88,7 +88,7 @@ final class ComponentConf
     void paintClippedTo(UI.ComponentArea area, Graphics g, Runnable painter ) {
         Shape oldClip = g.getClip();
 
-        Shape newClip = get(UI.ComponentArea.BODY);
+        Shape newClip = get(area);
         if ( newClip != null && newClip != oldClip ) {
             newClip = StyleUtility.intersect(newClip, oldClip);
             g.setClip(newClip);

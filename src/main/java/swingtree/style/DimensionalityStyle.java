@@ -14,13 +14,13 @@ import java.util.Optional;
 final class DimensionalityStyle
 {
     private static final DimensionalityStyle _NONE = new DimensionalityStyle(
-                                                        Size.unknown(),
-                                                        Size.unknown(),
-                                                        Size.unknown(),
-                                                        Size.unknown()
-                                                    );
+                                                            Size.unknown(),
+                                                            Size.unknown(),
+                                                            Size.unknown(),
+                                                            Size.unknown()
+                                                        );
 
-    public static DimensionalityStyle none() { return _NONE; }
+    static DimensionalityStyle none() { return _NONE; }
 
 
     private final Size _minSize;
