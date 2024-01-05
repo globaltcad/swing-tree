@@ -344,7 +344,7 @@ public final class ComponentExtension<C extends JComponent>
 
     void paintWithContentAreaClip( Graphics g, Runnable painter ) {
         gatherApplyAndInstallStyleConfig();
-        _styleEngine.getComponentConf().paintWithContentAreaClip(g, painter);
+        _styleEngine.getComponentConf().paintClippedTo(UI.ComponentArea.BODY, g, painter);
     }
 
     /**

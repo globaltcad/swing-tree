@@ -3,7 +3,6 @@ package swingtree.style;
 import org.slf4j.Logger;
 import swingtree.UI;
 import swingtree.animation.LifeSpan;
-import swingtree.animation.LifeTime;
 import swingtree.api.Painter;
 
 import javax.swing.JComponent;
@@ -170,7 +169,7 @@ final class StyleEngine
 
     private void _render( UI.Layer layer, Graphics2D g2d ) {
         _layerCaches[layer.ordinal()].paint(this._componentConf, g2d, (conf,graphics) -> {
-            StyleRenderer.renderStyleFor(conf, layer, graphics);
+            StyleRenderer.renderStyleOn(layer, conf, graphics);
         });
     }
 

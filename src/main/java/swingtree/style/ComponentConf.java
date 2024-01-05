@@ -85,7 +85,7 @@ final class ComponentConf
     }
 
 
-    void paintWithContentAreaClip(Graphics g, Runnable painter ) {
+    void paintClippedTo(UI.ComponentArea area, Graphics g, Runnable painter ) {
         Shape oldClip = g.getClip();
 
         Shape newClip = get(UI.ComponentArea.BODY);

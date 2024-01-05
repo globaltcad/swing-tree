@@ -25,22 +25,22 @@ final class StyleRenderer
     private StyleRenderer() {} // Un-instantiable!
 
 
-    public static void renderStyleFor( ComponentConf conf, UI.Layer layer, Graphics2D g2d )
+    public static void renderStyleOn( UI.Layer layer, ComponentConf conf, Graphics2D g2d )
     {
         // First up, we render things unique to certain layers:
 
         if ( layer == UI.Layer.BACKGROUND ) {
             conf.style().base().foundationColor().ifPresent(outerColor -> {
-                // Check if the color is transparent
-                if ( outerColor.getAlpha() > 0 ) {
+                if ( outerColor.getAlpha() > 0 ) { // Avoid rendering a fully transparent color!
                     g2d.setColor(outerColor);
                     g2d.fill(conf.get(UI.ComponentArea.EXTERIOR));
                 }
             });
             conf.style().base().backgroundColor().ifPresent(color -> {
-                if ( color.getAlpha() == 0 ) return;
-                g2d.setColor(color);
-                g2d.fill(conf.get(UI.ComponentArea.BODY));
+                if ( color.getAlpha() > 0 ) { // Avoid rendering a fully transparent color!
+                    g2d.setColor(color);
+                    g2d.fill(conf.get(UI.ComponentArea.BODY));
+                }
             });
         }
 
@@ -78,18 +78,20 @@ final class StyleRenderer
 
         // 4. Painters, which are provided by the user and can be anything
         List<PainterStyle> painters = conf.style().painters(layer);
+
         if ( !painters.isEmpty() )
-            conf.paintWithContentAreaClip( g2d, () -> {
-                // We remember the current transform and clip so that we can reset them after each painter:
-                AffineTransform currentTransform = new AffineTransform(g2d.getTransform());
-                Shape           currentClip      = g2d.getClip();
+        {
+            for ( PainterStyle painterStyle : painters )
+            {
+                Painter backgroundPainter = painterStyle.painter();
 
-                for ( PainterStyle painterStyle : painters )
-                {
-                    Painter backgroundPainter = painterStyle.painter();
+                if ( backgroundPainter == Painter.none() )
+                    break;
 
-                    if ( backgroundPainter == Painter.none() )
-                        return;
+                conf.paintClippedTo( painterStyle.clipArea(), g2d, () -> {
+                    // We remember the current transform and clip so that we can reset them after each painter:
+                    AffineTransform currentTransform = new AffineTransform(g2d.getTransform());
+                    Shape           currentClip      = g2d.getClip();
 
                     try {
                         backgroundPainter.paint(g2d);
@@ -114,8 +116,10 @@ final class StyleRenderer
                         g2d.setTransform(currentTransform);
                         g2d.setClip(currentClip);
                     }
-                }
-            });
+                });
+            }
+        }
+        // And that's it! We have rendered a style layer!
     }
 
     private static void _drawBorder( ComponentConf conf, Color color, Graphics2D g2d )
