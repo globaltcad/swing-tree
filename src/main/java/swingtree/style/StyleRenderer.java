@@ -203,10 +203,12 @@ final class StyleRenderer
                                         h + blurRadius * 2 - spreadRadius * 2
                                     );
 
+        Function<Integer, Integer> offsetFunction = (radius) -> (int)((radius * 2) / ( shadow.isInset() ? 4.5 : 3.79) );
+
         final int averageCornerRadius = ((int) ( topLeftRadius + topRightRadius + bottomRightRadius + bottomLeftRadius )) / 4;
         final int averageBorderWidth  = (int) (( leftBorderWidth + topBorderWidth + rightBorderWidth +  bottomBorderWidth ) / 4);
         final int shadowCornerRadius  = (int) Math.max( 0, averageCornerRadius + (shadow.isOutset() ? -spreadRadius-blurRadius*2 : -Math.max(averageBorderWidth,spreadRadius)) );
-        final int gradientStartOffset = 1 + shadowCornerRadius / 2;
+        final int gradientStartOffset = 1 + offsetFunction.apply(shadowCornerRadius);
 
         Rectangle2D.Float innerShadowRect = new Rectangle2D.Float(
                                         x + blurRadius + gradientStartOffset + spreadRadius,
