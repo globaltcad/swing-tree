@@ -45,15 +45,15 @@ public class SoftUIStyleSheet extends StyleSheet
         );
         add(group(Soft.BANNER).inherits(Soft.BASE), it -> it
             .shadow("bright", s -> s
-                .color(new Color(0.7f, 0.95f, 1f, 0.35f))
+                .color(new Color(1f, 1f, 1f, 0.25f))
                 .offset(-10)
             )
             .shadow("dark", s -> s
                 .color(new Color(0, 0.1f, 0.2f, 0.25f))
-                .offset(+9)
+                .offset(+6)
             )
             .shadowBlurRadius(13)
-            .shadowSpreadRadius(-2)
+            .shadowSpreadRadius(-7)
             .shadowIsInset(false)
             .gradient("default", grad -> grad
                 .transition(UI.Transition.TOP_LEFT_TO_BOTTOM_RIGHT)
@@ -89,7 +89,7 @@ public class SoftUIStyleSheet extends StyleSheet
                 .offset(-11)
             )
             .shadow("dark", s -> s
-                .color(new Color(0, 0.1f, 0.2f, 0.20f))
+                .color(new Color(0, 0.1f, 0.2f, 0.15f))
                 .offset(+4)
             )
             .shadowBlurRadius(13)
@@ -108,14 +108,14 @@ public class SoftUIStyleSheet extends StyleSheet
             .foundationColor(new Color(0.4f, 0.85f, 1))
             .shadow("bright", s -> s
                 .color(new Color(0.7f, 0.95f, 1f, 0.35f))
-                .offset(-11)
+                .offset(-10)
             )
             .shadow("dark", s -> s
                 .color(new Color(0, 0.1f, 0.2f, 0.20f))
                 .offset(+6)
             )
             .shadowBlurRadius(13)
-            .shadowSpreadRadius(-5)
+            .shadowSpreadRadius(-7)
             .shadowIsInset(false)
             .padding(30)
             .margin(10)
