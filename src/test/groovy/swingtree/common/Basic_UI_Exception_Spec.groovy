@@ -216,14 +216,14 @@ class Basic_UI_Exception_Spec extends Specification
             var ui = UI.panel()
         when : 'We use the builder node once.'
             var ui2 = ui.add(UI.label("Hello World!"))
-        then : 'One builder node has a normal String representation and the other one is striked through.'
+        then : 'One builder node has a normal String representation and the other one is struck through.'
             ui.toString() == "U̶I̶F̶o̶r̶P̶a̶n̶e̶l̶[̶s̶w̶i̶n̶g̶t̶r̶e̶e̶.̶U̶I̶\$̶P̶a̶n̶e̶l̶]̶"
             ui2.toString() == "UIForPanel[swingtree.UI\$Panel]"
 
         when : 'We use another type of builder node and do the same thing.'
             ui = UI.label("Hello World!")
             ui2 = ui.withFont(new Font("Arial", Font.BOLD, 12))
-        then : 'One builder node has a normal String representation and the other one is striked through.'
+        then : 'One builder node has a normal String representation and the other one is struck through.'
             ui.toString() == "U̶I̶F̶o̶r̶L̶a̶b̶e̶l̶[̶s̶w̶i̶n̶g̶t̶r̶e̶e̶.̶U̶I̶\$̶L̶a̶b̶e̶l̶]̶"
             ui2.toString() == "UIForLabel[swingtree.UI\$Label]"
     }

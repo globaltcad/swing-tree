@@ -149,7 +149,7 @@ class Style_Animations_Spec extends Specification
             temporarily change the component to support your animated style.
         """
         given : 'We create a simple `JLabel` UI component with a style animation.'
-            var label = UI.label("Click me!")
+            var ui = UI.label("Click me!")
                         .onMouseClick(it ->
                             it.animateFor(1, TimeUnit.SECONDS, state ->
                                 it.style(state, style -> style
@@ -158,42 +158,43 @@ class Style_Animations_Spec extends Specification
                                 )
                             )
                         )
+            var label = ui.component
 
         expect : 'It has the expected initial state.'
-            label.component.border == null
-            label.component.background == new Color(238, 238, 238) // default background color of a JLabel
-            label.component.foreground == new Color(51, 51, 51) // default foreground color of a JLabel
-            label.component.getUI() instanceof MetalLabelUI
+            label.border == null
+            label.background == new Color(238, 238, 238) // default background color of a JLabel
+            label.foreground == new Color(51, 51, 51) // default foreground color of a JLabel
+            label.getUI() instanceof MetalLabelUI
 
         when : 'We simulate a user click event programmatically'
             // Note that there is no "onMouseClick()" method on the label.
             // Instead we need to do this:
-            label.component.dispatchEvent(new MouseEvent(label.component, MouseEvent.MOUSE_CLICKED, System.currentTimeMillis(), 0, 0, 0, 1, false))
+            label.dispatchEvent(new MouseEvent(label, MouseEvent.MOUSE_CLICKED, System.currentTimeMillis(), 0, 0, 0, 1, false))
             Thread.sleep(50)
             UI.sync()
-            label.component.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+            label.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
 
 
         then : """
             The border will have a custom border installed.
         """
-            label.component.border != null
-            label.component.background != new Color(238, 238, 238)
-            label.component.foreground == new Color(51, 51, 51)
-            label.component.getUI() instanceof MetalLabelUI
+            label.border != null
+            label.background != new Color(238, 238, 238)
+            label.foreground == new Color(51, 51, 51)
+            label.getUI() instanceof MetalLabelUI
 
         when : 'We wait for the animation to end...'
             Thread.sleep(2000)
             UI.sync()
-            label.component.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+            label.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
 
         then : """
             The border will have been uninstalled.
         """
-            label.component.border == null
-            label.component.background == new Color(238, 238, 238)
-            label.component.foreground == new Color(51, 51, 51)
-            label.component.getUI() instanceof MetalLabelUI
+            label.border == null
+            label.background == new Color(238, 238, 238)
+            label.foreground == new Color(51, 51, 51)
+            label.getUI() instanceof MetalLabelUI
     }
 
 

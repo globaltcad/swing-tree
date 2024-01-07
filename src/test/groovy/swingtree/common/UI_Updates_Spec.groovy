@@ -39,14 +39,17 @@ class UI_Updates_Spec extends Specification
                         it.component.text = LocalDateTime.now().toString()
                     })
                 )
+        and : 'We actually build the component:'
+            var panel = ui.component
+
 
         when :
             Thread.sleep(200)
 
         then :
-            new Utility.Query(ui.component).find(JLabel, "L1").isPresent()
+            new Utility.Query(panel).find(JLabel, "L1").isPresent()
         and :
-            new Utility.Query(ui.component).find(JLabel, "L1").get().text != "Label 1"
+            new Utility.Query(panel).find(JLabel, "L1").get().text != "Label 1"
     }
 
 }

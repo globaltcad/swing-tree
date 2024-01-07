@@ -372,7 +372,7 @@ public final class UI extends UINamespaceUtilities
      *  Use this to target specific edges of a {@link JComponent} and apply
      *  custom {@link Style} properties to them.
      *  <br>
-     *  See {@link ComponentStyleDelegate#borderWidthAt(Edge, int)}
+     *  See {@link ComponentStyleDelegate#borderWidthAt(Edge, double)}
      */
     public enum Edge implements UIEnum<Edge>
     {
@@ -1093,7 +1093,7 @@ public final class UI extends UINamespaceUtilities
     }
     
     private static UIForPanel<JPanel> _panel() {
-        return new UIForPanel<>(new BuilderState<>(JPanel.class, Panel::new));
+        return new UIForPanel<>(new BuilderState<>(Panel.class, Panel::new));
     }
 
     /**
@@ -3078,7 +3078,7 @@ public final class UI extends UINamespaceUtilities
      * @return A builder instance for a new {@link JScrollPane}, which enables fluent method chaining.
      */
     public static UIForScrollPane<JScrollPane> scrollPane() {
-        return new UIForScrollPane<>(new BuilderState<>(JScrollPane.class, ScrollPane::new));
+        return new UIForScrollPane<>(new BuilderState(ScrollPane.class, ScrollPane::new));
     }
 
     /**
@@ -3769,7 +3769,11 @@ public final class UI extends UINamespaceUtilities
      */
     public static UIForLabel<JLabel> label( String text ) {
         NullUtil.nullArgCheck(text, "text", String.class);
-        return of((JLabel) new Label()).withText(text);
+        return _label().withText(text);
+    }
+
+    private static UIForLabel<JLabel> _label() {
+        return new UIForLabel<>(new BuilderState<>(Label.class, Label::new));
     }
 
     /**
@@ -3783,7 +3787,7 @@ public final class UI extends UINamespaceUtilities
     public static UIForLabel<JLabel> label( String text, HorizontalAlignment alignment ) {
         NullUtil.nullArgCheck(text, "text", String.class);
         NullUtil.nullArgCheck(alignment, "alignment", HorizontalAlignment.class);
-        return of((JLabel) new Label()).withText(text).withHorizontalAlignment( alignment );
+        return _label().withText(text).withHorizontalAlignment( alignment );
     }
 
     /**
@@ -3796,7 +3800,7 @@ public final class UI extends UINamespaceUtilities
     public static UIForLabel<JLabel> label( String text, Alignment alignment ) {
         NullUtil.nullArgCheck(text, "text", String.class);
         NullUtil.nullArgCheck(alignment, "alignment", Alignment.class);
-        return of((JLabel) new Label()).withText(text).withAlignment( alignment );
+        return _label().withText(text).withAlignment( alignment );
     }
 
     /**
@@ -3809,7 +3813,7 @@ public final class UI extends UINamespaceUtilities
     public static UIForLabel<JLabel> label( Val<String> text ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
-        return of((JLabel) new Label())
+        return _label()
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
     }
@@ -3826,7 +3830,7 @@ public final class UI extends UINamespaceUtilities
         NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
         NullUtil.nullArgCheck(alignment, "alignment", HorizontalAlignment.class);
-        return of((JLabel) new Label())
+        return _label()
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text)
                 .withHorizontalAlignment( alignment );
@@ -3840,7 +3844,7 @@ public final class UI extends UINamespaceUtilities
      */
     public static UIForLabel<JLabel> label( Icon icon ) {
         NullUtil.nullArgCheck(icon, "icon", Icon.class);
-        return of((JLabel) new Label()).withIcon(icon);
+        return _label().withIcon(icon);
     }
 
     /**
@@ -3884,7 +3888,7 @@ public final class UI extends UINamespaceUtilities
     public static UIForLabel<JLabel> labelWithIcon( Val<IconDeclaration> icon ) {
         NullUtil.nullArgCheck(icon, "icon", Val.class);
         NullUtil.nullPropertyCheck(icon, "icon", "Null icons are not allowed!");
-        return of((JLabel) new Label()).withIcon(icon);
+        return _label().withIcon(icon);
     }
 
     /**
@@ -3907,7 +3911,7 @@ public final class UI extends UINamespaceUtilities
         height = (int) (height * scale);
 
         Image scaled = icon.getImage().getScaledInstance(width, height, scaleHint);
-        return of((JLabel) new Label())
+        return _label()
                 .withIcon(new ImageIcon(scaled));
     }
 
@@ -3936,7 +3940,7 @@ public final class UI extends UINamespaceUtilities
      *  @return A builder instance for the label, which enables fluent method chaining.
      */
     public static UIForLabel<JLabel> boldLabel( String text ) {
-        return of((JLabel) new Label()).withText(text).makeBold();
+        return _label().withText(text).makeBold();
     }
 
     /**
@@ -3948,7 +3952,7 @@ public final class UI extends UINamespaceUtilities
     public static UIForLabel<JLabel> boldLabel( Val<String> text ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
-        return of((JLabel) new Label()).withText(text).makeBold();
+        return _label().withText(text).makeBold();
     }
 
     /**
@@ -3960,7 +3964,7 @@ public final class UI extends UINamespaceUtilities
      */
     public static UIForLabel<JLabel> html( String text ) {
         NullUtil.nullArgCheck(text, "text", String.class);
-        return of((JLabel) new Label()).withText("<html>" + text + "</html>");
+        return _label().withText("<html>" + text + "</html>");
     }
 
     /**
@@ -3973,7 +3977,7 @@ public final class UI extends UINamespaceUtilities
     public static UIForLabel<JLabel> html( Val<String> text ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
-        return of((JLabel) new Label())
+        return _label()
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text.view( it -> "<html>" + it + "</html>"));
     }

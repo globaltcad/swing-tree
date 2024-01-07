@@ -62,13 +62,13 @@ final class BuilderState<C extends java.awt.Component>
     private Supplier<C> _componentFetcher; // Is null when the builder is disposed.
 
 
-    BuilderState( Class<C> type, Supplier<C> componentSource )
+    <T extends C> BuilderState( Class<T> type, Supplier<C> componentSource )
     {
         this(type.cast(componentSource.get()));
         //this(
         //    SwingTree.get().getEventProcessor(),
         //    Mode.FUNCTIONAL,
-        //    type,
+        //    (Class<C>) type,
         //    ()->initializeComponent(componentSource.get()).get()
         //);
     }
