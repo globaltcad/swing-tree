@@ -1708,14 +1708,16 @@ public final class UI extends UINamespaceUtilities
         NullUtil.nullArgCheck(popup, "popup", JPopupMenu.class);
         return new UIForPopup<>(new BuilderState<>(popup));
     }
-
+    
     /**
      *  Use this to create a swing tree builder node for the {@link JPopupMenu} UI component.
      *  This is in essence a convenience method for {@code UI.of(new JPopupMenu())}.
      *
      * @return A builder instance for a {@link JPopupMenu}, which enables fluent method chaining.
      */
-    public static UIForPopup<JPopupMenu> popupMenu() { return of(new PopupMenu()); }
+    public static UIForPopup<JPopupMenu> popupMenu() {
+        return new UIForPopup<>(new BuilderState<>(PopupMenu.class, ()->new PopupMenu()));
+    }
 
     /**
      *  This returns an instance of a {@link UIForSeparator} builder
@@ -1738,7 +1740,9 @@ public final class UI extends UINamespaceUtilities
      *
      * @return A {@link UIForSeparator} UI builder instance which wraps the {@link JSeparator} and exposes helpful methods.
      */
-    public static UIForSeparator<JSeparator> separator() { return of(new JSeparator()); }
+    public static UIForSeparator<JSeparator> separator() { 
+        return new UIForSeparator<>(new BuilderState<>(JSeparator.class, ()->new JSeparator()));
+    }
 
     /**
      *  This returns an instance of a {@link UIForSeparator} builder
@@ -1784,7 +1788,9 @@ public final class UI extends UINamespaceUtilities
      *
      * @return A builder instance for a {@link JButton}, which enables fluent method chaining.
      */
-    public static UIForButton<JButton> button() { return of(new Button()); }
+    public static UIForButton<JButton> button() {
+        return new UIForButton<>(new BuilderState<>(Button.class, ()->new Button()));
+    }
 
     /**
      *  Use this to create a builder for the {@link JButton} UI component with the provided text displayed on top.
@@ -3256,7 +3262,9 @@ public final class UI extends UINamespaceUtilities
      *
      * @return A builder instance for a new {@link JTextPane}, which enables fluent method chaining.
      */
-    public static UIForTextPane<JTextPane> textPane() { return of(new TextPane()); }
+    public static UIForTextPane<JTextPane> textPane() {
+        return new UIForTextPane<>(new BuilderState<>(TextPane.class, ()->new TextPane()));
+    }
 
     /**
      *  Use this to create a builder for the provided {@link JSlider} instance.
@@ -3694,7 +3702,9 @@ public final class UI extends UINamespaceUtilities
      *
      * @return A builder instance for a new {@link JSpinner}, which enables fluent method chaining.
      */
-    public static UIForSpinner<JSpinner> spinner() { return of(new Spinner()); }
+    public static UIForSpinner<JSpinner> spinner() {
+        return new UIForSpinner<>(new BuilderState<>(Spinner.class, ()->new Spinner()));
+    }
 
     /**
      * Use this to create a builder for the provided {@link JSpinner} instance
@@ -4004,7 +4014,7 @@ public final class UI extends UINamespaceUtilities
      */
     public static UIForIcon<JIcon> icon( Icon icon ) {
         NullUtil.nullArgCheck(icon, "icon", Icon.class);
-        return of(new JIcon(icon));
+        return new UIForIcon<>(new BuilderState<>(JIcon.class, ()->new JIcon(icon)));
     }
 
     /**
@@ -4018,7 +4028,7 @@ public final class UI extends UINamespaceUtilities
      */
     public static UIForIcon<JIcon> icon( IconDeclaration icon ) {
         NullUtil.nullArgCheck(icon, "icon", IconDeclaration.class);
-        return of(new JIcon(icon));
+        return new UIForIcon<>(new BuilderState<>(JIcon.class, ()->new JIcon(icon)));
     }
 
     /**
@@ -4096,7 +4106,7 @@ public final class UI extends UINamespaceUtilities
      */
     public static UIForIcon<JIcon> icon( String iconPath ) {
         NullUtil.nullArgCheck(iconPath, "iconPath", String.class);
-        return of(new JIcon(iconPath));
+        return new UIForIcon<>(new BuilderState<>(JIcon.class, ()->new JIcon(iconPath)));
     }
 
     /**
@@ -4522,7 +4532,7 @@ public final class UI extends UINamespaceUtilities
     public static UIForToggleButton<JToggleButton> toggleButtonWithIcon( Val<IconDeclaration> icon ) {
         NullUtil.nullArgCheck(icon, "icon", Val.class);
         NullUtil.nullPropertyCheck(icon, "icon", "The icon of a toggle button may not be modelled using null!");
-        return of(new JToggleButton())
+        return new UIForToggleButton<>(new BuilderState<>(ToggleButton.class, ()->new JToggleButton()))
                 .applyIf(!icon.hasNoID(), it -> it.id(icon.id()))
                 .withIcon(icon);
     }
@@ -4556,7 +4566,7 @@ public final class UI extends UINamespaceUtilities
         NullUtil.nullArgCheck(icon, "icon", Val.class);
         NullUtil.nullPropertyCheck(icon, "icon", "The icon of a toggle button may not be modelled using null!");
         NullUtil.nullPropertyCheck(isToggled, "isToggled", "The selection state of a toggle button may not be modelled using null!");
-        return of(new JToggleButton())
+        return new UIForToggleButton<>(new BuilderState<>(ToggleButton.class, ()->new JToggleButton()))
                 .applyIf(!icon.hasNoID(), it -> it.id(icon.id()))
                 .applyIf(!isToggled.hasNoID(), it -> it.id(isToggled.id()))
                 .withIcon(icon)
@@ -4769,7 +4779,7 @@ public final class UI extends UINamespaceUtilities
      */
     public static UIForFormattedTextField formattedTextField( String text ) {
         NullUtil.nullArgCheck(text, "text", String.class);
-        return of(new JFormattedTextField(text));
+        return new UIForFormattedTextField(new BuilderState<>(JFormattedTextField.class, ()->new JFormattedTextField(text)));
     }
 
     /**
@@ -4784,7 +4794,7 @@ public final class UI extends UINamespaceUtilities
     public static UIForFormattedTextField formattedTextField( Val<String> text ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
-        return of(new JFormattedTextField())
+        return new UIForFormattedTextField(new BuilderState<>(JFormattedTextField.class, ()->new JFormattedTextField()))
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
     }
@@ -4800,7 +4810,7 @@ public final class UI extends UINamespaceUtilities
     public static UIForFormattedTextField formattedTextField( Var<String> text ) {
         NullUtil.nullArgCheck(text, "text", Var.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
-        return of(new JFormattedTextField())
+        return new UIForFormattedTextField(new BuilderState<>(JFormattedTextField.class, ()->new JFormattedTextField()))
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
     }
@@ -4811,7 +4821,9 @@ public final class UI extends UINamespaceUtilities
      *
      * @return A builder instance for a new {@link JFormattedTextField}, which enables fluent method chaining.
      */
-    public static UIForFormattedTextField formattedTextField() { return of(new JFormattedTextField()); }
+    public static UIForFormattedTextField formattedTextField() {
+        return new UIForFormattedTextField(new BuilderState<>(JFormattedTextField.class, ()->new JFormattedTextField()));
+    }
 
     /**
      *  Use this to create a builder for the provided {@link JPasswordField} instance.
@@ -4850,7 +4862,7 @@ public final class UI extends UINamespaceUtilities
     public static UIForPasswordField<JPasswordField> passwordField( Val<String> text ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
-        return of(new JPasswordField())
+        return new UIForPasswordField<>(new BuilderState<>(JPasswordField.class, ()->new PasswordField()))
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
     }
@@ -4877,7 +4889,9 @@ public final class UI extends UINamespaceUtilities
      *
      * @return A builder instance for a new {@link JPasswordField}, which enables fluent method chaining.
      */
-    public static UIForPasswordField<JPasswordField> passwordField() { return of(new PasswordField()); }
+    public static UIForPasswordField<JPasswordField> passwordField() {
+        return new UIForPasswordField<>(new BuilderState<>(JPasswordField.class, ()->new PasswordField()));
+    }
 
     /**
      *  Use this to create a builder for the provided {@link JProgressBar} instance.
@@ -4897,7 +4911,9 @@ public final class UI extends UINamespaceUtilities
      *
      * @return A builder instance for the provided {@link JProgressBar}, which enables fluent method chaining.
      */
-    public static UIForProgressBar<JProgressBar> progressBar() { return of(new ProgressBar()); }
+    public static UIForProgressBar<JProgressBar> progressBar() {
+        return new UIForProgressBar<>(new BuilderState<>(ProgressBar.class, ()->new ProgressBar()));
+    }
 
     /**
      *  Use this to create a builder for a new {@link JProgressBar} instance with
@@ -5606,7 +5622,7 @@ public final class UI extends UINamespaceUtilities
      * @return A basic UI builder instance wrapping a {@link JFrame}.
      */
     public static UIForJFrame<JFrame> frame() {
-        return new UIForJFrame<>(new BuilderState<>(new JFrame()));
+        return new UIForJFrame<>(new BuilderState<>(JFrame.class, ()->new JFrame()));
     }
 
     /**
@@ -5615,7 +5631,7 @@ public final class UI extends UINamespaceUtilities
      * @return A basic UI builder instance wrapping a {@link JFrame}.
      */
     public static UIForJFrame<JFrame> frame( String title ) {
-        return new UIForJFrame<>(new BuilderState<>(new JFrame()))
+        return new UIForJFrame<>(new BuilderState<>(JFrame.class, ()->new JFrame()))
                     .withTitle(title);
     }
 
@@ -5636,7 +5652,7 @@ public final class UI extends UINamespaceUtilities
      * @return A basic UI builder instance wrapping a {@link JDialog}.
      */
     public static UIForJDialog<JDialog> dialog() {
-        return new UIForJDialog<>(new BuilderState<>(new JDialog()));
+        return new UIForJDialog<>(new BuilderState<>(JDialog.class, ()->new JDialog()));
     }
 
     /**
@@ -5645,7 +5661,7 @@ public final class UI extends UINamespaceUtilities
      * @return A basic UI builder instance wrapping a {@link JDialog}.
      */
     public static UIForJDialog<JDialog> dialog( Window owner ) {
-        return new UIForJDialog<>(new BuilderState<>(new JDialog(owner)));
+        return new UIForJDialog<>(new BuilderState<>(JDialog.class, ()->new JDialog(owner)));
     }
 
     /**
@@ -5654,7 +5670,7 @@ public final class UI extends UINamespaceUtilities
      * @return A basic UI builder instance wrapping a {@link JDialog}.
      */
     public static UIForJDialog<JDialog> dialog( String title ) {
-        return new UIForJDialog<>(new BuilderState<>(new JDialog())).withTitle(title);
+        return new UIForJDialog<>(new BuilderState<>(JDialog.class, ()->new JDialog())).withTitle(title);
     }
 
     /**
@@ -5664,7 +5680,7 @@ public final class UI extends UINamespaceUtilities
      * @return A basic UI builder instance wrapping a {@link JDialog}.
      */
     public static UIForJDialog<JDialog> dialog( Window owner, String title ) {
-        return new UIForJDialog<>(new BuilderState<>(new JDialog(owner)))
+        return new UIForJDialog<>(new BuilderState<>(JDialog.class, ()->new JDialog(owner)))
                     .withTitle(title);
     }
 
