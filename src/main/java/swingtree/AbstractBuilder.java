@@ -338,10 +338,17 @@ abstract class AbstractBuilder<I, C extends Component>
         if ( !condition )
             return _this();
 
-        BuilderState<C> proceduralBuilder = _state().procedural();
-        building.accept(_newBuilderWithState(proceduralBuilder)._this());
-
-        return _newBuilderWithState(_state().supersede(proceduralBuilder))._this();
+        return _with( thisComponent -> {
+                    BuilderState<C> proceduralBuilder =
+                        new BuilderState<>(
+                                _state().eventProcessor(),
+                                BuilderState.Mode.PROCEDURAL,
+                                _state().componentType(),
+                                ()->thisComponent
+                            );
+                    building.accept(_newBuilderWithState(proceduralBuilder)._this());
+                })
+                ._this();
     }
 
 

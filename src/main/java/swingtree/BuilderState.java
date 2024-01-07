@@ -31,7 +31,7 @@ final class BuilderState<C extends java.awt.Component>
                     "This is a similar design choice as in Java's Stream API,\n" +
                     "where an exception is thrown when trying to reuse a stream after it has already been consumed.\n";
 
-    private enum Mode
+    enum Mode
     {
         DECLARATIVE, // Builder states get disposed after being used for building.
         PROCEDURAL,  // Builder states do not get disposed after being used for building.
@@ -83,11 +83,11 @@ final class BuilderState<C extends java.awt.Component>
         );
     }
 
-    private BuilderState(
-        EventProcessor eventProcessor,
-        Mode           mode,
-        Class<C>       type,
-        Supplier<C>    componentFetcher
+    BuilderState(
+            EventProcessor eventProcessor,
+            Mode mode,
+            Class<C> type,
+            Supplier<C> componentFetcher
     ) {
         Objects.requireNonNull(eventProcessor,   "eventProcessor");
         Objects.requireNonNull(mode,             "mode");
@@ -249,37 +249,6 @@ final class BuilderState<C extends java.awt.Component>
             default:
                 throw new IllegalStateException("Unknown mode: " + _mode);
         }
-    }
-
-    BuilderState<C> procedural()
-    {
-        if ( this.isDisposed() )
-            throw new IllegalStateException(
-                    "Trying to build using a builder which is already spent and disposed!" +
-                    WHY_A_BUILDER_IS_DISPOSED
-                );
-        return new BuilderState<>(
-            _eventProcessor,
-            Mode.PROCEDURAL,
-            _componentType,
-            _componentFetcher
-        );
-    }
-
-    BuilderState<C> supersede( BuilderState<C> other )
-    {
-        if ( this.isDisposed() )
-            throw new IllegalStateException(
-                    "Trying to build using a builder which has already been spent and disposed!\n" +
-                    WHY_A_BUILDER_IS_DISPOSED
-                );
-        other.dispose();
-        return new BuilderState<>(
-                _eventProcessor,
-                _mode,
-                _componentType,
-                _componentFetcher
-            );
     }
 
     @Override
