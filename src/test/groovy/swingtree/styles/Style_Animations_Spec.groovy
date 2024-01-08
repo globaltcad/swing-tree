@@ -50,7 +50,7 @@ class Style_Animations_Spec extends Specification
             temporarily change the component to support your animated style.
         """
         given : 'We create a simple `JLabel` UI component with a style animation.'
-            var label = UI.label("Click me!")
+            var ui = UI.label("Click me!")
                         .onMouseClick(it ->
                             it.animateFor(1, TimeUnit.MINUTES, state ->
                                 it.style(state, style -> style
@@ -60,6 +60,8 @@ class Style_Animations_Spec extends Specification
                                 )
                             )
                         )
+        and : 'We actually build the component:'
+            var label = ui.component
 
         expect : """
             When the user clicks on the label, the border width of the label
@@ -68,24 +70,24 @@ class Style_Animations_Spec extends Specification
             But initially the label will not have any border or background color.
             So let's check that.
         """
-            label.component.border == null
-            label.component.background == new Color(238, 238, 238) // default background color of a JLabel
-            label.component.foreground == new Color(51, 51, 51) // default foreground color of a JLabel
-            label.component.getUI() instanceof MetalLabelUI
+            label.border == null
+            label.background == new Color(238, 238, 238) // default background color of a JLabel
+            label.foreground == new Color(51, 51, 51) // default foreground color of a JLabel
+            label.getUI() instanceof MetalLabelUI
 
         when : 'We simulate a user click event programmatically'
             // Note that there is no "onMouseClick()" method on the label.
             // Instead we need to do this:
-            label.component.dispatchEvent(new MouseEvent(label.component, MouseEvent.MOUSE_CLICKED, System.currentTimeMillis(), 0, 0, 0, 1, false))
+            label.dispatchEvent(new MouseEvent(label, MouseEvent.MOUSE_CLICKED, System.currentTimeMillis(), 0, 0, 0, 1, false))
             Thread.sleep(100)
             UI.sync()
-            label.component.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+            label.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
 
         then : 'The label will have a border and a background color.'
-            label.component.border != null
-            label.component.background != new Color(238, 238, 238)
-            label.component.foreground == new Color(51, 51, 51)
-            label.component.getUI() instanceof MetalLabelUI
+            label.border != null
+            label.background != new Color(238, 238, 238)
+            label.foreground == new Color(51, 51, 51)
+            label.getUI() instanceof MetalLabelUI
     }
 
 
@@ -101,7 +103,7 @@ class Style_Animations_Spec extends Specification
             it will temporarily change the component to support your animated style.
         """
         given : 'We create a simple `JLabel` UI component with a style animation.'
-            var label = UI.label("Click me!")
+            var ui = UI.label("Click me!")
                         .onMouseClick(it ->
                             it.animateStyleFor(1, TimeUnit.MINUTES, (state, style) -> style
                                 .borderWidthAt(UI.Edge.BOTTOM, (int) (12 * state.cycle()))
@@ -112,6 +114,8 @@ class Style_Animations_Spec extends Specification
                                 .fontSize((int) (12 + 24 * state.cycle()))
                             )
                         )
+        and : 'We actually build the component:'
+            var label = ui.component
 
         expect : """
             When the user clicks on the label, the border width of the label
@@ -120,23 +124,23 @@ class Style_Animations_Spec extends Specification
             But initially the label will not have any border or background color.
             So let's check that.
         """
-            label.component.border == null
-            label.component.font.size == 12
-            label.component.getUI() instanceof MetalLabelUI
+            label.border == null
+            label.font.size == 12
+            label.getUI() instanceof MetalLabelUI
 
         when : 'We simulate a user click event programmatically'
             // Note that there is no "onMouseClick()" method on the label.
             // Instead we need to do this:
-            label.component.dispatchEvent(new MouseEvent(label.component, MouseEvent.MOUSE_CLICKED, System.currentTimeMillis(), 0, 0, 0, 1, false))
+            label.dispatchEvent(new MouseEvent(label, MouseEvent.MOUSE_CLICKED, System.currentTimeMillis(), 0, 0, 0, 1, false))
             Thread.sleep(2000)
             UI.sync()
-            label.component.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+            label.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
 
         then : 'The label will have a border and a background color.'
-            label.component.border != null
-            label.component.font.size > 12
+            label.border != null
+            label.font.size > 12
         and : 'SwingTree will haver overridden the default label UI in order to support the shadow.'
-            !(label.component.getUI() instanceof MetalLabelUI)
+            !(label.getUI() instanceof MetalLabelUI)
     }
 
 
@@ -209,7 +213,7 @@ class Style_Animations_Spec extends Specification
             will temporarily override the Look and Feel of the component.
         """
         given : 'We create a simple `JButton` UI component with a style animation.'
-            var button = UI.button("Click me!")
+            var ui = UI.button("Click me!")
                         .onClick(it ->
                             it.animateFor(300, TimeUnit.MILLISECONDS, state ->
                                 it.style(state, style -> style
@@ -230,26 +234,28 @@ class Style_Animations_Spec extends Specification
                                 )
                             )
                         )
+        and : 'We actually build the component:'
+            var button = ui.component
 
         expect : """
             Initially the button will the default button border and background color.
         """
-            button.component.border instanceof CompoundBorder
-            button.component.background == new Color(238, 238, 238) // default background color of a JButton
-            button.component.foreground == new Color(51, 51, 51) // default foreground color of a JButton
-            button.component.getUI() instanceof MetalButtonUI
+            button.border instanceof CompoundBorder
+            button.background == new Color(238, 238, 238) // default background color of a JButton
+            button.foreground == new Color(51, 51, 51) // default foreground color of a JButton
+            button.getUI() instanceof MetalButtonUI
 
         when : 'We simulate a user click event programmatically'
-            button.component.doClick()
+        button.doClick()
             Thread.sleep(100)
             UI.sync()
-            UI.runNow({button.component.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())})
+            UI.runNow({button.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())})
 
         then : 'The label will have a border and a background color.'
-            !(button.component.border instanceof CompoundBorder)
-            button.component.background != new Color(238, 238, 238)
-            button.component.foreground == new Color(51, 51, 51)
-            !(button.component.getUI() instanceof MetalButtonUI)
+            !(button.border instanceof CompoundBorder)
+            button.background != new Color(238, 238, 238)
+            button.foreground == new Color(51, 51, 51)
+            !(button.getUI() instanceof MetalButtonUI)
     }
 
 

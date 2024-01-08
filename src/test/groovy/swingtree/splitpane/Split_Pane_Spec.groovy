@@ -33,24 +33,24 @@ class Split_Pane_Spec extends Specification
     {
         given : 'We create a horizontally aligned split pane UI node.'
             var ui = UI.splitPane(UI.Align.HORIZONTAL)
-        expect : 'The split pane is not null.'
-            ui != null
-        and : 'The split pane is a JSplitPane.'
-            ui.component instanceof JSplitPane
+        and : 'We actually build the component:'
+            var splitPane = ui.component
+        expect : 'The split pane is a JSplitPane.'
+            splitPane instanceof JSplitPane
         and : 'The split pane is horizontally aligned b, meaning it splits vertically.'
-            ui.component.orientation == JSplitPane.VERTICAL_SPLIT
+            splitPane.orientation == JSplitPane.VERTICAL_SPLIT
     }
 
     def 'A vertically aligned split pane can be created through the "splitPane" factory method.'()
     {
         given : 'We create a vertically aligned split pane UI node.'
             var ui = UI.splitPane(UI.Align.VERTICAL)
-        expect : 'The split pane is not null.'
-            ui != null
-        and : 'The split pane is a JSplitPane.'
-            ui.component instanceof JSplitPane
+        and : 'We actually build the component:'
+            var splitPane = ui.component
+        expect : 'The split pane is a JSplitPane.'
+            splitPane instanceof JSplitPane
         and : 'The split pane is vertically aligned, meaning it splits horizontally.'
-            ui.component.orientation == JSplitPane.HORIZONTAL_SPLIT
+            splitPane.orientation == JSplitPane.HORIZONTAL_SPLIT
     }
 
     def 'An alignment property can be used to dynamically model the alignment of your split pane.'()
@@ -64,17 +64,17 @@ class Split_Pane_Spec extends Specification
             var alignment = Var.of(UI.Align.HORIZONTAL)
         and : 'We create a split pane UI node bound to the property.'
             var ui = UI.splitPane(alignment)
-        expect : 'The split pane is not null.'
-            ui != null
-        and : 'The split pane is a JSplitPane.'
-            ui.component instanceof JSplitPane
+        and : 'We actually build the component:'
+            var splitPane = ui.component
+        expect : 'The split pane is a JSplitPane.'
+            splitPane instanceof JSplitPane
         and : 'The split pane is horizontally aligned, meaning it splits vertically.'
-            ui.component.orientation == JSplitPane.VERTICAL_SPLIT
+            splitPane.orientation == JSplitPane.VERTICAL_SPLIT
         when : 'We change the alignment property to "VERTICAL".'
             alignment.set(UI.Align.VERTICAL)
             UI.sync()
         then : 'The split pane is vertically aligned, meaning it splits horizontally.'
-            ui.component.orientation == JSplitPane.HORIZONTAL_SPLIT
+            splitPane.orientation == JSplitPane.HORIZONTAL_SPLIT
     }
 
     def 'A split pane can be configured with a divider size.'( float uiScale )
@@ -91,14 +91,14 @@ class Split_Pane_Spec extends Specification
             SwingTree.get().setUiScaleFactor(uiScale)
         and : 'We create a split pane UI node with a divider size of 10.'
             var ui = UI.splitPane(UI.Align.HORIZONTAL).withDividerSize(10)
-        expect : 'The split pane is not null.'
-            ui != null
-        and : 'The split pane is a JSplitPane.'
-            ui.component instanceof JSplitPane
+        and : 'We actually build the component:'
+            var splitPane = ui.component
+        expect : 'The split pane is a JSplitPane.'
+            splitPane instanceof JSplitPane
         and : 'The split pane is horizontally aligned, meaning it splits vertically.'
-            ui.component.orientation == JSplitPane.VERTICAL_SPLIT
+            splitPane.orientation == JSplitPane.VERTICAL_SPLIT
         and : 'The divider size is 10.'
-            ui.component.dividerSize == (int) ( 10 * uiScale )
+            splitPane.dividerSize == (int) ( 10 * uiScale )
         where :
             uiScale << [ 1.0f, 1.5f, 2.0f ]
     }
@@ -107,14 +107,14 @@ class Split_Pane_Spec extends Specification
     {
         given : 'We create a split pane UI node with a divider location of 10.'
             var ui = UI.splitPane(UI.Align.HORIZONTAL).withDividerAt(10)
-        expect : 'The split pane is not null.'
-            ui != null
-        and : 'The split pane is a JSplitPane.'
-            ui.component instanceof JSplitPane
+        and : 'We actually build the component:'
+            var splitPane = ui.component
+        expect : 'The split pane is a JSplitPane.'
+            splitPane instanceof JSplitPane
         and : 'The split pane is horizontally aligned, meaning it splits vertically.'
-            ui.component.orientation == JSplitPane.VERTICAL_SPLIT
+            splitPane.orientation == JSplitPane.VERTICAL_SPLIT
         and : 'The divider location is 10.'
-            ui.component.dividerLocation == 10
+            splitPane.dividerLocation == 10
     }
 
     def 'The divider location of a split pane can dynamically be modelled using an integer property.'()
@@ -130,17 +130,18 @@ class Split_Pane_Spec extends Specification
         and : 'We create a split pane UI node bound to the property.'
             var ui = UI.splitPane(UI.Align.HORIZONTAL)
                             .withDividerAt(dividerLocation)
+        and : 'We actually build the component:'
+            var splitPane = ui.component
         expect : 'The split pane exists and it is indeed a horizontally aligned split pane splitting the vertical axis.'
-            ui != null
-            ui.component instanceof JSplitPane
-            ui.component.orientation == JSplitPane.VERTICAL_SPLIT
+            splitPane instanceof JSplitPane
+            splitPane.orientation == JSplitPane.VERTICAL_SPLIT
         and : 'The divider location is 10.'
-            ui.component.dividerLocation == 10
+            splitPane.dividerLocation == 10
         when : 'We change the divider location property to 20.'
             dividerLocation.set(20)
             UI.sync()
         then : 'The divider location is 20.'
-            ui.component.dividerLocation == 20
+            splitPane.dividerLocation == 20
     }
 
     def 'A horizontally aligned split pane can be configured with a divider location as a percentage.'( float uiScale )
@@ -154,20 +155,20 @@ class Split_Pane_Spec extends Specification
             scaling factor for the current system automatically for you,
             so you do not have to specify this factor manually. 
         """
-        SwingTree.get().setUiScaleFactor(uiScale)
+            SwingTree.get().setUiScaleFactor(uiScale)
         and : 'We create a split pane UI node with a division of 50%.'
             var ui = UI.splitPane(UI.Align.HORIZONTAL)
                         .withWidth(42)
                         .withHeight(100)
                         .withDivisionOf(0.5)
-        expect : 'The split pane is not null.'
-            ui != null
-        and : 'The split pane is a JSplitPane.'
-            ui.component instanceof JSplitPane
+        and : 'We actually build the component:'
+            var splitPane = ui.component
+        expect : 'The split pane is a JSplitPane.'
+            splitPane instanceof JSplitPane
         and : 'The split pane is horizontally aligned, meaning it splits vertically.'
-            ui.component.orientation == JSplitPane.VERTICAL_SPLIT
+            splitPane.orientation == JSplitPane.VERTICAL_SPLIT
         and : 'The divider location is 50 * uiScale.'
-            ui.component.dividerLocation == (int) ( 50 * uiScale )
+            splitPane.dividerLocation == (int) ( 50 * uiScale )
         where :
             uiScale << [ 1.0f, 1.5f, 2.0f ]
     }
@@ -189,14 +190,14 @@ class Split_Pane_Spec extends Specification
                         .withWidth(100)
                         .withHeight(42)
                         .withDivisionOf(0.5)
-        expect : 'The split pane is not null.'
-            ui != null
-        and : 'The split pane is a JSplitPane.'
-            ui.component instanceof JSplitPane
+        and : 'We actually build the component:'
+            var splitPane = ui.component
+        expect : 'The split pane is a JSplitPane.'
+            splitPane instanceof JSplitPane
         and : 'The split pane is vertically aligned, meaning it splits horizontally.'
-            ui.component.orientation == JSplitPane.HORIZONTAL_SPLIT
+            splitPane.orientation == JSplitPane.HORIZONTAL_SPLIT
         and : 'The divider location is 50 * uiScale.'
-            ui.component.dividerLocation == (int) ( 50 * uiScale )
+            splitPane.dividerLocation == (int) ( 50 * uiScale )
 
         where :
             uiScale << [ 1.0f, 1.5f, 2.0f ]
@@ -223,24 +224,24 @@ class Split_Pane_Spec extends Specification
                         .withHeight(100)
                         .withDivisionOf(divisionPercentage)
 
-        expect : 'The split pane is not null.'
-            ui != null
-        and : 'The split pane exists and it is indeed a horizontally aligned split pane splitting the vertical axis.'
-            ui.component instanceof JSplitPane
-            ui.component.orientation == JSplitPane.VERTICAL_SPLIT
-            ui.component.dividerLocation == (int)(50 * uiScale)
+        and : 'We actually build the component:'
+            var splitPane = ui.component
+        expect : 'The split pane exists and it is indeed a horizontally aligned split pane splitting the vertical axis.'
+            splitPane instanceof JSplitPane
+            splitPane.orientation == JSplitPane.VERTICAL_SPLIT
+            splitPane.dividerLocation == (int)(50 * uiScale)
 
         when : 'We change the division property to 0.25.'
             divisionPercentage.set(0.25d)
             UI.sync()
         then : 'The divider location is 25.'
-            ui.component.dividerLocation == (int)(25 * uiScale)
+            splitPane.dividerLocation == (int)(25 * uiScale)
 
         when : 'We change the division property to 0.75.'
             divisionPercentage.set(0.75d)
             UI.sync()
         then : 'The divider location is 75.'
-            ui.component.dividerLocation == (int)(75 * uiScale)
+            splitPane.dividerLocation == (int)(75 * uiScale)
 
         where:
             uiScale << [ 1f, 1.5f, 2f ]
@@ -268,17 +269,18 @@ class Split_Pane_Spec extends Specification
             var dividerSize = Var.of(10)
         and : 'We create a vertically aligned split pane UI node bound to the property.'
             var ui = UI.splitPane(UI.Align.VERTICAL).withDividerSize(dividerSize)
+        and : 'We actually build the component:'
+            var splitPane = ui.component
         expect : 'The split pane exists and it is indeed a vertically aligned split pane splitting the horizontal axis.'
-            ui != null
-            ui.component instanceof JSplitPane
-            ui.component.orientation == JSplitPane.HORIZONTAL_SPLIT
+            splitPane instanceof JSplitPane
+            splitPane.orientation == JSplitPane.HORIZONTAL_SPLIT
         and : 'The divider size is 10.'
-            ui.component.dividerSize == (int) ( 10 * uiScale )
+            splitPane.dividerSize == (int) ( 10 * uiScale )
         when : 'We change the divider size property to 42.'
             dividerSize.set(42)
             UI.sync()
         then : 'The divider size is 42.'
-            ui.component.dividerSize == (int) ( 42 * uiScale )
+            splitPane.dividerSize == (int) ( 42 * uiScale )
         where:
             uiScale << [ 1f, 1.5f, 2f ]
     }

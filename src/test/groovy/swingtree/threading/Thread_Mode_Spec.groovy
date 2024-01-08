@@ -160,7 +160,7 @@ class Thread_Mode_Spec extends Specification
         given : 'A UI built with the decoupled thread mode:'
             var ui = UI.use(EventProcessor.DECOUPLED, ()-> UI.panel())
         when : 'We try to access the component by this current non-swing thread.'
-            ui.component
+            ui.get(JPanel)
         then: 'An exception is thrown!'
             var e = thrown(Exception)
             e.message == "This UI is configured to be decoupled from the application thread, " +

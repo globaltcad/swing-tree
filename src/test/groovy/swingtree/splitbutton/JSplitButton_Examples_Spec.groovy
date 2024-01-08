@@ -66,15 +66,17 @@ class JSplitButton_Examples_Spec extends Specification
                 .add(UI.splitItem("I am the first drop down item."))
                 .add(UI.splitItem("I am the second item."))
                 .add(UI.splitItem("And I am the third."))
+        and : 'We get the built split button component.'
+            var button = ui.component
 
         expect : 'The component wrapped by the UI builder is in fact a split button:'
-            ui.component instanceof JSplitButton
+            button instanceof JSplitButton
         and : 'This button should have a popup menu with 3 components.'
-            ui.component.popupMenu.components.length == 3
+            button.popupMenu.components.length == 3
         and : 'They have the expected names:'
-            ((JMenuItem)ui.component.popupMenu.getComponent(0)).getText() == "I am the first drop down item."
-            ((JMenuItem)ui.component.popupMenu.getComponent(1)).getText() == "I am the second item."
-            ((JMenuItem)ui.component.popupMenu.getComponent(2)).getText() == "And I am the third."
+            ((JMenuItem)button.popupMenu.getComponent(0)).getText() == "I am the first drop down item."
+            ((JMenuItem)button.popupMenu.getComponent(1)).getText() == "I am the second item."
+            ((JMenuItem)button.popupMenu.getComponent(2)).getText() == "And I am the third."
     }
 
 

@@ -1385,7 +1385,9 @@ public final class UI extends UINamespaceUtilities
      *
      * @return A builder instance for a new {@link JBox}, which enables fluent method chaining.
      */
-    public static UIForBox<JBox> box() { return of((JBox)new Box()); }
+    public static UIForBox<JBox> box() {
+        return new UIForBox<>(new BuilderState<>(Box.class, Box::new));
+    }
 
     /**
      *  Use this to create a builder for a {@link JBox}, a generic component wrapper type
@@ -1678,7 +1680,7 @@ public final class UI extends UINamespaceUtilities
     public static <T extends JComponent> UIForSwing<T> of( SwingBuilder<T> builder )
     {
         NullUtil.nullArgCheck(builder, "builder", SwingBuilder.class);
-        return of(builder.build());
+        return new UIForSwing<>(new BuilderState<>((Class<T>) JComponent.class, ()->builder.build()));
     }
 
     /**
@@ -3715,7 +3717,8 @@ public final class UI extends UINamespaceUtilities
      */
     public static UIForSpinner<javax.swing.JSpinner> spinner( SpinnerModel model ) {
         NullUtil.nullArgCheck(model, "model", SpinnerModel.class);
-        return of((JSpinner) new Spinner()).peek( s -> s.setModel(model) );
+        return new UIForSpinner<>(new BuilderState<JSpinner>(Spinner.class, Spinner::new))
+                .peek( s -> s.setModel(model) );
     }
 
     /**
@@ -3742,7 +3745,8 @@ public final class UI extends UINamespaceUtilities
      * @return A builder instance for the provided {@link JSpinner}, which enables fluent method chaining.
      */
     public static UIForSpinner<javax.swing.JSpinner> spinner( int value, int min, int max, int step ) {
-        return of((JSpinner) new Spinner()).peek( s -> s.setModel(new SpinnerNumberModel(value, min, max, step)) );
+        return new UIForSpinner<>(new BuilderState<JSpinner>(Spinner.class, Spinner::new))
+                .peek( s -> s.setModel(new SpinnerNumberModel(value, min, max, step)) );
     }
 
     /**
@@ -3755,7 +3759,8 @@ public final class UI extends UINamespaceUtilities
      * @return A builder instance for the provided {@link JSpinner}, which enables fluent method chaining.
      */
     public static UIForSpinner<javax.swing.JSpinner> spinner( int value, int min, int max ) {
-        return of((JSpinner) new Spinner()).peek( s -> s.setModel(new SpinnerNumberModel(value, min, max, 1)) );
+        return new UIForSpinner<>(new BuilderState<JSpinner>(Spinner.class, Spinner::new))
+                .peek( s -> s.setModel(new SpinnerNumberModel(value, min, max, 1)) );
     }
 
     /**
@@ -4119,7 +4124,8 @@ public final class UI extends UINamespaceUtilities
      */
     public static UIForCheckBox<JCheckBox> checkBox( String text ) {
         NullUtil.nullArgCheck(text, "text", String.class);
-        return of((JCheckBox) new CheckBox()).withText(text);
+        return new UIForCheckBox<>(new BuilderState<JCheckBox>(CheckBox.class, CheckBox::new))
+                .withText(text);
     }
 
     /**
@@ -4133,7 +4139,7 @@ public final class UI extends UINamespaceUtilities
     public static UIForCheckBox<JCheckBox> checkBox( Val<String> text ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
-        return of((JCheckBox) new CheckBox())
+        return new UIForCheckBox<>(new BuilderState<JCheckBox>(CheckBox.class, CheckBox::new))
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
     }
@@ -4155,7 +4161,7 @@ public final class UI extends UINamespaceUtilities
         NullUtil.nullArgCheck(isChecked, "isChecked", Var.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
         NullUtil.nullPropertyCheck(isChecked, "isChecked", "The selection state of a check box may not be modelled using null!");
-        return of((JCheckBox) new CheckBox())
+        return new UIForCheckBox<>(new BuilderState<JCheckBox>(CheckBox.class, CheckBox::new))
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .applyIf(!isChecked.hasNoID(), it -> it.id(isChecked.id()))
                 .withText(text)
@@ -4175,7 +4181,7 @@ public final class UI extends UINamespaceUtilities
         NullUtil.nullArgCheck(text, "text", String.class);
         NullUtil.nullArgCheck(isChecked, "isChecked", Var.class);
         NullUtil.nullPropertyCheck(isChecked, "isChecked", "The selection state of a check box may not be modelled using null!");
-        return of((JCheckBox) new CheckBox())
+        return new UIForCheckBox<>(new BuilderState<JCheckBox>(CheckBox.class, CheckBox::new))
                 .applyIf(!isChecked.hasNoID(), it -> it.id(isChecked.id()))
                 .withText(text)
                 .isSelectedIf(isChecked);
@@ -4204,7 +4210,8 @@ public final class UI extends UINamespaceUtilities
      */
     public static UIForRadioButton<JRadioButton> radioButton( String text ) {
         NullUtil.nullArgCheck(text, "text", String.class);
-        return of((JRadioButton) new RadioButton()).withText(text);
+        return new UIForRadioButton<>(new BuilderState<JRadioButton>(RadioButton.class, RadioButton::new))
+                .withText(text);
     }
 
     /**
@@ -4217,7 +4224,7 @@ public final class UI extends UINamespaceUtilities
     public static UIForRadioButton<JRadioButton> radioButton( Val<String> text ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
-        return of((JRadioButton) new RadioButton())
+        return new UIForRadioButton<>(new BuilderState<JRadioButton>(RadioButton.class, RadioButton::new))
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
     }
@@ -4239,7 +4246,7 @@ public final class UI extends UINamespaceUtilities
         NullUtil.nullArgCheck(text, "selected", Var.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
         NullUtil.nullPropertyCheck(selected, "selected", "The selection state of a radio button may not be modelled using null!");
-        return of((JRadioButton) new RadioButton())
+        return new UIForRadioButton<>(new BuilderState<JRadioButton>(RadioButton.class, RadioButton::new))
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .applyIf(!selected.hasNoID(), it -> it.id(selected.id()))
                 .withText(text)
@@ -4259,7 +4266,7 @@ public final class UI extends UINamespaceUtilities
         NullUtil.nullArgCheck(text, "text", String.class);
         NullUtil.nullArgCheck(text, "selected", Var.class);
         NullUtil.nullPropertyCheck(selected, "selected", "The selection state of a radio button may not be modelled using null!");
-        return of((JRadioButton) new RadioButton())
+        return new UIForRadioButton<>(new BuilderState<JRadioButton>(RadioButton.class, RadioButton::new))
                 .withText(text)
                 .isSelectedIf(selected);
     }
@@ -4305,7 +4312,7 @@ public final class UI extends UINamespaceUtilities
         NullUtil.nullArgCheck(state, "state", Enum.class);
         NullUtil.nullArgCheck(selection, "selection", Var.class);
         NullUtil.nullPropertyCheck(selection, "selection", "The selection state of a radio button may not be modelled using null!");
-        return of((JRadioButton) new RadioButton())
+        return new UIForRadioButton<>(new BuilderState<JRadioButton>(RadioButton.class, RadioButton::new))
                 .applyIf(!selection.hasNoID(), it -> it.id(selection.id()))
                 .isSelectedIf( state, selection );
     }
@@ -4327,7 +4334,9 @@ public final class UI extends UINamespaceUtilities
      *
      * @return A builder instance for a new {@link JToggleButton}, which enables fluent method chaining.
      */
-    public static UIForToggleButton<JToggleButton> toggleButton() { return of((JToggleButton) new ToggleButton()); }
+    public static UIForToggleButton<JToggleButton> toggleButton() {
+        return new UIForToggleButton<>(new BuilderState<JToggleButton>(ToggleButton.class, ToggleButton::new));
+    }
 
     /**
      *  Use this to create a builder for a new {@link JToggleButton} instance
@@ -4607,7 +4616,7 @@ public final class UI extends UINamespaceUtilities
      */
     public static UIForTextField<JTextField> textField( String text ) {
         NullUtil.nullArgCheck(text, "text", String.class);
-        return of((JTextField) new TextField()).withText(text);
+        return textField().withText(text);
     }
 
     /**
@@ -4622,7 +4631,7 @@ public final class UI extends UINamespaceUtilities
     public static UIForTextField<JTextField> textField( Val<String> text ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
-        return of((JTextField) new TextField())
+        return textField()
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
     }
@@ -4638,7 +4647,7 @@ public final class UI extends UINamespaceUtilities
     public static UIForTextField<JTextField> textField( Var<String> text ) {
         NullUtil.nullArgCheck(text, "text", Var.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
-        return of((JTextField) new TextField())
+        return textField()
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
     }
@@ -4649,7 +4658,9 @@ public final class UI extends UINamespaceUtilities
      *
      * @return A builder instance for a new {@link JTextField}, which enables fluent method chaining.
      */
-    public static UIForTextField<JTextField> textField() { return of((JTextField) new TextField()); }
+    public static UIForTextField<JTextField> textField() {
+        return new UIForTextField<>(new BuilderState<JTextField>(TextField.class, TextField::new));
+    }
 
     /**
      *  A convenience method for creating a builder for a {@link JTextField} with a certain text alignment.
@@ -4664,7 +4675,7 @@ public final class UI extends UINamespaceUtilities
      */
     public static UIForTextField<JTextField> textField( HorizontalAlignment direction ) {
         NullUtil.nullArgCheck(direction, "direction", HorizontalAlignment.class);
-        return of((JTextField) new TextField()).withTextOrientation(direction);
+        return textField().withTextOrientation(direction);
     }
 
     /**
@@ -4682,14 +4693,14 @@ public final class UI extends UINamespaceUtilities
      */
     public static UIForTextField<JTextField> textField( HorizontalAlignment direction, String text ) {
         NullUtil.nullArgCheck(direction, "direction", HorizontalAlignment.class);
-        return of((JTextField) new TextField()).withTextOrientation(direction).withText(text);
+        return textField().withTextOrientation(direction).withText(text);
     }
 
     public static UIForTextField<JTextField> textField( HorizontalAlignment direction, Val<String> text ) {
         NullUtil.nullArgCheck(direction, "direction", HorizontalAlignment.class);
         NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
-        return of((JTextField) new TextField())
+        return textField()
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withTextOrientation(direction)
                 .withText(text);
@@ -4699,7 +4710,7 @@ public final class UI extends UINamespaceUtilities
         NullUtil.nullArgCheck(direction, "direction", HorizontalAlignment.class);
         NullUtil.nullArgCheck(text, "text", Var.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
-        return of((JTextField) new TextField())
+        return textField()
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withTextOrientation(direction)
                 .withText(text);
@@ -4722,7 +4733,7 @@ public final class UI extends UINamespaceUtilities
     public static <N extends Number> UIForTextField<JTextField> numericTextField( Var<N> number ) {
         NullUtil.nullArgCheck(number, "number", Var.class);
         NullUtil.nullPropertyCheck(number, "number", "Please use 0 instead of null!");
-        return of((JTextField) new TextField())
+        return textField()
                 .applyIf( !number.hasNoID(), it -> it.id(number.id()) )
                 .withNumber(number);
     }
@@ -4752,7 +4763,7 @@ public final class UI extends UINamespaceUtilities
         NullUtil.nullPropertyCheck(number, "number", "Please use 0 instead of null!");
         NullUtil.nullArgCheck(isValid, "isValid", Var.class);
         NullUtil.nullPropertyCheck(isValid, "isValid", "Please use false instead of null!");
-        return of((JTextField) new TextField())
+        return textField()
                 .applyIf( !number.hasNoID(), it -> it.id(number.id()) )
                 .withNumber(number, isValid);
     }
@@ -4847,7 +4858,8 @@ public final class UI extends UINamespaceUtilities
      */
     public static UIForPasswordField<JPasswordField> passwordField( String text ) {
         NullUtil.nullArgCheck(text, "text", String.class);
-        return of((JPasswordField) new PasswordField()).withText(text);
+        return new UIForPasswordField<>(new BuilderState<JPasswordField>(PasswordField.class, PasswordField::new))
+                .withText(text);
     }
 
     /**
@@ -4862,7 +4874,7 @@ public final class UI extends UINamespaceUtilities
     public static UIForPasswordField<JPasswordField> passwordField( Val<String> text ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
-        return new UIForPasswordField<>(new BuilderState<>(JPasswordField.class, ()->new PasswordField()))
+        return new UIForPasswordField<>(new BuilderState<>(JPasswordField.class, PasswordField::new))
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
     }
@@ -5081,7 +5093,8 @@ public final class UI extends UINamespaceUtilities
      */
     public static UIForTextArea<JTextArea> textArea( String text ) {
         NullUtil.nullArgCheck(text, "text", String.class);
-        return of((JTextArea) new TextArea()).withText(text);
+        return new UIForTextArea<>(new BuilderState<JTextArea>(TextArea.class, TextArea::new))
+                .withText(text);
     }
 
     /**
@@ -5096,7 +5109,7 @@ public final class UI extends UINamespaceUtilities
     public static UIForTextArea<JTextArea> textArea( Val<String> text ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
-        return of((JTextArea) new TextArea())
+        return new UIForTextArea<>(new BuilderState<JTextArea>(TextArea.class, TextArea::new))
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
     }
@@ -5112,7 +5125,7 @@ public final class UI extends UINamespaceUtilities
     public static UIForTextArea<JTextArea> textArea( Var<String> text ) {
         NullUtil.nullArgCheck(text, "text", Var.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
-        return of((JTextArea) new TextArea())
+        return new UIForTextArea<>(new BuilderState<JTextArea>(TextArea.class, TextArea::new))
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
     }
@@ -5131,7 +5144,9 @@ public final class UI extends UINamespaceUtilities
      * @param <E> The type of the elements in the list.
      * @return A builder instance for a new {@link JList}.
      */
-    public static <E> UIForList<E, JList<E>> list() { return of(new List<>()); }
+    public static <E> UIForList<E, JList<E>> list() {
+        return new UIForList<>(new BuilderState<>(List.class, List::new));
+    }
 
     /**
      * @param model The model which should be used for the new {@link JList}.
@@ -5140,9 +5155,11 @@ public final class UI extends UINamespaceUtilities
      */
     public static <E> UIForList<E, JList<E>> list( ListModel<E> model ) {
         NullUtil.nullArgCheck(model, "model", ListModel.class);
-        JList<E> list = new List<>();
-        list.setModel(model);
-        return of(list);
+        return new UIForList<>(new BuilderState<>(List.class, ()->{
+            JList<E> list = new List<>();
+            list.setModel(model);
+            return list;
+        }));
     }
 
     /**
@@ -5157,7 +5174,8 @@ public final class UI extends UINamespaceUtilities
     @SafeVarargs
     public static <E> UIForList<E, JList<E>> list( E... elements ) {
         NullUtil.nullArgCheck(elements, "elements", Object[].class);
-        return of(new List<E>()).withEntries( elements );
+        return new UIForList<>(new BuilderState<JList<E>>(List.class, ()->new List<E>()))
+                .withEntries( elements );
     }
 
     /**
@@ -5171,7 +5189,8 @@ public final class UI extends UINamespaceUtilities
      */
     public static <E> UIForList<E, JList<E>> list( Vals<E> elements ) {
         NullUtil.nullArgCheck(elements, "elements", Vals.class);
-        return of(new List<E>()).withEntries( elements );
+        return new UIForList<>(new BuilderState<JList<E>>(List.class, ()->new List<E>()))
+                .withEntries( elements );
     }
 
     /**
@@ -5209,7 +5228,8 @@ public final class UI extends UINamespaceUtilities
     public static <E> UIForList<E, JList<E>> list( Val<E> selection, Vals<E> elements ) {
         NullUtil.nullArgCheck(selection, "selection", Val.class);
         NullUtil.nullArgCheck(elements, "elements", Vals.class);
-        return of(new List<E>()).withEntries( elements ).withSelection( selection );
+        return new UIForList<>(new BuilderState<JList<E>>(List.class, ()->new List<E>()))
+                .withEntries( elements ).withSelection( selection );
     }
 
     /**
@@ -5234,7 +5254,8 @@ public final class UI extends UINamespaceUtilities
      * @return A builder instance for a new {@link JList} with the provided {@link List} as data model.
      */
     public static <E> UIForList<E, JList<E>> list( java.util.List<E> entries ) {
-        return of(new List<E>()).withEntries( entries );
+        return new UIForList<>(new BuilderState<JList<E>>(List.class, ()->new List<E>()))
+                .withEntries( entries );
     }
 
     /**
@@ -5261,7 +5282,9 @@ public final class UI extends UINamespaceUtilities
     /**
      * @return A fluent builder instance for a new {@link JTable}.
      */
-    public static UIForTable<JTable> table() { return of(new Table()); }
+    public static UIForTable<JTable> table() {
+        return new UIForTable<>(new BuilderState<>(Table.class, ()->new Table()));
+    }
 
     /**
      *  Use this to create a new {@link JTable} with a table model whose data can be represented based
@@ -5280,7 +5303,7 @@ public final class UI extends UINamespaceUtilities
     public static <E> UIForTable<JTable> table( ListData dataFormat, TableListDataSource<E> dataSource ) {
         NullUtil.nullArgCheck(dataFormat, "dataFormat", ListData.class);
         NullUtil.nullArgCheck(dataSource, "dataSource", TableListDataSource.class);
-        return of((JTable) new Table()).withModel(dataFormat, dataSource);
+        return table().withModel(dataFormat, dataSource);
     }
 
     /**
@@ -5300,7 +5323,7 @@ public final class UI extends UINamespaceUtilities
     public static <E> UIForTable<JTable> table( MapData dataFormat, TableMapDataSource<E> dataSource ) {
         NullUtil.nullArgCheck(dataFormat, "dataFormat", ListData.class);
         NullUtil.nullArgCheck(dataSource, "dataSource", TableMapDataSource.class);
-        return of((JTable) new Table()).withModel(dataFormat, dataSource);
+        return table().withModel(dataFormat, dataSource);
     }
 
     /**
@@ -5328,7 +5351,7 @@ public final class UI extends UINamespaceUtilities
      * @return A builder instance for a new {@link JTable}.
      */
     public static UIForTable<JTable> table( Buildable<BasicTableModel> tableModelBuildable ) {
-        return of((JTable) new Table()).withModel(tableModelBuildable);
+        return table().withModel(tableModelBuildable);
     }
 
     /**
@@ -5344,7 +5367,9 @@ public final class UI extends UINamespaceUtilities
     /**
      * @return A builder instance for a new {@link JTableHeader}.
      */
-    public static UIForTableHeader<TableHeader> tableHeader() { return of(new TableHeader()); }
+    public static UIForTableHeader<TableHeader> tableHeader() {
+        return new UIForTableHeader<>(new BuilderState<>(TableHeader.class, ()->new TableHeader()));
+    }
 
     /**
      * @return A functional API for building a {@link javax.swing.table.TableModel}.
@@ -5358,7 +5383,7 @@ public final class UI extends UINamespaceUtilities
      * @param <E> The type of the table entries.
      * @return A functional API for building a {@link javax.swing.table.TableModel}.
      */
-    public static <E> BasicTableModel.Builder<E> tableModel(Class<E> entryType) {
+    public static <E> BasicTableModel.Builder<E> tableModel( Class<E> entryType ) {
         return new BasicTableModel.Builder<>(entryType);
     }
 

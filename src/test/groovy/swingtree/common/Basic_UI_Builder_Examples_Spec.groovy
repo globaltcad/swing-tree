@@ -69,17 +69,19 @@ class Basic_UI_Builder_Examples_Spec extends Specification
                         .add(UI.panel())
                     )
                     .add(UI.panel())
+        and : 'We actually build the component:'
+            var panel = ui.component
 
         expect : 'The UI node contains a root JPanel with 3 children.'
-            ui.component instanceof JPanel
-            ui.component.components.length == 3
+            panel instanceof JPanel
+            panel.components.length == 3
         and : 'Because this is a regular Swing UI, we traverse the tree and find the children.'
-            ui.component.components[0] instanceof JPanel
-            ui.component.components[1] instanceof JPanel
-            ui.component.components[2] instanceof JPanel
+            panel.components[0] instanceof JPanel
+            panel.components[1] instanceof JPanel
+            panel.components[2] instanceof JPanel
         and : 'We can also traverse the tree to find the children of the children.'
-            ui.component.components[1].components[0] instanceof JPanel
-            ui.component.components[1].components[1] instanceof JPanel
+            panel.components[1].components[0] instanceof JPanel
+            panel.components[1].components[1] instanceof JPanel
     }
 
     def 'We can use the `box()` factory to group UIs seemlesly.'()
@@ -104,31 +106,33 @@ class Basic_UI_Builder_Examples_Spec extends Specification
                         .add(UI.panel())
                     )
                     .add(UI.box())
+        and : 'We actually build the component:'
+            var box = ui.component
 
         expect : 'The UI node contains a root JBox with 3 children.'
-            ui.component instanceof JBox
-            ui.component.components.length == 3
+            box instanceof JBox
+            box.components.length == 3
         and : 'Because this is a regular Swing UI, we traverse the tree and find the children.'
-            ui.component.components[0] instanceof JBox
-            ui.component.components[1] instanceof JBox
-            ui.component.components[2] instanceof JBox
+            box.components[0] instanceof JBox
+            box.components[1] instanceof JBox
+            box.components[2] instanceof JBox
         and : 'We can also traverse the tree to find the children of the children.'
-            ui.component.components[1].components[0] instanceof JPanel
-            ui.component.components[1].components[1] instanceof JPanel
+            box.components[1].components[0] instanceof JPanel
+            box.components[1].components[1] instanceof JPanel
         and : 'All the JPanel instances created with the `box()` factory methods are non-opacque and without insets!'
-            ui.component.isOpaque() == false
-            ui.component.components[0].isOpaque() == false
-            ui.component.components[1].isOpaque() == false
-            ui.component.components[2].isOpaque() == false
-            ui.component.layout.layoutConstraints == "ins 0, hidemode 2, gap 0"
-            ui.component.components[0].layout.layoutConstraints == "ins 0, hidemode 2, gap 0"
-            ui.component.components[1].layout.layoutConstraints == "ins 0, hidemode 2, gap 0"
-            ui.component.components[2].layout.layoutConstraints == "ins 0, hidemode 2, gap 0"
+            box.isOpaque() == false
+            box.components[0].isOpaque() == false
+            box.components[1].isOpaque() == false
+            box.components[2].isOpaque() == false
+            box.layout.layoutConstraints == "ins 0, hidemode 2, gap 0"
+            box.components[0].layout.layoutConstraints == "ins 0, hidemode 2, gap 0"
+            box.components[1].layout.layoutConstraints == "ins 0, hidemode 2, gap 0"
+            box.components[2].layout.layoutConstraints == "ins 0, hidemode 2, gap 0"
         and : 'The 2 innermost panels are opaque and have insets:'
-            ui.component.components[1].components[0].isOpaque() == true
-            ui.component.components[1].components[1].isOpaque() == true
-            ui.component.components[1].components[0].layout.layoutConstraints == "hidemode 2"
-            ui.component.components[1].components[1].layout.layoutConstraints == "hidemode 2"
+            box.components[1].components[0].isOpaque() == true
+            box.components[1].components[1].isOpaque() == true
+            box.components[1].components[0].layout.layoutConstraints == "hidemode 2"
+            box.components[1].components[1].layout.layoutConstraints == "hidemode 2"
     }
 
     def 'We can add a list of components to the swing tree API and get a builder node in return.'()
@@ -195,13 +199,17 @@ class Basic_UI_Builder_Examples_Spec extends Specification
     {
         given : 'We create a UI builder node containing a simple button.'
             var ui = UI.button()
+        and : 'We actually build the component:'
+            var button = ui.component
         expect : 'At the beginning the default cursor will be set.'
-            ui.component.cursor.type == Cursor.DEFAULT_CURSOR
+            button.cursor.type == Cursor.DEFAULT_CURSOR
 
         when : 'We set the cursor of the button to be something else...'
             ui = ui.withCursor(UI.Cursor.RESIZE_SOUTH_EAST)
+        and : 'We re-build the component.'
+            button = ui.component
         then : 'This will lead to the correct cursor being chosen.'
-            ui.component.cursor.type == Cursor.SE_RESIZE_CURSOR
+            button.cursor.type == Cursor.SE_RESIZE_CURSOR
     }
 
     def 'An enum based combo box can have custom cell rendering.'()
@@ -224,19 +232,21 @@ class Basic_UI_Builder_Examples_Spec extends Specification
                         UI.renderComboItem(Keyboard.Key)
                         .asText( cell -> cell.value().map( k -> k.name().toLowerCase() ).orElse("") )
                     )
+        and : 'We actually build the component:'
+            var comboBox = ui.component
 
         expect : 'The combo box will have the correct amount of items.'
-            ui.component.itemCount == Keyboard.Key.values().length
+            comboBox.itemCount == Keyboard.Key.values().length
         and : 'The combo box will have the correct selected item.'
-            ui.component.selectedItem == Keyboard.Key.A
+            comboBox.selectedItem == Keyboard.Key.A
         and : 'The combo box will have a renderer that renders the enum value as a lower case string.'
-            ui.component.renderer instanceof DefaultListCellRenderer
-            ui.component.renderer.getListCellRendererComponent(null, Keyboard.Key.A, 0, false, false).text == "a"
+            comboBox.renderer instanceof DefaultListCellRenderer
+            comboBox.renderer.getListCellRendererComponent(null, Keyboard.Key.A, 0, false, false).text == "a"
 
         when : 'We change the selection...'
             sel.set(Keyboard.Key.B)
         then : 'The combo box will have the correct selected item.'
-            ui.component.selectedItem == Keyboard.Key.B
+            comboBox.selectedItem == Keyboard.Key.B
     }
 
     def 'We can create a border layout based Swing tree.'()

@@ -41,16 +41,18 @@ class JButton_Example_Spec extends Specification
             var ui =
                 UI.button("I am displayed on the button!")
                 .onClick( it -> it.component.setEnabled(false) )
+        and : 'We actually build the component:'
+            var button = ui.component
 
         expect : 'The component wrapped by the UI builder is in fact a simple button:'
-            ui.component instanceof JButton
+            button instanceof JButton
         and : 'The button is enabled by default!'
-            ui.component.isEnabled()
+            button.isEnabled()
 
         when : 'We simulate a user click...'
-            UI.runNow( ()-> ui.component.doClick() )
+            UI.runNow( ()-> button.doClick() )
         then : 'The button will be disabled because of the click action we specified!'
-            !ui.component.isEnabled()
+            !button.isEnabled()
     }
 
     def 'A button will delegate its siblings within actions:'()
@@ -69,19 +71,21 @@ class JButton_Example_Spec extends Specification
                     UI.button("Click me!")
                     .onClick( it -> it.siblings.each {s -> s.setEnabled(false)} )
                 )
+        and : 'We actually build the component:'
+            var panel = ui.get(JPanel)
 
         expect : 'The components wrapped by the UI builder are as expected:'
-            ui.component.getComponent(0) instanceof JLabel
-            ui.component.getComponent(1) instanceof JButton
+            panel.getComponent(0) instanceof JLabel
+            panel.getComponent(1) instanceof JButton
         and : 'They are enabled by default!'
-            ui.component.getComponent(0).isEnabled()
-            ui.component.getComponent(1).isEnabled()
+            panel.getComponent(0).isEnabled()
+            panel.getComponent(1).isEnabled()
 
         when : 'We simulate a user click...'
-            UI.runNow( () -> ui.component.getComponent(1).doClick() )
+            UI.runNow( () -> panel.getComponent(1).doClick() )
         then :  'They are enabled by default!'
-            !ui.component.getComponent(0).isEnabled()
-            ui.component.getComponent(1).isEnabled()
+            !panel.getComponent(0).isEnabled()
+            panel.getComponent(1).isEnabled()
     }
 
     def 'In a button event we can go through the entire siblinghood, including the current button!'()
@@ -105,11 +109,13 @@ class JButton_Example_Spec extends Specification
                     )
                 )
                 .add(UI.spinner())
+        and : 'We actually build the component:'
+            var panel = ui.get(JPanel)
 
         when : 'We simulate a user click...'
-            UI.runNow( () -> ui.component.getComponent(2).doClick() )
+            UI.runNow( () -> panel.getComponent(2).doClick() )
         then :  'The label text changed!'
-            ui.component.getComponent(1).getText() == "I got hacked!"
+            panel.getComponent(1).getText() == "I got hacked!"
     }
 
 }

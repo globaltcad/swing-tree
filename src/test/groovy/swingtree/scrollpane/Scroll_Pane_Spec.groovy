@@ -56,10 +56,12 @@ class Scroll_Pane_Spec extends Specification
             var ui =
                     UI.scrollPane()
                     .withScrollBarPolicy(UI.Active.NEVER)
+        and : 'We actually build the component:'
+            var scrollPane = ui.component
 
         expect : 'The scroll pane has the expected scroll bar policies.'
-            ui.component.getHorizontalScrollBarPolicy() == JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
-            ui.component.getVerticalScrollBarPolicy() == JScrollPane.VERTICAL_SCROLLBAR_NEVER
+            scrollPane.getHorizontalScrollBarPolicy() == JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
+            scrollPane.getVerticalScrollBarPolicy() == JScrollPane.VERTICAL_SCROLLBAR_NEVER
     }
 
     def 'Configure both the horizontal and vertical scroll policy individually.'()
@@ -78,10 +80,12 @@ class Scroll_Pane_Spec extends Specification
                     UI.scrollPane()
                     .withHorizontalScrollBarPolicy(UI.Active.NEVER)
                     .withVerticalScrollBarPolicy(UI.Active.ALWAYS)
+        and : 'We actually build the component:'
+            var scrollPane = ui.component
 
         expect : 'The scroll pane has the expected scroll bar policies.'
-            ui.component.getHorizontalScrollBarPolicy() == JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
-            ui.component.getVerticalScrollBarPolicy() == JScrollPane.VERTICAL_SCROLLBAR_ALWAYS
+            scrollPane.getHorizontalScrollBarPolicy() == JScrollPane.HORIZONTAL_SCROLLBAR_NEVER
+            scrollPane.getVerticalScrollBarPolicy() == JScrollPane.VERTICAL_SCROLLBAR_ALWAYS
     }
 
     def 'We can configure the vertical and horizontal scroll bar scroll increment of a scroll pane.'()
@@ -91,9 +95,11 @@ class Scroll_Pane_Spec extends Specification
                     UI.scrollPane()
                     .withHorizontalScrollIncrement(42)
                     .withVerticalScrollIncrement(24)
+        and : 'We actually build the component:'
+            var scrollPane = ui.component
         expect : 'The scroll pane has the expected scroll increments.'
-            ui.component.getHorizontalScrollBar().getUnitIncrement() == 42
-            ui.component.getVerticalScrollBar().getUnitIncrement() == 24
+            scrollPane.getHorizontalScrollBar().getUnitIncrement() == 42
+            scrollPane.getVerticalScrollBar().getUnitIncrement() == 24
     }
 
     def 'We can configure the general scroll increment of the scroll pane scroll bars.'()
@@ -108,10 +114,12 @@ class Scroll_Pane_Spec extends Specification
             var ui =
                     UI.scrollPane()
                     .withScrollIncrement(42)
+        and : 'We actually build the component:'
+            var scrollPane = ui.component
 
         expect : 'The scroll pane has the expected scroll increments, both vertical and horizontally.'
-            ui.component.getHorizontalScrollBar().getUnitIncrement() == 42
-            ui.component.getVerticalScrollBar().getUnitIncrement() == 42
+            scrollPane.getHorizontalScrollBar().getUnitIncrement() == 42
+            scrollPane.getVerticalScrollBar().getUnitIncrement() == 42
     }
 
     def 'The horizontal as well as vertical block scroll increment can be configured easily.'()
@@ -121,9 +129,11 @@ class Scroll_Pane_Spec extends Specification
                     UI.scrollPane()
                     .withHorizontalBlockScrollIncrement(42)
                     .withVerticalBlockScrollIncrement(24)
+        and : 'We actually build the component:'
+            var scrollPane = ui.component
         expect : 'The scroll pane has the expected block scroll increments.'
-            ui.component.getHorizontalScrollBar().getBlockIncrement() == 42
-            ui.component.getVerticalScrollBar().getBlockIncrement() == 24
+            scrollPane.getHorizontalScrollBar().getBlockIncrement() == 42
+            scrollPane.getVerticalScrollBar().getBlockIncrement() == 24
     }
 
     def 'Configure the block scroll increment for both scroll bars in one line.'()
@@ -138,8 +148,10 @@ class Scroll_Pane_Spec extends Specification
             var ui =
                     UI.scrollPane()
                     .withBlockScrollIncrement(42)
+        and : 'We actually build the component:'
+            var scrollPane = ui.component
         expect : 'The scroll pane has the expected block scroll increments, both vertical and horizontally.'
-            ui.component.getHorizontalScrollBar().getBlockIncrement() == 42
-            ui.component.getVerticalScrollBar().getBlockIncrement() == 42
+            scrollPane.getHorizontalScrollBar().getBlockIncrement() == 42
+            scrollPane.getVerticalScrollBar().getBlockIncrement() == 42
     }
 }

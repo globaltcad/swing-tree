@@ -270,14 +270,18 @@ abstract class AbstractBuilder<I, C extends Component>
      *         application has an application thread (see {@link UI#use(EventProcessor, Supplier)})
      *         and this method is called from a thread other than the EDT.
      */
-    public final OptionalUI<C> component() { return OptionalUI.ofNullable(_state().component()); }
+    public final OptionalUI<C> component() {
+        return OptionalUI.ofNullable(_state().component());
+    }
 
     /**
      *  The type class of the component wrapped by this builder node.
      *  See documentation for method "build" for more information.
      * @return The type class of the component wrapped by this builder node.
      */
-    public final Class<C> getType() { return _state().componentType(); }
+    public final Class<C> getType() {
+        return _state().componentType();
+    }
 
     /**
      *  Use this if you wish to access the component wrapped by this builder directly.
@@ -478,7 +482,7 @@ abstract class AbstractBuilder<I, C extends Component>
      */
     public final <T extends C> T get( Class<T> type ) {
         assert type == _state().componentType() || type.isAssignableFrom(_state().componentType());
-        return (T) _state().component();
+        return (T) getComponent();
     }
 
 

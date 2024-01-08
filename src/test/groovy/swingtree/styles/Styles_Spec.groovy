@@ -12,6 +12,7 @@ import swingtree.threading.EventProcessor
 import swingtree.style.Style
 import swingtree.style.ComponentStyleDelegate
 
+import javax.swing.JButton
 import javax.swing.JComboBox
 import javax.swing.JComponent
 import javax.swing.JPanel
@@ -419,7 +420,7 @@ class Styles_Spec extends Specification
                                     .type(UI.GradientType.LINEAR)
                                 )
                         )
-                        .getComponent()
+                        .get(JPanel)
         expect : 'The style config has the expected string representation.'
             ComponentExtension.from(ui).getStyle().toString() == "Style[" +
                     "LayoutStyle[NONE], " +
@@ -443,7 +444,7 @@ class Styles_Spec extends Specification
                             .size(120, 80)
                             .borderRadius(40)
                         )
-                        .getComponent()
+                        .get(JButton)
         then : 'The style config has the expected string representation.'
             ComponentExtension.from(ui).getStyle().toString() == "Style[" +
                     "LayoutStyle[NONE], " +
@@ -509,7 +510,7 @@ class Styles_Spec extends Specification
                                 .borderRadiusAt(UI.Corner.TOP_LEFT, 0, 20)
                                 .borderRadiusAt(UI.Corner.BOTTOM_LEFT, 10, 0)
                         )
-                        .getComponent()
+                        .get(JPanel)
         expect : """
             The style config has the expected string representation,
             despite the fact that a visible border color was specified.
@@ -542,7 +543,7 @@ class Styles_Spec extends Specification
                             .borderRadiusAt(UI.Corner.TOP_LEFT, 0, 20)
                             .borderRadiusAt(UI.Corner.BOTTOM_LEFT, 10, 0)
                         )
-                        .getComponent()
+                        .get(JPanel)
         then : """
             The style config has the expected string representation,
             despite the fact that a visible border color was specified.
@@ -597,7 +598,7 @@ class Styles_Spec extends Specification
                             .foregroundColor(UI.COLOR_UNDEFINED)
                             .foundationColor(UI.COLOR_UNDEFINED)
                         )
-                        .getComponent()
+                        .get(JToggleButton)
         then : """
             The component will have its background and foreground color set to null,
             which will cause it to use the default colors of the Look and Feel.
@@ -664,7 +665,7 @@ class Styles_Spec extends Specification
                             .fontSelectionColor(UI.COLOR_UNDEFINED)
                             .fontBackgroundColor(UI.COLOR_UNDEFINED)
                         )
-                        .getComponent()
+                        .get(JComboBox)
         then : """
             The style configuration of the component will be simplified heavily, to
             the point where it is effectively considered to have no style at all.

@@ -439,6 +439,8 @@ class Event_Handling_Spec extends Specification
                         UI.textField("I am a text field")
                         .on(observable, it -> trace.add("1"))
                     )
+        and : 'We actually build the component:'
+            var panel = ui.component
 
         when : 'The observable is triggered.'
             observable.fire()
@@ -477,6 +479,8 @@ class Event_Handling_Spec extends Specification
                         UI.textField(property)
                         .onView(property, it -> trace.add(it.event.get()))
                     )
+        and : 'We actually build the component:'
+            var panel = ui.component
 
         when : 'The property is triggered.'
             property.set("I am a different text field")

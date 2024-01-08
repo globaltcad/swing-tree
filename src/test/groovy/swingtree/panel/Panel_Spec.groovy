@@ -42,41 +42,49 @@ class Panel_Spec extends Specification
     def 'A panel node can be created using the UI.panel() factory method.'() {
         when : 'We create a panel...'
             def ui = UI.panel()
-        then : 'The panel UI is not null.'
-            ui != null
-        and : 'The UI node wraps a JPanel.'
-            ui.component instanceof JPanel
+        and : 'We actually build the component:'
+            def panel = ui.get(JPanel)
+        then : 'The panel is not null.'
+            panel != null
+        and : 'We confirm that the panel is a JPanel.'
+            panel instanceof JPanel
     }
 
     def 'A panel can be created with a layout manager.'() {
         when : 'We create a panel with a layout manager...'
             def ui = UI.panel().withLayout(new FlowLayout())
-        then : 'The panel UI is not null.'
-            ui != null
+        and : 'We actually build the component:'
+            def panel = ui.get(JPanel)
+        then : 'The panel is not null.'
+            panel != null
         and : 'The UI node wraps a JPanel.'
-            ui.component instanceof JPanel
+            panel instanceof JPanel
         and : 'The panel has a FlowLayout.'
-            ui.component.layout instanceof FlowLayout
+            panel.layout instanceof FlowLayout
     }
 
     def 'A transparent panel can be created with a custom flow layout manager.'() {
         when : 'We create a panel with a layout manager...'
             def ui = UI.box().withLayout(new FlowLayout())
-        then : 'The panel UI is not null.'
-            ui != null
+        and : 'We actually build the component:'
+            def box = ui.component
+        then : 'The box is not null.'
+            box != null
         and : 'The UI node wraps a JBox.'
-            ui.component instanceof JBox
+            box instanceof JBox
         and : 'The panel has a FlowLayout.'
-            ui.component.layout instanceof FlowLayout
+            box.layout instanceof FlowLayout
     }
 
     def 'All of the "box(..)" factory methods will create transparent panels without insets.'(
         UIForBox<JBox> ui
     ) {
+        given : 'We create build the component...'
+            var box = ui.component
         expect : 'The panel is transparent.'
-            ui.component.isOpaque() == false
+            box.isOpaque() == false
         and : 'The panel has no insets.'
-            ui.component.layout.layoutConstraints.contains("ins 0")
+            box.layout.layoutConstraints.contains("ins 0")
 
         where : 'The following UI nodes are created using the "box(..)" factory methods.'
             ui << [
@@ -106,11 +114,13 @@ class Panel_Spec extends Specification
                     .add(UI.panel())
                     .add(UI.panel())
                     .add(UI.panel())
+        and : 'We actually build the component:'
+            def panel = ui.get(JPanel)
 
         expect : 'The panel has 3 children.'
-            ui.component.components.size() == 3
+            panel.components.size() == 3
         and : 'All children are JPanels.'
-            ui.component.components.every { it instanceof JPanel }
+            panel.components.every { it instanceof JPanel }
     }
 
     def 'The dimensions of a panel can be bound to a property.'( float uiScale )
@@ -133,10 +143,12 @@ class Panel_Spec extends Specification
             def ui = UI.panel()
                         .withPrefWidth(width)
                         .withPrefHeight(height)
+        and : 'We actually build the component:'
+            def panel = ui.get(JPanel)
 
         expect : 'The panel has the correct width and height.'
-            ui.component.preferredSize.width == (int) ( 300 * uiScale )
-            ui.component.preferredSize.height == (int) ( 200 * uiScale )
+            panel.preferredSize.width == (int) ( 300 * uiScale )
+            panel.preferredSize.height == (int) ( 200 * uiScale )
 
         when : 'We change the width of the panel.'
             width.set(400)
@@ -144,16 +156,16 @@ class Panel_Spec extends Specification
             UI.sync()
 
         then : 'The panel has the correct width and height.'
-            ui.component.preferredSize.width == (int) ( 400 * uiScale )
-            ui.component.preferredSize.height == (int) ( 200 * uiScale )
+            panel.preferredSize.width == (int) ( 400 * uiScale )
+            panel.preferredSize.height == (int) ( 200 * uiScale )
 
         when : 'We change the height of the panel.'
             height.set(300)
         and : 'Then we wait for the EDT to complete the UI modifications...'
             UI.sync()
         then : 'The panel has the correct width and height.'
-            ui.component.preferredSize.width == (int) ( 400 * uiScale )
-            ui.component.preferredSize.height == (int) ( 300 * uiScale )
+            panel.preferredSize.width == (int) ( 400 * uiScale )
+            panel.preferredSize.height == (int) ( 300 * uiScale )
         where :
             uiScale << [ 1.0f, 1.5f, 2.0f ]
     }

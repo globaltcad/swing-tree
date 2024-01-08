@@ -38,14 +38,16 @@ class Declarative_Tables_Spec extends Specification
         given : 'A simple table UI with a map based data table model.'
             var ui =
                     UI.table(UI.MapData.EDITABLE, { ["X":["a", "b", "c"], "Y":["1", "2", "3"]] })
+        and : 'We actually build the component:'
+            var table = ui.component
 
         expect : 'The table UI has the following state:'
-            ui.component.getColumnName(0) == "X"
-            ui.component.getColumnName(1) == "Y"
-            ui.component.getRowCount() == 3
-            ui.component.getColumnCount() == 2
-            ui.component.getValueAt(0, 0) == "a"
-            ui.component.getValueAt(0, 1) == "1"
+            table.getColumnName(0) == "X"
+            table.getColumnName(1) == "Y"
+            table.getRowCount() == 3
+            table.getColumnCount() == 2
+            table.getValueAt(0, 0) == "a"
+            table.getValueAt(0, 1) == "1"
     }
 
     def 'We can create a column major table based on a list of lists as a data model.'()
@@ -57,18 +59,20 @@ class Declarative_Tables_Spec extends Specification
         """
         given :
             var ui = UI.table(UI.ListData.COLUMN_MAJOR_EDITABLE, { [["a", "b", "c"], ["x", "y", "z"]] })
+        and : 'We actually build the component:'
+            var table = ui.component
 
         expect : 'The table UI has the following state:'
-            ui.component.getColumnName(0) == "A" // default column names
-            ui.component.getColumnName(1) == "B"
-            ui.component.getRowCount() == 3
-            ui.component.getColumnCount() == 2
-            ui.component.getValueAt(0, 0) == "a"
-            ui.component.getValueAt(0, 1) == "x"
-            ui.component.getValueAt(1, 0) == "b"
-            ui.component.getValueAt(1, 1) == "y"
-            ui.component.getValueAt(2, 0) == "c"
-            ui.component.getValueAt(2, 1) == "z"
+            table.getColumnName(0) == "A" // default column names
+            table.getColumnName(1) == "B"
+            table.getRowCount() == 3
+            table.getColumnCount() == 2
+            table.getValueAt(0, 0) == "a"
+            table.getValueAt(0, 1) == "x"
+            table.getValueAt(1, 0) == "b"
+            table.getValueAt(1, 1) == "y"
+            table.getValueAt(2, 0) == "c"
+            table.getValueAt(2, 1) == "z"
     }
 
     def 'We can pass an `Event` to the table model to trigger updates.'()
@@ -93,24 +97,26 @@ class Declarative_Tables_Spec extends Specification
                         .getsEntryAt( (r, c) -> data[r] )
                         .updateOn(update)
                     )
+        and : 'We actually build the component:'
+            var table = ui.get(JTable)
 
         expect : 'The table has 4 rows and 3 columns.'
-            ui.get(JTable).rowCount == 4
-            ui.get(JTable).columnCount == 3
+            table.rowCount == 4
+            table.columnCount == 3
         and : 'The table has the correct data.'
-            ui.get(JTable).getValueAt(0, 0) == 1
-            ui.get(JTable).getValueAt(1, 0) == 2
-            ui.get(JTable).getValueAt(2, 0) == 3
-            ui.get(JTable).getValueAt(3, 0) == 4
+            table.getValueAt(0, 0) == 1
+            table.getValueAt(1, 0) == 2
+            table.getValueAt(2, 0) == 3
+            table.getValueAt(3, 0) == 4
         when : 'We update the data.'
             data = [5, 6, 7, 8]
             update.fire()
             UI.sync() // sync with the EDT
         then : 'The table has the correct data.'
-            ui.get(JTable).getValueAt(0, 0) == 5
-            ui.get(JTable).getValueAt(1, 0) == 6
-            ui.get(JTable).getValueAt(2, 0) == 7
-            ui.get(JTable).getValueAt(3, 0) == 8
+            table.getValueAt(0, 0) == 5
+            table.getValueAt(1, 0) == 6
+            table.getValueAt(2, 0) == 7
+            table.getValueAt(3, 0) == 8
     }
 
     def 'We need to attach an update `Event` to our table when the table data is list based and its data changes.'()
@@ -127,16 +133,18 @@ class Declarative_Tables_Spec extends Specification
             var ui =
                         UI.table(UI.ListData.ROW_MAJOR_EDITABLE, { data })
                         .updateTableOn(event)
+        and : 'We actually build the component:'
+            var table = ui.get(JTable)
         when : 'We fire the event.'
             event.fire()
         then : 'The table UI is updated.'
-            ui.component.getRowCount() == 2
-            ui.component.getValueAt(0, 0) == 1
-            ui.component.getValueAt(0, 1) == 2
-            ui.component.getValueAt(0, 2) == 3
-            ui.component.getValueAt(1, 0) == 7
-            ui.component.getValueAt(1, 1) == 8
-            ui.component.getValueAt(1, 2) == 9
+            table.getRowCount() == 2
+            table.getValueAt(0, 0) == 1
+            table.getValueAt(0, 1) == 2
+            table.getValueAt(0, 2) == 3
+            table.getValueAt(1, 0) == 7
+            table.getValueAt(1, 1) == 8
+            table.getValueAt(1, 2) == 9
     }
 
 }
