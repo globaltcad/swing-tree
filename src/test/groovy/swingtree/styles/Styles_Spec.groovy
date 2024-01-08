@@ -25,9 +25,10 @@ import java.awt.geom.AffineTransform
 @Title("Style Properties")
 @Narrative('''
 
-    This specification demonstrates how the `Style` type
-    can be used to define how Swing components ought to be
-    rendered.
+    This specification demonstrates what kind of style configuration is
+    created by various usage patterns of the style API.
+    The style configuration defines how Swing components ought to be
+    configured and rendered.
 
 ''')
 @Subject([Style])
@@ -42,7 +43,7 @@ class Styles_Spec extends Specification
     def 'Various kinds of String expressions can be parsed as colors by various style properties.'(
         String colorString, Color expectedColor
     ) {
-        given : 'We use method chaining to build a colorful style:'
+        given : 'We use method chaining within the style API to build a colorful style:'
             var style =
                             ComponentExtension.from(
                                 UI.of(new JComponent(){})
@@ -209,19 +210,23 @@ class Styles_Spec extends Specification
             var paint1 = new GradientPaint(0, 0, Color.RED, 100, 100, Color.BLUE)
             var paint2 = new GradientPaint(0, 0, Color.BLACK, 100, 100, Color.GREEN)
             var transform = AffineTransform.getRotateInstance(0.5)
-            style = new ComponentStyleDelegate<>(new JPanel(), Style.none())
-                                .fontAlignment(UI.Alignment.CENTER)
-                                .fontBackgroundPaint(paint1)
-                                .fontPaint(paint2)
-                                .fontTransform(transform)
-                                .fontBackgroundColor("cyan")
-                                .fontBackgroundColor(new Color(0, 42, 42, 42))
-                                .image(UI.Layer.FOREGROUND, "bubbles", conf -> conf
-                                    .fitMode(UI.FitComponent.WIDTH)
-                                    .repeat(true)
-                                    .image("/img/bubbles.svg")
+            style = ComponentExtension.from(
+                                UI.of(new JSpinner()).withStyle(conf->conf
+                                    .fontAlignment(UI.Alignment.CENTER)
+                                    .fontBackgroundPaint(paint1)
+                                    .fontPaint(paint2)
+                                    .fontTransform(transform)
+                                    .fontBackgroundColor("cyan")
+                                    .fontBackgroundColor(new Color(0, 42, 42, 42))
+                                    .image(UI.Layer.FOREGROUND, "bubbles", imgConf -> imgConf
+                                        .fitMode(UI.FitComponent.WIDTH)
+                                        .repeat(true)
+                                        .image("/img/bubble-tree.svg")
+                                    )
                                 )
-                                .style()
+                                .get(JSpinner)
+                            )
+                            .getStyle()
 
         then :
                 style.toString() == "Style[" +
@@ -258,7 +263,7 @@ class Styles_Spec extends Specification
                                                     "default=ImageStyle[NONE], " +
                                                     "bubbles=ImageStyle[" +
                                                         "primer=?, " +
-                                                        "image=?, " +
+                                                        "image=${style.images(UI.Layer.FOREGROUND).get(0).image().get()}, " +
                                                         "placement=UNDEFINED, " +
                                                         "repeat=true, " +
                                                         "fitComponent=WIDTH, " +
@@ -275,18 +280,22 @@ class Styles_Spec extends Specification
                                     "]"
 
         when : 'We create another style with some other properties:'
-            style = new ComponentStyleDelegate<>(new JPanel(), Style.none())
-                                .layout(Layout.border(2, 4))
-                                .size(100, 200)
-                                .minSize(50, 100)
-                                .maxHeight(300)
-                                .prefWidth(400)
-                                .gradient(UI.Layer.BORDER, "gradient", conf -> conf
-                                    .colors(Color.RED, Color.GREEN, Color.BLUE)
-                                    .transition(UI.Transition.BOTTOM_TO_TOP)
-                                    .type(UI.GradientType.RADIAL)
+            style = ComponentExtension.from(
+                                UI.of(new JPanel()).withStyle(conf->conf
+                                    .layout(Layout.border(2, 4))
+                                    .size(100, 200)
+                                    .minSize(50, 100)
+                                    .maxHeight(300)
+                                    .prefWidth(400)
+                                    .gradient(UI.Layer.BORDER, "gradient", imgConf -> imgConf
+                                        .colors(Color.RED, Color.GREEN, Color.BLUE)
+                                        .transition(UI.Transition.BOTTOM_TO_TOP)
+                                        .type(UI.GradientType.RADIAL)
+                                    )
                                 )
-                                .style()
+                                .get(JPanel)
+                            )
+                            .getStyle()
 
         then :
                 style.toString() == "Style[" +
