@@ -6,6 +6,7 @@ import spock.lang.Subject
 import spock.lang.Title
 import swingtree.SwingTree
 import swingtree.UI
+import swingtree.components.JBox
 import swingtree.style.ComponentExtension
 import swingtree.style.Layout
 import swingtree.threading.EventProcessor
@@ -16,6 +17,7 @@ import javax.swing.JButton
 import javax.swing.JComboBox
 import javax.swing.JComponent
 import javax.swing.JPanel
+import javax.swing.JSpinner
 import javax.swing.JToggleButton
 import java.awt.*
 import java.awt.geom.AffineTransform
@@ -116,23 +118,32 @@ class Styles_Spec extends Specification
             "Hold my b(0/&/§H%,1fu3s98s"   | UI.COLOR_UNDEFINED
     }
 
-    def 'The String representation of a Style will tell you everything about it!'()
+    def 'The String representation of a style config will tell you everything about it!'()
     {
-        given : 'We first create a style with various properties:'
-            var style = new ComponentStyleDelegate<>(new JPanel(), Style.none())
-                                .foundationColor("red")
-                                .backgroundColor("green")
-                                .borderColor("blue")
-                                .borderRadius(12, 18)
-                                .shadowColor("yellow")
-                                .fontSelectionColor("cyan")
-                                .fontColor("magenta")
-                                .fontFamily("Times New Roman")
-                                .fontSize(12)
-                                .fontBold(true)
-                                .fontUnderline(true)
-                                .fontStrikeThrough(true)
-                                .style()
+        given : """
+            We have a simple Swing component.
+            We now send the component through the SwingTree builder API and apply a style to it... 
+        """
+            var style =
+                            ComponentExtension.from(
+                                UI.of(new JSpinner()).withStyle(conf->conf
+                                    .foundationColor("red")
+                                    .backgroundColor("green")
+                                    .borderColor("blue")
+                                    .borderWidths(1, 2, 3, 4)
+                                    .borderRadius(12, 18)
+                                    .shadowColor("yellow")
+                                    .fontSelectionColor("cyan")
+                                    .fontColor("magenta")
+                                    .fontFamily("Times New Roman")
+                                    .fontSize(12)
+                                    .fontBold(true)
+                                    .fontUnderline(true)
+                                    .fontStrikeThrough(true)
+                                )
+                                .get(JSpinner)
+                            )
+                            .getStyle()
 
         expect :
                 style.toString() == "Style[" +
@@ -140,7 +151,7 @@ class Styles_Spec extends Specification
                                         "BorderStyle[" +
                                             "arcWidth=12, " +
                                             "arcHeight=18, " +
-                                            "width=?, " +
+                                            "topWidth=1, rightWidth=2, bottomWidth=3, leftWidth=4, " +
                                             "margin=Outline[top=?, right=?, bottom=?, left=?], " +
                                             "padding=Outline[top=?, right=?, bottom=?, left=?], " +
                                             "color=rgba(0,0,255,255), " +
@@ -330,40 +341,50 @@ class Styles_Spec extends Specification
             var styler = s -> new ComponentStyleDelegate<>(new JPanel(), s)
 
         and : 'Then we create a starting style with various properties:'
-            var style1 = styler(Style.none())
-                                 .foundationColor("red")
-                                 .backgroundColor("green")
-                                 .borderColor("blue")
-                                 .borderRadius(12, 18)
-                                 .shadowColor("yellow")
-                                 .fontSelectionColor("cyan")
-                                 .fontColor("magenta")
-                                 .fontFamily("Times New Roman")
-                                 .fontSize(12)
-                                 .fontBold(true)
-                                 .fontUnderline(true)
-                                 .fontStrikeThrough(true)
-                                 .shadowSpreadRadius(12)
-                                 .shadowBlurRadius(42)
-                                 .style()
+            var style1 =
+                            ComponentExtension.from(
+                                UI.box().withStyle(conf->conf
+                                    .foundationColor("red")
+                                    .backgroundColor("green")
+                                    .borderColor("blue")
+                                    .borderRadius(12, 18)
+                                    .shadowColor("yellow")
+                                    .fontSelectionColor("cyan")
+                                    .fontColor("magenta")
+                                    .fontFamily("Times New Roman")
+                                    .fontSize(12)
+                                    .fontBold(true)
+                                    .fontUnderline(true)
+                                    .fontStrikeThrough(true)
+                                    .shadowSpreadRadius(12)
+                                    .shadowBlurRadius(42)
+                                )
+                                .get(JBox)
+                            )
+                            .getStyle()
 
         and : 'We then create a second style with the same properties:'
-            var style2 = styler(Style.none())
-                                 .foundationColor("red")
-                                 .backgroundColor("green")
-                                 .borderColor("blue")
-                                 .borderRadius(12, 18)
-                                 .shadowColor("yellow")
-                                 .fontSelectionColor("cyan")
-                                 .fontColor("magenta")
-                                 .fontFamily("Times New Roman")
-                                 .fontSize(12)
-                                 .fontBold(true)
-                                 .fontUnderline(true)
-                                 .fontStrikeThrough(true)
-                                 .shadowSpreadRadius(12)
-                                 .shadowBlurRadius(42)
-                                 .style()
+            var style2 =
+                            ComponentExtension.from(
+                                UI.box().withStyle(conf->conf
+                                    .foundationColor("red")
+                                    .backgroundColor("green")
+                                    .borderColor("blue")
+                                    .borderRadius(12, 18)
+                                    .shadowColor("yellow")
+                                    .fontSelectionColor("cyan")
+                                    .fontColor("magenta")
+                                    .fontFamily("Times New Roman")
+                                    .fontSize(12)
+                                    .fontBold(true)
+                                    .fontUnderline(true)
+                                    .fontStrikeThrough(true)
+                                    .shadowSpreadRadius(12)
+                                    .shadowBlurRadius(42)
+                                )
+                                .get(JBox)
+                            )
+                            .getStyle()
         expect :
                 style1 == style2
                 style1.hashCode() == style2.hashCode()
@@ -400,29 +421,30 @@ class Styles_Spec extends Specification
             It is also memory efficient, as the default style objects are global null objects.
         """
         given : 'We create a highly simplifiable style through the style API.'
-            var ui = UI.panel().withStyle(conf -> conf
-                                .borderColor(new Color(0,0,0,0))
-                                .borderRadius(0)
-                                .borderWidths(0,0,0,0)
-                                .shadowColor(new Color(50,150,200,0))
-                                .shadowBlurRadius(4)
-                                .shadowSpreadRadius(2)
-                                .image(UI.Layer.CONTENT, i -> i
-                                    .primer(new Color(100,100,100,0))
-                                    .size(100, 100)
-                                    .fitMode(UI.FitComponent.WIDTH)
-                                    .image("/images/bubbles.svg")
-                                    .opacity(0.0f) // You can't see me!
-                                )
-                                .gradient(UI.Layer.BACKGROUND, g -> g
-                                    .colors(new Color(100, 50, 200, 0), new Color(255, 00, 250, 0))
-                                    .transition(UI.Transition.TOP_TO_BOTTOM)
-                                    .type(UI.GradientType.LINEAR)
-                                )
+            var button =
+                        UI.panel().withStyle(conf -> conf
+                            .borderColor(new Color(0,0,0,0))
+                            .borderRadius(0)
+                            .borderWidths(0,0,0,0)
+                            .shadowColor(new Color(50,150,200,0))
+                            .shadowBlurRadius(4)
+                            .shadowSpreadRadius(2)
+                            .image(UI.Layer.CONTENT, i -> i
+                                .primer(new Color(100,100,100,0))
+                                .size(100, 100)
+                                .fitMode(UI.FitComponent.WIDTH)
+                                .image("/images/bubbles.svg")
+                                .opacity(0.0f) // You can't see me!
+                            )
+                            .gradient(UI.Layer.BACKGROUND, g -> g
+                                .colors(new Color(100, 50, 200, 0), new Color(255, 00, 250, 0))
+                                .transition(UI.Transition.TOP_TO_BOTTOM)
+                                .type(UI.GradientType.LINEAR)
+                            )
                         )
                         .get(JPanel)
         expect : 'The style config has the expected string representation.'
-            ComponentExtension.from(ui).getStyle().toString() == "Style[" +
+            ComponentExtension.from(button).getStyle().toString() == "Style[" +
                     "LayoutStyle[NONE], " +
                     "BorderStyle[NONE], " +
                     "BaseStyle[NONE], " +
@@ -438,15 +460,15 @@ class Styles_Spec extends Specification
                 "]"
 
         when : 'We create a not so simplifiable style for a component through the style API...'
-            ui = UI.button("Hello World").withStyle(conf -> conf
-                            .backgroundColor(Color.BLACK)
-                            .foregroundColor(Color.WHITE)
-                            .size(120, 80)
-                            .borderRadius(40)
-                        )
-                        .get(JButton)
+            button = UI.button("Hello World").withStyle(conf -> conf
+                         .backgroundColor(Color.BLACK)
+                         .foregroundColor(Color.WHITE)
+                         .size(120, 80)
+                         .borderRadius(40)
+                     )
+                     .get(JButton)
         then : 'The style config has the expected string representation.'
-            ComponentExtension.from(ui).getStyle().toString() == "Style[" +
+            ComponentExtension.from(button).getStyle().toString() == "Style[" +
                     "LayoutStyle[NONE], " +
                     "BorderStyle[" +
                         "radius=40, " +
@@ -503,12 +525,13 @@ class Styles_Spec extends Specification
             It is also memory efficient, as the default style objects are global null objects.
         """
         given : 'We create a highly simplifiable style through the style API.'
-            var ui = UI.panel().withStyle(conf -> conf
-                                .borderColor(Color.GREEN)
-                                .borderWidths(0,0,0,0)
-                                .padding(0,0,0,0)
-                                .borderRadiusAt(UI.Corner.TOP_LEFT, 0, 20)
-                                .borderRadiusAt(UI.Corner.BOTTOM_LEFT, 10, 0)
+            var panel =
+                        UI.panel().withStyle(conf -> conf
+                            .borderColor(Color.GREEN)
+                            .borderWidths(0,0,0,0)
+                            .padding(0,0,0,0)
+                            .borderRadiusAt(UI.Corner.TOP_LEFT, 0, 20)
+                            .borderRadiusAt(UI.Corner.BOTTOM_LEFT, 10, 0)
                         )
                         .get(JPanel)
         expect : """
@@ -517,7 +540,7 @@ class Styles_Spec extends Specification
             This is because the border width is 0, so the border is invisible
             and the border color is irrelevant.
         """
-            ComponentExtension.from(ui).getStyle().toString() == "Style[" +
+            ComponentExtension.from(panel).getStyle().toString() == "Style[" +
                     "LayoutStyle[NONE], " +
                     "BorderStyle[NONE], " +
                     "BaseStyle[NONE], " +
@@ -536,21 +559,21 @@ class Styles_Spec extends Specification
             We now define the exact same style, but with a visible border width
             of 1 px at the right edge.
         """
-            ui = UI.panel().withStyle(conf -> conf
-                            .borderColor(Color.GREEN)
-                            .borderWidths(0,0,0,1)
-                            .padding(0,0,0,0)
-                            .borderRadiusAt(UI.Corner.TOP_LEFT, 0, 20)
-                            .borderRadiusAt(UI.Corner.BOTTOM_LEFT, 10, 0)
-                        )
-                        .get(JPanel)
+            panel = UI.panel().withStyle(conf -> conf
+                        .borderColor(Color.GREEN)
+                        .borderWidths(0,0,0,1)
+                        .padding(0,0,0,0)
+                        .borderRadiusAt(UI.Corner.TOP_LEFT, 0, 20)
+                        .borderRadiusAt(UI.Corner.BOTTOM_LEFT, 10, 0)
+                    )
+                    .get(JPanel)
         then : """
             The style config has the expected string representation,
             despite the fact that a visible border color was specified.
             This is because the border width is 0, so the border is invisible
             and the border color is irrelevant.
         """
-            ComponentExtension.from(ui).getStyle().toString() == "Style[" +
+            ComponentExtension.from(panel).getStyle().toString() == "Style[" +
                     "LayoutStyle[NONE], " +
                     "BorderStyle[" +
                         "radius=?, " +
@@ -591,9 +614,9 @@ class Styles_Spec extends Specification
             aToggleButton.setBackground(Color.ORANGE)
             aToggleButton.setForeground(Color.DARK_GRAY)
         when : """
-            We now wrap the component in the SwingTree builder API and apply a style to it... 
+            We send the component through the SwingTree builder API and apply a style to it... 
         """
-            var ui = UI.of(aToggleButton).withStyle(conf -> conf
+        aToggleButton = UI.of(aToggleButton).withStyle(conf -> conf
                             .backgroundColor(UI.COLOR_UNDEFINED)
                             .foregroundColor(UI.COLOR_UNDEFINED)
                             .foundationColor(UI.COLOR_UNDEFINED)
@@ -603,8 +626,8 @@ class Styles_Spec extends Specification
             The component will have its background and foreground color set to null,
             which will cause it to use the default colors of the Look and Feel.
         """
-            ui.getBackground() == null
-            ui.getForeground() == null
+            aToggleButton.getBackground() == null
+            aToggleButton.getForeground() == null
         and : """
             The style config has the expected string representation!
             Note that only the background and foreground colors are now set to "DEFAULT",
@@ -614,7 +637,7 @@ class Styles_Spec extends Specification
             The foundation color is used by the SwingTree style engine only, which does not impose
             any default value for it (defaults may come from `StyleSheet` objects, but that is a different story).
         """
-            ComponentExtension.from(ui).getStyle().toString() == "Style[" +
+            ComponentExtension.from(aToggleButton).getStyle().toString() == "Style[" +
                     "LayoutStyle[NONE], " +
                     "BorderStyle[NONE], " +
                     "BaseStyle[" +
@@ -648,12 +671,12 @@ class Styles_Spec extends Specification
             color was specified for the property.
             This is true for the shadow color, gradient colors, image primer color, and font colors...
         """
-        given : 'We have a simple Swing component.'
-            var aComboBox = new JComboBox<String>()
-        when : """
-            We now wrap the component in the SwingTree builder API and apply a style to it... 
+        given : """
+            We have a simple Swing component.
+            Which we wrap in the SwingTree builder API and apply a style to it... 
         """
-            var ui = UI.of(aComboBox).withStyle( conf -> conf
+            var aComboBox =
+                        UI.of(new JComboBox<String>()).withStyle( conf -> conf
                             .shadowColor(UI.COLOR_UNDEFINED)
                             .gradient(UI.Layer.BACKGROUND, g -> g
                                 .colors(UI.COLOR_UNDEFINED, UI.COLOR_UNDEFINED, UI.COLOR_UNDEFINED)
@@ -666,11 +689,11 @@ class Styles_Spec extends Specification
                             .fontBackgroundColor(UI.COLOR_UNDEFINED)
                         )
                         .get(JComboBox)
-        then : """
+        expect : """
             The style configuration of the component will be simplified heavily, to
             the point where it is effectively considered to have no style at all.
         """
-            ComponentExtension.from(ui).getStyle().toString() == "Style[" +
+            ComponentExtension.from(aComboBox).getStyle().toString() == "Style[" +
                     "LayoutStyle[NONE], " +
                     "BorderStyle[NONE], " +
                     "BaseStyle[NONE], " +
