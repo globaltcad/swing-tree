@@ -22,7 +22,7 @@ import javax.swing.JToggleButton
 import java.awt.*
 import java.awt.geom.AffineTransform
 
-@Title("Style Properties")
+@Title("The Style Configuration")
 @Narrative('''
 
     This specification demonstrates what kind of style configuration is
@@ -122,8 +122,9 @@ class Styles_Spec extends Specification
     def 'The String representation of a style config will tell you everything about it!'()
     {
         given : """
-            We have a simple Swing component.
-            We now send the component through the SwingTree builder API and apply a style to it... 
+            We creat a simple Swing component, a JSpinner, and
+            send it through the SwingTree builder API where
+            we apply a style to it by updating its style configuration.
         """
             var style =
                             ComponentExtension.from(
@@ -228,7 +229,7 @@ class Styles_Spec extends Specification
                             )
                             .getStyle()
 
-        then :
+        then : 'The style config has the expected string representation.'
                 style.toString() == "Style[" +
                                         "LayoutStyle[NONE], " +
                                         "BorderStyle[NONE], " +
@@ -346,7 +347,17 @@ class Styles_Spec extends Specification
 
     def 'Style objects are value based (with respect to equality and hash code).'()
     {
-        given : 'First we need the `StyleDelegate` styler, which can apply styles to `Style` objects.'
+        reportInfo """
+            Style objects are value based, meaning that if two style objects
+            have the same properties, then they are considered equal.
+            So their identity is considered to be their value.
+            This is important for caching purposes, as the style objects are
+            used as cache keys.
+        """
+        given : """
+            First we need the component-style delegate styler, 
+            which can update the style properties of the style configuration.
+        """
             var styler = s -> new ComponentStyleDelegate<>(new JPanel(), s)
 
         and : 'Then we create a starting style with various properties:'
@@ -696,6 +707,43 @@ class Styles_Spec extends Specification
                             .fontColor(UI.COLOR_UNDEFINED)
                             .fontSelectionColor(UI.COLOR_UNDEFINED)
                             .fontBackgroundColor(UI.COLOR_UNDEFINED)
+                        )
+                        .get(JComboBox)
+        expect : """
+            The style configuration of the component will be simplified heavily, to
+            the point where it is effectively considered to have no style at all.
+        """
+            ComponentExtension.from(aComboBox).getStyle().toString() == "Style[" +
+                    "LayoutStyle[NONE], " +
+                    "BorderStyle[NONE], " +
+                    "BaseStyle[NONE], " +
+                    "FontStyle[NONE], " +
+                    "DimensionalityStyle[NONE], " +
+                    "StyleLayers[" +
+                        "background=StyleLayer[EMPTY], " +
+                        "content=StyleLayer[EMPTY], " +
+                        "border=StyleLayer[EMPTY], " +
+                        "foreground=StyleLayer[EMPTY]" +
+                    "], " +
+                    "properties=[]" +
+                "]"
+    }
+
+    def 'The `UI.FONT_UNDEFINED` constant can be used as a safe shorthand for null for the font property of the style API'()
+    {
+        reportInfo """
+            The `UI.FONT_UNDEFINED` constant is a java.awt.Font object with its family set to "" and its size set to -1.
+            Its identity is used to represent the absence of a font family, and is used as a safe shorthand for null,
+            meaning that when the style engine of a component encounters it, it will treat it as if no
+            font family was specified for the property.
+        """
+        given : """
+            We create a simple Swing JComboBox component,
+            which we send through the SwingTree builder API and apply a style to it... 
+        """
+            var aComboBox =
+                        UI.of(new JComboBox<String>()).withStyle( conf -> conf
+                            .font(UI.FONT_UNDEFINED)
                         )
                         .get(JComboBox)
         expect : """
