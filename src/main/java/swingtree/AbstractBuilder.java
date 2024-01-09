@@ -481,7 +481,11 @@ abstract class AbstractBuilder<I, C extends Component>
      * @return The result of the building process, namely: a type of JComponent.
      */
     public final <T extends C> T get( Class<T> type ) {
-        assert type == _state().componentType() || type.isAssignableFrom(_state().componentType());
+        if ( type != _state().componentType() && !type.isAssignableFrom(_state().componentType()) )
+            throw new IllegalArgumentException(
+                    "The type of the component wrapped by this builder is '" + _state().componentType() + "', " +
+                    "but the provided type is '" + type + "' which is not assignable from '" + _state().componentType() + "'."
+                );
         return (T) getComponent();
     }
 
