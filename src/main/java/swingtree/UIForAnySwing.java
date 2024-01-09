@@ -57,7 +57,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *  This means that the component will be repainted whenever the event is fired.
      *  <p>
      * @param event The event to which the repaint method of the component will be bound.
-     * @return The JComponent type which will be wrapped by this builder node.
+     * @return The JComponent type which will be managed by this builder.
      */
     public final I withRepaintIf( Observable event ) {
         return _with( c -> event.subscribe( () -> _runInUI(c::repaint) ) )._this();
@@ -73,7 +73,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param id The identifier for this {@link JComponent} which will
      *           simply translate to {@link JComponent#setName(String)}
      *
-     * @return The JComponent type which will be wrapped by this builder node.
+     * @return The JComponent type which will be managed by this builder.
      */
     public final I id( String id ) {
         return _with( c -> ComponentExtension.from(c).setId(id) )._this();
@@ -91,7 +91,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param id The enum identifier for this {@link JComponent} which will
      *           simply translate to {@link JComponent#setName(String)}
      *
-     * @return The JComponent type which will be wrapped by this builder node.
+     * @return The JComponent type which will be managed by this builder.
      * @param <E> The enum type.
      */
     public final <E extends Enum<E>> I id( E id ) {

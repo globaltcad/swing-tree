@@ -10,7 +10,7 @@ import javax.swing.JToggleButton;
  *  Extend this class to create a builder node for a custom {@link JToggleButton} subtype.
  *
  * @param <I> The type of this builder node.
- * @param <B> The type of the {@link JToggleButton} subtype which will be wrapped by this builder node.
+ * @param <B> The type of the {@link JToggleButton} subtype which will be managed by this builder.
  */
 public abstract class UIForAnyToggleButton<I, B extends JToggleButton> extends UIForAnyButton<I, B>
 {

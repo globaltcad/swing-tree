@@ -242,12 +242,12 @@ abstract class AbstractBuilder<I, C extends Component>
     protected final void _detachStrongRef() { _state().dispose(); }
 
     /**
-     *  The component wrapped by this builder node.
+     *  The component managed by this builder.
      *
      *  @throws IllegalStateException if this method is called from a thread other than the EDT
      *                                and this UI is configured to be decoupled from the application thread.
      *                                See {@link UI#use(EventProcessor, Supplier)}.
-     *  @return The component wrapped by this builder node.
+     *  @return The component managed by this builder.
      */
     public final C getComponent() {
         boolean isCoupled       = _state().eventProcessor() == EventProcessor.COUPLED;
@@ -263,7 +263,7 @@ abstract class AbstractBuilder<I, C extends Component>
     }
 
     /**
-     *  The optional component wrapped by this builder node.
+     *  The optional component managed by this builder.
      *
      * @return An {@link OptionalUI} wrapping a component or null.
      *         This optional will throw an exception if the
@@ -275,9 +275,9 @@ abstract class AbstractBuilder<I, C extends Component>
     }
 
     /**
-     *  The type class of the component wrapped by this builder node.
+     *  The type class of the component managed by this builder.
      *  See documentation for method "build" for more information.
-     * @return The type class of the component wrapped by this builder node.
+     * @return The type class of the component managed by this builder.
      */
     public final Class<C> getType() {
         return _state().componentType();

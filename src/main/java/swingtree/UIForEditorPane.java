@@ -17,7 +17,7 @@ public final class UIForEditorPane<P extends JEditorPane> extends UIForAnyEditor
      * {@link UIForAnySwing} (sub)types always wrap
      * a single component for which they are responsible.
      *
-     * @param state The {@link BuilderState} containing the component which will be wrapped by this builder node.
+     * @param state The {@link BuilderState} containing the component which will be managed by this builder.
      */
     UIForEditorPane( BuilderState<P> state ) {
         Objects.requireNonNull(state, "state");

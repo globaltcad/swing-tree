@@ -51,12 +51,12 @@ final class BuilderState<C extends java.awt.Component>
      */
     private final EventProcessor _eventProcessor;
     /**
-     *  The type class of the component wrapped by this builder node.
+     *  The type class of the component managed by this builder.
      */
     private final Class<C> _componentType;
 
     /**
-     *  A supplier for the component wrapped by this builder node.
+     *  A supplier for the component managed by this builder.
      *  The supplier is null when the builder is disposed.
      */
     private Supplier<C> _componentFetcher; // Is null when the builder is disposed.
@@ -84,10 +84,10 @@ final class BuilderState<C extends java.awt.Component>
     }
 
     BuilderState(
-            EventProcessor eventProcessor,
-            Mode mode,
-            Class<C> type,
-            Supplier<C> componentFetcher
+        EventProcessor eventProcessor,
+        Mode           mode,
+        Class<C>       type,
+        Supplier<C>    componentFetcher
     ) {
         Objects.requireNonNull(eventProcessor,   "eventProcessor");
         Objects.requireNonNull(mode,             "mode");
@@ -110,7 +110,7 @@ final class BuilderState<C extends java.awt.Component>
     }
 
     /**
-     *  @return The component wrapped by this builder node.
+     *  @return The component managed by this builder.
      *  @throws IllegalStateException If this builder state is disposed (it's reference to the component is null).
      */
     public C component()
@@ -127,10 +127,10 @@ final class BuilderState<C extends java.awt.Component>
             C component = _componentFetcher.get();
             _componentFetcher = () -> component;
             /*
-                   The component is fetched and stored in a local variable,
-                    and then the component is wrapped in a new supplier which returns the component from the local variable.
-                    This is done to ensure that the component is only built and fetched once,
-                    and that the component is not built again when the component is fetched.
+                The component is fetched and stored in a local variable,
+                and then the component is wrapped in a new supplier which returns the component from the local variable.
+                This is done to ensure that the component is only built and fetched once,
+                and that the component is not built again when the component is fetched.
             */
         }
 
@@ -147,7 +147,7 @@ final class BuilderState<C extends java.awt.Component>
     }
 
     /**
-     *  The type class of the component wrapped by this builder node. <br>
+     *  The type class of the component managed by this builder. <br>
      *  <b>This will never return null.</b>
      */
     public Class<C> componentType() {
@@ -155,7 +155,7 @@ final class BuilderState<C extends java.awt.Component>
     }
 
     /**
-     *  Cut off the strong reference to the component wrapped by this builder node
+     *  Cut off the strong reference to the component managed by this builder
      *  and dispose this builder node, meaning it is no longer usable for building. <br>
      *  <b>Only call this method from the UI thread (AWT's EDT thread) as builder states are not thread safe.</b>
      */
@@ -184,11 +184,11 @@ final class BuilderState<C extends java.awt.Component>
     }
 
     /**
-     * @param componentMutator A consumer which mutates the component wrapped by this builder node.
+     * @param componentMutator A consumer which mutates the component managed by this builder.
      * @return In procedural mode, this very builder node is returned.
      *         In declarative mode, a new builder node is returned which is a copy of this builder node,
      *         and this builder node is disposed.
-     *         Either way, the component wrapped by this builder node is mutated by the provided consumer.
+     *         Either way, the component managed by this builder is mutated by the provided consumer.
      */
     BuilderState<C> withMutator( Consumer<C> componentMutator )
     {

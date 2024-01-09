@@ -19,7 +19,7 @@ public class UIForBox<B extends JBox> extends UIForAnySwing<UIForBox<B>, B>
      * {@link UIForAnySwing} (sub)types always wrap
      * a builder state which defines how a component is created.
      *
-     * @param state The {@link BuilderState} containing the component which will be wrapped by this builder node.
+     * @param state The {@link BuilderState} containing the component which will be managed by this builder.
      */
     protected UIForBox( BuilderState<B> state ) {
         Objects.requireNonNull(state, "state");

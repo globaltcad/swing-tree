@@ -15,7 +15,7 @@ public class UIForAnything<T extends Component> extends AbstractBuilder<UIForAny
      * Instances of the {@link UIForAnything} builder do not support the
      * "add" method as defined inside the {@link AbstractNestedBuilder}.
      *
-     * @param state The {@link BuilderState} modelling the component which will be wrapped by this builder node.
+     * @param state The {@link BuilderState} modelling the component which will be managed by this builder.
      */
     protected UIForAnything( BuilderState<T> state ) {
         Objects.requireNonNull(state, "state");
