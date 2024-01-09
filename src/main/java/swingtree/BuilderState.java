@@ -64,13 +64,12 @@ final class BuilderState<C extends java.awt.Component>
 
     <T extends C> BuilderState( Class<T> type, Supplier<C> componentSource )
     {
-        this(type.cast(componentSource.get()));
-        //this(
-        //    SwingTree.get().getEventProcessor(),
-        //    Mode.FUNCTIONAL,
-        //    (Class<C>) type,
-        //    ()->initializeComponent(componentSource.get()).get()
-        //);
+        this(
+            SwingTree.get().getEventProcessor(),
+            Mode.FUNCTIONAL,
+            (Class<C>) type,
+            ()->initializeComponent(componentSource.get()).get()
+        );
     }
 
     BuilderState( C component )
