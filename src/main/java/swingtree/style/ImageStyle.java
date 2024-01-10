@@ -171,6 +171,35 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
 
     static ImageStyle none() { return _NONE; }
 
+    static ImageStyle of(
+        Color            primer,
+        ImageIcon        image,
+        UI.Placement     placement,
+        boolean          repeat,
+        UI.FitComponent  fitMode,
+        Size             size,
+        float            opacity,
+        Outline          padding,
+        Offset           offset,
+        UI.ComponentArea clipArea
+    ) {
+        if (
+            primer    == _NONE._primer    &&
+            image     == _NONE._image     &&
+            placement == _NONE._placement &&
+            repeat    == _NONE._repeat    &&
+            fitMode   == _NONE._fitMode   &&
+            size      == _NONE._size      &&
+            opacity   == _NONE._opacity   &&
+            padding   == _NONE._padding   &&
+            offset    == _NONE._offset    &&
+            clipArea  == _NONE._clipArea
+        )
+            return _NONE;
+        else
+            return new ImageStyle(primer, image, placement, repeat, fitMode, size, opacity, padding, offset, clipArea);
+    }
+
 
     private final Color            _primer;
 
@@ -254,7 +283,7 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
             color = null;
         if ( color == _primer )
             return this;
-        return new ImageStyle(color, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
+        return ImageStyle.of(color, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
     }
 
     /**
@@ -265,7 +294,7 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
      * @return A new {@link ImageStyle} instance with the specified image.
      */
     public ImageStyle image( Image image ) {
-        return new ImageStyle(_primer, image == null ? null : new ImageIcon(image), _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
+        return ImageStyle.of(_primer, image == null ? null : new ImageIcon(image), _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
     }
 
     /**
@@ -276,7 +305,7 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
      * @return A new {@link ImageStyle} instance with the specified image.
      */
     public ImageStyle image( ImageIcon image ) {
-        return new ImageStyle(_primer, image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
+        return ImageStyle.of(_primer, image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
     }
 
     /**
@@ -360,7 +389,7 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
      * @return A new {@link ImageStyle} instance with the specified placement.
      */
     public ImageStyle placement( UI.Placement placement ) {
-        return new ImageStyle(_primer, _image, placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
+        return ImageStyle.of(_primer, _image, placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
     }
 
     /**
@@ -373,7 +402,7 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
      * @return A new {@link ImageStyle} instance with the specified {@code repeat} flag value.
      */
     public ImageStyle repeat( boolean repeat ) {
-        return new ImageStyle(_primer, _image, _placement, repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
+        return ImageStyle.of(_primer, _image, _placement, repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
     }
 
     /**
@@ -393,7 +422,7 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
      */
     public ImageStyle autoFit( boolean autoFit ) { 
         UI.FitComponent fit = autoFit ? UI.FitComponent.WIDTH_AND_HEIGHT : UI.FitComponent.NO;
-        return new ImageStyle(_primer, _image, _placement, _repeat, fit, _size, _opacity, _padding, _offset, _clipArea);
+        return ImageStyle.of(_primer, _image, _placement, _repeat, fit, _size, _opacity, _padding, _offset, _clipArea);
     }
 
     /**
@@ -401,7 +430,7 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
      * @return A new {@link ImageStyle} instance with the specified {@code fit} mode.
      */
     public ImageStyle fitMode( UI.FitComponent fit ) {
-        return new ImageStyle(_primer, _image, _placement, _repeat, fit, _size, _opacity, _padding, _offset, _clipArea);
+        return ImageStyle.of(_primer, _image, _placement, _repeat, fit, _size, _opacity, _padding, _offset, _clipArea);
     }
 
     /**
@@ -411,7 +440,7 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
      * @return A new {@link ImageStyle} instance with the specified {@code width}.
      */
     public ImageStyle width( Integer width ) {
-        return new ImageStyle(_primer, _image, _placement, _repeat, _fitMode, _size.withWidth(width), _opacity, _padding, _offset, _clipArea);
+        return ImageStyle.of(_primer, _image, _placement, _repeat, _fitMode, _size.withWidth(width), _opacity, _padding, _offset, _clipArea);
     }
 
     /**
@@ -421,7 +450,7 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
      * @return A new {@link ImageStyle} instance with the specified {@code heiht}.
      */
     public ImageStyle height( Integer height ) {
-        return new ImageStyle(_primer, _image, _placement, _repeat, _fitMode, _size.withHeight(height), _opacity, _padding, _offset, _clipArea);
+        return ImageStyle.of(_primer, _image, _placement, _repeat, _fitMode, _size.withHeight(height), _opacity, _padding, _offset, _clipArea);
     }
 
     /**
@@ -442,7 +471,7 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
      * @return A new {@link ImageStyle} instance with the specified {@code size}.
      */
     public ImageStyle size( Size size ) {
-        return new ImageStyle(_primer, _image, _placement, _repeat, _fitMode, size, _opacity, _padding, _offset, _clipArea);
+        return ImageStyle.of(_primer, _image, _placement, _repeat, _fitMode, size, _opacity, _padding, _offset, _clipArea);
     }
 
     /**
@@ -454,7 +483,7 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
      * @return A new {@link ImageStyle} instance with the specified opacity.
      */
     public ImageStyle opacity( float opacity ) {
-        return new ImageStyle(_primer, _image, _placement, _repeat, _fitMode, _size, opacity, _padding, _offset, _clipArea);
+        return ImageStyle.of(_primer, _image, _placement, _repeat, _fitMode, _size, opacity, _padding, _offset, _clipArea);
     }
 
     /**
@@ -465,7 +494,7 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
      * @return A new {@link ImageStyle} instance with the specified padding.
      */
     ImageStyle padding( Outline padding ) {
-        return new ImageStyle(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, padding, _offset, _clipArea);
+        return ImageStyle.of(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, padding, _offset, _clipArea);
     }
 
     /**
@@ -514,7 +543,7 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
      *  @return A new {@link ImageStyle} instance with the specified offset.
      */
     public ImageStyle offset( int x, int y ) {
-        return new ImageStyle(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, Offset.of(x, y), _clipArea);
+        return ImageStyle.of(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, Offset.of(x, y), _clipArea);
     }
 
     /**
@@ -525,7 +554,7 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
      *  @return A new {@link ImageStyle} instance with the specified offset.
      */
     public ImageStyle horizontalOffset( int x ) {
-        return new ImageStyle(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset.withX(x), _clipArea);
+        return ImageStyle.of(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset.withX(x), _clipArea);
     }
 
     /**
@@ -536,7 +565,7 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
      *  @return A new {@link ImageStyle} instance with the specified offset.
      */
     public ImageStyle verticalOffset( int y ) {
-        return new ImageStyle(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset.withY(y), _clipArea);
+        return ImageStyle.of(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset.withY(y), _clipArea);
     }
 
     /**
@@ -578,11 +607,39 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
      *  @return A new {@link ImageStyle} instance with the specified clip area.
      */
     public ImageStyle clipTo( UI.ComponentArea clipArea ) {
-        return new ImageStyle(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, clipArea);
+        return ImageStyle.of(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, clipArea);
     }
 
     ImageStyle _scale( double scaleFactor ) {
-        return new ImageStyle(_primer, _image, _placement, _repeat, _fitMode, _size.scale(scaleFactor), _opacity, _padding.scale(scaleFactor), _offset.scale(scaleFactor), _clipArea);
+        return ImageStyle.of(_primer, _image, _placement, _repeat, _fitMode, _size.scale(scaleFactor), _opacity, _padding.scale(scaleFactor), _offset.scale(scaleFactor), _clipArea);
+    }
+
+    @Override
+    public ImageStyle simplified() {
+        if ( this == _NONE )
+            return _NONE;
+
+        ImageIcon simplifiedImage = _opacity == 0.0f ? null : _image;
+        Color simplifiedPrimer = _primer == null || _primer.getAlpha() == 0 ? null : _primer;
+
+        if ( simplifiedPrimer == UI.COLOR_UNDEFINED)
+            simplifiedPrimer = null;
+
+        if ( simplifiedImage == null && simplifiedPrimer == null )
+            return none();
+
+        return ImageStyle.of(
+                    simplifiedPrimer,
+                    simplifiedImage,
+                    _placement,
+                    _repeat,
+                    _fitMode,
+                    _size,
+                    _opacity,
+                    _padding.simplified(),
+                    _offset,
+                    _clipArea
+                );
     }
 
     @Override
@@ -626,31 +683,4 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
                 "]";
     }
 
-    @Override
-    public ImageStyle simplified() {
-        if ( this == _NONE )
-            return _NONE;
-
-        ImageIcon simplifiedImage = _opacity == 0.0f ? null : _image;
-        Color simplifiedPrimer = _primer == null || _primer.getAlpha() == 0 ? null : _primer;
-
-        if ( simplifiedPrimer == UI.COLOR_UNDEFINED)
-            simplifiedPrimer = null;
-
-        if ( simplifiedImage == null && simplifiedPrimer == null )
-            return none();
-
-        return new ImageStyle(
-                    simplifiedPrimer,
-                    simplifiedImage,
-                    _placement,
-                    _repeat,
-                    _fitMode,
-                    _size,
-                    _opacity,
-                    _padding.simplified(),
-                    _offset,
-                    _clipArea
-                );
-    }
 }
