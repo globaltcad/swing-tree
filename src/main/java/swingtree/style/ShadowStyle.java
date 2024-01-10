@@ -80,6 +80,25 @@ public final class ShadowStyle implements Simplifiable<ShadowStyle>
                                                 );
 
     public static ShadowStyle none() { return _NONE; }
+    
+    static ShadowStyle of(
+        Offset  offset,
+        float   shadowBlurRadius,
+        float   shadowSpreadRadius,
+        Color   shadowColor,
+        boolean isOutset
+    ) {
+        if ( 
+            offset == _NONE._offset &&
+            shadowBlurRadius == _NONE._blurRadius &&
+            shadowSpreadRadius == _NONE._spreadRadius &&
+            shadowColor == _NONE._color &&
+            isOutset == _NONE._isOutset
+        )
+            return _NONE;
+        else
+            return new ShadowStyle(offset, shadowBlurRadius, shadowSpreadRadius, shadowColor, isOutset);
+    }
 
     private final Offset  _offset;
     private final float   _blurRadius;
@@ -122,7 +141,7 @@ public final class ShadowStyle implements Simplifiable<ShadowStyle>
      * @return A new {@link ShadowStyle} with the specified horizontal shadow offset.
      */
     public ShadowStyle horizontalOffset( float horizontalShadowOffset ) {
-        return new ShadowStyle(_offset.withX(horizontalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);
+        return ShadowStyle.of(_offset.withX(horizontalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);
     }
 
     /**
@@ -131,7 +150,7 @@ public final class ShadowStyle implements Simplifiable<ShadowStyle>
      * @return A new {@link ShadowStyle} with the specified vertical shadow offset.
      */
     public ShadowStyle verticalOffset( float verticalShadowOffset ) {
-        return new ShadowStyle(_offset.withY(verticalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);
+        return ShadowStyle.of(_offset.withY(verticalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);
     }
 
     /**
@@ -142,7 +161,7 @@ public final class ShadowStyle implements Simplifiable<ShadowStyle>
      * @return A new {@link ShadowStyle} with the specified horizontal and vertical shadow offsets.
      */
     public ShadowStyle offset( int horizontalShadowOffset, int verticalShadowOffset ) {
-        return new ShadowStyle(Offset.of(horizontalShadowOffset, verticalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);
+        return ShadowStyle.of(Offset.of(horizontalShadowOffset, verticalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);
     }
 
     /**
@@ -153,7 +172,7 @@ public final class ShadowStyle implements Simplifiable<ShadowStyle>
      * @return A new {@link ShadowStyle} with the specified horizontal and vertical shadow offsets.
      */
     public ShadowStyle offset( int shadowOffset ) {
-        return new ShadowStyle(Offset.of(shadowOffset, shadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);
+        return ShadowStyle.of(Offset.of(shadowOffset, shadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);
     }
 
     /**
@@ -163,7 +182,7 @@ public final class ShadowStyle implements Simplifiable<ShadowStyle>
      * @return A new {@link ShadowStyle} with the specified blur radius.
      */
     public ShadowStyle blurRadius( float shadowBlurRadius ) {
-        return new ShadowStyle(_offset, shadowBlurRadius, _spreadRadius, _color, _isOutset);
+        return ShadowStyle.of(_offset, shadowBlurRadius, _spreadRadius, _color, _isOutset);
     }
 
     /**
@@ -175,7 +194,7 @@ public final class ShadowStyle implements Simplifiable<ShadowStyle>
      * @return A new {@link ShadowStyle} with the specified spread radius.
      */
     public ShadowStyle spreadRadius( float shadowSpreadRadius ) {
-        return new ShadowStyle(_offset, _blurRadius, shadowSpreadRadius, _color, _isOutset);
+        return ShadowStyle.of(_offset, _blurRadius, shadowSpreadRadius, _color, _isOutset);
     }
 
     /**
@@ -188,7 +207,7 @@ public final class ShadowStyle implements Simplifiable<ShadowStyle>
             shadowColor = null;
         if ( shadowColor == _color )
             return this;
-        return new ShadowStyle(_offset, _blurRadius, _spreadRadius, shadowColor, _isOutset);
+        return ShadowStyle.of(_offset, _blurRadius, _spreadRadius, shadowColor, _isOutset);
     }
 
     /**
@@ -214,7 +233,7 @@ public final class ShadowStyle implements Simplifiable<ShadowStyle>
             log.error("Failed to parse color string: '{}'", shadowColor, e);
             return this; // We want to avoid side effects other than a wrong color
         }
-        return new ShadowStyle(_offset, _blurRadius, _spreadRadius, newColor, _isOutset);
+        return ShadowStyle.of(_offset, _blurRadius, _spreadRadius, newColor, _isOutset);
     }
 
     /**
@@ -225,7 +244,7 @@ public final class ShadowStyle implements Simplifiable<ShadowStyle>
      * @return A new {@link ShadowStyle} with the specified inset/outset state.
      */
     public ShadowStyle isInset( boolean shadowInset ) {
-        return new ShadowStyle(_offset, _blurRadius, _spreadRadius, _color, !shadowInset);
+        return ShadowStyle.of(_offset, _blurRadius, _spreadRadius, _color, !shadowInset);
     }
 
     /**
@@ -236,14 +255,17 @@ public final class ShadowStyle implements Simplifiable<ShadowStyle>
      * @return A new {@link ShadowStyle} with the specified outset/inset state.
      */
     public ShadowStyle isOutset( boolean shadowOutset ) {
-        return new ShadowStyle(_offset, _blurRadius, _spreadRadius, _color, shadowOutset);
+        return ShadowStyle.of(_offset, _blurRadius, _spreadRadius, _color, shadowOutset);
     }
 
     ShadowStyle _scale( double scaleFactor ) {
-        return new ShadowStyle(_offset.scale(scaleFactor),
-                               (int) Math.round(_blurRadius       * scaleFactor),
-                               (int) Math.round(_spreadRadius     * scaleFactor),
-                               _color, _isOutset);
+        return ShadowStyle.of(
+                            _offset.scale(scaleFactor),
+                            (float) (_blurRadius * scaleFactor),
+                            (float) (_spreadRadius * scaleFactor),
+                            _color,
+                            _isOutset
+                        );
     }
 
     @Override
