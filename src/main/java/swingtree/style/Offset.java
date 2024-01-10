@@ -12,7 +12,12 @@ final class Offset
 
     public static Offset none() { return _NONE; }
 
-    public static Offset of( float x, float y ) { return new Offset(x, y); }
+    public static Offset of( float x, float y ) {
+        if ( x == 0 && y == 0 )
+            return _NONE;
+
+        return new Offset(x, y);
+    }
 
 
     private final float _x;
@@ -28,12 +33,12 @@ final class Offset
 
     float y() { return _y; }
 
-    Offset withX( float x ) { return new Offset(x, _y); }
+    Offset withX( float x ) { return Offset.of(x, _y); }
 
-    Offset withY( float y ) { return new Offset(_x, y); }
+    Offset withY( float y ) { return Offset.of(_x, y); }
 
     Offset scale( double scaleFactor ) {
-        return new Offset((int) Math.round(_x * scaleFactor), (int) Math.round(_y * scaleFactor));
+        return Offset.of((int) Math.round(_x * scaleFactor), (int) Math.round(_y * scaleFactor));
     }
 
     @Override
