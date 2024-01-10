@@ -23,12 +23,13 @@ class Label_Spec extends Specification
     {
         when : 'We create a label UI node...'
             var ui = UI.label("Test")
-        then : 'The label UI is not null.'
-            ui != null
-        and : 'The UI node wraps a JLabel.'
-            ui.component instanceof JLabel
+        and : 'We build the component.'
+            var label = ui.get(JLabel)
+
+        then : 'The component is a label.'
+            label instanceof JLabel
         and : 'The label has the specified text.'
-            ui.component.text == "Test"
+            label.text == "Test"
     }
 
     def 'The icon of a label may be specified using an `IconDeclaration`.'()
@@ -71,20 +72,22 @@ class Label_Spec extends Specification
             the behaviour of your view model.
         """
         given : 'We create an `IconDeclaration` as a simple path provider.'
-            IconDeclaration iconDeclaration = ()->"img/seed.png"
+            IconDeclaration iconDeclaration = IconDeclaration.of("img/seed.png")
         and : 'We create a new label ui node with the icon declaration.'
             var ui =
                     UI.label("Test")
                     .withIcon(iconDeclaration)
+        and : 'We build the component.'
+            var label = ui.get(JLabel)
 
         expect : 'The icon should be loaded and displayed.'
-            ui.component.icon != null
-            ui.component.icon.iconHeight == 512
-            ui.component.icon.iconWidth == 512
+            label.icon != null
+            label.icon.iconHeight == 512
+            label.icon.iconWidth == 512
         and : 'The icon should be the same as the one we specified.'
-            ui.component.icon === iconDeclaration.find().get()
+            label.icon === iconDeclaration.find().get()
         and : 'The label should have the specified text.'
-            ui.component.text == "Test"
+            label.text == "Test"
     }
 
     def 'Create labels with custom horizontal and vertical alignment.'() {
@@ -93,19 +96,23 @@ class Label_Spec extends Specification
                     UI.label("Test1")
                     .withHorizontalAlignment(UI.HorizontalAlignment.CENTER)
                     .withVerticalAlignment(UI.VerticalAlignment.TOP)
+        and : 'We build the component.'
+            var label = ui.get(JLabel)
 
         expect : 'The label should have the specified alignment.'
-            ui.component.horizontalAlignment == SwingConstants.CENTER
-            ui.component.verticalAlignment == SwingConstants.TOP
+            label.horizontalAlignment == SwingConstants.CENTER
+            label.verticalAlignment == SwingConstants.TOP
 
         when : 'We use the `withAlignment` method to create another label...'
             ui =
                 UI.label("Test2")
                 .withAlignment(UI.Alignment.TOP_RIGHT)
+        and : 'We build the component.'
+            label = ui.get(JLabel)
 
         then : 'Both alignments should be set.'
-            ui.component.horizontalAlignment == SwingConstants.RIGHT
-            ui.component.verticalAlignment == SwingConstants.TOP
+            label.horizontalAlignment == SwingConstants.RIGHT
+            label.verticalAlignment == SwingConstants.TOP
     }
 
     def 'Create labels with custom horizontal and vertical text position.'() {
@@ -114,19 +121,22 @@ class Label_Spec extends Specification
                     UI.label("Test1")
                     .withHorizontalTextPosition(UI.HorizontalAlignment.CENTER)
                     .withVerticalTextPosition(UI.VerticalAlignment.TOP)
-
+        and : 'We build the component.'
+            var label = ui.get(JLabel)
 
         expect : 'The label should have the specified text position.'
-            ui.component.horizontalTextPosition == SwingConstants.CENTER
-            ui.component.verticalTextPosition == SwingConstants.TOP
+            label.horizontalTextPosition == SwingConstants.CENTER
+            label.verticalTextPosition == SwingConstants.TOP
 
         when : 'We use the `withTextPosition` method to create another label...'
             ui =
                 UI.label("Test2")
                 .withTextPosition(UI.Alignment.TOP_RIGHT)
+        and : 'Once again we build the component.'
+            label = ui.get(JLabel)
 
         then : 'Both text positions should be set.'
-            ui.component.horizontalTextPosition == SwingConstants.RIGHT
-            ui.component.verticalTextPosition == SwingConstants.TOP
+            label.horizontalTextPosition == SwingConstants.RIGHT
+            label.verticalTextPosition == SwingConstants.TOP
     }
 }
