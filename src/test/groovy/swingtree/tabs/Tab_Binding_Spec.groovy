@@ -136,7 +136,7 @@ class Tab_Binding_Spec extends Specification
             the behaviour of your view model.
         """
         given : 'We create an `IconDeclaration`, which is essentially just a resource location value object.'
-            IconDeclaration iconDeclaration = ()->"swing.png"
+            IconDeclaration iconDeclaration = IconDeclaration.of("swing.png")
         and : 'An icon property and a tabbed pane UI node.'
             var icon = Var.of(iconDeclaration)
             def tabbedPane =
@@ -145,7 +145,7 @@ class Tab_Binding_Spec extends Specification
                 .get(JTabbedPane)
 
         when : 'We change the icon.'
-            IconDeclaration newIcon = () -> "seed.png"
+            IconDeclaration newIcon = IconDeclaration.of("seed.png")
             icon.set(newIcon)
             UI.sync()
 
