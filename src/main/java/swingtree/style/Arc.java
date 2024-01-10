@@ -24,14 +24,18 @@ final class Arc
      * @param arcHeight The height of the arc.
      * @return An {@link Arc} representing the 2 values.
      */
-    static Arc of( int arcWidth, int arcHeight ) { return new Arc( arcWidth, arcHeight ); }
+    static Arc of( float arcWidth, float arcHeight ) {
+        if ( arcWidth < 0 && arcHeight < 0 )
+            return _NONE;
+        return new Arc( arcWidth, arcHeight );
+    }
 
 
-    private final int _arcWidth;
-    private final int _arcHeight;
+    private final float _arcWidth;
+    private final float _arcHeight;
 
 
-    private Arc( int arcWidth, int arcHeight ) {
+    private Arc( float arcWidth, float arcHeight ) {
         _arcWidth  = Math.max(-1, arcWidth);
         _arcHeight = Math.max(-1, arcHeight);
     }
@@ -39,12 +43,12 @@ final class Arc
     /**
      * @return The width of the arc.
      */
-    public int width() { return _arcWidth; }
+    public float width() { return _arcWidth; }
 
     /**
      * @return The height of the arc.
      */
-    public int height() { return _arcHeight; }
+    public float height() { return _arcHeight; }
 
     /**
      *  Used to scale the arc, which is usually needed by the style engine
@@ -62,16 +66,16 @@ final class Arc
             return _NONE;
 
         return Arc.of(
-                    (int) Math.round( _arcWidth  * scale ),
-                    (int) Math.round( _arcHeight * scale )
-                );
+                (float) (_arcWidth  * scale),
+                (float) (_arcHeight * scale)
+            );
     }
 
     Arc simplified() {
         if ( this == _NONE )
             return _NONE;
 
-        if ( _arcWidth < 1 || _arcHeight < 1 )
+        if ( _arcWidth <= 0 || _arcHeight <= 0 )
             return _NONE;
 
         return this;
@@ -82,16 +86,23 @@ final class Arc
         if ( this == _NONE )
             return "Arc[NONE]";
         return this.getClass().getSimpleName()+"[" +
-                    "arcWidth="  + _arcWidth  +", "+
-                    "arcHeight=" + _arcHeight +
+                    "arcWidth="  + _toString(_arcWidth ) + ", "+
+                    "arcHeight=" + _toString(_arcHeight) +
                 "]";
+    }
+
+    static String _toString( float value ) {
+        if ( value == -1 )
+            return "?";
+        else
+            return String.valueOf(value).replace(".0", "");
     }
 
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 31 * hash + _arcWidth;
-        hash = 31 * hash + _arcHeight;
+        hash = 31 * hash + Float.floatToIntBits(_arcWidth);
+        hash = 31 * hash + Float.floatToIntBits(_arcHeight);
         return hash;
     }
 

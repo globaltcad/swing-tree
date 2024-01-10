@@ -40,6 +40,10 @@ class Styles_Spec extends Specification
         // which will throw exceptions if we try to perform UI operations in the test thread.
     }
 
+    def cleanupSpec() {
+        SwingTree.initialize()
+    }
+
     def 'Various kinds of String expressions can be parsed as colors by various style properties.'(
         String colorString, Color expectedColor
     ) {
@@ -119,10 +123,15 @@ class Styles_Spec extends Specification
             "Hold my b(0/&/§H%,1fu3s98s"   | UI.COLOR_UNDEFINED
     }
 
-    def 'The String representation of a style config will tell you everything about it!'()
+    def 'The String representation of a style config will tell you everything about it!'( float uiScale )
     {
-        given : """
-            We creat a simple Swing component, a JSpinner, and
+        given :
+            SwingTree.initialiseUsing { it.uiScaleFactor(uiScale) }
+            var scale = { it * uiScale }
+            var scaledToString = { String.valueOf(scale(it)).replace(".0", "") }
+            var roundScaledToString = { String.valueOf(Math.round(scale(it))).replace(".0", "") }
+        and : """
+            We create a simple Swing component, a JSpinner, and
             send it through the SwingTree builder API where
             we apply a style to it by updating its style configuration.
         """
@@ -151,10 +160,18 @@ class Styles_Spec extends Specification
                 style.toString() == "Style[" +
                                         "LayoutStyle[NONE], " +
                                         "BorderStyle[" +
-                                            "arcWidth=12, " +
-                                            "arcHeight=18, " +
-                                            "topWidth=1, rightWidth=2, bottomWidth=3, leftWidth=4, " +
-                                            "margin=Outline[top=?, right=?, bottom=?, left=?], " +
+                                            "arcWidth=" + scaledToString(12) + ", " +
+                                            "arcHeight=" + scaledToString(18) + ", " +
+                                            "topWidth=" + scaledToString(1) + ", " +
+                                            "rightWidth=" + scaledToString(2) + ", " +
+                                            "bottomWidth=" + scaledToString(3) + ", " +
+                                            "leftWidth=" + scaledToString(4) + ", " +
+                                            "margin=Outline[" +
+                                                "top=${(scale(1) % 1 == 0 ? "?" : 1 - scale(1) % 1 )}, " +
+                                                "right=${(scale(2) % 1 == 0 ? "?" : 1 - scale(2) % 1 )}, " +
+                                                "bottom=${(scale(3) % 1 == 0 ? "?" : 1 - scale(3) % 1 )}, " +
+                                                "left=${(scale(4) % 1 == 0 ? "?" : 1 - scale(4) % 1 )}" +
+                                            "], " +
                                             "padding=Outline[top=?, right=?, bottom=?, left=?], " +
                                             "color=rgba(0,0,255,255), " +
                                             "GradientStyle[NONE]" +
@@ -170,7 +187,7 @@ class Styles_Spec extends Specification
                                         "], " +
                                         "FontStyle[" +
                                             "family=Times New Roman, " +
-                                            "size=12, " +
+                                            "size=" + Math.round(12*uiScale) + ", " +
                                             "posture=0.0, " +
                                             "weight=2.0, " +
                                             "spacing=0.0, " +
@@ -310,14 +327,14 @@ class Styles_Spec extends Specification
                                         "BaseStyle[NONE], " +
                                         "FontStyle[NONE], " +
                                         "DimensionalityStyle[" +
-                                            "minWidth=50, " +
-                                            "minHeight=100, " +
-                                            "maxWidth=300, " +
+                                            "minWidth=" + roundScaledToString(50) + ", " +
+                                            "minHeight=" + roundScaledToString(100) + ", " +
+                                            "maxWidth=" + roundScaledToString(300) + ", " +
                                             "maxHeight=?, " +
-                                            "preferredWidth=400, " +
+                                            "preferredWidth=" + roundScaledToString(400) + ", " +
                                             "preferredHeight=?, " +
-                                            "width=100, " +
-                                            "height=200" +
+                                            "width=" + roundScaledToString(100) + ", " +
+                                            "height=" + roundScaledToString(200) +
                                         "], " +
                                         "StyleLayers[" +
                                             "background=StyleLayer[EMPTY], " +
@@ -342,7 +359,8 @@ class Styles_Spec extends Specification
                                     "], " +
                                     "properties=[]" +
                                 "]"
-
+        where :
+            uiScale << [ 1.0f, 1.5f, 2.0f, 2.25f, 3.0f ]
     }
 
     def 'Style objects are value based (with respect to equality and hash code).'()
@@ -424,7 +442,7 @@ class Styles_Spec extends Specification
                 styler(style2).shadowBlurRadius(1).style().hashCode()   == styler(style2).shadowBlurRadius(1).style().hashCode()
     }
 
-    def 'SwingTree will simplify the style configuration of a component if possible.'()
+    def 'SwingTree will simplify the style configuration of a component if possible.'( float uiScale )
     {
         reportInfo """
             Simplifying a style configuration means that if the properties of a style
@@ -440,7 +458,12 @@ class Styles_Spec extends Specification
             
             It is also memory efficient, as the default style objects are global null objects.
         """
-        given : 'We create a highly simplifiable style through the style API.'
+        given :
+            SwingTree.initialiseUsing { it.uiScaleFactor(uiScale) }
+            var scale = { it * uiScale }
+            var scaledToString = { String.valueOf(scale(it)).replace(".0", "") }
+            var roundScaledToString = { String.valueOf(Math.round(scale(it))).replace(".0", "") }
+        and : 'We create a highly simplifiable style through the style API.'
             var button =
                         UI.panel().withStyle(conf -> conf
                             .borderColor(new Color(0,0,0,0))
@@ -491,7 +514,7 @@ class Styles_Spec extends Specification
             ComponentExtension.from(button).getStyle().toString() == "Style[" +
                     "LayoutStyle[NONE], " +
                     "BorderStyle[" +
-                        "radius=40, " +
+                        "radius=" + scaledToString(40) + ", " +
                         "width=?, " +
                         "margin=Outline[top=?, right=?, bottom=?, left=?], " +
                         "padding=Outline[top=?, right=?, bottom=?, left=?], " +
@@ -515,8 +538,8 @@ class Styles_Spec extends Specification
                         "maxHeight=?, " +
                         "preferredWidth=?, " +
                         "preferredHeight=?, " +
-                        "width=120, " +
-                        "height=80" +
+                        "width=" + roundScaledToString(120) + ", " +
+                        "height=" + roundScaledToString(80) +
                     "], " +
                     "StyleLayers[" +
                         "background=StyleLayer[EMPTY], " +
@@ -526,9 +549,11 @@ class Styles_Spec extends Specification
                     "], " +
                     "properties=[]" +
                 "]"
+        where :
+            uiScale << [ 1.0f, 1.5f, 2.0f, 2.25f, 3.0f ]
     }
 
-    def 'The border style will be simplified if padding and widths are all 0.'()
+    def 'The border style will be simplified if padding and widths are all 0.'( float uiScale )
     {
         reportInfo """
             Simplifying a style configuration means that if the properties of a style
@@ -544,7 +569,9 @@ class Styles_Spec extends Specification
             
             It is also memory efficient, as the default style objects are global null objects.
         """
-        given : 'We create a highly simplifiable style through the style API.'
+        given :
+            SwingTree.initialiseUsing { it.uiScaleFactor(uiScale) }
+        and : 'We create a highly simplifiable style through the style API.'
             var panel =
                         UI.panel().withStyle(conf -> conf
                             .borderColor(Color.GREEN)
@@ -592,6 +619,12 @@ class Styles_Spec extends Specification
             despite the fact that a visible border color was specified.
             This is because the border width is 0, so the border is invisible
             and the border color is irrelevant.
+            
+            Also note that if the uiScale is not whole, then the left border width
+            is also not whole which then leads to there being a margin on the left side.
+            This margin is a correction for the size of a component being integer based.
+            So in order to make the transition between styles look smooth, we need the margin
+            to buffer the fractional part of the border width.
         """
             ComponentExtension.from(panel).getStyle().toString() == "Style[" +
                     "LayoutStyle[NONE], " +
@@ -600,8 +633,8 @@ class Styles_Spec extends Specification
                         "topWidth=?, " +
                         "rightWidth=?, " +
                         "bottomWidth=?, " +
-                        "leftWidth=1, " +
-                        "margin=Outline[top=?, right=?, bottom=?, left=?], " +
+                        "leftWidth=" + String.valueOf(uiScale).replace(".0", "") + ", " +
+                        "margin=Outline[top=?, right=?, bottom=?, left=${( uiScale % 1 == 0 ? "?" : 1 - uiScale % 1 )}], " +
                         "padding=Outline[top=?, right=?, bottom=?, left=?], " +
                         "color=rgba(0,255,0,255), " +
                         "GradientStyle[NONE]" +
@@ -617,6 +650,8 @@ class Styles_Spec extends Specification
                     "], " +
                     "properties=[]" +
                 "]"
+        where :
+            uiScale << [ 1.0f, 1.5f, 2.0f, 2.25f, 3.0f ]
     }
 
     def 'The `UI.COLOR_UNDEFINED` constant can be used as a safe shorthand for null for the background and foreground properties of the style API'()

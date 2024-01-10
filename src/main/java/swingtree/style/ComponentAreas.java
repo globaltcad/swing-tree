@@ -199,8 +199,8 @@ final class ComponentAreas
         boolean insAllTheSame = insTop == insLeft && insLeft == insBottom && insBottom == insRight;
 
         if ( border.allCornersShareTheSameArc() && insAllTheSame ) {
-            float arcWidth  = border.topLeftArc().map( a -> Math.max(0,a.width() ) ).orElse(0);
-            float arcHeight = border.topLeftArc().map( a -> Math.max(0,a.height()) ).orElse(0);
+            float arcWidth  = border.topLeftArc().map( a -> Math.max(0,a.width() ) ).orElse(0f);
+            float arcHeight = border.topLeftArc().map( a -> Math.max(0,a.height()) ).orElse(0f);
             arcWidth  = Math.max(0, arcWidth  - insTop);
             arcHeight = Math.max(0, arcHeight - insTop);
             if ( arcWidth == 0 || arcHeight == 0 )
