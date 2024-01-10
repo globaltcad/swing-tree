@@ -22,6 +22,23 @@ final class DimensionalityStyle
 
     static DimensionalityStyle none() { return _NONE; }
 
+    static DimensionalityStyle of(
+        Size minSize,
+        Size maxSize,
+        Size preferredSize,
+        Size size
+    ) {
+        if (
+            minSize       == _NONE._minSize &&
+            maxSize       == _NONE._maxSize &&
+            preferredSize == _NONE._preferredSize &&
+            size          == _NONE._size
+        )
+            return _NONE;
+        else
+            return new DimensionalityStyle(minSize, maxSize, preferredSize, size);
+    }
+
 
     private final Size _minSize;
     private final Size _maxSize;
@@ -42,51 +59,51 @@ final class DimensionalityStyle
     }
 
     DimensionalityStyle _withMinWidth( int minWidth ) {
-        return new DimensionalityStyle(_minSize.withWidth(minWidth), _maxSize, _preferredSize, _size);
+        return DimensionalityStyle.of(_minSize.withWidth(minWidth), _maxSize, _preferredSize, _size);
     }
 
     DimensionalityStyle _withMinHeight( int minHeight ) {
-        return new DimensionalityStyle(_minSize.withHeight(minHeight), _maxSize, _preferredSize, _size);
+        return DimensionalityStyle.of(_minSize.withHeight(minHeight), _maxSize, _preferredSize, _size);
     }
 
     DimensionalityStyle _withMinSize( Size minSize ) {
-        return new DimensionalityStyle(minSize, _maxSize, _preferredSize, _size);
+        return DimensionalityStyle.of(minSize, _maxSize, _preferredSize, _size);
     }
 
     DimensionalityStyle _withMaxWidth( int maxWidth ) {
-        return new DimensionalityStyle(_minSize, _maxSize.withWidth(maxWidth), _preferredSize, _size);
+        return DimensionalityStyle.of(_minSize, _maxSize.withWidth(maxWidth), _preferredSize, _size);
     }
 
     DimensionalityStyle _withMaxHeight( int maxHeight ) {
-        return new DimensionalityStyle(_minSize, _maxSize.withHeight(maxHeight), _preferredSize, _size);
+        return DimensionalityStyle.of(_minSize, _maxSize.withHeight(maxHeight), _preferredSize, _size);
     }
 
     DimensionalityStyle _withMaxSize( Size maxSize ) {
-        return new DimensionalityStyle(_minSize, maxSize, _preferredSize, _size);
+        return DimensionalityStyle.of(_minSize, maxSize, _preferredSize, _size);
     }
 
     DimensionalityStyle _withPreferredWidth( int preferredWidth ) {
-        return new DimensionalityStyle(_minSize, _maxSize, _preferredSize.withWidth(preferredWidth), _size);
+        return DimensionalityStyle.of(_minSize, _maxSize, _preferredSize.withWidth(preferredWidth), _size);
     }
 
     DimensionalityStyle _withPreferredHeight( int preferredHeight ) {
-        return new DimensionalityStyle(_minSize, _maxSize, _preferredSize.withHeight(preferredHeight), _size);
+        return DimensionalityStyle.of(_minSize, _maxSize, _preferredSize.withHeight(preferredHeight), _size);
     }
 
     DimensionalityStyle _withPreferredSize( Size preferredSize ) {
-        return new DimensionalityStyle(_minSize, _maxSize, preferredSize, _size);
+        return DimensionalityStyle.of(_minSize, _maxSize, preferredSize, _size);
     }
 
     DimensionalityStyle _withWidth( int width ) {
-        return new DimensionalityStyle(_minSize, _maxSize, _preferredSize, _size.withWidth(width));
+        return DimensionalityStyle.of(_minSize, _maxSize, _preferredSize, _size.withWidth(width));
     }
 
     DimensionalityStyle _withHeight( int height ) {
-        return new DimensionalityStyle(_minSize, _maxSize, _preferredSize, _size.withHeight(height));
+        return DimensionalityStyle.of(_minSize, _maxSize, _preferredSize, _size.withHeight(height));
     }
 
     DimensionalityStyle _withSize( Size size ) {
-        return new DimensionalityStyle(_minSize, _maxSize, _preferredSize, size);
+        return DimensionalityStyle.of(_minSize, _maxSize, _preferredSize, size);
     }
 
     public Optional<Integer> minWidth() { return _minSize.width().map(Number::intValue); }
@@ -106,7 +123,7 @@ final class DimensionalityStyle
     public Optional<Integer> height() { return _size.height().map(Number::intValue); }
 
     DimensionalityStyle _scale( double scale ) {
-        return new DimensionalityStyle(
+        return DimensionalityStyle.of(
                     _minSize.scale(scale),
                     _maxSize.scale(scale),
                     _preferredSize.scale(scale),
@@ -123,15 +140,7 @@ final class DimensionalityStyle
         Size simplifiedPreferredSize = _preferredSize.width().orElse(0f) == 0 && _preferredSize.height().orElse(0f) == 0 ? _NONE._preferredSize : _preferredSize;
         Size simplifiedSize          = _size.width().orElse(0f) == 0 && _size.height().orElse(0f) == 0 ? _NONE._size : _size;
 
-        if (
-            simplifiedMinSize       == _NONE._minSize &&
-            simplifiedMaxSize       == _NONE._maxSize &&
-            simplifiedPreferredSize == _NONE._preferredSize &&
-            simplifiedSize          == _NONE._size
-        )
-            return _NONE;
-
-        return new DimensionalityStyle(
+        return DimensionalityStyle.of(
                     simplifiedMinSize,
                     simplifiedMaxSize,
                     simplifiedPreferredSize,
