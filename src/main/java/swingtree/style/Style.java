@@ -62,6 +62,29 @@ public final class Style
      */
     public static Style none() { return _NONE; }
 
+    static Style of(
+        LayoutStyle         layout,
+        BorderStyle         border,
+        BaseStyle           base,
+        FontStyle           font,
+        DimensionalityStyle dimensionality,
+        StyleLayers         layers,
+        NamedStyles<String> properties
+    ) {
+        if (
+            layout         == _NONE._layout &&
+            border         == _NONE._border &&
+            base           == _NONE._base &&
+            font           == _NONE._font &&
+            dimensionality == _NONE._dimensionality &&
+            layers         == _NONE._layers &&
+            properties     == _NONE._properties
+        )
+            return _NONE;
+        else
+            return new Style(layout, border, base, font, dimensionality, layers, properties);
+    }
+
 
     private final LayoutStyle                _layout;
     private final BorderStyle                _border;
@@ -70,7 +93,6 @@ public final class Style
     private final DimensionalityStyle        _dimensionality;
     private final StyleLayers                _layers;
     private final NamedStyles<String>        _properties;
-
 
     private Style(
         LayoutStyle         layout,
@@ -188,7 +210,7 @@ public final class Style
      * @return A new {@link Style} instance which only contains style information relevant to the provided {@link UI.Layer}.
      */
     public Style onlyRetainingRenderCacheRelevantConfForLayer( UI.Layer layer ) {
-        return new Style(
+        return Style.of(
                     LayoutStyle.none(),
                     ( layer == UI.Layer.BORDER     ? _border : _border.withColor(null) ),
                     ( layer == UI.Layer.BACKGROUND ? _base   : BaseStyle.none() ),
@@ -245,46 +267,46 @@ public final class Style
         if ( layout == _layout )
             return this;
 
-        return new Style(layout, _border, _base, _font, _dimensionality, _layers, _properties);
+        return Style.of(layout, _border, _base, _font, _dimensionality, _layers, _properties);
     }
 
     Style _withBorder( BorderStyle border ) {
         if ( border == _border )
             return this;
 
-        return new Style(_layout, border, _base, _font, _dimensionality, _layers, _properties);
+        return Style.of(_layout, border, _base, _font, _dimensionality, _layers, _properties);
     }
 
     Style _withBase( BaseStyle background ) {
         if ( background == _base )
             return this;
 
-        return new Style(_layout, _border, background, _font, _dimensionality, _layers, _properties);
+        return Style.of(_layout, _border, background, _font, _dimensionality, _layers, _properties);
     }
 
     Style _withFont( FontStyle font ) {
         if ( font == _font )
             return this;
 
-        return new Style(_layout, _border, _base, font, _dimensionality, _layers, _properties);
+        return Style.of(_layout, _border, _base, font, _dimensionality, _layers, _properties);
     }
 
     Style _withDimensionality( DimensionalityStyle dimensionality ) {
         if ( dimensionality == _dimensionality )
             return this;
 
-        return new Style(_layout, _border, _base, _font, dimensionality, _layers, _properties);
+        return Style.of(_layout, _border, _base, _font, dimensionality, _layers, _properties);
     }
 
     Style _withShadow( UI.Layer layer, NamedStyles<ShadowStyle> shadows ) {
-        return new Style(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withShadows(shadows)), _properties);
+        return Style.of(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withShadows(shadows)), _properties);
     }
 
     Style _withProperties( NamedStyles<String> properties ) {
         if ( properties == _properties )
             return this;
 
-        return new Style(_layout, _border, _base, _font, _dimensionality, _layers, properties);
+        return Style.of(_layout, _border, _base, _font, _dimensionality, _layers, properties);
     }
 
     Style _withShadow( UI.Layer layer, Function<ShadowStyle, ShadowStyle> styler ) {
@@ -298,24 +320,24 @@ public final class Style
     }
 
     Style _withImages( UI.Layer layer, NamedStyles<ImageStyle> images ) {
-        return new Style(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withImages(images)), _properties);
+        return Style.of(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withImages(images)), _properties);
     }
 
     Style _withGradients( UI.Layer layer, NamedStyles<GradientStyle> shades ) {
         Objects.requireNonNull(shades);
-        return new Style(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withGradients(shades)), _properties);
+        return Style.of(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withGradients(shades)), _properties);
     }
 
     Style _withLayers( StyleLayers layers ) {
         if ( layers == _layers )
             return this;
 
-        return new Style(_layout, _border, _base, _font, _dimensionality, layers, _properties);
+        return Style.of(_layout, _border, _base, _font, _dimensionality, layers, _properties);
     }
 
     Style _withPainters( UI.Layer layer, NamedStyles<PainterStyle> painters ) {
         Objects.requireNonNull(painters);
-        return new Style(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withPainters(painters)), _properties);
+        return Style.of(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withPainters(painters)), _properties);
     }
 
     Style property( String key, String value ) {
@@ -354,7 +376,7 @@ public final class Style
     }
 
     Style scale( double scale ) {
-        return new Style(
+        return Style.of(
                     _layout,
                     _border._scale(scale),
                     _base, // Just colors and the cursor
@@ -367,7 +389,7 @@ public final class Style
 
     Style simplified() {
         return _withBase(_base.simplified())
-                ._withBorder(_border.simplified())
+               ._withBorder(_border.simplified())
                ._withDimensionality(_dimensionality.simplified())
                ._withLayers(_layers.simplified());
     }
