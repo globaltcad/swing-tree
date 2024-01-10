@@ -17,17 +17,17 @@ final class Outline
 {
     private static final Outline _NONE = new Outline(null, null, null, null);
 
-    public static Outline none() { return _NONE; }
+    static Outline none() { return _NONE; }
 
-    public static Outline of( float top, float right, float bottom, float left ) {
+    static Outline of( float top, float right, float bottom, float left ) {
         return new Outline(top, right, bottom, left);
     }
 
-    public static Outline of( double top, double right, double bottom, double left ) {
+    static Outline of( double top, double right, double bottom, double left ) {
         return new Outline((float) top, (float) right, (float) bottom, (float) left);
     }
 
-    public static Outline of( float allSides ) {
+    static Outline of( float allSides ) {
         return new Outline(allSides, allSides, allSides, allSides);
     }
 
@@ -37,6 +37,13 @@ final class Outline
     private final Float bottom;
     private final Float left;
 
+
+    static Outline ofNullable( Float top, Float right, Float bottom, Float left ) {
+        if ( top == null && right == null && bottom == null && left == null )
+            return _NONE;
+
+        return new Outline(top, right, bottom, left);
+    }
     
     private Outline( Float top, Float right, Float bottom, Float left ) {
         this.top    = top;
@@ -73,36 +80,36 @@ final class Outline
      * @param top The top outline value.
      * @return A new {@link Outline} with the specified top outline value.
      */
-    Outline withTop( float top ) { return new Outline(top, right, bottom, left); }
+    Outline withTop( float top ) { return Outline.ofNullable(top, right, bottom, left); }
 
     /**
      * @param right The right outline value.
      * @return A new {@link Outline} with the specified right outline value.
      */
-    Outline withRight( float right ) { return new Outline(top, right, bottom, left); }
+    Outline withRight( float right ) { return Outline.ofNullable(top, right, bottom, left); }
 
     /**
      * @param bottom The bottom outline value.
      * @return A new {@link Outline} with the specified bottom outline value.
      */
-    Outline withBottom( float bottom ) { return new Outline(top, right, bottom, left); }
+    Outline withBottom( float bottom ) { return Outline.ofNullable(top, right, bottom, left); }
 
     /**
      * @param left The left outline value.
      * @return A new {@link Outline} with the specified left outline value.
      */
-    Outline withLeft( float left ) { return new Outline(top, right, bottom, left); }
+    Outline withLeft( float left ) { return Outline.ofNullable(top, right, bottom, left); }
 
     /**
      * @param scale The scale factor.
      * @return A new {@link Outline} with the outline values scaled by the specified factor.
      */
     Outline scale( double scale ) {
-        return new Outline(
-                    top    == null ? null : (float) Math.round( top    * scale ),
-                    right  == null ? null : (float) Math.round( right  * scale ),
-                    bottom == null ? null : (float) Math.round( bottom * scale ),
-                    left   == null ? null : (float) Math.round( left   * scale )
+        return Outline.ofNullable(
+                    top    == null ? null : (float) ( top    * scale ),
+                    right  == null ? null : (float) ( right  * scale ),
+                    bottom == null ? null : (float) ( bottom * scale ),
+                    left   == null ? null : (float) ( left   * scale )
                 );
     }
 
@@ -118,7 +125,7 @@ final class Outline
         if ( top == null && right == null && bottom == null && left == null )
             return _NONE;
 
-        return new Outline(top, right, bottom, left);
+        return Outline.ofNullable(top, right, bottom, left);
     }
 
     /**
@@ -144,7 +151,7 @@ final class Outline
         if ( other == _NONE )
             return this;
 
-        return new Outline(
+        return Outline.ofNullable(
                     _plus(top,    other.top   ),
                     _plus(right,  other.right ),
                     _plus(bottom, other.bottom),
@@ -153,7 +160,7 @@ final class Outline
     }
 
     public Outline map( Function<Float, Float> mapper ) {
-        return new Outline(
+        return Outline.ofNullable(
                     top    == null ? null : mapper.apply(top),
                     right  == null ? null : mapper.apply(right),
                     bottom == null ? null : mapper.apply(bottom),
