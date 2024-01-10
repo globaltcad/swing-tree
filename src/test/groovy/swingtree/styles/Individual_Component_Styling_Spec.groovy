@@ -1100,10 +1100,11 @@ class Individual_Component_Styling_Spec extends Specification
             """
 
         given : 'We create various different UIs with different grounding styles.'
-            var img = UI.findIcon("img/funnel.svg").get()
+            var img = UI.findIcon("img/two-16th-notes.svg").get()
+            var spacing = 0.03f
             var ui1 =
                         UI.label("Top Left").withStyle( it -> it
-                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontAlignment(UI.HorizontalAlignment.CENTER).fontSpacing(spacing)
                             .border(2, Color.GREEN)
                             .size(120, 120)
                             .image(ground -> ground
@@ -1116,7 +1117,7 @@ class Individual_Component_Styling_Spec extends Specification
                         )
            var ui2 =
                         UI.label("Top Right").withStyle( it -> it
-                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontAlignment(UI.HorizontalAlignment.CENTER).fontSpacing(spacing)
                             .border(2, Color.GREEN)
                             .size(120, 120)
                             .image(ground -> ground
@@ -1130,6 +1131,7 @@ class Individual_Component_Styling_Spec extends Specification
            var ui3 =
                        UI.label("Bottom Left").withStyle( it -> it
                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                           .fontSpacing(spacing)
                            .border(2, Color.GREEN)
                            .size(120, 120)
                            .image(ground -> ground
@@ -1143,6 +1145,7 @@ class Individual_Component_Styling_Spec extends Specification
            var ui4 =
                        UI.label("Bottom Right").withStyle( it -> it
                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                           .fontSpacing(spacing)
                            .border(2, Color.GREEN)
                            .size(120, 120)
                            .image(ground -> ground
@@ -1156,6 +1159,7 @@ class Individual_Component_Styling_Spec extends Specification
            var ui5 =
                        UI.label("Center").withStyle( it -> it
                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                           .fontSpacing(spacing)
                            .border(2, Color.GREEN)
                            .size(120, 120)
                            .image(ground -> ground
@@ -1169,6 +1173,7 @@ class Individual_Component_Styling_Spec extends Specification
            var ui6 =
                        UI.label("Top").withStyle( it -> it
                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                           .fontSpacing(spacing)
                            .border(2, Color.GREEN)
                            .size(120, 120)
                            .image(ground -> ground
@@ -1182,6 +1187,7 @@ class Individual_Component_Styling_Spec extends Specification
            var ui7 =
                        UI.label("Bottom").withStyle( it -> it
                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                           .fontSpacing(spacing)
                            .border(2, Color.GREEN)
                            .size(120, 120)
                            .image(ground -> ground
@@ -1195,6 +1201,7 @@ class Individual_Component_Styling_Spec extends Specification
            var ui8 =
                        UI.label("Left").withStyle( it -> it
                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                           .fontSpacing(spacing)
                            .border(2, Color.GREEN)
                            .size(120, 120)
                            .image(ground -> ground
@@ -1208,6 +1215,7 @@ class Individual_Component_Styling_Spec extends Specification
            var ui9 =
                        UI.label("Right").withStyle( it -> it
                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                           .fontSpacing(spacing)
                            .border(2, Color.GREEN)
                            .size(120, 120)
                            .image(ground -> ground
@@ -1221,6 +1229,7 @@ class Individual_Component_Styling_Spec extends Specification
            var ui10 =
                        UI.label("Stretch").withStyle( it -> it
                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                           .fontSpacing(spacing)
                            .border(2, Color.GREEN)
                            .size(120, 120)
                            .image(ground -> ground
@@ -1232,6 +1241,7 @@ class Individual_Component_Styling_Spec extends Specification
            var ui11 =
                        UI.label("Only Color").withStyle( it -> it
                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                           .fontSpacing(spacing)
                            .border(2, Color.GREEN)
                            .size(120, 120)
                            .image(ground -> ground
@@ -1241,6 +1251,7 @@ class Individual_Component_Styling_Spec extends Specification
            var ui12 =
                        UI.label("Only Image").withStyle( it -> it
                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                           .fontSpacing(spacing)
                            .border(2, Color.GREEN)
                            .size(120, 120)
                            .image(ground -> ground
@@ -1251,6 +1262,7 @@ class Individual_Component_Styling_Spec extends Specification
            var ui13 =
                        UI.label("Center X Stretch").withStyle( it -> it
                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                           .fontSpacing(spacing)
                            .border(2, Color.GREEN)
                            .size(120, 120)
                            .image(ground -> ground
@@ -1265,6 +1277,7 @@ class Individual_Component_Styling_Spec extends Specification
            var ui14 =
                        UI.label("Center Y Stretch").withStyle( it -> it
                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                           .fontSpacing(spacing)
                            .border(2, Color.GREEN)
                            .size(120, 120)
                            .image(ground -> ground
@@ -1279,6 +1292,7 @@ class Individual_Component_Styling_Spec extends Specification
            var ui15 =
                        UI.label("Center XY Stretch").withStyle( it -> it
                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                           .fontSpacing(spacing)
                            .border(2, Color.GREEN)
                            .size(120, 120)
                            .image(ground -> ground
