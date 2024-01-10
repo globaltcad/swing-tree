@@ -45,13 +45,15 @@ class Configuring_UI_Components_Spec extends Specification
                     UI.button("Button").id("C3").makeFocused(),
                     UI.toggleButton("Toggle").id("C4")
                 )
+        and : 'We build the component tree.'
+            var frame = ui.get(JFrame)
         and : 'We wait for the UI thread to do its thing.'
             UI.sync()
         expect :
-            new Utility.Query(ui.component).find(JTextArea,     "C1").isPresent()
-            new Utility.Query(ui.component).find(JCheckBox,     "C2").isPresent()
-            new Utility.Query(ui.component).find(JButton,       "C3").isPresent()
-            new Utility.Query(ui.component).find(JToggleButton, "C4").isPresent()
+            new Utility.Query(frame).find(JTextArea,     "C1").isPresent()
+            new Utility.Query(frame).find(JCheckBox,     "C2").isPresent()
+            new Utility.Query(frame).find(JButton,       "C3").isPresent()
+            new Utility.Query(frame).find(JToggleButton, "C4").isPresent()
     }
 
     def 'Use the "makeDefaultButton()" method to make a button the default button.'()
@@ -75,15 +77,18 @@ class Configuring_UI_Components_Spec extends Specification
                         UI.toggleButton("Toggle").id("C4")
                     )
                 )
+        and : 'We build the component tree.'
+            var frame = ui.get(JFrame)
         and : 'We wait for the UI thread to do its thing.'
+            Thread.sleep(1000)
             UI.sync()
         expect :
-            new Utility.Query(ui.component).find(JTextArea,     "C1").isPresent()
-            new Utility.Query(ui.component).find(JCheckBox,     "C2").isPresent()
-            new Utility.Query(ui.component).find(JButton,       "C3").isPresent()
-            new Utility.Query(ui.component).find(JToggleButton, "C4").isPresent()
+            new Utility.Query(frame).find(JTextArea,     "C1").isPresent()
+            new Utility.Query(frame).find(JCheckBox,     "C2").isPresent()
+            new Utility.Query(frame).find(JButton,       "C3").isPresent()
+            new Utility.Query(frame).find(JToggleButton, "C4").isPresent()
         and :
-            ui.component.rootPane.defaultButton == new Utility.Query(ui.component).find(JButton, "C3").get()
+            frame.rootPane.defaultButton == new Utility.Query(frame).find(JButton, "C3").get()
     }
 
     def 'The visibility of a component can be configured using various methods.'()
@@ -97,11 +102,13 @@ class Configuring_UI_Components_Spec extends Specification
                     UI.splitButton("Button").id("C3").isVisibleIfNot(true),
                     UI.toggleButton("Toggle").id("C4").isVisibleIfNot(false)
                 )
+        and : 'We build the panel based component tree.'
+            var panel = ui.get(JPanel)
         expect : 'The components are visible or not depending on the configuration.'
-            new Utility.Query(ui.component).find(JSlider, "C1").get().isVisible() == true
-            new Utility.Query(ui.component).find(JEditorPane, "C2").get().isVisible() == false
-            new Utility.Query(ui.component).find(JSplitButton, "C3").get().isVisible() == false
-            new Utility.Query(ui.component).find(JToggleButton, "C4").get().isVisible() == true
+            new Utility.Query(panel).find(JSlider, "C1").get().isVisible() == true
+            new Utility.Query(panel).find(JEditorPane, "C2").get().isVisible() == false
+            new Utility.Query(panel).find(JSplitButton, "C3").get().isVisible() == false
+            new Utility.Query(panel).find(JToggleButton, "C4").get().isVisible() == true
     }
 
     def 'We can configure a button to have no border.'()
@@ -114,10 +121,12 @@ class Configuring_UI_Components_Spec extends Specification
                     UI.toggleButton("Toggle").id("C2").isBorderPaintedIf(true),
                     UI.splitButton("Split").id("C3").isBorderPaintedIf(false),
                 )
+        and : 'We build the panel based component tree.'
+            var panel = ui.get(JPanel)
         expect : 'The components have borders or not depending on the configuration.'
-            new Utility.Query(ui.component).find(JButton, "C1").get().isBorderPainted() == false
-            new Utility.Query(ui.component).find(JToggleButton, "C2").get().isBorderPainted() == true
-            new Utility.Query(ui.component).find(JSplitButton, "C3").get().isBorderPainted() == false
+            new Utility.Query(panel).find(JButton, "C1").get().isBorderPainted() == false
+            new Utility.Query(panel).find(JToggleButton, "C2").get().isBorderPainted() == true
+            new Utility.Query(panel).find(JSplitButton, "C3").get().isBorderPainted() == false
     }
 }
 
