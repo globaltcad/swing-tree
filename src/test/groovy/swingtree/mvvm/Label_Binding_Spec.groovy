@@ -11,6 +11,7 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
 
+import javax.swing.JLabel
 import javax.swing.SwingConstants
 import java.awt.Color
 import java.awt.Dimension
@@ -52,16 +53,18 @@ class Label_Binding_Spec extends Specification
 
         when : 'We create and bind to a label UI node...'
             var ui = UI.label("").withText(text)
+        and : 'We build the component.'
+            var label = ui.get(JLabel)
 
         then : 'The label should be updated when the property changes.'
-            ui.component.text == "Hello World"
+            label.text == "Hello World"
 
         when : 'We change the property value...'
             text.set("Goodbye World")
         and : 'Then we wait for the EDT to complete the UI modifications...'
             UI.sync()
         then : 'The label should be updated.'
-            ui.component.text == "Goodbye World"
+            label.text == "Goodbye World"
     }
 
     def 'We can bind to the foreground and background color of a UI node.'()
@@ -75,10 +78,12 @@ class Label_Binding_Spec extends Specification
                     UI.label("")
                     .withForeground(color1)
                     .withBackground(color2)
+        and : 'We build the root component of the UI tree.'
+            var label = ui.get(JLabel)
 
         then : 'The label should have the property colors.'
-            ui.component.foreground == Color.RED
-            ui.component.background == Color.BLUE
+            label.foreground == Color.RED
+            label.background == Color.BLUE
 
         when : 'We change the color values of both properties...'
             color1.set(Color.GREEN)
@@ -86,8 +91,8 @@ class Label_Binding_Spec extends Specification
         and : 'Then we wait for the EDT to complete the UI modifications...'
             UI.sync()
         then : 'The label colors are updated.'
-            ui.component.foreground == Color.GREEN
-            ui.component.background == Color.YELLOW
+            label.foreground == Color.GREEN
+            label.background == Color.YELLOW
     }
 
     def 'It is possible to bind to the minimum, maximum and preferred size of a label'( int uiScale )
@@ -117,11 +122,13 @@ class Label_Binding_Spec extends Specification
                     .withMinSize(minSize)
                     .withMaxSize(maxSize)
                     .withPrefSize(prefSize)
+        and : 'We build the root component of the UI tree.'
+            var label = ui.get(JLabel)
 
         then : 'The label should be updated when the property changes.'
-            ui.component.minimumSize == new Dimension(100 * uiScale, 100 * uiScale)
-            ui.component.maximumSize == new Dimension(200 * uiScale, 200 * uiScale)
-            ui.component.preferredSize == new Dimension(150 * uiScale, 150 * uiScale)
+            label.minimumSize == new Dimension(100 * uiScale, 100 * uiScale)
+            label.maximumSize == new Dimension(200 * uiScale, 200 * uiScale)
+            label.preferredSize == new Dimension(150 * uiScale, 150 * uiScale)
 
         when : 'We change the items of the properties...'
             minSize.set(new Dimension(50, 50))
@@ -130,9 +137,9 @@ class Label_Binding_Spec extends Specification
         and : 'Then we wait for the EDT to complete the UI modifications...'
             UI.sync()
         then : 'The label should be updated.'
-            ui.component.minimumSize == new Dimension(50 * uiScale, 50 * uiScale)
-            ui.component.maximumSize == new Dimension(100 * uiScale, 100 * uiScale)
-            ui.component.preferredSize == new Dimension(75 * uiScale, 75 * uiScale)
+            label.minimumSize == new Dimension(50 * uiScale, 50 * uiScale)
+            label.maximumSize == new Dimension(100 * uiScale, 100 * uiScale)
+            label.preferredSize == new Dimension(75 * uiScale, 75 * uiScale)
 
         where : """
             We use the following integer scaling factors simulating different high DPI scenarios.
@@ -154,16 +161,18 @@ class Label_Binding_Spec extends Specification
             var ui =
                     UI.label("")
                     .isEnabledIf(enabled)
+        and : 'We build the root component of the UI tree.'
+            var label = ui.get(JLabel)
 
         then : 'The label should be updated when the property changes.'
-            ui.component.enabled == true
+            label.enabled == true
 
         when : 'We change the items of the properties...'
             enabled.set(false)
         and : 'Then we wait for the EDT to complete the UI modifications...'
             UI.sync()
         then : 'The label should be updated.'
-            ui.component.enabled == false
+            label.enabled == false
     }
 
     def 'You can bind a variable to the "visible" flag of a label.'()
@@ -178,16 +187,18 @@ class Label_Binding_Spec extends Specification
             var ui =
                     UI.label("")
                     .isVisibleIf(visible)
+        and : 'We build the root component of the UI tree.'
+            var label = ui.get(JLabel)
 
         then : 'The label should be updated when the property changes.'
-            ui.component.visible == true
+            label.visible == true
 
         when : 'We change the items of the properties...'
             visible.set(false)
         and : 'Then we wait for the EDT to complete the UI modifications...'
             UI.sync()
         then : 'The label should be updated.'
-            ui.component.visible == false
+            label.visible == false
     }
 
     def 'A property can define the horizontal and vertical alignment of a label.'()
@@ -207,10 +218,12 @@ class Label_Binding_Spec extends Specification
                     UI.label("")
                     .withHorizontalAlignment(horizontal)
                     .withVerticalAlignment(vertical)
+        and : 'We build the root component of the UI tree.'
+            var label = ui.get(JLabel)
 
         then : 'The label should be updated when the property changes.'
-            ui.component.horizontalAlignment == SwingConstants.LEFT
-            ui.component.verticalAlignment == SwingConstants.TOP
+            label.horizontalAlignment == SwingConstants.LEFT
+            label.verticalAlignment == SwingConstants.TOP
 
         when : 'We change the items of the properties...'
             horizontal.set(UI.HorizontalAlignment.CENTER)
@@ -218,8 +231,8 @@ class Label_Binding_Spec extends Specification
         and : 'Then we wait for the EDT to complete the UI modifications...'
             UI.sync()
         then : 'The label should be updated.'
-            ui.component.horizontalAlignment == SwingConstants.CENTER
-            ui.component.verticalAlignment == SwingConstants.BOTTOM
+            label.horizontalAlignment == SwingConstants.CENTER
+            label.verticalAlignment == SwingConstants.BOTTOM
     }
 
     def 'A property can define the image relative horizontal and vertical alignment of a label.'()
@@ -239,10 +252,12 @@ class Label_Binding_Spec extends Specification
                     UI.label("")
                     .withHorizontalTextPosition(horizontal)
                     .withVerticalTextPosition(vertical)
+        and : 'We build the root component.'
+            var label = ui.get(JLabel)
 
         then : 'The label should be updated when the property changes.'
-            ui.component.horizontalTextPosition == SwingConstants.LEFT
-            ui.component.verticalTextPosition == SwingConstants.TOP
+            label.horizontalTextPosition == SwingConstants.LEFT
+            label.verticalTextPosition == SwingConstants.TOP
 
         when : 'We change the items of the properties...'
             horizontal.set(UI.HorizontalAlignment.CENTER)
@@ -250,8 +265,8 @@ class Label_Binding_Spec extends Specification
         and : 'Then we wait for the EDT to complete the UI modifications...'
             UI.sync()
         then : 'The label should be updated.'
-            ui.component.horizontalTextPosition == SwingConstants.CENTER
-            ui.component.verticalTextPosition == SwingConstants.BOTTOM
+            label.horizontalTextPosition == SwingConstants.CENTER
+            label.verticalTextPosition == SwingConstants.BOTTOM
     }
 
     def 'You can dynamically model the font size of your labels using an integer based property.'()
@@ -269,16 +284,18 @@ class Label_Binding_Spec extends Specification
             var ui =
                     UI.label("")
                     .withFontSize(fontSize)
+        and : 'We build the root component.'
+            var label = ui.get(JLabel)
 
         then : 'The label should be updated when the property changes.'
-            ui.component.font.size == 12
+            label.font.size == 12
 
         when : 'We change the items of the properties...'
             fontSize.set(24)
         and : 'Then we wait for the EDT to complete the UI modifications...'
             UI.sync()
         then : 'The label should be updated.'
-            ui.component.font.size == 24
+            label.font.size == 24
     }
 
     def 'We can store icons inside properties and then bind them to labels.'()
@@ -306,7 +323,7 @@ class Label_Binding_Spec extends Specification
             the behaviour of your view model.
         """
         given : 'We create an `IconDeclaration`, which is essentially just a resource location value object.'
-            IconDeclaration iconDeclaration = ()->"img/seed.png"
+            IconDeclaration iconDeclaration = IconDeclaration.of("img/seed.png")
         and : 'We create a simple swing-tree property for modelling the icon declaration.'
             Val<IconDeclaration> icon = Var.of(iconDeclaration)
             var originalIcon = icon.orElseThrow()
@@ -315,21 +332,23 @@ class Label_Binding_Spec extends Specification
             var ui =
                     UI.label("")
                     .withIcon(icon)
+        and : 'We build the root component.'
+            var label = ui.get(JLabel)
 
         then : 'The label should be updated when the property changes.'
-            ui.component.icon != null
-            ui.component.icon === originalIcon.find().get()
-            ui.component.icon.iconHeight == 512
-            ui.component.icon.iconWidth == 512
+            label.icon != null
+            label.icon === originalIcon.find().get()
+            label.icon.iconHeight == 512
+            label.icon.iconWidth == 512
 
         when : 'We change the items of the properties...'
-            icon.set((IconDeclaration)()->"img/swing.png")
+            icon.set(IconDeclaration.of("img/swing.png"))
         and : 'Then we wait for the EDT to complete the UI modifications...'
             UI.sync()
         then : 'The label should be a different one.'
-            ui.component.icon != null
-            ui.component.icon !== originalIcon.find().get()
-            ui.component.icon.iconHeight == 512
-            ui.component.icon.iconWidth == 512
+            label.icon != null
+            label.icon !== originalIcon.find().get()
+            label.icon.iconHeight == 512
+            label.icon.iconWidth == 512
     }
 }
