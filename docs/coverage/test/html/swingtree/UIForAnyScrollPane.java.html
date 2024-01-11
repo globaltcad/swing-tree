@@ -72,8 +72,8 @@ import java.util.Objects;
 <span class="fc" id="L72">        NullUtil.nullArgCheck(scrollBarPolicy, &quot;scrollBarPolicy&quot;, Val.class);</span>
 <span class="fc" id="L73">        NullUtil.nullPropertyCheck(scrollBarPolicy, &quot;scrollBarPolicy&quot;, &quot;Null is not a valid scroll bar policy.&quot;);</span>
 <span class="fc" id="L74">        return _withOnShow( scrollBarPolicy, (thisComponent,v) -&gt; {</span>
-<span class="fc" id="L75">                    _setVerticalScrollBarPolicy(thisComponent, v);</span>
-<span class="fc" id="L76">                })</span>
+<span class="nc" id="L75">                    _setVerticalScrollBarPolicy(thisComponent, v);</span>
+<span class="nc" id="L76">                })</span>
 <span class="fc" id="L77">                ._with( thisComponent -&gt; {</span>
 <span class="fc" id="L78">                    _setVerticalScrollBarPolicy(thisComponent, scrollBarPolicy.get());</span>
 <span class="fc" id="L79">                })</span>
@@ -95,9 +95,9 @@ import java.util.Objects;
     }
 
     private void _setHorizontalScrollBarPolicy( P thisComponent, UI.Active scrollBarPolicy ) {
-<span class="pc bpc" id="L98" title="1 of 4 branches missed.">        switch ( scrollBarPolicy ) {</span>
+<span class="pc bpc" id="L98" title="2 of 4 branches missed.">        switch ( scrollBarPolicy ) {</span>
 <span class="fc" id="L99">            case NEVER: thisComponent.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER); break;</span>
-<span class="fc" id="L100">            case ALWAYS: thisComponent.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS); break;</span>
+<span class="nc" id="L100">            case ALWAYS: thisComponent.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS); break;</span>
 <span class="fc" id="L101">            case AS_NEEDED: thisComponent.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED); break;</span>
         }
 <span class="fc" id="L103">    }</span>
@@ -112,8 +112,8 @@ import java.util.Objects;
 <span class="fc" id="L112">        NullUtil.nullArgCheck(scrollBarPolicy, &quot;scrollBarPolicy&quot;, Val.class);</span>
 <span class="fc" id="L113">        NullUtil.nullPropertyCheck(scrollBarPolicy, &quot;scrollBarPolicy&quot;, &quot;Null is not a valid scroll bar policy.&quot;);</span>
 <span class="fc" id="L114">        return _withOnShow( scrollBarPolicy, (thisComponent,v) -&gt; {</span>
-<span class="fc" id="L115">                    _setHorizontalScrollBarPolicy(thisComponent, v);</span>
-<span class="fc" id="L116">                })</span>
+<span class="nc" id="L115">                    _setHorizontalScrollBarPolicy(thisComponent, v);</span>
+<span class="nc" id="L116">                })</span>
 <span class="fc" id="L117">                ._with( thisComponent -&gt; {</span>
 <span class="fc" id="L118">                    _setHorizontalScrollBarPolicy(thisComponent, scrollBarPolicy.get());</span>
 <span class="fc" id="L119">                })</span>

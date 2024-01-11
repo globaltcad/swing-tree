@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StyleUtility.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">StyleUtility.java</span></div><h1>StyleUtility.java</h1><pre class="source lang-java linenums">package swingtree.style;
 
+import swingtree.UI;
 import swingtree.api.Painter;
 
 import java.awt.*;
@@ -16,205 +17,52 @@ import java.util.Objects;
 final class StyleUtility
 {
     static final String DEFAULT_KEY = &quot;default&quot;;
-<span class="fc" id="L19">    static final Layout UNSPECIFIC_LAYOUT_CONSTANT = new Layout.Unspecific();</span>
-<span class="fc" id="L20">    static final Layout NONE_LAYOUT_CONSTANT = new Layout.None();</span>
+<span class="fc" id="L20">    static final Layout UNSPECIFIC_LAYOUT_CONSTANT = new Layout.Unspecific();</span>
+<span class="fc" id="L21">    static final Layout NONE_LAYOUT_CONSTANT = new Layout.None();</span>
 
     private StyleUtility() {} // No instantiation, just a utility class
 
 
     static Shape intersect( Shape clipA, Shape clipB )
     {
-<span class="pc bpc" id="L27" title="1 of 2 branches missed.">        if ( Objects.equals(clipA, clipB) )</span>
-<span class="nc" id="L28">            return clipA;</span>
+<span class="fc bfc" id="L28" title="All 2 branches covered.">        if ( Objects.equals(clipA, clipB) )</span>
+<span class="fc" id="L29">            return clipA;</span>
 
-<span class="fc" id="L30">        Shape finalClip = null;</span>
+<span class="fc" id="L31">        Shape finalClip = null;</span>
 
-<span class="pc bpc" id="L32" title="3 of 4 branches missed.">        if ( clipA == null &amp;&amp; clipB != null )</span>
-<span class="nc" id="L33">            finalClip = clipB;</span>
+<span class="pc bpc" id="L33" title="1 of 4 branches missed.">        if ( clipA == null &amp;&amp; clipB != null )</span>
+<span class="fc" id="L34">            finalClip = clipB;</span>
 
-<span class="pc bpc" id="L35" title="1 of 4 branches missed.">        if ( clipA != null &amp;&amp; clipB == null )</span>
-<span class="fc" id="L36">            finalClip = clipA;</span>
+<span class="fc bfc" id="L36" title="All 4 branches covered.">        if ( clipA != null &amp;&amp; clipB == null )</span>
+<span class="fc" id="L37">            finalClip = clipA;</span>
 
-<span class="pc bpc" id="L38" title="1 of 4 branches missed.">        if ( clipA != null &amp;&amp; clipB != null ) {</span>
-<span class="fc" id="L39">            Area intersected = new Area(clipB);</span>
-<span class="fc" id="L40">            intersected.intersect(new Area(clipA));</span>
-<span class="fc" id="L41">            finalClip = intersected;</span>
+<span class="fc bfc" id="L39" title="All 4 branches covered.">        if ( clipA != null &amp;&amp; clipB != null ) {</span>
+<span class="fc" id="L40">            Area intersected = new Area(clipB);</span>
+<span class="fc" id="L41">            intersected.intersect(new Area(clipA));</span>
+<span class="fc" id="L42">            finalClip = intersected;</span>
         }
-<span class="fc" id="L43">        return finalClip;</span>
+<span class="fc" id="L44">        return finalClip;</span>
     }
 
     static String toString( Color color ) {
-<span class="fc bfc" id="L47" title="All 2 branches covered.">        if ( color == null ) return &quot;?&quot;;</span>
-<span class="fc" id="L48">        return &quot;rgba(&quot; + color.getRed() + &quot;,&quot; + color.getGreen() + &quot;,&quot; + color.getBlue() + &quot;,&quot; + color.getAlpha() + &quot;)&quot;;</span>
+<span class="fc bfc" id="L48" title="All 2 branches covered.">        if ( color == UI.COLOR_UNDEFINED) return &quot;DEFAULT&quot;;</span>
+<span class="fc bfc" id="L49" title="All 2 branches covered.">        if ( color == null ) return &quot;?&quot;;</span>
+<span class="fc" id="L50">        return &quot;rgba(&quot; + color.getRed() + &quot;,&quot; + color.getGreen() + &quot;,&quot; + color.getBlue() + &quot;,&quot; + color.getAlpha() + &quot;)&quot;;</span>
     }
 
     static String toString( Arc arc ) {
-<span class="nc bnc" id="L52" title="All 2 branches missed.">        if ( arc == null ) return &quot;?&quot;;</span>
-<span class="nc" id="L53">        return &quot;Arc(&quot; + arc.width() + &quot;,&quot; + arc.height() + &quot;)&quot;;</span>
+<span class="nc bnc" id="L54" title="All 2 branches missed.">        if ( arc == null ) return &quot;?&quot;;</span>
+<span class="nc" id="L55">        return &quot;Arc(&quot; + arc.width() + &quot;,&quot; + arc.height() + &quot;)&quot;;</span>
     }
 
     static String toString( Painter painter ) {
-<span class="pc bpc" id="L57" title="1 of 2 branches missed.">        if ( painter == null ) return &quot;?&quot;;</span>
-<span class="pc bpc" id="L58" title="1 of 2 branches missed.">        if ( painter == Painter.none() ) return &quot;none&quot;;</span>
-<span class="nc" id="L59">        return &quot;Painter@&quot; + Integer.toHexString(Objects.hashCode(painter));</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">        if ( painter == null ) return &quot;?&quot;;</span>
+<span class="nc bnc" id="L60" title="All 2 branches missed.">        if ( painter == Painter.none() ) return &quot;none&quot;;</span>
+<span class="nc" id="L61">        return &quot;Painter@&quot; + Integer.toHexString(Objects.hashCode(painter));</span>
     }
 
     static String toString( Enum&lt;?&gt; enumBasedId ) {
-<span class="fc" id="L63">        return enumBasedId.getClass().getSimpleName() + &quot;.&quot; + enumBasedId.name();</span>
-    }
-
-    /**
-     *  Tries to parse the supplied string as a color value
-     *  based on various formats.
-     *
-     * @param colorString The string to parse.
-     * @return The parsed color.
-     * @throws IllegalArgumentException If the string could not be parsed.
-     */
-    static Color toColor( String colorString )
-    {
-<span class="fc" id="L76">        Objects.requireNonNull(colorString);</span>
-        // First some cleanup
-<span class="fc" id="L78">        colorString = colorString.trim();</span>
-
-<span class="fc bfc" id="L80" title="All 2 branches covered.">        if ( colorString.startsWith(&quot;#&quot;) )</span>
-<span class="fc" id="L81">            return Color.decode(colorString);</span>
-
-<span class="fc bfc" id="L83" title="All 2 branches covered.">        if ( colorString.startsWith(&quot;0x&quot;) )</span>
-<span class="fc" id="L84">            return Color.decode(colorString);</span>
-
-<span class="fc bfc" id="L86" title="All 2 branches covered.">        if ( colorString.startsWith(&quot;rgb&quot;) ) {</span>
-            // We have an rgb() or rgba() color
-<span class="fc" id="L88">            int start = colorString.indexOf('(');</span>
-<span class="fc" id="L89">            int end = colorString.indexOf(')');</span>
-<span class="pc bpc" id="L90" title="3 of 6 branches missed.">            if ( start &lt; 0 || end &lt; 0 || end &lt; start )</span>
-<span class="nc" id="L91">                throw new IllegalArgumentException(&quot;Invalid rgb() or rgba() color: &quot; + colorString);</span>
-
-<span class="fc" id="L93">            String[] parts = colorString.substring(start + 1, end).split(&quot;,&quot;);</span>
-<span class="pc bpc" id="L94" title="2 of 4 branches missed.">            if ( parts.length &lt; 3 || parts.length &gt; 4 )</span>
-<span class="nc" id="L95">                throw new IllegalArgumentException(&quot;Invalid rgb() or rgba() color: &quot; + colorString);</span>
-
-<span class="fc bfc" id="L97" title="All 2 branches covered.">            for ( int i = 0; i &lt; parts.length; i++ )</span>
-<span class="fc" id="L98">                parts[i] = parts[i].trim();</span>
-
-<span class="fc" id="L100">            int[] values = new int[parts.length];</span>
-
-<span class="fc bfc" id="L102" title="All 2 branches covered.">            for ( int i = 0; i &lt; parts.length; i++ ) {</span>
-<span class="fc" id="L103">                String part = parts[i];</span>
-<span class="fc bfc" id="L104" title="All 2 branches covered.">                if ( part.endsWith(&quot;%&quot;) ) {</span>
-<span class="fc" id="L105">                    part = part.substring(0, part.length() - 1);</span>
-<span class="fc" id="L106">                    values[i] = Integer.parseInt(part);</span>
-<span class="pc bpc" id="L107" title="2 of 4 branches missed.">                    if ( values[i] &lt; 0 || values[i] &gt; 100 )</span>
-<span class="nc" id="L108">                        throw new IllegalArgumentException(&quot;Invalid rgb() or rgba() color: &quot; + colorString);</span>
-<span class="fc" id="L109">                    values[i] = (int) Math.ceil(values[i] * 2.55);</span>
-                }
-<span class="fc bfc" id="L111" title="All 2 branches covered.">                else if ( part.matches(&quot;[0-9]+((\\.[0-9]+[fF]?)|[fF])&quot;) )</span>
-<span class="fc" id="L112">                    values[i] = (int) (Float.parseFloat(part) * 255);</span>
-                else
-<span class="fc" id="L114">                    values[i] = Integer.parseInt(part);</span>
-            }
-<span class="fc" id="L116">            int r = values[0];</span>
-<span class="fc" id="L117">            int g = values[1];</span>
-<span class="fc" id="L118">            int b = values[2];</span>
-<span class="fc bfc" id="L119" title="All 2 branches covered.">            int a = values.length == 4 ? values[3] : 255;</span>
-<span class="fc" id="L120">            return new Color(r, g, b, a);</span>
-        }
-
-<span class="fc bfc" id="L123" title="All 2 branches covered.">        if ( colorString.startsWith(&quot;hsb&quot;) ) {</span>
-            // We have an hsb() or hsba() color
-<span class="fc" id="L125">            int start = colorString.indexOf('(');</span>
-<span class="fc" id="L126">            int end = colorString.indexOf(')');</span>
-<span class="pc bpc" id="L127" title="3 of 6 branches missed.">            if ( start &lt; 0 || end &lt; 0 || end &lt; start )</span>
-<span class="nc" id="L128">                throw new IllegalArgumentException(&quot;Invalid hsb() or hsba() color: &quot; + colorString);</span>
-
-<span class="fc" id="L130">            String[] parts = colorString.substring(start + 1, end).split(&quot;,&quot;);</span>
-<span class="pc bpc" id="L131" title="2 of 4 branches missed.">            if ( parts.length &lt; 3 || parts.length &gt; 4 )</span>
-<span class="nc" id="L132">                throw new IllegalArgumentException(&quot;Invalid hsb() or hsba() color: &quot; + colorString);</span>
-
-<span class="fc bfc" id="L134" title="All 2 branches covered.">            for ( int i = 0; i &lt; parts.length; i++ )</span>
-<span class="fc" id="L135">                parts[i] = parts[i].trim();</span>
-
-<span class="fc" id="L137">            float[] values = new float[parts.length];</span>
-
-<span class="fc bfc" id="L139" title="All 2 branches covered.">            for ( int i = 0; i &lt; parts.length; i++ ) {</span>
-<span class="fc" id="L140">                String part = parts[i];</span>
-<span class="fc bfc" id="L141" title="All 2 branches covered.">                if ( part.endsWith(&quot;%&quot;) ) {</span>
-<span class="fc" id="L142">                    part = part.substring(0, part.length() - 1);</span>
-<span class="fc" id="L143">                    values[i] = Float.parseFloat(part);</span>
-<span class="pc bpc" id="L144" title="2 of 4 branches missed.">                    if ( values[i] &lt; 0 || values[i] &gt; 100 )</span>
-<span class="nc" id="L145">                        throw new IllegalArgumentException(</span>
-                                &quot;Invalid hsb() or hsba() string '&quot; + colorString + &quot;', value '&quot; + part + &quot;' out of range.&quot;
-                        );
-<span class="fc" id="L148">                    values[i] = values[i] / 100.0f;</span>
-<span class="fc bfc" id="L149" title="All 2 branches covered.">                } else if ( part.endsWith(&quot;°&quot;) ) {</span>
-<span class="pc bpc" id="L150" title="1 of 2 branches missed.">                    if ( i &gt; 0 )</span>
-<span class="nc" id="L151">                        throw new IllegalArgumentException(</span>
-                                &quot;Invalid hsb() or hsba() string '&quot; + colorString + &quot;', unexpected degree symbol in '&quot; + part + &quot;' (only allowed for hue)&quot;
-                        );
-
-<span class="fc" id="L155">                    part = part.substring(0, part.length() - 1);</span>
-<span class="fc" id="L156">                    values[i] = Float.parseFloat(part);</span>
-<span class="pc bpc" id="L157" title="2 of 4 branches missed.">                    if ( values[i] &lt; 0 || values[i] &gt; 360 )</span>
-<span class="nc" id="L158">                        throw new IllegalArgumentException(</span>
-                                &quot;Invalid hsb() or hsba() string '&quot; + colorString + &quot;', hue value '&quot; + part + &quot;' out of range.&quot;
-                        );
-<span class="fc" id="L161">                    values[i] = values[i] / 360.0f;</span>
-<span class="fc bfc" id="L162" title="All 2 branches covered.">                } else if ( part.matches(&quot;[0-9]+((\\.[0-9]+[fF]?)|[fF])&quot;) )</span>
-<span class="fc" id="L163">                    values[i] = Float.parseFloat(part);</span>
-                else
-<span class="fc" id="L165">                    values[i] = Integer.parseInt(part);</span>
-            }
-
-<span class="fc" id="L168">            float h = values[0];</span>
-<span class="fc" id="L169">            float s = values[1];</span>
-<span class="fc" id="L170">            float b = values[2];</span>
-<span class="fc bfc" id="L171" title="All 2 branches covered.">            float a = values.length == 4 ? values[3] : 1.0f;</span>
-<span class="fc" id="L172">            Color c = Color.getHSBColor(h, s, b);</span>
-<span class="fc" id="L173">            return new Color(c.getRed(), c.getGreen(), c.getBlue(), (int)(a * 255));</span>
-        }
-
-        {
-<span class="fc" id="L177">            boolean transparent = false;</span>
-
-<span class="pc bpc" id="L179" title="1 of 2 branches missed.">            if ( colorString.trim().startsWith(&quot;transparent &quot;) ) {</span>
-<span class="nc" id="L180">                transparent = true;</span>
-<span class="nc" id="L181">                colorString = colorString.substring(12);</span>
-            }
-
-<span class="fc" id="L184">            Color color = null;</span>
-
-            // Let's try a few common color names
-<span class="fc bfc" id="L187" title="All 2 branches covered.">            if ( colorString.equalsIgnoreCase(&quot;black&quot;)       ) color = Color.BLACK;</span>
-<span class="fc bfc" id="L188" title="All 2 branches covered.">            if ( colorString.equalsIgnoreCase(&quot;blue&quot;)        ) color = Color.BLUE;</span>
-<span class="fc bfc" id="L189" title="All 2 branches covered.">            if ( colorString.equalsIgnoreCase(&quot;cyan&quot;)        ) color = Color.CYAN;</span>
-<span class="pc bpc" id="L190" title="1 of 2 branches missed.">            if ( colorString.equalsIgnoreCase(&quot;darkGray&quot;)    ) color = Color.DARK_GRAY;</span>
-<span class="fc bfc" id="L191" title="All 2 branches covered.">            if ( colorString.equalsIgnoreCase(&quot;gray&quot;)        ) color = Color.GRAY;</span>
-<span class="fc bfc" id="L192" title="All 2 branches covered.">            if ( colorString.equalsIgnoreCase(&quot;green&quot;)       ) color = Color.GREEN;</span>
-<span class="pc bpc" id="L193" title="1 of 2 branches missed.">            if ( colorString.equalsIgnoreCase(&quot;lightGray&quot;)   ) color = Color.LIGHT_GRAY;</span>
-<span class="fc bfc" id="L194" title="All 2 branches covered.">            if ( colorString.equalsIgnoreCase(&quot;magenta&quot;)     ) color = Color.MAGENTA;</span>
-<span class="fc bfc" id="L195" title="All 2 branches covered.">            if ( colorString.equalsIgnoreCase(&quot;orange&quot;)      ) color = Color.ORANGE;</span>
-<span class="pc bpc" id="L196" title="1 of 2 branches missed.">            if ( colorString.equalsIgnoreCase(&quot;pink&quot;)        ) color = Color.PINK;</span>
-<span class="fc bfc" id="L197" title="All 2 branches covered.">            if ( colorString.equalsIgnoreCase(&quot;red&quot;)         ) color = Color.RED;</span>
-<span class="pc bpc" id="L198" title="1 of 2 branches missed.">            if ( colorString.equalsIgnoreCase(&quot;white&quot;)       ) color = Color.WHITE;</span>
-<span class="fc bfc" id="L199" title="All 2 branches covered.">            if ( colorString.equalsIgnoreCase(&quot;yellow&quot;)      ) color = Color.YELLOW;</span>
-<span class="fc bfc" id="L200" title="All 2 branches covered.">            if ( colorString.equalsIgnoreCase(&quot;transparent&quot;) ) color = new Color(0, 0, 0, 0);</span>
-
-<span class="pc bpc" id="L202" title="1 of 2 branches missed.">            if ( color != null ) {</span>
-<span class="pc bpc" id="L203" title="1 of 2 branches missed.">                if ( transparent )</span>
-<span class="nc" id="L204">                    return new Color(color.getRed(), color.getGreen(), color.getBlue(), 0);</span>
-                else
-<span class="fc" id="L206">                    return color;</span>
-            }
-        }
-
-        // Let's try to find it as a system property
-        try {
-<span class="nc" id="L212">            return Color.getColor(colorString);</span>
-<span class="nc" id="L213">        } catch ( IllegalArgumentException e ) {</span>
-            // Ignore
-        }
-
-<span class="nc" id="L217">        throw new IllegalArgumentException(&quot;Could not parse or find color value: &quot; + colorString);</span>
+<span class="fc" id="L65">        return enumBasedId.getClass().getSimpleName() + &quot;.&quot; + enumBasedId.name();</span>
     }
 
 }

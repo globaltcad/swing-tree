@@ -23,13 +23,15 @@
       "blocks":[
         {"kind":"given","text":"We create a basic button which will a simple \"onClick\".","code":["var ui =","    UI.button(\"I am displayed on the button!\")","    .onClick( it -> it.component.setEnabled(false) )"]},
 
-        {"kind":"expect","text":"The component wrapped by the UI builder is in fact a simple button:","code":["ui.component instanceof JButton"]},
+        {"kind":"and","text":"We actually build the component:","code":["var button = ui.get(JButton)"]},
 
-        {"kind":"and","text":"The button is enabled by default!","code":["ui.component.isEnabled()"]},
+        {"kind":"expect","text":"The component wrapped by the UI builder is in fact a simple button:","code":["button instanceof JButton"]},
 
-        {"kind":"when","text":"We simulate a user click...","code":["UI.runNow( ()-> ui.component.doClick() )"]},
+        {"kind":"and","text":"The button is enabled by default!","code":["button.isEnabled()"]},
 
-        {"kind":"then","text":"The button will be disabled because of the click action we specified!","code":["!ui.component.isEnabled()"]}
+        {"kind":"when","text":"We simulate a user click...","code":["UI.runNow( ()-> button.doClick() )"]},
+
+        {"kind":"then","text":"The button will be disabled because of the click action we specified!","code":["!button.isEnabled()"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -44,13 +46,15 @@
       "blocks":[
         {"kind":"given","text":"We create a panel with a label and a button!","code":["var ui =","    UI.panel()","        .add(UI.label(\"Button:\"))","        .add(","            UI.button(\"Click me!\")","            .onClick( it -> it.siblings.each {s -> s.setEnabled(false)} )","        )"]},
 
-        {"kind":"expect","text":"The components wrapped by the UI builder are as expected:","code":["ui.component.getComponent(0) instanceof JLabel","ui.component.getComponent(1) instanceof JButton"]},
+        {"kind":"and","text":"We actually build the component:","code":["var panel = ui.get(JPanel)"]},
 
-        {"kind":"and","text":"They are enabled by default!","code":["ui.component.getComponent(0).isEnabled()","ui.component.getComponent(1).isEnabled()"]},
+        {"kind":"expect","text":"The components wrapped by the UI builder are as expected:","code":["panel.getComponent(0) instanceof JLabel","panel.getComponent(1) instanceof JButton"]},
 
-        {"kind":"when","text":"We simulate a user click...","code":["UI.runNow( () -> ui.component.getComponent(1).doClick() )"]},
+        {"kind":"and","text":"They are enabled by default!","code":["panel.getComponent(0).isEnabled()","panel.getComponent(1).isEnabled()"]},
 
-        {"kind":"then","text":"They are enabled by default!","code":["!ui.component.getComponent(0).isEnabled()","ui.component.getComponent(1).isEnabled()"]}
+        {"kind":"when","text":"We simulate a user click...","code":["UI.runNow( () -> panel.getComponent(1).doClick() )"]},
+
+        {"kind":"then","text":"They are enabled by default!","code":["!panel.getComponent(0).isEnabled()","panel.getComponent(1).isEnabled()"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -65,9 +69,11 @@
       "blocks":[
         {"kind":"given","text":"We create a panel with some random components and a fancy click action","code":["var ui =","    UI.panel()","    .add(UI.textField(\"text field\"))","    .add(UI.label(\"innocent label\"))","    .add(","        UI.button(\"Click me!\")","        .onClick(it ->","            it.siblinghood.each {s -> { if ( s instanceof JLabel ) s.setText(\"I got hacked!\") }}","        )","    )","    .add(UI.spinner())"]},
 
-        {"kind":"when","text":"We simulate a user click...","code":["UI.runNow( () -> ui.component.getComponent(2).doClick() )"]},
+        {"kind":"and","text":"We actually build the component:","code":["var panel = ui.get(JPanel)"]},
 
-        {"kind":"then","text":"The label text changed!","code":["ui.component.getComponent(1).getText() == \"I got hacked!\""]}
+        {"kind":"when","text":"We simulate a user click...","code":["UI.runNow( () -> panel.getComponent(2).doClick() )"]},
+
+        {"kind":"then","text":"The label text changed!","code":["panel.getComponent(1).getText() == \"I got hacked!\""]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

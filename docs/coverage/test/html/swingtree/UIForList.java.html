@@ -43,7 +43,7 @@ public final class UIForList&lt;E, L extends JList&lt;E&gt;&gt; extends UIForAny
     }
     
     @Override
-    protected UIForList&lt;E, L&gt; _with( BuilderState&lt;L&gt; newState ) {
+    protected UIForList&lt;E, L&gt; _newBuilderWithState(BuilderState&lt;L&gt; newState ) {
 <span class="fc" id="L47">        return new UIForList&lt;&gt;(newState);</span>
     }
 
@@ -220,7 +220,7 @@ public final class UIForList&lt;E, L extends JList&lt;E&gt;&gt; extends UIForAny
 <span class="fc" id="L220">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
 <span class="fc" id="L221">        return _with( thisComponent -&gt; {</span>
 <span class="fc" id="L222">                    thisComponent.addListSelectionListener(</span>
-<span class="nc" id="L223">                        e -&gt; _doApp(()-&gt;action.accept(new ComponentDelegate&lt;&gt;( thisComponent, e)))</span>
+<span class="nc" id="L223">                        e -&gt; _runInApp(()-&gt;action.accept(new ComponentDelegate&lt;&gt;( thisComponent, e)))</span>
                     );
 <span class="fc" id="L225">                })</span>
 <span class="fc" id="L226">                ._this();</span>

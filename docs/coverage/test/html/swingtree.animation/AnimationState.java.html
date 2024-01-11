@@ -1,12 +1,54 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AnimationState.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.animation</a> &gt; <span class="el_source">AnimationState.java</span></div><h1>AnimationState.java</h1><pre class="source lang-java linenums">package swingtree.animation;
 
+import org.slf4j.Logger;
+
 import java.awt.event.ActionEvent;
+import java.util.concurrent.TimeUnit;
 
 /**
- * The state of an animation at a given point in time.
+ * The state of an animation at a given point in time describing how far the animation has progressed
+ * using a number between 0 and 1 (see {@link #progress()}).
+ * Use the numbers exposed by the methods of this interface to define how
+ * your animation should progress over time.
  */
 public interface AnimationState
 {
+<span class="fc" id="L16">    Logger log = org.slf4j.LoggerFactory.getLogger(AnimationState.class);</span>
+
+    static AnimationState of( LifeSpan lifeSpan, Stride stride, ActionEvent event, long now ) {
+<span class="fc" id="L19">        long duration = lifeSpan.lifeTime().getDurationIn(TimeUnit.MILLISECONDS);</span>
+<span class="fc" id="L20">        long howLongIsRunning = Math.max(0, now - lifeSpan.getStartTimeIn(TimeUnit.MILLISECONDS));</span>
+<span class="fc" id="L21">        long howLongCurrentLoop = howLongIsRunning % duration;</span>
+<span class="fc" id="L22">        long howManyLoops       = howLongIsRunning / duration;</span>
+        double progress;
+<span class="pc bpc" id="L24" title="2 of 3 branches missed.">        switch ( stride ) {</span>
+            case PROGRESSIVE:
+<span class="fc" id="L26">                progress = howLongCurrentLoop / (double) duration;</span>
+<span class="fc" id="L27">                break;</span>
+            case REGRESSIVE:
+<span class="nc" id="L29">                progress = 1 - howLongCurrentLoop / (double) duration;</span>
+<span class="nc" id="L30">                break;</span>
+            default:
+<span class="nc" id="L32">                progress = howLongCurrentLoop / (double) duration;</span>
+<span class="nc" id="L33">                log.warn(&quot;Unknown stride: {}&quot;, stride);</span>
+        }
+<span class="fc" id="L35">        return new AnimationState() {</span>
+<span class="fc" id="L36">            @Override public double     progress()  { return progress;     }</span>
+<span class="fc" id="L37">            @Override public long       repeats()   { return howManyLoops; }</span>
+<span class="fc" id="L38">            @Override public LifeSpan   lifeSpan()  { return  lifeSpan;    }</span>
+<span class="fc" id="L39">            @Override public ActionEvent event()    { return event;        }</span>
+        };
+    }
+
+    static AnimationState endOf( LifeSpan lifeSpan, Stride stride, ActionEvent event ) {
+<span class="fc" id="L44">        return of(lifeSpan, stride, event, lifeSpan.getEndTimeIn(TimeUnit.MILLISECONDS, 1));</span>
+    }
+
+    static AnimationState startOf( LifeSpan lifeSpan, Stride stride, ActionEvent event ) {
+<span class="nc" id="L48">        return of(lifeSpan, stride, event, lifeSpan.getStartTimeIn(TimeUnit.MILLISECONDS));</span>
+    }
+
+
     /**
      * @return The animation progress in terms of a number between 0 and 1,
      *         where 0.5 means the animation is halfway through, and 1 means the animation completed.
@@ -22,7 +64,7 @@ public interface AnimationState
      * @param end The end value of the animation.
      * @return The animation progress in terms of a number between {@code start} and {@code end}.
      */
-<span class="nc" id="L25">    default double progress( double start, double end ) { return start + (end - start) * progress(); }</span>
+<span class="nc" id="L67">    default double progress( double start, double end ) { return start + (end - start) * progress(); }</span>
 
     /**
      *  The animation progress in the form of a value linearly growing from 1 to 0
@@ -31,7 +73,7 @@ public interface AnimationState
      *
      * @return The animation progress in terms of a number between 0 and 1, where 0.5 means the animation is halfway through.
      */
-<span class="nc" id="L34">    default double regress() { return 1 - progress(); }</span>
+<span class="nc" id="L76">    default double regress() { return 1 - progress(); }</span>
 
     /**
      *  The animation regression in the form of a value linearly growing from {@code start} to {@code end}.
@@ -41,7 +83,7 @@ public interface AnimationState
      * @param start The start value of the animation.
      * @return The animation progress in terms of a number between {@code start} and {@code end}.
      */
-<span class="nc" id="L44">    default double regress( double end, double start ) { return start + (end - start) * regress(); }</span>
+<span class="nc" id="L86">    default double regress( double end, double start ) { return start + (end - start) * regress(); }</span>
 
     /**
      *  A sine wave oscillating between 0 and 1 and back to 0 once per iteration.
@@ -50,7 +92,7 @@ public interface AnimationState
      *
      * @return The animation progress in terms of a number between 0 and 1, where 1 means the animation is halfway through.
      */
-<span class="nc" id="L53">    default double pulse() { return Math.sin(Math.PI * progress()); }</span>
+<span class="nc" id="L95">    default double pulse() { return Math.sin(Math.PI * progress()); }</span>
 
     /**
      *  A sine wave oscillating between {@code start} and {@code peak} and back to {@code start} once per iteration.
@@ -62,7 +104,7 @@ public interface AnimationState
      *  @param peak The peak value of the sine wave.
      *  @return The animation progress in terms of a number between {@code start} and {@code end}, where {@code end} means the animation is halfway through.
      */
-<span class="nc" id="L65">    default double pulse( double start, double peak ) { return start + (peak - start) * pulse(); }</span>
+<span class="nc" id="L107">    default double pulse( double start, double peak ) { return start + (peak - start) * pulse(); }</span>
 
     /**
      *   The animation progress in the form of quickly growing sine wave front going from 0 to 1
@@ -75,7 +117,7 @@ public interface AnimationState
      *
      * @return The animation progress in the form of peaking sine wave growing from 0 to 1.
      */
-<span class="nc" id="L78">    default double jumpIn() { return Math.sin(Math.PI * progress() / 2); }</span>
+<span class="nc" id="L120">    default double jumpIn() { return Math.sin(Math.PI * progress() / 2); }</span>
 
     /**
      *   The animation progress in the form of peaking sine wave growing from {@code start} to {@code end}
@@ -90,7 +132,7 @@ public interface AnimationState
      * @param end The end value of the animation.
      * @return The animation progress in the form of peaking sine wave growing from {@code start} to {@code end}.
      */
-<span class="nc" id="L93">    default double jumpIn( double start, double end ) { return start + (end - start) * jumpIn(); }</span>
+<span class="nc" id="L135">    default double jumpIn( double start, double end ) { return start + (end - start) * jumpIn(); }</span>
 
     /**
      *   The animation progress in the form of peaking sine wave growing from 1 to 0
@@ -102,7 +144,7 @@ public interface AnimationState
      *
      * @return The animation progress in the form of peaking sine wave growing from 1 to 0.
      */
-<span class="nc" id="L105">    default double jumpOut() { return Math.sin(Math.PI * (1 - progress()) / 2); }</span>
+<span class="nc" id="L147">    default double jumpOut() { return Math.sin(Math.PI * (1 - progress()) / 2); }</span>
 
     /**
      *   The animation progress in the form of a initially quickly changing sine wave
@@ -117,7 +159,7 @@ public interface AnimationState
      * @param start The start value of the animation.
      * @return The animation progress in the form of peaking sine wave growing from {@code start} to {@code end}.
      */
-<span class="nc" id="L120">    default double jumpOut( double end, double start ) { return end + (start - end) * jumpOut(); }</span>
+<span class="nc" id="L162">    default double jumpOut( double end, double start ) { return end + (start - end) * jumpOut(); }</span>
 
     /**
      *   The animation progress in the form of peaking sine wave growing from 0 to 1
@@ -133,7 +175,7 @@ public interface AnimationState
      * @return The animation progress in the form of peaking sine wave growing from 0 to 1.
      */
     default double fadeIn() {
-<span class="nc" id="L136">        return 0.5 * (1 + Math.sin( Math.PI * (progress() - 0.5) ));</span>
+<span class="nc" id="L178">        return 0.5 * (1 + Math.sin( Math.PI * (progress() - 0.5) ));</span>
     }
 
     /**
@@ -150,7 +192,7 @@ public interface AnimationState
      * @param end The end value of the animation.
      * @return The animation progress in the form of a wave growing from {@code start} to {@code end}.
      */
-<span class="nc" id="L153">    default double fadeIn( double start, double end ) { return start + (end - start) * fadeIn(); }</span>
+<span class="nc" id="L195">    default double fadeIn( double start, double end ) { return start + (end - start) * fadeIn(); }</span>
 
     /**
      *   The animation progress in the form of peaking sine wave growing from 1 to 0
@@ -164,7 +206,7 @@ public interface AnimationState
      *
      * @return The animation progress in the form of wave growing from 1 to 0.
      */
-<span class="nc" id="L167">    default double fadeOut() { return 1 - fadeIn(); }</span>
+<span class="nc" id="L209">    default double fadeOut() { return 1 - fadeIn(); }</span>
 
     /**
      *   The animation progress in the form of a sine wave going from {@code start} to {@code end}
@@ -180,7 +222,7 @@ public interface AnimationState
      * @param start The start value of the animation,
      * @return The animation progress in the form a sine wave going from {@code start} to {@code end}.
      */
-<span class="nc" id="L183">    default double fadeOut( double end, double start ) { return end + (start - end) * fadeOut(); }</span>
+<span class="nc" id="L225">    default double fadeOut( double end, double start ) { return end + (start - end) * fadeOut(); }</span>
 
     /**
      *  Defines the animation progress in terms of a number oscillating between 0, 1 and 0 once per iteration,
@@ -195,7 +237,7 @@ public interface AnimationState
      */
     default double cycle() {
         // progress() is guaranteed to be between 0 and 1, where 1 means the animation completed.
-<span class="fc" id="L198">        return 1 - Math.abs(2 * progress() - 1);</span>
+<span class="fc" id="L240">        return 1 - Math.abs(2 * progress() - 1);</span>
         // The result is guaranteed to be between 0 and 1, where 1 means the animation is
         // halfway through and 0 means the animation started or finished.
     }
@@ -219,9 +261,9 @@ public interface AnimationState
      *          where 1 means the animation is halfway through and 0 means the animation started or finished.
      */
     default double cyclePlus( double offset ) {
-<span class="fc" id="L222">        double progress = (progress() + offset) % 1;</span>
-<span class="pc bpc" id="L223" title="1 of 2 branches missed.">        if ( progress &lt; 0 ) progress += 1;</span>
-<span class="fc" id="L224">        return 1 - Math.abs(2 * progress - 1);</span>
+<span class="fc" id="L264">        double progress = (progress() + offset) % 1;</span>
+<span class="pc bpc" id="L265" title="1 of 2 branches missed.">        if ( progress &lt; 0 ) progress += 1;</span>
+<span class="fc" id="L266">        return 1 - Math.abs(2 * progress - 1);</span>
     }
 
     /**
@@ -246,9 +288,9 @@ public interface AnimationState
      *          where 1 means the animation is halfway through and 0 means the animation started or finished.
      */
     default double cycleMinus( double offset ) {
-<span class="fc" id="L249">        double progress = ( progress() - offset ) % 1;</span>
-<span class="fc bfc" id="L250" title="All 2 branches covered.">        if ( progress &lt; 0 ) progress += 1;</span>
-<span class="fc" id="L251">        return 1 - Math.abs(2 * progress - 1);</span>
+<span class="fc" id="L291">        double progress = ( progress() - offset ) % 1;</span>
+<span class="fc bfc" id="L292" title="All 2 branches covered.">        if ( progress &lt; 0 ) progress += 1;</span>
+<span class="fc" id="L293">        return 1 - Math.abs(2 * progress - 1);</span>
     }
 
     /**
@@ -259,9 +301,9 @@ public interface AnimationState
      */
     long repeats();
     /**
-     * @return The schedule of the animation, i.e. the time when the animation started and how long it should run.
+     * @return The {@link LifeSpan} of the animation, i.e. the time when the animation started and how long it should run.
      */
-    LifeTime lifetime();
+    LifeSpan lifeSpan();
     /**
      * @return The timer event that triggered the animation.
      */

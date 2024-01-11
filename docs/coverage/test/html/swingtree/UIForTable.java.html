@@ -36,7 +36,7 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
     }
     
     @Override
-    protected UIForTable&lt;T&gt; _with( BuilderState&lt;T&gt; newState ) {
+    protected UIForTable&lt;T&gt; _newBuilderWithState(BuilderState&lt;T&gt; newState ) {
 <span class="fc" id="L40">        return new UIForTable&lt;&gt;(newState);</span>
     }
 
@@ -293,18 +293,18 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
 <span class="fc" id="L293">        NullUtil.nullArgCheck(event, &quot;event&quot;, Event.class);</span>
 <span class="fc" id="L294">        return _with( thisComponent -&gt; {</span>
 <span class="fc" id="L295">                    event.subscribe(()-&gt;</span>
-<span class="fc" id="L296">                        _doUI(()-&gt;{</span>
-<span class="fc" id="L297">                            TableModel model = thisComponent.getModel();</span>
-<span class="pc bpc" id="L298" title="1 of 2 branches missed.">                            if ( model instanceof AbstractTableModel ) {</span>
+<span class="nc" id="L296">                        _runInUI(()-&gt;{</span>
+<span class="nc" id="L297">                            TableModel model = thisComponent.getModel();</span>
+<span class="nc bnc" id="L298" title="All 2 branches missed.">                            if ( model instanceof AbstractTableModel ) {</span>
                                 // We want the table model update to be as thorough as possible, so we
                                 // will fire a table structure changed event, followed by a table data
                                 // changed event.
-<span class="fc" id="L302">                                ((AbstractTableModel)model).fireTableStructureChanged();</span>
-<span class="fc" id="L303">                                ((AbstractTableModel)model).fireTableDataChanged();</span>
+<span class="nc" id="L302">                                ((AbstractTableModel)model).fireTableStructureChanged();</span>
+<span class="nc" id="L303">                                ((AbstractTableModel)model).fireTableDataChanged();</span>
                             }
                             else
 <span class="nc" id="L306">                                throw new IllegalStateException(&quot;The table model is not an AbstractTableModel instance.&quot;);</span>
-<span class="fc" id="L307">                        })</span>
+<span class="nc" id="L307">                        })</span>
                     );
 <span class="fc" id="L309">                })</span>
 <span class="fc" id="L310">                ._this();</span>

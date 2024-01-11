@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Location.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.layout</a> &gt; <span class="el_source">Location.java</span></div><h1>Location.java</h1><pre class="source lang-java linenums">package swingtree.layout;
+
+import java.awt.Point;
+
+/**
+ *  An immutable value class that represents a location in a two-dimensional
+ *  coordinate system specified in integer precision and specifically designed
+ *  for Swing components.
+ *  It can be used as an alternative to the AWT {@link Point} class,
+ *  but in situations where immutability is desired.
+ *  &lt;p&gt;
+ *  Use the {@link #of(float, float)} factory method to create a new instance
+ *  or {@link #withX(int)} and {@link #withY(int)} to create a new instance
+ *  with a modified value.
+ */
+public final class Location
+{
+<span class="fc" id="L18">    private final static Location ORIGIN = new Location( 0, 0 );</span>
+
+    /**
+     * @return A new location with the specified x- and y-coordinates.
+     *         If both coordinates are zero, the {@link #origin()} is returned.
+     */
+    public static Location of( float x, float y ) {
+<span class="fc bfc" id="L25" title="All 4 branches covered.">        if ( x == 0 &amp;&amp; y == 0 )</span>
+<span class="fc" id="L26">            return ORIGIN;</span>
+
+<span class="fc" id="L28">        return new Location(x, y);</span>
+    }
+
+    /**
+     * @return A new location with the x- and y-coordinates of the specified point.
+     *         If both coordinates are zero, the {@link #origin()} is returned.
+     */
+    public static Location of( Point p ) {
+<span class="nc" id="L36">        return of( p.x, p.y );</span>
+    }
+
+    public static Location origin() {
+<span class="fc" id="L40">        return ORIGIN;</span>
+    }
+
+    final float _x;
+    final float _y;
+
+
+<span class="fc" id="L47">    private Location( float x, float y ) {</span>
+<span class="fc" id="L48">        _x = x;</span>
+<span class="fc" id="L49">        _y = y;</span>
+<span class="fc" id="L50">    }</span>
+
+    /**
+     * @return The x-coordinate of this location.
+     */
+    public float x() {
+<span class="fc" id="L56">        return _x;</span>
+    }
+
+    /**
+     * @return The y-coordinate of this location.
+     */
+    public float y() {
+<span class="fc" id="L63">        return _y;</span>
+    }
+
+    /**
+     * @return A new location with the same x-coordinate as this location
+     *         and the specified y-coordinate.
+     */
+    public Location withY( int y ) {
+<span class="nc" id="L71">        return of( _x, y );</span>
+    }
+
+    /**
+     * @return A new location with the same y-coordinate as this location
+     *         and the specified x-coordinate.
+     */
+    public Location withX( int x ) {
+<span class="nc" id="L79">        return of( x, _y );</span>
+    }
+
+    /**
+     * @return A new AWT {@link Point} with the same x- and y-coordinates as this location.
+     */
+    public Point toPoint() {
+<span class="nc" id="L86">        return new Point( (int) _x, (int) _y);</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L91">        return this.getClass().getSimpleName()+&quot;[&quot; +</span>
+                    &quot;x=&quot; + _x + &quot;, &quot;+
+                    &quot;y=&quot; + _y +
+                &quot;]&quot;;
+    }
+
+    @Override
+    public boolean equals( Object o ) {
+<span class="pc bpc" id="L99" title="1 of 2 branches missed.">        if ( o == this ) return true;</span>
+<span class="pc bpc" id="L100" title="1 of 2 branches missed.">        if ( o == null ) return false;</span>
+<span class="pc bpc" id="L101" title="1 of 2 branches missed.">        if ( o.getClass() != this.getClass() ) return false;</span>
+<span class="fc" id="L102">        Location other = (Location) o;</span>
+<span class="fc bfc" id="L103" title="All 4 branches covered.">        return _x == other._x &amp;&amp; _y == other._y;</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="fc" id="L108">        return Float.hashCode(_x) ^ Float.hashCode(_y);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

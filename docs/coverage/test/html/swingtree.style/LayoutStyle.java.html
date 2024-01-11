@@ -8,11 +8,11 @@ import java.util.Optional;
  *  The layout manager of a component will use this information
  *  to determine the actual layout of the component in the layout.
  **/
-public final class LayoutStyle
+final class LayoutStyle
 {
 <span class="fc" id="L13">    private static final LayoutStyle _NONE = new LayoutStyle(Layout.unspecific(), null, null, null);</span>
 
-<span class="fc" id="L15">    public static LayoutStyle none() { return _NONE; }</span>
+<span class="fc" id="L15">    static LayoutStyle none() { return _NONE; }</span>
 
 
     private final Layout _layout;
@@ -67,11 +67,13 @@ public final class LayoutStyle
 
     @Override
     public String toString() {
-<span class="fc" id="L70">        return this.getClass().getSimpleName() + &quot;[&quot; +</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">        if ( this == _NONE )</span>
+<span class="fc" id="L71">            return this.getClass().getSimpleName() + &quot;[NONE]&quot;;</span>
+<span class="fc" id="L72">        return this.getClass().getSimpleName() + &quot;[&quot; +</span>
                     &quot;layout=&quot;     + _layout                                   + &quot;, &quot; +
-<span class="pc bpc" id="L72" title="1 of 2 branches missed.">                    &quot;constraint=&quot; + (_constraint == null ? &quot;?&quot; : _constraint) + &quot;, &quot; +</span>
-<span class="pc bpc" id="L73" title="1 of 2 branches missed.">                    &quot;alignmentX=&quot; + (_alignmentX == null ? &quot;?&quot; : _alignmentX) + &quot;, &quot; +</span>
-<span class="pc bpc" id="L74" title="1 of 2 branches missed.">                    &quot;alignmentY=&quot; + (_alignmentY == null ? &quot;?&quot; : _alignmentY) +</span>
+<span class="pc bpc" id="L74" title="1 of 2 branches missed.">                    &quot;constraint=&quot; + (_constraint == null ? &quot;?&quot; : _constraint) + &quot;, &quot; +</span>
+<span class="pc bpc" id="L75" title="1 of 2 branches missed.">                    &quot;alignmentX=&quot; + (_alignmentX == null ? &quot;?&quot; : _alignmentX) + &quot;, &quot; +</span>
+<span class="pc bpc" id="L76" title="1 of 2 branches missed.">                    &quot;alignmentY=&quot; + (_alignmentY == null ? &quot;?&quot; : _alignmentY) +</span>
                &quot;]&quot;;
     }
 

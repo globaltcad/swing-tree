@@ -14,10 +14,10 @@ public final class SplitButtonDelegate&lt;I extends JMenuItem&gt; extends Abstra
         private final SplitItemDelegate&lt;I&gt; _itemsDelegate;
 
         SplitButtonDelegate(
-                JSplitButton button,
-                SplitItemDelegate&lt;I&gt; itemsDelegate
+            JSplitButton button,
+            SplitItemDelegate&lt;I&gt; itemsDelegate
         ) {
-<span class="fc" id="L20">            super(button, button);</span>
+<span class="fc" id="L20">            super(false, button, button);</span>
 <span class="fc" id="L21">            _itemsDelegate  = Objects.requireNonNull(itemsDelegate);</span>
 <span class="fc" id="L22">        }</span>
 

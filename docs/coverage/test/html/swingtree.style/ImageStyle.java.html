@@ -2,6 +2,7 @@
 
 import swingtree.UI;
 import swingtree.api.IconDeclaration;
+import swingtree.layout.Size;
 
 import javax.swing.ImageIcon;
 import java.awt.*;
@@ -97,15 +98,32 @@ import java.util.Optional;
  *          The clip area determines onto which part of the component the image will be drawn.
  *          The following clip areas are available:
  *          &lt;ul&gt;
- *              &lt;li&gt; {@link swingtree.UI.ComponentArea#ALL} &lt;/li&gt;
- *              &lt;li&gt; {@link swingtree.UI.ComponentArea#EXTERIOR} &lt;/li&gt;
- *              &lt;li&gt; {@link swingtree.UI.ComponentArea#INTERIOR} &lt;/li&gt;
- *              &lt;li&gt; {@link swingtree.UI.ComponentArea#BORDER} &lt;/li&gt;
+ *              &lt;li&gt;{@link swingtree.UI.ComponentArea#ALL} -
+ *              The entire component, which is the union of all other clip
+ *              areas ({@code INTERIOR + EXTERIOR + BORDER + CONTENT}).
+ *              &lt;/li&gt;
+ *              &lt;li&gt;{@link swingtree.UI.ComponentArea#INTERIOR} -
+ *              The inner component area, which is defined as {@code ALL - EXTERIOR - BORDER}.
+ *              &lt;/li&gt;
+ *              &lt;li&gt;{@link swingtree.UI.ComponentArea#EXTERIOR} -
+ *              The outer component area, which can be expressed as {@code ALL - INTERIOR - BORDER},
+ *              or {@code ALL - CONTENT}.
+ *              &lt;/li&gt;
+ *              &lt;li&gt;{@link swingtree.UI.ComponentArea#BORDER} -
+ *              The border of the component, which is the area between the inner and outer component area
+ *              and which can be expressed as {@code ALL - INTERIOR - EXTERIOR}.
+ *              &lt;/li&gt;
+ *              &lt;li&gt;{@link swingtree.UI.ComponentArea#BODY} -
+ *              The body of the component is the inner component area including the border area.
+ *              It can be expressed as {@code ALL - EXTERIOR}, or {@code INTERIOR + BORDER}.
+ *              &lt;/li&gt;
  *          &lt;/ul&gt;
- *          &lt;b&gt;Note that the inner/interior component area is the area enclosed by the border,
- *          whereas the exterior component area is the area surrounding the border.&lt;/b&gt;
+ *          &lt;b&gt;Note that the inner/interior component area is the area enclosed by (and excluding) the border,
+ *          whereas the exterior component area is the area surrounding the border.
+ *          The component body area is the interior/inner component area plus the border.&lt;/b&gt;
+ *          &lt;/b&gt;
  *          &lt;p&gt;
- *          The default clip area is {@link swingtree.UI.ComponentArea#INTERIOR}
+ *          The default clip area is {@link swingtree.UI.ComponentArea#BODY}
  *          as this is the area which is most commonly used.
  *      &lt;/li&gt;
  *  &lt;/ol&gt;
@@ -135,26 +153,25 @@ import java.util.Optional;
  *      are transparent.
  *  &lt;/p&gt;
  **/
-public final class ImageStyle
+public final class ImageStyle implements Simplifiable&lt;ImageStyle&gt;
 {
-<span class="fc" id="L140">    private static final ImageStyle _NONE = new ImageStyle(</span>
-                                                UI.Layer.BACKGROUND,
+<span class="fc" id="L158">    static final UI.Layer DEFAULT_LAYER = UI.Layer.BACKGROUND;</span>
+<span class="fc" id="L159">    private static final ImageStyle _NONE = new ImageStyle(</span>
                                                 null,
                                                 null,
                                                 UI.Placement.UNDEFINED,
                                                 false,
                                                 UI.FitComponent.NO,
-<span class="fc" id="L147">                                                Size.none(),</span>
+<span class="fc" id="L165">                                                Size.unknown(),</span>
                                                 1.0f,
-<span class="fc" id="L149">                                                Outline.none(),</span>
-<span class="fc" id="L150">                                                Offset.none(),</span>
-                                                UI.ComponentArea.INTERIOR
+<span class="fc" id="L167">                                                Outline.none(),</span>
+<span class="fc" id="L168">                                                Offset.none(),</span>
+                                                UI.ComponentArea.BODY
                                             );
 
-<span class="fc" id="L154">    static ImageStyle none() { return _NONE; }</span>
+<span class="fc" id="L172">    static ImageStyle none() { return _NONE; }</span>
 
 
-    private final UI.Layer         _layer;
     private final Color            _primer;
 
     private final ImageIcon        _image;
@@ -169,7 +186,6 @@ public final class ImageStyle
 
 
     private ImageStyle(
-        UI.Layer         layer,
         Color            primer,
         ImageIcon        image,
         UI.Placement     placement,
@@ -180,68 +196,49 @@ public final class ImageStyle
         Outline          padding,
         Offset           offset,
         UI.ComponentArea clipArea
-<span class="fc" id="L183">    ) {</span>
-<span class="fc" id="L184">        _layer     = Objects.requireNonNull(layer);</span>
-<span class="fc" id="L185">        _primer    = primer;</span>
-<span class="fc" id="L186">        _image     = image;</span>
-<span class="fc" id="L187">        _placement = Objects.requireNonNull(placement);</span>
-<span class="fc" id="L188">        _repeat    = repeat;</span>
-<span class="fc" id="L189">        _fitMode   = Objects.requireNonNull(fitMode);</span>
-<span class="fc" id="L190">        _size      = Objects.requireNonNull(size);</span>
-<span class="fc" id="L191">        _opacity   = opacity;</span>
-<span class="fc" id="L192">        _padding   = Objects.requireNonNull(padding);</span>
-<span class="fc" id="L193">        _offset    = Objects.requireNonNull(offset);</span>
-<span class="fc" id="L194">        _clipArea  = Objects.requireNonNull(clipArea);</span>
-<span class="pc bpc" id="L195" title="2 of 4 branches missed.">        if ( _opacity &lt; 0.0f || _opacity &gt; 1.0f )</span>
-<span class="nc" id="L196">            throw new IllegalArgumentException(&quot;transparency must be between 0.0f and 1.0f&quot;);</span>
-<span class="fc" id="L197">    }</span>
+<span class="fc" id="L199">    ) {</span>
+<span class="fc" id="L200">        _primer    = primer;</span>
+<span class="fc" id="L201">        _image     = image;</span>
+<span class="fc" id="L202">        _placement = Objects.requireNonNull(placement);</span>
+<span class="fc" id="L203">        _repeat    = repeat;</span>
+<span class="fc" id="L204">        _fitMode   = Objects.requireNonNull(fitMode);</span>
+<span class="fc" id="L205">        _size      = Objects.requireNonNull(size);</span>
+<span class="fc" id="L206">        _opacity   = opacity;</span>
+<span class="fc" id="L207">        _padding   = Objects.requireNonNull(padding);</span>
+<span class="fc" id="L208">        _offset    = Objects.requireNonNull(offset);</span>
+<span class="fc" id="L209">        _clipArea  = Objects.requireNonNull(clipArea);</span>
+<span class="pc bpc" id="L210" title="2 of 4 branches missed.">        if ( _opacity &lt; 0.0f || _opacity &gt; 1.0f )</span>
+<span class="nc" id="L211">            throw new IllegalArgumentException(&quot;transparency must be between 0.0f and 1.0f&quot;);</span>
+<span class="fc" id="L212">    }</span>
 
-<span class="fc" id="L199">    UI.Layer layer() { return _layer; }</span>
+<span class="fc" id="L214">    Optional&lt;Color&gt; primer() { return Optional.ofNullable(_primer); }</span>
 
-<span class="fc" id="L201">    Optional&lt;Color&gt; primer() { return Optional.ofNullable(_primer); }</span>
-
-<span class="fc" id="L203">    Optional&lt;ImageIcon&gt; image() { return Optional.ofNullable(_image); }</span>
+<span class="fc" id="L216">    Optional&lt;ImageIcon&gt; image() { return Optional.ofNullable(_image); }</span>
 
     UI.Placement placement() {
-<span class="fc bfc" id="L206" title="All 4 branches covered.">        if ( _placement == UI.Placement.UNDEFINED &amp;&amp; _image instanceof SvgIcon )</span>
-<span class="fc" id="L207">            return ((SvgIcon) _image).getPreferredPlacement();</span>
+<span class="fc bfc" id="L219" title="All 4 branches covered.">        if ( _placement == UI.Placement.UNDEFINED &amp;&amp; _image instanceof SvgIcon )</span>
+<span class="fc" id="L220">            return ((SvgIcon) _image).getPreferredPlacement();</span>
 
-<span class="fc" id="L209">        return _placement;</span>
+<span class="fc" id="L222">        return _placement;</span>
     }
 
-<span class="fc" id="L212">    boolean repeat() { return _repeat; }</span>
+<span class="fc" id="L225">    boolean repeat() { return _repeat; }</span>
 
-<span class="fc" id="L214">    UI.FitComponent fitMode() { return _fitMode; }</span>
+<span class="fc" id="L227">    UI.FitComponent fitMode() { return _fitMode; }</span>
 
-<span class="fc" id="L216">    Optional&lt;Integer&gt; width() { return _size.width(); }</span>
+<span class="fc" id="L229">    Optional&lt;Integer&gt; width() { return _size.width().map(Number::intValue); }</span>
 
-<span class="fc" id="L218">    Optional&lt;Integer&gt; height() { return _size.height(); }</span>
+<span class="fc" id="L231">    Optional&lt;Integer&gt; height() { return _size.height().map(Number::intValue); }</span>
 
-<span class="fc" id="L220">    float opacity() { return _opacity; }</span>
+<span class="fc" id="L233">    float opacity() { return _opacity; }</span>
 
-<span class="fc" id="L222">    Outline padding() { return _padding; }</span>
+<span class="fc" id="L235">    Outline padding() { return _padding; }</span>
     
-<span class="fc" id="L224">    int horizontalOffset() { return _offset.x(); }</span>
+<span class="fc" id="L237">    int horizontalOffset() { return (int) _offset.x(); }</span>
     
-<span class="fc" id="L226">    int verticalOffset() { return _offset.y(); }</span>
+<span class="fc" id="L239">    int verticalOffset() { return (int) _offset.y(); }</span>
 
-<span class="fc" id="L228">    UI.ComponentArea clipArea() { return _clipArea; }</span>
-
-    /**
-     *  This method allows you to specify the layer onto which the image will be drawn.
-     *  The default layer is the background layer. &lt;br&gt;
-     *  Here a list of available layers:
-     *  &lt;ul&gt;
-     *      &lt;li&gt;{@link swingtree.UI.Layer#BACKGROUND}&lt;/li&gt;
-     *      &lt;li&gt;{@link swingtree.UI.Layer#CONTENT}&lt;/li&gt;
-     *      &lt;li&gt;{@link swingtree.UI.Layer#BORDER}&lt;/li&gt;
-     *      &lt;li&gt;{@link swingtree.UI.Layer#FOREGROUND}&lt;/li&gt;
-     *  &lt;/ul&gt;
-     *
-     * @param layer The layer onto which the image will be drawn.
-     * @return A new {@link ImageStyle} instance with the specified layer.
-     */
-<span class="fc" id="L244">    public ImageStyle layer( UI.Layer layer ) { return new ImageStyle(layer, _primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea); }</span>
+<span class="fc" id="L241">    UI.ComponentArea clipArea() { return _clipArea; }</span>
 
     /**
      *  Here you can specify the &lt;b&gt;primer color of the image style&lt;/b&gt; which will be used
@@ -251,7 +248,14 @@ public final class ImageStyle
      * @param color The primer color of the image style.
      * @return A new {@link ImageStyle} instance with the specified primer color.
      */
-<span class="fc" id="L254">    public ImageStyle primer( Color color ) { return new ImageStyle(_layer, color, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea); }</span>
+    public ImageStyle primer( Color color ) {
+<span class="fc" id="L252">        Objects.requireNonNull(color, &quot;Use UI.COLOR_UNDEFINED instead of null to represent the absence of a color.&quot;);</span>
+<span class="fc bfc" id="L253" title="All 2 branches covered.">        if ( color == UI.COLOR_UNDEFINED)</span>
+<span class="fc" id="L254">            color = null;</span>
+<span class="fc bfc" id="L255" title="All 2 branches covered.">        if ( color == _primer )</span>
+<span class="fc" id="L256">            return this;</span>
+<span class="fc" id="L257">        return new ImageStyle(color, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);</span>
+    }
 
     /**
      *  Here you can specify the &lt;b&gt;image&lt;/b&gt; which will be drawn onto the component.
@@ -260,7 +264,9 @@ public final class ImageStyle
      * @param image The image which will be drawn onto the component.
      * @return A new {@link ImageStyle} instance with the specified image.
      */
-<span class="pc bpc" id="L263" title="1 of 2 branches missed.">    public ImageStyle image( Image image ) { return new ImageStyle(_layer, _primer, image == null ? null : new ImageIcon(image), _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea); }</span>
+    public ImageStyle image( Image image ) {
+<span class="pc bpc" id="L268" title="1 of 2 branches missed.">        return new ImageStyle(_primer, image == null ? null : new ImageIcon(image), _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);</span>
+    }
 
     /**
      *  Here you can specify the &lt;b&gt;image icon&lt;/b&gt; which will be drawn onto the component.
@@ -269,7 +275,9 @@ public final class ImageStyle
      * @param image The image icon which will be drawn onto the component.
      * @return A new {@link ImageStyle} instance with the specified image.
      */
-<span class="fc" id="L272">    public ImageStyle image( ImageIcon image ) { return new ImageStyle(_layer, _primer, image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea); }</span>
+    public ImageStyle image( ImageIcon image ) {
+<span class="fc" id="L279">        return new ImageStyle(_primer, image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);</span>
+    }
 
     /**
      *  Here you can specify the &lt;b&gt;path to the image in the form of an {@link IconDeclaration}&lt;/b&gt;
@@ -282,8 +290,25 @@ public final class ImageStyle
      * @throws NullPointerException If the specified {@code image} is null.
      */
     public ImageStyle image( IconDeclaration image ) {
-<span class="nc" id="L285">        Objects.requireNonNull(image);</span>
-<span class="nc" id="L286">        return image.find().map(this::image).orElse(this); }</span>
+<span class="fc" id="L293">        Objects.requireNonNull(image);</span>
+<span class="fc" id="L294">        return image.find().map(this::image).orElse(this);</span>
+    }
+
+    /**
+     *  Here you can specify the &lt;b&gt;path to the image&lt;/b&gt; for which the icon will be loaded,
+     *  cached and drawn onto the component.
+     *  If the icon could not be found, then the image will not be drawn.
+     *  The path is relative to the classpath or may be an absolute path.
+     *  (see {@link swingtree.UI#findIcon(String)}).
+     *
+     * @param path The path to the (icon) image.
+     * @return A new {@link ImageStyle} instance with the specified image.
+     * @throws NullPointerException If the specified {@code path} is null.
+     */
+    public ImageStyle image( String path ) {
+<span class="fc" id="L309">        Objects.requireNonNull(path);</span>
+<span class="fc" id="L310">        return image(() -&gt; path);</span>
+    }
 
     /**
      *  Here you can specify the &lt;b&gt;placement&lt;/b&gt; of the image onto the component.
@@ -335,7 +360,7 @@ public final class ImageStyle
      * @return A new {@link ImageStyle} instance with the specified placement.
      */
     public ImageStyle placement( UI.Placement placement ) {
-<span class="fc" id="L338">        return new ImageStyle(_layer, _primer, _image, placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);</span>
+<span class="fc" id="L363">        return new ImageStyle(_primer, _image, placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);</span>
     }
 
     /**
@@ -348,7 +373,7 @@ public final class ImageStyle
      * @return A new {@link ImageStyle} instance with the specified {@code repeat} flag value.
      */
     public ImageStyle repeat( boolean repeat ) {
-<span class="fc" id="L351">        return new ImageStyle(_layer, _primer, _image, _placement, repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);</span>
+<span class="fc" id="L376">        return new ImageStyle(_primer, _image, _placement, repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);</span>
     }
 
     /**
@@ -367,8 +392,8 @@ public final class ImageStyle
      * @return A new {@link ImageStyle} instance with the specified {@code autoFit} flag value.
      */
     public ImageStyle autoFit( boolean autoFit ) { 
-<span class="pc bpc" id="L370" title="1 of 2 branches missed.">        UI.FitComponent fit = autoFit ? UI.FitComponent.WIDTH_AND_HEIGHT : UI.FitComponent.NO;</span>
-<span class="fc" id="L371">        return new ImageStyle(_layer, _primer, _image, _placement, _repeat, fit, _size, _opacity, _padding, _offset, _clipArea);</span>
+<span class="pc bpc" id="L395" title="1 of 2 branches missed.">        UI.FitComponent fit = autoFit ? UI.FitComponent.WIDTH_AND_HEIGHT : UI.FitComponent.NO;</span>
+<span class="fc" id="L396">        return new ImageStyle(_primer, _image, _placement, _repeat, fit, _size, _opacity, _padding, _offset, _clipArea);</span>
     }
 
     /**
@@ -376,7 +401,7 @@ public final class ImageStyle
      * @return A new {@link ImageStyle} instance with the specified {@code fit} mode.
      */
     public ImageStyle fitMode( UI.FitComponent fit ) {
-<span class="fc" id="L379">        return new ImageStyle(_layer, _primer, _image, _placement, _repeat, fit, _size, _opacity, _padding, _offset, _clipArea);</span>
+<span class="fc" id="L404">        return new ImageStyle(_primer, _image, _placement, _repeat, fit, _size, _opacity, _padding, _offset, _clipArea);</span>
     }
 
     /**
@@ -386,7 +411,7 @@ public final class ImageStyle
      * @return A new {@link ImageStyle} instance with the specified {@code width}.
      */
     public ImageStyle width( Integer width ) {
-<span class="fc" id="L389">        return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size.width(width), _opacity, _padding, _offset, _clipArea);</span>
+<span class="fc" id="L414">        return new ImageStyle(_primer, _image, _placement, _repeat, _fitMode, _size.withWidth(width), _opacity, _padding, _offset, _clipArea);</span>
     }
 
     /**
@@ -396,7 +421,7 @@ public final class ImageStyle
      * @return A new {@link ImageStyle} instance with the specified {@code heiht}.
      */
     public ImageStyle height( Integer height ) {
-<span class="fc" id="L399">        return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size.height(height), _opacity, _padding, _offset, _clipArea);</span>
+<span class="fc" id="L424">        return new ImageStyle(_primer, _image, _placement, _repeat, _fitMode, _size.withHeight(height), _opacity, _padding, _offset, _clipArea);</span>
     }
 
     /**
@@ -407,7 +432,17 @@ public final class ImageStyle
      * @return A new {@link ImageStyle} instance with the specified {@code width} and {@code height}.
      */
     public ImageStyle size( int width, int height ) {
-<span class="fc" id="L410">        return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, Size.of(width, height), _opacity, _padding, _offset, _clipArea);</span>
+<span class="fc" id="L435">        return size(Size.of(width, height));</span>
+    }
+
+    /**
+     *  Ensures that the image has the specified width and height.
+     *
+     * @param size The size of the image.
+     * @return A new {@link ImageStyle} instance with the specified {@code size}.
+     */
+    public ImageStyle size( Size size ) {
+<span class="fc" id="L445">        return new ImageStyle(_primer, _image, _placement, _repeat, _fitMode, size, _opacity, _padding, _offset, _clipArea);</span>
     }
 
     /**
@@ -419,7 +454,7 @@ public final class ImageStyle
      * @return A new {@link ImageStyle} instance with the specified opacity.
      */
     public ImageStyle opacity( float opacity ) {
-<span class="fc" id="L422">        return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size, opacity, _padding, _offset, _clipArea);</span>
+<span class="fc" id="L457">        return new ImageStyle(_primer, _image, _placement, _repeat, _fitMode, _size, opacity, _padding, _offset, _clipArea);</span>
     }
 
     /**
@@ -430,7 +465,7 @@ public final class ImageStyle
      * @return A new {@link ImageStyle} instance with the specified padding.
      */
     ImageStyle padding( Outline padding ) {
-<span class="fc" id="L433">        return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size, _opacity, padding, _offset, _clipArea);</span>
+<span class="fc" id="L468">        return new ImageStyle(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, padding, _offset, _clipArea);</span>
     }
 
     /**
@@ -444,7 +479,7 @@ public final class ImageStyle
      * @return A new {@link ImageStyle} instance with the specified padding.
      */
     public ImageStyle padding( int top, int right, int bottom, int left ) {
-<span class="nc" id="L447">        return padding(Outline.of(top, right, bottom, left));</span>
+<span class="nc" id="L482">        return padding(Outline.of(top, right, bottom, left));</span>
     }
 
     /**
@@ -456,7 +491,7 @@ public final class ImageStyle
      * @return A new {@link ImageStyle} instance with the specified padding.
      */
     public ImageStyle padding( int topBottom, int leftRight ) {
-<span class="nc" id="L459">        return padding(Outline.of(topBottom, leftRight, topBottom, leftRight));</span>
+<span class="nc" id="L494">        return padding(Outline.of(topBottom, leftRight, topBottom, leftRight));</span>
     }
 
     /**
@@ -467,7 +502,7 @@ public final class ImageStyle
      * @return A new {@link ImageStyle} instance with the specified padding.
      */
     public ImageStyle padding( int padding ) {
-<span class="fc" id="L470">        return padding(Outline.of(padding, padding, padding, padding));</span>
+<span class="fc" id="L505">        return padding(Outline.of(padding, padding, padding, padding));</span>
     }
 
     /**
@@ -479,7 +514,7 @@ public final class ImageStyle
      *  @return A new {@link ImageStyle} instance with the specified offset.
      */
     public ImageStyle offset( int x, int y ) {
-<span class="nc" id="L482">        return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, Offset.of(x, y), _clipArea);</span>
+<span class="nc" id="L517">        return new ImageStyle(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, Offset.of(x, y), _clipArea);</span>
     }
 
     /**
@@ -490,7 +525,7 @@ public final class ImageStyle
      *  @return A new {@link ImageStyle} instance with the specified offset.
      */
     public ImageStyle horizontalOffset( int x ) {
-<span class="nc" id="L493">        return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset.x(x), _clipArea);</span>
+<span class="nc" id="L528">        return new ImageStyle(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset.withX(x), _clipArea);</span>
     }
 
     /**
@@ -501,7 +536,7 @@ public final class ImageStyle
      *  @return A new {@link ImageStyle} instance with the specified offset.
      */
     public ImageStyle verticalOffset( int y ) {
-<span class="nc" id="L504">        return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset.y(y), _clipArea);</span>
+<span class="nc" id="L539">        return new ImageStyle(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset.withY(y), _clipArea);</span>
     }
 
     /**
@@ -510,16 +545,27 @@ public final class ImageStyle
      *  The {@link swingtree.UI.ComponentArea} enum defines the following clip areas:
      *  &lt;ul&gt;
      *      &lt;li&gt;{@link swingtree.UI.ComponentArea#ALL} -
-     *      The image will be drawn onto the entire component.
+     *      The image will be drawn onto the entire component, which
+     *      is the union of all other clip areas ({@code INTERIOR + EXTERIOR + BORDER + CONTENT}).
      *      &lt;/li&gt;
      *      &lt;li&gt;{@link swingtree.UI.ComponentArea#INTERIOR} -
-     *      The image will be drawn onto the inner component area.
+     *      The image will be drawn onto the inner component area,
+     *      which is defined as {@code ALL - EXTERIOR - BORDER}.
      *      &lt;/li&gt;
      *      &lt;li&gt;{@link swingtree.UI.ComponentArea#EXTERIOR} -
-     *      The image will be drawn onto the outer component area.
+     *      The image will be drawn onto the outer component area,
+     *      which can be expressed as {@code ALL - INTERIOR - BORDER},
+     *      or {@code ALL - CONTENT}.
      *      &lt;/li&gt;
      *      &lt;li&gt;{@link swingtree.UI.ComponentArea#BORDER} -
-     *      The image will be drawn onto the border of the component.
+     *      The image will be drawn onto the border of the component,
+     *      which is the area between the inner and outer component area
+     *      and which can be expressed as {@code ALL - INTERIOR - EXTERIOR}.
+     *      &lt;/li&gt;
+     *      &lt;li&gt;{@link swingtree.UI.ComponentArea#BODY} -
+     *      The image will be drawn onto the component body,
+     *      which is the inner component area including the border area.
+     *      It can be expressed as {@code ALL - EXTERIOR}, or {@code INTERIOR + BORDER}.
      *      &lt;/li&gt;
      *  &lt;/ul&gt;
      *  The default clip area is {@link swingtree.UI.ComponentArea#INTERIOR},
@@ -532,51 +578,80 @@ public final class ImageStyle
      *  @return A new {@link ImageStyle} instance with the specified clip area.
      */
     public ImageStyle clipTo( UI.ComponentArea clipArea ) {
-<span class="nc" id="L535">        return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, clipArea);</span>
+<span class="nc" id="L581">        return new ImageStyle(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, clipArea);</span>
     }
 
     ImageStyle _scale( double scaleFactor ) {
-<span class="fc" id="L539">        return new ImageStyle(_layer, _primer, _image, _placement, _repeat, _fitMode, _size.scale(scaleFactor), _opacity, _padding.scale(scaleFactor), _offset.scale(scaleFactor), _clipArea);</span>
+<span class="fc" id="L585">        return new ImageStyle(_primer, _image, _placement, _repeat, _fitMode, _size.scale(scaleFactor), _opacity, _padding.scale(scaleFactor), _offset.scale(scaleFactor), _clipArea);</span>
     }
 
     @Override
-<span class="fc" id="L543">    public int hashCode() { return Objects.hash(_layer, _primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea); }</span>
+    public int hashCode() {
+<span class="fc" id="L590">        return Objects.hash(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);</span>
+    }
 
     @Override
     public boolean equals( Object obj ) {
-<span class="pc bpc" id="L547" title="1 of 2 branches missed.">        if ( obj == null ) return false;</span>
-<span class="fc bfc" id="L548" title="All 2 branches covered.">        if ( obj == this ) return true;</span>
-<span class="pc bpc" id="L549" title="1 of 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
-<span class="fc" id="L550">        ImageStyle rhs = (ImageStyle) obj;</span>
-<span class="fc bfc" id="L551" title="All 2 branches covered.">        return Objects.equals(_layer,     rhs._layer)     &amp;&amp;</span>
-<span class="fc bfc" id="L552" title="All 2 branches covered.">               Objects.equals(_primer,    rhs._primer)    &amp;&amp;</span>
-<span class="fc bfc" id="L553" title="All 2 branches covered.">               Objects.equals(_image,     rhs._image)     &amp;&amp;</span>
-<span class="pc bpc" id="L554" title="1 of 2 branches missed.">               Objects.equals(_placement, rhs._placement) &amp;&amp;</span>
-<span class="pc bpc" id="L555" title="1 of 2 branches missed.">               Objects.equals(_repeat,    rhs._repeat)    &amp;&amp;</span>
-<span class="pc bpc" id="L556" title="1 of 2 branches missed.">               Objects.equals(_fitMode,   rhs._fitMode)   &amp;&amp;</span>
-<span class="pc bpc" id="L557" title="1 of 2 branches missed.">               Objects.equals(_size,      rhs._size)      &amp;&amp;</span>
-<span class="pc bpc" id="L558" title="1 of 2 branches missed.">               Objects.equals(_opacity,   rhs._opacity)   &amp;&amp;</span>
-<span class="pc bpc" id="L559" title="1 of 2 branches missed.">               Objects.equals(_padding,   rhs._padding)   &amp;&amp;</span>
-<span class="fc bfc" id="L560" title="All 2 branches covered.">               Objects.equals(_offset,    rhs._offset)    &amp;&amp;</span>
-<span class="pc bpc" id="L561" title="1 of 2 branches missed.">               Objects.equals(_clipArea,  rhs._clipArea);</span>
+<span class="pc bpc" id="L595" title="1 of 2 branches missed.">        if ( obj == null ) return false;</span>
+<span class="fc bfc" id="L596" title="All 2 branches covered.">        if ( obj == this ) return true;</span>
+<span class="pc bpc" id="L597" title="1 of 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
+<span class="fc" id="L598">        ImageStyle rhs = (ImageStyle) obj;</span>
+<span class="fc bfc" id="L599" title="All 2 branches covered.">        return Objects.equals(_primer,    rhs._primer)    &amp;&amp;</span>
+<span class="fc bfc" id="L600" title="All 2 branches covered.">               Objects.equals(_image,     rhs._image)     &amp;&amp;</span>
+<span class="pc bpc" id="L601" title="1 of 2 branches missed.">               Objects.equals(_placement, rhs._placement) &amp;&amp;</span>
+<span class="pc bpc" id="L602" title="1 of 2 branches missed.">               Objects.equals(_repeat,    rhs._repeat)    &amp;&amp;</span>
+<span class="pc bpc" id="L603" title="1 of 2 branches missed.">               Objects.equals(_fitMode,   rhs._fitMode)   &amp;&amp;</span>
+<span class="pc bpc" id="L604" title="1 of 2 branches missed.">               Objects.equals(_size,      rhs._size)      &amp;&amp;</span>
+<span class="pc bpc" id="L605" title="1 of 2 branches missed.">               Objects.equals(_opacity,   rhs._opacity)   &amp;&amp;</span>
+<span class="pc bpc" id="L606" title="1 of 2 branches missed.">               Objects.equals(_padding,   rhs._padding)   &amp;&amp;</span>
+<span class="pc bpc" id="L607" title="1 of 2 branches missed.">               Objects.equals(_offset,    rhs._offset)    &amp;&amp;</span>
+<span class="pc bpc" id="L608" title="1 of 2 branches missed.">               Objects.equals(_clipArea,  rhs._clipArea);</span>
     }
 
     @Override
     public String toString() {
-<span class="fc" id="L566">        return this.getClass().getSimpleName() + &quot;[&quot; +</span>
-                    &quot;layer=&quot;         + _layer                                                  + &quot;, &quot; +
-<span class="fc" id="L568">                    &quot;primer=&quot;        + StyleUtility.toString(_primer)                          + &quot;, &quot; +</span>
-<span class="pc bpc" id="L569" title="1 of 2 branches missed.">                    &quot;image=&quot;         + ( _image == null ? &quot;?&quot; : _image.toString() )            + &quot;, &quot; +</span>
+<span class="fc bfc" id="L613" title="All 2 branches covered.">        if ( this == _NONE ) return &quot;ImageStyle[NONE]&quot;;</span>
+<span class="fc" id="L614">        return this.getClass().getSimpleName() + &quot;[&quot; +</span>
+<span class="fc" id="L615">                    &quot;primer=&quot;        + StyleUtility.toString(_primer)                          + &quot;, &quot; +</span>
+<span class="pc bpc" id="L616" title="1 of 2 branches missed.">                    &quot;image=&quot;         + ( _image == null ? &quot;?&quot; : _image.toString() )            + &quot;, &quot; +</span>
                     &quot;placement=&quot;     + _placement                                              + &quot;, &quot; +
                     &quot;repeat=&quot;        + _repeat                                                 + &quot;, &quot; +
                     &quot;fitComponent=&quot;  + _fitMode                                                + &quot;, &quot; +
-<span class="fc" id="L573">                    &quot;width=&quot;         + _size.width().map(Objects::toString).orElse(&quot;?&quot;)  + &quot;, &quot; +</span>
-<span class="fc" id="L574">                    &quot;height=&quot;        + _size.height().map(Objects::toString).orElse(&quot;?&quot;) + &quot;, &quot; +</span>
+<span class="fc" id="L620">                    &quot;width=&quot;         + _size.width().map(Objects::toString).orElse(&quot;?&quot;)  + &quot;, &quot; +</span>
+<span class="fc" id="L621">                    &quot;height=&quot;        + _size.height().map(Objects::toString).orElse(&quot;?&quot;) + &quot;, &quot; +</span>
                     &quot;opacity=&quot;       + _opacity                                                + &quot;, &quot; +
                     &quot;padding=&quot;       + _padding                                                + &quot;, &quot; +
                     &quot;offset=&quot;        + _offset                                                 + &quot;, &quot; +
                     &quot;clipArea=&quot;      + _clipArea                                               +
                 &quot;]&quot;;
+    }
+
+    @Override
+    public ImageStyle simplified() {
+<span class="fc bfc" id="L631" title="All 2 branches covered.">        if ( this == _NONE )</span>
+<span class="fc" id="L632">            return _NONE;</span>
+
+<span class="fc bfc" id="L634" title="All 2 branches covered.">        ImageIcon simplifiedImage = _opacity == 0.0f ? null : _image;</span>
+<span class="fc bfc" id="L635" title="All 4 branches covered.">        Color simplifiedPrimer = _primer == null || _primer.getAlpha() == 0 ? null : _primer;</span>
+
+<span class="pc bpc" id="L637" title="1 of 2 branches missed.">        if ( simplifiedPrimer == UI.COLOR_UNDEFINED)</span>
+<span class="nc" id="L638">            simplifiedPrimer = null;</span>
+
+<span class="fc bfc" id="L640" title="All 4 branches covered.">        if ( simplifiedImage == null &amp;&amp; simplifiedPrimer == null )</span>
+<span class="fc" id="L641">            return none();</span>
+
+<span class="fc" id="L643">        return new ImageStyle(</span>
+                    simplifiedPrimer,
+                    simplifiedImage,
+                    _placement,
+                    _repeat,
+                    _fitMode,
+                    _size,
+                    _opacity,
+<span class="fc" id="L651">                    _padding.simplified(),</span>
+                    _offset,
+                    _clipArea
+                );
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

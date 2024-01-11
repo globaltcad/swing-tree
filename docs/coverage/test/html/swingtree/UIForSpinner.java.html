@@ -31,7 +31,7 @@ public final class UIForSpinner&lt;S extends JSpinner&gt; extends UIForAnySwing&
      */
 <span class="fc" id="L32">    UIForSpinner( BuilderState&lt;S&gt; state ) {</span>
 <span class="fc" id="L33">        Objects.requireNonNull(state);</span>
-<span class="fc" id="L34">        _state = state.with(this::_initialize);</span>
+<span class="fc" id="L34">        _state = state.withMutator(this::_initialize);</span>
 <span class="fc" id="L35">    }</span>
 
     private void _initialize( S thisComponent )
@@ -110,7 +110,7 @@ public final class UIForSpinner&lt;S extends JSpinner&gt; extends UIForAnySwing&
     }
     
     @Override
-    protected UIForSpinner&lt;S&gt; _with( BuilderState&lt;S&gt; newState ) {
+    protected UIForSpinner&lt;S&gt; _newBuilderWithState(BuilderState&lt;S&gt; newState ) {
 <span class="fc" id="L114">        return new UIForSpinner&lt;&gt;(newState);</span>
     }
 
@@ -155,7 +155,7 @@ public final class UIForSpinner&lt;S extends JSpinner&gt; extends UIForAnySwing&
 <span class="nc" id="L155">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
 <span class="nc" id="L156">        return _with( thisComponent -&gt;</span>
 <span class="nc" id="L157">                    _onChange(thisComponent,</span>
-<span class="nc" id="L158">                        e -&gt; _doApp(()-&gt;action.accept(new ComponentDelegate&lt;&gt;(thisComponent, e)))</span>
+<span class="nc" id="L158">                        e -&gt; _runInApp(()-&gt;action.accept(new ComponentDelegate&lt;&gt;(thisComponent, e)))</span>
                     )
                 )
 <span class="nc" id="L161">                ._this();</span>
@@ -217,7 +217,7 @@ public final class UIForSpinner&lt;S extends JSpinner&gt; extends UIForAnySwing&
                         // Get access the current component while still in the EDT. (getComponent() is only allowed in the EDT)
 <span class="fc" id="L218">                        final Object current = thisComponent.getValue();</span>
                         // Now let's do the actual work in the application thread:
-<span class="fc" id="L220">                        _doApp(() -&gt; {</span>
+<span class="fc" id="L220">                        _runInApp(() -&gt; {</span>
 <span class="fc" id="L221">                            Object interpreted = current;</span>
 <span class="pc bpc" id="L222" title="2 of 4 branches missed.">                            if (current != null &amp;&amp; Number.class.isAssignableFrom(value.type())) {</span>
 <span class="pc bpc" id="L223" title="1 of 2 branches missed.">                                if (Number.class.isAssignableFrom(current.getClass())) {</span>

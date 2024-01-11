@@ -91,7 +91,7 @@ public class JBox extends JComponent implements Accessible
 
     /** {@inheritDoc} */
     @Override public void paintChildren(Graphics g){
-<span class="fc" id="L94">        ComponentExtension.from(this).paintForegroundStyle( (Graphics2D) g, ()-&gt;super.paintChildren(g) );</span>
+<span class="fc" id="L94">        ComponentExtension.from(this).paintForeground( (Graphics2D) g, ()-&gt;super.paintChildren(g) );</span>
 <span class="fc" id="L95">    }</span>
 
     /**

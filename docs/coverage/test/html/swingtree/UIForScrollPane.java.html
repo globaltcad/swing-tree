@@ -3,7 +3,6 @@
 import swingtree.components.JScrollPanels;
 import swingtree.components.listener.NestedJScrollPanelScrollCorrection;
 
-import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import java.util.Objects;
 
@@ -20,22 +19,22 @@ public final class UIForScrollPane&lt;P extends JScrollPane&gt; extends UIForAny
      *
      * @param state The {@link BuilderState} modelling how the underlying component is build.
      */
-<span class="fc" id="L23">    UIForScrollPane( BuilderState&lt;P&gt; state ) {</span>
-<span class="fc" id="L24">        Objects.requireNonNull(state);</span>
-<span class="fc" id="L25">        _state = state.with( thisComponent -&gt; {</span>
-<span class="pc bpc" id="L26" title="3 of 4 branches missed.">           if ( !(thisComponent instanceof UI.ScrollPane) &amp;&amp; !(thisComponent instanceof JScrollPanels) )</span>
-<span class="nc" id="L27">               thisComponent.addMouseWheelListener(new NestedJScrollPanelScrollCorrection(thisComponent));</span>
-<span class="fc" id="L28">        });</span>
-<span class="fc" id="L29">    }</span>
+<span class="fc" id="L22">    UIForScrollPane( BuilderState&lt;P&gt; state ) {</span>
+<span class="fc" id="L23">        Objects.requireNonNull(state);</span>
+<span class="fc" id="L24">        _state = state.withMutator(thisComponent -&gt; {</span>
+<span class="pc bpc" id="L25" title="3 of 4 branches missed.">           if ( !(thisComponent instanceof UI.ScrollPane) &amp;&amp; !(thisComponent instanceof JScrollPanels) )</span>
+<span class="nc" id="L26">               thisComponent.addMouseWheelListener(new NestedJScrollPanelScrollCorrection(thisComponent));</span>
+<span class="fc" id="L27">        });</span>
+<span class="fc" id="L28">    }</span>
 
     @Override
     protected BuilderState&lt;P&gt; _state() {
-<span class="fc" id="L33">        return _state;</span>
+<span class="fc" id="L32">        return _state;</span>
     }
     
     @Override
-    protected UIForScrollPane&lt;P&gt; _with( BuilderState&lt;P&gt; newState ) {
-<span class="fc" id="L38">        return new UIForScrollPane&lt;&gt;(newState);</span>
+    protected UIForScrollPane&lt;P&gt; _newBuilderWithState(BuilderState&lt;P&gt; newState ) {
+<span class="fc" id="L37">        return new UIForScrollPane&lt;&gt;(newState);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

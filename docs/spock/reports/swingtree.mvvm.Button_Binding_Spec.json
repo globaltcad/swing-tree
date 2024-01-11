@@ -25,13 +25,15 @@
 
         {"kind":"when","text":"We create and bind to a button UI node...","code":["var ui = UI.button(\"\").withText(text)"]},
 
-        {"kind":"then","text":"The button should be updated when the property is changed and shown.","code":["ui.component.text == \"Hello World\""]},
+        {"kind":"and","text":"Build the component:","code":["var button = ui.get(JButton)"]},
+
+        {"kind":"then","text":"The button should be updated when the property is changed and shown.","code":["button.text == \"Hello World\""]},
 
         {"kind":"when","text":"We change the property value...","code":["text.set(\"Goodbye World\")"]},
 
         {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
 
-        {"kind":"then","text":"The button should be updated.","code":["ui.component.text == \"Goodbye World\""]}
+        {"kind":"then","text":"The button should be updated.","code":["button.text == \"Goodbye World\""]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -48,13 +50,15 @@
 
         {"kind":"when","text":"We create and bind to a button UI node...","code":["var ui = UI.button(\"\").isSelectedIf(selected)"]},
 
-        {"kind":"then","text":"The button should be updated when the property is changed and shown.","code":["ui.component.selected == false"]},
+        {"kind":"and","text":"Build the component:","code":["var button = ui.get(JButton)"]},
+
+        {"kind":"then","text":"The button should be updated when the property is changed and shown.","code":["button.selected == false"]},
 
         {"kind":"when","text":"We change the property value...","code":["selected.set(true)"]},
 
         {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
 
-        {"kind":"then","text":"The button should be updated.","code":["ui.component.selected == true"]}
+        {"kind":"then","text":"The button should be updated.","code":["button.selected == true"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -71,13 +75,15 @@
 
         {"kind":"when","text":"We create and bind to a button UI node...","code":["var ui = UI.button(\"\").isEnabledIf(enabled)"]},
 
-        {"kind":"then","text":"The button should be updated when the property is changed and shown.","code":["ui.component.enabled == false"]},
+        {"kind":"and","text":"Build the component:","code":["var button = ui.get(JButton)"]},
+
+        {"kind":"then","text":"The button should be updated when the property is changed and shown.","code":["button.enabled == false"]},
 
         {"kind":"when","text":"We change the property value...","code":["enabled.set(true)"]},
 
         {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
 
-        {"kind":"then","text":"The button should be updated.","code":["ui.component.enabled == true"]}
+        {"kind":"then","text":"The button should be updated.","code":["button.enabled == true"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -96,23 +102,25 @@
 
         {"kind":"and","text":"We create three radio buttons and bind them to the properties.","code":["var ui1 = UI.radioButton(\"1\").withButtonGroup(buttonGroup).isSelectedIf(selected1)","var ui2 = UI.radioButton(\"2\").withButtonGroup(buttonGroup).isSelectedIf(selected2)","var ui3 = UI.radioButton(\"3\").withButtonGroup(buttonGroup).isSelectedIf(selected3)"]},
 
-        {"kind":"when","text":"We select the first radio button...","code":["ui1.component.selected = true"]},
+        {"kind":"and","text":"We create the three buttons:","code":["var button1 = ui1.component","var button2 = ui2.component","var button3 = ui3.component"]},
+
+        {"kind":"when","text":"We select the first radio button...","code":["button1.selected = true"]},
 
         {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
 
-        {"kind":"then","text":"Both the buttons and the properties have the correct state:","code":["ui1.component.selected == true","ui2.component.selected == false","ui3.component.selected == false","selected1.get() == true","selected2.get() == false","selected3.get() == false"]},
+        {"kind":"then","text":"Both the buttons and the properties have the correct state:","code":["button1.selected == true","button2.selected == false","button3.selected == false","selected1.get() == true","selected2.get() == false","selected3.get() == false"]},
 
-        {"kind":"when","text":"We select the second radio button...","code":["ui2.component.selected = true"]},
-
-        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
-
-        {"kind":"then","text":"Both the buttons and the properties have the correct state:","code":["ui1.component.selected == false","ui2.component.selected == true","ui3.component.selected == false","selected1.get() == false","selected2.get() == true","selected3.get() == false"]},
-
-        {"kind":"when","text":"We select the third radio button...","code":["ui3.component.selected = true"]},
+        {"kind":"when","text":"We select the second radio button...","code":["button2.selected = true"]},
 
         {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
 
-        {"kind":"then","text":"Both the buttons and the properties have the correct state:","code":["ui1.component.selected == false","ui2.component.selected == false","ui3.component.selected == true","selected1.get() == false","selected2.get() == false","selected3.get() == true"]}
+        {"kind":"then","text":"Both the buttons and the properties have the correct state:","code":["button1.selected == false","button2.selected == true","button3.selected == false","selected1.get() == false","selected2.get() == true","selected3.get() == false"]},
+
+        {"kind":"when","text":"We select the third radio button...","code":["button3.selected = true"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"Both the buttons and the properties have the correct state:","code":["button1.selected == false","button2.selected == false","button3.selected == true","selected1.get() == false","selected2.get() == false","selected3.get() == true"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -129,13 +137,15 @@
 
         {"kind":"when","text":"We create and bind to a button UI node...","code":["var ui = UI.button(\"\").isSelectedIf(SelectionState.SELECTED, selectionState)"]},
 
-        {"kind":"then","text":"The button should be updated when the property is changed and shown.","code":["ui.component.selected == false"]},
+        {"kind":"and","text":"Build the component:","code":["var button = ui.get(JButton)"]},
+
+        {"kind":"then","text":"The button should be updated when the property is changed and shown.","code":["button.selected == false"]},
 
         {"kind":"when","text":"We change the property value...","code":["selectionState.set(SelectionState.SELECTED)"]},
 
         {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
 
-        {"kind":"then","text":"The button should be updated.","code":["ui.component.selected == true"]}
+        {"kind":"then","text":"The button should be updated.","code":["button.selected == true"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -152,11 +162,13 @@
 
         {"kind":"when","text":"We create and bind to a button UI node...","code":["var ui = UI.button(\"\").isSelectedIfNot(SelectionState.SELECTED, selectionState)"]},
 
-        {"kind":"then","text":"The button should be updated when the property is changed and shown.","code":["ui.component.selected == true"]},
+        {"kind":"and","text":"Build the component:","code":["var button = ui.get(JButton)"]},
+
+        {"kind":"then","text":"The button should be updated when the property is changed and shown.","code":["button.selected == true"]},
 
         {"kind":"when","text":"We change the property value...","code":["selectionState.set(SelectionState.SELECTED)","UI.sync()"]},
 
-        {"kind":"then","text":"The button should be updated.","code":["ui.component.selected == false"]}
+        {"kind":"then","text":"The button should be updated.","code":["button.selected == false"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

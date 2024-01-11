@@ -1,13 +1,13 @@
 {
   "project": "Swing-Tree",
   "version": "0.2.0",
-  "created": "Sun Nov 26 12:56:47 CET 2023",
+  "created": "Fri Jan 12 00:34:30 CET 2024",
   "statistics":{
-    "runs":"44",
-    "passed":"44",
-    "failed":"0",
-    "featureFailures":"0",
-    "successRate":"1.0",
+    "runs":"47",
+    "passed":"46",
+    "failed":"1",
+    "featureFailures":"1",
+    "successRate":"0.9787234042553191",
     "duration":"?"
   },
   "specifications": [{
@@ -62,13 +62,13 @@
       "className":"swingtree.common.Basic_UI_Exception_Spec",
       "title":"How Not To Use",
       "narrative":"This specification shows you how NOT to use the Swing-Tree API.",
-      "featureCount":"2",
+      "featureCount":"4",
       "failures":"0",
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
       "duration":"?",
-      "executedFeatures":[{"id":"Certain Swing-Tree UI builder, do not allow you to use nullable properties.","extraInfo":[]},{"id":"The given factory methods do not accept null arguments.","extraInfo":[]}],
+      "executedFeatures":[{"id":"A builder node may not be reused to ensure that SwingTree code remains declarative.","extraInfo":[]},{"id":"A disposed builder node will indicate that it should not be used in its String representation.","extraInfo":[]},{"id":"Certain Swing-Tree UI builder, do not allow you to use nullable properties.","extraInfo":[]},{"id":"The given factory methods do not accept null arguments.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"swingtree.common.Configuring_UI_Components_Spec",
@@ -398,13 +398,13 @@
       "className":"swingtree.styles.Style_Animations_Spec",
       "title":"Style Animations",
       "narrative":"Styles in SwingTree are based on a functional style engine\n    which reevaluates your styles whenever your component is\n    repainted. \n    This makes them a perfect fit for animations.\n    Continue reading to learn how to animate your styles.",
-      "featureCount":"3",
-      "failures":"0",
+      "featureCount":"4",
+      "failures":"1",
       "errors":"0",
       "skipped":"0" ,
-      "successRate":"1.0",
+      "successRate":"0.75",
       "duration":"?",
-      "executedFeatures":[{"id":"Advanced style animations will override the Look and Feel of a component temporarily","extraInfo":[]},{"id":"An `onMouseClick` event style animation is only temporary.","extraInfo":[]},{"id":"SwingTree will uninstall any custom border after an animation has completed.","extraInfo":[]}],
+      "executedFeatures":[{"id":"Advanced style animations will override the Look and Feel of a component temporarily","extraInfo":[]},{"id":"An `onMouseClick` event style animation dispatched using the `animateStyleFor` method is only temporary.","extraInfo":[]},{"id":"An `onMouseClick` event style animation is only temporary.","extraInfo":[]},{"id":"SwingTree will uninstall any custom border after an animation has completed.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"swingtree.styles.Style_Sheet_Spec",
@@ -420,15 +420,15 @@
       "ignoredFeatures":[]
     },{
       "className":"swingtree.styles.Styles_Spec",
-      "title":"Style Properties",
-      "narrative":"This specification demonstrates how the `Style` type\n    can be used to define how Swing components ought to be\n    rendered.",
-      "featureCount":"3",
+      "title":"The Style Configuration",
+      "narrative":"This specification demonstrates what kind of style configuration is\n    created by various usage patterns of the style API.\n    The style configuration defines how Swing components ought to be\n    configured and rendered.",
+      "featureCount":"8",
       "failures":"0",
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
       "duration":"?",
-      "executedFeatures":[{"id":"Style objects are value based (with respect to equality and hash code).","extraInfo":[]},{"id":"The String representation of a Style will tell you everything about it!","extraInfo":[]},{"id":"Various kinds of String expressions can be parsed as colors by various style properties.","extraInfo":[]}],
+      "executedFeatures":[{"id":"Style objects are value based (with respect to equality and hash code).","extraInfo":[]},{"id":"SwingTree will simplify the style configuration of a component if possible.","extraInfo":[]},{"id":"The String representation of a style config will tell you everything about it!","extraInfo":[]},{"id":"The `UI.COLOR_UNDEFINED` constant can be used as a safe shorthand for null for the background and foreground properties of the style API","extraInfo":[]},{"id":"The `UI.COLOR_UNDEFINED` constant can be used as a safe shorthand for null for various properties in the style API","extraInfo":[]},{"id":"The `UI.FONT_UNDEFINED` constant can be used as a safe shorthand for null for the font property of the style API","extraInfo":[]},{"id":"The border style will be simplified if padding and widths are all 0.","extraInfo":[]},{"id":"Various kinds of String expressions can be parsed as colors by various style properties.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"swingtree.tables.Declarative_Tables_Spec",
@@ -458,13 +458,13 @@
       "className":"swingtree.tabs.Tab_Event_Handling_Spec",
       "title":"Tab Event Handling",
       "narrative":"When building a tabbed pane using SwingTree, you often want to react to\n    events that occur on the tabs of a `JTabbedPane`. \n    For example, you may want trigger some action when a tab is selected.\n\n    In this specification, we will see how to handle events on tabs.",
-      "featureCount":"5",
+      "featureCount":"6",
       "failures":"0",
       "errors":"0",
       "skipped":"0" ,
       "successRate":"1.0",
       "duration":"?",
-      "executedFeatures":[{"id":"Notice when the mouse enters a tab using the \"onTabMouseEnter\" event handler.","extraInfo":[]},{"id":"Notice when the mouse exits a tab using the \"onTabMouseExit\" event handler.","extraInfo":[]},{"id":"The \"onTabMousePress\" event handler is called when the mouse is pressed on a tab.","extraInfo":[]},{"id":"The \"onTabMouseRelease\" event handler can be used to notice when the mouse press is released on a tab.","extraInfo":[]},{"id":"Use the \"onTabMouseClick\" to receive mouse click events on tabs.","extraInfo":[]}],
+      "executedFeatures":[{"id":"Notice when the mouse enters a tab using the \"onTabMouseEnter\" event handler.","extraInfo":[]},{"id":"Notice when the mouse exits a tab using the \"onTabMouseExit\" event handler.","extraInfo":[]},{"id":"The \"TabMouse-Events\" will not receive events if the mouse is outside of the tab bounds!","extraInfo":[]},{"id":"The \"onTabMousePress\" event handler is called when the mouse is pressed on a tab.","extraInfo":[]},{"id":"The \"onTabMouseRelease\" event handler can be used to notice when the mouse press is released on a tab.","extraInfo":[]},{"id":"Use the \"onTabMouseClick\" to receive mouse click events on tabs.","extraInfo":[]}],
       "ignoredFeatures":[]
     },{
       "className":"swingtree.testing.MVVM_Unit_Test_Spec",
@@ -537,6 +537,42 @@
       "successRate":"1.0",
       "duration":"?",
       "executedFeatures":[{"id":"Call `UI.info(String)` to easily summon a message dialog with an information icon.","extraInfo":[]},{"id":"Call `UI.info(String, String)` to easily summon a titled info message dialog.","extraInfo":[]},{"id":"If you want to present a titled error message dialog, use `UI.error(String, String)`.","extraInfo":[]},{"id":"If you want to summon an error message dialog, use `UI.error(String)`.","extraInfo":[]},{"id":"Invoking `UI.warn(String)` summons a warning message dialog.","extraInfo":[]},{"id":"Invoking `UI.warn(String, String)` summons a titled warning message dialog.","extraInfo":[]},{"id":"The convenience method `UI.confirm(String,String) summons a confirm dialog right away!","extraInfo":[]},{"id":"The factory method `UI.message(String)` allows for the configuration and summoning of a message dialog.","extraInfo":[]},{"id":"Use `UI.choice(String, Var)` for accessing the options dialog builder API.","extraInfo":[]},{"id":"Use `confirmation(String)` to build a simple conformation dialog returning a simple answer enum.","extraInfo":[]},{"id":"Use the `UI.ask(String,String,Icon,Var)` factory method to get answers from the user through a dialog.","extraInfo":[]},{"id":"Use the `UI.ask(String,String,Var)` factory method to get answers from the user through a dialog.","extraInfo":[]},{"id":"Use the `UI.ask(String,Var)` factory method to get answers from the user through a dialog.","extraInfo":[]}],
+      "ignoredFeatures":[]
+    },{
+      "className":"swingtree.other.Render_Cache_Spec",
+      "title":"Internal Render Caching",
+      "narrative":"**This specification covers the behaviour of an internal class!\n    Which means that the contents of this may not be relevant to.\n    Keep reading however if you are interested in some of the obscure details\n    of the SwingTree library internals.**\n\n    SwingTree offers advanced styling options as part of **the style API**,\n    which is most commonly used using the `withStyle(Styler)` method\n    on any builder node.\n    The rendering of these styles can get rather compute intensive,\n    especially in cases where repaints are called frequently.\n    This is not really a problem for modern CPUs/GPUs, which can handle the \n    rendering of UI effortlessly, but nonetheless, we do not want to waste\n    precious clock cycles and energy on meaningfully repaints of things that were already\n    painted many many times before.\n    This is especially important for mobile devices, which should not burn through \n    your battery just because of a few shaded buttons...\n\n    ---\n\n    **So how does SwingTree solve this issue?**\n\n    The answer is caching based rendering where the cache keys are the\n    immutable style configurations. And whenever the style configuration\n    object changes a different cache area is being hit.\n\n    The extensive usage of immutable data inside the SwingTree style engine\n    allows us to do caching for a wide wide variety of things besides rendering,\n    like the caching of complex shapes (needed for clipping and painting).\n\n    But I digress... Let's ensure that the caching works as expected:",
+      "featureCount":"1",
+      "failures":"0",
+      "errors":"0",
+      "skipped":"0" ,
+      "successRate":"1.0",
+      "duration":"?",
+      "executedFeatures":[{"id":"The cache can be created and used for painting.","extraInfo":[]}],
+      "ignoredFeatures":[]
+    },{
+      "className":"swingtree.other.SvgIcon_Spec",
+      "title":"SVG Support through SvgIcon",
+      "narrative":"Swing-Tree supports SVG icons through the `SvgIcon` class,\n    which is a subclass of `javax.swing.ImageIcon`.\n    This allows for smooth integration of SVG icons into regular\n    Swing components, like buttons, labels, etc.\n\n    In this specification we will see how to use the `SvgIcon` class.",
+      "featureCount":"6",
+      "failures":"0",
+      "errors":"0",
+      "skipped":"0" ,
+      "successRate":"1.0",
+      "duration":"?",
+      "executedFeatures":[{"id":"A basic `SvgIcon` does not have a size.","extraInfo":[]},{"id":"The `String` representation of the `SvgIcon` shows its properties.","extraInfo":[]},{"id":"The `SvgIcon` is immutable, and its size must be specified through wither methods.","extraInfo":[]},{"id":"The `UI.findIcon(IconDeclaration)` method will not fail when the icon is not found.","extraInfo":[]},{"id":"The `UI.findSvgIcon(IconDeclaration)` method will not fail when the icon is not found.","extraInfo":[]},{"id":"Use `UI.findSvgIcon(IconDeclaration)` to load an SVG icon from a file.","extraInfo":[]}],
+      "ignoredFeatures":[]
+    },{
+      "className":"swingtree.common.Builder_Modes_Spec",
+      "title":"Builder, Factory or Wrapper?",
+      "narrative":"SwingTree offers a fluent API for assembling Swing components\n    into a GUI tree, hence the name SwingTree. \n    It is designed around the idea of using method chaining \n    and statement nesting to facilitate the creation of a GUI tree.\n    This is a common pattern in many libraries, and is often referred to as a\n    Builder pattern, which is ruffly the what SwingTree consists of.\n\n    But you may be surprised to hear that one SwingTree builder\n    is not like the other. There are actually three different\n    builder modes! Although they all look the same and their declarations\n    will lead to the creation of the same GUI tree, they differ in terms\n    of their purpose and how they ought not to be used.\n\n    The three modes are:\n\n    * Declarative Only Factory Builder Mode\n    * Declarative Only Builder Mode\n    * Free Builder Mode\n\n    Sounds confusing! So let's break it down.\n\n    The first two modes are declarative only, which means that the\n    methods designed for chaining first dispose of the current builder and\n    then return a new instance of the builder. This disposed builder\n    is then disabled and can no longer be used to build the GUI tree.\n    This is done to prevent the builder from being used in any other way\n    than for building the GUI tree declaratively.\n\n    The difference between the two declarative modes is that the\n    factory builder mode behaves very similar to the stream API\n    in that all of the operations defined by the chain of method \n    calls are composed into a single function that is executed\n    when the component is being accessed. \n    Every time the component is accessed, a new component is created\n    and then sent through the chain of build operations.\n    Most builders in SwingTree are factory builders, \n    given that they are not created with a component instance\n    passed to their constructor.\n\n    The last mode is the free builder mode, which is the most unrestricted\n    of the three modes. It is spanned when switching to procedural\n    code using the various `apply` methods on the builder.\n    Make sure not to overuse this mode, as writing\n    GUI code procedurally is usually messier than declarative design.\n\n    If this is still confusing, don't worry.\n    The following examples will make it clear \n    where each mode is used and how they differ.\n\n    You actually do not need to know about the different modes\n    to use SwingTree, but it is good to know about them\n    to understand the design of the library.",
+      "featureCount":"2",
+      "failures":"0",
+      "errors":"0",
+      "skipped":"0" ,
+      "successRate":"1.0",
+      "duration":"?",
+      "executedFeatures":[{"id":"A regular builder is a factory builder","extraInfo":[]},{"id":"Builder instances created using an `of(..)` factory method are declarative only wrappers.","extraInfo":[]}],
       "ignoredFeatures":[]
     }
   ],

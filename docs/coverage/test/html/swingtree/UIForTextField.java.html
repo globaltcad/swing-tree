@@ -36,7 +36,7 @@ public final class UIForTextField&lt;F extends JTextField&gt; extends UIForAnyTe
     }
     
     @Override
-    protected UIForTextField&lt;F&gt; _with( BuilderState&lt;F&gt; newState ) {
+    protected UIForTextField&lt;F&gt; _newBuilderWithState(BuilderState&lt;F&gt; newState ) {
 <span class="fc" id="L40">        return new UIForTextField&lt;&gt;(newState);</span>
     }
 
@@ -50,7 +50,7 @@ public final class UIForTextField&lt;F extends JTextField&gt; extends UIForAnyTe
 <span class="fc" id="L50">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
 <span class="fc" id="L51">        return _with( thisComponent -&gt; {</span>
 <span class="fc" id="L52">                   _onEnter(thisComponent,</span>
-<span class="fc" id="L53">                       e -&gt; _doApp( () -&gt; action.accept(new ComponentDelegate&lt;&gt;( thisComponent, e )) )</span>
+<span class="fc" id="L53">                       e -&gt; _runInApp( () -&gt; action.accept(new ComponentDelegate&lt;&gt;( thisComponent, e )) )</span>
                    );
 <span class="fc" id="L55">               })</span>
 <span class="fc" id="L56">               ._this();</span>

@@ -126,20 +126,20 @@ class Style_Animations_Spec extends Specification
             So let's check that.
         """
             label.border == null
-            label.font.size == 12
+            label.font.size < 15
             label.getUI() instanceof MetalLabelUI
 
         when : 'We simulate a user click event programmatically'
             // Note that there is no "onMouseClick()" method on the label.
             // Instead we need to do this:
             label.dispatchEvent(new MouseEvent(label, MouseEvent.MOUSE_CLICKED, System.currentTimeMillis(), 0, 0, 0, 1, false))
-            Thread.sleep(2000)
+            Thread.sleep(1_000)
             UI.sync()
             label.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
 
         then : 'The label will have a border and a background color.'
             label.border != null
-            label.font.size > 12
+            label.font.size > 15
         and : 'SwingTree will haver overridden the default label UI in order to support the shadow.'
             !(label.getUI() instanceof MetalLabelUI)
     }

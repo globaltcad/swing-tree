@@ -18,7 +18,8 @@ class ComponentAnimator
 <span class="fc" id="L18">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(ComponentAnimator.class);</span>
 
     private final WeakReference&lt;Component&gt; _compRef;
-    private final LifeTime      _lifeTime;
+    private final LifeSpan      _lifeSpan;
+    private final Stride        _stride;
     private final RunCondition _condition;
     private final Animation     _animation;
 
@@ -26,47 +27,35 @@ class ComponentAnimator
     ComponentAnimator(
         Component     component, // may be null if the animation is not associated with a specific component
         LifeTime      lifeTime,
-        RunCondition condition,
+        Stride        stride,
+        RunCondition  condition,
         Animation     animation
-<span class="fc" id="L31">    ) {</span>
-<span class="fc bfc" id="L32" title="All 2 branches covered.">        _compRef   = component == null ? null : new WeakReference&lt;&gt;(component);</span>
-<span class="fc" id="L33">        _lifeTime  = Objects.requireNonNull(lifeTime);</span>
-<span class="fc" id="L34">        _condition = Objects.requireNonNull(condition);</span>
-<span class="fc" id="L35">        _animation = Objects.requireNonNull(animation);</span>
-<span class="fc" id="L36">    }</span>
+<span class="fc" id="L33">    ) {</span>
+<span class="fc bfc" id="L34" title="All 2 branches covered.">        _compRef   = component == null ? null : new WeakReference&lt;&gt;(component);</span>
+<span class="fc" id="L35">        _lifeSpan  = LifeSpan.startingNowWith(Objects.requireNonNull(lifeTime));</span>
+<span class="fc" id="L36">        _stride    = Objects.requireNonNull(stride);</span>
+<span class="fc" id="L37">        _condition = Objects.requireNonNull(condition);</span>
+<span class="fc" id="L38">        _animation = Objects.requireNonNull(animation);</span>
+<span class="fc" id="L39">    }</span>
 
     public Optional&lt;JComponent&gt; component() {
-<span class="fc bfc" id="L39" title="All 2 branches covered.">        if ( _compRef == null ) return Optional.empty();</span>
-<span class="fc" id="L40">        Component _component = this._compRef.get();</span>
-<span class="pc bpc" id="L41" title="1 of 2 branches missed.">        return Optional.ofNullable( _component instanceof JComponent ? (JComponent) _component : null );</span>
-    }
-
-    private AnimationState _createState( long now, ActionEvent event ) {
-<span class="fc" id="L45">        long duration = _lifeTime.getDurationIn(TimeUnit.MILLISECONDS);</span>
-<span class="fc" id="L46">        long howLongIsRunning = Math.max(0, now - _lifeTime.getStartTimeIn(TimeUnit.MILLISECONDS));</span>
-<span class="fc" id="L47">        long howLongCurrentLoop = howLongIsRunning % duration;</span>
-<span class="fc" id="L48">        long howManyLoops       = howLongIsRunning / duration;</span>
-<span class="fc" id="L49">        double progress         = howLongCurrentLoop / (double) duration;</span>
-<span class="fc" id="L50">        return new AnimationState() {</span>
-<span class="fc" id="L51">            @Override public double     progress()  { return progress;     }</span>
-<span class="fc" id="L52">            @Override public long        repeats()  { return howManyLoops; }</span>
-<span class="fc" id="L53">            @Override public LifeTime    lifetime() { return _lifeTime;    }</span>
-<span class="nc" id="L54">            @Override public ActionEvent event()    { return event;        }</span>
-        };
+<span class="fc bfc" id="L42" title="All 2 branches covered.">        if ( _compRef == null ) return Optional.empty();</span>
+<span class="fc" id="L43">        Component _component = this._compRef.get();</span>
+<span class="pc bpc" id="L44" title="1 of 2 branches missed.">        return Optional.ofNullable( _component instanceof JComponent ? (JComponent) _component : null );</span>
     }
 
     boolean run( long now, ActionEvent event )
     {
-<span class="pc bpc" id="L60" title="1 of 2 branches missed.">        if ( now &lt; _lifeTime.getStartTimeIn(TimeUnit.MILLISECONDS) )</span>
-<span class="nc" id="L61">            return true;</span>
+<span class="pc bpc" id="L49" title="1 of 2 branches missed.">        if ( now &lt; _lifeSpan.getStartTimeIn(TimeUnit.MILLISECONDS) )</span>
+<span class="nc" id="L50">            return true;</span>
 
-<span class="fc" id="L63">        AnimationState state = _createState(now, event);</span>
-<span class="fc" id="L64">        boolean shouldContinue = false;</span>
+<span class="fc" id="L52">        AnimationState state = AnimationState.of(_lifeSpan, _stride, event, now);</span>
+<span class="fc" id="L53">        boolean shouldContinue = false;</span>
 
         try {
-<span class="fc" id="L67">            shouldContinue = _condition.shouldContinue(state);</span>
-<span class="nc" id="L68">        } catch ( Exception e ) {</span>
-<span class="nc" id="L69">            log.warn(&quot;An exception occurred while checking if an animation should continue!&quot;, e);</span>
+<span class="fc" id="L56">            shouldContinue = _condition.shouldContinue(state);</span>
+<span class="nc" id="L57">        } catch ( Exception e ) {</span>
+<span class="nc" id="L58">            log.warn(&quot;An exception occurred while checking if an animation should continue!&quot;, e);</span>
             /*
                  If exceptions happen in user provided animation stop conditions,
                  then we don't want to mess up the rest of the animation logic, so we catch
@@ -78,18 +67,26 @@ class ComponentAnimator
                  Hi there! If you are reading this, you are probably a developer using the SwingTree
                  library, thank you for using it! Good luck finding out what went wrong! :)
             */
-<span class="fc" id="L81">        }</span>
+<span class="fc" id="L70">        }</span>
 
-<span class="fc bfc" id="L83" title="All 2 branches covered.">        Component component = _compRef == null ? null : _compRef.get();</span>
+<span class="fc bfc" id="L72" title="All 2 branches covered.">        Component component = _compRef == null ? null : _compRef.get();</span>
 
-<span class="pc bpc" id="L85" title="1 of 4 branches missed.">        if ( _compRef != null &amp;&amp; component == null )</span>
-<span class="nc" id="L86">            return false; // There was a component but it has been garbage collected.</span>
+<span class="pc bpc" id="L74" title="1 of 4 branches missed.">        if ( _compRef != null &amp;&amp; component == null )</span>
+<span class="nc" id="L75">            return false; // There was a component, but it has been garbage collected.</span>
 
-<span class="fc bfc" id="L88" title="All 2 branches covered.">        if ( !shouldContinue ) {</span>
+<span class="fc" id="L77">        Runnable requestComponentRepaint = () -&gt; {</span>
+<span class="fc bfc" id="L78" title="All 2 branches covered.">                                                if ( component != null ) {</span>
+<span class="fc" id="L79">                                                    component.revalidate();</span>
+<span class="fc" id="L80">                                                    component.repaint();</span>
+                                                }
+<span class="fc" id="L82">                                            };</span>
+
+<span class="fc bfc" id="L84" title="All 2 branches covered.">        if ( !shouldContinue ) {</span>
             try {
-<span class="fc" id="L90">                _animation.finish(state); // An animation may want to do something when it is finished (e.g. reset the component to its original state).</span>
-<span class="nc" id="L91">            } catch ( Exception e ) {</span>
-<span class="nc" id="L92">                log.warn(&quot;An exception occurred while executing the finish procedure of an animation!&quot;, e);</span>
+<span class="fc" id="L86">                _animation.finish(AnimationState.endOf(state.lifeSpan(), _stride, state.event()));</span>
+                // An animation may want to do something when it is finished (e.g. reset the component to its original state).
+<span class="nc" id="L88">            } catch ( Exception e ) {</span>
+<span class="nc" id="L89">                log.warn(&quot;An exception occurred while executing the finish procedure of an animation!&quot;, e);</span>
                 /*
                      If exceptions happen in the finishing procedure of animations provided by the user,
                      then we don't want to mess up the execution of the rest of the animations,
@@ -101,14 +98,15 @@ class ComponentAnimator
                      Hi there! If you are reading this, you are probably a developer using the SwingTree
                      library, thank you for using it! Good luck finding out what went wrong! :)
                 */
-<span class="fc" id="L104">            }</span>
-<span class="fc" id="L105">            return false;</span>
+<span class="fc" id="L101">            }</span>
+<span class="fc" id="L102">            requestComponentRepaint.run();</span>
+<span class="fc" id="L103">            return false;</span>
         }
 
         try {
-<span class="fc" id="L109">            _animation.run(state);</span>
-<span class="nc" id="L110">        } catch ( Exception e ) {</span>
-<span class="nc" id="L111">            log.warn(&quot;An exception occurred while executing an animation!&quot;, e);</span>
+<span class="fc" id="L107">            _animation.run(state);</span>
+<span class="nc" id="L108">        } catch ( Exception e ) {</span>
+<span class="nc" id="L109">            log.warn(&quot;An exception occurred while executing an animation!&quot;, e);</span>
             /*
                  If exceptions happen in the animations provided by the user,
                  then we don't want to mess up the execution of the rest of the animations,
@@ -120,14 +118,10 @@ class ComponentAnimator
                  Hi there! If you are reading this, you are probably a developer using the SwingTree
                  library, thank you for using it! Good luck finding out what went wrong! :)
             */
-<span class="fc" id="L123">        }</span>
+<span class="fc" id="L121">        }</span>
 
-<span class="fc bfc" id="L125" title="All 2 branches covered.">        if ( component != null ) {</span>
-<span class="fc" id="L126">            component.revalidate();</span>
-<span class="fc" id="L127">            component.repaint();</span>
-        }
-
-<span class="fc" id="L130">        return true;</span>
+<span class="fc" id="L123">        requestComponentRepaint.run();</span>
+<span class="fc" id="L124">        return true;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

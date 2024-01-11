@@ -31,7 +31,7 @@ public final class UIForPopup&lt;P extends JPopupMenu&gt; extends UIForAnySwing&
     }
     
     @Override
-    protected UIForPopup&lt;P&gt; _with( BuilderState&lt;P&gt; newState ) {
+    protected UIForPopup&lt;P&gt; _newBuilderWithState(BuilderState&lt;P&gt; newState ) {
 <span class="nc" id="L35">        return new UIForPopup&lt;&gt;(newState);</span>
     }
 
@@ -77,7 +77,7 @@ public final class UIForPopup&lt;P extends JPopupMenu&gt; extends UIForAnySwing&
 <span class="nc" id="L77">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
 <span class="nc" id="L78">        return _with( thisComponent -&gt; {</span>
 <span class="nc" id="L79">                    _onPopupOpen(thisComponent,</span>
-<span class="nc" id="L80">                        e -&gt; _doApp(()-&gt;action.accept(new ComponentDelegate&lt;&gt;( thisComponent, e )) )</span>
+<span class="nc" id="L80">                        e -&gt; _runInApp(()-&gt;action.accept(new ComponentDelegate&lt;&gt;( thisComponent, e )) )</span>
                     );
 <span class="nc" id="L82">                })</span>
 <span class="nc" id="L83">                ._this();</span>
@@ -105,7 +105,7 @@ public final class UIForPopup&lt;P extends JPopupMenu&gt; extends UIForAnySwing&
 <span class="nc" id="L105">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
 <span class="nc" id="L106">        return _with( thisComponent -&gt; {</span>
 <span class="nc" id="L107">                    _onPopupClose(thisComponent,</span>
-<span class="nc" id="L108">                        e -&gt; _doApp(()-&gt;action.accept(new ComponentDelegate&lt;&gt;( (P) thisComponent, e )) )</span>
+<span class="nc" id="L108">                        e -&gt; _runInApp(()-&gt;action.accept(new ComponentDelegate&lt;&gt;( (P) thisComponent, e )) )</span>
                     );
 <span class="nc" id="L110">                })</span>
 <span class="nc" id="L111">                ._this();</span>
@@ -132,7 +132,7 @@ public final class UIForPopup&lt;P extends JPopupMenu&gt; extends UIForAnySwing&
 <span class="nc" id="L132">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
 <span class="nc" id="L133">        return _with( thisComponent -&gt; {</span>
 <span class="nc" id="L134">                    _onPopupCancel(thisComponent,</span>
-<span class="nc" id="L135">                        e -&gt; _doApp(()-&gt;action.accept(new ComponentDelegate&lt;&gt;( thisComponent, e )) )</span>
+<span class="nc" id="L135">                        e -&gt; _runInApp(()-&gt;action.accept(new ComponentDelegate&lt;&gt;( thisComponent, e )) )</span>
                     );
 <span class="nc" id="L137">                })</span>
 <span class="nc" id="L138">                ._this();</span>

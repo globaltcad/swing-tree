@@ -32,7 +32,7 @@ public final class UIForSlider&lt;S extends JSlider&gt; extends UIForAnySwing&lt
     }
     
     @Override
-    protected UIForSlider&lt;S&gt; _with( BuilderState&lt;S&gt; newState ) {
+    protected UIForSlider&lt;S&gt; _newBuilderWithState(BuilderState&lt;S&gt; newState ) {
 <span class="fc" id="L36">        return new UIForSlider&lt;&gt;(newState);</span>
     }
 
@@ -86,7 +86,7 @@ public final class UIForSlider&lt;S extends JSlider&gt; extends UIForAnySwing&lt
 <span class="fc" id="L86">        NullUtil.nullArgCheck( action, &quot;action&quot;, Action.class );</span>
 <span class="fc" id="L87">        return _with( thisComponent -&gt; {</span>
 <span class="fc" id="L88">                    _onChange(thisComponent,</span>
-<span class="nc" id="L89">                        e -&gt; _doApp(()-&gt;action.accept(new ComponentDelegate&lt;&gt;(thisComponent, e)))</span>
+<span class="nc" id="L89">                        e -&gt; _runInApp(()-&gt;action.accept(new ComponentDelegate&lt;&gt;(thisComponent, e)))</span>
                     );
 <span class="fc" id="L91">                })</span>
 <span class="fc" id="L92">                ._this();</span>
@@ -210,7 +210,7 @@ public final class UIForSlider&lt;S extends JSlider&gt; extends UIForAnySwing&lt
 <span class="nc" id="L210">                })</span>
 <span class="fc" id="L211">                ._with( thisComponent -&gt; {</span>
 <span class="fc" id="L212">                    _onChange(thisComponent,</span>
-<span class="nc" id="L213">                        e -&gt; _doApp(thisComponent.getValue(), newItem -&gt; var.set(From.VIEW, newItem) )</span>
+<span class="nc" id="L213">                        e -&gt; _runInApp(thisComponent.getValue(), newItem -&gt; var.set(From.VIEW, newItem) )</span>
                     );
 <span class="fc" id="L215">                    _setValue(thisComponent, var.orElseThrow());</span>
 <span class="fc" id="L216">                })</span>

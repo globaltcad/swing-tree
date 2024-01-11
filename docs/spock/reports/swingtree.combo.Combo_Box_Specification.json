@@ -23,7 +23,7 @@
       "blocks":[
         {"kind":"given","text":"We pass the combo box to the Swing-Tree factory method.","code":["var ui = UI.of(new JComboBox<>(new DefaultComboBoxModel<>(new String[]{\"A\", \"B\", \"C\"})))"]},
 
-        {"kind":"and","text":"We unpack the combo box.","code":["var combo = ui.component"]},
+        {"kind":"and","text":"We unpack the combo box.","code":["var combo = ui.get(JComboBox)"]},
 
         {"kind":"expect","text":"The underlying component is a combo box.","code":["combo instanceof JComboBox"]},
 
@@ -42,11 +42,13 @@
       "blocks":[
         {"kind":"given","text":"We pass the combo box to the Swing-Tree factory method.","code":["var ui = UI.comboBox(\"A\", \"B\", \"C\")"]},
 
-        {"kind":"expect","text":"The underlying component is a combo box.","code":["ui.component instanceof JComboBox"]},
+        {"kind":"and","text":"We unpack the combo box.","code":["var combo = ui.get(JComboBox)"]},
 
-        {"kind":"and","text":"It has the expected state:","code":["ui.component.itemCount == 3","ui.component.getItemAt(0) == \"A\"","ui.component.getItemAt(1) == \"B\"","ui.component.getItemAt(2) == \"C\""]},
+        {"kind":"expect","text":"The underlying component is a combo box.","code":["combo instanceof JComboBox"]},
 
-        {"kind":"and","text":"It is backed by a built in model.","code":["!(ui.component.model instanceof DefaultComboBoxModel)","ui.component.model.size == 3","ui.component.model.getElementAt(0) == \"A\"","ui.component.model.getElementAt(1) == \"B\"","ui.component.model.getElementAt(2) == \"C\""]}
+        {"kind":"and","text":"It has the expected state:","code":["combo.itemCount == 3","combo.getItemAt(0) == \"A\"","combo.getItemAt(1) == \"B\"","combo.getItemAt(2) == \"C\""]},
+
+        {"kind":"and","text":"It is backed by a built in model.","code":["!(combo.model instanceof DefaultComboBoxModel)","combo.model.size == 3","combo.model.getElementAt(0) == \"A\"","combo.model.getElementAt(1) == \"B\"","combo.model.getElementAt(2) == \"C\""]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -61,9 +63,11 @@
       "blocks":[
         {"kind":"given","text":"We create an array and pass it to the combo box factory method.","code":["var items = new String[]{\"A\" , \"B\" , \"C\"}","var ui = UI.comboBox(items)"]},
 
+        {"kind":"and","text":"We build a combo box component.","code":["var combo = ui.get(JComboBox)"]},
+
         {"kind":"when","text":"We modify the array...","code":["items[0] = \"D\""]},
 
-        {"kind":"then","text":"The combo box is updated as well.","code":["ui.component.itemCount == 3","ui.component.getItemAt(0) == \"D\"","ui.component.getItemAt(1) == \"B\"","ui.component.getItemAt(2) == \"C\""]}
+        {"kind":"then","text":"The combo box is updated as well.","code":["combo.itemCount == 3","combo.getItemAt(0) == \"D\"","combo.getItemAt(1) == \"B\"","combo.getItemAt(2) == \"C\""]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -78,9 +82,11 @@
       "blocks":[
         {"kind":"given","text":"We create an array and pass it to the combo box factory method.","code":["var items = [\"A\" , \"B\" , \"C\"]","var ui = UI.comboBox(items)"]},
 
+        {"kind":"and","text":"We build a combo box component.","code":["var combo = ui.get(JComboBox)"]},
+
         {"kind":"when","text":"We modify the list by adding an element in the middle...","code":["items.add(1, \"D\")"]},
 
-        {"kind":"then","text":"The combo box is updated as well.","code":["ui.component.itemCount == 4","ui.component.getItemAt(0) == \"A\"","ui.component.getItemAt(1) == \"D\"","ui.component.getItemAt(2) == \"B\"","ui.component.getItemAt(3) == \"C\""]}
+        {"kind":"then","text":"The combo box is updated as well.","code":["combo.itemCount == 4","combo.getItemAt(0) == \"A\"","combo.getItemAt(1) == \"D\"","combo.getItemAt(2) == \"B\"","combo.getItemAt(3) == \"C\""]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -95,7 +101,7 @@
       "blocks":[
         {"kind":"given","text":"We create a combo box and make it editable.","code":["var ui = UI.comboBox(\"A\", \"B\", \"C\")","                .isEditableIf(true)","                .withSelectedItem(\"B\")"]},
 
-        {"kind":"and","text":"We get the combo box.","code":["var combo = ui.component"]},
+        {"kind":"and","text":"We get the combo box.","code":["var combo = ui.get(JComboBox)"]},
 
         {"kind":"expect","text":"The combo box is editable.","code":["combo.isEditable()"]},
 
@@ -120,7 +126,7 @@
       "blocks":[
         {"kind":"given","text":"We create a combo box and make it editable.","code":["var ui = UI.comboBox(Collections.unmodifiableList([\"A\", \"B\", \"C\"]))","                .isEditableIf(true)","                .withSelectedItem(\"B\")"]},
 
-        {"kind":"and","text":"We get the combo box.","code":["var combo = ui.component"]},
+        {"kind":"and","text":"We get the combo box.","code":["var combo = ui.get(JComboBox)"]},
 
         {"kind":"expect","text":"The combo box is editable.","code":["combo.isEditable()"]},
 
@@ -147,7 +153,7 @@
 
         {"kind":"and","text":"We create a combo box that is bound to the property and the list.","code":["var ui = UI.comboBox(selection, options)"]},
 
-        {"kind":"and","text":"We get the combo box.","code":["var combo = ui.component"]},
+        {"kind":"and","text":"We get the combo box.","code":["var combo = ui.get(JComboBox)"]},
 
         {"kind":"expect","text":"The combo box is initialized with the current selection.","code":["combo.getSelectedItem() == 42"]},
 
@@ -184,7 +190,7 @@
 
         {"kind":"and","text":"We create a combo box that is bound to the property and the list.","code":["var ui = UI.comboBox(selection, options)"]},
 
-        {"kind":"and","text":"We get the combo box.","code":["var combo = ui.component"]},
+        {"kind":"and","text":"We get the combo box.","code":["var combo = ui.get(JComboBox)"]},
 
         {"kind":"expect","text":"The combo box is initialized with the current selection.","code":["combo.getSelectedItem() == 42"]},
 
@@ -221,7 +227,7 @@
 
         {"kind":"and","text":"We create a combo box that is bound to the property and the list.","code":["var ui = UI.comboBox(selection, options)"]},
 
-        {"kind":"and","text":"We get the combo box.","code":["var combo = ui.component"]},
+        {"kind":"and","text":"We get the combo box.","code":["var combo = ui.get(JComboBox)"]},
 
         {"kind":"expect","text":"The combo box is initialized with the current selection.","code":["combo.getSelectedItem() == 42"]},
 
@@ -252,7 +258,7 @@
 
         {"kind":"and","text":"We create a combo box that is bound to the property and the list.","code":["var ui = UI.comboBox(selection, options)"]},
 
-        {"kind":"and","text":"We get the combo box.","code":["var combo = ui.component"]},
+        {"kind":"and","text":"We get the combo box.","code":["var combo = ui.get(JComboBox)"]},
 
         {"kind":"expect","text":"The combo box is initialized with the current selection.","code":["combo.getSelectedItem() == 42"]},
 
@@ -287,7 +293,7 @@
 
         {"kind":"and","text":"We create a combo box that is bound to the property.","code":["var ui =","            UI.comboBox(selection, 73, 42, 17)","            .isEditableIf(true)"]},
 
-        {"kind":"and","text":"We get the combo box.","code":["var combo = ui.component"]},
+        {"kind":"and","text":"We get the combo box.","code":["var combo = ui.get(JComboBox)"]},
 
         {"kind":"expect","text":"The combo box is initialized with the current selection.","code":["combo.getSelectedItem() == 42"]},
 
@@ -310,7 +316,7 @@
       "blocks":[
         {"kind":"given","text":"We create a combo box that is bound to the property.","code":["var ui =","            UI.comboBox(selection, items)","            .isEditableIf(true)"]},
 
-        {"kind":"and","text":"We get the combo box.","code":["var combo = ui.component"]},
+        {"kind":"and","text":"We get the combo box.","code":["var combo = ui.get(JComboBox)"]},
 
         {"kind":"expect","text":"The combo box is initialized with the current selection.","code":["combo.getSelectedItem() == selection.get()"]},
 
@@ -335,7 +341,7 @@
 
         {"kind":"and","text":"","code":["            var ui =","                comboBox(options)","\t\t\t\t.withSelectedItem(selected)"]},
 
-        {"kind":"and","text":"We get the combo box.","code":["var combo = ui.component"]},
+        {"kind":"and","text":"We get the combo box.","code":["var combo = ui.get(JComboBox)"]},
 
         {"kind":"when","text":"We change the selected property to 1...","code":["\t\t    selected.set(1)","UI.sync()"]},
 
@@ -356,7 +362,7 @@
 
         {"kind":"and","text":"","code":["            var ui =","                comboBox(options).isEditableIf(true)","\t\t\t\t.withSelectedItem(selected)"]},
 
-        {"kind":"and","text":"We get the combo box.","code":["var combo = ui.component"]},
+        {"kind":"and","text":"We get the combo box.","code":["var combo = ui.get(JComboBox)"]},
 
         {"kind":"when","text":"We change the selected property to 1...","code":["\t\t    selected.set(1)","UI.sync()"]},
 

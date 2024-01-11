@@ -28,7 +28,7 @@ public class UIForAnything&lt;T extends Component&gt; extends AbstractBuilder&lt
     }
     
     @Override
-    protected UIForAnything&lt;T&gt; _with( BuilderState&lt;T&gt; newState ) {
+    protected UIForAnything&lt;T&gt; _newBuilderWithState(BuilderState&lt;T&gt; newState ) {
 <span class="nc" id="L32">        return new UIForAnything&lt;&gt;(newState);</span>
     }
 }

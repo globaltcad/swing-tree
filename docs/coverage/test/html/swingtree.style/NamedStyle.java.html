@@ -9,35 +9,56 @@ import java.util.Objects;
  *
  * @param &lt;S&gt; The type of the style.
  */
-class NamedStyle&lt;S&gt;
+final class NamedStyle&lt;S&gt; implements Simplifiable&lt;NamedStyle&lt;S&gt;&gt;
 {
-<span class="fc" id="L14">    static &lt;S&gt; NamedStyle&lt;S&gt; of( String name, S style ) { return new NamedStyle&lt;&gt;( name, style ); }</span>
+    static &lt;S&gt; NamedStyle&lt;S&gt; of( String name, S style ) {
+<span class="fc" id="L15">        return new NamedStyle&lt;&gt;( name, style );</span>
+    }
 
     private final String _name;
-    private final S _style;
+    private final S      _style;
 
 
-<span class="fc" id="L20">    private NamedStyle( String name, S style ) {</span>
-<span class="fc" id="L21">        _name = Objects.requireNonNull(name);</span>
-<span class="fc" id="L22">        _style = Objects.requireNonNull(style);</span>
-<span class="fc" id="L23">    }</span>
+<span class="fc" id="L22">    private NamedStyle( String name, S style ) {</span>
+<span class="fc" id="L23">        _name = Objects.requireNonNull(name);</span>
+<span class="fc" id="L24">        _style = Objects.requireNonNull(style);</span>
+<span class="fc" id="L25">    }</span>
 
-<span class="fc" id="L25">    String name() { return _name; }</span>
+<span class="fc" id="L27">    String name() { return _name; }</span>
 
-<span class="fc" id="L27">    S style() { return _style; }</span>
+<span class="fc" id="L29">    S style() { return _style; }</span>
 
 
     @Override
-<span class="fc" id="L31">    public int hashCode() { return Objects.hash(_name, _style); }</span>
+<span class="fc" id="L33">    public int hashCode() { return Objects.hash(_name, _style); }</span>
 
     @Override
     public boolean equals( Object obj ) {
-<span class="pc bpc" id="L35" title="1 of 2 branches missed.">        if ( obj == null ) return false;</span>
-<span class="pc bpc" id="L36" title="1 of 2 branches missed.">        if ( obj == this ) return true;</span>
-<span class="pc bpc" id="L37" title="1 of 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
-<span class="fc" id="L38">        NamedStyle&lt;?&gt; rhs = (NamedStyle&lt;?&gt;) obj;</span>
-<span class="pc bpc" id="L39" title="1 of 2 branches missed.">        return Objects.equals(_name, rhs._name) &amp;&amp;</span>
-<span class="fc bfc" id="L40" title="All 2 branches covered.">               Objects.equals(_style, rhs._style);</span>
+<span class="pc bpc" id="L37" title="1 of 2 branches missed.">        if ( obj == null ) return false;</span>
+<span class="pc bpc" id="L38" title="1 of 2 branches missed.">        if ( obj == this ) return true;</span>
+<span class="pc bpc" id="L39" title="1 of 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
+<span class="fc" id="L40">        NamedStyle&lt;?&gt; rhs = (NamedStyle&lt;?&gt;) obj;</span>
+<span class="pc bpc" id="L41" title="1 of 2 branches missed.">        return Objects.equals(_name, rhs._name) &amp;&amp;</span>
+<span class="fc bfc" id="L42" title="All 2 branches covered.">               Objects.equals(_style, rhs._style);</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L47">        return this.getClass().getSimpleName()+&quot;[&quot; +</span>
+                    &quot;name=&quot;  + _name  +&quot;, &quot;+
+                    &quot;style=&quot; + _style +
+                &quot;]&quot;;
+    }
+
+    @Override
+    public NamedStyle&lt;S&gt; simplified() {
+<span class="fc bfc" id="L55" title="All 2 branches covered.">        if ( _style instanceof Simplifiable ) {</span>
+<span class="fc" id="L56">            S simplifiedStyle = ((Simplifiable&lt;S&gt;)_style).simplified();</span>
+<span class="fc bfc" id="L57" title="All 2 branches covered.">            if (simplifiedStyle == _style)</span>
+<span class="fc" id="L58">                return this;</span>
+<span class="fc" id="L59">            return new NamedStyle&lt;&gt;(_name, simplifiedStyle);</span>
+        }
+<span class="fc" id="L61">        return this;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

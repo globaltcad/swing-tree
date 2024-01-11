@@ -36,7 +36,7 @@ public final class UIForLabel&lt;L extends JLabel&gt; extends UIForAnySwing&lt;U
     }
     
     @Override
-    protected UIForLabel&lt;L&gt; _with( BuilderState&lt;L&gt; newState ) {
+    protected UIForLabel&lt;L&gt; _newBuilderWithState(BuilderState&lt;L&gt; newState ) {
 <span class="fc" id="L40">        return new UIForLabel&lt;&gt;(newState);</span>
     }
 
@@ -116,10 +116,10 @@ public final class UIForLabel&lt;L extends JLabel&gt; extends UIForAnySwing&lt;U
      * @return This very builder to allow for method chaining.
      */
     public UIForLabel&lt;L&gt; makePlain() {
-<span class="nc" id="L119">        this.peek( label -&gt; {</span>
-<span class="nc" id="L120">            _makePlain(label);</span>
-<span class="nc" id="L121">        });</span>
-<span class="nc" id="L122">        return this;</span>
+<span class="nc" id="L119">        return _with( label -&gt; {</span>
+<span class="nc" id="L120">                    _makePlain(label);</span>
+<span class="nc" id="L121">                })</span>
+<span class="nc" id="L122">                ._this();</span>
     }
 
     /**
@@ -129,11 +129,11 @@ public final class UIForLabel&lt;L extends JLabel&gt; extends UIForAnySwing&lt;U
      * @return This very builder to allow for method chaining.
      */
     public final UIForLabel&lt;L&gt; toggleBold() {
-<span class="nc" id="L132">        this.peek(label -&gt; {</span>
-<span class="nc" id="L133">            Font f = label.getFont();</span>
-<span class="nc" id="L134">            label.setFont(f.deriveFont(f.getStyle() ^ Font.BOLD));</span>
-<span class="nc" id="L135">        });</span>
-<span class="nc" id="L136">        return this;</span>
+<span class="nc" id="L132">        return _with( label -&gt; {</span>
+<span class="nc" id="L133">                    Font f = label.getFont();</span>
+<span class="nc" id="L134">                    label.setFont(f.deriveFont(f.getStyle() ^ Font.BOLD));</span>
+<span class="nc" id="L135">                })</span>
+<span class="nc" id="L136">                ._this();</span>
     }
 
     /**
@@ -565,11 +565,14 @@ public final class UIForLabel&lt;L extends JLabel&gt; extends UIForAnySwing&lt;U
      * @throws IllegalArgumentException if {@code font} is {@code null}.
      */
     public final UIForLabel&lt;L&gt; withFont( Font font ) {
-<span class="fc" id="L568">        NullUtil.nullArgCheck(font, &quot;font&quot;, Font.class);</span>
+<span class="fc" id="L568">        NullUtil.nullArgCheck(font, &quot;font&quot;, Font.class, &quot;Use 'UI.FONT_UNDEFINED' instead of null!&quot;);</span>
 <span class="fc" id="L569">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L570">                    thisComponent.setFont(font);</span>
-<span class="fc" id="L571">                })</span>
-<span class="fc" id="L572">                ._this();</span>
+<span class="pc bpc" id="L570" title="1 of 2 branches missed.">                    if ( font == UI.FONT_UNDEFINED )</span>
+<span class="nc" id="L571">                        thisComponent.setFont(null);</span>
+                    else
+<span class="fc" id="L573">                        thisComponent.setFont(font);</span>
+<span class="fc" id="L574">                })</span>
+<span class="fc" id="L575">                ._this();</span>
     }
 
     /**
@@ -584,15 +587,18 @@ public final class UIForLabel&lt;L extends JLabel&gt; extends UIForAnySwing&lt;U
      * @throws IllegalArgumentException if {@code font} is a property which can wrap {@code null}.
      */
     public final UIForLabel&lt;L&gt; withFont( Val&lt;Font&gt; font ) {
-<span class="nc" id="L587">        NullUtil.nullArgCheck(font, &quot;font&quot;, Val.class);</span>
-<span class="nc" id="L588">        NullUtil.nullPropertyCheck(font, &quot;font&quot;, &quot;Use the default font of this component instead of null!&quot;);</span>
-<span class="nc" id="L589">        return _withOnShow( font, (thisComponent,v) -&gt; {</span>
-<span class="nc" id="L590">                    thisComponent.setFont(v);</span>
-<span class="nc" id="L591">                })</span>
-<span class="nc" id="L592">                ._with( thisComponent -&gt; {</span>
-<span class="nc" id="L593">                    thisComponent.setFont(font.orElseThrow());</span>
-<span class="nc" id="L594">                })</span>
-<span class="nc" id="L595">                ._this();</span>
+<span class="nc" id="L590">        NullUtil.nullArgCheck(font, &quot;font&quot;, Val.class);</span>
+<span class="nc" id="L591">        NullUtil.nullPropertyCheck(font, &quot;font&quot;, &quot;Use the default font of this component instead of null!&quot;);</span>
+<span class="nc" id="L592">        return _withOnShow( font, (thisComponent,v) -&gt; {</span>
+<span class="nc bnc" id="L593" title="All 2 branches missed.">                    if ( v == UI.FONT_UNDEFINED )</span>
+<span class="nc" id="L594">                        thisComponent.setFont(null);</span>
+                    else
+<span class="nc" id="L596">                        thisComponent.setFont(v);</span>
+<span class="nc" id="L597">                })</span>
+<span class="nc" id="L598">                ._with( thisComponent -&gt; {</span>
+<span class="nc" id="L599">                    thisComponent.setFont(font.orElseThrow());</span>
+<span class="nc" id="L600">                })</span>
+<span class="nc" id="L601">                ._this();</span>
     }
 
 }

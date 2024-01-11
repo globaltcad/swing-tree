@@ -23,11 +23,13 @@
       "blocks":[
         {"kind":"given","text":"We create a simple swing tree of JPanel instances.","code":["var ui =","        UI.panel()","        .add(UI.panel())","        .add(","            UI.panel()","            .add(UI.panel())","            .add(UI.panel())","        )","        .add(UI.panel())"]},
 
-        {"kind":"expect","text":"The UI node contains a root JPanel with 3 children.","code":["ui.component instanceof JPanel","ui.component.components.length == 3"]},
+        {"kind":"and","text":"We actually build the component:","code":["var panel = ui.get(JPanel)"]},
 
-        {"kind":"and","text":"Because this is a regular Swing UI, we traverse the tree and find the children.","code":["ui.component.components[0] instanceof JPanel","ui.component.components[1] instanceof JPanel","ui.component.components[2] instanceof JPanel"]},
+        {"kind":"expect","text":"The UI node contains a root JPanel with 3 children.","code":["panel instanceof JPanel","panel.components.length == 3"]},
 
-        {"kind":"and","text":"We can also traverse the tree to find the children of the children.","code":["ui.component.components[1].components[0] instanceof JPanel","ui.component.components[1].components[1] instanceof JPanel"]}
+        {"kind":"and","text":"Because this is a regular Swing UI, we traverse the tree and find the children.","code":["panel.components[0] instanceof JPanel","panel.components[1] instanceof JPanel","panel.components[2] instanceof JPanel"]},
+
+        {"kind":"and","text":"We can also traverse the tree to find the children of the children.","code":["panel.components[1].components[0] instanceof JPanel","panel.components[1].components[1] instanceof JPanel"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -42,15 +44,17 @@
       "blocks":[
         {"kind":"given","text":"We create a simple swing tree of JPanel instances.","code":["var ui =","        UI.box()","        .add(UI.box())","        .add(","            UI.box()","            .add(UI.panel())","            .add(UI.panel())","        )","        .add(UI.box())"]},
 
-        {"kind":"expect","text":"The UI node contains a root JBox with 3 children.","code":["ui.component instanceof JBox","ui.component.components.length == 3"]},
+        {"kind":"and","text":"We actually build the component:","code":["var box = ui.get(JBox)"]},
 
-        {"kind":"and","text":"Because this is a regular Swing UI, we traverse the tree and find the children.","code":["ui.component.components[0] instanceof JBox","ui.component.components[1] instanceof JBox","ui.component.components[2] instanceof JBox"]},
+        {"kind":"expect","text":"The UI node contains a root JBox with 3 children.","code":["box instanceof JBox","box.components.length == 3"]},
 
-        {"kind":"and","text":"We can also traverse the tree to find the children of the children.","code":["ui.component.components[1].components[0] instanceof JPanel","ui.component.components[1].components[1] instanceof JPanel"]},
+        {"kind":"and","text":"Because this is a regular Swing UI, we traverse the tree and find the children.","code":["box.components[0] instanceof JBox","box.components[1] instanceof JBox","box.components[2] instanceof JBox"]},
 
-        {"kind":"and","text":"All the JPanel instances created with the `box()` factory methods are non-opacque and without insets!","code":["ui.component.isOpaque() == false","ui.component.components[0].isOpaque() == false","ui.component.components[1].isOpaque() == false","ui.component.components[2].isOpaque() == false","ui.component.layout.layoutConstraints == \"ins 0, hidemode 2, gap 0\"","ui.component.components[0].layout.layoutConstraints == \"ins 0, hidemode 2, gap 0\"","ui.component.components[1].layout.layoutConstraints == \"ins 0, hidemode 2, gap 0\"","ui.component.components[2].layout.layoutConstraints == \"ins 0, hidemode 2, gap 0\""]},
+        {"kind":"and","text":"We can also traverse the tree to find the children of the children.","code":["box.components[1].components[0] instanceof JPanel","box.components[1].components[1] instanceof JPanel"]},
 
-        {"kind":"and","text":"The 2 innermost panels are opaque and have insets:","code":["ui.component.components[1].components[0].isOpaque() == true","ui.component.components[1].components[1].isOpaque() == true","ui.component.components[1].components[0].layout.layoutConstraints == \"hidemode 2\"","ui.component.components[1].components[1].layout.layoutConstraints == \"hidemode 2\""]}
+        {"kind":"and","text":"All the JPanel instances created with the `box()` factory methods are non-opacque and without insets!","code":["box.isOpaque() == false","box.components[0].isOpaque() == false","box.components[1].isOpaque() == false","box.components[2].isOpaque() == false","box.layout.layoutConstraints == \"ins 0, hidemode 2, gap 0\"","box.components[0].layout.layoutConstraints == \"ins 0, hidemode 2, gap 0\"","box.components[1].layout.layoutConstraints == \"ins 0, hidemode 2, gap 0\"","box.components[2].layout.layoutConstraints == \"ins 0, hidemode 2, gap 0\""]},
+
+        {"kind":"and","text":"The 2 innermost panels are opaque and have insets:","code":["box.components[1].components[0].isOpaque() == true","box.components[1].components[1].isOpaque() == true","box.components[1].components[0].layout.layoutConstraints == \"hidemode 2\"","box.components[1].components[1].layout.layoutConstraints == \"hidemode 2\""]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -63,15 +67,15 @@
       "tags":{},"see":[],"extraInfo":["\n            Just like in regular Swing, the JPanel is the most basic \n            yet most important type of component in Swing-Tree\n            and you can create one using the `UI.panel()` factory method. \n            Don't hesitate to use as the main tool for grouping and structuring\n            your UI, just like you would use the 'div' tag in HTML.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We have a simple JPanel UI node.","code":["var ui = UI.panel()"]},
+        {"kind":"given","text":"We declare a simple JPanel UI builder.","code":["var ui = UI.panel()"]},
 
-        {"kind":"expect","text":"At the beginning the wrapped component will have no children.","code":["ui.component.components.length == 0"]},
+        {"kind":"expect","text":"At the beginning the wrapped component will have no children.","code":["ui.get(JPanel).components.length == 0"]},
 
         {"kind":"when","text":"We add a list of panels...","code":["var ui2 = ui.add([new JPanel(), new JPanel(), new JPanel()])"]},
 
         {"kind":"then","text":"We get the same UI node back, because Swing-Tree is based on the builder pattern.","code":["ui == ui2"]},
 
-        {"kind":"and","text":"The wrapped component will have the expected amount of child components.","code":["ui2.component.components.length == 3"]}
+        {"kind":"and","text":"The wrapped component will have the expected amount of child components.","code":["ui2.get(JPanel).components.length == 3"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -88,9 +92,9 @@
 
         {"kind":"and","text":"A simple UI builder instance wrapping the swing object.","code":["var ui = UI.of(panel)"]},
 
-        {"kind":"expect","text":"The UI node contains the swing object.","code":["ui.component === panel"]},
+        {"kind":"expect","text":"The UI node contains the swing object.","code":["ui.get(JPanel) === panel"]},
 
-        {"kind":"and","text":"The UI node is a JPanel without children.","code":["ui.component instanceof JPanel","panel.components.length == 0"]},
+        {"kind":"and","text":"The UI node is a JPanel without children.","code":["ui.get(JPanel) instanceof JPanel","panel.components.length == 0"]},
 
         {"kind":"when","text":"We now add something to our UI node...","code":["ui = ui.add(UI.label(\"Hey! I am a wrapped JLabel.\"))"]},
 
@@ -115,11 +119,15 @@
       "blocks":[
         {"kind":"given","text":"We create a UI builder node containing a simple button.","code":["var ui = UI.button()"]},
 
-        {"kind":"expect","text":"At the beginning the default cursor will be set.","code":["ui.component.cursor.type == Cursor.DEFAULT_CURSOR"]},
+        {"kind":"and","text":"We actually build the component:","code":["var button = ui.get(JButton)"]},
+
+        {"kind":"expect","text":"At the beginning the default cursor will be set.","code":["button.cursor.type == Cursor.DEFAULT_CURSOR"]},
 
         {"kind":"when","text":"We set the cursor of the button to be something else...","code":["ui = ui.withCursor(UI.Cursor.RESIZE_SOUTH_EAST)"]},
 
-        {"kind":"then","text":"This will lead to the correct cursor being chosen.","code":["ui.component.cursor.type == Cursor.SE_RESIZE_CURSOR"]}
+        {"kind":"and","text":"We re-build the component.","code":["button = ui.get(JButton)"]},
+
+        {"kind":"then","text":"This will lead to the correct cursor being chosen.","code":["button.cursor.type == Cursor.SE_RESIZE_CURSOR"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -136,15 +144,17 @@
 
         {"kind":"and","text":"We creat a combo box with a cell renderer that renders the enum value as a lower case string.","code":["var ui =","        UI.comboBox(sel)","        .withRenderer(","            UI.renderComboItem(Keyboard.Key)","            .asText( cell -> cell.value().map( k -> k.name().toLowerCase() ).orElse(\"\") )","        )"]},
 
-        {"kind":"expect","text":"The combo box will have the correct amount of items.","code":["ui.component.itemCount == Keyboard.Key.values().length"]},
+        {"kind":"and","text":"We actually build the component:","code":["var comboBox = ui.get(JComboBox)"]},
 
-        {"kind":"and","text":"The combo box will have the correct selected item.","code":["ui.component.selectedItem == Keyboard.Key.A"]},
+        {"kind":"expect","text":"The combo box will have the correct amount of items.","code":["comboBox.itemCount == Keyboard.Key.values().length"]},
 
-        {"kind":"and","text":"The combo box will have a renderer that renders the enum value as a lower case string.","code":["ui.component.renderer instanceof DefaultListCellRenderer","ui.component.renderer.getListCellRendererComponent(null, Keyboard.Key.A, 0, false, false).text == \"a\""]},
+        {"kind":"and","text":"The combo box will have the correct selected item.","code":["comboBox.selectedItem == Keyboard.Key.A"]},
+
+        {"kind":"and","text":"The combo box will have a renderer that renders the enum value as a lower case string.","code":["comboBox.renderer instanceof DefaultListCellRenderer","comboBox.renderer.getListCellRendererComponent(null, Keyboard.Key.A, 0, false, false).text == \"a\""]},
 
         {"kind":"when","text":"We change the selection...","code":["sel.set(Keyboard.Key.B)"]},
 
-        {"kind":"then","text":"The combo box will have the correct selected item.","code":["ui.component.selectedItem == Keyboard.Key.B"]}
+        {"kind":"then","text":"The combo box will have the correct selected item.","code":["comboBox.selectedItem == Keyboard.Key.B"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },

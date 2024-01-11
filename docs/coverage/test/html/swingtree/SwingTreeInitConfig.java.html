@@ -9,12 +9,13 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
- *  An immutable configuration object for {@link SwingTree},
+ *  An immutable configuration object for the {@link SwingTree} library,
  *  which can be configured using a functional {@link SwingTreeConfigurator} lambda
  *  passed to {@link SwingTree#initialiseUsing(SwingTreeConfigurator)}.
  *  &lt;p&gt;
  *  It allows for the configuration of the default
- *  font, font installation, scaling, event processing and stylesheet.
+ *  font, font installation, scaling, event processing and
+ *  application wide {@link StyleSheet}.
  */
 public final class SwingTreeInitConfig
 {
@@ -22,54 +23,68 @@ public final class SwingTreeInitConfig
      *  Defines how the {@link Font}, specified through {@link SwingTreeInitConfig#defaultFont(Font)},
      *  is installed in the {@link javax.swing.UIManager}.
      */
-<span class="fc" id="L25">    public enum FontInstallation</span>
+<span class="fc" id="L26">    public enum FontInstallation</span>
     {
         /**
          *  A soft installation will only install the font as the &quot;defaultFont&quot; property
          *  of the {@link javax.swing.UIManager}.
          */
-<span class="fc" id="L31">        SOFT,</span>
+<span class="fc" id="L32">        SOFT,</span>
+
         /**
          *  A hard installation will install the font as the &quot;defaultFont&quot; property
          *  of the {@link javax.swing.UIManager} and as the default font of all
          *  {@link javax.swing.UIManager} components.
          */
-<span class="fc" id="L37">        HARD,</span>
+<span class="fc" id="L39">        HARD,</span>
+
         /**
          *  No installation will be performed.
          */
-<span class="fc" id="L41">        NONE</span>
+<span class="fc" id="L44">        NONE</span>
     }
 
     /**
      *  Defines how the scaling factor for the UI should be determined.
      */
-<span class="fc" id="L47">    public enum Scaling</span>
+<span class="fc" id="L50">    public enum Scaling</span>
     {
-        /**
-         *  The scaling will be derived from the default font size.
-         */
-<span class="fc" id="L52">        FROM_DEFAULT_FONT,</span>
-        /**
-         *  The scaling will be derived from the system font size.
-         */
-<span class="fc" id="L56">        FROM_SYSTEM_FONT,</span>
-<span class="fc" id="L57">        FROM_SCALING_FACTOR,</span>
         /**
          *  No scaling will be performed.
          */
-<span class="fc" id="L61">        NONE</span>
+<span class="fc" id="L55">        NONE,</span>
+
+        /**
+         *  The scaling will be derived from the supplied scaling factor.
+         *  (see {@link SwingTreeInitConfig#uiScaleFactor(float)} as well as
+         *  system property {@code &quot;swingtree.uiScale&quot;}).
+         */
+<span class="fc" id="L62">        FROM_SCALING_FACTOR,</span>
+
+        /**
+         *  The scaling will be derived from the default font size,
+         *  if a default font was specified. (see {@link SwingTreeInitConfig#defaultFont(Font)})
+         */
+<span class="fc" id="L68">        FROM_DEFAULT_FONT,</span>
+
+        /**
+         *  The scaling will be derived from the system font size.
+         *  This scaling policy is chosen if no default font was specified,
+         *  no scaling factor was specified and the scaling mode is enabled
+         *  (see {@link SwingTreeInitConfig#isUiScaleFactorEnabled()}).
+         */
+<span class="fc" id="L76">        FROM_SYSTEM_FONT</span>
     }
 
     public static SwingTreeInitConfig standard() {
-<span class="fc" id="L65">        return new SwingTreeInitConfig(</span>
+<span class="fc" id="L80">        return new SwingTreeInitConfig(</span>
                         null,
                         FontInstallation.SOFT,
                         EventProcessor.COUPLED_STRICT,
-<span class="fc" id="L69">                        StyleSheet.none(),</span>
-<span class="fc" id="L70">                        SystemProperties.parseScaleFactor(System.getProperty( SystemProperties.UI_SCALE )),</span>
-<span class="fc" id="L71">                        SystemProperties.getBoolean( SystemProperties.UI_SCALE_ENABLED, true ),</span>
-<span class="fc" id="L72">                        SystemProperties.getBoolean( SystemProperties.UI_SCALE_ALLOW_SCALE_DOWN, false )</span>
+<span class="fc" id="L84">                        StyleSheet.none(),</span>
+<span class="fc" id="L85">                        SystemProperties.parseScaleFactor(System.getProperty( SystemProperties.UI_SCALE )),</span>
+<span class="fc" id="L86">                        SystemProperties.getBoolean( SystemProperties.UI_SCALE_ENABLED, true ),</span>
+<span class="fc" id="L87">                        SystemProperties.getBoolean( SystemProperties.UI_SCALE_ALLOW_SCALE_DOWN, false )</span>
                     );
     }
 
@@ -84,57 +99,75 @@ public final class SwingTreeInitConfig
 
 
     private SwingTreeInitConfig(
-            Font             defaultFont,
-            FontInstallation fontInstallation,
-            EventProcessor   eventProcessor,
-            StyleSheet       styleSheet,
-            float            uiScale,
-            boolean          uiScaleEnabled,
-            boolean          uiScaleAllowScaleDown
-<span class="fc" id="L94">    ) {</span>
-<span class="fc" id="L95">        _defaultFont           = defaultFont;</span>
-<span class="fc" id="L96">        _fontInstallation      = Objects.requireNonNull(fontInstallation);</span>
-<span class="fc" id="L97">        _eventProcessor        = Objects.requireNonNull(eventProcessor);</span>
-<span class="fc" id="L98">        _styleSheet            = Objects.requireNonNull(styleSheet);</span>
-<span class="fc" id="L99">        _uiScale               = uiScale;</span>
-<span class="fc" id="L100">        _uiScaleEnabled        = uiScaleEnabled;</span>
-<span class="fc" id="L101">        _uiScaleAllowScaleDown = uiScaleAllowScaleDown;</span>
-<span class="fc" id="L102">    }</span>
+        Font             defaultFont,
+        FontInstallation fontInstallation,
+        EventProcessor   eventProcessor,
+        StyleSheet       styleSheet,
+        float            uiScale,
+        boolean          uiScaleEnabled,
+        boolean          uiScaleAllowScaleDown
+<span class="fc" id="L109">    ) {</span>
+<span class="fc" id="L110">        _defaultFont           = defaultFont;</span>
+<span class="fc" id="L111">        _fontInstallation      = Objects.requireNonNull(fontInstallation);</span>
+<span class="fc" id="L112">        _eventProcessor        = Objects.requireNonNull(eventProcessor);</span>
+<span class="fc" id="L113">        _styleSheet            = Objects.requireNonNull(styleSheet);</span>
+<span class="fc" id="L114">        _uiScale               = uiScale;</span>
+<span class="fc" id="L115">        _uiScaleEnabled        = uiScaleEnabled;</span>
+<span class="fc" id="L116">        _uiScaleAllowScaleDown = uiScaleAllowScaleDown;</span>
+<span class="fc" id="L117">    }</span>
 
     /**
      *  Returns an {@link Optional} containing the default font
      *  or an empty {@link Optional} if no default font is set.
      */
     Optional&lt;Font&gt; defaultFont() {
-<span class="fc" id="L109">        return Optional.ofNullable(_defaultFont);</span>
+<span class="fc" id="L124">        return Optional.ofNullable(_defaultFont);</span>
     }
 
     /**
      *  Returns the {@link FontInstallation} mode.
      */
     FontInstallation fontInstallation() {
-<span class="fc" id="L116">        return _fontInstallation;</span>
+<span class="fc" id="L131">        return _fontInstallation;</span>
     }
 
     /**
-     *  Returns the {@link Scaling} mode.
+     *  Returns the {@link Scaling} mode
+     *  which is determined based on the configuration.
+     *  &lt;ul&gt;
+     *      &lt;li&gt;
+     *          If {@code false} was passed to {@link #isUiScaleFactorEnabled(boolean)},
+     *          then {@link Scaling#NONE} is returned.
+     *      &lt;/li&gt;
+     *      &lt;li&gt;
+     *          Otherwise, if a scaling factor greater than 0 was passed to {@link #uiScaleFactor(float)},
+     *          then {@link Scaling#FROM_SCALING_FACTOR} is returned.
+     *      &lt;/li&gt;
+     *      &lt;li&gt;
+     *          Otherwise, if a default font was passed to {@link #defaultFont(Font)}, &lt;br&gt;
+     *          then {@link Scaling#FROM_DEFAULT_FONT} is returned. &lt;br&gt;
+     *      &lt;/li&gt;
+     *  &lt;/ul&gt;
+     *  &lt;p&gt;
+     *  If none of the above applies, then {@link Scaling#FROM_SYSTEM_FONT} is returned. &lt;br&gt;
      */
     Scaling scalingStrategy() {
-<span class="pc bpc" id="L123" title="1 of 2 branches missed.">        if ( !_uiScaleEnabled )</span>
-<span class="nc" id="L124">            return Scaling.NONE;</span>
-<span class="pc bpc" id="L125" title="1 of 2 branches missed.">        if ( _uiScale &gt; 0 )</span>
-<span class="nc" id="L126">            return Scaling.FROM_SCALING_FACTOR;</span>
-<span class="fc bfc" id="L127" title="All 2 branches covered.">        if ( _defaultFont != null )</span>
-<span class="fc" id="L128">            return Scaling.FROM_DEFAULT_FONT;</span>
+<span class="pc bpc" id="L155" title="1 of 2 branches missed.">        if ( !_uiScaleEnabled )</span>
+<span class="nc" id="L156">            return Scaling.NONE;</span>
+<span class="pc bpc" id="L157" title="1 of 2 branches missed.">        if ( _uiScale &gt; 0 )</span>
+<span class="nc" id="L158">            return Scaling.FROM_SCALING_FACTOR;</span>
+<span class="fc bfc" id="L159" title="All 2 branches covered.">        if ( _defaultFont != null )</span>
+<span class="fc" id="L160">            return Scaling.FROM_DEFAULT_FONT;</span>
 
-<span class="fc" id="L130">        return Scaling.FROM_SYSTEM_FONT;</span>
+<span class="fc" id="L162">        return Scaling.FROM_SYSTEM_FONT;</span>
     }
 
     /**
-     *  Returns the {@link EventProcessor}.
+     *  Returns the {@link EventProcessor},
+     *  which is used to process both UI and application events.
      */
     EventProcessor eventProcessor() {
-<span class="fc" id="L137">        return _eventProcessor;</span>
+<span class="fc" id="L170">        return _eventProcessor;</span>
     }
 
     /**
@@ -142,21 +175,21 @@ public final class SwingTreeInitConfig
      *  or an empty {@link Optional} if no {@link StyleSheet} is set.
      */
     StyleSheet styleSheet() {
-<span class="fc" id="L145">        return _styleSheet;</span>
+<span class="fc" id="L178">        return _styleSheet;</span>
     }
 
     /**
      *  Returns the UI scaling factor as is specified by the system property {@code swingtree.uiScale}.
      */
     float uiScaleFactor() {
-<span class="fc" id="L152">        return _uiScale;</span>
+<span class="fc" id="L185">        return _uiScale;</span>
     }
 
     /**
      *  Returns whether the UI scaling mode is enabled as is specified by the system property {@code swingtree.uiScale.enabled}.
      */
     boolean isUiScaleFactorEnabled() {
-<span class="fc" id="L159">        return _uiScaleEnabled;</span>
+<span class="fc" id="L192">        return _uiScaleEnabled;</span>
     }
 
     /**
@@ -164,7 +197,7 @@ public final class SwingTreeInitConfig
      *  as is specified by the system property {@code swingtree.uiScale.allowScaleDown}.
      */
     boolean isUiScaleDownAllowed() {
-<span class="fc" id="L167">        return _uiScaleAllowScaleDown;</span>
+<span class="fc" id="L200">        return _uiScaleAllowScaleDown;</span>
     }
 
     /**
@@ -175,7 +208,7 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new default font.
      */
     public SwingTreeInitConfig defaultFont( Font newDefaultFont ) {
-<span class="nc" id="L178">        return new SwingTreeInitConfig(newDefaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown);</span>
+<span class="nc" id="L211">        return new SwingTreeInitConfig(newDefaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown);</span>
     }
 
     /**
@@ -195,7 +228,7 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new default font and {@link FontInstallation} mode.
      */
     public SwingTreeInitConfig defaultFont( Font newDefaultFont, FontInstallation newFontInstallation ) {
-<span class="fc" id="L198">        return new SwingTreeInitConfig(newDefaultFont, newFontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown);</span>
+<span class="fc" id="L231">        return new SwingTreeInitConfig(newDefaultFont, newFontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown);</span>
     }
 
     /**
@@ -209,7 +242,7 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new {@link EventProcessor}.
      */
     public SwingTreeInitConfig eventProcessor( EventProcessor newEventProcessor ) {
-<span class="fc" id="L212">        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, newEventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown);</span>
+<span class="fc" id="L245">        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, newEventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown);</span>
     }
 
     /**
@@ -220,11 +253,12 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new {@link StyleSheet}.
      */
     public SwingTreeInitConfig styleSheet( StyleSheet newStyleSheet ) {
-<span class="fc" id="L223">        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _eventProcessor, newStyleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown);</span>
+<span class="fc" id="L256">        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _eventProcessor, newStyleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown);</span>
     }
 
     /**
-     *  Used to configure the UI scaling factor as is specified by the system property {@code swingtree.uiScale}.
+     *  Use this to configure the UI scaling factor.
+     *  The default factor determined by the system property {@code &quot;swingtree.uiScale&quot;}.
      *  &lt;p&gt;
      *  If Java runtime scales (Java 9 or later), this scale factor is applied on top
      *  of the Java system scale factor. Java 8 does not scale and this scale factor
@@ -238,11 +272,12 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new UI scaling factor.
      */
     public SwingTreeInitConfig uiScaleFactor( float newUiScale ) {
-<span class="nc" id="L241">        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _eventProcessor, _styleSheet, newUiScale, _uiScaleEnabled, _uiScaleAllowScaleDown);</span>
+<span class="nc" id="L275">        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _eventProcessor, _styleSheet, newUiScale, _uiScaleEnabled, _uiScaleAllowScaleDown);</span>
     }
 
     /**
-     *  Used to configure whether the UI scaling mode is enabled as is specified by the system property {@code swingtree.uiScale.enabled}.
+     *  Used to configure whether the UI scaling mode is enabled as is specified by the
+     *  system property {@code swingtree.uiScale.enabled}.
      *  &lt;p&gt;
      *  &lt;strong&gt;Allowed Values&lt;/strong&gt; {@code false} and {@code true}&lt;br&gt;
      *  &lt;strong&gt;Default&lt;/strong&gt; {@code true}
@@ -250,8 +285,8 @@ public final class SwingTreeInitConfig
      * @param newUiScaleEnabled The new UI scaling mode.
      * @return A new {@link SwingTreeInitConfig} instance with the new UI scaling mode.
      */
-    public SwingTreeInitConfig isUiScaleFactorEnabled(boolean newUiScaleEnabled ) {
-<span class="nc" id="L254">        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, newUiScaleEnabled, _uiScaleAllowScaleDown);</span>
+    public SwingTreeInitConfig isUiScaleFactorEnabled( boolean newUiScaleEnabled ) {
+<span class="nc" id="L289">        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, newUiScaleEnabled, _uiScaleAllowScaleDown);</span>
     }
 
     /**
@@ -264,8 +299,8 @@ public final class SwingTreeInitConfig
      * @param newUiScaleAllowScaleDown The new UI scaling mode.
      * @return A new {@link SwingTreeInitConfig} instance with the new UI scaling mode.
      */
-    public SwingTreeInitConfig isUiScaleDownAllowed(boolean newUiScaleAllowScaleDown ) {
-<span class="nc" id="L268">        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, newUiScaleAllowScaleDown);</span>
+    public SwingTreeInitConfig isUiScaleDownAllowed( boolean newUiScaleAllowScaleDown ) {
+<span class="nc" id="L303">        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, newUiScaleAllowScaleDown);</span>
     }
 
 
@@ -312,37 +347,35 @@ public final class SwingTreeInitConfig
          * If the system property is not set, {@code defaultValue} is returned.
          */
         static boolean getBoolean( String key, boolean defaultValue ) {
-<span class="fc" id="L315">            String value = System.getProperty( key );</span>
-<span class="pc bpc" id="L316" title="1 of 2 branches missed.">            return (value != null) ? Boolean.parseBoolean( value ) : defaultValue;</span>
+<span class="fc" id="L350">            String value = System.getProperty( key );</span>
+<span class="pc bpc" id="L351" title="1 of 2 branches missed.">            return (value != null) ? Boolean.parseBoolean( value ) : defaultValue;</span>
         }
-
 
         /**
          * Similar to sun.java2d.SunGraphicsEnvironment.getScaleFactor(String)
          */
         static float parseScaleFactor( String s ) {
-<span class="pc bpc" id="L324" title="1 of 2 branches missed.">            if ( s == null )</span>
-<span class="fc" id="L325">                return -1;</span>
+<span class="pc bpc" id="L358" title="1 of 2 branches missed.">            if ( s == null )</span>
+<span class="fc" id="L359">                return -1;</span>
 
-<span class="nc" id="L327">            float units = 1;</span>
-<span class="nc bnc" id="L328" title="All 2 branches missed.">            if ( s.endsWith( &quot;x&quot; ) )</span>
-<span class="nc" id="L329">                s = s.substring( 0, s.length() - 1 );</span>
-<span class="nc bnc" id="L330" title="All 2 branches missed.">            else if ( s.endsWith( &quot;dpi&quot; ) ) {</span>
-<span class="nc" id="L331">                units = 96;</span>
-<span class="nc" id="L332">                s = s.substring( 0, s.length() - 3 );</span>
-<span class="nc bnc" id="L333" title="All 2 branches missed.">            } else if ( s.endsWith( &quot;%&quot; ) ) {</span>
-<span class="nc" id="L334">                units = 100;</span>
-<span class="nc" id="L335">                s = s.substring( 0, s.length() - 1 );</span>
+<span class="nc" id="L361">            float units = 1;</span>
+<span class="nc bnc" id="L362" title="All 2 branches missed.">            if ( s.endsWith( &quot;x&quot; ) )</span>
+<span class="nc" id="L363">                s = s.substring( 0, s.length() - 1 );</span>
+<span class="nc bnc" id="L364" title="All 2 branches missed.">            else if ( s.endsWith( &quot;dpi&quot; ) ) {</span>
+<span class="nc" id="L365">                units = 96;</span>
+<span class="nc" id="L366">                s = s.substring( 0, s.length() - 3 );</span>
+<span class="nc bnc" id="L367" title="All 2 branches missed.">            } else if ( s.endsWith( &quot;%&quot; ) ) {</span>
+<span class="nc" id="L368">                units = 100;</span>
+<span class="nc" id="L369">                s = s.substring( 0, s.length() - 1 );</span>
             }
 
             try {
-<span class="nc" id="L339">                float scale = Float.parseFloat( s );</span>
-<span class="nc bnc" id="L340" title="All 2 branches missed.">                return scale &gt; 0 ? scale / units : -1;</span>
-<span class="nc" id="L341">            } catch( NumberFormatException ex ) {</span>
-<span class="nc" id="L342">                return -1;</span>
+<span class="nc" id="L373">                float scale = Float.parseFloat( s );</span>
+<span class="nc bnc" id="L374" title="All 2 branches missed.">                return scale &gt; 0 ? scale / units : -1;</span>
+<span class="nc" id="L375">            } catch( NumberFormatException ex ) {</span>
+<span class="nc" id="L376">                return -1;</span>
             }
         }
-
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

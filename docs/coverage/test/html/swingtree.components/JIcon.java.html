@@ -19,12 +19,12 @@ import java.util.Map;
 public class JIcon extends JLabel
 {
     public JIcon(String path) {
-<span class="fc" id="L22">        super(_getFromCacheOrLoadFrom(path));</span>
+<span class="fc" id="L22">        super(_getFromCacheOrLoadFrom(IconDeclaration.of(path)));</span>
 <span class="fc" id="L23">        updateUI();</span>
 <span class="fc" id="L24">    }</span>
 
     public JIcon(IconDeclaration declaration) {
-<span class="nc" id="L27">        super(_getFromCacheOrLoadFrom(declaration.path()));</span>
+<span class="nc" id="L27">        super(_getFromCacheOrLoadFrom(declaration));</span>
 <span class="nc" id="L28">    }</span>
 
     public JIcon(Icon icon) {
@@ -43,7 +43,7 @@ public class JIcon extends JLabel
 <span class="nc" id="L43">    }</span>
 
     public JIcon(String path, String text) {
-<span class="nc" id="L46">        super(text, _getFromCacheOrLoadFrom(path), CENTER);</span>
+<span class="nc" id="L46">        super(text, _getFromCacheOrLoadFrom(IconDeclaration.of(path)), CENTER);</span>
 <span class="nc" id="L47">        updateUI();</span>
 <span class="nc" id="L48">    }</span>
 
@@ -61,7 +61,7 @@ public class JIcon extends JLabel
 
     /** {@inheritDoc} */
     @Override public void paintChildren(Graphics g){
-<span class="fc" id="L64">        ComponentExtension.from(this).paintForegroundStyle( (Graphics2D) g, ()-&gt;super.paintChildren(g) );</span>
+<span class="fc" id="L64">        ComponentExtension.from(this).paintForeground( (Graphics2D) g, ()-&gt;super.paintChildren(g) );</span>
 <span class="fc" id="L65">    }</span>
 
     @Override
@@ -73,13 +73,13 @@ public class JIcon extends JLabel
         */
 <span class="fc" id="L74">    }</span>
 
-    private static ImageIcon _getFromCacheOrLoadFrom( String path ) {
-<span class="fc" id="L77">        Map&lt;String, ImageIcon&gt; cache = SwingTree.get().getIconCache();</span>
-<span class="fc" id="L78">        ImageIcon icon = cache.get(path);</span>
+    private static ImageIcon _getFromCacheOrLoadFrom( IconDeclaration declaration ) {
+<span class="fc" id="L77">        Map&lt;IconDeclaration, ImageIcon&gt; cache = SwingTree.get().getIconCache();</span>
+<span class="fc" id="L78">        ImageIcon icon = cache.get(declaration);</span>
 <span class="pc bpc" id="L79" title="1 of 2 branches missed.">        if ( icon == null ) {</span>
-<span class="fc" id="L80">            icon = UI.findIcon(path).orElse(null);</span>
+<span class="fc" id="L80">            icon = UI.findIcon(declaration).orElse(null);</span>
 <span class="pc bpc" id="L81" title="1 of 2 branches missed.">            if ( icon != null )</span>
-<span class="fc" id="L82">                cache.put(path, icon);</span>
+<span class="fc" id="L82">                cache.put(declaration, icon);</span>
         }
 <span class="fc" id="L84">        return icon;</span>
     }

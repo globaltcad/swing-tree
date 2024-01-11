@@ -32,11 +32,11 @@ import java.util.List;
      */
     @SafeVarargs
     public final I add( E... components ) {
-<span class="nc" id="L35">        NullUtil.nullArgCheck(components, &quot;components&quot;, Object[].class);</span>
-<span class="nc" id="L36">        return _with( thisComponent -&gt; {</span>
-<span class="nc" id="L37">                    _addComponentsTo( thisComponent, components );</span>
-<span class="nc" id="L38">               })</span>
-<span class="nc" id="L39">               ._this();</span>
+<span class="fc" id="L35">        NullUtil.nullArgCheck(components, &quot;components&quot;, Object[].class);</span>
+<span class="fc" id="L36">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L37">                    _addComponentsTo( thisComponent, components );</span>
+<span class="fc" id="L38">               })</span>
+<span class="fc" id="L39">               ._this();</span>
     }
 
     @SafeVarargs
@@ -85,16 +85,16 @@ import java.util.List;
 <span class="pc bpc" id="L85" title="1 of 2 branches missed.">        if ( childComponent instanceof JComponent ) {</span>
 <span class="fc" id="L86">            JComponent child = (JComponent) childComponent;</span>
 
-<span class="fc bfc" id="L88" title="All 2 branches covered.">            Style style = ( conf != null ? null : ComponentExtension.from(child).calculateStyle() );</span>
+<span class="fc bfc" id="L88" title="All 2 branches covered.">            Style style = ( conf != null ? null : ComponentExtension.from(child).gatherStyle() );</span>
 <span class="fc bfc" id="L89" title="All 2 branches covered.">            if ( style != null )</span>
-<span class="fc" id="L90">                conf = style.layout().constraint().orElse(null);</span>
+<span class="fc" id="L90">                conf = style.layoutConstraint().orElse(null);</span>
 
 <span class="fc" id="L92">            _addComponentTo(thisComponent, childComponent, conf);</span>
 
 <span class="fc bfc" id="L94" title="All 2 branches covered.">            if ( style != null )</span>
 <span class="fc" id="L95">                ComponentExtension.from(child).applyAndInstallStyle(style, true);</span>
             else
-<span class="fc" id="L97">                ComponentExtension.from(child).calculateApplyAndInstallStyle(true);</span>
+<span class="fc" id="L97">                ComponentExtension.from(child).gatherApplyAndInstallStyle(true);</span>
 <span class="fc" id="L98">        }</span>
         else
 <span class="nc" id="L100">            _addComponentTo(thisComponent, childComponent, conf);</span>

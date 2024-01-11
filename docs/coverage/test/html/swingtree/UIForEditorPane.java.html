@@ -30,7 +30,7 @@ public final class UIForEditorPane&lt;P extends JEditorPane&gt; extends UIForAny
     }
     
     @Override
-    protected UIForEditorPane&lt;P&gt; _with( BuilderState&lt;P&gt; newState ) {
+    protected UIForEditorPane&lt;P&gt; _newBuilderWithState(BuilderState&lt;P&gt; newState ) {
 <span class="fc" id="L34">        return new UIForEditorPane&lt;&gt;(newState);</span>
     }
 }

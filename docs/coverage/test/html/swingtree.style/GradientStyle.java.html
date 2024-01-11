@@ -9,12 +9,15 @@ import java.util.Objects;
 import java.util.function.Function;
 
 /**
- *  An immutable, wither-like copy method based config API
- *  for specifying a gradient style as a sub-style of various other styles,
+ *  An immutable config API for specifying a gradient style.
+ *  as a sub-style of various other styles,
  *  like for example {@link BaseStyle} or {@link BorderStyle} accessed through the
  *  {@link ComponentStyleDelegate#gradient(String, Function)} or
  *  {@link ComponentStyleDelegate#borderGradient(String, Function)}
  *  methods.
+ *  The state of a gradient style is immutable and can only be updated by
+ *  wither like methods that return a new instance of the gradient style
+ *  with the specified property updated.
  *  &lt;p&gt;
  *  The following properties with their respective purpose are available:
  *  &lt;br&gt;
@@ -47,25 +50,21 @@ import java.util.function.Function;
  *          An array of colors that will be used
  *          as a basis for the gradient transition.
  *      &lt;/li&gt;
- *      &lt;li&gt;&lt;h3&gt;Layer&lt;/h3&gt;
- *          The layer defines if the gradient should be applied
- *          to the background or the border of a component.
- *      &lt;/li&gt;
  *  &lt;/ul&gt;
  *  &lt;p&gt;
  *  You can also use the {@link #none()} method to specify that no gradient should be used,
  *  as the instance returned by that method is a gradient without any colors, effectively
  *  making it a representation of the absence of a gradient style.
  */
-public final class GradientStyle
+public final class GradientStyle implements Simplifiable&lt;GradientStyle&gt;
 {
-<span class="fc" id="L62">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(GradientStyle.class);</span>
+<span class="fc" id="L61">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(GradientStyle.class);</span>
+<span class="fc" id="L62">    static final UI.Layer DEFAULT_LAYER = UI.Layer.BACKGROUND;</span>
 
 <span class="fc" id="L64">    private static final GradientStyle _NONE = new GradientStyle(</span>
                                                         UI.Transition.TOP_TO_BOTTOM,
                                                         UI.GradientType.LINEAR,
-                                                        new Color[0],
-                                                        UI.Layer.BACKGROUND
+                                                        new Color[0]
                                                     );
 
     /**
@@ -74,30 +73,26 @@ public final class GradientStyle
      *  @return A gradient without any colors, effectively
      *          representing the absence of a gradient.
      */
-<span class="fc" id="L77">    public static GradientStyle none() { return _NONE; }</span>
+<span class="fc" id="L76">    public static GradientStyle none() { return _NONE; }</span>
 
 
     private final UI.Transition   _transition;
     private final UI.GradientType _type;
     private final Color[]         _colors;
-    private final UI.Layer        _layer;
 
 
-    private GradientStyle( UI.Transition transition, UI.GradientType type, Color[] colors, UI.Layer layer )
-<span class="fc" id="L87">    {</span>
-<span class="fc" id="L88">        _transition = Objects.requireNonNull(transition);</span>
-<span class="fc" id="L89">        _type       = Objects.requireNonNull(type);</span>
-<span class="fc" id="L90">        _colors     = Objects.requireNonNull(colors);</span>
-<span class="fc" id="L91">        _layer      = Objects.requireNonNull(layer);</span>
-<span class="fc" id="L92">    }</span>
+    private GradientStyle( UI.Transition transition, UI.GradientType type, Color[] colors )
+<span class="fc" id="L85">    {</span>
+<span class="fc" id="L86">        _transition = Objects.requireNonNull(transition);</span>
+<span class="fc" id="L87">        _type       = Objects.requireNonNull(type);</span>
+<span class="fc" id="L88">        _colors     = Objects.requireNonNull(colors);</span>
+<span class="fc" id="L89">    }</span>
 
-<span class="fc" id="L94">    UI.Transition transition() { return _transition; }</span>
+<span class="fc" id="L91">    UI.Transition transition() { return _transition; }</span>
 
-<span class="fc" id="L96">    UI.GradientType type() { return _type; }</span>
+<span class="fc" id="L93">    UI.GradientType type() { return _type; }</span>
 
-<span class="fc" id="L98">    Color[] colors() { return _colors; }</span>
-
-<span class="fc" id="L100">    UI.Layer layer() { return _layer; }</span>
+<span class="fc" id="L95">    Color[] colors() { return _colors; }</span>
 
     /**
      *  Define a list of colors which will, as part of the gradient, transition from one
@@ -110,10 +105,10 @@ public final class GradientStyle
      * @throws NullPointerException if any of the colors is {@code null}.
      */
     public GradientStyle colors( Color... colors ) {
-<span class="fc" id="L113">        Objects.requireNonNull(colors);</span>
-<span class="fc bfc" id="L114" title="All 2 branches covered.">        for ( Color color : colors )</span>
-<span class="fc" id="L115">            Objects.requireNonNull(color);</span>
-<span class="fc" id="L116">        return new GradientStyle(_transition, _type, colors, _layer);</span>
+<span class="fc" id="L108">        Objects.requireNonNull(colors);</span>
+<span class="fc bfc" id="L109" title="All 2 branches covered.">        for ( Color color : colors )</span>
+<span class="fc" id="L110">            Objects.requireNonNull(color, &quot;Use UI.COLOR_UNDEFINED instead of null to represent the absence of a color.&quot;);</span>
+<span class="fc" id="L111">        return new GradientStyle(_transition, _type, colors);</span>
     }
 
     /**
@@ -127,16 +122,16 @@ public final class GradientStyle
      * @throws NullPointerException if any of the colors is {@code null}.
      */
     public GradientStyle colors( String... colors ) {
-<span class="nc" id="L130">        Objects.requireNonNull(colors);</span>
+<span class="nc" id="L125">        Objects.requireNonNull(colors);</span>
         try {
-<span class="nc" id="L132">            Color[] actualColors = new Color[colors.length];</span>
-<span class="nc bnc" id="L133" title="All 2 branches missed.">            for ( int i = 0; i &lt; colors.length; i++ )</span>
-<span class="nc" id="L134">                actualColors[i] = StyleUtility.toColor(colors[i]);</span>
+<span class="nc" id="L127">            Color[] actualColors = new Color[colors.length];</span>
+<span class="nc bnc" id="L128" title="All 2 branches missed.">            for ( int i = 0; i &lt; colors.length; i++ )</span>
+<span class="nc" id="L129">                actualColors[i] = UI.color(colors[i]);</span>
 
-<span class="nc" id="L136">            return new GradientStyle(_transition, _type, actualColors, _layer);</span>
-<span class="nc" id="L137">        } catch ( Exception e ) {</span>
-<span class="nc" id="L138">            log.error(&quot;Failed to parse color strings: &quot; + Arrays.toString(colors), e);</span>
-<span class="nc" id="L139">            return this; // We want to avoid side effects other than a wrong color</span>
+<span class="nc" id="L131">            return new GradientStyle(_transition, _type, actualColors);</span>
+<span class="nc" id="L132">        } catch ( Exception e ) {</span>
+<span class="nc" id="L133">            log.error(&quot;Failed to parse color strings: &quot; + Arrays.toString(colors), e);</span>
+<span class="nc" id="L134">            return this; // We want to avoid side effects other than a wrong color</span>
         }
     }
 
@@ -158,8 +153,8 @@ public final class GradientStyle
      * @throws NullPointerException if the alignment is {@code null}.
      */
     public GradientStyle transition( UI.Transition transition ) {
-<span class="fc" id="L161">        Objects.requireNonNull(transition);</span>
-<span class="fc" id="L162">        return new GradientStyle(transition, _type, _colors, _layer);</span>
+<span class="fc" id="L156">        Objects.requireNonNull(transition);</span>
+<span class="fc" id="L157">        return new GradientStyle(transition, _type, _colors);</span>
     }
 
     /**
@@ -174,56 +169,63 @@ public final class GradientStyle
      * @throws NullPointerException if the type is {@code null}.
      */
     public GradientStyle type( UI.GradientType type ) {
-<span class="fc" id="L177">        Objects.requireNonNull(type);</span>
-<span class="fc" id="L178">        return new GradientStyle(_transition, type, _colors, _layer);</span>
+<span class="fc" id="L172">        Objects.requireNonNull(type);</span>
+<span class="fc" id="L173">        return new GradientStyle(_transition, type, _colors);</span>
     }
-
-    /**
-     *  Define the layer of the gradient which is one of the following:
-     *  &lt;ul&gt;
-     *     &lt;li&gt;{@link UI.Layer#BACKGROUND}&lt;/li&gt;
-     *     &lt;li&gt;{@link UI.Layer#BORDER}&lt;/li&gt;
-     *  &lt;/ul&gt;
-     *
-     * @param layer The layer of the gradient.
-     * @return A new gradient style with the specified layer.
-     * @throws NullPointerException if the layer is {@code null}.
-     */
-    public GradientStyle layer( UI.Layer layer ) {
-<span class="fc" id="L193">        Objects.requireNonNull(layer);</span>
-<span class="fc" id="L194">        return new GradientStyle(_transition, _type, _colors, layer);</span>
-    }
-
 
     @Override
     public String toString() {
-<span class="fc" id="L200">        return getClass().getSimpleName() + &quot;[&quot; +</span>
+<span class="fc bfc" id="L178" title="All 2 branches covered.">        if ( this == _NONE )</span>
+<span class="fc" id="L179">            return getClass().getSimpleName() + &quot;[NONE]&quot;;</span>
+<span class="fc" id="L180">        return getClass().getSimpleName() + &quot;[&quot; +</span>
                     &quot;transition=&quot; + _transition + &quot;, &quot; +
                     &quot;type=&quot;       + _type + &quot;, &quot; +
-<span class="fc" id="L203">                    &quot;colors=&quot;     + Arrays.toString(_colors) + &quot;, &quot; +</span>
-                    &quot;layer=&quot;      + _layer                   +
+<span class="fc" id="L183">                    &quot;colors=&quot;     + Arrays.toString(_colors) +</span>
                 ']';
     }
 
     @Override
     public boolean equals( Object o ) {
-<span class="fc bfc" id="L210" title="All 2 branches covered.">        if ( this == o ) return true;</span>
-<span class="pc bpc" id="L211" title="1 of 2 branches missed.">        if ( !(o instanceof GradientStyle) ) return false;</span>
-<span class="fc" id="L212">        GradientStyle that = (GradientStyle) o;</span>
-<span class="pc bpc" id="L213" title="1 of 4 branches missed.">        return _transition == that._transition       &amp;&amp;</span>
+<span class="fc bfc" id="L189" title="All 2 branches covered.">        if ( this == o ) return true;</span>
+<span class="pc bpc" id="L190" title="1 of 2 branches missed.">        if ( !(o instanceof GradientStyle) ) return false;</span>
+<span class="fc" id="L191">        GradientStyle that = (GradientStyle) o;</span>
+<span class="pc bpc" id="L192" title="1 of 4 branches missed.">        return _transition == that._transition       &amp;&amp;</span>
                _type       == that._type             &amp;&amp;
-<span class="pc bpc" id="L215" title="1 of 4 branches missed.">               Arrays.equals(_colors, that._colors)  &amp;&amp;</span>
-               _layer      == that._layer;
+<span class="fc bfc" id="L194" title="All 2 branches covered.">               Arrays.equals(_colors, that._colors);</span>
     }
 
     @Override
     public int hashCode() {
-<span class="fc" id="L221">        int result = Objects.hash(_transition);</span>
-<span class="fc" id="L222">        result = 31 * result + Objects.hash(_type);</span>
-<span class="fc" id="L223">        result = 31 * result + Arrays.hashCode(_colors);</span>
-<span class="fc" id="L224">        result = 31 * result + Objects.hash(_layer);</span>
-<span class="fc" id="L225">        return result;</span>
+<span class="fc" id="L199">        return Objects.hash(_transition, _type, Arrays.hashCode(_colors));</span>
     }
 
+    @Override
+    public GradientStyle simplified() {
+<span class="fc bfc" id="L204" title="All 2 branches covered.">        if ( this == _NONE )</span>
+<span class="fc" id="L205">            return _NONE;</span>
+
+<span class="pc bpc" id="L207" title="1 of 2 branches missed.">        if ( _colors.length == 0 )</span>
+<span class="nc" id="L208">            return _NONE;</span>
+
+<span class="pc bpc" id="L210" title="1 of 6 branches missed.">        if ( Arrays.stream(_colors).allMatch( color -&gt; color.getAlpha() == 0 || color == UI.COLOR_UNDEFINED) )</span>
+<span class="fc" id="L211">            return _NONE;</span>
+
+<span class="pc bpc" id="L213" title="1 of 2 branches missed.">        int numberOfRealColors = Arrays.stream(_colors).mapToInt( color -&gt; color == UI.COLOR_UNDEFINED ? 0 : 1 ).sum();</span>
+
+<span class="pc bpc" id="L215" title="1 of 2 branches missed.">        if ( numberOfRealColors == 0 )</span>
+<span class="nc" id="L216">            return _NONE;</span>
+
+<span class="pc bpc" id="L218" title="1 of 2 branches missed.">        if ( numberOfRealColors != _colors.length ) {</span>
+<span class="nc" id="L219">            Color[] realColors = new Color[numberOfRealColors];</span>
+<span class="nc" id="L220">            int index = 0;</span>
+<span class="nc bnc" id="L221" title="All 2 branches missed.">            for ( Color color : _colors )</span>
+<span class="nc bnc" id="L222" title="All 2 branches missed.">                if ( color != UI.COLOR_UNDEFINED)</span>
+<span class="nc" id="L223">                    realColors[index++] = color;</span>
+
+<span class="nc" id="L225">            return new GradientStyle(_transition, _type, realColors);</span>
+        }
+
+<span class="fc" id="L228">        return this;</span>
+    }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

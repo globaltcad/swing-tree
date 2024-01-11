@@ -19,7 +19,7 @@ extends UIForAnyMenuItem&lt;UIForCheckBoxMenuItem&lt;M&gt;, M&gt;
     }
     
     @Override
-    protected UIForCheckBoxMenuItem&lt;M&gt; _with( BuilderState&lt;M&gt; newState ) {
+    protected UIForCheckBoxMenuItem&lt;M&gt; _newBuilderWithState(BuilderState&lt;M&gt; newState ) {
 <span class="fc" id="L23">        return new UIForCheckBoxMenuItem&lt;&gt;(newState);</span>
     }
 }

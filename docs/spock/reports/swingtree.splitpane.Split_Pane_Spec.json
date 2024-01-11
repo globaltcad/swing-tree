@@ -23,11 +23,11 @@
       "blocks":[
         {"kind":"given","text":"We create a horizontally aligned split pane UI node.","code":["var ui = UI.splitPane(UI.Align.HORIZONTAL)"]},
 
-        {"kind":"expect","text":"The split pane is not null.","code":["ui != null"]},
+        {"kind":"and","text":"We actually build the component:","code":["var splitPane = ui.component"]},
 
-        {"kind":"and","text":"The split pane is a JSplitPane.","code":["ui.component instanceof JSplitPane"]},
+        {"kind":"expect","text":"The split pane is a JSplitPane.","code":["splitPane instanceof JSplitPane"]},
 
-        {"kind":"and","text":"The split pane is horizontally aligned b, meaning it splits vertically.","code":["ui.component.orientation == JSplitPane.VERTICAL_SPLIT"]}
+        {"kind":"and","text":"The split pane is horizontally aligned b, meaning it splits vertically.","code":["splitPane.orientation == JSplitPane.VERTICAL_SPLIT"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -42,11 +42,11 @@
       "blocks":[
         {"kind":"given","text":"We create a vertically aligned split pane UI node.","code":["var ui = UI.splitPane(UI.Align.VERTICAL)"]},
 
-        {"kind":"expect","text":"The split pane is not null.","code":["ui != null"]},
+        {"kind":"and","text":"We actually build the component:","code":["var splitPane = ui.component"]},
 
-        {"kind":"and","text":"The split pane is a JSplitPane.","code":["ui.component instanceof JSplitPane"]},
+        {"kind":"expect","text":"The split pane is a JSplitPane.","code":["splitPane instanceof JSplitPane"]},
 
-        {"kind":"and","text":"The split pane is vertically aligned, meaning it splits horizontally.","code":["ui.component.orientation == JSplitPane.HORIZONTAL_SPLIT"]}
+        {"kind":"and","text":"The split pane is vertically aligned, meaning it splits horizontally.","code":["splitPane.orientation == JSplitPane.HORIZONTAL_SPLIT"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -63,15 +63,15 @@
 
         {"kind":"and","text":"We create a split pane UI node bound to the property.","code":["var ui = UI.splitPane(alignment)"]},
 
-        {"kind":"expect","text":"The split pane is not null.","code":["ui != null"]},
+        {"kind":"and","text":"We actually build the component:","code":["var splitPane = ui.component"]},
 
-        {"kind":"and","text":"The split pane is a JSplitPane.","code":["ui.component instanceof JSplitPane"]},
+        {"kind":"expect","text":"The split pane is a JSplitPane.","code":["splitPane instanceof JSplitPane"]},
 
-        {"kind":"and","text":"The split pane is horizontally aligned, meaning it splits vertically.","code":["ui.component.orientation == JSplitPane.VERTICAL_SPLIT"]},
+        {"kind":"and","text":"The split pane is horizontally aligned, meaning it splits vertically.","code":["splitPane.orientation == JSplitPane.VERTICAL_SPLIT"]},
 
         {"kind":"when","text":"We change the alignment property to \"VERTICAL\".","code":["alignment.set(UI.Align.VERTICAL)","UI.sync()"]},
 
-        {"kind":"then","text":"The split pane is vertically aligned, meaning it splits horizontally.","code":["ui.component.orientation == JSplitPane.HORIZONTAL_SPLIT"]}
+        {"kind":"then","text":"The split pane is vertically aligned, meaning it splits horizontally.","code":["splitPane.orientation == JSplitPane.HORIZONTAL_SPLIT"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -88,13 +88,13 @@
 
         {"kind":"and","text":"We create a split pane UI node with a divider size of 10.","code":["var ui = UI.splitPane(UI.Align.HORIZONTAL).withDividerSize(10)"]},
 
-        {"kind":"expect","text":"The split pane is not null.","code":["ui != null"]},
+        {"kind":"and","text":"We actually build the component:","code":["var splitPane = ui.component"]},
 
-        {"kind":"and","text":"The split pane is a JSplitPane.","code":["ui.component instanceof JSplitPane"]},
+        {"kind":"expect","text":"The split pane is a JSplitPane.","code":["splitPane instanceof JSplitPane"]},
 
-        {"kind":"and","text":"The split pane is horizontally aligned, meaning it splits vertically.","code":["ui.component.orientation == JSplitPane.VERTICAL_SPLIT"]},
+        {"kind":"and","text":"The split pane is horizontally aligned, meaning it splits vertically.","code":["splitPane.orientation == JSplitPane.VERTICAL_SPLIT"]},
 
-        {"kind":"and","text":"The divider size is 10.","code":["ui.component.dividerSize == (int) ( 10 * uiScale )"]},
+        {"kind":"and","text":"The divider size is 10.","code":["splitPane.dividerSize == (int) ( 10 * uiScale )"]},
 
         {"kind":"where","text":"","code":{"uiScale":["1.0f","1.5f","2.0f"]}}
       ],
@@ -111,13 +111,13 @@
       "blocks":[
         {"kind":"given","text":"We create a split pane UI node with a divider location of 10.","code":["var ui = UI.splitPane(UI.Align.HORIZONTAL).withDividerAt(10)"]},
 
-        {"kind":"expect","text":"The split pane is not null.","code":["ui != null"]},
+        {"kind":"and","text":"We actually build the component:","code":["var splitPane = ui.component"]},
 
-        {"kind":"and","text":"The split pane is a JSplitPane.","code":["ui.component instanceof JSplitPane"]},
+        {"kind":"expect","text":"The split pane is a JSplitPane.","code":["splitPane instanceof JSplitPane"]},
 
-        {"kind":"and","text":"The split pane is horizontally aligned, meaning it splits vertically.","code":["ui.component.orientation == JSplitPane.VERTICAL_SPLIT"]},
+        {"kind":"and","text":"The split pane is horizontally aligned, meaning it splits vertically.","code":["splitPane.orientation == JSplitPane.VERTICAL_SPLIT"]},
 
-        {"kind":"and","text":"The divider location is 10.","code":["ui.component.dividerLocation == 10"]}
+        {"kind":"and","text":"The divider location is 10.","code":["splitPane.dividerLocation == 10"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -134,13 +134,15 @@
 
         {"kind":"and","text":"We create a split pane UI node bound to the property.","code":["var ui = UI.splitPane(UI.Align.HORIZONTAL)","                .withDividerAt(dividerLocation)"]},
 
-        {"kind":"expect","text":"The split pane exists and it is indeed a horizontally aligned split pane splitting the vertical axis.","code":["ui != null","ui.component instanceof JSplitPane","ui.component.orientation == JSplitPane.VERTICAL_SPLIT"]},
+        {"kind":"and","text":"We actually build the component:","code":["var splitPane = ui.component"]},
 
-        {"kind":"and","text":"The divider location is 10.","code":["ui.component.dividerLocation == 10"]},
+        {"kind":"expect","text":"The split pane exists and it is indeed a horizontally aligned split pane splitting the vertical axis.","code":["splitPane instanceof JSplitPane","splitPane.orientation == JSplitPane.VERTICAL_SPLIT"]},
+
+        {"kind":"and","text":"The divider location is 10.","code":["splitPane.dividerLocation == 10"]},
 
         {"kind":"when","text":"We change the divider location property to 20.","code":["dividerLocation.set(20)","UI.sync()"]},
 
-        {"kind":"then","text":"The divider location is 20.","code":["ui.component.dividerLocation == 20"]}
+        {"kind":"then","text":"The divider location is 20.","code":["splitPane.dividerLocation == 20"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -157,13 +159,13 @@
 
         {"kind":"and","text":"We create a split pane UI node with a division of 50%.","code":["var ui = UI.splitPane(UI.Align.HORIZONTAL)","            .withWidth(42)","            .withHeight(100)","            .withDivisionOf(0.5)"]},
 
-        {"kind":"expect","text":"The split pane is not null.","code":["ui != null"]},
+        {"kind":"and","text":"We actually build the component:","code":["var splitPane = ui.component"]},
 
-        {"kind":"and","text":"The split pane is a JSplitPane.","code":["ui.component instanceof JSplitPane"]},
+        {"kind":"expect","text":"The split pane is a JSplitPane.","code":["splitPane instanceof JSplitPane"]},
 
-        {"kind":"and","text":"The split pane is horizontally aligned, meaning it splits vertically.","code":["ui.component.orientation == JSplitPane.VERTICAL_SPLIT"]},
+        {"kind":"and","text":"The split pane is horizontally aligned, meaning it splits vertically.","code":["splitPane.orientation == JSplitPane.VERTICAL_SPLIT"]},
 
-        {"kind":"and","text":"The divider location is 50 * uiScale.","code":["ui.component.dividerLocation == (int) ( 50 * uiScale )"]},
+        {"kind":"and","text":"The divider location is 50 * uiScale.","code":["splitPane.dividerLocation == (int) ( 50 * uiScale )"]},
 
         {"kind":"where","text":"","code":{"uiScale":["1.0f","1.5f","2.0f"]}}
       ],
@@ -182,13 +184,13 @@
 
         {"kind":"and","text":"We create a split pane UI node with a division of 50%.","code":["var ui = UI.splitPane(UI.Align.VERTICAL)","            .withWidth(100)","            .withHeight(42)","            .withDivisionOf(0.5)"]},
 
-        {"kind":"expect","text":"The split pane is not null.","code":["ui != null"]},
+        {"kind":"and","text":"We actually build the component:","code":["var splitPane = ui.component"]},
 
-        {"kind":"and","text":"The split pane is a JSplitPane.","code":["ui.component instanceof JSplitPane"]},
+        {"kind":"expect","text":"The split pane is a JSplitPane.","code":["splitPane instanceof JSplitPane"]},
 
-        {"kind":"and","text":"The split pane is vertically aligned, meaning it splits horizontally.","code":["ui.component.orientation == JSplitPane.HORIZONTAL_SPLIT"]},
+        {"kind":"and","text":"The split pane is vertically aligned, meaning it splits horizontally.","code":["splitPane.orientation == JSplitPane.HORIZONTAL_SPLIT"]},
 
-        {"kind":"and","text":"The divider location is 50 * uiScale.","code":["ui.component.dividerLocation == (int) ( 50 * uiScale )"]},
+        {"kind":"and","text":"The divider location is 50 * uiScale.","code":["splitPane.dividerLocation == (int) ( 50 * uiScale )"]},
 
         {"kind":"where","text":"","code":{"uiScale":["1.0f","1.5f","2.0f"]}}
       ],
@@ -209,17 +211,17 @@
 
         {"kind":"and","text":"We create a split pane UI node bound to the property.","code":["var ui = UI.splitPane(UI.Align.HORIZONTAL)","            .withWidth(42)","            .withHeight(100)","            .withDivisionOf(divisionPercentage)"]},
 
-        {"kind":"expect","text":"The split pane is not null.","code":["ui != null"]},
+        {"kind":"and","text":"We actually build the component:","code":["var splitPane = ui.component"]},
 
-        {"kind":"and","text":"The split pane exists and it is indeed a horizontally aligned split pane splitting the vertical axis.","code":["ui.component instanceof JSplitPane","ui.component.orientation == JSplitPane.VERTICAL_SPLIT","ui.component.dividerLocation == (int)(50 * uiScale)"]},
+        {"kind":"expect","text":"The split pane exists and it is indeed a horizontally aligned split pane splitting the vertical axis.","code":["splitPane instanceof JSplitPane","splitPane.orientation == JSplitPane.VERTICAL_SPLIT","splitPane.dividerLocation == (int)(50 * uiScale)"]},
 
         {"kind":"when","text":"We change the division property to 0.25.","code":["divisionPercentage.set(0.25d)","UI.sync()"]},
 
-        {"kind":"then","text":"The divider location is 25.","code":["ui.component.dividerLocation == (int)(25 * uiScale)"]},
+        {"kind":"then","text":"The divider location is 25.","code":["splitPane.dividerLocation == (int)(25 * uiScale)"]},
 
         {"kind":"when","text":"We change the division property to 0.75.","code":["divisionPercentage.set(0.75d)","UI.sync()"]},
 
-        {"kind":"then","text":"The divider location is 75.","code":["ui.component.dividerLocation == (int)(75 * uiScale)"]},
+        {"kind":"then","text":"The divider location is 75.","code":["splitPane.dividerLocation == (int)(75 * uiScale)"]},
 
         {"kind":"where","text":"","code":{"uiScale":["1f","1.5f","2f"]}}
       ],
@@ -240,13 +242,15 @@
 
         {"kind":"and","text":"We create a vertically aligned split pane UI node bound to the property.","code":["var ui = UI.splitPane(UI.Align.VERTICAL).withDividerSize(dividerSize)"]},
 
-        {"kind":"expect","text":"The split pane exists and it is indeed a vertically aligned split pane splitting the horizontal axis.","code":["ui != null","ui.component instanceof JSplitPane","ui.component.orientation == JSplitPane.HORIZONTAL_SPLIT"]},
+        {"kind":"and","text":"We actually build the component:","code":["var splitPane = ui.component"]},
 
-        {"kind":"and","text":"The divider size is 10.","code":["ui.component.dividerSize == (int) ( 10 * uiScale )"]},
+        {"kind":"expect","text":"The split pane exists and it is indeed a vertically aligned split pane splitting the horizontal axis.","code":["splitPane instanceof JSplitPane","splitPane.orientation == JSplitPane.HORIZONTAL_SPLIT"]},
+
+        {"kind":"and","text":"The divider size is 10.","code":["splitPane.dividerSize == (int) ( 10 * uiScale )"]},
 
         {"kind":"when","text":"We change the divider size property to 42.","code":["dividerSize.set(42)","UI.sync()"]},
 
-        {"kind":"then","text":"The divider size is 42.","code":["ui.component.dividerSize == (int) ( 42 * uiScale )"]},
+        {"kind":"then","text":"The divider size is 42.","code":["splitPane.dividerSize == (int) ( 42 * uiScale )"]},
 
         {"kind":"where","text":"","code":{"uiScale":["1f","1.5f","2f"]}}
       ],

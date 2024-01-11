@@ -23,9 +23,11 @@
       "blocks":[
         {"kind":"when","text":"We create a panel...","code":["def ui = UI.panel()"]},
 
-        {"kind":"then","text":"The panel UI is not null.","code":["ui != null"]},
+        {"kind":"and","text":"We actually build the component:","code":["def panel = ui.get(JPanel)"]},
 
-        {"kind":"and","text":"The UI node wraps a JPanel.","code":["ui.component instanceof JPanel"]}
+        {"kind":"then","text":"The panel is not null.","code":["panel != null"]},
+
+        {"kind":"and","text":"We confirm that the panel is a JPanel.","code":["panel instanceof JPanel"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -40,11 +42,13 @@
       "blocks":[
         {"kind":"when","text":"We create a panel with a layout manager...","code":["def ui = UI.panel().withLayout(new FlowLayout())"]},
 
-        {"kind":"then","text":"The panel UI is not null.","code":["ui != null"]},
+        {"kind":"and","text":"We actually build the component:","code":["def panel = ui.get(JPanel)"]},
 
-        {"kind":"and","text":"The UI node wraps a JPanel.","code":["ui.component instanceof JPanel"]},
+        {"kind":"then","text":"The panel is not null.","code":["panel != null"]},
 
-        {"kind":"and","text":"The panel has a FlowLayout.","code":["ui.component.layout instanceof FlowLayout"]}
+        {"kind":"and","text":"The UI node wraps a JPanel.","code":["panel instanceof JPanel"]},
+
+        {"kind":"and","text":"The panel has a FlowLayout.","code":["panel.layout instanceof FlowLayout"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -59,11 +63,13 @@
       "blocks":[
         {"kind":"when","text":"We create a panel with a layout manager...","code":["def ui = UI.box().withLayout(new FlowLayout())"]},
 
-        {"kind":"then","text":"The panel UI is not null.","code":["ui != null"]},
+        {"kind":"and","text":"We actually build the component:","code":["def box = ui.get(JBox)"]},
 
-        {"kind":"and","text":"The UI node wraps a JBox.","code":["ui.component instanceof JBox"]},
+        {"kind":"then","text":"The box is not null.","code":["box != null"]},
 
-        {"kind":"and","text":"The panel has a FlowLayout.","code":["ui.component.layout instanceof FlowLayout"]}
+        {"kind":"and","text":"The UI node wraps a JBox.","code":["box instanceof JBox"]},
+
+        {"kind":"and","text":"The panel has a FlowLayout.","code":["box.layout instanceof FlowLayout"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -76,9 +82,11 @@
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"expect","text":"The panel is transparent.","code":["ui.component.isOpaque() == false"]},
+        {"kind":"given","text":"We create build the component...","code":["var box = ui.get(JBox)"]},
 
-        {"kind":"and","text":"The panel has no insets.","code":["ui.component.layout.layoutConstraints.contains(\"ins 0\")"]},
+        {"kind":"expect","text":"The panel is transparent.","code":["box.isOpaque() == false"]},
+
+        {"kind":"and","text":"The panel has no insets.","code":["box.layout.layoutConstraints.contains(\"ins 0\")"]},
 
         {"kind":"where","text":"The following UI nodes are created using the \"box(..)\" factory methods.","code":{"ui":["UI.box()","UI.box(\"fill\")","UI.box(\"fill\", \"[grow]12[shrink]\")","UI.box(\"fill\", \"[grow]12[shrink]\", \"[grow]12[shrink]\")","UI.box(UI.FILL & UI.FLOW_X)","UI.box(UI.FILL & UI.FLOW_X, \"[grow]12[shrink]\")","UI.box(UI.FILL & UI.FLOW_X, \"[grow]12[shrink]\", \"[grow]12[shrink]\")",""]}}
       ],
@@ -110,9 +118,11 @@
       "blocks":[
         {"kind":"given","text":"We create a panel of panels:","code":["def ui =","        UI.panel()","        .add(UI.panel())","        .add(UI.panel())","        .add(UI.panel())"]},
 
-        {"kind":"expect","text":"The panel has 3 children.","code":["ui.component.components.size() == 3"]},
+        {"kind":"and","text":"We actually build the component:","code":["def panel = ui.get(JPanel)"]},
 
-        {"kind":"and","text":"All children are JPanels.","code":["ui.component.components.every { it instanceof JPanel }"]}
+        {"kind":"expect","text":"The panel has 3 children.","code":["panel.components.size() == 3"]},
+
+        {"kind":"and","text":"All children are JPanels.","code":["panel.components.every { it instanceof JPanel }"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -133,19 +143,21 @@
 
         {"kind":"and","text":"A panel bound to both properties","code":["def ui = UI.panel()","            .withPrefWidth(width)","            .withPrefHeight(height)"]},
 
-        {"kind":"expect","text":"The panel has the correct width and height.","code":["ui.component.preferredSize.width == (int) ( 300 * uiScale )","ui.component.preferredSize.height == (int) ( 200 * uiScale )"]},
+        {"kind":"and","text":"We actually build the component:","code":["def panel = ui.get(JPanel)"]},
+
+        {"kind":"expect","text":"The panel has the correct width and height.","code":["panel.preferredSize.width == (int) ( 300 * uiScale )","panel.preferredSize.height == (int) ( 200 * uiScale )"]},
 
         {"kind":"when","text":"We change the width of the panel.","code":["width.set(400)"]},
 
         {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
 
-        {"kind":"then","text":"The panel has the correct width and height.","code":["ui.component.preferredSize.width == (int) ( 400 * uiScale )","ui.component.preferredSize.height == (int) ( 200 * uiScale )"]},
+        {"kind":"then","text":"The panel has the correct width and height.","code":["panel.preferredSize.width == (int) ( 400 * uiScale )","panel.preferredSize.height == (int) ( 200 * uiScale )"]},
 
         {"kind":"when","text":"We change the height of the panel.","code":["height.set(300)"]},
 
         {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
 
-        {"kind":"then","text":"The panel has the correct width and height.","code":["ui.component.preferredSize.width == (int) ( 400 * uiScale )","ui.component.preferredSize.height == (int) ( 300 * uiScale )"]},
+        {"kind":"then","text":"The panel has the correct width and height.","code":["panel.preferredSize.width == (int) ( 400 * uiScale )","panel.preferredSize.height == (int) ( 300 * uiScale )"]},
 
         {"kind":"where","text":"","code":{"uiScale":["1.0f","1.5f","2.0f"]}}
       ],

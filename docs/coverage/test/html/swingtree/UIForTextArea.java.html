@@ -21,7 +21,7 @@ public final class UIForTextArea&lt;A extends JTextArea&gt; extends UIForAnyText
     }
     
     @Override
-    protected UIForTextArea&lt;A&gt; _with( BuilderState&lt;A&gt; newState ) {
+    protected UIForTextArea&lt;A&gt; _newBuilderWithState(BuilderState&lt;A&gt; newState ) {
 <span class="fc" id="L25">        return new UIForTextArea&lt;&gt;(newState);</span>
     }
 }

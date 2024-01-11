@@ -101,7 +101,7 @@
       "blocks":[
         {"kind":"given","text":"A UI built with the decoupled thread mode:","code":["var ui = UI.use(EventProcessor.DECOUPLED, ()-> UI.panel())"]},
 
-        {"kind":"when","text":"We try to access the component by this current non-swing thread.","code":["ui.component"]},
+        {"kind":"when","text":"We try to access the component by this current non-swing thread.","code":["ui.get(JPanel)"]},
 
         {"kind":"then","text":"An exception is thrown!","code":["var e = thrown(Exception)","e.message == \"This UI is configured to be decoupled from the application thread, \" +","             \"which means that it can only be modified from the EDT. \" +","             \"Please use 'UI.run(()->...)' method to execute your modifications on the EDT.\""]},
 

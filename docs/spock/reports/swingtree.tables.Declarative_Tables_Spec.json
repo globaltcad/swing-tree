@@ -23,7 +23,9 @@
       "blocks":[
         {"kind":"given","text":"A simple table UI with a map based data table model.","code":["var ui =","        UI.table(UI.MapData.EDITABLE, { [\"X\":[\"a\", \"b\", \"c\"], \"Y\":[\"1\", \"2\", \"3\"]] })"]},
 
-        {"kind":"expect","text":"The table UI has the following state:","code":["ui.component.getColumnName(0) == \"X\"","ui.component.getColumnName(1) == \"Y\"","ui.component.getRowCount() == 3","ui.component.getColumnCount() == 2","ui.component.getValueAt(0, 0) == \"a\"","ui.component.getValueAt(0, 1) == \"1\""]}
+        {"kind":"and","text":"We actually build the component:","code":["var table = ui.component"]},
+
+        {"kind":"expect","text":"The table UI has the following state:","code":["table.getColumnName(0) == \"X\"","table.getColumnName(1) == \"Y\"","table.getRowCount() == 3","table.getColumnCount() == 2","table.getValueAt(0, 0) == \"a\"","table.getValueAt(0, 1) == \"1\""]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -38,7 +40,9 @@
       "blocks":[
         {"kind":"given","text":"","code":["var ui = UI.table(UI.ListData.COLUMN_MAJOR_EDITABLE, { [[\"a\", \"b\", \"c\"], [\"x\", \"y\", \"z\"]] })"]},
 
-        {"kind":"expect","text":"The table UI has the following state:","code":["ui.component.getColumnName(0) == \"A\" // default column names","ui.component.getColumnName(1) == \"B\"","ui.component.getRowCount() == 3","ui.component.getColumnCount() == 2","ui.component.getValueAt(0, 0) == \"a\"","ui.component.getValueAt(0, 1) == \"x\"","ui.component.getValueAt(1, 0) == \"b\"","ui.component.getValueAt(1, 1) == \"y\"","ui.component.getValueAt(2, 0) == \"c\"","ui.component.getValueAt(2, 1) == \"z\""]}
+        {"kind":"and","text":"We actually build the component:","code":["var table = ui.component"]},
+
+        {"kind":"expect","text":"The table UI has the following state:","code":["table.getColumnName(0) == \"A\" // default column names","table.getColumnName(1) == \"B\"","table.getRowCount() == 3","table.getColumnCount() == 2","table.getValueAt(0, 0) == \"a\"","table.getValueAt(0, 1) == \"x\"","table.getValueAt(1, 0) == \"b\"","table.getValueAt(1, 1) == \"y\"","table.getValueAt(2, 0) == \"c\"","table.getValueAt(2, 1) == \"z\""]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -55,13 +59,15 @@
 
         {"kind":"and","text":"We create a table with a lambda based table model.","code":["var ui =","        UI.table().withModel(","            UI.tableModel()","            .colName( col -> [\"X\", \"Y\", \"Z\"].get(col) )","            .colCount( () -> 3 )","            .rowCount( () -> data.size() )","            .getsEntryAt( (r, c) -> data[r] )","            .updateOn(update)","        )"]},
 
-        {"kind":"expect","text":"The table has 4 rows and 3 columns.","code":["ui.get(JTable).rowCount == 4","ui.get(JTable).columnCount == 3"]},
+        {"kind":"and","text":"We actually build the component:","code":["var table = ui.get(JTable)"]},
 
-        {"kind":"and","text":"The table has the correct data.","code":["ui.get(JTable).getValueAt(0, 0) == 1","ui.get(JTable).getValueAt(1, 0) == 2","ui.get(JTable).getValueAt(2, 0) == 3","ui.get(JTable).getValueAt(3, 0) == 4"]},
+        {"kind":"expect","text":"The table has 4 rows and 3 columns.","code":["table.rowCount == 4","table.columnCount == 3"]},
+
+        {"kind":"and","text":"The table has the correct data.","code":["table.getValueAt(0, 0) == 1","table.getValueAt(1, 0) == 2","table.getValueAt(2, 0) == 3","table.getValueAt(3, 0) == 4"]},
 
         {"kind":"when","text":"We update the data.","code":["data = [5, 6, 7, 8]","update.fire()","UI.sync() // sync with the EDT"]},
 
-        {"kind":"then","text":"The table has the correct data.","code":["ui.get(JTable).getValueAt(0, 0) == 5","ui.get(JTable).getValueAt(1, 0) == 6","ui.get(JTable).getValueAt(2, 0) == 7","ui.get(JTable).getValueAt(3, 0) == 8"]}
+        {"kind":"then","text":"The table has the correct data.","code":["table.getValueAt(0, 0) == 5","table.getValueAt(1, 0) == 6","table.getValueAt(2, 0) == 7","table.getValueAt(3, 0) == 8"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -78,9 +84,11 @@
 
         {"kind":"and","text":"A simple table UI with a nested list based data table model.","code":["var ui =","            UI.table(UI.ListData.ROW_MAJOR_EDITABLE, { data })","            .updateTableOn(event)"]},
 
+        {"kind":"and","text":"We actually build the component:","code":["var table = ui.get(JTable)"]},
+
         {"kind":"when","text":"We fire the event.","code":["event.fire()"]},
 
-        {"kind":"then","text":"The table UI is updated.","code":["ui.component.getRowCount() == 2","ui.component.getValueAt(0, 0) == 1","ui.component.getValueAt(0, 1) == 2","ui.component.getValueAt(0, 2) == 3","ui.component.getValueAt(1, 0) == 7","ui.component.getValueAt(1, 1) == 8","ui.component.getValueAt(1, 2) == 9"]}
+        {"kind":"then","text":"The table UI is updated.","code":["table.getRowCount() == 2","table.getValueAt(0, 0) == 1","table.getValueAt(0, 1) == 2","table.getValueAt(0, 2) == 3","table.getValueAt(1, 0) == 7","table.getValueAt(1, 1) == 8","table.getValueAt(1, 2) == 9"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

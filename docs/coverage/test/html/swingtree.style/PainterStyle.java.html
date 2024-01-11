@@ -6,7 +6,7 @@ import swingtree.api.Painter;
 import java.util.Objects;
 
 /**
- *  An immutable, wither-like method chaining based config API for specifying a painter
+ *  An immutable config API for specifying a painter
  *  style for custom {@link Painter} implementations that are used to paint
  *  the inner area of a component on a specific layer.
  *  The following properties with their respective purpose are available:
@@ -18,22 +18,6 @@ import java.util.Objects;
  *              which is used to paint onto the inner area of a component.
  *          &lt;/p&gt;
  *      &lt;/li&gt;
- *      &lt;li&gt;&lt;h3&gt;Layer&lt;/h3&gt;
- *          &lt;p&gt;
- *              In essence the layer is an enum instance which
- *              gives the painter a particular rank in the painting order.
- *              So the {@link swingtree.UI.Layer#BACKGROUND} will be painted first,
- *              followed by the {@link swingtree.UI.Layer#CONTENT} and so on...
- *              &lt;br&gt;
- *              The following layers are available:
- *          &lt;/p&gt;
- *          &lt;ul&gt;
- *              &lt;li&gt;{@link UI.Layer#BACKGROUND}&lt;/li&gt;
- *              &lt;li&gt;{@link UI.Layer#CONTENT}&lt;/li&gt;
- *              &lt;li&gt;{@link UI.Layer#BORDER}&lt;/li&gt;
- *              &lt;li&gt;{@link UI.Layer#FOREGROUND}&lt;/li&gt;
- *          &lt;/ul&gt;
- *      &lt;/li&gt;
  *  &lt;/ol&gt;
  *  &lt;p&gt;
  *  Note that you can use the {@link #none()} method to specify that no painter should be used,
@@ -43,52 +27,58 @@ import java.util.Objects;
  */
 final class PainterStyle
 {
-<span class="fc" id="L46">    private static final PainterStyle _NONE = new PainterStyle(Painter.none(), UI.Layer.BACKGROUND);</span>
+<span class="fc" id="L30">    private static final PainterStyle _NONE = new PainterStyle(Painter.none(), UI.ComponentArea.BODY);</span>
 
 
-<span class="fc" id="L49">    public static PainterStyle none() { return _NONE; }</span>
+<span class="fc" id="L33">    public static PainterStyle none() { return _NONE; }</span>
+
+    public static PainterStyle of( Painter painter, UI.ComponentArea area ) {
+<span class="pc bpc" id="L36" title="1 of 2 branches missed.">        if ( painter == Painter.none() )</span>
+<span class="nc" id="L37">            return none();</span>
+        else
+<span class="fc" id="L39">            return new PainterStyle(painter, area);</span>
+    }
 
 
     private final Painter _painter;
-    private final UI.Layer _layer;
+    private final UI.ComponentArea _clipArea;
 
 
-    private PainterStyle( Painter painter, UI.Layer layer )
-<span class="fc" id="L57">    {</span>
-<span class="fc" id="L58">        _painter = painter;</span>
-<span class="fc" id="L59">        _layer   = layer;</span>
-<span class="fc" id="L60">    }</span>
+    private PainterStyle( Painter painter, UI.ComponentArea area )
+<span class="fc" id="L48">    {</span>
+<span class="fc" id="L49">        _painter = Objects.requireNonNull(painter);</span>
+<span class="fc" id="L50">        _clipArea = Objects.requireNonNull(area);</span>
+<span class="fc" id="L51">    }</span>
 
 
-<span class="fc" id="L63">    public Painter painter() { return _painter; }</span>
+<span class="fc" id="L54">    public Painter painter() { return _painter; }</span>
 
-<span class="fc" id="L65">    public PainterStyle painter(Painter painter) { return new PainterStyle(painter, _layer); }</span>
-
-<span class="fc" id="L67">    public UI.Layer layer() { return _layer; }</span>
-
-<span class="fc" id="L69">    public PainterStyle layer( UI.Layer layer ) { return new PainterStyle(_painter, layer); }</span>
-
+    public UI.ComponentArea clipArea() {
+<span class="fc" id="L57">        return _clipArea;</span>
+    }
 
     @Override
     public String toString() {
-<span class="fc" id="L74">        return &quot;PainterStyle[&quot; +</span>
-<span class="fc" id="L75">                    &quot;painter=&quot; + StyleUtility.toString(_painter) + &quot;, &quot; +</span>
-                    &quot;layer=&quot;   + _layer   +
+<span class="pc bpc" id="L62" title="1 of 2 branches missed.">        if ( _painter == Painter.none() )</span>
+<span class="fc" id="L63">            return this.getClass().getSimpleName() + &quot;[NONE]&quot;;</span>
+        else
+<span class="nc" id="L65">            return this.getClass().getSimpleName() + &quot;[&quot; +</span>
+<span class="nc" id="L66">                    &quot;painter=&quot; + StyleUtility.toString(_painter) + &quot;, &quot; +</span>
+                    &quot;clipArea=&quot; + _clipArea +
                 ']';
     }
 
     @Override
     public boolean equals(Object o) {
-<span class="pc bpc" id="L82" title="1 of 2 branches missed.">        if ( this == o ) return true;</span>
-<span class="pc bpc" id="L83" title="1 of 2 branches missed.">        if ( !(o instanceof PainterStyle) ) return false;</span>
-<span class="fc" id="L84">        PainterStyle that = (PainterStyle) o;</span>
-<span class="pc bpc" id="L85" title="3 of 4 branches missed.">        return _painter == that._painter &amp;&amp;</span>
-               _layer == that._layer;
+<span class="pc bpc" id="L73" title="1 of 2 branches missed.">        if ( this == o ) return true;</span>
+<span class="pc bpc" id="L74" title="1 of 2 branches missed.">        if ( !(o instanceof PainterStyle) ) return false;</span>
+<span class="fc" id="L75">        PainterStyle that = (PainterStyle) o;</span>
+<span class="pc bpc" id="L76" title="1 of 2 branches missed.">        return _painter == that._painter;</span>
     }
 
     @Override
     public int hashCode() {
-<span class="fc" id="L91">        return Objects.hash(_painter, _layer);</span>
+<span class="fc" id="L81">        return Objects.hash(_painter);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

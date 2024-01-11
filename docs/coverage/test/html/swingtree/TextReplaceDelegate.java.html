@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TextReplaceDelegate.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">TextReplaceDelegate.java</span></div><h1>TextReplaceDelegate.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import org.slf4j.Logger;
+import sprouts.Action;
+
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DocumentFilter;
+import javax.swing.text.JTextComponent;
+
+/**
+ *  A delegate object for the {@link Action} lambda passed
+ *  to the {@link UIForAnyTextComponent#onTextReplace(Action)} method,
+ *  which is used to register a listener for text replacement events.
+ *  &lt;br&gt;
+ *  This delegate provides useful context information to the action listener,
+ *  such as the text component itself, the {@link DocumentFilter.FilterBypass}
+ *  object that can be used to replace text in the document, the offset at which
+ *  the text is to be replaced and the length of the text to be replaced.
+ */
+public final class TextReplaceDelegate extends AbstractTextComponentDelegate
+{
+<span class="fc" id="L23">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(TextReplaceDelegate.class);</span>
+
+    private final String text;
+    private final AttributeSet attributeSet;
+
+
+    TextReplaceDelegate(
+        JTextComponent              textComponent,
+        DocumentFilter.FilterBypass filterBypass,
+        int                         offset,
+        int                         length,
+        String                      text,
+        AttributeSet                attributeSet
+    ) {
+<span class="fc" id="L37">        super(textComponent, filterBypass, offset, length);</span>
+<span class="pc bpc" id="L38" title="1 of 2 branches missed.">        this.text         = ( text == null ? &quot;&quot; : text );</span>
+<span class="fc" id="L39">        this.attributeSet = attributeSet;</span>
+<span class="fc" id="L40">    }</span>
+
+    /**
+     * @return The text to be inserted or an empty {@link String} indicating that no text is to be inserted.
+     *         Null is never returned.
+     */
+    public String getText() {
+<span class="nc" id="L47">        return text;</span>
+    }
+
+    /**mr
+     * @return The text to be removed.
+     */
+    public String getReplacementText() {
+        try {
+<span class="fc" id="L55">            return getComponent().getDocument().getText(getOffset(), getLength());</span>
+<span class="nc" id="L56">        } catch (BadLocationException e) {</span>
+<span class="nc" id="L57">            log.error(</span>
+                    &quot;Failed to read the replacement text from the document &quot; +
+<span class="nc" id="L59">                    &quot;at offset &quot;+ getOffset() + &quot; and using length &quot; + getLength() + &quot;!&quot;,</span>
+                    e
+                );
+        }
+<span class="nc" id="L63">        return &quot;&quot;;</span>
+    }
+
+    /**
+     * @return The attribute set of the text to be inserted.
+     */
+    public AttributeSet getAttributeSet() {
+<span class="nc" id="L70">        return attributeSet;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

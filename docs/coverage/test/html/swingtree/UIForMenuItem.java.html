@@ -22,7 +22,7 @@ public final class UIForMenuItem&lt;M extends JMenuItem&gt; extends UIForAnyMenu
     }
     
     @Override
-    protected UIForMenuItem&lt;M&gt; _with( BuilderState&lt;M&gt; newState ) {
+    protected UIForMenuItem&lt;M&gt; _newBuilderWithState(BuilderState&lt;M&gt; newState ) {
 <span class="fc" id="L26">        return new UIForMenuItem&lt;&gt;(newState);</span>
     }
 }

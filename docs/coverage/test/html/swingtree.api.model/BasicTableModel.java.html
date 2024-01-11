@@ -89,7 +89,7 @@ public interface BasicTableModel extends TableModel
         private ColumnClass&lt;E&gt; columnClass;
         private CellEditable cellEditable;
         private ColumnName columnName;
-        private Observable noticeableEvent;
+        private Observable observableEvent;
 
 <span class="fc" id="L94">         public Builder( Class&lt;E&gt; commonEntryType ) {</span>
 <span class="fc" id="L95">             this.commonEntryType = Objects.requireNonNull(commonEntryType);</span>
@@ -198,8 +198,8 @@ public interface BasicTableModel extends TableModel
          */
         public Builder&lt;E&gt; updateOn( Observable updateEvent ) {
 <span class="pc bpc" id="L200" title="1 of 2 branches missed.">            if ( updateEvent == null ) throw new IllegalArgumentException(&quot;updateEvent cannot be null&quot;);</span>
-<span class="pc bpc" id="L201" title="1 of 2 branches missed.">            if ( this.noticeableEvent != null ) throw new IllegalStateException(Event.class.getSimpleName()+&quot; already set&quot;);</span>
-<span class="fc" id="L202">            this.noticeableEvent = updateEvent;</span>
+<span class="pc bpc" id="L201" title="1 of 2 branches missed.">            if ( this.observableEvent != null ) throw new IllegalStateException(Event.class.getSimpleName()+&quot; already set&quot;);</span>
+<span class="fc" id="L202">            this.observableEvent = updateEvent;</span>
 <span class="fc" id="L203">            return this;</span>
         }
         /**
@@ -208,8 +208,8 @@ public interface BasicTableModel extends TableModel
          */
         @Override public BasicTableModel build() {
 <span class="fc" id="L210">            FunTableModel tm = new FunTableModel();</span>
-<span class="fc bfc" id="L211" title="All 2 branches covered.">            if ( noticeableEvent != null )</span>
-<span class="fc" id="L212">                noticeableEvent.subscribe(()-&gt; UI.run(()-&gt;{</span>
+<span class="fc bfc" id="L211" title="All 2 branches covered.">            if ( observableEvent != null )</span>
+<span class="fc" id="L212">                observableEvent.subscribe(()-&gt; UI.run(()-&gt;{</span>
                     // We want the table model update to be as thorough as possible, so we
                     // will fire a table structure changed event, followed by a table data
                     // changed event.

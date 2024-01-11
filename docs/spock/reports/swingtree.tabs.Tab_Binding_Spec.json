@@ -73,11 +73,11 @@
       "tags":{},"see":[],"extraInfo":["\n            You can bind an icon property to the icon of a tab.\n            But note that you may not use the `Icon` or `ImageIcon` classes directly,\n            instead you must use implementations of the `IconDeclaration` interface,\n            which merely models the resource location of the icon.\n\n            The reason for this distinction is the fact that traditional Swing icons\n            are heavy objects whose loading may or may not succeed, and so they are\n            not suitable for direct use in a property as part of your view model.\n            Instead, you should use the `IconDeclaration` interface, which is a\n            lightweight value object that merely models the resource location of the icon\n            even if it is not yet loaded or even does not exist at all.\n\n            This is especially useful in case of unit tests for you view model,\n            where the icon may not be available at all, but you still want to test\n            the behaviour of your view model.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We create an `IconDeclaration`, which is essentially just a resource location value object.","code":["IconDeclaration iconDeclaration = ()->\"swing.png\""]},
+        {"kind":"given","text":"We create an `IconDeclaration`, which is essentially just a resource location value object.","code":["IconDeclaration iconDeclaration = IconDeclaration.of(\"swing.png\")"]},
 
         {"kind":"and","text":"An icon property and a tabbed pane UI node.","code":["var icon = Var.of(iconDeclaration)","def tabbedPane =","    UI.tabbedPane(UI.Side.TOP)","    .add(UI.tab(\"Tab 1\").withIcon(icon))","    .get(JTabbedPane)"]},
 
-        {"kind":"when","text":"We change the icon.","code":["IconDeclaration newIcon = () -> \"seed.png\"","icon.set(newIcon)","UI.sync()"]},
+        {"kind":"when","text":"We change the icon.","code":["IconDeclaration newIcon = IconDeclaration.of(\"seed.png\")","icon.set(newIcon)","UI.sync()"]},
 
         {"kind":"then","text":"The icon of the tab is updated.","code":["tabbedPane.getIconAt(0) == newIcon.find().get()"]}
       ],

@@ -27,7 +27,7 @@ public final class UIForTextPane&lt;P extends JTextPane&gt; extends UIForAnyEdit
     }
     
     @Override
-    protected UIForTextPane&lt;P&gt; _with( BuilderState&lt;P&gt; newState ) {
+    protected UIForTextPane&lt;P&gt; _newBuilderWithState(BuilderState&lt;P&gt; newState ) {
 <span class="nc" id="L31">        return new UIForTextPane&lt;&gt;(newState);</span>
     }
 }

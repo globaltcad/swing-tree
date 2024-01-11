@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FlipFlopStyler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">FlipFlopStyler.java</span></div><h1>FlipFlopStyler.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import swingtree.animation.*;
+import swingtree.api.AnimatedStyler;
+import swingtree.style.ComponentStyleDelegate;
+
+import javax.swing.JComponent;
+import java.awt.event.ActionEvent;
+import java.lang.ref.WeakReference;
+import java.util.Objects;
+
+public class FlipFlopStyler&lt;C extends JComponent&gt;
+{
+    private final LifeTime          _lifetime;
+    private final AnimatedStyler&lt;C&gt; _styler;
+    private final WeakReference&lt;C&gt;  _owner;
+
+<span class="nc" id="L18">    private AnimationState _state = null;</span>
+<span class="nc" id="L19">    private boolean _isOn = false;</span>
+
+
+<span class="nc" id="L22">    FlipFlopStyler( C owner, LifeTime lifetime, AnimatedStyler&lt;C&gt; styler ) {</span>
+<span class="nc" id="L23">        _owner     = new WeakReference&lt;&gt;(Objects.requireNonNull(owner));</span>
+<span class="nc" id="L24">        _lifetime = Objects.requireNonNull(lifetime);</span>
+<span class="nc" id="L25">        _styler    = Objects.requireNonNull(styler);</span>
+<span class="nc" id="L26">    }</span>
+
+
+    ComponentStyleDelegate&lt;C&gt; style(ComponentStyleDelegate&lt;C&gt; delegate ) {
+<span class="nc" id="L30">        AnimationState state = _state;</span>
+<span class="nc bnc" id="L31" title="All 2 branches missed.">        if ( state == null )</span>
+<span class="nc" id="L32">            state = AnimationState.startOf(</span>
+<span class="nc" id="L33">                                LifeSpan.startingNowWith(_lifetime),</span>
+                                Stride.PROGRESSIVE,
+                                new ActionEvent(this, 0, null)
+                            );
+
+<span class="nc" id="L38">        _state = state;</span>
+<span class="nc" id="L39">        return _styler.style(state, delegate);</span>
+    }
+
+    void set( boolean isOn ) {
+<span class="nc bnc" id="L43" title="All 2 branches missed.">        if ( _isOn == isOn ) return;</span>
+<span class="nc" id="L44">        C owner = _owner.get();</span>
+<span class="nc bnc" id="L45" title="All 2 branches missed.">        if ( owner == null )</span>
+<span class="nc" id="L46">            return;</span>
+<span class="nc bnc" id="L47" title="All 2 branches missed.">        if ( isOn ) {</span>
+<span class="nc" id="L48">            Animator.animateFor(_lifetime, Stride.PROGRESSIVE, owner)</span>
+<span class="nc" id="L49">                    .go(new Animation() {</span>
+                        @Override
+                        public void run( AnimationState state ) {
+<span class="nc" id="L52">                            _state = state;</span>
+<span class="nc" id="L53">                            _isOn = true;</span>
+<span class="nc" id="L54">                        }</span>
+                        @Override
+                        public void finish( AnimationState state ) {
+<span class="nc" id="L57">                            _state = AnimationState.endOf(state.lifeSpan(), Stride.REGRESSIVE, state.event());</span>
+<span class="nc" id="L58">                        }</span>
+                    });
+        } else {
+<span class="nc" id="L61">            Animator.animateFor(_lifetime, Stride.REGRESSIVE, owner)</span>
+<span class="nc" id="L62">                    .go(new Animation() {</span>
+                        @Override
+                        public void run( AnimationState state ) {
+<span class="nc" id="L65">                            _state = state;</span>
+<span class="nc" id="L66">                            _isOn = false;</span>
+<span class="nc" id="L67">                        }</span>
+                        @Override
+                        public void finish( AnimationState state ) {
+<span class="nc" id="L70">                            _state = AnimationState.endOf(state.lifeSpan(), Stride.PROGRESSIVE, state.event());</span>
+<span class="nc" id="L71">                        }</span>
+                    });
+        }
+<span class="nc" id="L74">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

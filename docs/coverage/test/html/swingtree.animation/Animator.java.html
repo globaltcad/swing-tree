@@ -37,8 +37,10 @@ import java.util.function.Predicate;
 public class Animator
 {
     private final LifeTime      _lifeTime;  // Never null
+    private final Stride        _stride;    // Never null
     private final Component     _component; // may be null
     private final RunCondition _condition; // may be null
+
 
     /**
      * Creates an {@link Animator} instance which allows you to define the stop condition
@@ -49,7 +51,20 @@ public class Animator
      * @return An {@link Animator} instance that can be used to define how the animation should be executed.
      */
     public static Animator animateFor( LifeTime lifeTime ) {
-<span class="fc" id="L52">        return new Animator( lifeTime, null, null );</span>
+<span class="fc" id="L54">        return animateFor( lifeTime, Stride.PROGRESSIVE );</span>
+    }
+
+    /**
+     * Creates an {@link Animator} instance which allows you to define the stop condition
+     * for an animation as well as an {@link Animation} that will be executed
+     * when passed to the {@link #go(Animation)} method.
+     *
+     * @param lifeTime The schedule that defines when the animation should be executed and for how long.
+     * @param stride   The stride of the animation, i.e. whether it should be executed progressively or regressively.
+     * @return An {@link Animator} instance that can be used to define how the animation should be executed.
+     */
+    public static Animator animateFor( LifeTime lifeTime, Stride stride ) {
+<span class="fc" id="L67">        return new Animator( lifeTime, stride, null, null );</span>
     }
 
     /**
@@ -62,14 +77,29 @@ public class Animator
      * @return An {@link Animator} instance that can be used to define how the animation should be executed.
      */
     public static Animator animateFor( LifeTime lifeTime, Component component ) {
-<span class="fc" id="L65">        return new Animator( lifeTime, component, null );</span>
+<span class="fc" id="L80">        return animateFor( lifeTime, Stride.PROGRESSIVE, component );</span>
     }
 
-<span class="fc" id="L68">    private Animator( LifeTime lifeTime, Component component, RunCondition animation ) {</span>
-<span class="fc" id="L69">        _lifeTime  = Objects.requireNonNull(lifeTime);</span>
-<span class="fc" id="L70">        _component = component; // may be null</span>
-<span class="fc" id="L71">        _condition = animation; // may be null</span>
-<span class="fc" id="L72">    }</span>
+    /**
+     * Creates an {@link Animator} instance which allows you to define the stop condition
+     * for an animation as well as an {@link Animation} that will be executed
+     * when passed to the {@link #go(Animation)} method.
+     *
+     * @param lifeTime The schedule that defines when the animation should be executed and for how long.
+     * @param stride   The stride of the animation, i.e. whether it should be executed progressively or regressively.
+     * @return An {@link Animator} instance that can be used to define how the animation should be executed.
+     */
+    public static Animator animateFor( LifeTime lifeTime, Stride stride, Component component ) {
+<span class="fc" id="L93">        return new Animator( lifeTime, stride, component, null );</span>
+    }
+
+
+<span class="fc" id="L97">    private Animator( LifeTime lifeTime, Stride stride, Component component, RunCondition animation ) {</span>
+<span class="fc" id="L98">        _lifeTime  = Objects.requireNonNull(lifeTime);</span>
+<span class="fc" id="L99">        _stride    = Objects.requireNonNull(stride);</span>
+<span class="fc" id="L100">        _component = component; // may be null</span>
+<span class="fc" id="L101">        _condition = animation; // may be null</span>
+<span class="fc" id="L102">    }</span>
 
     /**
      *  Use this to define a stop condition for the animation.
@@ -79,7 +109,7 @@ public class Animator
      * @return A new {@link Animator} instance that will be executed until the given stop condition is true.
      */
     public Animator until( Predicate&lt;AnimationState&gt; shouldStop ) {
-<span class="nc" id="L82">        return this.asLongAs( shouldStop.negate() );</span>
+<span class="nc" id="L112">        return this.asLongAs( shouldStop.negate() );</span>
     }
 
     /**
@@ -90,11 +120,11 @@ public class Animator
      * @return A new {@link Animator} instance that will be executed as long as the given running condition is true.
      */
     public Animator asLongAs( Predicate&lt;AnimationState&gt; shouldRun ) {
-<span class="fc" id="L93">        return new Animator(_lifeTime, _component, state -&gt; {</span>
-<span class="fc bfc" id="L94" title="All 2 branches covered.">                    if ( shouldRun.test(state) )</span>
-<span class="pc bpc" id="L95" title="3 of 4 branches missed.">                        return _condition == null || _condition.shouldContinue(state);</span>
+<span class="fc" id="L123">        return new Animator(_lifeTime, _stride, _component, state -&gt; {</span>
+<span class="fc bfc" id="L124" title="All 2 branches covered.">                    if ( shouldRun.test(state) )</span>
+<span class="pc bpc" id="L125" title="3 of 4 branches missed.">                        return _condition == null || _condition.shouldContinue(state);</span>
 
-<span class="fc" id="L97">                    return false;</span>
+<span class="fc" id="L127">                    return false;</span>
                 });
     }
 
@@ -107,9 +137,9 @@ public class Animator
      * @param animation The animation that should be executed.
      */
     public void go( Animation animation ) {
-<span class="fc bfc" id="L110" title="All 2 branches covered.">        RunCondition shouldRun = Optional.ofNullable(_condition).orElse( state -&gt; state.repeats() == 0 );</span>
-<span class="fc" id="L111">        AnimationRunner.add( new ComponentAnimator( _component, _lifeTime, shouldRun, animation ) );</span>
-<span class="fc" id="L112">    }</span>
+<span class="fc bfc" id="L140" title="All 2 branches covered.">        RunCondition shouldRun = Optional.ofNullable(_condition).orElse( state -&gt; state.repeats() == 0 );</span>
+<span class="fc" id="L141">        AnimationRunner.add( new ComponentAnimator( _component, _lifeTime, _stride, shouldRun, animation ) );</span>
+<span class="fc" id="L142">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

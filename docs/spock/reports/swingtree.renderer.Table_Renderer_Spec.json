@@ -46,13 +46,15 @@
       "blocks":[
         {"kind":"given","text":"A simple table UI with a nested list based data table model.","code":["var ui = UI.table(UI.ListData.ROW_MAJOR_EDITABLE, { [[\"a\", \"b\", \"c\"], [\"1\", \"2\", \"3\"]] })"]},
 
+        {"kind":"and","text":"A component built using the above UI declaration:","code":["var table = ui.get(JTable)"]},
+
         {"kind":"and","text":"\n                A mocked cell interpreter which interprets the state of the table cell\n                and then defines how it should be rendered (by setting a UI component).\n            ","code":["var render = Mock(Render.Cell.Interpreter)"]},
 
-        {"kind":"expect","text":"The table UI has the following state:","code":["ui.component.getColumnName(0) == \"A\" // default column names","ui.component.getColumnName(1) == \"B\"","ui.component.getRowCount() == 2","ui.component.getValueAt(0, 0) == \"a\"","ui.component.getValueAt(0, 1) == \"b\""]},
+        {"kind":"expect","text":"The table UI has the following state:","code":["table.getColumnName(0) == \"A\" // default column names","table.getColumnName(1) == \"B\"","table.getRowCount() == 2","table.getValueAt(0, 0) == \"a\"","table.getValueAt(0, 1) == \"b\""]},
 
-        {"kind":"when","text":"We build a table renderer for strings and pass our mocked renderer to it.","code":["ui = ui.withRendererForColumn(1, UI.renderTable().when(String).as(render) )"]},
+        {"kind":"when","text":"We build a table renderer for strings and pass our mocked renderer to it.","code":["ui = ui.withRendererForColumn(1, UI.renderTable().when(String).as(render) )","table = ui.get(JTable)"]},
 
-        {"kind":"and","text":"We we access the resulting TableCellRenderer instance from the UI.","code":["var found = ui.get(JTable)","        .columnModel","        .getColumn(1)","        .cellRenderer"]},
+        {"kind":"and","text":"We we access the resulting TableCellRenderer instance from the UI.","code":["var found = table","            .columnModel","            .getColumn(1)","            .cellRenderer"]},
 
         {"kind":"and","text":"Finally we access the component from the renderer (which is responsible for the actual rendering).","code":["found.getTableCellRendererComponent(null, \"1\", false, false, 0, 0)"]},
 
@@ -71,13 +73,15 @@
       "blocks":[
         {"kind":"given","text":"","code":["var ui = UI.table(UI.ListData.COLUMN_MAJOR_EDITABLE, { [[\"a\", \"b\", \"c\"], [\"1\", \"2\", \"3\"]] })"]},
 
+        {"kind":"and","text":"A component built using the above UI declaration:","code":["var table = ui.get(JTable)"]},
+
         {"kind":"and","text":"\n                A mocked cell interpreter which interprets the state of the table cell\n                and then defines how it should be rendered (by setting a UI component).\n            ","code":["var render = Mock(Render.Cell.Interpreter)"]},
 
-        {"kind":"expect","text":"The table UI has the following state:","code":["ui.component.getColumnName(0) == \"A\" // default column names","ui.component.getColumnName(1) == \"B\"","ui.component.getRowCount() == 3","ui.component.getColumnCount() == 2","ui.component.getValueAt(0, 0) == \"a\"","ui.component.getValueAt(0, 1) == \"1\""]},
+        {"kind":"expect","text":"The table UI has the following state:","code":["table.getColumnName(0) == \"A\" // default column names","table.getColumnName(1) == \"B\"","table.getRowCount() == 3","table.getColumnCount() == 2","table.getValueAt(0, 0) == \"a\"","table.getValueAt(0, 1) == \"1\""]},
 
-        {"kind":"when","text":"We build a table renderer for strings and pass our mocked renderer to it.","code":["ui = ui.withRendererForColumn(1, UI.renderTable().when(String).as(render) )"]},
+        {"kind":"when","text":"We build a table renderer for strings and pass our mocked renderer to it.","code":["ui = ui.withRendererForColumn(1, UI.renderTable().when(String).as(render) )","table = ui.get(JTable)"]},
 
-        {"kind":"and","text":"","code":["var found = ui.get(JTable)","        .columnModel","        .getColumn(1)","        .cellRenderer"]},
+        {"kind":"and","text":"","code":["var found = table","                .columnModel","                .getColumn(1)","                .cellRenderer"]},
 
         {"kind":"and","text":"Finally we access the component from the renderer (which is responsible for the actual rendering).","code":["found.getTableCellRendererComponent(null, \"1\", false, false, 0, 0)"]},
 
@@ -96,13 +100,15 @@
       "blocks":[
         {"kind":"given","text":"A simple table UI with a map based data table model.","code":["var ui =","        UI.table(UI.MapData.EDITABLE, { [\"X\":[\"a\", \"b\", \"c\"], \"Y\":[\"1\", \"2\", \"3\"]] })"]},
 
+        {"kind":"and","text":"A component built using the above UI declaration:","code":["var table = ui.get(JTable)"]},
+
         {"kind":"and","text":"\n                A mocked cell interpreter which interprets the state of the table cell\n                and then defines how it should be rendered (by setting a UI component).\n            ","code":["var render = Mock(Render.Cell.Interpreter)"]},
 
-        {"kind":"expect","text":"The table UI has the following state:","code":["ui.component.getColumnName(0) == \"X\"","ui.component.getColumnName(1) == \"Y\"","ui.component.getRowCount() == 3","ui.component.getColumnCount() == 2","ui.component.getValueAt(0, 0) == \"a\"","ui.component.getValueAt(0, 1) == \"1\""]},
+        {"kind":"expect","text":"The table UI has the following state:","code":["table.getColumnName(0) == \"X\"","table.getColumnName(1) == \"Y\"","table.getRowCount() == 3","table.getColumnCount() == 2","table.getValueAt(0, 0) == \"a\"","table.getValueAt(0, 1) == \"1\""]},
 
-        {"kind":"when","text":"We build a table renderer for strings and pass our mocked renderer to it.","code":["ui = ui.withRendererForColumn(1, UI.renderTable().when(String).as(render) )"]},
+        {"kind":"when","text":"We build a table renderer for strings and pass our mocked renderer to it.","code":["ui = ui.withRendererForColumn(1, UI.renderTable().when(String).as(render) )","table = ui.get(JTable)"]},
 
-        {"kind":"and","text":"We we access the resulting TableCellRenderer instance from the UI.","code":["var found = ui.get(JTable)","            .columnModel","            .getColumn(1)","            .cellRenderer"]},
+        {"kind":"and","text":"We we access the resulting TableCellRenderer instance from the UI.","code":["var found = table","                    .columnModel","                    .getColumn(1)","                    .cellRenderer"]},
 
         {"kind":"and","text":"Finally we access the component from the renderer (which is responsible for the actual rendering).","code":["found.getTableCellRendererComponent(null, \"1\", false, false, 0, 0)"]},
 

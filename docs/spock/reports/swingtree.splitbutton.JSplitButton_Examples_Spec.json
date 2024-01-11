@@ -23,11 +23,13 @@
       "blocks":[
         {"kind":"given","text":"We create a basic split button which will not have any behaviour.","code":["var ui =","    UI.splitButton(\"I am displayed on the button!\")","    .add(UI.splitItem(\"I am the first drop down item.\"))","    .add(UI.splitItem(\"I am the second item.\"))","    .add(UI.splitItem(\"And I am the third.\"))"]},
 
-        {"kind":"expect","text":"The component wrapped by the UI builder is in fact a split button:","code":["ui.component instanceof JSplitButton"]},
+        {"kind":"and","text":"We get the built split button component.","code":["var button = ui.component"]},
 
-        {"kind":"and","text":"This button should have a popup menu with 3 components.","code":["ui.component.popupMenu.components.length == 3"]},
+        {"kind":"expect","text":"The component wrapped by the UI builder is in fact a split button:","code":["button instanceof JSplitButton"]},
 
-        {"kind":"and","text":"They have the expected names:","code":["((JMenuItem)ui.component.popupMenu.getComponent(0)).getText() == \"I am the first drop down item.\"","((JMenuItem)ui.component.popupMenu.getComponent(1)).getText() == \"I am the second item.\"","((JMenuItem)ui.component.popupMenu.getComponent(2)).getText() == \"And I am the third.\""]}
+        {"kind":"and","text":"This button should have a popup menu with 3 components.","code":["button.popupMenu.components.length == 3"]},
+
+        {"kind":"and","text":"They have the expected names:","code":["((JMenuItem)button.popupMenu.getComponent(0)).getText() == \"I am the first drop down item.\"","((JMenuItem)button.popupMenu.getComponent(1)).getText() == \"I am the second item.\"","((JMenuItem)button.popupMenu.getComponent(2)).getText() == \"And I am the third.\""]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
