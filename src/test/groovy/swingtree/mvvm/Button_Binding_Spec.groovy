@@ -10,6 +10,7 @@ import spock.lang.Specification
 import spock.lang.Title
 
 import javax.swing.ButtonGroup
+import javax.swing.JButton
 
 
 @Title("Button Binding")
@@ -47,16 +48,18 @@ class Button_Binding_Spec extends Specification
 
         when : 'We create and bind to a button UI node...'
             var ui = UI.button("").withText(text)
+        and : 'Build the component:'
+            var button = ui.get(JButton)
 
         then : 'The button should be updated when the property is changed and shown.'
-            ui.component.text == "Hello World"
+            button.text == "Hello World"
 
         when : 'We change the property value...'
             text.set("Goodbye World")
         and : 'Then we wait for the EDT to complete the UI modifications...'
             UI.sync()
         then : 'The button should be updated.'
-            ui.component.text == "Goodbye World"
+            button.text == "Goodbye World"
     }
 
     def 'You can bind to the selection state of a button.'()
@@ -69,16 +72,17 @@ class Button_Binding_Spec extends Specification
 
         when : 'We create and bind to a button UI node...'
             var ui = UI.button("").isSelectedIf(selected)
-
+        and : 'Build the component:'
+            var button = ui.get(JButton)
         then : 'The button should be updated when the property is changed and shown.'
-            ui.component.selected == false
+            button.selected == false
 
         when : 'We change the property value...'
             selected.set(true)
         and : 'Then we wait for the EDT to complete the UI modifications...'
             UI.sync()
         then : 'The button should be updated.'
-            ui.component.selected == true
+            button.selected == true
     }
 
     def 'You can bind to the enabled state of a button.'()
@@ -91,16 +95,18 @@ class Button_Binding_Spec extends Specification
 
         when : 'We create and bind to a button UI node...'
             var ui = UI.button("").isEnabledIf(enabled)
+        and : 'Build the component:'
+            var button = ui.get(JButton)
 
         then : 'The button should be updated when the property is changed and shown.'
-            ui.component.enabled == false
+            button.enabled == false
 
         when : 'We change the property value...'
             enabled.set(true)
         and : 'Then we wait for the EDT to complete the UI modifications...'
             UI.sync()
         then : 'The button should be updated.'
-            ui.component.enabled == true
+            button.enabled == true
     }
 
     def 'A button group will not only synchronize the selection state of radio buttons, but also bound properties.'()
@@ -123,39 +129,43 @@ class Button_Binding_Spec extends Specification
             var ui1 = UI.radioButton("1").withButtonGroup(buttonGroup).isSelectedIf(selected1)
             var ui2 = UI.radioButton("2").withButtonGroup(buttonGroup).isSelectedIf(selected2)
             var ui3 = UI.radioButton("3").withButtonGroup(buttonGroup).isSelectedIf(selected3)
+        and : 'We create the three buttons:'
+            var button1 = ui1.component
+            var button2 = ui2.component
+            var button3 = ui3.component
 
         when : 'We select the first radio button...'
-            ui1.component.selected = true
+            button1.selected = true
         and : 'Then we wait for the EDT to complete the UI modifications...'
             UI.sync()
         then : 'Both the buttons and the properties have the correct state:'
-            ui1.component.selected == true
-            ui2.component.selected == false
-            ui3.component.selected == false
+            button1.selected == true
+            button2.selected == false
+            button3.selected == false
             selected1.get() == true
             selected2.get() == false
             selected3.get() == false
 
         when : 'We select the second radio button...'
-            ui2.component.selected = true
+            button2.selected = true
         and : 'Then we wait for the EDT to complete the UI modifications...'
             UI.sync()
         then : 'Both the buttons and the properties have the correct state:'
-            ui1.component.selected == false
-            ui2.component.selected == true
-            ui3.component.selected == false
+            button1.selected == false
+            button2.selected == true
+            button3.selected == false
             selected1.get() == false
             selected2.get() == true
             selected3.get() == false
 
         when : 'We select the third radio button...'
-            ui3.component.selected = true
+            button3.selected = true
         and : 'Then we wait for the EDT to complete the UI modifications...'
             UI.sync()
         then : 'Both the buttons and the properties have the correct state:'
-            ui1.component.selected == false
-            ui2.component.selected == false
-            ui3.component.selected == true
+            button1.selected == false
+            button2.selected == false
+            button3.selected == true
             selected1.get() == false
             selected2.get() == false
             selected3.get() == true
@@ -178,16 +188,17 @@ class Button_Binding_Spec extends Specification
 
         when : 'We create and bind to a button UI node...'
             var ui = UI.button("").isSelectedIf(SelectionState.SELECTED, selectionState)
-
+        and : 'Build the component:'
+            var button = ui.get(JButton)
         then : 'The button should be updated when the property is changed and shown.'
-            ui.component.selected == false
+            button.selected == false
 
         when : 'We change the property value...'
             selectionState.set(SelectionState.SELECTED)
         and : 'Then we wait for the EDT to complete the UI modifications...'
             UI.sync()
         then : 'The button should be updated.'
-            ui.component.selected == true
+            button.selected == true
     }
 
     def 'Bind the "isSelected" flag of a button to the inequality between an enum and a enum property'()
@@ -206,14 +217,16 @@ class Button_Binding_Spec extends Specification
 
         when : 'We create and bind to a button UI node...'
             var ui = UI.button("").isSelectedIfNot(SelectionState.SELECTED, selectionState)
+        and : 'Build the component:'
+            var button = ui.get(JButton)
 
         then : 'The button should be updated when the property is changed and shown.'
-            ui.component.selected == true
+            button.selected == true
 
         when : 'We change the property value...'
             selectionState.set(SelectionState.SELECTED)
             UI.sync()
         then : 'The button should be updated.'
-            ui.component.selected == false
+            button.selected == false
     }
 }

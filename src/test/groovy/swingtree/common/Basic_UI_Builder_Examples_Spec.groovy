@@ -70,7 +70,7 @@ class Basic_UI_Builder_Examples_Spec extends Specification
                     )
                     .add(UI.panel())
         and : 'We actually build the component:'
-            var panel = ui.component
+            var panel = ui.get(JPanel)
 
         expect : 'The UI node contains a root JPanel with 3 children.'
             panel instanceof JPanel
@@ -107,7 +107,7 @@ class Basic_UI_Builder_Examples_Spec extends Specification
                     )
                     .add(UI.box())
         and : 'We actually build the component:'
-            var box = ui.component
+            var box = ui.get(JBox)
 
         expect : 'The UI node contains a root JBox with 3 children.'
             box instanceof JBox
@@ -144,11 +144,11 @@ class Basic_UI_Builder_Examples_Spec extends Specification
             Don't hesitate to use as the main tool for grouping and structuring
             your UI, just like you would use the 'div' tag in HTML.
         """
-        given : 'We have a simple JPanel UI node.'
+        given : 'We declare a simple JPanel UI builder.'
             var ui = UI.panel()
 
         expect : 'At the beginning the wrapped component will have no children.'
-            ui.component.components.length == 0
+            ui.get(JPanel).components.length == 0
 
         when : 'We add a list of panels...'
             var ui2 = ui.add([new JPanel(), new JPanel(), new JPanel()])
@@ -156,7 +156,7 @@ class Basic_UI_Builder_Examples_Spec extends Specification
             ui == ui2
 
         and : 'The wrapped component will have the expected amount of child components.'
-            ui2.component.components.length == 3
+            ui2.get(JPanel).components.length == 3
     }
 
     def 'Swing tree nests all kinds of components (trough builder nodes).'()
@@ -174,9 +174,9 @@ class Basic_UI_Builder_Examples_Spec extends Specification
             var ui = UI.of(panel)
 
         expect : 'The UI node contains the swing object.'
-            ui.component === panel
+            ui.get(JPanel) === panel
         and : 'The UI node is a JPanel without children.'
-            ui.component instanceof JPanel
+            ui.get(JPanel) instanceof JPanel
             panel.components.length == 0
 
         when : 'We now add something to our UI node...'
@@ -200,14 +200,14 @@ class Basic_UI_Builder_Examples_Spec extends Specification
         given : 'We create a UI builder node containing a simple button.'
             var ui = UI.button()
         and : 'We actually build the component:'
-            var button = ui.component
+            var button = ui.get(JButton)
         expect : 'At the beginning the default cursor will be set.'
             button.cursor.type == Cursor.DEFAULT_CURSOR
 
         when : 'We set the cursor of the button to be something else...'
             ui = ui.withCursor(UI.Cursor.RESIZE_SOUTH_EAST)
         and : 'We re-build the component.'
-            button = ui.component
+            button = ui.get(JButton)
         then : 'This will lead to the correct cursor being chosen.'
             button.cursor.type == Cursor.SE_RESIZE_CURSOR
     }
@@ -233,7 +233,7 @@ class Basic_UI_Builder_Examples_Spec extends Specification
                         .asText( cell -> cell.value().map( k -> k.name().toLowerCase() ).orElse("") )
                     )
         and : 'We actually build the component:'
-            var comboBox = ui.component
+            var comboBox = ui.get(JComboBox)
 
         expect : 'The combo box will have the correct amount of items.'
             comboBox.itemCount == Keyboard.Key.values().length

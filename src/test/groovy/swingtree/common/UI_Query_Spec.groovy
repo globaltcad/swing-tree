@@ -157,7 +157,7 @@ class UI_Query_Spec extends Specification
                     traceD.addAll(it.findAllByGroup(JTextField, "D").collect(c -> c.text))
                 })
 		and : 'We trigger the UI to be built!'
-			var panel = ui.component
+			var panel = ui.get(JPanel)
 
         when : 'We fire the event and query the tree for components with the group tag "A".'
             event.fire()

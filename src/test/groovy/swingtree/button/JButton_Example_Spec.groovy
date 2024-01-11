@@ -42,7 +42,7 @@ class JButton_Example_Spec extends Specification
                 UI.button("I am displayed on the button!")
                 .onClick( it -> it.component.setEnabled(false) )
         and : 'We actually build the component:'
-            var button = ui.component
+            var button = ui.get(JButton)
 
         expect : 'The component wrapped by the UI builder is in fact a simple button:'
             button instanceof JButton

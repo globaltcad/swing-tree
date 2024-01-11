@@ -64,8 +64,10 @@ class MVVM_Example_Spec extends Specification
                     .isEnabledIf(vm.buttonEnabled())
                     .onClick( it -> vm.login() )
                 )
+        and : 'Build the root component:'
+            var panel = ui.get(JPanel)
         then : 'The view was successfully created.'
-            ui != null
+            panel instanceof JPanel
     }
 
     def 'We can bind a boolean property to a button, and when the user presses it, we notice it.'()
@@ -75,11 +77,13 @@ class MVVM_Example_Spec extends Specification
             Var<Boolean> buttonPressed = Var.of(false).onChange(From.VIEW, {pressedStates.add(it.get()) })
         when : 'We create a view for our view model...'
             var ui = UI.button("Press me!").isPressedIf(buttonPressed)
+        and : 'Build the root component:'
+            var button = ui.get(JButton)
 
         then : 'The view was successfully created.'
-            ui != null
+            button != null
         when : 'We press the button.'
-            ui.component.doClick()
+            button.doClick()
         then : """
                 The property was updated 2 times, because the pressed state switches 
                 from false to true and then false again.
@@ -94,11 +98,13 @@ class MVVM_Example_Spec extends Specification
             Var<Boolean> buttonPressed = Var.of(false).onChange(From.VIEW, {actionPerformed = true})
         when : 'We create a view for our view model...'
             var ui = UI.button("Press me!").isSelectedIf(buttonPressed)
+        and : 'Build the button component:'
+            var button = ui.get(JButton)
 
-        then : 'The view was successfully created.'
-            ui != null
+        then : 'The view button was successfully created.'
+            button != null
         when : 'We press the button.'
-            ui.component.doClick()
+            button.doClick()
         then : 'The property was not updated because a JButton can only be pressed.'
             actionPerformed == false
     }
@@ -109,11 +115,12 @@ class MVVM_Example_Spec extends Specification
             Var<Boolean> checkBoxSelected = Var.of(false)
         when : 'We create a view for our view model...'
             var ui = UI.checkBox("Press me!").isSelectedIf(checkBoxSelected)
-
+        and : 'Build the root component:'
+            var checkBox = ui.get(JCheckBox)
         then : 'The view was successfully created.'
-            ui != null
-        when : 'We press the button.'
-            ui.component.doClick()
+            checkBox != null
+        when : 'We click the check box.'
+            checkBox.doClick()
         then : 'The property was updated.'
             checkBoxSelected.orElseNull() == true
     }
@@ -121,16 +128,17 @@ class MVVM_Example_Spec extends Specification
     def 'We can bind a boolean property to a radio button, and when the user presses it, we notice it.'()
     {
         given : 'We instantiate the "view model" in the form of a single property.'
-            Var<Boolean> radioButton = Var.of(false)
+            Var<Boolean> radioButtonSelected = Var.of(false)
         when : 'We create a view for our view model...'
-            var ui = UI.radioButton("Press me!").isSelectedIf(radioButton)
-
-        then : 'The view was successfully created.'
-            ui != null
+            var ui = UI.radioButton("Press me!").isSelectedIf(radioButtonSelected)
+        and : 'Now we build the root component:'
+            var radioButton = ui.get(JRadioButton)
+        then : 'The view radio button was successfully created.'
+            radioButton != null
         when : 'We press the radio button.'
-            ui.component.doClick()
+            radioButton.doClick()
         then : 'The property was updated.'
-            radioButton.orElseNull() == true
+            radioButtonSelected.orElseNull() == true
     }
 
     def 'We can bind a boolean property to a toggle button, and when the user presses it, we notice it.'()
@@ -139,11 +147,12 @@ class MVVM_Example_Spec extends Specification
             Var<Boolean> isToggled = Var.of(false)
         when : 'We create a view for our view model...'
             var ui = UI.toggleButton("Toggle me!").isSelectedIf(isToggled)
-
-        then : 'The view was successfully created.'
-            ui != null
+        and : 'We then also build the view component:'
+            var toggleButton = ui.get(JToggleButton)
+        then : 'The view button was successfully created.'
+            toggleButton != null
         when : 'We press the toggle button.'
-            ui.component.doClick()
+            toggleButton.doClick()
         then : 'The property was updated.'
             isToggled.orElseNull() == true
     }
@@ -167,11 +176,12 @@ class MVVM_Example_Spec extends Specification
 
         when : 'We create a view for our view model...'
             var ui = UI.comboBox(Size.values()).withSelectedItem(selected)
-
-        then : 'The view was successfully created.'
-            ui != null
+        and : 'We then also build the view component:'
+            var comboBox = ui.get(JComboBox)
+        then : 'The view component was successfully created.'
+            comboBox != null
         when : 'We select an item in the combo box.'
-            ui.component.setSelectedIndex(1)
+            comboBox.setSelectedIndex(1)
         then : 'The property was updated.'
             selected.orElseNull() == Size.MEDIUM
         and : 'The action was triggered.'
@@ -197,11 +207,13 @@ class MVVM_Example_Spec extends Specification
 
         when : 'We create a view for our view model...'
             var ui = UI.comboBox(selected)
+        and : 'We then also build the view component:'
+            var comboBox = ui.get(JComboBox)
+        then : 'The view component was successfully created.'
+            comboBox != null
 
-        then : 'The view was successfully created.'
-            ui != null
         when : 'We select an item in the combo box.'
-            ui.component.setSelectedItem(Option.MAYBE)
+            comboBox.setSelectedItem(Option.MAYBE)
         then : 'The property was updated.'
             selected.orElseNull() == Option.MAYBE
         and : 'The action was triggered.'
@@ -227,11 +239,13 @@ class MVVM_Example_Spec extends Specification
             Var<String> selected = Var.of("Tofu").onChange(From.VIEW, {actionPerformed = true})
         when : 'We create a view for our view model...'
             var ui = UI.comboBox("Tofu", "Tempeh", "Seitan").withSelectedItem(selected)
+        and : 'We then also build the view component:'
+            var comboBox = ui.get(JComboBox)
 
-        then : 'The view was successfully created.'
-            ui != null && !actionPerformed
+        then : 'The view component was successfully created.'
+            comboBox != null && !actionPerformed
         when : 'We select an item in the combo box.'
-            ui.component.setSelectedIndex(1)
+            comboBox.setSelectedIndex(1)
         then : 'The property was updated.'
             selected.orElseNull() == "Tempeh"
         and : 'The action was triggered.'
@@ -248,21 +262,23 @@ class MVVM_Example_Spec extends Specification
             List<String> data = ["Tofu", "Tempeh", "Seitan"]
         when : 'We create a combo box and bind it to the data.'
             var ui = UI.comboBox(data)
+        and : 'We then also build the view component:'
+            var comboBox = ui.get(JComboBox)
         then : 'The combo box was successfully created.'
-            ui != null
+            comboBox instanceof JComboBox
         and : 'The combo box contains the data.'
-            ui.component.itemCount == data.size()
-            ui.component.getItemAt(0) == data.get(0)
-            ui.component.getItemAt(1) == data.get(1)
-            ui.component.getItemAt(2) == data.get(2)
+            comboBox.itemCount == data.size()
+            comboBox.getItemAt(0) == data.get(0)
+            comboBox.getItemAt(1) == data.get(1)
+            comboBox.getItemAt(2) == data.get(2)
         when : 'We modify the list...'
             data.add("Soy Milk")
         then : 'The combo box is updated.'
-            ui.component.itemCount == data.size()
-            ui.component.getItemAt(0) == data.get(0)
-            ui.component.getItemAt(1) == data.get(1)
-            ui.component.getItemAt(2) == data.get(2)
-            ui.component.getItemAt(3) == data.get(3)
+            comboBox.itemCount == data.size()
+            comboBox.getItemAt(0) == data.get(0)
+            comboBox.getItemAt(1) == data.get(1)
+            comboBox.getItemAt(2) == data.get(2)
+            comboBox.getItemAt(3) == data.get(3)
     }
 
     def 'A simple array of elements can be used as a data model for a combo box.'()
@@ -275,20 +291,22 @@ class MVVM_Example_Spec extends Specification
             String[] data = ["Tofu", "Tempeh", "Seitan"]
         when : 'We create a combo box and bind it to the data.'
             var ui = UI.comboBox(data)
+        and : 'We then also build the view component:'
+            var comboBox = ui.get(JComboBox)
         then : 'The combo box was successfully created.'
-            ui != null
+            comboBox instanceof JComboBox
         and : 'The combo box contains the data.'
-            ui.component.itemCount == data.size()
-            ui.component.getItemAt(0) == data[0]
-            ui.component.getItemAt(1) == data[1]
-            ui.component.getItemAt(2) == data[2]
+            comboBox.itemCount == data.size()
+            comboBox.getItemAt(0) == data[0]
+            comboBox.getItemAt(1) == data[1]
+            comboBox.getItemAt(2) == data[2]
         when : 'We modify the array...'
             data[1] = "Soy Milk"
         then : 'The combo box is updated.'
-            ui.component.itemCount == data.size()
-            ui.component.getItemAt(0) == data[0]
-            ui.component.getItemAt(1) == data[1]
-            ui.component.getItemAt(2) == data[2]
+            comboBox.itemCount == data.size()
+            comboBox.getItemAt(0) == data[0]
+            comboBox.getItemAt(1) == data[1]
+            comboBox.getItemAt(2) == data[2]
     }
 
     def 'You can bind a property as the current selection as well as list of elements as options to a combo box.'()
@@ -299,29 +317,31 @@ class MVVM_Example_Spec extends Specification
             Var<String> selected = Var.of("Tofu")
         when : 'We create a combo box and bind it to the data.'
             var ui = UI.comboBox(selected, data)
+        and : 'We then also build the view component:'
+            var comboBox = ui.get(JComboBox)
         then : 'The combo box was successfully created.'
-            ui != null
+            comboBox instanceof JComboBox
         and : 'The combo box contains the data.'
-            ui.component.itemCount == data.size()
-            ui.component.getItemAt(0) == data.get(0)
-            ui.component.getItemAt(1) == data.get(1)
-            ui.component.getItemAt(2) == data.get(2)
+            comboBox.itemCount == data.size()
+            comboBox.getItemAt(0) == data.get(0)
+            comboBox.getItemAt(1) == data.get(1)
+            comboBox.getItemAt(2) == data.get(2)
         and : 'The combo box has the correct selection.'
-            ui.component.selectedItem == selected.orElseNull()
+            comboBox.selectedItem == selected.orElseNull()
         when : 'We modify the list...'
             data.add("Soy Milk")
         then : 'The combo box is updated.'
-            ui.component.itemCount == data.size()
-            ui.component.getItemAt(0) == data.get(0)
-            ui.component.getItemAt(1) == data.get(1)
-            ui.component.getItemAt(2) == data.get(2)
-            ui.component.getItemAt(3) == data.get(3)
+            comboBox.itemCount == data.size()
+            comboBox.getItemAt(0) == data.get(0)
+            comboBox.getItemAt(1) == data.get(1)
+            comboBox.getItemAt(2) == data.get(2)
+            comboBox.getItemAt(3) == data.get(3)
         and : 'The combo box has the correct selection.'
-            ui.component.selectedItem == selected.orElseNull()
+            comboBox.selectedItem == selected.orElseNull()
         when : 'We modify the selection...'
             selected.set("Seitan")
         then : 'The combo box has the correct selection.'
-            ui.component.selectedItem == selected.orElseNull()
+            comboBox.selectedItem == selected.orElseNull()
     }
 
     def 'View Models can be represented by properties.'()
@@ -362,18 +382,20 @@ class MVVM_Example_Spec extends Specification
             var ui = UI.panel()
                     .add(UI.label("Dynamic Super View:"))
                     .add(UI.panel().id("super").add(vm, viewer))
+        and : 'We build the component:'
+            var panel = ui.get(JPanel)
         expect : 'We query the UI for the views and verify that the "super" and "sub-1" views are present.'
-            new Utility.Query(ui).find(JPanel, "super").isPresent()
-            new Utility.Query(ui).find(JPanel, "sub-1").isPresent()
-            !new Utility.Query(ui).find(JPanel, "sub-2").isPresent()
+            new Utility.Query(panel).find(JPanel, "super").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-1").isPresent()
+            !new Utility.Query(panel).find(JPanel, "sub-2").isPresent()
         when : 'We update the view model property.'
             vm.set(vm2)
             UI.sync()
         then : 'The "sub-1" view is removed and the "sub-2" view is added.'
-            !new Utility.Query(ui).find(JPanel, "sub-1").isPresent()
-            new Utility.Query(ui).find(JPanel, "sub-2").isPresent()
+            !new Utility.Query(panel).find(JPanel, "sub-1").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-2").isPresent()
         and : 'The "super" view is still present.'
-            new Utility.Query(ui).find(JPanel, "super").isPresent()
+            new Utility.Query(panel).find(JPanel, "super").isPresent()
     }
 
 
@@ -431,49 +453,51 @@ class MVVM_Example_Spec extends Specification
             var ui = UI.panel()
                     .add(UI.label("Dynamic Super View:"))
                     .add(UI.panel().id("super").add(vms, viewer))
+        and : 'We build the component:'
+            var panel = ui.get(JPanel)
         expect : 'We query the UI for the views and verify that the "super" and "sub-1" views are present.'
-            new Utility.Query(ui).find(JPanel, "super").isPresent()
-            new Utility.Query(ui).find(JPanel, "sub-1").isPresent()
-            new Utility.Query(ui).find(JPanel, "sub-2").isPresent()
-            new Utility.Query(ui).find(JPanel, "sub-3").isPresent()
-            new Utility.Query(ui).find(JPanel, "sub-4").isPresent()
+            new Utility.Query(panel).find(JPanel, "super").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-1").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-2").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-3").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-4").isPresent()
         when : 'We remove something from the view model property list.'
             vms.remove(vm2)
             UI.sync()
         then : 'We expect all views to be present except for the "sub-2" view.'
-            new Utility.Query(ui).find(JPanel, "super").isPresent()
-            new Utility.Query(ui).find(JPanel, "sub-1").isPresent()
-            !new Utility.Query(ui).find(JPanel, "sub-2").isPresent()
-            new Utility.Query(ui).find(JPanel, "sub-3").isPresent()
-            new Utility.Query(ui).find(JPanel, "sub-4").isPresent()
+            new Utility.Query(panel).find(JPanel, "super").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-1").isPresent()
+            !new Utility.Query(panel).find(JPanel, "sub-2").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-3").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-4").isPresent()
         and : 'We remove something else from the view model property list but this time, for a change, use the index.'
             vms.removeAt(2) // vm4
             UI.sync()
         then : 'We expect all views to be present except for the "sub-2" and "sub-4" views.'
-            new Utility.Query(ui).find(JPanel, "super").isPresent()
-            new Utility.Query(ui).find(JPanel, "sub-1").isPresent()
-            !new Utility.Query(ui).find(JPanel, "sub-2").isPresent()
-            new Utility.Query(ui).find(JPanel, "sub-3").isPresent()
-            !new Utility.Query(ui).find(JPanel, "sub-4").isPresent()
+            new Utility.Query(panel).find(JPanel, "super").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-1").isPresent()
+            !new Utility.Query(panel).find(JPanel, "sub-2").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-3").isPresent()
+            !new Utility.Query(panel).find(JPanel, "sub-4").isPresent()
         when : 'We reintroduce "vm2"...'
             vms.add(vm2)
             UI.sync()
         then : 'We expect all views to be present except for the "sub-4" view.'
-            new Utility.Query(ui).find(JPanel, "super").isPresent()
-            new Utility.Query(ui).find(JPanel, "sub-1").isPresent()
-            new Utility.Query(ui).find(JPanel, "sub-2").isPresent()
-            new Utility.Query(ui).find(JPanel, "sub-3").isPresent()
-            !new Utility.Query(ui).find(JPanel, "sub-4").isPresent()
+            new Utility.Query(panel).find(JPanel, "super").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-1").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-2").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-3").isPresent()
+            !new Utility.Query(panel).find(JPanel, "sub-4").isPresent()
 
         when : 'We clear the view model property list.'
             vms.clear()
             UI.sync()
         then : 'We expect all views to be removed. (except for the "super" view)'
-            !new Utility.Query(ui).find(JPanel, "sub-1").isPresent()
-            !new Utility.Query(ui).find(JPanel, "sub-2").isPresent()
-            !new Utility.Query(ui).find(JPanel, "sub-3").isPresent()
-            !new Utility.Query(ui).find(JPanel, "sub-4").isPresent()
-            new Utility.Query(ui).find(JPanel, "super").isPresent()
+            !new Utility.Query(panel).find(JPanel, "sub-1").isPresent()
+            !new Utility.Query(panel).find(JPanel, "sub-2").isPresent()
+            !new Utility.Query(panel).find(JPanel, "sub-3").isPresent()
+            !new Utility.Query(panel).find(JPanel, "sub-4").isPresent()
+            new Utility.Query(panel).find(JPanel, "super").isPresent()
     }
 
     def 'A view model property may or may not exist, meaning its view may or may not be provided.'() {
@@ -507,15 +531,17 @@ class MVVM_Example_Spec extends Specification
                                 .add(UI.button("Do admin stuff!"))
                             )
                     )
+        and : 'We build the component:'
+            var panel = ui.get(JPanel)
         expect : 'We query the UI for the views and verify that the "super" and "sub-1" views are present.'
-            new Utility.Query(ui).find(JPanel, "super").isPresent()
-            !new Utility.Query(ui).find(JPanel, "sub-1").isPresent()
+            new Utility.Query(panel).find(JPanel, "super").isPresent()
+            !new Utility.Query(panel).find(JPanel, "sub-1").isPresent()
         when : 'We set the "moreUI" property to a view model which implements the "Viewable" interface (a "view provider").'
             moreUI.set("I am a dummy view model!")
             UI.sync()
         then : 'We expect all views to be present.'
-            new Utility.Query(ui).find(JPanel, "super").isPresent()
-            new Utility.Query(ui).find(JPanel, "sub-1").isPresent()
+            new Utility.Query(panel).find(JPanel, "super").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-1").isPresent()
     }
 
     def 'A boolean property can be used to switch between 2 foreground colors.'()
@@ -530,15 +556,17 @@ class MVVM_Example_Spec extends Specification
         and : 'We create a 2 colors.'
             Color red = Color.RED
             Color green = Color.GREEN
-        and : 'We create a label with a red foreground color.'
+        and : 'We declare a label with a red foreground color.'
             var ui = UI.label("Hello World!").withForegroundIf(isRed, red, green)
+        and : 'Then we build the component:'
+            var label = ui.get(JLabel)
         expect : 'The label should have a red foreground color.'
-            ui.component.foreground == red
+            label.foreground == red
         when : 'We change the boolean property to false.'
             isRed.set(false)
             UI.sync()
         then : 'The label should have a green foreground color.'
-            ui.component.foreground == green
+            label.foreground == green
     }
 
     def 'A boolean property can be used to switch between 2 background colors.'()
@@ -553,15 +581,17 @@ class MVVM_Example_Spec extends Specification
         and : 'We create a 2 colors.'
             Color red   = Color.RED
             Color green = Color.GREEN
-        and : 'We create a label with a red background color.'
+        and : 'We declare a label with a red background color.'
             var ui = UI.label("Hello World!").withBackgroundIf(isRed, red, green)
+        and : 'Then we build the label component:'
+            var label = ui.get(JLabel)
         expect : 'The label should have a red background color.'
-            ui.component.background == red
+            label.background == red
         when : 'We change the boolean property to false.'
             isRed.set(false)
             UI.sync()
         then : 'The label should have a green background color.'
-            ui.component.background == green
+            label.background == green
     }
 
     def 'A boolean property can be used to set or reset a foreground color.'()
@@ -575,20 +605,22 @@ class MVVM_Example_Spec extends Specification
             Var<Boolean> isRed = Var.of(false)
         and : 'We create a label with a yellow background color.'
             var ui = UI.label("Hello World!").withForegroundIf(isRed, Color.YELLOW)
+        and : 'Now we build the component:'
+            var label = ui.get(JLabel)
         and : 'We remember the original foreground color.'
-            Color originalColor = ui.component.foreground
+            Color originalColor = label.foreground
         expect : 'The label should have the original foreground color.'
-            ui.component.foreground == originalColor
+            label.foreground == originalColor
         when : 'We change the boolean property to true.'
             isRed.set(true)
             UI.sync()
         then : 'The label should have a yellow foreground color because the boolean property is true.'
-            ui.component.foreground == Color.YELLOW
+            label.foreground == Color.YELLOW
         when : 'We change the boolean property to false.'
             isRed.set(false)
             UI.sync()
         then : 'Again, the label should have the original foreground color.'
-            ui.component.foreground == originalColor
+            label.foreground == originalColor
     }
 
     def 'A boolean property can be used to set or reset a background color.'()
@@ -600,22 +632,24 @@ class MVVM_Example_Spec extends Specification
         """
         given : 'We create a property modelling the color switch.'
             Var<Boolean> isRed = Var.of(false)
-        and : 'We create a label with a yellow background color.'
+        and : 'We declare a label with a yellow background color.'
             var ui = UI.label("Hello World!").withBackgroundIf(isRed, Color.YELLOW)
+        and : 'Then we actually build the component:'
+            var label = ui.get(JLabel)
         and : 'We remember the original background color.'
-            Color originalColor = ui.component.background
+            Color originalColor = label.background
         expect : 'The label should have the original background color.'
-            ui.component.background == originalColor
+            label.background == originalColor
         when : 'We change the boolean property to true.'
             isRed.set(true)
             UI.sync()
         then : 'The label should have a yellow background color because the boolean property is true.'
-            ui.component.background == Color.YELLOW
+            label.background == Color.YELLOW
         when : 'We change the boolean property to false.'
             isRed.set(false)
             UI.sync()
         then : 'Again, the label should have the original background color.'
-            ui.component.background == originalColor
+            label.background == originalColor
     }
 
     def 'The foreground color of a Swing component can be modelled using a boolean and a Color property.'()
@@ -636,23 +670,25 @@ class MVVM_Example_Spec extends Specification
                         .withForeground(Color.GREEN) // default color
                         .withForegroundIf(displayColor, color)
                     )
+        and : 'We build the component:'
+            var panel = ui.get(JPanel)
         expect : 'The label should have the default foreground color.'
-            new Utility.Query(ui).find(JLabel, "XYZ").get().getForeground() == Color.GREEN
+            new Utility.Query(panel).find(JLabel, "XYZ").get().getForeground() == Color.GREEN
         when : 'We set the boolean property to true.'
             displayColor.set(true)
             UI.sync()
         then : 'The label should have a foreground color.'
-            new Utility.Query(ui).find(JLabel, "XYZ").get().getForeground() == Color.RED
+            new Utility.Query(panel).find(JLabel, "XYZ").get().getForeground() == Color.RED
         when : 'We set the color property to blue.'
             color.set(Color.BLUE)
             UI.sync()
         then : 'The label should have a foreground color of blue.'
-            new Utility.Query(ui).find(JLabel, "XYZ").get().getForeground() == Color.BLUE
+            new Utility.Query(panel).find(JLabel, "XYZ").get().getForeground() == Color.BLUE
         when : 'We set the boolean property to false.'
             displayColor.set(false)
             UI.sync()
         then : 'The label should have the default foreground color, green.'
-            new Utility.Query(ui).find(JLabel, "XYZ").get().getForeground() == Color.GREEN
+            new Utility.Query(panel).find(JLabel, "XYZ").get().getForeground() == Color.GREEN
     }
 
     def 'The background color of a Swing component can be modelled using a boolean and a Color property.'()
@@ -673,23 +709,25 @@ class MVVM_Example_Spec extends Specification
                         .withBackground(Color.GREEN) // default color
                         .withBackgroundIf(displayColor, color)
                     )
+        and : 'We build the component:'
+            var panel = ui.get(JPanel)
         expect : 'The label should have the default background color.'
-            new Utility.Query(ui).find(JLabel, "XYZ").get().getBackground() == Color.GREEN
+            new Utility.Query(panel).find(JLabel, "XYZ").get().getBackground() == Color.GREEN
         when : 'We set the boolean property to true.'
             displayColor.set(true)
             UI.sync()
         then : 'The label should have a background color.'
-            new Utility.Query(ui).find(JLabel, "XYZ").get().getBackground() == Color.RED
+            new Utility.Query(panel).find(JLabel, "XYZ").get().getBackground() == Color.RED
         when : 'We set the color property to blue.'
             color.set(Color.BLUE)
             UI.sync()
         then : 'The label should have a background color of blue.'
-            new Utility.Query(ui).find(JLabel, "XYZ").get().getBackground() == Color.BLUE
+            new Utility.Query(panel).find(JLabel, "XYZ").get().getBackground() == Color.BLUE
         when : 'We set the boolean property to false.'
             displayColor.set(false)
             UI.sync()
         then : 'The label should have the default background color, green.'
-            new Utility.Query(ui).find(JLabel, "XYZ").get().getBackground() == Color.GREEN
+            new Utility.Query(panel).find(JLabel, "XYZ").get().getBackground() == Color.GREEN
     }
 
     def 'The tooltip of a component can be modelled using a String property.'()
@@ -707,18 +745,20 @@ class MVVM_Example_Spec extends Specification
                         UI.label("Hi!").id("XYZ")
                         .withTooltip(tooltip)
                     )
+        and : 'We build the component:'
+            var panel = ui.get(JPanel)
         expect : 'The label should have the default tooltip.'
-            new Utility.Query(ui).find(JLabel, "XYZ").get().getToolTipText() == "Hello World!"
+            new Utility.Query(panel).find(JLabel, "XYZ").get().getToolTipText() == "Hello World!"
         when : 'We set the String property to "Hello Universe!".'
             tooltip.set("Hello Universe!")
             UI.sync()
         then : 'The label should have a tooltip.'
-            new Utility.Query(ui).find(JLabel, "XYZ").get().getToolTipText() == "Hello Universe!"
+            new Utility.Query(panel).find(JLabel, "XYZ").get().getToolTipText() == "Hello Universe!"
         when : 'We set the String property to an empty String.'
             tooltip.set("")
             UI.sync()
         then : 'The label should have no tooltip.'
-            new Utility.Query(ui).find(JLabel, "XYZ").get().getToolTipText() == null
+            new Utility.Query(panel).find(JLabel, "XYZ").get().getToolTipText() == null
     }
 
     def 'A border title can be modelled using properties.'()
@@ -737,18 +777,20 @@ class MVVM_Example_Spec extends Specification
                         UI.label("Hi!")
                         //... some other stuff
                     )
+        and : 'We build the component:'
+            var panel = ui.get(JPanel)
         expect : 'The panel should have the expected default border title.'
-            ((TitledBorder)new Utility.Query(ui).find(JPanel, "My-Panel").get().border).getTitle() == "Hello World!"
+            ((TitledBorder)new Utility.Query(panel).find(JPanel, "My-Panel").get().border).getTitle() == "Hello World!"
         when : 'We set the String property to "Hello Universe!".'
             title.set("Hello Universe!")
             UI.sync()
         then : 'The panel should have a border title.'
-            ((TitledBorder)new Utility.Query(ui).find(JPanel, "My-Panel").get().border).getTitle() == "Hello Universe!"
+            ((TitledBorder)new Utility.Query(panel).find(JPanel, "My-Panel").get().border).getTitle() == "Hello Universe!"
         when : 'We set the String property to an empty String.'
             title.set("")
             UI.sync()
         then : 'The panel should have no border title.'
-            ((TitledBorder)new Utility.Query(ui).find(JPanel, "My-Panel").get().border).getTitle() == ""
+            ((TitledBorder)new Utility.Query(panel).find(JPanel, "My-Panel").get().border).getTitle() == ""
     }
 
     def 'The type of cursor displayed over a component can be modelled using properties.'()
@@ -766,23 +808,25 @@ class MVVM_Example_Spec extends Specification
                         UI.label("Hi!").id("XYZ")
                         .withCursor(cursor)
                     )
+        and : 'We build the component:'
+            var panel = ui.get(JPanel)
         expect : 'The label should have the default cursor.'
-            new Utility.Query(ui).find(JLabel, "XYZ").get().cursor.type == UI.Cursor.DEFAULT.type
+            new Utility.Query(panel).find(JLabel, "XYZ").get().cursor.type == UI.Cursor.DEFAULT.type
         when : 'We set the Cursor property to a crosshair cursor.'
             cursor.set(UI.Cursor.CROSS)
             UI.sync()
         then : 'The label should have a crosshair cursor.'
-            new Utility.Query(ui).find(JLabel, "XYZ").get().cursor.type == UI.Cursor.CROSS.type
+            new Utility.Query(panel).find(JLabel, "XYZ").get().cursor.type == UI.Cursor.CROSS.type
         when : 'We set the Cursor property to a hand cursor.'
             cursor.set(UI.Cursor.HAND)
             UI.sync()
         then : 'The label should have a hand cursor.'
-            new Utility.Query(ui).find(JLabel, "XYZ").get().cursor.type == UI.Cursor.HAND.type
+            new Utility.Query(panel).find(JLabel, "XYZ").get().cursor.type == UI.Cursor.HAND.type
         when : 'We set the Cursor property to a text cursor.'
             cursor.set(UI.Cursor.TEXT)
             UI.sync()
         then : 'The label should have a text cursor.'
-            new Utility.Query(ui).find(JLabel, "XYZ").get().cursor.type == UI.Cursor.TEXT.type
+            new Utility.Query(panel).find(JLabel, "XYZ").get().cursor.type == UI.Cursor.TEXT.type
     }
 
     private static enum Size

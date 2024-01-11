@@ -67,7 +67,7 @@ class Panel_Spec extends Specification
         when : 'We create a panel with a layout manager...'
             def ui = UI.box().withLayout(new FlowLayout())
         and : 'We actually build the component:'
-            def box = ui.component
+            def box = ui.get(JBox)
         then : 'The box is not null.'
             box != null
         and : 'The UI node wraps a JBox.'
@@ -80,7 +80,7 @@ class Panel_Spec extends Specification
         UIForBox<JBox> ui
     ) {
         given : 'We create build the component...'
-            var box = ui.component
+            var box = ui.get(JBox)
         expect : 'The panel is transparent.'
             box.isOpaque() == false
         and : 'The panel has no insets.'

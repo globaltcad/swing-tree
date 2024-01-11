@@ -8,6 +8,7 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
 
+import javax.swing.JScrollPane
 import javax.swing.ScrollPaneConstants
 
 @Title("Scroll Pane Binding")
@@ -42,13 +43,15 @@ class Scroll_Pane_Binding_Spec extends Specification
             var policy = Var.of(UI.Active.NEVER)
         when : 'We create a scroll panel and bind the property to it.'
             var ui = UI.scrollPane().withVerticalScrollBarPolicy(policy)
-        then : 'The property was successfully bound to the UI.'
-            ui != null
+        and : 'Then we build the scroll pane:'
+            var pane = ui.get(JScrollPane)
+        then : 'The component was successfully created, and the property is now bound to it.'
+            pane != null
         when : 'We change and show the property value.'
             policy.set(UI.Active.ALWAYS)
             UI.sync()
         then : 'The UI was updated.'
-            ui.component.verticalScrollBarPolicy == ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS
+            pane.verticalScrollBarPolicy == ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS
     }
 
     def 'You can model the horizontal scroll bar policy us ing a view model property dynamically.'()
@@ -65,12 +68,14 @@ class Scroll_Pane_Binding_Spec extends Specification
             var policy = Var.of(UI.Active.ALWAYS)
         when : 'We create a scroll panel and bind the property to it.'
             var ui = UI.scrollPane().withHorizontalScrollBarPolicy(policy)
-        then : 'The property was successfully bound to the UI.'
-            ui != null
+        and : 'Then we build the scroll pane:'
+            var pane = ui.get(JScrollPane)
+        then : 'The component was successfully created, and the property is now bound to it.'
+            pane != null
         when : 'We change and show the property value.'
             policy.set(UI.Active.AS_NEEDED)
             UI.sync()
         then : 'The UI was updated.'
-            ui.component.horizontalScrollBarPolicy == ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED
+            pane.horizontalScrollBarPolicy == ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED
     }
 }

@@ -40,7 +40,7 @@ class Combo_Box_Specification extends Specification
         given : 'We pass the combo box to the Swing-Tree factory method.'
             var ui = UI.of(new JComboBox<>(new DefaultComboBoxModel<>(new String[]{"A", "B", "C"})))
         and : 'We unpack the combo box.'
-            var combo = ui.component
+            var combo = ui.get(JComboBox)
         expect : 'The underlying component is a combo box.'
             combo instanceof JComboBox
         and : 'It has the expected state:'
@@ -59,19 +59,21 @@ class Combo_Box_Specification extends Specification
     {
         given : 'We pass the combo box to the Swing-Tree factory method.'
             var ui = UI.comboBox("A", "B", "C")
+        and : 'We unpack the combo box.'
+            var combo = ui.get(JComboBox)
         expect : 'The underlying component is a combo box.'
-            ui.component instanceof JComboBox
+            combo instanceof JComboBox
         and : 'It has the expected state:'
-            ui.component.itemCount == 3
-            ui.component.getItemAt(0) == "A"
-            ui.component.getItemAt(1) == "B"
-            ui.component.getItemAt(2) == "C"
+            combo.itemCount == 3
+            combo.getItemAt(0) == "A"
+            combo.getItemAt(1) == "B"
+            combo.getItemAt(2) == "C"
         and : 'It is backed by a built in model.'
-            !(ui.component.model instanceof DefaultComboBoxModel)
-            ui.component.model.size == 3
-            ui.component.model.getElementAt(0) == "A"
-            ui.component.model.getElementAt(1) == "B"
-            ui.component.model.getElementAt(2) == "C"
+            !(combo.model instanceof DefaultComboBoxModel)
+            combo.model.size == 3
+            combo.model.getElementAt(0) == "A"
+            combo.model.getElementAt(1) == "B"
+            combo.model.getElementAt(2) == "C"
     }
 
     def 'A combo box created by Swing-Tree uses the provided item array as data model.'()
@@ -84,13 +86,15 @@ class Combo_Box_Specification extends Specification
         given : 'We create an array and pass it to the combo box factory method.'
             var items = new String[]{"A" , "B" , "C"}
             var ui = UI.comboBox(items)
+        and : 'We build a combo box component.'
+            var combo = ui.get(JComboBox)
         when : 'We modify the array...'
             items[0] = "D"
         then : 'The combo box is updated as well.'
-            ui.component.itemCount == 3
-            ui.component.getItemAt(0) == "D"
-            ui.component.getItemAt(1) == "B"
-            ui.component.getItemAt(2) == "C"
+            combo.itemCount == 3
+            combo.getItemAt(0) == "D"
+            combo.getItemAt(1) == "B"
+            combo.getItemAt(2) == "C"
     }
 
     def 'A combo box created by Swing-Tree uses the provided item list as data model.'()
@@ -103,14 +107,16 @@ class Combo_Box_Specification extends Specification
         given : 'We create an array and pass it to the combo box factory method.'
             var items = ["A" , "B" , "C"]
             var ui = UI.comboBox(items)
+        and : 'We build a combo box component.'
+            var combo = ui.get(JComboBox)
         when : 'We modify the list by adding an element in the middle...'
             items.add(1, "D")
         then : 'The combo box is updated as well.'
-            ui.component.itemCount == 4
-            ui.component.getItemAt(0) == "A"
-            ui.component.getItemAt(1) == "D"
-            ui.component.getItemAt(2) == "B"
-            ui.component.getItemAt(3) == "C"
+            combo.itemCount == 4
+            combo.getItemAt(0) == "A"
+            combo.getItemAt(1) == "D"
+            combo.getItemAt(2) == "B"
+            combo.getItemAt(3) == "C"
     }
 
     def 'A combo box can be made editable in a declarative way.'()
@@ -120,7 +126,7 @@ class Combo_Box_Specification extends Specification
                             .isEditableIf(true)
                             .withSelectedItem("B")
         and : 'We get the combo box.'
-            var combo = ui.component
+            var combo = ui.get(JComboBox)
         expect : 'The combo box is editable.'
             combo.isEditable()
         and : 'The selected item is set.'
@@ -145,7 +151,7 @@ class Combo_Box_Specification extends Specification
                             .isEditableIf(true)
                             .withSelectedItem("B")
         and : 'We get the combo box.'
-            var combo = ui.component
+            var combo = ui.get(JComboBox)
         expect : 'The combo box is editable.'
             combo.isEditable()
         and : 'The selected item is set.'
@@ -176,7 +182,7 @@ class Combo_Box_Specification extends Specification
         and : 'We create a combo box that is bound to the property and the list.'
             var ui = UI.comboBox(selection, options)
         and : 'We get the combo box.'
-            var combo = ui.component
+            var combo = ui.get(JComboBox)
         expect : 'The combo box is initialized with the current selection.'
             combo.getSelectedItem() == 42
         and : 'It also reports the correct selection index.'
@@ -222,7 +228,7 @@ class Combo_Box_Specification extends Specification
         and : 'We create a combo box that is bound to the property and the list.'
             var ui = UI.comboBox(selection, options)
         and : 'We get the combo box.'
-            var combo = ui.component
+            var combo = ui.get(JComboBox)
         expect : 'The combo box is initialized with the current selection.'
             combo.getSelectedItem() == 42
         and : 'It also reports the correct selection index.'
@@ -272,7 +278,7 @@ class Combo_Box_Specification extends Specification
         and : 'We create a combo box that is bound to the property and the list.'
             var ui = UI.comboBox(selection, options)
         and : 'We get the combo box.'
-            var combo = ui.component
+            var combo = ui.get(JComboBox)
         expect : 'The combo box is initialized with the current selection.'
             combo.getSelectedItem() == 42
         and : 'It also reports the correct selection index.'
@@ -313,7 +319,7 @@ class Combo_Box_Specification extends Specification
         and : 'We create a combo box that is bound to the property and the list.'
             var ui = UI.comboBox(selection, options)
         and : 'We get the combo box.'
-            var combo = ui.component
+            var combo = ui.get(JComboBox)
         expect : 'The combo box is initialized with the current selection.'
             combo.getSelectedItem() == 42
         and : 'It also reports the correct selection index.'
@@ -364,7 +370,7 @@ class Combo_Box_Specification extends Specification
                         UI.comboBox(selection, 73, 42, 17)
                         .isEditableIf(true)
         and : 'We get the combo box.'
-            var combo = ui.component
+            var combo = ui.get(JComboBox)
         expect : 'The combo box is initialized with the current selection.'
             combo.getSelectedItem() == 42
         and : 'It also reports the correct selection index.'
@@ -394,7 +400,7 @@ class Combo_Box_Specification extends Specification
                         UI.comboBox(selection, items)
                         .isEditableIf(true)
         and : 'We get the combo box.'
-            var combo = ui.component
+            var combo = ui.get(JComboBox)
         expect : 'The combo box is initialized with the current selection.'
             combo.getSelectedItem() == selection.get()
 
@@ -430,7 +436,7 @@ class Combo_Box_Specification extends Specification
                 comboBox(options)
 				.withSelectedItem(selected)
         and : 'We get the combo box.'
-            var combo = ui.component
+            var combo = ui.get(JComboBox)
 
 		when : 'We change the selected property to 1...'
 		    selected.set(1)
@@ -450,7 +456,7 @@ class Combo_Box_Specification extends Specification
                 comboBox(options).isEditableIf(true)
 				.withSelectedItem(selected)
         and : 'We get the combo box.'
-            var combo = ui.component
+            var combo = ui.get(JComboBox)
 
 		when : 'We change the selected property to 1...'
 		    selected.set(1)

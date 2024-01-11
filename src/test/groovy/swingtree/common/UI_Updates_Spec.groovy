@@ -40,7 +40,7 @@ class UI_Updates_Spec extends Specification
                     })
                 )
         and : 'We actually build the component:'
-            var panel = ui.component
+            var panel = ui.get(JPanel)
 
 
         when :

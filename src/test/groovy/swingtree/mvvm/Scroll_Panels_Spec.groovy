@@ -12,6 +12,8 @@ import swingtree.threading.EventProcessor
 import swingtree.UI
 import utility.Utility
 
+import javax.swing.JPanel
+
 @Title("Scroll Panels")
 @Narrative('''
 
@@ -85,16 +87,18 @@ class Scroll_Panels_Spec extends Specification
                     )
                 )
                 .add( UI.separator() )
-        then : 'The view was successfully created.'
-            ui != null
+        and : 'We build the root component:'
+            var panel = ui.get(JPanel)
+        then : 'It was successfully created.'
+            panel != null
         and : 'The view contains as many sub-views as the view model has entries.'
-            new Utility.Query(ui).findAll("sub-view").size() == vm.entries().size()
+            new Utility.Query(panel).findAll("sub-view").size() == vm.entries().size()
 
         when : 'We remove an item from the entry list.'
             vm.entries().removeAt(2)
             UI.sync()
         then : 'The view is updated accordingly.'
-            new Utility.Query(ui).findAll("sub-view").size() == vm.entries().size()
+            new Utility.Query(panel).findAll("sub-view").size() == vm.entries().size()
     }
 
     def 'Use a simple property list of Strings to populate a scroll panel.'()
@@ -144,22 +148,24 @@ class Scroll_Panels_Spec extends Specification
                     )
                 )
                 .add( UI.separator() )
+        and : 'We build the root component:'
+            var panel = ui.get(JPanel)
         then : 'The view was successfully created.'
-            ui != null
+            panel != null
         and : 'The view contains as many sub-views as the list has items.'
-            new Utility.Query(ui).findAll("sub-view").size() == list.size()
+            new Utility.Query(panel).findAll("sub-view").size() == list.size()
 
         when : 'We remove an item from the list.'
             list.removeAt(2)
             UI.sync()
         then : 'The view is updated.'
-            new Utility.Query(ui).findAll("sub-view").size() == list.size()
+            new Utility.Query(panel).findAll("sub-view").size() == list.size()
 
         when : 'We add an item to the list.'
             list.add("Six")
             UI.sync()
         then : 'The view is updated.'
-            new Utility.Query(ui).findAll("sub-view").size() == list.size()
+            new Utility.Query(panel).findAll("sub-view").size() == list.size()
     }
 
 }

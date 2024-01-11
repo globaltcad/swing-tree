@@ -9,6 +9,13 @@ import swingtree.SwingTree
 import swingtree.UI
 import swingtree.threading.EventProcessor
 
+import javax.swing.JButton
+import javax.swing.JFormattedTextField
+import javax.swing.JPanel
+import javax.swing.JRadioButton
+import javax.swing.JTextArea
+import javax.swing.JTextField
+
 @Title("Registering Event Handlers")
 @Narrative('''
         
@@ -47,7 +54,7 @@ class Event_Handling_Spec extends Specification
                     .onChange( it -> trace.add("7") )
 
         when : 'The button is clicked.'
-            ui.component.doClick()
+            ui.get(JRadioButton).doClick()
 
         then : 'The handlers are triggered in the same order as they were registered.'
             trace == ["1", "2", "3", "4", "5", "6", "7"]
@@ -77,7 +84,7 @@ class Event_Handling_Spec extends Specification
                     .onClick( it -> trace.add("7") )
 
         when : 'The button is clicked.'
-            ui.component.doClick()
+            ui.get(JButton).doClick()
 
         then : 'The handlers are triggered in the same order as they were registered.'
             trace == ["1", "2", "3", "4", "5", "6", "7"]
@@ -106,7 +113,7 @@ class Event_Handling_Spec extends Specification
                     .onResize( it -> trace.add("7") )
 
         when : 'The text field is resized.'
-            ui.component.setSize(100, 100)
+            ui.get(JFormattedTextField).setSize(100, 100)
             UI.sync()
 
         then : 'The handlers are triggered in the same order as they were registered.'
@@ -134,16 +141,18 @@ class Event_Handling_Spec extends Specification
                     .onShown( it -> trace.add("5") )
                     .onShown( it -> trace.add("6") )
                     .onShown( it -> trace.add("7") )
+        and : 'We actually build the component:'
+            var panel = ui.get(JTextArea)
 
         when : 'The text area is set to visible.'
-            ui.component.setVisible(true)
+            panel.setVisible(true)
             UI.sync()
         then : 'Nothing happens because the text area is already shown.'
             trace == []
 
         when : 'The text area is set to invisible and then visible again.'
-            ui.component.setVisible(false)
-            ui.component.setVisible(true)
+            panel.setVisible(false)
+            panel.setVisible(true)
             UI.sync()
         then : 'The handlers are triggered in the same order as they were registered.'
             trace == ["1", "2", "3", "4", "5", "6", "7"]
@@ -170,11 +179,13 @@ class Event_Handling_Spec extends Specification
                     .onEnter( it -> trace.add("5") )
                     .onEnter( it -> trace.add("6") )
                     .onEnter( it -> trace.add("7") )
+        and : 'We build the text field:'
+            var textField = ui.get(JTextField)
 
         when : 'Something is entered in the text field.'
-            ui.component.setText("Some other content...")
+            textField.setText("Some other content...")
             // We trigger the "enter" event by simulating an enter key press (which causes the action listener to be triggered).
-            ui.component.postActionEvent()
+            textField.postActionEvent()
             UI.sync()
 
         then : 'The handlers are triggered in the same order as they were registered.'
@@ -202,11 +213,13 @@ class Event_Handling_Spec extends Specification
                     .onEnter( it -> trace.add("5") )
                     .onEnter( it -> trace.add("6") )
                     .onEnter( it -> trace.add("7") )
+        and : 'We build the formatted text field:'
+            var formattedTextField = ui.get(JFormattedTextField)
 
         when : 'Something is entered in the text field.'
-            ui.component.setText("Some other content...")
+            formattedTextField.setText("Some other content...")
             // We trigger the "enter" event by simulating an enter key press (which causes the action listener to be triggered).
-            ui.component.postActionEvent()
+            formattedTextField.postActionEvent()
             UI.sync()
 
         then : 'The handlers are triggered in the same order as they were registered.'
@@ -260,7 +273,7 @@ class Event_Handling_Spec extends Specification
             ui = ui.onContentChange( it -> trace.add(it.component.text) )
 
         when : 'The text area content is changed.'
-            UI.runNow { ui.component.setText("Some other content...") }
+            UI.runNow { ui.get(JTextArea).setText("Some other content...") }
             UI.sync()
 
         then : 'The handler is triggered.'
@@ -285,7 +298,7 @@ class Event_Handling_Spec extends Specification
             ui = ui.onTextChange( it -> trace.add(it.component.text) )
 
         when : 'The text area content is changed.'
-            UI.runNow { ui.component.setText("Some other content...") }
+            UI.runNow { ui.get(JTextArea).setText("Some other content...") }
             UI.sync()
 
         then : 'The handler is triggered.'
@@ -314,7 +327,7 @@ class Event_Handling_Spec extends Specification
                 })
 
         when : 'The text area content is changed.'
-            UI.runNow { ui.component.document.insertString(5, "other ", null) }
+            UI.runNow { ui.get(JTextArea).document.insertString(5, "other ", null) }
             UI.sync()
 
         then : 'The handler is not triggered.'
@@ -344,7 +357,7 @@ class Event_Handling_Spec extends Specification
                 })
 
         when : 'The text area content is changed.'
-            UI.runNow { ui.component.document.remove(5, 5) }
+            UI.runNow { ui.get(JTextArea).document.remove(5, 5) }
             UI.sync()
 
         then : 'The handler is not triggered.'
@@ -376,7 +389,7 @@ class Event_Handling_Spec extends Specification
                 })
 
         when : 'The text area content is changed.'
-            UI.runNow { ui.component.setText("Some other content...") }
+            UI.runNow { ui.get(JTextArea).setText("Some other content...") }
             UI.sync()
 
         then : 'The handler was triggered.'
@@ -403,7 +416,7 @@ class Event_Handling_Spec extends Specification
                    .onTextReplace( it -> trace.add("7") )
 
         when : 'The text area content is changed.'
-            UI.runNow { ui.component.setText("Some other content...") }
+            UI.runNow { ui.get(JTextArea).setText("Some other content...") }
             UI.sync()
 
         then : 'The handlers are triggered in the correct order.'
@@ -440,7 +453,7 @@ class Event_Handling_Spec extends Specification
                         .on(observable, it -> trace.add("1"))
                     )
         and : 'We actually build the component:'
-            var panel = ui.component
+            var panel = ui.get(JPanel)
 
         when : 'The observable is triggered.'
             observable.fire()
@@ -480,7 +493,7 @@ class Event_Handling_Spec extends Specification
                         .onView(property, it -> trace.add(it.event.get()))
                     )
         and : 'We actually build the component:'
-            var panel = ui.component
+            var panel = ui.get(JPanel)
 
         when : 'The property is triggered.'
             property.set("I am a different text field")

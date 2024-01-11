@@ -7,6 +7,7 @@ import swingtree.SwingTree
 import swingtree.threading.EventProcessor
 import swingtree.UI
 
+import javax.swing.JLabel
 import javax.swing.UIManager
 import javax.swing.border.CompoundBorder
 import javax.swing.plaf.metal.MetalButtonUI
@@ -115,7 +116,7 @@ class Style_Animations_Spec extends Specification
                             )
                         )
         and : 'We actually build the component:'
-            var label = ui.component
+            var label = ui.get(JLabel)
 
         expect : """
             When the user clicks on the label, the border width of the label

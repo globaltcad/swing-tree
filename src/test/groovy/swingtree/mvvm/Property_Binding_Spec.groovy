@@ -8,8 +8,10 @@ import sprouts.Val
 import sprouts.Var
 import swingtree.SwingTree
 import swingtree.UI
+import swingtree.components.JSplitButton
 import swingtree.threading.EventProcessor
 
+import javax.swing.JPanel
 import java.awt.*
 
 @Title("Binding Properties to UI Components")
@@ -58,15 +60,17 @@ class Property_Binding_Spec extends Specification
         and : 'We create a property representing the size of a component.'
             Val<Dimension> size = Var.of(new Dimension(100, 100))
         and : 'We create a UI to which we want to bind:'
-            var node = UI.panel("fill, wrap 1")
+            var ui = UI.panel("fill, wrap 1")
                         .add(UI.label("Hello World").withPrefSize(size))
                         .add(UI.button("Click Me").withMinSize(size))
                         .add(UI.textField("Hello World").withMaxSize(size))
+        and : 'We build the component:'
+            var panel = ui.get(JPanel)
 
         expect : 'The components will have the size of the property.'
-            node.component.components[0].preferredSize == new Dimension((int)(100 * uiScale), (int)(100 * uiScale))
-            node.component.components[1].minimumSize == new Dimension((int)(100 * uiScale), (int)(100 * uiScale))
-            node.component.components[2].maximumSize == new Dimension((int)(100 * uiScale), (int)(100 * uiScale))
+            panel.components[0].preferredSize == new Dimension((int)(100 * uiScale), (int)(100 * uiScale))
+            panel.components[1].minimumSize == new Dimension((int)(100 * uiScale), (int)(100 * uiScale))
+            panel.components[2].maximumSize == new Dimension((int)(100 * uiScale), (int)(100 * uiScale))
 
         when : 'We change the value of the property.'
             size.set(new Dimension(200, 200))
@@ -74,9 +78,9 @@ class Property_Binding_Spec extends Specification
             UI.sync()
 
         then : 'The components will have the new sizes.'
-            node.component.components[0].preferredSize == new Dimension((int)(200 * uiScale), (int)(200 * uiScale))
-            node.component.components[1].minimumSize == new Dimension((int)(200 * uiScale), (int)(200 * uiScale))
-            node.component.components[2].maximumSize == new Dimension((int)(200 * uiScale), (int)(200 * uiScale))
+            panel.components[0].preferredSize == new Dimension((int)(200 * uiScale), (int)(200 * uiScale))
+            panel.components[1].minimumSize == new Dimension((int)(200 * uiScale), (int)(200 * uiScale))
+            panel.components[2].maximumSize == new Dimension((int)(200 * uiScale), (int)(200 * uiScale))
         where : """
             We use the following integer scaling factors simulating different high DPI scenarios.
             Note that usually the UI is scaled by 1, 1.5 an 2 (for 4k screens for example).
@@ -102,14 +106,16 @@ class Property_Binding_Spec extends Specification
             Var<Integer> prefHeight = Var.of(40)
             Var<Integer> maxWidth = Var.of(90)
         and : 'We create a UI to which we want to bind:'
-            var node = UI.panel("fill, wrap 1")
+            var ui = UI.panel("fill, wrap 1")
                         .add(UI.label("Hello World").withMinWidth(minWidth))
                         .add(UI.button("Click Me").withPrefHeight(prefHeight))
                         .add(UI.textField("Hello World").withMaxWidth(maxWidth))
+        and : 'We build the component:'
+            var panel = ui.get(JPanel)
         expect : 'The components will have the sizes of the properties.'
-            node.component.components[0].minimumSize.width == (int) ( 60 * uiScale )
-            node.component.components[1].preferredSize.height == (int) ( 40 * uiScale )
-            node.component.components[2].maximumSize.width == (int) ( 90 * uiScale )
+            panel.components[0].minimumSize.width == (int) ( 60 * uiScale )
+            panel.components[1].preferredSize.height == (int) ( 40 * uiScale )
+            panel.components[2].maximumSize.width == (int) ( 90 * uiScale )
 
         when : 'We change the value of the properties.'
             minWidth.set(100)
@@ -119,9 +125,9 @@ class Property_Binding_Spec extends Specification
             UI.sync()
 
         then : 'The components will have the new sizes.'
-            node.component.components[0].minimumSize.width == (int) ( 100 * uiScale )
-            node.component.components[1].preferredSize.height == (int) ( 80 * uiScale )
-            node.component.components[2].maximumSize.width == (int) ( 120 * uiScale )
+            panel.components[0].minimumSize.width == (int) ( 100 * uiScale )
+            panel.components[1].preferredSize.height == (int) ( 80 * uiScale )
+            panel.components[2].maximumSize.width == (int) ( 120 * uiScale )
         where :
             uiScale << [1f, 1.5f, 2f]
     }
@@ -142,14 +148,16 @@ class Property_Binding_Spec extends Specification
             Var<Integer> width = Var.of(60)
             Var<Integer> height = Var.of(40)
         and : 'We create a UI to which we want to bind:'
-            var node = UI.panel("fill, wrap 1")
+            var ui = UI.panel("fill, wrap 1")
                         .add(UI.label("Hello World").withMinSize(width, height))
                         .add(UI.toggleButton("Click Me").withPrefSize(width, height))
                         .add(UI.textArea("Hello World").withMaxSize(width, height))
+        and : 'We build the component:'
+            var panel = ui.get(JPanel)
         expect : 'The components will have the sizes of the properties.'
-            node.component.components[0].minimumSize == new Dimension(60 * uiScale, 40 * uiScale)
-            node.component.components[1].preferredSize == new Dimension(60 * uiScale, 40 * uiScale)
-            node.component.components[2].maximumSize == new Dimension(60 * uiScale, 40 * uiScale)
+            panel.components[0].minimumSize == new Dimension(60 * uiScale, 40 * uiScale)
+            panel.components[1].preferredSize == new Dimension(60 * uiScale, 40 * uiScale)
+            panel.components[2].maximumSize == new Dimension(60 * uiScale, 40 * uiScale)
 
         when : 'We change the value of the properties.'
             width.set(100)
@@ -158,9 +166,9 @@ class Property_Binding_Spec extends Specification
             UI.sync()
 
         then : 'The components will have the new sizes.'
-            node.component.components[0].minimumSize == new Dimension(100 * uiScale, 80 * uiScale)
-            node.component.components[1].preferredSize == new Dimension(100 * uiScale, 80 * uiScale)
-            node.component.components[2].maximumSize == new Dimension(100 * uiScale, 80 * uiScale)
+            panel.components[0].minimumSize == new Dimension(100 * uiScale, 80 * uiScale)
+            panel.components[1].preferredSize == new Dimension(100 * uiScale, 80 * uiScale)
+            panel.components[2].maximumSize == new Dimension(100 * uiScale, 80 * uiScale)
         where : """
             We use the following integer scaling factors simulating different high DPI scenarios.
             Note that usually the UI is scaled by 1, 1.5 an 2 (for 4k screens for example).
@@ -174,13 +182,15 @@ class Property_Binding_Spec extends Specification
         given : 'We create a property representing the color of a component.'
             Val<Color> property = Var.of(Color.RED)
         and : 'We create a UI to which we want to bind:'
-            var node = UI.panel("fill, wrap 1")
+            var ui = UI.panel("fill, wrap 1")
                         .add(UI.button("Click Me!"))
                         .add(UI.label("I have a Background").withBackground(property))
                         .add(UI.textField("Hello World"))
+        and : 'We build the component:'
+            var panel = ui.get(JPanel)
 
         expect : 'The label will have the background color of the property.'
-            node.component.components[1].background == Color.RED
+            panel.components[1].background == Color.RED
 
         when : 'We change the value of the property.'
             property.set(Color.BLUE)
@@ -188,7 +198,7 @@ class Property_Binding_Spec extends Specification
             UI.sync()
 
         then : 'The label will have the new color.'
-            node.component.components[1].background == Color.BLUE
+            panel.components[1].background == Color.BLUE
     }
 
     def 'We can bind to the text of a component.'()
@@ -196,13 +206,15 @@ class Property_Binding_Spec extends Specification
         given : 'We create a property representing the text of a component.'
             Val<String> property = Var.of("Hello World")
         and : 'We create a UI to which we want to bind:'
-            var node = UI.panel("fill, wrap 1")
+            var ui = UI.panel("fill, wrap 1")
                         .add(UI.button("Click Me!"))
                         .add(UI.textField("Hello World").withText(property))
                         .add(UI.checkBox("Hello World"))
+        and : 'We build the component:'
+            var panel = ui.get(JPanel)
 
         expect : 'The text field will have the text of the property.'
-            node.component.components[1].text == "Hello World"
+            panel.components[1].text == "Hello World"
 
         when : 'We change the value of the property.'
             property.set("Goodbye World")
@@ -210,7 +222,7 @@ class Property_Binding_Spec extends Specification
             UI.sync()
 
         then : 'The text field will have the new text.'
-            node.component.components[1].text == "Goodbye World"
+            panel.components[1].text == "Goodbye World"
     }
 
     def 'We can enable and disable a UI component dynamically through property binding.'()
@@ -218,13 +230,15 @@ class Property_Binding_Spec extends Specification
         given : 'We create a property representing the enabled state of a component.'
             Val<Boolean> property = Var.of(true)
         and : 'We create a UI to which we want to bind:'
-            var node = UI.panel("fill, wrap 1")
+            var ui = UI.panel("fill, wrap 1")
                         .add(UI.label("Below me is a spinner!"))
                         .add(UI.spinner().isEnabledIf(property))
                         .add(UI.textArea("I am here for decoration..."))
+        and : 'We build the component:'
+            var panel = ui.get(JPanel)
 
         expect : 'The spinner will be enabled.'
-            node.component.components[1].enabled == true
+            panel.components[1].enabled == true
 
         when : 'We change the value of the property.'
             property.set(false)
@@ -232,7 +246,7 @@ class Property_Binding_Spec extends Specification
             UI.sync()
 
         then : 'The spinner will be disabled.'
-            node.component.components[1].enabled == false
+            panel.components[1].enabled == false
     }
 
     def 'We can select or unselect a UI component dynamically through properties.'()
@@ -240,12 +254,14 @@ class Property_Binding_Spec extends Specification
         given : 'We create a property representing the selected state of a component.'
             Val<Boolean> property = Var.of(true)
         and : 'We create a UI to which we want to bind:'
-            var node = UI.panel("fill, wrap 1")
+            var ui = UI.panel("fill, wrap 1")
                         .add(UI.label("Below me is a checkbox!"))
                         .add(UI.checkBox("I am a checkbox").isSelectedIf(property))
                         .add(UI.textArea("I am here for decoration..."))
+        and : 'We build the component:'
+            var panel = ui.get(JPanel)
         expect : 'The checkbox will be selected.'
-            node.component.components[1].selected == true
+           panel.components[1].selected == true
 
         when : 'We change the value of the property.'
             property.set(false)
@@ -253,7 +269,7 @@ class Property_Binding_Spec extends Specification
             UI.sync()
 
         then : 'The checkbox will be unselected.'
-            node.component.components[1].selected == false
+            panel.components[1].selected == false
     }
 
     def 'Enable or disable the split items of a JSplitButton through properties.'()
@@ -261,13 +277,15 @@ class Property_Binding_Spec extends Specification
         given : 'We create a property representing the enabled state of a component.'
             Val<Boolean> property = Var.of(true)
         and : 'We create a UI to which we want to bind:'
-            var node = UI.splitButton("I am a split button")
+            var ui = UI.splitButton("I am a split button")
                             .add(UI.splitItem("I am a button").isEnabledIf(property))
                             .add(UI.splitItem("I am a button"))
                             .add(UI.splitItem("I am a button"))
+        and : 'We build the component:'
+            var splitButton = ui.get(JSplitButton)
 
         expect : 'The first split item will be enabled.'
-            node.component.popupMenu.components[0].enabled == true
+            splitButton.popupMenu.components[0].enabled == true
 
         when : 'We change the value of the property.'
             property.set(false)
@@ -275,7 +293,7 @@ class Property_Binding_Spec extends Specification
             UI.sync()
 
         then : 'The first split item will be disabled.'
-            node.component.popupMenu.components[0].enabled == false
+            splitButton.popupMenu.components[0].enabled == false
     }
 
     def 'The visibility of a UI component can be modelled dynamically using boolean properties.'()
@@ -283,15 +301,17 @@ class Property_Binding_Spec extends Specification
         given : 'We create a property representing the visibility state of a component.'
             Val<Boolean> property = Var.of(true)
         and : 'We create a UI to which we want to bind:'
-            var node = UI.panel("fill, wrap 1")
+            var ui = UI.panel("fill, wrap 1")
                         .add(UI.label("Below me is a spinner!"))
                         .add(UI.spinner().isVisibleIf(property))
                         .add(UI.textArea("I am here for decoration..."))
                         .add(UI.slider(UI.Align.VERTICAL).isVisibleIfNot(property))
+        and : 'We build the component:'
+            var panel = ui.get(JPanel)
         expect : 'The spinner will be visible.'
-            node.component.components[1].visible == true
+            panel.components[1].visible == true
         and : 'The slider will be invisible.'
-            node.component.components[3].visible == false
+            panel.components[3].visible == false
 
         when : 'We change the value of the property.'
             property.set(false)
@@ -299,9 +319,9 @@ class Property_Binding_Spec extends Specification
             UI.sync()
 
         then : 'The spinner will be invisible.'
-            node.component.components[1].visible == false
+            panel.components[1].visible == false
         and : 'The slider will be visible.'
-            node.component.components[3].visible == true
+            panel.components[3].visible == true
     }
 
     def 'The visibility of a UI component can be modelled using an enum property.'()
@@ -324,10 +344,12 @@ class Property_Binding_Spec extends Specification
                         .add(UI.label("If you accept the terms we can proceed!"))
                         .add(UI.button("Yes proceed!").isVisibleIf(Accept.YES, property))
                         .add(UI.label("Maybe or No is not enough :/").isVisibleIfNot(Accept.YES, property))
+        and : 'We build the component:'
+            var panel = ui.get(JPanel)
         expect : 'Initially the bound button will be visible.'
-            ui.component.components[1].visible == true
+            panel.components[1].visible == true
         and : 'The bound label will be invisible.'
-            ui.component.components[2].visible == false
+            panel.components[2].visible == false
 
         when : 'We change the value of the property.'
             property.set(Accept.NO)
@@ -335,9 +357,9 @@ class Property_Binding_Spec extends Specification
             UI.sync()
 
         then : 'The bound button will be invisible.'
-            ui.component.components[1].visible == false
+            panel.components[1].visible == false
         and : 'The bound label will be visible.'
-            ui.component.components[2].visible == true
+            panel.components[2].visible == true
     }
 
     def 'The enabled/disabled state of a UI component can be modelled using an enum property.'()
@@ -359,10 +381,12 @@ class Property_Binding_Spec extends Specification
                         .add(UI.label("If you accept the terms we can proceed!"))
                         .add(UI.button("Yes proceed!").isEnabledIf(Accept.YES, property))
                         .add(UI.label("Maybe or No is not enough :/").isEnabledIfNot(Accept.YES, property))
+        and : 'We build the component:'
+            var panel = ui.get(JPanel)
         expect : 'Initially the bound button will be enabled.'
-            ui.component.components[1].enabled == true
+            panel.components[1].enabled == true
         and : 'The bound label will be disabled.'
-            ui.component.components[2].enabled == false
+            panel.components[2].enabled == false
 
         when : 'We change the value of the property.'
             property.set(Accept.NO)
@@ -370,9 +394,9 @@ class Property_Binding_Spec extends Specification
             UI.sync()
 
         then : 'The bound button will be disabled.'
-            ui.component.components[1].enabled == false
+            panel.components[1].enabled == false
         and : 'The bound label will be enabled.'
-            ui.component.components[2].enabled == true
+            panel.components[2].enabled == true
     }
 
     def 'The focusability of a UI component can be modelled using an enum property.'()
@@ -394,10 +418,12 @@ class Property_Binding_Spec extends Specification
                         .add(UI.label("If you accept the terms we can proceed!"))
                         .add(UI.button("Yes proceed!").isFocusableIf(Accept.YES, property))
                         .add(UI.label("Maybe or No is not enough :/").isFocusableIfNot(Accept.YES, property))
+        and : 'We build the component:'
+            var panel = ui.get(JPanel)
         expect : 'Initially the bound button will be focusable.'
-            ui.component.components[1].focusable == true
+            panel.components[1].focusable == true
         and : 'The bound label will be unfocusable.'
-            ui.component.components[2].focusable == false
+            panel.components[2].focusable == false
 
         when : 'We change the value of the property.'
             property.set(Accept.NO)
@@ -405,9 +431,9 @@ class Property_Binding_Spec extends Specification
             UI.sync()
 
         then : 'The bound button will be unfocusable.'
-            ui.component.components[1].focusable == false
+            panel.components[1].focusable == false
         and : 'The bound label will be focusable.'
-            ui.component.components[2].focusable == true
+            panel.components[2].focusable == true
     }
 
     def 'The focusability of a UI component can be modelled dynamically using boolean properties.'()
@@ -415,15 +441,17 @@ class Property_Binding_Spec extends Specification
         given : 'We create a property representing the focusability state of a component.'
             Val<Boolean> property = Var.of(true)
         and : 'We create a UI to which we want to bind:'
-            var node = UI.panel("fill, wrap 1")
+            var ui = UI.panel("fill, wrap 1")
                         .add(UI.label("Below me is a spinner!"))
                         .add(UI.spinner().isFocusableIf(property))
                         .add(UI.textArea("I am here for decoration..."))
                         .add(UI.slider(UI.Align.VERTICAL).isFocusableIfNot(property))
+        and : 'We build the component:'
+            var panel = ui.get(JPanel)
         expect : 'The spinner will be focusable.'
-            node.component.components[1].focusable == true
+            panel.components[1].focusable == true
         and : 'The slider will be unfocusable.'
-            node.component.components[3].focusable == false
+            panel.components[3].focusable == false
 
         when : 'We change the value of the property.'
             property.set(false)
@@ -431,9 +459,9 @@ class Property_Binding_Spec extends Specification
             UI.sync()
 
         then : 'The spinner will be unfocusable.'
-            node.component.components[1].focusable == false
+            panel.components[1].focusable == false
         and : 'The slider will be focusable.'
-            node.component.components[3].focusable == true
+            panel.components[3].focusable == true
     }
 
     def 'Minimum as well as maximum height of UI components can be modelled using integer properties.'( int uiScale )
@@ -451,16 +479,18 @@ class Property_Binding_Spec extends Specification
         and : 'We create a property representing the minimum and maximum height.'
             Val<Integer> property = Var.of(50)
         and : 'We create a UI to which we want to bind:'
-            var node = UI.panel("fill, wrap 1")
+            var ui = UI.panel("fill, wrap 1")
                         .add(UI.label("Below me is a text area!"))
                         .add(UI.textArea("hi").withMinHeight(property))
                         .add(UI.label("Below me is another text area!"))
                         .add(UI.textArea("Hey").withMaxHeight(property))
+        and : 'We build the component:'
+            var panel = ui.get(JPanel)
 
         expect : 'The minimum height of the first text area will be 50 * uiScale.'
-            node.component.components[1].minimumSize.height == 50 * uiScale
+            panel.components[1].minimumSize.height == 50 * uiScale
         and : 'The maximum height of the second text area will be 50 * uiScale.'
-            node.component.components[3].maximumSize.height == 50 * uiScale
+            panel.components[3].maximumSize.height == 50 * uiScale
 
         when : 'We change the value of the property.'
             property.set(100)
@@ -468,9 +498,9 @@ class Property_Binding_Spec extends Specification
             UI.sync()
 
         then : 'The minimum height of the first text area will be 100 * uiScale.'
-            node.component.components[1].minimumSize.height == 100 * uiScale
+            panel.components[1].minimumSize.height == 100 * uiScale
         and : 'The maximum height of the second text area will be 100 * uiScale.'
-            node.component.components[3].maximumSize.height == 100 * uiScale
+            panel.components[3].maximumSize.height == 100 * uiScale
 
         where : """
             We use the following integer scaling factors simulating different high DPI scenarios.
@@ -497,20 +527,22 @@ class Property_Binding_Spec extends Specification
             Val<Integer> widthProperty = Var.of(50)
             Val<Integer> heightProperty = Var.of(100)
         and : 'We create a UI to which we want to bind:'
-            var node = UI.panel("fill, wrap 1")
+            var ui = UI.panel("fill, wrap 1")
                         .add(UI.label("Below me is a text area!"))
                         .add(UI.textArea("hi").withWidth(widthProperty).withHeight(heightProperty))
                         .add(UI.label("Below me is another text area!"))
                         .add(UI.textArea("Hey").withWidth(heightProperty).withHeight(widthProperty))
+        and : 'We build the component:'
+            var panel = ui.get(JPanel)
 
         expect : 'The width of the first text area will be 50 * uiScale.'
-            node.component.components[1].size.width == 50 * uiScale
+            panel.components[1].size.width == 50 * uiScale
         and : 'The height of the first text area will be 100 * uiScale.'
-            node.component.components[1].size.height == 100 * uiScale
+            panel.components[1].size.height == 100 * uiScale
         and : 'The width of the second text area will be 100 * uiScale.'
-            node.component.components[3].size.width == 100 * uiScale
+            panel.components[3].size.width == 100 * uiScale
         and : 'The height of the second text area will be 50 * uiScale.'
-            node.component.components[3].size.height == 50 * uiScale
+            panel.components[3].size.height == 50 * uiScale
 
         when : 'We change the value of the property.'
             widthProperty.set(100)
@@ -519,10 +551,10 @@ class Property_Binding_Spec extends Specification
             UI.sync()
 
         then : 'The dimensions of both UI components will be as expected.'
-            node.component.components[1].size.width == 100 * uiScale
-            node.component.components[1].size.height == 50 * uiScale
-            node.component.components[3].size.width == 50 * uiScale
-            node.component.components[3].size.height == 100 * uiScale
+            panel.components[1].size.width == 100 * uiScale
+            panel.components[1].size.height == 50 * uiScale
+            panel.components[3].size.width == 50 * uiScale
+            panel.components[3].size.height == 100 * uiScale
 
         where : """
             We use the following integer scaling factors simulating different high DPI scenarios.
@@ -548,31 +580,33 @@ class Property_Binding_Spec extends Specification
                         UI.panel("fill, wrap 1")
                         .add(UI.label("Below me is a text area!"))
                         .add(UI.textArea("hi").withForegroundIf(conditionProperty, color1Property, color2Property))
+        and : 'We build the component:'
+            var panel = ui.get(JPanel)
 
         expect : """
                 The foreground of the text area will be red, because the condition is true, 
                 meaning the first color is selected!
             """
-            ui.component.components[1].foreground == Color.RED
+            panel.components[1].foreground == Color.RED
 
         when : 'We change the value of the condition property.'
             conditionProperty.set(false)
             UI.sync() // Wait for the EDT to complete the UI modifications...
         then : 'The foreground of the text area will now switch to blue, because the condition is false.'
-            ui.component.components[1].foreground == Color.BLUE
+            panel.components[1].foreground == Color.BLUE
 
         when : 'We change the value of the color properties.'
             color1Property.set(Color.GREEN)
             color2Property.set(Color.YELLOW)
             UI.sync() // Wait for the EDT to complete the UI modifications...
         then : 'The foreground of the text area will be yellow, because the condition is false.'
-            ui.component.components[1].foreground == Color.YELLOW
+            panel.components[1].foreground == Color.YELLOW
 
         when : 'We change the value of the condition property.'
             conditionProperty.set(true)
             UI.sync() // Wait for the EDT to complete the UI modifications...
         then : 'The foreground of the text area will be green, because the condition is true.'
-            ui.component.components[1].foreground == Color.GREEN
+            panel.components[1].foreground == Color.GREEN
     }
 
 }

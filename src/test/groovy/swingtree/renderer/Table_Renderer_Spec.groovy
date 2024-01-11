@@ -68,6 +68,8 @@ class Table_Renderer_Spec extends Specification
         """
         given : 'A simple table UI with a nested list based data table model.'
             var ui = UI.table(UI.ListData.ROW_MAJOR_EDITABLE, { [["a", "b", "c"], ["1", "2", "3"]] })
+        and : 'A component built using the above UI declaration:'
+            var table = ui.get(JTable)
         and : """
                 A mocked cell interpreter which interprets the state of the table cell
                 and then defines how it should be rendered (by setting a UI component).
@@ -75,19 +77,20 @@ class Table_Renderer_Spec extends Specification
             var render = Mock(Render.Cell.Interpreter)
 
         expect : 'The table UI has the following state:'
-            ui.component.getColumnName(0) == "A" // default column names
-            ui.component.getColumnName(1) == "B"
-            ui.component.getRowCount() == 2
-            ui.component.getValueAt(0, 0) == "a"
-            ui.component.getValueAt(0, 1) == "b"
+            table.getColumnName(0) == "A" // default column names
+            table.getColumnName(1) == "B"
+            table.getRowCount() == 2
+            table.getValueAt(0, 0) == "a"
+            table.getValueAt(0, 1) == "b"
 
         when : 'We build a table renderer for strings and pass our mocked renderer to it.'
             ui = ui.withRendererForColumn(1, UI.renderTable().when(String).as(render) )
+            table = ui.get(JTable)
         and : 'We we access the resulting TableCellRenderer instance from the UI.'
-            var found = ui.get(JTable)
-                    .columnModel
-                    .getColumn(1)
-                    .cellRenderer
+            var found = table
+                        .columnModel
+                        .getColumn(1)
+                        .cellRenderer
         and : 'Finally we access the component from the renderer (which is responsible for the actual rendering).'
             found.getTableCellRendererComponent(null, "1", false, false, 0, 0)
 
@@ -104,6 +107,8 @@ class Table_Renderer_Spec extends Specification
         """
         given :
             var ui = UI.table(UI.ListData.COLUMN_MAJOR_EDITABLE, { [["a", "b", "c"], ["1", "2", "3"]] })
+        and : 'A component built using the above UI declaration:'
+            var table = ui.get(JTable)
         and : """
                 A mocked cell interpreter which interprets the state of the table cell
                 and then defines how it should be rendered (by setting a UI component).
@@ -111,20 +116,21 @@ class Table_Renderer_Spec extends Specification
             var render = Mock(Render.Cell.Interpreter)
 
         expect : 'The table UI has the following state:'
-            ui.component.getColumnName(0) == "A" // default column names
-            ui.component.getColumnName(1) == "B"
-            ui.component.getRowCount() == 3
-            ui.component.getColumnCount() == 2
-            ui.component.getValueAt(0, 0) == "a"
-            ui.component.getValueAt(0, 1) == "1"
+            table.getColumnName(0) == "A" // default column names
+            table.getColumnName(1) == "B"
+            table.getRowCount() == 3
+            table.getColumnCount() == 2
+            table.getValueAt(0, 0) == "a"
+            table.getValueAt(0, 1) == "1"
 
         when : 'We build a table renderer for strings and pass our mocked renderer to it.'
             ui = ui.withRendererForColumn(1, UI.renderTable().when(String).as(render) )
+            table = ui.get(JTable)
         and :
-            var found = ui.get(JTable)
-                    .columnModel
-                    .getColumn(1)
-                    .cellRenderer
+            var found = table
+                            .columnModel
+                            .getColumn(1)
+                            .cellRenderer
         and : 'Finally we access the component from the renderer (which is responsible for the actual rendering).'
             found.getTableCellRendererComponent(null, "1", false, false, 0, 0)
 
@@ -142,6 +148,8 @@ class Table_Renderer_Spec extends Specification
         given : 'A simple table UI with a map based data table model.'
             var ui =
                     UI.table(UI.MapData.EDITABLE, { ["X":["a", "b", "c"], "Y":["1", "2", "3"]] })
+        and : 'A component built using the above UI declaration:'
+            var table = ui.get(JTable)
         and : """
                 A mocked cell interpreter which interprets the state of the table cell
                 and then defines how it should be rendered (by setting a UI component).
@@ -149,20 +157,21 @@ class Table_Renderer_Spec extends Specification
             var render = Mock(Render.Cell.Interpreter)
 
         expect : 'The table UI has the following state:'
-            ui.component.getColumnName(0) == "X"
-            ui.component.getColumnName(1) == "Y"
-            ui.component.getRowCount() == 3
-            ui.component.getColumnCount() == 2
-            ui.component.getValueAt(0, 0) == "a"
-            ui.component.getValueAt(0, 1) == "1"
+            table.getColumnName(0) == "X"
+            table.getColumnName(1) == "Y"
+            table.getRowCount() == 3
+            table.getColumnCount() == 2
+            table.getValueAt(0, 0) == "a"
+            table.getValueAt(0, 1) == "1"
 
         when : 'We build a table renderer for strings and pass our mocked renderer to it.'
             ui = ui.withRendererForColumn(1, UI.renderTable().when(String).as(render) )
+            table = ui.get(JTable)
         and : 'We we access the resulting TableCellRenderer instance from the UI.'
-            var found = ui.get(JTable)
-                        .columnModel
-                        .getColumn(1)
-                        .cellRenderer
+            var found = table
+                                .columnModel
+                                .getColumn(1)
+                                .cellRenderer
         and : 'Finally we access the component from the renderer (which is responsible for the actual rendering).'
             found.getTableCellRendererComponent(null, "1", false, false, 0, 0)
 

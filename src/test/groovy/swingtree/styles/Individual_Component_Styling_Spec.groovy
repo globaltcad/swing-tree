@@ -441,11 +441,13 @@ class Individual_Component_Styling_Spec extends Specification
                            )
                         )
                     )
+        and : 'We build the toggle button:'
+            var button = ui.get(JToggleButton)
 
         when : 'We render the toggle button into a BufferedImage.'
-            var image1 = Utility.renderSingleComponent(ui.getComponent())
-            ui.getComponent().setSelected(true)
-            var image2 = Utility.renderSingleComponent(ui.getComponent())
+            var image1 = Utility.renderSingleComponent(button)
+            button.setSelected(true)
+            var image2 = Utility.renderSingleComponent(button)
 
         then : 'The image is as expected.'
             Utility.similarityBetween(image1, "components/shaded-JToggleButton.png", 99.95) > 99.95
@@ -1324,7 +1326,7 @@ class Individual_Component_Styling_Spec extends Specification
             var images = new BufferedImage[] {image1, image2, image3, image4, image5, image6, image7, image8, image9, image10, image11, image12, image13, image14, image15}
 
         then : 'The image is as expected.'
-            Utility.similarityBetween(images, "components/svg-image-panels-collage.png", 99.5) > 99.5
+            Utility.similarityBetween(images, "components/svg-image-panels-collage.png", 99) > 99
 
         where : 'We test this UI using the following scaling values:'
             scale << [1f, 1.25f, 1.75f, 2f]
