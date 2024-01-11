@@ -8,15 +8,19 @@ import javax.swing.JComponent;
 import java.awt.event.ActionEvent;
 import java.lang.ref.WeakReference;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 public class FlipFlopStyler<C extends JComponent>
 {
+
     private final LifeTime          _lifetime;
     private final AnimatedStyler<C> _styler;
     private final WeakReference<C>  _owner;
 
     private AnimationState _state = null;
     private boolean _isOn = false;
+    private boolean _isCurrentlyRunningAnimation = false;
+    private DisposableAnimation _animation = null;
 
 
     FlipFlopStyler( C owner, LifeTime lifetime, AnimatedStyler<C> styler ) {
@@ -26,7 +30,7 @@ public class FlipFlopStyler<C extends JComponent>
     }
 
 
-    ComponentStyleDelegate<C> style(ComponentStyleDelegate<C> delegate ) {
+    ComponentStyleDelegate<C> style( ComponentStyleDelegate<C> delegate ) {
         AnimationState state = _state;
         if ( state == null )
             state = AnimationState.startOf(
@@ -44,32 +48,90 @@ public class FlipFlopStyler<C extends JComponent>
         C owner = _owner.get();
         if ( owner == null )
             return;
+
+        LifeTime lifetime = _lifetime;
+        long offset = 0;
+
+        if ( _isCurrentlyRunningAnimation ) {
+            if ( _animation != null ) {
+                _animation.dispose();
+                _animation = null;
+            }
+            /*
+                Now this is tricky! We are in the middle of an animation transitioning between
+                the on and off states. What we want is to start a new animation from the progress
+                of the current animation. So we need to calculate the time offset for the new animation
+                based on the progress of the current animation.
+            */
+            double progress = _state.progress();
+            if ( _isOn )
+                progress = 1 - progress;
+            long animationDuration = lifetime.getDurationIn(TimeUnit.MILLISECONDS);
+            offset = -(long) (animationDuration * progress);
+        }
+
+        _isCurrentlyRunningAnimation = true;
+
         if ( isOn ) {
-            Animator.animateFor(_lifetime, Stride.PROGRESSIVE, owner)
-                    .go(new Animation() {
-                        @Override
-                        public void run( AnimationState state ) {
-                            _state = state;
-                            _isOn = true;
-                        }
-                        @Override
-                        public void finish( AnimationState state ) {
-                            _state = AnimationState.endOf(state.lifeSpan(), Stride.REGRESSIVE, state.event());
-                        }
-                    });
+            _animation = new DisposableAnimation(new Animation() {
+                @Override
+                public void run( AnimationState state ) {
+                    _state = state;
+                    _isOn = true;
+                }
+                @Override
+                public void finish( AnimationState state ) {
+                    _state = AnimationState.endOf(state.lifeSpan(), Stride.REGRESSIVE, state.event());
+                    _isOn = true;
+                    _isCurrentlyRunningAnimation = false;
+                }
+            });
+            Animator.animateFor(lifetime, Stride.PROGRESSIVE, owner)
+                    .goWithOffset(offset, TimeUnit.MILLISECONDS, _animation);
         } else {
-            Animator.animateFor(_lifetime, Stride.REGRESSIVE, owner)
-                    .go(new Animation() {
-                        @Override
-                        public void run( AnimationState state ) {
-                            _state = state;
-                            _isOn = false;
-                        }
-                        @Override
-                        public void finish( AnimationState state ) {
-                            _state = AnimationState.endOf(state.lifeSpan(), Stride.PROGRESSIVE, state.event());
-                        }
-                    });
+            _animation = new DisposableAnimation(new Animation() {
+                @Override
+                public void run( AnimationState state ) {
+                    _state = state;
+                    _isOn = false;
+                }
+                @Override
+                public void finish( AnimationState state ) {
+                    _state = AnimationState.endOf(state.lifeSpan(), Stride.PROGRESSIVE, state.event());
+                    _isOn = false;
+                    _isCurrentlyRunningAnimation = false;
+                }
+            });
+            Animator.animateFor(lifetime, Stride.REGRESSIVE, owner)
+                    .goWithOffset(offset, TimeUnit.MILLISECONDS, _animation);
+        }
+    }
+
+
+    static class DisposableAnimation implements Animation
+    {
+        private Animation _animation;
+
+        DisposableAnimation( Animation animation ) {
+            _animation = Objects.requireNonNull(animation);
+        }
+
+        @Override
+        public void run(AnimationState state) {
+            if ( _animation != null )
+                _animation.run(state);
+        }
+
+        @Override
+        public void finish(AnimationState state) {
+            if ( _animation != null )
+                _animation.finish(state);
+
+            dispose();
+        }
+
+        public void dispose() {
+            _animation = null;
         }
     }
 

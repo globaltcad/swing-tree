@@ -14,7 +14,12 @@ public final class LifeSpan
         return new LifeSpan(lifeTime, System.currentTimeMillis() + lifeTime.getDelayIn(TimeUnit.MILLISECONDS));
     }
 
-    public static LifeSpan endingNowWith( LifeTime lifeTime ) {
+    public static LifeSpan startingNowWithOffset( long offset, TimeUnit unit, LifeTime lifeTime ) {
+        long inMillis = unit.toMillis(offset);
+        return new LifeSpan(lifeTime, System.currentTimeMillis() + inMillis);
+    }
+
+            public static LifeSpan endingNowWith( LifeTime lifeTime ) {
         return new LifeSpan(lifeTime, System.currentTimeMillis() - lifeTime.getDurationIn(TimeUnit.MILLISECONDS));
     }
 

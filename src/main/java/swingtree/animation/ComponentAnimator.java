@@ -26,13 +26,13 @@ class ComponentAnimator
 
     ComponentAnimator(
         Component     component, // may be null if the animation is not associated with a specific component
-        LifeTime      lifeTime,
+        LifeSpan      lifeSpan,
         Stride        stride,
         RunCondition  condition,
         Animation     animation
     ) {
         _compRef   = component == null ? null : new WeakReference<>(component);
-        _lifeSpan  = LifeSpan.startingNowWith(Objects.requireNonNull(lifeTime));
+        _lifeSpan  = Objects.requireNonNull(lifeSpan);
         _stride    = Objects.requireNonNull(stride);
         _condition = Objects.requireNonNull(condition);
         _animation = Objects.requireNonNull(animation);

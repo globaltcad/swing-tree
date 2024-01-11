@@ -5,6 +5,7 @@ import swingtree.ComponentDelegate;
 import java.awt.*;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 /**
@@ -138,7 +139,42 @@ public class Animator
      */
     public void go( Animation animation ) {
         RunCondition shouldRun = Optional.ofNullable(_condition).orElse( state -> state.repeats() == 0 );
-        AnimationRunner.add( new ComponentAnimator( _component, _lifeTime, _stride, shouldRun, animation ) );
+        AnimationRunner.add( new ComponentAnimator(
+                _component,
+                LifeSpan.startingNowWith(Objects.requireNonNull(_lifeTime)),
+                _stride,
+                shouldRun,
+                animation
+            ));
+    }
+
+    /**
+     *  Runs the given animation based on a time offset in the given time unit
+     *  and the stop condition defined by {@link #until(Predicate)} or {@link #asLongAs(Predicate)}.
+     *  If no stop condition was defined, the animation will be executed once.
+     *  If you want to run an animation forever, simply pass {@code state -> true} to
+     *  the {@link #asLongAs(Predicate)} method, or {@code state -> false} to the {@link #until(Predicate)} method.
+     *  <p>
+     *  This method is useful in cases where you want an animation to start in the future,
+     *  or somewhere in the middle of their lifespan progress (see {@link AnimationState#progress()}).
+     *
+     * @param offset The offset in the given time unit after which the animation should be executed.
+     *               This number may also be negative, in which case the animation will be executed
+     *               immediately, and with a {@link AnimationState#progress()} value that is
+     *               advanced according to the offset.
+     *
+     * @param unit The time unit in which the offset is specified.
+     * @param animation The animation that should be executed.
+     */
+    public void goWithOffset( long offset, TimeUnit unit, Animation animation ) {
+        RunCondition shouldRun = Optional.ofNullable(_condition).orElse( state -> state.repeats() == 0 );
+        AnimationRunner.add( new ComponentAnimator(
+                _component,
+                LifeSpan.startingNowWithOffset(offset, unit, Objects.requireNonNull(_lifeTime)),
+                _stride,
+                shouldRun,
+                animation
+            ));
     }
 
 }
