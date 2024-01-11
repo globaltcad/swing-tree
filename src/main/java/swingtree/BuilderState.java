@@ -131,17 +131,6 @@ final class BuilderState<C extends java.awt.Component>
                     "you may only do so through the builder instance returned by the most recent builder method call."
                 );
 
-        if ( _mode == Mode.FUNCTIONAL_FACTORY_BUILDER) {
-            C component = _componentFetcher.get();
-            _componentFetcher = () -> component;
-            /*
-                The component is fetched and stored in a local variable,
-                and then the component is wrapped in a new supplier which returns the component from the local variable.
-                This is done to ensure that the component is only built and fetched once,
-                and that the component is not built again when the component is fetched.
-            */
-        }
-
         return _componentType.cast(_componentFetcher.get());
     }
 
