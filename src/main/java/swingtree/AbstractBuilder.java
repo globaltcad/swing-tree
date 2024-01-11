@@ -346,7 +346,7 @@ abstract class AbstractBuilder<I, C extends Component>
                     BuilderState<C> proceduralBuilder =
                         new BuilderState<>(
                                 _state().eventProcessor(),
-                                BuilderState.Mode.PROCEDURAL,
+                                BuilderState.Mode.PROCEDURAL_OR_DECLARATIVE,
                                 _state().componentType(),
                                 ()->thisComponent
                             );

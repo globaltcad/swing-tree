@@ -33,9 +33,18 @@ final class BuilderState<C extends java.awt.Component>
 
     enum Mode
     {
-        DECLARATIVE, // Builder states get disposed after being used for building.
-        PROCEDURAL,  // Builder states do not get disposed after being used for building.
-        FUNCTIONAL   // The component mutations are composed into a factory pipeline and executed when the component is fetched.
+        /**
+         * The component mutations are composed into a factory pipeline and executed when the component is fetched.
+         */
+        FUNCTIONAL_FACTORY_BUILDER,
+        /**
+         *  Builder states get disposed after being used for building.
+         */
+        DECLARATIVE_ONLY,
+        /**
+         *  Builder states do not get disposed after being used for building.
+         */
+        PROCEDURAL_OR_DECLARATIVE
     }
 
     /**
@@ -66,7 +75,7 @@ final class BuilderState<C extends java.awt.Component>
     {
         this(
             SwingTree.get().getEventProcessor(),
-            Mode.FUNCTIONAL,
+            Mode.FUNCTIONAL_FACTORY_BUILDER,
             (Class<C>) type,
             ()->initializeComponent(componentSource.get()).get()
         );
@@ -76,7 +85,7 @@ final class BuilderState<C extends java.awt.Component>
     {
         this(
             SwingTree.get().getEventProcessor(),
-            Mode.DECLARATIVE,
+            Mode.DECLARATIVE_ONLY,
             (Class<C>) component.getClass(),
             initializeComponent(component)
         );
@@ -112,7 +121,7 @@ final class BuilderState<C extends java.awt.Component>
      *  @return The component managed by this builder.
      *  @throws IllegalStateException If this builder state is disposed (it's reference to the component is null).
      */
-    public C component()
+    C component()
     {
         if ( this.isDisposed() )
             throw new IllegalStateException(
@@ -122,7 +131,7 @@ final class BuilderState<C extends java.awt.Component>
                     "you may only do so through the builder instance returned by the most recent builder method call."
                 );
 
-        if ( _mode == Mode.FUNCTIONAL ) {
+        if ( _mode == Mode.FUNCTIONAL_FACTORY_BUILDER) {
             C component = _componentFetcher.get();
             _componentFetcher = () -> component;
             /*
@@ -141,7 +150,7 @@ final class BuilderState<C extends java.awt.Component>
      * And also which type of thread can access the component. <br>
      * <b>This will never return null.</b>
      */
-    public EventProcessor eventProcessor() {
+    EventProcessor eventProcessor() {
         return _eventProcessor;
     }
 
@@ -149,7 +158,7 @@ final class BuilderState<C extends java.awt.Component>
      *  The type class of the component managed by this builder. <br>
      *  <b>This will never return null.</b>
      */
-    public Class<C> componentType() {
+    Class<C> componentType() {
         return _componentType;
     }
 
@@ -158,7 +167,7 @@ final class BuilderState<C extends java.awt.Component>
      *  and dispose this builder node, meaning it is no longer usable for building. <br>
      *  <b>Only call this method from the UI thread (AWT's EDT thread) as builder states are not thread safe.</b>
      */
-    public void dispose() {
+    void dispose() {
         if ( !UI.thisIsUIThread() ) {
             Thread currentThread = Thread.currentThread();
             if ( !currentThread.getName().startsWith("Test worker") )
@@ -178,7 +187,7 @@ final class BuilderState<C extends java.awt.Component>
     /**
      *  @return True if this builder node has already been disposed.
      */
-    public boolean isDisposed() {
+    boolean isDisposed() {
         return _componentFetcher == null;
     }
 
@@ -198,7 +207,7 @@ final class BuilderState<C extends java.awt.Component>
                     "Make sure to only use the builder instance returned by the most recent builder method call."
                 );
 
-        if ( _mode != Mode.FUNCTIONAL )
+        if ( _mode != Mode.FUNCTIONAL_FACTORY_BUILDER)
             try {
                 componentMutator.accept(_componentFetcher.get());
             } catch ( Exception e ) {
@@ -215,18 +224,7 @@ final class BuilderState<C extends java.awt.Component>
 
         switch ( _mode) 
         {
-            case DECLARATIVE :
-            {
-                Supplier<C> componentFactory = _componentFetcher;
-                this.dispose(); // detach strong reference to the component to allow it to be garbage collected.
-                return new BuilderState<>(
-                        _eventProcessor,
-                        _mode,
-                        _componentType,
-                        componentFactory
-                    );
-            }
-            case FUNCTIONAL:
+            case FUNCTIONAL_FACTORY_BUILDER:
             {
                 Supplier<C> componentFactory = _componentFetcher;
                 this.dispose(); // detach strong reference to the component to allow it to be garbage collected.
@@ -239,9 +237,20 @@ final class BuilderState<C extends java.awt.Component>
                             componentMutator.accept(newComponent);
                             return newComponent;
                         }
+                );
+            }
+            case DECLARATIVE_ONLY:
+            {
+                Supplier<C> componentFactory = _componentFetcher;
+                this.dispose(); // detach strong reference to the component to allow it to be garbage collected.
+                return new BuilderState<>(
+                        _eventProcessor,
+                        _mode,
+                        _componentType,
+                        componentFactory
                     );
             }
-            case PROCEDURAL :
+            case PROCEDURAL_OR_DECLARATIVE:
             {
                 return this;
             }
