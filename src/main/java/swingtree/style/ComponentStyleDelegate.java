@@ -518,7 +518,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param radius The border radius in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided border radius.
      */
-    public ComponentStyleDelegate<C> borderRadius( int radius ) {
+    public ComponentStyleDelegate<C> borderRadius( double radius ) {
         return _withStyle(_style._withBorder(_style.border().withArcWidth(radius).withArcHeight(radius)));
     }
 
@@ -531,7 +531,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param arcHeight The border arc height in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided border arc width and arc height.
      */
-    public ComponentStyleDelegate<C> borderRadius( int arcWidth, int arcHeight ) {
+    public ComponentStyleDelegate<C> borderRadius( double arcWidth, double arcHeight ) {
         return _withStyle(_style._withBorder(_style.border().withArcWidth(arcWidth).withArcHeight(arcHeight)));
     }
 
@@ -544,7 +544,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param arcHeight The border arc height in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided border arc width and arc height for the specified corner.
      */
-    public ComponentStyleDelegate<C> borderRadiusAt( UI.Corner corner, int arcWidth, int arcHeight ) {
+    public ComponentStyleDelegate<C> borderRadiusAt( UI.Corner corner, double arcWidth, double arcHeight ) {
         return _withStyle(_style._withBorder(_style.border().withArcWidthAt(corner, arcWidth).withArcHeightAt(corner, arcHeight)));
     }
 
@@ -557,7 +557,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param radius The border radius in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided border radius for the specified corner.
      */
-    public ComponentStyleDelegate<C> borderRadiusAt( UI.Corner corner, int radius ) {
+    public ComponentStyleDelegate<C> borderRadiusAt( UI.Corner corner, double radius ) {
         return this.borderRadiusAt(corner, radius, radius);
     }
 

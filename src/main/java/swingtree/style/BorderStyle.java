@@ -175,7 +175,7 @@ final class BorderStyle
         return BorderStyle.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, padding, _borderColor, _gradients);
     }
 
-    BorderStyle withArcWidthAt( UI.Corner corner, int borderArcWidth ) {
+    BorderStyle withArcWidthAt( UI.Corner corner, double borderArcWidth ) {
         if ( corner == UI.Corner.EVERY )
             return this.withArcWidth(borderArcWidth);
         float arcHeight;
@@ -197,14 +197,14 @@ final class BorderStyle
         }
     }
 
-    BorderStyle withArcWidth( int borderArcWidth ) {
+    BorderStyle withArcWidth( double borderArcWidth ) {
         return this.withArcWidthAt(UI.Corner.TOP_LEFT,     borderArcWidth)
                    .withArcWidthAt(UI.Corner.TOP_RIGHT,    borderArcWidth)
                    .withArcWidthAt(UI.Corner.BOTTOM_LEFT,  borderArcWidth)
                    .withArcWidthAt(UI.Corner.BOTTOM_RIGHT, borderArcWidth);
     }
 
-    BorderStyle withArcHeightAt( UI.Corner corner, int borderArcHeight ) {
+    BorderStyle withArcHeightAt( UI.Corner corner, double borderArcHeight ) {
         if ( corner == UI.Corner.EVERY )
             return this.withArcHeight(borderArcHeight);
         float arcWidth;
@@ -226,7 +226,7 @@ final class BorderStyle
         }
     }
 
-    BorderStyle withArcHeight( int borderArcHeight ) {
+    BorderStyle withArcHeight( double borderArcHeight ) {
         return this.withArcHeightAt(UI.Corner.TOP_LEFT,     borderArcHeight)
                    .withArcHeightAt(UI.Corner.TOP_RIGHT,    borderArcHeight)
                    .withArcHeightAt(UI.Corner.BOTTOM_LEFT,  borderArcHeight)

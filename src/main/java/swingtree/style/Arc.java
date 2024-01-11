@@ -30,6 +30,10 @@ final class Arc
         return new Arc( arcWidth, arcHeight );
     }
 
+    static Arc of( double arcWidth, double arcHeight ) {
+        return Arc.of( (float) arcWidth, (float) arcHeight );
+    }
+
 
     private final float _arcWidth;
     private final float _arcHeight;
