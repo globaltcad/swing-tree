@@ -372,19 +372,22 @@ class Individual_Component_Styling_Spec extends Specification
             Utility.similarityBetween(image, "components/rounded-green-JLabel.png", 99.5) > 99.5
     }
 
-    def 'This is how you can create a JPanel with a shaded border.'()
+    def 'This is how you can create a JPanel with a gradient border.'()
     {
         reportInfo """
-            It is really simple to create a JPanel with a shaded border,
-            all you need to do is pass the style configuration to the style API.
+            It is really easy to create a `JPanel` (or any other component for that matter) 
+            with custom border gradients. <br>
+            All you need to do is pass the style configuration to the style API.
             SwingTree will dynamically install or uninstall a custom border on a component
-            depending on whether or not there are any style configurations defined for the component. <br>
-            Note that in this example we make the border extra wide so that you can see the difference.
+            depending on whether or not there are any style configurations defined for the component. 
             ${Utility.linkSnapshot('components/shaded-border-JPanel.png')}
             
-            It demonstrates how to style a JPanel with the style API.
+            Note that in this example we make the border extra wide so 
+            that you can see the difference.
+
+            Also note that we add a little shadow just to make it look a little bit more fancy.
         """
-        given : 'We create a UI with a green label.'
+        given : 'We pass the following style rules to the style API f a `JPanel`:'
             var ui =
                     UI.panel()
                     .withStyle( it -> it
@@ -404,10 +407,10 @@ class Individual_Component_Styling_Spec extends Specification
                         .font(new Font("Arial", Font.BOLD, 20))
                     )
 
-        when : 'We render the panel into a BufferedImage.'
+        when : 'We then render the panel into a BufferedImage...'
             var image = Utility.renderSingleComponent(ui.getComponent())
 
-        then : 'The image is as expected.'
+        then : 'The image is rendered as expected (compare with the snapshot above).'
             Utility.similarityBetween(image, "components/shaded-border-JPanel.png", 99.5) > 99.5
     }
 
