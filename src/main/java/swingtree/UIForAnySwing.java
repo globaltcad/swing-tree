@@ -9,7 +9,9 @@ import net.miginfocom.swing.MigLayout;
 import org.slf4j.Logger;
 import sprouts.Action;
 import sprouts.*;
+import sprouts.Event;
 import swingtree.animation.AnimationState;
+import swingtree.animation.Animator;
 import swingtree.animation.LifeTime;
 import swingtree.api.AnimatedStyler;
 import swingtree.api.Peeker;
@@ -2229,8 +2231,8 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This builder instance, which enables fluent method chaining.
      */
     public final I withTransitionalStyle(
-        Val<Boolean> transitionToggle,
-        LifeTime transitionLifeTime,
+        Val<Boolean>      transitionToggle,
+        LifeTime          transitionLifeTime,
         AnimatedStyler<C> styler
     ) {
         NullUtil.nullArgCheck(transitionToggle, "transitionToggle", Val.class);
@@ -2240,6 +2242,48 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
                     FlipFlopStyler<C> flipFlopStyler = new FlipFlopStyler<>(c, transitionLifeTime, styler);
                     ComponentExtension.from(c).addStyler(flipFlopStyler::style);
                     _onShow( transitionToggle, c, (comp, v) -> flipFlopStyler.set(v) );
+                })
+                ._this();
+    }
+
+    /**
+     *    Allows you to configure a style which will be applied to the component temporarily
+     *    when the provided {@link Event} is fired. The style will be applied for the provided
+     *    {@link LifeTime} and then removed again.
+     *    Here an example demonstrating how an event based style animation which temporarily
+     *    defines a custom background and border color on a label:
+     *    <pre>{@code
+     *      UI.label("I have a highlight animation!")
+     *      .withTemporaryStyle(vm.highlightEvent(), LifeTime.of(0.5, TimeUnit.SECONDS), (state, it) -> it
+     *          .backgroundColor(new Color(0, 0, 0, (int)(state.progress() * 255)))
+     *          .borderColor(new Color(255, 255, 255, (int)(state.progress() * 255)))
+     *      )
+     *    }</pre>
+     *
+     * @param styleEvent The {@link Event} which should trigger the style animation.
+     * @param styleLifeTime The {@link LifeTime} of the style animation.
+     * @param styler An {@link AnimatedStyler} lambda can define a set of style rules for the component wrapped by this builder
+     *               by receiving an {@link AnimationState} and a {@link swingtree.style.ComponentStyleDelegate} and returning
+     *               an updated version with the desired style rules applied.
+     *               The {@link AnimatedStyler} may apply the style properties according to the {@link AnimationState}
+     *               and its {@link AnimationState#progress()} method (or other methods) to create a smooth
+     *               transition between the 2 states.
+     *
+     * @return This builder instance, which enables fluent method chaining.
+     */
+    public final I withTemporaryStyle(
+        Event             styleEvent,
+        LifeTime          styleLifeTime,
+        AnimatedStyler<C> styler
+    ){
+        NullUtil.nullArgCheck(styleEvent, "styleEvent", Event.class);
+        NullUtil.nullArgCheck(styleLifeTime, "styleLifeTime", LifeTime.class);
+        NullUtil.nullArgCheck(styler, "styler", AnimatedStyler.class);
+        return _with( thisComponent -> {
+                    Animator.animateFor(styleLifeTime, thisComponent).go( state ->
+                        ComponentExtension.from(thisComponent)
+                            .addAnimationStyler(state, conf -> styler.style(state, conf))
+                    );
                 })
                 ._this();
     }
