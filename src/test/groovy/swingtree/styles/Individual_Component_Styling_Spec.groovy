@@ -223,9 +223,10 @@ class Individual_Component_Styling_Spec extends Specification
     {
         reportInfo """
             A border is a very common feature of Swing components and when it comes to styling
-            your UI elements should not overlap with the border.
-            This is why the styling API will make sure that the layout manager accounts for the border width
-            you specify in your style.
+            your UI, elements should not overlap with the border.
+            This is why the style engine of a component 
+            will make sure that the layout manager accounts for the border width
+            you have specified in your style.
             Internally the layout manager will indirectly know about the margins and paddings
             of your component through the `Border::getBorderInsets(Component)` method.
         """
@@ -903,7 +904,7 @@ class Individual_Component_Styling_Spec extends Specification
             new JCheckBoxMenuItem() | UI.HorizontalAlignment.TRAILING
     }
 
-    def 'Paint images as component background through the style API.'()
+    def 'Paint images as component backgrounds using the style API.'()
     {
 
         reportInfo """
@@ -911,12 +912,15 @@ class Individual_Component_Styling_Spec extends Specification
                 for configuring the grounding of a component, which
                 is a sort of background for every style layer.
                 <br>
-                Here you can see an example of a panel with a background image.
+                Here you can see an example of multipl labels with different grounding styles. <br>
                 
                 ${Utility.linkSnapshot('components/image-panels-collage.png')}
+
+                They are all stitched together into a collage so that you can see them 
+                all at once and compare them with each other.
             """
 
-        given : 'We create various different UIs with different grounding styles.'
+        given : 'We pass the following style rules to a number of labels:'
             var img = Utility.loadImage("img/swing.png")
             var ui1 =
                         UI.label("Top Left").withStyle( it -> it
@@ -1083,10 +1087,10 @@ class Individual_Component_Styling_Spec extends Specification
             var images = new BufferedImage[] {image1, image2, image3, image4, image5, image6, image7, image8, image9, image10, image11, image12}
 
 
-        then : 'The image is as expected.'
+        then : 'The collage of images is as expected (compared with the snapshot above).'
             Utility.similarityBetween(images, "components/image-panels-collage.png", 99) > 99
 
-        where : 'We test this UI using the following scaling values:'
+        where : 'We test this using the following scaling values:'
             scale << [1f, 1.25f, 1.75f, 2f]
     }
 
@@ -1098,13 +1102,19 @@ class Individual_Component_Styling_Spec extends Specification
                 for configuring the grounding of a component, which
                 is a sort of background for every style layer.
                 <br>
-                Here you can see an example of a panel with an SVG based background image
+                Here you can see an example of a hand full of labels 
+                with an SVG based background image
                 rendered according to the specified placement policies, dimesnions and opacity.
                 
+                They are all stitched together into a collage so that you can see them
+                all at once and compare them with each other.
+
                 ${Utility.linkSnapshot('components/svg-image-panels-collage.png')}
+
+                The text of each label describes the placement policy of the image.
             """
 
-        given : 'We create various different UIs with different grounding styles.'
+        given : 'We pass the following style rules to a number of label declarations:'
             var img = UI.findIcon("img/two-16th-notes.svg").get()
             var spacing = 0.03f
             var ui1 =
@@ -1328,7 +1338,7 @@ class Individual_Component_Styling_Spec extends Specification
             var image15 = Utility.renderSingleComponent(ui15.getComponent())
             var images = new BufferedImage[] {image1, image2, image3, image4, image5, image6, image7, image8, image9, image10, image11, image12, image13, image14, image15}
 
-        then : 'The image is as expected.'
+        then : 'The image is rendered as expected (compared to the snapshot above).'
             Utility.similarityBetween(images, "components/svg-image-panels-collage.png", 99) > 99
 
         where : 'We test this UI using the following scaling values:'
@@ -1338,7 +1348,6 @@ class Individual_Component_Styling_Spec extends Specification
 
     def 'Paint automatically stretched images as component background through the style API.'()
     {
-
         reportInfo """
                 Inside your `Styler` lambdas you may access another sub style
                 for configuring the image style of a component, which
@@ -1347,16 +1356,17 @@ class Individual_Component_Styling_Spec extends Specification
                 for the component which may be stretched to fit the component size, 
                 which is demonstrated in this example.
                 <br>
-                Note that a image dimension will only be stretched to fir the component
+                Note that a image dimension will only be stretched to the component
                 if no size was specified for a particular dimension (width or height).
+                
+                ${Utility.linkSnapshot('components/stretched-image-panels-collage.png')}
+
                 Also note that here we actually configure 2 images for every component
                 which will both be rendered on top of the component.
                 Here you can see an example of a panel with a background image.
-                
-                ${Utility.linkSnapshot('components/stretched-image-panels-collage.png')}
             """
 
-        given : 'We create various different UIs with different grounding styles.'
+        given : 'We pass the following style rules to a number of label declarations:'
             var img = Utility.loadImage("img/trees.png")
             var ui1 =
                         UI.label("Top Left").withStyle( it -> it
@@ -1614,7 +1624,7 @@ class Individual_Component_Styling_Spec extends Specification
             var images = new BufferedImage[] {image1, image2, image3, image4, image5, image6, image7, image8, image9, image10, image11, image12}
 
 
-        then : 'The image is as expected.'
+        then : 'The image is rendered as expected (compared to the snapshot above).'
             Utility.similarityBetween(images, "components/stretched-image-panels-collage.png", 98) > 98
     }
 
@@ -1993,10 +2003,12 @@ class Individual_Component_Styling_Spec extends Specification
                         .property("my.custom.property.2", "42")
                         .property("my.custom.property.3", "true")
                     )
+        and : 'We build the toggle button:'
+            var button = ui.get(JToggleButton)
         expect : 'The component indeed has the specified client properties!'
-            ui.component.getClientProperty("my.custom.property.1") == "Hello World!"
-            ui.component.getClientProperty("my.custom.property.2") == "42"
-            ui.component.getClientProperty("my.custom.property.3") == "true"
+            button.getClientProperty("my.custom.property.1") == "Hello World!"
+            button.getClientProperty("my.custom.property.2") == "42"
+            button.getClientProperty("my.custom.property.3") == "true"
     }
 
 }
