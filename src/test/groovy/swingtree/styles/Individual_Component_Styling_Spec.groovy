@@ -1620,14 +1620,20 @@ class Individual_Component_Styling_Spec extends Specification
         reportInfo """
             The image sub-style can be used to paint a single image repeatedly in a panel
             by setting the `repeat` flag to true.
-            Here you can see various examples of this
+            Here you can see various examples of this in the form of a collage
             where the image is painted in the center, top, bottom, left, right and stretched.
+
+            Note that we use labels as a basis for this style configuration
+            to also describe the placement of the image.
+            
+            ${Utility.linkSnapshot('components/repeated-image-label-collage.png')}
         """
-        given : 'A UI with a single image painted repeatedly in a panel.'
+        given : 'A hand full of UIs each with a single image painted repeatedly in a label.'
             var img = Utility.loadImage("img/trees.png")
             var ui1 =
-                        UI.label("Repeated Image").withStyle( it -> it
+                        UI.label("Plain Repeat").withStyle( it -> it
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontColor(Color.BLUE)
                             .border(2, Color.BLACK).borderRadius(10)
                             .size(120, 120)
                             .image(ground -> ground
@@ -1637,8 +1643,9 @@ class Individual_Component_Styling_Spec extends Specification
                             )
                         )
             var ui2 =
-                        UI.label("Repeated Image").withStyle( it -> it
+                        UI.label("Top Let Repeat").withStyle( it -> it
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontColor(Color.BLUE)
                             .border(2, Color.BLACK).borderRadius(10)
                             .size(120, 120)
                             .image(ground -> ground
@@ -1649,8 +1656,9 @@ class Individual_Component_Styling_Spec extends Specification
                             )
                         )
             var ui3 =
-                        UI.label("Repeated Image").withStyle( it -> it
+                        UI.label("Fill Height").withStyle( it -> it
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontColor(Color.BLUE)
                             .border(2, Color.BLACK).borderRadius(10)
                             .size(120, 120)
                             .image(ground -> ground
@@ -1660,8 +1668,9 @@ class Individual_Component_Styling_Spec extends Specification
                             )
                         )
             var ui4 =
-                        UI.label("Repeated Image").withStyle( it -> it
+                        UI.label("Fill Width").withStyle( it -> it
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontColor(Color.BLUE)
                             .border(2, Color.BLACK).borderRadius(10)
                             .size(120, 120)
                             .image(ground -> ground
@@ -1672,24 +1681,26 @@ class Individual_Component_Styling_Spec extends Specification
                             )
                         )
             var ui5 =
-                        UI.label("Repeated Image").withStyle( it -> it
+                        UI.label("Width 40").withStyle( it -> it
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontColor(Color.BLUE)
                             .border(2, Color.BLACK).borderRadius(10)
                             .size(120, 120)
                             .image(ground -> ground
-                                .image(img)
+                                .image(img) // No auto-fit!
                                 .width(40)
                                 .repeat(true)
                                 .placement(UI.Placement.RIGHT)
                             )
                         )
             var ui6 =
-                        UI.label("Repeated Image").withStyle( it -> it
+                        UI.label("Height 40").withStyle( it -> it
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .fontColor(Color.BLUE)
                             .border(2, Color.BLACK).borderRadius(10)
                             .size(120, 120)
                             .image(ground -> ground
-                                .image(img)
+                                .image(img) // No auto-fit!
                                 .height(40)
                                 .repeat(true)
                                 .placement(UI.Placement.LEFT)
@@ -1698,16 +1709,16 @@ class Individual_Component_Styling_Spec extends Specification
 
 
         when : 'We paint the UIs into a BufferedImage instance.'
-            var image1 = Utility.renderSingleComponent(ui1.getComponent())
-            var image2 = Utility.renderSingleComponent(ui2.getComponent())
-            var image3 = Utility.renderSingleComponent(ui3.getComponent())
-            var image4 = Utility.renderSingleComponent(ui4.getComponent())
-            var image5 = Utility.renderSingleComponent(ui5.getComponent())
-            var image6 = Utility.renderSingleComponent(ui6.getComponent())
+            var image1 = Utility.renderSingleComponent(ui1.get(JLabel))
+            var image2 = Utility.renderSingleComponent(ui2.get(JLabel))
+            var image3 = Utility.renderSingleComponent(ui3.get(JLabel))
+            var image4 = Utility.renderSingleComponent(ui4.get(JLabel))
+            var image5 = Utility.renderSingleComponent(ui5.get(JLabel))
+            var image6 = Utility.renderSingleComponent(ui6.get(JLabel))
             var images = new BufferedImage[] {image1, image2, image3, image4, image5, image6}
 
-        then : 'The image is as expected.'
-            Utility.similarityBetween(images, "components/repeated-image-panel.png", 99.95) > 99.95
+        then : 'The image is rendered as expected.'
+            Utility.similarityBetween(images, "components/repeated-image-label-collage.png", 99.95) > 99.95
     }
 
     def 'Create fancy text fields with custom icons and a button.'(
