@@ -2229,6 +2229,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *               transition between the 2 states.
      *
      * @return This builder instance, which enables fluent method chaining.
+     * @see #withTemporaryStyle(Event, LifeTime, AnimatedStyler)
      */
     public final I withTransitionalStyle(
         Val<Boolean>      transitionToggle,
@@ -2270,6 +2271,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *               transition between the 2 states.
      *
      * @return This builder instance, which enables fluent method chaining.
+     * @see #withTransitionalStyle(Val, LifeTime, AnimatedStyler)
      */
     public final I withTemporaryStyle(
         Event             styleEvent,
