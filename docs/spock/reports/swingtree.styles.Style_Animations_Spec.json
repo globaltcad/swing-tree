@@ -54,7 +54,7 @@
 
         {"kind":"and","text":"SwingTree will haver overridden the default label UI in order to support the shadow.","code":["!(label.getUI() instanceof MetalLabelUI)"]}
       ],
-      "problems":{"dataValues":["[]"], "errors":["[Condition not satisfied:\n\nlabel.font.size > 15\n|     |    |    |\n|     |    12   false\n|     javax.swing.plaf.FontUIResource[family=Dialog,name=Dialog,style=bold,size=12]\nswingtree.UI$Label[,0,0,0x0,invalid,alignmentX=0.0,alignmentY=0.0,border=swingtree.style.StyleAndAnimationBorder@38716e3f,flags=8388608,maximumSize=,minimumSize=,preferredSize=,defaultIcon=,disabledIcon=,horizontalAlignment=LEADING,horizontalTextPosition=TRAILING,iconTextGap=4,labelFor=,text=Click me!,verticalAlignment=CENTER,verticalTextPosition=CENTER]\n]"]}
+      "problems":{"dataValues":["[]"], "errors":["[Condition not satisfied:\n\nlabel.font.size > 15\n|     |    |    |\n|     |    12   false\n|     java.awt.Font[family=Ubuntu,name=Ubuntu,style=plain,size=12]\nswingtree.UI$Label[,0,0,0x0,invalid,alignmentX=0.0,alignmentY=0.0,border=swingtree.style.StyleAndAnimationBorder@1c55449c,flags=8388608,maximumSize=,minimumSize=,preferredSize=,defaultIcon=,disabledIcon=,horizontalAlignment=LEADING,horizontalTextPosition=TRAILING,iconTextGap=4,labelFor=,text=Click me!,verticalAlignment=CENTER,verticalTextPosition=CENTER]\n]"]}
     },
   
     {
