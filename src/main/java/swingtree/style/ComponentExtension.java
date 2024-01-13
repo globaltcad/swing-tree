@@ -211,8 +211,6 @@ public final class ComponentExtension<C extends JComponent>
         return belongsToGroup(StyleUtility.toString(group));
     }
 
-    Shape getCurrentOuterBaseClip() { return _outerBaseClip; }
-
     /**
      * @return The current {@link Style} configuration of the component
      *         which is calculated based on the {@link Styler} lambdas
@@ -407,7 +405,8 @@ public final class ComponentExtension<C extends JComponent>
     {
         gatherApplyAndInstallStyleConfig();
 
-        _outerBaseClip = g.getClip();
+        Shape baseClip = g.getClip();
+        _outerBaseClip = baseClip;
 
         if ( _outerBaseClip == null && _owner.getParent() == null ) {
             // Happens when rendering individual components (usually unit tests)!
@@ -437,6 +436,8 @@ public final class ComponentExtension<C extends JComponent>
                 }
             });
         }
+
+        g.setClip(baseClip);
     }
 
     void paintBorderAndAnimations( Graphics2D g2d, Runnable formerBorderPainter )
@@ -444,15 +445,16 @@ public final class ComponentExtension<C extends JComponent>
         gatherApplyAndInstallStyleConfig();
 
         Shape former = g2d.getClip();
+        try {
+            if ( _outerBaseClip != null )
+                g2d.setClip(_outerBaseClip);
 
-        if ( getCurrentOuterBaseClip() != null )
-            g2d.setClip( getCurrentOuterBaseClip() );
-
-        _styleEngine.paintBorder(g2d, formerBorderPainter);
-        _styleEngine.paintAnimations(g2d);
-        _styleEngine = _styleEngine.withoutExpiredAnimationPainters();
-
-        g2d.setClip(former);
+            _styleEngine.paintBorder(g2d, formerBorderPainter);
+            _styleEngine.paintAnimations(g2d);
+            _styleEngine = _styleEngine.withoutExpiredAnimationPainters();
+        } finally {
+            g2d.setClip(former);
+        }
     }
 
     private Style _applyStyleToComponentState( Style newStyle, boolean force )
