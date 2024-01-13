@@ -22,13 +22,18 @@ import java.awt.*
 @Narrative("""
 
     No, SwingTree does not have a CSS parser.  
-    It does, however, have something better, which is similar to CSS.
+    It does, however, have something better, which looks similar to CSS.
     An API for configuring styles in a declarative and type-safe way.
-
-    The main class for creating style sheets is the `StyleSheet` class,
+    This API is also designed the concept of defining common style rules
+    withing a file called a "style sheet".
+    
+    The main difference to a CSS file however is that it is still plain Java code.
+    (Or any other JVM language for that matter.)
+    
+    The API for creating style sheets is primarily exposed through the `StyleSheet` class,
     an abstract class that you can extend to create your own styles like so:
     ```java
-        class MyStyleSheet {
+        class MyStyleSheet extends StyleSheet {
            @Override
            protected void configure() {
                 add(id("some unique id!"), it -> it
@@ -67,6 +72,9 @@ class Style_Sheet_Spec extends Specification
         reportInfo """
             You can think of a `StyleSheet` as a collection of `StyleTrait`s 
             forming a function for processing a `Style` object.
+            
+            So when you send a `Style` object through a `StyleSheet` then
+            a new `Style` object with the updated style properties will be returned.
         """
         given :
             var ss = new StyleSheet() {

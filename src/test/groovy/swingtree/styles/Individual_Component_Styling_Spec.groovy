@@ -544,7 +544,7 @@ class Individual_Component_Styling_Spec extends Specification
             
             The concept of naming exists to make any number of sub-styles possible.
             This concept of sub-styles is not exclusive to shadows.
-            You can also name shadesa and custom foreground or background painters.
+            You can also name gradients and custom foreground or background painters.
         """
         given : 'Before we create the styled slider, we first setup up FlatLaF as a basis.'
             FlatLightLaf.setup()
@@ -591,7 +591,7 @@ class Individual_Component_Styling_Spec extends Specification
             
             The concept of naming exists to make any number of sub-styles possible.
             This concept of sub-styles is not exclusive to shadows.
-            You can also name shadesa and custom foreground or background painters.
+            You can also name gradients and custom foreground or background painters.
         """
         given : 'Before we create the styled slider, we first setup up FlatLaF as a basis.'
             FlatLightLaf.setup()

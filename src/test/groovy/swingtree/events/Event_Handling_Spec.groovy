@@ -18,9 +18,13 @@ import javax.swing.JTextField
 
 @Title("Registering Event Handlers")
 @Narrative('''
-        
-    In this specification you can see how to register different kinds of event handlers
-    on Swing components.
+    
+    An important part of a UI declaration is the ability to hook up event handlers
+    to your components. In SwingTree you do not need to unpack the underlying Swing
+    component to register a particular event listener, but instead you can register
+    event handlers directly on the UI declaration.    
+    This specification demonstrates how different types of event handlers for different
+    types of events and components can be registered using simple lambda expressions.
         
 ''')
 class Event_Handling_Spec extends Specification
@@ -387,9 +391,11 @@ class Event_Handling_Spec extends Specification
                     trace2.add(it.replacementText)
                     trace3.add("$it.offset|$it.length")
                 })
+        and : 'Finally we build the text area:'
+            var textArea = ui.get(JTextArea)
 
         when : 'The text area content is changed.'
-            UI.runNow { ui.get(JTextArea).setText("Some other content...") }
+            UI.runNow { textArea.setText("Some other content...") }
             UI.sync()
 
         then : 'The handler was triggered.'
@@ -414,9 +420,11 @@ class Event_Handling_Spec extends Specification
                    .onTextReplace( it -> trace.add("5") )
                    .onTextReplace( it -> trace.add("6") )
                    .onTextReplace( it -> trace.add("7") )
+        and : 'Finally we build the text area:'
+            var textArea = ui.get(JTextArea)
 
         when : 'The text area content is changed.'
-            UI.runNow { ui.get(JTextArea).setText("Some other content...") }
+            UI.runNow { textArea.setText("Some other content...") }
             UI.sync()
 
         then : 'The handlers are triggered in the correct order.'
@@ -452,7 +460,7 @@ class Event_Handling_Spec extends Specification
                         UI.textField("I am a text field")
                         .on(observable, it -> trace.add("1"))
                     )
-        and : 'We actually build the component:'
+        and : 'We then actually trigger the component to be built:'
             var panel = ui.get(JPanel)
 
         when : 'The observable is triggered.'
