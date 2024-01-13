@@ -143,13 +143,13 @@ class Style_Sheet_Spec extends Specification
                          }
                      }
         and : 'A few components we are going to style using the style sheet.'
-            var textField = UI.textField("type something")
-            var button = UI.button("click me!")
-            var panel = UI.panel()
-            var textArea = UI.textArea("type some more!")
+            var textField = UI.textField("type something").get(JTextField)
+            var button = UI.button("click me!").get(JButton)
+            var panel = UI.panel().get(JPanel)
+            var textArea = UI.textArea("type some more!").get(JTextArea)
 
         when : 'We first run the text field through the style sheet...'
-            var fieldStyle  = ss.applyTo(textField.component).shadow()
+            var fieldStyle  = ss.applyTo(textField).shadow()
         then : 'The resulting style has the expected properties:'
             fieldStyle.color().get() == Color.BLUE // The text component trait overrides the component trait!
             fieldStyle.blurRadius() == 9 // The text field trait overrides the component trait!
@@ -158,7 +158,7 @@ class Style_Sheet_Spec extends Specification
             fieldStyle.horizontalOffset() == 42
 
         when : 'We then run the button through the style sheet...'
-            var buttonStyle = ss.applyTo(button.component).shadow()
+            var buttonStyle = ss.applyTo(button).shadow()
         then : 'Again, the resulting style is as expected:'
             buttonStyle.color().get() == Color.RED
             buttonStyle.blurRadius() == 17
@@ -167,7 +167,7 @@ class Style_Sheet_Spec extends Specification
             buttonStyle.horizontalOffset() != 24 // a button is not a text component
 
         when : 'We now run the panel through the style sheet...'
-            var panelStyle  = ss.applyTo(panel.component).shadow()
+            var panelStyle  = ss.applyTo(panel).shadow()
         then : 'Also no surprises here:'
             panelStyle.color().get() == Color.RED
             panelStyle.blurRadius() == 17
@@ -176,7 +176,7 @@ class Style_Sheet_Spec extends Specification
             panelStyle.horizontalOffset() != 24 // a panel is not a text component
 
         when : 'We finally run the text area through the style sheet...'
-            var areaStyle   = ss.applyTo(textArea.component).shadow()
+            var areaStyle   = ss.applyTo(textArea).shadow()
         then : 'It too has the expected style:'
             areaStyle.color().get() == Color.BLUE // The text component trait overrides the component trait!
             areaStyle.blurRadius() == 17
