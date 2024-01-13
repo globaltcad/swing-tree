@@ -12,6 +12,7 @@ import examples.games.SymbolGuesserViewModel
 import examples.mvvm.*
 import examples.simple.Form
 import examples.simple.ListRendering
+import examples.simple.NamedFieldsView
 import examples.simple.TodoApp
 import examples.stylish.BoxShadowPickerView
 import examples.stylish.BoxShadowPickerViewModel
@@ -298,6 +299,11 @@ class Examples_Spec extends Specification
     def 'The list rendering example UI defined in the examples can be created.'()
     {
         expect : new ListRendering()
+    }
+
+    def 'The `NamedFieldsView` example UI defined in the examples can be created.'()
+    {
+        expect : new NamedFieldsView()
     }
 
     def 'How SwingTree compares to a GUI Editor based implementation.'()
