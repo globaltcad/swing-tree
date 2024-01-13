@@ -253,7 +253,9 @@ final class DynamicLaF
     {
         private final ButtonUI _formerUI;
 
-        ButtonStyler(ButtonUI formerUI) { _formerUI = formerUI; }
+        ButtonStyler(ButtonUI formerUI) {
+            _formerUI = ( formerUI instanceof ButtonStyler ) ? ((ButtonStyler)formerUI)._formerUI : formerUI;
+        }
 
         @Override public void paint( Graphics g, JComponent c ) {
             ComponentExtension.from(c).paintBackground(g, ()->{
@@ -269,7 +271,9 @@ final class DynamicLaF
     {
         private final LabelUI _formerUI;
 
-        LabelStyler(LabelUI formerUI) { _formerUI = formerUI; }
+        LabelStyler(LabelUI formerUI) {
+            _formerUI = (formerUI instanceof LabelStyler) ? ((LabelStyler)formerUI)._formerUI : formerUI;
+        }
 
         @Override public void paint( Graphics g, JComponent c ) {
             ComponentExtension.from(c).paintBackground(g, ()->{
@@ -288,7 +292,9 @@ final class DynamicLaF
     {
         private final TextUI _formerUI;
 
-        TextFieldStyler(TextUI formerUI) { _formerUI = formerUI; }
+        TextFieldStyler(TextUI formerUI) {
+            _formerUI = ( formerUI instanceof TextFieldStyler ) ? ((TextFieldStyler)formerUI)._formerUI : formerUI;
+        }
         @Override protected void paintSafely(Graphics g) {
             if ( !getComponent().isOpaque() )
                 paintBackground(g);
