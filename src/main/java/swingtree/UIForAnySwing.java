@@ -2282,10 +2282,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         NullUtil.nullArgCheck(styleLifeTime, "styleLifeTime", LifeTime.class);
         NullUtil.nullArgCheck(styler, "styler", AnimatedStyler.class);
         return _with( thisComponent -> {
-                    Animator.animateFor(styleLifeTime, thisComponent).go( state ->
-                        ComponentExtension.from(thisComponent)
-                            .addAnimationStyler(state, conf -> styler.style(state, conf))
-                    );
+                    styleEvent.subscribe( ()->{
+                        Animator.animateFor(styleLifeTime, thisComponent).go( state ->
+                            ComponentExtension.from(thisComponent)
+                                .addAnimationStyler(state, conf -> styler.style(state, conf))
+                        );
+                    });
                 })
                 ._this();
     }

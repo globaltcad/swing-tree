@@ -1,6 +1,7 @@
 package examples.simple;
 
 import examples.FancyTextField;
+import sprouts.Event;
 import sprouts.Var;
 import swingtree.UI;
 import swingtree.animation.LifeTime;
@@ -20,6 +21,7 @@ import java.util.stream.Stream;
 public class NamedFieldsView extends JPanel {
 
     private final Var<Boolean> toggle = Var.of(false);
+    private final Event highlight = Event.create();
 
     public NamedFieldsView()
     {
@@ -147,10 +149,25 @@ public class NamedFieldsView extends JPanel {
             )
             .add("growx, pushx",
                 UI.label("Hello!")
-                .withTransitionalStyle(toggle, LifeTime.of(2.75, TimeUnit.SECONDS), (state, conf)->conf
+                .withTransitionalStyle(toggle, LifeTime.of(1, TimeUnit.SECONDS), (state, conf)->conf
                     .border((3*state.progress()), Color.BLACK)
                     .marginLeft( (int)(conf.component().getWidth()*state.progress()/2) )
                     .marginRight( (int)(conf.component().getWidth()*state.regress()/2) )
+                )
+            )
+        )
+        .add("growx, pushx, span",
+            UI.panel("fill")
+            .add("center",
+                UI.label("Hello!")
+                .onMouseEnter( it -> highlight.fire() )
+                .withTransitoryStyle(highlight, LifeTime.of(1, TimeUnit.SECONDS), (state, conf)->conf
+                    .shadowSpreadRadius(-10 + 20 * state.cycle())
+                    .shadowColor(Color.RED)
+                    .shadowBlurRadius( 6 * state.cycle() )
+                    .padding( 10 * state.cycle() )
+                    .margin( 20 * state.cycle() )
+                    .borderRadius(16)
                 )
             )
         );
