@@ -2229,7 +2229,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *               transition between the 2 states.
      *
      * @return This builder instance, which enables fluent method chaining.
-     * @see #withTemporaryStyle(Event, LifeTime, AnimatedStyler)
+     * @see #withTransitoryStyle(Event, LifeTime, AnimatedStyler)
      */
     public final I withTransitionalStyle(
         Val<Boolean>      transitionToggle,
@@ -2255,7 +2255,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      *    defines a custom background and border color on a label:
      *    <pre>{@code
      *      UI.label("I have a highlight animation!")
-     *      .withTemporaryStyle(vm.highlightEvent(), LifeTime.of(0.5, TimeUnit.SECONDS), (state, it) -> it
+     *      .withTransitoryStyle(vm.highlightEvent(), LifeTime.of(0.5, TimeUnit.SECONDS), (state, it) -> it
      *          .backgroundColor(new Color(0, 0, 0, (int)(state.progress() * 255)))
      *          .borderColor(new Color(255, 255, 255, (int)(state.progress() * 255)))
      *      )
@@ -2273,7 +2273,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @return This builder instance, which enables fluent method chaining.
      * @see #withTransitionalStyle(Val, LifeTime, AnimatedStyler)
      */
-    public final I withTemporaryStyle(
+    public final I withTransitoryStyle(
         Event             styleEvent,
         LifeTime          styleLifeTime,
         AnimatedStyler<C> styler

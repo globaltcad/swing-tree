@@ -1183,7 +1183,7 @@ abstract class AbstractDelegate<C extends JComponent>
      *      }))
      *  }</pre>
      *  You may also be interested in doing style animations, if so, maybe consider taking a look at
-     *  {@link UIForAnySwing#withTemporaryStyle(Event, LifeTime, AnimatedStyler)} to see how to do event based styling animations
+     *  {@link UIForAnySwing#withTransitoryStyle(Event, LifeTime, AnimatedStyler)} to see how to do event based styling animations
      *  and {@link UIForAnySwing#withTransitionalStyle(Val, LifeTime, AnimatedStyler)} to see how to do 2 state switch based styling animations.
      *
      * @param state The current animation state, which is important so that the rendering can be synchronized with the animation.
@@ -1228,7 +1228,7 @@ abstract class AbstractDelegate<C extends JComponent>
      *  }</pre>
      *  Also see {@link #animateStyleFor(LifeTime, AnimatedStyler)} for a version of this method which uses a {@link LifeTime} instead of a duration.
      *  If you are interested in doing more advanced style animations, consider taking a look at
-     *  {@link UIForAnySwing#withTemporaryStyle(Event, LifeTime, AnimatedStyler)} to see how to do event based styling animations
+     *  {@link UIForAnySwing#withTransitoryStyle(Event, LifeTime, AnimatedStyler)} to see how to do event based styling animations
      *  and {@link UIForAnySwing#withTransitionalStyle(Val, LifeTime, AnimatedStyler)} to see how to do 2 state switch based styling animations.
      *
      * @param duration The duration of the animation.
@@ -1278,7 +1278,7 @@ abstract class AbstractDelegate<C extends JComponent>
      *  }</pre>
      *  Also see {@link #animateStyleFor(double, TimeUnit, AnimatedStyler)} for a version of this method which uses a {@link LifeTime} instead of a duration.
      *  If you are interested in doing more advanced style animations, consider taking a look at
-     *  {@link UIForAnySwing#withTemporaryStyle(Event, LifeTime, AnimatedStyler)} to see how to do event based styling animations
+     *  {@link UIForAnySwing#withTransitoryStyle(Event, LifeTime, AnimatedStyler)} to see how to do event based styling animations
      *  and {@link UIForAnySwing#withTransitionalStyle(Val, LifeTime, AnimatedStyler)} to see how to do 2 state switch based styling animations.
      *
      * @param lifetime The lifetime of the animation.
