@@ -213,13 +213,13 @@ class Style_Sheet_Spec extends Specification
                          }
                      }
         and : 'Also, a few components we are going to style'
-            var label = UI.label("hi").group("group1")
-            var toggle = UI.toggleButton("click me!").group("group2")
-            var panel = UI.panel().group("group1", "group2")
+            var label = UI.label("hi").group("group1").get(JLabel)
+            var toggle = UI.toggleButton("click me!").group("group2").get(JToggleButton)
+            var panel = UI.panel().group("group1", "group2").get(JPanel)
         when : 'We run them all through the style sheet...'
-            var s1 = ss.applyTo(label.component)
-            var s2 = ss.applyTo(toggle.component)
-            var s3 = ss.applyTo(panel.component)
+            var s1 = ss.applyTo(label)
+            var s2 = ss.applyTo(toggle)
+            var s3 = ss.applyTo(panel)
         then : 'We can verify that the colors are applied correctly.'
             s1.base().backgroundColor().get() == Color.BLUE
             s2.base().foundationColor().get() == Color.CYAN
