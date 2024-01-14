@@ -87,8 +87,8 @@ final class ComponentAreas
                     if ( !mainIsSame )
                         return false;
                     
-                    Bounds oldBounds = oldState.currentBounds();
-                    Bounds newBounds = newState.currentBounds();
+                    Size oldBounds = oldState.currentBounds().size();
+                    Size newBounds = newState.currentBounds().size();
         
                     return oldBounds.equals(newBounds);
                 }
