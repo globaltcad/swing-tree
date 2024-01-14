@@ -138,6 +138,7 @@ public final class Style
     }
 
     /**
+     * @param layer The layer to retrieve the shadow style from.
      * @param shadowName The name of the shadow style to retrieve.
      * @return The shadow style with the provided name.
      */

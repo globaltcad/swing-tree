@@ -18,6 +18,8 @@ public final class Location
     private final static Location ORIGIN = new Location( 0, 0 );
 
     /**
+     * @param x The x-coordinate of the location to create.
+     * @param y The y-coordinate of the location to create.
      * @return A new location with the specified x- and y-coordinates.
      *         If both coordinates are zero, the {@link #origin()} is returned.
      */
@@ -29,6 +31,7 @@ public final class Location
     }
 
     /**
+     * @param p The point to create a location from.
      * @return A new location with the x- and y-coordinates of the specified point.
      *         If both coordinates are zero, the {@link #origin()} is returned.
      */
@@ -64,6 +67,7 @@ public final class Location
     }
 
     /**
+     * @param y The y-coordinate of the location to create.
      * @return A new location with the same x-coordinate as this location
      *         and the specified y-coordinate.
      */
@@ -72,6 +76,7 @@ public final class Location
     }
 
     /**
+     * @param x The x-coordinate of the location to create.
      * @return A new location with the same y-coordinate as this location
      *         and the specified x-coordinate.
      */

@@ -88,6 +88,8 @@ public class Animator
      *
      * @param lifeTime The schedule that defines when the animation should be executed and for how long.
      * @param stride   The stride of the animation, i.e. whether it should be executed progressively or regressively.
+     *                 See {@link Stride} for more information.
+     * @param component The component that should be repainted after each animation step.
      * @return An {@link Animator} instance that can be used to define how the animation should be executed.
      */
     public static Animator animateFor( LifeTime lifeTime, Stride stride, Component component ) {

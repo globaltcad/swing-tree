@@ -92,6 +92,7 @@ public interface IconDeclaration
     }
 
     /**
+     * @param size The preferred size of the icon in the form of a {@link Size} instance.
      * @return A new {@link IconDeclaration} instance with the same path
      *        but with the given size.
      */
@@ -100,6 +101,8 @@ public interface IconDeclaration
     }
 
     /**
+     * @param width The preferred width of the icon.
+     * @param height The preferred height of the icon.
      * @return A new {@link IconDeclaration} instance with the same path
      *        but with the specified width and height as preferred size.
      */
@@ -108,6 +111,7 @@ public interface IconDeclaration
     }
 
     /**
+     * @param width The preferred width of the icon.
      * @return A new {@link IconDeclaration} instance with the same path
      *        but with the specified width as preferred width.
      */
@@ -116,6 +120,7 @@ public interface IconDeclaration
     }
 
     /**
+     * @param height The preferred height of the icon.
      * @return A new {@link IconDeclaration} instance with the same path
      *        but with the specified height as preferred height.
      */

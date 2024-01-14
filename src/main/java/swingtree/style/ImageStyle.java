@@ -121,7 +121,6 @@ import java.util.Optional;
  *          <b>Note that the inner/interior component area is the area enclosed by (and excluding) the border,
  *          whereas the exterior component area is the area surrounding the border.
  *          The component body area is the interior/inner component area plus the border.</b>
- *          </b>
  *          <p>
  *          The default clip area is {@link swingtree.UI.ComponentArea#BODY}
  *          as this is the area which is most commonly used.

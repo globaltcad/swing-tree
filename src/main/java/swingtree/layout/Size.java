@@ -30,6 +30,8 @@ public final class Size
     }
 
     /**
+     * @param width The width of the size.
+     * @param height The height of the size.
      * @return A {@link Size} instance that represents the given width and height.
      */
     public static Size of( float width, float height ) {
@@ -38,6 +40,10 @@ public final class Size
         return new Size( width, height );
     }
 
+    /**
+     * @param dimension The dimension to convert to a {@link Size} instance.
+     * @return A {@link Size} instance that represents the given dimension.
+     */
     public static Size of( Dimension dimension ) {
         if ( dimension == null )
             return UNKNOWN;
@@ -68,6 +74,7 @@ public final class Size
     }
 
     /**
+     * @param width The width of the size to create.
      * @return A new {@link Size} instance with the given width.
      */
     public Size withWidth( int width ) {
@@ -75,6 +82,7 @@ public final class Size
     }
 
     /**
+     * @param height The height of the size to create.
      * @return A new {@link Size} instance with the given height.
      */
     public Size withHeight(int height ) {

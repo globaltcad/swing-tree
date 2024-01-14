@@ -436,7 +436,7 @@ public final class UI extends UINamespaceUtilities
      *  to target specific corners of a {@link JComponent} and apply
      *  custom {@link Style} properties to them.
      *  <br>
-     *  See {@link ComponentStyleDelegate#borderRadiusAt(Corner, int, int)}.
+     *  See {@link ComponentStyleDelegate#borderRadiusAt(Corner, double, double)}.
      */
     public enum Corner implements UIEnum<Corner>
     {

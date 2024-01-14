@@ -62,7 +62,7 @@ abstract class AbstractBuilder<I, C extends Component>
     /**
      * @param action An action which should be executed by the UI thread,
      *               which is determined by implementations of the {@link EventProcessor},
-     *               also see {@link UI#use(EventProcessor, Supplier)}. <b>
+     *               also see {@link UI#use(EventProcessor, Supplier)}. <br>
      *               Usually the UI thread is AWT's Event Dispatch Thread (EDT).
      */
     protected final void _runInUI( Runnable action ) {
