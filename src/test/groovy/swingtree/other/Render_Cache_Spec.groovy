@@ -56,28 +56,28 @@ class Render_Cache_Spec extends Specification
         given : 'We have a cache for the background layer of a component:'
             var cache = new swingtree.style.LayerCache(UI.Layer.BACKGROUND)
         and : 'And a basic style configuration object:'
-            var key = swingtree.style.ComponentConf.none()
+            var key0 = swingtree.style.ComponentConf.none()
         and : 'Finally, a mocked graphics object we can use to check if the cache was hit or not:'
             var g = Mock(Graphics2D)
 
         when : 'We try to do an initial paint into the cache...'
-            cache.validate(key, key)
-            cache.paint(key, g,  (conf, g2) -> {g2.fillRect(0,0,10,10) })
+            cache.validate(key0, key0)
+            cache.paint(key0, g,  (conf, g2) -> {g2.fillRect(0,0,10,10) })
         then : 'We did not render into the cache, instead we just painted eagerly!'
             1 * g.fillRect(0,0,10,10)
         and :
             !cache.hasBufferedImage()
 
         when : 'We try to do it a second time...'
-            cache.validate(key, key)
-            cache.paint(key, g,  (conf, g2) -> {g2.fillRect(0,0,10,10) })
+            cache.validate(key0, key0)
+            cache.paint(key0, g,  (conf, g2) -> {g2.fillRect(0,0,10,10) })
         then : 'Still, we just painted eagerly!'
             1 * g.fillRect(0,0,10,10)
         and :
             !cache.hasBufferedImage()
 
         when : 'We change the style configuration object to something that can be painted...'
-            key = ComponentExtension.from(
+            var key = ComponentExtension.from(
                         UI.button("Hello World").withStyle(conf -> conf
                             .backgroundColor(Color.BLACK)
                             .foregroundColor(Color.WHITE)
@@ -89,28 +89,50 @@ class Render_Cache_Spec extends Specification
                     .getConf();
 
         and : 'Then we do another round of validation and painting...'
-            cache.validate(key, key)
-            cache.paint(key, g,  (conf, g2) -> {g2.fillRect(0,0,10,10) })
+            cache.validate(key0, key)
+            var didRendering = false
+            cache.paint(key, g,  (conf, g2) -> {
+                g2.fillRect(0,0,10,10);
+                didRendering = true;
+            })
         then : 'We painted into the cache!'
-            1 * g.fillRect(0,0,10,10)
+            didRendering
+            0 * g.fillRect(0,0,10,10)
+            1 * g.drawImage({it instanceof BufferedImage},0,0,null)
+
         and :
             cache.hasBufferedImage()
 
         when : 'We do it again...'
             cache.validate(key, key)
-            cache.paint(key, g,  (conf, g2) -> {g2.fillRect(0,0,10,10) })
+            didRendering = false
+            cache.paint(key, g,  (conf, g2) -> {
+                g2.fillRect(0,0,10,10);
+                didRendering = true;
+            })
         then : 'Instead of the painter lambda being called, the buffer was used!'
+            !didRendering
             0 * g.fillRect(0,0,10,10)
             1 * g.drawImage({it instanceof BufferedImage},0,0,null)
 
         when : 'We repeat this process then the buffer will be used every time!'
             cache.validate(key, key)
-            cache.paint(key, g,  (conf, g2) -> {g2.fillRect(0,0,10,10) })
+            cache.paint(key, g,  (conf, g2) -> {
+                g2.fillRect(0,0,10,10);
+                didRendering = true;
+            })
             cache.validate(key, key)
-            cache.paint(key, g,  (conf, g2) -> {g2.fillRect(0,0,10,10) })
+            cache.paint(key, g,  (conf, g2) -> {
+                g2.fillRect(0,0,10,10);
+                didRendering = true;
+            })
             cache.validate(key, key)
-            cache.paint(key, g,  (conf, g2) -> {g2.fillRect(0,0,10,10) })
+            cache.paint(key, g,  (conf, g2) -> {
+                g2.fillRect(0,0,10,10);
+                didRendering = true;
+            })
         then : 'Instead of the painter lambda being called, the buffer was used!'
+            !didRendering
             0 * g.fillRect(0,0,10,10)
             3 * g.drawImage({it instanceof BufferedImage},0,0,null)
 
@@ -128,10 +150,15 @@ class Render_Cache_Spec extends Specification
                     .getConf();
         and : 'And we revalidate the cache...'
             cache.validate(key, key2)
-            cache.paint(key2, g,  (conf, g2) -> {g2.fillRect(0,0,10,10) })
+            didRendering = false
+            cache.paint(key2, g,  (conf, g2) -> {
+                g2.fillRect(0,0,10,10);
+                didRendering = true;
+            })
         then : 'The painting lambda was used to rerender the cache!'
-            1 * g.fillRect(0,0,10,10)
-            0 * g.drawImage({it instanceof BufferedImage},0,0,null)
+            didRendering
+            0 * g.fillRect(0,0,10,10)
+            1 * g.drawImage({it instanceof BufferedImage},0,0,null)
         and : 'And the buffer is still there!'
             cache.hasBufferedImage()
 

@@ -61,7 +61,8 @@ final class LayerCache
     private final UI.Layer   _layer;
     private CachedImage      _localCache;
     private ComponentConf    _strongRef; // The key must be referenced strongly so that the value is not garbage collected (the cached image)
-    private boolean          _cachingMakesSense = true;
+    private boolean          _cachingMakesSense = false;
+    private boolean          _isInitialized     = false;
 
 
     public LayerCache( UI.Layer layer ) {
@@ -107,7 +108,6 @@ final class LayerCache
     private void _freeLocalCache() {
         _strongRef         = null;
         _localCache        = null;
-        _cachingMakesSense = false;
     }
 
     public final void validate( ComponentConf oldState, ComponentConf newState )
@@ -118,7 +118,12 @@ final class LayerCache
         oldState = oldState.onlyRetainingLayer(_layer);
         newState = newState.onlyRetainingLayer(_layer);
 
-        _cachingMakesSense = _cachingMakesSenseFor(newState);
+        boolean validationNeeded = ( !_isInitialized || !oldState.equals(newState) );
+
+        _isInitialized = true;
+
+        if ( validationNeeded )
+            _cachingMakesSense = _cachingMakesSenseFor(newState);
 
         if ( !_cachingMakesSense ) {
             _freeLocalCache();
