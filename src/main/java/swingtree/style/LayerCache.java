@@ -108,6 +108,8 @@ final class LayerCache
     private void _freeLocalCache() {
         _strongRef         = null;
         _localCache        = null;
+        _cachingMakesSense = false;
+        _isInitialized     = false;
     }
 
     public final void validate( ComponentConf oldState, ComponentConf newState )

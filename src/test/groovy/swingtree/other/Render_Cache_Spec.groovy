@@ -95,10 +95,10 @@ class Render_Cache_Spec extends Specification
                 g2.fillRect(0,0,10,10);
                 didRendering = true;
             })
-        then : 'We painted into the cache!'
+        then : 'We did not paint into the cache!'
             didRendering
-            0 * g.fillRect(0,0,10,10)
-            1 * g.drawImage({it instanceof BufferedImage},0,0,null)
+            1 * g.fillRect(0,0,10,10)
+            0 * g.drawImage({it instanceof BufferedImage},0,0,null)
 
         and :
             cache.hasBufferedImage()
@@ -111,11 +111,12 @@ class Render_Cache_Spec extends Specification
                 didRendering = true;
             })
         then : 'Instead of the painter lambda being called, the buffer was used!'
-            !didRendering
+            didRendering
             0 * g.fillRect(0,0,10,10)
             1 * g.drawImage({it instanceof BufferedImage},0,0,null)
 
         when : 'We repeat this process then the buffer will be used every time!'
+            didRendering = false
             cache.validate(key, key)
             cache.paint(key, g,  (conf, g2) -> {
                 g2.fillRect(0,0,10,10);
@@ -157,8 +158,8 @@ class Render_Cache_Spec extends Specification
             })
         then : 'The painting lambda was used to rerender the cache!'
             didRendering
-            0 * g.fillRect(0,0,10,10)
-            1 * g.drawImage({it instanceof BufferedImage},0,0,null)
+            1 * g.fillRect(0,0,10,10)
+            0 * g.drawImage({it instanceof BufferedImage},0,0,null)
         and : 'And the buffer is still there!'
             cache.hasBufferedImage()
 
