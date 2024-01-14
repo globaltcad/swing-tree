@@ -3,7 +3,6 @@ package swingtree.style;
 import swingtree.layout.Bounds;
 import swingtree.layout.Size;
 
-import java.awt.Rectangle;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
@@ -75,7 +74,9 @@ final class ComponentAreas
                 @Override
                 public Area produce(ComponentConf currentState, ComponentAreas currentAreas) {
                     Bounds bounds = currentState.currentBounds();
-                    Area exteriorComponentArea = new Area(bounds.toRectangle());
+                    float width  = bounds.size().width().orElse(0f);
+                    float height = bounds.size().height().orElse(0f);
+                    Area exteriorComponentArea = new Area(new Rectangle2D.Float(0, 0, width, height));
                     exteriorComponentArea.subtract(currentAreas._bodyArea.getFor(currentState, currentAreas));
                     return exteriorComponentArea;
                 }
