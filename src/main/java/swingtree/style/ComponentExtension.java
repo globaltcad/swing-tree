@@ -707,8 +707,22 @@ public final class ComponentExtension<C extends JComponent>
         if ( newStyle.hasCustomForegroundPainters() )
             _makeAllChildrenTransparent(_owner);
 
-        if ( newStyle.hasActiveBackgroundGradients() && _owner.isOpaque() )
-            _owner.setOpaque(false);
+        if ( _owner.isOpaque() )
+        {
+            boolean canBeOpaque = true;
+
+            if ( newStyle.hasActiveBackgroundGradients() )
+                canBeOpaque = false;
+            else if (  255 > newStyle.base().foundationColor().map(Color::getAlpha).orElse(0) ) {
+                if ( newStyle.border().hasAnyNonZeroArcs() )
+                    canBeOpaque = false;
+                else if ( newStyle.border().margin().isPositive() )
+                    canBeOpaque = false;
+            }
+
+            if ( !canBeOpaque )
+                _owner.setOpaque(false);
+        }
 
         newStyle.properties().forEach( property -> {
 
