@@ -188,8 +188,8 @@ public final class UI extends UINamespaceUtilities
 <span class="nc" id="L188">            throw new RuntimeException();</span>
         }
         int forSeparator() {
-<span class="pc bpc" id="L191" title="2 of 3 branches missed.">            switch ( this ) {</span>
-<span class="nc" id="L192">                case HORIZONTAL: return JSeparator.HORIZONTAL;</span>
+<span class="pc bpc" id="L191" title="1 of 3 branches missed.">            switch ( this ) {</span>
+<span class="fc" id="L192">                case HORIZONTAL: return JSeparator.HORIZONTAL;</span>
 <span class="fc" id="L193">                case VERTICAL  : return JSeparator.VERTICAL;</span>
             }
 <span class="nc" id="L195">            throw new RuntimeException();</span>
@@ -1003,8 +1003,8 @@ public final class UI extends UINamespaceUtilities
         */
 <span class="fc" id="L1004">            ImageIcon icon = new ImageIcon(Toolkit.getDefaultToolkit().createImage(url), url.toExternalForm());</span>
 <span class="fc" id="L1005">            double ratio = (double) icon.getIconWidth() / (double) icon.getIconHeight();</span>
-<span class="pc bpc" id="L1006" title="3 of 4 branches missed.">            if ( width.isPresent() &amp;&amp; height.isPresent() )</span>
-<span class="nc" id="L1007">                return new ImageIcon(icon.getImage().getScaledInstance(width.get(), height.get(), Image.SCALE_SMOOTH));</span>
+<span class="pc bpc" id="L1006" title="1 of 4 branches missed.">            if ( width.isPresent() &amp;&amp; height.isPresent() )</span>
+<span class="fc" id="L1007">                return new ImageIcon(icon.getImage().getScaledInstance(width.get(), height.get(), Image.SCALE_SMOOTH));</span>
 <span class="pc bpc" id="L1008" title="1 of 2 branches missed.">            if ( width.isPresent() )</span>
 <span class="nc" id="L1009">                return new ImageIcon(icon.getImage().getScaledInstance(width.get(), (int) (width.get() / ratio), Image.SCALE_SMOOTH));</span>
 <span class="pc bpc" id="L1010" title="1 of 2 branches missed.">            if ( height.isPresent() )</span>
@@ -2517,11 +2517,11 @@ public final class UI extends UINamespaceUtilities
      * @return A builder instance for the provided {@link JMenuItem}, which enables fluent method chaining.
      */
     public static UIForMenuItem&lt;JMenuItem&gt; menuItem( String text, Icon icon ) {
-<span class="nc" id="L2520">        NullUtil.nullArgCheck(text, &quot;text&quot;, String.class);</span>
-<span class="nc" id="L2521">        NullUtil.nullArgCheck(icon, &quot;icon&quot;, Icon.class);</span>
-<span class="nc" id="L2522">        return menuItem()</span>
-<span class="nc" id="L2523">                    .withText(text)</span>
-<span class="nc" id="L2524">                    .withIcon(icon);</span>
+<span class="fc" id="L2520">        NullUtil.nullArgCheck(text, &quot;text&quot;, String.class);</span>
+<span class="fc" id="L2521">        NullUtil.nullArgCheck(icon, &quot;icon&quot;, Icon.class);</span>
+<span class="fc" id="L2522">        return menuItem()</span>
+<span class="fc" id="L2523">                    .withText(text)</span>
+<span class="fc" id="L2524">                    .withIcon(icon);</span>
     }
 
     /**
@@ -4032,8 +4032,8 @@ public final class UI extends UINamespaceUtilities
      * @throws IllegalArgumentException If the provided icon is null.
      */
     public static UIForIcon&lt;JIcon&gt; icon( IconDeclaration icon ) {
-<span class="nc" id="L4035">        NullUtil.nullArgCheck(icon, &quot;icon&quot;, IconDeclaration.class);</span>
-<span class="nc" id="L4036">        return new UIForIcon&lt;&gt;(new BuilderState&lt;&gt;(JIcon.class, ()-&gt;new JIcon(icon)));</span>
+<span class="fc" id="L4035">        NullUtil.nullArgCheck(icon, &quot;icon&quot;, IconDeclaration.class);</span>
+<span class="fc" id="L4036">        return new UIForIcon&lt;&gt;(new BuilderState&lt;&gt;(JIcon.class, ()-&gt;new JIcon(icon)));</span>
     }
 
     /**
@@ -4491,9 +4491,9 @@ public final class UI extends UINamespaceUtilities
     }
 
     public static UIForToggleButton&lt;JToggleButton&gt; toggleButton( IconDeclaration icon, FitComponent fit ) {
-<span class="nc" id="L4494">        NullUtil.nullArgCheck(icon, &quot;icon&quot;, IconDeclaration.class);</span>
-<span class="nc" id="L4495">        NullUtil.nullArgCheck(fit, &quot;fit&quot;, FitComponent.class);</span>
-<span class="nc" id="L4496">        return toggleButton().withIcon(icon, fit);</span>
+<span class="fc" id="L4494">        NullUtil.nullArgCheck(icon, &quot;icon&quot;, IconDeclaration.class);</span>
+<span class="fc" id="L4495">        NullUtil.nullArgCheck(fit, &quot;fit&quot;, FitComponent.class);</span>
+<span class="fc" id="L4496">        return toggleButton().withIcon(icon, fit);</span>
     }
 
     /**
@@ -5145,7 +5145,7 @@ public final class UI extends UINamespaceUtilities
      * @return A builder instance for a new {@link JList}.
      */
     public static &lt;E&gt; UIForList&lt;E, JList&lt;E&gt;&gt; list() {
-<span class="nc" id="L5148">        return new UIForList&lt;&gt;(new BuilderState&lt;&gt;(List.class, List::new));</span>
+<span class="fc" id="L5148">        return new UIForList&lt;&gt;(new BuilderState&lt;&gt;(List.class, List::new));</span>
     }
 
     /**

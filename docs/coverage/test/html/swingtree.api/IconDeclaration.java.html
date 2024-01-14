@@ -104,7 +104,7 @@ public interface IconDeclaration
      *        but with the specified width and height as preferred size.
      */
     default IconDeclaration withSize( int width, int height ) {
-<span class="nc" id="L107">        return IconDeclaration.of(Size.of(width, height), path());</span>
+<span class="fc" id="L107">        return IconDeclaration.of(Size.of(width, height), path());</span>
     }
 
     /**
@@ -129,7 +129,7 @@ public interface IconDeclaration
      * @param &lt;T&gt; The type of icon to find.
      */
     default &lt;T extends ImageIcon&gt; Optional&lt;T&gt; find( Class&lt;T&gt; type ) {
-<span class="nc" id="L132">        return UI.findIcon(this).map(type::cast);</span>
+<span class="fc" id="L132">        return UI.findIcon(this).map(type::cast);</span>
     }
 
     /**
@@ -176,7 +176,7 @@ public interface IconDeclaration
 <span class="pc bpc" id="L176" title="1 of 2 branches missed.">                if ( other == null ) return false;</span>
 <span class="pc bpc" id="L177" title="1 of 2 branches missed.">                if ( other.getClass() != this.getClass() ) return false;</span>
 <span class="fc" id="L178">                IconDeclaration that = (IconDeclaration) other;</span>
-<span class="pc bpc" id="L179" title="1 of 2 branches missed.">                return Objects.equals(this.path(), that.path())</span>
+<span class="fc bfc" id="L179" title="All 2 branches covered.">                return Objects.equals(this.path(), that.path())</span>
 <span class="pc bpc" id="L180" title="1 of 2 branches missed.">                    &amp;&amp; Objects.equals(this.size(), that.size());</span>
             }
         };

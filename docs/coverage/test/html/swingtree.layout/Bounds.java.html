@@ -111,7 +111,7 @@ public final class Bounds
      * @return A new bounds object with a new location that has the specified x coordinate.
      */
     public Bounds withX( int x ) {
-<span class="nc" id="L114">        return new Bounds(_location.withX(x), _size);</span>
+<span class="fc" id="L114">        return new Bounds(_location.withX(x), _size);</span>
     }
 
     /**
@@ -119,7 +119,7 @@ public final class Bounds
      * @return A new bounds object with a new location that has the specified y coordinate.
      */
     public Bounds withY( int y ) {
-<span class="nc" id="L122">        return new Bounds(_location.withY(y), _size);</span>
+<span class="fc" id="L122">        return new Bounds(_location.withY(y), _size);</span>
     }
 
     /**
@@ -174,7 +174,7 @@ public final class Bounds
      * @return A {@link Rectangle} object with the same location and size as this bounds object.
      */
     public Rectangle toRectangle() {
-<span class="fc" id="L177">        return new Rectangle((int) _location.x(), (int) _location.y(), (int) _size._width, (int) _size._height);</span>
+<span class="nc" id="L177">        return new Rectangle((int) _location.x(), (int) _location.y(), (int) _size._width, (int) _size._height);</span>
     }
 
     @Override

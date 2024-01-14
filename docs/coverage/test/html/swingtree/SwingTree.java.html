@@ -619,8 +619,8 @@ public final class SwingTree
         private float _calculateScaleFactor( Font font ) {
             // apply custom scale factor specified in system property &quot;swingtree.uiScale&quot;
 <span class="fc" id="L621">            float customScaleFactor = config.uiScaleFactor();</span>
-<span class="pc bpc" id="L622" title="1 of 2 branches missed.">            if ( customScaleFactor &gt; 0 ) {</span>
-<span class="nc" id="L623">                return customScaleFactor;</span>
+<span class="fc bfc" id="L622" title="All 2 branches covered.">            if ( customScaleFactor &gt; 0 ) {</span>
+<span class="fc" id="L623">                return customScaleFactor;</span>
             }
 
 <span class="fc" id="L626">            return _normalize(_internalComputeScaleFactorFrom( font ) );</span>

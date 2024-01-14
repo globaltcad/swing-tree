@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import swingtree.UI;
 import swingtree.api.Painter;
 import swingtree.layout.Bounds;
+import swingtree.layout.Size;
 
 import java.awt.*;
 import java.awt.geom.*;
@@ -20,7 +21,7 @@ import java.util.function.Function;
  */
 final class StyleRenderer
 {
-<span class="fc" id="L23">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(StyleRenderer.class);</span>
+<span class="fc" id="L24">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(StyleRenderer.class);</span>
 
     private StyleRenderer() {} // Un-instantiable!
 
@@ -29,76 +30,76 @@ final class StyleRenderer
     {
         // First up, we render things unique to certain layers:
 
-<span class="fc bfc" id="L32" title="All 2 branches covered.">        if ( layer == UI.Layer.BACKGROUND ) {</span>
-<span class="fc" id="L33">            conf.style().base().foundationColor().ifPresent(outerColor -&gt; {</span>
-<span class="fc bfc" id="L34" title="All 2 branches covered.">                if ( outerColor.getAlpha() &gt; 0 ) { // Avoid rendering a fully transparent color!</span>
-<span class="fc" id="L35">                    g2d.setColor(outerColor);</span>
-<span class="fc" id="L36">                    g2d.fill(conf.get(UI.ComponentArea.EXTERIOR));</span>
+<span class="fc bfc" id="L33" title="All 2 branches covered.">        if ( layer == UI.Layer.BACKGROUND ) {</span>
+<span class="fc" id="L34">            conf.style().base().foundationColor().ifPresent(outerColor -&gt; {</span>
+<span class="fc bfc" id="L35" title="All 2 branches covered.">                if ( outerColor.getAlpha() &gt; 0 ) { // Avoid rendering a fully transparent color!</span>
+<span class="fc" id="L36">                    g2d.setColor(outerColor);</span>
+<span class="fc" id="L37">                    g2d.fill(conf.get(UI.ComponentArea.EXTERIOR));</span>
                 }
-<span class="fc" id="L38">            });</span>
-<span class="fc" id="L39">            conf.style().base().backgroundColor().ifPresent(color -&gt; {</span>
-<span class="pc bpc" id="L40" title="1 of 2 branches missed.">                if ( color.getAlpha() &gt; 0 ) { // Avoid rendering a fully transparent color!</span>
-<span class="fc" id="L41">                    g2d.setColor(color);</span>
-<span class="fc" id="L42">                    g2d.fill(conf.get(UI.ComponentArea.BODY));</span>
+<span class="fc" id="L39">            });</span>
+<span class="fc" id="L40">            conf.style().base().backgroundColor().ifPresent(color -&gt; {</span>
+<span class="pc bpc" id="L41" title="1 of 2 branches missed.">                if ( color.getAlpha() &gt; 0 ) { // Avoid rendering a fully transparent color!</span>
+<span class="fc" id="L42">                    g2d.setColor(color);</span>
+<span class="fc" id="L43">                    g2d.fill(conf.get(UI.ComponentArea.BODY));</span>
                 }
-<span class="fc" id="L44">            });</span>
+<span class="fc" id="L45">            });</span>
         }
 
-<span class="fc bfc" id="L47" title="All 2 branches covered.">        if ( layer == UI.Layer.BORDER ) {</span>
-<span class="fc" id="L48">            conf.style().border().color().ifPresent(color -&gt; {</span>
-<span class="fc" id="L49">                _drawBorder( conf, color, g2d);</span>
-<span class="fc" id="L50">            });</span>
+<span class="fc bfc" id="L48" title="All 2 branches covered.">        if ( layer == UI.Layer.BORDER ) {</span>
+<span class="fc" id="L49">            conf.style().border().color().ifPresent(color -&gt; {</span>
+<span class="fc" id="L50">                _drawBorder( conf, color, g2d);</span>
+<span class="fc" id="L51">            });</span>
         }
 
         // Now onto things every layer has in common:
 
         // Every layer has 4 things:
         // 1. A grounding serving as a base background, which is a filled color and/or an image:
-<span class="fc bfc" id="L57" title="All 2 branches covered.">        for ( ImageStyle imageStyle : conf.style().images(layer) )</span>
-<span class="fc bfc" id="L58" title="All 2 branches covered.">            if ( !imageStyle.equals(ImageStyle.none()) )</span>
-<span class="fc" id="L59">                _renderImage( conf, imageStyle, conf.currentBounds(), g2d);</span>
+<span class="fc bfc" id="L58" title="All 2 branches covered.">        for ( ImageStyle imageStyle : conf.style().images(layer) )</span>
+<span class="fc bfc" id="L59" title="All 2 branches covered.">            if ( !imageStyle.equals(ImageStyle.none()) )</span>
+<span class="fc" id="L60">                _renderImage( conf, imageStyle, conf.currentBounds().size(), g2d);</span>
 
         // 2. Gradients, which are best used to give a component a nice surface lighting effect.
         // They may transition vertically, horizontally or diagonally over various different colors:
-<span class="fc bfc" id="L63" title="All 2 branches covered.">        for ( GradientStyle gradient : conf.style().gradients(layer) )</span>
-<span class="fc bfc" id="L64" title="All 2 branches covered.">            if ( gradient.colors().length &gt; 0 ) {</span>
-<span class="pc bpc" id="L65" title="1 of 2 branches missed.">                if ( gradient.colors().length == 1 ) {</span>
-<span class="nc" id="L66">                    g2d.setColor(gradient.colors()[0]);</span>
-<span class="nc" id="L67">                    g2d.fill(conf.get(UI.ComponentArea.BODY));</span>
+<span class="fc bfc" id="L64" title="All 2 branches covered.">        for ( GradientStyle gradient : conf.style().gradients(layer) )</span>
+<span class="fc bfc" id="L65" title="All 2 branches covered.">            if ( gradient.colors().length &gt; 0 ) {</span>
+<span class="pc bpc" id="L66" title="1 of 2 branches missed.">                if ( gradient.colors().length == 1 ) {</span>
+<span class="nc" id="L67">                    g2d.setColor(gradient.colors()[0]);</span>
+<span class="nc" id="L68">                    g2d.fill(conf.get(UI.ComponentArea.BODY));</span>
                 }
-<span class="fc bfc" id="L69" title="All 2 branches covered.">                else if ( gradient.transition().isDiagonal() )</span>
-<span class="fc" id="L70">                    _renderDiagonalGradient(g2d, conf.currentBounds(), conf.style().margin(), gradient, conf.get(UI.ComponentArea.BODY));</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">                else if ( gradient.transition().isDiagonal() )</span>
+<span class="fc" id="L71">                    _renderDiagonalGradient(g2d, conf.currentBounds().size(), conf.style().margin(), gradient, conf.get(UI.ComponentArea.BODY));</span>
                 else
-<span class="fc" id="L72">                    _renderVerticalOrHorizontalGradient(g2d, conf.currentBounds(), conf.style().margin(), gradient, conf.get(UI.ComponentArea.BODY));</span>
+<span class="fc" id="L73">                    _renderVerticalOrHorizontalGradient(g2d, conf.currentBounds().size(), conf.style().margin(), gradient, conf.get(UI.ComponentArea.BODY));</span>
             }
 
         // 3. Shadows, which are simple gradient based drop shadows that can go inwards or outwards
-<span class="fc bfc" id="L76" title="All 2 branches covered.">        for ( ShadowStyle shadow : conf.style().shadows(layer) )</span>
-<span class="fc" id="L77">            _renderShadows(conf, shadow, g2d);</span>
+<span class="fc bfc" id="L77" title="All 2 branches covered.">        for ( ShadowStyle shadow : conf.style().shadows(layer) )</span>
+<span class="fc" id="L78">            _renderShadows(conf, shadow, g2d);</span>
 
         // 4. Painters, which are provided by the user and can be anything
-<span class="fc" id="L80">        List&lt;PainterStyle&gt; painters = conf.style().painters(layer);</span>
+<span class="fc" id="L81">        List&lt;PainterStyle&gt; painters = conf.style().painters(layer);</span>
 
-<span class="pc bpc" id="L82" title="1 of 2 branches missed.">        if ( !painters.isEmpty() )</span>
+<span class="pc bpc" id="L83" title="1 of 2 branches missed.">        if ( !painters.isEmpty() )</span>
         {
-<span class="fc bfc" id="L84" title="All 2 branches covered.">            for ( PainterStyle painterStyle : painters )</span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">            for ( PainterStyle painterStyle : painters )</span>
             {
-<span class="fc" id="L86">                Painter backgroundPainter = painterStyle.painter();</span>
+<span class="fc" id="L87">                Painter backgroundPainter = painterStyle.painter();</span>
 
-<span class="fc bfc" id="L88" title="All 2 branches covered.">                if ( backgroundPainter == Painter.none() )</span>
-<span class="fc" id="L89">                    break;</span>
+<span class="fc bfc" id="L89" title="All 2 branches covered.">                if ( backgroundPainter == Painter.none() )</span>
+<span class="fc" id="L90">                    break;</span>
 
-<span class="fc" id="L91">                conf.paintClippedTo( painterStyle.clipArea(), g2d, () -&gt; {</span>
+<span class="fc" id="L92">                conf.paintClippedTo( painterStyle.clipArea(), g2d, () -&gt; {</span>
                     // We remember the current transform and clip so that we can reset them after each painter:
-<span class="fc" id="L93">                    AffineTransform currentTransform = new AffineTransform(g2d.getTransform());</span>
-<span class="fc" id="L94">                    Shape           currentClip      = g2d.getClip();</span>
+<span class="fc" id="L94">                    AffineTransform currentTransform = new AffineTransform(g2d.getTransform());</span>
+<span class="fc" id="L95">                    Shape           currentClip      = g2d.getClip();</span>
 
                     try {
-<span class="fc" id="L97">                        backgroundPainter.paint(g2d);</span>
-<span class="nc" id="L98">                    } catch (Exception e) {</span>
-<span class="nc" id="L99">                        log.warn(</span>
+<span class="fc" id="L98">                        backgroundPainter.paint(g2d);</span>
+<span class="nc" id="L99">                    } catch (Exception e) {</span>
+<span class="nc" id="L100">                        log.warn(</span>
                             &quot;An exception occurred while executing painter '&quot; + backgroundPainter + &quot;' &quot; +
-<span class="nc" id="L101">                            &quot;on layer '&quot; + layer + &quot;' for style '&quot; + conf.style() + &quot;' &quot;,</span>
+<span class="nc" id="L102">                            &quot;on layer '&quot; + layer + &quot;' for style '&quot; + conf.style() + &quot;' &quot;,</span>
                             e
                         );
                         /*
@@ -113,104 +114,104 @@ final class StyleRenderer
                         */
                     } finally {
                         // We do not know what the painter did to the graphics object, so we reset it:
-<span class="fc" id="L116">                        g2d.setTransform(currentTransform);</span>
-<span class="fc" id="L117">                        g2d.setClip(currentClip);</span>
+<span class="fc" id="L117">                        g2d.setTransform(currentTransform);</span>
+<span class="fc" id="L118">                        g2d.setClip(currentClip);</span>
                     }
-<span class="fc" id="L119">                });</span>
-<span class="fc" id="L120">            }</span>
+<span class="fc" id="L120">                });</span>
+<span class="fc" id="L121">            }</span>
         }
         // And that's it! We have rendered a style layer!
-<span class="fc" id="L123">    }</span>
+<span class="fc" id="L124">    }</span>
 
     private static void _drawBorder( ComponentConf conf, Color color, Graphics2D g2d )
     {
-<span class="pc bpc" id="L127" title="1 of 2 branches missed.">        if ( !Outline.none().equals(conf.style().border().widths()) ) {</span>
+<span class="pc bpc" id="L128" title="1 of 2 branches missed.">        if ( !Outline.none().equals(conf.style().border().widths()) ) {</span>
             try {
-<span class="fc" id="L129">                Area borderArea = conf.get(UI.ComponentArea.BORDER);</span>
-<span class="fc" id="L130">                g2d.setColor(color);</span>
-<span class="fc" id="L131">                g2d.fill(borderArea);</span>
+<span class="fc" id="L130">                Area borderArea = conf.get(UI.ComponentArea.BORDER);</span>
+<span class="fc" id="L131">                g2d.setColor(color);</span>
+<span class="fc" id="L132">                g2d.fill(borderArea);</span>
 
-<span class="pc bpc" id="L133" title="1 of 2 branches missed.">                if (!conf.style().border().gradients().isEmpty()) {</span>
-<span class="fc bfc" id="L134" title="All 2 branches covered.">                    for ( GradientStyle gradient : conf.style().border().gradients() ) {</span>
-<span class="fc bfc" id="L135" title="All 2 branches covered.">                        if ( gradient.colors().length &gt; 0 ) {</span>
-<span class="pc bpc" id="L136" title="1 of 2 branches missed.">                            if ( gradient.transition().isDiagonal() )</span>
-<span class="fc" id="L137">                                _renderDiagonalGradient(g2d, conf.currentBounds(), conf.style().margin(), gradient, borderArea);</span>
+<span class="pc bpc" id="L134" title="1 of 2 branches missed.">                if (!conf.style().border().gradients().isEmpty()) {</span>
+<span class="fc bfc" id="L135" title="All 2 branches covered.">                    for ( GradientStyle gradient : conf.style().border().gradients() ) {</span>
+<span class="fc bfc" id="L136" title="All 2 branches covered.">                        if ( gradient.colors().length &gt; 0 ) {</span>
+<span class="pc bpc" id="L137" title="1 of 2 branches missed.">                            if ( gradient.transition().isDiagonal() )</span>
+<span class="fc" id="L138">                                _renderDiagonalGradient(g2d, conf.currentBounds().size(), conf.style().margin(), gradient, borderArea);</span>
                             else
-<span class="nc" id="L139">                                _renderVerticalOrHorizontalGradient(g2d, conf.currentBounds(), conf.style().margin(), gradient, borderArea);</span>
+<span class="nc" id="L140">                                _renderVerticalOrHorizontalGradient(g2d, conf.currentBounds().size(), conf.style().margin(), gradient, borderArea);</span>
                         }
-<span class="fc" id="L141">                    }</span>
+<span class="fc" id="L142">                    }</span>
                 }
-<span class="nc" id="L143">            } catch ( Exception e ) {</span>
-<span class="nc" id="L144">                log.warn(</span>
-<span class="nc" id="L145">                    &quot;An exception occurred while drawing the border of border style '&quot; + conf.style().border() + &quot;' &quot;,</span>
+<span class="nc" id="L144">            } catch ( Exception e ) {</span>
+<span class="nc" id="L145">                log.warn(</span>
+<span class="nc" id="L146">                    &quot;An exception occurred while drawing the border of border style '&quot; + conf.style().border() + &quot;' &quot;,</span>
                     e
                 );
                 /*
                     If exceptions happen in user provided painters, we don't want to
                     mess up the rendering of the rest of the component, so we catch them here!
                 */
-<span class="fc" id="L152">            }</span>
+<span class="fc" id="L153">            }</span>
         }
-<span class="fc" id="L154">    }</span>
+<span class="fc" id="L155">    }</span>
 
     private static void _renderShadows(
         ComponentConf conf,
         ShadowStyle   shadow,
         Graphics2D    g2d
     ) {
-<span class="fc bfc" id="L161" title="All 2 branches covered.">        if ( !shadow.color().isPresent() )</span>
-<span class="fc" id="L162">            return;</span>
+<span class="fc bfc" id="L162" title="All 2 branches covered.">        if ( !shadow.color().isPresent() )</span>
+<span class="fc" id="L163">            return;</span>
 
-<span class="fc" id="L164">        Color shadowColor = shadow.color().orElse(Color.BLACK);</span>
-<span class="fc" id="L165">        Style style       = conf.style();</span>
-<span class="fc" id="L166">        Bounds bounds     = conf.currentBounds();</span>
+<span class="fc" id="L165">        Color shadowColor = shadow.color().orElse(Color.BLACK);</span>
+<span class="fc" id="L166">        Style style       = conf.style();</span>
+<span class="fc" id="L167">        Size  size        = conf.currentBounds().size();</span>
 
         // First let's check if we need to render any shadows at all
         // Is the shadow color transparent?
-<span class="pc bpc" id="L170" title="1 of 2 branches missed.">        if ( shadowColor.getAlpha() == 0 )</span>
-<span class="nc" id="L171">            return;</span>
+<span class="pc bpc" id="L171" title="1 of 2 branches missed.">        if ( shadowColor.getAlpha() == 0 )</span>
+<span class="nc" id="L172">            return;</span>
 
         // The background box is calculated from the margins and border radius:
-<span class="fc" id="L174">        final float leftBorderWidth   = style.border().widths().left().orElse(0f);</span>
-<span class="fc" id="L175">        final float topBorderWidth    = style.border().widths().top().orElse(0f);</span>
-<span class="fc" id="L176">        final float rightBorderWidth  = style.border().widths().right().orElse(0f);</span>
-<span class="fc" id="L177">        final float bottomBorderWidth = style.border().widths().bottom().orElse(0f);</span>
-<span class="fc bfc" id="L178" title="All 2 branches covered.">        final float left   = Math.max(style.margin().left().orElse(0f),   0) + ( shadow.isInset() ? leftBorderWidth   : 0 );</span>
-<span class="fc bfc" id="L179" title="All 2 branches covered.">        final float top    = Math.max(style.margin().top().orElse(0f),    0) + ( shadow.isInset() ? topBorderWidth    : 0 );</span>
-<span class="fc bfc" id="L180" title="All 2 branches covered.">        final float right  = Math.max(style.margin().right().orElse(0f),  0) + ( shadow.isInset() ? rightBorderWidth  : 0 );</span>
-<span class="fc bfc" id="L181" title="All 2 branches covered.">        final float bottom = Math.max(style.margin().bottom().orElse(0f), 0) + ( shadow.isInset() ? bottomBorderWidth : 0 );</span>
-<span class="fc" id="L182">        final float topLeftRadius     = Math.max(style.border().topLeftRadius(), 0);</span>
-<span class="fc" id="L183">        final float topRightRadius    = Math.max(style.border().topRightRadius(), 0);</span>
-<span class="fc" id="L184">        final float bottomRightRadius = Math.max(style.border().bottomRightRadius(), 0);</span>
-<span class="fc" id="L185">        final float bottomLeftRadius  = Math.max(style.border().bottomLeftRadius(), 0);</span>
+<span class="fc" id="L175">        final float leftBorderWidth   = style.border().widths().left().orElse(0f);</span>
+<span class="fc" id="L176">        final float topBorderWidth    = style.border().widths().top().orElse(0f);</span>
+<span class="fc" id="L177">        final float rightBorderWidth  = style.border().widths().right().orElse(0f);</span>
+<span class="fc" id="L178">        final float bottomBorderWidth = style.border().widths().bottom().orElse(0f);</span>
+<span class="fc bfc" id="L179" title="All 2 branches covered.">        final float left   = Math.max(style.margin().left().orElse(0f),   0) + ( shadow.isInset() ? leftBorderWidth   : 0 );</span>
+<span class="fc bfc" id="L180" title="All 2 branches covered.">        final float top    = Math.max(style.margin().top().orElse(0f),    0) + ( shadow.isInset() ? topBorderWidth    : 0 );</span>
+<span class="fc bfc" id="L181" title="All 2 branches covered.">        final float right  = Math.max(style.margin().right().orElse(0f),  0) + ( shadow.isInset() ? rightBorderWidth  : 0 );</span>
+<span class="fc bfc" id="L182" title="All 2 branches covered.">        final float bottom = Math.max(style.margin().bottom().orElse(0f), 0) + ( shadow.isInset() ? bottomBorderWidth : 0 );</span>
+<span class="fc" id="L183">        final float topLeftRadius     = Math.max(style.border().topLeftRadius(), 0);</span>
+<span class="fc" id="L184">        final float topRightRadius    = Math.max(style.border().topRightRadius(), 0);</span>
+<span class="fc" id="L185">        final float bottomRightRadius = Math.max(style.border().bottomRightRadius(), 0);</span>
+<span class="fc" id="L186">        final float bottomLeftRadius  = Math.max(style.border().bottomLeftRadius(), 0);</span>
 
-<span class="fc" id="L187">        final float width     = bounds.size().width().orElse(0f);</span>
-<span class="fc" id="L188">        final float height    = bounds.size().height().orElse(0f);</span>
+<span class="fc" id="L188">        final float width     = size.width().orElse(0f);</span>
+<span class="fc" id="L189">        final float height    = size.height().orElse(0f);</span>
 
         // Calculate the shadow box bounds based on the padding and border thickness
-<span class="fc" id="L191">        final float x = left + shadow.horizontalOffset();</span>
-<span class="fc" id="L192">        final float y = top  + shadow.verticalOffset();</span>
-<span class="fc" id="L193">        final float w = width  - left - right;</span>
-<span class="fc" id="L194">        final float h = height - top  - bottom;</span>
+<span class="fc" id="L192">        final float x = left + shadow.horizontalOffset();</span>
+<span class="fc" id="L193">        final float y = top  + shadow.verticalOffset();</span>
+<span class="fc" id="L194">        final float w = width  - left - right;</span>
+<span class="fc" id="L195">        final float h = height - top  - bottom;</span>
 
-<span class="fc" id="L196">        final float blurRadius   = Math.max(shadow.blurRadius(), 0);</span>
-<span class="fc bfc" id="L197" title="All 2 branches covered.">        final float spreadRadius = !shadow.isOutset() ? shadow.spreadRadius() : -shadow.spreadRadius();</span>
+<span class="fc" id="L197">        final float blurRadius   = Math.max(shadow.blurRadius(), 0);</span>
+<span class="fc bfc" id="L198" title="All 2 branches covered.">        final float spreadRadius = !shadow.isOutset() ? shadow.spreadRadius() : -shadow.spreadRadius();</span>
 
-<span class="fc" id="L199">        Rectangle2D.Float outerShadowRect = new Rectangle2D.Float(</span>
+<span class="fc" id="L200">        Rectangle2D.Float outerShadowRect = new Rectangle2D.Float(</span>
                                         x - blurRadius + spreadRadius,
                                         y - blurRadius + spreadRadius,
                                         w + blurRadius * 2 - spreadRadius * 2,
                                         h + blurRadius * 2 - spreadRadius * 2
                                     );
 
-<span class="fc bfc" id="L206" title="All 2 branches covered.">        Function&lt;Integer, Integer&gt; offsetFunction = (radius) -&gt; (int)((radius * 2) / ( shadow.isInset() ? 4.5 : 3.79) );</span>
+<span class="fc bfc" id="L207" title="All 2 branches covered.">        Function&lt;Integer, Integer&gt; offsetFunction = (radius) -&gt; (int)((radius * 2) / ( shadow.isInset() ? 4.5 : 3.79) );</span>
 
-<span class="fc" id="L208">        final int averageCornerRadius = ((int) ( topLeftRadius + topRightRadius + bottomRightRadius + bottomLeftRadius )) / 4;</span>
-<span class="fc" id="L209">        final int averageBorderWidth  = (int) (( leftBorderWidth + topBorderWidth + rightBorderWidth +  bottomBorderWidth ) / 4);</span>
-<span class="fc bfc" id="L210" title="All 2 branches covered.">        final int shadowCornerRadius  = (int) Math.max( 0, averageCornerRadius + (shadow.isOutset() ? -spreadRadius-blurRadius*2 : -Math.max(averageBorderWidth,spreadRadius)) );</span>
-<span class="fc" id="L211">        final int gradientStartOffset = 1 + offsetFunction.apply(shadowCornerRadius);</span>
+<span class="fc" id="L209">        final int averageCornerRadius = ((int) ( topLeftRadius + topRightRadius + bottomRightRadius + bottomLeftRadius )) / 4;</span>
+<span class="fc" id="L210">        final int averageBorderWidth  = (int) (( leftBorderWidth + topBorderWidth + rightBorderWidth +  bottomBorderWidth ) / 4);</span>
+<span class="fc bfc" id="L211" title="All 2 branches covered.">        final int shadowCornerRadius  = (int) Math.max( 0, averageCornerRadius + (shadow.isOutset() ? -spreadRadius-blurRadius*2 : -Math.max(averageBorderWidth,spreadRadius)) );</span>
+<span class="fc" id="L212">        final int gradientStartOffset = 1 + offsetFunction.apply(shadowCornerRadius);</span>
 
-<span class="fc" id="L213">        Rectangle2D.Float innerShadowRect = new Rectangle2D.Float(</span>
+<span class="fc" id="L214">        Rectangle2D.Float innerShadowRect = new Rectangle2D.Float(</span>
                                         x + blurRadius + gradientStartOffset + spreadRadius,
                                         y + blurRadius + gradientStartOffset + spreadRadius,
                                         w - blurRadius * 2 - gradientStartOffset * 2 - spreadRadius * 2,
@@ -219,38 +220,38 @@ final class StyleRenderer
 
         final Area baseArea;
 
-<span class="fc bfc" id="L222" title="All 2 branches covered.">        if ( shadow.isOutset() ) {</span>
-<span class="fc" id="L223">            int artifactAdjustment = 1;</span>
-<span class="fc" id="L224">            baseArea = ComponentAreas.calculateBaseArea(conf, artifactAdjustment, artifactAdjustment, artifactAdjustment, artifactAdjustment);</span>
-<span class="fc" id="L225">        }</span>
+<span class="fc bfc" id="L223" title="All 2 branches covered.">        if ( shadow.isOutset() ) {</span>
+<span class="fc" id="L224">            int artifactAdjustment = 1;</span>
+<span class="fc" id="L225">            baseArea = ComponentAreas.calculateBaseArea(conf, artifactAdjustment, artifactAdjustment, artifactAdjustment, artifactAdjustment);</span>
+<span class="fc" id="L226">        }</span>
         else
-<span class="fc" id="L227">            baseArea = new Area(conf.get(UI.ComponentArea.BODY));</span>
+<span class="fc" id="L228">            baseArea = new Area(conf.get(UI.ComponentArea.BODY));</span>
 
         // Apply the clipping to avoid overlapping the shadow and the box
-<span class="fc" id="L230">        Area shadowArea = new Area(outerShadowRect);</span>
+<span class="fc" id="L231">        Area shadowArea = new Area(outerShadowRect);</span>
 
-<span class="fc bfc" id="L232" title="All 2 branches covered.">        if ( shadow.isOutset() )</span>
-<span class="fc" id="L233">            shadowArea.subtract(baseArea);</span>
+<span class="fc bfc" id="L233" title="All 2 branches covered.">        if ( shadow.isOutset() )</span>
+<span class="fc" id="L234">            shadowArea.subtract(baseArea);</span>
         else
-<span class="fc" id="L235">            shadowArea.intersect(baseArea);</span>
+<span class="fc" id="L236">            shadowArea.intersect(baseArea);</span>
 
         // Draw the corner shadows
-<span class="fc" id="L238">        _renderCornerShadow(shadow, UI.Corner.TOP_LEFT,     shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);</span>
-<span class="fc" id="L239">        _renderCornerShadow(shadow, UI.Corner.TOP_RIGHT,    shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);</span>
-<span class="fc" id="L240">        _renderCornerShadow(shadow, UI.Corner.BOTTOM_LEFT,  shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);</span>
-<span class="fc" id="L241">        _renderCornerShadow(shadow, UI.Corner.BOTTOM_RIGHT, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);</span>
+<span class="fc" id="L239">        _renderCornerShadow(shadow, UI.Corner.TOP_LEFT,     shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);</span>
+<span class="fc" id="L240">        _renderCornerShadow(shadow, UI.Corner.TOP_RIGHT,    shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);</span>
+<span class="fc" id="L241">        _renderCornerShadow(shadow, UI.Corner.BOTTOM_LEFT,  shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);</span>
+<span class="fc" id="L242">        _renderCornerShadow(shadow, UI.Corner.BOTTOM_RIGHT, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);</span>
 
         // Draw the edge shadows
-<span class="fc" id="L244">        _renderEdgeShadow(shadow, UI.Edge.TOP,    shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);</span>
-<span class="fc" id="L245">        _renderEdgeShadow(shadow, UI.Edge.RIGHT,  shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);</span>
-<span class="fc" id="L246">        _renderEdgeShadow(shadow, UI.Edge.BOTTOM, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);</span>
-<span class="fc" id="L247">        _renderEdgeShadow(shadow, UI.Edge.LEFT,   shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);</span>
+<span class="fc" id="L245">        _renderEdgeShadow(shadow, UI.Edge.TOP,    shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);</span>
+<span class="fc" id="L246">        _renderEdgeShadow(shadow, UI.Edge.RIGHT,  shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);</span>
+<span class="fc" id="L247">        _renderEdgeShadow(shadow, UI.Edge.BOTTOM, shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);</span>
+<span class="fc" id="L248">        _renderEdgeShadow(shadow, UI.Edge.LEFT,   shadowArea, innerShadowRect, outerShadowRect, gradientStartOffset, g2d);</span>
 
-<span class="fc" id="L249">        Area outerMostArea = new Area(outerShadowRect);</span>
+<span class="fc" id="L250">        Area outerMostArea = new Area(outerShadowRect);</span>
         // If the base rectangle and the outer shadow box are not equal, then we need to fill the area of the base rectangle that is not covered by the outer shadow box!
-<span class="fc" id="L251">        _renderShadowBody(shadow, baseArea, innerShadowRect, outerMostArea, g2d);</span>
+<span class="fc" id="L252">        _renderShadowBody(shadow, baseArea, innerShadowRect, outerMostArea, g2d);</span>
 
-<span class="fc" id="L253">    }</span>
+<span class="fc" id="L254">    }</span>
 
     private static void _renderShadowBody(
         ShadowStyle       shadowStyle,
@@ -259,18 +260,18 @@ final class StyleRenderer
         Area              outerShadowBox,
         Graphics2D        g2d
     ) {
-<span class="fc" id="L262">        Graphics2D g2d2 = (Graphics2D) g2d.create();</span>
-<span class="fc" id="L263">        g2d2.setColor(shadowStyle.color().orElse(Color.BLACK));</span>
-<span class="fc bfc" id="L264" title="All 2 branches covered.">        if ( !shadowStyle.isOutset() ) {</span>
-<span class="fc" id="L265">            baseArea.subtract(outerShadowBox);</span>
-<span class="fc" id="L266">            g2d2.fill(baseArea);</span>
+<span class="fc" id="L263">        Graphics2D g2d2 = (Graphics2D) g2d.create();</span>
+<span class="fc" id="L264">        g2d2.setColor(shadowStyle.color().orElse(Color.BLACK));</span>
+<span class="fc bfc" id="L265" title="All 2 branches covered.">        if ( !shadowStyle.isOutset() ) {</span>
+<span class="fc" id="L266">            baseArea.subtract(outerShadowBox);</span>
+<span class="fc" id="L267">            g2d2.fill(baseArea);</span>
         } else {
-<span class="fc" id="L268">            Area innerShadowArea = new Area(innerShadowRect);</span>
-<span class="fc" id="L269">            innerShadowArea.subtract(baseArea);</span>
-<span class="fc" id="L270">            g2d2.fill(innerShadowArea);</span>
+<span class="fc" id="L269">            Area innerShadowArea = new Area(innerShadowRect);</span>
+<span class="fc" id="L270">            innerShadowArea.subtract(baseArea);</span>
+<span class="fc" id="L271">            g2d2.fill(innerShadowArea);</span>
         }
-<span class="fc" id="L272">        g2d2.dispose();</span>
-<span class="fc" id="L273">    }</span>
+<span class="fc" id="L273">        g2d2.dispose();</span>
+<span class="fc" id="L274">    }</span>
 
     private static void _renderCornerShadow(
         ShadowStyle       shadowStyle,
@@ -282,10 +283,10 @@ final class StyleRenderer
         Graphics2D        g2d
     ) {
         // We define a clipping box so that corners don't overlap
-<span class="fc" id="L285">        float clipBoxWidth   = outerShadowRect.width / 2f;</span>
-<span class="fc" id="L286">        float clipBoxHeight  = outerShadowRect.height / 2f;</span>
-<span class="fc" id="L287">        float clipBoxCenterX = outerShadowRect.x + clipBoxWidth;</span>
-<span class="fc" id="L288">        float clipBoxCenterY = outerShadowRect.y + clipBoxHeight;</span>
+<span class="fc" id="L286">        float clipBoxWidth   = outerShadowRect.width / 2f;</span>
+<span class="fc" id="L287">        float clipBoxHeight  = outerShadowRect.height / 2f;</span>
+<span class="fc" id="L288">        float clipBoxCenterX = outerShadowRect.x + clipBoxWidth;</span>
+<span class="fc" id="L289">        float clipBoxCenterY = outerShadowRect.y + clipBoxHeight;</span>
         Rectangle2D.Float cornerClipBox; // outer box!
 
         // The defining the corner shadow bound (where it starts and ends
@@ -293,127 +294,127 @@ final class StyleRenderer
         float cx;
         float cy;
         float cr; // depending on the corner, this is either the corner box width or height
-<span class="pc bpc" id="L296" title="1 of 5 branches missed.">        switch (corner) {</span>
+<span class="pc bpc" id="L297" title="1 of 5 branches missed.">        switch (corner) {</span>
             case TOP_LEFT:
-<span class="fc" id="L298">                cornerBox = new Rectangle2D.Float(</span>
+<span class="fc" id="L299">                cornerBox = new Rectangle2D.Float(</span>
                                     outerShadowRect.x, outerShadowRect.y,
                                     innerShadowRect.x - outerShadowRect.x,
                                     innerShadowRect.y - outerShadowRect.y
                                 );
-<span class="fc" id="L303">                cornerClipBox = new Rectangle2D.Float(</span>
+<span class="fc" id="L304">                cornerClipBox = new Rectangle2D.Float(</span>
                                     clipBoxCenterX - clipBoxWidth, clipBoxCenterY - clipBoxHeight,
                                     clipBoxWidth, clipBoxHeight
                                 );
 
-<span class="fc" id="L308">                cx = cornerBox.x + cornerBox.width;</span>
-<span class="fc" id="L309">                cy = cornerBox.y + cornerBox.height;</span>
-<span class="fc" id="L310">                cr = cornerBox.width;</span>
-<span class="fc" id="L311">                break;</span>
+<span class="fc" id="L309">                cx = cornerBox.x + cornerBox.width;</span>
+<span class="fc" id="L310">                cy = cornerBox.y + cornerBox.height;</span>
+<span class="fc" id="L311">                cr = cornerBox.width;</span>
+<span class="fc" id="L312">                break;</span>
             case TOP_RIGHT:
-<span class="fc" id="L313">                cornerBox = new Rectangle2D.Float(</span>
+<span class="fc" id="L314">                cornerBox = new Rectangle2D.Float(</span>
                                 innerShadowRect.x + innerShadowRect.width, outerShadowRect.y,
                                 outerShadowRect.x + outerShadowRect.width - innerShadowRect.x - innerShadowRect.width,
                                 innerShadowRect.y - outerShadowRect.y
                             );
-<span class="fc" id="L318">                cornerClipBox = new Rectangle2D.Float(</span>
+<span class="fc" id="L319">                cornerClipBox = new Rectangle2D.Float(</span>
                                     clipBoxCenterX, clipBoxCenterY - clipBoxHeight,
                                     clipBoxWidth, clipBoxHeight
                                 );
 
-<span class="fc" id="L323">                cx = cornerBox.x;</span>
-<span class="fc" id="L324">                cy = cornerBox.y + cornerBox.height;</span>
-<span class="fc" id="L325">                cr = cornerBox.width;</span>
-<span class="fc" id="L326">                break;</span>
+<span class="fc" id="L324">                cx = cornerBox.x;</span>
+<span class="fc" id="L325">                cy = cornerBox.y + cornerBox.height;</span>
+<span class="fc" id="L326">                cr = cornerBox.width;</span>
+<span class="fc" id="L327">                break;</span>
             case BOTTOM_LEFT:
-<span class="fc" id="L328">                cornerBox = new Rectangle2D.Float(</span>
+<span class="fc" id="L329">                cornerBox = new Rectangle2D.Float(</span>
                                 outerShadowRect.x,
                                 innerShadowRect.y + innerShadowRect.height,
                                 innerShadowRect.x - outerShadowRect.x,
                                 outerShadowRect.y + outerShadowRect.height - innerShadowRect.y - innerShadowRect.height
                             );
-<span class="fc" id="L334">                cornerClipBox = new Rectangle2D.Float(</span>
+<span class="fc" id="L335">                cornerClipBox = new Rectangle2D.Float(</span>
                                     clipBoxCenterX - clipBoxWidth, clipBoxCenterY,
                                     clipBoxWidth, clipBoxHeight
                                 );
 
-<span class="fc" id="L339">                cx = cornerBox.x + cornerBox.width;</span>
-<span class="fc" id="L340">                cy = cornerBox.y;</span>
-<span class="fc" id="L341">                cr = cornerBox.width;</span>
-<span class="fc" id="L342">                break;</span>
+<span class="fc" id="L340">                cx = cornerBox.x + cornerBox.width;</span>
+<span class="fc" id="L341">                cy = cornerBox.y;</span>
+<span class="fc" id="L342">                cr = cornerBox.width;</span>
+<span class="fc" id="L343">                break;</span>
             case BOTTOM_RIGHT:
-<span class="fc" id="L344">                cornerBox = new Rectangle2D.Float(</span>
+<span class="fc" id="L345">                cornerBox = new Rectangle2D.Float(</span>
                             innerShadowRect.x + innerShadowRect.width, innerShadowRect.y + innerShadowRect.height,
                             outerShadowRect.x + outerShadowRect.width - innerShadowRect.x - innerShadowRect.width,
                             outerShadowRect.y + outerShadowRect.height - innerShadowRect.y - innerShadowRect.height
                             );
-<span class="fc" id="L349">                cornerClipBox = new Rectangle2D.Float(</span>
+<span class="fc" id="L350">                cornerClipBox = new Rectangle2D.Float(</span>
                                     clipBoxCenterX, clipBoxCenterY,
                                     clipBoxWidth, clipBoxHeight
                                 );
 
-<span class="fc" id="L354">                cx = cornerBox.x;</span>
-<span class="fc" id="L355">                cy = cornerBox.y;</span>
-<span class="fc" id="L356">                cr = cornerBox.width;</span>
-<span class="fc" id="L357">                break;</span>
+<span class="fc" id="L355">                cx = cornerBox.x;</span>
+<span class="fc" id="L356">                cy = cornerBox.y;</span>
+<span class="fc" id="L357">                cr = cornerBox.width;</span>
+<span class="fc" id="L358">                break;</span>
             default:
-<span class="nc" id="L359">                throw new IllegalArgumentException(&quot;Invalid corner: &quot; + corner);</span>
+<span class="nc" id="L360">                throw new IllegalArgumentException(&quot;Invalid corner: &quot; + corner);</span>
         }
 
-<span class="pc bpc" id="L362" title="1 of 2 branches missed.">        if (cr &lt;= 0) return;</span>
+<span class="pc bpc" id="L363" title="1 of 2 branches missed.">        if (cr &lt;= 0) return;</span>
 
         Color innerColor;
         Color outerColor;
-<span class="fc" id="L366">        Color shadowBackgroundColor = _transparentShadowBackground(shadowStyle);</span>
-<span class="fc bfc" id="L367" title="All 2 branches covered.">        if ( shadowStyle.isOutset() ) {</span>
-<span class="fc" id="L368">            innerColor = shadowStyle.color().orElse(Color.BLACK);</span>
-<span class="fc" id="L369">            outerColor = shadowBackgroundColor;</span>
+<span class="fc" id="L367">        Color shadowBackgroundColor = _transparentShadowBackground(shadowStyle);</span>
+<span class="fc bfc" id="L368" title="All 2 branches covered.">        if ( shadowStyle.isOutset() ) {</span>
+<span class="fc" id="L369">            innerColor = shadowStyle.color().orElse(Color.BLACK);</span>
+<span class="fc" id="L370">            outerColor = shadowBackgroundColor;</span>
         } else {
-<span class="fc" id="L371">            innerColor = shadowBackgroundColor;</span>
-<span class="fc" id="L372">            outerColor = shadowStyle.color().orElse(Color.BLACK);</span>
+<span class="fc" id="L372">            innerColor = shadowBackgroundColor;</span>
+<span class="fc" id="L373">            outerColor = shadowStyle.color().orElse(Color.BLACK);</span>
         }
-<span class="fc" id="L374">        float gradientStart = (float) gradientStartOffset / cr;</span>
+<span class="fc" id="L375">        float gradientStart = (float) gradientStartOffset / cr;</span>
 
         // The first thing we can do is to clip the corner box to the area where the shadow is allowed
-<span class="fc" id="L377">        Area cornerArea = new Area(cornerBox);</span>
-<span class="fc" id="L378">        cornerArea.intersect(areaWhereShadowIsAllowed);</span>
+<span class="fc" id="L378">        Area cornerArea = new Area(cornerBox);</span>
+<span class="fc" id="L379">        cornerArea.intersect(areaWhereShadowIsAllowed);</span>
 
         // In the simplest case we don't need to do any gradient painting:
-<span class="pc bpc" id="L381" title="2 of 4 branches missed.">        if ( gradientStart == 1f || gradientStart == 0f ) {</span>
+<span class="pc bpc" id="L382" title="2 of 4 branches missed.">        if ( gradientStart == 1f || gradientStart == 0f ) {</span>
             // Simple, we just draw a circle and clip it
-<span class="nc" id="L383">            Area circle = new Area(new Ellipse2D.Float(cx - cr, cy - cr, cr * 2, cr * 2));</span>
-<span class="nc bnc" id="L384" title="All 2 branches missed.">            if ( shadowStyle.isInset() ) {</span>
-<span class="nc" id="L385">                g2d.setColor(outerColor);</span>
-<span class="nc" id="L386">                cornerArea.subtract(circle);</span>
+<span class="nc" id="L384">            Area circle = new Area(new Ellipse2D.Float(cx - cr, cy - cr, cr * 2, cr * 2));</span>
+<span class="nc bnc" id="L385" title="All 2 branches missed.">            if ( shadowStyle.isInset() ) {</span>
+<span class="nc" id="L386">                g2d.setColor(outerColor);</span>
+<span class="nc" id="L387">                cornerArea.subtract(circle);</span>
             } else {
-<span class="nc" id="L388">                g2d.setColor(innerColor);</span>
-<span class="nc" id="L389">                cornerArea.intersect(circle);</span>
+<span class="nc" id="L389">                g2d.setColor(innerColor);</span>
+<span class="nc" id="L390">                cornerArea.intersect(circle);</span>
             }
-<span class="nc" id="L391">            g2d.fill(cornerArea);</span>
-<span class="nc" id="L392">            return;</span>
+<span class="nc" id="L392">            g2d.fill(cornerArea);</span>
+<span class="nc" id="L393">            return;</span>
         }
 
         RadialGradientPaint cornerPaint;
-<span class="pc bpc" id="L396" title="2 of 4 branches missed.">        if ( gradientStart &gt; 1f || gradientStart &lt; 0f )</span>
-<span class="nc" id="L397">            cornerPaint = new RadialGradientPaint(</span>
+<span class="pc bpc" id="L397" title="2 of 4 branches missed.">        if ( gradientStart &gt; 1f || gradientStart &lt; 0f )</span>
+<span class="nc" id="L398">            cornerPaint = new RadialGradientPaint(</span>
                              cx, cy, cr,
                              new float[] {0f, 1f},
                              new Color[] {innerColor, outerColor}
                          );
         else
-<span class="fc" id="L403">            cornerPaint = new RadialGradientPaint(</span>
+<span class="fc" id="L404">            cornerPaint = new RadialGradientPaint(</span>
                              cx, cy, cr,
                              new float[] {0f, gradientStart, 1f},
                              new Color[] {innerColor, innerColor, outerColor}
                          );
 
         // We need to clip the corner paint to the corner box
-<span class="fc" id="L410">        cornerArea.intersect(new Area(cornerClipBox));</span>
+<span class="fc" id="L411">        cornerArea.intersect(new Area(cornerClipBox));</span>
 
-<span class="fc" id="L412">        Graphics2D cornerG2d = (Graphics2D) g2d.create();</span>
-<span class="fc" id="L413">        cornerG2d.setPaint(cornerPaint);</span>
-<span class="fc" id="L414">        cornerG2d.fill(cornerArea);</span>
-<span class="fc" id="L415">        cornerG2d.dispose();</span>
-<span class="fc" id="L416">    }</span>
+<span class="fc" id="L413">        Graphics2D cornerG2d = (Graphics2D) g2d.create();</span>
+<span class="fc" id="L414">        cornerG2d.setPaint(cornerPaint);</span>
+<span class="fc" id="L415">        cornerG2d.fill(cornerArea);</span>
+<span class="fc" id="L416">        cornerG2d.dispose();</span>
+<span class="fc" id="L417">    }</span>
 
     private static void _renderEdgeShadow(
         ShadowStyle       shadowStyle,
@@ -425,128 +426,128 @@ final class StyleRenderer
         Graphics2D        g2d
     ) {
         // We define a boundary center point and a clipping box so that edges don't overlap
-<span class="fc" id="L428">        float clipBoundaryX = outerShadowRect.x + outerShadowRect.width / 2f;</span>
-<span class="fc" id="L429">        float clipBoundaryY = outerShadowRect.y + outerShadowRect.height / 2f;</span>
-<span class="fc" id="L430">        Rectangle2D.Float edgeClipBox = null;</span>
+<span class="fc" id="L429">        float clipBoundaryX = outerShadowRect.x + outerShadowRect.width / 2f;</span>
+<span class="fc" id="L430">        float clipBoundaryY = outerShadowRect.y + outerShadowRect.height / 2f;</span>
+<span class="fc" id="L431">        Rectangle2D.Float edgeClipBox = null;</span>
 
         Rectangle2D.Float edgeBox;
         float gradEndX;
         float gradEndY;
         float gradStartX;
         float gradStartY;
-<span class="pc bpc" id="L437" title="1 of 5 branches missed.">        switch (edge) {</span>
+<span class="pc bpc" id="L438" title="1 of 5 branches missed.">        switch (edge) {</span>
             case TOP:
-<span class="fc" id="L439">                edgeBox = new Rectangle2D.Float(</span>
+<span class="fc" id="L440">                edgeBox = new Rectangle2D.Float(</span>
                                 innerShadowRect.x, outerShadowRect.y,
                                 innerShadowRect.width, innerShadowRect.y - outerShadowRect.y
                             );
 
-<span class="fc bfc" id="L444" title="All 2 branches covered.">                if ( (edgeBox.y + edgeBox.height) &gt; clipBoundaryY )</span>
-<span class="fc" id="L445">                    edgeClipBox = new Rectangle2D.Float(</span>
+<span class="fc bfc" id="L445" title="All 2 branches covered.">                if ( (edgeBox.y + edgeBox.height) &gt; clipBoundaryY )</span>
+<span class="fc" id="L446">                    edgeClipBox = new Rectangle2D.Float(</span>
                             edgeBox.x, edgeBox.y,
                             edgeBox.width, clipBoundaryY - edgeBox.y
                     );
 
-<span class="fc" id="L450">                gradEndX = edgeBox.x;</span>
-<span class="fc" id="L451">                gradEndY = edgeBox.y;</span>
-<span class="fc" id="L452">                gradStartX = edgeBox.x;</span>
-<span class="fc" id="L453">                gradStartY = edgeBox.y + edgeBox.height;</span>
-<span class="fc" id="L454">                break;</span>
+<span class="fc" id="L451">                gradEndX = edgeBox.x;</span>
+<span class="fc" id="L452">                gradEndY = edgeBox.y;</span>
+<span class="fc" id="L453">                gradStartX = edgeBox.x;</span>
+<span class="fc" id="L454">                gradStartY = edgeBox.y + edgeBox.height;</span>
+<span class="fc" id="L455">                break;</span>
             case RIGHT:
-<span class="fc" id="L456">                edgeBox = new Rectangle2D.Float(</span>
+<span class="fc" id="L457">                edgeBox = new Rectangle2D.Float(</span>
                                 innerShadowRect.x + innerShadowRect.width, innerShadowRect.y,
                                 outerShadowRect.x + outerShadowRect.width - innerShadowRect.x - innerShadowRect.width,
                                 innerShadowRect.height
                             );
-<span class="fc bfc" id="L461" title="All 2 branches covered.">                if ( edgeBox.x &lt; clipBoundaryX )</span>
-<span class="fc" id="L462">                    edgeClipBox = new Rectangle2D.Float(</span>
+<span class="fc bfc" id="L462" title="All 2 branches covered.">                if ( edgeBox.x &lt; clipBoundaryX )</span>
+<span class="fc" id="L463">                    edgeClipBox = new Rectangle2D.Float(</span>
                                         clipBoundaryX, edgeBox.y,
                                         edgeBox.x + edgeBox.width - clipBoundaryX, edgeBox.height
                                     );
-<span class="fc" id="L466">                gradEndX = edgeBox.x + edgeBox.width;</span>
-<span class="fc" id="L467">                gradEndY = edgeBox.y;</span>
-<span class="fc" id="L468">                gradStartX = edgeBox.x;</span>
-<span class="fc" id="L469">                gradStartY = edgeBox.y;</span>
-<span class="fc" id="L470">                break;</span>
+<span class="fc" id="L467">                gradEndX = edgeBox.x + edgeBox.width;</span>
+<span class="fc" id="L468">                gradEndY = edgeBox.y;</span>
+<span class="fc" id="L469">                gradStartX = edgeBox.x;</span>
+<span class="fc" id="L470">                gradStartY = edgeBox.y;</span>
+<span class="fc" id="L471">                break;</span>
             case BOTTOM:
-<span class="fc" id="L472">                edgeBox = new Rectangle2D.Float(</span>
+<span class="fc" id="L473">                edgeBox = new Rectangle2D.Float(</span>
                         innerShadowRect.x, innerShadowRect.y + innerShadowRect.height,
                         innerShadowRect.width, outerShadowRect.y + outerShadowRect.height - innerShadowRect.y - innerShadowRect.height
                     );
-<span class="fc bfc" id="L476" title="All 2 branches covered.">                if ( edgeBox.y &lt; clipBoundaryY )</span>
-<span class="fc" id="L477">                    edgeClipBox = new Rectangle2D.Float(</span>
+<span class="fc bfc" id="L477" title="All 2 branches covered.">                if ( edgeBox.y &lt; clipBoundaryY )</span>
+<span class="fc" id="L478">                    edgeClipBox = new Rectangle2D.Float(</span>
                             edgeBox.x,
                             clipBoundaryY,
                             edgeBox.width,
                             edgeBox.y + edgeBox.height - clipBoundaryY
                     );
 
-<span class="fc" id="L484">                gradEndX = edgeBox.x;</span>
-<span class="fc" id="L485">                gradEndY = edgeBox.y + edgeBox.height;</span>
-<span class="fc" id="L486">                gradStartX = edgeBox.x;</span>
-<span class="fc" id="L487">                gradStartY = edgeBox.y;</span>
-<span class="fc" id="L488">                break;</span>
+<span class="fc" id="L485">                gradEndX = edgeBox.x;</span>
+<span class="fc" id="L486">                gradEndY = edgeBox.y + edgeBox.height;</span>
+<span class="fc" id="L487">                gradStartX = edgeBox.x;</span>
+<span class="fc" id="L488">                gradStartY = edgeBox.y;</span>
+<span class="fc" id="L489">                break;</span>
             case LEFT:
-<span class="fc" id="L490">                edgeBox = new Rectangle2D.Float(</span>
+<span class="fc" id="L491">                edgeBox = new Rectangle2D.Float(</span>
                             outerShadowRect.x,
                             innerShadowRect.y,
                             innerShadowRect.x - outerShadowRect.x,
                             innerShadowRect.height
                             );
-<span class="fc bfc" id="L496" title="All 2 branches covered.">                if ( (edgeBox.x + edgeBox.width) &gt; clipBoundaryX )</span>
-<span class="fc" id="L497">                    edgeClipBox = new Rectangle2D.Float(</span>
+<span class="fc bfc" id="L497" title="All 2 branches covered.">                if ( (edgeBox.x + edgeBox.width) &gt; clipBoundaryX )</span>
+<span class="fc" id="L498">                    edgeClipBox = new Rectangle2D.Float(</span>
                             edgeBox.x,
                             edgeBox.y,
                             clipBoundaryX - edgeBox.x,
                             edgeBox.height
                     );
-<span class="fc" id="L503">                gradEndX = edgeBox.x;</span>
-<span class="fc" id="L504">                gradEndY = edgeBox.y;</span>
-<span class="fc" id="L505">                gradStartX = edgeBox.x + edgeBox.width;</span>
-<span class="fc" id="L506">                gradStartY = edgeBox.y;</span>
-<span class="fc" id="L507">                break;</span>
+<span class="fc" id="L504">                gradEndX = edgeBox.x;</span>
+<span class="fc" id="L505">                gradEndY = edgeBox.y;</span>
+<span class="fc" id="L506">                gradStartX = edgeBox.x + edgeBox.width;</span>
+<span class="fc" id="L507">                gradStartY = edgeBox.y;</span>
+<span class="fc" id="L508">                break;</span>
             default:
-<span class="nc" id="L509">                throw new IllegalArgumentException(&quot;Invalid edge: &quot; + edge);</span>
+<span class="nc" id="L510">                throw new IllegalArgumentException(&quot;Invalid edge: &quot; + edge);</span>
         }
 
-<span class="pc bpc" id="L512" title="1 of 4 branches missed.">        if ( gradStartX == gradEndX &amp;&amp; gradStartY == gradEndY ) return;</span>
+<span class="pc bpc" id="L513" title="1 of 4 branches missed.">        if ( gradStartX == gradEndX &amp;&amp; gradStartY == gradEndY ) return;</span>
 
         Color innerColor;
         Color outerColor;
         // Same as shadow color but without alpha:
-<span class="fc" id="L517">        Color shadowBackgroundColor = _transparentShadowBackground(shadowStyle);</span>
-<span class="fc bfc" id="L518" title="All 2 branches covered.">        if (shadowStyle.isOutset()) {</span>
-<span class="fc" id="L519">            innerColor = shadowStyle.color().orElse(Color.BLACK);</span>
-<span class="fc" id="L520">            outerColor = shadowBackgroundColor;</span>
+<span class="fc" id="L518">        Color shadowBackgroundColor = _transparentShadowBackground(shadowStyle);</span>
+<span class="fc bfc" id="L519" title="All 2 branches covered.">        if (shadowStyle.isOutset()) {</span>
+<span class="fc" id="L520">            innerColor = shadowStyle.color().orElse(Color.BLACK);</span>
+<span class="fc" id="L521">            outerColor = shadowBackgroundColor;</span>
         } else {
-<span class="fc" id="L522">            innerColor = shadowBackgroundColor;</span>
-<span class="fc" id="L523">            outerColor = shadowStyle.color().orElse(Color.BLACK);</span>
+<span class="fc" id="L523">            innerColor = shadowBackgroundColor;</span>
+<span class="fc" id="L524">            outerColor = shadowStyle.color().orElse(Color.BLACK);</span>
         }
         LinearGradientPaint edgePaint;
         // distance between start and end of gradient
-<span class="fc" id="L527">        float dist = (float) Math.sqrt(</span>
+<span class="fc" id="L528">        float dist = (float) Math.sqrt(</span>
                                     (gradEndX - gradStartX) * (gradEndX - gradStartX) +
                                     (gradEndY - gradStartY) * (gradEndY - gradStartY)
                                 );
-<span class="fc" id="L531">        float gradientStart = (float) gradientStartOffset / dist;</span>
-<span class="pc bpc" id="L532" title="2 of 4 branches missed.">        if ( gradientStart &gt; 1f || gradientStart &lt; 0f )</span>
-<span class="nc" id="L533">            edgePaint = new LinearGradientPaint(</span>
+<span class="fc" id="L532">        float gradientStart = (float) gradientStartOffset / dist;</span>
+<span class="pc bpc" id="L533" title="2 of 4 branches missed.">        if ( gradientStart &gt; 1f || gradientStart &lt; 0f )</span>
+<span class="nc" id="L534">            edgePaint = new LinearGradientPaint(</span>
                                gradStartX, gradStartY,
                                gradEndX, gradEndY,
                                new float[] {0f, 1f},
                                new Color[] {innerColor, outerColor}
                            );
         else {
-<span class="pc bpc" id="L540" title="2 of 4 branches missed.">            if ( gradientStart == 1f || gradientStart == 0f ) {</span>
+<span class="pc bpc" id="L541" title="2 of 4 branches missed.">            if ( gradientStart == 1f || gradientStart == 0f ) {</span>
                 // The gradient does not really exist, so we can just fill the whole area and then return
-<span class="nc" id="L542">                Area edgeArea = new Area(edgeBox);</span>
-<span class="nc" id="L543">                g2d.setColor(innerColor);</span>
-<span class="nc bnc" id="L544" title="All 2 branches missed.">                if ( shadowStyle.isOutset() )</span>
-<span class="nc" id="L545">                    edgeArea.intersect(contentArea);</span>
-<span class="nc" id="L546">                g2d.fill(edgeArea);</span>
-<span class="nc" id="L547">                return;</span>
+<span class="nc" id="L543">                Area edgeArea = new Area(edgeBox);</span>
+<span class="nc" id="L544">                g2d.setColor(innerColor);</span>
+<span class="nc bnc" id="L545" title="All 2 branches missed.">                if ( shadowStyle.isOutset() )</span>
+<span class="nc" id="L546">                    edgeArea.intersect(contentArea);</span>
+<span class="nc" id="L547">                g2d.fill(edgeArea);</span>
+<span class="nc" id="L548">                return;</span>
             }
-<span class="fc" id="L549">            edgePaint = new LinearGradientPaint(</span>
+<span class="fc" id="L550">            edgePaint = new LinearGradientPaint(</span>
                              gradStartX, gradStartY,
                              gradEndX, gradEndY,
                              new float[] {0f, gradientStart, 1f},
@@ -555,47 +556,47 @@ final class StyleRenderer
         }
 
         // We need to clip the edge paint to the edge box
-<span class="fc" id="L558">        Area edgeArea = new Area(edgeBox);</span>
-<span class="fc" id="L559">        edgeArea.intersect(contentArea);</span>
-<span class="fc bfc" id="L560" title="All 2 branches covered.">        if ( edgeClipBox != null )</span>
-<span class="fc" id="L561">            edgeArea.intersect(new Area(edgeClipBox));</span>
+<span class="fc" id="L559">        Area edgeArea = new Area(edgeBox);</span>
+<span class="fc" id="L560">        edgeArea.intersect(contentArea);</span>
+<span class="fc bfc" id="L561" title="All 2 branches covered.">        if ( edgeClipBox != null )</span>
+<span class="fc" id="L562">            edgeArea.intersect(new Area(edgeClipBox));</span>
 
-<span class="fc" id="L563">        Graphics2D edgeG2d = (Graphics2D) g2d.create();</span>
-<span class="fc" id="L564">        edgeG2d.setPaint(edgePaint);</span>
-<span class="fc" id="L565">        edgeG2d.fill(edgeArea);</span>
-<span class="fc" id="L566">        edgeG2d.dispose();</span>
-<span class="fc" id="L567">    }</span>
+<span class="fc" id="L564">        Graphics2D edgeG2d = (Graphics2D) g2d.create();</span>
+<span class="fc" id="L565">        edgeG2d.setPaint(edgePaint);</span>
+<span class="fc" id="L566">        edgeG2d.fill(edgeArea);</span>
+<span class="fc" id="L567">        edgeG2d.dispose();</span>
+<span class="fc" id="L568">    }</span>
 
     private static Color _transparentShadowBackground(ShadowStyle shadow) {
-<span class="fc" id="L570">        return shadow.color()</span>
-<span class="fc" id="L571">                    .map(c -&gt; new Color(c.getRed(), c.getGreen(), c.getBlue(), 0))</span>
-<span class="fc" id="L572">                    .orElse(new Color(0.5f, 0.5f, 0.5f, 0f));</span>
+<span class="fc" id="L571">        return shadow.color()</span>
+<span class="fc" id="L572">                    .map(c -&gt; new Color(c.getRed(), c.getGreen(), c.getBlue(), 0))</span>
+<span class="fc" id="L573">                    .orElse(new Color(0.5f, 0.5f, 0.5f, 0f));</span>
     }
 
     /**
      *  Renders a shade from the top left corner to the bottom right corner.
      *
      * @param g2d The graphics object to render to.
-     * @param bounds The bounds of the component.
+     * @param componentSize The width and height of the component
      * @param margin The margin of the component.
      * @param gradient The shade to render.
      */
     private static void _renderDiagonalGradient(
         Graphics2D    g2d,
-        Bounds        bounds,
+        Size          componentSize,
         Outline       margin,
         GradientStyle gradient,
         Area          specificArea
     ) {
-<span class="fc" id="L590">        Color[] colors = gradient.colors();</span>
-<span class="fc" id="L591">        UI.Transition type = gradient.transition();</span>
-<span class="fc" id="L592">        Dimension size = bounds.size().toDimension();</span>
-<span class="fc" id="L593">        size.width  -= (margin.right().orElse(0f).intValue() + margin.left().orElse(0f).intValue());</span>
-<span class="fc" id="L594">        size.height -= (margin.bottom().orElse(0f).intValue() + margin.top().orElse(0f).intValue());</span>
-<span class="fc" id="L595">        int width  = size.width;</span>
-<span class="fc" id="L596">        int height = size.height;</span>
-<span class="fc" id="L597">        int realX = margin.left().orElse(0f).intValue();</span>
-<span class="fc" id="L598">        int realY = margin.top().orElse(0f).intValue();</span>
+<span class="fc" id="L591">        Color[] colors = gradient.colors();</span>
+<span class="fc" id="L592">        UI.Transition type = gradient.transition();</span>
+<span class="fc" id="L593">        Dimension size = componentSize.toDimension();</span>
+<span class="fc" id="L594">        size.width  -= (margin.right().orElse(0f).intValue() + margin.left().orElse(0f).intValue());</span>
+<span class="fc" id="L595">        size.height -= (margin.bottom().orElse(0f).intValue() + margin.top().orElse(0f).intValue());</span>
+<span class="fc" id="L596">        int width  = size.width;</span>
+<span class="fc" id="L597">        int height = size.height;</span>
+<span class="fc" id="L598">        int realX = margin.left().orElse(0f).intValue();</span>
+<span class="fc" id="L599">        int realY = margin.top().orElse(0f).intValue();</span>
 
         int corner1X;
         int corner1Y;
@@ -606,380 +607,380 @@ final class StyleRenderer
         int diagonalCorner2X;
         int diagonalCorner2Y;
 
-<span class="fc" id="L609">        boolean revertColors = false;</span>
-<span class="pc bpc" id="L610" title="1 of 2 branches missed.">        if ( type == UI.Transition.TOP_RIGHT_TO_BOTTOM_LEFT ) {</span>
-<span class="nc" id="L611">            type = UI.Transition.BOTTOM_LEFT_TO_TOP_RIGHT;</span>
+<span class="fc" id="L610">        boolean revertColors = false;</span>
+<span class="pc bpc" id="L611" title="1 of 2 branches missed.">        if ( type == UI.Transition.TOP_RIGHT_TO_BOTTOM_LEFT ) {</span>
+<span class="nc" id="L612">            type = UI.Transition.BOTTOM_LEFT_TO_TOP_RIGHT;</span>
             // We revert the colors
-<span class="nc" id="L613">            revertColors = true;</span>
+<span class="nc" id="L614">            revertColors = true;</span>
         }
-<span class="fc bfc" id="L615" title="All 2 branches covered.">        if ( type == UI.Transition.BOTTOM_RIGHT_TO_TOP_LEFT ) {</span>
-<span class="fc" id="L616">            type = UI.Transition.TOP_LEFT_TO_BOTTOM_RIGHT;</span>
-<span class="fc" id="L617">            revertColors = true;</span>
+<span class="fc bfc" id="L616" title="All 2 branches covered.">        if ( type == UI.Transition.BOTTOM_RIGHT_TO_TOP_LEFT ) {</span>
+<span class="fc" id="L617">            type = UI.Transition.TOP_LEFT_TO_BOTTOM_RIGHT;</span>
+<span class="fc" id="L618">            revertColors = true;</span>
         }
 
-<span class="fc bfc" id="L620" title="All 2 branches covered.">        if ( revertColors ) {// We revert the colors</span>
-<span class="pc bpc" id="L621" title="1 of 2 branches missed.">            if ( colors.length == 2 ) {</span>
-<span class="fc" id="L622">                Color tmp = colors[0];</span>
-<span class="fc" id="L623">                colors[0] = colors[1];</span>
-<span class="fc" id="L624">                colors[1] = tmp;</span>
-<span class="fc" id="L625">            } else</span>
+<span class="fc bfc" id="L621" title="All 2 branches covered.">        if ( revertColors ) {// We revert the colors</span>
+<span class="pc bpc" id="L622" title="1 of 2 branches missed.">            if ( colors.length == 2 ) {</span>
+<span class="fc" id="L623">                Color tmp = colors[0];</span>
+<span class="fc" id="L624">                colors[0] = colors[1];</span>
+<span class="fc" id="L625">                colors[1] = tmp;</span>
+<span class="fc" id="L626">            } else</span>
                 // We have more than 2 colors, so we need to revert the array
-<span class="nc bnc" id="L627" title="All 2 branches missed.">                for ( int i = 0; i &lt; colors.length / 2; i++ ) {</span>
-<span class="nc" id="L628">                    Color tmp = colors[i];</span>
-<span class="nc" id="L629">                    colors[i] = colors[colors.length - i - 1];</span>
-<span class="nc" id="L630">                    colors[colors.length - i - 1] = tmp;</span>
+<span class="nc bnc" id="L628" title="All 2 branches missed.">                for ( int i = 0; i &lt; colors.length / 2; i++ ) {</span>
+<span class="nc" id="L629">                    Color tmp = colors[i];</span>
+<span class="nc" id="L630">                    colors[i] = colors[colors.length - i - 1];</span>
+<span class="nc" id="L631">                    colors[colors.length - i - 1] = tmp;</span>
                 }
         }
 
-<span class="pc bpc" id="L634" title="1 of 2 branches missed.">        if ( type == UI.Transition.TOP_LEFT_TO_BOTTOM_RIGHT ) {</span>
-<span class="fc" id="L635">            corner1X = realX;</span>
-<span class="fc" id="L636">            corner1Y = realY;</span>
-<span class="fc" id="L637">            corner2X = realX + width;</span>
-<span class="fc" id="L638">            corner2Y = realY + height;</span>
-<span class="fc" id="L639">            diagonalCorner1X = realX;</span>
-<span class="fc" id="L640">            diagonalCorner1Y = realY + height;</span>
-<span class="fc" id="L641">            diagonalCorner2X = realX + width;</span>
-<span class="fc" id="L642">            diagonalCorner2Y = realY;</span>
-<span class="nc bnc" id="L643" title="All 2 branches missed.">        } else if ( type == UI.Transition.BOTTOM_LEFT_TO_TOP_RIGHT ) {</span>
-<span class="nc" id="L644">            corner1X = realX + width;</span>
-<span class="nc" id="L645">            corner1Y = realY;</span>
-<span class="nc" id="L646">            corner2X = realX;</span>
-<span class="nc" id="L647">            corner2Y = realY + height;</span>
-<span class="nc" id="L648">            diagonalCorner1X = realX + width;</span>
-<span class="nc" id="L649">            diagonalCorner1Y = realY + height;</span>
-<span class="nc" id="L650">            diagonalCorner2X = realX;</span>
-<span class="nc" id="L651">            diagonalCorner2Y = realY;</span>
+<span class="pc bpc" id="L635" title="1 of 2 branches missed.">        if ( type == UI.Transition.TOP_LEFT_TO_BOTTOM_RIGHT ) {</span>
+<span class="fc" id="L636">            corner1X = realX;</span>
+<span class="fc" id="L637">            corner1Y = realY;</span>
+<span class="fc" id="L638">            corner2X = realX + width;</span>
+<span class="fc" id="L639">            corner2Y = realY + height;</span>
+<span class="fc" id="L640">            diagonalCorner1X = realX;</span>
+<span class="fc" id="L641">            diagonalCorner1Y = realY + height;</span>
+<span class="fc" id="L642">            diagonalCorner2X = realX + width;</span>
+<span class="fc" id="L643">            diagonalCorner2Y = realY;</span>
+<span class="nc bnc" id="L644" title="All 2 branches missed.">        } else if ( type == UI.Transition.BOTTOM_LEFT_TO_TOP_RIGHT ) {</span>
+<span class="nc" id="L645">            corner1X = realX + width;</span>
+<span class="nc" id="L646">            corner1Y = realY;</span>
+<span class="nc" id="L647">            corner2X = realX;</span>
+<span class="nc" id="L648">            corner2Y = realY + height;</span>
+<span class="nc" id="L649">            diagonalCorner1X = realX + width;</span>
+<span class="nc" id="L650">            diagonalCorner1Y = realY + height;</span>
+<span class="nc" id="L651">            diagonalCorner2X = realX;</span>
+<span class="nc" id="L652">            diagonalCorner2Y = realY;</span>
         }
         else
-<span class="nc" id="L654">            throw new IllegalArgumentException(&quot;Invalid gradient alignment: &quot; + type);</span>
+<span class="nc" id="L655">            throw new IllegalArgumentException(&quot;Invalid gradient alignment: &quot; + type);</span>
 
-<span class="fc" id="L656">        int diagonalCenterX = (diagonalCorner1X + diagonalCorner2X) / 2;</span>
-<span class="fc" id="L657">        int diagonalCenterY = (diagonalCorner1Y + diagonalCorner2Y) / 2;</span>
+<span class="fc" id="L657">        int diagonalCenterX = (diagonalCorner1X + diagonalCorner2X) / 2;</span>
+<span class="fc" id="L658">        int diagonalCenterY = (diagonalCorner1Y + diagonalCorner2Y) / 2;</span>
 
-<span class="fc" id="L659">        float[] fractions = new float[colors.length];</span>
-<span class="fc bfc" id="L660" title="All 2 branches covered.">        for ( int i = 0; i &lt; colors.length; i++ )</span>
-<span class="fc" id="L661">            fractions[i] = (float) i / (float) (colors.length - 1);</span>
+<span class="fc" id="L660">        float[] fractions = new float[colors.length];</span>
+<span class="fc bfc" id="L661" title="All 2 branches covered.">        for ( int i = 0; i &lt; colors.length; i++ )</span>
+<span class="fc" id="L662">            fractions[i] = (float) i / (float) (colors.length - 1);</span>
 
-<span class="pc bpc" id="L663" title="1 of 2 branches missed.">        if ( gradient.type() == UI.GradientType.RADIAL ) {</span>
+<span class="pc bpc" id="L664" title="1 of 2 branches missed.">        if ( gradient.type() == UI.GradientType.RADIAL ) {</span>
             float startCornerX, startCornerY;
-<span class="nc bnc" id="L665" title="All 2 branches missed.">            if ( type == UI.Transition.TOP_LEFT_TO_BOTTOM_RIGHT ) {</span>
-<span class="nc" id="L666">                startCornerX = corner1X;</span>
-<span class="nc" id="L667">                startCornerY = corner1Y;</span>
+<span class="nc bnc" id="L666" title="All 2 branches missed.">            if ( type == UI.Transition.TOP_LEFT_TO_BOTTOM_RIGHT ) {</span>
+<span class="nc" id="L667">                startCornerX = corner1X;</span>
+<span class="nc" id="L668">                startCornerY = corner1Y;</span>
             } else {
-<span class="nc" id="L669">                startCornerX = corner2X;</span>
-<span class="nc" id="L670">                startCornerY = corner2Y;</span>
+<span class="nc" id="L670">                startCornerX = corner2X;</span>
+<span class="nc" id="L671">                startCornerY = corner2Y;</span>
             }
-<span class="nc" id="L672">            float radius = (float) Math.sqrt(</span>
+<span class="nc" id="L673">            float radius = (float) Math.sqrt(</span>
                                                 (diagonalCenterX - startCornerX) * (diagonalCenterX - startCornerX) +
                                                 (diagonalCenterY - startCornerY) * (diagonalCenterY - startCornerY)
                                             );
-<span class="nc bnc" id="L676" title="All 2 branches missed.">            if ( colors.length == 2 )</span>
-<span class="nc" id="L677">                g2d.setPaint(new RadialGradientPaint(</span>
+<span class="nc bnc" id="L677" title="All 2 branches missed.">            if ( colors.length == 2 )</span>
+<span class="nc" id="L678">                g2d.setPaint(new RadialGradientPaint(</span>
                         new Point2D.Float(startCornerX, startCornerY),
                         radius,
                         fractions,
                         colors
                     ));
             else
-<span class="nc" id="L684">                g2d.setPaint(new RadialGradientPaint(</span>
+<span class="nc" id="L685">                g2d.setPaint(new RadialGradientPaint(</span>
                         new Point2D.Float(startCornerX, startCornerY),
                         radius,
                         fractions,
                         colors,
                         MultipleGradientPaint.CycleMethod.NO_CYCLE
                     ));
-<span class="pc bpc" id="L691" title="1 of 2 branches missed.">        } else if ( gradient.type() == UI.GradientType.LINEAR ) {</span>
-<span class="fc" id="L692">            double vector1X = diagonalCorner1X - diagonalCenterX;</span>
-<span class="fc" id="L693">            double vector1Y = diagonalCorner1Y - diagonalCenterY;</span>
-<span class="fc" id="L694">            double vector2X = diagonalCorner2X - diagonalCenterX;</span>
-<span class="fc" id="L695">            double vector2Y = diagonalCorner2Y - diagonalCenterY;</span>
+<span class="pc bpc" id="L692" title="1 of 2 branches missed.">        } else if ( gradient.type() == UI.GradientType.LINEAR ) {</span>
+<span class="fc" id="L693">            double vector1X = diagonalCorner1X - diagonalCenterX;</span>
+<span class="fc" id="L694">            double vector1Y = diagonalCorner1Y - diagonalCenterY;</span>
+<span class="fc" id="L695">            double vector2X = diagonalCorner2X - diagonalCenterX;</span>
+<span class="fc" id="L696">            double vector2Y = diagonalCorner2Y - diagonalCenterY;</span>
 
-<span class="fc" id="L697">            double vectorLength = Math.sqrt(vector1X * vector1X + vector1Y * vector1Y);</span>
-<span class="fc" id="L698">            vector1X = (vector1X / vectorLength);</span>
-<span class="fc" id="L699">            vector1Y = (vector1Y / vectorLength);</span>
+<span class="fc" id="L698">            double vectorLength = Math.sqrt(vector1X * vector1X + vector1Y * vector1Y);</span>
+<span class="fc" id="L699">            vector1X = (vector1X / vectorLength);</span>
+<span class="fc" id="L700">            vector1Y = (vector1Y / vectorLength);</span>
 
-<span class="fc" id="L701">            vectorLength = Math.sqrt(vector2X * vector2X + vector2Y * vector2Y);</span>
-<span class="fc" id="L702">            vector2X = (vector2X / vectorLength);</span>
-<span class="fc" id="L703">            vector2Y = (vector2Y / vectorLength);</span>
+<span class="fc" id="L702">            vectorLength = Math.sqrt(vector2X * vector2X + vector2Y * vector2Y);</span>
+<span class="fc" id="L703">            vector2X = (vector2X / vectorLength);</span>
+<span class="fc" id="L704">            vector2Y = (vector2Y / vectorLength);</span>
 
-<span class="fc" id="L705">            double nVector1X = -vector1Y;</span>
-<span class="fc" id="L706">            double nVector1Y =  vector1X;</span>
-<span class="fc" id="L707">            double nVector2X = -vector2Y;</span>
-<span class="fc" id="L708">            double nVector2Y =  vector2X;</span>
+<span class="fc" id="L706">            double nVector1X = -vector1Y;</span>
+<span class="fc" id="L707">            double nVector1Y =  vector1X;</span>
+<span class="fc" id="L708">            double nVector2X = -vector2Y;</span>
+<span class="fc" id="L709">            double nVector2Y =  vector2X;</span>
 
-<span class="fc" id="L710">            double distance1 = (corner1X - diagonalCenterX) * nVector1X + (corner1Y - diagonalCenterY) * nVector1Y;</span>
-<span class="fc" id="L711">            double distance2 = (corner2X - diagonalCenterX) * nVector2X + (corner2Y - diagonalCenterY) * nVector2Y;</span>
+<span class="fc" id="L711">            double distance1 = (corner1X - diagonalCenterX) * nVector1X + (corner1Y - diagonalCenterY) * nVector1Y;</span>
+<span class="fc" id="L712">            double distance2 = (corner2X - diagonalCenterX) * nVector2X + (corner2Y - diagonalCenterY) * nVector2Y;</span>
 
-<span class="fc" id="L713">            int gradientStartX = (int) (diagonalCenterX + nVector1X * distance1);</span>
-<span class="fc" id="L714">            int gradientStartY = (int) (diagonalCenterY + nVector1Y * distance1);</span>
-<span class="fc" id="L715">            int gradientEndX = (int) (diagonalCenterX + nVector2X * distance2);</span>
-<span class="fc" id="L716">            int gradientEndY = (int) (diagonalCenterY + nVector2Y * distance2);</span>
+<span class="fc" id="L714">            int gradientStartX = (int) (diagonalCenterX + nVector1X * distance1);</span>
+<span class="fc" id="L715">            int gradientStartY = (int) (diagonalCenterY + nVector1Y * distance1);</span>
+<span class="fc" id="L716">            int gradientEndX = (int) (diagonalCenterX + nVector2X * distance2);</span>
+<span class="fc" id="L717">            int gradientEndY = (int) (diagonalCenterY + nVector2Y * distance2);</span>
 
-<span class="pc bpc" id="L718" title="1 of 2 branches missed.">            if ( colors.length == 2 )</span>
-<span class="fc" id="L719">                g2d.setPaint(new GradientPaint(</span>
+<span class="pc bpc" id="L719" title="1 of 2 branches missed.">            if ( colors.length == 2 )</span>
+<span class="fc" id="L720">                g2d.setPaint(new GradientPaint(</span>
                                 gradientStartX, gradientStartY, colors[0],
                                 gradientEndX, gradientEndY, colors[1]
                             ));
             else
-<span class="nc" id="L724">                g2d.setPaint(new LinearGradientPaint(</span>
+<span class="nc" id="L725">                g2d.setPaint(new LinearGradientPaint(</span>
                                 gradientStartX, gradientStartY,
                                 gradientEndX, gradientEndY,
                                 fractions, colors
                             ));
         }
-<span class="fc" id="L730">        g2d.fill(specificArea);</span>
-<span class="fc" id="L731">    }</span>
+<span class="fc" id="L731">        g2d.fill(specificArea);</span>
+<span class="fc" id="L732">    }</span>
 
     private static void _renderVerticalOrHorizontalGradient(
         Graphics2D    g2d,
-        Bounds        bounds,
+        Size          componentSize,
         Outline       margin,
         GradientStyle gradient,
         Area          specificArea
     ) {
-<span class="fc" id="L740">        UI.Transition type = gradient.transition();</span>
-<span class="fc" id="L741">        Color[] colors = gradient.colors();</span>
-<span class="fc" id="L742">        Dimension size = bounds.size().toDimension();</span>
-<span class="fc" id="L743">        size.width  -= (margin.right().orElse(0f).intValue() + margin.left().orElse(0f).intValue());</span>
-<span class="fc" id="L744">        size.height -= (margin.bottom().orElse(0f).intValue() + margin.top().orElse(0f).intValue());</span>
-<span class="fc" id="L745">        int width  = size.width;</span>
-<span class="fc" id="L746">        int height = size.height;</span>
-<span class="fc" id="L747">        int realX = margin.left().orElse(0f).intValue();</span>
-<span class="fc" id="L748">        int realY = margin.top().orElse(0f).intValue();</span>
+<span class="fc" id="L741">        UI.Transition type = gradient.transition();</span>
+<span class="fc" id="L742">        Color[] colors = gradient.colors();</span>
+<span class="fc" id="L743">        Dimension size = componentSize.toDimension();</span>
+<span class="fc" id="L744">        size.width  -= (margin.right().orElse(0f).intValue() + margin.left().orElse(0f).intValue());</span>
+<span class="fc" id="L745">        size.height -= (margin.bottom().orElse(0f).intValue() + margin.top().orElse(0f).intValue());</span>
+<span class="fc" id="L746">        int width  = size.width;</span>
+<span class="fc" id="L747">        int height = size.height;</span>
+<span class="fc" id="L748">        int realX = margin.left().orElse(0f).intValue();</span>
+<span class="fc" id="L749">        int realY = margin.top().orElse(0f).intValue();</span>
 
         int corner1X;
         int corner1Y;
         int corner2X;
         int corner2Y;
 
-<span class="fc bfc" id="L755" title="All 2 branches covered.">        if ( type == UI.Transition.TOP_TO_BOTTOM ) {</span>
-<span class="fc" id="L756">            corner1X = realX;</span>
-<span class="fc" id="L757">            corner1Y = realY;</span>
-<span class="fc" id="L758">            corner2X = realX;</span>
-<span class="fc" id="L759">            corner2Y = realY + height;</span>
-<span class="pc bpc" id="L760" title="1 of 2 branches missed.">        } else if ( type == UI.Transition.LEFT_TO_RIGHT ) {</span>
-<span class="fc" id="L761">            corner1X = realX;</span>
-<span class="fc" id="L762">            corner1Y = realY;</span>
-<span class="fc" id="L763">            corner2X = realX + width;</span>
-<span class="fc" id="L764">            corner2Y = realY;</span>
-<span class="nc bnc" id="L765" title="All 2 branches missed.">        } else if ( type == UI.Transition.BOTTOM_TO_TOP ) {</span>
-<span class="nc" id="L766">            corner1X = realX;</span>
-<span class="nc" id="L767">            corner1Y = realY + height;</span>
-<span class="nc" id="L768">            corner2X = realX;</span>
-<span class="nc" id="L769">            corner2Y = realY;</span>
-<span class="nc bnc" id="L770" title="All 2 branches missed.">        } else if ( type == UI.Transition.RIGHT_TO_LEFT ) {</span>
-<span class="nc" id="L771">            corner1X = realX + width;</span>
-<span class="nc" id="L772">            corner1Y = realY;</span>
-<span class="nc" id="L773">            corner2X = realX;</span>
-<span class="nc" id="L774">            corner2Y = realY;</span>
+<span class="fc bfc" id="L756" title="All 2 branches covered.">        if ( type == UI.Transition.TOP_TO_BOTTOM ) {</span>
+<span class="fc" id="L757">            corner1X = realX;</span>
+<span class="fc" id="L758">            corner1Y = realY;</span>
+<span class="fc" id="L759">            corner2X = realX;</span>
+<span class="fc" id="L760">            corner2Y = realY + height;</span>
+<span class="pc bpc" id="L761" title="1 of 2 branches missed.">        } else if ( type == UI.Transition.LEFT_TO_RIGHT ) {</span>
+<span class="fc" id="L762">            corner1X = realX;</span>
+<span class="fc" id="L763">            corner1Y = realY;</span>
+<span class="fc" id="L764">            corner2X = realX + width;</span>
+<span class="fc" id="L765">            corner2Y = realY;</span>
+<span class="nc bnc" id="L766" title="All 2 branches missed.">        } else if ( type == UI.Transition.BOTTOM_TO_TOP ) {</span>
+<span class="nc" id="L767">            corner1X = realX;</span>
+<span class="nc" id="L768">            corner1Y = realY + height;</span>
+<span class="nc" id="L769">            corner2X = realX;</span>
+<span class="nc" id="L770">            corner2Y = realY;</span>
+<span class="nc bnc" id="L771" title="All 2 branches missed.">        } else if ( type == UI.Transition.RIGHT_TO_LEFT ) {</span>
+<span class="nc" id="L772">            corner1X = realX + width;</span>
+<span class="nc" id="L773">            corner1Y = realY;</span>
+<span class="nc" id="L774">            corner2X = realX;</span>
+<span class="nc" id="L775">            corner2Y = realY;</span>
         }
-<span class="nc" id="L776">        else throw new IllegalArgumentException(&quot;Unknown gradient alignment: &quot; + type);</span>
+<span class="nc" id="L777">        else throw new IllegalArgumentException(&quot;Unknown gradient alignment: &quot; + type);</span>
 
-<span class="pc bpc" id="L778" title="1 of 2 branches missed.">        if ( colors.length == 2 )</span>
-<span class="nc" id="L779">            g2d.setPaint(</span>
+<span class="pc bpc" id="L779" title="1 of 2 branches missed.">        if ( colors.length == 2 )</span>
+<span class="nc" id="L780">            g2d.setPaint(</span>
                     new GradientPaint(
                             corner1X, corner1Y, colors[0],
                             corner2X, corner2Y, colors[1]
                         )
                 );
         else {
-<span class="fc" id="L786">            float[] fractions = new float[colors.length];</span>
-<span class="fc bfc" id="L787" title="All 2 branches covered.">            for ( int i = 0; i &lt; colors.length; i++ )</span>
-<span class="fc" id="L788">                fractions[i] = (float) i / (float) (colors.length - 1);</span>
+<span class="fc" id="L787">            float[] fractions = new float[colors.length];</span>
+<span class="fc bfc" id="L788" title="All 2 branches covered.">            for ( int i = 0; i &lt; colors.length; i++ )</span>
+<span class="fc" id="L789">                fractions[i] = (float) i / (float) (colors.length - 1);</span>
 
-<span class="pc bpc" id="L790" title="1 of 2 branches missed.">            if ( gradient.type() == UI.GradientType.LINEAR )</span>
-<span class="fc" id="L791">                g2d.setPaint(</span>
+<span class="pc bpc" id="L791" title="1 of 2 branches missed.">            if ( gradient.type() == UI.GradientType.LINEAR )</span>
+<span class="fc" id="L792">                g2d.setPaint(</span>
                     new LinearGradientPaint(
                             corner1X, corner1Y,
                             corner2X, corner2Y,
                             fractions, colors
                         )
                 );
-<span class="nc bnc" id="L798" title="All 2 branches missed.">            else if ( gradient.type() == UI.GradientType.RADIAL ) {</span>
-<span class="nc" id="L799">                float radius = (float) Math.sqrt(</span>
+<span class="nc bnc" id="L799" title="All 2 branches missed.">            else if ( gradient.type() == UI.GradientType.RADIAL ) {</span>
+<span class="nc" id="L800">                float radius = (float) Math.sqrt(</span>
                                             (corner2X - corner1X) * (corner2X - corner1X) +
                                             (corner2Y - corner1Y) * (corner2Y - corner1Y)
                                         );
-<span class="nc" id="L803">                g2d.setPaint(new RadialGradientPaint(</span>
+<span class="nc" id="L804">                g2d.setPaint(new RadialGradientPaint(</span>
                                 new Point2D.Float(corner1X, corner1Y),
                                 radius,
                                 fractions,
                                 colors
                             ));
-<span class="nc" id="L809">            }</span>
+<span class="nc" id="L810">            }</span>
             else
-<span class="nc" id="L811">                throw new IllegalArgumentException(&quot;Invalid gradient type: &quot; + gradient.type());</span>
+<span class="nc" id="L812">                throw new IllegalArgumentException(&quot;Invalid gradient type: &quot; + gradient.type());</span>
         }
-<span class="fc" id="L813">        g2d.fill(specificArea);</span>
-<span class="fc" id="L814">    }</span>
+<span class="fc" id="L814">        g2d.fill(specificArea);</span>
+<span class="fc" id="L815">    }</span>
 
     private static void _renderImage(
         ComponentConf conf,
         ImageStyle  style,
-        Bounds      bounds,
+        Size        componentSize,
         Graphics2D  g2d
     ) {
-<span class="fc bfc" id="L822" title="All 2 branches covered.">        if ( style.primer().isPresent() ) {</span>
-<span class="fc" id="L823">            g2d.setColor(style.primer().get());</span>
-<span class="fc" id="L824">            g2d.fill(conf.get(style.clipArea()));</span>
+<span class="fc bfc" id="L823" title="All 2 branches covered.">        if ( style.primer().isPresent() ) {</span>
+<span class="fc" id="L824">            g2d.setColor(style.primer().get());</span>
+<span class="fc" id="L825">            g2d.fill(conf.get(style.clipArea()));</span>
         }
 
-<span class="fc" id="L827">        style.image().ifPresent( imageIcon -&gt; {</span>
-<span class="fc" id="L828">            final UI.Placement placement       = style.placement();</span>
-<span class="fc" id="L829">            final Outline      padding         = style.padding();</span>
-<span class="fc" id="L830">            final int          componentWidth  = bounds.size().width().orElse(0f).intValue();</span>
-<span class="fc" id="L831">            final int          componentHeight = bounds.size().height().orElse(0f).intValue();</span>
+<span class="fc" id="L828">        style.image().ifPresent( imageIcon -&gt; {</span>
+<span class="fc" id="L829">            final UI.Placement placement       = style.placement();</span>
+<span class="fc" id="L830">            final Outline      padding         = style.padding();</span>
+<span class="fc" id="L831">            final int          componentWidth  = componentSize.width().orElse(0f).intValue();</span>
+<span class="fc" id="L832">            final int          componentHeight = componentSize.height().orElse(0f).intValue();</span>
 
-<span class="fc" id="L833">            int imgWidth  = style.width().orElse(imageIcon.getIconWidth());</span>
-<span class="fc" id="L834">            int imgHeight = style.height().orElse(imageIcon.getIconHeight());</span>
+<span class="fc" id="L834">            int imgWidth  = style.width().orElse(imageIcon.getIconWidth());</span>
+<span class="fc" id="L835">            int imgHeight = style.height().orElse(imageIcon.getIconHeight());</span>
 
-<span class="fc bfc" id="L836" title="All 2 branches covered.">            if ( style.fitMode() != UI.FitComponent.NO ) {</span>
-<span class="fc bfc" id="L837" title="All 2 branches covered.">                if ( imageIcon instanceof SvgIcon) {</span>
-<span class="fc" id="L838">                    imgWidth  = style.width().orElse(componentWidth);</span>
-<span class="fc" id="L839">                    imgHeight = style.height().orElse(componentHeight);</span>
+<span class="fc bfc" id="L837" title="All 2 branches covered.">            if ( style.fitMode() != UI.FitComponent.NO ) {</span>
+<span class="fc bfc" id="L838" title="All 2 branches covered.">                if ( imageIcon instanceof SvgIcon) {</span>
+<span class="fc" id="L839">                    imgWidth  = style.width().orElse(componentWidth);</span>
+<span class="fc" id="L840">                    imgHeight = style.height().orElse(componentHeight);</span>
                 } else {
-<span class="pc bpc" id="L841" title="1 of 2 branches missed.">                    if ( style.fitMode() == UI.FitComponent.WIDTH_AND_HEIGHT ) {</span>
-<span class="fc" id="L842">                        imgWidth  = style.width().orElse(componentWidth);</span>
-<span class="fc" id="L843">                        imgHeight = style.height().orElse(componentHeight);</span>
+<span class="pc bpc" id="L842" title="1 of 2 branches missed.">                    if ( style.fitMode() == UI.FitComponent.WIDTH_AND_HEIGHT ) {</span>
+<span class="fc" id="L843">                        imgWidth  = style.width().orElse(componentWidth);</span>
+<span class="fc" id="L844">                        imgHeight = style.height().orElse(componentHeight);</span>
                     }
-<span class="pc bpc" id="L845" title="1 of 2 branches missed.">                    if ( style.fitMode() == UI.FitComponent.WIDTH )</span>
-<span class="nc" id="L846">                        imgWidth = style.width().orElse(componentWidth);</span>
-<span class="pc bpc" id="L847" title="1 of 2 branches missed.">                    if ( style.fitMode() == UI.FitComponent.HEIGHT )</span>
-<span class="nc" id="L848">                        imgHeight = style.height().orElse(componentHeight);</span>
+<span class="pc bpc" id="L846" title="1 of 2 branches missed.">                    if ( style.fitMode() == UI.FitComponent.WIDTH )</span>
+<span class="nc" id="L847">                        imgWidth = style.width().orElse(componentWidth);</span>
+<span class="pc bpc" id="L848" title="1 of 2 branches missed.">                    if ( style.fitMode() == UI.FitComponent.HEIGHT )</span>
+<span class="nc" id="L849">                        imgHeight = style.height().orElse(componentHeight);</span>
 
-<span class="pc bpc" id="L850" title="1 of 2 branches missed.">                    if ( style.fitMode() == UI.FitComponent.MAX_DIM ) {</span>
-<span class="nc bnc" id="L851" title="All 2 branches missed.">                        if ( componentWidth &gt; componentHeight ) {</span>
-<span class="nc" id="L852">                            imgWidth = style.width().orElse(componentWidth);</span>
-<span class="nc bnc" id="L853" title="All 2 branches missed.">                        } else if ( componentWidth &lt; componentHeight ) {</span>
-<span class="nc" id="L854">                            imgHeight = style.height().orElse(componentHeight);</span>
+<span class="pc bpc" id="L851" title="1 of 2 branches missed.">                    if ( style.fitMode() == UI.FitComponent.MAX_DIM ) {</span>
+<span class="nc bnc" id="L852" title="All 2 branches missed.">                        if ( componentWidth &gt; componentHeight ) {</span>
+<span class="nc" id="L853">                            imgWidth = style.width().orElse(componentWidth);</span>
+<span class="nc bnc" id="L854" title="All 2 branches missed.">                        } else if ( componentWidth &lt; componentHeight ) {</span>
+<span class="nc" id="L855">                            imgHeight = style.height().orElse(componentHeight);</span>
                         } else {
-<span class="nc" id="L856">                            imgWidth  = style.width().orElse(componentWidth);</span>
-<span class="nc" id="L857">                            imgHeight = style.height().orElse(componentHeight);</span>
+<span class="nc" id="L857">                            imgWidth  = style.width().orElse(componentWidth);</span>
+<span class="nc" id="L858">                            imgHeight = style.height().orElse(componentHeight);</span>
                         }
                     }
-<span class="pc bpc" id="L860" title="1 of 2 branches missed.">                    if ( style.fitMode() == UI.FitComponent.MIN_DIM ) {</span>
-<span class="nc bnc" id="L861" title="All 2 branches missed.">                        if ( componentWidth &lt; componentHeight ) {</span>
-<span class="nc" id="L862">                            imgWidth = style.width().orElse(componentWidth);</span>
-<span class="nc bnc" id="L863" title="All 2 branches missed.">                        } else if ( componentWidth &gt; componentHeight ) {</span>
-<span class="nc" id="L864">                            imgHeight = style.height().orElse(componentHeight);</span>
+<span class="pc bpc" id="L861" title="1 of 2 branches missed.">                    if ( style.fitMode() == UI.FitComponent.MIN_DIM ) {</span>
+<span class="nc bnc" id="L862" title="All 2 branches missed.">                        if ( componentWidth &lt; componentHeight ) {</span>
+<span class="nc" id="L863">                            imgWidth = style.width().orElse(componentWidth);</span>
+<span class="nc bnc" id="L864" title="All 2 branches missed.">                        } else if ( componentWidth &gt; componentHeight ) {</span>
+<span class="nc" id="L865">                            imgHeight = style.height().orElse(componentHeight);</span>
                         } else {
-<span class="nc" id="L866">                            imgWidth  = style.width().orElse(componentWidth);</span>
-<span class="nc" id="L867">                            imgHeight = style.height().orElse(componentHeight);</span>
+<span class="nc" id="L867">                            imgWidth  = style.width().orElse(componentWidth);</span>
+<span class="nc" id="L868">                            imgHeight = style.height().orElse(componentHeight);</span>
                         }
                     }
                 }
-<span class="pc bpc" id="L871" title="1 of 2 branches missed.">                imgWidth  = imgWidth  &gt;= 0 ? imgWidth  : componentWidth;</span>
-<span class="pc bpc" id="L872" title="1 of 2 branches missed.">                imgHeight = imgHeight &gt;= 0 ? imgHeight : componentHeight;</span>
+<span class="pc bpc" id="L872" title="1 of 2 branches missed.">                imgWidth  = imgWidth  &gt;= 0 ? imgWidth  : componentWidth;</span>
+<span class="pc bpc" id="L873" title="1 of 2 branches missed.">                imgHeight = imgHeight &gt;= 0 ? imgHeight : componentHeight;</span>
             }
-<span class="fc bfc" id="L874" title="All 2 branches covered.">            if ( imageIcon instanceof SvgIcon ) {</span>
-<span class="fc" id="L875">                SvgIcon   svgIcon = (SvgIcon) imageIcon;</span>
-<span class="fc" id="L876">                FloatSize size    = svgIcon.getSvgSize();</span>
-<span class="pc bpc" id="L877" title="1 of 2 branches missed.">                imgWidth  = imgWidth  &gt;= 0 ? imgWidth  : (int) size.width;</span>
-<span class="pc bpc" id="L878" title="1 of 2 branches missed.">                imgHeight = imgHeight &gt;= 0 ? imgHeight : (int) size.height;</span>
+<span class="fc bfc" id="L875" title="All 2 branches covered.">            if ( imageIcon instanceof SvgIcon ) {</span>
+<span class="fc" id="L876">                SvgIcon   svgIcon = (SvgIcon) imageIcon;</span>
+<span class="fc" id="L877">                FloatSize size    = svgIcon.getSvgSize();</span>
+<span class="pc bpc" id="L878" title="1 of 2 branches missed.">                imgWidth  = imgWidth  &gt;= 0 ? imgWidth  : (int) size.width;</span>
+<span class="pc bpc" id="L879" title="1 of 2 branches missed.">                imgHeight = imgHeight &gt;= 0 ? imgHeight : (int) size.height;</span>
             }
-<span class="fc" id="L880">            int x = style.horizontalOffset();</span>
-<span class="fc" id="L881">            int y = style.verticalOffset();</span>
+<span class="fc" id="L881">            int x = style.horizontalOffset();</span>
+<span class="fc" id="L882">            int y = style.verticalOffset();</span>
 
-<span class="pc bpc" id="L883" title="1 of 10 branches missed.">            switch ( placement ) {</span>
+<span class="pc bpc" id="L884" title="1 of 10 branches missed.">            switch ( placement ) {</span>
                 case TOP:
-<span class="fc" id="L885">                    x += (componentWidth - imgWidth) / 2;</span>
-<span class="fc" id="L886">                    break;</span>
+<span class="fc" id="L886">                    x += (componentWidth - imgWidth) / 2;</span>
+<span class="fc" id="L887">                    break;</span>
                 case LEFT:
-<span class="fc" id="L888">                    y += (componentHeight - imgHeight) / 2;</span>
-<span class="fc" id="L889">                    break;</span>
+<span class="fc" id="L889">                    y += (componentHeight - imgHeight) / 2;</span>
+<span class="fc" id="L890">                    break;</span>
                 case BOTTOM:
-<span class="fc" id="L891">                    x += (componentWidth - imgWidth) / 2;</span>
-<span class="fc" id="L892">                    y += componentHeight - imgHeight;</span>
-<span class="fc" id="L893">                    break;</span>
+<span class="fc" id="L892">                    x += (componentWidth - imgWidth) / 2;</span>
+<span class="fc" id="L893">                    y += componentHeight - imgHeight;</span>
+<span class="fc" id="L894">                    break;</span>
                 case RIGHT:
-<span class="fc" id="L895">                    x += componentWidth - imgWidth;</span>
-<span class="fc" id="L896">                    y += (componentHeight - imgHeight) / 2;</span>
-<span class="fc" id="L897">                    break;</span>
-<span class="fc" id="L898">                case TOP_LEFT: break;</span>
+<span class="fc" id="L896">                    x += componentWidth - imgWidth;</span>
+<span class="fc" id="L897">                    y += (componentHeight - imgHeight) / 2;</span>
+<span class="fc" id="L898">                    break;</span>
+<span class="fc" id="L899">                case TOP_LEFT: break;</span>
                 case TOP_RIGHT:
-<span class="fc" id="L900">                    x += componentWidth - imgWidth;</span>
-<span class="fc" id="L901">                    break;</span>
+<span class="fc" id="L901">                    x += componentWidth - imgWidth;</span>
+<span class="fc" id="L902">                    break;</span>
                 case BOTTOM_LEFT:
-<span class="fc" id="L903">                    y += componentHeight - imgHeight;</span>
-<span class="fc" id="L904">                    break;</span>
+<span class="fc" id="L904">                    y += componentHeight - imgHeight;</span>
+<span class="fc" id="L905">                    break;</span>
                 case BOTTOM_RIGHT:
-<span class="fc" id="L906">                    x += componentWidth - imgWidth;</span>
-<span class="fc" id="L907">                    y += componentHeight - imgHeight;</span>
-<span class="fc" id="L908">                    break;</span>
+<span class="fc" id="L907">                    x += componentWidth - imgWidth;</span>
+<span class="fc" id="L908">                    y += componentHeight - imgHeight;</span>
+<span class="fc" id="L909">                    break;</span>
                 case CENTER:
                 case UNDEFINED:
-<span class="fc" id="L911">                    x += (componentWidth - imgWidth) / 2;</span>
-<span class="fc" id="L912">                    y += (componentHeight - imgHeight) / 2;</span>
-<span class="fc" id="L913">                    break;</span>
+<span class="fc" id="L912">                    x += (componentWidth - imgWidth) / 2;</span>
+<span class="fc" id="L913">                    y += (componentHeight - imgHeight) / 2;</span>
+<span class="fc" id="L914">                    break;</span>
                 default:
-<span class="nc" id="L915">                    throw new IllegalArgumentException(&quot;Unknown placement: &quot; + placement);</span>
+<span class="nc" id="L916">                    throw new IllegalArgumentException(&quot;Unknown placement: &quot; + placement);</span>
             }
             // We apply the padding:
-<span class="fc" id="L918">            x += padding.left().orElse(0f).intValue();</span>
-<span class="fc" id="L919">            y += padding.top().orElse(0f).intValue();</span>
-<span class="fc" id="L920">            imgWidth  -= padding.left().orElse(0f).intValue() + padding.right().orElse(0f).intValue();</span>
-<span class="fc" id="L921">            imgHeight -= padding.top().orElse(0f).intValue()  + padding.bottom().orElse(0f).intValue();</span>
-<span class="fc bfc" id="L922" title="All 2 branches covered.">            if ( imageIcon instanceof SvgIcon ) {</span>
-<span class="fc" id="L923">                SvgIcon svgIcon = (SvgIcon) imageIcon;</span>
-<span class="pc bpc" id="L924" title="2 of 4 branches missed.">                if ( imgWidth &gt; -1 &amp;&amp; svgIcon.getIconWidth() &lt; 0 )</span>
-<span class="fc" id="L925">                    svgIcon = svgIcon.withIconWidth(imgWidth);</span>
-<span class="pc bpc" id="L926" title="2 of 4 branches missed.">                if ( imgHeight &gt; -1 &amp;&amp; svgIcon.getIconHeight() &lt; 0 )</span>
-<span class="fc" id="L927">                    svgIcon = svgIcon.withIconHeight(imgHeight);</span>
-<span class="fc" id="L928">                imageIcon = svgIcon;</span>
+<span class="fc" id="L919">            x += padding.left().orElse(0f).intValue();</span>
+<span class="fc" id="L920">            y += padding.top().orElse(0f).intValue();</span>
+<span class="fc" id="L921">            imgWidth  -= padding.left().orElse(0f).intValue() + padding.right().orElse(0f).intValue();</span>
+<span class="fc" id="L922">            imgHeight -= padding.top().orElse(0f).intValue()  + padding.bottom().orElse(0f).intValue();</span>
+<span class="fc bfc" id="L923" title="All 2 branches covered.">            if ( imageIcon instanceof SvgIcon ) {</span>
+<span class="fc" id="L924">                SvgIcon svgIcon = (SvgIcon) imageIcon;</span>
+<span class="pc bpc" id="L925" title="2 of 4 branches missed.">                if ( imgWidth &gt; -1 &amp;&amp; svgIcon.getIconWidth() &lt; 0 )</span>
+<span class="fc" id="L926">                    svgIcon = svgIcon.withIconWidth(imgWidth);</span>
+<span class="pc bpc" id="L927" title="2 of 4 branches missed.">                if ( imgHeight &gt; -1 &amp;&amp; svgIcon.getIconHeight() &lt; 0 )</span>
+<span class="fc" id="L928">                    svgIcon = svgIcon.withIconHeight(imgHeight);</span>
+<span class="fc" id="L929">                imageIcon = svgIcon;</span>
             }
 
-<span class="fc" id="L931">            final boolean repeat  = style.repeat();</span>
-<span class="fc" id="L932">            final float   opacity = style.opacity();</span>
+<span class="fc" id="L932">            final boolean repeat  = style.repeat();</span>
+<span class="fc" id="L933">            final float   opacity = style.opacity();</span>
 
-<span class="fc" id="L934">            final Shape oldClip = g2d.getClip();</span>
+<span class="fc" id="L935">            final Shape oldClip = g2d.getClip();</span>
 
-<span class="fc" id="L936">            Shape newClip = conf.get(style.clipArea());</span>
+<span class="fc" id="L937">            Shape newClip = conf.get(style.clipArea());</span>
             // We merge the new clip with the old one:
-<span class="pc bpc" id="L938" title="1 of 4 branches missed.">            if ( newClip != null &amp;&amp; oldClip != null )</span>
-<span class="fc" id="L939">                newClip = StyleUtility.intersect( newClip, oldClip );</span>
+<span class="pc bpc" id="L939" title="1 of 4 branches missed.">            if ( newClip != null &amp;&amp; oldClip != null )</span>
+<span class="fc" id="L940">                newClip = StyleUtility.intersect( newClip, oldClip );</span>
 
-<span class="fc" id="L941">            g2d.setClip(newClip);</span>
+<span class="fc" id="L942">            g2d.setClip(newClip);</span>
 
-<span class="fc bfc" id="L943" title="All 4 branches covered.">            if ( !repeat &amp;&amp; imageIcon instanceof SvgIcon ) {</span>
-<span class="fc" id="L944">                SvgIcon svgIcon = ((SvgIcon) imageIcon).withFitComponent(style.fitMode());</span>
-<span class="fc" id="L945">                svgIcon.withPreferredPlacement(UI.Placement.CENTER)</span>
-<span class="fc" id="L946">                        .paintIcon(null, g2d, x, y, imgWidth, imgHeight);</span>
-<span class="fc" id="L947">            }</span>
+<span class="fc bfc" id="L944" title="All 4 branches covered.">            if ( !repeat &amp;&amp; imageIcon instanceof SvgIcon ) {</span>
+<span class="fc" id="L945">                SvgIcon svgIcon = ((SvgIcon) imageIcon).withFitComponent(style.fitMode());</span>
+<span class="fc" id="L946">                svgIcon.withPreferredPlacement(UI.Placement.CENTER)</span>
+<span class="fc" id="L947">                        .paintIcon(null, g2d, x, y, imgWidth, imgHeight);</span>
+<span class="fc" id="L948">            }</span>
             else
             {
                 Image image;
-<span class="pc bpc" id="L951" title="1 of 2 branches missed.">                if ( imageIcon instanceof SvgIcon) {</span>
-<span class="nc" id="L952">                    SvgIcon svgIcon = (SvgIcon) imageIcon;</span>
-<span class="nc" id="L953">                    svgIcon = svgIcon.withIconWidth(imgWidth);</span>
-<span class="nc" id="L954">                    svgIcon = svgIcon.withIconHeight(imgHeight);</span>
-<span class="nc" id="L955">                    image   = svgIcon.getImage(); // This will render the SVGIcon with the new size</span>
-<span class="nc" id="L956">                }</span>
+<span class="pc bpc" id="L952" title="1 of 2 branches missed.">                if ( imageIcon instanceof SvgIcon) {</span>
+<span class="nc" id="L953">                    SvgIcon svgIcon = (SvgIcon) imageIcon;</span>
+<span class="nc" id="L954">                    svgIcon = svgIcon.withIconWidth(imgWidth);</span>
+<span class="nc" id="L955">                    svgIcon = svgIcon.withIconHeight(imgHeight);</span>
+<span class="nc" id="L956">                    image   = svgIcon.getImage(); // This will render the SVGIcon with the new size</span>
+<span class="nc" id="L957">                }</span>
                 else
-<span class="fc" id="L958">                    image = imageIcon.getImage();</span>
+<span class="fc" id="L959">                    image = imageIcon.getImage();</span>
 
-<span class="fc" id="L960">                Composite oldComposite = g2d.getComposite();</span>
+<span class="fc" id="L961">                Composite oldComposite = g2d.getComposite();</span>
 
                 try {
-<span class="fc" id="L963">                    g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));</span>
-<span class="fc bfc" id="L964" title="All 2 branches covered.">                    if (repeat) {</span>
-<span class="fc" id="L965">                        Paint oldPaint = g2d.getPaint();</span>
+<span class="fc" id="L964">                    g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));</span>
+<span class="fc bfc" id="L965" title="All 2 branches covered.">                    if (repeat) {</span>
+<span class="fc" id="L966">                        Paint oldPaint = g2d.getPaint();</span>
                         try {
-<span class="fc" id="L967">                            g2d.setPaint(new TexturePaint((BufferedImage) image, new Rectangle(x, y, imgWidth, imgHeight)));</span>
-<span class="fc" id="L968">                            g2d.fill(conf.get(UI.ComponentArea.BODY));</span>
+<span class="fc" id="L968">                            g2d.setPaint(new TexturePaint((BufferedImage) image, new Rectangle(x, y, imgWidth, imgHeight)));</span>
+<span class="fc" id="L969">                            g2d.fill(conf.get(UI.ComponentArea.BODY));</span>
                         } finally {
-<span class="fc" id="L970">                            g2d.setPaint(oldPaint);</span>
+<span class="fc" id="L971">                            g2d.setPaint(oldPaint);</span>
                         }
-<span class="fc" id="L972">                    }</span>
+<span class="fc" id="L973">                    }</span>
                     else
-<span class="fc" id="L974">                        g2d.drawImage(image, x, y, imgWidth, imgHeight, null);</span>
+<span class="fc" id="L975">                        g2d.drawImage(image, x, y, imgWidth, imgHeight, null);</span>
 
                 } finally {
-<span class="fc" id="L977">                    g2d.setComposite(oldComposite);</span>
+<span class="fc" id="L978">                    g2d.setComposite(oldComposite);</span>
                 }
             }
-<span class="fc" id="L980">            g2d.setClip(oldClip);</span>
-<span class="fc" id="L981">        });</span>
-<span class="fc" id="L982">    }</span>
+<span class="fc" id="L981">            g2d.setClip(oldClip);</span>
+<span class="fc" id="L982">        });</span>
+<span class="fc" id="L983">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

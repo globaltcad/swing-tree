@@ -97,7 +97,7 @@ final class StyleLayers
 <span class="fc bfc" id="L97" title="All 2 branches covered.">        return predicate.test(UI.Layer.BACKGROUND, _background)</span>
 <span class="fc bfc" id="L98" title="All 2 branches covered.">            &amp;&amp; predicate.test(UI.Layer.CONTENT,    _content)</span>
 <span class="pc bpc" id="L99" title="1 of 2 branches missed.">            &amp;&amp; predicate.test(UI.Layer.BORDER,     _border)</span>
-<span class="pc bpc" id="L100" title="1 of 2 branches missed.">            &amp;&amp; predicate.test(UI.Layer.FOREGROUND, _foreground);</span>
+<span class="fc bfc" id="L100" title="All 2 branches covered.">            &amp;&amp; predicate.test(UI.Layer.FOREGROUND, _foreground);</span>
     }
 
     public StyleLayers onlyRetainingAsUnnamedLayer( UI.Layer layer ){
@@ -125,7 +125,7 @@ final class StyleLayers
 <span class="fc" id="L125">        StyleLayer foreground = _foreground.simplified();</span>
 <span class="pc bpc" id="L126" title="1 of 2 branches missed.">        StyleLayer any        = ( _any == null ? null : _any.simplified() );</span>
 
-<span class="pc bpc" id="L128" title="2 of 10 branches missed.">        if (</span>
+<span class="pc bpc" id="L128" title="1 of 10 branches missed.">        if (</span>
              background == _background &amp;&amp;
              content    == _content    &amp;&amp;
              border     == _border     &amp;&amp;

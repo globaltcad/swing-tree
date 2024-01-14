@@ -14,24 +14,29 @@ public final class LifeSpan
 <span class="fc" id="L14">        return new LifeSpan(lifeTime, System.currentTimeMillis() + lifeTime.getDelayIn(TimeUnit.MILLISECONDS));</span>
     }
 
-    public static LifeSpan endingNowWith( LifeTime lifeTime ) {
-<span class="nc" id="L18">        return new LifeSpan(lifeTime, System.currentTimeMillis() - lifeTime.getDurationIn(TimeUnit.MILLISECONDS));</span>
+    public static LifeSpan startingNowWithOffset( long offset, TimeUnit unit, LifeTime lifeTime ) {
+<span class="nc" id="L18">        long inMillis = unit.toMillis(offset);</span>
+<span class="nc" id="L19">        return new LifeSpan(lifeTime, System.currentTimeMillis() + inMillis);</span>
+    }
+
+            public static LifeSpan endingNowWith( LifeTime lifeTime ) {
+<span class="nc" id="L23">        return new LifeSpan(lifeTime, System.currentTimeMillis() - lifeTime.getDurationIn(TimeUnit.MILLISECONDS));</span>
     }
 
     private final LifeTime _lifeTime;
     private final long _startTime;
 
-<span class="fc" id="L24">    LifeSpan( LifeTime lifeTime, long startTime ) {</span>
-<span class="fc" id="L25">        _lifeTime = Objects.requireNonNull(lifeTime);</span>
-<span class="fc" id="L26">        _startTime = startTime;</span>
-<span class="fc" id="L27">    }</span>
+<span class="fc" id="L29">    LifeSpan( LifeTime lifeTime, long startTime ) {</span>
+<span class="fc" id="L30">        _lifeTime = Objects.requireNonNull(lifeTime);</span>
+<span class="fc" id="L31">        _startTime = startTime;</span>
+<span class="fc" id="L32">    }</span>
 
     public LifeTime lifeTime() {
-<span class="fc" id="L30">        return _lifeTime;</span>
+<span class="fc" id="L35">        return _lifeTime;</span>
     }
 
     public long startTime() {
-<span class="nc" id="L34">        return _startTime;</span>
+<span class="nc" id="L39">        return _startTime;</span>
     }
 
     /**
@@ -40,8 +45,8 @@ public final class LifeSpan
      * @return The time when the animation should start.
      */
     public long getStartTimeIn( TimeUnit unit ) {
-<span class="fc" id="L43">        Objects.requireNonNull(unit);</span>
-<span class="fc" id="L44">        return unit.convert(_startTime, TimeUnit.MILLISECONDS);</span>
+<span class="fc" id="L48">        Objects.requireNonNull(unit);</span>
+<span class="fc" id="L49">        return unit.convert(_startTime, TimeUnit.MILLISECONDS);</span>
     }
 
 
@@ -56,29 +61,29 @@ public final class LifeSpan
      * @return The end time of the specified iteration in the given time unit.
      */
     public long getEndTimeIn( TimeUnit unit, int iteration ) {
-<span class="fc" id="L59">        Objects.requireNonNull(unit);</span>
-<span class="fc" id="L60">        return unit.convert(_startTime + _lifeTime.getDurationIn(TimeUnit.MILLISECONDS) * iteration, TimeUnit.MILLISECONDS);</span>
+<span class="fc" id="L64">        Objects.requireNonNull(unit);</span>
+<span class="fc" id="L65">        return unit.convert(_startTime + _lifeTime.getDurationIn(TimeUnit.MILLISECONDS) * iteration, TimeUnit.MILLISECONDS);</span>
     }
 
     /**
      * @return {@code true} if the animation is expired, {@code false} otherwise.
      */
     public boolean isExpired() {
-<span class="pc bpc" id="L67" title="1 of 2 branches missed.">        return System.currentTimeMillis() &gt;= _startTime + _lifeTime.getDurationIn(TimeUnit.MILLISECONDS);</span>
+<span class="pc bpc" id="L72" title="1 of 2 branches missed.">        return System.currentTimeMillis() &gt;= _startTime + _lifeTime.getDurationIn(TimeUnit.MILLISECONDS);</span>
     }
 
     @Override
     public boolean equals( Object o ) {
-<span class="nc bnc" id="L72" title="All 2 branches missed.">        if ( this == o ) return true;</span>
-<span class="nc bnc" id="L73" title="All 2 branches missed.">        if ( !(o instanceof LifeSpan) ) return false;</span>
-<span class="nc" id="L74">        LifeSpan lifeSpan = (LifeSpan) o;</span>
-<span class="nc bnc" id="L75" title="All 2 branches missed.">        return _startTime == lifeSpan._startTime &amp;&amp;</span>
-<span class="nc bnc" id="L76" title="All 2 branches missed.">               Objects.equals(_lifeTime, lifeSpan._lifeTime);</span>
+<span class="nc bnc" id="L77" title="All 2 branches missed.">        if ( this == o ) return true;</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">        if ( !(o instanceof LifeSpan) ) return false;</span>
+<span class="nc" id="L79">        LifeSpan lifeSpan = (LifeSpan) o;</span>
+<span class="nc bnc" id="L80" title="All 2 branches missed.">        return _startTime == lifeSpan._startTime &amp;&amp;</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">               Objects.equals(_lifeTime, lifeSpan._lifeTime);</span>
     }
 
     @Override
     public int hashCode() {
-<span class="nc" id="L81">        return Objects.hash(_lifeTime, _startTime);</span>
+<span class="nc" id="L86">        return Objects.hash(_lifeTime, _startTime);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -246,106 +246,112 @@ final class DynamicLaF
 <span class="fc" id="L246">        @Override public void paint(Graphics g, JComponent c ) { ComponentExtension.from(c).paintBackground(g, null); }</span>
 <span class="fc" id="L247">        @Override public void update( Graphics g, JComponent c ) { paint(g, c); }</span>
         @Override
-<span class="fc" id="L249">        public boolean contains(JComponent c, int x, int y) { return _contains(c, x, y, ()-&gt;super.contains(c, x, y)); }</span>
+<span class="nc" id="L249">        public boolean contains(JComponent c, int x, int y) { return _contains(c, x, y, ()-&gt;super.contains(c, x, y)); }</span>
     }
 
     static class ButtonStyler extends BasicButtonUI
     {
         private final ButtonUI _formerUI;
 
-<span class="fc" id="L256">        ButtonStyler(ButtonUI formerUI) { _formerUI = formerUI; }</span>
+<span class="fc" id="L256">        ButtonStyler(ButtonUI formerUI) {</span>
+<span class="pc bpc" id="L257" title="1 of 2 branches missed.">            _formerUI = ( formerUI instanceof ButtonStyler ) ? ((ButtonStyler)formerUI)._formerUI : formerUI;</span>
+<span class="fc" id="L258">        }</span>
 
         @Override public void paint( Graphics g, JComponent c ) {
-<span class="fc" id="L259">            ComponentExtension.from(c).paintBackground(g, ()-&gt;{</span>
-<span class="fc" id="L260">                _paintComponentThroughFormerUI(_formerUI, g, c);</span>
-<span class="fc" id="L261">            });</span>
-<span class="fc" id="L262">        }</span>
-<span class="fc" id="L263">        @Override public void update( Graphics g, JComponent c ) { paint(g, c); }</span>
+<span class="fc" id="L261">            ComponentExtension.from(c).paintBackground(g, ()-&gt;{</span>
+<span class="fc" id="L262">                _paintComponentThroughFormerUI(_formerUI, g, c);</span>
+<span class="fc" id="L263">            });</span>
+<span class="fc" id="L264">        }</span>
+<span class="fc" id="L265">        @Override public void update( Graphics g, JComponent c ) { paint(g, c); }</span>
         @Override
-<span class="nc" id="L265">        public boolean contains(JComponent c, int x, int y) { return _contains(c, x, y, ()-&gt;super.contains(c, x, y)); }</span>
+<span class="nc" id="L267">        public boolean contains(JComponent c, int x, int y) { return _contains(c, x, y, ()-&gt;super.contains(c, x, y)); }</span>
     }
 
     static class LabelStyler extends BasicLabelUI
     {
         private final LabelUI _formerUI;
 
-<span class="fc" id="L272">        LabelStyler(LabelUI formerUI) { _formerUI = formerUI; }</span>
+<span class="fc" id="L274">        LabelStyler(LabelUI formerUI) {</span>
+<span class="pc bpc" id="L275" title="1 of 2 branches missed.">            _formerUI = (formerUI instanceof LabelStyler) ? ((LabelStyler)formerUI)._formerUI : formerUI;</span>
+<span class="fc" id="L276">        }</span>
 
         @Override public void paint( Graphics g, JComponent c ) {
-<span class="fc" id="L275">            ComponentExtension.from(c).paintBackground(g, ()-&gt;{</span>
-<span class="fc bfc" id="L276" title="All 2 branches covered.">                if ( _formerUI != null )</span>
-<span class="fc" id="L277">                    _paintComponentThroughFormerUI(_formerUI, g, c);</span>
+<span class="fc" id="L279">            ComponentExtension.from(c).paintBackground(g, ()-&gt;{</span>
+<span class="fc bfc" id="L280" title="All 2 branches covered.">                if ( _formerUI != null )</span>
+<span class="fc" id="L281">                    _paintComponentThroughFormerUI(_formerUI, g, c);</span>
                 else
-<span class="fc" id="L279">                    super.paint(g, c);</span>
-<span class="fc" id="L280">            });</span>
-<span class="fc" id="L281">        }</span>
-<span class="fc" id="L282">        @Override public void update( Graphics g, JComponent c ) { paint(g, c); }</span>
+<span class="fc" id="L283">                    super.paint(g, c);</span>
+<span class="fc" id="L284">            });</span>
+<span class="fc" id="L285">        }</span>
+<span class="fc" id="L286">        @Override public void update( Graphics g, JComponent c ) { paint(g, c); }</span>
         @Override
-<span class="nc" id="L284">        public boolean contains(JComponent c, int x, int y) { return _contains(c, x, y, ()-&gt;super.contains(c, x, y)); }</span>
+<span class="nc" id="L288">        public boolean contains(JComponent c, int x, int y) { return _contains(c, x, y, ()-&gt;super.contains(c, x, y)); }</span>
     }
 
     static class TextFieldStyler extends BasicTextFieldUI
     {
         private final TextUI _formerUI;
 
-<span class="fc" id="L291">        TextFieldStyler(TextUI formerUI) { _formerUI = formerUI; }</span>
+<span class="fc" id="L295">        TextFieldStyler(TextUI formerUI) {</span>
+<span class="pc bpc" id="L296" title="1 of 2 branches missed.">            _formerUI = ( formerUI instanceof TextFieldStyler ) ? ((TextFieldStyler)formerUI)._formerUI : formerUI;</span>
+<span class="fc" id="L297">        }</span>
         @Override protected void paintSafely(Graphics g) {
-<span class="pc bpc" id="L293" title="1 of 2 branches missed.">            if ( !getComponent().isOpaque() )</span>
-<span class="fc" id="L294">                paintBackground(g);</span>
+<span class="pc bpc" id="L299" title="1 of 2 branches missed.">            if ( !getComponent().isOpaque() )</span>
+<span class="fc" id="L300">                paintBackground(g);</span>
 
-<span class="fc" id="L296">            ComponentExtension.from(getComponent()).paintWithContentAreaClip(g, ()-&gt;{</span>
-<span class="fc" id="L297">                super.paintSafely(g);// Paints the text</span>
-<span class="fc" id="L298">            });</span>
-<span class="fc" id="L299">        }</span>
+<span class="fc" id="L302">            ComponentExtension.from(getComponent()).paintWithContentAreaClip(g, ()-&gt;{</span>
+<span class="fc" id="L303">                super.paintSafely(g);// Paints the text</span>
+<span class="fc" id="L304">            });</span>
+<span class="fc" id="L305">        }</span>
         @Override protected void paintBackground(Graphics g) {
-<span class="fc" id="L301">            JComponent c = getComponent();</span>
+<span class="fc" id="L307">            JComponent c = getComponent();</span>
 
-<span class="fc" id="L303">            Insets margins = ComponentExtension.from(c).getMarginInsets();</span>
-<span class="fc" id="L304">            int insetTop    = margins.top   ;</span>
-<span class="fc" id="L305">            int insetLeft   = margins.left  ;</span>
-<span class="fc" id="L306">            int insetBottom = margins.bottom;</span>
-<span class="fc" id="L307">            int insetRight  = margins.right ;</span>
+<span class="fc" id="L309">            Insets margins = ComponentExtension.from(c).getMarginInsets();</span>
+<span class="fc" id="L310">            int insetTop    = margins.top   ;</span>
+<span class="fc" id="L311">            int insetLeft   = margins.left  ;</span>
+<span class="fc" id="L312">            int insetBottom = margins.bottom;</span>
+<span class="fc" id="L313">            int insetRight  = margins.right ;</span>
 
-<span class="fc" id="L309">            g.setColor(c.getBackground());</span>
-<span class="fc" id="L310">            ComponentExtension.from(getComponent()).paintWithContentAreaClip(g, ()-&gt;{</span>
-<span class="fc" id="L311">                g.fillRect(</span>
+<span class="fc" id="L315">            g.setColor(c.getBackground());</span>
+<span class="fc" id="L316">            ComponentExtension.from(getComponent()).paintWithContentAreaClip(g, ()-&gt;{</span>
+<span class="fc" id="L317">                g.fillRect(</span>
                         insetLeft, insetTop,
-<span class="fc" id="L313">                        c.getWidth() - insetLeft - insetRight, c.getHeight() - insetTop - insetBottom</span>
+<span class="fc" id="L319">                        c.getWidth() - insetLeft - insetRight, c.getHeight() - insetTop - insetBottom</span>
                     );
-<span class="fc" id="L315">            });</span>
-
-<span class="pc bpc" id="L317" title="7 of 8 branches missed.">            boolean shouldPaintFormerUI = ( insetLeft == 0 &amp;&amp; insetRight == 0 &amp;&amp; insetTop == 0 &amp;&amp; insetBottom == 0 );</span>
-<span class="fc" id="L318">            ComponentExtension.from(c).paintBackground(g, ()-&gt;{</span>
-<span class="pc bpc" id="L319" title="1 of 2 branches missed.">                if ( shouldPaintFormerUI )</span>
-<span class="nc" id="L320">                    _paintComponentThroughFormerUI(_formerUI, g, c);</span>
 <span class="fc" id="L321">            });</span>
-<span class="fc" id="L322">        }</span>
 
-<span class="fc" id="L324">        @Override public void update( Graphics g, JComponent c ) { paint(g, c); }</span>
+<span class="pc bpc" id="L323" title="7 of 8 branches missed.">            boolean shouldPaintFormerUI = ( insetLeft == 0 &amp;&amp; insetRight == 0 &amp;&amp; insetTop == 0 &amp;&amp; insetBottom == 0 );</span>
+<span class="fc" id="L324">            ComponentExtension.from(c).paintBackground(g, ()-&gt;{</span>
+<span class="pc bpc" id="L325" title="1 of 2 branches missed.">                if ( shouldPaintFormerUI )</span>
+<span class="nc" id="L326">                    _paintComponentThroughFormerUI(_formerUI, g, c);</span>
+<span class="fc" id="L327">            });</span>
+<span class="fc" id="L328">        }</span>
+
+<span class="fc" id="L330">        @Override public void update( Graphics g, JComponent c ) { paint(g, c); }</span>
         @Override
-<span class="nc" id="L326">        public boolean contains(JComponent c, int x, int y) { return _contains(c, x, y, ()-&gt;super.contains(c, x, y)); }</span>
+<span class="nc" id="L332">        public boolean contains(JComponent c, int x, int y) { return _contains(c, x, y, ()-&gt;super.contains(c, x, y)); }</span>
     }
 
     private static void _paintComponentThroughFormerUI(
         ComponentUI formerUI, Graphics g, JComponent c
     ) {
         try {
-<span class="pc bpc" id="L333" title="1 of 2 branches missed.">            if ( formerUI != null ) {</span>
-<span class="fc" id="L334">                Style style = ComponentExtension.from(c).getStyle();</span>
-<span class="fc" id="L335">                boolean hasMargin       = style.margin().isPositive();</span>
-<span class="fc" id="L336">                boolean hasBorderRadius = style.border().hasAnyNonZeroArcs();</span>
-<span class="fc bfc" id="L337" title="All 4 branches covered.">                if ( !hasMargin &amp;&amp; !hasBorderRadius )</span>
-<span class="fc" id="L338">                    formerUI.update(g, c);</span>
+<span class="pc bpc" id="L339" title="1 of 2 branches missed.">            if ( formerUI != null ) {</span>
+<span class="fc" id="L340">                Style style = ComponentExtension.from(c).getStyle();</span>
+<span class="fc" id="L341">                boolean hasMargin       = style.margin().isPositive();</span>
+<span class="fc" id="L342">                boolean hasBorderRadius = style.border().hasAnyNonZeroArcs();</span>
+<span class="fc bfc" id="L343" title="All 4 branches covered.">                if ( !hasMargin &amp;&amp; !hasBorderRadius )</span>
+<span class="fc" id="L344">                    formerUI.update(g, c);</span>
                 else {
-<span class="fc" id="L340">                    ComponentExtension.from(c).paintWithContentAreaClip(g, ()-&gt;{</span>
-<span class="fc" id="L341">                        formerUI.update(g, c);</span>
-<span class="fc" id="L342">                    });</span>
+<span class="fc" id="L346">                    ComponentExtension.from(c).paintWithContentAreaClip(g, ()-&gt;{</span>
+<span class="fc" id="L347">                        formerUI.update(g, c);</span>
+<span class="fc" id="L348">                    });</span>
                 }
             }
-<span class="nc" id="L345">        } catch ( Exception ex ) {</span>
-<span class="nc" id="L346">            ex.printStackTrace();</span>
-<span class="fc" id="L347">        }</span>
-<span class="fc" id="L348">    }</span>
+<span class="nc" id="L351">        } catch ( Exception ex ) {</span>
+<span class="nc" id="L352">            ex.printStackTrace();</span>
+<span class="fc" id="L353">        }</span>
+<span class="fc" id="L354">    }</span>
 
     /**
      *  Determines whether the given point, in the parent's coordinate space, is within this component.
@@ -359,16 +365,16 @@ final class DynamicLaF
      */
     private static boolean _contains(JComponent c, int x, int y, Supplier&lt;Boolean&gt; superContains)
     {
-<span class="fc" id="L362">        Border border = c.getBorder();</span>
-<span class="pc bpc" id="L363" title="1 of 2 branches missed.">        if ( border instanceof StyleAndAnimationBorder ) {</span>
-<span class="nc" id="L364">            StyleAndAnimationBorder&lt;?&gt; b = (StyleAndAnimationBorder&lt;?&gt;) border;</span>
-<span class="nc" id="L365">            Insets margins = b.getMarginInsets();</span>
-<span class="nc" id="L366">            int width  = c.getWidth();</span>
-<span class="nc" id="L367">            int height = c.getHeight();</span>
-<span class="nc bnc" id="L368" title="All 8 branches missed.">            boolean isInside = (x &gt;= margins.left) &amp;&amp; (x &lt; width - margins.right) &amp;&amp; (y &gt;= margins.top) &amp;&amp; (y &lt; height - margins.bottom);</span>
+<span class="nc" id="L368">        Border border = c.getBorder();</span>
+<span class="nc bnc" id="L369" title="All 2 branches missed.">        if ( border instanceof StyleAndAnimationBorder ) {</span>
+<span class="nc" id="L370">            StyleAndAnimationBorder&lt;?&gt; b = (StyleAndAnimationBorder&lt;?&gt;) border;</span>
+<span class="nc" id="L371">            Insets margins = b.getMarginInsets();</span>
+<span class="nc" id="L372">            int width  = c.getWidth();</span>
+<span class="nc" id="L373">            int height = c.getHeight();</span>
+<span class="nc bnc" id="L374" title="All 8 branches missed.">            boolean isInside = (x &gt;= margins.left) &amp;&amp; (x &lt; width - margins.right) &amp;&amp; (y &gt;= margins.top) &amp;&amp; (y &lt; height - margins.bottom);</span>
 
-<span class="nc bnc" id="L370" title="All 2 branches missed.">            if ( isInside )</span>
-<span class="nc" id="L371">                return true;</span>
+<span class="nc bnc" id="L376" title="All 2 branches missed.">            if ( isInside )</span>
+<span class="nc" id="L377">                return true;</span>
             else
             {/*
                 You might be thinking that we should return false here, but that would be wrong in certain cases!
@@ -377,21 +383,21 @@ final class DynamicLaF
                 So, if there are negative paddings, we loop through the subcomponents and see if any of
                 them contains the point.                                                                               */
 
-<span class="nc" id="L380">                Insets padding = b.getPaddingInsets();</span>
+<span class="nc" id="L386">                Insets padding = b.getPaddingInsets();</span>
 
-<span class="nc bnc" id="L382" title="All 8 branches missed.">                if ( padding.top &lt; 0 || padding.left &lt; 0 || padding.bottom &lt; 0 || padding.right &lt; 0 )</span>
-<span class="nc bnc" id="L383" title="All 2 branches missed.">                    for ( Component child : c.getComponents() ) {</span>
-<span class="nc bnc" id="L384" title="All 2 branches missed.">                        if ( child instanceof JComponent ) {</span>
-<span class="nc" id="L385">                            JComponent jc = (JComponent) child;</span>
-<span class="nc bnc" id="L386" title="All 2 branches missed.">                            if ( jc.contains(x, y) )</span>
-<span class="nc" id="L387">                                return true;</span>
+<span class="nc bnc" id="L388" title="All 8 branches missed.">                if ( padding.top &lt; 0 || padding.left &lt; 0 || padding.bottom &lt; 0 || padding.right &lt; 0 )</span>
+<span class="nc bnc" id="L389" title="All 2 branches missed.">                    for ( Component child : c.getComponents() ) {</span>
+<span class="nc bnc" id="L390" title="All 2 branches missed.">                        if ( child instanceof JComponent ) {</span>
+<span class="nc" id="L391">                            JComponent jc = (JComponent) child;</span>
+<span class="nc bnc" id="L392" title="All 2 branches missed.">                            if ( jc.contains(x, y) )</span>
+<span class="nc" id="L393">                                return true;</span>
                         }
                     }
                 else
-<span class="nc" id="L391">                    return false;</span>
+<span class="nc" id="L397">                    return false;</span>
             }
         }
-<span class="fc" id="L394">        return superContains.get();</span>
+<span class="nc" id="L400">        return superContains.get();</span>
     }
 
 }

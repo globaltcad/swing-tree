@@ -68,7 +68,7 @@ public final class Location
      *         and the specified y-coordinate.
      */
     public Location withY( int y ) {
-<span class="nc" id="L71">        return of( _x, y );</span>
+<span class="fc" id="L71">        return of( _x, y );</span>
     }
 
     /**
@@ -76,7 +76,7 @@ public final class Location
      *         and the specified x-coordinate.
      */
     public Location withX( int x ) {
-<span class="nc" id="L79">        return of( x, _y );</span>
+<span class="fc" id="L79">        return of( x, _y );</span>
     }
 
     /**
@@ -100,7 +100,7 @@ public final class Location
 <span class="pc bpc" id="L100" title="1 of 2 branches missed.">        if ( o == null ) return false;</span>
 <span class="pc bpc" id="L101" title="1 of 2 branches missed.">        if ( o.getClass() != this.getClass() ) return false;</span>
 <span class="fc" id="L102">        Location other = (Location) o;</span>
-<span class="fc bfc" id="L103" title="All 4 branches covered.">        return _x == other._x &amp;&amp; _y == other._y;</span>
+<span class="pc bpc" id="L103" title="1 of 4 branches missed.">        return _x == other._x &amp;&amp; _y == other._y;</span>
     }
 
     @Override

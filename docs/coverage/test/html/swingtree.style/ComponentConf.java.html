@@ -150,7 +150,7 @@ final class ComponentConf
     ComponentConf onlyRetainingLayer( UI.Layer layer ) {
 <span class="fc" id="L151">        return new ComponentConf(</span>
 <span class="fc" id="L152">                    _style.onlyRetainingRenderCacheRelevantConfForLayer(layer),</span>
-                    _currentBounds,
+<span class="fc" id="L153">                    _currentBounds.withX(0).withY(0),</span>
                     _baseOutline,
                     _areas
                 );

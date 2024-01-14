@@ -112,7 +112,7 @@ class Style_Animations_Spec extends Specification
                                 .shadowColor(new Color(0, 100,200, (int) (255 * state.cycle())))
                                 .shadowBlurRadius((int) (12 * state.cycle()))
                                 .shadowIsInset(false)
-                                .fontSize((int) (12 + 24 * state.cycle()))
+                                .fontSize((int) (22 + 14 * state.cycle()))
                             )
                         )
         and : 'We actually build the component:'
@@ -126,7 +126,7 @@ class Style_Animations_Spec extends Specification
             So let's check that.
         """
             label.border == null
-            label.font.size < 15
+            label.font.size <= 13
             label.getUI() instanceof MetalLabelUI
 
         when : 'We simulate a user click event programmatically'
@@ -139,7 +139,7 @@ class Style_Animations_Spec extends Specification
 
         then : 'The label will have a border and a background color.'
             label.border != null
-            label.font.size > 15
+            label.font.size > 13
         and : 'SwingTree will haver overridden the default label UI in order to support the shadow.'
             !(label.getUI() instanceof MetalLabelUI)
     }

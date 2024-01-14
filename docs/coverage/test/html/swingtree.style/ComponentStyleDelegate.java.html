@@ -518,7 +518,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @param radius The border radius in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided border radius.
      */
-    public ComponentStyleDelegate&lt;C&gt; borderRadius( int radius ) {
+    public ComponentStyleDelegate&lt;C&gt; borderRadius( double radius ) {
 <span class="fc" id="L522">        return _withStyle(_style._withBorder(_style.border().withArcWidth(radius).withArcHeight(radius)));</span>
     }
 
@@ -531,7 +531,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @param arcHeight The border arc height in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided border arc width and arc height.
      */
-    public ComponentStyleDelegate&lt;C&gt; borderRadius( int arcWidth, int arcHeight ) {
+    public ComponentStyleDelegate&lt;C&gt; borderRadius( double arcWidth, double arcHeight ) {
 <span class="fc" id="L535">        return _withStyle(_style._withBorder(_style.border().withArcWidth(arcWidth).withArcHeight(arcHeight)));</span>
     }
 
@@ -544,7 +544,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @param arcHeight The border arc height in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided border arc width and arc height for the specified corner.
      */
-    public ComponentStyleDelegate&lt;C&gt; borderRadiusAt( UI.Corner corner, int arcWidth, int arcHeight ) {
+    public ComponentStyleDelegate&lt;C&gt; borderRadiusAt( UI.Corner corner, double arcWidth, double arcHeight ) {
 <span class="fc" id="L548">        return _withStyle(_style._withBorder(_style.border().withArcWidthAt(corner, arcWidth).withArcHeightAt(corner, arcHeight)));</span>
     }
 
@@ -557,7 +557,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @param radius The border radius in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided border radius for the specified corner.
      */
-    public ComponentStyleDelegate&lt;C&gt; borderRadiusAt( UI.Corner corner, int radius ) {
+    public ComponentStyleDelegate&lt;C&gt; borderRadiusAt( UI.Corner corner, double radius ) {
 <span class="fc" id="L561">        return this.borderRadiusAt(corner, radius, radius);</span>
     }
 

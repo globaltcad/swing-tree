@@ -1,7 +1,7 @@
 {
   "className":"swingtree.styles.Style_Sheet_Spec",
   "title":"Creating Style Sheets",
-  "narrative":"No, SwingTree does not have a CSS parser.  \n    It does, however, have something better, which is similar to CSS.\n    An API for configuring styles in a declarative and type-safe way.\n\n    The main class for creating style sheets is the `StyleSheet` class,\n    an abstract class that you can extend to create your own styles like so:\n    ```java\n        class MyStyleSheet {\n           @Override\n           protected void configure() {\n                add(id(\"some unique id!\"), it -> it\n                    .borderRadius(3)\n                    // etc...\n                );\n                add(type(JPanel.class), it -> it\n                   .borderColor(Color.GREEN)\n                   // etc...\n                );\n                add(type(JButton.class), it -> it\n                    .borderWidth(7)\n                    // etc...\n                );\n            }\n        }\n    ```\n    You can then easily apply this style sheet to you SwingTree views like so:\n    ```java\n        UI.use(new MyStyleSheet(), () -> new MyView());\n    ```\n    The style sheet will be applied to all UI components created within the scope of the `use` method.",
+  "narrative":"No, SwingTree does not have a CSS parser.  \n    It does, however, have something better, which looks similar to CSS.\n    An API for configuring styles in a declarative and type-safe way.\n    This API is also designed the concept of defining common style rules\n    withing a file called a \"style sheet\".\n\n    The main difference to a CSS file however is that it is still plain Java code.\n    (Or any other JVM language for that matter.)\n\n    The API for creating style sheets is primarily exposed through the `StyleSheet` class,\n    an abstract class that you can extend to create your own styles like so:\n    ```java\n        class MyStyleSheet extends StyleSheet {\n           @Override\n           protected void configure() {\n                add(id(\"some unique id!\"), it -> it\n                    .borderRadius(3)\n                    // etc...\n                );\n                add(type(JPanel.class), it -> it\n                   .borderColor(Color.GREEN)\n                   // etc...\n                );\n                add(type(JButton.class), it -> it\n                    .borderWidth(7)\n                    // etc...\n                );\n            }\n        }\n    ```\n    You can then easily apply this style sheet to you SwingTree views like so:\n    ```java\n        UI.use(new MyStyleSheet(), () -> new MyView());\n    ```\n    The style sheet will be applied to all UI components created within the scope of the `use` method.",
   "subjects":["swingtree.style.StyleSheet","swingtree.style.Style"],
   "statistics":{
     "runs":"12",
@@ -18,7 +18,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            You can think of a `StyleSheet` as a collection of `StyleTrait`s \n            forming a function for processing a `Style` object.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            You can think of a `StyleSheet` as a collection of `StyleTrait`s \n            forming a function for processing a `Style` object.\n\n            So when you send a `Style` object through a `StyleSheet` then\n            a new `Style` object with the updated style properties will be returned.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"","code":["var ss = new StyleSheet() {","            @Override","            protected void configure() {","                 add(id(\"unique id!\"), it ->","                     it.borderRadius(3)","                 );","                 add(type(JButton.class), it ->","                     it.borderWidth(7)","                 );","                 add(type(JPanel.class), it ->","                    it.borderColor(Color.GREEN)","                 );","             }","         }"]},
@@ -42,21 +42,21 @@
       "blocks":[
         {"kind":"given","text":"","code":["var ss = new StyleSheet() {","            @Override","            protected void configure() {","                add(type(JTextField.class), it -> it","                    .shadowBlurRadius(9)","                );","                add(type(JPanel.class), it -> it","                    .shadowSpreadRadius(33)","                );","                add(type(JTextComponent.class), it -> it","                    .shadowOffset(42, 24)","                    .shadowColor(Color.BLUE)","                );","                add(type(JComponent.class), it -> it","                    .shadowColor(Color.RED)","                    .shadowBlurRadius(17)","                );","             }","         }"]},
 
-        {"kind":"and","text":"A few components we are going to style using the style sheet.","code":["var textField = UI.textField(\"type something\")","var button = UI.button(\"click me!\")","var panel = UI.panel()","var textArea = UI.textArea(\"type some more!\")"]},
+        {"kind":"and","text":"A few components we are going to style using the style sheet.","code":["var textField = UI.textField(\"type something\").get(JTextField)","var button = UI.button(\"click me!\").get(JButton)","var panel = UI.panel().get(JPanel)","var textArea = UI.textArea(\"type some more!\").get(JTextArea)"]},
 
-        {"kind":"when","text":"We first run the text field through the style sheet...","code":["var fieldStyle  = ss.applyTo(textField.component).shadow()"]},
+        {"kind":"when","text":"We first run the text field through the style sheet...","code":["var fieldStyle  = ss.applyTo(textField).shadow()"]},
 
         {"kind":"then","text":"The resulting style has the expected properties:","code":["fieldStyle.color().get() == Color.BLUE // The text component trait overrides the component trait!","fieldStyle.blurRadius() == 9 // The text field trait overrides the component trait!","fieldStyle.spreadRadius() != 33 // a text field is not a panel","fieldStyle.verticalOffset() == 24","fieldStyle.horizontalOffset() == 42"]},
 
-        {"kind":"when","text":"We then run the button through the style sheet...","code":["var buttonStyle = ss.applyTo(button.component).shadow()"]},
+        {"kind":"when","text":"We then run the button through the style sheet...","code":["var buttonStyle = ss.applyTo(button).shadow()"]},
 
         {"kind":"then","text":"Again, the resulting style is as expected:","code":["buttonStyle.color().get() == Color.RED","buttonStyle.blurRadius() == 17","buttonStyle.spreadRadius() != 33 // a button is not a panel","buttonStyle.verticalOffset() != 42 // a button is not a text component","buttonStyle.horizontalOffset() != 24 // a button is not a text component"]},
 
-        {"kind":"when","text":"We now run the panel through the style sheet...","code":["var panelStyle  = ss.applyTo(panel.component).shadow()"]},
+        {"kind":"when","text":"We now run the panel through the style sheet...","code":["var panelStyle  = ss.applyTo(panel).shadow()"]},
 
         {"kind":"then","text":"Also no surprises here:","code":["panelStyle.color().get() == Color.RED","panelStyle.blurRadius() == 17","panelStyle.spreadRadius() == 33","panelStyle.verticalOffset() != 42 // a panel is not a text component","panelStyle.horizontalOffset() != 24 // a panel is not a text component"]},
 
-        {"kind":"when","text":"We finally run the text area through the style sheet...","code":["var areaStyle   = ss.applyTo(textArea.component).shadow()"]},
+        {"kind":"when","text":"We finally run the text area through the style sheet...","code":["var areaStyle   = ss.applyTo(textArea).shadow()"]},
 
         {"kind":"then","text":"It too has the expected style:","code":["areaStyle.color().get() == Color.BLUE // The text component trait overrides the component trait!","areaStyle.blurRadius() == 17","areaStyle.spreadRadius() != 33 // a text area is not a panel","areaStyle.verticalOffset() == 24","areaStyle.horizontalOffset() == 42"]}
       ],
@@ -73,9 +73,9 @@
       "blocks":[
         {"kind":"given","text":"\n            We create a little example style sheet with two groups\n            and that each have their own style rules.\n        ","code":["var ss = new StyleSheet() {","            @Override","            protected void configure() {","                 add(group(\"group1\"), it -> it","                     .backgroundColor(Color.BLUE)","                 );","                 add(group(\"group2\"), it -> it","                     .foundationColor(Color.CYAN)","                 );","             }","         }"]},
 
-        {"kind":"and","text":"Also, a few components we are going to style","code":["var label = UI.label(\"hi\").group(\"group1\")","var toggle = UI.toggleButton(\"click me!\").group(\"group2\")","var panel = UI.panel().group(\"group1\", \"group2\")"]},
+        {"kind":"and","text":"Also, a few components we are going to style","code":["var label = UI.label(\"hi\").group(\"group1\").get(JLabel)","var toggle = UI.toggleButton(\"click me!\").group(\"group2\").get(JToggleButton)","var panel = UI.panel().group(\"group1\", \"group2\").get(JPanel)"]},
 
-        {"kind":"when","text":"We run them all through the style sheet...","code":["var s1 = ss.applyTo(label.component)","var s2 = ss.applyTo(toggle.component)","var s3 = ss.applyTo(panel.component)"]},
+        {"kind":"when","text":"We run them all through the style sheet...","code":["var s1 = ss.applyTo(label)","var s2 = ss.applyTo(toggle)","var s3 = ss.applyTo(panel)"]},
 
         {"kind":"then","text":"We can verify that the colors are applied correctly.","code":["s1.base().backgroundColor().get() == Color.BLUE","s2.base().foundationColor().get() == Color.CYAN","s3.base().backgroundColor().get() == Color.BLUE","s3.base().foundationColor().get() == Color.CYAN"]}
       ],

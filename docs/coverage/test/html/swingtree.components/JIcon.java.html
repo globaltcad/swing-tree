@@ -24,8 +24,8 @@ public class JIcon extends JLabel
 <span class="fc" id="L24">    }</span>
 
     public JIcon(IconDeclaration declaration) {
-<span class="nc" id="L27">        super(_getFromCacheOrLoadFrom(declaration));</span>
-<span class="nc" id="L28">    }</span>
+<span class="fc" id="L27">        super(_getFromCacheOrLoadFrom(declaration));</span>
+<span class="fc" id="L28">    }</span>
 
     public JIcon(Icon icon) {
 <span class="fc" id="L31">        super(icon);</span>
@@ -76,7 +76,7 @@ public class JIcon extends JLabel
     private static ImageIcon _getFromCacheOrLoadFrom( IconDeclaration declaration ) {
 <span class="fc" id="L77">        Map&lt;IconDeclaration, ImageIcon&gt; cache = SwingTree.get().getIconCache();</span>
 <span class="fc" id="L78">        ImageIcon icon = cache.get(declaration);</span>
-<span class="pc bpc" id="L79" title="1 of 2 branches missed.">        if ( icon == null ) {</span>
+<span class="fc bfc" id="L79" title="All 2 branches covered.">        if ( icon == null ) {</span>
 <span class="fc" id="L80">            icon = UI.findIcon(declaration).orElse(null);</span>
 <span class="pc bpc" id="L81" title="1 of 2 branches missed.">            if ( icon != null )</span>
 <span class="fc" id="L82">                cache.put(declaration, icon);</span>

@@ -1,7 +1,7 @@
 {
   "className":"swingtree.events.Event_Handling_Spec",
   "title":"Registering Event Handlers",
-  "narrative":"In this specification you can see how to register different kinds of event handlers\n    on Swing components.",
+  "narrative":"An important part of a UI declaration is the ability to hook up event handlers\n    to your components. In SwingTree you do not need to unpack the underlying Swing\n    component to register a particular event listener, but instead you can register\n    event handlers directly on the UI declaration.    \n    This specification demonstrates how different types of event handlers for different\n    types of events and components can be registered using simple lambda expressions.",
   "subjects":[],
   "statistics":{
     "runs":"15",
@@ -254,7 +254,9 @@
 
         {"kind":"and","text":"A handler that records the text area content.","code":["ui = ui.onTextReplace( it -> {","        trace1.add(it.component.text)","        trace2.add(it.replacementText)","        trace3.add(\"$it.offset|$it.length\")","    })"]},
 
-        {"kind":"when","text":"The text area content is changed.","code":["UI.runNow { ui.get(JTextArea).setText(\"Some other content...\") }","UI.sync()"]},
+        {"kind":"and","text":"Finally we build the text area:","code":["var textArea = ui.get(JTextArea)"]},
+
+        {"kind":"when","text":"The text area content is changed.","code":["UI.runNow { textArea.setText(\"Some other content...\") }","UI.sync()"]},
 
         {"kind":"then","text":"The handler was triggered.","code":["trace1 == [\"Some content...\"]","trace2 == [\"Some content...\"] // We replace everything.","trace3 == [\"0|15\"]"]}
       ],
@@ -275,7 +277,9 @@
 
         {"kind":"and","text":"A handler that records the text area content.","code":["ui = ui.onTextReplace( it -> trace.add(\"1\") )","       .onTextReplace( it -> trace.add(\"2\") )","       .onTextReplace( it -> trace.add(\"3\") )","       .onTextReplace( it -> trace.add(\"4\") )","       .onTextReplace( it -> trace.add(\"5\") )","       .onTextReplace( it -> trace.add(\"6\") )","       .onTextReplace( it -> trace.add(\"7\") )"]},
 
-        {"kind":"when","text":"The text area content is changed.","code":["UI.runNow { ui.get(JTextArea).setText(\"Some other content...\") }","UI.sync()"]},
+        {"kind":"and","text":"Finally we build the text area:","code":["var textArea = ui.get(JTextArea)"]},
+
+        {"kind":"when","text":"The text area content is changed.","code":["UI.runNow { textArea.setText(\"Some other content...\") }","UI.sync()"]},
 
         {"kind":"then","text":"The handlers are triggered in the correct order.","code":["trace == [\"1\", \"2\", \"3\", \"4\", \"5\", \"6\", \"7\"]"]}
       ],
@@ -296,7 +300,7 @@
 
         {"kind":"and","text":"A little example UI consisting of a panel with a text field:","code":["var ui =","        UI.panel(\"fill, insets 3\", \"[grow][shrink]\")","        .add(\"grow\",","            UI.textField(\"I am a text field\")","            .on(observable, it -> trace.add(\"1\"))","        )"]},
 
-        {"kind":"and","text":"We actually build the component:","code":["var panel = ui.get(JPanel)"]},
+        {"kind":"and","text":"We then actually trigger the component to be built:","code":["var panel = ui.get(JPanel)"]},
 
         {"kind":"when","text":"The observable is triggered.","code":["observable.fire()"]},
 

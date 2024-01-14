@@ -80,6 +80,25 @@ public final class ShadowStyle implements Simplifiable&lt;ShadowStyle&gt;
                                                 );
 
 <span class="fc" id="L82">    public static ShadowStyle none() { return _NONE; }</span>
+    
+    static ShadowStyle of(
+        Offset  offset,
+        float   shadowBlurRadius,
+        float   shadowSpreadRadius,
+        Color   shadowColor,
+        boolean isOutset
+    ) {
+<span class="pc bpc" id="L91" title="1 of 10 branches missed.">        if ( </span>
+            offset == _NONE._offset &amp;&amp;
+            shadowBlurRadius == _NONE._blurRadius &amp;&amp;
+            shadowSpreadRadius == _NONE._spreadRadius &amp;&amp;
+            shadowColor == _NONE._color &amp;&amp;
+            isOutset == _NONE._isOutset
+        )
+<span class="fc" id="L98">            return _NONE;</span>
+        else
+<span class="fc" id="L100">            return new ShadowStyle(offset, shadowBlurRadius, shadowSpreadRadius, shadowColor, isOutset);</span>
+    }
 
     private final Offset  _offset;
     private final float   _blurRadius;
@@ -94,27 +113,27 @@ public final class ShadowStyle implements Simplifiable&lt;ShadowStyle&gt;
         float   shadowSpreadRadius,
         Color   shadowColor,
         boolean isOutset
-<span class="fc" id="L97">    ) {</span>
-<span class="fc" id="L98">        _offset           = Objects.requireNonNull(offset);</span>
-<span class="fc" id="L99">        _blurRadius       = shadowBlurRadius;</span>
-<span class="fc" id="L100">        _spreadRadius     = shadowSpreadRadius;</span>
-<span class="fc" id="L101">        _color            = shadowColor;</span>
-<span class="fc" id="L102">        _isOutset         = isOutset;</span>
-<span class="fc" id="L103">    }</span>
+<span class="fc" id="L116">    ) {</span>
+<span class="fc" id="L117">        _offset           = Objects.requireNonNull(offset);</span>
+<span class="fc" id="L118">        _blurRadius       = shadowBlurRadius;</span>
+<span class="fc" id="L119">        _spreadRadius     = shadowSpreadRadius;</span>
+<span class="fc" id="L120">        _color            = shadowColor;</span>
+<span class="fc" id="L121">        _isOutset         = isOutset;</span>
+<span class="fc" id="L122">    }</span>
 
-<span class="fc" id="L105">    float horizontalOffset() { return _offset.x(); }</span>
+<span class="fc" id="L124">    float horizontalOffset() { return _offset.x(); }</span>
 
-<span class="fc" id="L107">    float verticalOffset() { return _offset.y(); }</span>
+<span class="fc" id="L126">    float verticalOffset() { return _offset.y(); }</span>
 
-<span class="fc" id="L109">    float blurRadius() { return _blurRadius; }</span>
+<span class="fc" id="L128">    float blurRadius() { return _blurRadius; }</span>
 
-<span class="fc" id="L111">    public float spreadRadius() { return _spreadRadius; }</span>
+<span class="fc" id="L130">    public float spreadRadius() { return _spreadRadius; }</span>
 
-<span class="fc" id="L113">    Optional&lt;Color&gt; color() { return Optional.ofNullable(_color); }</span>
+<span class="fc" id="L132">    Optional&lt;Color&gt; color() { return Optional.ofNullable(_color); }</span>
 
-<span class="fc" id="L115">    boolean isOutset() { return _isOutset; }</span>
+<span class="fc" id="L134">    boolean isOutset() { return _isOutset; }</span>
 
-<span class="fc bfc" id="L117" title="All 2 branches covered.">    boolean isInset() { return !_isOutset; }</span>
+<span class="fc bfc" id="L136" title="All 2 branches covered.">    boolean isInset() { return !_isOutset; }</span>
 
     /**
      * @param horizontalShadowOffset The horizontal shadow offset, if positive the shadow will move to the right,
@@ -122,7 +141,7 @@ public final class ShadowStyle implements Simplifiable&lt;ShadowStyle&gt;
      * @return A new {@link ShadowStyle} with the specified horizontal shadow offset.
      */
     public ShadowStyle horizontalOffset( float horizontalShadowOffset ) {
-<span class="fc" id="L125">        return new ShadowStyle(_offset.withX(horizontalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);</span>
+<span class="fc" id="L144">        return ShadowStyle.of(_offset.withX(horizontalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);</span>
     }
 
     /**
@@ -131,7 +150,7 @@ public final class ShadowStyle implements Simplifiable&lt;ShadowStyle&gt;
      * @return A new {@link ShadowStyle} with the specified vertical shadow offset.
      */
     public ShadowStyle verticalOffset( float verticalShadowOffset ) {
-<span class="fc" id="L134">        return new ShadowStyle(_offset.withY(verticalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);</span>
+<span class="fc" id="L153">        return ShadowStyle.of(_offset.withY(verticalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);</span>
     }
 
     /**
@@ -142,7 +161,7 @@ public final class ShadowStyle implements Simplifiable&lt;ShadowStyle&gt;
      * @return A new {@link ShadowStyle} with the specified horizontal and vertical shadow offsets.
      */
     public ShadowStyle offset( int horizontalShadowOffset, int verticalShadowOffset ) {
-<span class="nc" id="L145">        return new ShadowStyle(Offset.of(horizontalShadowOffset, verticalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);</span>
+<span class="nc" id="L164">        return ShadowStyle.of(Offset.of(horizontalShadowOffset, verticalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);</span>
     }
 
     /**
@@ -153,7 +172,7 @@ public final class ShadowStyle implements Simplifiable&lt;ShadowStyle&gt;
      * @return A new {@link ShadowStyle} with the specified horizontal and vertical shadow offsets.
      */
     public ShadowStyle offset( int shadowOffset ) {
-<span class="fc" id="L156">        return new ShadowStyle(Offset.of(shadowOffset, shadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);</span>
+<span class="fc" id="L175">        return ShadowStyle.of(Offset.of(shadowOffset, shadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);</span>
     }
 
     /**
@@ -163,7 +182,7 @@ public final class ShadowStyle implements Simplifiable&lt;ShadowStyle&gt;
      * @return A new {@link ShadowStyle} with the specified blur radius.
      */
     public ShadowStyle blurRadius( float shadowBlurRadius ) {
-<span class="fc" id="L166">        return new ShadowStyle(_offset, shadowBlurRadius, _spreadRadius, _color, _isOutset);</span>
+<span class="fc" id="L185">        return ShadowStyle.of(_offset, shadowBlurRadius, _spreadRadius, _color, _isOutset);</span>
     }
 
     /**
@@ -175,7 +194,7 @@ public final class ShadowStyle implements Simplifiable&lt;ShadowStyle&gt;
      * @return A new {@link ShadowStyle} with the specified spread radius.
      */
     public ShadowStyle spreadRadius( float shadowSpreadRadius ) {
-<span class="fc" id="L178">        return new ShadowStyle(_offset, _blurRadius, shadowSpreadRadius, _color, _isOutset);</span>
+<span class="fc" id="L197">        return ShadowStyle.of(_offset, _blurRadius, shadowSpreadRadius, _color, _isOutset);</span>
     }
 
     /**
@@ -183,12 +202,12 @@ public final class ShadowStyle implements Simplifiable&lt;ShadowStyle&gt;
      * @return A new {@link ShadowStyle} with the specified color.
      */
     public ShadowStyle color( Color shadowColor ) {
-<span class="fc" id="L186">        Objects.requireNonNull(shadowColor, &quot;Use UI.COLOR_UNDEFINED to specify no color instead of null&quot;);</span>
-<span class="fc bfc" id="L187" title="All 2 branches covered.">        if ( shadowColor == UI.COLOR_UNDEFINED)</span>
-<span class="fc" id="L188">            shadowColor = null;</span>
-<span class="fc bfc" id="L189" title="All 2 branches covered.">        if ( shadowColor == _color )</span>
-<span class="fc" id="L190">            return this;</span>
-<span class="fc" id="L191">        return new ShadowStyle(_offset, _blurRadius, _spreadRadius, shadowColor, _isOutset);</span>
+<span class="fc" id="L205">        Objects.requireNonNull(shadowColor, &quot;Use UI.COLOR_UNDEFINED to specify no color instead of null&quot;);</span>
+<span class="fc bfc" id="L206" title="All 2 branches covered.">        if ( shadowColor == UI.COLOR_UNDEFINED)</span>
+<span class="fc" id="L207">            shadowColor = null;</span>
+<span class="fc bfc" id="L208" title="All 2 branches covered.">        if ( shadowColor == _color )</span>
+<span class="fc" id="L209">            return this;</span>
+<span class="fc" id="L210">        return ShadowStyle.of(_offset, _blurRadius, _spreadRadius, shadowColor, _isOutset);</span>
     }
 
     /**
@@ -206,15 +225,15 @@ public final class ShadowStyle implements Simplifiable&lt;ShadowStyle&gt;
      * @return A new {@link ShadowStyle} with the specified color.
      */
     public ShadowStyle color( String shadowColor ) {
-<span class="nc" id="L209">        Objects.requireNonNull(shadowColor);</span>
+<span class="nc" id="L228">        Objects.requireNonNull(shadowColor);</span>
         Color newColor;
         try {
-<span class="nc" id="L212">            newColor = UI.color(shadowColor);</span>
-<span class="nc" id="L213">        } catch ( Exception e ) {</span>
-<span class="nc" id="L214">            log.error(&quot;Failed to parse color string: '{}'&quot;, shadowColor, e);</span>
-<span class="nc" id="L215">            return this; // We want to avoid side effects other than a wrong color</span>
-<span class="nc" id="L216">        }</span>
-<span class="nc" id="L217">        return new ShadowStyle(_offset, _blurRadius, _spreadRadius, newColor, _isOutset);</span>
+<span class="nc" id="L231">            newColor = UI.color(shadowColor);</span>
+<span class="nc" id="L232">        } catch ( Exception e ) {</span>
+<span class="nc" id="L233">            log.error(&quot;Failed to parse color string: '{}'&quot;, shadowColor, e);</span>
+<span class="nc" id="L234">            return this; // We want to avoid side effects other than a wrong color</span>
+<span class="nc" id="L235">        }</span>
+<span class="nc" id="L236">        return ShadowStyle.of(_offset, _blurRadius, _spreadRadius, newColor, _isOutset);</span>
     }
 
     /**
@@ -225,7 +244,7 @@ public final class ShadowStyle implements Simplifiable&lt;ShadowStyle&gt;
      * @return A new {@link ShadowStyle} with the specified inset/outset state.
      */
     public ShadowStyle isInset( boolean shadowInset ) {
-<span class="fc bfc" id="L228" title="All 2 branches covered.">        return new ShadowStyle(_offset, _blurRadius, _spreadRadius, _color, !shadowInset);</span>
+<span class="fc bfc" id="L247" title="All 2 branches covered.">        return ShadowStyle.of(_offset, _blurRadius, _spreadRadius, _color, !shadowInset);</span>
     }
 
     /**
@@ -236,70 +255,73 @@ public final class ShadowStyle implements Simplifiable&lt;ShadowStyle&gt;
      * @return A new {@link ShadowStyle} with the specified outset/inset state.
      */
     public ShadowStyle isOutset( boolean shadowOutset ) {
-<span class="nc" id="L239">        return new ShadowStyle(_offset, _blurRadius, _spreadRadius, _color, shadowOutset);</span>
+<span class="nc" id="L258">        return ShadowStyle.of(_offset, _blurRadius, _spreadRadius, _color, shadowOutset);</span>
     }
 
     ShadowStyle _scale( double scaleFactor ) {
-<span class="fc" id="L243">        return new ShadowStyle(_offset.scale(scaleFactor),</span>
-<span class="fc" id="L244">                               (int) Math.round(_blurRadius       * scaleFactor),</span>
-<span class="fc" id="L245">                               (int) Math.round(_spreadRadius     * scaleFactor),</span>
-                               _color, _isOutset);
+<span class="fc" id="L262">        return ShadowStyle.of(</span>
+<span class="fc" id="L263">                            _offset.scale(scaleFactor),</span>
+                            (float) (_blurRadius * scaleFactor),
+                            (float) (_spreadRadius * scaleFactor),
+                            _color,
+                            _isOutset
+                        );
     }
 
     @Override
     public int hashCode() {
-<span class="fc" id="L251">        int hash = 7;</span>
-<span class="fc" id="L252">        hash = 31 * hash + _offset.hashCode();</span>
-<span class="fc" id="L253">        hash = 31 * hash + Float.hashCode(_blurRadius);</span>
-<span class="fc" id="L254">        hash = 31 * hash + Float.hashCode(_spreadRadius);</span>
-<span class="fc" id="L255">        hash = 31 * hash + Objects.hashCode(_color);</span>
-<span class="fc bfc" id="L256" title="All 2 branches covered.">        hash = 31 * hash + (_isOutset ? 1 : 0);</span>
-<span class="fc" id="L257">        return hash;</span>
+<span class="fc" id="L273">        int hash = 7;</span>
+<span class="fc" id="L274">        hash = 31 * hash + _offset.hashCode();</span>
+<span class="fc" id="L275">        hash = 31 * hash + Float.hashCode(_blurRadius);</span>
+<span class="fc" id="L276">        hash = 31 * hash + Float.hashCode(_spreadRadius);</span>
+<span class="fc" id="L277">        hash = 31 * hash + Objects.hashCode(_color);</span>
+<span class="fc bfc" id="L278" title="All 2 branches covered.">        hash = 31 * hash + (_isOutset ? 1 : 0);</span>
+<span class="fc" id="L279">        return hash;</span>
     }
 
     @Override
     public boolean equals(Object obj) {
-<span class="pc bpc" id="L262" title="1 of 2 branches missed.">        if ( obj == null ) return false;</span>
-<span class="fc bfc" id="L263" title="All 2 branches covered.">        if ( obj == this ) return true;</span>
-<span class="pc bpc" id="L264" title="1 of 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
-<span class="fc" id="L265">        ShadowStyle rhs = (ShadowStyle) obj;</span>
-<span class="fc bfc" id="L266" title="All 6 branches covered.">        return Objects.equals(_offset, rhs._offset)       &amp;&amp;</span>
+<span class="pc bpc" id="L284" title="1 of 2 branches missed.">        if ( obj == null ) return false;</span>
+<span class="fc bfc" id="L285" title="All 2 branches covered.">        if ( obj == this ) return true;</span>
+<span class="pc bpc" id="L286" title="1 of 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
+<span class="fc" id="L287">        ShadowStyle rhs = (ShadowStyle) obj;</span>
+<span class="fc bfc" id="L288" title="All 6 branches covered.">        return Objects.equals(_offset, rhs._offset)       &amp;&amp;</span>
                _blurRadius       == rhs._blurRadius       &amp;&amp;
                _spreadRadius     == rhs._spreadRadius     &amp;&amp;
-<span class="pc bpc" id="L269" title="1 of 4 branches missed.">               Objects.equals(_color, rhs._color)         &amp;&amp;</span>
+<span class="pc bpc" id="L291" title="1 of 4 branches missed.">               Objects.equals(_color, rhs._color)         &amp;&amp;</span>
                _isOutset         == rhs._isOutset;
     }
 
     @Override
     public String toString() {
-<span class="fc bfc" id="L275" title="All 2 branches covered.">        if ( this == _NONE )</span>
-<span class="fc" id="L276">            return &quot;ShadowStyle[NONE]&quot;;</span>
-<span class="fc" id="L277">        return &quot;ShadowStyle[&quot; +</span>
-<span class="fc" id="L278">                    &quot;horizontalOffset=&quot; + _toString(_offset.x()  ) + &quot;, &quot; +</span>
-<span class="fc" id="L279">                    &quot;verticalOffset=&quot;   + _toString(_offset.y()  ) + &quot;, &quot; +</span>
-<span class="fc" id="L280">                    &quot;blurRadius=&quot;       + _toString(_blurRadius  ) + &quot;, &quot; +</span>
-<span class="fc" id="L281">                    &quot;spreadRadius=&quot;     + _toString(_spreadRadius) + &quot;, &quot; +</span>
-<span class="pc bpc" id="L282" title="1 of 2 branches missed.">                    &quot;color=&quot;            + StyleUtility.toString(_color) + &quot;, &quot; +</span>
+<span class="fc bfc" id="L297" title="All 2 branches covered.">        if ( this == _NONE )</span>
+<span class="fc" id="L298">            return &quot;ShadowStyle[NONE]&quot;;</span>
+<span class="fc" id="L299">        return &quot;ShadowStyle[&quot; +</span>
+<span class="fc" id="L300">                    &quot;horizontalOffset=&quot; + _toString(_offset.x()  ) + &quot;, &quot; +</span>
+<span class="fc" id="L301">                    &quot;verticalOffset=&quot;   + _toString(_offset.y()  ) + &quot;, &quot; +</span>
+<span class="fc" id="L302">                    &quot;blurRadius=&quot;       + _toString(_blurRadius  ) + &quot;, &quot; +</span>
+<span class="fc" id="L303">                    &quot;spreadRadius=&quot;     + _toString(_spreadRadius) + &quot;, &quot; +</span>
+<span class="pc bpc" id="L304" title="1 of 2 branches missed.">                    &quot;color=&quot;            + StyleUtility.toString(_color) + &quot;, &quot; +</span>
                     &quot;isInset=&quot;          + !_isOutset +
                 &quot;]&quot;;
     }
 
     private static String _toString( float value ) {
-<span class="pc bpc" id="L288" title="1 of 2 branches missed.">        return value == 0 ? &quot;0&quot; : String.valueOf(value).replace(&quot;.0&quot;, &quot;&quot;);</span>
+<span class="pc bpc" id="L310" title="1 of 2 branches missed.">        return value == 0 ? &quot;0&quot; : String.valueOf(value).replace(&quot;.0&quot;, &quot;&quot;);</span>
     }
 
     @Override
     public ShadowStyle simplified() {
-<span class="fc bfc" id="L293" title="All 2 branches covered.">        if ( this == _NONE )</span>
-<span class="fc" id="L294">            return _NONE;</span>
+<span class="fc bfc" id="L315" title="All 2 branches covered.">        if ( this == _NONE )</span>
+<span class="fc" id="L316">            return _NONE;</span>
 
-<span class="fc bfc" id="L296" title="All 4 branches covered.">        if ( _color == null || _color.getAlpha() == 0 )</span>
-<span class="fc" id="L297">            return _NONE;</span>
+<span class="fc bfc" id="L318" title="All 4 branches covered.">        if ( _color == null || _color.getAlpha() == 0 )</span>
+<span class="fc" id="L319">            return _NONE;</span>
 
-<span class="pc bpc" id="L299" title="1 of 2 branches missed.">        if ( _color == UI.COLOR_UNDEFINED)</span>
-<span class="nc" id="L300">            return _NONE;</span>
+<span class="pc bpc" id="L321" title="1 of 2 branches missed.">        if ( _color == UI.COLOR_UNDEFINED)</span>
+<span class="nc" id="L322">            return _NONE;</span>
 
-<span class="fc" id="L302">        return this;</span>
+<span class="fc" id="L324">        return this;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

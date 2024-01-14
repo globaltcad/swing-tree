@@ -24,27 +24,35 @@ final class Arc
      * @param arcHeight The height of the arc.
      * @return An {@link Arc} representing the 2 values.
      */
-<span class="fc" id="L27">    static Arc of( int arcWidth, int arcHeight ) { return new Arc( arcWidth, arcHeight ); }</span>
+    static Arc of( float arcWidth, float arcHeight ) {
+<span class="pc bpc" id="L28" title="3 of 4 branches missed.">        if ( arcWidth &lt; 0 &amp;&amp; arcHeight &lt; 0 )</span>
+<span class="nc" id="L29">            return _NONE;</span>
+<span class="fc" id="L30">        return new Arc( arcWidth, arcHeight );</span>
+    }
+
+    static Arc of( double arcWidth, double arcHeight ) {
+<span class="fc" id="L34">        return Arc.of( (float) arcWidth, (float) arcHeight );</span>
+    }
 
 
-    private final int _arcWidth;
-    private final int _arcHeight;
+    private final float _arcWidth;
+    private final float _arcHeight;
 
 
-<span class="fc" id="L34">    private Arc( int arcWidth, int arcHeight ) {</span>
-<span class="fc" id="L35">        _arcWidth  = Math.max(-1, arcWidth);</span>
-<span class="fc" id="L36">        _arcHeight = Math.max(-1, arcHeight);</span>
-<span class="fc" id="L37">    }</span>
+<span class="fc" id="L42">    private Arc( float arcWidth, float arcHeight ) {</span>
+<span class="fc" id="L43">        _arcWidth  = Math.max(-1, arcWidth);</span>
+<span class="fc" id="L44">        _arcHeight = Math.max(-1, arcHeight);</span>
+<span class="fc" id="L45">    }</span>
 
     /**
      * @return The width of the arc.
      */
-<span class="fc" id="L42">    public int width() { return _arcWidth; }</span>
+<span class="fc" id="L50">    public float width() { return _arcWidth; }</span>
 
     /**
      * @return The height of the arc.
      */
-<span class="fc" id="L47">    public int height() { return _arcHeight; }</span>
+<span class="fc" id="L55">    public float height() { return _arcHeight; }</span>
 
     /**
      *  Used to scale the arc, which is usually needed by the style engine
@@ -58,51 +66,58 @@ final class Arc
      * @return A new scaled {@link Arc}.
      */
     Arc scale( double scale ) {
-<span class="fc bfc" id="L61" title="All 2 branches covered.">        if ( this == _NONE )</span>
-<span class="fc" id="L62">            return _NONE;</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">        if ( this == _NONE )</span>
+<span class="fc" id="L70">            return _NONE;</span>
 
-<span class="fc" id="L64">        return Arc.of(</span>
-<span class="fc" id="L65">                    (int) Math.round( _arcWidth  * scale ),</span>
-<span class="fc" id="L66">                    (int) Math.round( _arcHeight * scale )</span>
-                );
+<span class="fc" id="L72">        return Arc.of(</span>
+                (float) (_arcWidth  * scale),
+                (float) (_arcHeight * scale)
+            );
     }
 
     Arc simplified() {
-<span class="fc bfc" id="L71" title="All 2 branches covered.">        if ( this == _NONE )</span>
-<span class="fc" id="L72">            return _NONE;</span>
+<span class="fc bfc" id="L79" title="All 2 branches covered.">        if ( this == _NONE )</span>
+<span class="fc" id="L80">            return _NONE;</span>
 
-<span class="fc bfc" id="L74" title="All 4 branches covered.">        if ( _arcWidth &lt; 1 || _arcHeight &lt; 1 )</span>
-<span class="fc" id="L75">            return _NONE;</span>
+<span class="fc bfc" id="L82" title="All 4 branches covered.">        if ( _arcWidth &lt;= 0 || _arcHeight &lt;= 0 )</span>
+<span class="fc" id="L83">            return _NONE;</span>
 
-<span class="fc" id="L77">        return this;</span>
+<span class="fc" id="L85">        return this;</span>
     }
 
     @Override
     public String toString() {
-<span class="nc bnc" id="L82" title="All 2 branches missed.">        if ( this == _NONE )</span>
-<span class="nc" id="L83">            return &quot;Arc[NONE]&quot;;</span>
-<span class="nc" id="L84">        return this.getClass().getSimpleName()+&quot;[&quot; +</span>
-                    &quot;arcWidth=&quot;  + _arcWidth  +&quot;, &quot;+
-                    &quot;arcHeight=&quot; + _arcHeight +
+<span class="nc bnc" id="L90" title="All 2 branches missed.">        if ( this == _NONE )</span>
+<span class="nc" id="L91">            return &quot;Arc[NONE]&quot;;</span>
+<span class="nc" id="L92">        return this.getClass().getSimpleName()+&quot;[&quot; +</span>
+<span class="nc" id="L93">                    &quot;arcWidth=&quot;  + _toString(_arcWidth ) + &quot;, &quot;+</span>
+<span class="nc" id="L94">                    &quot;arcHeight=&quot; + _toString(_arcHeight) +</span>
                 &quot;]&quot;;
+    }
+
+    static String _toString( float value ) {
+<span class="pc bpc" id="L99" title="1 of 2 branches missed.">        if ( value == -1 )</span>
+<span class="nc" id="L100">            return &quot;?&quot;;</span>
+        else
+<span class="fc" id="L102">            return String.valueOf(value).replace(&quot;.0&quot;, &quot;&quot;);</span>
     }
 
     @Override
     public int hashCode() {
-<span class="fc" id="L92">        int hash = 7;</span>
-<span class="fc" id="L93">        hash = 31 * hash + _arcWidth;</span>
-<span class="fc" id="L94">        hash = 31 * hash + _arcHeight;</span>
-<span class="fc" id="L95">        return hash;</span>
+<span class="fc" id="L107">        int hash = 7;</span>
+<span class="fc" id="L108">        hash = 31 * hash + Float.floatToIntBits(_arcWidth);</span>
+<span class="fc" id="L109">        hash = 31 * hash + Float.floatToIntBits(_arcHeight);</span>
+<span class="fc" id="L110">        return hash;</span>
     }
 
     @Override
     public boolean equals( Object obj ) {
-<span class="pc bpc" id="L100" title="1 of 2 branches missed.">        if ( obj == null ) return false;</span>
-<span class="pc bpc" id="L101" title="1 of 2 branches missed.">        if ( obj == this ) return true;</span>
-<span class="pc bpc" id="L102" title="1 of 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
+<span class="pc bpc" id="L115" title="1 of 2 branches missed.">        if ( obj == null ) return false;</span>
+<span class="pc bpc" id="L116" title="1 of 2 branches missed.">        if ( obj == this ) return true;</span>
+<span class="pc bpc" id="L117" title="1 of 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
 
-<span class="fc" id="L104">        Arc other = (Arc) obj;</span>
-<span class="pc bpc" id="L105" title="1 of 4 branches missed.">        return _arcWidth == other._arcWidth &amp;&amp; _arcHeight == other._arcHeight;</span>
+<span class="fc" id="L119">        Arc other = (Arc) obj;</span>
+<span class="pc bpc" id="L120" title="1 of 4 branches missed.">        return _arcWidth == other._arcWidth &amp;&amp; _arcHeight == other._arcHeight;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

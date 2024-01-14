@@ -5,8 +5,8 @@
   "subjects":[],
   "statistics":{
     "runs":"4",
-    "successRate":"75.0%",
-    "failures":"1",
+    "successRate":"100.0%",
+    "failures":"0",
     "errors":"0",
     "skipped":"0",
     "duration":"?"
@@ -36,25 +36,25 @@
   
     {
       "id":"An `onMouseClick` event style animation dispatched using the `animateStyleFor` method is only temporary.",
-      "result":"FAIL",
+      "result":"PASS",
       "duration":"?",
       "iterations":{
       "tags":{},"see":[],"extraInfo":["\n            The event delegate passed to the `onMouseClick` lambda exposes\n            a useful API for interacting with the component.\n            This includes the `animateStyleFor` method which allows you\n            to animate the style of the component for a given duration.\n            Once you apply a style animation to it, it will append the provided styler lambda\n            to the end of the style chain and then when the component is repainted,\n            it will temporarily change the component to support your animated style.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We create a simple `JLabel` UI component with a style animation.","code":["var ui = UI.label(\"Click me!\")","            .onMouseClick(it ->","                it.animateStyleFor(1, TimeUnit.MINUTES, (state, style) -> style","                    .borderWidthAt(UI.Edge.BOTTOM, (int) (12 * state.cycle()))","                    .borderColor(Color.BLACK)","                    .shadowColor(new Color(0, 100,200, (int) (255 * state.cycle())))","                    .shadowBlurRadius((int) (12 * state.cycle()))","                    .shadowIsInset(false)","                    .fontSize((int) (12 + 24 * state.cycle()))","                )","            )"]},
+        {"kind":"given","text":"We create a simple `JLabel` UI component with a style animation.","code":["var ui = UI.label(\"Click me!\")","            .onMouseClick(it ->","                it.animateStyleFor(1, TimeUnit.MINUTES, (state, style) -> style","                    .borderWidthAt(UI.Edge.BOTTOM, (int) (12 * state.cycle()))","                    .borderColor(Color.BLACK)","                    .shadowColor(new Color(0, 100,200, (int) (255 * state.cycle())))","                    .shadowBlurRadius((int) (12 * state.cycle()))","                    .shadowIsInset(false)","                    .fontSize((int) (22 + 14 * state.cycle()))","                )","            )"]},
 
         {"kind":"and","text":"We actually build the component:","code":["var label = ui.get(JLabel)"]},
 
-        {"kind":"expect","text":"\n            When the user clicks on the label, the border width of the label\n            will be animated from 0 to 10 over the course of 100 milliseconds\n            and the background color will be animated from transparent to orange.\n            But initially the label will not have any border or background color.\n            So let's check that.\n        ","code":["label.border == null","label.font.size < 15","label.getUI() instanceof MetalLabelUI"]},
+        {"kind":"expect","text":"\n            When the user clicks on the label, the border width of the label\n            will be animated from 0 to 10 over the course of 100 milliseconds\n            and the background color will be animated from transparent to orange.\n            But initially the label will not have any border or background color.\n            So let's check that.\n        ","code":["label.border == null","label.font.size <= 13","label.getUI() instanceof MetalLabelUI"]},
 
         {"kind":"when","text":"We simulate a user click event programmatically","code":["label.dispatchEvent(new MouseEvent(label, MouseEvent.MOUSE_CLICKED, System.currentTimeMillis(), 0, 0, 0, 1, false))","Thread.sleep(1_000)","UI.sync()","label.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
 
-        {"kind":"then","text":"The label will have a border and a background color.","code":["label.border != null","label.font.size > 15"]},
+        {"kind":"then","text":"The label will have a border and a background color.","code":["label.border != null","label.font.size > 13"]},
 
         {"kind":"and","text":"SwingTree will haver overridden the default label UI in order to support the shadow.","code":["!(label.getUI() instanceof MetalLabelUI)"]}
       ],
-      "problems":{"dataValues":["[]"], "errors":["[Condition not satisfied:\n\nlabel.font.size > 15\n|     |    |    |\n|     |    12   false\n|     java.awt.Font[family=Ubuntu,name=Ubuntu,style=plain,size=12]\nswingtree.UI$Label[,0,0,0x0,invalid,alignmentX=0.0,alignmentY=0.0,border=swingtree.style.StyleAndAnimationBorder@1c55449c,flags=8388608,maximumSize=,minimumSize=,preferredSize=,defaultIcon=,disabledIcon=,horizontalAlignment=LEADING,horizontalTextPosition=TRAILING,iconTextGap=4,labelFor=,text=Click me!,verticalAlignment=CENTER,verticalTextPosition=CENTER]\n]"]}
+      "problems":{"dataValues":[], "errors":[]}
     },
   
     {

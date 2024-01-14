@@ -155,12 +155,12 @@ import java.util.function.Consumer;
      * @return This very builder to allow for method chaining.
      */
     public I withIcon( ImageIcon icon, UI.FitComponent fitComponent ) {
-<span class="nc" id="L158">        NullUtil.nullArgCheck(icon,&quot;svgIcon&quot;, ImageIcon.class);</span>
-<span class="nc" id="L159">        NullUtil.nullArgCheck(fitComponent,&quot;fitComponent&quot;, UI.FitComponent.class);</span>
-<span class="nc bnc" id="L160" title="All 2 branches missed.">        if ( icon instanceof SvgIcon)</span>
+<span class="fc" id="L158">        NullUtil.nullArgCheck(icon,&quot;svgIcon&quot;, ImageIcon.class);</span>
+<span class="fc" id="L159">        NullUtil.nullArgCheck(fitComponent,&quot;fitComponent&quot;, UI.FitComponent.class);</span>
+<span class="pc bpc" id="L160" title="1 of 2 branches missed.">        if ( icon instanceof SvgIcon)</span>
         {
-<span class="nc" id="L162">            SvgIcon svgIcon = (SvgIcon) icon;</span>
-<span class="nc" id="L163">            return withIcon( svgIcon.withFitComponent(fitComponent) );</span>
+<span class="fc" id="L162">            SvgIcon svgIcon = (SvgIcon) icon;</span>
+<span class="fc" id="L163">            return withIcon( svgIcon.withFitComponent(fitComponent) );</span>
         }
         else
 <span class="nc" id="L166">            return _with( thisComponent -&gt; {</span>
@@ -178,11 +178,11 @@ import java.util.function.Consumer;
     }
 
     public I withIcon( IconDeclaration icon, UI.FitComponent fitComponent ) {
-<span class="nc" id="L181">        NullUtil.nullArgCheck(icon,&quot;icon&quot;, IconDeclaration.class);</span>
-<span class="nc" id="L182">        NullUtil.nullArgCheck(fitComponent,&quot;fitComponent&quot;, UI.FitComponent.class);</span>
-<span class="nc" id="L183">        return icon.find()</span>
-<span class="nc" id="L184">                   .map( i -&gt; withIcon(i, fitComponent) )</span>
-<span class="nc" id="L185">                   .orElseGet( this::_this );</span>
+<span class="fc" id="L181">        NullUtil.nullArgCheck(icon,&quot;icon&quot;, IconDeclaration.class);</span>
+<span class="fc" id="L182">        NullUtil.nullArgCheck(fitComponent,&quot;fitComponent&quot;, UI.FitComponent.class);</span>
+<span class="fc" id="L183">        return icon.find()</span>
+<span class="fc" id="L184">                   .map( i -&gt; withIcon(i, fitComponent) )</span>
+<span class="fc" id="L185">                   .orElseGet( this::_this );</span>
     }
 
     /**

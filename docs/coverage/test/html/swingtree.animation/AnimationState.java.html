@@ -45,7 +45,7 @@ public interface AnimationState
     }
 
     static AnimationState startOf( LifeSpan lifeSpan, Stride stride, ActionEvent event ) {
-<span class="nc" id="L48">        return of(lifeSpan, stride, event, lifeSpan.getStartTimeIn(TimeUnit.MILLISECONDS));</span>
+<span class="fc" id="L48">        return of(lifeSpan, stride, event, lifeSpan.getStartTimeIn(TimeUnit.MILLISECONDS));</span>
     }
 
 
@@ -73,7 +73,7 @@ public interface AnimationState
      *
      * @return The animation progress in terms of a number between 0 and 1, where 0.5 means the animation is halfway through.
      */
-<span class="nc" id="L76">    default double regress() { return 1 - progress(); }</span>
+<span class="fc" id="L76">    default double regress() { return 1 - progress(); }</span>
 
     /**
      *  The animation regression in the form of a value linearly growing from {@code start} to {@code end}.
