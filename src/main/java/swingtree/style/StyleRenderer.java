@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import swingtree.UI;
 import swingtree.api.Painter;
 import swingtree.layout.Bounds;
+import swingtree.layout.Size;
 
 import java.awt.*;
 import java.awt.geom.*;
@@ -56,7 +57,7 @@ final class StyleRenderer
         // 1. A grounding serving as a base background, which is a filled color and/or an image:
         for ( ImageStyle imageStyle : conf.style().images(layer) )
             if ( !imageStyle.equals(ImageStyle.none()) )
-                _renderImage( conf, imageStyle, conf.currentBounds(), g2d);
+                _renderImage( conf, imageStyle, conf.currentBounds().size(), g2d);
 
         // 2. Gradients, which are best used to give a component a nice surface lighting effect.
         // They may transition vertically, horizontally or diagonally over various different colors:
@@ -67,9 +68,9 @@ final class StyleRenderer
                     g2d.fill(conf.get(UI.ComponentArea.BODY));
                 }
                 else if ( gradient.transition().isDiagonal() )
-                    _renderDiagonalGradient(g2d, conf.currentBounds(), conf.style().margin(), gradient, conf.get(UI.ComponentArea.BODY));
+                    _renderDiagonalGradient(g2d, conf.currentBounds().size(), conf.style().margin(), gradient, conf.get(UI.ComponentArea.BODY));
                 else
-                    _renderVerticalOrHorizontalGradient(g2d, conf.currentBounds(), conf.style().margin(), gradient, conf.get(UI.ComponentArea.BODY));
+                    _renderVerticalOrHorizontalGradient(g2d, conf.currentBounds().size(), conf.style().margin(), gradient, conf.get(UI.ComponentArea.BODY));
             }
 
         // 3. Shadows, which are simple gradient based drop shadows that can go inwards or outwards
@@ -134,9 +135,9 @@ final class StyleRenderer
                     for ( GradientStyle gradient : conf.style().border().gradients() ) {
                         if ( gradient.colors().length > 0 ) {
                             if ( gradient.transition().isDiagonal() )
-                                _renderDiagonalGradient(g2d, conf.currentBounds(), conf.style().margin(), gradient, borderArea);
+                                _renderDiagonalGradient(g2d, conf.currentBounds().size(), conf.style().margin(), gradient, borderArea);
                             else
-                                _renderVerticalOrHorizontalGradient(g2d, conf.currentBounds(), conf.style().margin(), gradient, borderArea);
+                                _renderVerticalOrHorizontalGradient(g2d, conf.currentBounds().size(), conf.style().margin(), gradient, borderArea);
                         }
                     }
                 }
@@ -163,7 +164,7 @@ final class StyleRenderer
 
         Color shadowColor = shadow.color().orElse(Color.BLACK);
         Style style       = conf.style();
-        Bounds bounds     = conf.currentBounds();
+        Size  size        = conf.currentBounds().size();
 
         // First let's check if we need to render any shadows at all
         // Is the shadow color transparent?
@@ -184,8 +185,8 @@ final class StyleRenderer
         final float bottomRightRadius = Math.max(style.border().bottomRightRadius(), 0);
         final float bottomLeftRadius  = Math.max(style.border().bottomLeftRadius(), 0);
 
-        final float width     = bounds.size().width().orElse(0f);
-        final float height    = bounds.size().height().orElse(0f);
+        final float width     = size.width().orElse(0f);
+        final float height    = size.height().orElse(0f);
 
         // Calculate the shadow box bounds based on the padding and border thickness
         final float x = left + shadow.horizontalOffset();
@@ -576,20 +577,20 @@ final class StyleRenderer
      *  Renders a shade from the top left corner to the bottom right corner.
      *
      * @param g2d The graphics object to render to.
-     * @param bounds The bounds of the component.
+     * @param componentSize The width and height of the component
      * @param margin The margin of the component.
      * @param gradient The shade to render.
      */
     private static void _renderDiagonalGradient(
         Graphics2D    g2d,
-        Bounds        bounds,
+        Size          componentSize,
         Outline       margin,
         GradientStyle gradient,
         Area          specificArea
     ) {
         Color[] colors = gradient.colors();
         UI.Transition type = gradient.transition();
-        Dimension size = bounds.size().toDimension();
+        Dimension size = componentSize.toDimension();
         size.width  -= (margin.right().orElse(0f).intValue() + margin.left().orElse(0f).intValue());
         size.height -= (margin.bottom().orElse(0f).intValue() + margin.top().orElse(0f).intValue());
         int width  = size.width;
@@ -732,14 +733,14 @@ final class StyleRenderer
 
     private static void _renderVerticalOrHorizontalGradient(
         Graphics2D    g2d,
-        Bounds        bounds,
+        Size          componentSize,
         Outline       margin,
         GradientStyle gradient,
         Area          specificArea
     ) {
         UI.Transition type = gradient.transition();
         Color[] colors = gradient.colors();
-        Dimension size = bounds.size().toDimension();
+        Dimension size = componentSize.toDimension();
         size.width  -= (margin.right().orElse(0f).intValue() + margin.left().orElse(0f).intValue());
         size.height -= (margin.bottom().orElse(0f).intValue() + margin.top().orElse(0f).intValue());
         int width  = size.width;
@@ -816,7 +817,7 @@ final class StyleRenderer
     private static void _renderImage(
         ComponentConf conf,
         ImageStyle  style,
-        Bounds      bounds,
+        Size        componentSize,
         Graphics2D  g2d
     ) {
         if ( style.primer().isPresent() ) {
@@ -827,8 +828,8 @@ final class StyleRenderer
         style.image().ifPresent( imageIcon -> {
             final UI.Placement placement       = style.placement();
             final Outline      padding         = style.padding();
-            final int          componentWidth  = bounds.size().width().orElse(0f).intValue();
-            final int          componentHeight = bounds.size().height().orElse(0f).intValue();
+            final int          componentWidth  = componentSize.width().orElse(0f).intValue();
+            final int          componentHeight = componentSize.height().orElse(0f).intValue();
 
             int imgWidth  = style.width().orElse(imageIcon.getIconWidth());
             int imgHeight = style.height().orElse(imageIcon.getIconHeight());
