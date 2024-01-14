@@ -165,7 +165,10 @@ final class LayerCache
         if ( !_localCache.isRendered() ) {
             Graphics2D g2 = _localCache.createGraphics();
             try {
+                g2.setFont(g.getFont());
+                g2.setColor(g.getColor());
                 g2.setBackground(g.getBackground());
+                g2.setComposite(g.getComposite());
                 g2.setClip(null); // We want to capture the full style and clip it later (see g.drawImage(_cache, 0, 0, null); below.
                 g2.setComposite(g.getComposite());
                 g2.setPaint(g.getPaint());
