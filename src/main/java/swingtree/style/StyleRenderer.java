@@ -826,6 +826,7 @@ final class StyleRenderer
         }
 
         style.image().ifPresent( imageIcon -> {
+            final UI.FitComponent fit          = style.fitMode();
             final UI.Placement placement       = style.placement();
             final Outline      padding         = style.padding();
             final int          componentWidth  = componentSize.width().orElse(0f).intValue();
@@ -834,39 +835,27 @@ final class StyleRenderer
             int imgWidth  = style.width().orElse(imageIcon.getIconWidth());
             int imgHeight = style.height().orElse(imageIcon.getIconHeight());
 
-            if ( style.fitMode() != UI.FitComponent.NO ) {
+            if ( fit != UI.FitComponent.NO ) {
                 if ( imageIcon instanceof SvgIcon) {
                     imgWidth  = style.width().orElse(componentWidth);
                     imgHeight = style.height().orElse(componentHeight);
                 } else {
-                    if ( style.fitMode() == UI.FitComponent.WIDTH_AND_HEIGHT ) {
+                    if ( fit == UI.FitComponent.WIDTH_AND_HEIGHT ) {
                         imgWidth  = style.width().orElse(componentWidth);
                         imgHeight = style.height().orElse(componentHeight);
                     }
-                    if ( style.fitMode() == UI.FitComponent.WIDTH )
+                    if (
+                        fit == UI.FitComponent.WIDTH ||
+                        (fit == UI.FitComponent.MAX_DIM && componentWidth > componentHeight)  ||
+                        (fit == UI.FitComponent.MIN_DIM && componentWidth < componentHeight )
+                    ) {
                         imgWidth = style.width().orElse(componentWidth);
-                    if ( style.fitMode() == UI.FitComponent.HEIGHT )
+                    } if (
+                        fit == UI.FitComponent.HEIGHT ||
+                        (fit == UI.FitComponent.MAX_DIM && componentWidth < componentHeight) ||
+                        (fit == UI.FitComponent.MIN_DIM && componentWidth > componentHeight )
+                    ) {
                         imgHeight = style.height().orElse(componentHeight);
-
-                    if ( style.fitMode() == UI.FitComponent.MAX_DIM ) {
-                        if ( componentWidth > componentHeight ) {
-                            imgWidth = style.width().orElse(componentWidth);
-                        } else if ( componentWidth < componentHeight ) {
-                            imgHeight = style.height().orElse(componentHeight);
-                        } else {
-                            imgWidth  = style.width().orElse(componentWidth);
-                            imgHeight = style.height().orElse(componentHeight);
-                        }
-                    }
-                    if ( style.fitMode() == UI.FitComponent.MIN_DIM ) {
-                        if ( componentWidth < componentHeight ) {
-                            imgWidth = style.width().orElse(componentWidth);
-                        } else if ( componentWidth > componentHeight ) {
-                            imgHeight = style.height().orElse(componentHeight);
-                        } else {
-                            imgWidth  = style.width().orElse(componentWidth);
-                            imgHeight = style.height().orElse(componentHeight);
-                        }
                     }
                 }
                 imgWidth  = imgWidth  >= 0 ? imgWidth  : componentWidth;
@@ -942,7 +931,7 @@ final class StyleRenderer
             g2d.setClip(newClip);
 
             if ( !repeat && imageIcon instanceof SvgIcon ) {
-                SvgIcon svgIcon = ((SvgIcon) imageIcon).withFitComponent(style.fitMode());
+                SvgIcon svgIcon = ((SvgIcon) imageIcon).withFitComponent(fit);
                 svgIcon.withPreferredPlacement(UI.Placement.CENTER)
                         .paintIcon(null, g2d, x, y, imgWidth, imgHeight);
             }
