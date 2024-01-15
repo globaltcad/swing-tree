@@ -590,11 +590,12 @@ final class StyleRenderer
     ) {
         Color[] colors = gradient.colors();
         UI.Transition type = gradient.transition();
-        Dimension size = componentSize.toDimension();
-        float width  = size.width  - ( margin.right().orElse(0f)  + margin.left().orElse(0f) );
-        float height = size.height - ( margin.bottom().orElse(0f) + margin.top().orElse(0f) );
+        Dimension dimensions = componentSize.toDimension();
+        float width  = dimensions.width  - ( margin.right().orElse(0f)  + margin.left().orElse(0f) );
+        float height = dimensions.height - ( margin.bottom().orElse(0f) + margin.top().orElse(0f) );
         float realX  = margin.left().orElse(0f) + gradient.offset().x();
         float realY  = margin.top().orElse(0f)  + gradient.offset().y();
+        float size   = gradient.size();
 
         float corner1X;
         float corner1Y;
@@ -668,10 +669,16 @@ final class StyleRenderer
                 startCornerX = corner2X;
                 startCornerY = corner2Y;
             }
-            float radius = (float) Math.sqrt(
-                                           (diagonalCenterX - startCornerX) * (diagonalCenterX - startCornerX) +
-                                           (diagonalCenterY - startCornerY) * (diagonalCenterY - startCornerY)
-                                       );
+            float radius;
+
+            if ( size < 0 )
+                radius = (float) Math.sqrt(
+                                     (diagonalCenterX - startCornerX) * (diagonalCenterX - startCornerX) +
+                                     (diagonalCenterY - startCornerY) * (diagonalCenterY - startCornerY)
+                                 );
+            else
+                radius = size;
+
             if ( colors.length == 2 )
                 g2d.setPaint(new RadialGradientPaint(
                         new Point2D.Float(startCornerX, startCornerY),
@@ -714,6 +721,16 @@ final class StyleRenderer
             float gradientEndX   = (diagonalCenterX + nVector2X * distance2);
             float gradientEndY   = (diagonalCenterY + nVector2Y * distance2);
 
+            if ( size >= 0 ) {
+                float vectorX = gradientEndX - gradientStartX;
+                float vectorY = gradientEndY - gradientStartY;
+                float vectorLength2 = (float) Math.sqrt(vectorX * vectorX + vectorY * vectorY);
+                vectorX = (vectorX / vectorLength2);
+                vectorY = (vectorY / vectorLength2);
+                gradientEndX = gradientStartX + vectorX * size;
+                gradientEndY = gradientStartY + vectorY * size;
+            }
+
             if ( colors.length == 2 )
                 g2d.setPaint(new GradientPaint(
                                 gradientStartX, gradientStartY, colors[0],
@@ -738,11 +755,12 @@ final class StyleRenderer
     ) {
         UI.Transition type = gradient.transition();
         Color[] colors = gradient.colors();
-        Dimension size = componentSize.toDimension();
-        float width  = size.width  - ( margin.right().orElse(0f)  + margin.left().orElse(0f) );
-        float height = size.height - ( margin.bottom().orElse(0f) + margin.top().orElse(0f)  );
+        Dimension dimensions = componentSize.toDimension();
+        float width  = dimensions.width  - ( margin.right().orElse(0f)  + margin.left().orElse(0f) );
+        float height = dimensions.height - ( margin.bottom().orElse(0f) + margin.top().orElse(0f)  );
         float realX  = margin.left().orElse(0f) + gradient.offset().x();
         float realY  = margin.top().orElse(0f)  + gradient.offset().y();
+        float size   = gradient.size();
 
         float corner1X;
         float corner1Y;
@@ -772,19 +790,52 @@ final class StyleRenderer
         }
         else throw new IllegalArgumentException("Unknown gradient alignment: " + type);
 
-        if ( colors.length == 2 )
-            g2d.setPaint(
-                    new GradientPaint(
-                            corner1X, corner1Y, colors[0],
-                            corner2X, corner2Y, colors[1]
+        if ( gradient.type() == UI.GradientType.LINEAR ) {
+            if ( size >= 0 ) {
+                float vectorX = corner2X - corner1X;
+                float vectorY = corner2Y - corner1Y;
+                float vectorLength = (float) Math.sqrt(vectorX * vectorX + vectorY * vectorY);
+                vectorX = (vectorX / vectorLength);
+                vectorY = (vectorY / vectorLength);
+                corner2X = corner1X + vectorX * size;
+                corner2Y = corner1Y + vectorY * size;
+            }
+        }
+
+        float radius = size;
+
+        if ( gradient.type() == UI.GradientType.RADIAL ) {
+            if ( size < 0 )
+                radius = (float) Math.sqrt(
+                                        (corner2X - corner1X) * (corner2X - corner1X) +
+                                        (corner2Y - corner1Y) * (corner2Y - corner1Y)
+                                    );
+        }
+
+        if ( colors.length == 2 ) {
+            if ( gradient.type() == UI.GradientType.LINEAR ) {
+                g2d.setPaint(
+                        new GradientPaint(
+                                corner1X, corner1Y, colors[0],
+                                corner2X, corner2Y, colors[1]
                         )
                 );
-        else {
+            } else if ( gradient.type() == UI.GradientType.RADIAL ) {
+                g2d.setPaint(new RadialGradientPaint(
+                                new Point2D.Float(corner1X, corner1Y),
+                                radius,
+                                new float[] {0f, 1f},
+                                colors
+                            ));
+            }
+            else
+                throw new IllegalArgumentException("Invalid gradient type: " + gradient.type());
+        } else {
             float[] fractions = new float[colors.length];
             for ( int i = 0; i < colors.length; i++ )
                 fractions[i] = (float) i / (float) (colors.length - 1);
 
-            if ( gradient.type() == UI.GradientType.LINEAR )
+            if ( gradient.type() == UI.GradientType.LINEAR ) {
                 g2d.setPaint(
                     new LinearGradientPaint(
                             corner1X, corner1Y,
@@ -792,11 +843,7 @@ final class StyleRenderer
                             fractions, colors
                         )
                 );
-            else if ( gradient.type() == UI.GradientType.RADIAL ) {
-                float radius = (float) Math.sqrt(
-                                            (corner2X - corner1X) * (corner2X - corner1X) +
-                                            (corner2Y - corner1Y) * (corner2Y - corner1Y)
-                                        );
+            } else if ( gradient.type() == UI.GradientType.RADIAL ) {
                 g2d.setPaint(new RadialGradientPaint(
                                 new Point2D.Float(corner1X, corner1Y),
                                 radius,
