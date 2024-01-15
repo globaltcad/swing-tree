@@ -591,10 +591,8 @@ final class StyleRenderer
         Color[] colors = gradient.colors();
         UI.Transition type = gradient.transition();
         Dimension size = componentSize.toDimension();
-        float width  = size.width;
-        float height = size.height;
-        width  -= ( margin.right().orElse(0f)  + margin.left().orElse(0f) );
-        height -= ( margin.bottom().orElse(0f) + margin.top().orElse(0f) );
+        float width  = size.width  - ( margin.right().orElse(0f)  + margin.left().orElse(0f) );
+        float height = size.height - ( margin.bottom().orElse(0f) + margin.top().orElse(0f) );
         float realX = margin.left().orElse(0f);
         float realY = margin.top().orElse(0f);
 
@@ -671,9 +669,9 @@ final class StyleRenderer
                 startCornerY = corner2Y;
             }
             float radius = (float) Math.sqrt(
-                                                (diagonalCenterX - startCornerX) * (diagonalCenterX - startCornerX) +
-                                                (diagonalCenterY - startCornerY) * (diagonalCenterY - startCornerY)
-                                            );
+                                           (diagonalCenterX - startCornerX) * (diagonalCenterX - startCornerX) +
+                                           (diagonalCenterY - startCornerY) * (diagonalCenterY - startCornerY)
+                                       );
             if ( colors.length == 2 )
                 g2d.setPaint(new RadialGradientPaint(
                         new Point2D.Float(startCornerX, startCornerY),
@@ -690,31 +688,31 @@ final class StyleRenderer
                         MultipleGradientPaint.CycleMethod.NO_CYCLE
                     ));
         } else if ( gradient.type() == UI.GradientType.LINEAR ) {
-            double vector1X = diagonalCorner1X - diagonalCenterX;
-            double vector1Y = diagonalCorner1Y - diagonalCenterY;
-            double vector2X = diagonalCorner2X - diagonalCenterX;
-            double vector2Y = diagonalCorner2Y - diagonalCenterY;
+            float vector1X = diagonalCorner1X - diagonalCenterX;
+            float vector1Y = diagonalCorner1Y - diagonalCenterY;
+            float vector2X = diagonalCorner2X - diagonalCenterX;
+            float vector2Y = diagonalCorner2Y - diagonalCenterY;
 
-            double vectorLength = Math.sqrt(vector1X * vector1X + vector1Y * vector1Y);
+            float vectorLength = (float) Math.sqrt(vector1X * vector1X + vector1Y * vector1Y);
             vector1X = (vector1X / vectorLength);
             vector1Y = (vector1Y / vectorLength);
 
-            vectorLength = Math.sqrt(vector2X * vector2X + vector2Y * vector2Y);
+            vectorLength = (float) Math.sqrt(vector2X * vector2X + vector2Y * vector2Y);
             vector2X = (vector2X / vectorLength);
             vector2Y = (vector2Y / vectorLength);
 
-            double nVector1X = -vector1Y;
-            double nVector1Y =  vector1X;
-            double nVector2X = -vector2Y;
-            double nVector2Y =  vector2X;
+            float nVector1X = -vector1Y;
+            float nVector1Y =  vector1X;
+            float nVector2X = -vector2Y;
+            float nVector2Y =  vector2X;
 
-            double distance1 = (corner1X - diagonalCenterX) * nVector1X + (corner1Y - diagonalCenterY) * nVector1Y;
-            double distance2 = (corner2X - diagonalCenterX) * nVector2X + (corner2Y - diagonalCenterY) * nVector2Y;
+            float distance1 = (corner1X - diagonalCenterX) * nVector1X + (corner1Y - diagonalCenterY) * nVector1Y;
+            float distance2 = (corner2X - diagonalCenterX) * nVector2X + (corner2Y - diagonalCenterY) * nVector2Y;
 
-            float gradientStartX = (int) (diagonalCenterX + nVector1X * distance1);
-            float gradientStartY = (int) (diagonalCenterY + nVector1Y * distance1);
-            float gradientEndX = (int) (diagonalCenterX + nVector2X * distance2);
-            float gradientEndY = (int) (diagonalCenterY + nVector2Y * distance2);
+            float gradientStartX = (diagonalCenterX + nVector1X * distance1);
+            float gradientStartY = (diagonalCenterY + nVector1Y * distance1);
+            float gradientEndX   = (diagonalCenterX + nVector2X * distance2);
+            float gradientEndY   = (diagonalCenterY + nVector2Y * distance2);
 
             if ( colors.length == 2 )
                 g2d.setPaint(new GradientPaint(
@@ -741,17 +739,15 @@ final class StyleRenderer
         UI.Transition type = gradient.transition();
         Color[] colors = gradient.colors();
         Dimension size = componentSize.toDimension();
-        size.width  -= (margin.right().orElse(0f).intValue() + margin.left().orElse(0f).intValue());
-        size.height -= (margin.bottom().orElse(0f).intValue() + margin.top().orElse(0f).intValue());
-        int width  = size.width;
-        int height = size.height;
-        int realX = margin.left().orElse(0f).intValue();
-        int realY = margin.top().orElse(0f).intValue();
+        float width  = size.width  - ( margin.right().orElse(0f)  + margin.left().orElse(0f) );
+        float height = size.height - ( margin.bottom().orElse(0f) + margin.top().orElse(0f)  );
+        float realX = margin.left().orElse(0f);
+        float realY = margin.top().orElse(0f);
 
-        int corner1X;
-        int corner1Y;
-        int corner2X;
-        int corner2Y;
+        float corner1X;
+        float corner1Y;
+        float corner2X;
+        float corner2Y;
 
         if ( type == UI.Transition.TOP_TO_BOTTOM ) {
             corner1X = realX;
