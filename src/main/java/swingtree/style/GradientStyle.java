@@ -51,6 +51,12 @@ import java.util.function.Function;
  *          An array of colors that will be used
  *          as a basis for the gradient transition.
  *      </li>
+ *      <li><h3>Offset</h3>
+ *          The offset defines the start position of the gradient
+ *          on the x and y axis.
+ *          This property, together with the {@link #transition(UI.Transition)}
+ *          property, defines the start position and direction of the gradient.
+ *      </li>
  *  </ul>
  *  <p>
  *  You can also use the {@link #none()} method to specify that no gradient should be used,
@@ -180,6 +186,10 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
     }
 
     /**
+     *  Define the offset of the gradient which is the start position of the gradient
+     *  on the x and y-axis. <br>
+     *  Note that the offset is relative to the component that the gradient is applied to.
+     *  <p>
      * @param x The gradient start offset on the x-axis.
      * @param y The gradient start offset on the y-axis.
      * @return A new gradient style with the specified offset.
@@ -195,8 +205,9 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
         return getClass().getSimpleName() + "[" +
                     "transition=" + _transition + ", " +
                     "type="       + _type + ", " +
-                    "colors="     + Arrays.toString(_colors) +
-                ']';
+                    "colors="     + Arrays.toString(_colors) + ", " +
+                    "offset="     + _offset +
+                "]";
     }
 
     @Override
@@ -206,12 +217,13 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
         GradientStyle that = (GradientStyle) o;
         return _transition == that._transition       &&
                _type       == that._type             &&
-               Arrays.equals(_colors, that._colors);
+               Arrays.equals(_colors, that._colors)  &&
+               Objects.equals(_offset, that._offset);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(_transition, _type, Arrays.hashCode(_colors));
+        return Objects.hash(_transition, _type, Arrays.hashCode(_colors), _offset);
     }
 
     @Override

@@ -593,8 +593,8 @@ final class StyleRenderer
         Dimension size = componentSize.toDimension();
         float width  = size.width  - ( margin.right().orElse(0f)  + margin.left().orElse(0f) );
         float height = size.height - ( margin.bottom().orElse(0f) + margin.top().orElse(0f) );
-        float realX = margin.left().orElse(0f);
-        float realY = margin.top().orElse(0f);
+        float realX  = margin.left().orElse(0f) + gradient.offset().x();
+        float realY  = margin.top().orElse(0f)  + gradient.offset().y();
 
         float corner1X;
         float corner1Y;
@@ -741,8 +741,8 @@ final class StyleRenderer
         Dimension size = componentSize.toDimension();
         float width  = size.width  - ( margin.right().orElse(0f)  + margin.left().orElse(0f) );
         float height = size.height - ( margin.bottom().orElse(0f) + margin.top().orElse(0f)  );
-        float realX = margin.left().orElse(0f);
-        float realY = margin.top().orElse(0f);
+        float realX  = margin.left().orElse(0f) + gradient.offset().x();
+        float realY  = margin.top().orElse(0f)  + gradient.offset().y();
 
         float corner1X;
         float corner1Y;

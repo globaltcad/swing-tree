@@ -19,6 +19,10 @@ final class Offset
         return new Offset(x, y);
     }
 
+    public static Offset of( double x, double y ) {
+        return Offset.of((float) x, (float) y);
+    }
+
 
     private final float _x;
     private final float _y;

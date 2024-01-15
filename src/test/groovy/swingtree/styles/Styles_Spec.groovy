@@ -349,10 +349,10 @@ class Styles_Spec extends Specification
                                                         "type=RADIAL, " +
                                                         "colors=[java.awt.Color[r=255,g=0,b=0], " +
                                                         "java.awt.Color[r=0,g=255,b=0], " +
-                                                        "java.awt.Color[r=0,g=0,b=255]" +
+                                                        "java.awt.Color[r=0,g=0,b=255]], " +
+                                                        "offset=Offset[x=0, y=0]" +
                                                     "]" +
-                                                "]" +
-                                            "], " +
+                                                "], " +
                                             "images=ImageStyle[NONE]" +
                                         "], " +
                                         "foreground=StyleLayer[EMPTY]" +
