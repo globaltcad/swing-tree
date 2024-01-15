@@ -2,6 +2,7 @@ package swingtree.style;
 
 import org.slf4j.Logger;
 import swingtree.UI;
+import swingtree.layout.Location;
 
 import java.awt.*;
 import java.util.Arrays;
@@ -64,7 +65,8 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
     private static final GradientStyle _NONE = new GradientStyle(
                                                         UI.Transition.TOP_TO_BOTTOM,
                                                         UI.GradientType.LINEAR,
-                                                        new Color[0]
+                                                        new Color[0],
+                                                        Offset.none()
                                                     );
 
     /**
@@ -79,13 +81,15 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
     private final UI.Transition   _transition;
     private final UI.GradientType _type;
     private final Color[]         _colors;
+    private final Offset         _offset;
 
 
-    private GradientStyle( UI.Transition transition, UI.GradientType type, Color[] colors )
+    private GradientStyle( UI.Transition transition, UI.GradientType type, Color[] colors, Offset offset )
     {
         _transition = Objects.requireNonNull(transition);
         _type       = Objects.requireNonNull(type);
         _colors     = Objects.requireNonNull(colors);
+        _offset     = Objects.requireNonNull(offset);
     }
 
     UI.Transition transition() { return _transition; }
@@ -93,6 +97,8 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
     UI.GradientType type() { return _type; }
 
     Color[] colors() { return _colors; }
+
+    Offset offset() { return _offset; }
 
     /**
      *  Define a list of colors which will, as part of the gradient, transition from one
@@ -108,7 +114,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
         Objects.requireNonNull(colors);
         for ( Color color : colors )
             Objects.requireNonNull(color, "Use UI.COLOR_UNDEFINED instead of null to represent the absence of a color.");
-        return new GradientStyle(_transition, _type, colors);
+        return new GradientStyle(_transition, _type, colors, _offset);
     }
 
     /**
@@ -128,7 +134,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
             for ( int i = 0; i < colors.length; i++ )
                 actualColors[i] = UI.color(colors[i]);
 
-            return new GradientStyle(_transition, _type, actualColors);
+            return new GradientStyle(_transition, _type, actualColors, _offset);
         } catch ( Exception e ) {
             log.error("Failed to parse color strings: " + Arrays.toString(colors), e);
             return this; // We want to avoid side effects other than a wrong color
@@ -154,7 +160,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
      */
     public GradientStyle transition( UI.Transition transition ) {
         Objects.requireNonNull(transition);
-        return new GradientStyle(transition, _type, _colors);
+        return new GradientStyle(transition, _type, _colors, _offset);
     }
 
     /**
@@ -170,7 +176,16 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
      */
     public GradientStyle type( UI.GradientType type ) {
         Objects.requireNonNull(type);
-        return new GradientStyle(_transition, type, _colors);
+        return new GradientStyle(_transition, type, _colors, _offset);
+    }
+
+    /**
+     * @param x The gradient start offset on the x-axis.
+     * @param y The gradient start offset on the y-axis.
+     * @return A new gradient style with the specified offset.
+     */
+    public GradientStyle offset( double x, double y ) {
+        return new GradientStyle(_transition, _type, _colors, Offset.of(x,y));
     }
 
     @Override
@@ -222,7 +237,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
                 if ( color != UI.COLOR_UNDEFINED)
                     realColors[index++] = color;
 
-            return new GradientStyle(_transition, _type, realColors);
+            return new GradientStyle(_transition, _type, realColors, _offset);
         }
 
         return this;
