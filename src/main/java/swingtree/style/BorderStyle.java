@@ -2,11 +2,9 @@ package swingtree.style;
 
 import swingtree.UI;
 
-import java.awt.*;
-import java.util.*;
-import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.awt.Color;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  *  An immutable config container for border styles that is part of
@@ -24,9 +22,8 @@ final class BorderStyle
                                                 Outline.none(),
                                                 Outline.none(),
                                                 Outline.none(),
-                                                null,
-                                                StyleLayer._NO_GRADIENTS
-                                            );
+                                                null
+    );
 
     public static BorderStyle none() { return _NONE; }
 
@@ -38,8 +35,7 @@ final class BorderStyle
         Outline borderWidths,
         Outline margin,
         Outline padding,
-        Color   borderColor,
-        NamedStyles<GradientStyle> gradients
+        Color   borderColor
     ) {
         if ( topLeftArc      == Arc.none() &&
              topRightArc     == Arc.none() &&
@@ -48,12 +44,11 @@ final class BorderStyle
              borderWidths    == Outline.none() &&
              margin          == Outline.none() &&
              padding         == Outline.none() &&
-             borderColor     == null &&
-             gradients       == StyleLayer._NO_GRADIENTS
+             borderColor     == null
         )
             return _NONE;
         else
-            return new BorderStyle(topLeftArc, topRightArc, bottomLeftArc, bottomRightArc, borderWidths, margin, padding, borderColor, gradients);
+            return new BorderStyle(topLeftArc, topRightArc, bottomLeftArc, bottomRightArc, borderWidths, margin, padding, borderColor);
     }
 
 
@@ -67,7 +62,6 @@ final class BorderStyle
     private final Outline _padding;
 
     private final Color _borderColor;
-    private final NamedStyles<GradientStyle> _gradients;
 
 
     private BorderStyle(
@@ -78,8 +72,7 @@ final class BorderStyle
         Outline borderWidths,
         Outline margin,
         Outline padding,
-        Color   borderColor,
-        NamedStyles<GradientStyle> gradients
+        Color   borderColor
     ) {
         _topLeftArc      = topLeftArc;
         _topRightArc     = topRightArc;
@@ -89,7 +82,6 @@ final class BorderStyle
         _margin          = Objects.requireNonNull(margin);
         _padding         = Objects.requireNonNull(padding);
         _borderColor     = borderColor;
-        _gradients       = Objects.requireNonNull(gradients);
     }
 
     public Optional<Arc> topLeftArc() { return _topLeftArc == Arc.none() ? Optional.empty() : Optional.of(_topLeftArc); }
@@ -123,56 +115,22 @@ final class BorderStyle
 
     public Optional<Color> color() { return Optional.ofNullable(_borderColor); }
 
-    public GradientStyle gradient() {
-        return gradient(StyleUtility.DEFAULT_KEY);
-    }
-
-    public GradientStyle gradient( String shadeName ) {
-        Objects.requireNonNull(shadeName);
-        return Optional.ofNullable(_gradients.get(shadeName)).orElse(GradientStyle.none());
-    }
-
-    /**
-     * @return A list of all named gradient styles sorted by their name.
-     */
-    public List<GradientStyle> gradients() {
-        return Collections.unmodifiableList(
-                _gradients.namedStyles()
-                            .stream()
-                            .sorted(Comparator.comparing(NamedStyle::name))
-                            .map(NamedStyle::style)
-                            .collect(Collectors.toList())
-            );
-    }
-
-    BorderStyle withGradients( NamedStyles<GradientStyle> gradients ) {
-        Objects.requireNonNull(gradients);
-        return BorderStyle.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _borderColor, gradients);
-    }
-
-    public BorderStyle withGradient( String gradientName, Function<GradientStyle, GradientStyle> styler ) {
-        Objects.requireNonNull(gradientName);
-        Objects.requireNonNull(styler);
-        GradientStyle shadow = Optional.ofNullable(_gradients.get(gradientName)).orElse(GradientStyle.none());
-        return withGradients(_gradients.withNamedStyle(gradientName, styler.apply(shadow)));
-    }
-
     BorderStyle withWidths( Outline borderWidths ) {
         if ( borderWidths == _borderWidths )
             return this;
-        return BorderStyle.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, borderWidths, _margin, _padding, _borderColor, _gradients);
+        return BorderStyle.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, borderWidths, _margin, _padding, _borderColor);
     }
 
     BorderStyle withMargin( Outline margin ) {
         if ( margin == _margin )
             return this;
-        return BorderStyle.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, margin, _padding, _borderColor, _gradients);
+        return BorderStyle.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, margin, _padding, _borderColor);
     }
 
     BorderStyle withPadding( Outline padding ) {
         if ( padding == _padding )
             return this;
-        return BorderStyle.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, padding, _borderColor, _gradients);
+        return BorderStyle.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, padding, _borderColor);
     }
 
     BorderStyle withArcWidthAt( UI.Corner corner, double borderArcWidth ) {
@@ -182,16 +140,16 @@ final class BorderStyle
         switch ( corner ) {
             case TOP_LEFT:
                 arcHeight = _topLeftArc != Arc.none() ? _topLeftArc.height() : 0;
-                return BorderStyle.of(Arc.of(borderArcWidth, arcHeight), _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _borderColor, _gradients);
+                return BorderStyle.of(Arc.of(borderArcWidth, arcHeight), _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _borderColor);
             case TOP_RIGHT:
                 arcHeight = _topRightArc != Arc.none() ? _topRightArc.height() : 0;
-                return BorderStyle.of(_topLeftArc, Arc.of(borderArcWidth, arcHeight), _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _borderColor, _gradients);
+                return BorderStyle.of(_topLeftArc, Arc.of(borderArcWidth, arcHeight), _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _borderColor);
             case BOTTOM_LEFT:
                 arcHeight = _bottomLeftArc != Arc.none() ? _bottomLeftArc.height() : 0;
-                return BorderStyle.of(_topLeftArc, _topRightArc, Arc.of(borderArcWidth, arcHeight), _bottomRightArc, _borderWidths, _margin, _padding, _borderColor, _gradients);
+                return BorderStyle.of(_topLeftArc, _topRightArc, Arc.of(borderArcWidth, arcHeight), _bottomRightArc, _borderWidths, _margin, _padding, _borderColor);
             case BOTTOM_RIGHT:
                 arcHeight = _bottomRightArc != Arc.none() ? _bottomRightArc.height() : 0;
-                return BorderStyle.of(_topLeftArc, _topRightArc, _bottomLeftArc, Arc.of(borderArcWidth, arcHeight), _borderWidths, _margin, _padding, _borderColor, _gradients);
+                return BorderStyle.of(_topLeftArc, _topRightArc, _bottomLeftArc, Arc.of(borderArcWidth, arcHeight), _borderWidths, _margin, _padding, _borderColor);
             default:
                 throw new IllegalArgumentException("Unknown corner: " + corner);
         }
@@ -211,16 +169,16 @@ final class BorderStyle
         switch ( corner ) {
             case TOP_LEFT:
                 arcWidth = _topLeftArc != Arc.none() ? _topLeftArc.width() : 0;
-                return BorderStyle.of(Arc.of(arcWidth, borderArcHeight), _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _borderColor, _gradients);
+                return BorderStyle.of(Arc.of(arcWidth, borderArcHeight), _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _borderColor);
             case TOP_RIGHT:
                 arcWidth = _topRightArc != Arc.none() ? _topRightArc.width() : 0;
-                return BorderStyle.of(_topLeftArc, Arc.of(arcWidth, borderArcHeight), _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _borderColor, _gradients);
+                return BorderStyle.of(_topLeftArc, Arc.of(arcWidth, borderArcHeight), _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _borderColor);
             case BOTTOM_LEFT:
                 arcWidth = _bottomLeftArc != Arc.none() ? _bottomLeftArc.width() : 0;
-                return BorderStyle.of(_topLeftArc, _topRightArc, Arc.of(arcWidth, borderArcHeight), _bottomRightArc, _borderWidths, _margin, _padding, _borderColor, _gradients);
+                return BorderStyle.of(_topLeftArc, _topRightArc, Arc.of(arcWidth, borderArcHeight), _bottomRightArc, _borderWidths, _margin, _padding, _borderColor);
             case BOTTOM_RIGHT:
                 arcWidth = _bottomRightArc != Arc.none() ? _bottomRightArc.width() : 0;
-                return BorderStyle.of(_topLeftArc, _topRightArc, _bottomLeftArc, Arc.of(arcWidth, borderArcHeight), _borderWidths, _margin, _padding, _borderColor, _gradients);
+                return BorderStyle.of(_topLeftArc, _topRightArc, _bottomLeftArc, Arc.of(arcWidth, borderArcHeight), _borderWidths, _margin, _padding, _borderColor);
             default:
                 throw new IllegalArgumentException("Unknown corner: " + corner);
         }
@@ -237,10 +195,10 @@ final class BorderStyle
         if ( edge == UI.Edge.EVERY )
             return this.withWidth(borderWidth);
         switch (edge) {
-            case TOP:    return BorderStyle.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths.withTop(borderWidth), _margin, _padding, _borderColor, _gradients);
-            case RIGHT:  return BorderStyle.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths.withRight(borderWidth), _margin, _padding, _borderColor, _gradients);
-            case BOTTOM: return BorderStyle.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths.withBottom(borderWidth), _margin, _padding, _borderColor, _gradients);
-            case LEFT:   return BorderStyle.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths.withLeft(borderWidth), _margin, _padding, _borderColor, _gradients);
+            case TOP:    return BorderStyle.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths.withTop(borderWidth), _margin, _padding, _borderColor);
+            case RIGHT:  return BorderStyle.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths.withRight(borderWidth), _margin, _padding, _borderColor);
+            case BOTTOM: return BorderStyle.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths.withBottom(borderWidth), _margin, _padding, _borderColor);
+            case LEFT:   return BorderStyle.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths.withLeft(borderWidth), _margin, _padding, _borderColor);
             default:
                 throw new IllegalArgumentException("Unknown side: " + edge);
         }
@@ -254,7 +212,7 @@ final class BorderStyle
     }
 
     BorderStyle withColor( Color borderColor ) {
-        return BorderStyle.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, borderColor, _gradients);
+        return BorderStyle.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, borderColor);
     }
 
     boolean allCornersShareTheSameArc() {
@@ -273,8 +231,7 @@ final class BorderStyle
         boolean hasAnyNonZeroArcs      = hasAnyNonZeroArcs();
         boolean hasAnyNonZeroWidths    = _borderWidths.isPositive();
         boolean hasAVisibleColor       = _borderColor != null && _borderColor.getAlpha() > 0;
-        boolean hasAnyVisibleGradients = _gradients.stylesStream().anyMatch(gradient -> !gradient.equals(GradientStyle.none()) );
-        return hasAnyNonZeroArcs || hasAnyNonZeroWidths || hasAVisibleColor || hasAnyVisibleGradients;
+        return hasAnyNonZeroArcs || hasAnyNonZeroWidths || hasAVisibleColor;
     }
 
     BorderStyle _scale( double scale ) {
@@ -291,8 +248,7 @@ final class BorderStyle
                     _borderWidths.scale(scale),
                     _margin.scale(scale),
                     _padding.scale(scale),
-                    _borderColor,
-                    _gradients
+                    _borderColor
                 );
     }
 
@@ -308,7 +264,6 @@ final class BorderStyle
         Outline simplifiedMargin       = _margin; // Allowing the user to set an all 0 margin is needed for overriding the default margin (from former border!)
         Outline simplifiedPadding      = _padding.simplified();
         Color simplifiedBorderColor    = _borderColor != null && _borderColor.getAlpha() > 0 ? _borderColor : null;
-        NamedStyles<GradientStyle> simplifiedGradients = _gradients.simplified();
 
         if ( simplifiedBorderColor == UI.COLOR_UNDEFINED)
             simplifiedBorderColor = null;
@@ -317,7 +272,6 @@ final class BorderStyle
 
         if ( hasNoBorderWidths ) {
             simplifiedBorderColor = null;
-            simplifiedGradients   = StyleLayer._NO_GRADIENTS;
         }
 
         if (
@@ -328,8 +282,7 @@ final class BorderStyle
             simplifiedBorderWidths   == _borderWidths &&
             simplifiedMargin         == _margin &&
             simplifiedPadding        == _padding &&
-            simplifiedBorderColor    == _borderColor &&
-            simplifiedGradients      == _gradients
+            simplifiedBorderColor    == _borderColor
         )
             return this;
         else
@@ -341,8 +294,7 @@ final class BorderStyle
                         simplifiedBorderWidths,
                         simplifiedMargin,
                         simplifiedPadding,
-                        simplifiedBorderColor,
-                        simplifiedGradients
+                        simplifiedBorderColor
                     );
     }
 
@@ -367,7 +319,6 @@ final class BorderStyle
         hash = 97 * hash + _margin.hashCode();
         hash = 97 * hash + _padding.hashCode();
         hash = 97 * hash + ( _borderColor != null ? _borderColor.hashCode()    : 0 );
-        hash = 97 * hash + _gradients.hashCode();
         return hash;
     }
 
@@ -385,8 +336,7 @@ final class BorderStyle
             Objects.equals(_borderColor,    rhs._borderColor)    &&
             Objects.equals(_borderWidths,   rhs._borderWidths)   &&
             Objects.equals(_margin,         rhs._margin)         &&
-            Objects.equals(_padding,        rhs._padding)        &&
-            Objects.equals(_gradients,      rhs._gradients);
+            Objects.equals(_padding,        rhs._padding);
     }
 
     @Override
@@ -422,15 +372,12 @@ final class BorderStyle
                     ", leftWidth="   + _borderWidths.left().map(this::_toString).orElse("?");
         }
 
-        String shadesString = _gradients.toString(StyleUtility.DEFAULT_KEY, "gradients");
-
         return this.getClass().getSimpleName() + "[" +
                     arcsString + ", " +
                     borderWidthsString + ", " +
                     "margin=" + _margin + ", " +
                     "padding=" + _padding + ", " +
-                    "color=" + StyleUtility.toString(_borderColor) + ", " +
-                    shadesString +
+                    "color=" + StyleUtility.toString(_borderColor) +
                 "]";
     }
 

@@ -562,57 +562,6 @@ public final class ComponentStyleDelegate<C extends JComponent>
     }
 
     /**
-     *  This method makes it possible to define border shades for the border of your UI components.
-     *  This is useful when you want to do advanced border effects, such as neumorphism a.k.a. soft UI. <br>
-     *  Here is an example of how to use this method:
-     *  <pre>{@code
-     *    UI.panel()
-     *    .withStyle( it -> it
-     *      .borderGradient( grad -> grad
-     *        .colors("#000000", "#000000")
-     *        .align(GradientAlignment.TOP_TO_BOTTOM)
-     *      )
-     *    )
-     * }</pre>
-     *
-     * @param styler A function that takes a {@link GradientStyle} and returns a new {@link GradientStyle}.
-     * @return A new {@link ComponentStyleDelegate} with a border shade defined by the provided styler lambda.
-     */
-    public ComponentStyleDelegate<C> borderGradient( Function<GradientStyle, GradientStyle> styler ) {
-        Objects.requireNonNull(styler);
-        return _withStyle(_style._withBorder(_style.border().withGradient(StyleUtility.DEFAULT_KEY, styler)));
-    }
-
-    /**
-     *  This method makes it possible to define multiple border shades through a unique name for said shading effect.
-     *  This is useful when you want to do advanced border effects, such as neumorphism a.k.a. soft UI. <br>
-     *  Here is an example of how to use this method:
-     *  <pre>{@code
-     *    UI.panel()
-     *    .withStyle( it -> it
-     *      .borderGradient("dark shading", grad -> grad
-     *        .colors("#000000", "#000000")
-     *        .transition(UI.Transition.TOP_TO_BOTTOM)
-     *      )
-     *      .borderGradient("light shading", grad -> grad
-     *        .colors("#ffffff", "#ffffff")
-     *        .transition(UI.Transition.TOP_TO_BOTTOM)
-     *      )
-     *    )
-     * }</pre>
-     * Note that the border shades will be rendered in alphabetical order based on the name of the shade.
-     *
-     * @param shadeName The name of the border shade.
-     * @param styler A function that takes a {@link GradientStyle} and returns a new {@link GradientStyle}.
-     * @return A new {@link ComponentStyleDelegate} with a named border shade defined by the provided styler lambda.
-     */
-    public ComponentStyleDelegate<C> borderGradient( String shadeName, Function<GradientStyle, GradientStyle> styler ) {
-        Objects.requireNonNull(shadeName);
-        Objects.requireNonNull(styler);
-        return _withStyle(_style._withBorder(_style.border().withGradient(shadeName, styler)));
-    }
-
-    /**
      *  Returns a new {@link Style} with the provided {@link ImageIcon} as the icon
      *  for the current component (see {@link #component()}).
      *  Note that this will only produce a result for components that actually support icons.

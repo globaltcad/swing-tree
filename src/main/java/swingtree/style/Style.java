@@ -363,6 +363,11 @@ public final class Style
         return _withGradients(layer, newShadows);
     }
 
+    GradientStyle gradient( UI.Layer layer, String shadeName ) {
+        Objects.requireNonNull(shadeName);
+        return _layers.get(layer).gradients().get(shadeName);
+    }
+
     Style images( UI.Layer layer, String imageName, Function<ImageStyle, ImageStyle> styler ) {
         Objects.requireNonNull(imageName);
         Objects.requireNonNull(styler);

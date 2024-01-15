@@ -173,8 +173,7 @@ class Styles_Spec extends Specification
                                                 "left=${(scale(4) % 1 == 0 ? "?" : 1 - scale(4) % 1 )}" +
                                             "], " +
                                             "padding=Outline[top=?, right=?, bottom=?, left=?], " +
-                                            "color=rgba(0,0,255,255), " +
-                                            "GradientStyle[NONE]" +
+                                            "color=rgba(0,0,255,255)" +
                                         "], " +
                                         "BaseStyle[" +
                                             "icon=?, " +
@@ -350,7 +349,9 @@ class Styles_Spec extends Specification
                                                         "colors=[java.awt.Color[r=255,g=0,b=0], " +
                                                         "java.awt.Color[r=0,g=255,b=0], " +
                                                         "java.awt.Color[r=0,g=0,b=255]], " +
-                                                        "offset=Offset[x=0, y=0]" +
+                                                        "offset=Offset[x=0, y=0], " +
+                                                        "size=-1.0, " +
+                                                        "area=BODY" +
                                                     "]" +
                                                 "], " +
                                             "images=ImageStyle[NONE]" +
@@ -518,8 +519,7 @@ class Styles_Spec extends Specification
                         "width=?, " +
                         "margin=Outline[top=?, right=?, bottom=?, left=?], " +
                         "padding=Outline[top=?, right=?, bottom=?, left=?], " +
-                        "color=?, " +
-                        "GradientStyle[NONE]" +
+                        "color=?" +
                     "], " +
                     "BaseStyle[" +
                         "icon=?, " +
@@ -636,8 +636,7 @@ class Styles_Spec extends Specification
                         "leftWidth=" + String.valueOf(uiScale).replace(".0", "") + ", " +
                         "margin=Outline[top=?, right=?, bottom=?, left=${( uiScale % 1 == 0 ? "?" : 1 - uiScale % 1 )}], " +
                         "padding=Outline[top=?, right=?, bottom=?, left=?], " +
-                        "color=rgba(0,255,0,255), " +
-                        "GradientStyle[NONE]" +
+                        "color=rgba(0,255,0,255)" +
                     "], " +
                     "BaseStyle[NONE], " +
                     "FontStyle[NONE], " +

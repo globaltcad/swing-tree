@@ -68,9 +68,9 @@ final class StyleRenderer
                     g2d.fill(conf.get(UI.ComponentArea.BODY));
                 }
                 else if ( gradient.transition().isDiagonal() )
-                    _renderDiagonalGradient(g2d, conf.currentBounds().size(), conf.style().margin(), gradient, conf.get(UI.ComponentArea.BODY));
+                    _renderDiagonalGradient(g2d, conf.currentBounds().size(), conf.style().margin(), gradient, conf.get(gradient.area()));
                 else
-                    _renderVerticalOrHorizontalGradient(g2d, conf.currentBounds().size(), conf.style().margin(), gradient, conf.get(UI.ComponentArea.BODY));
+                    _renderVerticalOrHorizontalGradient(g2d, conf.currentBounds().size(), conf.style().margin(), gradient, conf.get(gradient.area()));
             }
 
         // 3. Shadows, which are simple gradient based drop shadows that can go inwards or outwards
@@ -130,17 +130,6 @@ final class StyleRenderer
                 Area borderArea = conf.get(UI.ComponentArea.BORDER);
                 g2d.setColor(color);
                 g2d.fill(borderArea);
-
-                if (!conf.style().border().gradients().isEmpty()) {
-                    for ( GradientStyle gradient : conf.style().border().gradients() ) {
-                        if ( gradient.colors().length > 0 ) {
-                            if ( gradient.transition().isDiagonal() )
-                                _renderDiagonalGradient(g2d, conf.currentBounds().size(), conf.style().margin(), gradient, borderArea);
-                            else
-                                _renderVerticalOrHorizontalGradient(g2d, conf.currentBounds().size(), conf.style().margin(), gradient, borderArea);
-                        }
-                    }
-                }
             } catch ( Exception e ) {
                 log.warn(
                     "An exception occurred while drawing the border of border style '" + conf.style().border() + "' ",

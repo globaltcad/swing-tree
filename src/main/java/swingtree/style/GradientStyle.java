@@ -65,6 +65,11 @@ import java.util.function.Function;
  *          If no size is specified, the size of the gradient will be
  *          based on the size of the component that the gradient is applied to.
  *      </li>
+ *      <li><h3>Area</h3>
+ *          The component are to which the gradient is clipped to.
+ *          Which means that the gradient will only be visible within the
+ *          specified area of the component.
+ *      <br>
  *  </ul>
  *  <p>
  *  You can also use the {@link #none()} method to specify that no gradient should be used,
@@ -81,7 +86,8 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
                                                         UI.GradientType.LINEAR,
                                                         new Color[0],
                                                         Offset.none(),
-                                                        -1f
+                                                        -1f,
+                                                        UI.ComponentArea.BODY
                                                     );
 
     /**
@@ -93,19 +99,21 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
     public static GradientStyle none() { return _NONE; }
 
 
-    private final UI.Transition   _transition;
-    private final UI.GradientType _type;
-    private final Color[]         _colors;
-    private final Offset         _offset;
-    private final float          _size;
+    private final UI.Transition     _transition;
+    private final UI.GradientType   _type;
+    private final Color[]           _colors;
+    private final Offset           _offset;
+    private final float            _size;
+    private final UI.ComponentArea _area;
 
 
-    private GradientStyle( UI.Transition transition, UI.GradientType type, Color[] colors, Offset offset, float size ) {
+    private GradientStyle( UI.Transition transition, UI.GradientType type, Color[] colors, Offset offset, float size, UI.ComponentArea area ) {
         _transition = Objects.requireNonNull(transition);
         _type       = Objects.requireNonNull(type);
         _colors     = Objects.requireNonNull(colors);
         _offset     = Objects.requireNonNull(offset);
         _size       = ( size < 0 ? -1 : size );
+        _area       = Objects.requireNonNull(area);
     }
 
     UI.Transition transition() { return _transition; }
@@ -117,6 +125,8 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
     Offset offset() { return _offset; }
 
     float size() { return _size; }
+
+    UI.ComponentArea area() { return _area; }
 
     /**
      *  Define a list of colors which will, as part of the gradient, transition from one
@@ -132,7 +142,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
         Objects.requireNonNull(colors);
         for ( Color color : colors )
             Objects.requireNonNull(color, "Use UI.COLOR_UNDEFINED instead of null to represent the absence of a color.");
-        return new GradientStyle(_transition, _type, colors, _offset, _size);
+        return new GradientStyle(_transition, _type, colors, _offset, _size, _area);
     }
 
     /**
@@ -152,7 +162,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
             for ( int i = 0; i < colors.length; i++ )
                 actualColors[i] = UI.color(colors[i]);
 
-            return new GradientStyle(_transition, _type, actualColors, _offset, _size);
+            return new GradientStyle(_transition, _type, actualColors, _offset, _size, _area);
         } catch ( Exception e ) {
             log.error("Failed to parse color strings: " + Arrays.toString(colors), e);
             return this; // We want to avoid side effects other than a wrong color
@@ -178,7 +188,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
      */
     public GradientStyle transition( UI.Transition transition ) {
         Objects.requireNonNull(transition);
-        return new GradientStyle(transition, _type, _colors, _offset, _size);
+        return new GradientStyle(transition, _type, _colors, _offset, _size, _area);
     }
 
     /**
@@ -194,7 +204,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
      */
     public GradientStyle type( UI.GradientType type ) {
         Objects.requireNonNull(type);
-        return new GradientStyle(_transition, type, _colors, _offset, _size);
+        return new GradientStyle(_transition, type, _colors, _offset, _size, _area);
     }
 
     /**
@@ -207,7 +217,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
      * @return A new gradient style with the specified offset.
      */
     public GradientStyle offset( double x, double y ) {
-        return new GradientStyle(_transition, _type, _colors, Offset.of(x,y), _size);
+        return new GradientStyle(_transition, _type, _colors, Offset.of(x,y), _size, _area);
     }
 
     /**
@@ -222,7 +232,19 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
      * @return A new gradient style with the specified size.
      */
     public GradientStyle size( double size ) {
-        return new GradientStyle(_transition, _type, _colors, _offset, (float) size);
+        return new GradientStyle(_transition, _type, _colors, _offset, (float) size, _area);
+    }
+
+    /**
+     *  Define the area of the component to which the gradient is clipped to.
+     *  Which means that the gradient will only be visible within the
+     *  specified area of the component.
+     *
+     * @param area The area of the component to which the gradient is clipped to.
+     * @return A new gradient style with the specified area.
+     */
+    public GradientStyle area( UI.ComponentArea area ) {
+        return new GradientStyle(_transition, _type, _colors, _offset, _size, area);
     }
 
     @Override
@@ -234,7 +256,8 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
                     "type="       + _type + ", " +
                     "colors="     + Arrays.toString(_colors) + ", " +
                     "offset="     + _offset + ", " +
-                    "size="       + _size +
+                    "size="       + _size + ", " +
+                    "area="       + _area +
                 "]";
     }
 
@@ -247,12 +270,13 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
                _type       == that._type             &&
                Arrays.equals(_colors, that._colors)  &&
                Objects.equals(_offset, that._offset) &&
-               _size       == that._size;
+               _size       == that._size             &&
+               _area       == that._area;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(_transition, _type, Arrays.hashCode(_colors), _offset, _size);
+        return Objects.hash(_transition, _type, Arrays.hashCode(_colors), _offset, _size, _area);
     }
 
     @Override
@@ -278,7 +302,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
                 if ( color != UI.COLOR_UNDEFINED)
                     realColors[index++] = color;
 
-            return new GradientStyle(_transition, _type, realColors, _offset, _size);
+            return new GradientStyle(_transition, _type, realColors, _offset, _size, _area);
         }
 
         return this;

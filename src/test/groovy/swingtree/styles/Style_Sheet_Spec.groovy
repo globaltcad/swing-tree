@@ -5,6 +5,7 @@ import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
 import swingtree.SwingTree
+import swingtree.UI.Layer
 import swingtree.threading.EventProcessor
 import swingtree.UI
 import swingtree.style.Arc
@@ -591,9 +592,10 @@ class Style_Sheet_Spec extends Specification
                 @Override
                 protected void configure() {
                     add(group("A").inherits("B", "C"), it -> it
-                        .borderGradient(g -> g
+                        .gradient(UI.Layer.BORDER, g -> g
                             .transition(UI.Transition.BOTTOM_TO_TOP)
                             .colors(Color.RED, Color.BLUE)
+                            .area(UI.ComponentArea.BORDER)
                         )
                     );
                     add(group("B"), it -> it
@@ -603,9 +605,10 @@ class Style_Sheet_Spec extends Specification
                     add(group("C"), it -> it
                         .borderWidth(20)
                         .borderColor(Color.YELLOW)
-                        .borderGradient("named shade", s -> s
+                        .gradient(UI.Layer.BORDER, "named shade", s -> s
                             .transition(UI.Transition.TOP_TO_BOTTOM)
                             .colors(Color.CYAN, Color.MAGENTA)
+                            .area(UI.ComponentArea.BORDER)
                         )
                     );
                 }
@@ -621,10 +624,12 @@ class Style_Sheet_Spec extends Specification
             s.border().widths().right().get() == 10
             s.border().color().get() == Color.GREEN
         and : 'Note that only the default border shade will be overridden, not the named one.'
-            s.border().gradient().transition() == UI.Transition.BOTTOM_TO_TOP
-            s.border().gradient().colors() as java.util.List == [Color.RED, Color.BLUE]
-            s.border().gradient("named shade").transition() == UI.Transition.TOP_TO_BOTTOM
-            s.border().gradient("named shade").colors() as java.util.List == [Color.CYAN, Color.MAGENTA]
+            s.gradient(UI.Layer.BORDER, "default").transition() == UI.Transition.BOTTOM_TO_TOP
+            s.gradient(UI.Layer.BORDER, "default").colors() as java.util.List == [Color.RED, Color.BLUE]
+            s.gradient(UI.Layer.BORDER, "default").area() == UI.ComponentArea.BORDER
+            s.gradient(UI.Layer.BORDER, "named shade").transition() == UI.Transition.TOP_TO_BOTTOM
+            s.gradient(UI.Layer.BORDER, "named shade").colors() as java.util.List == [Color.CYAN, Color.MAGENTA]
+            s.gradient(UI.Layer.BORDER, "named shade").area() == UI.ComponentArea.BORDER
     }
 
 
@@ -655,7 +660,7 @@ class Style_Sheet_Spec extends Specification
                     add(group("A").inherits("E", "B", "C"), it -> it
                         .borderWidth(5)
                         .backgroundColor(Color.RED)
-                        .borderGradient(s -> s
+                        .gradient(Layer.BORDER, s -> s
                             .transition(UI.Transition.BOTTOM_TO_TOP)
                             .colors(Color.RED, Color.BLUE)
                         )
@@ -704,8 +709,8 @@ class Style_Sheet_Spec extends Specification
             s.border().widths().right().get() == 5
             s.border().color().get() == Color.MAGENTA
             s.base().backgroundColor().get() == Color.RED
-            s.border().gradient().transition() == UI.Transition.BOTTOM_TO_TOP
-            s.border().gradient().colors() as java.util.List == [Color.RED, Color.BLUE]
+            s.gradient(Layer.BORDER, "default").transition() == UI.Transition.BOTTOM_TO_TOP
+            s.gradient(Layer.BORDER, "default").colors() as java.util.List == [Color.RED, Color.BLUE]
             s.shadow(UI.Layer.BACKGROUND, "named shadow") == null
             s.shadow(UI.Layer.CONTENT, "named shadow").spreadRadius() == 42
             s.shadow(UI.Layer.CONTENT, "named shadow").color().get() == Color.CYAN
