@@ -591,21 +591,21 @@ final class StyleRenderer
         Color[] colors = gradient.colors();
         UI.Transition type = gradient.transition();
         Dimension size = componentSize.toDimension();
-        size.width  -= (margin.right().orElse(0f).intValue() + margin.left().orElse(0f).intValue());
-        size.height -= (margin.bottom().orElse(0f).intValue() + margin.top().orElse(0f).intValue());
-        int width  = size.width;
-        int height = size.height;
-        int realX = margin.left().orElse(0f).intValue();
-        int realY = margin.top().orElse(0f).intValue();
+        float width  = size.width;
+        float height = size.height;
+        width  -= ( margin.right().orElse(0f)  + margin.left().orElse(0f) );
+        height -= ( margin.bottom().orElse(0f) + margin.top().orElse(0f) );
+        float realX = margin.left().orElse(0f);
+        float realY = margin.top().orElse(0f);
 
-        int corner1X;
-        int corner1Y;
-        int corner2X;
-        int corner2Y;
-        int diagonalCorner1X;
-        int diagonalCorner1Y;
-        int diagonalCorner2X;
-        int diagonalCorner2Y;
+        float corner1X;
+        float corner1Y;
+        float corner2X;
+        float corner2Y;
+        float diagonalCorner1X;
+        float diagonalCorner1Y;
+        float diagonalCorner2X;
+        float diagonalCorner2Y;
 
         boolean revertColors = false;
         if ( type == UI.Transition.TOP_RIGHT_TO_BOTTOM_LEFT ) {
@@ -654,8 +654,8 @@ final class StyleRenderer
         else
             throw new IllegalArgumentException("Invalid gradient alignment: " + type);
 
-        int diagonalCenterX = (diagonalCorner1X + diagonalCorner2X) / 2;
-        int diagonalCenterY = (diagonalCorner1Y + diagonalCorner2Y) / 2;
+        float diagonalCenterX = (diagonalCorner1X + diagonalCorner2X) / 2;
+        float diagonalCenterY = (diagonalCorner1Y + diagonalCorner2Y) / 2;
 
         float[] fractions = new float[colors.length];
         for ( int i = 0; i < colors.length; i++ )
@@ -711,10 +711,10 @@ final class StyleRenderer
             double distance1 = (corner1X - diagonalCenterX) * nVector1X + (corner1Y - diagonalCenterY) * nVector1Y;
             double distance2 = (corner2X - diagonalCenterX) * nVector2X + (corner2Y - diagonalCenterY) * nVector2Y;
 
-            int gradientStartX = (int) (diagonalCenterX + nVector1X * distance1);
-            int gradientStartY = (int) (diagonalCenterY + nVector1Y * distance1);
-            int gradientEndX = (int) (diagonalCenterX + nVector2X * distance2);
-            int gradientEndY = (int) (diagonalCenterY + nVector2Y * distance2);
+            float gradientStartX = (int) (diagonalCenterX + nVector1X * distance1);
+            float gradientStartY = (int) (diagonalCenterY + nVector1Y * distance1);
+            float gradientEndX = (int) (diagonalCenterX + nVector2X * distance2);
+            float gradientEndY = (int) (diagonalCenterY + nVector2Y * distance2);
 
             if ( colors.length == 2 )
                 g2d.setPaint(new GradientPaint(
