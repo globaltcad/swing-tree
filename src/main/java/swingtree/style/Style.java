@@ -222,15 +222,7 @@ public final class Style
                 );
     }
 
-    boolean hasCustomBackgroundPainters() {
-        return hasCustomPaintersOnLayer(UI.Layer.BACKGROUND);
-    }
-
-    boolean hasCustomForegroundPainters() {
-        return hasCustomPaintersOnLayer(UI.Layer.FOREGROUND);
-    }
-
-    boolean hasCustomPaintersOnLayer( UI.Layer layer ) {
+    boolean hasPaintersOnLayer(UI.Layer layer ) {
         return _layers.get(layer).painters().stylesStream().anyMatch(p -> !Painter.none().equals(p.painter()));
     }
 

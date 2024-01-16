@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import swingtree.UI;
 import swingtree.components.JBox;
 import swingtree.components.JIcon;
 
@@ -8,7 +9,6 @@ import javax.swing.border.Border;
 import javax.swing.plaf.*;
 import javax.swing.plaf.basic.*;
 import java.awt.*;
-import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
@@ -32,8 +32,9 @@ final class DynamicLaF
     }
 
 
-
-    boolean customLookAndFeelIsInstalled() { return _styleLaF != null; }
+    boolean customLookAndFeelIsInstalled() {
+        return _styleLaF != null;
+    }
 
     DynamicLaF establishLookAndFeelFor( Style style, JComponent owner ) {
 
@@ -41,59 +42,27 @@ final class DynamicLaF
 
         // For panels mostly:
         boolean weNeedToOverrideLaF = false;
-        boolean hasBorderRadius = style.border().hasAnyNonZeroArcs();
-        boolean hasMargin = style.margin().isPositive();
-        boolean hasBackgroundPainter = style.hasCustomBackgroundPainters();
-        boolean hasBackgroundShades  = style.hasCustomGradients();
 
-        if ( hasBorderRadius )
+        if ( style.border().hasAnyNonZeroArcs() ) // Border radius
             weNeedToOverrideLaF = true;
 
-        if ( hasMargin )
+        if ( style.margin().isPositive() )
             weNeedToOverrideLaF = true;
 
-        if ( hasBackgroundPainter )
+        if ( style.hasCustomGradients() )
             weNeedToOverrideLaF = true;
 
-        if ( hasBackgroundShades )
-            weNeedToOverrideLaF = true;
-
-        if ( style.hasCustomBackgroundPainters() )
+        if ( style.hasPaintersOnLayer(UI.Layer.BACKGROUND) )
             weNeedToOverrideLaF = true;
 
         if ( style.anyVisibleShadows() )
             weNeedToOverrideLaF = true;
 
-        if ( weNeedToOverrideLaF ) {
-            boolean foundationIsTransparent = style.base()
-                                                    .foundationColor()
-                                                    .map( c -> c.getAlpha() < 255 )
-                                                    .orElse(
-                                                        Optional.ofNullable(owner.getBackground())
-                                                            .map( c -> c.getAlpha() < 255 )
-                                                            .orElse(true)
-                                                    );
-            if ( owner.isOpaque() ) {
-                owner.setOpaque( !hasBorderRadius && !hasMargin || !foundationIsTransparent );
-                if ( owner instanceof JScrollPane ) {
-                    JScrollPane scrollPane = (JScrollPane) owner;
-                    if ( scrollPane.getViewport() != null )
-                        scrollPane.getViewport().setOpaque(owner.isOpaque());
-                }
-            }
-            /* ^
-                If our style reveals what is behind it, then we need
-                to make the component non-opaque so that the previous rendering get's flushed out!
-             */
+        if ( weNeedToOverrideLaF )
             result = _installCustomLaF(owner);
-
-            if ( owner instanceof AbstractButton) {
-                AbstractButton b = (AbstractButton) owner;
-                b.setContentAreaFilled(!hasBackgroundShades && !hasBackgroundPainter);
-            }
-        }
-        else if ( customLookAndFeelIsInstalled() )
-            result = _uninstallCustomLaF(owner);
+        else
+            if ( customLookAndFeelIsInstalled() )
+                result = _uninstallCustomLaF(owner);
 
         return result;
     }

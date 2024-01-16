@@ -198,7 +198,7 @@ final class LayerCache
         if ( !bounds.hasWidth() || !bounds.hasHeight() )
             return false;
 
-        if ( state.style().hasCustomPaintersOnLayer(_layer) )
+        if ( state.style().hasPaintersOnLayer(_layer) )
             return false; // We don't know what the painters will do, so we don't cache their painting!
 
         int heavyStyleCount = 0;

@@ -558,12 +558,12 @@ class Style_Sheet_Spec extends Specification
             var s1 = ss.applyTo(label1.component)
             var s2 = ss.applyTo(label2.component)
         then : '...and we check the results'
-            s1.hasCustomBackgroundPainters()
+            s1.hasPaintersOnLayer(UI.Layer.BACKGROUND)
             s1.painters(UI.Layer.BACKGROUND).size() == 1
             s1.painters(UI.Layer.CONTENT).size() == 1
             s1.painters(UI.Layer.BORDER).size() == 1
             s1.painters(UI.Layer.FOREGROUND).size() == 1
-            s2.hasCustomBackgroundPainters()
+            s2.hasPaintersOnLayer(UI.Layer.BACKGROUND)
             s2.painters(UI.Layer.BACKGROUND).size() == 1
             s2.painters(UI.Layer.CONTENT).size() == 1
             s2.painters(UI.Layer.BORDER).size() == 1
