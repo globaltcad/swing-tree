@@ -716,8 +716,8 @@ public final class ComponentExtension<C extends JComponent>
             else if (  255 > newStyle.base().foundationColor().map(Color::getAlpha).orElse(0) ) {
                 if ( newStyle.border().hasAnyNonZeroArcs() )
                     canBeOpaque = false;
-                else if ( newStyle.border().margin().isPositive() )
-                    canBeOpaque = false;
+                //else if ( newStyle.border().margin().isPositive() )
+                //    canBeOpaque = false;
             }
 
             if ( !canBeOpaque )

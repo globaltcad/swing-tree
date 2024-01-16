@@ -74,7 +74,7 @@ final class DynamicLaF
                                                             .orElse(true)
                                                     );
             if ( owner.isOpaque() ) {
-                owner.setOpaque( !hasBorderRadius && !hasMargin && !foundationIsTransparent );
+                owner.setOpaque( !hasBorderRadius && !hasMargin || !foundationIsTransparent );
                 if ( owner instanceof JScrollPane ) {
                     JScrollPane scrollPane = (JScrollPane) owner;
                     if ( scrollPane.getViewport() != null )
