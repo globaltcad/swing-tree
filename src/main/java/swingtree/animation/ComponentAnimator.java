@@ -83,7 +83,9 @@ class ComponentAnimator
 
         if ( !shouldContinue ) {
             try {
-                _animation.finish(AnimationState.endOf(state.lifeSpan(), _stride, state.event()));
+                state = AnimationState.endOf(state.lifeSpan(), _stride, state.event());
+                _animation.run(state); // We run the animation one last time to make sure the component is in its final state.
+                _animation.finish(state); // This method may or may not be overridden by the user.
                 // An animation may want to do something when it is finished (e.g. reset the component to its original state).
             } catch ( Exception e ) {
                 log.warn("An exception occurred while executing the finish procedure of an animation!", e);
