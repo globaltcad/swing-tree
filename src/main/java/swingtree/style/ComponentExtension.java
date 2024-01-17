@@ -710,37 +710,6 @@ public final class ComponentExtension<C extends JComponent>
         {
             boolean canBeOpaque = true;
 
-            boolean foundationIsTransparent = newStyle
-                                              .base()
-                                              .foundationColor()
-                                              .map( c -> c.getAlpha() < 255 )
-                                              .orElse(
-                                                  Optional.ofNullable(_owner.getBackground())
-                                                      .map( c -> c.getAlpha() < 255 )
-                                                      .orElse(true)
-                                              );
-
-            if ( _dynamicLaF != DynamicLaF.none() ) {
-                boolean hasMargin            = newStyle.margin().isPositive();
-                boolean hasBackgroundPainter = newStyle.hasPaintersOnLayer(UI.Layer.BACKGROUND);
-                boolean hasBackgroundShades  = newStyle.hasCustomGradients();
-
-                _owner.setOpaque(!hasBorderRadius && !hasMargin || !foundationIsTransparent);
-                if (_owner instanceof JScrollPane) {
-                    JScrollPane scrollPane = (JScrollPane) _owner;
-                    if (scrollPane.getViewport() != null)
-                        scrollPane.getViewport().setOpaque(_owner.isOpaque());
-                }
-                /* ^
-                    If our style reveals what is behind it, then we need
-                    to make the component non-opaque so that the previous rendering get's flushed out!
-                 */
-                if ( _owner instanceof AbstractButton) {
-                    AbstractButton b = (AbstractButton) _owner;
-                    b.setContentAreaFilled(!hasBackgroundShades && !hasBackgroundPainter);
-                }
-            }
-
             if ( newStyle.hasActiveBackgroundGradients() )
                 canBeOpaque = false;
             else if ( 255 > newStyle.base().foundationColor().map(Color::getAlpha).orElse(0) ) {

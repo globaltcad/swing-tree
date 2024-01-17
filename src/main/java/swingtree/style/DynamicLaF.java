@@ -9,6 +9,7 @@ import javax.swing.border.Border;
 import javax.swing.plaf.*;
 import javax.swing.plaf.basic.*;
 import java.awt.*;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
@@ -58,9 +59,36 @@ final class DynamicLaF
         if ( style.anyVisibleShadows() )
             weNeedToOverrideLaF = true;
 
-        if ( weNeedToOverrideLaF )
+        if ( weNeedToOverrideLaF ) {
+            if (owner instanceof JScrollPane) {
+                boolean foundationIsTransparent = style
+                                                  .base()
+                                                  .foundationColor()
+                                                  .map( c -> c.getAlpha() < 255 )
+                                                  .orElse(
+                                                      Optional.ofNullable(owner.getBackground())
+                                                          .map( c -> c.getAlpha() < 255 )
+                                                          .orElse(true)
+                                                  );
+
+                boolean hasBorderRadius = style.border().hasAnyNonZeroArcs();
+                boolean hasMargin       = style.margin().isPositive();
+
+                owner.setOpaque(!hasBorderRadius && !hasMargin && !foundationIsTransparent);
+                JScrollPane scrollPane = (JScrollPane) owner;
+                if (scrollPane.getViewport() != null)
+                    scrollPane.getViewport().setOpaque(owner.isOpaque());
+            }
+            /* ^
+                If our style reveals what is behind it, then we need
+                to make the component non-opaque so that the previous rendering get's flushed out!
+             */
+            if ( owner instanceof AbstractButton) {
+                AbstractButton b = (AbstractButton) owner;
+                b.setContentAreaFilled(!style.hasCustomGradients() && !style.hasPaintersOnLayer(UI.Layer.BACKGROUND));
+            }
             result = _installCustomLaF(owner);
-        else
+        } else
             if ( customLookAndFeelIsInstalled() )
                 result = _uninstallCustomLaF(owner);
 
