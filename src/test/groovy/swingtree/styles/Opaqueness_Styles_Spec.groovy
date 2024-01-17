@@ -6,8 +6,10 @@ import spock.lang.Title
 import swingtree.UI
 
 import javax.swing.JButton
+import javax.swing.JFormattedTextField
 import javax.swing.JMenuItem
 import javax.swing.JPanel
+import javax.swing.JSlider
 import javax.swing.JTextField
 import javax.swing.JToggleButton
 
@@ -199,6 +201,49 @@ class Opaqueness_Styles_Spec extends Specification
 
         expect :
             menuItem.isOpaque() == false
+    }
+
+    def 'If a component has a transparent background color, then it will not be opaque.'()
+    {
+        reportInfo """
+ 
+            If a component has a transparent background color then it will not be opaque.
+
+        """
+        given :
+            var ui =
+                    UI.slider(UI.Align.HORIZONTAL)
+                    .withStyle(it -> it
+                        .backgroundColor(new java.awt.Color(40, 210, 220, 100))
+                    )
+
+        and :
+            var slider = ui.get(JSlider)
+
+        expect :
+            slider.isOpaque() == false
+    }
+
+
+    def 'If a component has an opaque background color, then it will also be opaque.'()
+    {
+        reportInfo """
+ 
+            If a component has an opaque background color, then it will also be opaque.
+
+        """
+        given :
+            var ui =
+                    UI.formattedTextField()
+                    .withStyle(it -> it
+                        .backgroundColor(new java.awt.Color(40, 210, 220))
+                    )
+
+        and :
+            var formattedTextField = ui.get(JFormattedTextField)
+
+        expect :
+            formattedTextField.isOpaque() == true
     }
 
 }

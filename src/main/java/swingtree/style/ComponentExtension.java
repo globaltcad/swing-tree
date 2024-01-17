@@ -753,6 +753,9 @@ public final class ComponentExtension<C extends JComponent>
             if ( newStyle.border().widths().isPositive() && 255 > newStyle.border().color().map(Color::getAlpha).orElse(0) )
                 canBeOpaque = false;
 
+            if ( 255 > newStyle.base().backgroundColor().map(Color::getAlpha).orElse(255) )
+                canBeOpaque = false;
+
             if ( !canBeOpaque )
                 _owner.setOpaque(false);
         }
