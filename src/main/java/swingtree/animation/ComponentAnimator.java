@@ -9,6 +9,8 @@ import java.lang.ref.WeakReference;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  *  Runs an {@link Animation} on a {@link Component} according to a {@link LifeTime} and a {@link RunCondition}.
@@ -22,6 +24,7 @@ class ComponentAnimator
     private final Stride        _stride;
     private final RunCondition _condition;
     private final Animation     _animation;
+    private final AtomicLong    _currentRepeat = new AtomicLong(0);
 
 
     ComponentAnimator(
@@ -83,7 +86,7 @@ class ComponentAnimator
 
         if ( !shouldContinue ) {
             try {
-                state = AnimationState.endOf(state.lifeSpan(), _stride, state.event());
+                state = AnimationState.endOf(state.lifeSpan(), _stride, state.event(), _currentRepeat.get());
                 _animation.run(state); // We run the animation one last time to make sure the component is in its final state.
                 _animation.finish(state); // This method may or may not be overridden by the user.
                 // An animation may want to do something when it is finished (e.g. reset the component to its original state).
@@ -106,6 +109,7 @@ class ComponentAnimator
         }
 
         try {
+            _currentRepeat.set(state.repeats());
             _animation.run(state);
         } catch ( Exception e ) {
             log.warn("An exception occurred while executing an animation!", e);

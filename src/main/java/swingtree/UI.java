@@ -10,6 +10,7 @@ import sprouts.Event;
 import sprouts.*;
 import swingtree.animation.Animator;
 import swingtree.animation.LifeTime;
+import swingtree.animation.Stride;
 import swingtree.api.*;
 import swingtree.api.model.BasicTableModel;
 import swingtree.api.model.TableListDataSource;
@@ -5988,6 +5989,10 @@ public final class UI extends UINamespaceUtilities
      */
     public static Animator animateFor( double duration, TimeUnit unit ) {
         return Animator.animateFor( LifeTime.of(duration, unit) );
+    }
+
+    public static Animator animateFor(double duration, TimeUnit unit, Stride stride) {
+        return Animator.animateFor( LifeTime.of(duration, unit), stride );
     }
 
     /**

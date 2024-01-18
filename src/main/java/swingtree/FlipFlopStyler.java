@@ -81,7 +81,7 @@ public class FlipFlopStyler<C extends JComponent>
                 }
                 @Override
                 public void finish( AnimationState state ) {
-                    _state = AnimationState.endOf(state.lifeSpan(), Stride.REGRESSIVE, state.event());
+                    _state = AnimationState.endOf(state.lifeSpan(), Stride.REGRESSIVE, state.event(), 1+state.repeats());
                     _isOn = true;
                     _isCurrentlyRunningAnimation = false;
                 }
@@ -97,7 +97,7 @@ public class FlipFlopStyler<C extends JComponent>
                 }
                 @Override
                 public void finish( AnimationState state ) {
-                    _state = AnimationState.endOf(state.lifeSpan(), Stride.PROGRESSIVE, state.event());
+                    _state = AnimationState.endOf(state.lifeSpan(), Stride.PROGRESSIVE, state.event(), 1+state.repeats());
                     _isOn = false;
                     _isCurrentlyRunningAnimation = false;
                 }

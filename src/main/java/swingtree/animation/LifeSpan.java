@@ -60,7 +60,7 @@ public final class LifeSpan
      * @param iteration The iteration for which the end time should be determined and returned.
      * @return The end time of the specified iteration in the given time unit.
      */
-    public long getEndTimeIn( TimeUnit unit, int iteration ) {
+    public long getEndTimeIn( TimeUnit unit, long iteration ) {
         Objects.requireNonNull(unit);
         return unit.convert(_startTime + _lifeTime.getDurationIn(TimeUnit.MILLISECONDS) * iteration, TimeUnit.MILLISECONDS);
     }

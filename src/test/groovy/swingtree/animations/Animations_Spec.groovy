@@ -5,6 +5,7 @@ import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
 import swingtree.SwingTree
+import swingtree.animation.Stride
 import swingtree.threading.EventProcessor
 import swingtree.UI
 import swingtree.animation.Animator
@@ -65,6 +66,36 @@ class Animations_Spec extends Specification
             progressValues[2] == new ArrayList(progressValues[2]).sort()
     }
 
+    def 'Use the API exposed by `UI.animateFor(..)` to schedule regressive animations (whose progress goes from 1 to 0)'()
+    {
+        reportInfo """
+            Swing-Tree has a built in animation scheduler that can be used to schedule 
+            implementations of the "Animation" interface. This scheduler can also
+            be used to schedule animations that go from 1 to 0.
+        """
+        given : 'A list which we will use to store the animation states.'
+            var progressValues = [0:[],1:[],2:[]]
+
+        when : 'We schedule an animation that will run 3 times and has a duration of 0.1 seconds.'
+            UI.animateFor(0.1, TimeUnit.SECONDS, Stride.REGRESSIVE )
+                .asLongAs({ it.repeats() < 3 })
+                .go({
+                    progressValues[(int)it.repeats()] << it.progress()
+                })
+        and : 'We wait for the animation to finish'
+            TimeUnit.MILLISECONDS.sleep(500)
+        then : 'The animation has been executed 3 times'
+            progressValues.keySet() as List == [0, 1, 2]
+        and : 'The progress values are always between 0 and 1'
+            progressValues[0].every { it >= 0 && it <= 1 }
+            progressValues[1].every { it >= 0 && it <= 1 }
+            progressValues[2].every { it >= 0 && it <= 1 }
+        and : 'The progress values are always decreasing'
+            progressValues[0] == new ArrayList(progressValues[0]).sort().reverse()
+            progressValues[1] == new ArrayList(progressValues[1]).sort().reverse()
+            progressValues[2] == new ArrayList(progressValues[2]).sort().reverse()
+    }
+
     def 'The event delegation object of a user event can be used to register animations.'()
     {
         reportInfo """
@@ -105,7 +136,7 @@ class Animations_Spec extends Specification
             button.doClick()
 
         and : 'We wait for the animation to finish'
-            TimeUnit.MILLISECONDS.sleep(200)
+            TimeUnit.MILLISECONDS.sleep(210)
         then : 'The animation has been completed 4 times.'
             iterations == [0, 1, 2, 3]
         and : 'The progress and cycle values are always between 0 and 1'
