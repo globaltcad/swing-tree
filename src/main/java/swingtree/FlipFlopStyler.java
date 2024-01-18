@@ -43,7 +43,7 @@ public class FlipFlopStyler<C extends JComponent>
         return _styler.style(state, delegate);
     }
 
-    void set( boolean isOn ) {
+    void set( final boolean isOn ) {
         if ( _isOn == isOn ) return;
         C owner = _owner.get();
         if ( owner == null )
@@ -72,39 +72,21 @@ public class FlipFlopStyler<C extends JComponent>
 
         _isCurrentlyRunningAnimation = true;
 
-        if ( isOn ) {
-            _animation = new DisposableAnimation(new Animation() {
-                @Override
-                public void run( AnimationState state ) {
-                    _state = state;
-                    _isOn = true;
-                }
-                @Override
-                public void finish( AnimationState state ) {
-                    _state = AnimationState.endOf(state.lifeSpan(), Stride.REGRESSIVE, state.event(), 1+state.repeats());
-                    _isOn = true;
-                    _isCurrentlyRunningAnimation = false;
-                }
-            });
-            Animator.animateFor(lifetime, Stride.PROGRESSIVE, owner)
-                    .goWithOffset(offset, TimeUnit.MILLISECONDS, _animation);
-        } else {
-            _animation = new DisposableAnimation(new Animation() {
-                @Override
-                public void run( AnimationState state ) {
-                    _state = state;
-                    _isOn = false;
-                }
-                @Override
-                public void finish( AnimationState state ) {
-                    _state = AnimationState.endOf(state.lifeSpan(), Stride.PROGRESSIVE, state.event(), 1+state.repeats());
-                    _isOn = false;
-                    _isCurrentlyRunningAnimation = false;
-                }
-            });
-            Animator.animateFor(lifetime, Stride.REGRESSIVE, owner)
-                    .goWithOffset(offset, TimeUnit.MILLISECONDS, _animation);
-        }
+        _animation = new DisposableAnimation(new Animation() {
+            @Override
+            public void run( AnimationState state ) {
+                _state = state;
+                _isOn = isOn;
+            }
+            @Override
+            public void finish( AnimationState state ) {
+                _state = state;
+                _isOn = isOn;
+                _isCurrentlyRunningAnimation = false;
+            }
+        });
+        Animator.animateFor(lifetime, isOn ? Stride.PROGRESSIVE : Stride.REGRESSIVE, owner)
+                .goWithOffset(offset, TimeUnit.MILLISECONDS, _animation);
     }
 
 
