@@ -5991,6 +5991,27 @@ public final class UI extends UINamespaceUtilities
         return Animator.animateFor( LifeTime.of(duration, unit) );
     }
 
+    /**
+     *  Exposes a builder API for creating and scheduling periodic animation updates.
+     *  This is a convenience method for {@link Animator#animateFor(LifeTime, Stride)}. <br>
+     *  A typical usage would be:
+     *  <pre>{@code
+     *    UI.animateFor( 0.1, TimeUnit.MINUTES, Stride.REGRESSIVE )
+     *       .until( it -> it.progress() < 0.75 && someOtherCondition() )
+     *       .go( it -> {
+     *          // do something
+     *          someComponent.setBackground( new Color( 0, 0, 0, (int)(it.progress()*255) ) );
+     *          // ...
+     *          someComponent.repaint();
+     *       });
+     *  }</pre>
+     *  @param duration The duration of the animation.
+     *                  This is the time it takes for the animation to reach 100% progress.
+     *  @param unit The time unit of the duration.
+     *  @param stride The stride of the animation, which determines whether the animation
+     *                progresses going forward or backwards.
+     *  @return An {@link Animator} instance which allows you to configure the animation.
+     */
     public static Animator animateFor(double duration, TimeUnit unit, Stride stride) {
         return Animator.animateFor( LifeTime.of(duration, unit), stride );
     }

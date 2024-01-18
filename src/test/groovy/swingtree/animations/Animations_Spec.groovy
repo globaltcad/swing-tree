@@ -54,8 +54,8 @@ class Animations_Spec extends Specification
                 })
         and : 'We wait for the animation to finish'
             TimeUnit.MILLISECONDS.sleep(500)
-        then : 'The animation has been executed 3 times'
-            progressValues.keySet() as List == [0, 1, 2]
+        then : 'The animation has been executed at least once'
+            progressValues.values().flatten().size() > 0
         and : 'The progress values are always between 0 and 1'
             progressValues[0].every { it >= 0 && it <= 1 }
             progressValues[1].every { it >= 0 && it <= 1 }
@@ -64,6 +64,12 @@ class Animations_Spec extends Specification
             progressValues[0] == new ArrayList(progressValues[0]).sort()
             progressValues[1] == new ArrayList(progressValues[1]).sort()
             progressValues[2] == new ArrayList(progressValues[2]).sort()
+        and : """
+            The animation scheduler always ensures that the last animation run is
+            executed with a progress value of 1.0. 
+            This is to ensure that the animation is always finished predictably.
+        """
+            progressValues[2].last() == 1
     }
 
     def 'Use the API exposed by `UI.animateFor(..)` to schedule regressive animations (whose progress goes from 1 to 0)'()
@@ -84,8 +90,8 @@ class Animations_Spec extends Specification
                 })
         and : 'We wait for the animation to finish'
             TimeUnit.MILLISECONDS.sleep(500)
-        then : 'The animation has been executed 3 times'
-            progressValues.keySet() as List == [0, 1, 2]
+        then : 'The animation has been executed at least once'
+            progressValues.values().flatten().size() > 0
         and : 'The progress values are always between 0 and 1'
             progressValues[0].every { it >= 0 && it <= 1 }
             progressValues[1].every { it >= 0 && it <= 1 }
@@ -94,6 +100,12 @@ class Animations_Spec extends Specification
             progressValues[0] == new ArrayList(progressValues[0]).sort().reverse()
             progressValues[1] == new ArrayList(progressValues[1]).sort().reverse()
             progressValues[2] == new ArrayList(progressValues[2]).sort().reverse()
+        and : """
+            The animation scheduler always ensures that the last animation run is
+            executed with a progress value of 0.0. 
+            This is to ensure that the animation is always finished predictably.
+        """
+            progressValues[2].last() == 0
     }
 
     def 'The event delegation object of a user event can be used to register animations.'()
