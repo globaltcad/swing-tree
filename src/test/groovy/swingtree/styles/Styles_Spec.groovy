@@ -638,7 +638,19 @@ class Styles_Spec extends Specification
                         "padding=Outline[top=?, right=?, bottom=?, left=?], " +
                         "color=rgba(0,255,0,255)" +
                     "], " +
-                    "BaseStyle[NONE], " +
+                    "BaseStyle[" +
+                        (
+                            uiScale % 1 == 0 ?
+                                "NONE" :
+                                "icon=?, " +
+                                "fitComponent=NO, " +
+                                "backgroundColor=rgba(238,238,238,255), " +
+                                "foundationColor=?, " +
+                                "foregroundColor=?, " +
+                                "cursor=?, " +
+                                "orientation=UNKNOWN"
+                        ) +
+                    "], " +
                     "FontStyle[NONE], " +
                     "DimensionalityStyle[NONE], " +
                     "StyleLayers[" +

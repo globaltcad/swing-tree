@@ -523,10 +523,12 @@ public final class ComponentExtension<C extends JComponent>
             }
         }
 
-        // If the style has a border radius set we need to make sure that we have a background color:
-        if ( hasBorderRadius && !hasBackground ) {
-            _initialBackgroundColor = _initialBackgroundColor != null ? _initialBackgroundColor :  _owner.getBackground();
-            newStyle = newStyle.backgroundColor(_initialBackgroundColor);
+        if ( !hasBackground && _initialIsOpaque ) {
+            // If the style has a border radius set we need to make sure that we have a background color:
+            if ( hasBorderRadius || newStyle.border().margin().isPositive() ) {
+                _initialBackgroundColor = _initialBackgroundColor != null ? _initialBackgroundColor : _owner.getBackground();
+                newStyle = newStyle.backgroundColor(_initialBackgroundColor);
+            }
         }
 
         if ( newStyle.base().foregroundColor().isPresent() && !Objects.equals( _owner.getForeground(), newStyle.base().foregroundColor().get() ) ) {
@@ -723,8 +725,8 @@ public final class ComponentExtension<C extends JComponent>
             else if ( 255 > newStyle.base().foundationColor().map(Color::getAlpha).orElse(0) ) {
                 if ( newStyle.border().hasAnyNonZeroArcs() )
                     canBeOpaque = false;
-                //else if ( newStyle.border().margin().isPositive() )
-                //    canBeOpaque = false;
+                else if ( newStyle.border().margin().isPositive() )
+                    canBeOpaque = false;
             }
 
             if ( newStyle.border().widths().isPositive() && 255 > newStyle.border().color().map(Color::getAlpha).orElse(0) )
