@@ -80,7 +80,11 @@ class ComponentAnimator
 
         Runnable requestComponentRepaint = () -> {
                                                 if ( component != null ) {
-                                                    ComponentExtension.from((JComponent) component).gatherApplyAndInstallStyle(false);
+                                                    if ( component.getParent() == null ) {
+                                                        ComponentExtension.from((JComponent) component).gatherApplyAndInstallStyle(false);
+                                                        // There will be no repaint if the component is not visible.
+                                                        // So we have to manually apply the style.
+                                                    }
                                                     component.revalidate();
                                                     component.repaint();
                                                 }

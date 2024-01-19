@@ -128,7 +128,7 @@ class Animations_Spec extends Specification
             var button =
                     UI.button("Click me! Or don't.")
                     .onClick({
-                        it.animateFor(0.05, TimeUnit.SECONDS)
+                        it.animateFor(0.1, TimeUnit.SECONDS)
                             .asLongAs({ it.repeats() < 4 })
                             .go(state -> {
                                 if ( !iterations.contains(state.repeats()) )
@@ -141,14 +141,14 @@ class Animations_Spec extends Specification
                     })
                     .get(JButton)
         and :
-            TimeUnit.MILLISECONDS.sleep(200)
+            TimeUnit.MILLISECONDS.sleep(410)
         then : 'Initially the animation has not been executed yet.'
             iterations == []
         when : 'We simulate a click on the button'
             button.doClick()
 
         and : 'We wait for the animation to finish'
-            TimeUnit.MILLISECONDS.sleep(210)
+            TimeUnit.MILLISECONDS.sleep(410)
         then : 'The animation has been completed 4 times.'
             iterations == [0, 1, 2, 3]
         and : 'The progress and cycle values are always between 0 and 1'
