@@ -66,6 +66,7 @@ public final class ComponentExtension<C extends JComponent>
     private StyleSource<C>  _styleSource  = StyleSource.create();
 
     private Color _initialBackgroundColor = null;
+    private Boolean _initialIsOpaque = null;
 
     private Shape _outerBaseClip = null;
 
@@ -491,9 +492,16 @@ public final class ComponentExtension<C extends JComponent>
                 _owner.setBackground(_initialBackgroundColor);
                 _initialBackgroundColor = null;
             }
+            if ( _initialIsOpaque != null ) {
+                _owner.setOpaque(_initialIsOpaque);
+                _initialIsOpaque = null;
+            }
             if ( isNotStyled )
                 return newStyle;
         }
+
+        if ( _initialIsOpaque == null )
+            _initialIsOpaque = _owner.isOpaque();
 
         boolean hasBorderRadius = newStyle.border().hasAnyNonZeroArcs();
         boolean hasBackground   = newStyle.base().backgroundColor().isPresent();
@@ -706,7 +714,7 @@ public final class ComponentExtension<C extends JComponent>
         if ( newStyle.hasPaintersOnLayer(UI.Layer.FOREGROUND) )
             _makeAllChildrenTransparent(_owner);
 
-        if ( _owner.isOpaque() )
+
         {
             boolean canBeOpaque = true;
 
@@ -727,6 +735,8 @@ public final class ComponentExtension<C extends JComponent>
 
             if ( !canBeOpaque )
                 _owner.setOpaque(false);
+            else
+                _owner.setOpaque(_initialIsOpaque);
         }
 
         newStyle.properties().forEach( property -> {

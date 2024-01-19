@@ -61,17 +61,20 @@ class Opaqueness_Styles_Spec extends Specification
             Therefore, a vanilla component with rounded corners is not opaque.
 
         """
-        given :
+        given : 'A text field UI declaration styled to have round corners:'
             var ui =
                     UI.textField()
                     .withStyle(it -> it
                         .borderRadius(16)
                     )
 
-        and :
+        and : 'We build the underlying Swing text field:'
             var textField = ui.get(JTextField)
 
-        expect :
+        expect : """
+                The component is not opaque because it has rounded corners
+                exposing the parent component behind it.
+        """
             textField.isOpaque() == false
     }
 
@@ -86,7 +89,7 @@ class Opaqueness_Styles_Spec extends Specification
             because the entire area of the component is painted.
 
         """
-        given :
+        given : 'A text field UI declaration styled to have round corners and a foundation color:'
             var ui =
                     UI.textField()
                     .withStyle(it -> it
@@ -94,10 +97,13 @@ class Opaqueness_Styles_Spec extends Specification
                         .foundationColor("blue")
                     )
 
-        and :
+        and : 'We then build the underlying text field:'
             var textField = ui.get(JTextField)
 
-        expect :
+        expect : """
+                The component is opaque because the foundation color, which fills
+                the area created by the rounded corners, is opaque.
+        """
             textField.isOpaque() == true
     }
 
@@ -113,7 +119,7 @@ class Opaqueness_Styles_Spec extends Specification
             because the entire area of the component is painted.
 
         """
-        given :
+        given : 'A toggle button with a positive margin and a foundation color:'
             var ui =
                     UI.toggleButton()
                     .withStyle(it -> it
@@ -121,10 +127,13 @@ class Opaqueness_Styles_Spec extends Specification
                         .foundationColor("blue")
                     )
 
-        and :
+        and : 'We then build the underlying Swing component:'
             var toggleButton = ui.get(JToggleButton)
 
-        expect :
+        expect : """
+                The component is opaque because the foundation color, which fills
+                the area created by the margin, is opaque.
+        """
             toggleButton.isOpaque() == true
     }
 
@@ -139,7 +148,7 @@ class Opaqueness_Styles_Spec extends Specification
             because the entire area of the component is painted.
 
         """
-        given :
+        given : 'A panel UI declaration with a positive margin, a foundation color and a border radius:'
             var ui =
                     UI.panel()
                     .withStyle(it -> it
@@ -148,10 +157,13 @@ class Opaqueness_Styles_Spec extends Specification
                         .foundationColor("blue")
                     )
 
-        and :
+        and : 'We then build the underlying panel component:'
             var panel = ui.get(JPanel)
 
-        expect :
+        expect : """
+                The component is flagged as opaque because the foundation color, which fills
+                the exterior component area created by the margin and the border radius, is opaque too.
+        """
             panel.isOpaque() == true
     }
 
@@ -165,17 +177,21 @@ class Opaqueness_Styles_Spec extends Specification
             the background is only painted in the component interior.
 
         """
-        given :
+        given : 'We create a simple button UI declaration with a transparent border color:'
             var ui =
                     UI.button()
                     .withStyle(it -> it
                         .border(3, new java.awt.Color(20, 230, 200, 140))
                     )
 
-        and :
+        and : 'We then build the underlying button component:'
             var button = ui.get(JButton)
 
-        expect :
+        expect : """
+                The component is not opaque because the border color is transparent.
+                And there is nothing behind the border, which means that the parent component
+                will be visible behind the border.
+        """
             button.isOpaque() == false
     }
 
@@ -190,7 +206,10 @@ class Opaqueness_Styles_Spec extends Specification
             is only painted in the component exterior.
 
         """
-        given :
+        given : """
+                We create a simple button UI declaration with a transparent border color,
+                an opaque foundation color and an opaque background color:
+        """
             var ui =
                     UI.menuItem()
                     .withStyle(it -> it
@@ -199,10 +218,17 @@ class Opaqueness_Styles_Spec extends Specification
                         .backgroundColor("red")
                     )
 
-        and :
+        and : 'We then build the underlying button component:'
             var menuItem = ui.get(JMenuItem)
 
-        expect :
+        expect : """
+                The component is not opaque because the border color is transparent.
+                And there is nothing behind the border, which means that the parent component
+                will be visible behind the border.
+                The foundation color and the background color are not relevant here
+                because they are only painted in the component exterior and interior
+                (which does not overlap with the border area).
+        """
             menuItem.isOpaque() == false
     }
 
@@ -211,19 +237,23 @@ class Opaqueness_Styles_Spec extends Specification
         reportInfo """
  
             If a component has a transparent background color then it will not be opaque.
-
+            
         """
-        given :
+        given : 'We create a slider UI declaration with a transparent background color:'
             var ui =
                     UI.slider(UI.Align.HORIZONTAL)
                     .withStyle(it -> it
                         .backgroundColor(new java.awt.Color(40, 210, 220, 100))
                     )
 
-        and :
+        and : 'We then build the underlying slider component:'
             var slider = ui.get(JSlider)
 
-        expect :
+        expect : """
+                The component is not opaque because the background color is transparent.
+                And there is nothing behind the background, which means that the parent component
+                will be visible behind the background.
+        """
             slider.isOpaque() == false
     }
 
@@ -235,17 +265,20 @@ class Opaqueness_Styles_Spec extends Specification
             If a component has an opaque background color, then it will also be opaque.
 
         """
-        given :
+        given : 'We define a slider UI declaration with an opaque background color:'
             var ui =
                     UI.formattedTextField()
                     .withStyle(it -> it
                         .backgroundColor(new java.awt.Color(40, 210, 220))
                     )
 
-        and :
+        and : 'We then build the underlying slider component:'
             var formattedTextField = ui.get(JFormattedTextField)
 
-        expect :
+        expect : """
+                The component is opaque because the background color is opaque.
+                So the parent component will not be visible behind the background.
+        """
             formattedTextField.isOpaque() == true
     }
 
@@ -267,9 +300,9 @@ class Opaqueness_Styles_Spec extends Specification
             be opaque again.
 
         """
-        given :
+        given : 'We first define a flag property that we will use to control the transition:'
             var isOn = Var.of(false)
-        and : 'The component is styled to have temporarily rounded corners:'
+        and : 'Then we create the text field UI declaration, which is styled to have temporarily rounded corners:'
             var ui =
                     UI.textField()
                     .withTransitionalStyle(isOn, LifeTime.of(1, TimeUnit.MILLISECONDS), (state, it) -> it
@@ -279,7 +312,72 @@ class Opaqueness_Styles_Spec extends Specification
         and : 'We build the underlying Swing component:'
             var textField = ui.get(JTextField)
 
-        expect : 'The component is opaque because the `isOn` flag is false:'
+        expect : """
+            The component is opaque because the `isOn` flag is false, which translates to a progress of 0,
+            causing the border radius to be 0 as well (16 * 0 = 0).
+        """
+            textField.isOpaque() == true
+
+        when : 'We set the `isOn` flag to true so that the transition starts:'
+            isOn.set(true)
+        and : 'We wait for the transition to complete:'
+            Thread.sleep(50)
+            UI.sync()
+
+        then : """
+            The component is not opaque because the `isOn` flag is true, which translates to a progress of 1
+            (or greater than 0 depending on the time elapsed since the transition started),
+            causing the border radius to be 16 as well (16 * 1 = 16).
+        """
+            textField.isOpaque() == false
+
+        when : """
+            We now want to go back to the initial state, so we set the `isOn` flag to false again...
+        """
+            isOn.set(false)
+        and : '...again we wait for the transition to complete...'
+            Thread.sleep(50)
+            UI.sync()
+        then : """
+            The component is opaque again because the `isOn` flag is false, which translates to a progress of 0,
+            causing the border radius to be 0 as well (16 * 0 = 0).
+            Just like in the beginning.
+        """
+            textField.isOpaque() == true
+    }
+
+    def 'A component styled to have transitionally round corners together with a foundation color will always stay opaque.'()
+    {
+        reportInfo """
+ 
+            The foundation color is a fill color that is used to fill the exterior of the component,
+            which is the area surrounding the border.
+            It is visible when the component has a margin and or a border radius.
+            If the foundation color is opaque, then the component will be opaque as well
+            because the entire area of the component is painted.
+            
+            In this test we will see that the component will stay opaque even if it transitions
+            into having rounded corners. This is because in this test
+            the foundation color is opaque.
+
+        """
+        given : 'We first define a flag property that we will use to control the transition:'
+            var isOn = Var.of(false)
+        and : 'Then we create the text field UI declaration, which is styled to have temporarily rounded corners:'
+            var ui =
+                    UI.textField()
+                    .withTransitionalStyle(isOn, LifeTime.of(1, TimeUnit.MILLISECONDS), (state, it) -> it
+                        .borderRadius(16 * state.progress())
+                        .foundationColor("blue")
+                    )
+
+        and : 'We build the underlying Swing component:'
+            var textField = ui.get(JTextField)
+
+        expect : """
+            The component has to be opaque because the component has no rounded 
+            corners and the foundation color is opaque.
+        """
             textField.isOpaque() == true
 
         when : 'We set the `isOn` flag to true:'
@@ -288,16 +386,279 @@ class Opaqueness_Styles_Spec extends Specification
             Thread.sleep(50)
             UI.sync()
 
-        then : 'The component is not opaque because the `isOn` flag is true:'
-            textField.isOpaque() == false
+        then : """
+            The component now has a border radius of 16, because the `isOn` flag is true, which translates to a progress of 1
+            and consequently a border radius of 16 (16 * 1 = 16).
+            But despite the rounded corners, the component is still opaque because the foundation color, which fills
+            the area created by the rounded corners, is opaque.
+            So the parent component will not be visible behind the border.
+        """
+            textField.isOpaque() == true
 
-        //when :
-        //    isOn.set(false)
-        //and :
-        //    Thread.sleep(50)
-        //    UI.sync()
-        //then :
-        //    textField.isOpaque() == true
+        when : """
+            We now want to go back to the initial state, so we set the `isOn` flag to false again...
+        """
+            isOn.set(false)
+        and : '...again we wait for the transition to complete...'
+            Thread.sleep(50)
+            UI.sync()
+        then : """
+            Again, the component has no rounded corners and the foundation color is opaque.
+            So the component is opaque too.
+        """
+            textField.isOpaque() == true
+    }
+
+    def 'A component styled to have a transitionally positive margin together with a foundation color will stay opaque.'()
+    {
+        reportInfo """
+ 
+            The foundation color is a fill color that is used to fill the exterior of the component,
+            which is the area surrounding the border.
+            It is visible when the component has a margin and or a border radius.
+            If the foundation color is opaque, then the component will be opaque as well
+            because the entire area of the component is painted.
+            
+            This test demonstrates that the component will stay opaque even if it transitions
+            into having a positive margin. This is because in the following scenario
+            the foundation color is opaque.
+
+        """
+        given : 'We first define a flag property that we will use to control the transition:'
+            var isOn = Var.of(false)
+        and : 'Then we create the toggle button UI declaration, which is styled to have temporarily a positive margin:'
+            var ui =
+                    UI.toggleButton()
+                    .withTransitionalStyle(isOn, LifeTime.of(1, TimeUnit.MILLISECONDS), (state, it) -> it
+                        .margin(16 * state.progress())
+                        .foundationColor("blue")
+                    )
+
+        and : 'We build the underlying Swing component:'
+            var toggleButton = ui.get(JToggleButton)
+
+        expect : """
+            The component has to be opaque because the component has no margin and the foundation color is opaque.
+        """
+            toggleButton.isOpaque() == true
+
+        when : 'We set the `isOn` flag to true:'
+            isOn.set(true)
+        and : 'We wait for the transition to complete:'
+            Thread.sleep(50)
+            UI.sync()
+
+        then : """
+            The component now has a margin of 16, because the `isOn` flag is true, which translates to a progress of 1
+            and consequently a margin of 16 (16 * 1 = 16).
+            But despite the margin, the component is still opaque because the foundation color, which fills
+            the area created by the margin, is opaque.
+            So the parent component will not be visible behind the border.
+        """
+            toggleButton.isOpaque() == true
+
+        when : """
+            We now want to go back to the initial state, so we set the `isOn` flag to false again...
+        """
+            isOn.set(false)
+        and : '...again we wait for the transition to complete...'
+            Thread.sleep(50)
+            UI.sync()
+        then : """
+            Again, as expected, the component has no margin and the foundation color is opaque.
+            So the component is opaque too.
+        """
+            toggleButton.isOpaque() == true
+    }
+
+    def 'A component styled to have a transitionally positive margin together with a foundation color and a border radius will stay opaque.'()
+    {
+        reportInfo """
+ 
+            The foundation color is a fill color that is used to fill the exterior of the component,
+            which is the area surrounding the border. It is visible when the component has a 
+            margin and or a border radius.
+            If the foundation color is opaque, then the component will be opaque as well
+            because the entire area of the component is painted.
+            
+            The scenario below demonstrates that the component will stay opaque even if it transitions
+            into having a positive margin and rounded corners. 
+            The reason is that in this scenario the foundation color is opaque.
+            An opaque foundation color will fill the area created by the margin and the rounded corners
+            leaving no area unpainted and no part of the parent component visible on the full component area.
+
+        """
+        given : 'We first define a flag property that we will use to control the transition:'
+            var isOn = Var.of(false)
+        and : 'Then we create the panel UI declaration, which is styled to have temporarily a positive margin and rounded corners:'
+            var ui =
+                    UI.panel()
+                    .withTransitionalStyle(isOn, LifeTime.of(1, TimeUnit.MILLISECONDS), (state, it) -> it
+                        .margin(16 * state.progress())
+                        .borderRadius(16 * state.progress())
+                        .foundationColor("blue")
+                    )
+
+        and : 'We build the underlying Swing component:'
+            var panel = ui.get(JPanel)
+
+        expect : """
+            The component has to be opaque because the component has no margin and the foundation color is opaque.
+        """
+            panel.isOpaque() == true
+
+        when : 'We set the `isOn` flag to true in order to start the transition:'
+            isOn.set(true)
+        and : 'We wait for the transition to complete:'
+            Thread.sleep(50)
+            UI.sync()
+
+        then : """
+            The component now has a margin of 16 and a border radius of 16, because the `isOn` flag is true, which translates to a progress of 1
+            and consequently a margin of 16 (16 * 1 = 16).
+            But despite the margin and the rounded corners, the component is still opaque because the foundation color, which fills
+            the area created by the margin and the rounded corners, is opaque.
+            So the parent component will not be visible behind the border.
+        """
+            panel.isOpaque() == true
+
+        when : """
+            We now want to go back to the initial state, so we set the `isOn` flag to false again...
+        """
+            isOn.set(false)
+        and : '...again we wait for the transition to complete...'
+            Thread.sleep(50)
+            UI.sync()
+        then : """
+            Again, as expected, the component has no margin and the foundation color is opaque.
+            So the component is opaque too.
+        """
+            panel.isOpaque() == true
+    }
+
+    def 'A component with a border color having a transitional alpha chanel is only opaque when the color is opaque'()
+    {
+        reportInfo """
+ 
+            SwingTree renders the border by filling the area between the component exterior
+            and its interior. There is nothing behind the border, so the component is not opaque.
+            Note that the background color of the component is not relevant here because
+            the background is only painted in the component interior.
+
+        """
+        given : 'We first define a flag property that we will use to control the transition:'
+            var isOn = Var.of(false)
+        and : 'Then we create a simple button UI declaration with a transparent border color:'
+            var ui =
+                    UI.button()
+                    .withTransitionalStyle(isOn, LifeTime.of(1, TimeUnit.MILLISECONDS), (state, it) -> it
+                        .border(3, new java.awt.Color(20, 230, 200, (int)(255 * state.progress())))
+                    )
+
+        and : 'We build the underlying button component:'
+            var button = ui.get(JButton)
+
+        expect : """
+                Initially the component is not opaque because the border color is transparent
+                due to the `isOn` flag being false, which translates to a progress of 0,
+                causing the border color to be transparent as well (255 * 0 = 0).
+                Also, there is nothing behind the border, which means that the parent component
+                will be visible behind the border.
+        """
+            button.isOpaque() == false
+
+        when : 'We set the `isOn` flag to true so that the transition starts:'
+            isOn.set(true)
+        and : 'We wait for the transition to complete:'
+            Thread.sleep(50)
+            UI.sync()
+
+        then : """
+            The component is now opaque because the `isOn` flag is true, which translates to 
+            an animation progress transitioning to 1,
+            causing the border color to be opaque as well (255 * 1 = 255).
+        """
+            button.isOpaque() == true
+
+        when : """
+            We now want to go back to the initial state, so we set the `isOn` flag to false again...
+        """
+            isOn.set(false)
+        and : '...again we wait for the transition to complete...'
+            Thread.sleep(50)
+            UI.sync()
+        then : """
+            We are back to the initial state, so the component is not opaque again,
+            because the border color is transparent again.
+        """
+            button.isOpaque() == false
+    }
+
+    def 'A component with a temporarily transparent border color, opaque a foundation and background colors will not be opaque.'()
+    {
+        reportInfo """
+ 
+            SwingTree renders the border by filling the area between the component exterior
+            and its interior. There is nothing behind the border, so the component is not opaque.
+            Neither the background color of the component nor the foundation color are relevant here
+            because the background is only painted in the component interior and the foundation color
+            is only painted in the component exterior.
+            
+            Here you can see that the component will become opaque when the border color becomes opaque.
+            
+        """
+        given : 'We first define a flag property that we will use to control the transition:'
+            var isOn = Var.of(false)
+        and : 'We create a simple menu item UI declaration with a transparent border color, an opaque foundation color and an opaque background color:'
+            var ui =
+                    UI.menuItem()
+                    .withTransitionalStyle(isOn, LifeTime.of(1, TimeUnit.MILLISECONDS), (state, it) -> it
+                        .border(3, new java.awt.Color(20, 230, 200, (int)(255 * state.progress())))
+                        .foundationColor("blue")
+                        .backgroundColor("red")
+                    )
+
+        and : 'We then build the underlying menu item:'
+            var menuItem = ui.get(JMenuItem)
+
+        expect : """
+                Initially the component is not opaque because the border color is transparent
+                due to the `isOn` flag being false, which translates to a progress of 0,
+                causing the border color to be transparent as well (255 * 0 = 0).
+                Also, there is nothing behind the border, which means that the parent component
+                will be visible behind the border.
+        """
+            menuItem.isOpaque() == false
+
+        when : 'We set the `isOn` flag to true causing the transition to start:'
+            isOn.set(true)
+        and : 'We wait for the transition to complete:'
+            Thread.sleep(50)
+            UI.sync()
+
+        then : """
+            The component is now opaque because the `isOn` flag is true, which translates to 
+            an animation progress transitioning to 1,
+            causing the border color to be opaque as well (255 * 1 = 255).
+        """
+            menuItem.isOpaque() == true
+
+        when : """
+            We now want to go back to the initial state, so we set the `isOn` flag to false again...
+        """
+            isOn.set(false)
+        and : '...again we wait for the transition to complete...'
+            Thread.sleep(50)
+            UI.sync()
+        then : """
+            We are back to the initial state where the component is no longer opaque
+            due to the border color being transparent again.
+            
+            Note that the foundation color and the background color are not relevant here
+            because they are only painted in the component exterior and interior
+            (which does not overlap with the border area).
+        """
+            menuItem.isOpaque() == false
     }
 }
 
