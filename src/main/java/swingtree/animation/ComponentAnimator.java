@@ -1,6 +1,7 @@
 package swingtree.animation;
 
 import org.slf4j.Logger;
+import swingtree.style.ComponentExtension;
 
 import javax.swing.JComponent;
 import java.awt.Component;
@@ -79,6 +80,7 @@ class ComponentAnimator
 
         Runnable requestComponentRepaint = () -> {
                                                 if ( component != null ) {
+                                                    ComponentExtension.from((JComponent) component).gatherApplyAndInstallStyle(false);
                                                     component.revalidate();
                                                     component.repaint();
                                                 }

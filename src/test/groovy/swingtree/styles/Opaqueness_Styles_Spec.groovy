@@ -3,7 +3,9 @@ package swingtree.styles
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
+import sprouts.Var
 import swingtree.UI
+import swingtree.animation.LifeTime
 
 import javax.swing.JButton
 import javax.swing.JFormattedTextField
@@ -12,6 +14,7 @@ import javax.swing.JPanel
 import javax.swing.JSlider
 import javax.swing.JTextField
 import javax.swing.JToggleButton
+import java.util.concurrent.TimeUnit
 
 @Title("Opaque or not Opaque")
 @Narrative('''
@@ -246,5 +249,55 @@ class Opaqueness_Styles_Spec extends Specification
             formattedTextField.isOpaque() == true
     }
 
+    def 'A component styled to have transitionally round corners will only temporarily be non opaque.'()
+    {
+        reportInfo """
+ 
+            Rounded corners are a problem with respect to opaqueness
+            because the component is not painted in its entirety.
+            Every Swing component is at its core a rectangle,
+            and the rounded corners are in a way just cut off from the rectangle.
+            This leaves the area outside of the rounded corners unpainted
+            and it puts the responsibility on the parent component to paint
+            that area.
+            
+            Therefore, a vanilla component with rounded corners is not opaque.
+            But this is only true for the time the component actually has rounded corners.
+            If the component is transitioning to have no rounded corners, then it will
+            be opaque again.
+
+        """
+        given :
+            var isOn = Var.of(false)
+        and : 'The component is styled to have temporarily rounded corners:'
+            var ui =
+                    UI.textField()
+                    .withTransitionalStyle(isOn, LifeTime.of(1, TimeUnit.MILLISECONDS), (state, it) -> it
+                        .borderRadius(16 * state.progress())
+                    )
+
+        and : 'We build the underlying Swing component:'
+            var textField = ui.get(JTextField)
+
+        expect : 'The component is opaque because the `isOn` flag is false:'
+            textField.isOpaque() == true
+
+        when : 'We set the `isOn` flag to true:'
+            isOn.set(true)
+        and : 'We wait for the transition to complete:'
+            Thread.sleep(50)
+            UI.sync()
+
+        then : 'The component is not opaque because the `isOn` flag is true:'
+            textField.isOpaque() == false
+
+        //when :
+        //    isOn.set(false)
+        //and :
+        //    Thread.sleep(50)
+        //    UI.sync()
+        //then :
+        //    textField.isOpaque() == true
+    }
 }
 
