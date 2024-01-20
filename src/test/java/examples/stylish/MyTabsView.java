@@ -43,7 +43,7 @@ public class MyTabsView extends Panel
             )
             .add(vm.getTabs(), tabModel ->
                 button(tabModel.title()).withMaxHeight(38).withMinHeight(38).withFontSize(12)
-                .withRepaintIf(repaintEvent)
+                .withRepaintOn(repaintEvent)
                 .withTooltip(tabModel.tip())
                 .peek( b ->
                     tabModel.iconSource().onChange(From.VIEW_MODEL, i -> {

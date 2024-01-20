@@ -26,7 +26,7 @@ public class SymbolGuesserView extends Panel
                     label("Which symbol is this?").withFont(new Font("Arial", Font.BOLD, 24))
                 )
                 .add(ALIGN_X_CENTER,
-                    panel(FILL.and(INS(48))).withRepaintIf(vm.getRepaintEvent())
+                    panel(FILL.and(INS(48))).withRepaintOn(vm.getRepaintEvent())
                     .withStyle( it ->
                         it.backgroundColor(BACKGROUND.brighter())
                           .foundationColor(new Color(255,255,255, 0))

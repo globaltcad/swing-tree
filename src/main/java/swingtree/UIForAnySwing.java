@@ -61,7 +61,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
      * @param event The event to which the repaint method of the component will be bound.
      * @return The JComponent type which will be managed by this builder.
      */
-    public final I withRepaintIf( Observable event ) {
+    public final I withRepaintOn( Observable event ) {
         return _with( c -> event.subscribe( () -> _runInUI(c::repaint) ) )._this();
     }
 

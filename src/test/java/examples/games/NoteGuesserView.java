@@ -24,7 +24,7 @@ public class NoteGuesserView extends Panel
             label("Which note is this?").withFont(new Font("Arial", Font.BOLD, 24))
         )
         .add(PUSH.and(GROW),
-            panel(FILL).withRepaintIf(vm.getRepaintEvent())
+            panel(FILL).withRepaintOn(vm.getRepaintEvent())
             .withStyle( it ->
                 it
                  .backgroundColor(OLD_SHEET_MUSIC_COLOR.brighter())
