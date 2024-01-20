@@ -721,5 +721,60 @@ class Opaqueness_Styles_Spec extends Specification
         """
             panel.isOpaque() == true
     }
+
+    def 'A label will become opaque when transitioning to an opaque background color.'()
+    {
+        reportInfo """
+ 
+            A label is a component that is not opaque by default.
+            It is only opaque when it has an opaque background color.
+            This test demonstrates that a label will become opaque when transitioning
+            to an opaque background color.
+
+        """
+        given : 'We first define a boolean flag property that we will use to control the transition:'
+            var isOn = Var.of(false)
+        and : 'Then we create the label based UI declaration, which is styled to temporarily have an opaque background color:'
+            var ui =
+                    UI.label("Hello World")
+                    .withTransitionalStyle(isOn, LifeTime.of(1, TimeUnit.MILLISECONDS), (state, it) -> it
+                        .backgroundColor(new java.awt.Color(40, 210, 220, (int)(255 * state.progress())))
+                    )
+
+        and : 'We build the underlying `JLabel`:'
+            var label = ui.get(javax.swing.JLabel)
+
+        expect : """
+            The component has to be non opaque because the background color is transparent.
+            So the parent component will be visible behind the background.
+        """
+            label.isOpaque() == false
+
+        when : 'We set the `isOn` flag to true in order to start the transition:'
+            isOn.set(true)
+        and : 'We wait for the transition to complete:'
+            Thread.sleep(50)
+            UI.sync()
+
+        then : """
+            The label is now opaque because the `isOn` flag is true, which translates to 
+            an animation progress transitioning to 1,
+            causing the background color to be opaque (255 * 1 = 255).
+        """
+            label.isOpaque() == true
+
+        when : """
+            We now want to go back to the initial state, so we set the `isOn` flag to false again...
+        """
+            isOn.set(false)
+        and : '...again we wait for the transition to complete...'
+            Thread.sleep(50)
+            UI.sync()
+        then : """
+            We are back to the initial state where the label is no longer opaque
+            due to the background color being transparent again.
+        """
+            label.isOpaque() == false
+    }
 }
 

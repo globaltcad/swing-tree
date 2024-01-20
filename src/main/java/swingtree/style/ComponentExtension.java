@@ -737,6 +737,8 @@ public final class ComponentExtension<C extends JComponent>
 
             if ( !canBeOpaque )
                 _owner.setOpaque(false);
+            else if ( hasBackground && !(_owner instanceof JSlider) )
+                _owner.setOpaque(true);
             else
                 _owner.setOpaque(_initialIsOpaque);
         }
