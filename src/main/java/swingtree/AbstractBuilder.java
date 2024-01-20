@@ -248,7 +248,9 @@ abstract class AbstractBuilder<I, C extends Component>
      *                                and this UI is configured to be decoupled from the application thread.
      *                                See {@link UI#use(EventProcessor, Supplier)}.
      *  @return The component managed by this builder.
+     * @deprecated Use {@link #get(Class)} instead.
      */
+    @Deprecated
     public final C getComponent() {
         boolean isCoupled       = _state().eventProcessor() == EventProcessor.COUPLED;
         boolean isCoupledStrict = _state().eventProcessor() == EventProcessor.COUPLED_STRICT;
@@ -269,7 +271,9 @@ abstract class AbstractBuilder<I, C extends Component>
      *         This optional will throw an exception if the
      *         application has an application thread (see {@link UI#use(EventProcessor, Supplier)})
      *         and this method is called from a thread other than the EDT.
+     * @deprecated Use {@link #get(Class)} instead.
      */
+    @Deprecated
     public final OptionalUI<C> component() {
         return OptionalUI.ofNullable(_state().component());
     }
