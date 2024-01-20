@@ -660,5 +660,66 @@ class Opaqueness_Styles_Spec extends Specification
         """
             menuItem.isOpaque() == false
     }
+
+    def 'An otherwise opaque panel with a temporarily positive margin will be non opaque for that time.'()
+    {
+        reportInfo """
+ 
+            The margins of a component create additional space around the component.
+            If the component has a foundation color, then the foundation color will fill
+            the area created by the margin.
+            If however, there is no foundation color, then this will just be additional
+            empty space around the component, which exposes the parent component behind it.
+            
+            Here you can see that a panel, which is initially opaque, will become non opaque
+            when it transitions into having a positive margin.
+
+        """
+        given : 'We first define a boolean flag property that we will use to control the transition:'
+            var isOn = Var.of(false)
+        and : 'Then we create the panel based UI declaration, which is styled to temporarily have a positive margin:'
+            var ui =
+                    UI.panel()
+                    .withTransitionalStyle(isOn, LifeTime.of(1, TimeUnit.MILLISECONDS), (state, it) -> it
+                        .margin(10 * state.progress())
+                    )
+
+        and : 'We build the underlying `JPanel`:'
+            var panel = ui.get(JPanel)
+
+        expect : """
+            The component has to be opaque because the component has no margin.
+            So nowhere on the component area will the parent component be visible.
+        """
+            panel.isOpaque() == true
+
+        when : 'We set the `isOn` flag to true in order to start the transition:'
+            isOn.set(true)
+        and : 'We wait for the transition to complete:'
+            Thread.sleep(50)
+            UI.sync()
+
+        then : """
+            The component now has a margin of 10, because the `isOn` flag is true (which translates to a progress of 1
+            and consequently a margin of 10 (10 * 1 = 10)).
+            This causes the component to be non opaque because the parent component will be visible
+            in the area created by the margin.
+        """
+            panel.isOpaque() == false
+
+        when : """
+            We now want to go back to the initial state, so we set the `isOn` flag to false again...
+        """
+            isOn.set(false)
+        and : '...again we wait for the transition to complete...'
+            Thread.sleep(50)
+            UI.sync()
+        then : """
+            As expected, the component has no margin meaning that the 
+            component completely covers the parent component, which ultimately 
+            causes the component to be opaque again.
+        """
+            panel.isOpaque() == true
+    }
 }
 
