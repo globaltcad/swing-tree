@@ -716,7 +716,6 @@ public final class ComponentExtension<C extends JComponent>
         if ( newStyle.hasPaintersOnLayer(UI.Layer.FOREGROUND) )
             _makeAllChildrenTransparent(_owner);
 
-
         {
             boolean canBeOpaque = true;
 
@@ -737,9 +736,26 @@ public final class ComponentExtension<C extends JComponent>
 
             if ( !canBeOpaque )
                 _owner.setOpaque(false);
-            else if ( hasBackground && !(_owner instanceof JSlider) )
+            else if ( hasBackground ) {
                 _owner.setOpaque(true);
-            else
+                if ( !_initialIsOpaque ) {
+                    boolean isSwingTreeComponent = _isNestedClassInUINamespace();
+                    boolean hasSwingTreeUI = _dynamicLaF.customLookAndFeelIsInstalled();
+                    if ( isSwingTreeComponent && !hasSwingTreeUI ){
+                        _owner.setBackground(UI.COLOR_UNDEFINED);
+                        /*
+                            We do not set the background color to null here, because
+                            that would cause the background color to be inherited from the parent.
+                            This is a problem because in this case we do not have a custom
+                            UI installed, so the background color would be painted by the
+                            default Swing UI, which would be wrong.
+                            But because this is one of our own components, which has the paint method
+                            overridden, we can simply set the background color to "undefined" (which has an alpha of 0)
+                            and then paint the background ourselves.
+                        */
+                    }
+                }
+            } else
                 _owner.setOpaque(_initialIsOpaque);
         }
 
@@ -756,6 +772,21 @@ public final class ComponentExtension<C extends JComponent>
         });
 
         return newStyle;
+    }
+
+    private boolean _isNestedClassInUINamespace() {
+        Class<UI> uiClass = UI.class;
+        Class<?>  componentClass = _owner.getClass();
+        /*
+            Inside the UI namespace are nested classes extending various Swing components.
+            Here we check if the component is one of those nested classes.
+        */
+        while ( componentClass != null ) {
+            if ( componentClass.getEnclosingClass() == uiClass )
+                return true;
+            componentClass = componentClass.getSuperclass();
+        }
+        return false;
     }
 
     private void _applyAlignmentToMigLayoutIfItExists(LayoutStyle style)
