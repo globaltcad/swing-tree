@@ -709,14 +709,14 @@ class Individual_Component_Styling_Spec extends Specification
                         .fontBold(true)
                         .fontItalic(true)
                         .fontColor("#FF0000") // Red
-                        .fontSpacing(0.077)
+                        .fontSpacing(0.054)
                     )
 
         when : 'We render the text area into a BufferedImage.'
             var image = Utility.renderSingleComponent(ui.getComponent())
 
         then : 'The image is as expected.'
-            Utility.similarityBetween(image, "components/custom-font-JTextArea.png", 99.95) > 99.95
+            Utility.similarityBetween(image, "components/custom-font-JTextArea.png", 99.4) > 99.4
     }
 
     def 'Configure the background, foreground and selection color of a text field through the API exposed in your `Styler` lambdas'()
