@@ -776,5 +776,62 @@ class Opaqueness_Styles_Spec extends Specification
         """
             label.isOpaque() == false
     }
+
+    def 'A slider (which typically transparent) will become opaque when transitioning to an opaque background color.'()
+    {
+        reportInfo """
+ 
+            A slider is a component that is not opaque by default.
+            It is only opaque when it has an opaque background color.
+            This test demonstrates that a slider will become opaque when transitioning
+            to an opaque background color.
+
+        """
+        given : 'We first define a boolean flag property that we will use to control the transition:'
+            var isOn = Var.of(false)
+        and : 'Then we create the slider based UI declaration, which is styled to temporarily have an opaque background color:'
+            var ui =
+                    UI.slider(UI.Align.HORIZONTAL)
+                    .withTransitionalStyle(isOn, LifeTime.of(1, TimeUnit.MILLISECONDS), (state, it) -> it
+                        .backgroundColor(new java.awt.Color(40, 210, 220, (int)(255 * state.progress())))
+                    )
+
+        and : 'We build the underlying `JSlider`:'
+            var slider = ui.get(javax.swing.JSlider)
+
+        expect : """
+            The component has to be non opaque because the background color is transparent.
+            So the parent component will be visible behind the background.
+        """
+            slider.isOpaque() == false
+        and : 'This is also reflected in the background color of the slider:'
+            slider.getBackground().getAlpha() == 0
+
+        when : 'We set the `isOn` flag to true in order to start the transition:'
+            isOn.set(true)
+        and : 'We wait for the transition to complete:'
+            Thread.sleep(50)
+            UI.sync()
+
+        then : """
+            The slider is now opaque because the `isOn` flag is true, which translates to 
+            an animation progress transitioning to 1,
+            causing the background color to be opaque (255 * 1 = 255).
+        """
+            slider.isOpaque() == true
+
+        when : """
+            We now want to go back to the initial state, so we set the `isOn` flag to false again...
+        """
+            isOn.set(false)
+        and : '...again we wait for the transition to complete...'
+            Thread.sleep(50)
+            UI.sync()
+        then : """
+            We are back to the initial state where the slider is no longer opaque
+            due to the background color being transparent again.
+        """
+            slider.isOpaque() == false
+    }
 }
 
