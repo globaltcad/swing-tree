@@ -513,6 +513,11 @@ abstract class UIForAnything<I, C extends E, E extends Component>
             {
                 C thisComponent = componentRef.get();
                 if ( thisComponent == null ) {
+                    /*
+                        We make sure that the action is only executed if the component
+                        is not disposed. This is important because the action may
+                        access the component, and we don't want to get a NPE.
+                    */
                     Val<T> property = propertyRef.get();
                     if ( property != null )
                         property.unsubscribe(this);
@@ -522,11 +527,6 @@ abstract class UIForAnything<I, C extends E, E extends Component>
 
                 T v = value.orElseNull(); // IMPORTANT! We first capture the value and then execute the action in the app thread.
                 _runInUI(() ->
-                    /*
-                        We make sure that the action is only executed if the component
-                        is not disposed. This is important because the action may
-                        access the component, and we don't want to get a NPE.
-                    */
                     UI.run( () -> {
                         try {
                             displayAction.accept(thisComponent, v); // Here the captured value is used. This is extremely important!
