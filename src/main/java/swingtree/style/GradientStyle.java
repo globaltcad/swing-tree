@@ -4,6 +4,8 @@ import org.slf4j.Logger;
 import swingtree.UI;
 import swingtree.layout.Location;
 
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import java.awt.*;
 import java.util.Arrays;
 import java.util.Objects;
@@ -13,9 +15,8 @@ import java.util.function.Function;
  *  An immutable config API for specifying a gradient style.
  *  as a sub-style of various other styles,
  *  like for example {@link BaseStyle} or {@link BorderStyle} accessed through the
- *  {@link ComponentStyleDelegate#gradient(String, Function)} or
- *  {@link ComponentStyleDelegate#borderGradient(String, Function)}
- *  methods.
+ *  {@link ComponentStyleDelegate#gradient(String, Function)}
+ *  method.
  *  The state of a gradient style is immutable and can only be updated by
  *  wither like methods that return a new instance of the gradient style
  *  with the specified property updated.
@@ -87,7 +88,8 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
                                                         new Color[0],
                                                         Offset.none(),
                                                         -1f,
-                                                        UI.ComponentArea.BODY
+                                                        UI.ComponentArea.BODY,
+                                                        UI.ComponentBoundary.EXTERIOR_TO_BORDER
                                                     );
 
     /**
@@ -99,21 +101,31 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
     public static GradientStyle none() { return _NONE; }
 
 
-    private final UI.Transition     _transition;
-    private final UI.GradientType   _type;
-    private final Color[]           _colors;
-    private final Offset           _offset;
-    private final float            _size;
-    private final UI.ComponentArea _area;
+    private final UI.Transition        _transition;
+    private final UI.GradientType      _type;
+    private final Color[]              _colors;
+    private final Offset               _offset;
+    private final float                _size;
+    private final UI.ComponentArea     _area;
+    private final UI.ComponentBoundary _boundary;
 
 
-    private GradientStyle( UI.Transition transition, UI.GradientType type, Color[] colors, Offset offset, float size, UI.ComponentArea area ) {
+    private GradientStyle(
+        UI.Transition        transition,
+        UI.GradientType      type,
+        Color[]              colors,
+        Offset               offset,
+        float                size,
+        UI.ComponentArea     area,
+        UI.ComponentBoundary boundary
+    ) {
         _transition = Objects.requireNonNull(transition);
         _type       = Objects.requireNonNull(type);
         _colors     = Objects.requireNonNull(colors);
         _offset     = Objects.requireNonNull(offset);
         _size       = ( size < 0 ? -1 : size );
         _area       = Objects.requireNonNull(area);
+        _boundary   = Objects.requireNonNull(boundary);
     }
 
     UI.Transition transition() { return _transition; }
@@ -127,6 +139,8 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
     float size() { return _size; }
 
     UI.ComponentArea area() { return _area; }
+
+    UI.ComponentBoundary boundary() { return _boundary; }
 
     /**
      *  Define a list of colors which will, as part of the gradient, transition from one
@@ -142,7 +156,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
         Objects.requireNonNull(colors);
         for ( Color color : colors )
             Objects.requireNonNull(color, "Use UI.COLOR_UNDEFINED instead of null to represent the absence of a color.");
-        return new GradientStyle(_transition, _type, colors, _offset, _size, _area);
+        return new GradientStyle(_transition, _type, colors, _offset, _size, _area, _boundary);
     }
 
     /**
@@ -162,7 +176,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
             for ( int i = 0; i < colors.length; i++ )
                 actualColors[i] = UI.color(colors[i]);
 
-            return new GradientStyle(_transition, _type, actualColors, _offset, _size, _area);
+            return new GradientStyle(_transition, _type, actualColors, _offset, _size, _area, _boundary);
         } catch ( Exception e ) {
             log.error("Failed to parse color strings: " + Arrays.toString(colors), e);
             return this; // We want to avoid side effects other than a wrong color
@@ -188,7 +202,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
      */
     public GradientStyle transition( UI.Transition transition ) {
         Objects.requireNonNull(transition);
-        return new GradientStyle(transition, _type, _colors, _offset, _size, _area);
+        return new GradientStyle(transition, _type, _colors, _offset, _size, _area, _boundary);
     }
 
     /**
@@ -204,7 +218,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
      */
     public GradientStyle type( UI.GradientType type ) {
         Objects.requireNonNull(type);
-        return new GradientStyle(_transition, type, _colors, _offset, _size, _area);
+        return new GradientStyle(_transition, type, _colors, _offset, _size, _area, _boundary);
     }
 
     /**
@@ -217,7 +231,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
      * @return A new gradient style with the specified offset.
      */
     public GradientStyle offset( double x, double y ) {
-        return new GradientStyle(_transition, _type, _colors, Offset.of(x,y), _size, _area);
+        return new GradientStyle(_transition, _type, _colors, Offset.of(x,y), _size, _area, _boundary);
     }
 
     /**
@@ -232,7 +246,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
      * @return A new gradient style with the specified size.
      */
     public GradientStyle size( double size ) {
-        return new GradientStyle(_transition, _type, _colors, _offset, (float) size, _area);
+        return new GradientStyle(_transition, _type, _colors, _offset, (float) size, _area, _boundary);
     }
 
     /**
@@ -244,7 +258,48 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
      * @return A new gradient style with the specified area.
      */
     public GradientStyle area( UI.ComponentArea area ) {
-        return new GradientStyle(_transition, _type, _colors, _offset, _size, area);
+        return new GradientStyle(_transition, _type, _colors, _offset, _size, area, _boundary);
+    }
+
+    /**
+     *  Define the boundary at which the gradient should start in terms of its offset.
+     *  So if the boundary is set to {@link UI.ComponentBoundary#EXTERIOR_TO_BORDER}
+     *  then the gradient position will be determined by the margin of the component. <br>
+     *  Here a complete list of the available boundaries:
+     * <ul>
+     *     <li>{@link UI.ComponentBoundary#OUTER_TO_EXTERIOR} -
+     *     The outermost boundary of the entire component, including any margin that might be applied.
+     *     Using this boundary will cause the gradient to be positioned somewhere at
+     *     the outer most edge of the component.
+     *     </li>
+     *     <li>{@link UI.ComponentBoundary#EXTERIOR_TO_BORDER} -
+     *     The boundary located after the margin but before the border.
+     *     This tightly wraps the entire {@link UI.ComponentArea#BODY}.
+     *     Using this boundary will cause the gradient to be positioned somewhere at
+     *     the outer most edge of the component's body, which is between the margin and the border.
+     *     </li>
+     *     <li>{@link UI.ComponentBoundary#BORDER_TO_INTERIOR} -
+     *     The boundary located after the border but before the padding.
+     *     It represents the edge of the component's interior.
+     *     Using this boundary will cause the gradient to be positioned somewhere at
+     *     the outer most edge of the component's interior, which is between the border and the padding area.
+     *     </li>
+     *     <li>{@link UI.ComponentBoundary#INTERIOR_TO_CONTENT} -
+     *     The boundary located after the padding.
+     *     It represents the innermost boundary of the component, where the actual content of the component begins,
+     *     like for example the contents of a {@link JPanel} or {@link JScrollPane}.
+     *     Using this boundary will cause the gradient to be positioned somewhere after the padding area
+     *     and before the content area, which is where all of the child components are located.
+     *     </li>
+     * </ul>
+     *  <p>
+     *
+     *
+     * @param boundary The boundary at which the gradient should start in terms of its offset.
+     * @return A new gradient style with the specified boundary.
+     */
+    public GradientStyle boundary( UI.ComponentBoundary boundary ) {
+        return new GradientStyle(_transition, _type, _colors, _offset, _size, _area, boundary);
     }
 
     @Override
@@ -271,12 +326,13 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
                Arrays.equals(_colors, that._colors)  &&
                Objects.equals(_offset, that._offset) &&
                _size       == that._size             &&
-               _area       == that._area;
+               _area       == that._area             &&
+               _boundary   == that._boundary;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(_transition, _type, Arrays.hashCode(_colors), _offset, _size, _area);
+        return Objects.hash(_transition, _type, Arrays.hashCode(_colors), _offset, _size, _area, _boundary);
     }
 
     @Override
@@ -302,7 +358,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
                 if ( color != UI.COLOR_UNDEFINED)
                     realColors[index++] = color;
 
-            return new GradientStyle(_transition, _type, realColors, _offset, _size, _area);
+            return new GradientStyle(_transition, _type, realColors, _offset, _size, _area, _boundary);
         }
 
         return this;

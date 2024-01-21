@@ -67,10 +67,19 @@ final class StyleRenderer
                     g2d.setColor(gradient.colors()[0]);
                     g2d.fill(conf.get(UI.ComponentArea.BODY));
                 }
-                else if ( gradient.transition().isDiagonal() )
-                    _renderDiagonalGradient(g2d, conf.currentBounds().size(), conf.style().margin(), gradient, conf.get(gradient.area()));
-                else
-                    _renderVerticalOrHorizontalGradient(g2d, conf.currentBounds().size(), conf.style().margin(), gradient, conf.get(gradient.area()));
+                else {
+                    Outline insets = Outline.none();
+                    switch ( gradient.boundary() ) {
+                        case OUTER_TO_EXTERIOR:   insets = Outline.none(); break;
+                        case EXTERIOR_TO_BORDER:  insets = conf.style().margin(); break;
+                        case BORDER_TO_INTERIOR:  insets = conf.style().margin().plus(conf.style().border().widths()); break;
+                        case INTERIOR_TO_CONTENT: insets = conf.style().margin().plus(conf.style().border().widths()).plus(conf.style().padding()); break;
+                    }
+                    if ( gradient.transition().isDiagonal() )
+                    _renderDiagonalGradient(g2d, conf.currentBounds().size(), insets, gradient, conf.get(gradient.area()));
+                    else
+                        _renderVerticalOrHorizontalGradient(g2d, conf.currentBounds().size(), insets, gradient, conf.get(gradient.area()));
+                }
             }
 
         // 3. Shadows, which are simple gradient based drop shadows that can go inwards or outwards

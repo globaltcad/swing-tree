@@ -493,6 +493,49 @@ public final class UI extends UINamespaceUtilities
     }
 
     /**
+     * Enum representing the different boundaries of a UI component.
+     * Here's a brief explanation of each enum entry:
+     * <ul>
+     *     <li>{@link ComponentBoundary#OUTER_TO_EXTERIOR} -
+     *     The outermost boundary of the entire component, including any margin that might be applied.
+     *     </li>
+     *     <li>{@link ComponentBoundary#EXTERIOR_TO_BORDER} -
+     *     The boundary located after the margin but before the border.
+     *     This tightly wraps the entire {@link ComponentArea#BODY}.
+     *     </li>
+     *     <li>{@link ComponentBoundary#BORDER_TO_INTERIOR} -
+     *     The boundary located after the border but before the padding.
+     *     It represents the edge of the component's interior.
+     *     </li>
+     *     <li>{@link ComponentBoundary#INTERIOR_TO_CONTENT} -
+     *     The boundary located after the padding.
+     *     It represents the innermost boundary of the component, where the actual content of the component begins,
+     *     like for example the contents of a {@link JPanel} or {@link JScrollPane}.
+     *     </li>
+     * </ul>
+     */
+    public enum ComponentBoundary {
+        /**
+         * The outermost boundary of the component, including any margin that might be applied.
+         */
+        OUTER_TO_EXTERIOR, // The outermost boundary of the component.
+        /**
+         * The boundary located after the margin but before the border. This wraps the {@link ComponentArea#BODY}.
+         */
+        EXTERIOR_TO_BORDER, // After the margin, before the border.
+        /**
+         * The boundary located after the border but before the padding. It represents the edge of the component's interior.
+         */
+        BORDER_TO_INTERIOR, // After the border, before the padding.
+        /**
+         * The boundary located after the padding.
+         * It represents the innermost boundary of the component, where the actual content of the component begins,
+         * like for example the contents of a {@link JPanel} or {@link JScrollPane}.
+         */
+        INTERIOR_TO_CONTENT // After the padding, before the content.
+    }
+
+    /**
      *  Use this to specify the orientation of a component.
      *  This is especially important for components that display text.
      *  <br>
