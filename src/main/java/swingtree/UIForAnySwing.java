@@ -44,10 +44,10 @@ import java.util.function.Function;
  * 	where you can browse a large collection of examples demonstrating how to use the API of this class.</b>
  *  <br><br>
  *
- * @param <I> The concrete extension of the {@link AbstractNestedBuilder}.
+ * @param <I> The concrete extension of the {@link UIForAnything}.
  * @param <C> The type parameter for the component type wrapped by an instance of this class.
  */
-public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNestedBuilder<I, C, JComponent>
+public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnything<I, C, JComponent>
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(UI.class);
 
@@ -3660,12 +3660,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
     }
 
     @Override
-    protected void _addComponentTo(C thisComponent, JComponent newComponent, Object conf ) {
-        NullUtil.nullArgCheck(newComponent, "component", JComponent.class);
-        if ( conf == null )
-            thisComponent.add(newComponent);
+    protected void _addComponentTo(C thisComponent, JComponent addedComponent, Object constraints) {
+        NullUtil.nullArgCheck(addedComponent, "component", JComponent.class);
+        if ( constraints == null )
+            thisComponent.add(addedComponent);
         else
-            thisComponent.add(newComponent, conf);
+            thisComponent.add(addedComponent, constraints);
     }
 
     /**
@@ -3979,7 +3979,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
             }
         });
         viewables.forEach( v -> {
-            _addBuildersTo( thisComponent, new AbstractNestedBuilder[]{viewSupplier.createViewFor(v)} );
+            _addBuildersTo( thisComponent, new UIForAnything[]{viewSupplier.createViewFor(v)} );
         });
     }
 

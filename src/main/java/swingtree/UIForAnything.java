@@ -18,8 +18,8 @@ import java.util.function.Supplier;
 
 /**
  *  This is the root builder type for all other SwingTree builder subtypes.
- *  It is a generic builder which may wrap anything to allow for method chaining based building
- *  in SwingTree. <br>
+ *  It is a generic builder which may wrap any type of Swing component to allow for method chaining
+ *  and nesting based building in SwingTree. <br>
  *  Note that a builder is immutable, which means that every method call on a builder
  *  returns a new builder instance with the new state. <br>
  *  The state of the previous builder is disposed of, which means that the wrapped component
@@ -30,224 +30,16 @@ import java.util.function.Supplier;
  * @param <C> The type parameter representing the concrete component type which this builder is responsible for building.
  * @param <E> The component type parameter which ought to be built in some way.
  */
-abstract class AbstractNestedBuilder<I, C extends E, E extends Component>
+abstract class UIForAnything<I, C extends E, E extends Component>
 {
     /**
-     *  Returns the state of the builder, which is a container for the wrapped component
-     *  as well as it's type and current {@link EventProcessor}.
-     * @return The state of the builder.
+     *  The type class of the component managed by this builder.
+     *  See documentation for method "build" for more information.
+     * @return The type class of the component managed by this builder.
      */
-    protected abstract BuilderState<C> _state();
-
-    /**
-     *  An internal wither method which creates a new builder instance with the provided
-     *  {@link BuilderState} stored inside it.
-     *
-     * @param newState The new state which should be stored inside the new builder instance.
-     * @return A new builder instance with the provided state stored inside it.
-     */
-    protected abstract AbstractNestedBuilder<I,C, E> _newBuilderWithState( BuilderState<C> newState );
-
-    /**
-     *  Creates a new builder with the provided component mutation applied to the wrapped component. <br>
-     *  Note that the SwingTree builders are immutable, which means that this method
-     *  does not mutate the current builder instance, but instead creates a new builder instance
-     *  with a new {@link BuilderState} which contains the provided component mutation (see {@link BuilderState#withMutator(Consumer)}).
-     *  Also see {@link #_newBuilderWithState(BuilderState)}.
-     *
-     * @param componentMutator A consumer lambda which receives the wrapped component and
-     *                         is then used to apply some builder action to it.
-     * @return A new builder instance with the provided component mutation applied to the wrapped component.
-     */
-    protected final AbstractNestedBuilder<I,C,E> _with( Consumer<C> componentMutator ) {
-        BuilderState<C> newState = _state().withMutator(componentMutator);
-        return _newBuilderWithState(newState);
+    public final Class<C> getType() {
+        return _state().componentType();
     }
-
-    /**
-     * @param action An action which should be executed by the UI thread,
-     *               which is determined by implementations of the {@link EventProcessor},
-     *               also see {@link UI#use(EventProcessor, Supplier)}. <br>
-     *               Usually the UI thread is AWT's Event Dispatch Thread (EDT).
-     */
-    protected final void _runInUI( Runnable action ) {
-        _state().eventProcessor().registerUIEvent( action );
-    }
-
-    /**
-     * @param action An action which should be executed by the application thread,
-     *               which is determined by implementations of the {@link EventProcessor},
-     *               also see {@link UI#use(EventProcessor, Supplier)}.
-     */
-    protected final void _runInApp( Runnable action ) {
-        _state().eventProcessor().registerAppEvent(action);
-    }
-
-    /**
-     * @param value A value which should be captured and then passed to the provided action
-     *              on the current application thread (see {@link EventProcessor} and {@link UI#use(EventProcessor, Supplier)}).
-     * @param action A consumer lambda which is executed by the application thread
-     *               and receives the provided value.
-     * @param <T> The type of the value.
-     */
-    protected final <T> void _runInApp( T value, Consumer<T> action ) {
-        _runInApp(()->action.accept(value));
-    }
-
-    /**
-     *  Use this to register a state change listener for the provided property
-     *  which will be executed by the UI thread (see {@link EventProcessor}).
-     *
-     * @param val A property whose state changes should be listened to on the UI thread.
-     * @param c The component which is wrapped by this builder.
-     * @param displayAction A consumer lambda receiving the provided value and
-     *                      is then executed by the UI thread.
-     * @param <T> The type of the item wrapped by the provided property.
-     */
-    protected final <T> void _onShow( Val<T> val, C c, BiConsumer<C, T> displayAction )
-    {
-        Objects.requireNonNull(val);
-        Objects.requireNonNull(displayAction);
-        _onShow( new WeakReference<>(val), new WeakReference<>(c), displayAction );
-    }
-
-    protected final <T> AbstractNestedBuilder<I,C,E> _withOnShow( Val<T> val, BiConsumer<C, T> displayAction )
-    {
-        Objects.requireNonNull(val);
-        Objects.requireNonNull(displayAction);
-        return _with( thisComponent -> _onShow( val, thisComponent, displayAction) );
-    }
-
-    private <T> void _onShow(
-        WeakReference<Val<T>> propertyRef,
-        WeakReference<C>      componentRef,
-        BiConsumer<C, T>      displayAction
-    ) {
-        Objects.requireNonNull(propertyRef);
-        Objects.requireNonNull(componentRef);
-        Objects.requireNonNull(displayAction);
-        Action<Val<T>> action = new Action<Val<T>>() {
-            @Override
-            public void accept( Val<T> value )
-            {
-                C thisComponent = componentRef.get();
-                if ( thisComponent == null ) {
-                    Val<T> property = propertyRef.get();
-                    if ( property != null )
-                        property.unsubscribe(this);
-                        // ^ We unsubscribe from the property because the component is disposed.
-                    return;
-                }
-
-                T v = value.orElseNull(); // IMPORTANT! We first capture the value and then execute the action in the app thread.
-                _runInUI(() ->
-                    /*
-                        We make sure that the action is only executed if the component
-                        is not disposed. This is important because the action may
-                        access the component, and we don't want to get a NPE.
-                    */
-                    UI.run( () -> {
-                        try {
-                            displayAction.accept(thisComponent, v); // Here the captured value is used. This is extremely important!
-                            /*
-                                 Since this is happening in another thread we are using the captured property item/value.
-                                 The property might have changed in the meantime, but we don't care about that,
-                                 we want things to happen in the order they were triggered.
-                             */
-                        } catch ( Exception e ) {
-                            throw new RuntimeException(
-                                "Failed to apply state of property '" + propertyRef.get() + "' to " +
-                                "component '" + thisComponent + "'.",
-                                e
-                            );
-                        }
-                    })
-                );
-            }
-        };
-        Optional.ofNullable(propertyRef.get()).ifPresent(
-            property -> property.onChange(From.ALL, action)
-        );
-        CustomCleaner
-            .getInstance()
-            .register(componentRef.get(),
-                () -> {
-                    Val<T> property = propertyRef.get();
-                    if ( property != null )
-                        property.unsubscribe(action);
-                }
-            );
-    }
-
-    /**
-     *  Use this to register a state change listener for the provided property list
-     *  which will be executed by the UI thread (see {@link EventProcessor}).
-     *
-     * @param vals A property list whose state changes should be listened to on the UI thread.
-     * @param c The component which is wrapped by this builder.
-     * @param displayAction A consumer lambda receiving the action delegate and
-     *                      is then executed by the UI thread.
-     * @param <T> The type of the items wrapped by the provided property list.
-     */
-    protected final <T> void _onShow(
-            Vals<T> vals, C c, BiConsumer<C, ValsDelegate<T>> displayAction
-    ) {
-        Objects.requireNonNull(vals);
-        Objects.requireNonNull(displayAction);
-        _onShow( vals, new WeakReference<>(c), displayAction );
-    }
-
-    protected final <T> AbstractNestedBuilder<I,C,E> _withOnShow(
-        Vals<T> vals, BiConsumer<C, ValsDelegate<T>> displayAction
-    ) {
-        Objects.requireNonNull(vals);
-        Objects.requireNonNull(displayAction);
-        return _with( thisComponent -> _onShow( vals, thisComponent, displayAction ) );
-    }
-
-    private <T> void _onShow(
-        Vals<T> properties, WeakReference<C> ref, BiConsumer<C, ValsDelegate<T>> displayAction
-    ) {
-        Objects.requireNonNull(properties);
-        Objects.requireNonNull(displayAction);
-        Action<ValsDelegate<T>> action = new Action<ValsDelegate<T>>() {
-            @Override
-            public void accept( ValsDelegate<T> delegate ) {
-                C thisComponent = ref.get();
-                if ( thisComponent == null ) {
-                    properties.unsubscribe(this); // We unsubscribe from the property if the component is disposed.
-                    return;
-                }
-                _runInUI(() ->{
-                    displayAction.accept(thisComponent, delegate);
-                    /*
-                        We make sure that the action is only executed if the component
-                        is not disposed. This is important because the action may
-                        access the component, and we don't want to get a NPE.
-                    */
-                });
-            }
-        };
-        properties.onChange(action);
-        CustomCleaner.getInstance().register(ref.get(), () -> properties.unsubscribe(action));
-    }
-
-    /**
-     * @return The builder instance itself based on the type parameter {@code <I>}.
-     */
-    protected final I _this() { return (I) this; }
-
-    /**
-     *  This method is used to dispose of the state of the builder,
-     *  which means that the builder state disposes of its reference to either
-     *  the wrapped component or the wrapped component or the composite of component
-     *  factories which are used to build the wrapped component eagerly each time
-     *  the wrapped component is accessed. <br>
-     *  This is important to avoid memory leaks, as a component is typically
-     *  part of a tree of components, and if one component is not garbage collected,
-     *  then the whole tree is not garbage collected.
-     */
-    protected final void _disposeState() { _state().dispose(); }
 
     /**
      *  The component managed by this builder.
@@ -284,15 +76,6 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component>
     @Deprecated
     public final OptionalUI<C> component() {
         return OptionalUI.ofNullable(_state().component());
-    }
-
-    /**
-     *  The type class of the component managed by this builder.
-     *  See documentation for method "build" for more information.
-     * @return The type class of the component managed by this builder.
-     */
-    public final Class<C> getType() {
-        return _state().componentType();
     }
 
     /**
@@ -525,7 +308,7 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component>
      * @return This very instance, which enables builder-style method chaining.
      */
     public final <T extends JComponent> I add( UIForAnySwing<?, T> builder ) {
-        return (I) this.add( new AbstractNestedBuilder[]{builder} );
+        return (I) this.add( new UIForAnything[]{builder} );
     }
 
     /**
@@ -540,7 +323,7 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component>
      */
     @SafeVarargs
     @SuppressWarnings("varargs")
-    public final <B extends AbstractNestedBuilder<?, ?, JComponent>> I add( B... builders )
+    public final <B extends UIForAnything<?, ?, JComponent>> I add( B... builders )
     {
         if ( builders == null )
             throw new IllegalArgumentException("Swing tree builders may not be null!");
@@ -569,11 +352,10 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component>
     }
 
     @SafeVarargs
-    protected final <B extends AbstractNestedBuilder<?, ?, JComponent>> void _addBuildersTo(
-        C thisComponent,
-        B... builders
+    protected final <B extends UIForAnything<?, ?, JComponent>> void _addBuildersTo(
+        C thisComponent, B... builders
     ) {
-        for ( AbstractNestedBuilder<?, ?, ?> b : builders )
+        for ( UIForAnything<?, ?, ?> b : builders )
             _addBuilderTo(thisComponent, b, null);
     }
 
@@ -583,9 +365,9 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component>
             _addBuilderTo(thisComponent, UI.of((JComponent) other), null);
     }
 
-    protected final void _addBuilderTo( C thisComponent, AbstractNestedBuilder<?, ?, ?> builder, Object conf )
+    protected final void _addBuilderTo( C thisComponent, UIForAnything<?, ?, ?> builder, Object conf )
     {
-        NullUtil.nullArgCheck(builder, "builder", AbstractNestedBuilder.class);
+        NullUtil.nullArgCheck(builder, "builder", UIForAnything.class);
 
         boolean isCoupled       = _state().eventProcessor() == EventProcessor.COUPLED;
         boolean isCoupledStrict = _state().eventProcessor() == EventProcessor.COUPLED_STRICT;
@@ -625,11 +407,228 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component>
      * Implementations of this abstract method ought to enable support for nested building.
      * <br><br>
      *
-     * @param thisComponent The component which is wrapped by this builder.
-     * @param component     A component instance which ought to be added to the wrapped component type.
-     * @param conf          The layout constraint which ought to be used to add the component to the wrapped component type.
+     * @param thisComponent  The component which is wrapped by this builder.
+     * @param addedComponent A component instance which ought to be added to the wrapped component type.
+     * @param constraints    The layout constraint which ought to be used to add the component to the wrapped component type.
      */
-    protected abstract void _addComponentTo( C thisComponent, E component, Object conf );
+    protected abstract void _addComponentTo( C thisComponent, E addedComponent, Object constraints );
+
+    /**
+     *  Returns the state of the builder, which is a container for the wrapped component
+     *  as well as it's type and current {@link EventProcessor}.
+     * @return The state of the builder.
+     */
+    protected abstract BuilderState<C> _state();
+
+    /**
+     *  An internal wither method which creates a new builder instance with the provided
+     *  {@link BuilderState} stored inside it.
+     *
+     * @param newState The new state which should be stored inside the new builder instance.
+     * @return A new builder instance with the provided state stored inside it.
+     */
+    protected abstract UIForAnything<I,C, E> _newBuilderWithState( BuilderState<C> newState );
+
+    /**
+     *  Creates a new builder with the provided component mutation applied to the wrapped component. <br>
+     *  Note that the SwingTree builders are immutable, which means that this method
+     *  does not mutate the current builder instance, but instead creates a new builder instance
+     *  with a new {@link BuilderState} which contains the provided component mutation (see {@link BuilderState#withMutator(Consumer)}).
+     *  Also see {@link #_newBuilderWithState(BuilderState)}.
+     *
+     * @param componentMutator A consumer lambda which receives the wrapped component and
+     *                         is then used to apply some builder action to it.
+     * @return A new builder instance with the provided component mutation applied to the wrapped component.
+     */
+    protected final UIForAnything<I,C,E> _with( Consumer<C> componentMutator ) {
+        BuilderState<C> newState = _state().withMutator(componentMutator);
+        return _newBuilderWithState(newState);
+    }
+
+    /**
+     * @param action An action which should be executed by the UI thread,
+     *               which is determined by implementations of the {@link EventProcessor},
+     *               also see {@link UI#use(EventProcessor, Supplier)}. <br>
+     *               Usually the UI thread is AWT's Event Dispatch Thread (EDT).
+     */
+    protected final void _runInUI( Runnable action ) {
+        _state().eventProcessor().registerUIEvent( action );
+    }
+
+    /**
+     * @param action An action which should be executed by the application thread,
+     *               which is determined by implementations of the {@link EventProcessor},
+     *               also see {@link UI#use(EventProcessor, Supplier)}.
+     */
+    protected final void _runInApp( Runnable action ) {
+        _state().eventProcessor().registerAppEvent(action);
+    }
+
+    /**
+     * @param value A value which should be captured and then passed to the provided action
+     *              on the current application thread (see {@link EventProcessor} and {@link UI#use(EventProcessor, Supplier)}).
+     * @param action A consumer lambda which is executed by the application thread
+     *               and receives the provided value.
+     * @param <T> The type of the value.
+     */
+    protected final <T> void _runInApp( T value, Consumer<T> action ) {
+        _runInApp(()->action.accept(value));
+    }
+
+    /**
+     *  Use this to register a state change listener for the provided property
+     *  which will be executed by the UI thread (see {@link EventProcessor}).
+     *
+     * @param val A property whose state changes should be listened to on the UI thread.
+     * @param thisComponent The component which is wrapped by this builder.
+     * @param displayAction A consumer lambda receiving the provided value and
+     *                      is then executed by the UI thread.
+     * @param <T> The type of the item wrapped by the provided property.
+     */
+    protected final <T> void _onShow( Val<T> val, C thisComponent, BiConsumer<C, T> displayAction )
+    {
+        Objects.requireNonNull(val);
+        Objects.requireNonNull(displayAction);
+        _onShow( new WeakReference<>(val), new WeakReference<>(thisComponent), displayAction );
+    }
+
+    protected final <T> UIForAnything<I,C,E> _withOnShow( Val<T> val, BiConsumer<C, T> displayAction )
+    {
+        Objects.requireNonNull(val);
+        Objects.requireNonNull(displayAction);
+        return _with( thisComponent -> _onShow( val, thisComponent, displayAction) );
+    }
+
+    private <T> void _onShow(
+        WeakReference<Val<T>> propertyRef,
+        WeakReference<C>      componentRef,
+        BiConsumer<C, T>      displayAction
+    ) {
+        Objects.requireNonNull(propertyRef);
+        Objects.requireNonNull(componentRef);
+        Objects.requireNonNull(displayAction);
+        Action<Val<T>> action = new Action<Val<T>>() {
+            @Override
+            public void accept( Val<T> value )
+            {
+                C thisComponent = componentRef.get();
+                if ( thisComponent == null ) {
+                    Val<T> property = propertyRef.get();
+                    if ( property != null )
+                        property.unsubscribe(this);
+                        // ^ We unsubscribe from the property because the component is disposed.
+                    return;
+                }
+
+                T v = value.orElseNull(); // IMPORTANT! We first capture the value and then execute the action in the app thread.
+                _runInUI(() ->
+                    /*
+                        We make sure that the action is only executed if the component
+                        is not disposed. This is important because the action may
+                        access the component, and we don't want to get a NPE.
+                    */
+                    UI.run( () -> {
+                        try {
+                            displayAction.accept(thisComponent, v); // Here the captured value is used. This is extremely important!
+                            /*
+                                 Since this is happening in another thread we are using the captured property item/value.
+                                 The property might have changed in the meantime, but we don't care about that,
+                                 we want things to happen in the order they were triggered.
+                             */
+                        } catch ( Exception e ) {
+                            throw new RuntimeException(
+                                "Failed to apply state of property '" + propertyRef.get() + "' to " +
+                                "component '" + thisComponent + "'.",
+                                e
+                            );
+                        }
+                    })
+                );
+            }
+        };
+        Optional.ofNullable(propertyRef.get()).ifPresent(
+            property -> property.onChange(From.ALL, action)
+        );
+        CustomCleaner
+            .getInstance()
+            .register(componentRef.get(),
+                () -> {
+                    Val<T> property = propertyRef.get();
+                    if ( property != null )
+                        property.unsubscribe(action);
+                }
+            );
+    }
+
+    /**
+     *  Use this to register a state change listener for the provided property list
+     *  which will be executed by the UI thread (see {@link EventProcessor}).
+     *
+     * @param vals A property list whose state changes should be listened to on the UI thread.
+     * @param c The component which is wrapped by this builder.
+     * @param displayAction A consumer lambda receiving the action delegate and
+     *                      is then executed by the UI thread.
+     * @param <T> The type of the items wrapped by the provided property list.
+     */
+    protected final <T> void _onShow(
+        Vals<T> vals, C c, BiConsumer<C, ValsDelegate<T>> displayAction
+    ) {
+        Objects.requireNonNull(vals);
+        Objects.requireNonNull(displayAction);
+        _onShow( vals, new WeakReference<>(c), displayAction );
+    }
+
+    protected final <T> UIForAnything<I,C,E> _withOnShow(
+        Vals<T> vals, BiConsumer<C, ValsDelegate<T>> displayAction
+    ) {
+        Objects.requireNonNull(vals);
+        Objects.requireNonNull(displayAction);
+        return _with( thisComponent -> _onShow( vals, thisComponent, displayAction ) );
+    }
+
+    private <T> void _onShow(
+        Vals<T> properties, WeakReference<C> ref, BiConsumer<C, ValsDelegate<T>> displayAction
+    ) {
+        Objects.requireNonNull(properties);
+        Objects.requireNonNull(displayAction);
+        Action<ValsDelegate<T>> action = new Action<ValsDelegate<T>>() {
+            @Override
+            public void accept( ValsDelegate<T> delegate ) {
+                C thisComponent = ref.get();
+                if ( thisComponent == null ) {
+                    properties.unsubscribe(this); // We unsubscribe from the property if the component is disposed.
+                    return;
+                }
+                _runInUI(() ->{
+                    displayAction.accept(thisComponent, delegate);
+                    /*
+                        We make sure that the action is only executed if the component
+                        is not disposed. This is important because the action may
+                        access the component, and we don't want to get a NPE.
+                    */
+                });
+            }
+        };
+        properties.onChange(action);
+        CustomCleaner.getInstance().register(ref.get(), () -> properties.unsubscribe(action));
+    }
+
+    /**
+     * @return The builder instance itself based on the type parameter {@code <I>}.
+     */
+    protected final I _this() { return (I) this; }
+
+    /**
+     *  This method is used to dispose of the state of the builder,
+     *  which means that the builder state disposes of its reference to either
+     *  the wrapped component or the wrapped component or the composite of component
+     *  factories which are used to build the wrapped component eagerly each time
+     *  the wrapped component is accessed. <br>
+     *  This is important to avoid memory leaks, as a component is typically
+     *  part of a tree of components, and if one component is not garbage collected,
+     *  then the whole tree is not garbage collected.
+     */
+    protected final void _disposeState() { _state().dispose(); }
 
     @Override
     public final int hashCode() {
@@ -641,7 +640,7 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component>
         if ( obj == null ) return false;
         if ( obj == this ) return true;
         if ( obj.getClass() != getClass() ) return false;
-        AbstractNestedBuilder<?,?,?> other = (AbstractNestedBuilder<?,?,?>) obj;
+        UIForAnything<?,?,?> other = (UIForAnything<?,?,?>) obj;
         return _state().equals(other._state());
     }
 
