@@ -152,8 +152,8 @@ final class BuilderState<C extends java.awt.Component>
     }
 
     /**
-     *  Cut off the strong reference to the component managed by this builder
-     *  and dispose this builder node, meaning it is no longer usable for building. <br>
+     *  Cut off the strong reference to the component supplier managed by this builder
+     *  and disposes this builder node as a whole, meaning it is no longer usable for building. <br>
      *  <b>Only call this method from the UI thread (AWT's EDT thread) as builder states are not thread safe.</b>
      */
     void dispose() {

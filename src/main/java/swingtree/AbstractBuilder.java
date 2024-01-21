@@ -233,13 +233,16 @@ abstract class AbstractBuilder<I, C extends Component>
     protected final I _this() { return (I) this; }
 
     /**
-     *  This method sets the strong reference to the component to null,
-     *  which allows the component to be garbage collected.
+     *  This method is used to dispose of the state of the builder,
+     *  which means that the builder state disposes of its reference to either
+     *  the wrapped component or the wrapped component or the composite of component
+     *  factories which are used to build the wrapped component eagerly each time
+     *  the wrapped component is accessed. <br>
      *  This is important to avoid memory leaks, as a component is typically
      *  part of a tree of components, and if one component is not garbage collected,
      *  then the whole tree is not garbage collected.
      */
-    protected final void _detachStrongRef() { _state().dispose(); }
+    protected final void _disposeState() { _state().dispose(); }
 
     /**
      *  The component managed by this builder.

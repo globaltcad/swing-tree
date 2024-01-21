@@ -39,12 +39,6 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extend
                ._this();
     }
 
-    @SafeVarargs
-    protected final void _addComponentsTo( C thisComponent, E... componentsToBeAdded ) {
-        for ( E other : componentsToBeAdded )
-            _addBuilderTo(thisComponent, UI.of((JComponent) other), null);
-    }
-
     /**
      * @param builder A builder for another {@link JComponent} instance which ought to be added to the wrapped component type.
      * @param <T> The type of the {@link JComponent} which is wrapped by the provided builder.
@@ -55,16 +49,59 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extend
     }
 
     /**
-     * This builder class expects its implementations to be builder types
-     * for anything which can be built in a nested tree-like structure.
-     * Implementations of this abstract method ought to enable support for nested building.
-     * <br><br>
+     *  This method provides the same functionality as the other "add" methods.
+     *  However, it bypasses the necessity to call the "get" method by
+     *  calling it internally for you. <br>
+     *  This helps to improve readability, especially when the degree of nesting is very low.
      *
-     * @param thisComponent The component which is wrapped by this builder.
-     * @param component     A component instance which ought to be added to the wrapped component type.
-     * @param conf          The layout constraint which ought to be used to add the component to the wrapped component type.
+     * @param builders An array of builder instances whose JComponents ought to be added to the one wrapped by this builder.
+     * @param <B> The type of the builder instances which are used to configure the components that will be added to the component wrapped by this builder.
+     * @return This very instance, which enables builder-style method chaining.
      */
-    protected abstract void _addComponentTo( C thisComponent, E component, Object conf );
+    @SafeVarargs
+    @SuppressWarnings("varargs")
+    public final <B extends AbstractNestedBuilder<?, ?, JComponent>> I add( B... builders )
+    {
+        if ( builders == null )
+            throw new IllegalArgumentException("Swing tree builders may not be null!");
+
+        return _with( thisComponent -> {
+                    _addBuildersTo( thisComponent, builders );
+                })
+                ._this();
+    }
+
+    /**
+     *  This builder class expects its implementations to be builder types
+     *  for anything which can be built in a nested tree-like structure.
+     *  Implementations of this abstract method ought to enable support for nested building.
+     *  <br><br>
+     *
+     * @param components A list of component instances which ought to be added to the wrapped component type.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I add( List<E> components ) {
+        return _with( thisComponent -> {
+                    for ( E component : components )
+                        _addBuilderTo(thisComponent, UI.of((JComponent) component), null);
+                })
+                ._this();
+    }
+
+    @SafeVarargs
+    protected final <B extends AbstractNestedBuilder<?, ?, JComponent>> void _addBuildersTo(
+        C thisComponent,
+        B... builders
+    ) {
+        for ( AbstractNestedBuilder<?, ?, ?> b : builders )
+            _addBuilderTo(thisComponent, b, null);
+    }
+
+    @SafeVarargs
+    protected final void _addComponentsTo( C thisComponent, E... componentsToBeAdded ) {
+        for ( E other : componentsToBeAdded )
+            _addBuilderTo(thisComponent, UI.of((JComponent) other), null);
+    }
 
     protected final void _addBuilderTo( C thisComponent, AbstractNestedBuilder<?, ?, ?> builder, Object conf )
     {
@@ -99,60 +136,19 @@ abstract class AbstractNestedBuilder<I, C extends E, E extends Component> extend
         else
             _addComponentTo(thisComponent, childComponent, conf);
 
-        builder._detachStrongRef(); // Detach strong reference to the component to allow it to be garbage collected.
+        builder._disposeState(); // The builder may now no longer be used.
     }
 
     /**
-     *  This method provides the same functionality as the other "add" methods.
-     *  However, it bypasses the necessity to call the "get" method by
-     *  calling it internally for you. <br>
-     *  This helps to improve readability, especially when the degree of nesting is very low.
+     * This builder class expects its implementations to be builder types
+     * for anything which can be built in a nested tree-like structure.
+     * Implementations of this abstract method ought to enable support for nested building.
+     * <br><br>
      *
-     * @param builders An array of builder instances whose JComponents ought to be added to the one wrapped by this builder.
-     * @param <B> The type of the builder instances which are used to configure the components that will be added to the component wrapped by this builder.
-     * @return This very instance, which enables builder-style method chaining.
+     * @param thisComponent The component which is wrapped by this builder.
+     * @param component     A component instance which ought to be added to the wrapped component type.
+     * @param conf          The layout constraint which ought to be used to add the component to the wrapped component type.
      */
-    @SafeVarargs
-    @SuppressWarnings("varargs")
-    public final <B extends AbstractNestedBuilder<?, ?, JComponent>> I add( B... builders )
-    {
-        if ( builders == null )
-            throw new IllegalArgumentException("Swing tree builders may not be null!");
-
-        return _with( thisComponent -> {
-                    _addBuildersTo( thisComponent, builders );
-                })
-                ._this();
-    }
-
-    @SafeVarargs
-    protected final <B extends AbstractNestedBuilder<?, ?, JComponent>> void _addBuildersTo(
-        C thisComponent,
-        B... builders
-    ) {
-        for ( AbstractNestedBuilder<?, ?, ?> b : builders )
-            _addBuilderTo(thisComponent, b, null);
-    }
-
-    /**
-     *  This builder class expects its implementations to be builder types
-     *  for anything which can be built in a nested tree-like structure.
-     *  Implementations of this abstract method ought to enable support for nested building.
-     *  <br><br>
-     *
-     * @param components A list of component instances which ought to be added to the wrapped component type.
-     * @return This very instance, which enables builder-style method chaining.
-     */
-    public final I add( List<E> components ) {
-        return _with( thisComponent -> {
-                    for ( E component : components )
-                        _addBuilderTo(thisComponent, UI.of((JComponent) component), null);
-                })
-                ._this();
-    }
-
-    protected final int _childCount( C c ) {
-        return  ( c instanceof Container ? ( (Container) c ).getComponentCount() : 0 );
-    }
+    protected abstract void _addComponentTo( C thisComponent, E component, Object conf );
 
 }

@@ -3987,7 +3987,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         C thisComponent, Val<M> viewable, String attr, ViewSupplier<M> viewSupplier
     ) {
         // First we remember the index of the component which will be provided by the viewable dynamically.
-        final int index = _childCount( thisComponent );
+        final int index = _numberOfChildrenOf( thisComponent );
         // Then we add the component provided by the viewable to the list of children.
         if ( attr == null ) {
             if ( viewable.isPresent() )
@@ -4002,6 +4002,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends AbstractNes
         }
         // Finally we add a listener to the viewable which will update the component when the viewable changes.
         _onShow( viewable, thisComponent, (c,v) -> _updateComponentAt(index, v, viewSupplier, attr, c) );
+    }
+
+    private final int _numberOfChildrenOf( C c ) {
+        return  ( c instanceof Container ? ( (Container) c ).getComponentCount() : 0 );
     }
 
     private <M> void _updateComponentAt(
