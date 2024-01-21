@@ -1017,18 +1017,6 @@ public final class UI extends UINamespaceUtilities
     private UI(){ super(); } // This is a static API
 
     /**
-     *  Use this to create a builder for anything.
-     *
-     * @param component The component which should be wrapped by the builder.
-     * @param <T> The type parameter defining the concrete type of the component.
-     * @return A builder instance for the provided object, which enables fluent method chaining.
-     */
-    public static <T extends java.awt.Component> UIForAnything<T> of( T component ) {
-        NullUtil.nullArgCheck(component, "component", java.awt.Component.class);
-        return new UIForAnything<>(new BuilderState<>(component));
-    }
-
-    /**
      *  This returns an instance of a generic swing tree builder
      *  for anything extending the {@link JComponent} class.
      *  <br><br>

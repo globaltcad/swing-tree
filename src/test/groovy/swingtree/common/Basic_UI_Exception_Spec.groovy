@@ -88,7 +88,6 @@ class Basic_UI_Exception_Spec extends Specification
                     {UI.separator((UI.Align)null)},
                     {UI.of((JTextArea)null)},
                     {UI.of((JLabel)null)},
-                    {UI.of((java.awt.Component)null)},
                     {UI.of((JTabbedPane)null)},
                     {UI.splitItem(null)},
                     {UI.splitButton(null)},
