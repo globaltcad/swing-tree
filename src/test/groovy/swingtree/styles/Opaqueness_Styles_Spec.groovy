@@ -14,6 +14,7 @@ import javax.swing.JPanel
 import javax.swing.JSlider
 import javax.swing.JTextField
 import javax.swing.JToggleButton
+import java.awt.Color
 import java.util.concurrent.TimeUnit
 
 @Title("Opaque or not Opaque")
@@ -832,6 +833,83 @@ class Opaqueness_Styles_Spec extends Specification
             due to the background color being transparent again.
         """
             slider.isOpaque() == false
+    }
+
+
+    def 'A check box (which typically transparent) will become opaque when transitioning to various styles.'(
+        boolean opaque, int margin, int radius, int border, String borderColor, String foundation, String background, String[] gradient
+    ) {
+        reportInfo """
+ 
+            A check box is a component that is not opaque by default.
+            It is only opaque when it has an opaque background color.
+            This test demonstrates that a check box will become opaque when transitioning
+            to various style configurations
+
+        """
+        given : 'We first define a boolean flag property that we will use to control the transition:'
+            var isOn = Var.of(false)
+        and : 'Then we create the slider based UI declaration, which is styled to temporarily have an opaque background color:'
+            var ui =
+                    UI.checkBox("Checked?")
+                    .withTransitionalStyle(isOn, LifeTime.of(1, TimeUnit.MILLISECONDS), (state, it) -> it
+                        .margin(margin)
+                        .borderRadius(radius)
+                        .backgroundColor( state.progress() == 1 ? background : "" )
+                        .foundationColor( state.progress() == 1 ? foundation : "" )
+                        .borderColor( state.progress() == 1 ? borderColor : "" )
+                        .borderWidth(border)
+                        .gradient(g -> g.colors(gradient))
+                    )
+
+        and : 'We build the underlying check box:'
+            var checkBox = ui.get(javax.swing.JCheckBox)
+
+        expect : """
+            The component has to be non opaque because the background color is transparent.
+            So the parent component will be visible behind the background.
+        """
+            checkBox.isOpaque() == false
+
+        when : 'We set the `isOn` flag to true in order to start the transition:'
+            isOn.set(true)
+        and : 'We wait for the transition to complete:'
+            Thread.sleep(50)
+            UI.sync()
+
+        then : """
+            The slider is now opaque because the `isOn` flag is true, which translates to 
+            an animation progress transitioning to 1,
+            causing the background color to be opaque (255 * 1 = 255).
+        """
+            checkBox.isOpaque() == opaque
+
+        when : """
+            We now want to go back to the initial state, so we set the `isOn` flag to false again...
+        """
+            isOn.set(false)
+        and : '...again we wait for the transition to complete...'
+            Thread.sleep(50)
+            UI.sync()
+        then : """
+            We are back to the initial state where the check box is no longer opaque.
+        """
+            checkBox.isOpaque() == false
+
+        where :
+            opaque  | margin | radius | border |     borderColor    |     foundation     |     background     | gradient
+            false   | 0      | 0      | 0      |   "rgba(0,0,0,0)"  |   "rgba(0,0,0,0)"  |   "rgba(0,0,0,0)"  | []
+
+            true    | 0      | 0      | 0      |   "rgba(0,0,0,0)"  |   "rgba(0,0,0,0)"  |   "rgb(0,0,0)"     | []
+
+            false   | 1      | 0      | 0      |   "rgba(0,0,0,0)"  |   "rgba(0,0,0,0)"  |   "rgb(0,0,0)"     | []
+            false   | 0      | 1      | 0      |   "rgba(0,0,0,0)"  |   "rgba(0,0,0,0)"  |   "rgb(0,0,0)"     | []
+            false   | 0      | 0      | 1      |   "rgba(0,0,0,0)"  |   "rgba(0,0,0,0)"  |   "rgb(0,0,0)"     | []
+
+            true    | 1      | 0      | 0      |   "rgba(0,0,0,0)"  |   "rgb(0,0,0)"     |   "rgb(0,0,0)"     | []
+            true    | 0      | 1      | 0      |   "rgba(0,0,0,0)"  |   "rgb(0,0,0)"     |   "rgb(0,0,0)"     | []
+            false   | 0      | 0      | 1      |   "rgba(0,0,0,0)"  |   "rgba(0,0,0,0)"  |   "rgb(0,0,0)"     | []
+
     }
 }
 
