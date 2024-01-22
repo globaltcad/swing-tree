@@ -505,7 +505,7 @@ public final class ComponentExtension<C extends JComponent>
 
         boolean hasBorderRadius = newStyle.border().hasAnyNonZeroArcs();
         boolean hasBackground   = newStyle.base().backgroundColor().isPresent();
-        List<UI.ComponentArea> gradientAreas = newStyle.gradientCoveredAreas();
+        List<UI.ComponentArea> opaqueGradientAreas = newStyle.gradientCoveredAreas();
 
         if ( hasBackground && !Objects.equals( _owner.getBackground(), newStyle.base().backgroundColor().get() ) ) {
             _initialBackgroundColor = _initialBackgroundColor != null ? _initialBackgroundColor :  _owner.getBackground();
@@ -719,26 +719,31 @@ public final class ComponentExtension<C extends JComponent>
 
         {
             boolean canBeOpaque = true;
-            boolean hasOpaqueFoundation = 255 == newStyle.base().foundationColor().map(Color::getAlpha).orElse(0);
-            boolean hasOpaqueBorder     = 255 == newStyle.border().color().map(Color::getAlpha).orElse(0);
-            boolean hasOpaqueBackground = 255 == newStyle.base().backgroundColor().map(Color::getAlpha).orElse(255);
-            boolean hasBorder           = newStyle.border().widths().isPositive();
-            boolean hasMargin           = newStyle.margin().isPositive();
 
-            if ( newStyle.hasActiveBackgroundGradients() )
-                canBeOpaque = false;
-            else if ( !hasOpaqueFoundation ) {
-                if ( newStyle.border().hasAnyNonZeroArcs() )
+            if ( !opaqueGradientAreas.contains(UI.ComponentArea.ALL) ) {
+                boolean hasOpaqueFoundation = 255 == newStyle.base().foundationColor().map(Color::getAlpha).orElse(0);
+                boolean hasOpaqueBorder     = 255 == newStyle.border().color().map(Color::getAlpha).orElse(0);
+                boolean hasOpaqueBackground = 255 == newStyle.base().backgroundColor().map(Color::getAlpha).orElse(255);
+                boolean hasBorder           = newStyle.border().widths().isPositive();
+                boolean hasMargin           = newStyle.margin().isPositive();
+
+                if ( !hasOpaqueFoundation && !opaqueGradientAreas.contains(UI.ComponentArea.EXTERIOR) ) {
+                    if ( hasBorderRadius )
+                        canBeOpaque = false;
+                    else if ( hasMargin )
+                        canBeOpaque = false;
+                }
+
+                if ( hasBorder && (!hasOpaqueBorder && !opaqueGradientAreas.contains(UI.ComponentArea.BORDER)) )
                     canBeOpaque = false;
-                else if ( hasMargin )
+
+                if (
+                    !hasOpaqueBackground &&
+                    !opaqueGradientAreas.contains(UI.ComponentArea.INTERIOR)// &&
+                    //!opaqueGradientAreas.contains(UI.ComponentArea.BODY)
+                )
                     canBeOpaque = false;
             }
-
-            if ( hasBorder && !hasOpaqueBorder )
-                canBeOpaque = false;
-
-            if ( !hasOpaqueBackground )
-                canBeOpaque = false;
 
             if ( !canBeOpaque )
                 _owner.setOpaque(false);
