@@ -3977,6 +3977,17 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 case NONE: break;
                 default: throw new IllegalStateException("Unknown type: "+delegate.changeType());
             }
+            if ( c.getComponentCount() != delegate.vals().size() )
+                log.warn(
+                        "Broken binding to view model list detected! \n" +
+                        "UI sub-component count '"+c.getComponentCount()+"' " +
+                        "does not match viewable models list of size '"+delegate.vals().size()+"'. \n" +
+                        "A possible cause for this is that components " +
+                        "were " + ( c.getComponentCount() > delegate.vals().size() ? "added" : "removed" ) + " " +
+                        "to this '" + c + "' \ndirectly, instead of through the property list binding. \n" +
+                        "However, this could also be a bug in the UI framework.",
+                        new Throwable()
+                    );
         });
         viewables.forEach( v -> {
             _addBuildersTo( thisComponent, new UIForAnything[]{viewSupplier.createViewFor(v)} );
