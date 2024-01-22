@@ -444,8 +444,12 @@ public final class SwingTree
                 dpiAwareFont = _createCompositeFont( fontName, Font.PLAIN, 13 );
 
             } else if( SystemInfo.isLinux ) {
-                Font font = LinuxFontPolicy.getFont();
-                dpiAwareFont = (font instanceof FontUIResource) ? (FontUIResource) font : new FontUIResource( font );
+                try {
+                    Font font = LinuxFontPolicy.getFont();
+                    dpiAwareFont = (font instanceof FontUIResource) ? (FontUIResource) font : new FontUIResource( font );
+                } catch (Exception e) {
+                    log.error("Failed to find linux font for scaling!", e);
+                }
             }
 
             // fallback
