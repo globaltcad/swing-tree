@@ -505,6 +505,7 @@ public final class ComponentExtension<C extends JComponent>
 
         boolean hasBorderRadius = newStyle.border().hasAnyNonZeroArcs();
         boolean hasBackground   = newStyle.base().backgroundColor().isPresent();
+        List<UI.ComponentArea> gradientAreas = newStyle.gradientCoveredAreas();
 
         if ( hasBackground && !Objects.equals( _owner.getBackground(), newStyle.base().backgroundColor().get() ) ) {
             _initialBackgroundColor = _initialBackgroundColor != null ? _initialBackgroundColor :  _owner.getBackground();
@@ -718,20 +719,25 @@ public final class ComponentExtension<C extends JComponent>
 
         {
             boolean canBeOpaque = true;
+            boolean hasOpaqueFoundation = 255 == newStyle.base().foundationColor().map(Color::getAlpha).orElse(0);
+            boolean hasOpaqueBorder     = 255 == newStyle.border().color().map(Color::getAlpha).orElse(0);
+            boolean hasOpaqueBackground = 255 == newStyle.base().backgroundColor().map(Color::getAlpha).orElse(255);
+            boolean hasBorder           = newStyle.border().widths().isPositive();
+            boolean hasMargin           = newStyle.margin().isPositive();
 
             if ( newStyle.hasActiveBackgroundGradients() )
                 canBeOpaque = false;
-            else if ( 255 > newStyle.base().foundationColor().map(Color::getAlpha).orElse(0) ) {
+            else if ( !hasOpaqueFoundation ) {
                 if ( newStyle.border().hasAnyNonZeroArcs() )
                     canBeOpaque = false;
-                else if ( newStyle.border().margin().isPositive() )
+                else if ( hasMargin )
                     canBeOpaque = false;
             }
 
-            if ( newStyle.border().widths().isPositive() && 255 > newStyle.border().color().map(Color::getAlpha).orElse(0) )
+            if ( hasBorder && !hasOpaqueBorder )
                 canBeOpaque = false;
 
-            if ( 255 > newStyle.base().backgroundColor().map(Color::getAlpha).orElse(255) )
+            if ( !hasOpaqueBackground )
                 canBeOpaque = false;
 
             if ( !canBeOpaque )

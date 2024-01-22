@@ -252,6 +252,19 @@ public final class Style
         return gradients.stream().anyMatch( s -> s.colors().length > 0 );
     }
 
+    List<UI.ComponentArea> gradientCoveredAreas() {
+        return Arrays.stream(UI.Layer.values())
+                .map(_layers::get)
+                .map(StyleLayer::gradients)
+                .flatMap( g -> g
+                    .stylesStream()
+                    .map( grad -> grad.isOpaque() ? grad.area() : null )
+                    .filter(Objects::nonNull)
+                )
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
     public Style foundationColor( Color color ) { return _withBase(base().foundationColor(color)); }
 
     public Style backgroundColor( Color color ) { return _withBase(base().backgroundColor(color)); }

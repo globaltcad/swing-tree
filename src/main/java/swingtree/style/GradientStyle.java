@@ -2,11 +2,10 @@ package swingtree.style;
 
 import org.slf4j.Logger;
 import swingtree.UI;
-import swingtree.layout.Location;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import java.awt.*;
+import java.awt.Color;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Function;
@@ -141,6 +140,17 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
     UI.ComponentArea area() { return _area; }
 
     UI.ComponentBoundary boundary() { return _boundary; }
+
+    boolean isOpaque() {
+        boolean foundTransparentColor = false;
+        for ( Color c : _colors ) {
+            if ( c.getAlpha() < 255 ) {
+                foundTransparentColor = true;
+                break;
+            }
+        }
+        return !foundTransparentColor;
+    }
 
     /**
      *  Define a list of colors which will, as part of the gradient, transition from one
