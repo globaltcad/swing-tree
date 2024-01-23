@@ -195,9 +195,19 @@ abstract class UIForAnything<I, C extends E, E extends Component>
      */
     public final I applyIfPresent( Optional<Consumer<I>> building ) {
         NullUtil.nullArgCheck(building, "building", Optional.class);
-        I builder = _this();
-        building.ifPresent( buildingLambda -> buildingLambda.accept(builder) );
-        return builder;
+        return _with( thisComponent -> {
+                    BuilderState<C> proceduralBuilder =
+                        new BuilderState<>(
+                                _state().eventProcessor(),
+                                BuilderState.Mode.PROCEDURAL_OR_DECLARATIVE,
+                                _state().componentType(),
+                                ()->thisComponent
+                            );
+                    building.ifPresent( buildingLambda -> {
+                        buildingLambda.accept(_newBuilderWithState(proceduralBuilder)._this());
+                    });
+                })
+                ._this();
     }
 
     /**
