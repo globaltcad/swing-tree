@@ -536,14 +536,6 @@ public final class ComponentExtension<C extends JComponent>
             }
         }
 
-        _applyGenericBaseStyleTo(_owner, newStyle);
-        _applyIconStyleTo(_owner, newStyle);
-        _applyLayoutStyleTo(_owner, newStyle);
-        _applyDimensionalityStyleTo(_owner, newStyle);
-        _applyFontStyleTo(_owner, newStyle);
-        _applyPropertiesTo(_owner, newStyle);
-        _doComboBoxMarginAdjustment(_owner, newStyle);
-
         if ( !onlyDimensionalityIsStyled ) {
             _installCustomBorderBasedStyleAndAnimationRenderer();
             if ( !styleCanBeRenderedThroughBorder )
@@ -606,6 +598,14 @@ public final class ComponentExtension<C extends JComponent>
             }
             else _owner.setOpaque(_initialIsOpaque);
         }
+
+        _applyGenericBaseStyleTo(_owner, newStyle);
+        _applyIconStyleTo(_owner, newStyle);
+        _applyLayoutStyleTo(_owner, newStyle);
+        _applyDimensionalityStyleTo(_owner, newStyle);
+        _applyFontStyleTo(_owner, newStyle);
+        _applyPropertiesTo(_owner, newStyle);
+        _doComboBoxMarginAdjustment(_owner, newStyle);
 
         return newStyle;
     }
