@@ -97,8 +97,8 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
         if ( icon instanceof SvgIcon)
         {
             SvgIcon svgIcon = (SvgIcon) icon;
-            svgIcon = svgIcon.withIconWidth(width);
-            icon    = svgIcon.withIconHeight(height);
+            svgIcon = svgIcon.withIconWidth(UI.scale(width));
+            icon    = svgIcon.withIconHeight(UI.scale(height));
         }
         else if ( width != icon.getIconWidth() || height != icon.getIconHeight() )
         {
