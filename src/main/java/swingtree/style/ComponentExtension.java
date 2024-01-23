@@ -723,7 +723,7 @@ public final class ComponentExtension<C extends JComponent>
             if ( !opaqueGradientAreas.contains(UI.ComponentArea.ALL) ) {
                 boolean hasOpaqueFoundation = 255 == newStyle.base().foundationColor().map(Color::getAlpha).orElse(0);
                 boolean hasOpaqueBorder     = 255 == newStyle.border().color().map(Color::getAlpha).orElse(0);
-                boolean hasOpaqueBackground = 255 == newStyle.base().backgroundColor().map(Color::getAlpha).orElse(255);
+                boolean hasOpaqueBackground = 255 == newStyle.base().backgroundColor().map( c -> c != UI.COLOR_UNDEFINED ? c : _initialBackgroundColor ).map(Color::getAlpha).orElse(255);
                 boolean hasBorder           = newStyle.border().widths().isPositive();
                 boolean hasMargin           = newStyle.margin().isPositive();
 
@@ -739,8 +739,8 @@ public final class ComponentExtension<C extends JComponent>
 
                 if (
                     !hasOpaqueBackground &&
-                    !opaqueGradientAreas.contains(UI.ComponentArea.INTERIOR)// &&
-                    //!opaqueGradientAreas.contains(UI.ComponentArea.BODY)
+                    !opaqueGradientAreas.contains(UI.ComponentArea.INTERIOR) &&
+                    !opaqueGradientAreas.contains(UI.ComponentArea.BODY)
                 )
                     canBeOpaque = false;
             }

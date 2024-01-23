@@ -120,11 +120,24 @@ final class BaseStyle
         if ( obj == this ) return true;
         if ( obj.getClass() != getClass() ) return false;
         BaseStyle rhs = (BaseStyle) obj;
+
+        boolean sameBackground = Objects.equals(_backgroundColor, rhs._backgroundColor);
+        if ( _foregroundColor == UI.COLOR_UNDEFINED || rhs._foregroundColor == UI.COLOR_UNDEFINED )
+            sameBackground = _backgroundColor == rhs._backgroundColor;
+
+        boolean sameFoundation = Objects.equals(_foundationColor, rhs._foundationColor);
+        if ( _foregroundColor == UI.COLOR_UNDEFINED || rhs._foregroundColor == UI.COLOR_UNDEFINED )
+            sameFoundation = _foundationColor == rhs._foundationColor;
+
+        boolean sameForeground = Objects.equals(_foregroundColor, rhs._foregroundColor);
+        if ( _foregroundColor == UI.COLOR_UNDEFINED || rhs._foregroundColor == UI.COLOR_UNDEFINED )
+            sameForeground = _foregroundColor == rhs._foregroundColor;
+
         return Objects.equals(_icon,            rhs._icon           ) &&
                Objects.equals(_fit,             rhs._fit            ) &&
-               Objects.equals(_backgroundColor, rhs._backgroundColor) &&
-               Objects.equals(_foundationColor, rhs._foundationColor) &&
-               Objects.equals(_foregroundColor, rhs._foregroundColor) &&
+               sameBackground                                         &&
+               sameFoundation                                         &&
+               sameForeground                                         &&
                Objects.equals(_cursor,          rhs._cursor         ) &&
                Objects.equals(_orientation,     rhs._orientation    );
     }

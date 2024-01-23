@@ -142,6 +142,9 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
     UI.ComponentBoundary boundary() { return _boundary; }
 
     boolean isOpaque() {
+        if ( _colors.length == 0 )
+            return false;
+
         boolean foundTransparentColor = false;
         for ( Color c : _colors ) {
             if ( c.getAlpha() < 255 ) {
