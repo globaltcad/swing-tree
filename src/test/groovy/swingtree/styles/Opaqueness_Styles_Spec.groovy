@@ -7,13 +7,7 @@ import sprouts.Var
 import swingtree.UI
 import swingtree.animation.LifeTime
 
-import javax.swing.JButton
-import javax.swing.JFormattedTextField
-import javax.swing.JMenuItem
-import javax.swing.JPanel
-import javax.swing.JSlider
-import javax.swing.JTextField
-import javax.swing.JToggleButton
+import javax.swing.*
 import java.awt.Color
 import java.util.concurrent.TimeUnit
 
@@ -836,14 +830,80 @@ class Opaqueness_Styles_Spec extends Specification
     }
 
 
-    def 'A check box (which typically transparent) will become opaque when transitioning to various styles.'(
+    def 'A slider (which typically opaque) will become non-opaque when transitioning to a transparent background color.'()
+    {
+        reportInfo """
+ 
+            A slider is a component that is not opaque by default.
+            It is only opaque when it has an opaque background color.
+            This test demonstrates that a slider will become non opaque when transitioning
+            to a transparent background color.
+
+        """
+        given : 'We first define a boolean flag property that we will use to control the transition:'
+            var isOn = Var.of(false)
+        and : 'Then we create the slider based UI declaration, which is styled to either have an undefined or transparent background color:'
+            var ui =
+                    UI.slider(UI.Align.HORIZONTAL)
+                    .withTransitionalStyle(isOn, LifeTime.of(1, TimeUnit.MILLISECONDS), (state, it) -> it
+                        .backgroundColor(
+                            state.progress() == 0
+                                ? UI.COLOR_UNDEFINED
+                                : new Color(0,0,0,0)
+                        )
+                    )
+
+        and : 'We build the underlying `JSlider`:'
+            var slider = ui.get(javax.swing.JSlider)
+
+        expect : """
+            The component has to be opaque because the "undefined" background color 
+            is conceptually equivalent to "no color specified" and therefore 
+            causes the slider to have its default background color, which is opaque.
+        """
+            slider.isOpaque() == true
+        and : 'Due to the usage of `UI.COLOR_UNDEFINED`, the background color of the slider is undefined too:'
+            slider.getBackground() == null
+
+        when : 'We set the `isOn` flag to true in order to start the transition:'
+            isOn.set(true)
+        and : 'We wait for the transition to complete:'
+            Thread.sleep(50)
+            UI.sync()
+
+        then : """
+            The slider is now opaque because the `isOn` flag is true, which translates to 
+            an animation progress transitioning to 1,
+            causing the background color to be opaque (255 * 1 = 255).
+        """
+            slider.isOpaque() == false
+        and : 'Now the background color of the slider is transparent:'
+            slider.getBackground().getAlpha() == 0
+
+        when : """
+            We now want to go back to the initial state, so we set the `isOn` flag to false again...
+        """
+            isOn.set(false)
+        and : '...again we wait for the transition to complete...'
+            Thread.sleep(50)
+            UI.sync()
+        then : """
+            We are back to the initial state where the slider is opaque again
+            due to the background color being undefined (which causes the slider to have its default background color).
+        """
+            slider.isOpaque() == true
+        and : 'Due to the usage of `UI.COLOR_UNDEFINED`, the background color of the slider is undefined too:'
+            slider.getBackground() == null
+    }
+
+    def 'A check box (which typically opaque) may become non-opaque when transitioning to various styles.'(
         boolean opaque, int margin, int radius, int border, String borderColor, String foundation, String background, String[] gradient
     ) {
         reportInfo """
  
-            A check box is a component that is not opaque by default.
-            It is only opaque when it has an opaque background color.
-            This test demonstrates that a check box will become opaque when transitioning
+            A check box is a component that is opaque by default.
+            
+            This test demonstrates that a check box will become non-opaque when transitioning
             to various style configurations
 
         """
@@ -858,18 +918,18 @@ class Opaqueness_Styles_Spec extends Specification
                         .backgroundColor( state.progress() == 1 ? background : "" )
                         .foundationColor( state.progress() == 1 ? foundation : "" )
                         .borderColor( state.progress() == 1 ? borderColor : "" )
-                        .borderWidth(border)
-                        .gradient(g -> g.colors(gradient))
+                        .borderWidth( state.progress() == 1 ? border : 0 )
+                        .gradient(g -> g.colors( state.progress() == 1 ? gradient : []))
                     )
 
         and : 'We build the underlying check box:'
             var checkBox = ui.get(javax.swing.JCheckBox)
 
         expect : """
-            The component has to be non opaque because the background color is transparent.
-            So the parent component will be visible behind the background.
+            The component has to be opaque because it was not yet styled and it is also opaque by default.
+            So the parent component will not be visible behind the background.
         """
-            checkBox.isOpaque() == false
+            checkBox.isOpaque() == true
 
         when : 'We set the `isOn` flag to true in order to start the transition:'
             isOn.set(true)
@@ -878,9 +938,9 @@ class Opaqueness_Styles_Spec extends Specification
             UI.sync()
 
         then : """
-            The slider is now opaque because the `isOn` flag is true, which translates to 
+            The check box has the expected opaqueness because the `isOn` flag is true, which translates to 
             an animation progress transitioning to 1,
-            causing the background color to be opaque (255 * 1 = 255).
+            causing the various styles to take effect!
         """
             checkBox.isOpaque() == opaque
 
@@ -892,9 +952,9 @@ class Opaqueness_Styles_Spec extends Specification
             Thread.sleep(50)
             UI.sync()
         then : """
-            We are back to the initial state where the check box is no longer opaque.
+            We are back to the initial state where the check box is now opaque again
         """
-            checkBox.isOpaque() == false
+            checkBox.isOpaque() == true
 
         where :
             opaque  | margin | radius | border |     borderColor    |     foundation     |     background     | gradient
@@ -909,6 +969,15 @@ class Opaqueness_Styles_Spec extends Specification
             true    | 1      | 0      | 0      |   "rgba(0,0,0,0)"  |   "rgb(0,0,0)"     |   "rgb(0,0,0)"     | []
             true    | 0      | 1      | 0      |   "rgba(0,0,0,0)"  |   "rgb(0,0,0)"     |   "rgb(0,0,0)"     | []
             false   | 0      | 0      | 1      |   "rgba(0,0,0,0)"  |   "rgba(0,0,0,0)"  |   "rgb(0,0,0)"     | []
+
+            true    | 0      | 0      | 1      |   "rgb(0,0,0)"     |   "rgba(0,0,0,0)"  |   "rgb(0,0,0)"     | []
+
+            false   | 1      | 0      | 0      |   "rgba(0,0,0,0)"  |   "rgba(0,0,0,0)"  |   "rgb(0,0,0)"     | ["red", "green"]
+            false   | 0      | 1      | 0      |   "rgba(0,0,0,0)"  |   "rgba(0,0,0,0)"  |   "rgb(0,0,0)"     | ["red", "green"]
+            false   | 0      | 0      | 1      |   "rgba(0,0,0,0)"  |   "rgba(0,0,0,0)"  |   "rgb(0,0,0)"     | ["red", "green"]
+
+            true    | 0      | 0      | 0      |   "rgba(0,0,0,0)"  |   "rgba(0,0,0,0)"  |   "rgba(0,0,0, 0)" | ["red", "green"]
+
 
     }
 }

@@ -122,11 +122,11 @@ final class BaseStyle
         BaseStyle rhs = (BaseStyle) obj;
 
         boolean sameBackground = Objects.equals(_backgroundColor, rhs._backgroundColor);
-        if ( _foregroundColor == UI.COLOR_UNDEFINED || rhs._foregroundColor == UI.COLOR_UNDEFINED )
+        if ( _backgroundColor == UI.COLOR_UNDEFINED || rhs._backgroundColor == UI.COLOR_UNDEFINED )
             sameBackground = _backgroundColor == rhs._backgroundColor;
 
         boolean sameFoundation = Objects.equals(_foundationColor, rhs._foundationColor);
-        if ( _foregroundColor == UI.COLOR_UNDEFINED || rhs._foregroundColor == UI.COLOR_UNDEFINED )
+        if ( _foundationColor == UI.COLOR_UNDEFINED || rhs._foundationColor == UI.COLOR_UNDEFINED )
             sameFoundation = _foundationColor == rhs._foundationColor;
 
         boolean sameForeground = Objects.equals(_foregroundColor, rhs._foregroundColor);

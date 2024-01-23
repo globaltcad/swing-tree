@@ -504,22 +504,26 @@ public final class ComponentExtension<C extends JComponent>
             _initialIsOpaque = _owner.isOpaque();
 
         boolean hasBorderRadius = newStyle.border().hasAnyNonZeroArcs();
-        boolean hasBackground   = newStyle.base().backgroundColor().isPresent();
         List<UI.ComponentArea> opaqueGradientAreas = newStyle.gradientCoveredAreas();
+        boolean hasBackground   = newStyle.base().backgroundColor().isPresent();
 
-        if ( hasBackground && !Objects.equals( _owner.getBackground(), newStyle.base().backgroundColor().get() ) ) {
-            _initialBackgroundColor = _initialBackgroundColor != null ? _initialBackgroundColor :  _owner.getBackground();
-            Color newColor =  newStyle.base().backgroundColor().get();
-            if ( newColor == UI.COLOR_UNDEFINED)
-                newColor = null;
-            _owner.setBackground( newColor );
-            if ( _owner instanceof JScrollPane ) {
-                JScrollPane scrollPane = (JScrollPane) _owner;
-                if ( scrollPane.getViewport() != null ) {
-                    newColor = newStyle.base().backgroundColor().get();
-                    if ( newColor == UI.COLOR_UNDEFINED)
-                        newColor = null;
-                    scrollPane.getViewport().setBackground( newColor );
+        if ( hasBackground ) {
+            boolean backgroundIsAlreadySet = Objects.equals( _owner.getBackground(), newStyle.base().backgroundColor().get() );
+            if ( !backgroundIsAlreadySet || newStyle.base().backgroundColor().get() == UI.COLOR_UNDEFINED )
+            {
+                _initialBackgroundColor = _initialBackgroundColor != null ? _initialBackgroundColor :  _owner.getBackground();
+                Color newColor =  newStyle.base().backgroundColor().get();
+                if ( newColor == UI.COLOR_UNDEFINED)
+                    newColor = null;
+                _owner.setBackground( newColor );
+                if ( _owner instanceof JScrollPane ) {
+                    JScrollPane scrollPane = (JScrollPane) _owner;
+                    if ( scrollPane.getViewport() != null ) {
+                        newColor = newStyle.base().backgroundColor().get();
+                        if ( newColor == UI.COLOR_UNDEFINED)
+                            newColor = null;
+                        scrollPane.getViewport().setBackground( newColor );
+                    }
                 }
             }
         }
