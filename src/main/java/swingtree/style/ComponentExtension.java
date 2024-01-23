@@ -536,181 +536,13 @@ public final class ComponentExtension<C extends JComponent>
             }
         }
 
-        if ( newStyle.base().foregroundColor().isPresent() && !Objects.equals( _owner.getForeground(), newStyle.base().foregroundColor().get() ) ) {
-            Color newColor = newStyle.base().foregroundColor().get();
-            if ( newColor == UI.COLOR_UNDEFINED)
-                newColor = null;
-            _owner.setForeground( newColor );
-        }
-
-        newStyle.base().cursor().ifPresent( cursor -> {
-            if ( !Objects.equals( _owner.getCursor(), cursor ) )
-                _owner.setCursor( cursor );
-        });
-
-        if ( newStyle.base().orientation() != UI.ComponentOrientation.UNKNOWN ) {
-            ComponentOrientation currentOrientation = _owner.getComponentOrientation();
-            UI.ComponentOrientation newOrientation = newStyle.base().orientation();
-            switch ( newOrientation ) {
-                case LEFT_TO_RIGHT:
-                    if ( !Objects.equals( currentOrientation, ComponentOrientation.LEFT_TO_RIGHT ) )
-                        _owner.applyComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
-                    break;
-                case RIGHT_TO_LEFT:
-                    if ( !Objects.equals( currentOrientation, ComponentOrientation.RIGHT_TO_LEFT ) )
-                        _owner.applyComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
-                    break;
-                default:
-                    if ( !Objects.equals( currentOrientation, ComponentOrientation.UNKNOWN ) )
-                        _owner.applyComponentOrientation(ComponentOrientation.UNKNOWN);
-                    break;
-            }
-        }
-
-        UI.FitComponent fit = newStyle.base().fit();
-        newStyle.base().icon().ifPresent( icon -> {
-            if ( icon instanceof SvgIcon) {
-                SvgIcon svgIcon = (SvgIcon) icon;
-                icon = svgIcon.withFitComponent(fit);
-            }
-            if ( _owner instanceof AbstractButton ) {
-                AbstractButton button = (AbstractButton) _owner;
-                if ( !Objects.equals( button.getIcon(), icon ) )
-                    button.setIcon( icon );
-            }
-            if ( _owner instanceof JLabel ) {
-                JLabel label = (JLabel) _owner;
-                if ( !Objects.equals( label.getIcon(), icon ) )
-                    label.setIcon( icon );
-            }
-            if ( _owner instanceof JIcon ) {
-                JIcon jIcon = (JIcon) _owner;
-                if ( !Objects.equals( jIcon.getIcon(), icon ) )
-                    jIcon.setIcon( icon );
-            }
-        });
-
-        newStyle.layout().alignmentX().ifPresent( alignmentX -> {
-            if ( !Objects.equals( _owner.getAlignmentX(), alignmentX ) )
-                _owner.setAlignmentX( alignmentX );
-        });
-
-        newStyle.layout().alignmentY().ifPresent( alignmentY -> {
-            if ( !Objects.equals( _owner.getAlignmentY(), alignmentY ) )
-                _owner.setAlignmentY( alignmentY );
-        });
-
-        newStyle.layout().layout().installFor( _owner );
-
-        _applyAlignmentToMigLayoutIfItExists(newStyle.layout());
-
-        if ( newStyle.dimensionality().minWidth().isPresent() || newStyle.dimensionality().minHeight().isPresent() ) {
-            Dimension minSize = _owner.getMinimumSize();
-
-            int minWidth  = newStyle.dimensionality().minWidth().orElse(minSize == null ? 0 : minSize.width);
-            int minHeight = newStyle.dimensionality().minHeight().orElse(minSize == null ? 0 : minSize.height);
-
-            Dimension newMinSize = new Dimension(minWidth, minHeight);
-
-            if ( ! newMinSize.equals(minSize) )
-                _owner.setMinimumSize(newMinSize);
-        }
-
-        if ( newStyle.dimensionality().maxWidth().isPresent() || newStyle.dimensionality().maxHeight().isPresent() ) {
-            Dimension maxSize = _owner.getMaximumSize();
-
-            int maxWidth  = newStyle.dimensionality().maxWidth().orElse(maxSize == null  ? Integer.MAX_VALUE : maxSize.width);
-            int maxHeight = newStyle.dimensionality().maxHeight().orElse(maxSize == null ? Integer.MAX_VALUE : maxSize.height);
-
-            Dimension newMaxSize = new Dimension(maxWidth, maxHeight);
-
-            if ( ! newMaxSize.equals(maxSize) )
-                _owner.setMaximumSize(newMaxSize);
-        }
-
-        if ( newStyle.dimensionality().preferredWidth().isPresent() || newStyle.dimensionality().preferredHeight().isPresent() ) {
-            Dimension prefSize = _owner.getPreferredSize();
-
-            int prefWidth  = newStyle.dimensionality().preferredWidth().orElse(prefSize == null ? 0 : prefSize.width);
-            int prefHeight = newStyle.dimensionality().preferredHeight().orElse(prefSize == null ? 0 : prefSize.height);
-
-            Dimension newPrefSize = new Dimension(prefWidth, prefHeight);
-
-            if ( !newPrefSize.equals(prefSize) )
-                _owner.setPreferredSize(newPrefSize);
-        }
-
-        if ( newStyle.dimensionality().width().isPresent() || newStyle.dimensionality().height().isPresent() ) {
-            Dimension size = _owner.getSize();
-
-            int width  = newStyle.dimensionality().width().orElse(size == null ? 0 : size.width);
-            int height = newStyle.dimensionality().height().orElse(size == null ? 0 : size.height);
-
-            Dimension newSize = new Dimension(width, height);
-
-            if ( ! newSize.equals(size) )
-                _owner.setSize(newSize);
-        }
-
-        if ( _owner instanceof JTextComponent ) {
-            JTextComponent tc = (JTextComponent) _owner;
-            if ( newStyle.font().selectionColor().isPresent() && ! Objects.equals( tc.getSelectionColor(), newStyle.font().selectionColor().get() ) )
-                tc.setSelectionColor(newStyle.font().selectionColor().get());
-        }
-
-        if ( _owner instanceof JComboBox ) {
-            int bottom = newStyle.margin().bottom().map(Number::intValue).orElse(0);
-            // We adjust the position of the popup menu:
-            try {
-                Point location = _owner.getLocationOnScreen();
-                int x = location.x;
-                int y = location.y + _owner.getHeight() - bottom;
-                JComboBox<?> comboBox = (JComboBox<?>) _owner;
-                JPopupMenu popup = (JPopupMenu) comboBox.getAccessibleContext().getAccessibleChild(0);
-                Point oldLocation = popup.getLocation();
-                if ( popup.isShowing() && (oldLocation.x != x || oldLocation.y != y) )
-                    popup.setLocation(x, y);
-            } catch ( Exception e ) {
-                // ignore
-            }
-        }
-
-        newStyle.font()
-             .createDerivedFrom(_owner.getFont())
-             .ifPresent( newFont -> {
-                    if ( !newFont.equals(_owner.getFont()) )
-                        _owner.setFont( newFont );
-                });
-
-        newStyle.font().horizontalAlignment().ifPresent( alignment -> {
-            if ( _owner instanceof JLabel ) {
-                JLabel label = (JLabel) _owner;
-                if ( !Objects.equals( label.getHorizontalAlignment(), alignment.forSwing() ) )
-                    label.setHorizontalAlignment( alignment.forSwing() );
-            }
-            if ( _owner instanceof AbstractButton ) {
-                AbstractButton button = (AbstractButton) _owner;
-                if ( !Objects.equals( button.getHorizontalAlignment(), alignment.forSwing() ) )
-                    button.setHorizontalAlignment( alignment.forSwing() );
-            }
-            if ( _owner instanceof JTextField ) {
-                JTextField textField = (JTextField) _owner;
-                if ( !Objects.equals( textField.getHorizontalAlignment(), alignment.forSwing() ) )
-                    textField.setHorizontalAlignment( alignment.forSwing() );
-            }
-        });
-        newStyle.font().verticalAlignment().ifPresent( alignment -> {
-            if ( _owner instanceof JLabel ) {
-                JLabel label = (JLabel) _owner;
-                if ( !Objects.equals( label.getVerticalAlignment(), alignment.forSwing() ) )
-                    label.setVerticalAlignment( alignment.forSwing() );
-            }
-            if ( _owner instanceof AbstractButton ) {
-                AbstractButton button = (AbstractButton) _owner;
-                if ( !Objects.equals( button.getVerticalAlignment(), alignment.forSwing() ) )
-                    button.setVerticalAlignment( alignment.forSwing() );
-            }
-        });
+        _applyGenericBaseStyleTo(_owner, newStyle);
+        _applyIconStyleTo(_owner, newStyle);
+        _applyLayoutStyleTo(_owner, newStyle);
+        _applyDimensionalityStyleTo(_owner, newStyle);
+        _applyFontStyleTo(_owner, newStyle);
+        _applyPropertiesTo(_owner, newStyle);
+        _doComboBoxMarginAdjustment(_owner, newStyle);
 
         if ( !onlyDimensionalityIsStyled ) {
             _installCustomBorderBasedStyleAndAnimationRenderer();
@@ -721,104 +553,154 @@ public final class ComponentExtension<C extends JComponent>
         if ( newStyle.hasPaintersOnLayer(UI.Layer.FOREGROUND) )
             _makeAllChildrenTransparent(_owner);
 
-        {
-            boolean canBeOpaque = true;
+        boolean canBeOpaque = true;
 
-            if ( !opaqueGradientAreas.contains(UI.ComponentArea.ALL) ) {
-                boolean hasOpaqueFoundation = 255 == newStyle.base().foundationColor().map(Color::getAlpha).orElse(0);
-                boolean hasOpaqueBorder     = 255 == newStyle.border().color().map(Color::getAlpha).orElse(0);
-                boolean hasOpaqueBackground = 255 == newStyle.base().backgroundColor().map( c -> c != UI.COLOR_UNDEFINED ? c : _initialBackgroundColor ).map(Color::getAlpha).orElse(255);
-                boolean hasBorder           = newStyle.border().widths().isPositive();
-                boolean hasMargin           = newStyle.margin().isPositive();
+        if ( !opaqueGradientAreas.contains(UI.ComponentArea.ALL) ) {
+            boolean hasOpaqueFoundation = 255 == newStyle.base().foundationColor().map(Color::getAlpha).orElse(0);
+            boolean hasOpaqueBorder     = 255 == newStyle.border().color().map(Color::getAlpha).orElse(0);
+            boolean hasOpaqueBackground = 255 == newStyle.base().backgroundColor().map( c -> c != UI.COLOR_UNDEFINED ? c : _initialBackgroundColor ).map(Color::getAlpha).orElse(255);
+            boolean hasBorder           = newStyle.border().widths().isPositive();
+            boolean hasMargin           = newStyle.margin().isPositive();
 
-                if ( !hasOpaqueFoundation && !opaqueGradientAreas.contains(UI.ComponentArea.EXTERIOR) ) {
-                    if ( hasBorderRadius )
-                        canBeOpaque = false;
-                    else if ( hasMargin )
-                        canBeOpaque = false;
-                }
-
-                if ( hasBorder && (!hasOpaqueBorder && !opaqueGradientAreas.contains(UI.ComponentArea.BORDER)) )
+            if ( !hasOpaqueFoundation && !opaqueGradientAreas.contains(UI.ComponentArea.EXTERIOR) ) {
+                if ( hasBorderRadius )
                     canBeOpaque = false;
-
-                if (
-                    !hasOpaqueBackground &&
-                    !opaqueGradientAreas.contains(UI.ComponentArea.INTERIOR) &&
-                    !opaqueGradientAreas.contains(UI.ComponentArea.BODY)
-                )
+                else if ( hasMargin )
                     canBeOpaque = false;
             }
 
-            if ( !canBeOpaque )
-                _owner.setOpaque(false);
-            else {
-                _owner.setOpaque(true);
-                boolean hasBackgroundGradients = newStyle.hasActiveBackgroundGradients();
-                if ( !_initialIsOpaque || hasBackgroundGradients ) {
-                    boolean isSwingTreeComponent = _isNestedClassInUINamespace();
-                    //boolean hasSwingTreeUI = _dynamicLaF.customLookAndFeelIsInstalled();
-                    if ( isSwingTreeComponent ){
-                        _owner.setBackground(UI.COLOR_UNDEFINED);
-                        /*
-                            We do not set the background color to null here, because
-                            that would cause the background color to be inherited from the parent.
-                            This is a problem because in this case we do not have a custom
-                            UI installed, so the background color would be painted by the
-                            default Swing UI, which would be wrong.
-                            But because this is one of our own components, which has the paint method
-                            overridden, we can simply set the background color to "undefined" (which has an alpha of 0)
-                            and then paint the background ourselves.
-                        */
-                    } else {
-                        _owner.setOpaque(false);
-                    }
-                }
-                else _owner.setOpaque(_initialIsOpaque);
-            }
+            if ( hasBorder && (!hasOpaqueBorder && !opaqueGradientAreas.contains(UI.ComponentArea.BORDER)) )
+                canBeOpaque = false;
+
+            if (
+                !hasOpaqueBackground &&
+                !opaqueGradientAreas.contains(UI.ComponentArea.INTERIOR) &&
+                !opaqueGradientAreas.contains(UI.ComponentArea.BODY)
+            )
+                canBeOpaque = false;
         }
 
-        newStyle.properties().forEach( property -> {
-
-            Object oldValue = _owner.getClientProperty(property.name());
-            if ( property.style().equals(oldValue) )
-                return;
-
-            if ( property.style().isEmpty() )
-                _owner.putClientProperty(property.name(), null); // remove property
-            else
-                _owner.putClientProperty(property.name(), property.style());
-        });
+        if ( !canBeOpaque )
+            _owner.setOpaque(false);
+        else {
+            _owner.setOpaque(true);
+            boolean hasBackgroundGradients = newStyle.hasActiveBackgroundGradients();
+            if ( !_initialIsOpaque || hasBackgroundGradients ) {
+                boolean isSwingTreeComponent = _isNestedClassInUINamespace();
+                //boolean hasSwingTreeUI = _dynamicLaF.customLookAndFeelIsInstalled();
+                if ( isSwingTreeComponent ){
+                    _owner.setBackground(UI.COLOR_UNDEFINED);
+                    /*
+                        We do not set the background color to null here, because
+                        that would cause the background color to be inherited from the parent.
+                        This is a problem because in this case we do not have a custom
+                        UI installed, so the background color would be painted by the
+                        default Swing UI, which would be wrong.
+                        But because this is one of our own components, which has the paint method
+                        overridden, we can simply set the background color to "undefined" (which has an alpha of 0)
+                        and then paint the background ourselves.
+                    */
+                } else {
+                    _owner.setOpaque(false);
+                }
+            }
+            else _owner.setOpaque(_initialIsOpaque);
+        }
 
         return newStyle;
     }
 
-    private boolean _isNestedClassInUINamespace() {
-        Class<UI> uiClass = UI.class;
-        Class<?>  componentClass = _owner.getClass();
-        /*
-            Inside the UI namespace are nested classes extending various Swing components.
-            Here we check if the component is one of those nested classes.
-        */
-        while ( componentClass != null ) {
-            if ( componentClass.getEnclosingClass() == uiClass )
-                return true;
-            componentClass = componentClass.getSuperclass();
+    private void _applyGenericBaseStyleTo( final C owner, final Style styleConf )
+    {
+        if ( styleConf.base().foregroundColor().isPresent() && !Objects.equals( owner.getForeground(), styleConf.base().foregroundColor().get() ) ) {
+            Color newColor = styleConf.base().foregroundColor().get();
+            if ( newColor == UI.COLOR_UNDEFINED)
+                newColor = null;
+            owner.setForeground( newColor );
         }
-        return false;
+
+        styleConf.base().cursor().ifPresent( cursor -> {
+            if ( !Objects.equals( owner.getCursor(), cursor ) )
+                owner.setCursor( cursor );
+        });
+
+        if ( styleConf.base().orientation() != UI.ComponentOrientation.UNKNOWN ) {
+            ComponentOrientation currentOrientation = owner.getComponentOrientation();
+            UI.ComponentOrientation newOrientation = styleConf.base().orientation();
+            switch ( newOrientation ) {
+                case LEFT_TO_RIGHT:
+                    if ( !Objects.equals( currentOrientation, ComponentOrientation.LEFT_TO_RIGHT ) )
+                        owner.applyComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
+                    break;
+                case RIGHT_TO_LEFT:
+                    if ( !Objects.equals( currentOrientation, ComponentOrientation.RIGHT_TO_LEFT ) )
+                        owner.applyComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+                    break;
+                default:
+                    if ( !Objects.equals( currentOrientation, ComponentOrientation.UNKNOWN ) )
+                        owner.applyComponentOrientation(ComponentOrientation.UNKNOWN);
+                    break;
+            }
+        }
     }
 
-    private void _applyAlignmentToMigLayoutIfItExists(LayoutStyle style)
+    private void _applyIconStyleTo( final C owner, Style styleConf )
     {
+        UI.FitComponent fit = styleConf.base().fit();
+        styleConf.base().icon().ifPresent( icon -> {
+            if ( icon instanceof SvgIcon) {
+                SvgIcon svgIcon = (SvgIcon) icon;
+                icon = svgIcon.withFitComponent(fit);
+            }
+            if ( owner instanceof AbstractButton ) {
+                AbstractButton button = (AbstractButton) owner;
+                if ( !Objects.equals( button.getIcon(), icon ) )
+                    button.setIcon( icon );
+            }
+            if ( owner instanceof JLabel ) {
+                JLabel label = (JLabel) owner;
+                if ( !Objects.equals( label.getIcon(), icon ) )
+                    label.setIcon( icon );
+            }
+            if ( owner instanceof JIcon ) {
+                JIcon jIcon = (JIcon) owner;
+                if ( !Objects.equals( jIcon.getIcon(), icon ) )
+                    jIcon.setIcon( icon );
+            }
+        });
+    }
+
+    private void _applyLayoutStyleTo( final C owner, final Style styleConf )
+    {
+        final LayoutStyle style = styleConf.layout();
+
+        // Generic Layout stuff:
+
+        styleConf.layout().alignmentX().ifPresent( alignmentX -> {
+            if ( !Objects.equals( owner.getAlignmentX(), alignmentX ) )
+                owner.setAlignmentX( alignmentX );
+        });
+
+        styleConf.layout().alignmentY().ifPresent( alignmentY -> {
+            if ( !Objects.equals( owner.getAlignmentY(), alignmentY ) )
+                owner.setAlignmentY( alignmentY );
+        });
+
+        // Install Generic Layout:
+        styleConf.layout().layout().installFor(owner);
+
+        // Now on to MigLayout stuff:
+
         Optional<Float> alignmentX = style.alignmentX();
         Optional<Float> alignmentY = style.alignmentY();
 
         if ( !alignmentX.isPresent() && !alignmentY.isPresent() )
             return;
 
-        LayoutManager layout = ( _owner.getParent() == null ? null : _owner.getParent().getLayout() );
+        LayoutManager layout = ( owner.getParent() == null ? null : owner.getParent().getLayout() );
         if ( layout instanceof MigLayout ) {
             MigLayout migLayout = (MigLayout) layout;
-            Object rawComponentConstraints = migLayout.getComponentConstraints(_owner);
+            Object rawComponentConstraints = migLayout.getComponentConstraints(owner);
             if ( rawComponentConstraints instanceof String )
                 rawComponentConstraints = ConstraintParser.parseComponentConstraint(rawComponentConstraints.toString());
 
@@ -850,10 +732,158 @@ public final class ComponentExtension<C extends JComponent>
                 finalComponentConstraints.alignY(y);
 
             if ( xChange || yChange ) {
-                migLayout.setComponentConstraints(_owner, finalComponentConstraints);
-                _owner.getParent().revalidate();
+                migLayout.setComponentConstraints(owner, finalComponentConstraints);
+                owner.getParent().revalidate();
             }
         }
+    }
+
+    private void _applyDimensionalityStyleTo( final C owner, final Style styleConf )
+    {
+        final DimensionalityStyle dimensionalityStyle = styleConf.dimensionality();
+
+        if ( dimensionalityStyle.minWidth().isPresent() || dimensionalityStyle.minHeight().isPresent() ) {
+            Dimension minSize = owner.getMinimumSize();
+
+            int minWidth  = dimensionalityStyle.minWidth().orElse(minSize == null ? 0 : minSize.width);
+            int minHeight = dimensionalityStyle.minHeight().orElse(minSize == null ? 0 : minSize.height);
+
+            Dimension newMinSize = new Dimension(minWidth, minHeight);
+
+            if ( ! newMinSize.equals(minSize) )
+                owner.setMinimumSize(newMinSize);
+        }
+
+        if ( dimensionalityStyle.maxWidth().isPresent() || dimensionalityStyle.maxHeight().isPresent() ) {
+            Dimension maxSize = owner.getMaximumSize();
+
+            int maxWidth  = dimensionalityStyle.maxWidth().orElse(maxSize == null  ? Integer.MAX_VALUE : maxSize.width);
+            int maxHeight = dimensionalityStyle.maxHeight().orElse(maxSize == null ? Integer.MAX_VALUE : maxSize.height);
+
+            Dimension newMaxSize = new Dimension(maxWidth, maxHeight);
+
+            if ( ! newMaxSize.equals(maxSize) )
+                owner.setMaximumSize(newMaxSize);
+        }
+
+        if ( dimensionalityStyle.preferredWidth().isPresent() || dimensionalityStyle.preferredHeight().isPresent() ) {
+            Dimension prefSize = owner.getPreferredSize();
+
+            int prefWidth  = dimensionalityStyle.preferredWidth().orElse(prefSize == null ? 0 : prefSize.width);
+            int prefHeight = dimensionalityStyle.preferredHeight().orElse(prefSize == null ? 0 : prefSize.height);
+
+            Dimension newPrefSize = new Dimension(prefWidth, prefHeight);
+
+            if ( !newPrefSize.equals(prefSize) )
+                owner.setPreferredSize(newPrefSize);
+        }
+
+        if ( dimensionalityStyle.width().isPresent() || dimensionalityStyle.height().isPresent() ) {
+            Dimension size = owner.getSize();
+
+            int width  = dimensionalityStyle.width().orElse(size == null ? 0 : size.width);
+            int height = dimensionalityStyle.height().orElse(size == null ? 0 : size.height);
+
+            Dimension newSize = new Dimension(width, height);
+
+            if ( ! newSize.equals(size) )
+                owner.setSize(newSize);
+        }
+    }
+
+    private void _applyFontStyleTo( final C owner, final Style styleConf )
+    {
+        final FontStyle fontStyle = styleConf.font();
+
+        if ( owner instanceof JTextComponent ) {
+            JTextComponent tc = (JTextComponent) owner;
+            if ( fontStyle.selectionColor().isPresent() && ! Objects.equals( tc.getSelectionColor(), fontStyle.selectionColor().get() ) )
+                tc.setSelectionColor(fontStyle.selectionColor().get());
+        }
+
+        fontStyle
+             .createDerivedFrom(owner.getFont())
+             .ifPresent( newFont -> {
+                    if ( !newFont.equals(owner.getFont()) )
+                        owner.setFont( newFont );
+                });
+
+        fontStyle.horizontalAlignment().ifPresent( alignment -> {
+            if ( owner instanceof JLabel ) {
+                JLabel label = (JLabel) owner;
+                if ( !Objects.equals( label.getHorizontalAlignment(), alignment.forSwing() ) )
+                    label.setHorizontalAlignment( alignment.forSwing() );
+            }
+            if ( owner instanceof AbstractButton ) {
+                AbstractButton button = (AbstractButton) owner;
+                if ( !Objects.equals( button.getHorizontalAlignment(), alignment.forSwing() ) )
+                    button.setHorizontalAlignment( alignment.forSwing() );
+            }
+            if ( owner instanceof JTextField ) {
+                JTextField textField = (JTextField) owner;
+                if ( !Objects.equals( textField.getHorizontalAlignment(), alignment.forSwing() ) )
+                    textField.setHorizontalAlignment( alignment.forSwing() );
+            }
+        });
+        fontStyle.verticalAlignment().ifPresent( alignment -> {
+            if ( owner instanceof JLabel ) {
+                JLabel label = (JLabel) owner;
+                if ( !Objects.equals( label.getVerticalAlignment(), alignment.forSwing() ) )
+                    label.setVerticalAlignment( alignment.forSwing() );
+            }
+            if ( owner instanceof AbstractButton ) {
+                AbstractButton button = (AbstractButton) owner;
+                if ( !Objects.equals( button.getVerticalAlignment(), alignment.forSwing() ) )
+                    button.setVerticalAlignment( alignment.forSwing() );
+            }
+        });
+    }
+
+    private void _applyPropertiesTo( final C owner, final Style styleConf ) {
+        styleConf.properties().forEach( property -> {
+            Object oldValue = owner.getClientProperty(property.name());
+            if ( property.style().equals(oldValue) )
+                return;
+
+            if ( property.style().isEmpty() )
+                owner.putClientProperty(property.name(), null); // remove property
+            else
+                owner.putClientProperty(property.name(), property.style());
+        });
+    }
+
+    private void _doComboBoxMarginAdjustment( final C owner, final Style styleConf ) {
+        if ( _owner instanceof JComboBox ) {
+            int bottom = styleConf.margin().bottom().map(Number::intValue).orElse(0);
+            // We adjust the position of the popup menu:
+            try {
+                Point location = owner.getLocationOnScreen();
+                int x = location.x;
+                int y = location.y + owner.getHeight() - bottom;
+                JComboBox<?> comboBox = (JComboBox<?>) owner;
+                JPopupMenu popup = (JPopupMenu) comboBox.getAccessibleContext().getAccessibleChild(0);
+                Point oldLocation = popup.getLocation();
+                if ( popup.isShowing() && (oldLocation.x != x || oldLocation.y != y) )
+                    popup.setLocation(x, y);
+            } catch ( Exception e ) {
+                // ignore
+            }
+        }
+    }
+
+    private boolean _isNestedClassInUINamespace() {
+        Class<UI> uiClass = UI.class;
+        Class<?>  componentClass = _owner.getClass();
+        /*
+            Inside the UI namespace are nested classes extending various Swing components.
+            Here we check if the component is one of those nested classes.
+        */
+        while ( componentClass != null ) {
+            if ( componentClass.getEnclosingClass() == uiClass )
+                return true;
+            componentClass = componentClass.getSuperclass();
+        }
+        return false;
     }
 
     /**
