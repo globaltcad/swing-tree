@@ -751,12 +751,13 @@ public final class ComponentExtension<C extends JComponent>
 
             if ( !canBeOpaque )
                 _owner.setOpaque(false);
-            else if ( hasBackground ) {
+            else {
                 _owner.setOpaque(true);
-                if ( !_initialIsOpaque ) {
+                boolean hasBackgroundGradients = newStyle.hasActiveBackgroundGradients();
+                if ( !_initialIsOpaque || hasBackgroundGradients ) {
                     boolean isSwingTreeComponent = _isNestedClassInUINamespace();
-                    boolean hasSwingTreeUI = _dynamicLaF.customLookAndFeelIsInstalled();
-                    if ( isSwingTreeComponent && !hasSwingTreeUI ){
+                    //boolean hasSwingTreeUI = _dynamicLaF.customLookAndFeelIsInstalled();
+                    if ( isSwingTreeComponent ){
                         _owner.setBackground(UI.COLOR_UNDEFINED);
                         /*
                             We do not set the background color to null here, because
@@ -768,10 +769,12 @@ public final class ComponentExtension<C extends JComponent>
                             overridden, we can simply set the background color to "undefined" (which has an alpha of 0)
                             and then paint the background ourselves.
                         */
+                    } else {
+                        _owner.setOpaque(false);
                     }
                 }
-            } else
-                _owner.setOpaque(_initialIsOpaque);
+                else _owner.setOpaque(_initialIsOpaque);
+            }
         }
 
         newStyle.properties().forEach( property -> {

@@ -253,7 +253,11 @@ public final class Style
     }
 
     List<UI.ComponentArea> gradientCoveredAreas() {
-        return Arrays.stream(UI.Layer.values())
+        return gradientCoveredAreas(UI.Layer.values());
+    }
+
+    List<UI.ComponentArea> gradientCoveredAreas(UI.Layer... layers) {
+        return Arrays.stream(layers)
                 .map(_layers::get)
                 .map(StyleLayer::gradients)
                 .flatMap( g -> g
