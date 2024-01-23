@@ -978,6 +978,9 @@ class Opaqueness_Styles_Spec extends Specification
 
             true    | 0      | 0      | 0      |   "rgba(0,0,0,0)"  |   "rgba(0,0,0,0)"  |   "rgba(0,0,0, 0)" | ["red", "green"]
 
+            false   | 0      | 0      | 0      |   "rgba(0,0,0,0)"  |   "rgba(0,0,0,0)"  |   "rgba(0,0,0, 0)" | ["red", "rgba(0,0,0,0)"]
+            false   | 0      | 0      | 0      |   "rgba(0,0,0,0)"  |   "rgba(0,0,0,0)"  |   "rgba(0,0,0, 0)" | ["rgba(0,0,0,0)", "green"]
+
 
     }
 }
