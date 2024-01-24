@@ -226,6 +226,10 @@ public final class Style
         return _layers.get(layer).painters().stylesStream().anyMatch(p -> !Painter.none().equals(p.painter()));
     }
 
+    boolean hasImagesOnLayer(UI.Layer layer ) {
+        return _layers.get(layer).images().stylesStream().anyMatch(i -> i.image().isPresent() || i.primer().isPresent());
+    }
+
     List<GradientStyle> gradients( UI.Layer layer ) {
         return _layers.get(layer).gradients().sortedByNamesAndFilteredBy();
     }

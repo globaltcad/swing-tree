@@ -113,9 +113,6 @@ final class StyleInstaller<C extends JComponent>
                 _dynamicLaF = _dynamicLaF.establishLookAndFeelFor(newStyle, owner);
         }
 
-        if ( newStyle.hasPaintersOnLayer(UI.Layer.FOREGROUND) )
-            _makeAllChildrenTransparent(owner);
-
         boolean canBeOpaque = true;
 
         if ( !opaqueGradientAreas.contains(UI.ComponentArea.ALL) ) {
@@ -147,30 +144,49 @@ final class StyleInstaller<C extends JComponent>
             owner.setOpaque(false);
         else
         {
-            boolean hasBackgroundGradients = newStyle.hasActiveBackgroundGradients();
+            boolean isSwingTreeComponent = _isNestedClassInUINamespace(owner);
 
-            if ( _initialIsOpaque && !hasBackgroundGradients )
+            if ( !isSwingTreeComponent ) {
+                owner.setOpaque(false);
+            } else {
                 owner.setOpaque(true);
-            else
-            {
-                boolean isSwingTreeComponent = _isNestedClassInUINamespace(owner);
 
-                if ( !isSwingTreeComponent ){
-                    owner.setOpaque(false);
-                } else {
-                    owner.setOpaque(true);
+                boolean requiresBackgroundPainting = newStyle.hasActiveBackgroundGradients();
+                requiresBackgroundPainting = requiresBackgroundPainting || newStyle.anyVisibleShadows(UI.Layer.BACKGROUND);
+                requiresBackgroundPainting = requiresBackgroundPainting || newStyle.hasPaintersOnLayer(UI.Layer.BACKGROUND);
+                requiresBackgroundPainting = requiresBackgroundPainting || newStyle.hasImagesOnLayer(UI.Layer.BACKGROUND);
+                requiresBackgroundPainting = requiresBackgroundPainting || hasBorderRadius;
+                requiresBackgroundPainting = requiresBackgroundPainting || newStyle.margin().isPositive();
+                requiresBackgroundPainting = requiresBackgroundPainting || newStyle.border().color().map( c -> c.getAlpha() < 255 ).orElse(false);
+
+                if ( requiresBackgroundPainting )
                     owner.setBackground(UI.COLOR_UNDEFINED);
-                    /*
-                        We do not set the background color to null here, because
-                        that would cause the background color to be inherited from the parent.
-                        This is a problem because in this case we do not have a custom
-                        UI installed, so the background color would be painted by the
-                        default Swing UI, which would be wrong.
-                        But because this is one of our own components, which has the paint method
-                        overridden, we can simply set the background color to "undefined" (which has an alpha of 0)
-                        and then paint the background ourselves.
-                    */
-                }
+                /*
+                    The above line looks very strange, but it is very important!
+                    To understand what is going on here, you have to know that when a component is
+                    flagged to be opaque, then every Swing look and feel will, before painting
+                    anything else, first fill out the entire background of the component with
+                    the background color of the component.
+
+                    Now this is a problem when you have the background layer of your SwingTree component
+                    styled using various things like gradients, shadows, images, etc.
+
+                    We could simply set the opaque flag to false, but then we would lose the
+                    performance benefits of having the opaque flag set to true (avoiding the
+                    traversal repaint of parent components, and their parent components, etc).
+
+                    In this branch we have already determined that the style configuration
+                    leads to an opaque component, and we also have the ability to render
+                    the background of the component ourselves due to the
+                    component being a SwingTree component (it has the paint method overridden).
+
+                    So what we do here is we set the background color of the component to
+                    UI.COLOR_UNDEFINED, which is a special color that is actually fully transparent.
+
+                    This way, when the Swing look and feel tries to paint the background of the
+                    component, it will actually paint nothing, and we can do the background
+                    painting ourselves in the paint method of the component.
+                */
             }
         }
 
@@ -181,6 +197,9 @@ final class StyleInstaller<C extends JComponent>
         _applyFontStyleTo(owner, newStyle);
         _applyPropertiesTo(owner, newStyle);
         _doComboBoxMarginAdjustment(owner, newStyle);
+
+        if ( newStyle.hasPaintersOnLayer(UI.Layer.FOREGROUND) )
+            _makeAllChildrenTransparent(owner);
 
         return newStyle;
     }

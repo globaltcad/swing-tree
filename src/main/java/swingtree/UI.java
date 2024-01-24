@@ -396,11 +396,11 @@ public final class UI extends UINamespaceUtilities
 
     /**
      *  Use these enum instances to specify the gradient type for various sub styles,
-     *  like for example the gradient style API exposed by {@link ComponentStyleDelegate#borderGradient(Function)}
+     *  like for example the gradient style API exposed by {@link ComponentStyleDelegate#gradient(Layer, String, Function)}
      *  or {@link ComponentStyleDelegate#gradient(Function)} methods (see {@link UIForAnySwing#withStyle(Styler)}).
      *  <p>
      *  {@link GradientStyle#type(GradientType)} method exposed by methods like
-     *  {@link ComponentStyleDelegate#gradient(String, Function)} or {@link ComponentStyleDelegate#borderGradient(String, Function)}.
+     *  {@link ComponentStyleDelegate#gradient(String, Function)} or {@link ComponentStyleDelegate#gradient(Layer, String, Function)}.
      */
     public enum GradientType implements UIEnum<GradientType>
     {
@@ -409,11 +409,11 @@ public final class UI extends UINamespaceUtilities
 
     /**
      *  Use these enum instances to specify the gradient alignment for various sub styles,
-     *  like for example the gradient style API exposed by {@link ComponentStyleDelegate#borderGradient(Function)}
+     *  like for example the gradient style API exposed by {@link ComponentStyleDelegate#gradient(Function)}
      *  or {@link ComponentStyleDelegate#gradient(Function)} methods (see {@link UIForAnySwing#withStyle(Styler)}).
      * <p>
      *  {@link GradientStyle#transition(Transition)} method exposed by methods like
-     *  {@link ComponentStyleDelegate#gradient(String, Function)} or {@link ComponentStyleDelegate#borderGradient(String, Function)}.
+     *  {@link ComponentStyleDelegate#gradient(String, Function)} or {@link ComponentStyleDelegate#gradient(Layer, String, Function)}.
      */
     public enum Transition implements UIEnum<Transition>
     {
@@ -4822,7 +4822,11 @@ public final class UI extends UINamespaceUtilities
      */
     public static UIForFormattedTextField formattedTextField( String text ) {
         NullUtil.nullArgCheck(text, "text", String.class);
-        return new UIForFormattedTextField(new BuilderState<>(JFormattedTextField.class, ()->new JFormattedTextField(text)));
+        return new UIForFormattedTextField(new BuilderState<>(JFormattedTextField.class, ()->{
+            JFormattedTextField tf = new FormattedTextField();
+            tf.setText(text);
+            return tf;
+        }));
     }
 
     /**
@@ -4837,7 +4841,7 @@ public final class UI extends UINamespaceUtilities
     public static UIForFormattedTextField formattedTextField( Val<String> text ) {
         NullUtil.nullArgCheck(text, "text", Val.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
-        return new UIForFormattedTextField(new BuilderState<>(JFormattedTextField.class, ()->new JFormattedTextField()))
+        return new UIForFormattedTextField(new BuilderState<>(JFormattedTextField.class, ()->new FormattedTextField()))
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
     }
@@ -4853,7 +4857,7 @@ public final class UI extends UINamespaceUtilities
     public static UIForFormattedTextField formattedTextField( Var<String> text ) {
         NullUtil.nullArgCheck(text, "text", Var.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
-        return new UIForFormattedTextField(new BuilderState<>(JFormattedTextField.class, ()->new JFormattedTextField()))
+        return new UIForFormattedTextField(new BuilderState<>(JFormattedTextField.class, ()->new FormattedTextField()))
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withText(text);
     }
@@ -4865,7 +4869,7 @@ public final class UI extends UINamespaceUtilities
      * @return A builder instance for a new {@link JFormattedTextField}, which enables fluent method chaining.
      */
     public static UIForFormattedTextField formattedTextField() {
-        return new UIForFormattedTextField(new BuilderState<>(JFormattedTextField.class, ()->new JFormattedTextField()));
+        return new UIForFormattedTextField(new BuilderState<>(JFormattedTextField.class, ()->new FormattedTextField()));
     }
 
     /**
