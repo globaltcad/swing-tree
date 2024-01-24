@@ -60,11 +60,13 @@ final class StyleInstaller<C extends JComponent>
             if ( styleSource.hasNoAnimationStylers() && styleEngine.hasNoPainters() )
                 _uninstallCustomBorderBasedStyleAndAnimationRenderer(owner);
             if ( _initialBackgroundColor != null ) {
-                owner.setBackground(_initialBackgroundColor);
+                if ( !Objects.equals( owner.getBackground(), _initialBackgroundColor ) )
+                    owner.setBackground(_initialBackgroundColor);
                 _initialBackgroundColor = null;
             }
             if ( _initialIsOpaque != null ) {
-                owner.setOpaque(_initialIsOpaque);
+                if ( owner.isOpaque() != _initialIsOpaque )
+                    owner.setOpaque(_initialIsOpaque);
                 _initialIsOpaque = null;
             }
             if ( isNotStyled )
@@ -86,14 +88,20 @@ final class StyleInstaller<C extends JComponent>
                 Color newColor =  newStyle.base().backgroundColor().get();
                 if ( newColor == UI.COLOR_UNDEFINED)
                     newColor = null;
-                owner.setBackground( newColor );
-                if ( owner instanceof JScrollPane ) {
-                    JScrollPane scrollPane = (JScrollPane) owner;
-                    if ( scrollPane.getViewport() != null ) {
-                        newColor = newStyle.base().backgroundColor().get();
-                        if ( newColor == UI.COLOR_UNDEFINED)
-                            newColor = null;
-                        scrollPane.getViewport().setBackground( newColor );
+
+                if ( !Objects.equals( owner.getBackground(), newColor ) ) {
+                    owner.setBackground( newColor );
+                    if ( owner instanceof JScrollPane ) {
+                        JScrollPane scrollPane = (JScrollPane) owner;
+                        if ( scrollPane.getViewport() != null ) {
+                            newColor = newStyle.base().backgroundColor().get();
+                            if ( newColor == UI.COLOR_UNDEFINED)
+                                newColor = null;
+
+                            JViewport viewport = scrollPane.getViewport();
+                            if ( !Objects.equals( viewport.getBackground(), newColor ) )
+                                viewport.setBackground( newColor );
+                        }
                     }
                 }
             }
@@ -140,16 +148,20 @@ final class StyleInstaller<C extends JComponent>
                 canBeOpaque = false;
         }
 
-        if ( !canBeOpaque )
-            owner.setOpaque(false);
+        if ( !canBeOpaque ) {
+            if ( owner.isOpaque() )
+                owner.setOpaque(false);
+        }
         else
         {
             boolean isSwingTreeComponent = _isNestedClassInUINamespace(owner);
 
             if ( !isSwingTreeComponent ) {
-                owner.setOpaque(false);
+                if ( owner.isOpaque() )
+                    owner.setOpaque(false);
             } else {
-                owner.setOpaque(true);
+                if ( !owner.isOpaque() )
+                    owner.setOpaque(true);
 
                 boolean requiresBackgroundPainting = newStyle.hasActiveBackgroundGradients();
                 requiresBackgroundPainting = requiresBackgroundPainting || newStyle.anyVisibleShadows(UI.Layer.BACKGROUND);
@@ -159,7 +171,7 @@ final class StyleInstaller<C extends JComponent>
                 requiresBackgroundPainting = requiresBackgroundPainting || newStyle.margin().isPositive();
                 requiresBackgroundPainting = requiresBackgroundPainting || newStyle.border().color().map( c -> c.getAlpha() < 255 ).orElse(false);
 
-                if ( requiresBackgroundPainting )
+                if ( requiresBackgroundPainting && !Objects.equals( owner.getBackground(), UI.COLOR_UNDEFINED ) )
                     owner.setBackground(UI.COLOR_UNDEFINED);
                 /*
                     The above line looks very strange, but it is very important!
@@ -210,7 +222,9 @@ final class StyleInstaller<C extends JComponent>
             Color newColor = styleConf.base().foregroundColor().get();
             if ( newColor == UI.COLOR_UNDEFINED)
                 newColor = null;
-            owner.setForeground( newColor );
+
+            if ( !Objects.equals( owner.getForeground(), newColor ) )
+                owner.setForeground( newColor );
         }
 
         styleConf.base().cursor().ifPresent( cursor -> {
@@ -505,6 +519,9 @@ final class StyleInstaller<C extends JComponent>
      * @param c The component to make all children transparent.
      */
     private void _makeAllChildrenTransparent( JComponent c ) {
+        if ( !c.isVisible() )
+            return;
+
         if ( c.isOpaque() )
             c.setOpaque(false);
 
