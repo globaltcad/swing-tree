@@ -145,13 +145,20 @@ final class StyleInstaller<C extends JComponent>
 
         if ( !canBeOpaque )
             owner.setOpaque(false);
-        else {
-            owner.setOpaque(true);
+        else
+        {
             boolean hasBackgroundGradients = newStyle.hasActiveBackgroundGradients();
-            if ( !_initialIsOpaque || hasBackgroundGradients ) {
+
+            if ( _initialIsOpaque && !hasBackgroundGradients )
+                owner.setOpaque(true);
+            else
+            {
                 boolean isSwingTreeComponent = _isNestedClassInUINamespace(owner);
-                //boolean hasSwingTreeUI = _dynamicLaF.customLookAndFeelIsInstalled();
-                if ( isSwingTreeComponent ){
+
+                if ( !isSwingTreeComponent ){
+                    owner.setOpaque(false);
+                } else {
+                    owner.setOpaque(true);
                     owner.setBackground(UI.COLOR_UNDEFINED);
                     /*
                         We do not set the background color to null here, because
@@ -163,11 +170,8 @@ final class StyleInstaller<C extends JComponent>
                         overridden, we can simply set the background color to "undefined" (which has an alpha of 0)
                         and then paint the background ourselves.
                     */
-                } else {
-                    owner.setOpaque(false);
                 }
             }
-            else owner.setOpaque(_initialIsOpaque);
         }
 
         _applyGenericBaseStyleTo(owner, newStyle);
