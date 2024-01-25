@@ -76,17 +76,13 @@ final class DynamicLaF
 
                 owner.setOpaque(!hasBorderRadius && !hasMargin && !foundationIsTransparent);
                 JScrollPane scrollPane = (JScrollPane) owner;
-                if (scrollPane.getViewport() != null)
+                if ( scrollPane.getViewport() != null )
                     scrollPane.getViewport().setOpaque(owner.isOpaque());
             }
             /* ^
                 If our style reveals what is behind it, then we need
                 to make the component non-opaque so that the previous rendering get's flushed out!
              */
-            if ( owner instanceof AbstractButton) {
-                AbstractButton b = (AbstractButton) owner;
-                b.setContentAreaFilled(!style.hasCustomGradients() && !style.hasPaintersOnLayer(UI.Layer.BACKGROUND));
-            }
             result = _installCustomLaF(owner);
         } else
             if ( customLookAndFeelIsInstalled() )

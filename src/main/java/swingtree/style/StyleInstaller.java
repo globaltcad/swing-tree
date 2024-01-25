@@ -164,7 +164,7 @@ final class StyleInstaller<C extends JComponent>
                 if ( !owner.isOpaque() )
                     owner.setOpaque(true);
 
-                boolean requiresBackgroundPainting = newStyle.hasActiveBackgroundGradients();
+                boolean requiresBackgroundPainting = newStyle.hasVisibleBackgroundGradients();
                 requiresBackgroundPainting = requiresBackgroundPainting || newStyle.anyVisibleShadows(UI.Layer.BACKGROUND);
                 requiresBackgroundPainting = requiresBackgroundPainting || newStyle.hasPaintersOnLayer(UI.Layer.BACKGROUND);
                 requiresBackgroundPainting = requiresBackgroundPainting || newStyle.hasImagesOnLayer(UI.Layer.BACKGROUND);
@@ -201,6 +201,17 @@ final class StyleInstaller<C extends JComponent>
                     painting ourselves in the paint method of the component.
                 */
             }
+        }
+
+        if ( owner instanceof AbstractButton) {
+            AbstractButton b = (AbstractButton) owner;
+            boolean hasVisibleBackgroundGradients = newStyle.hasVisibleBackgroundGradients();
+            boolean hasBackgroundPainters         = newStyle.hasPaintersOnLayer(UI.Layer.BACKGROUND);
+
+            boolean shouldButtonBeFilled =  !hasVisibleBackgroundGradients && !hasBackgroundPainters;
+
+            if ( shouldButtonBeFilled != b.isContentAreaFilled() )
+                b.setContentAreaFilled( shouldButtonBeFilled );
         }
 
         _applyGenericBaseStyleTo(owner, newStyle);

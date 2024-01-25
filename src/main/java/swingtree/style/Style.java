@@ -250,7 +250,7 @@ public final class Style
         return !( gradients.size() == 1 && GradientStyle.none().equals(gradients.get(StyleUtility.DEFAULT_KEY)) );
     }
 
-    boolean hasActiveBackgroundGradients() {
+    boolean hasVisibleBackgroundGradients() {
         List<GradientStyle> gradients = gradients(UI.Layer.BACKGROUND);
         if ( gradients.isEmpty() ) return false;
         return gradients.stream().anyMatch( s -> s.colors().length > 0 );
