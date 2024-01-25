@@ -77,8 +77,15 @@ final class StyleInstaller<C extends JComponent>
             _initialIsOpaque = owner.isOpaque();
 
         boolean hasBorderRadius = newStyle.border().hasAnyNonZeroArcs();
-        List<UI.ComponentArea> opaqueGradientAreas = newStyle.gradientCoveredAreas();
         boolean hasBackground   = newStyle.base().backgroundColor().isPresent();
+
+        if ( !hasBackground && _initialIsOpaque ) {
+            // If the style has a border radius set we need to make sure that we have a background color:
+            if ( hasBorderRadius || newStyle.border().margin().isPositive() ) {
+                _initialBackgroundColor = _initialBackgroundColor != null ? _initialBackgroundColor : owner.getBackground();
+                newStyle = newStyle.backgroundColor(_initialBackgroundColor);
+            }
+        }
 
         if ( hasBackground ) {
             boolean backgroundIsAlreadySet = Objects.equals( owner.getBackground(), newStyle.base().backgroundColor().get() );
@@ -107,19 +114,13 @@ final class StyleInstaller<C extends JComponent>
             }
         }
 
-        if ( !hasBackground && _initialIsOpaque ) {
-            // If the style has a border radius set we need to make sure that we have a background color:
-            if ( hasBorderRadius || newStyle.border().margin().isPositive() ) {
-                _initialBackgroundColor = _initialBackgroundColor != null ? _initialBackgroundColor : owner.getBackground();
-                newStyle = newStyle.backgroundColor(_initialBackgroundColor);
-            }
-        }
-
         if ( !onlyDimensionalityIsStyled ) {
             installCustomBorderBasedStyleAndAnimationRenderer(owner);
             if ( !styleCanBeRenderedThroughBorder )
                 _dynamicLaF = _dynamicLaF.establishLookAndFeelFor(newStyle, owner);
         }
+
+        List<UI.ComponentArea> opaqueGradientAreas = newStyle.gradientCoveredAreas();
 
         boolean canBeOpaque = true;
 
