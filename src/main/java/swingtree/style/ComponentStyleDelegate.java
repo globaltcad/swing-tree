@@ -623,7 +623,10 @@ public final class ComponentStyleDelegate<C extends JComponent>
 
     /**
      *  Returns a new {@link Style} with the provided background foundation color.
-     *  The background color covers the entire component area, including the padding spaces.
+     *  The foundation color covers the {@link UI.ComponentArea#EXTERIOR}, which
+     *  starts at the outer bounds of the component and the beginning of the border.
+     *  So the space spanned by the margins of the component including the additional
+     *  exterior space exposed by the border radius.
      *
      * @param color The background color.
      * @return A new {@link ComponentStyleDelegate} with the provided background color.
@@ -636,7 +639,10 @@ public final class ComponentStyleDelegate<C extends JComponent>
     /**
      *  Returns a new {@link Style} with the provided background foundation color in the form of a string.
      *  The string can be either a hex color string, a color name or a color constant from the system properties.
-     *  The background color covers the entire component area, including the padding spaces.
+     *  The foundation color covers the {@link UI.ComponentArea#EXTERIOR}, which
+     *  starts at the outer bounds of the component and the beginning of the border.
+     *  So the space spanned by the margins of the component including the additional
+     *  exterior space exposed by the border radius.
      *
      * @param colorString The background color.
      * @return A new {@link ComponentStyleDelegate} with the provided background color.
@@ -654,8 +660,49 @@ public final class ComponentStyleDelegate<C extends JComponent>
     }
 
     /**
+     *  Returns a new {@link Style} with the provided background foundation color
+     *  defined by the supplied red, green and blue color channels in
+     *  the form of doubles expected to be in the range of 0.0 to 1.0.
+     *  The foundation color covers the {@link UI.ComponentArea#EXTERIOR}, which
+     *  starts at the outer bounds of the component and the beginning of the border.
+     *  So the space spanned by the margins of the component including the additional
+     *  exterior space exposed by the border radius.
+     *
+     * @param r The red component of the background color in the range of 0.0 to 1.0.
+     * @param g The green component of the background color in the range of 0.0 to 1.0.
+     * @param b The blue component of the background color in the range of 0.0 to 1.0.
+     * @return A new {@link ComponentStyleDelegate} with the provided background color.
+     */
+    public ComponentStyleDelegate<C> foundationColor( double r, double g, double b ) {
+        return foundationColor(new Color((float) r, (float) g, (float) b));
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided background foundation color
+     *  defined by the supplied red, green, blue and alpha color channels in
+     *  the form of doubles expected to be in the range of 0.0 to 1.0.
+     *  The foundation color covers the {@link UI.ComponentArea#EXTERIOR}, which
+     *  starts at the outer bounds of the component and the beginning of the border.
+     *  So the space spanned by the margins of the component including the additional
+     *  exterior space exposed by the border radius.
+     *
+     * @param r The red component of the background color in the range of 0.0 to 1.0.
+     * @param g The green component of the background color in the range of 0.0 to 1.0.
+     * @param b The blue component of the background color in the range of 0.0 to 1.0.
+     * @param a The alpha component of the background color in the range of 0.0 to 1.0.
+     * @return A new {@link ComponentStyleDelegate} with the provided background color.
+     */
+    public ComponentStyleDelegate<C> foundationColor( double r, double g, double b, double a ) {
+        return foundationColor(new Color((float) r, (float) g, (float) b, (float) a));
+    }
+
+    /**
      *  Returns a new {@link Style} with the provided inner Background color.
-     *  The inner background will be rendered with an inset space based on the padding defined by this {@link Style}.
+     *  The background color covers the {@link UI.ComponentArea#INTERIOR}, which, when going inwards,
+     *  starts at the end of the component's border area ({@link UI.ComponentArea#BORDER}),
+     *  (which is defined by {@link UI.ComponentBoundary#BORDER_TO_INTERIOR})
+     *  and then completely fills the component's inner bounds ({@link UI.ComponentArea#INTERIOR}),
+     *  including both the space spanned by the padding and the content area.
      *
      * @param color The inner background color.
      * @return A new {@link ComponentStyleDelegate} with the provided inner background color.
@@ -666,9 +713,52 @@ public final class ComponentStyleDelegate<C extends JComponent>
     }
 
     /**
+     *  Returns a new {@link Style} with the provided inner Background color
+     *  defined by the supplied red, green and blue color channels in
+     *  the form of doubles expected to be in the range of 0.0 to 1.0.
+     *  The background color covers the {@link UI.ComponentArea#INTERIOR}, which, when going inwards,
+     *  starts at the end of the component's border area ({@link UI.ComponentArea#BORDER}),
+     *  (which is defined by {@link UI.ComponentBoundary#BORDER_TO_INTERIOR})
+     *  and then completely fills the component's inner bounds ({@link UI.ComponentArea#INTERIOR}),
+     *  including both the space spanned by the padding and the content area.
+     *
+     * @param r The red component of the inner background color in the range of 0.0 to 1.0.
+     * @param g The green component of the inner background color in the range of 0.0 to 1.0.
+     * @param b The blue component of the inner background color in the range of 0.0 to 1.0.
+     * @return A new {@link ComponentStyleDelegate} with the provided inner background color.
+     */
+    public ComponentStyleDelegate<C> backgroundColor( double r, double g, double b ) {
+        return backgroundColor(new Color((float) r, (float) g, (float) b));
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided inner Background color
+     *  defined by the supplied red, green, blue and alpha color channels in
+     *  the form of doubles expected to be in the range of 0.0 to 1.0.
+     *  The background color covers the {@link UI.ComponentArea#INTERIOR}, which, when going inwards,
+     *  starts at the end of the component's border area ({@link UI.ComponentArea#BORDER}),
+     *  (which is defined by {@link UI.ComponentBoundary#BORDER_TO_INTERIOR})
+     *  and then completely fills the component's inner bounds ({@link UI.ComponentArea#INTERIOR}),
+     *  including both the space spanned by the padding and the content area.
+     *
+     * @param r The red component of the inner background color in the range of 0.0 to 1.0.
+     * @param g The green component of the inner background color in the range of 0.0 to 1.0.
+     * @param b The blue component of the inner background color in the range of 0.0 to 1.0.
+     * @param a The alpha component of the inner background color in the range of 0.0 to 1.0.
+     * @return A new {@link ComponentStyleDelegate} with the provided inner background color.
+     */
+    public ComponentStyleDelegate<C> backgroundColor( double r, double g, double b, double a ) {
+        return backgroundColor(new Color((float) r, (float) g, (float) b, (float) a));
+    }
+
+    /**
      *  Returns a new {@link Style} with the provided inner Background color in the form of a string.
      *  The string can be either a hex color string, a color name or a color constant from the system properties.
-     *  The inner background will be rendered with an inset space based on the padding defined by this {@link Style}.
+     *  The background color covers the {@link UI.ComponentArea#INTERIOR}, which, when going inwards,
+     *  starts at the end of the component's border area ({@link UI.ComponentArea#BORDER}),
+     *  (which is defined by {@link UI.ComponentBoundary#BORDER_TO_INTERIOR})
+     *  and then completely fills the component's inner bounds ({@link UI.ComponentArea#INTERIOR}),
+     *  including both the space spanned by the padding and the content area.
      *
      * @param colorString The inner background color.
      * @return A new {@link ComponentStyleDelegate} with the provided inner background color.
@@ -943,11 +1033,15 @@ public final class ComponentStyleDelegate<C extends JComponent>
 
     /**
      *  Returns a new {@link Style} with the provided shadow color applied to the default shadow.
-     *  The shadow will be rendered with an inset space based on the padding defined by this {@link Style}.
      *  Note that in order to see the shadow, you may also need to call
      *  {@link #shadowBlurRadius(double)} and {@link #shadowSpreadRadius(double)}. <br>
+     *  The shadow will be rendered on the {@link UI.Layer#CONTENT} layer,
+     *  if you want it to be rendered on a different layer, you
+     *  may want to take a look at {@link #shadow(UI.Layer, String, Function)}. <br>
+     *  <br>
      *  Note that this property will not only be applied to the default shadow, but also any
-     *  other named shadow that you may have defined using {@link #shadow(String, Function)}.
+     *  other named shadow that you may have defined using {@link #shadow(String, Function)}
+     *  (and which are also rendered on the {@link UI.Layer#CONTENT} layer).
      *
      * @param color The shadow color.
      * @return A new {@link ComponentStyleDelegate} with the provided shadow color.
@@ -959,11 +1053,15 @@ public final class ComponentStyleDelegate<C extends JComponent>
     /**
      *  Returns a new {@link Style} with the provided shadow color in the form of a string.
      *  The string can be either a hex color string, a color name or a color constant from the system properties.
-     *  The shadow will be rendered with an inset space based on the padding defined by this {@link Style}.
      *  Note that in order to see the shadow, you may also need to call
      *  {@link #shadowBlurRadius(double)} and {@link #shadowSpreadRadius(double)}. <br>
+     *  The shadow will be rendered on the {@link UI.Layer#CONTENT} layer,
+     *  if you want it to be rendered on a different layer, you
+     *  may want to take a look at {@link #shadow(UI.Layer, String, Function)}. <br>
+     *  <br>
      *  Note that this property will not only be applied to the default shadow, but also any
-     *  other named shadow that you may have defined using {@link #shadow(String, Function)}.
+     *  other named shadow that you may have defined using {@link #shadow(String, Function)}
+     *  (and which are also rendered on the {@link UI.Layer#CONTENT} layer).
      *
      * @param colorString The shadow color.
      * @return A new {@link ComponentStyleDelegate} with the provided shadow color.
@@ -978,6 +1076,53 @@ public final class ComponentStyleDelegate<C extends JComponent>
             return this;
         }
         return _withStyle(_style._withShadow(ShadowStyle.DEFAULT_LAYER,  shadow -> shadow.color(newColor)));
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided shadow color
+     *  defined by the supplied red, green and blue color channels in
+     *  the form of doubles expected to be in the range of 0.0 to 1.0.
+     *  Note that in order to see the shadow, you may also need to call
+     *  {@link #shadowBlurRadius(double)} and {@link #shadowSpreadRadius(double)}. <br>
+     *  The shadow will be rendered on the {@link UI.Layer#CONTENT} layer,
+     *  if you want it to be rendered on a different layer, you
+     *  may want to take a look at {@link #shadow(UI.Layer, String, Function)}. <br>
+     *  <br>
+     *  Note that this property will not only be applied to the default shadow, but also any
+     *  other named shadow that you may have defined using {@link #shadow(String, Function)}
+     *  (and which are also rendered on the {@link UI.Layer#CONTENT} layer).
+     *
+     * @param r The red component of the shadow color in the range of 0.0 to 1.0.
+     * @param g The green component of the shadow color in the range of 0.0 to 1.0.
+     * @param b The blue component of the shadow color in the range of 0.0 to 1.0.
+     * @return A new {@link ComponentStyleDelegate} with the provided shadow color.
+     */
+    public ComponentStyleDelegate<C> shadowColor( double r, double g, double b ) {
+        return shadowColor(new Color((float) r, (float) g, (float) b));
+    }
+
+    /**
+     *  Returns a new {@link Style} with the provided shadow color
+     *  defined by the supplied red, green, blue and alpha color channels in
+     *  the form of doubles expected to be in the range of 0.0 to 1.0.
+     *  Note that in order to see the shadow, you may also need to call
+     *  {@link #shadowBlurRadius(double)} and {@link #shadowSpreadRadius(double)}. <br>
+     *  The shadow will be rendered on the {@link UI.Layer#CONTENT} layer,
+     *  if you want it to be rendered on a different layer, you
+     *  may want to take a look at {@link #shadow(UI.Layer, String, Function)}. <br>
+     *  <br>
+     *  Note that this property will not only be applied to the default shadow, but also any
+     *  other named shadow that you may have defined using {@link #shadow(String, Function)}
+     *  (and which are also rendered on the {@link UI.Layer#CONTENT} layer).
+     *
+     * @param r The red component of the shadow color in the range of 0.0 to 1.0.
+     * @param g The green component of the shadow color in the range of 0.0 to 1.0.
+     * @param b The blue component of the shadow color in the range of 0.0 to 1.0.
+     * @param a The alpha component of the shadow color in the range of 0.0 to 1.0.
+     * @return A new {@link ComponentStyleDelegate} with the provided shadow color.
+     */
+    public ComponentStyleDelegate<C> shadowColor( double r, double g, double b, double a ) {
+        return shadowColor(new Color((float) r, (float) g, (float) b, (float) a));
     }
 
     /**

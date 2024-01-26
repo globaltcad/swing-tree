@@ -540,7 +540,7 @@ class Individual_Component_Styling_Spec extends Specification
                         .gradient(UI.Layer.BORDER, "border gradient", s -> s
                             .transition(UI.Transition.BOTTOM_RIGHT_TO_TOP_LEFT)
                             .colors(Color.YELLOW, new Color(255,255,255,0))
-                            .area(UI.ComponentArea.BORDER)
+                            .clipTo(UI.ComponentArea.BORDER)
                         )
                         .shadowColor(new Color(0,0,0,100))
                         .shadowSpreadRadius(1)

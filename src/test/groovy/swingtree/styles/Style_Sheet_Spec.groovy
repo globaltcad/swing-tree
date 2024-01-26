@@ -595,7 +595,7 @@ class Style_Sheet_Spec extends Specification
                         .gradient(UI.Layer.BORDER, g -> g
                             .transition(UI.Transition.BOTTOM_TO_TOP)
                             .colors(Color.RED, Color.BLUE)
-                            .area(UI.ComponentArea.BORDER)
+                            .clipTo(UI.ComponentArea.BORDER)
                         )
                     );
                     add(group("B"), it -> it
@@ -608,7 +608,7 @@ class Style_Sheet_Spec extends Specification
                         .gradient(UI.Layer.BORDER, "named shade", s -> s
                             .transition(UI.Transition.TOP_TO_BOTTOM)
                             .colors(Color.CYAN, Color.MAGENTA)
-                            .area(UI.ComponentArea.BORDER)
+                            .clipTo(UI.ComponentArea.BORDER)
                         )
                     );
                 }

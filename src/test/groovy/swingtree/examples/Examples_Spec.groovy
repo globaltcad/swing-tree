@@ -3,6 +3,7 @@ package swingtree.examples
 import examples.Calculator
 import examples.animated.AnimatedButtonsView
 import examples.animated.AnimatedView
+import examples.animated.TransitionalAnimation
 import examples.comparisons.comparison1.MadeWithNetBeansEditor
 import examples.comparisons.comparison1.MadeWithSwingTree
 import examples.games.NoteGuesserView
@@ -245,6 +246,11 @@ class Examples_Spec extends Specification
     def 'The animation example view can be created.'()
     {
         expect : new AnimatedView(Mock(JFrame))
+    }
+
+    def 'The transitional style animation example view can be created.'()
+    {
+        expect : new TransitionalAnimation()
     }
 
     def 'The settings example UI defined in the examples looks as expected.'()

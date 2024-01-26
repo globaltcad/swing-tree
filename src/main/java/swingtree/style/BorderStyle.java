@@ -299,7 +299,7 @@ final class BorderStyle
     }
 
     BorderStyle correctedForRounding() {
-        Outline correction = _borderWidths.plus(_padding)
+        Outline correction = _borderWidths.plus(_padding).plus(_margin)
                                 .map( v -> v % 1 )
                                 .map( v -> v > 0f ? 1f - v : 0f )
                                 .map( v -> v == 0f ? null : v )

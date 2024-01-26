@@ -237,6 +237,27 @@ public final class ShadowStyle implements Simplifiable<ShadowStyle>
     }
 
     /**
+     * @param red The red component of the shadow color.
+     * @param green The green component of the shadow color.
+     * @param blue The blue component of the shadow color.
+     * @return A new {@link ShadowStyle} with the specified color.
+     */
+    public ShadowStyle color( double red, double green, double blue ) {
+        return color(red, green, blue, 1.0);
+    }
+
+    /**
+     * @param red The red component of the shadow color.
+     * @param green The green component of the shadow color.
+     * @param blue The blue component of the shadow color.
+     * @param alpha The alpha component of the shadow color.
+     * @return A new {@link ShadowStyle} with the specified color.
+     */
+    public ShadowStyle color( double red, double green, double blue, double alpha ) {
+        return color(new Color((float) red, (float) green, (float) blue, (float) alpha));
+    }
+
+    /**
      * @param shadowInset Whether the shadow is inset or outset.
      *                    If true, the shadow is inset, otherwise it is outset.
      *                    Inset shadows go inward, starting from the inner edge of the box (and its border),

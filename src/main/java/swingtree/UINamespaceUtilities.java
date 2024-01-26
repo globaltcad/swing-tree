@@ -84,8 +84,8 @@ public abstract class UINamespaceUtilities extends UILayoutConstants
      * @param b The blue value (0.0-1.0).
      * @return The new color.
      */
-    public static Color color( float r, float g, float b ) {
-        return new Color(r, g, b);
+    public static Color color( double r, double g, double b ) {
+        return new Color((float) r, (float) g, (float) b);
     }
 
     /**
@@ -98,8 +98,8 @@ public abstract class UINamespaceUtilities extends UILayoutConstants
      * @param a The alpha value (0.0-1.0).
      * @return The new color.
      */
-    public static Color color( float r, float g, float b, float a ) {
-        return new Color(r, g, b, a);
+    public static Color color( double r, double g, double b, double a ) {
+        return new Color((float) r, (float) g, (float) b, (float) a);
     }
 
     /**

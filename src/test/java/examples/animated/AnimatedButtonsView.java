@@ -25,7 +25,7 @@ public class AnimatedButtonsView extends Panel
         of(this).withLayout(FILL.and(WRAP(3)).and(INS(32)), "", "[][]24[]24[]")
         .add( SHRINK.and(SPAN).and(ALIGN_CENTER),
             html(
-                "<h1>Animated Buttons</h1>" +
+                "<h1 style=\"text-align: center;\">Animated Buttons</h1>" +
                 "<p>" +
                 "A view of various button with lot's of animations." +
                 "</p>"

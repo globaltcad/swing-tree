@@ -270,7 +270,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
      * @param area The area of the component to which the gradient is clipped to.
      * @return A new gradient style with the specified area.
      */
-    public GradientStyle area( UI.ComponentArea area ) {
+    public GradientStyle clipTo( UI.ComponentArea area ) {
         return new GradientStyle(_transition, _type, _colors, _offset, _size, area, _boundary);
     }
 
