@@ -1,7 +1,7 @@
 {
   "className":"swingtree.mvvm.Properties_Spec",
   "title":"Properties",
-  "narrative":"SwingTree includes support for writing UIs using the MVVM pattern,\n    by shipping with a set of observable property types as part of the \n    included **Sprouts property API**,\n    which is designed from the ground up to be used for modelling Swing UIs.\n\n    Properties are a powerful tool because they make it possible to\n    model the state and logic of your UIs without actually depending on them,\n    which is especially useful for testing, debugging and refactoring.\n\n    This specification introduces you to their API and shows you how to use them.\n\n    (For more information about the raw properties themselves\n    check out their [repository](https://github.com/globaltcad/sprouts))",
+  "narrative":"SwingTree includes support for writing UIs using the MVVM pattern,\n    by shipping with a set of observable property types as part of the\n    included **Sprouts property API**,\n    which is designed from the ground up to be used for modelling Swing UIs.\n\n    Properties are a powerful tool because they make it possible to\n    model the state and logic of your UIs without actually depending on them,\n    which is especially useful for testing, debugging and refactoring.\n\n    This specification introduces you to their API and shows you how to use them.\n\n    (For more information about the raw properties themselves\n    check out their [repository](https://github.com/globaltcad/sprouts))",
   "subjects":["sprouts.Val","sprouts.Var"],
   "statistics":{
     "runs":"14",

@@ -47,14 +47,14 @@ public class UIForScrollPanels&lt;P extends JScrollPanels&gt; extends UIForAnySc
 	}
 
 	@Override
-	protected void _addComponentTo(P thisComponent, JComponent newComponent, Object conf ) {
-<span class="fc" id="L51">		Objects.requireNonNull(newComponent);</span>
+	protected void _addComponentTo(P thisComponent, JComponent addedComponent, Object constraints) {
+<span class="fc" id="L51">		Objects.requireNonNull(addedComponent);</span>
 
 <span class="fc" id="L53">		EntryViewModel entry = _entryModel();</span>
-<span class="pc bpc" id="L54" title="1 of 2 branches missed.">		if ( conf == null )</span>
-<span class="fc" id="L55">			thisComponent.addEntry( entry, m -&gt; UI.of(newComponent) );</span>
+<span class="pc bpc" id="L54" title="1 of 2 branches missed.">		if ( constraints == null )</span>
+<span class="fc" id="L55">			thisComponent.addEntry( entry, m -&gt; UI.of(addedComponent) );</span>
 		else
-<span class="nc" id="L57">			thisComponent.addEntry( conf.toString(), entry, m -&gt; UI.of(newComponent) );</span>
+<span class="nc" id="L57">			thisComponent.addEntry( constraints.toString(), entry, m -&gt; UI.of(addedComponent) );</span>
 <span class="fc" id="L58">	}</span>
 
 	private EntryViewModel _entryModel() {

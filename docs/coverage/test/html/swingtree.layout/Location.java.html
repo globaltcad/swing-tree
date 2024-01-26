@@ -18,77 +18,82 @@ public final class Location
 <span class="fc" id="L18">    private final static Location ORIGIN = new Location( 0, 0 );</span>
 
     /**
+     * @param x The x-coordinate of the location to create.
+     * @param y The y-coordinate of the location to create.
      * @return A new location with the specified x- and y-coordinates.
      *         If both coordinates are zero, the {@link #origin()} is returned.
      */
     public static Location of( float x, float y ) {
-<span class="fc bfc" id="L25" title="All 4 branches covered.">        if ( x == 0 &amp;&amp; y == 0 )</span>
-<span class="fc" id="L26">            return ORIGIN;</span>
+<span class="fc bfc" id="L27" title="All 4 branches covered.">        if ( x == 0 &amp;&amp; y == 0 )</span>
+<span class="fc" id="L28">            return ORIGIN;</span>
 
-<span class="fc" id="L28">        return new Location(x, y);</span>
+<span class="fc" id="L30">        return new Location(x, y);</span>
     }
 
     /**
+     * @param p The point to create a location from.
      * @return A new location with the x- and y-coordinates of the specified point.
      *         If both coordinates are zero, the {@link #origin()} is returned.
      */
     public static Location of( Point p ) {
-<span class="nc" id="L36">        return of( p.x, p.y );</span>
+<span class="nc" id="L39">        return of( p.x, p.y );</span>
     }
 
     public static Location origin() {
-<span class="fc" id="L40">        return ORIGIN;</span>
+<span class="fc" id="L43">        return ORIGIN;</span>
     }
 
     final float _x;
     final float _y;
 
 
-<span class="fc" id="L47">    private Location( float x, float y ) {</span>
-<span class="fc" id="L48">        _x = x;</span>
-<span class="fc" id="L49">        _y = y;</span>
-<span class="fc" id="L50">    }</span>
+<span class="fc" id="L50">    private Location( float x, float y ) {</span>
+<span class="fc" id="L51">        _x = x;</span>
+<span class="fc" id="L52">        _y = y;</span>
+<span class="fc" id="L53">    }</span>
 
     /**
      * @return The x-coordinate of this location.
      */
     public float x() {
-<span class="fc" id="L56">        return _x;</span>
+<span class="fc" id="L59">        return _x;</span>
     }
 
     /**
      * @return The y-coordinate of this location.
      */
     public float y() {
-<span class="fc" id="L63">        return _y;</span>
+<span class="fc" id="L66">        return _y;</span>
     }
 
     /**
+     * @param y The y-coordinate of the location to create.
      * @return A new location with the same x-coordinate as this location
      *         and the specified y-coordinate.
      */
     public Location withY( int y ) {
-<span class="fc" id="L71">        return of( _x, y );</span>
+<span class="fc" id="L75">        return of( _x, y );</span>
     }
 
     /**
+     * @param x The x-coordinate of the location to create.
      * @return A new location with the same y-coordinate as this location
      *         and the specified x-coordinate.
      */
     public Location withX( int x ) {
-<span class="fc" id="L79">        return of( x, _y );</span>
+<span class="fc" id="L84">        return of( x, _y );</span>
     }
 
     /**
      * @return A new AWT {@link Point} with the same x- and y-coordinates as this location.
      */
     public Point toPoint() {
-<span class="nc" id="L86">        return new Point( (int) _x, (int) _y);</span>
+<span class="nc" id="L91">        return new Point( (int) _x, (int) _y);</span>
     }
 
     @Override
     public String toString() {
-<span class="nc" id="L91">        return this.getClass().getSimpleName()+&quot;[&quot; +</span>
+<span class="nc" id="L96">        return this.getClass().getSimpleName()+&quot;[&quot; +</span>
                     &quot;x=&quot; + _x + &quot;, &quot;+
                     &quot;y=&quot; + _y +
                 &quot;]&quot;;
@@ -96,16 +101,16 @@ public final class Location
 
     @Override
     public boolean equals( Object o ) {
-<span class="pc bpc" id="L99" title="1 of 2 branches missed.">        if ( o == this ) return true;</span>
-<span class="pc bpc" id="L100" title="1 of 2 branches missed.">        if ( o == null ) return false;</span>
-<span class="pc bpc" id="L101" title="1 of 2 branches missed.">        if ( o.getClass() != this.getClass() ) return false;</span>
-<span class="fc" id="L102">        Location other = (Location) o;</span>
-<span class="pc bpc" id="L103" title="1 of 4 branches missed.">        return _x == other._x &amp;&amp; _y == other._y;</span>
+<span class="pc bpc" id="L104" title="1 of 2 branches missed.">        if ( o == this ) return true;</span>
+<span class="pc bpc" id="L105" title="1 of 2 branches missed.">        if ( o == null ) return false;</span>
+<span class="pc bpc" id="L106" title="1 of 2 branches missed.">        if ( o.getClass() != this.getClass() ) return false;</span>
+<span class="fc" id="L107">        Location other = (Location) o;</span>
+<span class="pc bpc" id="L108" title="1 of 4 branches missed.">        return _x == other._x &amp;&amp; _y == other._y;</span>
     }
 
     @Override
     public int hashCode() {
-<span class="fc" id="L108">        return Float.hashCode(_x) ^ Float.hashCode(_y);</span>
+<span class="fc" id="L113">        return Float.hashCode(_x) ^ Float.hashCode(_y);</span>
     }
 
 }

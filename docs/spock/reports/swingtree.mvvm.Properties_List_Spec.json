@@ -1,7 +1,7 @@
 {
   "className":"swingtree.mvvm.Properties_List_Spec",
   "title":"Lists of Properties",
-  "narrative":"Just like properties you can create lists of properties\n    and then bind them to UI components.\n    They are a powerful tool to model the state \n    as well as business logic of your UI without actually depending on it.\n    This is especially useful for testing your UIs logic.\n    This specification shows how to use the various\n    methods exposed by the property lists classes, \n    namely \"Vals\" (immutable) and \"Vars\" (mutable).",
+  "narrative":"Just like properties you can create lists of properties\n    and then bind them to UI components.\n    They are a powerful tool to model the state\n    as well as business logic of your UI without actually depending on it.\n    This is especially useful for testing your UIs logic.\n    This specification shows how to use the various\n    methods exposed by the property lists classes,\n    namely \"Vals\" (immutable) and \"Vars\" (mutable).",
   "subjects":["sprouts.Vals","sprouts.Vars"],
   "statistics":{
     "runs":"18",

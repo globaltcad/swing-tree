@@ -1,7 +1,7 @@
 {
   "className":"swingtree.windows.Showing_UI_Spec",
   "title":"Showing UIs",
-  "narrative":"Any user interface needs a way to be shown to the user. \n    In Swing, this is done through various kinds of classes, \n    namely, the JFrame, JDialog and JWindow classes.\n\n    Swing-Tree allows you to instantiate and configure these\n    instances in a declarative fashion, and then show them\n    to the user.",
+  "narrative":"Any user interface needs a way to be shown to the user.\n    In Swing, this is done through various kinds of classes,\n    namely, the JFrame, JDialog and JWindow classes.\n\n    Swing-Tree allows you to instantiate and configure these\n    instances in a declarative fashion, and then show them\n    to the user.",
   "subjects":["swingtree.UI","swingtree.UIForJFrame","swingtree.UIForJDialog"],
   "statistics":{
     "runs":"4",

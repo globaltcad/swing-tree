@@ -1,7 +1,7 @@
 {
   "className":"swingtree.splitbutton.JSplitButton_Examples_Spec",
   "title":"A Button of Buttons",
-  "narrative":"The Swing-Tree split button component allows \n    you to easily create split buttons in your UIs.\n    A split button is a button that has a drop down menu attached to it.\n    This allows you to easily add additional functionality to your buttons.\n    The split button component is a wrapper around the AlexAndria Software\n    JSplitButton component.",
+  "narrative":"The Swing-Tree split button component allows\n    you to easily create split buttons in your UIs.\n    A split button is a button that has a drop down menu attached to it.\n    This allows you to easily add additional functionality to your buttons.\n    The split button component is a wrapper around the AlexAndria Software\n    JSplitButton component.",
   "subjects":[],
   "statistics":{
     "runs":"10",

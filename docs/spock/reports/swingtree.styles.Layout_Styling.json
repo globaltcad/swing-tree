@@ -1,7 +1,7 @@
 {
   "className":"swingtree.styles.Layout_Styling",
   "title":"Layout Styling",
-  "narrative":"SwingTree allows you to define the layout of your components \n    through the styling API, which is a functional DSL\n    that not only allows you to define how a component should be painted,\n    like for example the background color, the font, the border widths, etc.\n    but also allows you to define the miglayout constraints for the component.\n\n    The examples defined in this specification will demonstrate how to use the styling API\n    to define the layout of your components.",
+  "narrative":"SwingTree allows you to define the layout of your components\n    through the styling API, which is a functional DSL\n    that not only allows you to define how a component should be painted,\n    like for example the background color, the font, the border widths, etc.\n    but also allows you to define the miglayout constraints for the component.\n\n    The examples defined in this specification will demonstrate how to use the styling API\n    to define the layout of your components.",
   "subjects":[],
   "statistics":{
     "runs":"6",

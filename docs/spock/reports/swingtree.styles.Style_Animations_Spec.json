@@ -1,7 +1,7 @@
 {
   "className":"swingtree.styles.Style_Animations_Spec",
   "title":"Style Animations",
-  "narrative":"Styles in SwingTree are based on a functional style engine\n    which reevaluates your styles whenever your component is\n    repainted. \n    This makes them a perfect fit for animations.\n    Continue reading to learn how to animate your styles.",
+  "narrative":"Styles in SwingTree are based on a functional style engine\n    which reevaluates your styles whenever your component is\n    repainted.\n    This makes them a perfect fit for animations.\n    Continue reading to learn how to animate your styles.",
   "subjects":[],
   "statistics":{
     "runs":"4",

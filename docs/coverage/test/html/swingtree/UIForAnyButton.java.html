@@ -97,8 +97,8 @@ import java.util.function.Consumer;
 <span class="fc bfc" id="L97" title="All 2 branches covered.">        if ( icon instanceof SvgIcon)</span>
         {
 <span class="fc" id="L99">            SvgIcon svgIcon = (SvgIcon) icon;</span>
-<span class="fc" id="L100">            svgIcon = svgIcon.withIconWidth(width);</span>
-<span class="fc" id="L101">            icon    = svgIcon.withIconHeight(height);</span>
+<span class="fc" id="L100">            svgIcon = svgIcon.withIconWidth(UI.scale(width));</span>
+<span class="fc" id="L101">            icon    = svgIcon.withIconHeight(UI.scale(height));</span>
 <span class="fc" id="L102">        }</span>
 <span class="pc bpc" id="L103" title="3 of 4 branches missed.">        else if ( width != icon.getIconWidth() || height != icon.getIconHeight() )</span>
         {

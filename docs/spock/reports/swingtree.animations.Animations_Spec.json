@@ -1,10 +1,10 @@
 {
   "className":"swingtree.animations.Animations_Spec",
   "title":"Animations",
-  "narrative":"Animations are a great way to improve the UX of your application.\n    Swing-Tree has a built in animation scheduler that can execute animations \n    given that you have at least specified the duration of the animation.\n    Internally the animation scheduler is a \"Timer\" that will regularly update\n    your animations and then remove them from the scheduler once they are finished.",
+  "narrative":"Animations are a great way to improve the UX of your application.\n    Swing-Tree has a built in animation scheduler that can execute animations\n    given that you have at least specified the duration of the animation.\n    Internally the animation scheduler is a \"Timer\" that will regularly update\n    your animations and then remove them from the scheduler once they are finished.",
   "subjects":["swingtree.animation.Animator","swingtree.UI","swingtree.animation.LifeTime"],
   "statistics":{
-    "runs":"4",
+    "runs":"5",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -27,11 +27,38 @@
 
         {"kind":"and","text":"We wait for the animation to finish","code":["TimeUnit.MILLISECONDS.sleep(500)"]},
 
-        {"kind":"then","text":"The animation has been executed 3 times","code":["progressValues.keySet() as List == [0, 1, 2]"]},
+        {"kind":"then","text":"The animation has been executed at least once","code":["progressValues.values().flatten().size() > 0"]},
 
         {"kind":"and","text":"The progress values are always between 0 and 1","code":["progressValues[0].every { it >= 0 && it <= 1 }","progressValues[1].every { it >= 0 && it <= 1 }","progressValues[2].every { it >= 0 && it <= 1 }"]},
 
-        {"kind":"and","text":"The progress values are always increasing","code":["progressValues[0] == new ArrayList(progressValues[0]).sort()","progressValues[1] == new ArrayList(progressValues[1]).sort()","progressValues[2] == new ArrayList(progressValues[2]).sort()"]}
+        {"kind":"and","text":"The progress values are always increasing","code":["progressValues[0] == new ArrayList(progressValues[0]).sort()","progressValues[1] == new ArrayList(progressValues[1]).sort()","progressValues[2] == new ArrayList(progressValues[2]).sort()"]},
+
+        {"kind":"and","text":"\n            The animation scheduler always ensures that the last animation run is\n            executed with a progress value of 1.0. \n            This is to ensure that the animation is always finished predictably.\n        ","code":["progressValues[2].last() == 1"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use the API exposed by `UI.animateFor(..)` to schedule regressive animations (whose progress goes from 1 to 0)",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Swing-Tree has a built in animation scheduler that can be used to schedule \n            implementations of the \"Animation\" interface. This scheduler can also\n            be used to schedule animations that go from 1 to 0.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A list which we will use to store the animation states.","code":["var progressValues = [0:[],1:[],2:[]]"]},
+
+        {"kind":"when","text":"We schedule an animation that will run 3 times and has a duration of 0.1 seconds.","code":["UI.animateFor(0.1, TimeUnit.SECONDS, Stride.REGRESSIVE )","    .asLongAs({ it.repeats() < 3 })","    .go({","        progressValues[(int)it.repeats()] << it.progress()","    })"]},
+
+        {"kind":"and","text":"We wait for the animation to finish","code":["TimeUnit.MILLISECONDS.sleep(500)"]},
+
+        {"kind":"then","text":"The animation has been executed at least once","code":["progressValues.values().flatten().size() > 0"]},
+
+        {"kind":"and","text":"The progress values are always between 0 and 1","code":["progressValues[0].every { it >= 0 && it <= 1 }","progressValues[1].every { it >= 0 && it <= 1 }","progressValues[2].every { it >= 0 && it <= 1 }"]},
+
+        {"kind":"and","text":"The progress values are always decreasing","code":["progressValues[0] == new ArrayList(progressValues[0]).sort().reverse()","progressValues[1] == new ArrayList(progressValues[1]).sort().reverse()","progressValues[2] == new ArrayList(progressValues[2]).sort().reverse()"]},
+
+        {"kind":"and","text":"\n            The animation scheduler always ensures that the last animation run is\n            executed with a progress value of 0.0. \n            This is to ensure that the animation is always finished predictably.\n        ","code":["progressValues[2].last() == 0"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -46,15 +73,15 @@
       "blocks":[
         {"kind":"given","text":"","code":["var iterations = [] // An iteration is when the progress goes from 0 to 1","var progresses = [] // The progress of an animation iteration is always between 0 and 1","var cycles = []     // The cycle value reaches 1 when the progress reaches 0.5 and then decreases to 0","var cyclesPlus42 = [] // The cycle value can be offset by any value","var cyclesMinus42 = [] // ..."]},
 
-        {"kind":"when","text":"","code":["var button =","        UI.button(\"Click me! Or don't.\")","        .onClick({","            it.animateFor(0.05, TimeUnit.SECONDS)","                .asLongAs({ it.repeats() < 4 })","                .go(state -> {","                    if ( !iterations.contains(state.repeats()) )","                        iterations << state.repeats()","                    progresses    << state.progress()","                    cycles        << state.cycle()","                    cyclesPlus42  << state.cyclePlus(0.42)","                    cyclesMinus42 << state.cycleMinus(0.42)","                })","        })","        .get(JButton)"]},
+        {"kind":"when","text":"","code":["var button =","        UI.button(\"Click me! Or don't.\")","        .onClick({","            it.animateFor(0.1, TimeUnit.SECONDS)","                .asLongAs({ it.repeats() < 4 })","                .go(state -> {","                    if ( !iterations.contains(state.repeats()) )","                        iterations << state.repeats()","                    progresses    << state.progress()","                    cycles        << state.cycle()","                    cyclesPlus42  << state.cyclePlus(0.42)","                    cyclesMinus42 << state.cycleMinus(0.42)","                })","        })","        .get(JButton)"]},
 
-        {"kind":"and","text":"","code":["TimeUnit.MILLISECONDS.sleep(200)"]},
+        {"kind":"and","text":"","code":["TimeUnit.MILLISECONDS.sleep(410)"]},
 
         {"kind":"then","text":"Initially the animation has not been executed yet.","code":["iterations == []"]},
 
         {"kind":"when","text":"We simulate a click on the button","code":["button.doClick()"]},
 
-        {"kind":"and","text":"We wait for the animation to finish","code":["TimeUnit.MILLISECONDS.sleep(200)"]},
+        {"kind":"and","text":"We wait for the animation to finish","code":["TimeUnit.MILLISECONDS.sleep(410)"]},
 
         {"kind":"then","text":"The animation has been completed 4 times.","code":["iterations == [0, 1, 2, 3]"]},
 

@@ -1,7 +1,7 @@
 {
   "className":"swingtree.mvvm.MVVM_Example_Spec",
   "title":"MVVM Introduction",
-  "narrative":"Swing-Tree allows you to create a Model-View-ViewModel (MVVM) architecture\n    based on 2 simple property interfaces: `Val`, and `Var`!\n\n    `Val` is a read-only property, and `Var` is a read-write property.\n\n    The state of both properties can be observed by the view using simple listeners.\n    This happens automatically when you pass them to the Swing-Tree view.\n    If you want to trigger an action when the property changes, you \n    have to pass the `Var` property to the view and define a action\n    for it inside of your view model.",
+  "narrative":"Swing-Tree allows you to create a Model-View-ViewModel (MVVM) architecture\n    based on 2 simple property interfaces: `Val`, and `Var`!\n\n    `Val` is a read-only property, and `Var` is a read-write property.\n\n    The state of both properties can be observed by the view using simple listeners.\n    This happens automatically when you pass them to the Swing-Tree view.\n    If you want to trigger an action when the property changes, you\n    have to pass the `Var` property to the view and define a action\n    for it inside of your view model.",
   "subjects":[],
   "statistics":{
     "runs":"24",

@@ -43,16 +43,16 @@ public class FlipFlopStyler&lt;C extends JComponent&gt;
 <span class="fc" id="L43">        return _styler.style(state, delegate);</span>
     }
 
-    void set( boolean isOn ) {
-<span class="nc bnc" id="L47" title="All 2 branches missed.">        if ( _isOn == isOn ) return;</span>
-<span class="nc" id="L48">        C owner = _owner.get();</span>
-<span class="nc bnc" id="L49" title="All 2 branches missed.">        if ( owner == null )</span>
+    void set( final boolean isOn ) {
+<span class="pc bpc" id="L47" title="1 of 2 branches missed.">        if ( _isOn == isOn ) return;</span>
+<span class="fc" id="L48">        C owner = _owner.get();</span>
+<span class="pc bpc" id="L49" title="1 of 2 branches missed.">        if ( owner == null )</span>
 <span class="nc" id="L50">            return;</span>
 
-<span class="nc" id="L52">        LifeTime lifetime = _lifetime;</span>
-<span class="nc" id="L53">        long offset = 0;</span>
+<span class="fc" id="L52">        LifeTime lifetime = _lifetime;</span>
+<span class="fc" id="L53">        long offset = 0;</span>
 
-<span class="nc bnc" id="L55" title="All 2 branches missed.">        if ( _isCurrentlyRunningAnimation ) {</span>
+<span class="pc bpc" id="L55" title="1 of 2 branches missed.">        if ( _isCurrentlyRunningAnimation ) {</span>
 <span class="nc bnc" id="L56" title="All 2 branches missed.">            if ( _animation != null ) {</span>
 <span class="nc" id="L57">                _animation.dispose();</span>
 <span class="nc" id="L58">                _animation = null;</span>
@@ -70,69 +70,51 @@ public class FlipFlopStyler&lt;C extends JComponent&gt;
 <span class="nc" id="L70">            offset = -(long) (animationDuration * progress);</span>
         }
 
-<span class="nc" id="L73">        _isCurrentlyRunningAnimation = true;</span>
+<span class="fc" id="L73">        _isCurrentlyRunningAnimation = true;</span>
 
-<span class="nc bnc" id="L75" title="All 2 branches missed.">        if ( isOn ) {</span>
-<span class="nc" id="L76">            _animation = new DisposableAnimation(new Animation() {</span>
-                @Override
-                public void run( AnimationState state ) {
-<span class="nc" id="L79">                    _state = state;</span>
-<span class="nc" id="L80">                    _isOn = true;</span>
-<span class="nc" id="L81">                }</span>
-                @Override
-                public void finish( AnimationState state ) {
-<span class="nc" id="L84">                    _state = AnimationState.endOf(state.lifeSpan(), Stride.REGRESSIVE, state.event());</span>
-<span class="nc" id="L85">                    _isOn = true;</span>
-<span class="nc" id="L86">                    _isCurrentlyRunningAnimation = false;</span>
-<span class="nc" id="L87">                }</span>
-            });
-<span class="nc" id="L89">            Animator.animateFor(lifetime, Stride.PROGRESSIVE, owner)</span>
-<span class="nc" id="L90">                    .goWithOffset(offset, TimeUnit.MILLISECONDS, _animation);</span>
-        } else {
-<span class="nc" id="L92">            _animation = new DisposableAnimation(new Animation() {</span>
-                @Override
-                public void run( AnimationState state ) {
-<span class="nc" id="L95">                    _state = state;</span>
-<span class="nc" id="L96">                    _isOn = false;</span>
-<span class="nc" id="L97">                }</span>
-                @Override
-                public void finish( AnimationState state ) {
-<span class="nc" id="L100">                    _state = AnimationState.endOf(state.lifeSpan(), Stride.PROGRESSIVE, state.event());</span>
-<span class="nc" id="L101">                    _isOn = false;</span>
-<span class="nc" id="L102">                    _isCurrentlyRunningAnimation = false;</span>
-<span class="nc" id="L103">                }</span>
-            });
-<span class="nc" id="L105">            Animator.animateFor(lifetime, Stride.REGRESSIVE, owner)</span>
-<span class="nc" id="L106">                    .goWithOffset(offset, TimeUnit.MILLISECONDS, _animation);</span>
-        }
-<span class="nc" id="L108">    }</span>
+<span class="fc" id="L75">        _animation = new DisposableAnimation(new Animation() {</span>
+            @Override
+            public void run( AnimationState state ) {
+<span class="fc" id="L78">                _state = state;</span>
+<span class="fc" id="L79">                _isOn = isOn;</span>
+<span class="fc" id="L80">            }</span>
+            @Override
+            public void finish( AnimationState state ) {
+<span class="fc" id="L83">                _state = state;</span>
+<span class="fc" id="L84">                _isOn = isOn;</span>
+<span class="fc" id="L85">                _isCurrentlyRunningAnimation = false;</span>
+<span class="fc" id="L86">            }</span>
+        });
+<span class="fc bfc" id="L88" title="All 2 branches covered.">        Animator.animateFor(lifetime, isOn ? Stride.PROGRESSIVE : Stride.REGRESSIVE, owner)</span>
+<span class="fc" id="L89">                .goWithOffset(offset, TimeUnit.MILLISECONDS, _animation);</span>
+<span class="fc" id="L90">    }</span>
 
 
     static class DisposableAnimation implements Animation
     {
         private Animation _animation;
 
-<span class="nc" id="L115">        DisposableAnimation( Animation animation ) {</span>
-<span class="nc" id="L116">            _animation = Objects.requireNonNull(animation);</span>
-<span class="nc" id="L117">        }</span>
+<span class="fc" id="L97">        DisposableAnimation( Animation animation ) {</span>
+<span class="fc" id="L98">            _animation = Objects.requireNonNull(animation);</span>
+<span class="fc" id="L99">        }</span>
 
         @Override
         public void run(AnimationState state) {
-<span class="nc bnc" id="L121" title="All 2 branches missed.">            if ( _animation != null )</span>
-<span class="nc" id="L122">                _animation.run(state);</span>
-<span class="nc" id="L123">        }</span>
+<span class="pc bpc" id="L103" title="1 of 2 branches missed.">            if ( _animation != null )</span>
+<span class="fc" id="L104">                _animation.run(state);</span>
+<span class="fc" id="L105">        }</span>
 
         @Override
         public void finish(AnimationState state) {
-<span class="nc bnc" id="L127" title="All 2 branches missed.">            if ( _animation != null )</span>
-<span class="nc" id="L128">                _animation.finish(state);</span>
+<span class="pc bpc" id="L109" title="1 of 2 branches missed.">            if ( _animation != null )</span>
+<span class="fc" id="L110">                _animation.finish(state);</span>
 
-<span class="nc" id="L130">            dispose();</span>
-<span class="nc" id="L131">        }</span>
+<span class="fc" id="L112">            dispose();</span>
+<span class="fc" id="L113">        }</span>
 
         public void dispose() {
-<span class="nc" id="L134">            _animation = null;</span>
-<span class="nc" id="L135">        }</span>
+<span class="fc" id="L116">            _animation = null;</span>
+<span class="fc" id="L117">        }</span>
     }
 
 }

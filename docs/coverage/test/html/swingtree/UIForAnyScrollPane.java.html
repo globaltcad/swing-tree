@@ -10,19 +10,19 @@ import java.util.Objects;
 <span class="fc" id="L10">public abstract class UIForAnyScrollPane&lt;I, P extends JScrollPane&gt; extends UIForAnySwing&lt;I, P&gt;</span>
 {
     @Override
-    protected void _addComponentTo(P thisComponent, JComponent newComponent, Object conf ) {
-<span class="pc bpc" id="L14" title="1 of 2 branches missed.">        if ( conf != null ) {</span>
+    protected void _addComponentTo(P thisComponent, JComponent addedComponent, Object constraints) {
+<span class="pc bpc" id="L14" title="1 of 2 branches missed.">        if ( constraints != null ) {</span>
             // The user wants to add a component to the scroll pane with a specific constraint.
             // Swing does not support any constraints for scroll panes, but we are not Swing, we are SwingTree!
-<span class="nc" id="L17">            newComponent = UI.panel(&quot;fill, ins 0&quot;).add(conf.toString(), newComponent).getComponent();</span>
+<span class="nc" id="L17">            addedComponent = UI.panel(&quot;fill, ins 0&quot;).add(constraints.toString(), addedComponent).getComponent();</span>
             //  ^ So we improve this situation by wrapping the component in a mig layout panel, supporting constraints.
 
             // Let's strip it of any visible properties, since it should serve merely as a container.
-<span class="nc" id="L21">            newComponent.setBorder(null);</span>
-<span class="nc" id="L22">            newComponent.setOpaque(false);</span>
-<span class="nc" id="L23">            newComponent.setBackground(null);</span>
+<span class="nc" id="L21">            addedComponent.setBorder(null);</span>
+<span class="nc" id="L22">            addedComponent.setOpaque(false);</span>
+<span class="nc" id="L23">            addedComponent.setBackground(null);</span>
         }
-<span class="fc" id="L25">        thisComponent.setViewportView(newComponent);</span>
+<span class="fc" id="L25">        thisComponent.setViewportView(addedComponent);</span>
 <span class="fc" id="L26">    }</span>
 
     /**

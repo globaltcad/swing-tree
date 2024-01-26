@@ -1,7 +1,7 @@
 {
   "className":"swingtree.scrollpane.Scroll_Pane_Spec",
   "title":"The Scroll Pane",
-  "narrative":"Just like for any other main component in Swing,\n    Swing-Tree also supports a nice API for \n    building UIs with scroll panes.\n\n    A scroll pane is a component that allows\n    the user to scroll through a larger view\n    of a component. It is a container that\n    contains a single component, called the\n    viewport. The viewport is the area that\n    is actually visible to the user. \n\n    The scroll pane also contains a set of\n    scrollbars that allow the user to scroll\n    the viewport. \n\n    In this specification, we will see how\n    to build a scroll pane with Swing-Tree.",
+  "narrative":"Just like for any other main component in Swing,\n    Swing-Tree also supports a nice API for\n    building UIs with scroll panes.\n\n    A scroll pane is a component that allows\n    the user to scroll through a larger view\n    of a component. It is a container that\n    contains a single component, called the\n    viewport. The viewport is the area that\n    is actually visible to the user.\n\n    The scroll pane also contains a set of\n    scrollbars that allow the user to scroll\n    the viewport.\n\n    In this specification, we will see how\n    to build a scroll pane with Swing-Tree.",
   "subjects":["swingtree.UIForScrollPane","javax.swing.JScrollPane"],
   "statistics":{
     "runs":"6",

@@ -1,7 +1,7 @@
 {
   "className":"swingtree.examples.Examples_Spec",
   "title":"Examples UIs",
-  "narrative":"This is an overview of the various example UIs\n    in the test suite.\n\n    This specification also ensures that the\n    various UI examples in the test suite, \n    run successfully and also produce\n    UIs with expected state and appearance.",
+  "narrative":"This is an overview of the various example UIs\n    in the test suite.\n\n    This specification also ensures that the\n    various UI examples in the test suite,\n    run successfully and also produce\n    UIs with expected state and appearance.",
   "subjects":[],
   "statistics":{
     "runs":"20",

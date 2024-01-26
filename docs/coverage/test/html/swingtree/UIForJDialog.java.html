@@ -32,8 +32,8 @@ public final class UIForJDialog&lt;D extends JDialog&gt; extends UIForAnyWindow&
 
 
 	@Override
-	protected void _addComponentTo(D thisComponent, Component newComponent, Object conf ) {
-<span class="pc bpc" id="L36" title="1 of 2 branches missed.">		thisComponent.add( conf == null ? null : conf.toString(), newComponent );</span>
+	protected void _addComponentTo(D thisComponent, Component addedComponent, Object constraints) {
+<span class="pc bpc" id="L36" title="1 of 2 branches missed.">		thisComponent.add( constraints == null ? null : constraints.toString(), addedComponent);</span>
 <span class="fc" id="L37">	}</span>
 
 	@Override

@@ -17,7 +17,7 @@ import java.util.function.Consumer;
  * @param &lt;I&gt; The type of the builder itself.
  * @param &lt;W&gt; The type of the window which is being configured by this builder.
  */
-<span class="fc" id="L20">public abstract class UIForAnyWindow&lt;I extends UIForAnyWindow&lt;I,W&gt;, W extends Window&gt; extends AbstractNestedBuilder&lt;I,W,Component&gt;</span>
+<span class="fc" id="L20">public abstract class UIForAnyWindow&lt;I extends UIForAnyWindow&lt;I,W&gt;, W extends Window&gt; extends UIForAnything&lt;I,W,Component&gt;</span>
 {
 	/**
 	 *  Adds a title to the window. &lt;br&gt;

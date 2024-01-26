@@ -1,7 +1,7 @@
 {
   "className":"swingtree.tabs.Tab_Event_Handling_Spec",
   "title":"Tab Event Handling",
-  "narrative":"When building a tabbed pane using SwingTree, you often want to react to\n    events that occur on the tabs of a `JTabbedPane`. \n    For example, you may want trigger some action when a tab is selected.\n\n    In this specification, we will see how to handle events on tabs.",
+  "narrative":"When building a tabbed pane using SwingTree, you often want to react to\n    events that occur on the tabs of a `JTabbedPane`.\n    For example, you may want trigger some action when a tab is selected.\n\n    In this specification, we will see how to handle events on tabs.",
   "subjects":["swingtree.UIForTabbedPane"],
   "statistics":{
     "runs":"6",

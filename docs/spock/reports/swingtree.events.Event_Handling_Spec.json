@@ -1,7 +1,7 @@
 {
   "className":"swingtree.events.Event_Handling_Spec",
   "title":"Registering Event Handlers",
-  "narrative":"An important part of a UI declaration is the ability to hook up event handlers\n    to your components. In SwingTree you do not need to unpack the underlying Swing\n    component to register a particular event listener, but instead you can register\n    event handlers directly on the UI declaration.    \n    This specification demonstrates how different types of event handlers for different\n    types of events and components can be registered using simple lambda expressions.",
+  "narrative":"An important part of a UI declaration is the ability to hook up event handlers\n    to your components. In SwingTree you do not need to unpack the underlying Swing\n    component to register a particular event listener, but instead you can register\n    event handlers directly on the UI declaration.\n    This specification demonstrates how different types of event handlers for different\n    types of events and components can be registered using simple lambda expressions.",
   "subjects":[],
   "statistics":{
     "runs":"15",

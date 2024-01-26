@@ -86,7 +86,7 @@ final class StyleSource&lt;C extends JComponent&gt;
         try {
 <span class="fc" id="L87">            styleConf = _styleSheet.applyTo( owner, styleConf );</span>
 <span class="nc" id="L88">        } catch (Exception e) {</span>
-<span class="nc" id="L89">            log.warn(&quot;An exception occurred while applying the style sheet for component '&quot;+owner+&quot;'.&quot;, e);</span>
+<span class="nc" id="L89">            log.error(&quot;An exception occurred while applying the style sheet for component '&quot;+owner+&quot;'.&quot;, e);</span>
             /*
                  If any exceptions happen in a StyleSheet implementation provided by a user,
                  then we don't want to prevent the other Stylers from doing their job,
@@ -96,8 +96,8 @@ final class StyleSource&lt;C extends JComponent&gt;
 
         try {
 <span class="fc" id="L98">            styleConf = _localStyler.style(new ComponentStyleDelegate&lt;&gt;(owner, styleConf)).style();</span>
-<span class="nc" id="L99">        } catch (Exception e) {</span>
-<span class="nc" id="L100">            log.warn(&quot;An exception occurred while applying the local styler for component '&quot;+owner+&quot;'.&quot;, e);</span>
+<span class="fc" id="L99">        } catch (Exception e) {</span>
+<span class="fc" id="L100">            log.error(&quot;An exception occurred while applying the local styler for component '&quot;+owner+&quot;'.&quot;, e);</span>
             /*
                  If any exceptions happen in a Styler implementation provided by a user,
                  then we don't want to prevent the other Stylers from doing their job,
@@ -107,7 +107,7 @@ final class StyleSource&lt;C extends JComponent&gt;
 
         // Animation styles are last: they override everything else:
 <span class="fc bfc" id="L109" title="All 2 branches covered.">        for ( Expirable&lt;Styler&lt;C&gt;&gt; expirableStyler : _animationStylers )</span>
-<span class="pc bpc" id="L110" title="1 of 2 branches missed.">            if ( !expirableStyler.isExpired() )</span>
+<span class="fc bfc" id="L110" title="All 2 branches covered.">            if ( !expirableStyler.isExpired() )</span>
                 try {
 <span class="fc" id="L112">                    styleConf = expirableStyler.get().style(new ComponentStyleDelegate&lt;&gt;(owner, styleConf)).style();</span>
 <span class="nc" id="L113">                } catch ( Exception e ) {</span>

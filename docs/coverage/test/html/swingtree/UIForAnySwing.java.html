@@ -44,10 +44,10 @@ import java.util.function.Function;
  * 	where you can browse a large collection of examples demonstrating how to use the API of this class.&lt;/b&gt;
  *  &lt;br&gt;&lt;br&gt;
  *
- * @param &lt;I&gt; The concrete extension of the {@link AbstractNestedBuilder}.
+ * @param &lt;I&gt; The concrete extension of the {@link UIForAnything}.
  * @param &lt;C&gt; The type parameter for the component type wrapped by an instance of this class.
  */
-<span class="fc" id="L50">public abstract class UIForAnySwing&lt;I, C extends JComponent&gt; extends AbstractNestedBuilder&lt;I, C, JComponent&gt;</span>
+<span class="fc" id="L50">public abstract class UIForAnySwing&lt;I, C extends JComponent&gt; extends UIForAnything&lt;I, C, JComponent&gt;</span>
 {
 <span class="fc" id="L52">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(UI.class);</span>
 
@@ -61,7 +61,7 @@ import java.util.function.Function;
      * @param event The event to which the repaint method of the component will be bound.
      * @return The JComponent type which will be managed by this builder.
      */
-    public final I withRepaintIf( Observable event ) {
+    public final I withRepaintOn( Observable event ) {
 <span class="pc" id="L65">        return _with( c -&gt; event.subscribe( () -&gt; _runInUI(c::repaint) ) )._this();</span>
     }
 
@@ -587,7 +587,7 @@ import java.util.function.Function;
      *  @return This very instance, which enables builder-style method chaining.
      */
     public final I isOpaqueIf( boolean isOpaque ) {
-<span class="nc" id="L590">        return _with( c -&gt; c.setOpaque( isOpaque ) )._this();</span>
+<span class="fc" id="L590">        return _with( c -&gt; c.setOpaque( isOpaque ) )._this();</span>
     }
 
     /**
@@ -2242,7 +2242,7 @@ import java.util.function.Function;
 <span class="fc" id="L2242">        return _with( c -&gt; {</span>
 <span class="fc" id="L2243">                    FlipFlopStyler&lt;C&gt; flipFlopStyler = new FlipFlopStyler&lt;&gt;(c, transitionLifeTime, styler);</span>
 <span class="fc" id="L2244">                    ComponentExtension.from(c).addStyler(flipFlopStyler::style);</span>
-<span class="pc" id="L2245">                    _onShow( transitionToggle, c, (comp, v) -&gt; flipFlopStyler.set(v) );</span>
+<span class="fc" id="L2245">                    _onShow( transitionToggle, c, (comp, v) -&gt; flipFlopStyler.set(v) );</span>
 <span class="fc" id="L2246">                })</span>
 <span class="fc" id="L2247">                ._this();</span>
     }
@@ -3660,12 +3660,12 @@ import java.util.function.Function;
     }
 
     @Override
-    protected void _addComponentTo(C thisComponent, JComponent newComponent, Object conf ) {
-<span class="fc" id="L3664">        NullUtil.nullArgCheck(newComponent, &quot;component&quot;, JComponent.class);</span>
-<span class="fc bfc" id="L3665" title="All 2 branches covered.">        if ( conf == null )</span>
-<span class="fc" id="L3666">            thisComponent.add(newComponent);</span>
+    protected void _addComponentTo(C thisComponent, JComponent addedComponent, Object constraints) {
+<span class="fc" id="L3664">        NullUtil.nullArgCheck(addedComponent, &quot;component&quot;, JComponent.class);</span>
+<span class="fc bfc" id="L3665" title="All 2 branches covered.">        if ( constraints == null )</span>
+<span class="fc" id="L3666">            thisComponent.add(addedComponent);</span>
         else
-<span class="fc" id="L3668">            thisComponent.add(newComponent, conf);</span>
+<span class="fc" id="L3668">            thisComponent.add(addedComponent, constraints);</span>
 <span class="fc" id="L3669">    }</span>
 
     /**
@@ -3977,88 +3977,103 @@ import java.util.function.Function;
 <span class="nc" id="L3977">                case NONE: break;</span>
 <span class="nc" id="L3978">                default: throw new IllegalStateException(&quot;Unknown type: &quot;+delegate.changeType());</span>
             }
-<span class="fc" id="L3980">        });</span>
-<span class="fc" id="L3981">        viewables.forEach( v -&gt; {</span>
-<span class="fc" id="L3982">            _addBuildersTo( thisComponent, new AbstractNestedBuilder[]{viewSupplier.createViewFor(v)} );</span>
-<span class="fc" id="L3983">        });</span>
-<span class="fc" id="L3984">    }</span>
+<span class="pc bpc" id="L3980" title="1 of 2 branches missed.">            if ( c.getComponentCount() != delegate.vals().size() )</span>
+<span class="nc" id="L3981">                log.warn(</span>
+                        &quot;Broken binding to view model list detected! \n&quot; +
+<span class="nc" id="L3983">                        &quot;UI sub-component count '&quot;+c.getComponentCount()+&quot;' &quot; +</span>
+<span class="nc" id="L3984">                        &quot;does not match viewable models list of size '&quot;+delegate.vals().size()+&quot;'. \n&quot; +</span>
+                        &quot;A possible cause for this is that components &quot; +
+<span class="nc bnc" id="L3986" title="All 2 branches missed.">                        &quot;were &quot; + ( c.getComponentCount() &gt; delegate.vals().size() ? &quot;added&quot; : &quot;removed&quot; ) + &quot; &quot; +</span>
+                        &quot;to this '&quot; + c + &quot;' \ndirectly, instead of through the property list binding. \n&quot; +
+                        &quot;However, this could also be a bug in the UI framework.&quot;,
+                        new Throwable()
+                    );
+<span class="fc" id="L3991">        });</span>
+<span class="fc" id="L3992">        viewables.forEach( v -&gt; {</span>
+<span class="fc" id="L3993">            _addBuildersTo( thisComponent, new UIForAnything[]{viewSupplier.createViewFor(v)} );</span>
+<span class="fc" id="L3994">        });</span>
+<span class="fc" id="L3995">    }</span>
 
     private &lt;M&gt; void _addViewablePropTo(
         C thisComponent, Val&lt;M&gt; viewable, String attr, ViewSupplier&lt;M&gt; viewSupplier
     ) {
         // First we remember the index of the component which will be provided by the viewable dynamically.
-<span class="fc" id="L3990">        final int index = _childCount( thisComponent );</span>
+<span class="fc" id="L4001">        final int index = _numberOfChildrenOf( thisComponent );</span>
         // Then we add the component provided by the viewable to the list of children.
-<span class="fc bfc" id="L3992" title="All 2 branches covered.">        if ( attr == null ) {</span>
-<span class="fc bfc" id="L3993" title="All 2 branches covered.">            if ( viewable.isPresent() )</span>
-<span class="fc" id="L3994">                _addBuildersTo(thisComponent, viewSupplier.createViewFor(viewable.get()));</span>
+<span class="fc bfc" id="L4003" title="All 2 branches covered.">        if ( attr == null ) {</span>
+<span class="fc bfc" id="L4004" title="All 2 branches covered.">            if ( viewable.isPresent() )</span>
+<span class="fc" id="L4005">                _addBuildersTo(thisComponent, viewSupplier.createViewFor(viewable.get()));</span>
             else
-<span class="fc" id="L3996">                _addComponentsTo(thisComponent, new JPanel()); // We add a dummy component to the list of children.</span>
+<span class="fc" id="L4007">                _addComponentsTo(thisComponent, new JPanel()); // We add a dummy component to the list of children.</span>
         } else {
-<span class="pc bpc" id="L3998" title="1 of 2 branches missed.">            if ( viewable.isPresent() )</span>
-<span class="fc" id="L3999">                _addBuildersTo(thisComponent, attr, viewSupplier.createViewFor(viewable.get()));</span>
+<span class="pc bpc" id="L4009" title="1 of 2 branches missed.">            if ( viewable.isPresent() )</span>
+<span class="fc" id="L4010">                _addBuildersTo(thisComponent, attr, viewSupplier.createViewFor(viewable.get()));</span>
             else
-<span class="nc" id="L4001">                _addComponentsTo(thisComponent, attr, new JPanel()); // We add a dummy component to the list of children.</span>
+<span class="nc" id="L4012">                _addComponentsTo(thisComponent, attr, new JPanel()); // We add a dummy component to the list of children.</span>
         }
         // Finally we add a listener to the viewable which will update the component when the viewable changes.
-<span class="fc" id="L4004">        _onShow( viewable, thisComponent, (c,v) -&gt; _updateComponentAt(index, v, viewSupplier, attr, c) );</span>
-<span class="fc" id="L4005">    }</span>
+<span class="fc" id="L4015">        _onShow( viewable, thisComponent, (c,v) -&gt; _updateComponentAt(index, v, viewSupplier, attr, c) );</span>
+<span class="fc" id="L4016">    }</span>
+
+    private final int _numberOfChildrenOf( C c ) {
+<span class="pc bpc" id="L4019" title="1 of 2 branches missed.">        return  ( c instanceof Container ? ( (Container) c ).getComponentCount() : 0 );</span>
+    }
 
     private &lt;M&gt; void _updateComponentAt(
         int index, M v, ViewSupplier&lt;M&gt; viewSupplier, String attr, C c
     ) {
-<span class="pc bpc" id="L4010" title="1 of 2 branches missed.">        JComponent newComponent = v == null ? new JPanel() : UI.use(_state().eventProcessor(), () -&gt; viewSupplier.createViewFor(v).getComponent() );</span>
+<span class="pc bpc" id="L4025" title="1 of 2 branches missed.">        JComponent newComponent = v == null ? new JPanel() : UI.use(_state().eventProcessor(), () -&gt; viewSupplier.createViewFor(v).getComponent() );</span>
         // We remove the old component.
-<span class="fc" id="L4012">        c.remove(c.getComponent(index));</span>
+<span class="fc" id="L4027">        c.remove(c.getComponent(index));</span>
         // We add the new component.
-<span class="pc bpc" id="L4014" title="1 of 2 branches missed.">        if ( attr == null )</span>
-<span class="fc" id="L4015">            c.add(newComponent, index);</span>
+<span class="pc bpc" id="L4029" title="1 of 2 branches missed.">        if ( attr == null )</span>
+<span class="fc" id="L4030">            c.add(newComponent, index);</span>
         else
-<span class="nc" id="L4017">            c.add(newComponent, attr, index);</span>
+<span class="nc" id="L4032">            c.add(newComponent, attr, index);</span>
         // We update the layout.
-<span class="fc" id="L4019">        c.revalidate();</span>
-<span class="fc" id="L4020">        c.repaint();</span>
-<span class="fc" id="L4021">    }</span>
+<span class="fc" id="L4034">        c.revalidate();</span>
+<span class="fc" id="L4035">        c.repaint();</span>
+<span class="fc" id="L4036">    }</span>
 
     private &lt;M&gt; void _addComponentAt(
         int index, M v, ViewSupplier&lt;M&gt; viewSupplier, String attr, C thisComponent
     ) {
         // We add the new component.
-<span class="pc bpc" id="L4027" title="1 of 2 branches missed.">        if ( attr == null )</span>
-<span class="fc" id="L4028">            thisComponent.add(UI.use(_state().eventProcessor(), () -&gt; viewSupplier.createViewFor(v).getComponent()), index);</span>
+<span class="pc bpc" id="L4042" title="1 of 2 branches missed.">        if ( attr == null )</span>
+<span class="fc" id="L4043">            thisComponent.add(UI.use(_state().eventProcessor(), () -&gt; viewSupplier.createViewFor(v).getComponent()), index);</span>
         else
-<span class="nc" id="L4030">            thisComponent.add(UI.use(_state().eventProcessor(), () -&gt; viewSupplier.createViewFor(v).getComponent()), attr, index);</span>
+<span class="nc" id="L4045">            thisComponent.add(UI.use(_state().eventProcessor(), () -&gt; viewSupplier.createViewFor(v).getComponent()), attr, index);</span>
         // We update the layout.
-<span class="fc" id="L4032">        thisComponent.revalidate();</span>
-<span class="fc" id="L4033">        thisComponent.repaint();</span>
-<span class="fc" id="L4034">    }</span>
+<span class="fc" id="L4047">        thisComponent.revalidate();</span>
+<span class="fc" id="L4048">        thisComponent.repaint();</span>
+<span class="fc" id="L4049">    }</span>
 
     private void _removeComponentAt( int index, C thisComponent ) {
         // We remove the old component.
-<span class="fc" id="L4038">        thisComponent.remove(thisComponent.getComponent(index));</span>
+<span class="fc" id="L4053">        thisComponent.remove(thisComponent.getComponent(index));</span>
         // We update the layout.
-<span class="fc" id="L4040">        thisComponent.revalidate();</span>
-<span class="fc" id="L4041">        thisComponent.repaint();</span>
-<span class="fc" id="L4042">    }</span>
+<span class="fc" id="L4055">        thisComponent.revalidate();</span>
+<span class="fc" id="L4056">        thisComponent.repaint();</span>
+<span class="fc" id="L4057">    }</span>
 
     private void _clearComponentsOf( C thisComponent ) {
         // We remove all components.
-<span class="fc" id="L4046">        thisComponent.removeAll();</span>
+<span class="fc" id="L4061">        thisComponent.removeAll();</span>
         // We update the layout.
-<span class="fc" id="L4048">        thisComponent.revalidate();</span>
-<span class="fc" id="L4049">        thisComponent.repaint();</span>
-<span class="fc" id="L4050">    }</span>
+<span class="fc" id="L4063">        thisComponent.revalidate();</span>
+<span class="fc" id="L4064">        thisComponent.repaint();</span>
+<span class="fc" id="L4065">    }</span>
 
     private static boolean _isBorderLayout( Object o ) {
-<span class="fc bfc" id="L4053" title="All 2 branches covered.">        return BorderLayout.CENTER.equals(o)     ||</span>
-<span class="fc bfc" id="L4054" title="All 2 branches covered.">               BorderLayout.PAGE_START.equals(o) ||</span>
-<span class="fc bfc" id="L4055" title="All 2 branches covered.">               BorderLayout.PAGE_END.equals(o)   ||</span>
-<span class="fc bfc" id="L4056" title="All 2 branches covered.">               BorderLayout.LINE_END.equals(o)   ||</span>
-<span class="fc bfc" id="L4057" title="All 2 branches covered.">               BorderLayout.LINE_START.equals(o) ||</span>
-<span class="pc bpc" id="L4058" title="1 of 2 branches missed.">               BorderLayout.EAST.equals(o)       ||</span>
-<span class="pc bpc" id="L4059" title="1 of 2 branches missed.">               BorderLayout.WEST.equals(o)       ||</span>
-<span class="pc bpc" id="L4060" title="1 of 2 branches missed.">               BorderLayout.NORTH.equals(o)      ||</span>
-<span class="pc bpc" id="L4061" title="1 of 2 branches missed.">               BorderLayout.SOUTH.equals(o);</span>
+<span class="fc bfc" id="L4068" title="All 2 branches covered.">        return BorderLayout.CENTER.equals(o)     ||</span>
+<span class="fc bfc" id="L4069" title="All 2 branches covered.">               BorderLayout.PAGE_START.equals(o) ||</span>
+<span class="fc bfc" id="L4070" title="All 2 branches covered.">               BorderLayout.PAGE_END.equals(o)   ||</span>
+<span class="fc bfc" id="L4071" title="All 2 branches covered.">               BorderLayout.LINE_END.equals(o)   ||</span>
+<span class="fc bfc" id="L4072" title="All 2 branches covered.">               BorderLayout.LINE_START.equals(o) ||</span>
+<span class="pc bpc" id="L4073" title="1 of 2 branches missed.">               BorderLayout.EAST.equals(o)       ||</span>
+<span class="pc bpc" id="L4074" title="1 of 2 branches missed.">               BorderLayout.WEST.equals(o)       ||</span>
+<span class="pc bpc" id="L4075" title="1 of 2 branches missed.">               BorderLayout.NORTH.equals(o)      ||</span>
+<span class="pc bpc" id="L4076" title="1 of 2 branches missed.">               BorderLayout.SOUTH.equals(o);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

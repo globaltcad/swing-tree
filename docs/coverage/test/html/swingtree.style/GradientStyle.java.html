@@ -3,7 +3,9 @@
 import org.slf4j.Logger;
 import swingtree.UI;
 
-import java.awt.*;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import java.awt.Color;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Function;
@@ -12,9 +14,8 @@ import java.util.function.Function;
  *  An immutable config API for specifying a gradient style.
  *  as a sub-style of various other styles,
  *  like for example {@link BaseStyle} or {@link BorderStyle} accessed through the
- *  {@link ComponentStyleDelegate#gradient(String, Function)} or
- *  {@link ComponentStyleDelegate#borderGradient(String, Function)}
- *  methods.
+ *  {@link ComponentStyleDelegate#gradient(String, Function)}
+ *  method.
  *  The state of a gradient style is immutable and can only be updated by
  *  wither like methods that return a new instance of the gradient style
  *  with the specified property updated.
@@ -50,6 +51,25 @@ import java.util.function.Function;
  *          An array of colors that will be used
  *          as a basis for the gradient transition.
  *      &lt;/li&gt;
+ *      &lt;li&gt;&lt;h3&gt;Offset&lt;/h3&gt;
+ *          The offset defines the start position of the gradient
+ *          on the x and y axis.
+ *          This property, together with the {@link #transition(UI.Transition)}
+ *          property, defines the start position and direction of the gradient.
+ *      &lt;/li&gt;
+ *      &lt;li&gt;&lt;h3&gt;Size&lt;/h3&gt;
+ *          The size defines the size of the gradient
+ *          in terms of the distance from the start position of the gradient
+ *          to the end position of the gradient.
+ *          &lt;br&gt;
+ *          If no size is specified, the size of the gradient will be
+ *          based on the size of the component that the gradient is applied to.
+ *      &lt;/li&gt;
+ *      &lt;li&gt;&lt;h3&gt;Area&lt;/h3&gt;
+ *          The component are to which the gradient is clipped to.
+ *          Which means that the gradient will only be visible within the
+ *          specified area of the component.
+ *      &lt;br&gt;
  *  &lt;/ul&gt;
  *  &lt;p&gt;
  *  You can also use the {@link #none()} method to specify that no gradient should be used,
@@ -58,13 +78,17 @@ import java.util.function.Function;
  */
 public final class GradientStyle implements Simplifiable&lt;GradientStyle&gt;
 {
-<span class="fc" id="L61">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(GradientStyle.class);</span>
-<span class="fc" id="L62">    static final UI.Layer DEFAULT_LAYER = UI.Layer.BACKGROUND;</span>
+<span class="fc" id="L81">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(GradientStyle.class);</span>
+<span class="fc" id="L82">    static final UI.Layer DEFAULT_LAYER = UI.Layer.BACKGROUND;</span>
 
-<span class="fc" id="L64">    private static final GradientStyle _NONE = new GradientStyle(</span>
+<span class="fc" id="L84">    private static final GradientStyle _NONE = new GradientStyle(</span>
                                                         UI.Transition.TOP_TO_BOTTOM,
                                                         UI.GradientType.LINEAR,
-                                                        new Color[0]
+                                                        new Color[0],
+<span class="fc" id="L88">                                                        Offset.none(),</span>
+                                                        -1f,
+                                                        UI.ComponentArea.BODY,
+                                                        UI.ComponentBoundary.EXTERIOR_TO_BORDER
                                                     );
 
     /**
@@ -73,26 +97,63 @@ public final class GradientStyle implements Simplifiable&lt;GradientStyle&gt;
      *  @return A gradient without any colors, effectively
      *          representing the absence of a gradient.
      */
-<span class="fc" id="L76">    public static GradientStyle none() { return _NONE; }</span>
+<span class="fc" id="L100">    public static GradientStyle none() { return _NONE; }</span>
 
 
-    private final UI.Transition   _transition;
-    private final UI.GradientType _type;
-    private final Color[]         _colors;
+    private final UI.Transition        _transition;
+    private final UI.GradientType      _type;
+    private final Color[]              _colors;
+    private final Offset               _offset;
+    private final float                _size;
+    private final UI.ComponentArea     _area;
+    private final UI.ComponentBoundary _boundary;
 
 
-    private GradientStyle( UI.Transition transition, UI.GradientType type, Color[] colors )
-<span class="fc" id="L85">    {</span>
-<span class="fc" id="L86">        _transition = Objects.requireNonNull(transition);</span>
-<span class="fc" id="L87">        _type       = Objects.requireNonNull(type);</span>
-<span class="fc" id="L88">        _colors     = Objects.requireNonNull(colors);</span>
-<span class="fc" id="L89">    }</span>
+    private GradientStyle(
+        UI.Transition        transition,
+        UI.GradientType      type,
+        Color[]              colors,
+        Offset               offset,
+        float                size,
+        UI.ComponentArea     area,
+        UI.ComponentBoundary boundary
+<span class="fc" id="L120">    ) {</span>
+<span class="fc" id="L121">        _transition = Objects.requireNonNull(transition);</span>
+<span class="fc" id="L122">        _type       = Objects.requireNonNull(type);</span>
+<span class="fc" id="L123">        _colors     = Objects.requireNonNull(colors);</span>
+<span class="fc" id="L124">        _offset     = Objects.requireNonNull(offset);</span>
+<span class="pc bpc" id="L125" title="1 of 2 branches missed.">        _size       = ( size &lt; 0 ? -1 : size );</span>
+<span class="fc" id="L126">        _area       = Objects.requireNonNull(area);</span>
+<span class="fc" id="L127">        _boundary   = Objects.requireNonNull(boundary);</span>
+<span class="fc" id="L128">    }</span>
 
-<span class="fc" id="L91">    UI.Transition transition() { return _transition; }</span>
+<span class="fc" id="L130">    UI.Transition transition() { return _transition; }</span>
 
-<span class="fc" id="L93">    UI.GradientType type() { return _type; }</span>
+<span class="fc" id="L132">    UI.GradientType type() { return _type; }</span>
 
-<span class="fc" id="L95">    Color[] colors() { return _colors; }</span>
+<span class="fc" id="L134">    Color[] colors() { return _colors; }</span>
+
+<span class="fc" id="L136">    Offset offset() { return _offset; }</span>
+
+<span class="fc" id="L138">    float size() { return _size; }</span>
+
+<span class="fc" id="L140">    UI.ComponentArea area() { return _area; }</span>
+
+<span class="fc" id="L142">    UI.ComponentBoundary boundary() { return _boundary; }</span>
+
+    boolean isOpaque() {
+<span class="fc bfc" id="L145" title="All 2 branches covered.">        if ( _colors.length == 0 )</span>
+<span class="fc" id="L146">            return false;</span>
+
+<span class="fc" id="L148">        boolean foundTransparentColor = false;</span>
+<span class="fc bfc" id="L149" title="All 2 branches covered.">        for ( Color c : _colors ) {</span>
+<span class="fc bfc" id="L150" title="All 2 branches covered.">            if ( c.getAlpha() &lt; 255 ) {</span>
+<span class="fc" id="L151">                foundTransparentColor = true;</span>
+<span class="fc" id="L152">                break;</span>
+            }
+        }
+<span class="fc bfc" id="L155" title="All 2 branches covered.">        return !foundTransparentColor;</span>
+    }
 
     /**
      *  Define a list of colors which will, as part of the gradient, transition from one
@@ -105,10 +166,10 @@ public final class GradientStyle implements Simplifiable&lt;GradientStyle&gt;
      * @throws NullPointerException if any of the colors is {@code null}.
      */
     public GradientStyle colors( Color... colors ) {
-<span class="fc" id="L108">        Objects.requireNonNull(colors);</span>
-<span class="fc bfc" id="L109" title="All 2 branches covered.">        for ( Color color : colors )</span>
-<span class="fc" id="L110">            Objects.requireNonNull(color, &quot;Use UI.COLOR_UNDEFINED instead of null to represent the absence of a color.&quot;);</span>
-<span class="fc" id="L111">        return new GradientStyle(_transition, _type, colors);</span>
+<span class="fc" id="L169">        Objects.requireNonNull(colors);</span>
+<span class="fc bfc" id="L170" title="All 2 branches covered.">        for ( Color color : colors )</span>
+<span class="fc" id="L171">            Objects.requireNonNull(color, &quot;Use UI.COLOR_UNDEFINED instead of null to represent the absence of a color.&quot;);</span>
+<span class="fc" id="L172">        return new GradientStyle(_transition, _type, colors, _offset, _size, _area, _boundary);</span>
     }
 
     /**
@@ -122,16 +183,16 @@ public final class GradientStyle implements Simplifiable&lt;GradientStyle&gt;
      * @throws NullPointerException if any of the colors is {@code null}.
      */
     public GradientStyle colors( String... colors ) {
-<span class="nc" id="L125">        Objects.requireNonNull(colors);</span>
+<span class="fc" id="L186">        Objects.requireNonNull(colors);</span>
         try {
-<span class="nc" id="L127">            Color[] actualColors = new Color[colors.length];</span>
-<span class="nc bnc" id="L128" title="All 2 branches missed.">            for ( int i = 0; i &lt; colors.length; i++ )</span>
-<span class="nc" id="L129">                actualColors[i] = UI.color(colors[i]);</span>
+<span class="fc" id="L188">            Color[] actualColors = new Color[colors.length];</span>
+<span class="fc bfc" id="L189" title="All 2 branches covered.">            for ( int i = 0; i &lt; colors.length; i++ )</span>
+<span class="fc" id="L190">                actualColors[i] = UI.color(colors[i]);</span>
 
-<span class="nc" id="L131">            return new GradientStyle(_transition, _type, actualColors);</span>
-<span class="nc" id="L132">        } catch ( Exception e ) {</span>
-<span class="nc" id="L133">            log.error(&quot;Failed to parse color strings: &quot; + Arrays.toString(colors), e);</span>
-<span class="nc" id="L134">            return this; // We want to avoid side effects other than a wrong color</span>
+<span class="fc" id="L192">            return new GradientStyle(_transition, _type, actualColors, _offset, _size, _area, _boundary);</span>
+<span class="nc" id="L193">        } catch ( Exception e ) {</span>
+<span class="nc" id="L194">            log.error(&quot;Failed to parse color strings: &quot; + Arrays.toString(colors), e);</span>
+<span class="nc" id="L195">            return this; // We want to avoid side effects other than a wrong color</span>
         }
     }
 
@@ -153,8 +214,8 @@ public final class GradientStyle implements Simplifiable&lt;GradientStyle&gt;
      * @throws NullPointerException if the alignment is {@code null}.
      */
     public GradientStyle transition( UI.Transition transition ) {
-<span class="fc" id="L156">        Objects.requireNonNull(transition);</span>
-<span class="fc" id="L157">        return new GradientStyle(transition, _type, _colors);</span>
+<span class="fc" id="L217">        Objects.requireNonNull(transition);</span>
+<span class="fc" id="L218">        return new GradientStyle(transition, _type, _colors, _offset, _size, _area, _boundary);</span>
     }
 
     /**
@@ -169,63 +230,151 @@ public final class GradientStyle implements Simplifiable&lt;GradientStyle&gt;
      * @throws NullPointerException if the type is {@code null}.
      */
     public GradientStyle type( UI.GradientType type ) {
-<span class="fc" id="L172">        Objects.requireNonNull(type);</span>
-<span class="fc" id="L173">        return new GradientStyle(_transition, type, _colors);</span>
+<span class="fc" id="L233">        Objects.requireNonNull(type);</span>
+<span class="fc" id="L234">        return new GradientStyle(_transition, type, _colors, _offset, _size, _area, _boundary);</span>
+    }
+
+    /**
+     *  Define the offset of the gradient which is the start position of the gradient
+     *  on the x and y-axis. &lt;br&gt;
+     *  Note that the offset is relative to the component that the gradient is applied to.
+     *  &lt;p&gt;
+     * @param x The gradient start offset on the x-axis.
+     * @param y The gradient start offset on the y-axis.
+     * @return A new gradient style with the specified offset.
+     */
+    public GradientStyle offset( double x, double y ) {
+<span class="nc" id="L247">        return new GradientStyle(_transition, _type, _colors, Offset.of(x,y), _size, _area, _boundary);</span>
+    }
+
+    /**
+     *  Define the size of the gradient which is the size of the gradient
+     *  in terms of the distance from the start position of the gradient
+     *  to the end position of the gradient.
+     *  &lt;p&gt;
+     *  Note that if no size is specified, the size of the gradient will be
+     *  based on the size of the component that the gradient is applied to.
+     *
+     * @param size The gradient size.
+     * @return A new gradient style with the specified size.
+     */
+    public GradientStyle size( double size ) {
+<span class="nc" id="L262">        return new GradientStyle(_transition, _type, _colors, _offset, (float) size, _area, _boundary);</span>
+    }
+
+    /**
+     *  Define the area of the component to which the gradient is clipped to.
+     *  Which means that the gradient will only be visible within the
+     *  specified area of the component.
+     *
+     * @param area The area of the component to which the gradient is clipped to.
+     * @return A new gradient style with the specified area.
+     */
+    public GradientStyle area( UI.ComponentArea area ) {
+<span class="fc" id="L274">        return new GradientStyle(_transition, _type, _colors, _offset, _size, area, _boundary);</span>
+    }
+
+    /**
+     *  Define the boundary at which the gradient should start in terms of its offset.
+     *  So if the boundary is set to {@link UI.ComponentBoundary#EXTERIOR_TO_BORDER}
+     *  then the gradient position will be determined by the margin of the component. &lt;br&gt;
+     *  Here a complete list of the available boundaries:
+     * &lt;ul&gt;
+     *     &lt;li&gt;{@link UI.ComponentBoundary#OUTER_TO_EXTERIOR} -
+     *     The outermost boundary of the entire component, including any margin that might be applied.
+     *     Using this boundary will cause the gradient to be positioned somewhere at
+     *     the outer most edge of the component.
+     *     &lt;/li&gt;
+     *     &lt;li&gt;{@link UI.ComponentBoundary#EXTERIOR_TO_BORDER} -
+     *     The boundary located after the margin but before the border.
+     *     This tightly wraps the entire {@link UI.ComponentArea#BODY}.
+     *     Using this boundary will cause the gradient to be positioned somewhere at
+     *     the outer most edge of the component's body, which is between the margin and the border.
+     *     &lt;/li&gt;
+     *     &lt;li&gt;{@link UI.ComponentBoundary#BORDER_TO_INTERIOR} -
+     *     The boundary located after the border but before the padding.
+     *     It represents the edge of the component's interior.
+     *     Using this boundary will cause the gradient to be positioned somewhere at
+     *     the outer most edge of the component's interior, which is between the border and the padding area.
+     *     &lt;/li&gt;
+     *     &lt;li&gt;{@link UI.ComponentBoundary#INTERIOR_TO_CONTENT} -
+     *     The boundary located after the padding.
+     *     It represents the innermost boundary of the component, where the actual content of the component begins,
+     *     like for example the contents of a {@link JPanel} or {@link JScrollPane}.
+     *     Using this boundary will cause the gradient to be positioned somewhere after the padding area
+     *     and before the content area, which is where all of the child components are located.
+     *     &lt;/li&gt;
+     * &lt;/ul&gt;
+     *  &lt;p&gt;
+     *
+     *
+     * @param boundary The boundary at which the gradient should start in terms of its offset.
+     * @return A new gradient style with the specified boundary.
+     */
+    public GradientStyle boundary( UI.ComponentBoundary boundary ) {
+<span class="nc" id="L315">        return new GradientStyle(_transition, _type, _colors, _offset, _size, _area, boundary);</span>
     }
 
     @Override
     public String toString() {
-<span class="fc bfc" id="L178" title="All 2 branches covered.">        if ( this == _NONE )</span>
-<span class="fc" id="L179">            return getClass().getSimpleName() + &quot;[NONE]&quot;;</span>
-<span class="fc" id="L180">        return getClass().getSimpleName() + &quot;[&quot; +</span>
+<span class="fc bfc" id="L320" title="All 2 branches covered.">        if ( this == _NONE )</span>
+<span class="fc" id="L321">            return getClass().getSimpleName() + &quot;[NONE]&quot;;</span>
+<span class="fc" id="L322">        return getClass().getSimpleName() + &quot;[&quot; +</span>
                     &quot;transition=&quot; + _transition + &quot;, &quot; +
                     &quot;type=&quot;       + _type + &quot;, &quot; +
-<span class="fc" id="L183">                    &quot;colors=&quot;     + Arrays.toString(_colors) +</span>
-                ']';
+<span class="fc" id="L325">                    &quot;colors=&quot;     + Arrays.toString(_colors) + &quot;, &quot; +</span>
+                    &quot;offset=&quot;     + _offset + &quot;, &quot; +
+                    &quot;size=&quot;       + _size + &quot;, &quot; +
+                    &quot;area=&quot;       + _area +
+                &quot;]&quot;;
     }
 
     @Override
     public boolean equals( Object o ) {
-<span class="fc bfc" id="L189" title="All 2 branches covered.">        if ( this == o ) return true;</span>
-<span class="pc bpc" id="L190" title="1 of 2 branches missed.">        if ( !(o instanceof GradientStyle) ) return false;</span>
-<span class="fc" id="L191">        GradientStyle that = (GradientStyle) o;</span>
-<span class="pc bpc" id="L192" title="1 of 4 branches missed.">        return _transition == that._transition       &amp;&amp;</span>
+<span class="fc bfc" id="L334" title="All 2 branches covered.">        if ( this == o ) return true;</span>
+<span class="pc bpc" id="L335" title="1 of 2 branches missed.">        if ( !(o instanceof GradientStyle) ) return false;</span>
+<span class="fc" id="L336">        GradientStyle that = (GradientStyle) o;</span>
+<span class="pc bpc" id="L337" title="1 of 4 branches missed.">        return _transition == that._transition       &amp;&amp;</span>
                _type       == that._type             &amp;&amp;
-<span class="fc bfc" id="L194" title="All 2 branches covered.">               Arrays.equals(_colors, that._colors);</span>
+<span class="fc bfc" id="L339" title="All 2 branches covered.">               Arrays.equals(_colors, that._colors)  &amp;&amp;</span>
+<span class="pc bpc" id="L340" title="4 of 8 branches missed.">               Objects.equals(_offset, that._offset) &amp;&amp;</span>
+               _size       == that._size             &amp;&amp;
+               _area       == that._area             &amp;&amp;
+               _boundary   == that._boundary;
     }
 
     @Override
     public int hashCode() {
-<span class="fc" id="L199">        return Objects.hash(_transition, _type, Arrays.hashCode(_colors));</span>
+<span class="fc" id="L348">        return Objects.hash(_transition, _type, Arrays.hashCode(_colors), _offset, _size, _area, _boundary);</span>
     }
 
     @Override
     public GradientStyle simplified() {
-<span class="fc bfc" id="L204" title="All 2 branches covered.">        if ( this == _NONE )</span>
-<span class="fc" id="L205">            return _NONE;</span>
+<span class="fc bfc" id="L353" title="All 2 branches covered.">        if ( this == _NONE )</span>
+<span class="fc" id="L354">            return _NONE;</span>
 
-<span class="pc bpc" id="L207" title="1 of 2 branches missed.">        if ( _colors.length == 0 )</span>
-<span class="nc" id="L208">            return _NONE;</span>
+<span class="pc bpc" id="L356" title="1 of 2 branches missed.">        if ( _colors.length == 0 )</span>
+<span class="nc" id="L357">            return _NONE;</span>
 
-<span class="pc bpc" id="L210" title="1 of 6 branches missed.">        if ( Arrays.stream(_colors).allMatch( color -&gt; color.getAlpha() == 0 || color == UI.COLOR_UNDEFINED) )</span>
-<span class="fc" id="L211">            return _NONE;</span>
+<span class="pc bpc" id="L359" title="1 of 6 branches missed.">        if ( Arrays.stream(_colors).allMatch( color -&gt; color.getAlpha() == 0 || color == UI.COLOR_UNDEFINED) )</span>
+<span class="fc" id="L360">            return _NONE;</span>
 
-<span class="pc bpc" id="L213" title="1 of 2 branches missed.">        int numberOfRealColors = Arrays.stream(_colors).mapToInt( color -&gt; color == UI.COLOR_UNDEFINED ? 0 : 1 ).sum();</span>
+<span class="pc bpc" id="L362" title="1 of 2 branches missed.">        int numberOfRealColors = Arrays.stream(_colors).mapToInt( color -&gt; color == UI.COLOR_UNDEFINED ? 0 : 1 ).sum();</span>
 
-<span class="pc bpc" id="L215" title="1 of 2 branches missed.">        if ( numberOfRealColors == 0 )</span>
-<span class="nc" id="L216">            return _NONE;</span>
+<span class="pc bpc" id="L364" title="1 of 2 branches missed.">        if ( numberOfRealColors == 0 )</span>
+<span class="nc" id="L365">            return _NONE;</span>
 
-<span class="pc bpc" id="L218" title="1 of 2 branches missed.">        if ( numberOfRealColors != _colors.length ) {</span>
-<span class="nc" id="L219">            Color[] realColors = new Color[numberOfRealColors];</span>
-<span class="nc" id="L220">            int index = 0;</span>
-<span class="nc bnc" id="L221" title="All 2 branches missed.">            for ( Color color : _colors )</span>
-<span class="nc bnc" id="L222" title="All 2 branches missed.">                if ( color != UI.COLOR_UNDEFINED)</span>
-<span class="nc" id="L223">                    realColors[index++] = color;</span>
+<span class="pc bpc" id="L367" title="1 of 2 branches missed.">        if ( numberOfRealColors != _colors.length ) {</span>
+<span class="nc" id="L368">            Color[] realColors = new Color[numberOfRealColors];</span>
+<span class="nc" id="L369">            int index = 0;</span>
+<span class="nc bnc" id="L370" title="All 2 branches missed.">            for ( Color color : _colors )</span>
+<span class="nc bnc" id="L371" title="All 2 branches missed.">                if ( color != UI.COLOR_UNDEFINED)</span>
+<span class="nc" id="L372">                    realColors[index++] = color;</span>
 
-<span class="nc" id="L225">            return new GradientStyle(_transition, _type, realColors);</span>
+<span class="nc" id="L374">            return new GradientStyle(_transition, _type, realColors, _offset, _size, _area, _boundary);</span>
         }
 
-<span class="fc" id="L228">        return this;</span>
+<span class="fc" id="L377">        return this;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

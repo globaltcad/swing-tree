@@ -1,7 +1,7 @@
 {
   "className":"swingtree.splitpane.Split_Pane_Spec",
   "title":"Split Panes",
-  "narrative":"In this specification you can can not only see how to use the Swing-Tree API to \n   create and configure split panes but also how to bind them to your view model model.\n   The alignment of a split pane for example can be bound to a property in your view model.",
+  "narrative":"In this specification you can can not only see how to use the Swing-Tree API to\n   create and configure split panes but also how to bind them to your view model model.\n   The alignment of a split pane for example can be bound to a property in your view model.",
   "subjects":[],
   "statistics":{
     "runs":"10",

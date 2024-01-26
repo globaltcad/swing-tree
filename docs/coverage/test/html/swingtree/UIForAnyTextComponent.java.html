@@ -93,7 +93,7 @@ import java.util.function.Consumer;
     public final I withText( Var&lt;String&gt; text ) {
 <span class="fc" id="L94">        NullUtil.nullPropertyCheck(text, &quot;text&quot;, &quot;Use an empty string instead of null!&quot;);</span>
 <span class="fc" id="L95">        return _withOnShow( text, (c, t) -&gt; {</span>
-<span class="pc bpc" id="L96" title="1 of 2 branches missed.">                    if ( !Objects.equals(c.getText(), t) )  // avoid infinite recursion or some other Swing weirdness</span>
+<span class="fc bfc" id="L96" title="All 2 branches covered.">                    if ( !Objects.equals(c.getText(), t) )  // avoid infinite recursion or some other Swing weirdness</span>
 <span class="fc" id="L97">                        _setTextSilently( c, t );</span>
 <span class="fc" id="L98">                })</span>
 <span class="fc" id="L99">                ._with( thisComponent -&gt; {</span>

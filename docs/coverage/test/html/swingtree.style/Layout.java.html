@@ -476,35 +476,35 @@ public interface Layout
 
         @Override
         public boolean equals( Object o ) {
-<span class="nc bnc" id="L479" title="All 2 branches missed.">            if ( o == null ) return false;</span>
-<span class="nc bnc" id="L480" title="All 2 branches missed.">            if ( o == this ) return true;</span>
-<span class="nc bnc" id="L481" title="All 2 branches missed.">            if ( o.getClass() != getClass() ) return false;</span>
-<span class="nc" id="L482">            BorderLayoutInstaller other = (BorderLayoutInstaller) o;</span>
-<span class="nc bnc" id="L483" title="All 4 branches missed.">            return _hgap == other._hgap &amp;&amp; _vgap == other._vgap;</span>
+<span class="pc bpc" id="L479" title="1 of 2 branches missed.">            if ( o == null ) return false;</span>
+<span class="pc bpc" id="L480" title="1 of 2 branches missed.">            if ( o == this ) return true;</span>
+<span class="pc bpc" id="L481" title="1 of 2 branches missed.">            if ( o.getClass() != getClass() ) return false;</span>
+<span class="fc" id="L482">            BorderLayoutInstaller other = (BorderLayoutInstaller) o;</span>
+<span class="pc bpc" id="L483" title="2 of 4 branches missed.">            return _hgap == other._hgap &amp;&amp; _vgap == other._vgap;</span>
         }
 
         @Override
         public void installFor( JComponent component ) {
 <span class="fc" id="L488">            LayoutManager currentLayout = component.getLayout();</span>
-<span class="pc bpc" id="L489" title="1 of 2 branches missed.">            if ( !(currentLayout instanceof BorderLayout) ) {</span>
+<span class="fc bfc" id="L489" title="All 2 branches covered.">            if ( !(currentLayout instanceof BorderLayout) ) {</span>
                 // We need to replace the current layout with a BorderLayout:
 <span class="fc" id="L491">                BorderLayout newLayout = new BorderLayout(_hgap, _vgap);</span>
 <span class="fc" id="L492">                component.setLayout(newLayout);</span>
 <span class="fc" id="L493">                return;</span>
             }
-<span class="nc" id="L495">            BorderLayout borderLayout = (BorderLayout) currentLayout;</span>
-<span class="nc" id="L496">            int horizontalGap = _hgap;</span>
-<span class="nc" id="L497">            int verticalGap   = _vgap;</span>
+<span class="fc" id="L495">            BorderLayout borderLayout = (BorderLayout) currentLayout;</span>
+<span class="fc" id="L496">            int horizontalGap = _hgap;</span>
+<span class="fc" id="L497">            int verticalGap   = _vgap;</span>
 
-<span class="nc bnc" id="L499" title="All 2 branches missed.">            boolean horizontalGapChanged = horizontalGap != borderLayout.getHgap();</span>
-<span class="nc bnc" id="L500" title="All 2 branches missed.">            boolean verticalGapChanged   = verticalGap   != borderLayout.getVgap();</span>
+<span class="pc bpc" id="L499" title="1 of 2 branches missed.">            boolean horizontalGapChanged = horizontalGap != borderLayout.getHgap();</span>
+<span class="pc bpc" id="L500" title="1 of 2 branches missed.">            boolean verticalGapChanged   = verticalGap   != borderLayout.getVgap();</span>
 
-<span class="nc bnc" id="L502" title="All 4 branches missed.">            if ( horizontalGapChanged || verticalGapChanged ) {</span>
+<span class="pc bpc" id="L502" title="2 of 4 branches missed.">            if ( horizontalGapChanged || verticalGapChanged ) {</span>
 <span class="nc" id="L503">                borderLayout.setHgap(horizontalGap);</span>
 <span class="nc" id="L504">                borderLayout.setVgap(verticalGap);</span>
 <span class="nc" id="L505">                component.revalidate();</span>
             }
-<span class="nc" id="L507">        }</span>
+<span class="fc" id="L507">        }</span>
 
         @Override public String toString() {
 <span class="fc" id="L510">            return getClass().getSimpleName() + &quot;[&quot; +</span>

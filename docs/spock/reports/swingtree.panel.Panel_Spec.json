@@ -1,7 +1,7 @@
 {
   "className":"swingtree.panel.Panel_Spec",
   "title":"Panels",
-  "narrative":"Just like in regular Swing, the JPanel is the most basic \n    yet most important type of component in Swing-Tree\n    and you can create one using the `UI.panel()` factory method. \n    Don't hesitate to use as the main tool for grouping and structuring\n    your UI, just like you would use the 'div' tag in HTML.",
+  "narrative":"Just like in regular Swing, the JPanel is the most basic\n    yet most important type of component in Swing-Tree\n    and you can create one using the `UI.panel()` factory method.\n    Don't hesitate to use as the main tool for grouping and structuring\n    your UI, just like you would use the 'div' tag in HTML.",
   "subjects":["swingtree.UIForPanel"],
   "statistics":{
     "runs":"7",

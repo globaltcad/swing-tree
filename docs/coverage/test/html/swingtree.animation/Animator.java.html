@@ -88,19 +88,21 @@ public class Animator
      *
      * @param lifeTime The schedule that defines when the animation should be executed and for how long.
      * @param stride   The stride of the animation, i.e. whether it should be executed progressively or regressively.
+     *                 See {@link Stride} for more information.
+     * @param component The component that should be repainted after each animation step.
      * @return An {@link Animator} instance that can be used to define how the animation should be executed.
      */
     public static Animator animateFor( LifeTime lifeTime, Stride stride, Component component ) {
-<span class="fc" id="L94">        return new Animator( lifeTime, stride, component, null );</span>
+<span class="fc" id="L96">        return new Animator( lifeTime, stride, component, null );</span>
     }
 
 
-<span class="fc" id="L98">    private Animator( LifeTime lifeTime, Stride stride, Component component, RunCondition animation ) {</span>
-<span class="fc" id="L99">        _lifeTime  = Objects.requireNonNull(lifeTime);</span>
-<span class="fc" id="L100">        _stride    = Objects.requireNonNull(stride);</span>
-<span class="fc" id="L101">        _component = component; // may be null</span>
-<span class="fc" id="L102">        _condition = animation; // may be null</span>
-<span class="fc" id="L103">    }</span>
+<span class="fc" id="L100">    private Animator( LifeTime lifeTime, Stride stride, Component component, RunCondition animation ) {</span>
+<span class="fc" id="L101">        _lifeTime  = Objects.requireNonNull(lifeTime);</span>
+<span class="fc" id="L102">        _stride    = Objects.requireNonNull(stride);</span>
+<span class="fc" id="L103">        _component = component; // may be null</span>
+<span class="fc" id="L104">        _condition = animation; // may be null</span>
+<span class="fc" id="L105">    }</span>
 
     /**
      *  Use this to define a stop condition for the animation.
@@ -110,7 +112,7 @@ public class Animator
      * @return A new {@link Animator} instance that will be executed until the given stop condition is true.
      */
     public Animator until( Predicate&lt;AnimationState&gt; shouldStop ) {
-<span class="nc" id="L113">        return this.asLongAs( shouldStop.negate() );</span>
+<span class="nc" id="L115">        return this.asLongAs( shouldStop.negate() );</span>
     }
 
     /**
@@ -121,11 +123,11 @@ public class Animator
      * @return A new {@link Animator} instance that will be executed as long as the given running condition is true.
      */
     public Animator asLongAs( Predicate&lt;AnimationState&gt; shouldRun ) {
-<span class="fc" id="L124">        return new Animator(_lifeTime, _stride, _component, state -&gt; {</span>
-<span class="fc bfc" id="L125" title="All 2 branches covered.">                    if ( shouldRun.test(state) )</span>
-<span class="pc bpc" id="L126" title="3 of 4 branches missed.">                        return _condition == null || _condition.shouldContinue(state);</span>
+<span class="fc" id="L126">        return new Animator(_lifeTime, _stride, _component, state -&gt; {</span>
+<span class="fc bfc" id="L127" title="All 2 branches covered.">                    if ( shouldRun.test(state) )</span>
+<span class="pc bpc" id="L128" title="3 of 4 branches missed.">                        return _condition == null || _condition.shouldContinue(state);</span>
 
-<span class="fc" id="L128">                    return false;</span>
+<span class="fc" id="L130">                    return false;</span>
                 });
     }
 
@@ -138,15 +140,15 @@ public class Animator
      * @param animation The animation that should be executed.
      */
     public void go( Animation animation ) {
-<span class="fc bfc" id="L141" title="All 2 branches covered.">        RunCondition shouldRun = Optional.ofNullable(_condition).orElse( state -&gt; state.repeats() == 0 );</span>
-<span class="fc" id="L142">        AnimationRunner.add( new ComponentAnimator(</span>
+<span class="fc bfc" id="L143" title="All 2 branches covered.">        RunCondition shouldRun = Optional.ofNullable(_condition).orElse( state -&gt; state.repeats() == 0 );</span>
+<span class="fc" id="L144">        AnimationRunner.add( new ComponentAnimator(</span>
                 _component,
-<span class="fc" id="L144">                LifeSpan.startingNowWith(Objects.requireNonNull(_lifeTime)),</span>
+<span class="fc" id="L146">                LifeSpan.startingNowWith(Objects.requireNonNull(_lifeTime)),</span>
                 _stride,
                 shouldRun,
                 animation
             ));
-<span class="fc" id="L149">    }</span>
+<span class="fc" id="L151">    }</span>
 
     /**
      *  Runs the given animation based on a time offset in the given time unit
@@ -167,15 +169,15 @@ public class Animator
      * @param animation The animation that should be executed.
      */
     public void goWithOffset( long offset, TimeUnit unit, Animation animation ) {
-<span class="nc bnc" id="L170" title="All 2 branches missed.">        RunCondition shouldRun = Optional.ofNullable(_condition).orElse( state -&gt; state.repeats() == 0 );</span>
-<span class="nc" id="L171">        AnimationRunner.add( new ComponentAnimator(</span>
+<span class="pc bpc" id="L172" title="1 of 2 branches missed.">        RunCondition shouldRun = Optional.ofNullable(_condition).orElse( state -&gt; state.repeats() == 0 );</span>
+<span class="fc" id="L173">        AnimationRunner.add( new ComponentAnimator(</span>
                 _component,
-<span class="nc" id="L173">                LifeSpan.startingNowWithOffset(offset, unit, Objects.requireNonNull(_lifeTime)),</span>
+<span class="fc" id="L175">                LifeSpan.startingNowWithOffset(offset, unit, Objects.requireNonNull(_lifeTime)),</span>
                 _stride,
                 shouldRun,
                 animation
             ));
-<span class="nc" id="L178">    }</span>
+<span class="fc" id="L180">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

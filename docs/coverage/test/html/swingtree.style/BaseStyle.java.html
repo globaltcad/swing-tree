@@ -120,26 +120,39 @@ final class BaseStyle
 <span class="pc bpc" id="L120" title="1 of 2 branches missed.">        if ( obj == this ) return true;</span>
 <span class="pc bpc" id="L121" title="1 of 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
 <span class="fc" id="L122">        BaseStyle rhs = (BaseStyle) obj;</span>
-<span class="pc bpc" id="L123" title="1 of 2 branches missed.">        return Objects.equals(_icon,            rhs._icon           ) &amp;&amp;</span>
-<span class="pc bpc" id="L124" title="1 of 2 branches missed.">               Objects.equals(_fit,             rhs._fit            ) &amp;&amp;</span>
-<span class="fc bfc" id="L125" title="All 2 branches covered.">               Objects.equals(_backgroundColor, rhs._backgroundColor) &amp;&amp;</span>
-<span class="fc bfc" id="L126" title="All 2 branches covered.">               Objects.equals(_foundationColor, rhs._foundationColor) &amp;&amp;</span>
-<span class="fc bfc" id="L127" title="All 2 branches covered.">               Objects.equals(_foregroundColor, rhs._foregroundColor) &amp;&amp;</span>
-<span class="fc bfc" id="L128" title="All 2 branches covered.">               Objects.equals(_cursor,          rhs._cursor         ) &amp;&amp;</span>
-<span class="fc bfc" id="L129" title="All 2 branches covered.">               Objects.equals(_orientation,     rhs._orientation    );</span>
+
+<span class="fc" id="L124">        boolean sameBackground = Objects.equals(_backgroundColor, rhs._backgroundColor);</span>
+<span class="fc bfc" id="L125" title="All 4 branches covered.">        if ( _backgroundColor == UI.COLOR_UNDEFINED || rhs._backgroundColor == UI.COLOR_UNDEFINED )</span>
+<span class="fc bfc" id="L126" title="All 2 branches covered.">            sameBackground = _backgroundColor == rhs._backgroundColor;</span>
+
+<span class="fc" id="L128">        boolean sameFoundation = Objects.equals(_foundationColor, rhs._foundationColor);</span>
+<span class="pc bpc" id="L129" title="2 of 4 branches missed.">        if ( _foundationColor == UI.COLOR_UNDEFINED || rhs._foundationColor == UI.COLOR_UNDEFINED )</span>
+<span class="nc bnc" id="L130" title="All 2 branches missed.">            sameFoundation = _foundationColor == rhs._foundationColor;</span>
+
+<span class="fc" id="L132">        boolean sameForeground = Objects.equals(_foregroundColor, rhs._foregroundColor);</span>
+<span class="fc bfc" id="L133" title="All 4 branches covered.">        if ( _foregroundColor == UI.COLOR_UNDEFINED || rhs._foregroundColor == UI.COLOR_UNDEFINED )</span>
+<span class="fc bfc" id="L134" title="All 2 branches covered.">            sameForeground = _foregroundColor == rhs._foregroundColor;</span>
+
+<span class="pc bpc" id="L136" title="1 of 2 branches missed.">        return Objects.equals(_icon,            rhs._icon           ) &amp;&amp;</span>
+<span class="pc bpc" id="L137" title="1 of 8 branches missed.">               Objects.equals(_fit,             rhs._fit            ) &amp;&amp;</span>
+               sameBackground                                         &amp;&amp;
+               sameFoundation                                         &amp;&amp;
+               sameForeground                                         &amp;&amp;
+<span class="fc bfc" id="L141" title="All 2 branches covered.">               Objects.equals(_cursor,          rhs._cursor         ) &amp;&amp;</span>
+<span class="fc bfc" id="L142" title="All 2 branches covered.">               Objects.equals(_orientation,     rhs._orientation    );</span>
     }
 
     @Override
     public String toString() {
-<span class="fc bfc" id="L134" title="All 2 branches covered.">        if ( this == _NONE )</span>
-<span class="fc" id="L135">            return this.getClass().getSimpleName() + &quot;[NONE]&quot;;</span>
-<span class="fc" id="L136">        return this.getClass().getSimpleName() + &quot;[&quot; +</span>
-<span class="pc bpc" id="L137" title="1 of 2 branches missed.">                    &quot;icon=&quot;            + ( _icon       == null ? &quot;?&quot; : _icon.toString()  ) + &quot;, &quot; +</span>
+<span class="fc bfc" id="L147" title="All 2 branches covered.">        if ( this == _NONE )</span>
+<span class="fc" id="L148">            return this.getClass().getSimpleName() + &quot;[NONE]&quot;;</span>
+<span class="fc" id="L149">        return this.getClass().getSimpleName() + &quot;[&quot; +</span>
+<span class="pc bpc" id="L150" title="1 of 2 branches missed.">                    &quot;icon=&quot;            + ( _icon       == null ? &quot;?&quot; : _icon.toString()  ) + &quot;, &quot; +</span>
                     &quot;fitComponent=&quot;    + _fit                                              + &quot;, &quot; +
-<span class="fc" id="L139">                    &quot;backgroundColor=&quot; + StyleUtility.toString(_backgroundColor)           + &quot;, &quot; +</span>
-<span class="fc" id="L140">                    &quot;foundationColor=&quot; + StyleUtility.toString(_foundationColor)           + &quot;, &quot; +</span>
-<span class="fc" id="L141">                    &quot;foregroundColor=&quot; + StyleUtility.toString(_foregroundColor)           + &quot;, &quot; +</span>
-<span class="pc bpc" id="L142" title="1 of 2 branches missed.">                    &quot;cursor=&quot;          + ( _cursor == null ? &quot;?&quot; : _cursor.toString() )    + &quot;, &quot; +</span>
+<span class="fc" id="L152">                    &quot;backgroundColor=&quot; + StyleUtility.toString(_backgroundColor)           + &quot;, &quot; +</span>
+<span class="fc" id="L153">                    &quot;foundationColor=&quot; + StyleUtility.toString(_foundationColor)           + &quot;, &quot; +</span>
+<span class="fc" id="L154">                    &quot;foregroundColor=&quot; + StyleUtility.toString(_foregroundColor)           + &quot;, &quot; +</span>
+<span class="pc bpc" id="L155" title="1 of 2 branches missed.">                    &quot;cursor=&quot;          + ( _cursor == null ? &quot;?&quot; : _cursor.toString() )    + &quot;, &quot; +</span>
                     &quot;orientation=&quot;     + _orientation                                      +
                 &quot;]&quot;;
     }

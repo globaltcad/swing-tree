@@ -133,7 +133,7 @@ final class LayerCache
         }
 
 <span class="fc" id="L135">        boolean cacheIsInvalid = true;</span>
-<span class="fc bfc" id="L136" title="All 2 branches covered.">        boolean cacheIsFull    = _CACHE.size() &gt; 128;</span>
+<span class="pc bpc" id="L136" title="1 of 2 branches missed.">        boolean cacheIsFull    = _CACHE.size() &gt; 128;</span>
 
 <span class="fc" id="L138">        boolean newBufferNeeded = false;</span>
 
@@ -147,8 +147,8 @@ final class LayerCache
 <span class="fc" id="L147">            newBufferNeeded = true;</span>
         }
 
-<span class="fc bfc" id="L150" title="All 2 branches covered.">        if ( cacheIsFull )</span>
-<span class="fc" id="L151">            return;</span>
+<span class="pc bpc" id="L150" title="1 of 2 branches missed.">        if ( cacheIsFull )</span>
+<span class="nc" id="L151">            return;</span>
 
 <span class="fc bfc" id="L153" title="All 2 branches covered.">        if ( newBufferNeeded )</span>
 <span class="fc" id="L154">            _allocateOrGetCachedBuffer(newState);</span>
@@ -198,7 +198,7 @@ final class LayerCache
 <span class="pc bpc" id="L198" title="1 of 4 branches missed.">        if ( !bounds.hasWidth() || !bounds.hasHeight() )</span>
 <span class="fc" id="L199">            return false;</span>
 
-<span class="fc bfc" id="L201" title="All 2 branches covered.">        if ( state.style().hasCustomPaintersOnLayer(_layer) )</span>
+<span class="fc bfc" id="L201" title="All 2 branches covered.">        if ( state.style().hasPaintersOnLayer(_layer) )</span>
 <span class="fc" id="L202">            return false; // We don't know what the painters will do, so we don't cache their painting!</span>
 
 <span class="fc" id="L204">        int heavyStyleCount = 0;</span>

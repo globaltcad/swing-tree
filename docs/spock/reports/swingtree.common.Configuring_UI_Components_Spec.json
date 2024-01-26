@@ -1,7 +1,7 @@
 {
   "className":"swingtree.common.Configuring_UI_Components_Spec",
   "title":"Configuring UI withMethod Chaining",
-  "narrative":"The declarative nature of Swing-Tree is enabled by 1 fundamental\n    design patterns:\n\n    > Composition and Method Chaining!\n\n    So every method on a Swing-Tree UI builder node returns the node\n    instance itself. \n    This is especially useful when you want to configure a UI component.\n\n    In this specification we will see what this looks like.",
+  "narrative":"The declarative nature of Swing-Tree is enabled by 1 fundamental\n    design patterns:\n\n    > Composition and Method Chaining!\n\n    So every method on a Swing-Tree UI builder node returns the node\n    instance itself.\n    This is especially useful when you want to configure a UI component.\n\n    In this specification we will see what this looks like.",
   "subjects":[],
   "statistics":{
     "runs":"4",
