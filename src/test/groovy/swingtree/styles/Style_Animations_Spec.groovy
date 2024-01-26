@@ -7,6 +7,7 @@ import swingtree.SwingTree
 import swingtree.threading.EventProcessor
 import swingtree.UI
 
+import javax.swing.JButton
 import javax.swing.JLabel
 import javax.swing.UIManager
 import javax.swing.border.CompoundBorder
@@ -62,7 +63,7 @@ class Style_Animations_Spec extends Specification
                             )
                         )
         and : 'We actually build the component:'
-            var label = ui.component
+            var label = ui.get(JLabel)
 
         expect : """
             When the user clicks on the label, the border width of the label
@@ -163,7 +164,7 @@ class Style_Animations_Spec extends Specification
                                 )
                             )
                         )
-            var label = ui.component
+            var label = ui.get(JLabel)
 
         expect : 'It has the expected initial state.'
             label.border == null
@@ -236,7 +237,7 @@ class Style_Animations_Spec extends Specification
                             )
                         )
         and : 'We actually build the component:'
-            var button = ui.component
+            var button = ui.get(JButton)
 
         expect : """
             Initially the button will the default button border and background color.
