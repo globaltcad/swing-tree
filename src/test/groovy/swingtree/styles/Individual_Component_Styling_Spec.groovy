@@ -74,7 +74,7 @@ class Individual_Component_Styling_Spec extends Specification
         reportInfo """
             Fun-Fact: 
             Styling in SwingTree is fully functional, which means 
-            that the `Style` settings objects are all immutable. 
+            that the style config objects are all immutable. 
             They are not modified in place, but instead transformed
             by so called "`Styler` lambdas".
             Not only does this architecture make it easy to compose, reuse and share
@@ -98,7 +98,7 @@ class Individual_Component_Styling_Spec extends Specification
         """
             SwingTree.get().setUiScaleFactor(uiScale)
         and : 'We create a panel with some custom styling!'
-            var panel =
+            var ui =
                         UI.panel()
                         .withStyle( it -> it
                             .foundationColor("green")
@@ -111,14 +111,149 @@ class Individual_Component_Styling_Spec extends Specification
                             .shadowOffset(10)
                             .font("Papyrus", 42)
                         )
+        and : 'We build the panel:'
+            var panel = ui.get(JPanel)
         expect : 'The background color of the panel will be set to cyan.'
-            panel.component.background == Color.cyan
+            panel.background == Color.cyan
         and : 'The foreground color of the panel will be set to blue.'
-            panel.component.foreground == Color.blue
+            panel.foreground == Color.blue
         and : 'The insets of the border will be increased by the border width (because the border grows inwards).'
-            panel.component.border.getBorderInsets(panel.component) == new Insets(5 * uiScale, 5 * uiScale, 5 * uiScale, 5 * uiScale)
+            panel.border.getBorderInsets(panel) == new Insets(5 * uiScale, 5 * uiScale, 5 * uiScale, 5 * uiScale)
         and : 'The font of the panel will be set to Papyrus with a size of 42 * uiScale.'
-            panel.component.font.toString().contains("family=Dialog,name=Papyrus,style=plain,size=" + 42 * uiScale)
+            panel.font.toString().contains("family=Dialog,name=Papyrus,style=plain,size=" + 42 * uiScale)
+        where : """
+            We use the following integer scaling factors simulating different high DPI scenarios.
+            Note that usually the UI is scaled by 1, 1.5 an 2 (for 4k screens for example).
+            A scaling factor of 3 is rather unusual, however it is possible to scale it by 3 nonetheless.
+        """
+            uiScale << [1, 2, 3]
+    }
+
+    def  'Use the style API to make panel edges round.'( int uiScale )
+    {
+        reportInfo """
+            In raw Swing it is not possible to make the edges of a panel round.
+            However, SwingTree makes it possible to do so trough the style API.
+            ${Utility.linkSnapshot('components/rounded-panel.png')}
+        """
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+            So when your screen has a higher pixel density then this factor
+            is used by SwingTree to ensure that the UI is upscaled accordingly! 
+            Please note that the line below only exists for testing purposes, 
+            SwingTree will determine a suitable 
+            scaling factor for the current system automatically for you,
+            so you do not have to specify this factor manually. 
+        """
+            SwingTree.get().setUiScaleFactor(uiScale)
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'We create a panel with some custom styling!'
+            var ui =
+                        UI.panel().withBackground(UI.color("salmon"))
+                        .withStyle( it -> it
+                            .borderRadius(42)
+                            .size(180, 120)
+                        )
+        and : 'We build the panel:'
+            var panel = ui.get(JPanel)
+        and : 'We expect that the panel has the background color "salmon".'
+            panel.background == new Color(250, 128, 114)
+        and : 'The panel is no longer opaque (due to the edges exposing the parent background).'
+            !panel.isOpaque()
+
+        when : 'We render the panel into a BufferedImage.'
+            var image = Utility.renderSingleComponent(panel)
+
+        then : 'The rendered image of the panel is as expected.'
+            Utility.similarityBetween(image, "components/rounded-panel.png", 99.5) > 99.5
+
+        where : """
+            We use the following integer scaling factors simulating different high DPI scenarios.
+            Note that usually the UI is scaled by 1, 1.5 an 2 (for 4k screens for example).
+            A scaling factor of 3 is rather unusual, however it is possible to scale it by 3 nonetheless.
+        """
+            uiScale << [1, 2, 3]
+    }
+
+    def  'Rendering a panel, styled to have round edges, will not be visible when it is flagged as non-opaque.'( int uiScale )
+    {
+        reportInfo """
+            When you use the Style API of SwingTree to make the edges of a panel, which
+            is not opaque, round, then the edges will not be visible.
+            This is because the standard behaviour of a component marked as non-opaque
+            is to not paint its background.
+            When styles are simple, SwingTree will honour this legacy behaviour.
+
+            ${Utility.linkSnapshot('components/rounded-non-opaque-panel.png')}
+
+            You may have nticed this big empty space to the right of this text.
+            This is actually an image of the panel we are rendering.
+            And what you see in this image is...
+            well, nothing. It is a fully transparent image.
+        """
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+            So when your screen has a higher pixel density then this factor
+            is used by SwingTree to ensure that the UI is upscaled accordingly! 
+            Please note that the line below only exists for testing purposes, 
+            SwingTree will determine a suitable 
+            scaling factor for the current system automatically for you,
+            so you do not have to specify this factor manually. 
+        """
+            SwingTree.get().setUiScaleFactor(uiScale)
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'We create a panel with some custom styling!'
+            var ui =
+                       UI.panel().withBackground(UI.color("navy"))
+                       .isOpaqueIf(false) // We explicitly set the panel to be non-opaque.
+                       .withStyle( it -> it
+                           .borderRadius(42)
+                           .size(180, 120)
+                       )
+        and : 'We build the panel:'
+            var panel = ui.get(JPanel)
+        and : 'We expect that the panel has the background color "navy".'
+            panel.background == new Color(0, 0, 128)
+        and : 'The panel is no longer opaque (due to the edges exposing the parent background).'
+            !panel.isOpaque()
+
+        when : 'We render the panel into a BufferedImage.'
+            var image = Utility.renderSingleComponent(panel)
+
+        then : 'The rendered image of the panel is as expected, a fully transparent image.'
+            Utility.similarityBetween(image, "components/rounded-non-opaque-panel.png", 99.5) > 99.5
+
+        when : """
+            We specify the background color of the panel through the style API instead of the UI API.
+            Then things will look a little bit different.
+            This is because we are now telling the SwingTree style engine of the panel
+            to do the actual background rendering.
+            
+            Doing so will still cause the panel to be non-opaque, but now the style engine
+            will render the background of the panel (with the specified background color
+            and rounded edges) into the image.
+            
+            ${Utility.linkSnapshot('components/rounded-non-opaque-panel-with-background.png')}
+
+            Now let's reproduce this by creating a new
+            UI declaration for a non opaque panel with rounded edges
+            and the background color specified through the style API.
+        """
+            ui =
+                UI.panel()
+                .isOpaqueIf(false) // We explicitly set the panel to be non-opaque.
+                .withStyle( it -> it
+                    .borderRadius(42)
+                    .size(180, 120)
+                    .backgroundColor("navy")
+                )
+        and : 'We build the panel and render it into a BufferedImage right away.'
+            panel = ui.get(JPanel)
+            image = Utility.renderSingleComponent(panel)
+
+        then : 'The rendered image of the panel is now no longer fully transparent, it has a rounded blueish body:'
+            Utility.similarityBetween(image, "components/rounded-non-opaque-panel-with-background.png", 99.5) > 99.5
+
         where : """
             We use the following integer scaling factors simulating different high DPI scenarios.
             Note that usually the UI is scaled by 1, 1.5 an 2 (for 4k screens for example).
@@ -277,24 +412,26 @@ class Individual_Component_Styling_Spec extends Specification
         """
         given : 'We create a simple `JLabel` UI component with a style animation.'
             var doStyle = true
-            var label = UI.label("Click me!")
+            var ui = UI.label("Click me!")
                             .withStyle(style ->
                                  doStyle ? style.border(3, new Color(230, 238, 220)) : style
                             )
+        and : 'We build the label:'
+            var label = ui.get(JLabel)
 
         expect : """
             There is now a custom border installed on the label.
         """
-            label.component.border != null
+            label.border != null
 
         when : 'We disable the style and simulate a repaint.'
             doStyle = false
-            label.component.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+            label.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
 
         then : """
             The custom border has been uninstalled.
         """
-            label.component.border == null
+            label.border == null
     }
 
 
@@ -308,36 +445,38 @@ class Individual_Component_Styling_Spec extends Specification
         """
         given : 'We create a simple `JLabel` UI component with a style animation.'
             var doStyle = false
-            var label = UI.label("Click me!").withBorderTitled("Original border")
+            var ui = UI.label("Click me!").withBorderTitled("Original border")
                             .withStyle(style ->
                                  doStyle ? style.border(3, new Color(230, 238, 220)) : style
                             )
+        and : 'We build the label:'
+            var label = ui.get(JLabel)
 
         expect : """
             Initially there is a custom border installed on the label.
         """
-            label.component.border instanceof TitledBorder
-            label.component.border.title == "Original border"
+            label.border instanceof TitledBorder
+            label.border.title == "Original border"
 
         when : 'We enable the style and simulate a repaint.'
             doStyle = true
-            label.component.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+            label.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
 
         then : """
             The custom border has been installed.
         """
-            label.component.border != null
-            !(label.component.border instanceof TitledBorder)
+            label.border != null
+            !(label.border instanceof TitledBorder)
 
         when : 'We disable the style and simulate a repaint.'
             doStyle = false
-            label.component.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+            label.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
 
         then : """
             The original border has been re-installed.
         """
-            label.component.border instanceof TitledBorder
-            label.component.border.title == "Original border"
+            label.border instanceof TitledBorder
+            label.border.title == "Original border"
     }
 
     def 'This is how you can create a rounded green label with a border at the bottom.'()
@@ -367,7 +506,7 @@ class Individual_Component_Styling_Spec extends Specification
                     )
 
         when : 'We render the label into a BufferedImage.'
-            var image = Utility.renderSingleComponent(ui.getComponent())
+            var image = Utility.renderSingleComponent(ui.get(JLabel))
 
         then : 'The image is as expected.'
             Utility.similarityBetween(image, "components/rounded-green-JLabel.png", 99.5) > 99.5
