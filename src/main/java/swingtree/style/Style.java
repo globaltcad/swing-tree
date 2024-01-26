@@ -166,11 +166,11 @@ public final class Style
         return _layers.get(layer).shadows();
     }
 
-    boolean anyVisibleShadows() {
-        return Arrays.stream(UI.Layer.values()).anyMatch(this::anyVisibleShadows);
+    boolean hasVisibleShadows() {
+        return Arrays.stream(UI.Layer.values()).anyMatch(this::hasVisibleShadows);
     }
 
-    boolean anyVisibleShadows(UI.Layer layer) {
+    boolean hasVisibleShadows(UI.Layer layer) {
         return _layers.get(layer)
                 .shadows()
                 .stylesStream()
@@ -250,8 +250,8 @@ public final class Style
         return !( gradients.size() == 1 && GradientStyle.none().equals(gradients.get(StyleUtility.DEFAULT_KEY)) );
     }
 
-    boolean hasVisibleBackgroundGradients() {
-        List<GradientStyle> gradients = gradients(UI.Layer.BACKGROUND);
+    boolean hasVisibleGradientsOnLayer( UI.Layer layer ) {
+        List<GradientStyle> gradients = gradients(layer);
         if ( gradients.isEmpty() ) return false;
         return gradients.stream().anyMatch( s -> s.colors().length > 0 );
     }

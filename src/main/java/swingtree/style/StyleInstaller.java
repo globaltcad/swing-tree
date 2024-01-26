@@ -76,8 +76,16 @@ final class StyleInstaller<C extends JComponent>
         if ( _initialIsOpaque == null )
             _initialIsOpaque = owner.isOpaque();
 
-        boolean hasBorderRadius = newStyle.border().hasAnyNonZeroArcs();
-        boolean hasBackground   = newStyle.base().backgroundColor().isPresent();
+        final List<UI.ComponentArea> opaqueGradientAreas = newStyle.gradientCoveredAreas();
+        final boolean hasBackgroundGradients             = newStyle.hasVisibleGradientsOnLayer(UI.Layer.BACKGROUND);
+        final boolean hasBackgroundPainters              = newStyle.hasPaintersOnLayer(UI.Layer.BACKGROUND);
+        final boolean hasBackgroundImages                = newStyle.hasImagesOnLayer(UI.Layer.BACKGROUND);
+        final boolean hasBackgroundShadows               = newStyle.hasVisibleShadows(UI.Layer.BACKGROUND);
+        final boolean hasBorderRadius                    = newStyle.border().hasAnyNonZeroArcs();
+        final boolean hasBackground                      = newStyle.base().backgroundColor().isPresent();
+        final boolean hasMargin                          = newStyle.margin().isPositive();
+        final boolean hasOpaqueBorder                    = !(255 > newStyle.border().color().map(Color::getAlpha).orElse(0));
+
 
         if ( !hasBackground && _initialIsOpaque ) {
             // If the style has a border radius set we need to make sure that we have a background color:
@@ -120,16 +128,12 @@ final class StyleInstaller<C extends JComponent>
                 _dynamicLaF = _dynamicLaF.establishLookAndFeelFor(newStyle, owner);
         }
 
-        List<UI.ComponentArea> opaqueGradientAreas = newStyle.gradientCoveredAreas();
-
         boolean canBeOpaque = true;
 
         if ( !opaqueGradientAreas.contains(UI.ComponentArea.ALL) ) {
             boolean hasOpaqueFoundation = 255 == newStyle.base().foundationColor().map(Color::getAlpha).orElse(0);
-            boolean hasOpaqueBorder     = 255 == newStyle.border().color().map(Color::getAlpha).orElse(0);
             boolean hasOpaqueBackground = 255 == newStyle.base().backgroundColor().map( c -> c != UI.COLOR_UNDEFINED ? c : _initialBackgroundColor ).map(Color::getAlpha).orElse(255);
             boolean hasBorder           = newStyle.border().widths().isPositive();
-            boolean hasMargin           = newStyle.margin().isPositive();
 
             if ( !hasOpaqueFoundation && !opaqueGradientAreas.contains(UI.ComponentArea.EXTERIOR) ) {
                 if ( hasBorderRadius )
@@ -164,13 +168,12 @@ final class StyleInstaller<C extends JComponent>
                 if ( !owner.isOpaque() )
                     owner.setOpaque(true);
 
-                boolean requiresBackgroundPainting = newStyle.hasVisibleBackgroundGradients();
-                requiresBackgroundPainting = requiresBackgroundPainting || newStyle.anyVisibleShadows(UI.Layer.BACKGROUND);
-                requiresBackgroundPainting = requiresBackgroundPainting || newStyle.hasPaintersOnLayer(UI.Layer.BACKGROUND);
-                requiresBackgroundPainting = requiresBackgroundPainting || newStyle.hasImagesOnLayer(UI.Layer.BACKGROUND);
+                boolean requiresBackgroundPainting = hasBackgroundGradients;
+                requiresBackgroundPainting = requiresBackgroundPainting || hasBackgroundShadows;
+                requiresBackgroundPainting = requiresBackgroundPainting || hasBackgroundPainters;
+                requiresBackgroundPainting = requiresBackgroundPainting || hasBackgroundImages;
                 requiresBackgroundPainting = requiresBackgroundPainting || hasBorderRadius;
-                requiresBackgroundPainting = requiresBackgroundPainting || newStyle.margin().isPositive();
-                requiresBackgroundPainting = requiresBackgroundPainting || newStyle.border().color().map( c -> c.getAlpha() < 255 ).orElse(false);
+                requiresBackgroundPainting = requiresBackgroundPainting || hasMargin;
 
                 if ( requiresBackgroundPainting && !Objects.equals( owner.getBackground(), UI.COLOR_UNDEFINED ) )
                     owner.setBackground(UI.COLOR_UNDEFINED);
@@ -205,10 +208,8 @@ final class StyleInstaller<C extends JComponent>
 
         if ( owner instanceof AbstractButton) {
             AbstractButton b = (AbstractButton) owner;
-            boolean hasVisibleBackgroundGradients = newStyle.hasVisibleBackgroundGradients();
-            boolean hasBackgroundPainters         = newStyle.hasPaintersOnLayer(UI.Layer.BACKGROUND);
 
-            boolean shouldButtonBeFilled =  !hasVisibleBackgroundGradients && !hasBackgroundPainters;
+            boolean shouldButtonBeFilled = !hasBackgroundGradients && !hasBackgroundPainters;
 
             if ( shouldButtonBeFilled != b.isContentAreaFilled() )
                 b.setContentAreaFilled( shouldButtonBeFilled );

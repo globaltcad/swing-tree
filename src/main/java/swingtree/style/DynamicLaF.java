@@ -56,7 +56,7 @@ final class DynamicLaF
         if ( style.hasPaintersOnLayer(UI.Layer.BACKGROUND) )
             weNeedToOverrideLaF = true;
 
-        if ( style.anyVisibleShadows() )
+        if ( style.hasVisibleShadows() )
             weNeedToOverrideLaF = true;
 
         if ( weNeedToOverrideLaF ) {
