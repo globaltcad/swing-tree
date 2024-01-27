@@ -88,11 +88,11 @@ class Individual_Component_Styling_Spec extends Specification
             The `AnimationState` allows you to access the "progress" of the transition,
             which is a value between 0 and 1 that indicates how far the transition has progressed.
 
+            ${Utility.linkSnapshot('components/transitioning-label.png')}
+
             You can use this progress value to interpolate between two states.
             If the progress has reached 1 in this concrete example, then the component
-            will look like this:
-
-            ${Utility.linkSnapshot('components/transitioning-label.png')}
+            will look like the fancily styled label on the right.
 
             If the progress is 0 on the other hand, the comoponent will look
             like a regular label. Take a look:
