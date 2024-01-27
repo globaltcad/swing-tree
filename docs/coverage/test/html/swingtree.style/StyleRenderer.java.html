@@ -69,14 +69,14 @@ final class StyleRenderer
                 }
                 else {
 <span class="fc" id="L71">                    Outline insets = Outline.none();</span>
-<span class="pc bpc" id="L72" title="4 of 5 branches missed.">                    switch ( gradient.boundary() ) {</span>
+<span class="pc bpc" id="L72" title="3 of 5 branches missed.">                    switch ( gradient.boundary() ) {</span>
 <span class="nc" id="L73">                        case OUTER_TO_EXTERIOR:   insets = Outline.none(); break;</span>
 <span class="fc" id="L74">                        case EXTERIOR_TO_BORDER:  insets = conf.style().margin(); break;</span>
-<span class="nc" id="L75">                        case BORDER_TO_INTERIOR:  insets = conf.style().margin().plus(conf.style().border().widths()); break;</span>
+<span class="fc" id="L75">                        case BORDER_TO_INTERIOR:  insets = conf.style().margin().plus(conf.style().border().widths()); break;</span>
 <span class="nc" id="L76">                        case INTERIOR_TO_CONTENT: insets = conf.style().margin().plus(conf.style().border().widths()).plus(conf.style().padding()); break;</span>
                     }
 <span class="fc bfc" id="L78" title="All 2 branches covered.">                    if ( gradient.transition().isDiagonal() )</span>
-<span class="fc" id="L79">                    _renderDiagonalGradient(g2d, conf.currentBounds().size(), insets, gradient, conf.get(gradient.area()));</span>
+<span class="fc" id="L79">                        _renderDiagonalGradient(g2d, conf.currentBounds().size(), insets, gradient, conf.get(gradient.area()));</span>
                     else
 <span class="fc" id="L81">                        _renderVerticalOrHorizontalGradient(g2d, conf.currentBounds().size(), insets, gradient, conf.get(gradient.area()));</span>
                 }
@@ -788,7 +788,7 @@ final class StyleRenderer
         }
 <span class="nc" id="L789">        else throw new IllegalArgumentException(&quot;Unknown gradient alignment: &quot; + type);</span>
 
-<span class="pc bpc" id="L791" title="1 of 2 branches missed.">        if ( gradient.type() == UI.GradientType.LINEAR ) {</span>
+<span class="fc bfc" id="L791" title="All 2 branches covered.">        if ( gradient.type() == UI.GradientType.LINEAR ) {</span>
 <span class="pc bpc" id="L792" title="1 of 2 branches missed.">            if ( size &gt;= 0 ) {</span>
 <span class="nc" id="L793">                float vectorX = corner2X - corner1X;</span>
 <span class="nc" id="L794">                float vectorY = corner2Y - corner1Y;</span>
@@ -802,24 +802,24 @@ final class StyleRenderer
 
 <span class="fc" id="L803">        float radius = size;</span>
 
-<span class="pc bpc" id="L805" title="1 of 2 branches missed.">        if ( gradient.type() == UI.GradientType.RADIAL ) {</span>
-<span class="nc bnc" id="L806" title="All 2 branches missed.">            if ( size &lt; 0 )</span>
+<span class="fc bfc" id="L805" title="All 2 branches covered.">        if ( gradient.type() == UI.GradientType.RADIAL ) {</span>
+<span class="pc bpc" id="L806" title="1 of 2 branches missed.">            if ( size &lt; 0 )</span>
 <span class="nc" id="L807">                radius = (float) Math.sqrt(</span>
                                         (corner2X - corner1X) * (corner2X - corner1X) +
                                         (corner2Y - corner1Y) * (corner2Y - corner1Y)
                                     );
         }
 
-<span class="pc bpc" id="L813" title="1 of 2 branches missed.">        if ( colors.length == 2 ) {</span>
-<span class="nc bnc" id="L814" title="All 2 branches missed.">            if ( gradient.type() == UI.GradientType.LINEAR ) {</span>
+<span class="fc bfc" id="L813" title="All 2 branches covered.">        if ( colors.length == 2 ) {</span>
+<span class="pc bpc" id="L814" title="1 of 2 branches missed.">            if ( gradient.type() == UI.GradientType.LINEAR ) {</span>
 <span class="nc" id="L815">                g2d.setPaint(</span>
                         new GradientPaint(
                                 corner1X, corner1Y, colors[0],
                                 corner2X, corner2Y, colors[1]
                         )
                 );
-<span class="nc bnc" id="L821" title="All 2 branches missed.">            } else if ( gradient.type() == UI.GradientType.RADIAL ) {</span>
-<span class="nc" id="L822">                g2d.setPaint(new RadialGradientPaint(</span>
+<span class="pc bpc" id="L821" title="1 of 2 branches missed.">            } else if ( gradient.type() == UI.GradientType.RADIAL ) {</span>
+<span class="fc" id="L822">                g2d.setPaint(new RadialGradientPaint(</span>
                                 new Point2D.Float(corner1X, corner1Y),
                                 radius,
                                 new float[] {0f, 1f},

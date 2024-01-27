@@ -4,7 +4,7 @@
   "narrative":"This is an overview of the various example UIs\n    in the test suite.\n\n    This specification also ensures that the\n    various UI examples in the test suite,\n    run successfully and also produce\n    UIs with expected state and appearance.",
   "subjects":[],
   "statistics":{
-    "runs":"20",
+    "runs":"21",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -187,6 +187,19 @@
       },
       "blocks":[
         {"kind":"expect","text":"","code":["expect : new AnimatedView(Mock(JFrame))"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The transitional style animation example view can be created.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["expect : new TransitionalAnimation()"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },

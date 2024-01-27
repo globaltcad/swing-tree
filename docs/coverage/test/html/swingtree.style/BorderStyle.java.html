@@ -299,7 +299,7 @@ final class BorderStyle
     }
 
     BorderStyle correctedForRounding() {
-<span class="fc" id="L302">        Outline correction = _borderWidths.plus(_padding)</span>
+<span class="fc" id="L302">        Outline correction = _borderWidths.plus(_padding).plus(_margin)</span>
 <span class="fc" id="L303">                                .map( v -&gt; v % 1 )</span>
 <span class="fc bfc" id="L304" title="All 2 branches covered.">                                .map( v -&gt; v &gt; 0f ? 1f - v : 0f )</span>
 <span class="fc bfc" id="L305" title="All 2 branches covered.">                                .map( v -&gt; v == 0f ? null : v )</span>

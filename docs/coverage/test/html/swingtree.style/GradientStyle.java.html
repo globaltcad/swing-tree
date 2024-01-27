@@ -122,7 +122,7 @@ public final class GradientStyle implements Simplifiable&lt;GradientStyle&gt;
 <span class="fc" id="L122">        _type       = Objects.requireNonNull(type);</span>
 <span class="fc" id="L123">        _colors     = Objects.requireNonNull(colors);</span>
 <span class="fc" id="L124">        _offset     = Objects.requireNonNull(offset);</span>
-<span class="pc bpc" id="L125" title="1 of 2 branches missed.">        _size       = ( size &lt; 0 ? -1 : size );</span>
+<span class="fc bfc" id="L125" title="All 2 branches covered.">        _size       = ( size &lt; 0 ? -1 : size );</span>
 <span class="fc" id="L126">        _area       = Objects.requireNonNull(area);</span>
 <span class="fc" id="L127">        _boundary   = Objects.requireNonNull(boundary);</span>
 <span class="fc" id="L128">    }</span>
@@ -244,7 +244,7 @@ public final class GradientStyle implements Simplifiable&lt;GradientStyle&gt;
      * @return A new gradient style with the specified offset.
      */
     public GradientStyle offset( double x, double y ) {
-<span class="nc" id="L247">        return new GradientStyle(_transition, _type, _colors, Offset.of(x,y), _size, _area, _boundary);</span>
+<span class="fc" id="L247">        return new GradientStyle(_transition, _type, _colors, Offset.of(x,y), _size, _area, _boundary);</span>
     }
 
     /**
@@ -259,7 +259,7 @@ public final class GradientStyle implements Simplifiable&lt;GradientStyle&gt;
      * @return A new gradient style with the specified size.
      */
     public GradientStyle size( double size ) {
-<span class="nc" id="L262">        return new GradientStyle(_transition, _type, _colors, _offset, (float) size, _area, _boundary);</span>
+<span class="fc" id="L262">        return new GradientStyle(_transition, _type, _colors, _offset, (float) size, _area, _boundary);</span>
     }
 
     /**
@@ -270,7 +270,7 @@ public final class GradientStyle implements Simplifiable&lt;GradientStyle&gt;
      * @param area The area of the component to which the gradient is clipped to.
      * @return A new gradient style with the specified area.
      */
-    public GradientStyle area( UI.ComponentArea area ) {
+    public GradientStyle clipTo( UI.ComponentArea area ) {
 <span class="fc" id="L274">        return new GradientStyle(_transition, _type, _colors, _offset, _size, area, _boundary);</span>
     }
 
@@ -312,7 +312,7 @@ public final class GradientStyle implements Simplifiable&lt;GradientStyle&gt;
      * @return A new gradient style with the specified boundary.
      */
     public GradientStyle boundary( UI.ComponentBoundary boundary ) {
-<span class="nc" id="L315">        return new GradientStyle(_transition, _type, _colors, _offset, _size, _area, boundary);</span>
+<span class="fc" id="L315">        return new GradientStyle(_transition, _type, _colors, _offset, _size, _area, boundary);</span>
     }
 
     @Override
@@ -334,7 +334,7 @@ public final class GradientStyle implements Simplifiable&lt;GradientStyle&gt;
 <span class="fc bfc" id="L334" title="All 2 branches covered.">        if ( this == o ) return true;</span>
 <span class="pc bpc" id="L335" title="1 of 2 branches missed.">        if ( !(o instanceof GradientStyle) ) return false;</span>
 <span class="fc" id="L336">        GradientStyle that = (GradientStyle) o;</span>
-<span class="pc bpc" id="L337" title="1 of 4 branches missed.">        return _transition == that._transition       &amp;&amp;</span>
+<span class="fc bfc" id="L337" title="All 4 branches covered.">        return _transition == that._transition       &amp;&amp;</span>
                _type       == that._type             &amp;&amp;
 <span class="fc bfc" id="L339" title="All 2 branches covered.">               Arrays.equals(_colors, that._colors)  &amp;&amp;</span>
 <span class="pc bpc" id="L340" title="4 of 8 branches missed.">               Objects.equals(_offset, that._offset) &amp;&amp;</span>

@@ -27,7 +27,7 @@ import java.util.function.Supplier;
 {
 <span class="fc" id="L28">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(LenientAWTEventProcessor.class);</span>
 
-    @Override protected void _tryRunning( Runnable runnable ) {
+    @Override protected void _tryRunning( Runnable runnable, boolean expectedToBeInvokedFromUIThread ) {
         try {
 <span class="fc" id="L32">            runnable.run();</span>
 <span class="nc" id="L33">        } catch (Exception e) {</span>

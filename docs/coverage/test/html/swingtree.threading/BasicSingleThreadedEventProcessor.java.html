@@ -2,14 +2,14 @@
 
 <span class="fc" id="L3">abstract class BasicSingleThreadedEventProcessor implements EventProcessor</span>
 {
-<span class="fc" id="L5">    @Override public final void registerAppEvent( Runnable runnable ) { _tryRunning( runnable ); }</span>
+<span class="fc" id="L5">    @Override public final void registerAppEvent( Runnable runnable ) { _tryRunning( runnable, true ); }</span>
 
-<span class="nc" id="L7">    @Override public final void registerAndRunAppEventNow( Runnable runnable ) { _tryRunning( runnable ); }</span>
+<span class="nc" id="L7">    @Override public final void registerAndRunAppEventNow( Runnable runnable ) { _tryRunning( runnable, true ); }</span>
 
-<span class="fc" id="L9">    @Override public final void registerUIEvent( Runnable runnable ) { _tryRunning( runnable ); }</span>
+<span class="fc" id="L9">    @Override public final void registerUIEvent( Runnable runnable ) { _tryRunning( runnable, false ); }</span>
 
-<span class="nc" id="L11">    @Override public final void registerAndRunUIEventNow( Runnable runnable ) { _tryRunning( runnable ); }</span>
+<span class="nc" id="L11">    @Override public final void registerAndRunUIEventNow( Runnable runnable ) { _tryRunning( runnable, false ); }</span>
 
-    abstract protected void _tryRunning( Runnable runnable );
+    abstract protected void _tryRunning( Runnable runnable, boolean expectedToBeInvokedFromUIThread );
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

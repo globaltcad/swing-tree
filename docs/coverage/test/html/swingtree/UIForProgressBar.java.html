@@ -149,12 +149,12 @@ public final class UIForProgressBar&lt;P extends JProgressBar&gt; extends UIForA
     }
 
     private void _setProgress( P thisComponent, double progress ) {
-<span class="nc" id="L152">        int min = thisComponent.getMinimum();</span>
-<span class="nc" id="L153">        int max = thisComponent.getMaximum();</span>
-<span class="nc" id="L154">        int range = max - min;</span>
-<span class="nc" id="L155">        int value = (int) ( min + range * progress );</span>
-<span class="nc" id="L156">        thisComponent.setValue( value );</span>
-<span class="nc" id="L157">    }</span>
+<span class="fc" id="L152">        int min = thisComponent.getMinimum();</span>
+<span class="fc" id="L153">        int max = thisComponent.getMaximum();</span>
+<span class="fc" id="L154">        int range = max - min;</span>
+<span class="fc" id="L155">        int value = (int) ( min + range * progress );</span>
+<span class="fc" id="L156">        thisComponent.setValue( value );</span>
+<span class="fc" id="L157">    }</span>
 
     /**
      * @param val An integer property used to dynamically update the value of the progress bar.
@@ -179,15 +179,15 @@ public final class UIForProgressBar&lt;P extends JProgressBar&gt; extends UIForA
      * @throws IllegalArgumentException if {@code value} is {@code null}.
      */
     public final UIForProgressBar&lt;P&gt; withProgress( Val&lt;Double&gt; progress ) {
-<span class="nc" id="L182">        NullUtil.nullArgCheck( progress, &quot;progress&quot;, Val.class );</span>
-<span class="nc" id="L183">        NullUtil.nullPropertyCheck(progress, &quot;progress&quot;, &quot;Null is not a valid progress for the progress property of a progress bar.&quot;);</span>
-<span class="nc" id="L184">        return _withOnShow( progress, (thisComponent,v) -&gt; {</span>
+<span class="fc" id="L182">        NullUtil.nullArgCheck( progress, &quot;progress&quot;, Val.class );</span>
+<span class="fc" id="L183">        NullUtil.nullPropertyCheck(progress, &quot;progress&quot;, &quot;Null is not a valid progress for the progress property of a progress bar.&quot;);</span>
+<span class="fc" id="L184">        return _withOnShow( progress, (thisComponent,v) -&gt; {</span>
 <span class="nc" id="L185">                    _setProgress( thisComponent, v );</span>
 <span class="nc" id="L186">               })</span>
-<span class="nc" id="L187">               ._with( thisComponent -&gt; {</span>
-<span class="nc" id="L188">                   _setProgress( thisComponent, progress.orElseThrow() );</span>
-<span class="nc" id="L189">               })</span>
-<span class="nc" id="L190">               ._this();</span>
+<span class="fc" id="L187">               ._with( thisComponent -&gt; {</span>
+<span class="fc" id="L188">                   _setProgress( thisComponent, progress.orElseThrow() );</span>
+<span class="fc" id="L189">               })</span>
+<span class="fc" id="L190">               ._this();</span>
     }
 
 }

@@ -25,8 +25,8 @@ final class Cached&lt;T&gt; implements CacheProducerAndValidator&lt;T&gt;
 <span class="fc" id="L25">    }</span>
 
     final Cached&lt;T&gt; validate( ComponentConf oldState, ComponentConf newState, ComponentAreas context ) {
-<span class="pc bpc" id="L28" title="1 of 4 branches missed.">        if ( _value != null &amp;&amp; !_producerAndValidator.leadsToSameValue(oldState, newState, context) ) {</span>
-<span class="nc" id="L29">            return new Cached&lt;&gt;(_producerAndValidator);</span>
+<span class="fc bfc" id="L28" title="All 4 branches covered.">        if ( _value != null &amp;&amp; !_producerAndValidator.leadsToSameValue(oldState, newState, context) ) {</span>
+<span class="fc" id="L29">            return new Cached&lt;&gt;(_producerAndValidator);</span>
         }
 <span class="fc" id="L31">        return this;</span>
     }

@@ -84,8 +84,8 @@ import java.util.Objects;
      * @param b The blue value (0.0-1.0).
      * @return The new color.
      */
-    public static Color color( float r, float g, float b ) {
-<span class="nc" id="L88">        return new Color(r, g, b);</span>
+    public static Color color( double r, double g, double b ) {
+<span class="fc" id="L88">        return new Color((float) r, (float) g, (float) b);</span>
     }
 
     /**
@@ -98,8 +98,8 @@ import java.util.Objects;
      * @param a The alpha value (0.0-1.0).
      * @return The new color.
      */
-    public static Color color( float r, float g, float b, float a ) {
-<span class="nc" id="L102">        return new Color(r, g, b, a);</span>
+    public static Color color( double r, double g, double b, double a ) {
+<span class="fc" id="L102">        return new Color((float) r, (float) g, (float) b, (float) a);</span>
     }
 
     /**

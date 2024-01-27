@@ -5066,10 +5066,10 @@ public final class UI extends UINamespaceUtilities
      * @return A builder instance for the provided {@link JProgressBar}, which enables fluent method chaining.
      */
     public static UIForProgressBar&lt;JProgressBar&gt; progressBar( Align align, Val&lt;Double&gt; progress ) {
-<span class="nc" id="L5069">        NullUtil.nullArgCheck(align, &quot;align&quot;, Align.class);</span>
-<span class="nc" id="L5070">        NullUtil.nullArgCheck(progress, &quot;progress&quot;, Val.class);</span>
-<span class="nc" id="L5071">        NullUtil.nullPropertyCheck(progress, &quot;progress&quot;, &quot;Null is not a valid value for the progress property of a progress bar.&quot;);</span>
-<span class="nc" id="L5072">        return progressBar().withOrientation(align).withMin(0).withMax(100).withProgress(progress);</span>
+<span class="fc" id="L5069">        NullUtil.nullArgCheck(align, &quot;align&quot;, Align.class);</span>
+<span class="fc" id="L5070">        NullUtil.nullArgCheck(progress, &quot;progress&quot;, Val.class);</span>
+<span class="fc" id="L5071">        NullUtil.nullPropertyCheck(progress, &quot;progress&quot;, &quot;Null is not a valid value for the progress property of a progress bar.&quot;);</span>
+<span class="fc" id="L5072">        return progressBar().withOrientation(align).withMin(0).withMax(100).withProgress(progress);</span>
     }
 
     /**

@@ -35,8 +35,8 @@ final class ComponentAreas
 
                 @Override
                 public boolean leadsToSameValue(ComponentConf oldState, ComponentConf newState, ComponentAreas currentAreas) {
-<span class="pc bpc" id="L38" title="1 of 2 branches missed.">                    if ( !currentAreas._interiorArea.leadsToSameValue(oldState, newState, currentAreas) )</span>
-<span class="nc" id="L39">                        return false;</span>
+<span class="fc bfc" id="L38" title="All 2 branches covered.">                    if ( !currentAreas._interiorArea.leadsToSameValue(oldState, newState, currentAreas) )</span>
+<span class="fc" id="L39">                        return false;</span>
 
 <span class="pc bpc" id="L41" title="1 of 2 branches missed.">                    if ( !currentAreas._bodyArea.leadsToSameValue(oldState, newState, currentAreas) )</span>
 <span class="nc" id="L42">                        return false;</span>
@@ -67,7 +67,7 @@ final class ComponentAreas
 <span class="fc" id="L67">                    Outline oldWidths = oldState.style().border().widths();</span>
 <span class="fc" id="L68">                    Outline newWidths = newState.style().border().widths();</span>
 <span class="fc" id="L69">                    boolean sameWidths = oldWidths.equals(newWidths);</span>
-<span class="pc bpc" id="L70" title="2 of 4 branches missed.">                    return sameWidths &amp;&amp; _testWouldLeadToSameBaseArea(oldState, newState);</span>
+<span class="pc bpc" id="L70" title="1 of 4 branches missed.">                    return sameWidths &amp;&amp; _testWouldLeadToSameBaseArea(oldState, newState);</span>
                 }
             }),
 <span class="fc" id="L73">            new Cached&lt;&gt;(new CacheProducerAndValidator&lt;Area&gt;(){</span>
@@ -138,13 +138,13 @@ final class ComponentAreas
 <span class="fc" id="L138">        Cached&lt;Area&gt; newExterior   = _exteriorArea.validate(oldConf, newConf, this);</span>
 <span class="fc" id="L139">        Cached&lt;Area&gt; newBody       = _bodyArea.validate(oldConf, newConf, this);</span>
         
-<span class="pc bpc" id="L141" title="4 of 8 branches missed.">        if (</span>
+<span class="pc bpc" id="L141" title="3 of 8 branches missed.">        if (</span>
             newBorderArea != _borderArea ||
             newInterior   != _interiorArea ||
             newExterior   != _exteriorArea ||
             newBody       != _bodyArea
         ) {
-<span class="nc" id="L147">            return new ComponentAreas(newBorderArea, newInterior, newExterior, newBody);</span>
+<span class="fc" id="L147">            return new ComponentAreas(newBorderArea, newInterior, newExterior, newBody);</span>
         }
 <span class="fc" id="L149">        return this;</span>
     }
@@ -364,8 +364,8 @@ final class ComponentAreas
 <span class="fc" id="L364">        Outline     margin1  = state1.style().margin();</span>
 <span class="fc" id="L365">        Outline     margin2  = state2.style().margin();</span>
 <span class="fc" id="L366">        boolean sameMargin  = margin1.equals(margin2);</span>
-<span class="pc bpc" id="L367" title="1 of 2 branches missed.">        if ( !sameMargin )</span>
-<span class="nc" id="L368">            return false;</span>
+<span class="fc bfc" id="L367" title="All 2 branches covered.">        if ( !sameMargin )</span>
+<span class="fc" id="L368">            return false;</span>
 <span class="fc" id="L369">        BorderStyle border1  = state1.style().border();</span>
 <span class="fc" id="L370">        BorderStyle border2  = state2.style().border();</span>
 <span class="fc" id="L371">        boolean sameBorder  = border1.equals(border2);</span>

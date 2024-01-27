@@ -7,9 +7,9 @@ import swingtree.UI;
 {
 <span class="fc" id="L8">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(AWTEventProcessor.class);</span>
 
-    @Override protected void _tryRunning( Runnable runnable ) {
+    @Override protected void _tryRunning( Runnable runnable, boolean expectedToBeInvokedFromUIThread ) {
         try {
-<span class="fc" id="L12">            _checkIfThreadIsCorrect();</span>
+<span class="fc" id="L12">            _checkIfThreadIsCorrect( expectedToBeInvokedFromUIThread );</span>
 <span class="fc" id="L13">        } catch (Exception e) {</span>
             // If a user wants better logging, they can do it through SLF4J or implement their own EventProcessor.
 <span class="fc" id="L15">            log.error(&quot;The current thread is not the UI thread!&quot;, e);</span>
@@ -22,8 +22,8 @@ import swingtree.UI;
 <span class="fc" id="L22">        }</span>
 <span class="fc" id="L23">    }</span>
 
-    private void _checkIfThreadIsCorrect() {
-<span class="fc bfc" id="L26" title="All 2 branches covered.">        if ( !UI.thisIsUIThread() ) {</span>
+    private void _checkIfThreadIsCorrect( boolean expectedToBeInvokedFromUIThread ) {
+<span class="fc bfc" id="L26" title="All 4 branches covered.">        if ( !UI.thisIsUIThread() &amp;&amp; expectedToBeInvokedFromUIThread ) {</span>
 <span class="fc" id="L27">            Thread currentThread = Thread.currentThread();</span>
 <span class="fc" id="L28">            String threadName    = currentThread.getName();</span>
 <span class="fc" id="L29">            String problem       = &quot;Encountered the wrong thread instead of the expected UI thread!&quot;;</span>

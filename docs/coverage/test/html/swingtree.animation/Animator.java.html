@@ -169,7 +169,7 @@ public class Animator
      * @param animation The animation that should be executed.
      */
     public void goWithOffset( long offset, TimeUnit unit, Animation animation ) {
-<span class="pc bpc" id="L172" title="1 of 2 branches missed.">        RunCondition shouldRun = Optional.ofNullable(_condition).orElse( state -&gt; state.repeats() == 0 );</span>
+<span class="fc bfc" id="L172" title="All 2 branches covered.">        RunCondition shouldRun = Optional.ofNullable(_condition).orElse( state -&gt; state.repeats() == 0 );</span>
 <span class="fc" id="L173">        AnimationRunner.add( new ComponentAnimator(</span>
                 _component,
 <span class="fc" id="L175">                LifeSpan.startingNowWithOffset(offset, unit, Objects.requireNonNull(_lifeTime)),</span>

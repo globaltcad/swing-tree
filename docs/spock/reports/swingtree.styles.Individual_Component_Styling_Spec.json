@@ -4,7 +4,7 @@
   "narrative":"This specification demonstrates how the style API can be used to style\n    individual components declaratively.\n    You may access it on any SwingTree builder by passing a `Styler` lambda\n    to the `withStyle` method.\n    A `Styler` lambda applies style rules to a component\n    by receiving a `ComponentStyleDelegate` and returning\n    an updated version with the desired style rules applied.\n\n    Here a typical example of how to style a button\n    using the style API:\n    ```java\n        UI.button(\"Click Me!\")\n        .withStyle( it -> it\n            .borderColor(Color.CYAN)\n            .borderWidthAt(Edge.BOTTOM, 3)\n            .borderRadius(10)\n        )\n    ```\n\n    Here the `it` variable is the `ComponentStyleDelegate` which exposes\n    an extensive API for configuring how a particular component\n    looks and behaves.",
   "subjects":[],
   "statistics":{
-    "runs":"33",
+    "runs":"34",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -13,6 +13,39 @@
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
+    {
+      "id":"An animated style transition transforms your style configuration based on its animation state.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The style API allows you to define animated style transitions.\n            This is a very powerful feature that allows your fancy UI styles\n            to be animated from one state to another. \n\n            In this example we are using a boolean based `Var` to control the transition.\n            It is passed to the `withTransitionalStyle` method of the UI builder API\n            where you can define a transitional `Styler` lambda that does not only\n            receive the `ComponentStyleDelegate` but also the `AnimationState` of the transition.\n            The `AnimationState` allows you to access the \"progress\" of the transition,\n            which is a value between 0 and 1 that indicates how far the transition has progressed.\n\n            You can use this progress value to interpolate between two states.\n            If the progress has reached 1 in this concrete example, then the component\n            will look like this:\n\n            <img src=\"https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/components/transitioning-label.png\" alt=\"components/transitioning-label.png\" style=\"max-width: 50%;\" />\n\n            If the progress is 0 on the other hand, the comoponent will look\n            like a regular label. Take a look:\n\n            <img src=\"https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/components/pre-transitioning-label.png\" alt=\"components/pre-transitioning-label.png\" style=\"max-width: 50%;\" />\n\n            Except for the text it is almost completely unrecongnizable from the previous image, \n            right? :)\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first define a flag property that we will use to control the transition:","code":["var isOn = Var.of(false)","var THICKNESS = 5"]},
+
+        {"kind":"and","text":"Then we create label with a lot of style properties...","code":["var ui =","        UI.label(\"I am transitioning into...\")","        .withSize(300, 160)","        .withTransitionalStyle(isOn, LifeTime.of(0, TimeUnit.MILLISECONDS), (state, it) -> it","            .padding(26 - (THICKNESS/2) * state.progress())","            .margin(42 - (THICKNESS/2) * state.progress())","            .borderRadius( 38 * state.progress() )","            .border(THICKNESS * state.progress(), UI.color(0.5,1,1))","            .backgroundColor(200/255d, 210/255d, 220/255d, state.progress() )","            .shadow(\"bright\", s -> s","                .color(0.5, 1, 1, state.progress())","                .offset(-6)","            )","            .shadow(\"dark\", s -> s","                .color(0, 0, 0, state.progress()/4)","                .offset(+6)","            )","            .shadowBlurRadius(10 * state.progress())","            .shadowSpreadRadius(-5 * state.progress())","            .shadowIsInset(false)","            .gradient(UI.Layer.BORDER, \"border-grad\", grad -> grad","                .transition(UI.Transition.TOP_LEFT_TO_BOTTOM_RIGHT)","                .colors(","                    UI.color(0.75, 0.5, 1, state.progress()),","                    UI.color(0.5, 1, 1, 0)","                )","                .clipTo(UI.ComponentArea.BORDER)","            )","            .gradient(UI.Layer.BACKGROUND, \"content-grad\", grad -> grad","                .type(UI.GradientType.RADIAL)","                .boundary(UI.ComponentBoundary.BORDER_TO_INTERIOR)","                .offset(","                    it.component().getWidth()*state.progress(),","                    it.component().getHeight()*state.progress()","                )","                .colors(","                    UI.color(0.35, 0.71, 1, state.progress()),","                    UI.color(0.5, 1, 1, 0)","                )","                .clipTo(UI.ComponentArea.BODY)","                .size(100+250*state.progress())","            )","        )"]},
+
+        {"kind":"and","text":"We build the underlying Swing component:","code":["var textField = ui.get(JLabel)"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true:","code":["isOn.set(true)"]},
+
+        {"kind":"and","text":"We wait for the transition to complete:","code":["Thread.sleep(50)","UI.sync()"]},
+
+        {"kind":"and","text":"We render the label into a BufferedImage:","code":["var image = Utility.renderSingleComponent(textField)"]},
+
+        {"kind":"then","text":"\n            The label has transitioned into a fancy looking component.\n        ","code":["Utility.similarityBetween(image, \"components/transitioning-label.png\", 99.5) > 99.5"]},
+
+        {"kind":"when","text":"\n            We now want to go back to the initial state, so we set the `isOn` flag to false again...\n            This will case the animation state progress to go back to 0, \n            which simplifies the style configuration.\n        ","code":["isOn.set(false)"]},
+
+        {"kind":"and","text":"...again we wait for the transition to complete...","code":["Thread.sleep(50)","UI.sync()"]},
+
+        {"kind":"and","text":"We render the label into a BufferedImage again:","code":["image = Utility.renderSingleComponent(textField)"]},
+
+        {"kind":"then","text":"\n            Now the label has transitioned back to its initial state.\n            An it looks as expected.\n        ","code":["Utility.similarityBetween(image, \"components/pre-transitioning-label.png\", 99.5) > 99.5"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
     {
       "id":"Styling components is based on a functional styler lambda.",
       "result":"PASS",
@@ -234,7 +267,7 @@
       "tags":{},"see":[],"extraInfo":["\n            It is really easy to create a `JPanel` (or any other component for that matter) \n            with custom border gradients. <br>\n            All you need to do is pass the style configuration to the style API.\n            SwingTree will dynamically install or uninstall a custom border on a component\n            depending on whether or not there are any style configurations defined for the component. \n            <img src=\"https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/components/shaded-border-JPanel.png\" alt=\"components/shaded-border-JPanel.png\" style=\"max-width: 50%;\" />\n\n            Note that in this example we make the border extra wide so \n            that you can see the difference.\n\n            Also note that we add a little shadow just to make it look a little bit more fancy.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We pass the following style rules to the style API f a `JPanel`:","code":["var ui =","        UI.panel()","        .withStyle( it -> it","            .size(205, 205)","            .backgroundColor(new Color(40,180,240))","            .foundationColor(new Color(200,200,240))","            .padding(30)","            .margin(22)","            .border(15, Color.CYAN)","            .gradient(UI.Layer.BORDER, \"border gradient\", s -> s","                .transition(UI.Transition.BOTTOM_RIGHT_TO_TOP_LEFT)","                .colors(Color.YELLOW, new Color(255,255,255,0))","                .area(UI.ComponentArea.BORDER)","            )","            .shadowColor(new Color(0,0,0,100))","            .shadowSpreadRadius(1)","            .shadowBlurRadius(2)","            .font(new Font(\"Arial\", Font.BOLD, 20))","        )"]},
+        {"kind":"given","text":"We pass the following style rules to the style API f a `JPanel`:","code":["var ui =","        UI.panel()","        .withStyle( it -> it","            .size(205, 205)","            .backgroundColor(new Color(40,180,240))","            .foundationColor(new Color(200,200,240))","            .padding(30)","            .margin(22)","            .border(15, Color.CYAN)","            .gradient(UI.Layer.BORDER, \"border gradient\", s -> s","                .transition(UI.Transition.BOTTOM_RIGHT_TO_TOP_LEFT)","                .colors(Color.YELLOW, new Color(255,255,255,0))","                .clipTo(UI.ComponentArea.BORDER)","            )","            .shadowColor(new Color(0,0,0,100))","            .shadowSpreadRadius(1)","            .shadowBlurRadius(2)","            .font(new Font(\"Arial\", Font.BOLD, 20))","        )"]},
 
         {"kind":"when","text":"We then render the panel into a BufferedImage...","code":["var image = Utility.renderSingleComponent(ui.getComponent())"]},
 
