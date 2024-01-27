@@ -27,7 +27,7 @@ final class LenientAWTEventProcessor extends BasicSingleThreadedEventProcessor
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(LenientAWTEventProcessor.class);
 
-    @Override protected void _tryRunning( Runnable runnable ) {
+    @Override protected void _tryRunning( Runnable runnable, boolean expectedToBeInvokedFromUIThread ) {
         try {
             runnable.run();
         } catch (Exception e) {

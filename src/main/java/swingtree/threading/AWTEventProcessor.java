@@ -7,9 +7,9 @@ final class AWTEventProcessor extends BasicSingleThreadedEventProcessor
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(AWTEventProcessor.class);
 
-    @Override protected void _tryRunning( Runnable runnable ) {
+    @Override protected void _tryRunning( Runnable runnable, boolean expectedToBeInvokedFromUIThread ) {
         try {
-            _checkIfThreadIsCorrect();
+            _checkIfThreadIsCorrect( expectedToBeInvokedFromUIThread );
         } catch (Exception e) {
             // If a user wants better logging, they can do it through SLF4J or implement their own EventProcessor.
             log.error("The current thread is not the UI thread!", e);
@@ -22,8 +22,8 @@ final class AWTEventProcessor extends BasicSingleThreadedEventProcessor
         }
     }
 
-    private void _checkIfThreadIsCorrect() {
-        if ( !UI.thisIsUIThread() ) {
+    private void _checkIfThreadIsCorrect( boolean expectedToBeInvokedFromUIThread ) {
+        if ( !UI.thisIsUIThread() && expectedToBeInvokedFromUIThread ) {
             Thread currentThread = Thread.currentThread();
             String threadName    = currentThread.getName();
             String problem       = "Encountered the wrong thread instead of the expected UI thread!";
