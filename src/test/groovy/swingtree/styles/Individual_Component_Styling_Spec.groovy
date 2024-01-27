@@ -3,12 +3,15 @@ package swingtree.styles
 import com.formdev.flatlaf.FlatLightLaf
 import examples.stylish.MyTabsView
 import examples.stylish.MyTabsViewModel
+import groovyjarjarantlr4.v4.runtime.atn.Transition
 import net.miginfocom.swing.MigLayout
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
+import sprouts.Var
 import swingtree.SwingTree
 import swingtree.UI
+import swingtree.animation.LifeTime
 import swingtree.components.JBox
 import swingtree.threading.EventProcessor
 import utility.SwingTreeTestConfigurator
@@ -19,6 +22,7 @@ import javax.swing.border.TitledBorder
 import java.awt.*
 import java.awt.geom.RoundRectangle2D
 import java.awt.image.BufferedImage
+import java.util.concurrent.TimeUnit
 
 @Title("Styling Components")
 @Narrative('''
@@ -68,6 +72,118 @@ class Individual_Component_Styling_Spec extends Specification
     def cleanup() {
         UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
     }
+
+
+    def 'An animated style transition transforms your style configuration based on its animation state.'()
+    {
+        reportInfo """
+            The style API allows you to define animated style transitions.
+            This is a very powerful feature that allows your fancy UI styles
+            to be animated from one state to another. 
+            
+            In this example we are using a boolean based `Var` to control the transition.
+            It is passed to the `withTransitionalStyle` method of the UI builder API
+            where you can define a transitional `Styler` lambda that does not only
+            receive the `ComponentStyleDelegate` but also the `AnimationState` of the transition.
+            The `AnimationState` allows you to access the "progress" of the transition,
+            which is a value between 0 and 1 that indicates how far the transition has progressed.
+
+            You can use this progress value to interpolate between two states.
+            If the progress has reached 1 in this concrete example, then the component
+            will look like this:
+
+            ${Utility.linkSnapshot('components/transitioning-label.png')}
+
+            If the progress is 0 on the other hand, the comoponent will look
+            like a regular label. Take a look:
+    
+            ${Utility.linkSnapshot('components/pre-transitioning-label.png')}
+
+            Except for the text it is almost completely unrecongnizable from the previous image, 
+            right? :)
+        """
+        given : 'We first define a flag property that we will use to control the transition:'
+            var isOn = Var.of(false)
+            var THICKNESS = 5
+        and : 'Then we create label with a lot of style properties...'
+            var ui =
+                    UI.label("I am transitioning into...")
+                    .withSize(300, 160)
+                    .withTransitionalStyle(isOn, LifeTime.of(0, TimeUnit.MILLISECONDS), (state, it) -> it
+                        .padding(26 - (THICKNESS/2) * state.progress())
+                        .margin(42 - (THICKNESS/2) * state.progress())
+                        .borderRadius( 38 * state.progress() )
+                        .border(THICKNESS * state.progress(), UI.color(0.5,1,1))
+                        .backgroundColor(200/255d, 210/255d, 220/255d, state.progress() )
+                        .shadow("bright", s -> s
+                            .color(0.5, 1, 1, state.progress())
+                            .offset(-6)
+                        )
+                        .shadow("dark", s -> s
+                            .color(0, 0, 0, state.progress()/4)
+                            .offset(+6)
+                        )
+                        .shadowBlurRadius(10 * state.progress())
+                        .shadowSpreadRadius(-5 * state.progress())
+                        .shadowIsInset(false)
+                        .gradient(UI.Layer.BORDER, "border-grad", grad -> grad
+                            .transition(UI.Transition.TOP_LEFT_TO_BOTTOM_RIGHT)
+                            .colors(
+                                UI.color(0.75, 0.5, 1, state.progress()),
+                                UI.color(0.5, 1, 1, 0)
+                            )
+                            .clipTo(UI.ComponentArea.BORDER)
+                        )
+                        .gradient(UI.Layer.BACKGROUND, "content-grad", grad -> grad
+                            .type(UI.GradientType.RADIAL)
+                            .boundary(UI.ComponentBoundary.BORDER_TO_INTERIOR)
+                            .offset(
+                                it.component().getWidth()*state.progress(),
+                                it.component().getHeight()*state.progress()
+                            )
+                            .colors(
+                                UI.color(0.35, 0.71, 1, state.progress()),
+                                UI.color(0.5, 1, 1, 0)
+                            )
+                            .clipTo(UI.ComponentArea.BODY)
+                            .size(100+250*state.progress())
+                        )
+                    )
+
+        and : 'We build the underlying Swing component:'
+            var textField = ui.get(JLabel)
+
+        when : 'We set the `isOn` flag to true:'
+            isOn.set(true)
+        and : 'We wait for the transition to complete:'
+            Thread.sleep(50)
+            UI.sync()
+        and : 'We render the label into a BufferedImage:'
+            var image = Utility.renderSingleComponent(textField)
+
+        then : """
+            The label has transitioned into a fancy looking component.
+        """
+            Utility.similarityBetween(image, "components/transitioning-label.png", 99.5) > 99.5
+
+        when : """
+            We now want to go back to the initial state, so we set the `isOn` flag to false again...
+            This will case the animation state progress to go back to 0, 
+            which simplifies the style configuration.
+        """
+            isOn.set(false)
+        and : '...again we wait for the transition to complete...'
+            Thread.sleep(50)
+            UI.sync()
+        and : 'We render the label into a BufferedImage again:'
+            image = Utility.renderSingleComponent(textField)
+        then : """
+            Now the label has transitioned back to its initial state.
+            An it looks as expected.
+        """
+            Utility.similarityBetween(image, "components/pre-transitioning-label.png", 99.5) > 99.5
+    }
+
 
     def 'Styling components is based on a functional styler lambda.'( int uiScale )
     {
