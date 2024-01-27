@@ -30,17 +30,26 @@ public final class AnimationState
     private static AnimationState _of( LifeSpan lifeSpan, Stride stride, ActionEvent event, long now, boolean isEnd ) {
         long duration = lifeSpan.lifeTime().getDurationIn(TimeUnit.MILLISECONDS);
         long howLongIsRunning = Math.max(0, now - lifeSpan.getStartTimeIn(TimeUnit.MILLISECONDS));
-        long howLongCurrentLoop = howLongIsRunning % duration;
+        long howLongCurrentLoop = duration <= 0 ? 0 : howLongIsRunning % duration;
         if ( isEnd && howLongCurrentLoop == 0 )
             howLongCurrentLoop = duration;
-        long howManyLoops       = howLongIsRunning / duration;
+        long howManyLoops      = duration <= 0 ? 0 : howLongIsRunning / duration;
         double progress;
+        if ( duration <= 0 ) {
+            howManyLoops = ( isEnd ? 1 : 0 );
+        }
         switch ( stride ) {
             case PROGRESSIVE:
-                progress = howLongCurrentLoop / (double) duration;
+                if ( duration <= 0 )
+                    progress     = ( isEnd ? 1 : 0 );
+                else
+                    progress = howLongCurrentLoop / (double) duration;
                 break;
             case REGRESSIVE:
-                progress = 1 - howLongCurrentLoop / (double) duration;
+                if ( duration <= 0 )
+                    progress     = ( isEnd ? 0 : 1 );
+                else
+                    progress = 1 - howLongCurrentLoop / (double) duration;
                 break;
             default:
                 progress = howLongCurrentLoop / (double) duration;

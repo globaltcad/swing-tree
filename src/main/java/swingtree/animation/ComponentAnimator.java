@@ -57,7 +57,8 @@ class ComponentAnimator
         boolean shouldContinue = false;
 
         try {
-            shouldContinue = _condition.shouldContinue(state);
+            long duration = state.lifeSpan().lifeTime().getDurationIn(TimeUnit.MILLISECONDS);
+            shouldContinue = _condition.shouldContinue(state) && duration > 0;
         } catch ( Exception e ) {
             log.warn("An exception occurred while checking if an animation should continue!", e);
             /*
