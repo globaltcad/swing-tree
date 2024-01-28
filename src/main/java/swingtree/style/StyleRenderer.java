@@ -697,6 +697,15 @@ final class StyleRenderer
             } else {
                 float focusX = startCornerX + gradient.focus().x();
                 float focusY = startCornerY + gradient.focus().y();
+
+                if ( gradient.rotation() % 360f != 0 ) {
+                    Point2D.Float p1 = new Point2D.Float(startCornerX, startCornerY);
+                    Point2D.Float p2 = new Point2D.Float(focusX, focusY);
+                    p2 = _rotatePoint(p1, p2, gradient.rotation());
+                    focusX = p2.x;
+                    focusY = p2.y;
+                }
+
                 g2d.setPaint(new RadialGradientPaint(
                         new Point2D.Float(startCornerX, startCornerY),
                         radius,
@@ -741,6 +750,14 @@ final class StyleRenderer
                 vectorY = (vectorY / vectorLength2);
                 gradientEndX = gradientStartX + vectorX * size;
                 gradientEndY = gradientStartY + vectorY * size;
+            }
+
+            if ( gradient.rotation() % 360f != 0 ) {
+                Point2D.Float p1 = new Point2D.Float(gradientStartX, gradientStartY);
+                Point2D.Float p2 = new Point2D.Float(gradientEndX, gradientEndY);
+                p2 = _rotatePoint(p1, p2, gradient.rotation());
+                gradientEndX = p2.x;
+                gradientEndY = p2.y;
             }
 
             if ( colors.length == 2 )
@@ -845,6 +862,15 @@ final class StyleRenderer
                 } else {
                     float focusX = corner1X + gradient.focus().x();
                     float focusY = corner1Y + gradient.focus().y();
+
+                    if ( gradient.rotation() % 360f != 0 ) {
+                        Point2D.Float p1 = new Point2D.Float(corner1X, corner1Y);
+                        Point2D.Float p2 = new Point2D.Float(focusX, focusY);
+                        p2 = _rotatePoint(p1, p2, gradient.rotation());
+                        focusX = p2.x;
+                        focusY = p2.y;
+                    }
+
                     g2d.setPaint(new RadialGradientPaint(
                                 new Point2D.Float(corner1X, corner1Y),
                                 radius,
@@ -861,6 +887,14 @@ final class StyleRenderer
             float[] fractions = new float[colors.length];
             for ( int i = 0; i < colors.length; i++ )
                 fractions[i] = (float) i / (float) (colors.length - 1);
+
+            if ( gradient.rotation() % 360f != 0 ) {
+                Point2D.Float p1 = new Point2D.Float(corner1X, corner1Y);
+                Point2D.Float p2 = new Point2D.Float(corner2X, corner2Y);
+                p2 = _rotatePoint(p1, p2, gradient.rotation());
+                corner2X = p2.x;
+                corner2Y = p2.y;
+            }
 
             if ( gradient.type() == UI.GradientType.LINEAR ) {
                 g2d.setPaint(
@@ -883,6 +917,15 @@ final class StyleRenderer
                 } else {
                     float focusX = corner1X + gradient.focus().x();
                     float focusY = corner1Y + gradient.focus().y();
+
+                    if ( gradient.rotation() % 360f != 0 ) {
+                        Point2D.Float p1 = new Point2D.Float(corner1X, corner1Y);
+                        Point2D.Float p2 = new Point2D.Float(focusX, focusY);
+                        p2 = _rotatePoint(p1, p2, gradient.rotation());
+                        focusX = p2.x;
+                        focusY = p2.y;
+                    }
+
                     g2d.setPaint(new RadialGradientPaint(
                                 new Point2D.Float(corner1X, corner1Y),
                                 radius,
@@ -897,6 +940,34 @@ final class StyleRenderer
                 throw new IllegalArgumentException("Invalid gradient type: " + gradient.type());
         }
         g2d.fill(specificArea);
+    }
+
+    /**
+     *  Takes two points {@code p1} and {@code p2} as well as
+     *  a {@code rotation} float representing degrees and returns
+     *  the point {@code p2} rotated around {@code p1} by {@code rotation} degrees.
+     */
+    private static Point2D.Float _rotatePoint(
+        final Point2D.Float p1,
+        final Point2D.Float p2,
+        final float         rotation
+    ) {
+        if ( rotation == 0f )
+            return p2;
+        else if ( rotation % 360f == 0f )
+            return p2;
+
+        final double angle = Math.toRadians(rotation);
+        final double sin   = Math.sin(angle);
+        final double cos   = Math.cos(angle);
+
+        final double x = p2.x - p1.x;
+        final double y = p2.y - p1.y;
+
+        final double newX = x * cos - y * sin;
+        final double newY = x * sin + y * cos;
+
+        return new Point2D.Float((float) (p1.x + newX), (float) (p1.y + newY));
     }
 
     private static void _renderImage(
