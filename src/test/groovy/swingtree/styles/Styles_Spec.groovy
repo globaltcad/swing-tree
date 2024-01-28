@@ -351,7 +351,9 @@ class Styles_Spec extends Specification
                                                         "java.awt.Color[r=0,g=0,b=255]], " +
                                                         "offset=Offset[x=0, y=0], " +
                                                         "size=-1.0, " +
-                                                        "area=BODY" +
+                                                        "area=BODY, " +
+                                                        "boundary=EXTERIOR_TO_BORDER, " +
+                                                        "focus=Offset[x=0, y=0]" +
                                                     "]" +
                                                 "], " +
                                             "images=ImageStyle[NONE]" +
