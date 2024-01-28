@@ -423,7 +423,8 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
                _size       == that._size             &&
                _area       == that._area             &&
                _boundary   == that._boundary         &&
-               _focus      == that._focus;
+               _focus      == that._focus            &&
+               _rotation   == that._rotation;
     }
 
     @Override
