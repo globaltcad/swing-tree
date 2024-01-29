@@ -3956,8 +3956,8 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         return this.add(attr.toString(), viewables, viewSupplier);
     }
 
-    protected <M> void _addViewableProps( Vals<M> viewables, String attr, ViewSupplier<M> viewSupplier, C thisComponent ) {
-        _onShow( viewables, thisComponent, (c, delegate) -> {
+    protected <M> void _addViewableProps( Vals<M> models, String attr, ViewSupplier<M> viewSupplier, C thisComponent ) {
+        _onShow( models, thisComponent, (c, delegate) -> {
             // we simply redo all the components.
             switch ( delegate.changeType() ) {
                 case SET: _updateComponentAt(delegate.index(), delegate.newValue().get(), viewSupplier, attr, c); break;
@@ -3989,7 +3989,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                         new Throwable()
                     );
         });
-        viewables.forEach( v -> {
+        models.forEach( v -> {
             _addBuildersTo( thisComponent, new UIForAnything[]{viewSupplier.createViewFor(v)} );
         });
     }
@@ -3998,7 +3998,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         C thisComponent, Val<M> viewable, String attr, ViewSupplier<M> viewSupplier
     ) {
         // First we remember the index of the component which will be provided by the viewable dynamically.
-        final int index = _numberOfChildrenOf( thisComponent );
+        final int index = thisComponent.getComponentCount();
         // Then we add the component provided by the viewable to the list of children.
         if ( attr == null ) {
             if ( viewable.isPresent() )
@@ -4013,10 +4013,6 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         }
         // Finally we add a listener to the viewable which will update the component when the viewable changes.
         _onShow( viewable, thisComponent, (c,v) -> _updateComponentAt(index, v, viewSupplier, attr, c) );
-    }
-
-    private final int _numberOfChildrenOf( C c ) {
-        return  ( c instanceof Container ? ( (Container) c ).getComponentCount() : 0 );
     }
 
     private <M> void _updateComponentAt(
@@ -4048,12 +4044,41 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         thisComponent.repaint();
     }
 
-    private void _removeComponentAt( int index, C thisComponent ) {
-        // We remove the old component.
-        thisComponent.remove(thisComponent.getComponent(index));
-        // We update the layout.
-        thisComponent.revalidate();
-        thisComponent.repaint();
+    private void _removeComponentAt( int index, C thisComponent )
+    {
+        if ( index < 0 ) {
+            log.error(
+                "Cannot remove sub-component of '"+thisComponent+"' \n" +
+                "at index '"+index+"' because the index is negative.",
+                new Throwable()
+            );
+        } else {
+            int numberOfExistingComponents = thisComponent.getComponentCount();
+            if (index >= numberOfExistingComponents) {
+                log.error(
+                    "Cannot remove sub-component of '" + thisComponent + "' \n" +
+                    "at index '" + index + "' because there it currently only has '" + numberOfExistingComponents + "' " +
+                    "sub-components instead of at least '" + (index + 1) + "' sub-components.",
+                    new Throwable()
+                );
+            } else {
+                // We get the component at the specified index.
+                Component component = thisComponent.getComponent(index);
+                if ( component == null ) {
+                    log.error(
+                        "Cannot remove sub-component of '" + thisComponent + "' \n" +
+                        "at index '" + index + "' because there is no component at that index.",
+                        new Throwable()
+                    );
+                } else {
+                    // We remove the component.
+                    thisComponent.remove(component);
+                    // We update the layout.
+                    thisComponent.revalidate();
+                    thisComponent.repaint();
+                }
+            }
+        }
     }
 
     private void _clearComponentsOf( C thisComponent ) {
