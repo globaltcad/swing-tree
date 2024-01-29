@@ -25,6 +25,7 @@ final class StyleInstaller<C extends JComponent>
     private DynamicLaF _dynamicLaF = DynamicLaF.none(); // Not null, but can be DynamicLaF.none().
     private Color      _initialBackgroundColor = null;
     private Boolean    _initialIsOpaque = null;
+    private Boolean    _initialContentAreaFilled = null;
 
 
     void installCustomBorderBasedStyleAndAnimationRenderer(C owner ) {
@@ -75,6 +76,9 @@ final class StyleInstaller<C extends JComponent>
 
         if ( _initialIsOpaque == null )
             _initialIsOpaque = owner.isOpaque();
+
+        if ( owner instanceof AbstractButton && _initialContentAreaFilled == null )
+            _initialContentAreaFilled = ((AbstractButton) owner).isContentAreaFilled();
 
         final List<UI.ComponentArea> opaqueGradientAreas = newStyle.gradientCoveredAreas();
         final boolean hasBackgroundGradients             = newStyle.hasVisibleGradientsOnLayer(UI.Layer.BACKGROUND);
@@ -168,51 +172,57 @@ final class StyleInstaller<C extends JComponent>
                 if ( !owner.isOpaque() )
                     owner.setOpaque(true);
 
-                boolean requiresBackgroundPainting = hasBackgroundGradients;
-                requiresBackgroundPainting = requiresBackgroundPainting || hasBackgroundShadows;
-                requiresBackgroundPainting = requiresBackgroundPainting || hasBackgroundPainters;
-                requiresBackgroundPainting = requiresBackgroundPainting || hasBackgroundImages;
-                requiresBackgroundPainting = requiresBackgroundPainting || hasBorderRadius;
-                requiresBackgroundPainting = requiresBackgroundPainting || hasMargin;
+                boolean customBackgroundFucksUpComponent = ( owner instanceof JTabbedPane );
 
-                if ( requiresBackgroundPainting && !Objects.equals( owner.getBackground(), UI.COLOR_UNDEFINED ) )
-                    owner.setBackground(UI.COLOR_UNDEFINED);
-                /*
-                    The above line looks very strange, but it is very important!
-                    To understand what is going on here, you have to know that when a component is
-                    flagged to be opaque, then every Swing look and feel will, before painting
-                    anything else, first fill out the entire background of the component with
-                    the background color of the component.
+                if ( !customBackgroundFucksUpComponent ) {
+                    boolean requiresBackgroundPainting = hasBackgroundGradients;
+                    requiresBackgroundPainting = requiresBackgroundPainting || hasBackgroundShadows;
+                    requiresBackgroundPainting = requiresBackgroundPainting || hasBackgroundPainters;
+                    requiresBackgroundPainting = requiresBackgroundPainting || hasBackgroundImages;
+                    requiresBackgroundPainting = requiresBackgroundPainting || hasBorderRadius;
+                    requiresBackgroundPainting = requiresBackgroundPainting || hasMargin;
 
-                    Now this is a problem when you have the background layer of your SwingTree component
-                    styled using various things like gradients, shadows, images, etc.
+                    if ( requiresBackgroundPainting && !Objects.equals( owner.getBackground(), UI.COLOR_UNDEFINED ) )
+                        owner.setBackground(UI.COLOR_UNDEFINED);
+                    /*
+                        The above line looks very strange, but it is very important!
+                        To understand what is going on here, you have to know that when a component is
+                        flagged to be opaque, then every Swing look and feel will, before painting
+                        anything else, first fill out the entire background of the component with
+                        the background color of the component.
 
-                    We could simply set the opaque flag to false, but then we would lose the
-                    performance benefits of having the opaque flag set to true (avoiding the
-                    traversal repaint of parent components, and their parent components, etc).
+                        Now this is a problem when you have the background layer of your SwingTree component
+                        styled using various things like gradients, shadows, images, etc.
 
-                    In this branch we have already determined that the style configuration
-                    leads to an opaque component, and we also have the ability to render
-                    the background of the component ourselves due to the
-                    component being a SwingTree component (it has the paint method overridden).
+                        We could simply set the opaque flag to false, but then we would lose the
+                        performance benefits of having the opaque flag set to true (avoiding the
+                        traversal repaint of parent components, and their parent components, etc).
 
-                    So what we do here is we set the background color of the component to
-                    UI.COLOR_UNDEFINED, which is a special color that is actually fully transparent.
+                        In this branch we have already determined that the style configuration
+                        leads to an opaque component, and we also have the ability to render
+                        the background of the component ourselves due to the
+                        component being a SwingTree component (it has the paint method overridden).
 
-                    This way, when the Swing look and feel tries to paint the background of the
-                    component, it will actually paint nothing, and we can do the background
-                    painting ourselves in the paint method of the component.
-                */
+                        So what we do here is we set the background color of the component to
+                        UI.COLOR_UNDEFINED, which is a special color that is actually fully transparent.
+
+                        This way, when the Swing look and feel tries to paint the background of the
+                        component, it will actually paint nothing, and we can do the background
+                        painting ourselves in the paint method of the component.
+                    */
+                }
             }
         }
 
-        if ( owner instanceof AbstractButton) {
-            AbstractButton b = (AbstractButton) owner;
+        if ( _dynamicLaF.overrideWasNeeded() ) {
+            if ( owner instanceof AbstractButton) {
+                AbstractButton b = (AbstractButton) owner;
 
-            boolean shouldButtonBeFilled = !hasBackgroundGradients && !hasBackgroundPainters;
+                boolean shouldButtonBeFilled = !hasBackgroundGradients && !hasBackgroundPainters;
 
-            if ( shouldButtonBeFilled != b.isContentAreaFilled() )
-                b.setContentAreaFilled( shouldButtonBeFilled );
+                if ( shouldButtonBeFilled != b.isContentAreaFilled() )
+                    b.setContentAreaFilled( shouldButtonBeFilled );
+            }
         }
 
         _applyGenericBaseStyleTo(owner, newStyle);

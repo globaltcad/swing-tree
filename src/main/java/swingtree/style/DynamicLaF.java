@@ -18,20 +18,25 @@ import java.util.function.Supplier;
  */
 final class DynamicLaF
 {
-    private static final DynamicLaF _NONE = new DynamicLaF(null, null);
+    private static final DynamicLaF _NONE = new DynamicLaF(null, null, false);
 
     static DynamicLaF none() { return _NONE; }
 
 
     private final ComponentUI _styleLaF;  // Nullable
     private final ComponentUI _formerLaF; // Nullable
+    private final boolean     _overrideWasNeeded;
 
 
-    private DynamicLaF( ComponentUI styleLaF, ComponentUI formerLaF ) {
-        _styleLaF  = styleLaF;
-        _formerLaF = formerLaF;
+    private DynamicLaF( ComponentUI styleLaF, ComponentUI formerLaF, boolean overrideWasNeeded ) {
+        _styleLaF          = styleLaF;
+        _formerLaF         = formerLaF;
+        _overrideWasNeeded = overrideWasNeeded;
     }
 
+    boolean overrideWasNeeded() {
+        return _overrideWasNeeded;
+    }
 
     boolean customLookAndFeelIsInstalled() {
         return _styleLaF != null;
@@ -88,7 +93,10 @@ final class DynamicLaF
             if ( customLookAndFeelIsInstalled() )
                 result = _uninstallCustomLaF(owner);
 
-        return result;
+        if ( _overrideWasNeeded != weNeedToOverrideLaF )
+            return new DynamicLaF(result._styleLaF, result._formerLaF, weNeedToOverrideLaF);
+        else
+            return result;
     }
 
 
@@ -169,7 +177,7 @@ final class DynamicLaF
         if ( !success && owner.isOpaque() )
             owner.setOpaque(false);
 
-        return new DynamicLaF(formerLaF, styleLaF);
+        return new DynamicLaF(formerLaF, styleLaF, true);
     }
 
     DynamicLaF _uninstallCustomLaF( JComponent _owner )
@@ -208,7 +216,7 @@ final class DynamicLaF
                 styleLaF = null;
             }
         }
-        return new DynamicLaF(styleLaF, _formerLaF);
+        return new DynamicLaF(styleLaF, _formerLaF, false);
     }
 
     void installCustomUIFor(JComponent owner )
