@@ -654,9 +654,7 @@ final class StyleRenderer
         float diagonalCenterX = (diagonalCorner1X + diagonalCorner2X) / 2;
         float diagonalCenterY = (diagonalCorner1Y + diagonalCorner2Y) / 2;
 
-        float[] fractions = new float[colors.length];
-        for ( int i = 0; i < colors.length; i++ )
-            fractions[i] = (float) i / (float) (colors.length - 1);
+        float[] fractions = _fractionsFrom(gradient);
 
         if ( gradient.type() == UI.GradientType.RADIAL ) {
             float startCornerX, startCornerY;
@@ -760,7 +758,7 @@ final class StyleRenderer
                 gradientEndY = p2.y;
             }
 
-            if ( colors.length == 2 )
+            if ( colors.length == 2 && gradient.fractions().length == 0 )
                 g2d.setPaint(new GradientPaint(
                                 gradientStartX, gradientStartY, colors[0],
                                 gradientEndX, gradientEndY, colors[1]
@@ -842,7 +840,7 @@ final class StyleRenderer
                                     );
         }
 
-        if ( colors.length == 2 ) {
+        if ( colors.length == 2 && gradient.fractions().length == 0 ) {
             if ( gradient.type() == UI.GradientType.LINEAR ) {
                 g2d.setPaint(
                         new GradientPaint(
@@ -884,9 +882,7 @@ final class StyleRenderer
             else
                 throw new IllegalArgumentException("Invalid gradient type: " + gradient.type());
         } else {
-            float[] fractions = new float[colors.length];
-            for ( int i = 0; i < colors.length; i++ )
-                fractions[i] = (float) i / (float) (colors.length - 1);
+            float[] fractions = _fractionsFrom(gradient);
 
             if ( gradient.rotation() % 360f != 0 ) {
                 Point2D.Float p1 = new Point2D.Float(corner1X, corner1Y);
@@ -940,6 +936,38 @@ final class StyleRenderer
                 throw new IllegalArgumentException("Invalid gradient type: " + gradient.type());
         }
         g2d.fill(specificArea);
+    }
+
+    private static float[] _fractionsFrom(GradientStyle style ) {
+        Color[] colors = style.colors();
+        float[] fractions = style.fractions();
+
+        if ( fractions.length == colors.length )
+            return fractions;
+        else if ( fractions.length > colors.length ) {
+            float[] newFractions = new float[colors.length];
+            System.arraycopy(fractions, 0, newFractions, 0, colors.length);
+            return newFractions;
+        } else {
+            if ( fractions.length == 0 ) {
+                fractions = new float[colors.length];
+                for ( int i = 0; i < colors.length; i++ )
+                    fractions[i] = (float) i / (float) (colors.length - 1);
+                return fractions;
+            } else {
+                float[] newFractions = new float[colors.length];
+                System.arraycopy(fractions, 0, newFractions, 0, fractions.length);
+                /*
+                    Now simply complete th missing fractions by linear interpolation
+                    between the last fraction and 1f
+                */
+                float lastFraction = fractions[fractions.length - 1];
+                float step = (1f - lastFraction) / (colors.length - fractions.length);
+                for ( int i = fractions.length; i < colors.length; i++ )
+                    newFractions[i] = lastFraction + step * (i - fractions.length + 1);
+                return newFractions;
+            }
+        }
     }
 
     /**

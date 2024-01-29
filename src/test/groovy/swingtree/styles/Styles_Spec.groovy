@@ -354,7 +354,8 @@ class Styles_Spec extends Specification
                                                         "area=BODY, " +
                                                         "boundary=EXTERIOR_TO_BORDER, " +
                                                         "focus=Offset[x=0, y=0], " +
-                                                        "rotation=0" +
+                                                        "rotation=0.0, " +
+                                                        "fractions=[]" +
                                                     "]" +
                                                 "], " +
                                             "images=ImageStyle[NONE]" +
