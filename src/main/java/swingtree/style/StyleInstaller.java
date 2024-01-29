@@ -24,6 +24,7 @@ final class StyleInstaller<C extends JComponent>
 {
     private DynamicLaF _dynamicLaF = DynamicLaF.none(); // Not null, but can be DynamicLaF.none().
     private Color      _initialBackgroundColor = null;
+    private Color      _currentColor = null;
     private Boolean    _initialIsOpaque = null;
     private Boolean    _initialContentAreaFilled = null;
 
@@ -99,6 +100,12 @@ final class StyleInstaller<C extends JComponent>
             }
         }
 
+        boolean backgroundWasSetSomewhereElse = false;
+        if ( _currentColor != null ) {
+            if ( _currentColor != owner.getBackground() )
+                backgroundWasSetSomewhereElse = true;
+        }
+
         if ( hasBackground ) {
             boolean backgroundIsAlreadySet = Objects.equals( owner.getBackground(), newStyle.base().backgroundColor().get() );
             if ( !backgroundIsAlreadySet || newStyle.base().backgroundColor().get() == UI.COLOR_UNDEFINED )
@@ -172,9 +179,11 @@ final class StyleInstaller<C extends JComponent>
                 if ( !owner.isOpaque() )
                     owner.setOpaque(true);
 
-                boolean customBackgroundFucksUpComponent = ( owner instanceof JTabbedPane );
+                boolean transparentBackgroundIsProblematic =
+                                                    ( owner instanceof JTabbedPane ) ||
+                                                    backgroundWasSetSomewhereElse;
 
-                if ( !customBackgroundFucksUpComponent ) {
+                if ( !transparentBackgroundIsProblematic ) {
                     boolean requiresBackgroundPainting = hasBackgroundGradients;
                     requiresBackgroundPainting = requiresBackgroundPainting || hasBackgroundShadows;
                     requiresBackgroundPainting = requiresBackgroundPainting || hasBackgroundPainters;
@@ -235,6 +244,9 @@ final class StyleInstaller<C extends JComponent>
 
         if ( newStyle.hasPaintersOnLayer(UI.Layer.FOREGROUND) )
             _makeAllChildrenTransparent(owner);
+
+        if ( !backgroundWasSetSomewhereElse )
+            _currentColor = owner.getBackground();
 
         return newStyle;
     }
