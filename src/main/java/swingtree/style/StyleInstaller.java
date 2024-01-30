@@ -167,8 +167,13 @@ final class StyleInstaller<C extends JComponent>
         else
         {
             boolean isSwingTreeComponent = _isNestedClassInUINamespace(owner);
+            Color backgroundColor = owner.getBackground();
+            boolean backgroundIsFullyTransparent = backgroundColor == null || backgroundColor.getAlpha() == 0;
 
-            if ( !isSwingTreeComponent && !backgroundWasSetSomewhereElse ) {
+            if ( !isSwingTreeComponent && !backgroundIsFullyTransparent ) {
+                if ( owner.isOpaque() != _initialIsOpaque )
+                    owner.setOpaque(_initialIsOpaque);
+            } else if ( !isSwingTreeComponent && !backgroundWasSetSomewhereElse ) {
                 if ( owner.isOpaque() )
                     owner.setOpaque(false);
             } else {
