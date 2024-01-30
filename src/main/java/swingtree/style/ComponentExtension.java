@@ -464,8 +464,13 @@ public final class ComponentExtension<C extends JComponent>
             border.recalculateInsets(newStyle);
         }
 
-        if ( _styleEngine.getComponentConf().style().equals(newStyle) && !force )
-            return newStyle;
+        if ( !force ) {
+            // We check if it makes sense to apply the new style:
+            boolean componentBackgroundWasMutated = _styleInstaller.backgroundWasChangedSomewhereElse(_owner);
+
+            if ( !componentBackgroundWasMutated && _styleEngine.getComponentConf().style().equals(newStyle) )
+                return newStyle;
+        }
 
         return _styleInstaller.applyStyleToComponentState(_owner, newStyle, _styleSource, _styleEngine);
     }

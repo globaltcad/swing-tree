@@ -100,11 +100,7 @@ final class StyleInstaller<C extends JComponent>
             }
         }
 
-        boolean backgroundWasSetSomewhereElse = false;
-        if ( _currentColor != null ) {
-            if ( _currentColor != owner.getBackground() )
-                backgroundWasSetSomewhereElse = true;
-        }
+        boolean backgroundWasSetSomewhereElse = backgroundWasChangedSomewhereElse( owner );
 
         if ( hasBackground ) {
             boolean backgroundIsAlreadySet = Objects.equals( owner.getBackground(), newStyle.base().backgroundColor().get() );
@@ -172,7 +168,7 @@ final class StyleInstaller<C extends JComponent>
         {
             boolean isSwingTreeComponent = _isNestedClassInUINamespace(owner);
 
-            if ( !isSwingTreeComponent ) {
+            if ( !isSwingTreeComponent && !backgroundWasSetSomewhereElse ) {
                 if ( owner.isOpaque() )
                     owner.setOpaque(false);
             } else {
@@ -249,6 +245,14 @@ final class StyleInstaller<C extends JComponent>
             _currentColor = owner.getBackground();
 
         return newStyle;
+    }
+
+    boolean backgroundWasChangedSomewhereElse( C owner ) {
+        if ( _currentColor != null ) {
+            if ( _currentColor != owner.getBackground() )
+                return true;
+        }
+        return false;
     }
 
     private void _applyGenericBaseStyleTo( final C owner, final Style styleConf )
