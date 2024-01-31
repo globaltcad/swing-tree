@@ -586,14 +586,16 @@ final class StyleRenderer
         GradientStyle gradient,
         Area          specificArea
     ) {
-        Color[] colors = gradient.colors();
-        UI.Transition type = gradient.transition();
-        Dimension dimensions = componentSize.toDimension();
-        float width  = dimensions.width  - ( margin.right().orElse(0f)  + margin.left().orElse(0f) );
-        float height = dimensions.height - ( margin.bottom().orElse(0f) + margin.top().orElse(0f) );
-        float realX  = margin.left().orElse(0f) + gradient.offset().x();
-        float realY  = margin.top().orElse(0f)  + gradient.offset().y();
-        float size   = gradient.size();
+        UI.Transition       type       = gradient.transition();
+        final UI.Cycle      cycle      = gradient.cycle();
+        final Color[]       colors     = gradient.colors();
+        final Dimension     dimensions = componentSize.toDimension();
+
+        final float width  = dimensions.width  - ( margin.right().orElse(0f)  + margin.left().orElse(0f) );
+        final float height = dimensions.height - ( margin.bottom().orElse(0f) + margin.top().orElse(0f) );
+        final float realX  = margin.left().orElse(0f) + gradient.offset().x();
+        final float realY  = margin.top().orElse(0f)  + gradient.offset().y();
+        final float size   = gradient.size();
 
         float corner1X;
         float corner1Y;
@@ -648,8 +650,10 @@ final class StyleRenderer
             diagonalCorner2X = realX;
             diagonalCorner2Y = realY;
         }
-        else
-            throw new IllegalArgumentException("Invalid gradient alignment: " + type);
+        else {
+            log.warn("Invalid transition type: " + type, new Throwable());
+            return;
+        }
 
         float diagonalCenterX = (diagonalCorner1X + diagonalCorner2X) / 2;
         float diagonalCenterY = (diagonalCorner1Y + diagonalCorner2Y) / 2;
@@ -682,7 +686,7 @@ final class StyleRenderer
                             radius,
                             fractions,
                             colors,
-                            MultipleGradientPaint.CycleMethod.NO_CYCLE
+                            _cycleMethodFrom(cycle)
                         ));
                 else
                     g2d.setPaint(new RadialGradientPaint(
@@ -690,7 +694,7 @@ final class StyleRenderer
                             radius,
                             fractions,
                             colors,
-                            MultipleGradientPaint.CycleMethod.NO_CYCLE
+                            _cycleMethodFrom(cycle)
                         ));
             } else {
                 float focusX = startCornerX + gradient.focus().x();
@@ -710,7 +714,7 @@ final class StyleRenderer
                         new Point2D.Float(focusX, focusY),
                         fractions,
                         colors,
-                        MultipleGradientPaint.CycleMethod.NO_CYCLE
+                        _cycleMethodFrom(cycle)
                     ));
             }
         } else if ( gradient.type() == UI.GradientType.LINEAR ) {
@@ -758,7 +762,7 @@ final class StyleRenderer
                 gradientEndY = p2.y;
             }
 
-            if ( colors.length == 2 && gradient.fractions().length == 0 )
+            if ( colors.length == 2 && gradient.fractions().length == 0 && cycle == UI.Cycle.NONE )
                 g2d.setPaint(new GradientPaint(
                                 gradientStartX, gradientStartY, colors[0],
                                 gradientEndX, gradientEndY, colors[1]
@@ -768,7 +772,7 @@ final class StyleRenderer
                                 gradientStartX, gradientStartY,
                                 gradientEndX, gradientEndY,
                                 fractions, colors,
-                                MultipleGradientPaint.CycleMethod.NO_CYCLE
+                                _cycleMethodFrom(cycle)
                             ));
         }
         g2d.fill(specificArea);
@@ -781,14 +785,16 @@ final class StyleRenderer
         GradientStyle gradient,
         Area          specificArea
     ) {
-        UI.Transition type = gradient.transition();
-        Color[] colors = gradient.colors();
-        Dimension dimensions = componentSize.toDimension();
-        float width  = dimensions.width  - ( margin.right().orElse(0f)  + margin.left().orElse(0f) );
-        float height = dimensions.height - ( margin.bottom().orElse(0f) + margin.top().orElse(0f)  );
-        float realX  = margin.left().orElse(0f) + gradient.offset().x();
-        float realY  = margin.top().orElse(0f)  + gradient.offset().y();
-        float size   = gradient.size();
+        final UI.Transition type       = gradient.transition();
+        final UI.Cycle      cycle      = gradient.cycle();
+        final Color[]       colors     = gradient.colors();
+        final Dimension     dimensions = componentSize.toDimension();
+
+        final float width  = dimensions.width  - ( margin.right().orElse(0f)  + margin.left().orElse(0f) );
+        final float height = dimensions.height - ( margin.bottom().orElse(0f) + margin.top().orElse(0f)  );
+        final float realX  = margin.left().orElse(0f) + gradient.offset().x();
+        final float realY  = margin.top().orElse(0f)  + gradient.offset().y();
+        final float size   = gradient.size();
 
         float corner1X;
         float corner1Y;
@@ -816,7 +822,10 @@ final class StyleRenderer
             corner2X = realX;
             corner2Y = realY;
         }
-        else throw new IllegalArgumentException("Unknown gradient alignment: " + type);
+        else {
+            log.warn("Unknown gradient type: " + type, new Throwable());
+            return;
+        }
 
         if ( gradient.type() == UI.GradientType.LINEAR ) {
             if ( size >= 0 ) {
@@ -840,47 +849,48 @@ final class StyleRenderer
                                     );
         }
 
-        if ( colors.length == 2 && gradient.fractions().length == 0 ) {
-            if ( gradient.type() == UI.GradientType.LINEAR ) {
-                g2d.setPaint(
-                        new GradientPaint(
-                                corner1X, corner1Y, colors[0],
-                                corner2X, corner2Y, colors[1]
-                        )
-                    );
-            } else if ( gradient.type() == UI.GradientType.RADIAL ) {
-                if ( gradient.focus().equals(Offset.none()) ) {
-                    g2d.setPaint(new RadialGradientPaint(
-                                new Point2D.Float(corner1X, corner1Y),
-                                radius,
-                                new float[] {0f, 1f},
-                                colors,
-                                MultipleGradientPaint.CycleMethod.NO_CYCLE
-                            ));
-                } else {
-                    float focusX = corner1X + gradient.focus().x();
-                    float focusY = corner1Y + gradient.focus().y();
+        if (
+            colors.length == 2 &&
+            gradient.fractions().length == 0 &&
+            gradient.type() == UI.GradientType.LINEAR &&
+            cycle == UI.Cycle.NONE
+        ) {
+            g2d.setPaint(
+                    new GradientPaint(
+                        corner1X, corner1Y, colors[0],
+                        corner2X, corner2Y, colors[1]
+                    )
+                );
+        } else if ( colors.length == 2 && gradient.fractions().length == 0 && gradient.type() == UI.GradientType.RADIAL ) {
+            if ( gradient.focus().equals(Offset.none()) ) {
+                g2d.setPaint(new RadialGradientPaint(
+                            new Point2D.Float(corner1X, corner1Y),
+                            radius,
+                            new float[] {0f, 1f},
+                            colors,
+                            _cycleMethodFrom(cycle)
+                        ));
+            } else {
+                float focusX = corner1X + gradient.focus().x();
+                float focusY = corner1Y + gradient.focus().y();
 
-                    if ( gradient.rotation() % 360f != 0 ) {
-                        Point2D.Float p1 = new Point2D.Float(corner1X, corner1Y);
-                        Point2D.Float p2 = new Point2D.Float(focusX, focusY);
-                        p2 = _rotatePoint(p1, p2, gradient.rotation());
-                        focusX = p2.x;
-                        focusY = p2.y;
-                    }
-
-                    g2d.setPaint(new RadialGradientPaint(
-                                new Point2D.Float(corner1X, corner1Y),
-                                radius,
-                                new Point2D.Float(focusX, focusY),
-                                new float[] {0f, 1f},
-                                colors,
-                                MultipleGradientPaint.CycleMethod.NO_CYCLE
-                            ));
+                if ( gradient.rotation() % 360f != 0 ) {
+                    Point2D.Float p1 = new Point2D.Float(corner1X, corner1Y);
+                    Point2D.Float p2 = new Point2D.Float(focusX, focusY);
+                    p2 = _rotatePoint(p1, p2, gradient.rotation());
+                    focusX = p2.x;
+                    focusY = p2.y;
                 }
+
+                g2d.setPaint(new RadialGradientPaint(
+                            new Point2D.Float(corner1X, corner1Y),
+                            radius,
+                            new Point2D.Float(focusX, focusY),
+                            new float[] {0f, 1f},
+                            colors,
+                            _cycleMethodFrom(cycle)
+                        ));
             }
-            else
-                throw new IllegalArgumentException("Invalid gradient type: " + gradient.type());
         } else {
             float[] fractions = _fractionsFrom(gradient);
 
@@ -898,7 +908,7 @@ final class StyleRenderer
                             corner1X, corner1Y,
                             corner2X, corner2Y,
                             fractions, colors,
-                            MultipleGradientPaint.CycleMethod.NO_CYCLE
+                            _cycleMethodFrom(cycle)
                         )
                 );
             } else if ( gradient.type() == UI.GradientType.RADIAL ) {
@@ -908,7 +918,7 @@ final class StyleRenderer
                                 radius,
                                 fractions,
                                 colors,
-                                MultipleGradientPaint.CycleMethod.NO_CYCLE
+                                _cycleMethodFrom(cycle)
                             ));
                 } else {
                     float focusX = corner1X + gradient.focus().x();
@@ -928,14 +938,27 @@ final class StyleRenderer
                                 new Point2D.Float(focusX, focusY),
                                 fractions,
                                 colors,
-                                MultipleGradientPaint.CycleMethod.NO_CYCLE
+                                _cycleMethodFrom(cycle)
                             ));
                 }
             }
-            else
-                throw new IllegalArgumentException("Invalid gradient type: " + gradient.type());
+            else {
+                log.warn("Unknown gradient type: " + gradient.type(), new Throwable());
+                return;
+            }
         }
         g2d.fill(specificArea);
+    }
+
+    private static MultipleGradientPaint.CycleMethod _cycleMethodFrom(UI.Cycle cycle) {
+        switch (cycle) {
+            case NONE:     return MultipleGradientPaint.CycleMethod.NO_CYCLE;
+            case REPEAT:   return MultipleGradientPaint.CycleMethod.REPEAT;
+            case REFLECT:  return MultipleGradientPaint.CycleMethod.REFLECT;
+            default:
+                log.warn("Unknown cycle method: " + cycle, new Throwable());
+                return MultipleGradientPaint.CycleMethod.NO_CYCLE;
+        }
     }
 
     private static float[] _fractionsFrom(GradientStyle style ) {
