@@ -2181,7 +2181,7 @@ class Individual_Component_Styling_Spec extends Specification
                                 .minWidth(85)
                                 .margin(5).padding(5)
                                 .borderRadius(6)
-                                .backgroundColor(Color.GRAY)
+                                .backgroundColor("magenta")
                             )
                         )
                     )
