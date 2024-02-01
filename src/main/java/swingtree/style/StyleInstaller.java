@@ -212,14 +212,13 @@ final class StyleInstaller<C extends JComponent>
                 if (
                     requiresBackgroundPainting &&
                     ( !hasBackground || !customLookAndFeelInstalled ) &&
-                    !(!backgroundWasSetSomewhereElse && backgroundIsActuallyBackground)
+                    ( backgroundWasSetSomewhereElse || !backgroundIsActuallyBackground )
                 ) {
                     if ( owner.isOpaque() )
                         owner.setOpaque(false);
                 }
                 else
                 {
-
                     requiresBackgroundPainting = requiresBackgroundPainting || (hasBackground && isSwingTreeComponent);
 
                     if ( requiresBackgroundPainting && !Objects.equals( owner.getBackground(), UI.COLOR_UNDEFINED ) )
