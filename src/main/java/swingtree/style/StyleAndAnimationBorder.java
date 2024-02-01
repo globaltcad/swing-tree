@@ -38,17 +38,20 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
     private final Insets _fullPaddingInsets = new Insets(0, 0, 0, 0);
 
 
-    StyleAndAnimationBorder( ComponentExtension<C> compExt, Border formerBorder ) {
+    StyleAndAnimationBorder( ComponentExtension<C> compExt, Border formerBorder, Style style ) {
         _compExt       = compExt;
         _insets        = null;
         _formerBorder  = formerBorder;
         if ( _compExt.getOwner() instanceof AbstractButton ) {
             AbstractButton b = (AbstractButton) _compExt.getOwner();
             _borderWasNotPainted = !b.isBorderPainted();
-            b.setBorderPainted(true);
+            if ( !b.isBorderPainted() )
+                b.setBorderPainted(true);
         }
         else
             _borderWasNotPainted = false;
+
+        recalculateInsets(style);
     }
 
     Border getFormerBorder() { return _formerBorder; }

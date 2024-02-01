@@ -29,10 +29,10 @@ final class StyleInstaller<C extends JComponent>
     private Boolean    _initialContentAreaFilled = null;
 
 
-    void installCustomBorderBasedStyleAndAnimationRenderer(C owner ) {
+    void installCustomBorderBasedStyleAndAnimationRenderer( C owner, Style style ) {
         Border currentBorder = owner.getBorder();
         if ( !(currentBorder instanceof StyleAndAnimationBorder) )
-            owner.setBorder(new StyleAndAnimationBorder<>(ComponentExtension.from(owner), currentBorder));
+            owner.setBorder(new StyleAndAnimationBorder<>(ComponentExtension.from(owner), currentBorder, style));
     }
 
     void installCustomUIFor( C owner ) {
@@ -130,7 +130,7 @@ final class StyleInstaller<C extends JComponent>
         }
 
         if ( !onlyDimensionalityIsStyled ) {
-            installCustomBorderBasedStyleAndAnimationRenderer(owner);
+            installCustomBorderBasedStyleAndAnimationRenderer(owner, newStyle);
             if ( !styleCanBeRenderedThroughBorder )
                 _dynamicLaF = _dynamicLaF.establishLookAndFeelFor(newStyle, owner);
         }
