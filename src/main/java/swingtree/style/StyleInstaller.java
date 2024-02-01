@@ -204,9 +204,6 @@ final class StyleInstaller<C extends JComponent>
                 if ( owner.isOpaque() )
                     owner.setOpaque(false);
             } else {
-                if ( !owner.isOpaque() )
-                    owner.setOpaque(true);
-
                 boolean customLookAndFeelInstalled = _dynamicLaF.customLookAndFeelIsInstalled();
 
                 if (
@@ -219,6 +216,9 @@ final class StyleInstaller<C extends JComponent>
                 }
                 else
                 {
+                    if ( !owner.isOpaque() )
+                        owner.setOpaque(true);
+
                     requiresBackgroundPainting = requiresBackgroundPainting || (hasBackground && isSwingTreeComponent);
 
                     if ( requiresBackgroundPainting && !Objects.equals( owner.getBackground(), UI.COLOR_UNDEFINED ) )
