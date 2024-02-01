@@ -128,7 +128,7 @@ class SvgIcon_Spec extends Specification
             var declaration = IconDeclaration.of("/img/my-name-is-so-idiotic-that-it-will-probably-never-exist.svg")
             var icon = UI.findSvgIcon(declaration)
         expect : 'The icon is not loaded.'
-            icon.isEmpty()
+            !icon.isPresent()
     }
 
     def 'The `UI.findIcon(IconDeclaration)` method will not fail when the icon is not found.'()
@@ -146,6 +146,6 @@ class SvgIcon_Spec extends Specification
             var declaration = IconDeclaration.of("/img/my-name-is-so-idiotic-that-it-will-probably-never-exist.svg")
             var icon = UI.findIcon(declaration)
         expect : 'The icon is not loaded.'
-            icon.isEmpty()
+            !icon.isPresent()
     }
 }
