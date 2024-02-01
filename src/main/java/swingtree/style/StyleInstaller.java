@@ -182,18 +182,16 @@ final class StyleInstaller<C extends JComponent>
         }
 
 
-        Color backgroundColor = owner.getBackground();
-        boolean backgroundIsFullyTransparent = backgroundColor == null || backgroundColor.getAlpha() == 0;
-
-        boolean requiresBackgroundPainting = hasBackgroundGradients;
-        requiresBackgroundPainting = requiresBackgroundPainting || hasBackgroundShadows;
-        requiresBackgroundPainting = requiresBackgroundPainting || hasBackgroundPainters;
-        requiresBackgroundPainting = requiresBackgroundPainting || hasBackgroundImages;
-        requiresBackgroundPainting = requiresBackgroundPainting || hasBorderRadius;
-        requiresBackgroundPainting = requiresBackgroundPainting || hasMargin;
-
-        boolean customLookAndFeelInstalled = _dynamicLaF.customLookAndFeelIsInstalled();
-
+        final Color   backgroundColor = owner.getBackground();
+        final boolean backgroundIsFullyTransparent = backgroundColor == null || backgroundColor.getAlpha() == 0;
+        final boolean customLookAndFeelInstalled = _dynamicLaF.customLookAndFeelIsInstalled();
+        final boolean requiresBackgroundPainting =
+                                             hasBackgroundGradients ||
+                                             hasBackgroundShadows   ||
+                                             hasBackgroundPainters  ||
+                                             hasBackgroundImages    ||
+                                             hasBorderRadius        ||
+                                             hasMargin;
         if ( !canBeOpaque )
         {
             if ( owner.isOpaque() )
@@ -203,15 +201,18 @@ final class StyleInstaller<C extends JComponent>
         {
             if ( owner.isOpaque() != _initialIsOpaque )
                 owner.setOpaque(_initialIsOpaque);
-        } else if ( !isSwingTreeComponent && !backgroundWasSetSomewhereElse )
+        }
+        else if ( !isSwingTreeComponent && !backgroundWasSetSomewhereElse )
         {
             if ( owner.isOpaque() )
                 owner.setOpaque(false);
-        } else if (
+        }
+        else if (
             requiresBackgroundPainting &&
             ( !hasBackground || !customLookAndFeelInstalled ) &&
             ( backgroundWasSetSomewhereElse || !backgroundIsActuallyBackground )
-        ) {
+        )
+        {
             if ( owner.isOpaque() )
                 owner.setOpaque(false);
         }
@@ -220,9 +221,9 @@ final class StyleInstaller<C extends JComponent>
             if ( !owner.isOpaque() )
                 owner.setOpaque(true);
 
-            requiresBackgroundPainting = requiresBackgroundPainting || (hasBackground && isSwingTreeComponent);
+            boolean bypassLaFBackgroundPainting = requiresBackgroundPainting || (hasBackground && isSwingTreeComponent);
 
-            if ( requiresBackgroundPainting && !Objects.equals( owner.getBackground(), UI.COLOR_UNDEFINED ) )
+            if ( bypassLaFBackgroundPainting && !Objects.equals( owner.getBackground(), UI.COLOR_UNDEFINED ) )
                 backgroundSetter = ()->owner.setBackground(UI.COLOR_UNDEFINED);
             /*
                 The above line looks very strange, but it is very important!
