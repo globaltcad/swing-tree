@@ -43,8 +43,12 @@ final class StyleInstaller<C extends JComponent>
         return _dynamicLaF.customLookAndFeelIsInstalled();
     }
 
-    Style applyStyleToComponentState( C owner, Style newStyle, StyleSource<C> styleSource, StyleEngine styleEngine )
-    {
+    Style applyStyleToComponentState(
+        C owner,
+        Style newStyle,
+        StyleSource<C> styleSource,
+        StyleEngine styleEngine
+    ) {
         final Style.Report styleReport = newStyle.getReport();
         Runnable backgroundSetter = ()->{};
 
@@ -58,10 +62,14 @@ final class StyleInstaller<C extends JComponent>
                                                        (styleReport.noImages      || styleReport.allImagesAreBorderImages)
                                                    );
 
+        if ( !onlyDimensionalityIsStyled && !isNotStyled || styleEngine.hasAnimationPainters() ) {
+            installCustomBorderBasedStyleAndAnimationRenderer(owner, newStyle);
+        } else if ( styleSource.hasNoAnimationStylers() ) {
+            _uninstallCustomBorderBasedStyleAndAnimationRenderer(owner);
+        }
+
         if ( isNotStyled || onlyDimensionalityIsStyled ) {
             _dynamicLaF = _dynamicLaF._uninstallCustomLaF(owner);
-            if ( styleSource.hasNoAnimationStylers() && styleEngine.hasNoPainters() )
-                _uninstallCustomBorderBasedStyleAndAnimationRenderer(owner);
             if ( _initialBackgroundColor != null ) {
                 if ( !Objects.equals( owner.getBackground(), _initialBackgroundColor ) )
                     backgroundSetter = ()->owner.setBackground(_initialBackgroundColor);
@@ -258,7 +266,6 @@ final class StyleInstaller<C extends JComponent>
 
 
         if ( !onlyDimensionalityIsStyled ) {
-            installCustomBorderBasedStyleAndAnimationRenderer(owner, newStyle);
             if ( !styleCanBeRenderedThroughBorder )
                 _dynamicLaF = _dynamicLaF.establishLookAndFeelFor(newStyle, owner);
         }
@@ -571,10 +578,14 @@ final class StyleInstaller<C extends JComponent>
 
     private void _uninstallCustomBorderBasedStyleAndAnimationRenderer( C owner ) {
         Border currentBorder = owner.getBorder();
+        if ( currentBorder == null )
+            return;
+
         if ( currentBorder instanceof StyleAndAnimationBorder) {
             StyleAndAnimationBorder<?> border = (StyleAndAnimationBorder<?>) currentBorder;
             owner.setBorder(border.getFormerBorder());
         }
+
         if ( _initialBackgroundColor != null ) {
             if ( !Objects.equals( owner.getBackground(), _initialBackgroundColor ) )
                 owner.setBackground(_initialBackgroundColor);

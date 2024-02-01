@@ -234,6 +234,9 @@ public final class ComponentExtension<C extends JComponent>
     public void addAnimationPainter( AnimationState state, swingtree.api.Painter painter ) {
         _styleEngine = _styleEngine.withAnimationPainter(state.lifeSpan(), Objects.requireNonNull(painter));
         _styleInstaller.installCustomBorderBasedStyleAndAnimationRenderer(_owner, _styleEngine.getComponentConf().style());
+        /*
+            We need to install the custom SwingTree border which is used to render the animations!
+        */
     }
 
     /**
@@ -244,7 +247,6 @@ public final class ComponentExtension<C extends JComponent>
      */
     public void addAnimationStyler( AnimationState state, Styler<C> styler ) {
         _styleSource = _styleSource.withAnimationStyler(state.lifeSpan(), styler);
-        _styleInstaller.installCustomBorderBasedStyleAndAnimationRenderer(_owner, _styleEngine.getComponentConf().style());
     }
 
     /**

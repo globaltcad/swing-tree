@@ -52,6 +52,10 @@ final class StyleEngine
 
     ComponentConf getComponentConf() { return _componentConf; }
 
+    public boolean hasAnimationPainters() {
+        return _animationPainters.length > 0;
+    }
+
     StyleEngine withNewStyleAndComponent( Style newStyle, JComponent component ) {
         ComponentConf newConf = _componentConf.with(newStyle, component);
         for ( LayerCache layerCache : _layerCaches )
@@ -88,10 +92,6 @@ final class StyleEngine
 
         // Reset antialiasing to its previous state:
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
-    }
-
-    boolean hasNoPainters() {
-        return _animationPainters.length == 0;
     }
 
     void paintAnimations( Graphics2D g2d )
