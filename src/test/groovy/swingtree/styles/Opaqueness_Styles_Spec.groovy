@@ -8,7 +8,7 @@ import swingtree.UI
 import swingtree.animation.LifeTime
 
 import javax.swing.*
-import java.awt.Color
+import java.awt.*
 import java.util.concurrent.TimeUnit
 
 @Title("Opaque or not Opaque")
@@ -913,17 +913,17 @@ class Opaqueness_Styles_Spec extends Specification
             var ui =
                     UI.checkBox("Checked?")
                     .withTransitionalStyle(isOn, LifeTime.of(1, TimeUnit.MILLISECONDS), (state, it) -> it
-                        .margin(margin)
-                        .borderRadius(radius)
+                        .margin( state.progress() == 1 ? margin : 0 )
+                        .borderRadius( state.progress() == 1 ? radius : 0 )
                         .backgroundColor( state.progress() == 1 ? background : "" )
                         .foundationColor( state.progress() == 1 ? foundation : "" )
                         .borderColor( state.progress() == 1 ? borderColor : "" )
                         .borderWidth( state.progress() == 1 ? border : 0 )
-                        .gradient(g -> g.colors( state.progress() == 1 ? gradient : []))
+                        .gradient(g -> g.colors( state.progress() == 1 ? gradient : new String[0]))
                     )
 
         and : 'We build the underlying check box:'
-            var checkBox = ui.get(javax.swing.JCheckBox)
+            var checkBox = ui.get(JCheckBox)
 
         expect : """
             The component has to be opaque because it was not yet styled and it is also opaque by default.

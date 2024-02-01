@@ -185,7 +185,7 @@ class Individual_Component_Styling_Spec extends Specification
     }
 
 
-    def 'Styling components is based on a functional styler lambda.'( int uiScale )
+    def 'The functional style API changes the state of your components to reflect the desired looks.'( int uiScale )
     {
         reportInfo """
             Fun-Fact: 
