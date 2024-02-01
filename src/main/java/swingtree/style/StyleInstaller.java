@@ -207,7 +207,18 @@ final class StyleInstaller<C extends JComponent>
                 if ( !owner.isOpaque() )
                     owner.setOpaque(true);
 
-                if ( !backgroundWasSetSomewhereElse && backgroundIsActuallyBackground ) {
+                boolean customLookAndFeelInstalled = _dynamicLaF.customLookAndFeelIsInstalled();
+
+                if (
+                    requiresBackgroundPainting &&
+                    ( !hasBackground || !customLookAndFeelInstalled ) &&
+                    !(!backgroundWasSetSomewhereElse && backgroundIsActuallyBackground)
+                ) {
+                    if ( owner.isOpaque() )
+                        owner.setOpaque(false);
+                }
+                else
+                {
 
                     requiresBackgroundPainting = requiresBackgroundPainting || (hasBackground && isSwingTreeComponent);
 
@@ -239,13 +250,6 @@ final class StyleInstaller<C extends JComponent>
                         component, it will actually paint nothing, and we can do the background
                         painting ourselves in the paint method of the component.
                     */
-                }
-                else if ( !hasBackground || !_dynamicLaF.customLookAndFeelIsInstalled() )
-                {
-                    if ( requiresBackgroundPainting ) {
-                        if ( owner.isOpaque() )
-                            owner.setOpaque(false);
-                    }
                 }
             }
         }
