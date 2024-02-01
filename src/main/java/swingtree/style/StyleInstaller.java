@@ -68,6 +68,11 @@ final class StyleInstaller<C extends JComponent>
             _uninstallCustomBorderBasedStyleAndAnimationRenderer(owner);
         }
 
+        if ( !onlyDimensionalityIsStyled ) {
+            if ( !styleCanBeRenderedThroughBorder )
+                _dynamicLaF = _dynamicLaF.establishLookAndFeelFor(newStyle, owner);
+        }
+
         if ( isNotStyled || onlyDimensionalityIsStyled ) {
             _dynamicLaF = _dynamicLaF._uninstallCustomLaF(owner);
             if ( _initialBackgroundColor != null ) {
@@ -101,7 +106,8 @@ final class StyleInstaller<C extends JComponent>
         final boolean hasOpaqueBorder                    = !(255 > newStyle.border().color().map(Color::getAlpha).orElse(0));
         final boolean isSwingTreeComponent               = _isNestedClassInUINamespace(owner);
         final boolean backgroundIsActuallyBackground =
-                                    !( owner instanceof JTabbedPane );
+                                    !( owner instanceof JTabbedPane ) &&
+                                    !( owner instanceof JSlider     );
 
 
         if ( !hasBackground && _initialIsOpaque ) {
@@ -184,6 +190,13 @@ final class StyleInstaller<C extends JComponent>
             Color backgroundColor = owner.getBackground();
             boolean backgroundIsFullyTransparent = backgroundColor == null || backgroundColor.getAlpha() == 0;
 
+            boolean requiresBackgroundPainting = hasBackgroundGradients;
+            requiresBackgroundPainting = requiresBackgroundPainting || hasBackgroundShadows;
+            requiresBackgroundPainting = requiresBackgroundPainting || hasBackgroundPainters;
+            requiresBackgroundPainting = requiresBackgroundPainting || hasBackgroundImages;
+            requiresBackgroundPainting = requiresBackgroundPainting || hasBorderRadius;
+            requiresBackgroundPainting = requiresBackgroundPainting || hasMargin;
+
             if ( !isSwingTreeComponent && !backgroundIsFullyTransparent ) {
                 if ( owner.isOpaque() != _initialIsOpaque )
                     owner.setOpaque(_initialIsOpaque);
@@ -194,17 +207,9 @@ final class StyleInstaller<C extends JComponent>
                 if ( !owner.isOpaque() )
                     owner.setOpaque(true);
 
-                boolean transparentBackgroundIsProblematic =
-                                                    !backgroundIsActuallyBackground ||
-                                                    backgroundWasSetSomewhereElse;
+                if ( !backgroundWasSetSomewhereElse && backgroundIsActuallyBackground ) {
 
-                if ( !transparentBackgroundIsProblematic ) {
-                    boolean requiresBackgroundPainting = hasBackgroundGradients || (hasBackground && isSwingTreeComponent);
-                    requiresBackgroundPainting = requiresBackgroundPainting || hasBackgroundShadows;
-                    requiresBackgroundPainting = requiresBackgroundPainting || hasBackgroundPainters;
-                    requiresBackgroundPainting = requiresBackgroundPainting || hasBackgroundImages;
-                    requiresBackgroundPainting = requiresBackgroundPainting || hasBorderRadius;
-                    requiresBackgroundPainting = requiresBackgroundPainting || hasMargin;
+                    requiresBackgroundPainting = requiresBackgroundPainting || (hasBackground && isSwingTreeComponent);
 
                     if ( requiresBackgroundPainting && !Objects.equals( owner.getBackground(), UI.COLOR_UNDEFINED ) )
                         backgroundSetter = ()->owner.setBackground(UI.COLOR_UNDEFINED);
@@ -235,6 +240,13 @@ final class StyleInstaller<C extends JComponent>
                         painting ourselves in the paint method of the component.
                     */
                 }
+                else if ( !hasBackground || !_dynamicLaF.customLookAndFeelIsInstalled() )
+                {
+                    if ( requiresBackgroundPainting ) {
+                        if ( owner.isOpaque() )
+                            owner.setOpaque(false);
+                    }
+                }
             }
         }
 
@@ -243,8 +255,10 @@ final class StyleInstaller<C extends JComponent>
                                             .filter( c -> c != UI.COLOR_UNDEFINED )
                                             .orElse(null);
 
-            if ( !Objects.equals( owner.getBackground(), newColor ) )
-                backgroundSetter = ()->owner.setBackground(newColor);
+            backgroundSetter = ()->{
+                if ( !Objects.equals( owner.getBackground(), newColor ) )
+                    owner.setBackground(newColor);
+            };
         }
 
         _applyGenericBaseStyleTo(owner, newStyle);
@@ -262,12 +276,6 @@ final class StyleInstaller<C extends JComponent>
 
         if ( !backgroundWasSetSomewhereElse )
             _currentBackgroundColor = owner.getBackground();
-
-
-        if ( !onlyDimensionalityIsStyled ) {
-            if ( !styleCanBeRenderedThroughBorder )
-                _dynamicLaF = _dynamicLaF.establishLookAndFeelFor(newStyle, owner);
-        }
 
         if ( _dynamicLaF.overrideWasNeeded() ) {
             if ( owner instanceof AbstractButton) {

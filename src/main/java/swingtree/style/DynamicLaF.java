@@ -7,8 +7,13 @@ import swingtree.components.JIcon;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.plaf.*;
-import javax.swing.plaf.basic.*;
-import java.awt.*;
+import javax.swing.plaf.basic.BasicButtonUI;
+import javax.swing.plaf.basic.BasicLabelUI;
+import javax.swing.plaf.basic.BasicPanelUI;
+import javax.swing.plaf.basic.BasicTextFieldUI;
+import java.awt.Component;
+import java.awt.Graphics;
+import java.awt.Insets;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -102,27 +107,22 @@ final class DynamicLaF
 
     private DynamicLaF _installCustomLaF( JComponent owner ) {
         // First we check if we already have a custom LaF installed:
-        boolean success;
         ComponentUI formerLaF = _formerLaF;
         ComponentUI styleLaF  = _styleLaF;
 
-        if ( customLookAndFeelIsInstalled() )
-            success = true;
-        else {
+        if ( !customLookAndFeelIsInstalled() ) {
             if (owner instanceof JBox) { // This is a SwinTree component, so it already has a custom LaF.
                 JBox p = (JBox) owner;
                 formerLaF = p.getUI();
                 //PanelUI laf = createJBoxUI();
                 //p.setUI(laf);
                 styleLaF = formerLaF;
-                success = true;
             } else if (owner instanceof JIcon) { // This is a SwinTree component, so it already has a custom LaF.
                 JIcon i = (JIcon) owner;
                 formerLaF = i.getUI();
                 //LabelUI laf = createJIconUI();
                 //i.setUI(laf);
                 styleLaF = formerLaF;
-                success = true;
             } else if (owner instanceof JPanel) {
                 JPanel p = (JPanel) owner;
                 formerLaF = p.getUI();
@@ -134,7 +134,6 @@ final class DynamicLaF
                     panelUI.installUI(p);
                     // We make the former LaF believe that it is still in charge of the component.
                 }
-                success = true;
             } else if (owner instanceof AbstractButton) {
                 AbstractButton b = (AbstractButton) owner;
                 formerLaF = b.getUI();
@@ -146,7 +145,6 @@ final class DynamicLaF
                     // We make the former LaF believe that it is still in charge of the component.
                 }
                 styleLaF = laf;
-                success = true;
             } else if (owner instanceof JLabel) {
                 JLabel l = (JLabel) owner;
                 formerLaF = l.getUI();
@@ -158,7 +156,6 @@ final class DynamicLaF
                     // We make the former LaF believe that it is still in charge of the component.
                 }
                 styleLaF = laf;
-                success = true;
             } else if (owner instanceof JTextField && !(owner instanceof JPasswordField)) {
                 JTextField t = (JTextField) owner;
                 formerLaF = t.getUI();
@@ -170,12 +167,8 @@ final class DynamicLaF
                     // We make the former LaF believe that it is still in charge of the component.
                 }
                 styleLaF = laf;
-                success = true;
             }
-            else success = false;
         }
-        if ( !success && owner.isOpaque() )
-            owner.setOpaque(false);
 
         return new DynamicLaF(formerLaF, styleLaF, true);
     }
