@@ -52,9 +52,9 @@ final class StyleInstaller<C extends JComponent>
         final Style.Report styleReport = newStyle.getReport();
         Runnable backgroundSetter = ()->{};
 
-        boolean isNotStyled                     = styleReport.isNotStyled();
-        boolean onlyDimensionalityIsStyled      = styleReport.onlyDimensionalityIsStyled();
-        boolean styleCanBeRenderedThroughBorder = (
+        final boolean isNotStyled                     = styleReport.isNotStyled();
+        final boolean onlyDimensionalityIsStyled      = styleReport.onlyDimensionalityIsStyled();
+        final boolean styleCanBeRenderedThroughBorder = (
                                                        styleReport.noBaseStyle    &&
                                                        (styleReport.noShadowStyle || styleReport.allShadowsAreBorderShadows)     &&
                                                        (styleReport.noPainters    || styleReport.allPaintersAreBorderPainters)   &&
@@ -237,7 +237,6 @@ final class StyleInstaller<C extends JComponent>
                 }
             }
         }
-
 
         if ( hasBackground ) {
             Color newColor = newStyle.base().backgroundColor()
