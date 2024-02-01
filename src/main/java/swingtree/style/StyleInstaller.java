@@ -181,74 +181,75 @@ final class StyleInstaller<C extends JComponent>
                 canBeOpaque = false;
         }
 
-        if ( !canBeOpaque ) {
+
+        Color backgroundColor = owner.getBackground();
+        boolean backgroundIsFullyTransparent = backgroundColor == null || backgroundColor.getAlpha() == 0;
+
+        boolean requiresBackgroundPainting = hasBackgroundGradients;
+        requiresBackgroundPainting = requiresBackgroundPainting || hasBackgroundShadows;
+        requiresBackgroundPainting = requiresBackgroundPainting || hasBackgroundPainters;
+        requiresBackgroundPainting = requiresBackgroundPainting || hasBackgroundImages;
+        requiresBackgroundPainting = requiresBackgroundPainting || hasBorderRadius;
+        requiresBackgroundPainting = requiresBackgroundPainting || hasMargin;
+
+        boolean customLookAndFeelInstalled = _dynamicLaF.customLookAndFeelIsInstalled();
+
+        if ( !canBeOpaque )
+        {
+            if ( owner.isOpaque() )
+                owner.setOpaque(false);
+        }
+        else if ( !isSwingTreeComponent && !backgroundIsFullyTransparent )
+        {
+            if ( owner.isOpaque() != _initialIsOpaque )
+                owner.setOpaque(_initialIsOpaque);
+        } else if ( !isSwingTreeComponent && !backgroundWasSetSomewhereElse )
+        {
+            if ( owner.isOpaque() )
+                owner.setOpaque(false);
+        } else if (
+            requiresBackgroundPainting &&
+            ( !hasBackground || !customLookAndFeelInstalled ) &&
+            ( backgroundWasSetSomewhereElse || !backgroundIsActuallyBackground )
+        ) {
             if ( owner.isOpaque() )
                 owner.setOpaque(false);
         }
         else
         {
-            Color backgroundColor = owner.getBackground();
-            boolean backgroundIsFullyTransparent = backgroundColor == null || backgroundColor.getAlpha() == 0;
+            if ( !owner.isOpaque() )
+                owner.setOpaque(true);
 
-            boolean requiresBackgroundPainting = hasBackgroundGradients;
-            requiresBackgroundPainting = requiresBackgroundPainting || hasBackgroundShadows;
-            requiresBackgroundPainting = requiresBackgroundPainting || hasBackgroundPainters;
-            requiresBackgroundPainting = requiresBackgroundPainting || hasBackgroundImages;
-            requiresBackgroundPainting = requiresBackgroundPainting || hasBorderRadius;
-            requiresBackgroundPainting = requiresBackgroundPainting || hasMargin;
+            requiresBackgroundPainting = requiresBackgroundPainting || (hasBackground && isSwingTreeComponent);
 
-            boolean customLookAndFeelInstalled = _dynamicLaF.customLookAndFeelIsInstalled();
+            if ( requiresBackgroundPainting && !Objects.equals( owner.getBackground(), UI.COLOR_UNDEFINED ) )
+                backgroundSetter = ()->owner.setBackground(UI.COLOR_UNDEFINED);
+            /*
+                The above line looks very strange, but it is very important!
+                To understand what is going on here, you have to know that when a component is
+                flagged to be opaque, then every Swing look and feel will, before painting
+                anything else, first fill out the entire background of the component with
+                the background color of the component.
 
-            if ( !isSwingTreeComponent && !backgroundIsFullyTransparent ) {
-                if ( owner.isOpaque() != _initialIsOpaque )
-                    owner.setOpaque(_initialIsOpaque);
-            } else if ( !isSwingTreeComponent && !backgroundWasSetSomewhereElse ) {
-                if ( owner.isOpaque() )
-                    owner.setOpaque(false);
-            } else if (
-                requiresBackgroundPainting &&
-                ( !hasBackground || !customLookAndFeelInstalled ) &&
-                ( backgroundWasSetSomewhereElse || !backgroundIsActuallyBackground )
-            ) {
-                if ( owner.isOpaque() )
-                    owner.setOpaque(false);
-            }
-            else
-            {
-                if ( !owner.isOpaque() )
-                    owner.setOpaque(true);
+                Now this is a problem when you have the background layer of your SwingTree component
+                styled using various things like gradients, shadows, images, etc.
 
-                requiresBackgroundPainting = requiresBackgroundPainting || (hasBackground && isSwingTreeComponent);
+                We could simply set the opaque flag to false, but then we would lose the
+                performance benefits of having the opaque flag set to true (avoiding the
+                traversal repaint of parent components, and their parent components, etc).
 
-                if ( requiresBackgroundPainting && !Objects.equals( owner.getBackground(), UI.COLOR_UNDEFINED ) )
-                    backgroundSetter = ()->owner.setBackground(UI.COLOR_UNDEFINED);
-                /*
-                    The above line looks very strange, but it is very important!
-                    To understand what is going on here, you have to know that when a component is
-                    flagged to be opaque, then every Swing look and feel will, before painting
-                    anything else, first fill out the entire background of the component with
-                    the background color of the component.
+                In this branch we have already determined that the style configuration
+                leads to an opaque component, and we also have the ability to render
+                the background of the component ourselves due to the
+                component being a SwingTree component (it has the paint method overridden).
 
-                    Now this is a problem when you have the background layer of your SwingTree component
-                    styled using various things like gradients, shadows, images, etc.
+                So what we do here is we set the background color of the component to
+                UI.COLOR_UNDEFINED, which is a special color that is actually fully transparent.
 
-                    We could simply set the opaque flag to false, but then we would lose the
-                    performance benefits of having the opaque flag set to true (avoiding the
-                    traversal repaint of parent components, and their parent components, etc).
-
-                    In this branch we have already determined that the style configuration
-                    leads to an opaque component, and we also have the ability to render
-                    the background of the component ourselves due to the
-                    component being a SwingTree component (it has the paint method overridden).
-
-                    So what we do here is we set the background color of the component to
-                    UI.COLOR_UNDEFINED, which is a special color that is actually fully transparent.
-
-                    This way, when the Swing look and feel tries to paint the background of the
-                    component, it will actually paint nothing, and we can do the background
-                    painting ourselves in the paint method of the component.
-                */
-            }
+                This way, when the Swing look and feel tries to paint the background of the
+                component, it will actually paint nothing, and we can do the background
+                painting ourselves in the paint method of the component.
+            */
         }
 
         if ( hasBackground ) {
