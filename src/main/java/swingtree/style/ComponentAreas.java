@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import swingtree.UI;
 import swingtree.layout.Size;
 
 import java.awt.geom.Arc2D;
@@ -9,6 +10,7 @@ import java.awt.geom.RoundRectangle2D;
 import java.lang.ref.WeakReference;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.WeakHashMap;
 
 /**
@@ -105,6 +107,24 @@ final class ComponentAreas
         _bodyArea     = Objects.requireNonNull(mainComponentArea);
     }
 
+
+    public Area get( UI.ComponentArea areaType ) {
+        BoxModelConf boxModel = Optional.ofNullable(_key.get()).orElse(BoxModelConf.none());
+        switch ( areaType ) {
+            case ALL:
+                return null; // No clipping
+            case BODY:
+                return bodyArea().getFor(boxModel, this); // all - exterior == interior + border
+            case INTERIOR:
+                return interiorArea().getFor(boxModel, this); // all - exterior - border == content - border
+            case BORDER:
+                return borderArea().getFor(boxModel, this); // all - exterior - interior
+            case EXTERIOR:
+                return exteriorArea().getFor(boxModel, this); // all - border - interior
+            default:
+                return null;
+        }
+    }
 
     public LazyRef<Area> borderArea() { return _borderArea; }
 

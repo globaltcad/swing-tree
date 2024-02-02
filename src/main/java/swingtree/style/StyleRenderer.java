@@ -34,13 +34,13 @@ final class StyleRenderer
             conf.baseColors().foundationColor().ifPresent(outerColor -> {
                 if ( outerColor.getAlpha() > 0 ) { // Avoid rendering a fully transparent color!
                     g2d.setColor(outerColor);
-                    g2d.fill(conf.get(UI.ComponentArea.EXTERIOR));
+                    g2d.fill(conf.areas().get(UI.ComponentArea.EXTERIOR));
                 }
             });
             conf.baseColors().backgroundColor().ifPresent(color -> {
                 if ( color.getAlpha() > 0 ) { // Avoid rendering a fully transparent color!
                     g2d.setColor(color);
-                    g2d.fill(conf.get(UI.ComponentArea.BODY));
+                    g2d.fill(conf.areas().get(UI.ComponentArea.BODY));
                 }
             });
         }
@@ -65,7 +65,7 @@ final class StyleRenderer
             if ( gradient.colors().length > 0 ) {
                 if ( gradient.colors().length == 1 ) {
                     g2d.setColor(gradient.colors()[0]);
-                    g2d.fill(conf.get(UI.ComponentArea.BODY));
+                    g2d.fill(conf.areas().get(UI.ComponentArea.BODY));
                 }
                 else {
                     Outline insets = Outline.none();
@@ -76,9 +76,9 @@ final class StyleRenderer
                         case INTERIOR_TO_CONTENT: insets = conf.boxModel().margin().plus(conf.boxModel().widths()).plus(conf.boxModel().padding()); break;
                     }
                     if ( gradient.transition().isDiagonal() )
-                        _renderDiagonalGradient(g2d, conf.boxModel().size(), insets, gradient, conf.get(gradient.area()));
+                        _renderDiagonalGradient(g2d, conf.boxModel().size(), insets, gradient, conf.areas().get(gradient.area()));
                     else
-                        _renderVerticalOrHorizontalGradient(g2d, conf.boxModel().size(), insets, gradient, conf.get(gradient.area()));
+                        _renderVerticalOrHorizontalGradient(g2d, conf.boxModel().size(), insets, gradient, conf.areas().get(gradient.area()));
                 }
             }
 
@@ -136,7 +136,7 @@ final class StyleRenderer
     {
         if ( !Outline.none().equals(conf.boxModel().widths()) ) {
             try {
-                Area borderArea = conf.get(UI.ComponentArea.BORDER);
+                Area borderArea = conf.areas().get(UI.ComponentArea.BORDER);
                 g2d.setColor(color);
                 g2d.fill(borderArea);
             } catch ( Exception e ) {
@@ -222,7 +222,7 @@ final class StyleRenderer
             baseArea = ComponentAreas.calculateBaseArea(conf.boxModel(), artifactAdjustment, artifactAdjustment, artifactAdjustment, artifactAdjustment);
         }
         else
-            baseArea = new Area(conf.get(UI.ComponentArea.BODY));
+            baseArea = new Area(conf.areas().get(UI.ComponentArea.BODY));
 
         // Apply the clipping to avoid overlapping the shadow and the box
         Area shadowArea = new Area(outerShadowRect);
@@ -1028,7 +1028,7 @@ final class StyleRenderer
     ) {
         if ( style.primer().isPresent() ) {
             g2d.setColor(style.primer().get());
-            g2d.fill(conf.get(style.clipArea()));
+            g2d.fill(conf.areas().get(style.clipArea()));
         }
 
         style.image().ifPresent( imageIcon -> {
@@ -1136,7 +1136,7 @@ final class StyleRenderer
 
             final Shape oldClip = g2d.getClip();
 
-            Shape newClip = conf.get(style.clipArea());
+            Shape newClip = conf.areas().get(style.clipArea());
             // We merge the new clip with the old one:
             if ( newClip != null && oldClip != null )
                 newClip = StyleUtility.intersect( newClip, oldClip );
@@ -1168,7 +1168,7 @@ final class StyleRenderer
                         Paint oldPaint = g2d.getPaint();
                         try {
                             g2d.setPaint(new TexturePaint((BufferedImage) image, new Rectangle(x, y, imgWidth, imgHeight)));
-                            g2d.fill(conf.get(UI.ComponentArea.BODY));
+                            g2d.fill(conf.areas().get(UI.ComponentArea.BODY));
                         } finally {
                             g2d.setPaint(oldPaint);
                         }

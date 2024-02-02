@@ -58,7 +58,7 @@ final class StyleEngine
     void paintClippedTo( UI.ComponentArea area, Graphics g, Runnable painter ) {
         Shape oldClip = g.getClip();
 
-        Shape newClip = get(area, ComponentAreas.of(_boxModelConf));
+        Shape newClip = ComponentAreas.of(_boxModelConf).get(area);
         if ( newClip != null && newClip != oldClip ) {
             newClip = StyleUtility.intersect(newClip, oldClip);
             g.setClip(newClip);
@@ -75,29 +75,10 @@ final class StyleEngine
         Shape contentClip = null;
         ComponentAreas _areas = ComponentAreas.of(_boxModelConf);
         if ( _areas.bodyArea().exists() || _componentConf.style().margin().isPositive() )
-            contentClip = get(UI.ComponentArea.BODY, _areas);
+            contentClip = _areas.get(UI.ComponentArea.BODY);
 
         return Optional.ofNullable(contentClip);
     }
-
-    public Area get( UI.ComponentArea areaType, ComponentAreas areas ) {
-        switch ( areaType ) {
-            case ALL:
-                return null; // No clipping
-            case BODY:
-                return areas.bodyArea().getFor(_boxModelConf, areas); // all - exterior == interior + border
-            case INTERIOR:
-                return areas.interiorArea().getFor(_boxModelConf, areas); // all - exterior - border == content - border
-            case BORDER:
-                return areas.borderArea().getFor(_boxModelConf, areas); // all - exterior - interior
-            case EXTERIOR:
-                return areas.exteriorArea().getFor(_boxModelConf, areas); // all - border - interior
-            default:
-                return null;
-        }
-    }
-
-
 
     public boolean hasAnimationPainters() {
         return _animationPainters.length > 0;
