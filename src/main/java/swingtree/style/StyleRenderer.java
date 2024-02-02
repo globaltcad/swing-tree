@@ -55,13 +55,13 @@ final class StyleRenderer
 
         // Every layer has 4 things:
         // 1. A grounding serving as a base background, which is a filled color and/or an image:
-        for ( ImageConf imageConf : conf.layer().images().sortedByNamesAndFilteredBy() )
+        for ( ImageConf imageConf : conf.layer().images().sortedByNames() )
             if ( !imageConf.equals(ImageConf.none()) )
                 _renderImage( conf, imageConf, conf.boxModel().size(), g2d);
 
         // 2. Gradients, which are best used to give a component a nice surface lighting effect.
         // They may transition vertically, horizontally or diagonally over various different colors:
-        for ( GradientConf gradient : conf.layer().gradients().sortedByNamesAndFilteredBy() )
+        for ( GradientConf gradient : conf.layer().gradients().sortedByNames() )
             if ( gradient.colors().length > 0 ) {
                 if ( gradient.colors().length == 1 ) {
                     g2d.setColor(gradient.colors()[0]);
@@ -83,11 +83,11 @@ final class StyleRenderer
             }
 
         // 3. Shadows, which are simple gradient based drop shadows that can go inwards or outwards
-        for ( ShadowConf shadow : conf.layer().shadows().sortedByNamesAndFilteredBy() )
+        for ( ShadowConf shadow : conf.layer().shadows().sortedByNames() )
             _renderShadows(conf, shadow, g2d);
 
         // 4. Painters, which are provided by the user and can be anything
-        List<PainterConf> painters = conf.layer().painters().sortedByNamesAndFilteredBy();
+        List<PainterConf> painters = conf.layer().painters().sortedByNames();
 
         if ( !painters.isEmpty() )
         {

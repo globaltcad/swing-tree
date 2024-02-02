@@ -186,7 +186,7 @@ public final class StyleConf
         return Collections.unmodifiableList(
                             new ArrayList<>(_layers.get(layer)
                                 .painters()
-                                .sortedByNamesAndFilteredBy()
+                                .sortedByNames()
                             )
                         );
     }
@@ -231,7 +231,7 @@ public final class StyleConf
     }
 
     List<GradientConf> gradients(UI.Layer layer ) {
-        return _layers.get(layer).gradients().sortedByNamesAndFilteredBy();
+        return _layers.get(layer).gradients().sortedByNames();
     }
 
     boolean hasCustomGradients() {
@@ -391,7 +391,7 @@ public final class StyleConf
     }
 
     List<ImageConf> images(UI.Layer layer ) {
-        return _layers.get(layer).images().sortedByNamesAndFilteredBy();
+        return _layers.get(layer).images().sortedByNames();
     }
 
     StyleConf scale(double scale ) {

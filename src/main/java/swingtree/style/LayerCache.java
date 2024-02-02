@@ -206,7 +206,7 @@ final class LayerCache
             return false; // We don't know what the painters will do, so we don't cache their painting!
 
         int heavyStyleCount = 0;
-        for ( ImageConf imageConf : state.layer().images().sortedByNamesAndFilteredBy() )
+        for ( ImageConf imageConf : state.layer().images().sortedByNames() )
             if ( !imageConf.equals(ImageConf.none()) && imageConf.image().isPresent() ) {
                 ImageIcon icon = imageConf.image().get();
                 boolean isSpecialIcon = ( icon.getClass() != ImageIcon.class );
@@ -214,10 +214,10 @@ final class LayerCache
                 if ( isSpecialIcon || hasSize )
                     heavyStyleCount++;
             }
-        for ( GradientConf gradient : state.layer().gradients().sortedByNamesAndFilteredBy() )
+        for ( GradientConf gradient : state.layer().gradients().sortedByNames() )
             if ( !gradient.equals(GradientConf.none()) && gradient.colors().length > 0 )
                 heavyStyleCount++;
-        for ( ShadowConf shadow : state.layer().shadows().sortedByNamesAndFilteredBy() )
+        for ( ShadowConf shadow : state.layer().shadows().sortedByNames() )
             if ( !shadow.equals(ShadowConf.none()) && shadow.color().isPresent() )
                 heavyStyleCount++;
 

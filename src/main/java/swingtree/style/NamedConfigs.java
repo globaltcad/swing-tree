@@ -121,7 +121,7 @@ final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
         return Optional.ofNullable(get(name));
     }
 
-    public List<S> sortedByNamesAndFilteredBy() {
+    public List<S> sortedByNames() {
         return Collections.unmodifiableList(
                     namedStyles()
                     .stream()
