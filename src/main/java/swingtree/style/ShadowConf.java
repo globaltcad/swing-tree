@@ -316,8 +316,8 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
     @Override
     public String toString() {
         if ( this == _NONE )
-            return "ShadowStyle[NONE]";
-        return "ShadowStyle[" +
+            return this.getClass().getSimpleName()+"[NONE]";
+        return this.getClass().getSimpleName()+"[" +
                     "horizontalOffset=" + _toString(_offset.x()  ) + ", " +
                     "verticalOffset="   + _toString(_offset.y()  ) + ", " +
                     "blurRadius="       + _toString(_blurRadius  ) + ", " +

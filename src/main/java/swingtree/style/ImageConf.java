@@ -666,7 +666,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
 
     @Override
     public String toString() {
-        if ( this == _NONE ) return "ImageStyle[NONE]";
+        if ( this == _NONE ) return this.getClass().getSimpleName()+"[NONE]";
         return this.getClass().getSimpleName() + "[" +
                     "primer="        + StyleUtility.toString(_primer)                          + ", " +
                     "image="         + ( _image == null ? "?" : _image.toString() )            + ", " +

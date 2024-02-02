@@ -157,9 +157,9 @@ class Styles_Spec extends Specification
                             .getStyle()
 
         expect :
-                style.toString() == "Style[" +
-                                        "LayoutStyle[NONE], " +
-                                        "BorderStyle[" +
+                style.toString() == "StyleConf[" +
+                                        "LayoutConf[NONE], " +
+                                        "BorderConf[" +
                                             "arcWidth=" + scaledToString(12) + ", " +
                                             "arcHeight=" + scaledToString(18) + ", " +
                                             "topWidth=" + scaledToString(1) + ", " +
@@ -175,7 +175,7 @@ class Styles_Spec extends Specification
                                             "padding=Outline[top=?, right=?, bottom=?, left=?], " +
                                             "color=rgba(0,0,255,255)" +
                                         "], " +
-                                        "BaseStyle[" +
+                                        "BaseConf[" +
                                             "icon=?, " +
                                             "fitComponent=NO, " +
                                             "backgroundColor=rgba(0,255,0,255), " +
@@ -184,7 +184,7 @@ class Styles_Spec extends Specification
                                             "cursor=?, " +
                                             "orientation=UNKNOWN" +
                                         "], " +
-                                        "FontStyle[" +
+                                        "FontConf[" +
                                             "family=Times New Roman, " +
                                             "size=" + Math.round(12*uiScale) + ", " +
                                             "posture=0.0, " +
@@ -201,11 +201,11 @@ class Styles_Spec extends Specification
                                             "horizontalAlignment=?, " +
                                             "verticalAlignment=?" +
                                         "], " +
-                                        "DimensionalityStyle[NONE], " +
+                                        "DimensionalityConf[NONE], " +
                                         "StyleLayers[" +
                                             "background=StyleLayer[EMPTY], " +
                                             "content=StyleLayer[" +
-                                                "shadows=ShadowStyle[" +
+                                                "shadows=ShadowConf[" +
                                                     "horizontalOffset=0, " +
                                                     "verticalOffset=0, " +
                                                     "blurRadius=0, " +
@@ -213,9 +213,9 @@ class Styles_Spec extends Specification
                                                     "color=rgba(255,255,0,255), " +
                                                     "isInset=false" +
                                                 "], " +
-                                                "painters=PainterStyle[NONE], " +
-                                                "gradients=GradientStyle[NONE], " +
-                                                "images=ImageStyle[NONE]" +
+                                                "painters=PainterConf[NONE], " +
+                                                "gradients=GradientConf[NONE], " +
+                                                "images=ImageConf[NONE]" +
                                             "], " +
                                             "border=StyleLayer[EMPTY], " +
                                             "foreground=StyleLayer[EMPTY]" +
@@ -246,11 +246,11 @@ class Styles_Spec extends Specification
                             .getStyle()
 
         then : 'The style config has the expected string representation.'
-                style.toString() == "Style[" +
-                                        "LayoutStyle[NONE], " +
-                                        "BorderStyle[NONE], " +
-                                        "BaseStyle[NONE], " +
-                                        "FontStyle[" +
+                style.toString() == "StyleConf[" +
+                                        "LayoutConf[NONE], " +
+                                        "BorderConf[NONE], " +
+                                        "BaseConf[NONE], " +
+                                        "FontConf[" +
                                             "family=, " +
                                             "size=0, " +
                                             "posture=0.0, " +
@@ -267,18 +267,18 @@ class Styles_Spec extends Specification
                                             "horizontalAlignment=CENTER, " +
                                             "verticalAlignment=CENTER" +
                                         "], " +
-                                        "DimensionalityStyle[NONE], " +
+                                        "DimensionalityConf[NONE], " +
                                         "StyleLayers[" +
                                             "background=StyleLayer[EMPTY], " +
                                             "content=StyleLayer[EMPTY], " +
                                             "border=StyleLayer[EMPTY], " +
                                             "foreground=StyleLayer[" +
-                                                "shadows=ShadowStyle[NONE], " +
-                                                "painters=PainterStyle[NONE], " +
-                                                "gradients=GradientStyle[NONE], " +
-                                                "images=NamedStyles[" +
-                                                    "default=ImageStyle[NONE], " +
-                                                    "bubbles=ImageStyle[" +
+                                                "shadows=ShadowConf[NONE], " +
+                                                "painters=PainterConf[NONE], " +
+                                                "gradients=GradientConf[NONE], " +
+                                                "images=NamedConfigs[" +
+                                                    "default=ImageConf[NONE], " +
+                                                    "bubbles=ImageConf[" +
                                                         "primer=?, " +
                                                         "image=${style.images(UI.Layer.FOREGROUND).get(0).image().get()}, " +
                                                         "placement=UNDEFINED, " +
@@ -315,17 +315,17 @@ class Styles_Spec extends Specification
                             .getStyle()
 
         then :
-                style.toString() == "Style[" +
-                                        "LayoutStyle[" +
+                style.toString() == "StyleConf[" +
+                                        "LayoutConf[" +
                                             "layout=BorderLayoutInstaller[hgap=2, vgap=4], " +
                                             "constraint=?, " +
                                             "alignmentX=?, " +
                                             "alignmentY=?" +
                                         "], " +
-                                        "BorderStyle[NONE], " +
-                                        "BaseStyle[NONE], " +
-                                        "FontStyle[NONE], " +
-                                        "DimensionalityStyle[" +
+                                        "BorderConf[NONE], " +
+                                        "BaseConf[NONE], " +
+                                        "FontConf[NONE], " +
+                                        "DimensionalityConf[" +
                                             "minWidth=" + roundScaledToString(50) + ", " +
                                             "minHeight=" + roundScaledToString(100) + ", " +
                                             "maxWidth=" + roundScaledToString(300) + ", " +
@@ -339,11 +339,11 @@ class Styles_Spec extends Specification
                                             "background=StyleLayer[EMPTY], " +
                                             "content=StyleLayer[EMPTY], " +
                                             "border=StyleLayer[" +
-                                                "shadows=ShadowStyle[NONE], " +
-                                                "painters=PainterStyle[NONE], " +
-                                                "gradients=NamedStyles[" +
-                                                    "default=GradientStyle[NONE], " +
-                                                    "gradient=GradientStyle[" +
+                                                "shadows=ShadowConf[NONE], " +
+                                                "painters=PainterConf[NONE], " +
+                                                "gradients=NamedConfigs[" +
+                                                    "default=GradientConf[NONE], " +
+                                                    "gradient=GradientConf[" +
                                                         "transition=BOTTOM_TO_TOP, " +
                                                         "type=RADIAL, " +
                                                         "colors=[java.awt.Color[r=255,g=0,b=0], " +
@@ -359,7 +359,7 @@ class Styles_Spec extends Specification
                                                         "cycle=NONE" +
                                                     "]" +
                                                 "], " +
-                                            "images=ImageStyle[NONE]" +
+                                            "images=ImageConf[NONE]" +
                                         "], " +
                                         "foreground=StyleLayer[EMPTY]" +
                                     "], " +
@@ -493,12 +493,12 @@ class Styles_Spec extends Specification
                         )
                         .get(JPanel)
         expect : 'The style config has the expected string representation.'
-            ComponentExtension.from(button).getStyle().toString() == "Style[" +
-                    "LayoutStyle[NONE], " +
-                    "BorderStyle[NONE], " +
-                    "BaseStyle[NONE], " +
-                    "FontStyle[NONE], " +
-                    "DimensionalityStyle[NONE], " +
+            ComponentExtension.from(button).getStyle().toString() == "StyleConf[" +
+                    "LayoutConf[NONE], " +
+                    "BorderConf[NONE], " +
+                    "BaseConf[NONE], " +
+                    "FontConf[NONE], " +
+                    "DimensionalityConf[NONE], " +
                     "StyleLayers[" +
                         "background=StyleLayer[EMPTY], " +
                         "content=StyleLayer[EMPTY], " +
@@ -517,16 +517,16 @@ class Styles_Spec extends Specification
                      )
                      .get(JButton)
         then : 'The style config has the expected string representation.'
-            ComponentExtension.from(button).getStyle().toString() == "Style[" +
-                    "LayoutStyle[NONE], " +
-                    "BorderStyle[" +
+            ComponentExtension.from(button).getStyle().toString() == "StyleConf[" +
+                    "LayoutConf[NONE], " +
+                    "BorderConf[" +
                         "radius=" + scaledToString(40) + ", " +
                         "width=?, " +
                         "margin=Outline[top=?, right=?, bottom=?, left=?], " +
                         "padding=Outline[top=?, right=?, bottom=?, left=?], " +
                         "color=?" +
                     "], " +
-                    "BaseStyle[" +
+                    "BaseConf[" +
                         "icon=?, " +
                         "fitComponent=NO, " +
                         "backgroundColor=rgba(0,0,0,255), " +
@@ -535,8 +535,8 @@ class Styles_Spec extends Specification
                         "cursor=?, " +
                         "orientation=UNKNOWN" +
                     "], " +
-                    "FontStyle[NONE], " +
-                    "DimensionalityStyle[" +
+                    "FontConf[NONE], " +
+                    "DimensionalityConf[" +
                         "minWidth=?, " +
                         "minHeight=?, " +
                         "maxWidth=?, " +
@@ -592,12 +592,12 @@ class Styles_Spec extends Specification
             This is because the border width is 0, so the border is invisible
             and the border color is irrelevant.
         """
-            ComponentExtension.from(panel).getStyle().toString() == "Style[" +
-                    "LayoutStyle[NONE], " +
-                    "BorderStyle[NONE], " +
-                    "BaseStyle[NONE], " +
-                    "FontStyle[NONE], " +
-                    "DimensionalityStyle[NONE], " +
+            ComponentExtension.from(panel).getStyle().toString() == "StyleConf[" +
+                    "LayoutConf[NONE], " +
+                    "BorderConf[NONE], " +
+                    "BaseConf[NONE], " +
+                    "FontConf[NONE], " +
+                    "DimensionalityConf[NONE], " +
                     "StyleLayers[" +
                         "background=StyleLayer[EMPTY], " +
                         "content=StyleLayer[EMPTY], " +
@@ -631,9 +631,9 @@ class Styles_Spec extends Specification
             So in order to make the transition between styles look smooth, we need the margin
             to buffer the fractional part of the border width.
         """
-            ComponentExtension.from(panel).getStyle().toString() == "Style[" +
-                    "LayoutStyle[NONE], " +
-                    "BorderStyle[" +
+            ComponentExtension.from(panel).getStyle().toString() == "StyleConf[" +
+                    "LayoutConf[NONE], " +
+                    "BorderConf[" +
                         "radius=?, " +
                         "topWidth=?, " +
                         "rightWidth=?, " +
@@ -643,7 +643,7 @@ class Styles_Spec extends Specification
                         "padding=Outline[top=?, right=?, bottom=?, left=?], " +
                         "color=rgba(0,255,0,255)" +
                     "], " +
-                    "BaseStyle[" +
+                    "BaseConf[" +
                         (
                             uiScale % 1 == 0 ?
                                 "NONE" :
@@ -656,8 +656,8 @@ class Styles_Spec extends Specification
                                 "orientation=UNKNOWN"
                         ) +
                     "], " +
-                    "FontStyle[NONE], " +
-                    "DimensionalityStyle[NONE], " +
+                    "FontConf[NONE], " +
+                    "DimensionalityConf[NONE], " +
                     "StyleLayers[" +
                         "background=StyleLayer[EMPTY], " +
                         "content=StyleLayer[EMPTY], " +
@@ -708,10 +708,10 @@ class Styles_Spec extends Specification
             The foundation color is used by the SwingTree style engine only, which does not impose
             any default value for it (defaults may come from `StyleSheet` objects, but that is a different story).
         """
-            ComponentExtension.from(aToggleButton).getStyle().toString() == "Style[" +
-                    "LayoutStyle[NONE], " +
-                    "BorderStyle[NONE], " +
-                    "BaseStyle[" +
+            ComponentExtension.from(aToggleButton).getStyle().toString() == "StyleConf[" +
+                    "LayoutConf[NONE], " +
+                    "BorderConf[NONE], " +
+                    "BaseConf[" +
                         "icon=?, " +
                         "fitComponent=NO, " +
                         "backgroundColor=DEFAULT, " +
@@ -720,8 +720,8 @@ class Styles_Spec extends Specification
                         "cursor=?, " +
                         "orientation=UNKNOWN" +
                     "], " +
-                    "FontStyle[NONE], " +
-                    "DimensionalityStyle[NONE], " +
+                    "FontConf[NONE], " +
+                    "DimensionalityConf[NONE], " +
                     "StyleLayers[" +
                         "background=StyleLayer[EMPTY], " +
                         "content=StyleLayer[EMPTY], " +
@@ -764,12 +764,12 @@ class Styles_Spec extends Specification
             The style configuration of the component will be simplified heavily, to
             the point where it is effectively considered to have no style at all.
         """
-            ComponentExtension.from(aComboBox).getStyle().toString() == "Style[" +
-                    "LayoutStyle[NONE], " +
-                    "BorderStyle[NONE], " +
-                    "BaseStyle[NONE], " +
-                    "FontStyle[NONE], " +
-                    "DimensionalityStyle[NONE], " +
+            ComponentExtension.from(aComboBox).getStyle().toString() == "StyleConf[" +
+                    "LayoutConf[NONE], " +
+                    "BorderConf[NONE], " +
+                    "BaseConf[NONE], " +
+                    "FontConf[NONE], " +
+                    "DimensionalityConf[NONE], " +
                     "StyleLayers[" +
                         "background=StyleLayer[EMPTY], " +
                         "content=StyleLayer[EMPTY], " +
@@ -801,12 +801,12 @@ class Styles_Spec extends Specification
             The style configuration of the component will be simplified heavily, to
             the point where it is effectively considered to have no style at all.
         """
-            ComponentExtension.from(aComboBox).getStyle().toString() == "Style[" +
-                    "LayoutStyle[NONE], " +
-                    "BorderStyle[NONE], " +
-                    "BaseStyle[NONE], " +
-                    "FontStyle[NONE], " +
-                    "DimensionalityStyle[NONE], " +
+            ComponentExtension.from(aComboBox).getStyle().toString() == "StyleConf[" +
+                    "LayoutConf[NONE], " +
+                    "BorderConf[NONE], " +
+                    "BaseConf[NONE], " +
+                    "FontConf[NONE], " +
+                    "DimensionalityConf[NONE], " +
                     "StyleLayers[" +
                         "background=StyleLayer[EMPTY], " +
                         "content=StyleLayer[EMPTY], " +
