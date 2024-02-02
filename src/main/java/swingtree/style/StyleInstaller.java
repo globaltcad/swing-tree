@@ -440,13 +440,13 @@ final class StyleInstaller<C extends JComponent>
 
     private void _applyDimensionalityStyleTo( final C owner, final StyleConf styleConf )
     {
-        final DimensionalityStyle dimensionalityStyle = styleConf.dimensionality();
+        final DimensionalityConf dimensionalityConf = styleConf.dimensionality();
 
-        if ( dimensionalityStyle.minWidth().isPresent() || dimensionalityStyle.minHeight().isPresent() ) {
+        if ( dimensionalityConf.minWidth().isPresent() || dimensionalityConf.minHeight().isPresent() ) {
             Dimension minSize = owner.getMinimumSize();
 
-            int minWidth  = dimensionalityStyle.minWidth().orElse(minSize == null ? 0 : minSize.width);
-            int minHeight = dimensionalityStyle.minHeight().orElse(minSize == null ? 0 : minSize.height);
+            int minWidth  = dimensionalityConf.minWidth().orElse(minSize == null ? 0 : minSize.width);
+            int minHeight = dimensionalityConf.minHeight().orElse(minSize == null ? 0 : minSize.height);
 
             Dimension newMinSize = new Dimension(minWidth, minHeight);
 
@@ -454,11 +454,11 @@ final class StyleInstaller<C extends JComponent>
                 owner.setMinimumSize(newMinSize);
         }
 
-        if ( dimensionalityStyle.maxWidth().isPresent() || dimensionalityStyle.maxHeight().isPresent() ) {
+        if ( dimensionalityConf.maxWidth().isPresent() || dimensionalityConf.maxHeight().isPresent() ) {
             Dimension maxSize = owner.getMaximumSize();
 
-            int maxWidth  = dimensionalityStyle.maxWidth().orElse(maxSize == null  ? Integer.MAX_VALUE : maxSize.width);
-            int maxHeight = dimensionalityStyle.maxHeight().orElse(maxSize == null ? Integer.MAX_VALUE : maxSize.height);
+            int maxWidth  = dimensionalityConf.maxWidth().orElse(maxSize == null  ? Integer.MAX_VALUE : maxSize.width);
+            int maxHeight = dimensionalityConf.maxHeight().orElse(maxSize == null ? Integer.MAX_VALUE : maxSize.height);
 
             Dimension newMaxSize = new Dimension(maxWidth, maxHeight);
 
@@ -466,11 +466,11 @@ final class StyleInstaller<C extends JComponent>
                 owner.setMaximumSize(newMaxSize);
         }
 
-        if ( dimensionalityStyle.preferredWidth().isPresent() || dimensionalityStyle.preferredHeight().isPresent() ) {
+        if ( dimensionalityConf.preferredWidth().isPresent() || dimensionalityConf.preferredHeight().isPresent() ) {
             Dimension prefSize = owner.getPreferredSize();
 
-            int prefWidth  = dimensionalityStyle.preferredWidth().orElse(prefSize == null ? 0 : prefSize.width);
-            int prefHeight = dimensionalityStyle.preferredHeight().orElse(prefSize == null ? 0 : prefSize.height);
+            int prefWidth  = dimensionalityConf.preferredWidth().orElse(prefSize == null ? 0 : prefSize.width);
+            int prefHeight = dimensionalityConf.preferredHeight().orElse(prefSize == null ? 0 : prefSize.height);
 
             Dimension newPrefSize = new Dimension(prefWidth, prefHeight);
 
@@ -478,11 +478,11 @@ final class StyleInstaller<C extends JComponent>
                 owner.setPreferredSize(newPrefSize);
         }
 
-        if ( dimensionalityStyle.width().isPresent() || dimensionalityStyle.height().isPresent() ) {
+        if ( dimensionalityConf.width().isPresent() || dimensionalityConf.height().isPresent() ) {
             Dimension size = owner.getSize();
 
-            int width  = dimensionalityStyle.width().orElse(size == null ? 0 : size.width);
-            int height = dimensionalityStyle.height().orElse(size == null ? 0 : size.height);
+            int width  = dimensionalityConf.width().orElse(size == null ? 0 : size.width);
+            int height = dimensionalityConf.height().orElse(size == null ? 0 : size.height);
 
             Dimension newSize = new Dimension(width, height);
 

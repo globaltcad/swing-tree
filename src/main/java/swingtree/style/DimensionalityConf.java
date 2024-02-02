@@ -11,18 +11,18 @@ import java.util.Optional;
  *  The layout manager of a component will use this information
  *  to determine the actual size of the component in the layout.
  **/
-final class DimensionalityStyle
+final class DimensionalityConf
 {
-    private static final DimensionalityStyle _NONE = new DimensionalityStyle(
+    private static final DimensionalityConf _NONE = new DimensionalityConf(
                                                             Size.unknown(),
                                                             Size.unknown(),
                                                             Size.unknown(),
                                                             Size.unknown()
                                                         );
 
-    static DimensionalityStyle none() { return _NONE; }
+    static DimensionalityConf none() { return _NONE; }
 
-    static DimensionalityStyle of(
+    static DimensionalityConf of(
         Size minSize,
         Size maxSize,
         Size preferredSize,
@@ -36,7 +36,7 @@ final class DimensionalityStyle
         )
             return _NONE;
         else
-            return new DimensionalityStyle(minSize, maxSize, preferredSize, size);
+            return new DimensionalityConf(minSize, maxSize, preferredSize, size);
     }
 
 
@@ -46,7 +46,7 @@ final class DimensionalityStyle
     private final Size _size;
 
 
-    private DimensionalityStyle(
+    private DimensionalityConf(
         Size minSize,
         Size maxSize,
         Size preferredSize,
@@ -58,52 +58,52 @@ final class DimensionalityStyle
         _size          = Objects.requireNonNull(size);
     }
 
-    DimensionalityStyle _withMinWidth( int minWidth ) {
-        return DimensionalityStyle.of(_minSize.withWidth(minWidth), _maxSize, _preferredSize, _size);
+    DimensionalityConf _withMinWidth(int minWidth ) {
+        return DimensionalityConf.of(_minSize.withWidth(minWidth), _maxSize, _preferredSize, _size);
     }
 
-    DimensionalityStyle _withMinHeight( int minHeight ) {
-        return DimensionalityStyle.of(_minSize.withHeight(minHeight), _maxSize, _preferredSize, _size);
+    DimensionalityConf _withMinHeight(int minHeight ) {
+        return DimensionalityConf.of(_minSize.withHeight(minHeight), _maxSize, _preferredSize, _size);
     }
 
-    DimensionalityStyle _withMinSize( Size minSize ) {
-        return DimensionalityStyle.of(minSize, _maxSize, _preferredSize, _size);
+    DimensionalityConf _withMinSize(Size minSize ) {
+        return DimensionalityConf.of(minSize, _maxSize, _preferredSize, _size);
     }
 
-    DimensionalityStyle _withMaxWidth( int maxWidth ) {
-        return DimensionalityStyle.of(_minSize, _maxSize.withWidth(maxWidth), _preferredSize, _size);
+    DimensionalityConf _withMaxWidth(int maxWidth ) {
+        return DimensionalityConf.of(_minSize, _maxSize.withWidth(maxWidth), _preferredSize, _size);
     }
 
-    DimensionalityStyle _withMaxHeight( int maxHeight ) {
-        return DimensionalityStyle.of(_minSize, _maxSize.withHeight(maxHeight), _preferredSize, _size);
+    DimensionalityConf _withMaxHeight(int maxHeight ) {
+        return DimensionalityConf.of(_minSize, _maxSize.withHeight(maxHeight), _preferredSize, _size);
     }
 
-    DimensionalityStyle _withMaxSize( Size maxSize ) {
-        return DimensionalityStyle.of(_minSize, maxSize, _preferredSize, _size);
+    DimensionalityConf _withMaxSize(Size maxSize ) {
+        return DimensionalityConf.of(_minSize, maxSize, _preferredSize, _size);
     }
 
-    DimensionalityStyle _withPreferredWidth( int preferredWidth ) {
-        return DimensionalityStyle.of(_minSize, _maxSize, _preferredSize.withWidth(preferredWidth), _size);
+    DimensionalityConf _withPreferredWidth(int preferredWidth ) {
+        return DimensionalityConf.of(_minSize, _maxSize, _preferredSize.withWidth(preferredWidth), _size);
     }
 
-    DimensionalityStyle _withPreferredHeight( int preferredHeight ) {
-        return DimensionalityStyle.of(_minSize, _maxSize, _preferredSize.withHeight(preferredHeight), _size);
+    DimensionalityConf _withPreferredHeight(int preferredHeight ) {
+        return DimensionalityConf.of(_minSize, _maxSize, _preferredSize.withHeight(preferredHeight), _size);
     }
 
-    DimensionalityStyle _withPreferredSize( Size preferredSize ) {
-        return DimensionalityStyle.of(_minSize, _maxSize, preferredSize, _size);
+    DimensionalityConf _withPreferredSize(Size preferredSize ) {
+        return DimensionalityConf.of(_minSize, _maxSize, preferredSize, _size);
     }
 
-    DimensionalityStyle _withWidth( int width ) {
-        return DimensionalityStyle.of(_minSize, _maxSize, _preferredSize, _size.withWidth(width));
+    DimensionalityConf _withWidth(int width ) {
+        return DimensionalityConf.of(_minSize, _maxSize, _preferredSize, _size.withWidth(width));
     }
 
-    DimensionalityStyle _withHeight( int height ) {
-        return DimensionalityStyle.of(_minSize, _maxSize, _preferredSize, _size.withHeight(height));
+    DimensionalityConf _withHeight(int height ) {
+        return DimensionalityConf.of(_minSize, _maxSize, _preferredSize, _size.withHeight(height));
     }
 
-    DimensionalityStyle _withSize( Size size ) {
-        return DimensionalityStyle.of(_minSize, _maxSize, _preferredSize, size);
+    DimensionalityConf _withSize(Size size ) {
+        return DimensionalityConf.of(_minSize, _maxSize, _preferredSize, size);
     }
 
     public Optional<Integer> minWidth() { return _minSize.width().map(Number::intValue); }
@@ -122,8 +122,8 @@ final class DimensionalityStyle
 
     public Optional<Integer> height() { return _size.height().map(Number::intValue); }
 
-    DimensionalityStyle _scale( double scale ) {
-        return DimensionalityStyle.of(
+    DimensionalityConf _scale(double scale ) {
+        return DimensionalityConf.of(
                     _minSize.scale(scale),
                     _maxSize.scale(scale),
                     _preferredSize.scale(scale),
@@ -131,7 +131,7 @@ final class DimensionalityStyle
                 );
     }
 
-    DimensionalityStyle simplified() {
+    DimensionalityConf simplified() {
         if ( this == _NONE )
             return _NONE;
 
@@ -140,7 +140,7 @@ final class DimensionalityStyle
         Size simplifiedPreferredSize = _preferredSize.width().orElse(0f) == 0 && _preferredSize.height().orElse(0f) == 0 ? _NONE._preferredSize : _preferredSize;
         Size simplifiedSize          = _size.width().orElse(0f) == 0 && _size.height().orElse(0f) == 0 ? _NONE._size : _size;
 
-        return DimensionalityStyle.of(
+        return DimensionalityConf.of(
                     simplifiedMinSize,
                     simplifiedMaxSize,
                     simplifiedPreferredSize,
@@ -173,8 +173,8 @@ final class DimensionalityStyle
     @Override
     public final boolean equals( Object o ) {
         if ( this == o ) return true;
-        if ( !(o instanceof DimensionalityStyle) ) return false;
-        DimensionalityStyle that = (DimensionalityStyle) o;
+        if ( !(o instanceof DimensionalityConf) ) return false;
+        DimensionalityConf that = (DimensionalityConf) o;
         return Objects.equals(_minSize,        that._minSize)       &&
                Objects.equals(_maxSize,        that._maxSize)       &&
                Objects.equals(_preferredSize,  that._preferredSize) &&

@@ -52,7 +52,7 @@ public final class StyleConf
                                             BorderConf.none(),
                                             BaseConf.none(),
                                             FontStyle.none(),
-                                            DimensionalityStyle.none(),
+                                            DimensionalityConf.none(),
                                             StyleLayers.empty(),
                                             NamedStyles.empty()
                                         );
@@ -67,7 +67,7 @@ public final class StyleConf
         BorderConf border,
         BaseConf base,
         FontStyle           font,
-        DimensionalityStyle dimensionality,
+        DimensionalityConf dimensionality,
         StyleLayers         layers,
         NamedStyles<String> properties
     ) {
@@ -90,7 +90,7 @@ public final class StyleConf
     private final BorderConf _border;
     private final BaseConf _base;
     private final FontStyle                  _font;
-    private final DimensionalityStyle        _dimensionality;
+    private final DimensionalityConf _dimensionality;
     private final StyleLayers                _layers;
     private final NamedStyles<String>        _properties;
 
@@ -99,7 +99,7 @@ public final class StyleConf
         BorderConf border,
         BaseConf base,
         FontStyle           font,
-        DimensionalityStyle dimensionality,
+        DimensionalityConf dimensionality,
         StyleLayers         layers,
         NamedStyles<String> properties
     ) {
@@ -125,7 +125,7 @@ public final class StyleConf
     BaseConf base() { return _base; }
 
 
-    DimensionalityStyle dimensionality() { return _dimensionality; }
+    DimensionalityConf dimensionality() { return _dimensionality; }
 
 
     /**
@@ -216,7 +216,7 @@ public final class StyleConf
                     ( layer == UI.Layer.BORDER     ? _border : _border.withColor(null) ),
                     ( layer == UI.Layer.BACKGROUND ? _base   : BaseConf.none() ),
                     FontStyle.none(),
-                    DimensionalityStyle.none(),
+                    DimensionalityConf.none(),
                     _layers.onlyRetainingAsUnnamedLayer(layer),
                     NamedStyles.empty()
                 );
@@ -305,7 +305,7 @@ public final class StyleConf
         return StyleConf.of(_layout, _border, _base, font, _dimensionality, _layers, _properties);
     }
 
-    StyleConf _withDimensionality(DimensionalityStyle dimensionality ) {
+    StyleConf _withDimensionality(DimensionalityConf dimensionality ) {
         if ( dimensionality == _dimensionality )
             return this;
 
