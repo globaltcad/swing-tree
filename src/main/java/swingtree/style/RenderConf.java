@@ -1,7 +1,6 @@
 package swingtree.style;
 
 import swingtree.UI;
-import swingtree.layout.Size;
 
 import java.awt.Graphics;
 import java.awt.Shape;
@@ -19,19 +18,15 @@ import java.util.Objects;
 final class RenderConf
 {
     private static final RenderConf _NONE = new RenderConf(
-                                                    BorderConf.none(),
-                                                    BaseConf.none(),
+                                                    StructureConf.none(),
+                                                    BaseColorConf.none(),
                                                     StyleLayer.empty(),
-                                                    Size.unknown(),
-                                                    Outline.none(),
                                                     new ComponentAreas()
                                                 );
 
-    private final BorderConf     _border;
-    private final BaseConf       _base;
-    private final StyleLayer _layer;
-    private final Size _size;
-    private final Outline        _baseOutline;
+    private final StructureConf _structureConf;
+    private final BaseColorConf  _baseColor;
+    private final StyleLayer     _layer;
     private final ComponentAreas _areas;
 
     private boolean _wasAlreadyHashed = false;
@@ -40,62 +35,62 @@ final class RenderConf
 
 
     private RenderConf(
-        BorderConf     border,
-        BaseConf       base,
+        StructureConf structureConf,
+        BaseColorConf  base,
         StyleLayer     layers,
-        Size           currentBounds,
-        Outline        baseOutline,
         ComponentAreas areas
     ) {
-        _border        = Objects.requireNonNull(border);
-        _base          = Objects.requireNonNull(base);
-        _layer = Objects.requireNonNull(layers);
-        _size = Objects.requireNonNull(currentBounds);
-        _baseOutline   = Objects.requireNonNull(baseOutline);
-        _areas         = Objects.requireNonNull(areas);
+        _structureConf = Objects.requireNonNull(structureConf);
+        _baseColor    = Objects.requireNonNull(base);
+        _layer        = Objects.requireNonNull(layers);
+        _areas        = Objects.requireNonNull(areas);
     }
 
     static RenderConf of(
-        BorderConf     border,
-        BaseConf       base,
+        StructureConf structureConf,
+        BaseColorConf  base,
         StyleLayer     layers,
-        Size           currentBounds,
-        Outline        baseOutline,
         ComponentAreas areas
     ) {
         if (
-            border        == _NONE._border &&
-            base          == _NONE._base &&
-            layers        == _NONE._layer &&
-            currentBounds == _NONE._size &&
-            baseOutline   == _NONE._baseOutline &&
-            areas         == _NONE._areas
+            structureConf == StructureConf.none() &&
+            base      == BaseColorConf.none() &&
+            layers    == _NONE._layer &&
+            areas     == _NONE._areas
         )
             return _NONE;
         else
-            return new RenderConf(border, base, layers, currentBounds, baseOutline, areas);
+            return new RenderConf(structureConf, base, layers, areas);
     }
 
     static RenderConf of(UI.Layer layer, ComponentConf fullConf) {
+        StructureConf structureConf = StructureConf.of(
+                                        fullConf.style().border(),
+                                        fullConf.baseOutline(),
+                                        fullConf.currentBounds().size()
+                                    );
+        BaseColorConf colorConf = BaseColorConf.of(
+                                    fullConf.style().base().foundationColor().filter( c -> layer == UI.Layer.BACKGROUND ).orElse(null),
+                                    fullConf.style().base().backgroundColor().filter( c -> layer == UI.Layer.BACKGROUND ).orElse(null),
+                                    fullConf.style()
+                                            .border()
+                                            .color()
+                                            .filter(c -> layer == UI.Layer.BORDER )
+                                            .orElse(null)
+                                );
         return of(
-            ( layer == UI.Layer.BORDER     ? fullConf.style().border() : fullConf.style().border().withColor(null) ),
-            ( layer == UI.Layer.BACKGROUND ? fullConf.style().base()   : BaseConf.none() ),
-            fullConf.style().layer(layer),
-            fullConf.currentBounds().size(),
-            fullConf.baseOutline(),
-            fullConf.areas()
-        );
+                    structureConf,
+                    colorConf,
+                    fullConf.style().layer(layer),
+                    fullConf.areas()
+                );
     }
 
-    BorderConf border() { return _border; }
+    StructureConf structure() { return _structureConf; }
 
-    BaseConf base() { return _base; }
+    BaseColorConf baseColors() { return _baseColor; }
 
     StyleLayer layer() { return _layer; }
-
-    Size size() { return _size; }
-
-    Outline baseOutline() { return _baseOutline; }
 
     ComponentAreas areas() { return _areas; }
 
@@ -136,7 +131,7 @@ final class RenderConf
         if ( _wasAlreadyHashed )
             return _hashCode;
 
-        _hashCode = Objects.hash(_border, _base, _layer, _size, _baseOutline);
+        _hashCode = Objects.hash(_structureConf, _baseColor, _layer);
         _wasAlreadyHashed = true;
         return _hashCode;
     }
@@ -147,11 +142,9 @@ final class RenderConf
         if ( o == null ) return false;
         if ( o.getClass() != this.getClass() ) return false;
         RenderConf other = (RenderConf) o;
-        return Objects.equals(_border,        other._border) &&
-               Objects.equals(_base,          other._base  ) &&
-               Objects.equals(_layer,         other._layer ) &&
-               Objects.equals(_size,          other._size  ) &&
-               Objects.equals(_baseOutline,   other._baseOutline);
+        return Objects.equals(_structureConf, other._structureConf) &&
+               Objects.equals(_baseColor, other._baseColor) &&
+               Objects.equals(_layer, other._layer);
     }
 
 

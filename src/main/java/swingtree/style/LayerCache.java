@@ -80,7 +80,7 @@ final class LayerCache
         CachedImage bufferedImage = CACHE.get(styleConf);
 
         if ( bufferedImage == null ) {
-            Size size = styleConf.size();
+            Size size = styleConf.structure().size();
             bufferedImage = new CachedImage(
                                 size.width().map(Number::intValue).orElse(1),
                                 size.height().map(Number::intValue).orElse(1),
@@ -194,7 +194,7 @@ final class LayerCache
 
     public boolean _cachingMakesSenseFor( RenderConf state )
     {
-        Size bounds = state.size();
+        Size bounds = state.structure().size();
         if ( !bounds.hasPositiveWidth() || !bounds.hasPositiveHeight() )
             return false;
 
@@ -217,17 +217,18 @@ final class LayerCache
             if ( !shadow.equals(ShadowConf.none()) && shadow.color().isPresent() )
                 heavyStyleCount++;
 
-        BorderConf border = state.border();
+        StructureConf border = state.structure();
+        BaseColorConf colorConf = state.baseColors();
         boolean rounded = border.hasAnyNonZeroArcs();
 
         if ( _layer == UI.Layer.BORDER ) {
             boolean hasWidth = !Outline.none().equals(border.widths());
-            if ( hasWidth && border.color().isPresent() )
+            if ( hasWidth && colorConf.borderColor().isPresent() )
                 heavyStyleCount++;
         }
         if ( _layer == UI.Layer.BACKGROUND ) {
-            BaseConf base = state.base();
-            boolean roundedOrHasMargin = rounded || !state.border().margin().equals(Outline.none());
+            BaseColorConf base = state.baseColors();
+            boolean roundedOrHasMargin = rounded || !state.structure().margin().equals(Outline.none());
             if ( base.backgroundColor().isPresent() && roundedOrHasMargin )
                 heavyStyleCount++;
         }

@@ -31,13 +31,13 @@ final class StyleRenderer
         // First up, we render things unique to certain layers:
 
         if ( layer == UI.Layer.BACKGROUND ) {
-            conf.base().foundationColor().ifPresent(outerColor -> {
+            conf.baseColors().foundationColor().ifPresent(outerColor -> {
                 if ( outerColor.getAlpha() > 0 ) { // Avoid rendering a fully transparent color!
                     g2d.setColor(outerColor);
                     g2d.fill(conf.get(UI.ComponentArea.EXTERIOR));
                 }
             });
-            conf.base().backgroundColor().ifPresent(color -> {
+            conf.baseColors().backgroundColor().ifPresent(color -> {
                 if ( color.getAlpha() > 0 ) { // Avoid rendering a fully transparent color!
                     g2d.setColor(color);
                     g2d.fill(conf.get(UI.ComponentArea.BODY));
@@ -46,7 +46,7 @@ final class StyleRenderer
         }
 
         if ( layer == UI.Layer.BORDER ) {
-            conf.border().color().ifPresent(color -> {
+            conf.baseColors().borderColor().ifPresent(color -> {
                 _drawBorder( conf, color, g2d);
             });
         }
@@ -57,7 +57,7 @@ final class StyleRenderer
         // 1. A grounding serving as a base background, which is a filled color and/or an image:
         for ( ImageConf imageConf : conf.layer().images().sortedByNamesAndFilteredBy() )
             if ( !imageConf.equals(ImageConf.none()) )
-                _renderImage( conf, imageConf, conf.size(), g2d);
+                _renderImage( conf, imageConf, conf.structure().size(), g2d);
 
         // 2. Gradients, which are best used to give a component a nice surface lighting effect.
         // They may transition vertically, horizontally or diagonally over various different colors:
@@ -71,14 +71,14 @@ final class StyleRenderer
                     Outline insets = Outline.none();
                     switch ( gradient.boundary() ) {
                         case OUTER_TO_EXTERIOR:   insets = Outline.none(); break;
-                        case EXTERIOR_TO_BORDER:  insets = conf.border().margin(); break;
-                        case BORDER_TO_INTERIOR:  insets = conf.border().margin().plus(conf.border().widths()); break;
-                        case INTERIOR_TO_CONTENT: insets = conf.border().margin().plus(conf.border().widths()).plus(conf.border().padding()); break;
+                        case EXTERIOR_TO_BORDER:  insets = conf.structure().margin(); break;
+                        case BORDER_TO_INTERIOR:  insets = conf.structure().margin().plus(conf.structure().widths()); break;
+                        case INTERIOR_TO_CONTENT: insets = conf.structure().margin().plus(conf.structure().widths()).plus(conf.structure().padding()); break;
                     }
                     if ( gradient.transition().isDiagonal() )
-                        _renderDiagonalGradient(g2d, conf.size(), insets, gradient, conf.get(gradient.area()));
+                        _renderDiagonalGradient(g2d, conf.structure().size(), insets, gradient, conf.get(gradient.area()));
                     else
-                        _renderVerticalOrHorizontalGradient(g2d, conf.size(), insets, gradient, conf.get(gradient.area()));
+                        _renderVerticalOrHorizontalGradient(g2d, conf.structure().size(), insets, gradient, conf.get(gradient.area()));
                 }
             }
 
@@ -134,14 +134,14 @@ final class StyleRenderer
 
     private static void _drawBorder( RenderConf conf, Color color, Graphics2D g2d )
     {
-        if ( !Outline.none().equals(conf.border().widths()) ) {
+        if ( !Outline.none().equals(conf.structure().widths()) ) {
             try {
                 Area borderArea = conf.get(UI.ComponentArea.BORDER);
                 g2d.setColor(color);
                 g2d.fill(borderArea);
             } catch ( Exception e ) {
                 log.warn(
-                    "An exception occurred while drawing the border of border style '" + conf.border() + "' ",
+                    "An exception occurred while drawing the border of border style '" + conf.structure() + "' ",
                     e
                 );
                 /*
@@ -161,7 +161,7 @@ final class StyleRenderer
             return;
 
         Color shadowColor = shadow.color().orElse(Color.BLACK);
-        Size  size        = conf.size();
+        Size  size        = conf.structure().size();
 
         // First let's check if we need to render any shadows at all
         // Is the shadow color transparent?
@@ -169,18 +169,18 @@ final class StyleRenderer
             return;
 
         // The background box is calculated from the margins and border radius:
-        final float leftBorderWidth   = conf.border().widths().left().orElse(0f);
-        final float topBorderWidth    = conf.border().widths().top().orElse(0f);
-        final float rightBorderWidth  = conf.border().widths().right().orElse(0f);
-        final float bottomBorderWidth = conf.border().widths().bottom().orElse(0f);
-        final float left   = Math.max(conf.border().margin().left().orElse(0f),   0) + ( shadow.isInset() ? leftBorderWidth   : 0 );
-        final float top    = Math.max(conf.border().margin().top().orElse(0f),    0) + ( shadow.isInset() ? topBorderWidth    : 0 );
-        final float right  = Math.max(conf.border().margin().right().orElse(0f),  0) + ( shadow.isInset() ? rightBorderWidth  : 0 );
-        final float bottom = Math.max(conf.border().margin().bottom().orElse(0f), 0) + ( shadow.isInset() ? bottomBorderWidth : 0 );
-        final float topLeftRadius     = Math.max(conf.border().topLeftRadius(), 0);
-        final float topRightRadius    = Math.max(conf.border().topRightRadius(), 0);
-        final float bottomRightRadius = Math.max(conf.border().bottomRightRadius(), 0);
-        final float bottomLeftRadius  = Math.max(conf.border().bottomLeftRadius(), 0);
+        final float leftBorderWidth   = conf.structure().widths().left().orElse(0f);
+        final float topBorderWidth    = conf.structure().widths().top().orElse(0f);
+        final float rightBorderWidth  = conf.structure().widths().right().orElse(0f);
+        final float bottomBorderWidth = conf.structure().widths().bottom().orElse(0f);
+        final float left   = Math.max(conf.structure().margin().left().orElse(0f),   0) + ( shadow.isInset() ? leftBorderWidth   : 0 );
+        final float top    = Math.max(conf.structure().margin().top().orElse(0f),    0) + ( shadow.isInset() ? topBorderWidth    : 0 );
+        final float right  = Math.max(conf.structure().margin().right().orElse(0f),  0) + ( shadow.isInset() ? rightBorderWidth  : 0 );
+        final float bottom = Math.max(conf.structure().margin().bottom().orElse(0f), 0) + ( shadow.isInset() ? bottomBorderWidth : 0 );
+        final float topLeftRadius     = Math.max(conf.structure().topLeftRadius(), 0);
+        final float topRightRadius    = Math.max(conf.structure().topRightRadius(), 0);
+        final float bottomRightRadius = Math.max(conf.structure().bottomRightRadius(), 0);
+        final float bottomLeftRadius  = Math.max(conf.structure().bottomLeftRadius(), 0);
 
         final float width     = size.width().orElse(0f);
         final float height    = size.height().orElse(0f);
