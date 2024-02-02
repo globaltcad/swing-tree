@@ -6,6 +6,7 @@ import java.awt.geom.Arc2D;
 import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
+import java.lang.ref.WeakReference;
 import java.util.Map;
 import java.util.Objects;
 import java.util.WeakHashMap;
@@ -22,14 +23,27 @@ final class ComponentAreas
     private final LazyRef<Area> _interiorArea;
     private final LazyRef<Area> _exteriorArea;
     private final LazyRef<Area> _bodyArea;
+    private final WeakReference<StructureConf> _key;
 
 
     static ComponentAreas of( StructureConf state ) {
-        return _CACHE.computeIfAbsent(state, conf -> new ComponentAreas());
+        return _CACHE.computeIfAbsent(state, conf -> new ComponentAreas(state));
     }
 
-    private ComponentAreas() {
+    static StructureConf intern( StructureConf state ) {
+        ComponentAreas areas = _CACHE.get(state);
+        if ( areas != null ) {
+            StructureConf key = areas._key.get();
+            if ( key != null )
+                return key;
+        }
+        _CACHE.put(state, new ComponentAreas(state));
+        return state;
+    }
+
+    private ComponentAreas(StructureConf conf) {
         this(
+            conf,
             new LazyRef<>(new CacheProducerAndValidator<Area>(){
                 @Override
                 public Area produce(StructureConf currentState, ComponentAreas currentAreas) {
@@ -78,11 +92,13 @@ final class ComponentAreas
     }
     
     public ComponentAreas(
+        StructureConf conf,
         LazyRef<Area> borderArea,
         LazyRef<Area> interiorComponentArea,
         LazyRef<Area> exteriorComponentArea,
         LazyRef<Area> mainComponentArea
     ) {
+        _key = new WeakReference<>(conf);
         _borderArea   = Objects.requireNonNull(borderArea);
         _interiorArea = Objects.requireNonNull(interiorComponentArea);
         _exteriorArea = Objects.requireNonNull(exteriorComponentArea);

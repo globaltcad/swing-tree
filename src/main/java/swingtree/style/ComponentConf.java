@@ -5,12 +5,8 @@ import swingtree.layout.Bounds;
 
 import javax.swing.JComponent;
 import javax.swing.border.Border;
-import java.awt.Graphics;
 import java.awt.Insets;
-import java.awt.Shape;
-import java.awt.geom.Area;
 import java.util.Objects;
-import java.util.Optional;
 
 /**
  *  An immutable snapshot of essential component state needed for rendering
@@ -34,7 +30,6 @@ final class ComponentConf
     private final Bounds  _currentBounds;
     private final Outline _baseOutline;
 
-    private ComponentAreas _areas = null;
     private boolean _wasAlreadyHashed = false;
     private int     _hashCode         = 0; // cached hash code
 
@@ -54,46 +49,6 @@ final class ComponentConf
     Bounds currentBounds() { return _currentBounds; }
 
     Outline baseOutline() { return _baseOutline; }
-
-    Optional<Shape> componentArea() {
-        Shape contentClip = null;
-        if ( _areas == null )
-            _areas = ComponentAreas.of(this.toStructureConf());
-        if ( _areas.bodyArea().exists() || _styleConf.margin().isPositive() )
-            contentClip = get(UI.ComponentArea.BODY);
-
-        return Optional.ofNullable(contentClip);
-    }
-
-    public Area get( UI.ComponentArea areaType ) {
-        switch ( areaType ) {
-            case ALL:
-                return null; // No clipping
-            case BODY:
-                return _areas.bodyArea().getFor(toStructureConf(), _areas); // all - exterior == interior + border
-            case INTERIOR:
-                return _areas.interiorArea().getFor(toStructureConf(), _areas); // all - exterior - border == content - border
-            case BORDER:
-                return _areas.borderArea().getFor(toStructureConf(), _areas); // all - exterior - interior
-            case EXTERIOR:
-                return _areas.exteriorArea().getFor(toStructureConf(), _areas); // all - border - interior
-            default:
-                return null;
-        }
-    }
-
-
-    void paintClippedTo(UI.ComponentArea area, Graphics g, Runnable painter ) {
-        toRenderConf().paintClippedTo(area, g, painter);
-    }
-
-    RenderConf toRenderConf() {
-        return RenderConf.of(UI.Layer.BORDER, this);
-    }
-
-    StructureConf toStructureConf() {
-        return toRenderConf().structure();
-    }
 
     ComponentConf with( StyleConf styleConf, JComponent component )
     {
@@ -129,7 +84,7 @@ final class ComponentConf
      * @param layer The layer to retain.
      * @return A new {@link ComponentConf} instance which only contains style information relevant to the provided {@link UI.Layer}.
      */
-    RenderConf onlyRetainingLayer( UI.Layer layer ) {
+    RenderConf toRenderConfFor( UI.Layer layer ) {
         return RenderConf.of(layer,this);
     }
 

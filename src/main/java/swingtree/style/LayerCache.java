@@ -69,29 +69,33 @@ final class LayerCache
         _layer = Objects.requireNonNull(layer);
     }
 
+    RenderConf getCurrentKey() {
+        return _strongRef == null ? RenderConf.none() : _strongRef;
+    }
+
     public boolean hasBufferedImage() {
         return _localCache != null;
     }
 
-    private void _allocateOrGetCachedBuffer( RenderConf styleConf )
+    private void _allocateOrGetCachedBuffer( RenderConf renderConf )
     {
         Map<RenderConf, CachedImage> CACHE = _CACHE;
 
-        CachedImage bufferedImage = CACHE.get(styleConf);
+        CachedImage bufferedImage = CACHE.get(renderConf);
 
         if ( bufferedImage == null ) {
-            Size size = styleConf.structure().size();
+            Size size = renderConf.structure().size();
             bufferedImage = new CachedImage(
                                 size.width().map(Number::intValue).orElse(1),
                                 size.height().map(Number::intValue).orElse(1),
-                                styleConf
+                                renderConf
                             );
-            CACHE.put(styleConf, bufferedImage);
-            _strongRef = styleConf;
+            CACHE.put(renderConf, bufferedImage);
+            _strongRef = renderConf;
         }
         else {
             // We keep a strong reference to the state so that the cached image is not garbage collected
-            _strongRef = bufferedImage.getKeyOrElse(styleConf);
+            _strongRef = bufferedImage.getKeyOrElse(renderConf);
             /*
                 The reason why we take the key stored in the cached image as a strong reference is because this
                 key object is also the key in the global (weak) hash map based cache
@@ -117,8 +121,8 @@ final class LayerCache
         if ( newConf.currentBounds().hasWidth(0) || newConf.currentBounds().hasHeight(0) )
             return;
 
-        final RenderConf oldState = oldConf.onlyRetainingLayer(_layer);
-        final RenderConf newState = newConf.onlyRetainingLayer(_layer);
+        final RenderConf oldState = oldConf.toRenderConfFor(_layer);
+        final RenderConf newState = newConf.toRenderConfFor(_layer);
 
         boolean validationNeeded = ( !_isInitialized || !oldState.equals(newState) );
 

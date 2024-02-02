@@ -6,12 +6,12 @@ import swingtree.animation.LifeSpan;
 import swingtree.api.Painter;
 
 import javax.swing.JComponent;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.awt.Shape;
+import java.awt.geom.Area;
+import java.util.*;
 
 /**
  *  Orchestrates the rendering of a component's style and animations. <br>
@@ -22,24 +22,26 @@ final class StyleEngine
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(StyleEngine.class);
 
     static StyleEngine create() {
-        return new StyleEngine(ComponentConf.none(), new Expirable[0], null);
+        return new StyleEngine(StructureConf.none(), ComponentConf.none(), new Expirable[0], null);
     }
 
     static boolean IS_ANTIALIASING_ENABLED(){
         return UI.scale() < 1.5;
     }
 
-
+    private final StructureConf        _structureConf;
     private final ComponentConf        _componentConf;
     private final Expirable<Painter>[] _animationPainters;
     private final LayerCache[]         _layerCaches;
 
 
     private StyleEngine(
+        StructureConf         structureConf,
         ComponentConf         componentConf,
         Expirable<Painter>[]  animationPainters,
         LayerCache[]          layerCaches // Null when the style engine is freshly created
     ) {
+        _structureConf = Objects.requireNonNull(structureConf);
         _componentConf = Objects.requireNonNull(componentConf);
         _animationPainters = Objects.requireNonNull(animationPainters);
         if ( layerCaches == null ) {
@@ -52,31 +54,67 @@ final class StyleEngine
 
     ComponentConf getComponentConf() { return _componentConf; }
 
+
+    void paintClippedTo(UI.ComponentArea area, Graphics g, Runnable painter ) {
+        RenderConf defaultConf = _layerCaches[UI.Layer.BACKGROUND.ordinal()].getCurrentKey();
+        defaultConf.paintClippedTo(area, g, painter);
+    }
+
+
+    Optional<Shape> componentArea() {
+        Shape contentClip = null;
+        ComponentAreas _areas = ComponentAreas.of(_structureConf);
+        if ( _areas.bodyArea().exists() || _componentConf.style().margin().isPositive() )
+            contentClip = get(UI.ComponentArea.BODY, _areas);
+
+        return Optional.ofNullable(contentClip);
+    }
+
+    public Area get( UI.ComponentArea areaType, ComponentAreas areas ) {
+        switch ( areaType ) {
+            case ALL:
+                return null; // No clipping
+            case BODY:
+                return areas.bodyArea().getFor(_structureConf, areas); // all - exterior == interior + border
+            case INTERIOR:
+                return areas.interiorArea().getFor(_structureConf, areas); // all - exterior - border == content - border
+            case BORDER:
+                return areas.borderArea().getFor(_structureConf, areas); // all - exterior - interior
+            case EXTERIOR:
+                return areas.exteriorArea().getFor(_structureConf, areas); // all - border - interior
+            default:
+                return null;
+        }
+    }
+
+
+
     public boolean hasAnimationPainters() {
         return _animationPainters.length > 0;
     }
 
     StyleEngine withNewStyleAndComponent(StyleConf newStyle, JComponent component ) {
         ComponentConf newConf = _componentConf.with(newStyle, component);
+        StructureConf newStructureConf = StructureConf.of(newConf.style().border(), newConf.baseOutline(), newConf.currentBounds().size());
         for ( LayerCache layerCache : _layerCaches )
             layerCache.validate(_componentConf, newConf);
-        return new StyleEngine( newConf, _animationPainters, _layerCaches);
+        return new StyleEngine( newStructureConf, newConf, _animationPainters, _layerCaches);
     }
 
     StyleEngine withAnimationPainter( LifeSpan lifeSpan, Painter animationPainter ) {
         java.util.List<Expirable<Painter>> animationPainters = new ArrayList<>(Arrays.asList(_animationPainters));
         animationPainters.add(new Expirable<>(lifeSpan, animationPainter));
-        return new StyleEngine(_componentConf, animationPainters.toArray(new Expirable[0]), _layerCaches);
+        return new StyleEngine(_structureConf, _componentConf, animationPainters.toArray(new Expirable[0]), _layerCaches);
     }
 
     StyleEngine withoutAnimationPainters() {
-        return new StyleEngine(_componentConf, new Expirable[0], _layerCaches);
+        return new StyleEngine(_structureConf, _componentConf, new Expirable[0], _layerCaches);
     }
 
     StyleEngine withoutExpiredAnimationPainters() {
         List<Expirable<Painter>> animationPainters = new ArrayList<>(Arrays.asList(_animationPainters));
         animationPainters.removeIf(Expirable::isExpired);
-        return new StyleEngine(_componentConf, animationPainters.toArray(new Expirable[0]), _layerCaches);
+        return new StyleEngine(_structureConf, _componentConf, animationPainters.toArray(new Expirable[0]), _layerCaches);
     }
 
     void renderBackgroundStyle( Graphics2D g2d )

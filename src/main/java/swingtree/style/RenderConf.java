@@ -23,6 +23,8 @@ final class RenderConf
                                                     StyleLayer.empty()
                                                 );
 
+    public static RenderConf none() { return _NONE; }
+
     private final StructureConf _structureConf;
     private final BaseColorConf  _baseColor;
     private final StyleLayer     _layer;

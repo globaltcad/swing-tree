@@ -50,8 +50,16 @@ final class StructureConf
              size            == Size.unknown()
         )
             return _NONE;
-        else
-            return new StructureConf(topLeftArc, topRightArc, bottomLeftArc, bottomRightArc, borderWidths, margin, padding, baseOutline, size);
+        else {
+            StructureConf newConf = new StructureConf(
+                                        topLeftArc,    topRightArc,
+                                        bottomLeftArc, bottomRightArc,
+                                        borderWidths,  margin,
+                                        padding,       baseOutline,
+                                        size
+                                    );
+            return ComponentAreas.intern(newConf);
+        }
     }
 
     static StructureConf of(BorderConf borderConf, Outline baseOutline, Size size )   {
