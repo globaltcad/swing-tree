@@ -51,7 +51,7 @@ public final class StyleConf
                                             LayoutStyle.none(),
                                             BorderConf.none(),
                                             BaseConf.none(),
-                                            FontStyle.none(),
+                                            FontConf.none(),
                                             DimensionalityConf.none(),
                                             StyleLayers.empty(),
                                             NamedStyles.empty()
@@ -66,7 +66,7 @@ public final class StyleConf
         LayoutStyle         layout,
         BorderConf border,
         BaseConf base,
-        FontStyle           font,
+        FontConf font,
         DimensionalityConf dimensionality,
         StyleLayers         layers,
         NamedStyles<String> properties
@@ -89,7 +89,7 @@ public final class StyleConf
     private final LayoutStyle                _layout;
     private final BorderConf _border;
     private final BaseConf _base;
-    private final FontStyle                  _font;
+    private final FontConf _font;
     private final DimensionalityConf _dimensionality;
     private final StyleLayers                _layers;
     private final NamedStyles<String>        _properties;
@@ -98,7 +98,7 @@ public final class StyleConf
         LayoutStyle         layout,
         BorderConf border,
         BaseConf base,
-        FontStyle           font,
+        FontConf font,
         DimensionalityConf dimensionality,
         StyleLayers         layers,
         NamedStyles<String> properties
@@ -177,7 +177,7 @@ public final class StyleConf
                 .anyMatch(s -> s.color().isPresent() && s.color().get().getAlpha() > 0 );
     }
 
-    public FontStyle font() { return _font; }
+    public FontConf font() { return _font; }
 
     /**
      * @return An unmodifiable list of painters sorted by their names in ascending alphabetical order.
@@ -215,7 +215,7 @@ public final class StyleConf
                     LayoutStyle.none(),
                     ( layer == UI.Layer.BORDER     ? _border : _border.withColor(null) ),
                     ( layer == UI.Layer.BACKGROUND ? _base   : BaseConf.none() ),
-                    FontStyle.none(),
+                    FontConf.none(),
                     DimensionalityConf.none(),
                     _layers.onlyRetainingAsUnnamedLayer(layer),
                     NamedStyles.empty()
@@ -298,7 +298,7 @@ public final class StyleConf
         return StyleConf.of(_layout, _border, background, _font, _dimensionality, _layers, _properties);
     }
 
-    StyleConf _withFont(FontStyle font ) {
+    StyleConf _withFont(FontConf font ) {
         if ( font == _font )
             return this;
 

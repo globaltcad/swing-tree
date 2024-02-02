@@ -79,7 +79,7 @@ final class StyleSource<C extends JComponent>
                               .map(ComponentExtension::from)
                               .map(ComponentExtension::getStyle)
                               .map(StyleConf::font)
-                              .filter( f -> !f.equals(FontStyle.none()) )
+                              .filter( f -> !f.equals(FontConf.none()) )
                               .map( f -> StyleConf.none()._withFont(f) )
                               .orElse(StyleConf.none());
 

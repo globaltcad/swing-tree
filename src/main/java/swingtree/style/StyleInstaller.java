@@ -493,22 +493,22 @@ final class StyleInstaller<C extends JComponent>
 
     private void _applyFontStyleTo( final C owner, final StyleConf styleConf )
     {
-        final FontStyle fontStyle = styleConf.font();
+        final FontConf fontConf = styleConf.font();
 
         if ( owner instanceof JTextComponent ) {
             JTextComponent tc = (JTextComponent) owner;
-            if ( fontStyle.selectionColor().isPresent() && ! Objects.equals( tc.getSelectionColor(), fontStyle.selectionColor().get() ) )
-                tc.setSelectionColor(fontStyle.selectionColor().get());
+            if ( fontConf.selectionColor().isPresent() && ! Objects.equals( tc.getSelectionColor(), fontConf.selectionColor().get() ) )
+                tc.setSelectionColor(fontConf.selectionColor().get());
         }
 
-        fontStyle
+        fontConf
              .createDerivedFrom(owner.getFont())
              .ifPresent( newFont -> {
                     if ( !newFont.equals(owner.getFont()) )
                         owner.setFont( newFont );
                 });
 
-        fontStyle.horizontalAlignment().ifPresent( alignment -> {
+        fontConf.horizontalAlignment().ifPresent(alignment -> {
             if ( owner instanceof JLabel ) {
                 JLabel label = (JLabel) owner;
                 if ( !Objects.equals( label.getHorizontalAlignment(), alignment.forSwing() ) )
@@ -525,7 +525,7 @@ final class StyleInstaller<C extends JComponent>
                     textField.setHorizontalAlignment( alignment.forSwing() );
             }
         });
-        fontStyle.verticalAlignment().ifPresent( alignment -> {
+        fontConf.verticalAlignment().ifPresent(alignment -> {
             if ( owner instanceof JLabel ) {
                 JLabel label = (JLabel) owner;
                 if ( !Objects.equals( label.getVerticalAlignment(), alignment.forSwing() ) )
