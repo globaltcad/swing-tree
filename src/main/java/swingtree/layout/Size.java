@@ -73,6 +73,14 @@ public final class Size
         return ( _height < 0 ? Optional.empty() : Optional.of(_height) );
     }
 
+    public boolean hasPositiveWidth() {
+        return _width > 0;
+    }
+
+    public boolean hasPositiveHeight() {
+        return _height > 0;
+    }
+
     /**
      * @param width The width of the size to create.
      * @return A new {@link Size} instance with the given width.

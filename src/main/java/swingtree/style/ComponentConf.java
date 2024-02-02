@@ -47,7 +47,7 @@ final class ComponentConf
         Outline        baseOutline,
         ComponentAreas componentAreas
     ) {
-        _styleConf = Objects.requireNonNull(styleConf);
+        _styleConf     = Objects.requireNonNull(styleConf);
         _currentBounds = Objects.requireNonNull(currentBounds);
         _baseOutline   = Objects.requireNonNull(baseOutline);
         _areas         = Objects.requireNonNull(componentAreas);
@@ -67,18 +67,20 @@ final class ComponentConf
         return Optional.ofNullable(contentClip);
     }
 
+    ComponentAreas areas() { return _areas; }
+
     public Area get( UI.ComponentArea areaType ) {
         switch ( areaType ) {
             case ALL:
                 return null; // No clipping
             case BODY:
-                return _areas.bodyArea().getFor(this, _areas); // all - exterior == interior + border
+                return _areas.bodyArea().getFor(this.toRenderConf(), _areas); // all - exterior == interior + border
             case INTERIOR:
-                return _areas.interiorArea().getFor(this, _areas); // all - exterior - border == content - border
+                return _areas.interiorArea().getFor(this.toRenderConf(), _areas); // all - exterior - border == content - border
             case BORDER:
-                return _areas.borderArea().getFor(this, _areas); // all - exterior - interior
+                return _areas.borderArea().getFor(this.toRenderConf(), _areas); // all - exterior - interior
             case EXTERIOR:
-                return _areas.exteriorArea().getFor(this, _areas); // all - border - interior
+                return _areas.exteriorArea().getFor(this.toRenderConf(), _areas); // all - border - interior
             default:
                 return null;
         }
@@ -86,20 +88,14 @@ final class ComponentConf
 
 
     void paintClippedTo(UI.ComponentArea area, Graphics g, Runnable painter ) {
-        Shape oldClip = g.getClip();
-
-        Shape newClip = get(area);
-        if ( newClip != null && newClip != oldClip ) {
-            newClip = StyleUtility.intersect(newClip, oldClip);
-            g.setClip(newClip);
-        }
-
-        painter.run();
-
-        g.setClip(oldClip);
+        toRenderConf().paintClippedTo(area, g, painter);
     }
 
-    ComponentConf with(StyleConf styleConf, JComponent component )
+    RenderConf toRenderConf() {
+        return RenderConf.of(UI.Layer.BORDER, this);
+    }
+
+    ComponentConf with( StyleConf styleConf, JComponent component )
     {
         Outline outline = Outline.none();
         Border border = component.getBorder();
@@ -115,7 +111,7 @@ final class ComponentConf
             return this;
 
         ComponentConf newConf = new ComponentConf(
-                styleConf,
+                                    styleConf,
                                     Bounds.of(component.getX(), component.getY(), component.getWidth(), component.getHeight()),
                                     outline,
                                     _areas
@@ -125,7 +121,7 @@ final class ComponentConf
                         newConf._styleConf,
                         newConf._currentBounds,
                         newConf._baseOutline,
-                        _areas.validate(this, newConf)
+                        _areas.validate(this.toRenderConf(), newConf.toRenderConf())
                 );
     }
 
@@ -147,13 +143,8 @@ final class ComponentConf
      * @param layer The layer to retain.
      * @return A new {@link ComponentConf} instance which only contains style information relevant to the provided {@link UI.Layer}.
      */
-    ComponentConf onlyRetainingLayer( UI.Layer layer ) {
-        return new ComponentConf(
-                    _styleConf.onlyRetainingRenderCacheRelevantConfForLayer(layer),
-                    _currentBounds.withX(0).withY(0),
-                    _baseOutline,
-                    _areas
-                );
+    RenderConf onlyRetainingLayer( UI.Layer layer ) {
+        return RenderConf.of(layer,this);
     }
 
     @Override

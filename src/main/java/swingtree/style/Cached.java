@@ -4,9 +4,9 @@ import java.util.Objects;
 
 /**
  *  A wrapper for a value that is produced from a {@link ComponentConf} through
- *  a {@link CacheProducerAndValidator#produce(ComponentConf, ComponentAreas)} implementation and validated against
+ *  a {@link CacheProducerAndValidator#produce(RenderConf, ComponentAreas)} implementation and validated against
  *  a previous {@link ComponentConf} through a
- *  {@link CacheProducerAndValidator#leadsToSameValue(ComponentConf, ComponentConf, ComponentAreas)}
+ *  {@link CacheProducerAndValidator#leadsToSameValue(RenderConf, RenderConf, ComponentAreas)}
  *  implementation.
  *  <p>
  *  This design is possible due to the fact that the {@link ComponentConf} is deeply immutable
@@ -24,14 +24,14 @@ final class Cached<T> implements CacheProducerAndValidator<T>
         _producerAndValidator = Objects.requireNonNull(producerAndValidator);
     }
 
-    final Cached<T> validate( ComponentConf oldState, ComponentConf newState, ComponentAreas context ) {
+    final Cached<T> validate( RenderConf oldState, RenderConf newState, ComponentAreas context ) {
         if ( _value != null && !_producerAndValidator.leadsToSameValue(oldState, newState, context) ) {
             return new Cached<>(_producerAndValidator);
         }
         return this;
     }
 
-    final T getFor( ComponentConf currentState, ComponentAreas context ) {
+    final T getFor( RenderConf currentState, ComponentAreas context ) {
         if ( _value == null )
             _value = _producerAndValidator.produce(currentState, context);
         return _value;
@@ -42,12 +42,12 @@ final class Cached<T> implements CacheProducerAndValidator<T>
     }
 
     @Override
-    public T produce(ComponentConf currentState, ComponentAreas context) {
+    public T produce(RenderConf currentState, ComponentAreas context) {
         return _producerAndValidator.produce(currentState, context);
     }
 
     @Override
-    public boolean leadsToSameValue(ComponentConf oldState, ComponentConf newState, ComponentAreas context) {
+    public boolean leadsToSameValue(RenderConf oldState, RenderConf newState, ComponentAreas context) {
         return _producerAndValidator.leadsToSameValue(oldState, newState, context);
     }
 

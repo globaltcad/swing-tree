@@ -124,9 +124,9 @@ public final class StyleConf
 
     BaseConf base() { return _base; }
 
-
     DimensionalityConf dimensionality() { return _dimensionality; }
 
+    StyleLayer layer(UI.Layer layer ) { return _layers.get(layer); }
 
     /**
      * @return The default shadow style.

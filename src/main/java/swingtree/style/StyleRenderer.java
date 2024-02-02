@@ -15,7 +15,7 @@ import java.util.function.Function;
 
 /**
  *  A stateless un-instantiable utility class that renders the style of a component
- *  using the immutable {@link ComponentConf} object containing the essential state
+ *  using the immutable {@link RenderConf} object containing the essential state
  *  needed for rendering, like for example the current {@link Bounds} and {@link StyleConf}
  *  of a particular component.
  */
@@ -26,18 +26,18 @@ final class StyleRenderer
     private StyleRenderer() {} // Un-instantiable!
 
 
-    public static void renderStyleOn( UI.Layer layer, ComponentConf conf, Graphics2D g2d )
+    public static void renderStyleOn( UI.Layer layer, RenderConf conf, Graphics2D g2d )
     {
         // First up, we render things unique to certain layers:
 
         if ( layer == UI.Layer.BACKGROUND ) {
-            conf.style().base().foundationColor().ifPresent(outerColor -> {
+            conf.base().foundationColor().ifPresent(outerColor -> {
                 if ( outerColor.getAlpha() > 0 ) { // Avoid rendering a fully transparent color!
                     g2d.setColor(outerColor);
                     g2d.fill(conf.get(UI.ComponentArea.EXTERIOR));
                 }
             });
-            conf.style().base().backgroundColor().ifPresent(color -> {
+            conf.base().backgroundColor().ifPresent(color -> {
                 if ( color.getAlpha() > 0 ) { // Avoid rendering a fully transparent color!
                     g2d.setColor(color);
                     g2d.fill(conf.get(UI.ComponentArea.BODY));
@@ -46,7 +46,7 @@ final class StyleRenderer
         }
 
         if ( layer == UI.Layer.BORDER ) {
-            conf.style().border().color().ifPresent(color -> {
+            conf.border().color().ifPresent(color -> {
                 _drawBorder( conf, color, g2d);
             });
         }
@@ -55,13 +55,13 @@ final class StyleRenderer
 
         // Every layer has 4 things:
         // 1. A grounding serving as a base background, which is a filled color and/or an image:
-        for ( ImageConf imageConf : conf.style().images(layer) )
+        for ( ImageConf imageConf : conf.layer().images().sortedByNamesAndFilteredBy() )
             if ( !imageConf.equals(ImageConf.none()) )
-                _renderImage( conf, imageConf, conf.currentBounds().size(), g2d);
+                _renderImage( conf, imageConf, conf.size(), g2d);
 
         // 2. Gradients, which are best used to give a component a nice surface lighting effect.
         // They may transition vertically, horizontally or diagonally over various different colors:
-        for ( GradientConf gradient : conf.style().gradients(layer) )
+        for ( GradientConf gradient : conf.layer().gradients().sortedByNamesAndFilteredBy() )
             if ( gradient.colors().length > 0 ) {
                 if ( gradient.colors().length == 1 ) {
                     g2d.setColor(gradient.colors()[0]);
@@ -71,23 +71,23 @@ final class StyleRenderer
                     Outline insets = Outline.none();
                     switch ( gradient.boundary() ) {
                         case OUTER_TO_EXTERIOR:   insets = Outline.none(); break;
-                        case EXTERIOR_TO_BORDER:  insets = conf.style().margin(); break;
-                        case BORDER_TO_INTERIOR:  insets = conf.style().margin().plus(conf.style().border().widths()); break;
-                        case INTERIOR_TO_CONTENT: insets = conf.style().margin().plus(conf.style().border().widths()).plus(conf.style().padding()); break;
+                        case EXTERIOR_TO_BORDER:  insets = conf.border().margin(); break;
+                        case BORDER_TO_INTERIOR:  insets = conf.border().margin().plus(conf.border().widths()); break;
+                        case INTERIOR_TO_CONTENT: insets = conf.border().margin().plus(conf.border().widths()).plus(conf.border().padding()); break;
                     }
                     if ( gradient.transition().isDiagonal() )
-                        _renderDiagonalGradient(g2d, conf.currentBounds().size(), insets, gradient, conf.get(gradient.area()));
+                        _renderDiagonalGradient(g2d, conf.size(), insets, gradient, conf.get(gradient.area()));
                     else
-                        _renderVerticalOrHorizontalGradient(g2d, conf.currentBounds().size(), insets, gradient, conf.get(gradient.area()));
+                        _renderVerticalOrHorizontalGradient(g2d, conf.size(), insets, gradient, conf.get(gradient.area()));
                 }
             }
 
         // 3. Shadows, which are simple gradient based drop shadows that can go inwards or outwards
-        for ( ShadowConf shadow : conf.style().shadows(layer) )
+        for ( ShadowConf shadow : conf.layer().shadows().sortedByNamesAndFilteredBy() )
             _renderShadows(conf, shadow, g2d);
 
         // 4. Painters, which are provided by the user and can be anything
-        List<PainterConf> painters = conf.style().painters(layer);
+        List<PainterConf> painters = conf.layer().painters().sortedByNamesAndFilteredBy();
 
         if ( !painters.isEmpty() )
         {
@@ -108,7 +108,7 @@ final class StyleRenderer
                     } catch (Exception e) {
                         log.warn(
                             "An exception occurred while executing painter '" + backgroundPainter + "' " +
-                            "on layer '" + layer + "' for style '" + conf.style() + "' ",
+                            "on layer '" + layer + "' for style '" + conf + "' ",
                             e
                         );
                         /*
@@ -132,16 +132,16 @@ final class StyleRenderer
         // And that's it! We have rendered a style layer!
     }
 
-    private static void _drawBorder( ComponentConf conf, Color color, Graphics2D g2d )
+    private static void _drawBorder( RenderConf conf, Color color, Graphics2D g2d )
     {
-        if ( !Outline.none().equals(conf.style().border().widths()) ) {
+        if ( !Outline.none().equals(conf.border().widths()) ) {
             try {
                 Area borderArea = conf.get(UI.ComponentArea.BORDER);
                 g2d.setColor(color);
                 g2d.fill(borderArea);
             } catch ( Exception e ) {
                 log.warn(
-                    "An exception occurred while drawing the border of border style '" + conf.style().border() + "' ",
+                    "An exception occurred while drawing the border of border style '" + conf.border() + "' ",
                     e
                 );
                 /*
@@ -153,16 +153,15 @@ final class StyleRenderer
     }
 
     private static void _renderShadows(
-        ComponentConf conf,
-        ShadowConf shadow,
+        RenderConf    conf,
+        ShadowConf    shadow,
         Graphics2D    g2d
     ) {
         if ( !shadow.color().isPresent() )
             return;
 
         Color shadowColor = shadow.color().orElse(Color.BLACK);
-        StyleConf styleConf = conf.style();
-        Size  size        = conf.currentBounds().size();
+        Size  size        = conf.size();
 
         // First let's check if we need to render any shadows at all
         // Is the shadow color transparent?
@@ -170,18 +169,18 @@ final class StyleRenderer
             return;
 
         // The background box is calculated from the margins and border radius:
-        final float leftBorderWidth   = styleConf.border().widths().left().orElse(0f);
-        final float topBorderWidth    = styleConf.border().widths().top().orElse(0f);
-        final float rightBorderWidth  = styleConf.border().widths().right().orElse(0f);
-        final float bottomBorderWidth = styleConf.border().widths().bottom().orElse(0f);
-        final float left   = Math.max(styleConf.margin().left().orElse(0f),   0) + ( shadow.isInset() ? leftBorderWidth   : 0 );
-        final float top    = Math.max(styleConf.margin().top().orElse(0f),    0) + ( shadow.isInset() ? topBorderWidth    : 0 );
-        final float right  = Math.max(styleConf.margin().right().orElse(0f),  0) + ( shadow.isInset() ? rightBorderWidth  : 0 );
-        final float bottom = Math.max(styleConf.margin().bottom().orElse(0f), 0) + ( shadow.isInset() ? bottomBorderWidth : 0 );
-        final float topLeftRadius     = Math.max(styleConf.border().topLeftRadius(), 0);
-        final float topRightRadius    = Math.max(styleConf.border().topRightRadius(), 0);
-        final float bottomRightRadius = Math.max(styleConf.border().bottomRightRadius(), 0);
-        final float bottomLeftRadius  = Math.max(styleConf.border().bottomLeftRadius(), 0);
+        final float leftBorderWidth   = conf.border().widths().left().orElse(0f);
+        final float topBorderWidth    = conf.border().widths().top().orElse(0f);
+        final float rightBorderWidth  = conf.border().widths().right().orElse(0f);
+        final float bottomBorderWidth = conf.border().widths().bottom().orElse(0f);
+        final float left   = Math.max(conf.border().margin().left().orElse(0f),   0) + ( shadow.isInset() ? leftBorderWidth   : 0 );
+        final float top    = Math.max(conf.border().margin().top().orElse(0f),    0) + ( shadow.isInset() ? topBorderWidth    : 0 );
+        final float right  = Math.max(conf.border().margin().right().orElse(0f),  0) + ( shadow.isInset() ? rightBorderWidth  : 0 );
+        final float bottom = Math.max(conf.border().margin().bottom().orElse(0f), 0) + ( shadow.isInset() ? bottomBorderWidth : 0 );
+        final float topLeftRadius     = Math.max(conf.border().topLeftRadius(), 0);
+        final float topRightRadius    = Math.max(conf.border().topRightRadius(), 0);
+        final float bottomRightRadius = Math.max(conf.border().bottomRightRadius(), 0);
+        final float bottomLeftRadius  = Math.max(conf.border().bottomLeftRadius(), 0);
 
         final float width     = size.width().orElse(0f);
         final float height    = size.height().orElse(0f);
@@ -1022,7 +1021,7 @@ final class StyleRenderer
     }
 
     private static void _renderImage(
-        ComponentConf conf,
+        RenderConf conf,
         ImageConf style,
         Size        componentSize,
         Graphics2D  g2d

@@ -1,7 +1,7 @@
 package swingtree.style;
 
 interface CacheProducerAndValidator<T> {
-    T produce(ComponentConf currentState, ComponentAreas context);
+    T produce(RenderConf currentState, ComponentAreas context);
 
-    boolean leadsToSameValue(ComponentConf oldState, ComponentConf newState, ComponentAreas context);
+    boolean leadsToSameValue(RenderConf oldState, RenderConf newState, ComponentAreas context);
 }

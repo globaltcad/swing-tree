@@ -22,15 +22,15 @@ import java.util.function.BiConsumer;
  */
 final class LayerCache
 {
-    private static final Map<ComponentConf, CachedImage> _CACHE = new WeakHashMap<>();
+    private static final Map<RenderConf, CachedImage> _CACHE = new WeakHashMap<>();
 
 
     private static final class CachedImage extends BufferedImage
     {
-        private WeakReference<ComponentConf> _key;
+        private WeakReference<RenderConf> _key;
         private boolean _isRendered = false;
 
-        CachedImage( int width, int height, ComponentConf cacheKey ) {
+        CachedImage( int width, int height, RenderConf cacheKey ) {
             super(width, height, BufferedImage.TYPE_INT_ARGB);
             _key = new WeakReference<>(cacheKey);
         }
@@ -43,8 +43,8 @@ final class LayerCache
             return super.createGraphics();
         }
 
-        public ComponentConf getKeyOrElse( ComponentConf newFallbackKey ) {
-            ComponentConf key = _key.get();
+        public RenderConf getKeyOrElse( RenderConf newFallbackKey ) {
+            RenderConf key = _key.get();
             if ( key == null ) {
                 _key = new WeakReference<>(newFallbackKey);
                 key = newFallbackKey;
@@ -60,7 +60,7 @@ final class LayerCache
 
     private final UI.Layer   _layer;
     private CachedImage      _localCache;
-    private ComponentConf    _strongRef; // The key must be referenced strongly so that the value is not garbage collected (the cached image)
+    private RenderConf       _strongRef; // The key must be referenced strongly so that the value is not garbage collected (the cached image)
     private boolean          _cachingMakesSense = false;
     private boolean          _isInitialized     = false;
 
@@ -73,14 +73,14 @@ final class LayerCache
         return _localCache != null;
     }
 
-    private void _allocateOrGetCachedBuffer( ComponentConf styleConf )
+    private void _allocateOrGetCachedBuffer( RenderConf styleConf )
     {
-        Map<ComponentConf, CachedImage> CACHE = _CACHE;
+        Map<RenderConf, CachedImage> CACHE = _CACHE;
 
         CachedImage bufferedImage = CACHE.get(styleConf);
 
         if ( bufferedImage == null ) {
-            Size size = styleConf.currentBounds().size();
+            Size size = styleConf.size();
             bufferedImage = new CachedImage(
                                 size.width().map(Number::intValue).orElse(1),
                                 size.height().map(Number::intValue).orElse(1),
@@ -112,13 +112,13 @@ final class LayerCache
         _isInitialized     = false;
     }
 
-    public final void validate( ComponentConf oldState, ComponentConf newState )
+    public final void validate( ComponentConf oldConf, ComponentConf newConf )
     {
-        if ( newState.currentBounds().hasWidth(0) || newState.currentBounds().hasHeight(0) )
+        if ( newConf.currentBounds().hasWidth(0) || newConf.currentBounds().hasHeight(0) )
             return;
 
-        oldState = oldState.onlyRetainingLayer(_layer);
-        newState = newState.onlyRetainingLayer(_layer);
+        final RenderConf oldState = oldConf.onlyRetainingLayer(_layer);
+        final RenderConf newState = newConf.onlyRetainingLayer(_layer);
 
         boolean validationNeeded = ( !_isInitialized || !oldState.equals(newState) );
 
@@ -154,7 +154,7 @@ final class LayerCache
             _allocateOrGetCachedBuffer(newState);
     }
 
-    public final void paint( ComponentConf conf, Graphics2D g, BiConsumer<ComponentConf, Graphics2D> renderer )
+    public final void paint( ComponentConf conf, Graphics2D g, BiConsumer<RenderConf, Graphics2D> renderer )
     {
         Bounds componentBounds = conf.currentBounds();
 
@@ -162,7 +162,7 @@ final class LayerCache
             return;
 
         if ( !_cachingMakesSense ) {
-            renderer.accept(_strongRef == null ? conf : _strongRef, g);
+            renderer.accept(_strongRef == null ? RenderConf.of(_layer, conf) : _strongRef, g);
             return;
         }
 
@@ -184,7 +184,7 @@ final class LayerCache
             }
             catch (Exception ignored) {}
             finally {
-                renderer.accept(_strongRef == null ? conf : _strongRef, g2);
+                renderer.accept(_strongRef == null ? RenderConf.of(_layer, conf) : _strongRef, g2);
                 g2.dispose();
             }
         }
@@ -192,17 +192,17 @@ final class LayerCache
         g.drawImage(_localCache, 0, 0, null);
     }
 
-    public boolean _cachingMakesSenseFor( ComponentConf state )
+    public boolean _cachingMakesSenseFor( RenderConf state )
     {
-        Bounds bounds = state.currentBounds();
-        if ( !bounds.hasWidth() || !bounds.hasHeight() )
+        Size bounds = state.size();
+        if ( !bounds.hasPositiveWidth() || !bounds.hasPositiveHeight() )
             return false;
 
-        if ( state.style().hasPaintersOnLayer(_layer) )
+        if ( state.layer().hasPainters() )
             return false; // We don't know what the painters will do, so we don't cache their painting!
 
         int heavyStyleCount = 0;
-        for ( ImageConf imageConf : state.style().images(_layer) )
+        for ( ImageConf imageConf : state.layer().images().sortedByNamesAndFilteredBy() )
             if ( !imageConf.equals(ImageConf.none()) && imageConf.image().isPresent() ) {
                 ImageIcon icon = imageConf.image().get();
                 boolean isSpecialIcon = ( icon.getClass() != ImageIcon.class );
@@ -210,14 +210,14 @@ final class LayerCache
                 if ( isSpecialIcon || hasSize )
                     heavyStyleCount++;
             }
-        for ( GradientConf gradient : state.style().gradients(_layer) )
+        for ( GradientConf gradient : state.layer().gradients().sortedByNamesAndFilteredBy() )
             if ( !gradient.equals(GradientConf.none()) && gradient.colors().length > 0 )
                 heavyStyleCount++;
-        for ( ShadowConf shadow : state.style().shadows(_layer) )
+        for ( ShadowConf shadow : state.layer().shadows().sortedByNamesAndFilteredBy() )
             if ( !shadow.equals(ShadowConf.none()) && shadow.color().isPresent() )
                 heavyStyleCount++;
 
-        BorderConf border = state.style().border();
+        BorderConf border = state.border();
         boolean rounded = border.hasAnyNonZeroArcs();
 
         if ( _layer == UI.Layer.BORDER ) {
@@ -226,8 +226,8 @@ final class LayerCache
                 heavyStyleCount++;
         }
         if ( _layer == UI.Layer.BACKGROUND ) {
-            BaseConf base = state.style().base();
-            boolean roundedOrHasMargin = rounded || !state.style().margin().equals(Outline.none());
+            BaseConf base = state.base();
+            boolean roundedOrHasMargin = rounded || !state.border().margin().equals(Outline.none());
             if ( base.backgroundColor().isPresent() && roundedOrHasMargin )
                 heavyStyleCount++;
         }
@@ -236,7 +236,7 @@ final class LayerCache
             return false;
 
         int threshold = 256 * 256 * Math.min(heavyStyleCount, 5);
-        int pixelCount = (int) bounds.area();
+        int pixelCount = (int) (bounds.width().orElse(0f) * bounds.height().orElse(0f));
 
         return pixelCount <= threshold;
     }

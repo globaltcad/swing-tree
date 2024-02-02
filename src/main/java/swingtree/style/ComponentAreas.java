@@ -1,6 +1,5 @@
 package swingtree.style;
 
-import swingtree.layout.Bounds;
 import swingtree.layout.Size;
 
 import java.awt.geom.Arc2D;
@@ -26,7 +25,7 @@ final class ComponentAreas
             new Cached<>(new CacheProducerAndValidator<Area>(){
 
                 @Override
-                public Area produce(ComponentConf currentState, ComponentAreas currentAreas) {
+                public Area produce(RenderConf currentState, ComponentAreas currentAreas) {
                     Area componentArea = currentAreas._interiorArea.getFor(currentState, currentAreas);
                     Area borderArea = new Area(currentAreas._bodyArea.getFor(currentState, currentAreas));
                     borderArea.subtract(componentArea);
@@ -34,7 +33,7 @@ final class ComponentAreas
                 }
 
                 @Override
-                public boolean leadsToSameValue(ComponentConf oldState, ComponentConf newState, ComponentAreas currentAreas) {
+                public boolean leadsToSameValue(RenderConf oldState, RenderConf newState, ComponentAreas currentAreas) {
                     if ( !currentAreas._interiorArea.leadsToSameValue(oldState, newState, currentAreas) )
                         return false;
 
@@ -47,8 +46,8 @@ final class ComponentAreas
             new Cached<>(new CacheProducerAndValidator<Area>(){
         
                 @Override
-                public Area produce(ComponentConf currentState, ComponentAreas currentAreas) {
-                    Outline widths = currentState.style().border().widths();
+                public Area produce(RenderConf currentState, ComponentAreas currentAreas) {
+                    Outline widths = currentState.border().widths();
                     float leftBorderWidth   = widths.left().orElse(0f);
                     float topBorderWidth    = widths.top().orElse(0f);
                     float rightBorderWidth  = widths.right().orElse(0f);
@@ -63,43 +62,43 @@ final class ComponentAreas
                 }
         
                 @Override
-                public boolean leadsToSameValue(ComponentConf oldState, ComponentConf newState, ComponentAreas currentAreas) {
-                    Outline oldWidths = oldState.style().border().widths();
-                    Outline newWidths = newState.style().border().widths();
+                public boolean leadsToSameValue(RenderConf oldState, RenderConf newState, ComponentAreas currentAreas) {
+                    Outline oldWidths = oldState.border().widths();
+                    Outline newWidths = newState.border().widths();
                     boolean sameWidths = oldWidths.equals(newWidths);
                     return sameWidths && _testWouldLeadToSameBaseArea(oldState, newState);
                 }
             }),
             new Cached<>(new CacheProducerAndValidator<Area>(){
                 @Override
-                public Area produce(ComponentConf currentState, ComponentAreas currentAreas) {
-                    Bounds bounds = currentState.currentBounds();
-                    float width  = bounds.size().width().orElse(0f);
-                    float height = bounds.size().height().orElse(0f);
+                public Area produce(RenderConf currentState, ComponentAreas currentAreas) {
+                    Size size = currentState.size();
+                    float width  = size.width().orElse(0f);
+                    float height = size.height().orElse(0f);
                     Area exteriorComponentArea = new Area(new Rectangle2D.Float(0, 0, width, height));
                     exteriorComponentArea.subtract(currentAreas._bodyArea.getFor(currentState, currentAreas));
                     return exteriorComponentArea;
                 }
         
                 @Override
-                public boolean leadsToSameValue(ComponentConf oldState, ComponentConf newState, ComponentAreas currentAreas) {
+                public boolean leadsToSameValue(RenderConf oldState, RenderConf newState, ComponentAreas currentAreas) {
                     boolean mainIsSame = currentAreas._bodyArea.leadsToSameValue(oldState, newState, currentAreas);
                     if ( !mainIsSame )
                         return false;
                     
-                    Size oldBounds = oldState.currentBounds().size();
-                    Size newBounds = newState.currentBounds().size();
+                    Size oldBounds = oldState.size();
+                    Size newBounds = newState.size();
         
                     return oldBounds.equals(newBounds);
                 }
             }),
             new Cached<>(new CacheProducerAndValidator<Area>(){
                 @Override
-                public Area produce(ComponentConf currentState, ComponentAreas currentAreas) {
+                public Area produce(RenderConf currentState, ComponentAreas currentAreas) {
                     return calculateBaseArea(currentState, 0, 0, 0, 0);
                 }
                 @Override
-                public boolean leadsToSameValue(ComponentConf oldState, ComponentConf newState, ComponentAreas currentAreas) {
+                public boolean leadsToSameValue(RenderConf oldState, RenderConf newState, ComponentAreas currentAreas) {
                     return _testWouldLeadToSameBaseArea(oldState, newState);
                 }
             })
@@ -128,7 +127,7 @@ final class ComponentAreas
     public Cached<Area> bodyArea() { return _bodyArea; }
 
 
-    public ComponentAreas validate(ComponentConf oldConf, ComponentConf newConf )
+    public ComponentAreas validate( RenderConf oldConf, RenderConf newConf )
     {
         if ( oldConf.equals(newConf) )
             return this;
@@ -149,13 +148,12 @@ final class ComponentAreas
         return this;
     }
 
-    static Area calculateBaseArea( ComponentConf state, float insTop, float insLeft, float insBottom, float insRight )
+    static Area calculateBaseArea( RenderConf state, float insTop, float insLeft, float insBottom, float insRight )
     {
         return _calculateBaseArea(
+                    state.border(),
+                    state.size(),
                     state.baseOutline(),
-                    state.style().margin(),
-                    state.style().border(),
-                    state.currentBounds().size(),
                     insTop,
                     insLeft,
                     insBottom,
@@ -164,15 +162,16 @@ final class ComponentAreas
     }
 
     private static Area _calculateBaseArea(
-            Outline     outline,
-            Outline     margin,
-            BorderConf  border,
-            Size        size,
-            float       insTop,
-            float       insLeft,
-            float       insBottom,
-            float       insRight
+        final BorderConf  border,
+        final Size        size,
+        final Outline     outline,
+        float insTop,
+        float insLeft,
+        float insBottom,
+        float insRight
     ) {
+        final Outline margin = border.margin();
+
         if ( BorderConf.none().equals(border) ) {
             Outline insets = outline.plus(margin).plus(Outline.of(insTop, insLeft, insBottom, insRight));
             // If there is no style, we just return the component's bounds:
@@ -351,7 +350,7 @@ final class ComponentAreas
      *  So we check the various properties of the states that are used to calculate the base area
      *  and if they are all the same, we return true.
      */
-    private static boolean _testWouldLeadToSameBaseArea(ComponentConf state1, ComponentConf state2 ) {
+    private static boolean _testWouldLeadToSameBaseArea(RenderConf state1, RenderConf state2 ) {
         if ( state1 == state2 )
             return true;
         if ( state1 == null || state2 == null )
@@ -361,18 +360,18 @@ final class ComponentAreas
         boolean sameOutline = outline1.equals(outline2);
         if ( !sameOutline )
             return false;
-        Outline     margin1  = state1.style().margin();
-        Outline     margin2  = state2.style().margin();
+        Outline     margin1  = state1.border().margin();
+        Outline     margin2  = state2.border().margin();
         boolean sameMargin  = margin1.equals(margin2);
         if ( !sameMargin )
             return false;
-        BorderConf border1  = state1.style().border();
-        BorderConf border2  = state2.style().border();
+        BorderConf border1  = state1.border();
+        BorderConf border2  = state2.border();
         boolean sameBorder  = border1.equals(border2);
         if ( !sameBorder )
             return false;
-        Size size1 = state1.currentBounds().size();
-        Size size2 = state2.currentBounds().size();
+        Size size1 = state1.size();
+        Size size2 = state2.size();
         boolean sameSize  = size1.equals(size2);
         if ( !sameSize )
             return false;

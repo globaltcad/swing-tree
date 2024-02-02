@@ -108,6 +108,10 @@ final class StyleLayer implements Simplifiable<StyleLayer>
         return Objects.equals(_images, otherStyle._images);
     }
 
+    public boolean hasPainters() {
+        return !_painters.equals(_NO_PAINTERS);
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(_shadows, _painters, _gradients, _images);
