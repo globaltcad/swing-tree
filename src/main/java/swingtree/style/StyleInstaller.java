@@ -372,7 +372,7 @@ final class StyleInstaller<C extends JComponent>
 
     private void _applyLayoutStyleTo( final C owner, final StyleConf styleConf )
     {
-        final LayoutStyle style = styleConf.layout();
+        final LayoutConf style = styleConf.layout();
 
         // Generic Layout stuff:
 

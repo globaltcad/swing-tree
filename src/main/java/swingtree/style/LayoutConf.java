@@ -8,11 +8,11 @@ import java.util.Optional;
  *  The layout manager of a component will use this information
  *  to determine the actual layout of the component in the layout.
  **/
-final class LayoutStyle
+final class LayoutConf
 {
-    private static final LayoutStyle _NONE = new LayoutStyle(Layout.unspecific(), null, null, null);
+    private static final LayoutConf _NONE = new LayoutConf(Layout.unspecific(), null, null, null);
 
-    static LayoutStyle none() { return _NONE; }
+    static LayoutConf none() { return _NONE; }
 
 
     private final Layout _layout;
@@ -22,7 +22,7 @@ final class LayoutStyle
     private final Float  _alignmentY;
 
 
-    private LayoutStyle(
+    private LayoutConf(
         Layout layout,
         Object constraint,
         Float alignmentX,
@@ -42,13 +42,13 @@ final class LayoutStyle
 
     Optional<Float> alignmentY() { return Optional.ofNullable(_alignmentY); }
 
-    LayoutStyle layout( Layout installer ) { return new LayoutStyle(installer, _constraint, _alignmentX, _alignmentY); }
+    LayoutConf layout(Layout installer ) { return new LayoutConf(installer, _constraint, _alignmentX, _alignmentY); }
 
-    LayoutStyle constraint( Object constraint ) { return new LayoutStyle(_layout, constraint, _alignmentX, _alignmentY); }
+    LayoutConf constraint(Object constraint ) { return new LayoutConf(_layout, constraint, _alignmentX, _alignmentY); }
 
-    LayoutStyle alignmentX( Float alignmentX ) { return new LayoutStyle(_layout, _constraint, alignmentX, _alignmentY); }
+    LayoutConf alignmentX(Float alignmentX ) { return new LayoutConf(_layout, _constraint, alignmentX, _alignmentY); }
 
-    LayoutStyle alignmentY( Float alignmentY ) { return new LayoutStyle(_layout, _constraint, _alignmentX, alignmentY); }
+    LayoutConf alignmentY(Float alignmentY ) { return new LayoutConf(_layout, _constraint, _alignmentX, alignmentY); }
 
     @Override
     public int hashCode() { return Objects.hash(_layout, _alignmentX, _alignmentY); }
@@ -58,7 +58,7 @@ final class LayoutStyle
         if ( obj == null ) return false;
         if ( obj == this ) return true;
         if ( obj.getClass() != getClass() ) return false;
-        LayoutStyle other = (LayoutStyle) obj;
+        LayoutConf other = (LayoutConf) obj;
         return Objects.equals(_layout,            other._layout)         &&
                Objects.equals(_constraint,        other._constraint)     &&
                Objects.equals(_alignmentX,        other._alignmentX)     &&

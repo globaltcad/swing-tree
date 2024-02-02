@@ -48,7 +48,7 @@ import java.util.stream.Collectors;
 public final class StyleConf
 {
     private static final StyleConf _NONE = new StyleConf(
-                                            LayoutStyle.none(),
+                                            LayoutConf.none(),
                                             BorderConf.none(),
                                             BaseConf.none(),
                                             FontConf.none(),
@@ -63,7 +63,7 @@ public final class StyleConf
     public static StyleConf none() { return _NONE; }
 
     static StyleConf of(
-        LayoutStyle         layout,
+        LayoutConf layout,
         BorderConf border,
         BaseConf base,
         FontConf font,
@@ -86,7 +86,7 @@ public final class StyleConf
     }
 
 
-    private final LayoutStyle                _layout;
+    private final LayoutConf _layout;
     private final BorderConf _border;
     private final BaseConf _base;
     private final FontConf _font;
@@ -95,7 +95,7 @@ public final class StyleConf
     private final NamedStyles<String>        _properties;
 
     private StyleConf(
-        LayoutStyle         layout,
+        LayoutConf layout,
         BorderConf border,
         BaseConf base,
         FontConf font,
@@ -114,7 +114,7 @@ public final class StyleConf
 
     public Optional<Object> layoutConstraint() { return _layout.constraint(); }
 
-    LayoutStyle layout() { return _layout; }
+    LayoutConf layout() { return _layout; }
 
     Outline padding() { return _border.padding(); }
 
@@ -212,7 +212,7 @@ public final class StyleConf
      */
     public StyleConf onlyRetainingRenderCacheRelevantConfForLayer(UI.Layer layer ) {
         return StyleConf.of(
-                    LayoutStyle.none(),
+                    LayoutConf.none(),
                     ( layer == UI.Layer.BORDER     ? _border : _border.withColor(null) ),
                     ( layer == UI.Layer.BACKGROUND ? _base   : BaseConf.none() ),
                     FontConf.none(),
@@ -277,7 +277,7 @@ public final class StyleConf
 
     public StyleConf backgroundColor(Color color ) { return _withBase(base().backgroundColor(color)); }
 
-    StyleConf _withLayout(LayoutStyle layout ) {
+    StyleConf _withLayout(LayoutConf layout ) {
         if ( layout == _layout )
             return this;
 
