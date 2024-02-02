@@ -55,9 +55,9 @@ final class StyleRenderer
 
         // Every layer has 4 things:
         // 1. A grounding serving as a base background, which is a filled color and/or an image:
-        for ( ImageStyle imageStyle : conf.style().images(layer) )
-            if ( !imageStyle.equals(ImageStyle.none()) )
-                _renderImage( conf, imageStyle, conf.currentBounds().size(), g2d);
+        for ( ImageConf imageConf : conf.style().images(layer) )
+            if ( !imageConf.equals(ImageConf.none()) )
+                _renderImage( conf, imageConf, conf.currentBounds().size(), g2d);
 
         // 2. Gradients, which are best used to give a component a nice surface lighting effect.
         // They may transition vertically, horizontally or diagonally over various different colors:
@@ -1023,7 +1023,7 @@ final class StyleRenderer
 
     private static void _renderImage(
         ComponentConf conf,
-        ImageStyle  style,
+        ImageConf style,
         Size        componentSize,
         Graphics2D  g2d
     ) {

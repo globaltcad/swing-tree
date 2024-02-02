@@ -333,7 +333,7 @@ public final class StyleConf
         return _withLayers(_layers.map( layer -> layer.withShadows(layer.shadows().mapStyles(styler::apply)) ));
     }
 
-    StyleConf _withImages(UI.Layer layer, NamedStyles<ImageStyle> images ) {
+    StyleConf _withImages(UI.Layer layer, NamedStyles<ImageConf> images ) {
         return StyleConf.of(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withImages(images)), _properties);
     }
 
@@ -381,16 +381,16 @@ public final class StyleConf
         return _layers.get(layer).gradients().get(shadeName);
     }
 
-    StyleConf images(UI.Layer layer, String imageName, Function<ImageStyle, ImageStyle> styler ) {
+    StyleConf images(UI.Layer layer, String imageName, Function<ImageConf, ImageConf> styler ) {
         Objects.requireNonNull(imageName);
         Objects.requireNonNull(styler);
-        ImageStyle ground = _layers.get(layer).images().style(imageName).orElse(ImageStyle.none());
+        ImageConf ground = _layers.get(layer).images().style(imageName).orElse(ImageConf.none());
         // We clone the ground map:
-        NamedStyles<ImageStyle> newImages = _layers.get(layer).images().withNamedStyle(imageName, styler.apply(ground));
+        NamedStyles<ImageConf> newImages = _layers.get(layer).images().withNamedStyle(imageName, styler.apply(ground));
         return _withImages( layer, newImages );
     }
 
-    List<ImageStyle> images( UI.Layer layer ) {
+    List<ImageConf> images(UI.Layer layer ) {
         return _layers.get(layer).images().sortedByNamesAndFilteredBy();
     }
 

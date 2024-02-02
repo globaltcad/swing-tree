@@ -1361,11 +1361,11 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * Note that the background images will be rendered in alphabetical order based on the name of the image.
      *
      * @param imageName The name of the background image.
-     * @param styler A function that takes a {@link ImageStyle} and returns a new {@link ImageStyle}.
+     * @param styler A function that takes a {@link ImageConf} and returns a new {@link ImageConf}.
      * @return A new {@link ComponentStyleDelegate} with a named background image defined by the provided styler lambda.
      */
-    public ComponentStyleDelegate<C> image( String imageName, Function<ImageStyle, ImageStyle> styler ) {
-        return image(ImageStyle.DEFAULT_LAYER, imageName, styler);
+    public ComponentStyleDelegate<C> image( String imageName, Function<ImageConf, ImageConf> styler ) {
+        return image(ImageConf.DEFAULT_LAYER, imageName, styler);
     }
 
     /**
@@ -1397,10 +1397,10 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *                  <li>{@link swingtree.UI.Layer#FOREGROUND}</li>
      *              </ul>
      * @param imageName The name of the background image.
-     * @param styler A function that takes a {@link ImageStyle} and returns a new {@link ImageStyle}.
+     * @param styler A function that takes a {@link ImageConf} and returns a new {@link ImageConf}.
      * @return A new {@link ComponentStyleDelegate} with a named background image defined by the provided styler lambda.
      */
-    public ComponentStyleDelegate<C> image( UI.Layer layer, String imageName, Function<ImageStyle, ImageStyle> styler ) {
+    public ComponentStyleDelegate<C> image( UI.Layer layer, String imageName, Function<ImageConf, ImageConf> styler ) {
         Objects.requireNonNull(imageName);
         Objects.requireNonNull(styler);
         return _withStyle(_styleConf.images(layer, imageName, styler));
@@ -1423,11 +1423,11 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * Note that this method translates to {@link #image(UI.Layer, String, Function)} but with the
      * layer set to {@link UI.Layer#BACKGROUND} and the name being the "default" style name.
      *
-     * @param styler A function that takes a {@link ImageStyle} and returns a new {@link ImageStyle}.
+     * @param styler A function that takes a {@link ImageConf} and returns a new {@link ImageConf}.
      * @return A new {@link ComponentStyleDelegate} with a background image defined by the provided styler lambda.
      */
-    public ComponentStyleDelegate<C> image( Function<ImageStyle, ImageStyle> styler ) {
-        return image(ImageStyle.DEFAULT_LAYER, StyleUtility.DEFAULT_KEY, styler);
+    public ComponentStyleDelegate<C> image( Function<ImageConf, ImageConf> styler ) {
+        return image(ImageConf.DEFAULT_LAYER, StyleUtility.DEFAULT_KEY, styler);
     }
 
     /**
@@ -1448,10 +1448,10 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * name being the "default" style name.
      *
      * @param layer The layer on which the image should be rendered.
-     * @param styler A function that takes a {@link ImageStyle} and returns a new {@link ImageStyle}.
+     * @param styler A function that takes a {@link ImageConf} and returns a new {@link ImageConf}.
      * @return A new {@link ComponentStyleDelegate} with a background image defined by the provided styler lambda.
      */
-    public ComponentStyleDelegate<C> image( UI.Layer layer, Function<ImageStyle, ImageStyle> styler ) {
+    public ComponentStyleDelegate<C> image( UI.Layer layer, Function<ImageConf, ImageConf> styler ) {
         Objects.requireNonNull(styler);
         return _withStyle(_styleConf.images(layer, StyleUtility.DEFAULT_KEY, styler));
     }

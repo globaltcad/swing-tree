@@ -202,9 +202,9 @@ final class LayerCache
             return false; // We don't know what the painters will do, so we don't cache their painting!
 
         int heavyStyleCount = 0;
-        for ( ImageStyle imageStyle : state.style().images(_layer) )
-            if ( !imageStyle.equals(ImageStyle.none()) && imageStyle.image().isPresent() ) {
-                ImageIcon icon = imageStyle.image().get();
+        for ( ImageConf imageConf : state.style().images(_layer) )
+            if ( !imageConf.equals(ImageConf.none()) && imageConf.image().isPresent() ) {
+                ImageIcon icon = imageConf.image().get();
                 boolean isSpecialIcon = ( icon.getClass() != ImageIcon.class );
                 boolean hasSize = ( icon.getIconHeight() > 0 || icon.getIconWidth() > 0 );
                 if ( isSpecialIcon || hasSize )

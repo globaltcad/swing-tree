@@ -478,8 +478,8 @@ public final class UI extends UINamespaceUtilities
     }
 
     /**
-     *  Use this to specify the placement of an image as part of the {@link ImageStyle} through
-     *  the {@link ImageStyle#placement(Placement)} method exposed by the style API (see {@link UIForAnySwing#withStyle(Styler)}).
+     *  Use this to specify the placement of an image as part of the {@link ImageConf} through
+     *  the {@link ImageConf#placement(Placement)} method exposed by the style API (see {@link UIForAnySwing#withStyle(Styler)}).
      */
     public enum Placement implements UIEnum<Placement>
     {
@@ -492,8 +492,8 @@ public final class UI extends UINamespaceUtilities
 
     /**
      *  Defines the areas of a component, which is used
-     *  to by the {@link ImageStyle} to determine if and how an image should be clipped.
-     *  Pass instances of this to {@link ImageStyle#clipTo(ComponentArea)} to configure the clipping behaviour
+     *  to by the {@link ImageConf} to determine if and how an image should be clipped.
+     *  Pass instances of this to {@link ImageConf#clipTo(ComponentArea)} to configure the clipping behaviour
      *  as part of the style API (see {@link UIForAnySwing#withStyle(Styler)}). <br>
      *  The following list describes what each enum instance represents:
      *  <ul>

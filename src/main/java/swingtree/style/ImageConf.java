@@ -152,10 +152,10 @@ import java.util.Optional;
  *      are transparent.
  *  </p>
  **/
-public final class ImageStyle implements Simplifiable<ImageStyle>
+public final class ImageConf implements Simplifiable<ImageConf>
 {
     static final UI.Layer DEFAULT_LAYER = UI.Layer.BACKGROUND;
-    private static final ImageStyle _NONE = new ImageStyle(
+    private static final ImageConf _NONE = new ImageConf(
                                                 null,
                                                 null,
                                                 UI.Placement.UNDEFINED,
@@ -168,9 +168,9 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
                                                 UI.ComponentArea.BODY
                                             );
 
-    static ImageStyle none() { return _NONE; }
+    static ImageConf none() { return _NONE; }
 
-    static ImageStyle of(
+    static ImageConf of(
         Color            primer,
         ImageIcon        image,
         UI.Placement     placement,
@@ -196,7 +196,7 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
         )
             return _NONE;
         else
-            return new ImageStyle(primer, image, placement, repeat, fitMode, size, opacity, padding, offset, clipArea);
+            return new ImageConf(primer, image, placement, repeat, fitMode, size, opacity, padding, offset, clipArea);
     }
 
 
@@ -213,7 +213,7 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
     private final UI.ComponentArea _clipArea;
 
 
-    private ImageStyle(
+    private ImageConf(
         Color            primer,
         ImageIcon        image,
         UI.Placement     placement,
@@ -274,15 +274,15 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
      *  Note that the primer color will not be visible if the image is opaque and it fills the entire component.
      *
      * @param color The primer color of the image style.
-     * @return A new {@link ImageStyle} instance with the specified primer color.
+     * @return A new {@link ImageConf} instance with the specified primer color.
      */
-    public ImageStyle primer( Color color ) {
+    public ImageConf primer(Color color ) {
         Objects.requireNonNull(color, "Use UI.COLOR_UNDEFINED instead of null to represent the absence of a color.");
         if ( color == UI.COLOR_UNDEFINED)
             color = null;
         if ( color == _primer )
             return this;
-        return ImageStyle.of(color, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
+        return ImageConf.of(color, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
     }
 
     /**
@@ -290,10 +290,10 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
      *  The supplied object must be an instance of {@link Image} implementation.
      *
      * @param image The image which will be drawn onto the component.
-     * @return A new {@link ImageStyle} instance with the specified image.
+     * @return A new {@link ImageConf} instance with the specified image.
      */
-    public ImageStyle image( Image image ) {
-        return ImageStyle.of(_primer, image == null ? null : new ImageIcon(image), _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
+    public ImageConf image(Image image ) {
+        return ImageConf.of(_primer, image == null ? null : new ImageIcon(image), _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
     }
 
     /**
@@ -301,10 +301,10 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
      *  The supplied object must be an instance of {@link ImageIcon} implementation.
      *
      * @param image The image icon which will be drawn onto the component.
-     * @return A new {@link ImageStyle} instance with the specified image.
+     * @return A new {@link ImageConf} instance with the specified image.
      */
-    public ImageStyle image( ImageIcon image ) {
-        return ImageStyle.of(_primer, image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
+    public ImageConf image(ImageIcon image ) {
+        return ImageConf.of(_primer, image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
     }
 
     /**
@@ -314,10 +314,10 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
      *  The path is relative to the classpath or may be an absolute path.
      *
      * @param image The path to the (icon) image in the form of an {@link IconDeclaration}.
-     * @return A new {@link ImageStyle} instance with the specified image.
+     * @return A new {@link ImageConf} instance with the specified image.
      * @throws NullPointerException If the specified {@code image} is null.
      */
-    public ImageStyle image( IconDeclaration image ) {
+    public ImageConf image(IconDeclaration image ) {
         Objects.requireNonNull(image);
         return image.find().map(this::image).orElse(this);
     }
@@ -330,10 +330,10 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
      *  (see {@link swingtree.UI#findIcon(String)}).
      *
      * @param path The path to the (icon) image.
-     * @return A new {@link ImageStyle} instance with the specified image.
+     * @return A new {@link ImageConf} instance with the specified image.
      * @throws NullPointerException If the specified {@code path} is null.
      */
-    public ImageStyle image( String path ) {
+    public ImageConf image(String path ) {
         Objects.requireNonNull(path);
         return image(() -> path);
     }
@@ -385,10 +385,10 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
      *  </ul>
      *
      * @param placement The placement of the image onto the component.
-     * @return A new {@link ImageStyle} instance with the specified placement.
+     * @return A new {@link ImageConf} instance with the specified placement.
      */
-    public ImageStyle placement( UI.Placement placement ) {
-        return ImageStyle.of(_primer, _image, placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
+    public ImageConf placement(UI.Placement placement ) {
+        return ImageConf.of(_primer, _image, placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
     }
 
     /**
@@ -398,10 +398,10 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
      *  image already fills out the inner component area (see {@link #autoFit(boolean)}, {@link #size(int, int)}).
      *
      * @param repeat Weather the image should be painted repeatedly across the inner component area.
-     * @return A new {@link ImageStyle} instance with the specified {@code repeat} flag value.
+     * @return A new {@link ImageConf} instance with the specified {@code repeat} flag value.
      */
-    public ImageStyle repeat( boolean repeat ) {
-        return ImageStyle.of(_primer, _image, _placement, repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
+    public ImageConf repeat(boolean repeat ) {
+        return ImageConf.of(_primer, _image, _placement, repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
     }
 
     /**
@@ -417,39 +417,39 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
      * @param autoFit If true the image will be scaled to fit the inner component area for every
      *                dimension which was not specified,
      *                otherwise the image will not be scaled to fit the inner component area.
-     * @return A new {@link ImageStyle} instance with the specified {@code autoFit} flag value.
+     * @return A new {@link ImageConf} instance with the specified {@code autoFit} flag value.
      */
-    public ImageStyle autoFit( boolean autoFit ) { 
+    public ImageConf autoFit(boolean autoFit ) {
         UI.FitComponent fit = autoFit ? UI.FitComponent.WIDTH_AND_HEIGHT : UI.FitComponent.NO;
-        return ImageStyle.of(_primer, _image, _placement, _repeat, fit, _size, _opacity, _padding, _offset, _clipArea);
+        return ImageConf.of(_primer, _image, _placement, _repeat, fit, _size, _opacity, _padding, _offset, _clipArea);
     }
 
     /**
      * @param fit The fit mode of the image.
-     * @return A new {@link ImageStyle} instance with the specified {@code fit} mode.
+     * @return A new {@link ImageConf} instance with the specified {@code fit} mode.
      */
-    public ImageStyle fitMode( UI.FitComponent fit ) {
-        return ImageStyle.of(_primer, _image, _placement, _repeat, fit, _size, _opacity, _padding, _offset, _clipArea);
+    public ImageConf fitMode(UI.FitComponent fit ) {
+        return ImageConf.of(_primer, _image, _placement, _repeat, fit, _size, _opacity, _padding, _offset, _clipArea);
     }
 
     /**
      *  Ensures that the image has the specified width.
      *
      * @param width The width of the image.
-     * @return A new {@link ImageStyle} instance with the specified {@code width}.
+     * @return A new {@link ImageConf} instance with the specified {@code width}.
      */
-    public ImageStyle width( Integer width ) {
-        return ImageStyle.of(_primer, _image, _placement, _repeat, _fitMode, _size.withWidth(width), _opacity, _padding, _offset, _clipArea);
+    public ImageConf width(Integer width ) {
+        return ImageConf.of(_primer, _image, _placement, _repeat, _fitMode, _size.withWidth(width), _opacity, _padding, _offset, _clipArea);
     }
 
     /**
      *  Ensures that the image has the specified height.
      *
      * @param height The height of the image.
-     * @return A new {@link ImageStyle} instance with the specified {@code heiht}.
+     * @return A new {@link ImageConf} instance with the specified {@code heiht}.
      */
-    public ImageStyle height( Integer height ) {
-        return ImageStyle.of(_primer, _image, _placement, _repeat, _fitMode, _size.withHeight(height), _opacity, _padding, _offset, _clipArea);
+    public ImageConf height(Integer height ) {
+        return ImageConf.of(_primer, _image, _placement, _repeat, _fitMode, _size.withHeight(height), _opacity, _padding, _offset, _clipArea);
     }
 
     /**
@@ -457,9 +457,9 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
      *
      * @param width The width of the image.
      * @param height The height of the image.
-     * @return A new {@link ImageStyle} instance with the specified {@code width} and {@code height}.
+     * @return A new {@link ImageConf} instance with the specified {@code width} and {@code height}.
      */
-    public ImageStyle size( int width, int height ) {
+    public ImageConf size(int width, int height ) {
         return size(Size.of(width, height));
     }
 
@@ -467,10 +467,10 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
      *  Ensures that the image has the specified width and height.
      *
      * @param size The size of the image.
-     * @return A new {@link ImageStyle} instance with the specified {@code size}.
+     * @return A new {@link ImageConf} instance with the specified {@code size}.
      */
-    public ImageStyle size( Size size ) {
-        return ImageStyle.of(_primer, _image, _placement, _repeat, _fitMode, size, _opacity, _padding, _offset, _clipArea);
+    public ImageConf size(Size size ) {
+        return ImageConf.of(_primer, _image, _placement, _repeat, _fitMode, size, _opacity, _padding, _offset, _clipArea);
     }
 
     /**
@@ -479,10 +479,10 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
      *  and 1.0f means that the image is completely opaque.
      *
      * @param opacity The opacity of the image.
-     * @return A new {@link ImageStyle} instance with the specified opacity.
+     * @return A new {@link ImageConf} instance with the specified opacity.
      */
-    public ImageStyle opacity( float opacity ) {
-        return ImageStyle.of(_primer, _image, _placement, _repeat, _fitMode, _size, opacity, _padding, _offset, _clipArea);
+    public ImageConf opacity(float opacity ) {
+        return ImageConf.of(_primer, _image, _placement, _repeat, _fitMode, _size, opacity, _padding, _offset, _clipArea);
     }
 
     /**
@@ -490,10 +490,10 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
      *  The padding is the space between the image and the inner component area.
      *
      * @param padding The padding of the image.
-     * @return A new {@link ImageStyle} instance with the specified padding.
+     * @return A new {@link ImageConf} instance with the specified padding.
      */
-    ImageStyle padding( Outline padding ) {
-        return ImageStyle.of(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, padding, _offset, _clipArea);
+    ImageConf padding(Outline padding ) {
+        return ImageConf.of(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, padding, _offset, _clipArea);
     }
 
     /**
@@ -504,9 +504,9 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
      * @param right The right padding of the image.
      * @param bottom The bottom padding of the image.
      * @param left The left padding of the image.
-     * @return A new {@link ImageStyle} instance with the specified padding.
+     * @return A new {@link ImageConf} instance with the specified padding.
      */
-    public ImageStyle padding( int top, int right, int bottom, int left ) {
+    public ImageConf padding(int top, int right, int bottom, int left ) {
         return padding(Outline.of(top, right, bottom, left));
     }
 
@@ -516,9 +516,9 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
      *
      * @param topBottom The top and bottom padding of the image.
      * @param leftRight The left and right padding of the image.
-     * @return A new {@link ImageStyle} instance with the specified padding.
+     * @return A new {@link ImageConf} instance with the specified padding.
      */
-    public ImageStyle padding( int topBottom, int leftRight ) {
+    public ImageConf padding(int topBottom, int leftRight ) {
         return padding(Outline.of(topBottom, leftRight, topBottom, leftRight));
     }
 
@@ -527,9 +527,9 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
      *  The padding is the space between the image and the inner component area.
      *
      * @param padding The padding of the image.
-     * @return A new {@link ImageStyle} instance with the specified padding.
+     * @return A new {@link ImageConf} instance with the specified padding.
      */
-    public ImageStyle padding( int padding ) {
+    public ImageConf padding(int padding ) {
         return padding(Outline.of(padding, padding, padding, padding));
     }
 
@@ -539,10 +539,10 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
      *
      *  @param x The horizontal offset.
      *  @param y The vertical offset.
-     *  @return A new {@link ImageStyle} instance with the specified offset.
+     *  @return A new {@link ImageConf} instance with the specified offset.
      */
-    public ImageStyle offset( int x, int y ) {
-        return ImageStyle.of(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, Offset.of(x, y), _clipArea);
+    public ImageConf offset(int x, int y ) {
+        return ImageConf.of(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, Offset.of(x, y), _clipArea);
     }
 
     /**
@@ -550,10 +550,10 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
      *  and drawn onto the component.
      *
      *  @param x The horizontal offset.
-     *  @return A new {@link ImageStyle} instance with the specified offset.
+     *  @return A new {@link ImageConf} instance with the specified offset.
      */
-    public ImageStyle horizontalOffset( int x ) {
-        return ImageStyle.of(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset.withX(x), _clipArea);
+    public ImageConf horizontalOffset(int x ) {
+        return ImageConf.of(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset.withX(x), _clipArea);
     }
 
     /**
@@ -561,10 +561,10 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
      *  and drawn onto the component.
      *
      *  @param y The vertical offset.
-     *  @return A new {@link ImageStyle} instance with the specified offset.
+     *  @return A new {@link ImageConf} instance with the specified offset.
      */
-    public ImageStyle verticalOffset( int y ) {
-        return ImageStyle.of(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset.withY(y), _clipArea);
+    public ImageConf verticalOffset(int y ) {
+        return ImageConf.of(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset.withY(y), _clipArea);
     }
 
     /**
@@ -603,18 +603,18 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
      *  onto the entire component, which may also cover the border and margin area of the component.
      *
      *  @param clipArea The clip area of the image.
-     *  @return A new {@link ImageStyle} instance with the specified clip area.
+     *  @return A new {@link ImageConf} instance with the specified clip area.
      */
-    public ImageStyle clipTo( UI.ComponentArea clipArea ) {
-        return ImageStyle.of(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, clipArea);
+    public ImageConf clipTo(UI.ComponentArea clipArea ) {
+        return ImageConf.of(_primer, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, clipArea);
     }
 
-    ImageStyle _scale( double scaleFactor ) {
-        return ImageStyle.of(_primer, _image, _placement, _repeat, _fitMode, _size.scale(scaleFactor), _opacity, _padding.scale(scaleFactor), _offset.scale(scaleFactor), _clipArea);
+    ImageConf _scale(double scaleFactor ) {
+        return ImageConf.of(_primer, _image, _placement, _repeat, _fitMode, _size.scale(scaleFactor), _opacity, _padding.scale(scaleFactor), _offset.scale(scaleFactor), _clipArea);
     }
 
     @Override
-    public ImageStyle simplified() {
+    public ImageConf simplified() {
         if ( this == _NONE )
             return _NONE;
 
@@ -627,7 +627,7 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
         if ( simplifiedImage == null && simplifiedPrimer == null )
             return none();
 
-        return ImageStyle.of(
+        return ImageConf.of(
                     simplifiedPrimer,
                     simplifiedImage,
                     _placement,
@@ -651,7 +651,7 @@ public final class ImageStyle implements Simplifiable<ImageStyle>
         if ( obj == null ) return false;
         if ( obj == this ) return true;
         if ( obj.getClass() != getClass() ) return false;
-        ImageStyle rhs = (ImageStyle) obj;
+        ImageConf rhs = (ImageConf) obj;
         return Objects.equals(_primer,    rhs._primer)    &&
                Objects.equals(_image,     rhs._image)     &&
                Objects.equals(_placement, rhs._placement) &&

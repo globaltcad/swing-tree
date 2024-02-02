@@ -2,7 +2,7 @@ package swingtree.layout;
 
 import swingtree.api.Styler;
 import swingtree.style.ComponentStyleDelegate;
-import swingtree.style.ImageStyle;
+import swingtree.style.ImageConf;
 
 import java.awt.Dimension;
 import java.util.Objects;
@@ -16,7 +16,7 @@ import java.util.function.Function;
  *  as part of {@link swingtree.api.IconDeclaration}s
  *  and the SwingTree style API, see {@link swingtree.UIForAnySwing#withStyle(Styler)},
  *  {@link ComponentStyleDelegate#image(Function)} and
- *  {@link ImageStyle#size(int, int)}.
+ *  {@link ImageConf#size(int, int)}.
  */
 public final class Size
 {
