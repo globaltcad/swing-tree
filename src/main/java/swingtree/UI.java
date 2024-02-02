@@ -399,7 +399,7 @@ public final class UI extends UINamespaceUtilities
      *  like for example the gradient style API exposed by {@link ComponentStyleDelegate#gradient(Layer, String, Function)}
      *  or {@link ComponentStyleDelegate#gradient(Function)} methods (see {@link UIForAnySwing#withStyle(Styler)}).
      *  <p>
-     *  {@link GradientStyle#type(GradientType)} method exposed by methods like
+     *  {@link GradientConf#type(GradientType)} method exposed by methods like
      *  {@link ComponentStyleDelegate#gradient(String, Function)} or {@link ComponentStyleDelegate#gradient(Layer, String, Function)}.
      */
     public enum GradientType implements UIEnum<GradientType>
@@ -412,7 +412,7 @@ public final class UI extends UINamespaceUtilities
      *  like for example the gradient style API exposed by {@link ComponentStyleDelegate#gradient(Function)}
      *  or {@link ComponentStyleDelegate#gradient(Function)} methods (see {@link UIForAnySwing#withStyle(Styler)}).
      * <p>
-     *  {@link GradientStyle#transition(Transition)} method exposed by methods like
+     *  {@link GradientConf#transition(Transition)} method exposed by methods like
      *  {@link ComponentStyleDelegate#gradient(String, Function)} or {@link ComponentStyleDelegate#gradient(Layer, String, Function)}.
      */
     public enum Transition implements UIEnum<Transition>

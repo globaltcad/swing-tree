@@ -1250,11 +1250,11 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * layer set to {@link UI.Layer#BACKGROUND}.
      *
      * @param shadeName The name of the background shade.
-     * @param styler A function that takes a {@link GradientStyle} and returns a new {@link GradientStyle}.
+     * @param styler A function that takes a {@link GradientConf} and returns a new {@link GradientConf}.
      * @return A new {@link ComponentStyleDelegate} with a named background shade defined by the provided styler lambda.
      */
-    public ComponentStyleDelegate<C> gradient( String shadeName, Function<GradientStyle, GradientStyle> styler ) {
-        return gradient(GradientStyle.DEFAULT_LAYER, shadeName, styler);
+    public ComponentStyleDelegate<C> gradient( String shadeName, Function<GradientConf, GradientConf> styler ) {
+        return gradient(GradientConf.DEFAULT_LAYER, shadeName, styler);
     }
 
     /**
@@ -1280,13 +1280,13 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *
      * @param layer The layer on which the gradient should be rendered.
      * @param shadeName The name of the background shade.
-     * @param styler A function that takes a {@link GradientStyle} and returns a new {@link GradientStyle}.
+     * @param styler A function that takes a {@link GradientConf} and returns a new {@link GradientConf}.
      * @return A new {@link ComponentStyleDelegate} with a named background shade defined by the provided styler lambda.
      */
     public ComponentStyleDelegate<C> gradient(
         UI.Layer layer,
         String shadeName,
-        Function<GradientStyle, GradientStyle> styler
+        Function<GradientConf, GradientConf> styler
     ) {
         Objects.requireNonNull(shadeName);
         Objects.requireNonNull(styler);
@@ -1309,11 +1309,11 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * This method translates to {@link #gradient(UI.Layer, String, Function)} but with the
      * layer set to {@link UI.Layer#BACKGROUND} and the name being the "default" style name
      *
-     * @param styler A function that takes a {@link GradientStyle} and returns a new {@link GradientStyle}.
+     * @param styler A function that takes a {@link GradientConf} and returns a new {@link GradientConf}.
      * @return A new {@link ComponentStyleDelegate} with a background shade defined by the provided styler lambda.
      */
-    public ComponentStyleDelegate<C> gradient( Function<GradientStyle, GradientStyle> styler ) {
-        return gradient(GradientStyle.DEFAULT_LAYER, StyleUtility.DEFAULT_KEY, styler);
+    public ComponentStyleDelegate<C> gradient( Function<GradientConf, GradientConf> styler ) {
+        return gradient(GradientConf.DEFAULT_LAYER, StyleUtility.DEFAULT_KEY, styler);
     }
 
     /**
@@ -1333,10 +1333,10 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * name being the "default" style name
      *
      * @param layer The layer on which the gradient should be rendered.
-     * @param styler A function that takes a {@link GradientStyle} and returns a new {@link GradientStyle}.
+     * @param styler A function that takes a {@link GradientConf} and returns a new {@link GradientConf}.
      * @return A new {@link ComponentStyleDelegate} with a background shade defined by the provided styler lambda.
      */
-    public ComponentStyleDelegate<C> gradient( UI.Layer layer, Function<GradientStyle, GradientStyle> styler ) {
+    public ComponentStyleDelegate<C> gradient( UI.Layer layer, Function<GradientConf, GradientConf> styler ) {
         Objects.requireNonNull(styler);
         return _withStyle(_styleConf.gradient(layer, StyleUtility.DEFAULT_KEY, styler));
     }

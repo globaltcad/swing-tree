@@ -61,7 +61,7 @@ final class StyleRenderer
 
         // 2. Gradients, which are best used to give a component a nice surface lighting effect.
         // They may transition vertically, horizontally or diagonally over various different colors:
-        for ( GradientStyle gradient : conf.style().gradients(layer) )
+        for ( GradientConf gradient : conf.style().gradients(layer) )
             if ( gradient.colors().length > 0 ) {
                 if ( gradient.colors().length == 1 ) {
                     g2d.setColor(gradient.colors()[0]);
@@ -583,7 +583,7 @@ final class StyleRenderer
         Graphics2D    g2d,
         Size          componentSize,
         Outline       margin,
-        GradientStyle gradient,
+        GradientConf gradient,
         Area          specificArea
     ) {
         UI.Transition       type       = gradient.transition();
@@ -782,7 +782,7 @@ final class StyleRenderer
         Graphics2D    g2d,
         Size          componentSize,
         Outline       margin,
-        GradientStyle gradient,
+        GradientConf gradient,
         Area          specificArea
     ) {
         final UI.Transition type       = gradient.transition();
@@ -961,7 +961,7 @@ final class StyleRenderer
         }
     }
 
-    private static float[] _fractionsFrom(GradientStyle style ) {
+    private static float[] _fractionsFrom(GradientConf style ) {
         Color[] colors = style.colors();
         float[] fractions = style.fractions();
 

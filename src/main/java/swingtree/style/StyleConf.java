@@ -230,7 +230,7 @@ public final class StyleConf
         return _layers.get(layer).images().stylesStream().anyMatch(i -> i.image().isPresent() || i.primer().isPresent());
     }
 
-    List<GradientStyle> gradients( UI.Layer layer ) {
+    List<GradientConf> gradients(UI.Layer layer ) {
         return _layers.get(layer).gradients().sortedByNamesAndFilteredBy();
     }
 
@@ -246,12 +246,12 @@ public final class StyleConf
     }
 
     boolean hasCustomGradients( UI.Layer layer ) {
-        NamedStyles<GradientStyle> gradients = _layers.get(layer).gradients();
-        return !( gradients.size() == 1 && GradientStyle.none().equals(gradients.get(StyleUtility.DEFAULT_KEY)) );
+        NamedStyles<GradientConf> gradients = _layers.get(layer).gradients();
+        return !( gradients.size() == 1 && GradientConf.none().equals(gradients.get(StyleUtility.DEFAULT_KEY)) );
     }
 
     boolean hasVisibleGradientsOnLayer( UI.Layer layer ) {
-        List<GradientStyle> gradients = gradients(layer);
+        List<GradientConf> gradients = gradients(layer);
         if ( gradients.isEmpty() ) return false;
         return gradients.stream().anyMatch( s -> s.colors().length > 0 );
     }
@@ -337,7 +337,7 @@ public final class StyleConf
         return StyleConf.of(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withImages(images)), _properties);
     }
 
-    StyleConf _withGradients(UI.Layer layer, NamedStyles<GradientStyle> shades ) {
+    StyleConf _withGradients(UI.Layer layer, NamedStyles<GradientConf> shades ) {
         Objects.requireNonNull(shades);
         return StyleConf.of(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withGradients(shades)), _properties);
     }
@@ -367,16 +367,16 @@ public final class StyleConf
                             .collect(Collectors.toList());
     }
 
-    StyleConf gradient(UI.Layer layer, String shadeName, Function<GradientStyle, GradientStyle> styler ) {
+    StyleConf gradient(UI.Layer layer, String shadeName, Function<GradientConf, GradientConf> styler ) {
         Objects.requireNonNull(shadeName);
         Objects.requireNonNull(styler);
-        GradientStyle shadow = Optional.ofNullable(_layers.get(layer).gradients().get(shadeName)).orElse(GradientStyle.none());
+        GradientConf shadow = Optional.ofNullable(_layers.get(layer).gradients().get(shadeName)).orElse(GradientConf.none());
         // We clone the shadow map:
-        NamedStyles<GradientStyle> newShadows = _layers.get(layer).gradients().withNamedStyle(shadeName, styler.apply(shadow));
+        NamedStyles<GradientConf> newShadows = _layers.get(layer).gradients().withNamedStyle(shadeName, styler.apply(shadow));
         return _withGradients(layer, newShadows);
     }
 
-    GradientStyle gradient( UI.Layer layer, String shadeName ) {
+    GradientConf gradient(UI.Layer layer, String shadeName ) {
         Objects.requireNonNull(shadeName);
         return _layers.get(layer).gradients().get(shadeName);
     }

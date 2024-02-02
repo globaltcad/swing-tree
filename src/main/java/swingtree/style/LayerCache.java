@@ -210,8 +210,8 @@ final class LayerCache
                 if ( isSpecialIcon || hasSize )
                     heavyStyleCount++;
             }
-        for ( GradientStyle gradient : state.style().gradients(_layer) )
-            if ( !gradient.equals(GradientStyle.none()) && gradient.colors().length > 0 )
+        for ( GradientConf gradient : state.style().gradients(_layer) )
+            if ( !gradient.equals(GradientConf.none()) && gradient.colors().length > 0 )
                 heavyStyleCount++;
         for ( ShadowStyle shadow : state.style().shadows(_layer) )
             if ( !shadow.equals(ShadowStyle.none()) && shadow.color().isPresent() )

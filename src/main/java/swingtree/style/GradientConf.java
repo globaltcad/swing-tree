@@ -128,12 +128,12 @@ import java.util.function.Function;
  *  as the instance returned by that method is a gradient without any colors, effectively
  *  making it a representation of the absence of a gradient style.
  */
-public final class GradientStyle implements Simplifiable<GradientStyle>
+public final class GradientConf implements Simplifiable<GradientConf>
 {
-    private static final Logger log = org.slf4j.LoggerFactory.getLogger(GradientStyle.class);
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(GradientConf.class);
     static final UI.Layer DEFAULT_LAYER = UI.Layer.BACKGROUND;
 
-    private static final GradientStyle _NONE = new GradientStyle(
+    private static final GradientConf _NONE = new GradientConf(
                                                         UI.Transition.TOP_TO_BOTTOM,
                                                         UI.GradientType.LINEAR,
                                                         new Color[0],
@@ -153,9 +153,9 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
      *  @return A gradient without any colors, effectively
      *          representing the absence of a gradient.
      */
-    public static GradientStyle none() { return _NONE; }
+    public static GradientConf none() { return _NONE; }
     
-    static GradientStyle of(
+    static GradientConf of(
         UI.Transition        transition,
         UI.GradientType      type,
         Color[]              colors,
@@ -168,7 +168,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
         float[]              fractions,
         UI.Cycle             cycle
     ) {
-        GradientStyle none = none();
+        GradientConf none = none();
         if ( transition == none._transition &&
              type       == none._type       &&
              colors     == none._colors     &&
@@ -183,7 +183,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
         )
             return none;
 
-        return new GradientStyle(transition, type, colors, offset, size, area, boundary, focus, rotation, fractions, cycle);
+        return new GradientConf(transition, type, colors, offset, size, area, boundary, focus, rotation, fractions, cycle);
     }
 
 
@@ -200,7 +200,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
     private final UI.Cycle             _cycle;
 
 
-    private GradientStyle(
+    private GradientConf(
         UI.Transition        transition,
         UI.GradientType      type,
         Color[]              colors,
@@ -272,7 +272,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
      * @return A new gradient style with the specified colors.
      * @throws NullPointerException if any of the colors is {@code null}.
      */
-    public GradientStyle colors( Color... colors ) {
+    public GradientConf colors(Color... colors ) {
         Objects.requireNonNull(colors);
         for ( Color color : colors )
             Objects.requireNonNull(color, "Use UI.COLOR_UNDEFINED instead of null to represent the absence of a color.");
@@ -289,7 +289,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
      * @return A new gradient style with the specified colors.
      * @throws NullPointerException if any of the colors is {@code null}.
      */
-    public GradientStyle colors( String... colors ) {
+    public GradientConf colors(String... colors ) {
         Objects.requireNonNull(colors);
         try {
             Color[] actualColors = new Color[colors.length];
@@ -320,7 +320,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
      * @return A new gradient style with the specified alignment.
      * @throws NullPointerException if the alignment is {@code null}.
      */
-    public GradientStyle transition( UI.Transition transition ) {
+    public GradientConf transition(UI.Transition transition ) {
         Objects.requireNonNull(transition);
         return of(transition, _type, _colors, _offset, _size, _area, _boundary, _focus, _rotation, _fractions, _cycle);
     }
@@ -336,7 +336,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
      * @return A new gradient style with the specified type.
      * @throws NullPointerException if the type is {@code null}.
      */
-    public GradientStyle type( UI.GradientType type ) {
+    public GradientConf type(UI.GradientType type ) {
         Objects.requireNonNull(type);
         return of(_transition, type, _colors, _offset, _size, _area, _boundary, _focus, _rotation, _fractions, _cycle);
     }
@@ -350,7 +350,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
      * @param y The gradient start offset on the y-axis.
      * @return A new gradient style with the specified offset.
      */
-    public GradientStyle offset( double x, double y ) {
+    public GradientConf offset(double x, double y ) {
         return of(_transition, _type, _colors, Offset.of(x,y), _size, _area, _boundary, _focus, _rotation, _fractions, _cycle);
     }
 
@@ -365,7 +365,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
      * @param size The gradient size.
      * @return A new gradient style with the specified size.
      */
-    public GradientStyle size( double size ) {
+    public GradientConf size(double size ) {
         return of(_transition, _type, _colors, _offset, (float) size, _area, _boundary, _focus, _rotation, _fractions, _cycle);
     }
 
@@ -377,7 +377,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
      * @param area The area of the component to which the gradient is clipped to.
      * @return A new gradient style with the specified area.
      */
-    public GradientStyle clipTo( UI.ComponentArea area ) {
+    public GradientConf clipTo(UI.ComponentArea area ) {
         return of(_transition, _type, _colors, _offset, _size, area, _boundary, _focus, _rotation, _fractions, _cycle);
     }
 
@@ -425,7 +425,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
      * @param boundary The boundary at which the gradient should start in terms of its offset.
      * @return A new gradient style with the specified boundary.
      */
-    public GradientStyle boundary( UI.ComponentBoundary boundary ) {
+    public GradientConf boundary(UI.ComponentBoundary boundary ) {
         return of(_transition, _type, _colors, _offset, _size, _area, boundary, _focus, _rotation, _fractions, _cycle);
     }
 
@@ -439,7 +439,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
      *  @param x The focus offset on the x-axis.
      *  @param y The focus offset on the y-axis.
      */
-    public GradientStyle focus( double x, double y ) {
+    public GradientConf focus(double x, double y ) {
         return of(_transition, _type, _colors, _offset, _size, _area, _boundary, Offset.of(x,y), _rotation, _fractions, _cycle);
     }
 
@@ -448,7 +448,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
      *
      *  @param rotation The rotation of the gradient in degrees.
      */
-    public GradientStyle rotation( float rotation ) {
+    public GradientConf rotation(float rotation ) {
         return of(_transition, _type, _colors, _offset, _size, _area, _boundary, _focus, rotation, _fractions, _cycle);
     }
 
@@ -462,7 +462,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
      *
      *  @param fractions The fractions of the gradient.
      */
-    public GradientStyle fractions( double... fractions ) {
+    public GradientConf fractions(double... fractions ) {
         float[] actualFractions = new float[fractions.length];
         for ( int i = 0; i < fractions.length; i++ )
             actualFractions[i] = (float) fractions[i];
@@ -499,7 +499,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
      * @return A new gradient style with the specified cycle method.
      * @throws NullPointerException if the cycle is {@code null}.
      */
-    public GradientStyle cycle( UI.Cycle cycle ) {
+    public GradientConf cycle(UI.Cycle cycle ) {
         Objects.requireNonNull(cycle);
         return of(_transition, _type, _colors, _offset, _size, _area, _boundary, _focus, _rotation, _fractions, cycle);
     }
@@ -527,8 +527,8 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
     @Override
     public boolean equals( Object o ) {
         if ( this == o ) return true;
-        if ( !(o instanceof GradientStyle) ) return false;
-        GradientStyle that = (GradientStyle) o;
+        if ( !(o instanceof GradientConf) ) return false;
+        GradientConf that = (GradientConf) o;
         return _transition == that._transition       &&
                _type       == that._type             &&
                Arrays.equals(_colors, that._colors)  &&
@@ -560,7 +560,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
     }
 
     @Override
-    public GradientStyle simplified() {
+    public GradientConf simplified() {
         if ( this == _NONE )
             return _NONE;
 
