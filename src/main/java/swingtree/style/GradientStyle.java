@@ -97,6 +97,31 @@ import java.util.function.Function;
  *          If the number of fractions is greater than the number of colors, then the remaining
  *          fractions will be ignored.
  *      </li>
+ *      <li><h3>Cycle</h3>
+ *          The cycle of the gradient which can be one of the following constants:
+ *          <ul>
+ *              <li>{@link UI.Cycle#NONE} -
+ *                  The gradient is only rendered once, without repeating.
+ *                  The last color is used to fill the remaining area.
+ *                  This is the default cycle.
+ *              </li>
+ *              <li>{@link UI.Cycle#REFLECT} -
+ *                  The gradient is rendered once and then reflected.,
+ *                  which means that the gradient is rendered again in reverse order
+ *                  starting from the last color and ending with the first color.
+ *                  After that, the gradient is rendered again in the original order,
+ *                  starting from the first color and ending with the last color and so on.
+ *              </li>
+ *              <li>{@link UI.Cycle#REPEAT} -
+ *                  The gradient is rendered repeatedly, which means that it
+ *                  is rendered again and again in the original order, starting from the first color
+ *                  and ending with the last color.
+ *              </li>
+ *          </ul>
+ *          Note that this property ultimately translates to the {@link java.awt.MultipleGradientPaint.CycleMethod}
+ *          of the {@link java.awt.LinearGradientPaint} or {@link java.awt.RadialGradientPaint} that is used
+ *          to render the gradient inside the SwingTree style engine.
+ *      </li>
  *  </ul>
  *  <p>
  *  You can also use the {@link #none()} method to specify that no gradient should be used,
@@ -118,7 +143,8 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
                                                         UI.ComponentBoundary.EXTERIOR_TO_BORDER,
                                                         Offset.none(),
                                                         0f,
-                                                        new float[0]
+                                                        new float[0],
+                                                        UI.Cycle.NONE
                                                     );
 
     /**
@@ -139,7 +165,8 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
         UI.ComponentBoundary boundary,
         Offset               focus,
         float                rotation,
-        float[]              fractions
+        float[]              fractions,
+        UI.Cycle             cycle
     ) {
         GradientStyle none = none();
         if ( transition == none._transition &&
@@ -151,11 +178,12 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
              boundary   == none._boundary   &&
              focus      == none._focus      &&
              rotation   == none._rotation   &&
-             Arrays.equals(fractions, none._fractions)
+             Arrays.equals(fractions, none._fractions) &&
+             cycle      == none._cycle
         )
             return none;
 
-        return new GradientStyle(transition, type, colors, offset, size, area, boundary, focus, rotation, fractions);
+        return new GradientStyle(transition, type, colors, offset, size, area, boundary, focus, rotation, fractions, cycle);
     }
 
 
@@ -169,6 +197,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
     private final Offset               _focus;
     private final float                _rotation;
     private final float[]              _fractions;
+    private final UI.Cycle             _cycle;
 
 
     private GradientStyle(
@@ -181,7 +210,8 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
         UI.ComponentBoundary boundary,
         Offset               focus,
         float                rotation,
-        float[]              fractions
+        float[]              fractions,
+        UI.Cycle             cycle
     ) {
         _transition = Objects.requireNonNull(transition);
         _type       = Objects.requireNonNull(type);
@@ -193,6 +223,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
         _focus      = Objects.requireNonNull(focus);
         _rotation   = rotation;
         _fractions  = Objects.requireNonNull(fractions);
+        _cycle      = Objects.requireNonNull(cycle);
     }
 
     UI.Transition transition() { return _transition; }
@@ -214,6 +245,8 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
     float rotation() { return _rotation; }
 
     float[] fractions() { return _fractions; }
+
+    UI.Cycle cycle() { return _cycle; }
 
     boolean isOpaque() {
         if ( _colors.length == 0 )
@@ -243,7 +276,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
         Objects.requireNonNull(colors);
         for ( Color color : colors )
             Objects.requireNonNull(color, "Use UI.COLOR_UNDEFINED instead of null to represent the absence of a color.");
-        return new GradientStyle(_transition, _type, colors, _offset, _size, _area, _boundary, _focus, _rotation, _fractions);
+        return of(_transition, _type, colors, _offset, _size, _area, _boundary, _focus, _rotation, _fractions, _cycle);
     }
 
     /**
@@ -263,7 +296,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
             for ( int i = 0; i < colors.length; i++ )
                 actualColors[i] = UI.color(colors[i]);
 
-            return of(_transition, _type, actualColors, _offset, _size, _area, _boundary, _focus, _rotation, _fractions);
+            return of(_transition, _type, actualColors, _offset, _size, _area, _boundary, _focus, _rotation, _fractions, _cycle);
         } catch ( Exception e ) {
             log.error("Failed to parse color strings: " + Arrays.toString(colors), e);
             return this; // We want to avoid side effects other than a wrong color
@@ -289,7 +322,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
      */
     public GradientStyle transition( UI.Transition transition ) {
         Objects.requireNonNull(transition);
-        return of(transition, _type, _colors, _offset, _size, _area, _boundary, _focus, _rotation, _fractions);
+        return of(transition, _type, _colors, _offset, _size, _area, _boundary, _focus, _rotation, _fractions, _cycle);
     }
 
     /**
@@ -305,7 +338,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
      */
     public GradientStyle type( UI.GradientType type ) {
         Objects.requireNonNull(type);
-        return of(_transition, type, _colors, _offset, _size, _area, _boundary, _focus, _rotation, _fractions);
+        return of(_transition, type, _colors, _offset, _size, _area, _boundary, _focus, _rotation, _fractions, _cycle);
     }
 
     /**
@@ -318,7 +351,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
      * @return A new gradient style with the specified offset.
      */
     public GradientStyle offset( double x, double y ) {
-        return of(_transition, _type, _colors, Offset.of(x,y), _size, _area, _boundary, _focus, _rotation, _fractions);
+        return of(_transition, _type, _colors, Offset.of(x,y), _size, _area, _boundary, _focus, _rotation, _fractions, _cycle);
     }
 
     /**
@@ -333,7 +366,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
      * @return A new gradient style with the specified size.
      */
     public GradientStyle size( double size ) {
-        return of(_transition, _type, _colors, _offset, (float) size, _area, _boundary, _focus, _rotation, _fractions);
+        return of(_transition, _type, _colors, _offset, (float) size, _area, _boundary, _focus, _rotation, _fractions, _cycle);
     }
 
     /**
@@ -345,11 +378,11 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
      * @return A new gradient style with the specified area.
      */
     public GradientStyle clipTo( UI.ComponentArea area ) {
-        return of(_transition, _type, _colors, _offset, _size, area, _boundary, _focus, _rotation, _fractions);
+        return of(_transition, _type, _colors, _offset, _size, area, _boundary, _focus, _rotation, _fractions, _cycle);
     }
 
     /**
-     *  Define the boundary at which the gradient should start in terms of its offset.
+     *  Define the boundary at which the gradient should start in terms of its base position.
      *  So if the boundary is set to {@link UI.ComponentBoundary#EXTERIOR_TO_BORDER}
      *  then the gradient position will be determined by the margin of the component. <br>
      *  Here a complete list of the available boundaries:
@@ -380,13 +413,20 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
      *     </li>
      * </ul>
      *  <p>
-     *
+     *  You can think of this property as a convenient way to define the base position of the gradient.
+     *  So if you want to do the positioning yourself, then you may configure this property to
+     *  {@link UI.ComponentBoundary#OUTER_TO_EXTERIOR}, which will cause the gradient to be positioned
+     *  at the outermost edge of the component, and then use the {@link #offset(double, double)} method
+     *  to define the exact position of the gradient.
+     *  (You may also want to set the {@link #transition(UI.Transition)}
+     *  property to {@link UI.Transition#TOP_LEFT_TO_BOTTOM_RIGHT} to make sure that the gradient
+     *  is positioned in the top left corner (origin position) of the component)
      *
      * @param boundary The boundary at which the gradient should start in terms of its offset.
      * @return A new gradient style with the specified boundary.
      */
     public GradientStyle boundary( UI.ComponentBoundary boundary ) {
-        return of(_transition, _type, _colors, _offset, _size, _area, boundary, _focus, _rotation, _fractions);
+        return of(_transition, _type, _colors, _offset, _size, _area, boundary, _focus, _rotation, _fractions, _cycle);
     }
 
     /**
@@ -400,7 +440,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
      *  @param y The focus offset on the y-axis.
      */
     public GradientStyle focus( double x, double y ) {
-        return of(_transition, _type, _colors, _offset, _size, _area, _boundary, Offset.of(x,y), _rotation, _fractions);
+        return of(_transition, _type, _colors, _offset, _size, _area, _boundary, Offset.of(x,y), _rotation, _fractions, _cycle);
     }
 
     /**
@@ -409,7 +449,7 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
      *  @param rotation The rotation of the gradient in degrees.
      */
     public GradientStyle rotation( float rotation ) {
-        return of(_transition, _type, _colors, _offset, _size, _area, _boundary, _focus, rotation, _fractions);
+        return of(_transition, _type, _colors, _offset, _size, _area, _boundary, _focus, rotation, _fractions, _cycle);
     }
 
     /**
@@ -427,8 +467,43 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
         for ( int i = 0; i < fractions.length; i++ )
             actualFractions[i] = (float) fractions[i];
 
-        return of(_transition, _type, _colors, _offset, _size, _area, _boundary, _focus, _rotation, actualFractions);
+        return of(_transition, _type, _colors, _offset, _size, _area, _boundary, _focus, _rotation, actualFractions, _cycle);
     }
+
+    /**
+     *  Define the cycle of the gradient which is one of the following:
+     *  <ul>
+     *      <li>{@link UI.Cycle#NONE} -
+     *          The gradient is only rendered once, without repeating.
+     *          The last color is used to fill the remaining area.
+     *          This is the default cycle.
+     *      </li>
+     *      <li>{@link UI.Cycle#REFLECT} -
+     *          The gradient is rendered once and then reflected.,
+     *          which means that the gradient is rendered again in reverse order
+     *          starting from the last color and ending with the first color.
+     *          After that, the gradient is rendered again in the original order,
+     *          starting from the first color and ending with the last color and so on.
+     *      </li>
+     *      <li>{@link UI.Cycle#REPEAT} -
+     *          The gradient is rendered repeatedly, which means that it
+     *          is rendered again and again in the original order, starting from the first color
+     *          and ending with the last color.
+     *      </li>
+     *  </ul>
+     *  Note that this property ultimately translates to the {@link java.awt.MultipleGradientPaint.CycleMethod}
+     *  of the {@link java.awt.LinearGradientPaint} or {@link java.awt.RadialGradientPaint} that is used
+     *  to render the gradient inside the SwingTree style engine.
+     *
+     * @param cycle The cycle of the gradient.
+     * @return A new gradient style with the specified cycle method.
+     * @throws NullPointerException if the cycle is {@code null}.
+     */
+    public GradientStyle cycle( UI.Cycle cycle ) {
+        Objects.requireNonNull(cycle);
+        return of(_transition, _type, _colors, _offset, _size, _area, _boundary, _focus, _rotation, _fractions, cycle);
+    }
+
 
     @Override
     public String toString() {
@@ -444,7 +519,8 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
                     "boundary="   + _boundary + ", " +
                     "focus="      + _focus + ", " +
                     "rotation="   + _rotation + ", " +
-                    "fractions="  + Arrays.toString(_fractions) +
+                    "fractions="  + Arrays.toString(_fractions) + ", " +
+                    "cycle="      + _cycle +
                 "]";
     }
 
@@ -462,7 +538,8 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
                _boundary   == that._boundary         &&
                _focus      == that._focus            &&
                _rotation   == that._rotation         &&
-               Arrays.equals(_fractions, that._fractions);
+               Arrays.equals(_fractions, that._fractions) &&
+               _cycle      == that._cycle;
     }
 
     @Override
@@ -477,7 +554,8 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
                 _boundary,
                 _focus,
                 _rotation,
-                Arrays.hashCode(_fractions)
+                Arrays.hashCode(_fractions),
+                _cycle
             );
     }
 
@@ -513,11 +591,11 @@ public final class GradientStyle implements Simplifiable<GradientStyle>
                 if ( color != UI.COLOR_UNDEFINED)
                     realColors[index++] = color;
 
-            return of(_transition, _type, realColors, _offset, _size, _area, _boundary, focus, rotation, _fractions);
+            return of(_transition, _type, realColors, _offset, _size, _area, _boundary, focus, rotation, _fractions, _cycle);
         }
 
         if ( focus != _focus )
-            return of(_transition, _type, _colors, _offset, _size, _area, _boundary, focus, rotation, _fractions);
+            return of(_transition, _type, _colors, _offset, _size, _area, _boundary, focus, rotation, _fractions, _cycle);
 
         return this;
     }

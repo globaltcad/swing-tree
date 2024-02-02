@@ -433,6 +433,37 @@ public final class UI extends UINamespaceUtilities
     }
 
     /**
+     *  Used to specify the cycle method for a gradient conf in the style API.
+     *  See {@link UIForAnySwing#withStyle(Styler)} and {@link ComponentStyleDelegate#gradient(Function)}.
+     *  <br>
+     *  The following list describes what each enum instance represents:
+     *  <ul>
+     *      <li>{@link Cycle#NONE} -
+     *          The gradient is only rendered once, without repeating.
+     *          The last color is used to fill the remaining area.
+     *      </li>
+     *      <li>{@link Cycle#REFLECT} -
+     *          The gradient is rendered once and then reflected.,
+     *          which means that the gradient is rendered again in reverse order
+     *          starting from the last color and ending with the first color.
+     *          After that, the gradient is rendered again in the original order,
+     *          starting from the first color and ending with the last color and so on.
+     *      </li>
+     *      <li>{@link Cycle#REPEAT} -
+     *          The gradient is rendered repeatedly, which means that it
+     *          is rendered again and again in the original order, starting from the first color
+     *          and ending with the last color.
+     *      </li>
+     *  </ul>
+     */
+    public enum Cycle implements UIEnum<Cycle>
+    {
+        NONE,
+        REFLECT,
+        REPEAT
+    }
+
+    /**
      *  Use this in the style API (see {@link UIForAnySwing#withStyle(Styler)})
      *  to target specific corners of a {@link JComponent} and apply
      *  custom {@link Style} properties to them.
