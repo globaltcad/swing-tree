@@ -167,7 +167,7 @@ final class ComponentAreas
     private static Area _calculateBaseArea(
             Outline     outline,
             Outline     margin,
-            BorderStyle border,
+            BorderConf border,
             Size        size,
             StyleConf styleConf,
             float       insTop,
@@ -366,8 +366,8 @@ final class ComponentAreas
         boolean sameMargin  = margin1.equals(margin2);
         if ( !sameMargin )
             return false;
-        BorderStyle border1  = state1.style().border();
-        BorderStyle border2  = state2.style().border();
+        BorderConf border1  = state1.style().border();
+        BorderConf border2  = state2.style().border();
         boolean sameBorder  = border1.equals(border2);
         if ( !sameBorder )
             return false;

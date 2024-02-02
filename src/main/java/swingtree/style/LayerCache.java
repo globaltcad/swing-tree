@@ -217,7 +217,7 @@ final class LayerCache
             if ( !shadow.equals(ShadowStyle.none()) && shadow.color().isPresent() )
                 heavyStyleCount++;
 
-        BorderStyle border = state.style().border();
+        BorderConf border = state.style().border();
         boolean rounded = border.hasAnyNonZeroArcs();
 
         if ( _layer == UI.Layer.BORDER ) {
@@ -226,7 +226,7 @@ final class LayerCache
                 heavyStyleCount++;
         }
         if ( _layer == UI.Layer.BACKGROUND ) {
-            BaseStyle base = state.style().base();
+            BaseConf base = state.style().base();
             boolean roundedOrHasMargin = rounded || !state.style().margin().equals(Outline.none());
             if ( base.backgroundColor().isPresent() && roundedOrHasMargin )
                 heavyStyleCount++;

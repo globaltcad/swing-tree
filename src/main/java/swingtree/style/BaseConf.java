@@ -13,9 +13,9 @@ import java.util.Optional;
  *  Instances of this are part of the full {@link StyleConf} configuration that is used to
  *  style a component in all kinds of ways.
  */
-final class BaseStyle
+final class BaseConf
 {
-    private static final BaseStyle _NONE = new BaseStyle(
+    private static final BaseConf _NONE = new BaseConf(
                                                     null,
                                                     UI.FitComponent.NO,
                                                     null,
@@ -26,11 +26,11 @@ final class BaseStyle
                                                  );
 
     /**
-     *  Returns the default {@link BaseStyle} which represents the absence of a base style.
+     *  Returns the default {@link BaseConf} which represents the absence of a base style.
      *
-     * @return The default {@link BaseStyle}, containing no style properties.
+     * @return The default {@link BaseConf}, containing no style properties.
      */
-    public static BaseStyle none() { return _NONE; }
+    public static BaseConf none() { return _NONE; }
 
 
     private final ImageIcon               _icon;
@@ -42,7 +42,7 @@ final class BaseStyle
     private final UI.ComponentOrientation _orientation;
 
 
-    private BaseStyle(
+    private BaseConf(
         ImageIcon               icon,
         UI.FitComponent         fit,
         Color                   foundation,
@@ -74,41 +74,41 @@ final class BaseStyle
 
     public UI.ComponentOrientation orientation() { return _orientation; }
 
-    BaseStyle icon( ImageIcon icon ) {
-        return new BaseStyle(icon, _fit, _foundationColor, _backgroundColor, _foregroundColor, _cursor, _orientation);
+    BaseConf icon(ImageIcon icon ) {
+        return new BaseConf(icon, _fit, _foundationColor, _backgroundColor, _foregroundColor, _cursor, _orientation);
     }
 
-    BaseStyle fit( UI.FitComponent fit ) {
-        return new BaseStyle(_icon, fit, _foundationColor, _backgroundColor, _foregroundColor, _cursor, _orientation);
+    BaseConf fit(UI.FitComponent fit ) {
+        return new BaseConf(_icon, fit, _foundationColor, _backgroundColor, _foregroundColor, _cursor, _orientation);
     }
 
-    BaseStyle foundationColor( Color foundation ) {
-        return new BaseStyle(_icon, _fit, foundation, _backgroundColor, _foregroundColor, _cursor, _orientation);
+    BaseConf foundationColor(Color foundation ) {
+        return new BaseConf(_icon, _fit, foundation, _backgroundColor, _foregroundColor, _cursor, _orientation);
     }
 
-    BaseStyle backgroundColor( Color color ) {
-        return new BaseStyle(_icon, _fit, _foundationColor, color, _foregroundColor, _cursor, _orientation);
+    BaseConf backgroundColor(Color color ) {
+        return new BaseConf(_icon, _fit, _foundationColor, color, _foregroundColor, _cursor, _orientation);
     }
 
-    BaseStyle foregroundColor( Color color ) {
-        return new BaseStyle(_icon, _fit, _foundationColor, _backgroundColor, color, _cursor, _orientation);
+    BaseConf foregroundColor(Color color ) {
+        return new BaseConf(_icon, _fit, _foundationColor, _backgroundColor, color, _cursor, _orientation);
     }
 
-    BaseStyle cursor( Cursor cursor ) {
-        return new BaseStyle(_icon, _fit, _foundationColor, _backgroundColor, _foregroundColor, cursor, _orientation);
+    BaseConf cursor(Cursor cursor ) {
+        return new BaseConf(_icon, _fit, _foundationColor, _backgroundColor, _foregroundColor, cursor, _orientation);
     }
 
-    BaseStyle orientation( UI.ComponentOrientation orientation ) {
-        return new BaseStyle(_icon, _fit, _foundationColor, _backgroundColor, _foregroundColor, _cursor, orientation);
+    BaseConf orientation(UI.ComponentOrientation orientation ) {
+        return new BaseConf(_icon, _fit, _foundationColor, _backgroundColor, _foregroundColor, _cursor, orientation);
     }
 
-    BaseStyle simplified() {
+    BaseConf simplified() {
         Color simplifiedFoundation = _foundationColor == UI.COLOR_UNDEFINED ? null : _foundationColor;
 
         if ( simplifiedFoundation == _foundationColor )
             return this;
 
-        return new BaseStyle(_icon, _fit, simplifiedFoundation, _backgroundColor, _foregroundColor, _cursor, _orientation);
+        return new BaseConf(_icon, _fit, simplifiedFoundation, _backgroundColor, _foregroundColor, _cursor, _orientation);
     }
 
     @Override
@@ -119,7 +119,7 @@ final class BaseStyle
         if ( obj == null ) return false;
         if ( obj == this ) return true;
         if ( obj.getClass() != getClass() ) return false;
-        BaseStyle rhs = (BaseStyle) obj;
+        BaseConf rhs = (BaseConf) obj;
 
         boolean sameBackground = Objects.equals(_backgroundColor, rhs._backgroundColor);
         if ( _backgroundColor == UI.COLOR_UNDEFINED || rhs._backgroundColor == UI.COLOR_UNDEFINED )

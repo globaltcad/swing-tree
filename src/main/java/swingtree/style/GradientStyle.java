@@ -13,7 +13,7 @@ import java.util.function.Function;
 /**
  *  An immutable config API for specifying a gradient style.
  *  as a sub-style of various other styles,
- *  like for example {@link BaseStyle} or {@link BorderStyle} accessed through the
+ *  like for example {@link BaseConf} or {@link BorderConf} accessed through the
  *  {@link ComponentStyleDelegate#gradient(String, Function)}
  *  method.
  *  The state of a gradient style is immutable and can only be updated by

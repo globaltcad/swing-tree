@@ -49,8 +49,8 @@ public final class StyleConf
 {
     private static final StyleConf _NONE = new StyleConf(
                                             LayoutStyle.none(),
-                                            BorderStyle.none(),
-                                            BaseStyle.none(),
+                                            BorderConf.none(),
+                                            BaseConf.none(),
                                             FontStyle.none(),
                                             DimensionalityStyle.none(),
                                             StyleLayers.empty(),
@@ -64,8 +64,8 @@ public final class StyleConf
 
     static StyleConf of(
         LayoutStyle         layout,
-        BorderStyle         border,
-        BaseStyle           base,
+        BorderConf border,
+        BaseConf base,
         FontStyle           font,
         DimensionalityStyle dimensionality,
         StyleLayers         layers,
@@ -87,8 +87,8 @@ public final class StyleConf
 
 
     private final LayoutStyle                _layout;
-    private final BorderStyle                _border;
-    private final BaseStyle                  _base;
+    private final BorderConf _border;
+    private final BaseConf _base;
     private final FontStyle                  _font;
     private final DimensionalityStyle        _dimensionality;
     private final StyleLayers                _layers;
@@ -96,8 +96,8 @@ public final class StyleConf
 
     private StyleConf(
         LayoutStyle         layout,
-        BorderStyle         border,
-        BaseStyle           base,
+        BorderConf border,
+        BaseConf base,
         FontStyle           font,
         DimensionalityStyle dimensionality,
         StyleLayers         layers,
@@ -120,9 +120,9 @@ public final class StyleConf
 
     Outline margin() { return _border.margin(); }
 
-    BorderStyle border() { return _border; }
+    BorderConf border() { return _border; }
 
-    BaseStyle base() { return _base; }
+    BaseConf base() { return _base; }
 
 
     DimensionalityStyle dimensionality() { return _dimensionality; }
@@ -214,7 +214,7 @@ public final class StyleConf
         return StyleConf.of(
                     LayoutStyle.none(),
                     ( layer == UI.Layer.BORDER     ? _border : _border.withColor(null) ),
-                    ( layer == UI.Layer.BACKGROUND ? _base   : BaseStyle.none() ),
+                    ( layer == UI.Layer.BACKGROUND ? _base   : BaseConf.none() ),
                     FontStyle.none(),
                     DimensionalityStyle.none(),
                     _layers.onlyRetainingAsUnnamedLayer(layer),
@@ -284,14 +284,14 @@ public final class StyleConf
         return StyleConf.of(layout, _border, _base, _font, _dimensionality, _layers, _properties);
     }
 
-    StyleConf _withBorder(BorderStyle border ) {
+    StyleConf _withBorder(BorderConf border ) {
         if ( border == _border )
             return this;
 
         return StyleConf.of(_layout, border, _base, _font, _dimensionality, _layers, _properties);
     }
 
-    StyleConf _withBase(BaseStyle background ) {
+    StyleConf _withBase(BaseConf background ) {
         if ( background == _base )
             return this;
 

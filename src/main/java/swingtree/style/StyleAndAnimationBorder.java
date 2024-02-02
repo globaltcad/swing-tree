@@ -68,8 +68,8 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
         try {
             _compExt.paintBorderAndAnimations((Graphics2D) g, ()->{
                 if ( _formerBorder != null && !_borderWasNotPainted ) {
-                    BorderStyle borderStyle = _compExt.getStyle().border();
-                    if ( !borderStyle.isVisible() )
+                    BorderConf borderConf = _compExt.getStyle().border();
+                    if ( !borderConf.isVisible() )
                         _paintFormerBorder(c, g, x, y, width, height);
                 }
             });
