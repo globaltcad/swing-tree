@@ -24,14 +24,14 @@ final class ComponentConf
 {
     public static ComponentConf none() {
         return new ComponentConf(
-                    Style.none(),
+                    StyleConf.none(),
                     Bounds.none(),
                     Outline.none(),
                     new ComponentAreas()
                 );
     }
 
-    private final Style   _style;
+    private final StyleConf _styleConf;
     private final Bounds  _currentBounds;
     private final Outline _baseOutline;
 
@@ -42,18 +42,18 @@ final class ComponentConf
 
 
     private ComponentConf(
-        Style          style,
+        StyleConf styleConf,
         Bounds         currentBounds,
         Outline        baseOutline,
         ComponentAreas componentAreas
     ) {
-        _style         = Objects.requireNonNull(style);
+        _styleConf = Objects.requireNonNull(styleConf);
         _currentBounds = Objects.requireNonNull(currentBounds);
         _baseOutline   = Objects.requireNonNull(baseOutline);
         _areas         = Objects.requireNonNull(componentAreas);
     }
 
-    Style style() { return _style; }
+    StyleConf style() { return _styleConf; }
 
     Bounds currentBounds() { return _currentBounds; }
 
@@ -61,7 +61,7 @@ final class ComponentConf
 
     Optional<Shape> componentArea() {
         Shape contentClip = null;
-        if ( _areas.bodyArea().exists() || _style.margin().isPositive() )
+        if ( _areas.bodyArea().exists() || _styleConf.margin().isPositive() )
             contentClip = get(UI.ComponentArea.BODY);
 
         return Optional.ofNullable(contentClip);
@@ -99,7 +99,7 @@ final class ComponentConf
         g.setClip(oldClip);
     }
 
-    ComponentConf with( Style style, JComponent component )
+    ComponentConf with(StyleConf styleConf, JComponent component )
     {
         Outline outline = Outline.none();
         Border border = component.getBorder();
@@ -108,33 +108,33 @@ final class ComponentConf
             outline = Outline.of(base.top, base.left, base.bottom, base.right);
         }
 
-        boolean sameStyle   = _style.equals(style);
+        boolean sameStyle   = _styleConf.equals(styleConf);
         boolean sameBounds  = _currentBounds.equals(component.getX(), component.getY(), component.getWidth(), component.getHeight());
         boolean sameOutline = _baseOutline.equals(outline);
         if ( sameStyle && sameBounds && sameOutline )
             return this;
 
         ComponentConf newConf = new ComponentConf(
-                                    style,
+                styleConf,
                                     Bounds.of(component.getX(), component.getY(), component.getWidth(), component.getHeight()),
                                     outline,
                                     _areas
                                 );
 
         return new ComponentConf(
-                        newConf._style,
+                        newConf._styleConf,
                         newConf._currentBounds,
                         newConf._baseOutline,
                         _areas.validate(this, newConf)
                 );
     }
 
-    ComponentConf withStyle( Style style ) {
-        if ( _style.equals(style) )
+    ComponentConf withStyle( StyleConf styleConf) {
+        if ( _styleConf.equals(styleConf) )
             return this;
 
         return new ComponentConf(
-                    style,
+                styleConf,
                     _currentBounds,
                     _baseOutline,
                     _areas
@@ -149,7 +149,7 @@ final class ComponentConf
      */
     ComponentConf onlyRetainingLayer( UI.Layer layer ) {
         return new ComponentConf(
-                    _style.onlyRetainingRenderCacheRelevantConfForLayer(layer),
+                    _styleConf.onlyRetainingRenderCacheRelevantConfForLayer(layer),
                     _currentBounds.withX(0).withY(0),
                     _baseOutline,
                     _areas
@@ -159,7 +159,7 @@ final class ComponentConf
     @Override
     public String toString() {
         return this.getClass().getSimpleName()+"[" +
-                    "style="         + _style         + ", "+
+                    "style="         + _styleConf + ", "+
                     "bounds="        + _currentBounds + ", "+
                     "baseOutline="   + _baseOutline   + ", "+
                 "]";
@@ -171,7 +171,7 @@ final class ComponentConf
         if ( o == null ) return false;
         if ( o.getClass() != this.getClass() ) return false;
         ComponentConf other = (ComponentConf) o;
-        return Objects.equals(_style, other._style)
+        return Objects.equals(_styleConf, other._styleConf)
             && Objects.equals(_currentBounds, other._currentBounds)
             && Objects.equals(_baseOutline, other._baseOutline);
     }
@@ -181,7 +181,7 @@ final class ComponentConf
         if ( _wasAlreadyHashed )
             return _hashCode;
 
-        _hashCode = Objects.hash(_style, _currentBounds, _baseOutline);
+        _hashCode = Objects.hash(_styleConf, _currentBounds, _baseOutline);
         _wasAlreadyHashed = true;
         return _hashCode;
     }

@@ -29,10 +29,10 @@ final class StyleInstaller<C extends JComponent>
     private Boolean    _initialContentAreaFilled = null;
 
 
-    void installCustomBorderBasedStyleAndAnimationRenderer( C owner, Style style ) {
+    void installCustomBorderBasedStyleAndAnimationRenderer( C owner, StyleConf styleConf) {
         Border currentBorder = owner.getBorder();
         if ( !(currentBorder instanceof StyleAndAnimationBorder) )
-            owner.setBorder(new StyleAndAnimationBorder<>(ComponentExtension.from(owner), currentBorder, style));
+            owner.setBorder(new StyleAndAnimationBorder<>(ComponentExtension.from(owner), currentBorder, styleConf));
     }
 
     void installCustomUIFor( C owner ) {
@@ -43,13 +43,13 @@ final class StyleInstaller<C extends JComponent>
         return _dynamicLaF.customLookAndFeelIsInstalled();
     }
 
-    Style applyStyleToComponentState(
+    StyleConf applyStyleToComponentState(
         C owner,
-        Style newStyle,
+        StyleConf newStyle,
         StyleSource<C> styleSource,
         StyleEngine styleEngine
     ) {
-        final Style.Report styleReport = newStyle.getReport();
+        final StyleConf.Report styleReport = newStyle.getReport();
         Runnable backgroundSetter = ()->{};
 
         final boolean isNotStyled                     = styleReport.isNotStyled();
@@ -308,7 +308,7 @@ final class StyleInstaller<C extends JComponent>
         return false;
     }
 
-    private void _applyGenericBaseStyleTo( final C owner, final Style styleConf )
+    private void _applyGenericBaseStyleTo( final C owner, final StyleConf styleConf )
     {
         if ( styleConf.base().foregroundColor().isPresent() && !Objects.equals( owner.getForeground(), styleConf.base().foregroundColor().get() ) ) {
             Color newColor = styleConf.base().foregroundColor().get();
@@ -344,7 +344,7 @@ final class StyleInstaller<C extends JComponent>
         }
     }
 
-    private void _applyIconStyleTo( final C owner, Style styleConf )
+    private void _applyIconStyleTo( final C owner, StyleConf styleConf )
     {
         UI.FitComponent fit = styleConf.base().fit();
         styleConf.base().icon().ifPresent( icon -> {
@@ -370,7 +370,7 @@ final class StyleInstaller<C extends JComponent>
         });
     }
 
-    private void _applyLayoutStyleTo( final C owner, final Style styleConf )
+    private void _applyLayoutStyleTo( final C owner, final StyleConf styleConf )
     {
         final LayoutStyle style = styleConf.layout();
 
@@ -438,7 +438,7 @@ final class StyleInstaller<C extends JComponent>
         }
     }
 
-    private void _applyDimensionalityStyleTo( final C owner, final Style styleConf )
+    private void _applyDimensionalityStyleTo( final C owner, final StyleConf styleConf )
     {
         final DimensionalityStyle dimensionalityStyle = styleConf.dimensionality();
 
@@ -491,7 +491,7 @@ final class StyleInstaller<C extends JComponent>
         }
     }
 
-    private void _applyFontStyleTo( final C owner, final Style styleConf )
+    private void _applyFontStyleTo( final C owner, final StyleConf styleConf )
     {
         final FontStyle fontStyle = styleConf.font();
 
@@ -539,7 +539,7 @@ final class StyleInstaller<C extends JComponent>
         });
     }
 
-    private void _applyPropertiesTo( final C owner, final Style styleConf ) {
+    private void _applyPropertiesTo( final C owner, final StyleConf styleConf ) {
         styleConf.properties().forEach( property -> {
             Object oldValue = owner.getClientProperty(property.name());
             if ( property.style().equals(oldValue) )
@@ -552,7 +552,7 @@ final class StyleInstaller<C extends JComponent>
         });
     }
 
-    private void _doComboBoxMarginAdjustment( final C owner, final Style styleConf ) {
+    private void _doComboBoxMarginAdjustment( final C owner, final StyleConf styleConf ) {
         if ( owner instanceof JComboBox ) {
             int bottom = styleConf.margin().bottom().map(Number::intValue).orElse(0);
             // We adjust the position of the popup menu:

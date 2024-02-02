@@ -14,7 +14,7 @@ import java.awt.*;
  *  A custom {@link Border} implementation which is capable of painting large parts of
  *  the styles exposed by the style API (see {@link swingtree.UIForAnySwing#withStyle(Styler)})
  *  as well as the previously installed {@link Border} of a component,
- *  to which it delegates the painting of the border if the current {@link Style}
+ *  to which it delegates the painting of the border if the current {@link StyleConf}
  *  does not override the looks of the former border.
  *  Not only does this paint borders, shadows and animation lambda, but it also
  *  calculates the border insets of the component based on the margins, paddings and border widths
@@ -38,7 +38,7 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
     private final Insets _fullPaddingInsets = new Insets(0, 0, 0, 0);
 
 
-    StyleAndAnimationBorder( ComponentExtension<C> compExt, Border formerBorder, Style style ) {
+    StyleAndAnimationBorder( ComponentExtension<C> compExt, Border formerBorder, StyleConf styleConf) {
         _compExt       = compExt;
         _insets        = null;
         _formerBorder  = formerBorder;
@@ -51,7 +51,7 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
         else
             _borderWasNotPainted = false;
 
-        recalculateInsets(style);
+        recalculateInsets(styleConf);
     }
 
     Border getFormerBorder() { return _formerBorder; }
@@ -116,12 +116,12 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
         return _insets;
     }
 
-    void recalculateInsets(Style style)
+    void recalculateInsets(StyleConf styleConf)
     {
-        _calculateMarginInsets(style);
-        _calculatePaddingInsets(style);
-        _calculateFullPaddingInsets(style);
-        _calculateBorderInsets(style);
+        _calculateMarginInsets(styleConf);
+        _calculatePaddingInsets(styleConf);
+        _calculateFullPaddingInsets(styleConf);
+        _calculateBorderInsets(styleConf);
     }
 
     @Override
@@ -165,7 +165,7 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
         }
     }
 
-    private void _calculateBorderInsets( Style style )
+    private void _calculateBorderInsets( StyleConf styleConf)
     {
         Insets correction = getBaseInsets(false);
 
@@ -174,21 +174,21 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
         float right  = correction.right;
         float bottom = correction.bottom;
 
-        left   = style.margin().left()  .orElse(left  );
-        top    = style.margin().top()   .orElse(top   );
-        right  = style.margin().right() .orElse(right );
-        bottom = style.margin().bottom().orElse(bottom);
+        left   = styleConf.margin().left()  .orElse(left  );
+        top    = styleConf.margin().top()   .orElse(top   );
+        right  = styleConf.margin().right() .orElse(right );
+        bottom = styleConf.margin().bottom().orElse(bottom);
 
         // Add padding:
-        left   += style.padding().left().orElse(0f);
-        top    += style.padding().top().orElse(0f);
-        right  += style.padding().right().orElse(0f);
-        bottom += style.padding().bottom().orElse(0f);
+        left   += styleConf.padding().left().orElse(0f);
+        top    += styleConf.padding().top().orElse(0f);
+        right  += styleConf.padding().right().orElse(0f);
+        bottom += styleConf.padding().bottom().orElse(0f);
         // Add border widths:
-        left   += Math.max(style.border().widths().left().orElse(0f),   0);
-        top    += Math.max(style.border().widths().top().orElse(0f),    0);
-        right  += Math.max(style.border().widths().right().orElse(0f),  0);
-        bottom += Math.max(style.border().widths().bottom().orElse(0f), 0);
+        left   += Math.max(styleConf.border().widths().left().orElse(0f),   0);
+        top    += Math.max(styleConf.border().widths().top().orElse(0f),    0);
+        right  += Math.max(styleConf.border().widths().right().orElse(0f),  0);
+        bottom += Math.max(styleConf.border().widths().bottom().orElse(0f), 0);
 
         if (
             _insets == null         ||
@@ -206,18 +206,18 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
         }
     }
 
-    private void _calculateMarginInsets( Style style )
+    private void _calculateMarginInsets( StyleConf styleConf)
     {
-        float left   = style.margin().left().orElse(0f);
-        float top    = style.margin().top().orElse(0f);
-        float right  = style.margin().right().orElse(0f);
-        float bottom = style.margin().bottom().orElse(0f);
+        float left   = styleConf.margin().left().orElse(0f);
+        float top    = styleConf.margin().top().orElse(0f);
+        float right  = styleConf.margin().right().orElse(0f);
+        float bottom = styleConf.margin().bottom().orElse(0f);
 
         // Add border widths:
-        left   += Math.max(style.border().widths().left().orElse(0f),   0);
-        top    += Math.max(style.border().widths().top().orElse(0f),    0);
-        right  += Math.max(style.border().widths().right().orElse(0f),  0);
-        bottom += Math.max(style.border().widths().bottom().orElse(0f), 0);
+        left   += Math.max(styleConf.border().widths().left().orElse(0f),   0);
+        top    += Math.max(styleConf.border().widths().top().orElse(0f),    0);
+        right  += Math.max(styleConf.border().widths().right().orElse(0f),  0);
+        bottom += Math.max(styleConf.border().widths().bottom().orElse(0f), 0);
 
         _marginInsets.top    = (int) top;
         _marginInsets.left   = (int) left;
@@ -225,20 +225,20 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
         _marginInsets.bottom = (int) bottom;
     }
 
-    private void _calculatePaddingInsets( Style style )
+    private void _calculatePaddingInsets( StyleConf styleConf)
     {
-        _paddingInsets.top    = style.padding().top().map(Number::intValue).orElse(0);
-        _paddingInsets.left   = style.padding().left().map(Number::intValue).orElse(0);
-        _paddingInsets.right  = style.padding().right().map(Number::intValue).orElse(0);
-        _paddingInsets.bottom = style.padding().bottom().map(Number::intValue).orElse(0);
+        _paddingInsets.top    = styleConf.padding().top().map(Number::intValue).orElse(0);
+        _paddingInsets.left   = styleConf.padding().left().map(Number::intValue).orElse(0);
+        _paddingInsets.right  = styleConf.padding().right().map(Number::intValue).orElse(0);
+        _paddingInsets.bottom = styleConf.padding().bottom().map(Number::intValue).orElse(0);
     }
 
-    private void _calculateFullPaddingInsets( Style style )
+    private void _calculateFullPaddingInsets( StyleConf styleConf)
     {
-        _fullPaddingInsets.top    = (int)( style.padding().top().orElse(0f)    + style.margin().top().orElse(0f) );
-        _fullPaddingInsets.left   = (int)( style.padding().left().orElse(0f)   + style.margin().left().orElse(0f) );
-        _fullPaddingInsets.right  = (int)( style.padding().right().orElse(0f)  + style.margin().right().orElse(0f) );
-        _fullPaddingInsets.bottom = (int)( style.padding().bottom().orElse(0f) + style.margin().bottom().orElse(0f) );
+        _fullPaddingInsets.top    = (int)( styleConf.padding().top().orElse(0f)    + styleConf.margin().top().orElse(0f) );
+        _fullPaddingInsets.left   = (int)( styleConf.padding().left().orElse(0f)   + styleConf.margin().left().orElse(0f) );
+        _fullPaddingInsets.right  = (int)( styleConf.padding().right().orElse(0f)  + styleConf.margin().right().orElse(0f) );
+        _fullPaddingInsets.bottom = (int)( styleConf.padding().bottom().orElse(0f) + styleConf.margin().bottom().orElse(0f) );
     }
 
 }

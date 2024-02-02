@@ -13,7 +13,7 @@ import java.util.stream.Stream;
  *  by their unique name.
  *  Yes, this class could have been a linked hashmap or treemap
  *  however, we do not expect the existence of more than a handful
- *  of named styles in a {@link Style} instance which is why we chose
+ *  of named styles in a {@link StyleConf} instance which is why we chose
  *  to use an array instead as it is more memory as well as CPU efficient
  *  to just iterate over a few array elements than to use a hashmap or treemap.
  *

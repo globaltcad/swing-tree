@@ -47,31 +47,31 @@ final class DynamicLaF
         return _styleLaF != null;
     }
 
-    DynamicLaF establishLookAndFeelFor( Style style, JComponent owner ) {
+    DynamicLaF establishLookAndFeelFor(StyleConf styleConf, JComponent owner ) {
 
         DynamicLaF result = this;
 
         // For panels mostly:
         boolean weNeedToOverrideLaF = false;
 
-        if ( style.border().hasAnyNonZeroArcs() ) // Border radius
+        if ( styleConf.border().hasAnyNonZeroArcs() ) // Border radius
             weNeedToOverrideLaF = true;
 
-        if ( style.margin().isPositive() )
+        if ( styleConf.margin().isPositive() )
             weNeedToOverrideLaF = true;
 
-        if ( style.hasCustomGradients() )
+        if ( styleConf.hasCustomGradients() )
             weNeedToOverrideLaF = true;
 
-        if ( style.hasPaintersOnLayer(UI.Layer.BACKGROUND) )
+        if ( styleConf.hasPaintersOnLayer(UI.Layer.BACKGROUND) )
             weNeedToOverrideLaF = true;
 
-        if ( style.hasVisibleShadows() )
+        if ( styleConf.hasVisibleShadows() )
             weNeedToOverrideLaF = true;
 
         if ( weNeedToOverrideLaF ) {
             if (owner instanceof JScrollPane) {
-                boolean foundationIsTransparent = style
+                boolean foundationIsTransparent = styleConf
                                                   .base()
                                                   .foundationColor()
                                                   .map( c -> c.getAlpha() < 255 )
@@ -81,8 +81,8 @@ final class DynamicLaF
                                                           .orElse(true)
                                                   );
 
-                boolean hasBorderRadius = style.border().hasAnyNonZeroArcs();
-                boolean hasMargin       = style.margin().isPositive();
+                boolean hasBorderRadius = styleConf.border().hasAnyNonZeroArcs();
+                boolean hasMargin       = styleConf.margin().isPositive();
 
                 owner.setOpaque(!hasBorderRadius && !hasMargin && !foundationIsTransparent);
                 JScrollPane scrollPane = (JScrollPane) owner;
@@ -331,9 +331,9 @@ final class DynamicLaF
     ) {
         try {
             if ( formerUI != null ) {
-                Style style = ComponentExtension.from(c).getStyle();
-                boolean hasMargin       = style.margin().isPositive();
-                boolean hasBorderRadius = style.border().hasAnyNonZeroArcs();
+                StyleConf styleConf = ComponentExtension.from(c).getStyle();
+                boolean hasMargin       = styleConf.margin().isPositive();
+                boolean hasBorderRadius = styleConf.border().hasAnyNonZeroArcs();
                 if ( !hasMargin && !hasBorderRadius )
                     formerUI.update(g, c);
                 else {

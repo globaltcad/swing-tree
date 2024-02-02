@@ -1,7 +1,7 @@
 package swingtree.api;
 
 import swingtree.style.ComponentStyleDelegate;
-import swingtree.style.Style;
+import swingtree.style.StyleConf;
 
 import javax.swing.JComponent;
 import java.util.Objects;
@@ -10,7 +10,7 @@ import java.util.Objects;
  * A {@link Styler} is a function that takes a {@link ComponentStyleDelegate} and then
  * transforms and returns it with some new style properties (see {@link swingtree.UIForAnySwing#withStyle(Styler)}). <br>
  * Note that all of this is done in a functional manner, so the original {@link ComponentStyleDelegate}
- * as well as the delegated {@link Style} object is not modified
+ * as well as the delegated {@link StyleConf} object is not modified
  * because {@link ComponentStyleDelegate} is an immutable object. <br>
  * This design makes the underlying style engine of SwingTree very flexible and scalable
  * because it allows for the composition of styles and reuse of style logic across many components

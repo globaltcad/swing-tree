@@ -11,7 +11,7 @@ import java.util.*;
 
 /**
  *  An immutable, wither-like method based config API for font styles
- *  that is part of the full {@link Style} configuration object.
+ *  that is part of the full {@link StyleConf} configuration object.
  *  <p>
  *  The following properties with their respective purpose are available:
  *  <br>

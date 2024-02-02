@@ -10,7 +10,7 @@ import java.util.Optional;
 /**
  *  An immutable, wither-like copy method based config object for basic component style
  *  properties like background color, foundation color, foreground color and the cursor.
- *  Instances of this are part of the full {@link Style} configuration that is used to
+ *  Instances of this are part of the full {@link StyleConf} configuration that is used to
  *  style a component in all kinds of ways.
  */
 final class BaseStyle

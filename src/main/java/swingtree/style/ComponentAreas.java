@@ -169,13 +169,13 @@ final class ComponentAreas
             Outline     margin,
             BorderStyle border,
             Size        size,
-            Style       style,
+            StyleConf styleConf,
             float       insTop,
             float       insLeft,
             float       insBottom,
             float       insRight
     ) {
-        if ( style.equals(Style.none()) ) {
+        if ( styleConf.equals(StyleConf.none()) ) {
             // If there is no style, we just return the component's bounds:
             return new Area(new Rectangle2D.Float(
                             insLeft, insTop,

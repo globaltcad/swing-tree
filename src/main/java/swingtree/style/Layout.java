@@ -332,13 +332,13 @@ public interface Layout
         @Override
         public void installFor( JComponent component ) {
             ComponentExtension<?> extension = ComponentExtension.from(component);
-            Style style = extension.getStyle();
-            if ( style.layout().constraint().isPresent() ) {
+            StyleConf styleConf = extension.getStyle();
+            if ( styleConf.layout().constraint().isPresent() ) {
                 // We ensure that the parent layout has the correct component constraints for the component:
                 LayoutManager parentLayout = ( component.getParent() == null ? null : component.getParent().getLayout() );
                 if ( parentLayout instanceof MigLayout) {
                     MigLayout migLayout = (MigLayout) parentLayout;
-                    Object componentConstraints = style.layout().constraint().get();
+                    Object componentConstraints = styleConf.layout().constraint().get();
                     Object currentComponentConstraints = migLayout.getComponentConstraints(component);
                     //     ^ can be a String or a CC object, we want to compare it to the new constraints:
                     if ( !componentConstraints.equals(currentComponentConstraints) ) {

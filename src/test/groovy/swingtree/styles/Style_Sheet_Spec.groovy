@@ -12,7 +12,7 @@ import swingtree.style.Arc
 
 import swingtree.style.Outline
 
-import swingtree.style.Style
+import swingtree.style.StyleConf
 import swingtree.style.StyleSheet
 
 import javax.swing.*
@@ -59,7 +59,7 @@ import java.awt.*
     The style sheet will be applied to all UI components created within the scope of the `use` method.
     
 """)
-@Subject([StyleSheet, Style])
+@Subject([StyleSheet, StyleConf])
 class Style_Sheet_Spec extends Specification
 {
     def setupSpec() {
@@ -72,10 +72,10 @@ class Style_Sheet_Spec extends Specification
     {
         reportInfo """
             You can think of a `StyleSheet` as a collection of `StyleTrait`s 
-            forming a function for processing a `Style` object.
+            forming a function for processing a `StyleConf` object.
             
-            So when you send a `Style` object through a `StyleSheet` then
-            a new `Style` object with the updated style properties will be returned.
+            So when you send a `StyleConf` object through a `StyleSheet` then
+            a new `StyleConf` object with the updated style properties will be returned.
         """
         given :
             var ss = new StyleSheet() {

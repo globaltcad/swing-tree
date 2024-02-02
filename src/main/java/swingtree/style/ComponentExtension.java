@@ -205,11 +205,11 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     /**
-     * @return The current {@link Style} configuration of the component
+     * @return The current {@link StyleConf} configuration of the component
      *         which is calculated based on the {@link Styler} lambdas
      *         associated with the component.
      */
-    public Style getStyle() { return _styleEngine.getComponentConf().style(); }
+    public StyleConf getStyle() { return _styleEngine.getComponentConf().style(); }
 
     ComponentConf getConf() {
         return _styleEngine.getComponentConf();
@@ -355,17 +355,17 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     /**
-     *  Calculates a new {@link Style} object based on the {@link Styler} lambdas associated
+     *  Calculates a new {@link StyleConf} object based on the {@link Styler} lambdas associated
      *  with the component...
      *
-     * @return A new immutable {@link Style} configuration.
+     * @return A new immutable {@link StyleConf} configuration.
      */
-    public Style gatherStyle() {
+    public StyleConf gatherStyle() {
         return _styleSource.gatherStyleFor(_owner);
     }
 
     /**
-     *  Calculates a new {@link Style} object based on the {@link Styler} lambdas associated
+     *  Calculates a new {@link StyleConf} object based on the {@link Styler} lambdas associated
      *  with the component and then applies it to the component after which
      *  a new {@link StyleEngine} is installed for the component.
      *  If the calculated style is the same as the current style, nothing happens
@@ -378,24 +378,24 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     /**
-     *  Applies the given {@link Style} to the component after which
+     *  Applies the given {@link StyleConf} to the component after which
      *  a new {@link StyleEngine} is installed for the component.
      *  If the given style is the same as the current style, nothing happens
      *  except in case the <code>force</code> parameter is set to <code>true</code>.
      *
-     * @param style The style to apply.
+     * @param styleConf The style to apply.
      * @param force If set to <code>true</code>, the style will be applied even if it is the same as the current style.
      */
-    public void applyAndInstallStyle( Style style, boolean force ) {
-        _installStyle( _applyStyleToComponentState(style, force) );
+    public void applyAndInstallStyle(StyleConf styleConf, boolean force ) {
+        _installStyle( _applyStyleToComponentState(styleConf, force) );
     }
 
     void gatherApplyAndInstallStyleConfig() {
         _installStyle( _applyStyleToComponentState(gatherStyle(), false) );
     }
 
-    private void _installStyle( Style style ) {
-        _styleEngine = _styleEngine.withNewStyleAndComponent(style, _owner);
+    private void _installStyle( StyleConf styleConf) {
+        _styleEngine = _styleEngine.withNewStyleAndComponent(styleConf, _owner);
     }
 
     void paintBackground( Graphics g, Runnable lookAndFeelPainting )
@@ -455,7 +455,7 @@ public final class ComponentExtension<C extends JComponent>
     }
 
 
-    private Style _applyStyleToComponentState( Style newStyle, boolean force )
+    private StyleConf _applyStyleToComponentState(StyleConf newStyle, boolean force )
     {
         _styleSource = _styleSource.withoutExpiredAnimationStylers(); // Clean up expired animation stylers!
 

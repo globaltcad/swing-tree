@@ -6,7 +6,7 @@ import java.awt.*;
 
 /**
  *  A value object that represents the arc width and height of a rounded rectangle corner
- *  as part of a component {@link Style}.
+ *  as part of a component {@link StyleConf}.
  */
 final class Arc
 {

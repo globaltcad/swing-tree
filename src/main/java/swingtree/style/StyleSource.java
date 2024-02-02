@@ -11,9 +11,9 @@ import java.util.*;
 
 /**
  *  A style source is a container for a local styler, animation stylers and a style sheet
- *  which are all used to calculate the final {@link Style} configuration of a component. <br>
+ *  which are all used to calculate the final {@link StyleConf} configuration of a component. <br>
  *  This object can be thought of as a function of lambdas that takes a {@link JComponent}
- *  and returns a {@link Style} object. <br>
+ *  and returns a {@link StyleConf} object. <br>
  *
  * @param <C> The type of the component that is being styled, animated or sized in a particular way...
  */
@@ -72,16 +72,16 @@ final class StyleSource<C extends JComponent>
     }
 
 
-    Style gatherStyleFor( C owner )
+    StyleConf gatherStyleFor(C owner )
     {
-        Style styleConf = Optional.ofNullable(owner.getParent())
+        StyleConf styleConf = Optional.ofNullable(owner.getParent())
                               .map( p -> p instanceof JComponent ? (JComponent) p : null )
                               .map(ComponentExtension::from)
                               .map(ComponentExtension::getStyle)
-                              .map(Style::font)
+                              .map(StyleConf::font)
                               .filter( f -> !f.equals(FontStyle.none()) )
-                              .map( f -> Style.none()._withFont(f) )
-                              .orElse(Style.none());
+                              .map( f -> StyleConf.none()._withFont(f) )
+                              .orElse(StyleConf.none());
 
         try {
             styleConf = _styleSheet.applyTo( owner, styleConf );
@@ -134,11 +134,11 @@ final class StyleSource<C extends JComponent>
         return styleConf;
     }
 
-    private static Style _applyDPIScaling( Style style ) {
+    private static StyleConf _applyDPIScaling(StyleConf styleConf) {
         if ( UI.scale() == 1f )
-            return style;
+            return styleConf;
 
-        return style.scale( UI.scale() );
+        return styleConf.scale( UI.scale() );
     }
 
 }

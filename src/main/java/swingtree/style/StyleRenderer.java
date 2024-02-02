@@ -16,7 +16,7 @@ import java.util.function.Function;
 /**
  *  A stateless un-instantiable utility class that renders the style of a component
  *  using the immutable {@link ComponentConf} object containing the essential state
- *  needed for rendering, like for example the current {@link Bounds} and {@link Style}
+ *  needed for rendering, like for example the current {@link Bounds} and {@link StyleConf}
  *  of a particular component.
  */
 final class StyleRenderer
@@ -161,7 +161,7 @@ final class StyleRenderer
             return;
 
         Color shadowColor = shadow.color().orElse(Color.BLACK);
-        Style style       = conf.style();
+        StyleConf styleConf = conf.style();
         Size  size        = conf.currentBounds().size();
 
         // First let's check if we need to render any shadows at all
@@ -170,18 +170,18 @@ final class StyleRenderer
             return;
 
         // The background box is calculated from the margins and border radius:
-        final float leftBorderWidth   = style.border().widths().left().orElse(0f);
-        final float topBorderWidth    = style.border().widths().top().orElse(0f);
-        final float rightBorderWidth  = style.border().widths().right().orElse(0f);
-        final float bottomBorderWidth = style.border().widths().bottom().orElse(0f);
-        final float left   = Math.max(style.margin().left().orElse(0f),   0) + ( shadow.isInset() ? leftBorderWidth   : 0 );
-        final float top    = Math.max(style.margin().top().orElse(0f),    0) + ( shadow.isInset() ? topBorderWidth    : 0 );
-        final float right  = Math.max(style.margin().right().orElse(0f),  0) + ( shadow.isInset() ? rightBorderWidth  : 0 );
-        final float bottom = Math.max(style.margin().bottom().orElse(0f), 0) + ( shadow.isInset() ? bottomBorderWidth : 0 );
-        final float topLeftRadius     = Math.max(style.border().topLeftRadius(), 0);
-        final float topRightRadius    = Math.max(style.border().topRightRadius(), 0);
-        final float bottomRightRadius = Math.max(style.border().bottomRightRadius(), 0);
-        final float bottomLeftRadius  = Math.max(style.border().bottomLeftRadius(), 0);
+        final float leftBorderWidth   = styleConf.border().widths().left().orElse(0f);
+        final float topBorderWidth    = styleConf.border().widths().top().orElse(0f);
+        final float rightBorderWidth  = styleConf.border().widths().right().orElse(0f);
+        final float bottomBorderWidth = styleConf.border().widths().bottom().orElse(0f);
+        final float left   = Math.max(styleConf.margin().left().orElse(0f),   0) + ( shadow.isInset() ? leftBorderWidth   : 0 );
+        final float top    = Math.max(styleConf.margin().top().orElse(0f),    0) + ( shadow.isInset() ? topBorderWidth    : 0 );
+        final float right  = Math.max(styleConf.margin().right().orElse(0f),  0) + ( shadow.isInset() ? rightBorderWidth  : 0 );
+        final float bottom = Math.max(styleConf.margin().bottom().orElse(0f), 0) + ( shadow.isInset() ? bottomBorderWidth : 0 );
+        final float topLeftRadius     = Math.max(styleConf.border().topLeftRadius(), 0);
+        final float topRightRadius    = Math.max(styleConf.border().topRightRadius(), 0);
+        final float bottomRightRadius = Math.max(styleConf.border().bottomRightRadius(), 0);
+        final float bottomLeftRadius  = Math.max(styleConf.border().bottomLeftRadius(), 0);
 
         final float width     = size.width().orElse(0f);
         final float height    = size.height().orElse(0f);

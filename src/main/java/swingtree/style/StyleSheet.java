@@ -14,7 +14,7 @@ import java.util.function.BiFunction;
  *  A style sheet object is in essence merely a collection of
  *  {@link StyleTrait}s and corresponding {@link Styler} lambdas
  *  which are used by the SwingTree style engine
- *  to calculate component {@link Style} configurations
+ *  to calculate component {@link StyleConf} configurations
  *  in a functional and side effect free manner. <br>
  *  Implement the {@link #configure()} method and
  *  use the {@link #add(StyleTrait, Styler)} method to
@@ -56,7 +56,7 @@ import java.util.function.BiFunction;
  *  are intended to be registered, is not called eagerly in the constructor of the style sheet,
  *  but rather lazily when the style sheet is first used to calculate
  *  the style for a particular component through the
- *  {@link #applyTo(JComponent)} or {@link #applyTo(JComponent, Style)} methods.
+ *  {@link #applyTo(JComponent)} or {@link #applyTo(JComponent, StyleConf)} methods.
  */
 public abstract class StyleSheet
 {
@@ -73,7 +73,7 @@ public abstract class StyleSheet
     public static StyleSheet none() { return _NONE; }
 
 
-    private final BiFunction<JComponent, Style, Style> _defaultStyle;
+    private final BiFunction<JComponent, StyleConf, StyleConf> _defaultStyle;
     private final Map<StyleTrait<?>, Styler<?>> _styleDeclarations = new LinkedHashMap<>();
     private StyleTrait<?>[][] _traitPaths = {}; // The paths are calculated from the above map and used to apply the styles.
 
@@ -276,13 +276,13 @@ public abstract class StyleSheet
      * }</pre>
      *
      * @param toBeStyled The component to apply the style sheet to.
-     * @return The {@link Style} that was applied to the component.
+     * @return The {@link StyleConf} that was applied to the component.
      */
-    public Style applyTo( JComponent toBeStyled ) { return applyTo( toBeStyled, Style.none() ); }
+    public StyleConf applyTo(JComponent toBeStyled ) { return applyTo( toBeStyled, StyleConf.none() ); }
 
     /**
      *  Applies the style sheet to the given component using the
-     *  supplied starting {@link Style} as a basis.
+     *  supplied starting {@link StyleConf} as a basis.
      *  Note that the style sheet is already configured at this point,
      *  because the {@link #configure()} method is called in the constructor of the style sheet.
      *  <p>
@@ -294,17 +294,17 @@ public abstract class StyleSheet
      * }</pre>
      *
      * @param toBeStyled The component to apply the style sheet to.
-     * @param startingStyle The {@link Style} to start with when applying the style sheet.
-     * @return The {@link Style} that was applied to the component.
+     * @param startingStyle The {@link StyleConf} to start with when applying the style sheet.
+     * @return The {@link StyleConf} that was applied to the component.
      * @throws NullPointerException If either argument is null.
      */
-    public Style applyTo( JComponent toBeStyled, Style startingStyle ) {
+    public StyleConf applyTo(JComponent toBeStyled, StyleConf startingStyle ) {
         Objects.requireNonNull(toBeStyled);
         Objects.requireNonNull(startingStyle);
         return _applyTo( toBeStyled, _defaultStyle.apply(toBeStyled, startingStyle) );
     }
 
-    private Style _applyTo( JComponent toBeStyled, Style startingStyle )
+    private StyleConf _applyTo(JComponent toBeStyled, StyleConf startingStyle )
     {
         if ( !_initialized )
             reconfigure();

@@ -56,7 +56,7 @@ final class StyleEngine
         return _animationPainters.length > 0;
     }
 
-    StyleEngine withNewStyleAndComponent( Style newStyle, JComponent component ) {
+    StyleEngine withNewStyleAndComponent(StyleConf newStyle, JComponent component ) {
         ComponentConf newConf = _componentConf.with(newStyle, component);
         for ( LayerCache layerCache : _layerCaches )
             layerCache.validate(_componentConf, newConf);

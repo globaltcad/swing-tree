@@ -371,7 +371,7 @@ public final class UI extends UINamespaceUtilities
     }
     /**
      *  Use this to target specific edges of a {@link JComponent} and apply
-     *  custom {@link Style} properties to them.
+     *  custom {@link StyleConf} properties to them.
      *  <br>
      *  See {@link ComponentStyleDelegate#borderWidthAt(Edge, double)}
      */
@@ -466,7 +466,7 @@ public final class UI extends UINamespaceUtilities
     /**
      *  Use this in the style API (see {@link UIForAnySwing#withStyle(Styler)})
      *  to target specific corners of a {@link JComponent} and apply
-     *  custom {@link Style} properties to them.
+     *  custom {@link StyleConf} properties to them.
      *  <br>
      *  See {@link ComponentStyleDelegate#borderRadiusAt(Corner, double, double)}.
      */

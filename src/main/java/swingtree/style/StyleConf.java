@@ -13,12 +13,12 @@ import java.util.stream.Collectors;
  *  An immutable config container with cloning based update methods designed
  *  for functional {@link javax.swing.JComponent} styling.
  *  The styling in SwingTree is completely functional, meaning that changing a property
- *  of a {@link Style} instance will always return a new {@link Style} instance with the
+ *  of a {@link StyleConf} instance will always return a new {@link StyleConf} instance with the
  *  updated property.
  *  <p>
  *  Consider the following example demonstrating how a {@link javax.swing.JPanel} is styled through the SwingTree
  *  style API, which consists of a functional {@link swingtree.api.Styler} lambda that processes a
- *  {@link ComponentStyleDelegate} instance that internally assembles a {@link Style} object:
+ *  {@link ComponentStyleDelegate} instance that internally assembles a {@link StyleConf} object:
  *  <pre>{@code
  *  panel(FILL)
  *  .withStyle( it -> it
@@ -45,9 +45,9 @@ import java.util.stream.Collectors;
  *  See {@link swingtree.style.StyleSheet} for more information about
  *  how this composition of styles is achieved in practice.
  */
-public final class Style
+public final class StyleConf
 {
-    private static final Style _NONE = new Style(
+    private static final StyleConf _NONE = new StyleConf(
                                             LayoutStyle.none(),
                                             BorderStyle.none(),
                                             BaseStyle.none(),
@@ -60,9 +60,9 @@ public final class Style
     /**
      * @return The default style instance, representing the absence of a style.
      */
-    public static Style none() { return _NONE; }
+    public static StyleConf none() { return _NONE; }
 
-    static Style of(
+    static StyleConf of(
         LayoutStyle         layout,
         BorderStyle         border,
         BaseStyle           base,
@@ -82,7 +82,7 @@ public final class Style
         )
             return _NONE;
         else
-            return new Style(layout, border, base, font, dimensionality, layers, properties);
+            return new StyleConf(layout, border, base, font, dimensionality, layers, properties);
     }
 
 
@@ -94,7 +94,7 @@ public final class Style
     private final StyleLayers                _layers;
     private final NamedStyles<String>        _properties;
 
-    private Style(
+    private StyleConf(
         LayoutStyle         layout,
         BorderStyle         border,
         BaseStyle           base,
@@ -191,7 +191,7 @@ public final class Style
                         );
     }
 
-    Style painter( UI.Layer layer, UI.ComponentArea area, String painterName, Painter painter ) {
+    StyleConf painter(UI.Layer layer, UI.ComponentArea area, String painterName, Painter painter ) {
         Objects.requireNonNull(painterName);
         Objects.requireNonNull(painter);
         // We clone the painter map:
@@ -205,13 +205,13 @@ public final class Style
     }
 
     /**
-     *  Returns a new {@link Style} instance which only contains style information relevant
+     *  Returns a new {@link StyleConf} instance which only contains style information relevant
      *  for rendering the provided {@link UI.Layer}. Style information on other layers is discarded.
      * @param layer The layer to retain.
-     * @return A new {@link Style} instance which only contains style information relevant to the provided {@link UI.Layer}.
+     * @return A new {@link StyleConf} instance which only contains style information relevant to the provided {@link UI.Layer}.
      */
-    public Style onlyRetainingRenderCacheRelevantConfForLayer( UI.Layer layer ) {
-        return Style.of(
+    public StyleConf onlyRetainingRenderCacheRelevantConfForLayer(UI.Layer layer ) {
+        return StyleConf.of(
                     LayoutStyle.none(),
                     ( layer == UI.Layer.BORDER     ? _border : _border.withColor(null) ),
                     ( layer == UI.Layer.BACKGROUND ? _base   : BaseStyle.none() ),
@@ -273,88 +273,88 @@ public final class Style
                 .collect(Collectors.toList());
     }
 
-    public Style foundationColor( Color color ) { return _withBase(base().foundationColor(color)); }
+    public StyleConf foundationColor(Color color ) { return _withBase(base().foundationColor(color)); }
 
-    public Style backgroundColor( Color color ) { return _withBase(base().backgroundColor(color)); }
+    public StyleConf backgroundColor(Color color ) { return _withBase(base().backgroundColor(color)); }
 
-    Style _withLayout( LayoutStyle layout ) {
+    StyleConf _withLayout(LayoutStyle layout ) {
         if ( layout == _layout )
             return this;
 
-        return Style.of(layout, _border, _base, _font, _dimensionality, _layers, _properties);
+        return StyleConf.of(layout, _border, _base, _font, _dimensionality, _layers, _properties);
     }
 
-    Style _withBorder( BorderStyle border ) {
+    StyleConf _withBorder(BorderStyle border ) {
         if ( border == _border )
             return this;
 
-        return Style.of(_layout, border, _base, _font, _dimensionality, _layers, _properties);
+        return StyleConf.of(_layout, border, _base, _font, _dimensionality, _layers, _properties);
     }
 
-    Style _withBase( BaseStyle background ) {
+    StyleConf _withBase(BaseStyle background ) {
         if ( background == _base )
             return this;
 
-        return Style.of(_layout, _border, background, _font, _dimensionality, _layers, _properties);
+        return StyleConf.of(_layout, _border, background, _font, _dimensionality, _layers, _properties);
     }
 
-    Style _withFont( FontStyle font ) {
+    StyleConf _withFont(FontStyle font ) {
         if ( font == _font )
             return this;
 
-        return Style.of(_layout, _border, _base, font, _dimensionality, _layers, _properties);
+        return StyleConf.of(_layout, _border, _base, font, _dimensionality, _layers, _properties);
     }
 
-    Style _withDimensionality( DimensionalityStyle dimensionality ) {
+    StyleConf _withDimensionality(DimensionalityStyle dimensionality ) {
         if ( dimensionality == _dimensionality )
             return this;
 
-        return Style.of(_layout, _border, _base, _font, dimensionality, _layers, _properties);
+        return StyleConf.of(_layout, _border, _base, _font, dimensionality, _layers, _properties);
     }
 
-    Style _withShadow( UI.Layer layer, NamedStyles<ShadowStyle> shadows ) {
-        return Style.of(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withShadows(shadows)), _properties);
+    StyleConf _withShadow(UI.Layer layer, NamedStyles<ShadowStyle> shadows ) {
+        return StyleConf.of(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withShadows(shadows)), _properties);
     }
 
-    Style _withProperties( NamedStyles<String> properties ) {
+    StyleConf _withProperties(NamedStyles<String> properties ) {
         if ( properties == _properties )
             return this;
 
-        return Style.of(_layout, _border, _base, _font, _dimensionality, _layers, properties);
+        return StyleConf.of(_layout, _border, _base, _font, _dimensionality, _layers, properties);
     }
 
-    Style _withShadow( UI.Layer layer, Function<ShadowStyle, ShadowStyle> styler ) {
+    StyleConf _withShadow(UI.Layer layer, Function<ShadowStyle, ShadowStyle> styler ) {
         // A new map is created where all the styler is applied to all the values:
         NamedStyles<ShadowStyle> styledShadows = _layers.get(layer).shadows().mapStyles(styler::apply);
         return _withShadow(layer, styledShadows);
     }
 
-    Style _withShadow( Function<ShadowStyle, ShadowStyle> styler ) {
+    StyleConf _withShadow(Function<ShadowStyle, ShadowStyle> styler ) {
         return _withLayers(_layers.map( layer -> layer.withShadows(layer.shadows().mapStyles(styler::apply)) ));
     }
 
-    Style _withImages( UI.Layer layer, NamedStyles<ImageStyle> images ) {
-        return Style.of(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withImages(images)), _properties);
+    StyleConf _withImages(UI.Layer layer, NamedStyles<ImageStyle> images ) {
+        return StyleConf.of(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withImages(images)), _properties);
     }
 
-    Style _withGradients( UI.Layer layer, NamedStyles<GradientStyle> shades ) {
+    StyleConf _withGradients(UI.Layer layer, NamedStyles<GradientStyle> shades ) {
         Objects.requireNonNull(shades);
-        return Style.of(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withGradients(shades)), _properties);
+        return StyleConf.of(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withGradients(shades)), _properties);
     }
 
-    Style _withLayers( StyleLayers layers ) {
+    StyleConf _withLayers(StyleLayers layers ) {
         if ( layers == _layers )
             return this;
 
-        return Style.of(_layout, _border, _base, _font, _dimensionality, layers, _properties);
+        return StyleConf.of(_layout, _border, _base, _font, _dimensionality, layers, _properties);
     }
 
-    Style _withPainters( UI.Layer layer, NamedStyles<PainterStyle> painters ) {
+    StyleConf _withPainters(UI.Layer layer, NamedStyles<PainterStyle> painters ) {
         Objects.requireNonNull(painters);
-        return Style.of(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withPainters(painters)), _properties);
+        return StyleConf.of(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withPainters(painters)), _properties);
     }
 
-    Style property( String key, String value ) {
+    StyleConf property(String key, String value ) {
         Objects.requireNonNull(key);
         Objects.requireNonNull(value);
         return _withProperties(_properties.withNamedStyle(key, value));
@@ -367,7 +367,7 @@ public final class Style
                             .collect(Collectors.toList());
     }
 
-    Style gradient( UI.Layer layer, String shadeName, Function<GradientStyle, GradientStyle> styler ) {
+    StyleConf gradient(UI.Layer layer, String shadeName, Function<GradientStyle, GradientStyle> styler ) {
         Objects.requireNonNull(shadeName);
         Objects.requireNonNull(styler);
         GradientStyle shadow = Optional.ofNullable(_layers.get(layer).gradients().get(shadeName)).orElse(GradientStyle.none());
@@ -381,7 +381,7 @@ public final class Style
         return _layers.get(layer).gradients().get(shadeName);
     }
 
-    Style images( UI.Layer layer, String imageName, Function<ImageStyle, ImageStyle> styler ) {
+    StyleConf images(UI.Layer layer, String imageName, Function<ImageStyle, ImageStyle> styler ) {
         Objects.requireNonNull(imageName);
         Objects.requireNonNull(styler);
         ImageStyle ground = _layers.get(layer).images().style(imageName).orElse(ImageStyle.none());
@@ -394,8 +394,8 @@ public final class Style
         return _layers.get(layer).images().sortedByNamesAndFilteredBy();
     }
 
-    Style scale( double scale ) {
-        return Style.of(
+    StyleConf scale(double scale ) {
+        return StyleConf.of(
                     _layout,
                     _border._scale(scale),
                     _base, // Just colors and the cursor
@@ -406,43 +406,43 @@ public final class Style
                 );
     }
 
-    Style simplified() {
+    StyleConf simplified() {
         return _withBase(_base.simplified())
                ._withBorder(_border.simplified())
                ._withDimensionality(_dimensionality.simplified())
                ._withLayers(_layers.simplified());
     }
 
-    Style correctedForRounding() {
+    StyleConf correctedForRounding() {
         return _withBorder(_border.correctedForRounding());
     }
 
-    boolean hasEqualLayoutAs( Style otherStyle ) {
+    boolean hasEqualLayoutAs( StyleConf otherStyle ) {
         return Objects.equals(_layout, otherStyle._layout);
     }
 
-    boolean hasEqualMarginAndPaddingAs( Style otherStyle ) {
+    boolean hasEqualMarginAndPaddingAs( StyleConf otherStyle ) {
         return Objects.equals(_border.margin(), otherStyle._border.margin()) &&
                Objects.equals(_border.padding(), otherStyle._border.padding());
     }
 
-    boolean hasEqualBorderAs( Style otherStyle ) {
+    boolean hasEqualBorderAs( StyleConf otherStyle ) {
         return Objects.equals(_border, otherStyle._border);
     }
 
-    boolean hasEqualBaseAs( Style otherStyle ) {
+    boolean hasEqualBaseAs( StyleConf otherStyle ) {
         return Objects.equals(_base, otherStyle._base);
     }
 
-    boolean hasEqualFontAs( Style otherStyle ) {
+    boolean hasEqualFontAs( StyleConf otherStyle ) {
         return Objects.equals(_font, otherStyle._font);
     }
 
-    boolean hasEqualDimensionalityAs( Style otherStyle ) {
+    boolean hasEqualDimensionalityAs( StyleConf otherStyle ) {
         return Objects.equals(_dimensionality, otherStyle._dimensionality);
     }
 
-    boolean hasEqualShadowsAs( Style otherStyle ) {
+    boolean hasEqualShadowsAs( StyleConf otherStyle ) {
         boolean allLayersAreEqual = true;
         for ( UI.Layer layer : UI.Layer.values() ) {
             if ( !hasEqualShadowsAs(layer, otherStyle) ) {
@@ -453,7 +453,7 @@ public final class Style
         return allLayersAreEqual;
     }
 
-    boolean hasEqualShadowsAs( UI.Layer layer, Style otherStyle ) {
+    boolean hasEqualShadowsAs( UI.Layer layer, StyleConf otherStyle ) {
         StyleLayer thisLayer = _layers.get(layer);
         StyleLayer otherLayer = otherStyle._layers.get(layer);
         if ( thisLayer == null && otherLayer == null )
@@ -463,7 +463,7 @@ public final class Style
         return thisLayer.hasEqualShadowsAs(otherLayer);
     }
 
-    boolean hasEqualPaintersAs( Style otherStyle ) {
+    boolean hasEqualPaintersAs( StyleConf otherStyle ) {
         boolean allLayersAreEqual = true;
         for ( UI.Layer layer : UI.Layer.values() ) {
             if ( !hasEqualPaintersAs(layer, otherStyle) ) {
@@ -474,7 +474,7 @@ public final class Style
         return allLayersAreEqual;
     }
 
-    boolean hasEqualPaintersAs( UI.Layer layer, Style otherStyle ) {
+    boolean hasEqualPaintersAs( UI.Layer layer, StyleConf otherStyle ) {
         StyleLayer thisLayer = _layers.get(layer);
         StyleLayer otherLayer = otherStyle._layers.get(layer);
         if ( thisLayer == null && otherLayer == null )
@@ -484,7 +484,7 @@ public final class Style
         return thisLayer.hasEqualPaintersAs(otherLayer);
     }
 
-    boolean hasEqualGradientsAs( Style otherStyle ) {
+    boolean hasEqualGradientsAs( StyleConf otherStyle ) {
         boolean allLayersAreEqual = true;
         for ( UI.Layer layer : UI.Layer.values() ) {
             if ( !hasEqualGradientsAs(layer, otherStyle) ) {
@@ -495,7 +495,7 @@ public final class Style
         return allLayersAreEqual;
     }
 
-    boolean hasEqualGradientsAs( UI.Layer layer, Style otherStyle ) {
+    boolean hasEqualGradientsAs( UI.Layer layer, StyleConf otherStyle ) {
         StyleLayer thisLayer = _layers.get(layer);
         StyleLayer otherLayer = otherStyle._layers.get(layer);
         if ( thisLayer == null && otherLayer == null )
@@ -505,7 +505,7 @@ public final class Style
         return thisLayer.hasEqualGradientsAs(otherLayer);
     }
 
-    boolean hasEqualImagesAs(Style otherStyle ) {
+    boolean hasEqualImagesAs(StyleConf otherStyle ) {
         boolean allLayersAreEqual = true;
         for ( UI.Layer layer : UI.Layer.values() ) {
             if ( !hasEqualImagesAs(layer, otherStyle) ) {
@@ -516,7 +516,7 @@ public final class Style
         return allLayersAreEqual;
     }
 
-    boolean hasEqualImagesAs( UI.Layer layer, Style otherStyle ) {
+    boolean hasEqualImagesAs( UI.Layer layer, StyleConf otherStyle ) {
         StyleLayer thisLayer = _layers.get(layer);
         StyleLayer otherLayer = otherStyle._layers.get(layer);
         if ( thisLayer == null && otherLayer == null )
@@ -526,7 +526,7 @@ public final class Style
         return thisLayer.hasEqualImagesAs(otherLayer);
     }
 
-    boolean hasEqualPropertiesAs( Style otherStyle ) {
+    boolean hasEqualPropertiesAs( StyleConf otherStyle ) {
         return Objects.equals(_properties, otherStyle._properties);
     }
 
@@ -545,8 +545,8 @@ public final class Style
     public boolean equals( Object obj ) {
         if ( obj == this ) return true;
         if ( obj == null ) return false;
-        if ( !(obj instanceof Style) ) return false;
-        Style other = (Style) obj;
+        if ( !(obj instanceof StyleConf) ) return false;
+        StyleConf other = (StyleConf) obj;
         return hasEqualLayoutAs(other)         &&
                hasEqualBorderAs(other)         &&
                hasEqualBaseAs(other)           &&
@@ -595,25 +595,25 @@ public final class Style
         public final boolean allImagesAreBorderImages;
 
 
-        private Report( Style style ) {
-            this.noLayoutStyle           = Style.none().hasEqualLayoutAs(style);
-            this.noPaddingAndMarginStyle = Style.none().hasEqualMarginAndPaddingAs(style);
-            this.noBorderStyle           = Style.none().hasEqualBorderAs(style);
-            this.noBaseStyle             = Style.none().hasEqualBaseAs(style);
-            this.noFontStyle             = Style.none().hasEqualFontAs(style);
-            this.noDimensionalityStyle   = Style.none().hasEqualDimensionalityAs(style);
-            this.noShadowStyle           = Style.none().hasEqualShadowsAs(style);
-            this.noPainters              = Style.none().hasEqualPaintersAs(style);
-            this.noGradients             = Style.none().hasEqualGradientsAs(style);
-            this.noImages                = Style.none().hasEqualImagesAs(style);
-            this.noProperties            = Style.none().hasEqualPropertiesAs(style);
+        private Report( StyleConf styleConf) {
+            this.noLayoutStyle           = StyleConf.none().hasEqualLayoutAs(styleConf);
+            this.noPaddingAndMarginStyle = StyleConf.none().hasEqualMarginAndPaddingAs(styleConf);
+            this.noBorderStyle           = StyleConf.none().hasEqualBorderAs(styleConf);
+            this.noBaseStyle             = StyleConf.none().hasEqualBaseAs(styleConf);
+            this.noFontStyle             = StyleConf.none().hasEqualFontAs(styleConf);
+            this.noDimensionalityStyle   = StyleConf.none().hasEqualDimensionalityAs(styleConf);
+            this.noShadowStyle           = StyleConf.none().hasEqualShadowsAs(styleConf);
+            this.noPainters              = StyleConf.none().hasEqualPaintersAs(styleConf);
+            this.noGradients             = StyleConf.none().hasEqualGradientsAs(styleConf);
+            this.noImages                = StyleConf.none().hasEqualImagesAs(styleConf);
+            this.noProperties            = StyleConf.none().hasEqualPropertiesAs(styleConf);
 
-            this.borderIsVisible = style.border().isVisible();
+            this.borderIsVisible = styleConf.border().isVisible();
 
-            this.allShadowsAreBorderShadows     = style._layers.everyNamedStyle( (layer, styleLayer) -> layer == UI.Layer.BORDER || styleLayer.shadows().everyNamedStyle(   ns -> !ns.style().color().isPresent() ) );
-            this.allGradientsAreBorderGradients = style._layers.everyNamedStyle( (layer, styleLayer) -> layer == UI.Layer.BORDER || styleLayer.gradients().everyNamedStyle( ns -> ns.style().colors().length == 0 ) );
-            this.allPaintersAreBorderPainters   = style._layers.everyNamedStyle( (layer, styleLayer) -> layer == UI.Layer.BORDER || styleLayer.painters().everyNamedStyle(  ns -> Painter.none().equals(ns.style().painter()) ) );
-            this.allImagesAreBorderImages       = style._layers.everyNamedStyle( (layer, styleLayer) -> layer == UI.Layer.BORDER || styleLayer.images().everyNamedStyle(    ns -> !ns.style().image().isPresent() && !ns.style().primer().isPresent() ) );
+            this.allShadowsAreBorderShadows     = styleConf._layers.everyNamedStyle( (layer, styleLayer) -> layer == UI.Layer.BORDER || styleLayer.shadows().everyNamedStyle(ns -> !ns.style().color().isPresent() ) );
+            this.allGradientsAreBorderGradients = styleConf._layers.everyNamedStyle( (layer, styleLayer) -> layer == UI.Layer.BORDER || styleLayer.gradients().everyNamedStyle(ns -> ns.style().colors().length == 0 ) );
+            this.allPaintersAreBorderPainters   = styleConf._layers.everyNamedStyle( (layer, styleLayer) -> layer == UI.Layer.BORDER || styleLayer.painters().everyNamedStyle(ns -> Painter.none().equals(ns.style().painter()) ) );
+            this.allImagesAreBorderImages       = styleConf._layers.everyNamedStyle( (layer, styleLayer) -> layer == UI.Layer.BORDER || styleLayer.images().everyNamedStyle(ns -> !ns.style().image().isPresent() && !ns.style().primer().isPresent() ) );
         }
 
         public boolean isNotStyled() {

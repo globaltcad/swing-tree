@@ -10,7 +10,7 @@ import swingtree.components.JBox
 import swingtree.style.ComponentExtension
 import swingtree.style.Layout
 import swingtree.threading.EventProcessor
-import swingtree.style.Style
+import swingtree.style.StyleConf
 import swingtree.style.ComponentStyleDelegate
 
 import javax.swing.JButton
@@ -31,7 +31,7 @@ import java.awt.geom.AffineTransform
     configured and rendered.
 
 ''')
-@Subject([Style])
+@Subject([StyleConf])
 class Styles_Spec extends Specification
 {
     def setupSpec() {

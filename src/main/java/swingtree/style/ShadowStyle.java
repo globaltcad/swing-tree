@@ -10,7 +10,7 @@ import java.util.Optional;
 /**
  *  An immutable config API
  *  designed for defining shadow styles
- *  as part of the full {@link Style} configuration object.
+ *  as part of the full {@link StyleConf} configuration object.
  *  The state of this object can only be updated by using wither like update methods,
  *  like {@link #horizontalOffset(float)}, {@link #verticalOffset(float)}, {@link #blurRadius(float)}...
  *  which return a new instance of this class with the updated state.

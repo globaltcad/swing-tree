@@ -3,7 +3,7 @@ package swingtree;
 import sprouts.*;
 import swingtree.api.Peeker;
 import swingtree.style.ComponentExtension;
-import swingtree.style.Style;
+import swingtree.style.StyleConf;
 import swingtree.threading.EventProcessor;
 
 import javax.swing.JComponent;
@@ -394,14 +394,14 @@ abstract class UIForAnything<I, C extends E, E extends Component>
         if ( childComponent instanceof JComponent ) {
             JComponent child = (JComponent) childComponent;
 
-            Style style = ( conf != null ? null : ComponentExtension.from(child).gatherStyle() );
-            if ( style != null )
-                conf = style.layoutConstraint().orElse(null);
+            StyleConf styleConf = ( conf != null ? null : ComponentExtension.from(child).gatherStyle() );
+            if ( styleConf != null )
+                conf = styleConf.layoutConstraint().orElse(null);
 
             _addComponentTo(thisComponent, childComponent, conf);
 
-            if ( style != null )
-                ComponentExtension.from(child).applyAndInstallStyle(style, true);
+            if ( styleConf != null )
+                ComponentExtension.from(child).applyAndInstallStyle(styleConf, true);
             else
                 ComponentExtension.from(child).gatherApplyAndInstallStyle(true);
         }
