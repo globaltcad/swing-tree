@@ -156,7 +156,6 @@ final class ComponentAreas
                     state.style().margin(),
                     state.style().border(),
                     state.currentBounds().size(),
-                    state.style(),
                     insTop,
                     insLeft,
                     insBottom,
@@ -167,20 +166,21 @@ final class ComponentAreas
     private static Area _calculateBaseArea(
             Outline     outline,
             Outline     margin,
-            BorderConf border,
+            BorderConf  border,
             Size        size,
-            StyleConf styleConf,
             float       insTop,
             float       insLeft,
             float       insBottom,
             float       insRight
     ) {
-        if ( styleConf.equals(StyleConf.none()) ) {
+        if ( BorderConf.none().equals(border) ) {
+            Outline insets = outline.plus(margin).plus(Outline.of(insTop, insLeft, insBottom, insRight));
             // If there is no style, we just return the component's bounds:
             return new Area(new Rectangle2D.Float(
-                            insLeft, insTop,
-                            size.width().orElse(0f) - insLeft - insRight,
-                            size.height().orElse(0f) - insTop - insBottom
+                            insets.left().orElse(0f),
+                            insets.top().orElse(0f),
+                            size.width().orElse(0f) - insets.left().orElse(0f) - insets.right().orElse(0f),
+                            size.height().orElse(0f) - insets.top().orElse(0f) - insets.bottom().orElse(0f)
                         ));
         }
 
