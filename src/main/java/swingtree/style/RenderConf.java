@@ -20,14 +20,12 @@ final class RenderConf
     private static final RenderConf _NONE = new RenderConf(
                                                     StructureConf.none(),
                                                     BaseColorConf.none(),
-                                                    StyleLayer.empty(),
-                                                    new ComponentAreas()
+                                                    StyleLayer.empty()
                                                 );
 
     private final StructureConf _structureConf;
     private final BaseColorConf  _baseColor;
     private final StyleLayer     _layer;
-    private final ComponentAreas _areas;
 
     private boolean _wasAlreadyHashed = false;
     private int     _hashCode         = 0; // cached hash code
@@ -37,30 +35,26 @@ final class RenderConf
     private RenderConf(
         StructureConf structureConf,
         BaseColorConf  base,
-        StyleLayer     layers,
-        ComponentAreas areas
+        StyleLayer     layers
     ) {
         _structureConf = Objects.requireNonNull(structureConf);
         _baseColor    = Objects.requireNonNull(base);
         _layer        = Objects.requireNonNull(layers);
-        _areas        = Objects.requireNonNull(areas);
     }
 
     static RenderConf of(
         StructureConf structureConf,
         BaseColorConf  base,
-        StyleLayer     layers,
-        ComponentAreas areas
+        StyleLayer     layers
     ) {
         if (
             structureConf == StructureConf.none() &&
             base      == BaseColorConf.none() &&
-            layers    == _NONE._layer &&
-            areas     == _NONE._areas
+            layers    == _NONE._layer
         )
             return _NONE;
         else
-            return new RenderConf(structureConf, base, layers, areas);
+            return new RenderConf(structureConf, base, layers);
     }
 
     static RenderConf of(UI.Layer layer, ComponentConf fullConf) {
@@ -81,8 +75,7 @@ final class RenderConf
         return of(
                     structureConf,
                     colorConf,
-                    fullConf.style().layer(layer),
-                    fullConf.areas()
+                    fullConf.style().layer(layer)
                 );
     }
 
@@ -92,7 +85,7 @@ final class RenderConf
 
     StyleLayer layer() { return _layer; }
 
-    ComponentAreas areas() { return _areas; }
+    ComponentAreas areas() { return ComponentAreas.of(_structureConf); }
 
 
     void paintClippedTo(UI.ComponentArea area, Graphics g, Runnable painter ) {
@@ -114,13 +107,13 @@ final class RenderConf
             case ALL:
                 return null; // No clipping
             case BODY:
-                return _areas.bodyArea().getFor(_structureConf, _areas); // all - exterior == interior + border
+                return areas().bodyArea().getFor(_structureConf, areas()); // all - exterior == interior + border
             case INTERIOR:
-                return _areas.interiorArea().getFor(_structureConf, _areas); // all - exterior - border == content - border
+                return areas().interiorArea().getFor(_structureConf, areas()); // all - exterior - border == content - border
             case BORDER:
-                return _areas.borderArea().getFor(_structureConf, _areas); // all - exterior - interior
+                return areas().borderArea().getFor(_structureConf, areas()); // all - exterior - interior
             case EXTERIOR:
-                return _areas.exteriorArea().getFor(_structureConf, _areas); // all - border - interior
+                return areas().exteriorArea().getFor(_structureConf, areas()); // all - border - interior
             default:
                 return null;
         }

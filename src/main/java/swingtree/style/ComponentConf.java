@@ -26,8 +26,7 @@ final class ComponentConf
         return new ComponentConf(
                     StyleConf.none(),
                     Bounds.none(),
-                    Outline.none(),
-                    new ComponentAreas()
+                    Outline.none()
                 );
     }
 
@@ -35,8 +34,7 @@ final class ComponentConf
     private final Bounds  _currentBounds;
     private final Outline _baseOutline;
 
-    private final ComponentAreas _areas;
-
+    private ComponentAreas _areas = null;
     private boolean _wasAlreadyHashed = false;
     private int     _hashCode         = 0; // cached hash code
 
@@ -44,13 +42,11 @@ final class ComponentConf
     private ComponentConf(
         StyleConf styleConf,
         Bounds         currentBounds,
-        Outline        baseOutline,
-        ComponentAreas componentAreas
+        Outline        baseOutline
     ) {
         _styleConf     = Objects.requireNonNull(styleConf);
         _currentBounds = Objects.requireNonNull(currentBounds);
         _baseOutline   = Objects.requireNonNull(baseOutline);
-        _areas         = Objects.requireNonNull(componentAreas);
     }
 
     StyleConf style() { return _styleConf; }
@@ -61,13 +57,13 @@ final class ComponentConf
 
     Optional<Shape> componentArea() {
         Shape contentClip = null;
+        if ( _areas == null )
+            _areas = ComponentAreas.of(this.toStructureConf());
         if ( _areas.bodyArea().exists() || _styleConf.margin().isPositive() )
             contentClip = get(UI.ComponentArea.BODY);
 
         return Optional.ofNullable(contentClip);
     }
-
-    ComponentAreas areas() { return _areas; }
 
     public Area get( UI.ComponentArea areaType ) {
         switch ( areaType ) {
@@ -117,15 +113,13 @@ final class ComponentConf
         ComponentConf newConf = new ComponentConf(
                                     styleConf,
                                     Bounds.of(component.getX(), component.getY(), component.getWidth(), component.getHeight()),
-                                    outline,
-                                    _areas
+                                    outline
                                 );
 
         return new ComponentConf(
                         newConf._styleConf,
                         newConf._currentBounds,
-                        newConf._baseOutline,
-                        _areas.validate(this.toRenderConf().structure(), newConf.toRenderConf().structure())
+                        newConf._baseOutline
                 );
     }
 

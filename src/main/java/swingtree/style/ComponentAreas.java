@@ -6,7 +6,9 @@ import java.awt.geom.Arc2D;
 import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
+import java.util.Map;
 import java.util.Objects;
+import java.util.WeakHashMap;
 
 /**
  *  A wrapper object for transient reference based caching of the various areas of a component.
@@ -14,16 +16,21 @@ import java.util.Objects;
  */
 final class ComponentAreas
 {
-    private final Cached<Area> _borderArea;
-    private final Cached<Area> _interiorArea;
-    private final Cached<Area> _exteriorArea;
-    private final Cached<Area> _bodyArea;
+    private static final Map<StructureConf, ComponentAreas> _CACHE = new WeakHashMap<>();
+
+    private final LazyRef<Area> _borderArea;
+    private final LazyRef<Area> _interiorArea;
+    private final LazyRef<Area> _exteriorArea;
+    private final LazyRef<Area> _bodyArea;
 
 
-    public ComponentAreas() {
+    static ComponentAreas of( StructureConf state ) {
+        return _CACHE.computeIfAbsent(state, conf -> new ComponentAreas());
+    }
+
+    private ComponentAreas() {
         this(
-            new Cached<>(new CacheProducerAndValidator<Area>(){
-
+            new LazyRef<>(new CacheProducerAndValidator<Area>(){
                 @Override
                 public Area produce(StructureConf currentState, ComponentAreas currentAreas) {
                     Area componentArea = currentAreas._interiorArea.getFor(currentState, currentAreas);
@@ -31,19 +38,8 @@ final class ComponentAreas
                     borderArea.subtract(componentArea);
                     return borderArea;
                 }
-
-                @Override
-                public boolean leadsToSameValue(StructureConf oldState, StructureConf newState, ComponentAreas currentAreas) {
-                    if ( !currentAreas._interiorArea.leadsToSameValue(oldState, newState, currentAreas) )
-                        return false;
-
-                    if ( !currentAreas._bodyArea.leadsToSameValue(oldState, newState, currentAreas) )
-                        return false;
-
-                    return true;
-                }
-            }) ,
-            new Cached<>(new CacheProducerAndValidator<Area>(){
+            }),
+            new LazyRef<>(new CacheProducerAndValidator<Area>(){
         
                 @Override
                 public Area produce(StructureConf currentState, ComponentAreas currentAreas) {
@@ -60,16 +56,8 @@ final class ComponentAreas
                                rightBorderWidth
                            );
                 }
-        
-                @Override
-                public boolean leadsToSameValue(StructureConf oldState, StructureConf newState, ComponentAreas currentAreas) {
-                    Outline oldWidths = oldState.widths();
-                    Outline newWidths = newState.widths();
-                    boolean sameWidths = oldWidths.equals(newWidths);
-                    return sameWidths && _testWouldLeadToSameBaseArea(oldState, newState);
-                }
             }),
-            new Cached<>(new CacheProducerAndValidator<Area>(){
+            new LazyRef<>(new CacheProducerAndValidator<Area>(){
                 @Override
                 public Area produce(StructureConf currentState, ComponentAreas currentAreas) {
                     Size size = currentState.size();
@@ -79,37 +67,21 @@ final class ComponentAreas
                     exteriorComponentArea.subtract(currentAreas._bodyArea.getFor(currentState, currentAreas));
                     return exteriorComponentArea;
                 }
-        
-                @Override
-                public boolean leadsToSameValue(StructureConf oldState, StructureConf newState, ComponentAreas currentAreas) {
-                    boolean mainIsSame = currentAreas._bodyArea.leadsToSameValue(oldState, newState, currentAreas);
-                    if ( !mainIsSame )
-                        return false;
-                    
-                    Size oldBounds = oldState.size();
-                    Size newBounds = newState.size();
-        
-                    return oldBounds.equals(newBounds);
-                }
             }),
-            new Cached<>(new CacheProducerAndValidator<Area>(){
+            new LazyRef<>(new CacheProducerAndValidator<Area>(){
                 @Override
                 public Area produce(StructureConf currentState, ComponentAreas currentAreas) {
                     return calculateBaseArea(currentState, 0, 0, 0, 0);
-                }
-                @Override
-                public boolean leadsToSameValue(StructureConf oldState, StructureConf newState, ComponentAreas currentAreas) {
-                    return _testWouldLeadToSameBaseArea(oldState, newState);
                 }
             })
         );
     }
     
     public ComponentAreas(
-        Cached<Area> borderArea, 
-        Cached<Area> interiorComponentArea, 
-        Cached<Area> exteriorComponentArea, 
-        Cached<Area> mainComponentArea
+        LazyRef<Area> borderArea,
+        LazyRef<Area> interiorComponentArea,
+        LazyRef<Area> exteriorComponentArea,
+        LazyRef<Area> mainComponentArea
     ) {
         _borderArea   = Objects.requireNonNull(borderArea);
         _interiorArea = Objects.requireNonNull(interiorComponentArea);
@@ -118,35 +90,13 @@ final class ComponentAreas
     }
 
 
-    public Cached<Area> borderArea() { return _borderArea; }
+    public LazyRef<Area> borderArea() { return _borderArea; }
 
-    public Cached<Area> exteriorArea() { return _exteriorArea; }
+    public LazyRef<Area> exteriorArea() { return _exteriorArea; }
 
-    public Cached<Area> interiorArea() { return _interiorArea; }
+    public LazyRef<Area> interiorArea() { return _interiorArea; }
 
-    public Cached<Area> bodyArea() { return _bodyArea; }
-
-
-    public ComponentAreas validate( StructureConf oldConf, StructureConf newConf )
-    {
-        if ( oldConf.equals(newConf) )
-            return this;
-
-        Cached<Area> newBorderArea = _borderArea.validate(oldConf, newConf, this);
-        Cached<Area> newInterior   = _interiorArea.validate(oldConf, newConf, this);
-        Cached<Area> newExterior   = _exteriorArea.validate(oldConf, newConf, this);
-        Cached<Area> newBody       = _bodyArea.validate(oldConf, newConf, this);
-        
-        if (
-            newBorderArea != _borderArea ||
-            newInterior   != _interiorArea ||
-            newExterior   != _exteriorArea ||
-            newBody       != _bodyArea
-        ) {
-            return new ComponentAreas(newBorderArea, newInterior, newExterior, newBody);
-        }
-        return this;
-    }
+    public LazyRef<Area> bodyArea() { return _bodyArea; }
 
     static Area calculateBaseArea( StructureConf state, float insTop, float insLeft, float insBottom, float insRight )
     {
@@ -342,39 +292,4 @@ final class ComponentAreas
             return area;
         }
     }
-
-    /**
-     *  For caching purposes we need to know if two states would lead to the same base area or not.
-     *  So we check the various properties of the states that are used to calculate the base area
-     *  and if they are all the same, we return true.
-     */
-    private static boolean _testWouldLeadToSameBaseArea(StructureConf state1, StructureConf state2 ) {
-        if ( state1 == state2 )
-            return true;
-        if ( state1 == null || state2 == null )
-            return false;
-        Outline     outline1 = state1.baseOutline();
-        Outline     outline2 = state2.baseOutline();
-        boolean sameOutline = outline1.equals(outline2);
-        if ( !sameOutline )
-            return false;
-        Outline     margin1  = state1.margin();
-        Outline     margin2  = state2.margin();
-        boolean sameMargin  = margin1.equals(margin2);
-        if ( !sameMargin )
-            return false;
-        StructureConf border1  = state1;
-        StructureConf border2  = state2;
-        boolean sameBorder = border1.equals(border2);
-        if ( !sameBorder )
-            return false;
-        Size size1 = state1.size();
-        Size size2 = state2.size();
-        boolean sameSize  = size1.equals(size2);
-        if ( !sameSize )
-            return false;
-        return true;
-    }
-
-
 }
