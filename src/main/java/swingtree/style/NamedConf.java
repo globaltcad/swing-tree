@@ -9,17 +9,17 @@ import java.util.Objects;
  *
  * @param <S> The type of the style.
  */
-final class NamedStyle<S> implements Simplifiable<NamedStyle<S>>
+final class NamedConf<S> implements Simplifiable<NamedConf<S>>
 {
-    static <S> NamedStyle<S> of( String name, S style ) {
-        return new NamedStyle<>( name, style );
+    static <S> NamedConf<S> of(String name, S style ) {
+        return new NamedConf<>( name, style );
     }
 
     private final String _name;
     private final S      _style;
 
 
-    private NamedStyle( String name, S style ) {
+    private NamedConf(String name, S style ) {
         _name = Objects.requireNonNull(name);
         _style = Objects.requireNonNull(style);
     }
@@ -37,7 +37,7 @@ final class NamedStyle<S> implements Simplifiable<NamedStyle<S>>
         if ( obj == null ) return false;
         if ( obj == this ) return true;
         if ( obj.getClass() != getClass() ) return false;
-        NamedStyle<?> rhs = (NamedStyle<?>) obj;
+        NamedConf<?> rhs = (NamedConf<?>) obj;
         return Objects.equals(_name, rhs._name) &&
                Objects.equals(_style, rhs._style);
     }
@@ -51,12 +51,12 @@ final class NamedStyle<S> implements Simplifiable<NamedStyle<S>>
     }
 
     @Override
-    public NamedStyle<S> simplified() {
+    public NamedConf<S> simplified() {
         if ( _style instanceof Simplifiable ) {
             S simplifiedStyle = ((Simplifiable<S>)_style).simplified();
             if (simplifiedStyle == _style)
                 return this;
-            return new NamedStyle<>(_name, simplifiedStyle);
+            return new NamedConf<>(_name, simplifiedStyle);
         }
         return this;
     }

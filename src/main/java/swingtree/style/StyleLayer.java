@@ -4,10 +4,10 @@ import java.util.Objects;
 
 final class StyleLayer implements Simplifiable<StyleLayer>
 {
-    static final NamedStyles<ShadowStyle>   _NO_SHADOWS   = NamedStyles.of(NamedStyle.of(StyleUtility.DEFAULT_KEY,ShadowStyle.none()));
-    static final NamedStyles<PainterStyle>  _NO_PAINTERS  = NamedStyles.of(NamedStyle.of(StyleUtility.DEFAULT_KEY,PainterStyle.none()));
-    static final NamedStyles<GradientConf> _NO_GRADIENTS = NamedStyles.of(NamedStyle.of(StyleUtility.DEFAULT_KEY, GradientConf.none()));
-    static final NamedStyles<ImageConf>    _NO_IMAGES    = NamedStyles.of(NamedStyle.of(StyleUtility.DEFAULT_KEY, ImageConf.none()));
+    static final NamedConfigs<ShadowStyle> _NO_SHADOWS   = NamedConfigs.of(NamedConf.of(StyleUtility.DEFAULT_KEY,ShadowStyle.none()));
+    static final NamedConfigs<PainterStyle> _NO_PAINTERS  = NamedConfigs.of(NamedConf.of(StyleUtility.DEFAULT_KEY,PainterStyle.none()));
+    static final NamedConfigs<GradientConf> _NO_GRADIENTS = NamedConfigs.of(NamedConf.of(StyleUtility.DEFAULT_KEY, GradientConf.none()));
+    static final NamedConfigs<ImageConf> _NO_IMAGES    = NamedConfigs.of(NamedConf.of(StyleUtility.DEFAULT_KEY, ImageConf.none()));
 
     private static final StyleLayer _EMPTY = new StyleLayer(
                                                     _NO_SHADOWS,
@@ -20,17 +20,17 @@ final class StyleLayer implements Simplifiable<StyleLayer>
         return _EMPTY;
     }
 
-    private final NamedStyles<ShadowStyle>   _shadows;
-    private final NamedStyles<PainterStyle>  _painters;
-    private final NamedStyles<GradientConf> _gradients;
-    private final NamedStyles<ImageConf>    _images;
+    private final NamedConfigs<ShadowStyle> _shadows;
+    private final NamedConfigs<PainterStyle> _painters;
+    private final NamedConfigs<GradientConf> _gradients;
+    private final NamedConfigs<ImageConf> _images;
 
 
     static StyleLayer of(
-        NamedStyles<ShadowStyle>   shadows,
-        NamedStyles<PainterStyle>  painters,
-        NamedStyles<GradientConf> gradients,
-        NamedStyles<ImageConf>    images
+        NamedConfigs<ShadowStyle> shadows,
+        NamedConfigs<PainterStyle> painters,
+        NamedConfigs<GradientConf> gradients,
+        NamedConfigs<ImageConf> images
     ) {
         StyleLayer empty = StyleLayer.empty();
         if (
@@ -45,10 +45,10 @@ final class StyleLayer implements Simplifiable<StyleLayer>
     }
 
     StyleLayer(
-        NamedStyles<ShadowStyle>   shadows,
-        NamedStyles<PainterStyle>  painters,
-        NamedStyles<GradientConf> gradients,
-        NamedStyles<ImageConf>    images
+        NamedConfigs<ShadowStyle> shadows,
+        NamedConfigs<PainterStyle> painters,
+        NamedConfigs<GradientConf> gradients,
+        NamedConfigs<ImageConf> images
     ) {
         _shadows   = shadows;
         _painters  = painters;
@@ -57,29 +57,29 @@ final class StyleLayer implements Simplifiable<StyleLayer>
     }
 
 
-    NamedStyles<ShadowStyle>   shadows() {
+    NamedConfigs<ShadowStyle> shadows() {
         return _shadows;
     }
-    NamedStyles<PainterStyle>  painters() {
+    NamedConfigs<PainterStyle> painters() {
         return _painters;
     }
-    NamedStyles<GradientConf> gradients() {
+    NamedConfigs<GradientConf> gradients() {
         return _gradients;
     }
-    NamedStyles<ImageConf>    images() {
+    NamedConfigs<ImageConf> images() {
         return _images;
     }
 
-    StyleLayer withShadows( NamedStyles<ShadowStyle> shadows ) {
+    StyleLayer withShadows( NamedConfigs<ShadowStyle> shadows ) {
         return of(shadows, _painters, _gradients, _images);
     }
-    StyleLayer withPainters( NamedStyles<PainterStyle> painters ) {
+    StyleLayer withPainters( NamedConfigs<PainterStyle> painters ) {
         return of(_shadows, painters, _gradients, _images);
     }
-    StyleLayer withGradients( NamedStyles<GradientConf> gradients ) {
+    StyleLayer withGradients( NamedConfigs<GradientConf> gradients ) {
         return of(_shadows, _painters, gradients, _images);
     }
-    StyleLayer withImages( NamedStyles<ImageConf> images ) {
+    StyleLayer withImages( NamedConfigs<ImageConf> images ) {
         return of(_shadows, _painters, _gradients, images);
     }
 
@@ -146,10 +146,10 @@ final class StyleLayer implements Simplifiable<StyleLayer>
 
     @Override
     public StyleLayer simplified() {
-        NamedStyles<ShadowStyle>   simplifiedShadows   = _shadows.simplified();
-        NamedStyles<PainterStyle>  simplifiedPainters  = _painters.simplified();
-        NamedStyles<GradientConf> simplifiedGradients = _gradients.simplified();
-        NamedStyles<ImageConf>    simplifiedImages    = _images.simplified();
+        NamedConfigs<ShadowStyle> simplifiedShadows   = _shadows.simplified();
+        NamedConfigs<PainterStyle> simplifiedPainters  = _painters.simplified();
+        NamedConfigs<GradientConf> simplifiedGradients = _gradients.simplified();
+        NamedConfigs<ImageConf> simplifiedImages    = _images.simplified();
 
         if (
             simplifiedShadows   == _shadows   &&

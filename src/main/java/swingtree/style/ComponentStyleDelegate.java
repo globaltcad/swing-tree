@@ -1223,7 +1223,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
         Objects.requireNonNull(styler);
         ShadowStyle shadow = Optional.ofNullable(_styleConf.shadow(layer, shadowName)).orElse(ShadowStyle.none());
         // We clone the shadow map:
-        NamedStyles<ShadowStyle> newShadows = _styleConf.shadowsMap(layer).withNamedStyle(shadowName, styler.apply(shadow));
+        NamedConfigs<ShadowStyle> newShadows = _styleConf.shadowsMap(layer).withNamedStyle(shadowName, styler.apply(shadow));
         return _withStyle(_styleConf._withShadow(layer, newShadows));
     }
 

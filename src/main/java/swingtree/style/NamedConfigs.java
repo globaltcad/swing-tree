@@ -7,9 +7,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- *  An immutable value container that stores {@link NamedStyle} instances
+ *  An immutable value container that stores {@link NamedConf} instances
  *  representing a mapping of unique string names to styles of type {@link S}.
- *  The {@link NamedStyle} instances are stored in an array and can be accessed
+ *  The {@link NamedConf} instances are stored in an array and can be accessed
  *  by their unique name.
  *  Yes, this class could have been a linked hashmap or treemap
  *  however, we do not expect the existence of more than a handful
@@ -19,71 +19,71 @@ import java.util.stream.Stream;
  *
  * @param <S> The type of the style.
  */
-final class NamedStyles<S> implements Simplifiable<NamedStyles<S>>
+final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
 {
-    private static final NamedStyles<?> EMPTY = new NamedStyles<>();
+    private static final NamedConfigs<?> EMPTY = new NamedConfigs<>();
 
-    static <S> NamedStyles<S> of( NamedStyle<S> defaultStyle ) {
-        return new NamedStyles<>( defaultStyle );
+    static <S> NamedConfigs<S> of(NamedConf<S> defaultStyle ) {
+        return new NamedConfigs<>( defaultStyle );
     }
 
-    static <S> NamedStyles<S> empty() { return (NamedStyles<S>) EMPTY; }
+    static <S> NamedConfigs<S> empty() { return (NamedConfigs<S>) EMPTY; }
 
-    private final NamedStyle<S>[] _styles;
+    private final NamedConf<S>[] _styles;
 
 
     @SafeVarargs
-    private NamedStyles( NamedStyle<S>... styles ) {
+    private NamedConfigs(NamedConf<S>... styles ) {
         _styles = Objects.requireNonNull(styles);
         // No nll entries:
-        for ( NamedStyle<S> style : styles )
+        for ( NamedConf<S> style : styles )
             Objects.requireNonNull(style);
 
         // No duplicate names:
         Set<String> names = new HashSet<>(styles.length * 2);
-        for ( NamedStyle<S> style : styles )
+        for ( NamedConf<S> style : styles )
             if ( !names.add(style.name()) )
                 throw new IllegalArgumentException("Duplicate style name: " + style.name());
     }
 
     public int size() { return _styles.length; }
 
-    public List<NamedStyle<S>> namedStyles() { return Collections.unmodifiableList(Arrays.asList(_styles)); }
+    public List<NamedConf<S>> namedStyles() { return Collections.unmodifiableList(Arrays.asList(_styles)); }
 
     public Stream<S> stylesStream() {
         return namedStyles()
                 .stream()
-                .map(NamedStyle::style);
+                .map(NamedConf::style);
     }
 
-    public NamedStyles<S> withNamedStyle( String name, S style ) {
+    public NamedConfigs<S> withNamedStyle(String name, S style ) {
         Objects.requireNonNull(name);
         Objects.requireNonNull(style);
 
         int foundIndex = _findNamedStyle(name);
 
         if ( foundIndex == -1 ) {
-            NamedStyle<S>[] styles = Arrays.copyOf(_styles, _styles.length + 1);
-            styles[styles.length - 1] = NamedStyle.of(name, style);
-            return new NamedStyles<>(styles);
+            NamedConf<S>[] styles = Arrays.copyOf(_styles, _styles.length + 1);
+            styles[styles.length - 1] = NamedConf.of(name, style);
+            return new NamedConfigs<>(styles);
         }
 
-        NamedStyle<S>[] styles = Arrays.copyOf(_styles, _styles.length);
-        styles[foundIndex] = NamedStyle.of(name, style);
-        return new NamedStyles<>(styles);
+        NamedConf<S>[] styles = Arrays.copyOf(_styles, _styles.length);
+        styles[foundIndex] = NamedConf.of(name, style);
+        return new NamedConfigs<>(styles);
     }
 
-    public NamedStyles<S> mapStyles( Function<S,S> f ) {
+    public NamedConfigs<S> mapStyles(Function<S,S> f ) {
         Objects.requireNonNull(f);
-        return mapNamedStyles( ns -> NamedStyle.of(ns.name(), f.apply(ns.style())) );
+        return mapNamedStyles( ns -> NamedConf.of(ns.name(), f.apply(ns.style())) );
     }
 
-    public NamedStyles<S> mapNamedStyles( Function<NamedStyle<S>,NamedStyle<S>> f ) {
+    public NamedConfigs<S> mapNamedStyles(Function<NamedConf<S>, NamedConf<S>> f ) {
         Objects.requireNonNull(f);
 
-        NamedStyle<S>[] newStyles = null;
+        NamedConf<S>[] newStyles = null;
         for ( int i = 0; i < _styles.length; i++ ) {
-            NamedStyle<S> mapped = f.apply(_styles[i]);
+            NamedConf<S> mapped = f.apply(_styles[i]);
             if ( newStyles == null && mapped != _styles[i] ) {
                 newStyles = Arrays.copyOf(_styles, _styles.length);
                 // We avoid heap allocation if possible!
@@ -94,7 +94,7 @@ final class NamedStyles<S> implements Simplifiable<NamedStyles<S>>
         if ( newStyles == null )
             return this;
 
-        return new NamedStyles<>(newStyles);
+        return new NamedConfigs<>(newStyles);
     }
 
     private int _findNamedStyle( String name ) {
@@ -125,13 +125,13 @@ final class NamedStyles<S> implements Simplifiable<NamedStyles<S>>
         return Collections.unmodifiableList(
                     namedStyles()
                     .stream()
-                    .sorted(Comparator.comparing(NamedStyle::name))
-                    .map(NamedStyle::style)
+                    .sorted(Comparator.comparing(NamedConf::name))
+                    .map(NamedConf::style)
                     .collect(Collectors.toList())
                 );
     }
 
-    public boolean everyNamedStyle( Predicate<NamedStyle<S>> namedStyleTester ) {
+    public boolean everyNamedStyle( Predicate<NamedConf<S>> namedStyleTester ) {
         return Arrays.stream(_styles).allMatch(namedStyleTester);
     }
 
@@ -172,12 +172,12 @@ final class NamedStyles<S> implements Simplifiable<NamedStyles<S>>
         if ( obj == null ) return false;
         if ( obj == this ) return true;
         if ( obj.getClass() != getClass() ) return false;
-        NamedStyles<?> rhs = (NamedStyles<?>) obj;
+        NamedConfigs<?> rhs = (NamedConfigs<?>) obj;
         return Arrays.equals(_styles, rhs._styles);
     }
 
     @Override
-    public NamedStyles<S> simplified() {
-        return mapNamedStyles(NamedStyle::simplified);
+    public NamedConfigs<S> simplified() {
+        return mapNamedStyles(NamedConf::simplified);
     }
 }

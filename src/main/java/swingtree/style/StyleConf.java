@@ -54,7 +54,7 @@ public final class StyleConf
                                             FontConf.none(),
                                             DimensionalityConf.none(),
                                             StyleLayers.empty(),
-                                            NamedStyles.empty()
+                                            NamedConfigs.empty()
                                         );
 
     /**
@@ -69,7 +69,7 @@ public final class StyleConf
         FontConf font,
         DimensionalityConf dimensionality,
         StyleLayers         layers,
-        NamedStyles<String> properties
+        NamedConfigs<String> properties
     ) {
         if (
             layout         == _NONE._layout &&
@@ -92,7 +92,7 @@ public final class StyleConf
     private final FontConf _font;
     private final DimensionalityConf _dimensionality;
     private final StyleLayers                _layers;
-    private final NamedStyles<String>        _properties;
+    private final NamedConfigs<String> _properties;
 
     private StyleConf(
         LayoutConf layout,
@@ -101,7 +101,7 @@ public final class StyleConf
         FontConf font,
         DimensionalityConf dimensionality,
         StyleLayers         layers,
-        NamedStyles<String> properties
+        NamedConfigs<String> properties
     ) {
         _layout         = Objects.requireNonNull(layout);
         _border         = Objects.requireNonNull(border);
@@ -156,13 +156,13 @@ public final class StyleConf
                         .shadows()
                         .namedStyles()
                         .stream()
-                        .sorted(Comparator.comparing(NamedStyle::name))
-                        .map(NamedStyle::style)
+                        .sorted(Comparator.comparing(NamedConf::name))
+                        .map(NamedConf::style)
                         .collect(Collectors.toList())
                     );
     }
 
-    NamedStyles<ShadowStyle> shadowsMap(UI.Layer layer) {
+    NamedConfigs<ShadowStyle> shadowsMap(UI.Layer layer) {
         return _layers.get(layer).shadows();
     }
 
@@ -195,7 +195,7 @@ public final class StyleConf
         Objects.requireNonNull(painterName);
         Objects.requireNonNull(painter);
         // We clone the painter map:
-        NamedStyles<PainterStyle> newPainters = _layers.get(layer)
+        NamedConfigs<PainterStyle> newPainters = _layers.get(layer)
                                                     .painters()
                                                     .withNamedStyle(
                                                         painterName, // Existing painters are overwritten if they have the same name.
@@ -218,7 +218,7 @@ public final class StyleConf
                     FontConf.none(),
                     DimensionalityConf.none(),
                     _layers.onlyRetainingAsUnnamedLayer(layer),
-                    NamedStyles.empty()
+                    NamedConfigs.empty()
                 );
     }
 
@@ -246,7 +246,7 @@ public final class StyleConf
     }
 
     boolean hasCustomGradients( UI.Layer layer ) {
-        NamedStyles<GradientConf> gradients = _layers.get(layer).gradients();
+        NamedConfigs<GradientConf> gradients = _layers.get(layer).gradients();
         return !( gradients.size() == 1 && GradientConf.none().equals(gradients.get(StyleUtility.DEFAULT_KEY)) );
     }
 
@@ -312,11 +312,11 @@ public final class StyleConf
         return StyleConf.of(_layout, _border, _base, _font, dimensionality, _layers, _properties);
     }
 
-    StyleConf _withShadow(UI.Layer layer, NamedStyles<ShadowStyle> shadows ) {
+    StyleConf _withShadow(UI.Layer layer, NamedConfigs<ShadowStyle> shadows ) {
         return StyleConf.of(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withShadows(shadows)), _properties);
     }
 
-    StyleConf _withProperties(NamedStyles<String> properties ) {
+    StyleConf _withProperties(NamedConfigs<String> properties ) {
         if ( properties == _properties )
             return this;
 
@@ -325,7 +325,7 @@ public final class StyleConf
 
     StyleConf _withShadow(UI.Layer layer, Function<ShadowStyle, ShadowStyle> styler ) {
         // A new map is created where all the styler is applied to all the values:
-        NamedStyles<ShadowStyle> styledShadows = _layers.get(layer).shadows().mapStyles(styler::apply);
+        NamedConfigs<ShadowStyle> styledShadows = _layers.get(layer).shadows().mapStyles(styler::apply);
         return _withShadow(layer, styledShadows);
     }
 
@@ -333,11 +333,11 @@ public final class StyleConf
         return _withLayers(_layers.map( layer -> layer.withShadows(layer.shadows().mapStyles(styler::apply)) ));
     }
 
-    StyleConf _withImages(UI.Layer layer, NamedStyles<ImageConf> images ) {
+    StyleConf _withImages(UI.Layer layer, NamedConfigs<ImageConf> images ) {
         return StyleConf.of(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withImages(images)), _properties);
     }
 
-    StyleConf _withGradients(UI.Layer layer, NamedStyles<GradientConf> shades ) {
+    StyleConf _withGradients(UI.Layer layer, NamedConfigs<GradientConf> shades ) {
         Objects.requireNonNull(shades);
         return StyleConf.of(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withGradients(shades)), _properties);
     }
@@ -349,7 +349,7 @@ public final class StyleConf
         return StyleConf.of(_layout, _border, _base, _font, _dimensionality, layers, _properties);
     }
 
-    StyleConf _withPainters(UI.Layer layer, NamedStyles<PainterStyle> painters ) {
+    StyleConf _withPainters(UI.Layer layer, NamedConfigs<PainterStyle> painters ) {
         Objects.requireNonNull(painters);
         return StyleConf.of(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withPainters(painters)), _properties);
     }
@@ -360,10 +360,10 @@ public final class StyleConf
         return _withProperties(_properties.withNamedStyle(key, value));
     }
 
-    List<NamedStyle<String>> properties() {
+    List<NamedConf<String>> properties() {
         return _properties.namedStyles()
                             .stream()
-                            .sorted(Comparator.comparing(NamedStyle::name))
+                            .sorted(Comparator.comparing(NamedConf::name))
                             .collect(Collectors.toList());
     }
 
@@ -372,7 +372,7 @@ public final class StyleConf
         Objects.requireNonNull(styler);
         GradientConf shadow = Optional.ofNullable(_layers.get(layer).gradients().get(shadeName)).orElse(GradientConf.none());
         // We clone the shadow map:
-        NamedStyles<GradientConf> newShadows = _layers.get(layer).gradients().withNamedStyle(shadeName, styler.apply(shadow));
+        NamedConfigs<GradientConf> newShadows = _layers.get(layer).gradients().withNamedStyle(shadeName, styler.apply(shadow));
         return _withGradients(layer, newShadows);
     }
 
@@ -386,7 +386,7 @@ public final class StyleConf
         Objects.requireNonNull(styler);
         ImageConf ground = _layers.get(layer).images().style(imageName).orElse(ImageConf.none());
         // We clone the ground map:
-        NamedStyles<ImageConf> newImages = _layers.get(layer).images().withNamedStyle(imageName, styler.apply(ground));
+        NamedConfigs<ImageConf> newImages = _layers.get(layer).images().withNamedStyle(imageName, styler.apply(ground));
         return _withImages( layer, newImages );
     }
 
