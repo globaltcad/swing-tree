@@ -25,7 +25,7 @@ final class ComponentAreas
             new Cached<>(new CacheProducerAndValidator<Area>(){
 
                 @Override
-                public Area produce(RenderConf currentState, ComponentAreas currentAreas) {
+                public Area produce(StructureConf currentState, ComponentAreas currentAreas) {
                     Area componentArea = currentAreas._interiorArea.getFor(currentState, currentAreas);
                     Area borderArea = new Area(currentAreas._bodyArea.getFor(currentState, currentAreas));
                     borderArea.subtract(componentArea);
@@ -33,7 +33,7 @@ final class ComponentAreas
                 }
 
                 @Override
-                public boolean leadsToSameValue(RenderConf oldState, RenderConf newState, ComponentAreas currentAreas) {
+                public boolean leadsToSameValue(StructureConf oldState, StructureConf newState, ComponentAreas currentAreas) {
                     if ( !currentAreas._interiorArea.leadsToSameValue(oldState, newState, currentAreas) )
                         return false;
 
@@ -46,8 +46,8 @@ final class ComponentAreas
             new Cached<>(new CacheProducerAndValidator<Area>(){
         
                 @Override
-                public Area produce(RenderConf currentState, ComponentAreas currentAreas) {
-                    Outline widths = currentState.structure().widths();
+                public Area produce(StructureConf currentState, ComponentAreas currentAreas) {
+                    Outline widths = currentState.widths();
                     float leftBorderWidth   = widths.left().orElse(0f);
                     float topBorderWidth    = widths.top().orElse(0f);
                     float rightBorderWidth  = widths.right().orElse(0f);
@@ -62,17 +62,17 @@ final class ComponentAreas
                 }
         
                 @Override
-                public boolean leadsToSameValue(RenderConf oldState, RenderConf newState, ComponentAreas currentAreas) {
-                    Outline oldWidths = oldState.structure().widths();
-                    Outline newWidths = newState.structure().widths();
+                public boolean leadsToSameValue(StructureConf oldState, StructureConf newState, ComponentAreas currentAreas) {
+                    Outline oldWidths = oldState.widths();
+                    Outline newWidths = newState.widths();
                     boolean sameWidths = oldWidths.equals(newWidths);
                     return sameWidths && _testWouldLeadToSameBaseArea(oldState, newState);
                 }
             }),
             new Cached<>(new CacheProducerAndValidator<Area>(){
                 @Override
-                public Area produce(RenderConf currentState, ComponentAreas currentAreas) {
-                    Size size = currentState.structure().size();
+                public Area produce(StructureConf currentState, ComponentAreas currentAreas) {
+                    Size size = currentState.size();
                     float width  = size.width().orElse(0f);
                     float height = size.height().orElse(0f);
                     Area exteriorComponentArea = new Area(new Rectangle2D.Float(0, 0, width, height));
@@ -81,24 +81,24 @@ final class ComponentAreas
                 }
         
                 @Override
-                public boolean leadsToSameValue(RenderConf oldState, RenderConf newState, ComponentAreas currentAreas) {
+                public boolean leadsToSameValue(StructureConf oldState, StructureConf newState, ComponentAreas currentAreas) {
                     boolean mainIsSame = currentAreas._bodyArea.leadsToSameValue(oldState, newState, currentAreas);
                     if ( !mainIsSame )
                         return false;
                     
-                    Size oldBounds = oldState.structure().size();
-                    Size newBounds = newState.structure().size();
+                    Size oldBounds = oldState.size();
+                    Size newBounds = newState.size();
         
                     return oldBounds.equals(newBounds);
                 }
             }),
             new Cached<>(new CacheProducerAndValidator<Area>(){
                 @Override
-                public Area produce(RenderConf currentState, ComponentAreas currentAreas) {
+                public Area produce(StructureConf currentState, ComponentAreas currentAreas) {
                     return calculateBaseArea(currentState, 0, 0, 0, 0);
                 }
                 @Override
-                public boolean leadsToSameValue(RenderConf oldState, RenderConf newState, ComponentAreas currentAreas) {
+                public boolean leadsToSameValue(StructureConf oldState, StructureConf newState, ComponentAreas currentAreas) {
                     return _testWouldLeadToSameBaseArea(oldState, newState);
                 }
             })
@@ -127,7 +127,7 @@ final class ComponentAreas
     public Cached<Area> bodyArea() { return _bodyArea; }
 
 
-    public ComponentAreas validate( RenderConf oldConf, RenderConf newConf )
+    public ComponentAreas validate( StructureConf oldConf, StructureConf newConf )
     {
         if ( oldConf.equals(newConf) )
             return this;
@@ -148,10 +148,10 @@ final class ComponentAreas
         return this;
     }
 
-    static Area calculateBaseArea( RenderConf state, float insTop, float insLeft, float insBottom, float insRight )
+    static Area calculateBaseArea( StructureConf state, float insTop, float insLeft, float insBottom, float insRight )
     {
         return _calculateBaseArea(
-                    state.structure(),
+                    state,
                     insTop,
                     insLeft,
                     insBottom,
@@ -348,28 +348,28 @@ final class ComponentAreas
      *  So we check the various properties of the states that are used to calculate the base area
      *  and if they are all the same, we return true.
      */
-    private static boolean _testWouldLeadToSameBaseArea(RenderConf state1, RenderConf state2 ) {
+    private static boolean _testWouldLeadToSameBaseArea(StructureConf state1, StructureConf state2 ) {
         if ( state1 == state2 )
             return true;
         if ( state1 == null || state2 == null )
             return false;
-        Outline     outline1 = state1.structure().baseOutline();
-        Outline     outline2 = state2.structure().baseOutline();
+        Outline     outline1 = state1.baseOutline();
+        Outline     outline2 = state2.baseOutline();
         boolean sameOutline = outline1.equals(outline2);
         if ( !sameOutline )
             return false;
-        Outline     margin1  = state1.structure().margin();
-        Outline     margin2  = state2.structure().margin();
+        Outline     margin1  = state1.margin();
+        Outline     margin2  = state2.margin();
         boolean sameMargin  = margin1.equals(margin2);
         if ( !sameMargin )
             return false;
-        StructureConf border1  = state1.structure();
-        StructureConf border2  = state2.structure();
+        StructureConf border1  = state1;
+        StructureConf border2  = state2;
         boolean sameBorder = border1.equals(border2);
         if ( !sameBorder )
             return false;
-        Size size1 = state1.structure().size();
-        Size size2 = state2.structure().size();
+        Size size1 = state1.size();
+        Size size2 = state2.size();
         boolean sameSize  = size1.equals(size2);
         if ( !sameSize )
             return false;

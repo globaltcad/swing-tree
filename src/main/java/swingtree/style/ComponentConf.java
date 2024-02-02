@@ -74,13 +74,13 @@ final class ComponentConf
             case ALL:
                 return null; // No clipping
             case BODY:
-                return _areas.bodyArea().getFor(this.toRenderConf(), _areas); // all - exterior == interior + border
+                return _areas.bodyArea().getFor(toStructureConf(), _areas); // all - exterior == interior + border
             case INTERIOR:
-                return _areas.interiorArea().getFor(this.toRenderConf(), _areas); // all - exterior - border == content - border
+                return _areas.interiorArea().getFor(toStructureConf(), _areas); // all - exterior - border == content - border
             case BORDER:
-                return _areas.borderArea().getFor(this.toRenderConf(), _areas); // all - exterior - interior
+                return _areas.borderArea().getFor(toStructureConf(), _areas); // all - exterior - interior
             case EXTERIOR:
-                return _areas.exteriorArea().getFor(this.toRenderConf(), _areas); // all - border - interior
+                return _areas.exteriorArea().getFor(toStructureConf(), _areas); // all - border - interior
             default:
                 return null;
         }
@@ -93,6 +93,10 @@ final class ComponentConf
 
     RenderConf toRenderConf() {
         return RenderConf.of(UI.Layer.BORDER, this);
+    }
+
+    StructureConf toStructureConf() {
+        return toRenderConf().structure();
     }
 
     ComponentConf with( StyleConf styleConf, JComponent component )
@@ -121,19 +125,7 @@ final class ComponentConf
                         newConf._styleConf,
                         newConf._currentBounds,
                         newConf._baseOutline,
-                        _areas.validate(this.toRenderConf(), newConf.toRenderConf())
-                );
-    }
-
-    ComponentConf withStyle( StyleConf styleConf) {
-        if ( _styleConf.equals(styleConf) )
-            return this;
-
-        return new ComponentConf(
-                styleConf,
-                    _currentBounds,
-                    _baseOutline,
-                    _areas
+                        _areas.validate(this.toRenderConf().structure(), newConf.toRenderConf().structure())
                 );
     }
 

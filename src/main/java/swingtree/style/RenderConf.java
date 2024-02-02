@@ -114,13 +114,13 @@ final class RenderConf
             case ALL:
                 return null; // No clipping
             case BODY:
-                return _areas.bodyArea().getFor(this, _areas); // all - exterior == interior + border
+                return _areas.bodyArea().getFor(_structureConf, _areas); // all - exterior == interior + border
             case INTERIOR:
-                return _areas.interiorArea().getFor(this, _areas); // all - exterior - border == content - border
+                return _areas.interiorArea().getFor(_structureConf, _areas); // all - exterior - border == content - border
             case BORDER:
-                return _areas.borderArea().getFor(this, _areas); // all - exterior - interior
+                return _areas.borderArea().getFor(_structureConf, _areas); // all - exterior - interior
             case EXTERIOR:
-                return _areas.exteriorArea().getFor(this, _areas); // all - border - interior
+                return _areas.exteriorArea().getFor(_structureConf, _areas); // all - border - interior
             default:
                 return null;
         }
