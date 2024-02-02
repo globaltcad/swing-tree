@@ -55,10 +55,20 @@ final class StyleEngine
     ComponentConf getComponentConf() { return _componentConf; }
 
 
-    void paintClippedTo(UI.ComponentArea area, Graphics g, Runnable painter ) {
-        RenderConf defaultConf = _layerCaches[UI.Layer.BACKGROUND.ordinal()].getCurrentKey();
-        defaultConf.paintClippedTo(area, g, painter);
+    void paintClippedTo( UI.ComponentArea area, Graphics g, Runnable painter ) {
+        Shape oldClip = g.getClip();
+
+        Shape newClip = get(area, ComponentAreas.of(_boxModelConf));
+        if ( newClip != null && newClip != oldClip ) {
+            newClip = StyleUtility.intersect(newClip, oldClip);
+            g.setClip(newClip);
+        }
+
+        painter.run();
+
+        g.setClip(oldClip);
     }
+
 
 
     Optional<Shape> componentArea() {
