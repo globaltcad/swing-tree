@@ -84,7 +84,7 @@ final class LayerCache
         CachedImage bufferedImage = CACHE.get(renderConf);
 
         if ( bufferedImage == null ) {
-            Size size = renderConf.structure().size();
+            Size size = renderConf.boxModel().size();
             bufferedImage = new CachedImage(
                                 size.width().map(Number::intValue).orElse(1),
                                 size.height().map(Number::intValue).orElse(1),
@@ -198,8 +198,8 @@ final class LayerCache
 
     public boolean _cachingMakesSenseFor( RenderConf state )
     {
-        Size bounds = state.structure().size();
-        if ( !bounds.hasPositiveWidth() || !bounds.hasPositiveHeight() )
+        Size size = state.boxModel().size();
+        if ( !size.hasPositiveWidth() || !size.hasPositiveHeight() )
             return false;
 
         if ( state.layer().hasPainters() )
@@ -221,7 +221,7 @@ final class LayerCache
             if ( !shadow.equals(ShadowConf.none()) && shadow.color().isPresent() )
                 heavyStyleCount++;
 
-        StructureConf border = state.structure();
+        BoxModelConf border = state.boxModel();
         BaseColorConf colorConf = state.baseColors();
         boolean rounded = border.hasAnyNonZeroArcs();
 
@@ -232,7 +232,7 @@ final class LayerCache
         }
         if ( _layer == UI.Layer.BACKGROUND ) {
             BaseColorConf base = state.baseColors();
-            boolean roundedOrHasMargin = rounded || !state.structure().margin().equals(Outline.none());
+            boolean roundedOrHasMargin = rounded || !state.boxModel().margin().equals(Outline.none());
             if ( base.backgroundColor().isPresent() && roundedOrHasMargin )
                 heavyStyleCount++;
         }
@@ -241,7 +241,7 @@ final class LayerCache
             return false;
 
         int threshold = 256 * 256 * Math.min(heavyStyleCount, 5);
-        int pixelCount = (int) (bounds.width().orElse(0f) * bounds.height().orElse(0f));
+        int pixelCount = (int) (size.width().orElse(0f) * size.height().orElse(0f));
 
         return pixelCount <= threshold;
     }

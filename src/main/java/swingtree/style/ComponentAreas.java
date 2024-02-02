@@ -17,23 +17,23 @@ import java.util.WeakHashMap;
  */
 final class ComponentAreas
 {
-    private static final Map<StructureConf, ComponentAreas> _CACHE = new WeakHashMap<>();
+    private static final Map<BoxModelConf, ComponentAreas> _CACHE = new WeakHashMap<>();
 
     private final LazyRef<Area> _borderArea;
     private final LazyRef<Area> _interiorArea;
     private final LazyRef<Area> _exteriorArea;
     private final LazyRef<Area> _bodyArea;
-    private final WeakReference<StructureConf> _key;
+    private final WeakReference<BoxModelConf> _key;
 
 
-    static ComponentAreas of( StructureConf state ) {
+    static ComponentAreas of( BoxModelConf state ) {
         return _CACHE.computeIfAbsent(state, conf -> new ComponentAreas(state));
     }
 
-    static StructureConf intern( StructureConf state ) {
+    static BoxModelConf intern(BoxModelConf state ) {
         ComponentAreas areas = _CACHE.get(state);
         if ( areas != null ) {
-            StructureConf key = areas._key.get();
+            BoxModelConf key = areas._key.get();
             if ( key != null )
                 return key;
         }
@@ -41,12 +41,12 @@ final class ComponentAreas
         return state;
     }
 
-    private ComponentAreas(StructureConf conf) {
+    private ComponentAreas(BoxModelConf conf) {
         this(
             conf,
             new LazyRef<>(new CacheProducerAndValidator<Area>(){
                 @Override
-                public Area produce(StructureConf currentState, ComponentAreas currentAreas) {
+                public Area produce(BoxModelConf currentState, ComponentAreas currentAreas) {
                     Area componentArea = currentAreas._interiorArea.getFor(currentState, currentAreas);
                     Area borderArea = new Area(currentAreas._bodyArea.getFor(currentState, currentAreas));
                     borderArea.subtract(componentArea);
@@ -56,7 +56,7 @@ final class ComponentAreas
             new LazyRef<>(new CacheProducerAndValidator<Area>(){
         
                 @Override
-                public Area produce(StructureConf currentState, ComponentAreas currentAreas) {
+                public Area produce(BoxModelConf currentState, ComponentAreas currentAreas) {
                     Outline widths = currentState.widths();
                     float leftBorderWidth   = widths.left().orElse(0f);
                     float topBorderWidth    = widths.top().orElse(0f);
@@ -73,7 +73,7 @@ final class ComponentAreas
             }),
             new LazyRef<>(new CacheProducerAndValidator<Area>(){
                 @Override
-                public Area produce(StructureConf currentState, ComponentAreas currentAreas) {
+                public Area produce(BoxModelConf currentState, ComponentAreas currentAreas) {
                     Size size = currentState.size();
                     float width  = size.width().orElse(0f);
                     float height = size.height().orElse(0f);
@@ -84,7 +84,7 @@ final class ComponentAreas
             }),
             new LazyRef<>(new CacheProducerAndValidator<Area>(){
                 @Override
-                public Area produce(StructureConf currentState, ComponentAreas currentAreas) {
+                public Area produce(BoxModelConf currentState, ComponentAreas currentAreas) {
                     return calculateBaseArea(currentState, 0, 0, 0, 0);
                 }
             })
@@ -92,7 +92,7 @@ final class ComponentAreas
     }
     
     public ComponentAreas(
-        StructureConf conf,
+        BoxModelConf conf,
         LazyRef<Area> borderArea,
         LazyRef<Area> interiorComponentArea,
         LazyRef<Area> exteriorComponentArea,
@@ -114,7 +114,7 @@ final class ComponentAreas
 
     public LazyRef<Area> bodyArea() { return _bodyArea; }
 
-    static Area calculateBaseArea( StructureConf state, float insTop, float insLeft, float insBottom, float insRight )
+    static Area calculateBaseArea(BoxModelConf state, float insTop, float insLeft, float insBottom, float insRight )
     {
         return _calculateBaseArea(
                     state,
@@ -126,7 +126,7 @@ final class ComponentAreas
     }
 
     private static Area _calculateBaseArea(
-        final StructureConf border,
+        final BoxModelConf border,
         float insTop,
         float insLeft,
         float insBottom,

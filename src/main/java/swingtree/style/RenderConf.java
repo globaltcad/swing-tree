@@ -18,14 +18,14 @@ import java.util.Objects;
 final class RenderConf
 {
     private static final RenderConf _NONE = new RenderConf(
-                                                    StructureConf.none(),
+                                                    BoxModelConf.none(),
                                                     BaseColorConf.none(),
                                                     StyleLayer.empty()
                                                 );
 
     public static RenderConf none() { return _NONE; }
 
-    private final StructureConf _structureConf;
+    private final BoxModelConf   _boxModelConf;
     private final BaseColorConf  _baseColor;
     private final StyleLayer     _layer;
 
@@ -35,32 +35,32 @@ final class RenderConf
 
 
     private RenderConf(
-        StructureConf structureConf,
+        BoxModelConf   boxModelConf,
         BaseColorConf  base,
         StyleLayer     layers
     ) {
-        _structureConf = Objects.requireNonNull(structureConf);
+        _boxModelConf = Objects.requireNonNull(boxModelConf);
         _baseColor    = Objects.requireNonNull(base);
         _layer        = Objects.requireNonNull(layers);
     }
 
     static RenderConf of(
-        StructureConf structureConf,
+        BoxModelConf   boxModelConf,
         BaseColorConf  base,
         StyleLayer     layers
     ) {
         if (
-            structureConf == StructureConf.none() &&
-            base      == BaseColorConf.none() &&
-            layers    == _NONE._layer
+            boxModelConf == BoxModelConf.none() &&
+            base         == BaseColorConf.none() &&
+            layers       == _NONE._layer
         )
             return _NONE;
         else
-            return new RenderConf(structureConf, base, layers);
+            return new RenderConf(boxModelConf, base, layers);
     }
 
     static RenderConf of(UI.Layer layer, ComponentConf fullConf) {
-        StructureConf structureConf = StructureConf.of(
+        BoxModelConf boxModelConf = BoxModelConf.of(
                                         fullConf.style().border(),
                                         fullConf.baseOutline(),
                                         fullConf.currentBounds().size()
@@ -75,19 +75,19 @@ final class RenderConf
                                             .orElse(null)
                                 );
         return of(
-                    structureConf,
+                    boxModelConf,
                     colorConf,
                     fullConf.style().layer(layer)
                 );
     }
 
-    StructureConf structure() { return _structureConf; }
+    BoxModelConf boxModel() { return _boxModelConf; }
 
     BaseColorConf baseColors() { return _baseColor; }
 
     StyleLayer layer() { return _layer; }
 
-    ComponentAreas areas() { return ComponentAreas.of(_structureConf); }
+    ComponentAreas areas() { return ComponentAreas.of(_boxModelConf); }
 
 
     void paintClippedTo(UI.ComponentArea area, Graphics g, Runnable painter ) {
@@ -109,13 +109,13 @@ final class RenderConf
             case ALL:
                 return null; // No clipping
             case BODY:
-                return areas().bodyArea().getFor(_structureConf, areas()); // all - exterior == interior + border
+                return areas().bodyArea().getFor(_boxModelConf, areas()); // all - exterior == interior + border
             case INTERIOR:
-                return areas().interiorArea().getFor(_structureConf, areas()); // all - exterior - border == content - border
+                return areas().interiorArea().getFor(_boxModelConf, areas()); // all - exterior - border == content - border
             case BORDER:
-                return areas().borderArea().getFor(_structureConf, areas()); // all - exterior - interior
+                return areas().borderArea().getFor(_boxModelConf, areas()); // all - exterior - interior
             case EXTERIOR:
-                return areas().exteriorArea().getFor(_structureConf, areas()); // all - border - interior
+                return areas().exteriorArea().getFor(_boxModelConf, areas()); // all - border - interior
             default:
                 return null;
         }
@@ -126,7 +126,7 @@ final class RenderConf
         if ( _wasAlreadyHashed )
             return _hashCode;
 
-        _hashCode = Objects.hash(_structureConf, _baseColor, _layer);
+        _hashCode = Objects.hash(_boxModelConf, _baseColor, _layer);
         _wasAlreadyHashed = true;
         return _hashCode;
     }
@@ -137,7 +137,7 @@ final class RenderConf
         if ( o == null ) return false;
         if ( o.getClass() != this.getClass() ) return false;
         RenderConf other = (RenderConf) o;
-        return Objects.equals(_structureConf, other._structureConf) &&
+        return Objects.equals(_boxModelConf, other._boxModelConf) &&
                Objects.equals(_baseColor, other._baseColor) &&
                Objects.equals(_layer, other._layer);
     }

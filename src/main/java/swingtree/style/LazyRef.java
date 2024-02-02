@@ -12,7 +12,7 @@ final class LazyRef<T>
         _producerAndValidator = Objects.requireNonNull(producerAndValidator);
     }
 
-    final T getFor( StructureConf currentState, ComponentAreas context ) {
+    final T getFor(BoxModelConf currentState, ComponentAreas context ) {
         if ( _value == null )
             _value = _producerAndValidator.produce(currentState, context);
         return _value;

@@ -12,9 +12,9 @@ import java.util.Optional;
  *  The state of this object is updated through with-methods that return
  *  a new instance of this class with the updated state.
  */
-final class StructureConf
+final class BoxModelConf
 {
-    private static final StructureConf _NONE = new StructureConf(
+    private static final BoxModelConf _NONE = new BoxModelConf(
                                                 Arc.none(),
                                                 Arc.none(),
                                                 Arc.none(),
@@ -26,9 +26,9 @@ final class StructureConf
                                                 Size.unknown()
                                             );
 
-    public static StructureConf none() { return _NONE; }
+    public static BoxModelConf none() { return _NONE; }
 
-    static StructureConf of(
+    static BoxModelConf of(
         Arc     topLeftArc,
         Arc     topRightArc,
         Arc     bottomLeftArc,
@@ -51,7 +51,7 @@ final class StructureConf
         )
             return _NONE;
         else {
-            StructureConf newConf = new StructureConf(
+            BoxModelConf newConf = new BoxModelConf(
                                         topLeftArc,    topRightArc,
                                         bottomLeftArc, bottomRightArc,
                                         borderWidths,  margin,
@@ -62,8 +62,8 @@ final class StructureConf
         }
     }
 
-    static StructureConf of(BorderConf borderConf, Outline baseOutline, Size size )   {
-        return StructureConf.of(
+    static BoxModelConf of(BorderConf borderConf, Outline baseOutline, Size size )   {
+        return BoxModelConf.of(
             borderConf.topLeftArc().orElse(Arc.none()),
             borderConf.topRightArc().orElse(Arc.none()),
             borderConf.bottomLeftArc().orElse(Arc.none()),
@@ -90,7 +90,7 @@ final class StructureConf
     private final Size    _size;
 
 
-    private StructureConf(
+    private BoxModelConf(
         Arc     topLeftArc,
         Arc     topRightArc,
         Arc     bottomLeftArc,
@@ -145,78 +145,78 @@ final class StructureConf
     
     public Size size() { return _size; }
 
-    StructureConf withArcWidthAt(UI.Corner corner, double borderArcWidth ) {
+    BoxModelConf withArcWidthAt(UI.Corner corner, double borderArcWidth ) {
         if ( corner == UI.Corner.EVERY )
             return this.withArcWidth(borderArcWidth);
         float arcHeight;
         switch ( corner ) {
             case TOP_LEFT:
                 arcHeight = _topLeftArc != Arc.none() ? _topLeftArc.height() : 0;
-                return StructureConf.of(Arc.of(borderArcWidth, arcHeight), _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _baseOutline, _size);
+                return BoxModelConf.of(Arc.of(borderArcWidth, arcHeight), _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _baseOutline, _size);
             case TOP_RIGHT:
                 arcHeight = _topRightArc != Arc.none() ? _topRightArc.height() : 0;
-                return StructureConf.of(_topLeftArc, Arc.of(borderArcWidth, arcHeight), _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _baseOutline, _size);
+                return BoxModelConf.of(_topLeftArc, Arc.of(borderArcWidth, arcHeight), _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _baseOutline, _size);
             case BOTTOM_LEFT:
                 arcHeight = _bottomLeftArc != Arc.none() ? _bottomLeftArc.height() : 0;
-                return StructureConf.of(_topLeftArc, _topRightArc, Arc.of(borderArcWidth, arcHeight), _bottomRightArc, _borderWidths, _margin, _padding, _baseOutline, _size);
+                return BoxModelConf.of(_topLeftArc, _topRightArc, Arc.of(borderArcWidth, arcHeight), _bottomRightArc, _borderWidths, _margin, _padding, _baseOutline, _size);
             case BOTTOM_RIGHT:
                 arcHeight = _bottomRightArc != Arc.none() ? _bottomRightArc.height() : 0;
-                return StructureConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, Arc.of(borderArcWidth, arcHeight), _borderWidths, _margin, _padding, _baseOutline, _size);
+                return BoxModelConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, Arc.of(borderArcWidth, arcHeight), _borderWidths, _margin, _padding, _baseOutline, _size);
             default:
                 throw new IllegalArgumentException("Unknown corner: " + corner);
         }
     }
 
-    StructureConf withArcWidth(double borderArcWidth ) {
+    BoxModelConf withArcWidth(double borderArcWidth ) {
         return this.withArcWidthAt(UI.Corner.TOP_LEFT,     borderArcWidth)
                    .withArcWidthAt(UI.Corner.TOP_RIGHT,    borderArcWidth)
                    .withArcWidthAt(UI.Corner.BOTTOM_LEFT,  borderArcWidth)
                    .withArcWidthAt(UI.Corner.BOTTOM_RIGHT, borderArcWidth);
     }
 
-    StructureConf withArcHeightAt(UI.Corner corner, double borderArcHeight ) {
+    BoxModelConf withArcHeightAt(UI.Corner corner, double borderArcHeight ) {
         if ( corner == UI.Corner.EVERY )
             return this.withArcHeight(borderArcHeight);
         float arcWidth;
         switch ( corner ) {
             case TOP_LEFT:
                 arcWidth = _topLeftArc != Arc.none() ? _topLeftArc.width() : 0;
-                return StructureConf.of(Arc.of(arcWidth, borderArcHeight), _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _baseOutline, _size);
+                return BoxModelConf.of(Arc.of(arcWidth, borderArcHeight), _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _baseOutline, _size);
             case TOP_RIGHT:
                 arcWidth = _topRightArc != Arc.none() ? _topRightArc.width() : 0;
-                return StructureConf.of(_topLeftArc, Arc.of(arcWidth, borderArcHeight), _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _baseOutline, _size);
+                return BoxModelConf.of(_topLeftArc, Arc.of(arcWidth, borderArcHeight), _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _baseOutline, _size);
             case BOTTOM_LEFT:
                 arcWidth = _bottomLeftArc != Arc.none() ? _bottomLeftArc.width() : 0;
-                return StructureConf.of(_topLeftArc, _topRightArc, Arc.of(arcWidth, borderArcHeight), _bottomRightArc, _borderWidths, _margin, _padding, _baseOutline, _size);
+                return BoxModelConf.of(_topLeftArc, _topRightArc, Arc.of(arcWidth, borderArcHeight), _bottomRightArc, _borderWidths, _margin, _padding, _baseOutline, _size);
             case BOTTOM_RIGHT:
                 arcWidth = _bottomRightArc != Arc.none() ? _bottomRightArc.width() : 0;
-                return StructureConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, Arc.of(arcWidth, borderArcHeight), _borderWidths, _margin, _padding, _baseOutline, _size);
+                return BoxModelConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, Arc.of(arcWidth, borderArcHeight), _borderWidths, _margin, _padding, _baseOutline, _size);
             default:
                 throw new IllegalArgumentException("Unknown corner: " + corner);
         }
     }
 
-    StructureConf withArcHeight(double borderArcHeight ) {
+    BoxModelConf withArcHeight(double borderArcHeight ) {
         return this.withArcHeightAt(UI.Corner.TOP_LEFT,     borderArcHeight)
                    .withArcHeightAt(UI.Corner.TOP_RIGHT,    borderArcHeight)
                    .withArcHeightAt(UI.Corner.BOTTOM_LEFT,  borderArcHeight)
                    .withArcHeightAt(UI.Corner.BOTTOM_RIGHT, borderArcHeight);
     }
 
-    StructureConf withWidthAt(UI.Edge edge, float borderWidth ) {
+    BoxModelConf withWidthAt(UI.Edge edge, float borderWidth ) {
         if ( edge == UI.Edge.EVERY )
             return this.withWidth(borderWidth);
         switch (edge) {
-            case TOP:    return StructureConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths.withTop(borderWidth), _margin, _padding, _baseOutline, _size);
-            case RIGHT:  return StructureConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths.withRight(borderWidth), _margin, _padding, _baseOutline, _size);
-            case BOTTOM: return StructureConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths.withBottom(borderWidth), _margin, _padding, _baseOutline, _size);
-            case LEFT:   return StructureConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths.withLeft(borderWidth), _margin, _padding, _baseOutline, _size);
+            case TOP:    return BoxModelConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths.withTop(borderWidth), _margin, _padding, _baseOutline, _size);
+            case RIGHT:  return BoxModelConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths.withRight(borderWidth), _margin, _padding, _baseOutline, _size);
+            case BOTTOM: return BoxModelConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths.withBottom(borderWidth), _margin, _padding, _baseOutline, _size);
+            case LEFT:   return BoxModelConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths.withLeft(borderWidth), _margin, _padding, _baseOutline, _size);
             default:
                 throw new IllegalArgumentException("Unknown side: " + edge);
         }
     }
 
-    StructureConf withWidth(double borderWidth ) {
+    BoxModelConf withWidth(double borderWidth ) {
         return this.withWidthAt(UI.Edge.TOP,    (float) borderWidth)
                    .withWidthAt(UI.Edge.RIGHT,  (float) borderWidth)
                    .withWidthAt(UI.Edge.BOTTOM, (float) borderWidth)
@@ -255,7 +255,7 @@ final class StructureConf
         if ( obj == null ) return false;
         if ( obj == this ) return true;
         if ( obj.getClass() != getClass() ) return false;
-        StructureConf rhs = (StructureConf) obj;
+        BoxModelConf rhs = (BoxModelConf) obj;
         return
             Objects.equals(_topLeftArc,     rhs._topLeftArc)     &&
             Objects.equals(_topRightArc,    rhs._topRightArc)    &&
