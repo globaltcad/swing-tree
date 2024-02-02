@@ -213,8 +213,8 @@ final class LayerCache
         for ( GradientConf gradient : state.style().gradients(_layer) )
             if ( !gradient.equals(GradientConf.none()) && gradient.colors().length > 0 )
                 heavyStyleCount++;
-        for ( ShadowStyle shadow : state.style().shadows(_layer) )
-            if ( !shadow.equals(ShadowStyle.none()) && shadow.color().isPresent() )
+        for ( ShadowConf shadow : state.style().shadows(_layer) )
+            if ( !shadow.equals(ShadowConf.none()) && shadow.color().isPresent() )
                 heavyStyleCount++;
 
         BorderConf border = state.style().border();

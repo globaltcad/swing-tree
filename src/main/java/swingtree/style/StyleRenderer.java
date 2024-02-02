@@ -83,22 +83,22 @@ final class StyleRenderer
             }
 
         // 3. Shadows, which are simple gradient based drop shadows that can go inwards or outwards
-        for ( ShadowStyle shadow : conf.style().shadows(layer) )
+        for ( ShadowConf shadow : conf.style().shadows(layer) )
             _renderShadows(conf, shadow, g2d);
 
         // 4. Painters, which are provided by the user and can be anything
-        List<PainterStyle> painters = conf.style().painters(layer);
+        List<PainterConf> painters = conf.style().painters(layer);
 
         if ( !painters.isEmpty() )
         {
-            for ( PainterStyle painterStyle : painters )
+            for ( PainterConf painterConf : painters )
             {
-                Painter backgroundPainter = painterStyle.painter();
+                Painter backgroundPainter = painterConf.painter();
 
                 if ( backgroundPainter == Painter.none() )
                     break;
 
-                conf.paintClippedTo( painterStyle.clipArea(), g2d, () -> {
+                conf.paintClippedTo( painterConf.clipArea(), g2d, () -> {
                     // We remember the current transform and clip so that we can reset them after each painter:
                     AffineTransform currentTransform = new AffineTransform(g2d.getTransform());
                     Shape           currentClip      = g2d.getClip();
@@ -154,7 +154,7 @@ final class StyleRenderer
 
     private static void _renderShadows(
         ComponentConf conf,
-        ShadowStyle   shadow,
+        ShadowConf shadow,
         Graphics2D    g2d
     ) {
         if ( !shadow.color().isPresent() )
@@ -252,15 +252,15 @@ final class StyleRenderer
     }
 
     private static void _renderShadowBody(
-        ShadowStyle       shadowStyle,
+        ShadowConf shadowConf,
         Area              baseArea,
         Rectangle2D.Float innerShadowRect,
         Area              outerShadowBox,
         Graphics2D        g2d
     ) {
         Graphics2D g2d2 = (Graphics2D) g2d.create();
-        g2d2.setColor(shadowStyle.color().orElse(Color.BLACK));
-        if ( !shadowStyle.isOutset() ) {
+        g2d2.setColor(shadowConf.color().orElse(Color.BLACK));
+        if ( !shadowConf.isOutset() ) {
             baseArea.subtract(outerShadowBox);
             g2d2.fill(baseArea);
         } else {
@@ -272,7 +272,7 @@ final class StyleRenderer
     }
 
     private static void _renderCornerShadow(
-        ShadowStyle       shadowStyle,
+        ShadowConf shadowConf,
         UI.Corner         corner,
         Area              areaWhereShadowIsAllowed,
         Rectangle2D.Float innerShadowRect,
@@ -362,13 +362,13 @@ final class StyleRenderer
 
         Color innerColor;
         Color outerColor;
-        Color shadowBackgroundColor = _transparentShadowBackground(shadowStyle);
-        if ( shadowStyle.isOutset() ) {
-            innerColor = shadowStyle.color().orElse(Color.BLACK);
+        Color shadowBackgroundColor = _transparentShadowBackground(shadowConf);
+        if ( shadowConf.isOutset() ) {
+            innerColor = shadowConf.color().orElse(Color.BLACK);
             outerColor = shadowBackgroundColor;
         } else {
             innerColor = shadowBackgroundColor;
-            outerColor = shadowStyle.color().orElse(Color.BLACK);
+            outerColor = shadowConf.color().orElse(Color.BLACK);
         }
         float gradientStart = (float) gradientStartOffset / cr;
 
@@ -380,7 +380,7 @@ final class StyleRenderer
         if ( gradientStart == 1f || gradientStart == 0f ) {
             // Simple, we just draw a circle and clip it
             Area circle = new Area(new Ellipse2D.Float(cx - cr, cy - cr, cr * 2, cr * 2));
-            if ( shadowStyle.isInset() ) {
+            if ( shadowConf.isInset() ) {
                 g2d.setColor(outerColor);
                 cornerArea.subtract(circle);
             } else {
@@ -415,7 +415,7 @@ final class StyleRenderer
     }
 
     private static void _renderEdgeShadow(
-        ShadowStyle       shadowStyle,
+        ShadowConf shadowConf,
         UI.Edge           edge,
         Area              contentArea,
         Rectangle2D.Float innerShadowRect,
@@ -513,13 +513,13 @@ final class StyleRenderer
         Color innerColor;
         Color outerColor;
         // Same as shadow color but without alpha:
-        Color shadowBackgroundColor = _transparentShadowBackground(shadowStyle);
-        if (shadowStyle.isOutset()) {
-            innerColor = shadowStyle.color().orElse(Color.BLACK);
+        Color shadowBackgroundColor = _transparentShadowBackground(shadowConf);
+        if (shadowConf.isOutset()) {
+            innerColor = shadowConf.color().orElse(Color.BLACK);
             outerColor = shadowBackgroundColor;
         } else {
             innerColor = shadowBackgroundColor;
-            outerColor = shadowStyle.color().orElse(Color.BLACK);
+            outerColor = shadowConf.color().orElse(Color.BLACK);
         }
         LinearGradientPaint edgePaint;
         // distance between start and end of gradient
@@ -540,7 +540,7 @@ final class StyleRenderer
                 // The gradient does not really exist, so we can just fill the whole area and then return
                 Area edgeArea = new Area(edgeBox);
                 g2d.setColor(innerColor);
-                if ( shadowStyle.isOutset() )
+                if ( shadowConf.isOutset() )
                     edgeArea.intersect(contentArea);
                 g2d.fill(edgeArea);
                 return;
@@ -565,7 +565,7 @@ final class StyleRenderer
         edgeG2d.dispose();
     }
 
-    private static Color _transparentShadowBackground(ShadowStyle shadow) {
+    private static Color _transparentShadowBackground(ShadowConf shadow) {
         return shadow.color()
                     .map(c -> new Color(c.getRed(), c.getGreen(), c.getBlue(), 0))
                     .orElse(new Color(0.5f, 0.5f, 0.5f, 0f));

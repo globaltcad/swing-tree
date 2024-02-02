@@ -25,18 +25,18 @@ import java.util.Objects;
  *  effectively making it a representation of the absence of a painter.
  *  <p>
  */
-final class PainterStyle
+final class PainterConf
 {
-    private static final PainterStyle _NONE = new PainterStyle(Painter.none(), UI.ComponentArea.BODY);
+    private static final PainterConf _NONE = new PainterConf(Painter.none(), UI.ComponentArea.BODY);
 
 
-    public static PainterStyle none() { return _NONE; }
+    public static PainterConf none() { return _NONE; }
 
-    public static PainterStyle of( Painter painter, UI.ComponentArea area ) {
+    public static PainterConf of(Painter painter, UI.ComponentArea area ) {
         if ( painter == Painter.none() )
             return none();
         else
-            return new PainterStyle(painter, area);
+            return new PainterConf(painter, area);
     }
 
 
@@ -44,7 +44,7 @@ final class PainterStyle
     private final UI.ComponentArea _clipArea;
 
 
-    private PainterStyle( Painter painter, UI.ComponentArea area )
+    private PainterConf(Painter painter, UI.ComponentArea area )
     {
         _painter = Objects.requireNonNull(painter);
         _clipArea = Objects.requireNonNull(area);
@@ -71,8 +71,8 @@ final class PainterStyle
     @Override
     public boolean equals(Object o) {
         if ( this == o ) return true;
-        if ( !(o instanceof PainterStyle) ) return false;
-        PainterStyle that = (PainterStyle) o;
+        if ( !(o instanceof PainterConf) ) return false;
+        PainterConf that = (PainterConf) o;
         return _painter == that._painter;
     }
 

@@ -1047,7 +1047,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided shadow color.
      */
     public ComponentStyleDelegate<C> shadowColor( Color color ) {
-        return _withStyle(_styleConf._withShadow(ShadowStyle.DEFAULT_LAYER, shadow -> shadow.color(color)));
+        return _withStyle(_styleConf._withShadow(ShadowConf.DEFAULT_LAYER, shadow -> shadow.color(color)));
     }
 
     /**
@@ -1075,7 +1075,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
             log.error("Failed to parse color string: '"+colorString+"'", e);
             return this;
         }
-        return _withStyle(_styleConf._withShadow(ShadowStyle.DEFAULT_LAYER, shadow -> shadow.color(newColor)));
+        return _withStyle(_styleConf._withShadow(ShadowConf.DEFAULT_LAYER, shadow -> shadow.color(newColor)));
     }
 
     /**
@@ -1165,11 +1165,11 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  alphabetical order based on their name (within a particular layer).
      *
      * @param shadowName The name of the shadow.
-     * @param styler A function that takes a {@link ShadowStyle} and returns a new {@link ShadowStyle}.
+     * @param styler A function that takes a {@link ShadowConf} and returns a new {@link ShadowConf}.
      * @return A new {@link ComponentStyleDelegate} with a named shadow defined by the provided styler lambda.
      */
-    public ComponentStyleDelegate<C> shadow( String shadowName, Function<ShadowStyle, ShadowStyle> styler ) {
-        return shadow(ShadowStyle.DEFAULT_LAYER, shadowName, styler);
+    public ComponentStyleDelegate<C> shadow( String shadowName, Function<ShadowConf, ShadowConf> styler ) {
+        return shadow(ShadowConf.DEFAULT_LAYER, shadowName, styler);
     }
 
     /**
@@ -1211,19 +1211,19 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *                  <li>{@link UI.Layer#FOREGROUND}</li>
      *              </ul>
      * @param shadowName The name of the shadow.
-     * @param styler A function that takes a {@link ShadowStyle} and returns a new {@link ShadowStyle}.
+     * @param styler A function that takes a {@link ShadowConf} and returns a new {@link ShadowConf}.
      * @return A new {@link ComponentStyleDelegate} with a named shadow defined by the provided styler lambda.
      */
     public ComponentStyleDelegate<C> shadow(
         UI.Layer layer,
         String shadowName,
-        Function<ShadowStyle, ShadowStyle> styler
+        Function<ShadowConf, ShadowConf> styler
     ) {
         Objects.requireNonNull(shadowName);
         Objects.requireNonNull(styler);
-        ShadowStyle shadow = Optional.ofNullable(_styleConf.shadow(layer, shadowName)).orElse(ShadowStyle.none());
+        ShadowConf shadow = Optional.ofNullable(_styleConf.shadow(layer, shadowName)).orElse(ShadowConf.none());
         // We clone the shadow map:
-        NamedConfigs<ShadowStyle> newShadows = _styleConf.shadowsMap(layer).withNamedStyle(shadowName, styler.apply(shadow));
+        NamedConfigs<ShadowConf> newShadows = _styleConf.shadowsMap(layer).withNamedStyle(shadowName, styler.apply(shadow));
         return _withStyle(_styleConf._withShadow(layer, newShadows));
     }
 

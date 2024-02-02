@@ -131,8 +131,8 @@ public final class StyleConf
     /**
      * @return The default shadow style.
      */
-    public ShadowStyle shadow() {
-        return _layers.get(ShadowStyle.DEFAULT_LAYER)
+    public ShadowConf shadow() {
+        return _layers.get(ShadowConf.DEFAULT_LAYER)
                         .shadows()
                         .get(StyleUtility.DEFAULT_KEY);
     }
@@ -142,7 +142,7 @@ public final class StyleConf
      * @param shadowName The name of the shadow style to retrieve.
      * @return The shadow style with the provided name.
      */
-    public ShadowStyle shadow( UI.Layer layer, String shadowName ) {
+    public ShadowConf shadow(UI.Layer layer, String shadowName ) {
         Objects.requireNonNull(shadowName);
         return _layers.get(layer).shadows().get(shadowName);
     }
@@ -150,7 +150,7 @@ public final class StyleConf
     /**
      * @return An unmodifiable list of all shadow styles sorted by their names in ascending alphabetical order.
      */
-    List<ShadowStyle> shadows( UI.Layer layer ) {
+    List<ShadowConf> shadows(UI.Layer layer ) {
         return Collections.unmodifiableList(
                         _layers.get(layer)
                         .shadows()
@@ -162,7 +162,7 @@ public final class StyleConf
                     );
     }
 
-    NamedConfigs<ShadowStyle> shadowsMap(UI.Layer layer) {
+    NamedConfigs<ShadowConf> shadowsMap(UI.Layer layer) {
         return _layers.get(layer).shadows();
     }
 
@@ -182,7 +182,7 @@ public final class StyleConf
     /**
      * @return An unmodifiable list of painters sorted by their names in ascending alphabetical order.
      */
-    List<PainterStyle> painters( UI.Layer layer ) {
+    List<PainterConf> painters(UI.Layer layer ) {
         return Collections.unmodifiableList(
                             new ArrayList<>(_layers.get(layer)
                                 .painters()
@@ -195,11 +195,11 @@ public final class StyleConf
         Objects.requireNonNull(painterName);
         Objects.requireNonNull(painter);
         // We clone the painter map:
-        NamedConfigs<PainterStyle> newPainters = _layers.get(layer)
+        NamedConfigs<PainterConf> newPainters = _layers.get(layer)
                                                     .painters()
                                                     .withNamedStyle(
                                                         painterName, // Existing painters are overwritten if they have the same name.
-                                                        PainterStyle.of(painter, area)
+                                                        PainterConf.of(painter, area)
                                                     ); 
         return _withPainters(layer, newPainters);
     }
@@ -312,7 +312,7 @@ public final class StyleConf
         return StyleConf.of(_layout, _border, _base, _font, dimensionality, _layers, _properties);
     }
 
-    StyleConf _withShadow(UI.Layer layer, NamedConfigs<ShadowStyle> shadows ) {
+    StyleConf _withShadow(UI.Layer layer, NamedConfigs<ShadowConf> shadows ) {
         return StyleConf.of(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withShadows(shadows)), _properties);
     }
 
@@ -323,13 +323,13 @@ public final class StyleConf
         return StyleConf.of(_layout, _border, _base, _font, _dimensionality, _layers, properties);
     }
 
-    StyleConf _withShadow(UI.Layer layer, Function<ShadowStyle, ShadowStyle> styler ) {
+    StyleConf _withShadow(UI.Layer layer, Function<ShadowConf, ShadowConf> styler ) {
         // A new map is created where all the styler is applied to all the values:
-        NamedConfigs<ShadowStyle> styledShadows = _layers.get(layer).shadows().mapStyles(styler::apply);
+        NamedConfigs<ShadowConf> styledShadows = _layers.get(layer).shadows().mapStyles(styler::apply);
         return _withShadow(layer, styledShadows);
     }
 
-    StyleConf _withShadow(Function<ShadowStyle, ShadowStyle> styler ) {
+    StyleConf _withShadow(Function<ShadowConf, ShadowConf> styler ) {
         return _withLayers(_layers.map( layer -> layer.withShadows(layer.shadows().mapStyles(styler::apply)) ));
     }
 
@@ -349,7 +349,7 @@ public final class StyleConf
         return StyleConf.of(_layout, _border, _base, _font, _dimensionality, layers, _properties);
     }
 
-    StyleConf _withPainters(UI.Layer layer, NamedConfigs<PainterStyle> painters ) {
+    StyleConf _withPainters(UI.Layer layer, NamedConfigs<PainterConf> painters ) {
         Objects.requireNonNull(painters);
         return StyleConf.of(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withPainters(painters)), _properties);
     }

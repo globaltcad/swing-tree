@@ -69,19 +69,19 @@ import java.util.Optional;
  *  as the instance returned by that method is a shadow with no offset, no blur, no spread and no color,
  *  effectively making it a representation of the absence of a shadow.
  */
-public final class ShadowStyle implements Simplifiable<ShadowStyle>
+public final class ShadowConf implements Simplifiable<ShadowConf>
 {
-    private static final Logger log = org.slf4j.LoggerFactory.getLogger(ShadowStyle.class);
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(ShadowConf.class);
     static final UI.Layer DEFAULT_LAYER = UI.Layer.CONTENT;
 
-    private static final ShadowStyle _NONE = new ShadowStyle(
+    private static final ShadowConf _NONE = new ShadowConf(
                                                     Offset.none(),0, 0,
                                                     null, true
                                                 );
 
-    public static ShadowStyle none() { return _NONE; }
+    public static ShadowConf none() { return _NONE; }
     
-    static ShadowStyle of(
+    static ShadowConf of(
         Offset  offset,
         float   shadowBlurRadius,
         float   shadowSpreadRadius,
@@ -97,7 +97,7 @@ public final class ShadowStyle implements Simplifiable<ShadowStyle>
         )
             return _NONE;
         else
-            return new ShadowStyle(offset, shadowBlurRadius, shadowSpreadRadius, shadowColor, isOutset);
+            return new ShadowConf(offset, shadowBlurRadius, shadowSpreadRadius, shadowColor, isOutset);
     }
 
     private final Offset  _offset;
@@ -107,7 +107,7 @@ public final class ShadowStyle implements Simplifiable<ShadowStyle>
     private final boolean _isOutset;
 
 
-    private ShadowStyle(
+    private ShadowConf(
         Offset  offset,
         float   shadowBlurRadius,
         float   shadowSpreadRadius,
@@ -138,19 +138,19 @@ public final class ShadowStyle implements Simplifiable<ShadowStyle>
     /**
      * @param horizontalShadowOffset The horizontal shadow offset, if positive the shadow will move to the right,
      *                               if negative the shadow will move to the left.
-     * @return A new {@link ShadowStyle} with the specified horizontal shadow offset.
+     * @return A new {@link ShadowConf} with the specified horizontal shadow offset.
      */
-    public ShadowStyle horizontalOffset( float horizontalShadowOffset ) {
-        return ShadowStyle.of(_offset.withX(horizontalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);
+    public ShadowConf horizontalOffset(float horizontalShadowOffset ) {
+        return ShadowConf.of(_offset.withX(horizontalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);
     }
 
     /**
      * @param verticalShadowOffset The vertical shadow offset, if positive the shadow will move down,
      *                             if negative the shadow will move up.
-     * @return A new {@link ShadowStyle} with the specified vertical shadow offset.
+     * @return A new {@link ShadowConf} with the specified vertical shadow offset.
      */
-    public ShadowStyle verticalOffset( float verticalShadowOffset ) {
-        return ShadowStyle.of(_offset.withY(verticalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);
+    public ShadowConf verticalOffset(float verticalShadowOffset ) {
+        return ShadowConf.of(_offset.withY(verticalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);
     }
 
     /**
@@ -158,10 +158,10 @@ public final class ShadowStyle implements Simplifiable<ShadowStyle>
      *                               if negative the shadow will move to the left.
      * @param verticalShadowOffset The vertical shadow offset, if positive the shadow will move down,
      *                             if negative the shadow will move up.
-     * @return A new {@link ShadowStyle} with the specified horizontal and vertical shadow offsets.
+     * @return A new {@link ShadowConf} with the specified horizontal and vertical shadow offsets.
      */
-    public ShadowStyle offset( int horizontalShadowOffset, int verticalShadowOffset ) {
-        return ShadowStyle.of(Offset.of(horizontalShadowOffset, verticalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);
+    public ShadowConf offset(int horizontalShadowOffset, int verticalShadowOffset ) {
+        return ShadowConf.of(Offset.of(horizontalShadowOffset, verticalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);
     }
 
     /**
@@ -169,20 +169,20 @@ public final class ShadowStyle implements Simplifiable<ShadowStyle>
      *
      * @param shadowOffset The shadow offset, if positive the shadow will move to the right and down,
      *                     if negative the shadow will move to the left and up.
-     * @return A new {@link ShadowStyle} with the specified horizontal and vertical shadow offsets.
+     * @return A new {@link ShadowConf} with the specified horizontal and vertical shadow offsets.
      */
-    public ShadowStyle offset( int shadowOffset ) {
-        return ShadowStyle.of(Offset.of(shadowOffset, shadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);
+    public ShadowConf offset(int shadowOffset ) {
+        return ShadowConf.of(Offset.of(shadowOffset, shadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);
     }
 
     /**
      * @param shadowBlurRadius The blur radius of the shadow, which defines the width of the blur effect.
      *                         The higher the value, the bigger the blur, so the shadow transition will be
      *                         stretched over a wider area.
-     * @return A new {@link ShadowStyle} with the specified blur radius.
+     * @return A new {@link ShadowConf} with the specified blur radius.
      */
-    public ShadowStyle blurRadius( float shadowBlurRadius ) {
-        return ShadowStyle.of(_offset, shadowBlurRadius, _spreadRadius, _color, _isOutset);
+    public ShadowConf blurRadius(float shadowBlurRadius ) {
+        return ShadowConf.of(_offset, shadowBlurRadius, _spreadRadius, _color, _isOutset);
     }
 
     /**
@@ -191,23 +191,23 @@ public final class ShadowStyle implements Simplifiable<ShadowStyle>
      *                           This offsets the start of the shadow similarly to the vertical and horizontal
      *                           offsets, but instead of moving the shadow, it extends the shadow
      *                           so that it either grows or shrinks in size.
-     * @return A new {@link ShadowStyle} with the specified spread radius.
+     * @return A new {@link ShadowConf} with the specified spread radius.
      */
-    public ShadowStyle spreadRadius( float shadowSpreadRadius ) {
-        return ShadowStyle.of(_offset, _blurRadius, shadowSpreadRadius, _color, _isOutset);
+    public ShadowConf spreadRadius(float shadowSpreadRadius ) {
+        return ShadowConf.of(_offset, _blurRadius, shadowSpreadRadius, _color, _isOutset);
     }
 
     /**
      * @param shadowColor The color of the shadow.
-     * @return A new {@link ShadowStyle} with the specified color.
+     * @return A new {@link ShadowConf} with the specified color.
      */
-    public ShadowStyle color( Color shadowColor ) {
+    public ShadowConf color(Color shadowColor ) {
         Objects.requireNonNull(shadowColor, "Use UI.COLOR_UNDEFINED to specify no color instead of null");
         if ( shadowColor == UI.COLOR_UNDEFINED)
             shadowColor = null;
         if ( shadowColor == _color )
             return this;
-        return ShadowStyle.of(_offset, _blurRadius, _spreadRadius, shadowColor, _isOutset);
+        return ShadowConf.of(_offset, _blurRadius, _spreadRadius, shadowColor, _isOutset);
     }
 
     /**
@@ -222,9 +222,9 @@ public final class ShadowStyle implements Simplifiable<ShadowStyle>
      *                      <li>HSB value - like "hsb(0, 100%, 100%)"</li>
      *                      <li>HSBA value - like "hsba(0, 100%, 100%, 1.0)"</li>
      *                    </ul>
-     * @return A new {@link ShadowStyle} with the specified color.
+     * @return A new {@link ShadowConf} with the specified color.
      */
-    public ShadowStyle color( String shadowColor ) {
+    public ShadowConf color(String shadowColor ) {
         Objects.requireNonNull(shadowColor);
         Color newColor;
         try {
@@ -233,16 +233,16 @@ public final class ShadowStyle implements Simplifiable<ShadowStyle>
             log.error("Failed to parse color string: '{}'", shadowColor, e);
             return this; // We want to avoid side effects other than a wrong color
         }
-        return ShadowStyle.of(_offset, _blurRadius, _spreadRadius, newColor, _isOutset);
+        return ShadowConf.of(_offset, _blurRadius, _spreadRadius, newColor, _isOutset);
     }
 
     /**
      * @param red The red component of the shadow color.
      * @param green The green component of the shadow color.
      * @param blue The blue component of the shadow color.
-     * @return A new {@link ShadowStyle} with the specified color.
+     * @return A new {@link ShadowConf} with the specified color.
      */
-    public ShadowStyle color( double red, double green, double blue ) {
+    public ShadowConf color(double red, double green, double blue ) {
         return color(red, green, blue, 1.0);
     }
 
@@ -251,9 +251,9 @@ public final class ShadowStyle implements Simplifiable<ShadowStyle>
      * @param green The green component of the shadow color.
      * @param blue The blue component of the shadow color.
      * @param alpha The alpha component of the shadow color.
-     * @return A new {@link ShadowStyle} with the specified color.
+     * @return A new {@link ShadowConf} with the specified color.
      */
-    public ShadowStyle color( double red, double green, double blue, double alpha ) {
+    public ShadowConf color(double red, double green, double blue, double alpha ) {
         return color(new Color((float) red, (float) green, (float) blue, (float) alpha));
     }
 
@@ -262,10 +262,10 @@ public final class ShadowStyle implements Simplifiable<ShadowStyle>
      *                    If true, the shadow is inset, otherwise it is outset.
      *                    Inset shadows go inward, starting from the inner edge of the box (and its border),
      *                    whereas outset shadows go outward, starting from the outer edge of the box's border.
-     * @return A new {@link ShadowStyle} with the specified inset/outset state.
+     * @return A new {@link ShadowConf} with the specified inset/outset state.
      */
-    public ShadowStyle isInset( boolean shadowInset ) {
-        return ShadowStyle.of(_offset, _blurRadius, _spreadRadius, _color, !shadowInset);
+    public ShadowConf isInset(boolean shadowInset ) {
+        return ShadowConf.of(_offset, _blurRadius, _spreadRadius, _color, !shadowInset);
     }
 
     /**
@@ -273,14 +273,14 @@ public final class ShadowStyle implements Simplifiable<ShadowStyle>
      *                     If true, the shadow is outset, otherwise it is inset.
      *                     Outset shadows go outward, starting from the outer edge of the box's border,
      *                     whereas inset shadows go inward, starting from the inner edge of the box (and its border).
-     * @return A new {@link ShadowStyle} with the specified outset/inset state.
+     * @return A new {@link ShadowConf} with the specified outset/inset state.
      */
-    public ShadowStyle isOutset( boolean shadowOutset ) {
-        return ShadowStyle.of(_offset, _blurRadius, _spreadRadius, _color, shadowOutset);
+    public ShadowConf isOutset(boolean shadowOutset ) {
+        return ShadowConf.of(_offset, _blurRadius, _spreadRadius, _color, shadowOutset);
     }
 
-    ShadowStyle _scale( double scaleFactor ) {
-        return ShadowStyle.of(
+    ShadowConf _scale(double scaleFactor ) {
+        return ShadowConf.of(
                             _offset.scale(scaleFactor),
                             (float) (_blurRadius * scaleFactor),
                             (float) (_spreadRadius * scaleFactor),
@@ -305,7 +305,7 @@ public final class ShadowStyle implements Simplifiable<ShadowStyle>
         if ( obj == null ) return false;
         if ( obj == this ) return true;
         if ( obj.getClass() != getClass() ) return false;
-        ShadowStyle rhs = (ShadowStyle) obj;
+        ShadowConf rhs = (ShadowConf) obj;
         return Objects.equals(_offset, rhs._offset)       &&
                _blurRadius       == rhs._blurRadius       &&
                _spreadRadius     == rhs._spreadRadius     &&
@@ -332,7 +332,7 @@ public final class ShadowStyle implements Simplifiable<ShadowStyle>
     }
 
     @Override
-    public ShadowStyle simplified() {
+    public ShadowConf simplified() {
         if ( this == _NONE )
             return _NONE;
 
