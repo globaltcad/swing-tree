@@ -15,9 +15,9 @@ import java.util.function.BiConsumer;
 
 /**
  *  A {@link BufferedImage} based cache for the rendering of a particular layer of a component's style. <br>
- *  So if the {@link ComponentConf} of a component changes, the cache is invalidated and the layer
+ *  So if the {@link RenderConf} of a component changes, the cache is invalidated and the layer
  *  is rendered again. <br>
- *  This is made possible by the fact that the {@link ComponentConf} is deeply immutable and can be used
+ *  This is made possible by the fact that the {@link RenderConf} is deeply immutable and can be used
  *  as a key data structure for caching.
  */
 final class LayerCache

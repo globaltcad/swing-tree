@@ -3,13 +3,13 @@ package swingtree.style;
 import java.util.Objects;
 
 /**
- *  A wrapper for a value that is produced from a {@link ComponentConf} through
+ *  A wrapper for a value that is produced from a {@link RenderConf} through
  *  a {@link CacheProducerAndValidator#produce(RenderConf, ComponentAreas)} implementation and validated against
- *  a previous {@link ComponentConf} through a
+ *  a previous {@link RenderConf} through a
  *  {@link CacheProducerAndValidator#leadsToSameValue(RenderConf, RenderConf, ComponentAreas)}
  *  implementation.
  *  <p>
- *  This design is possible due to the fact that the {@link ComponentConf} is deeply immutable
+ *  This design is possible due to the fact that the {@link RenderConf} is deeply immutable
  *  and can be used as a key data structure for caching.
  *
  * @param <T> The type of the cached value.
