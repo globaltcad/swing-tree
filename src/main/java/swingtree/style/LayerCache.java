@@ -88,9 +88,10 @@ final class LayerCache
             bufferedImage = new CachedImage(
                                 size.width().map(Number::intValue).orElse(1),
                                 size.height().map(Number::intValue).orElse(1),
-                    layerRenderConf
+                                layerRenderConf
                             );
             CACHE.put(layerRenderConf, bufferedImage);
+
             _layerRenderData = layerRenderConf;
         }
         else {
@@ -160,8 +161,6 @@ final class LayerCache
 
         if ( newBufferNeeded )
             _allocateOrGetCachedBuffer(newState);
-        else
-            _layerRenderData = newState;
     }
 
     public final void paint( Graphics2D g, BiConsumer<LayerRenderConf, Graphics2D> renderer )
