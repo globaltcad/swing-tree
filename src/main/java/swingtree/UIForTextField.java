@@ -13,6 +13,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  *  A SwingTree builder node designed for configuring {@link JTextField} instances.
@@ -104,11 +105,45 @@ public final class UIForTextField<F extends JTextField> extends UIForAnyTextComp
     public final <N extends Number> UIForTextField<F> withNumber( Var<N> number, Var<Boolean> isValid ) {
         NullUtil.nullArgCheck(number, "number", Var.class);
         NullUtil.nullArgCheck(isValid, "isValid", Var.class);
+        return withNumber( number, isValid, Object::toString );
+    }
+
+    /**
+     *  Binds this text field to a numeric {@link Var} property
+     *  which will only accept numbers as input and a custom formatter which
+     *  turns the number into a string.
+     *
+     * @param number The numeric {@link Var} property to bind to.
+     * @param formatter A function which will be used to format the number as a string.
+     * @return This builder node.
+     * @param <N> The numeric type of the {@link Var} property.
+     */
+    public final <N extends Number> UIForTextField<F> withNumber( Var<N> number, Function<N, String> formatter ) {
+        NullUtil.nullArgCheck(number, "number", Var.class);
+        NullUtil.nullArgCheck(formatter, "formatter", Function.class);
+        Var<Boolean> isValid = Var.of(true);
+        return withNumber( number, isValid, Object::toString );
+    }
+
+    /**
+     *  Effectively bind this text field to a numeric {@link Var} property
+     *  which will only accept numbers as input.
+     *
+     * @param number The numeric {@link Var} property to bind to.
+     * @param isValid A {@link Var} property which will be set to {@code true} if the input is valid, and {@code false} otherwise.
+     * @param formatter A function which will be used to format the number as a string.
+     * @return This builder node.
+     * @param <N> The numeric type of the {@link Var} property.
+     */
+    public final <N extends Number> UIForTextField<F> withNumber( Var<N> number, Var<Boolean> isValid, Function<N, String> formatter ) {
+        NullUtil.nullArgCheck(number, "number", Var.class);
+        NullUtil.nullArgCheck(isValid, "isValid", Var.class);
+        NullUtil.nullArgCheck(formatter, "formatter", Function.class);
         NullUtil.nullPropertyCheck(number, "number", "Null is not a valid value for a numeric property.");
         NullUtil.nullPropertyCheck(isValid, "isValid", "Null is not a valid value for a boolean property.");
-        Var<String> text = Var.of( number.get().toString() );
+        Var<String> text = Var.of( formatter.apply(number.get()) );
         return ((UIForTextField<F>)_with( thisComponent -> {
-                    _onShow( number, thisComponent, (c,n) -> _setTextSilently( thisComponent, n.toString() ) );
+                    _onShow( number, thisComponent, (c,n) -> _setTextSilently( thisComponent, formatter.apply(n) ) );
                     text.onChange(From.VIEW,  s -> {
                         try {
                             if ( number.type() == Integer.class )
