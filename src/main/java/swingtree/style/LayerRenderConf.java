@@ -8,21 +8,21 @@ import java.util.Objects;
 
 /**
  *  An immutable snapshot of essential component state needed for rendering
- *  the style of a component.
+ *  the style of a particular component layer. <br>
  *  This is immutable to use it as a basis for caching.
  *  When the snapshot changes compared to the previous one, the image buffer based
  *  render cache is being invalidated and the component is rendered again
  *  (potentially with a new cached image buffer).
  */
-final class RenderConf
+final class LayerRenderConf
 {
-    private static final RenderConf _NONE = new RenderConf(
+    private static final LayerRenderConf _NONE = new LayerRenderConf(
                                                     BoxModelConf.none(),
                                                     BaseColorConf.none(),
                                                     StyleLayer.empty()
                                                 );
 
-    public static RenderConf none() { return _NONE; }
+    public static LayerRenderConf none() { return _NONE; }
 
     private final BoxModelConf   _boxModelConf;
     private final BaseColorConf  _baseColor;
@@ -32,7 +32,7 @@ final class RenderConf
     private int     _hashCode         = 0; // cached hash code
 
 
-    private RenderConf(
+    private LayerRenderConf(
         BoxModelConf   boxModelConf,
         BaseColorConf  base,
         StyleLayer     layers
@@ -42,7 +42,7 @@ final class RenderConf
         _layer        = Objects.requireNonNull(layers);
     }
 
-    static RenderConf of(
+    static LayerRenderConf of(
         BoxModelConf   boxModelConf,
         BaseColorConf  base,
         StyleLayer     layers
@@ -54,10 +54,10 @@ final class RenderConf
         )
             return _NONE;
         else
-            return new RenderConf(boxModelConf, base, layers);
+            return new LayerRenderConf(boxModelConf, base, layers);
     }
 
-    static RenderConf of(UI.Layer layer, ComponentConf fullConf ) {
+    static LayerRenderConf of(UI.Layer layer, ComponentConf fullConf ) {
         BoxModelConf boxModelConf = BoxModelConf.of(
                                         fullConf.style().border(),
                                         fullConf.baseOutline(),
@@ -117,7 +117,7 @@ final class RenderConf
         if ( o == this ) return true;
         if ( o == null ) return false;
         if ( o.getClass() != this.getClass() ) return false;
-        RenderConf other = (RenderConf) o;
+        LayerRenderConf other = (LayerRenderConf) o;
         return Objects.equals(_boxModelConf, other._boxModelConf) &&
                Objects.equals(_baseColor, other._baseColor) &&
                Objects.equals(_layer, other._layer);

@@ -83,8 +83,8 @@ final class ComponentConf
      * @param layer The layer to retain.
      * @return A new {@link ComponentConf} instance which only contains style information relevant to the provided {@link UI.Layer}.
      */
-    RenderConf toRenderConfFor(UI.Layer layer ) {
-        return RenderConf.of(layer,this);
+    LayerRenderConf toRenderConfFor(UI.Layer layer ) {
+        return LayerRenderConf.of(layer,this);
     }
 
     @Override

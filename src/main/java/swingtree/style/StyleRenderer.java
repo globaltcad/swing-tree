@@ -15,7 +15,7 @@ import java.util.function.Function;
 
 /**
  *  A stateless un-instantiable utility class that renders the style of a component
- *  using the immutable {@link RenderConf} object containing the essential state
+ *  using the immutable {@link LayerRenderConf} object containing the essential state
  *  needed for rendering, like for example the current {@link Bounds} and {@link StyleConf}
  *  of a particular component.
  */
@@ -26,7 +26,7 @@ final class StyleRenderer
     private StyleRenderer() {} // Un-instantiable!
 
 
-    public static void renderStyleOn( UI.Layer layer, RenderConf conf, Graphics2D g2d )
+    public static void renderStyleOn(UI.Layer layer, LayerRenderConf conf, Graphics2D g2d )
     {
         // First up, we render things unique to certain layers:
 
@@ -132,7 +132,7 @@ final class StyleRenderer
         // And that's it! We have rendered a style layer!
     }
 
-    private static void _drawBorder(RenderConf conf, Color color, Graphics2D g2d )
+    private static void _drawBorder(LayerRenderConf conf, Color color, Graphics2D g2d )
     {
         if ( !Outline.none().equals(conf.boxModel().widths()) ) {
             try {
@@ -153,7 +153,7 @@ final class StyleRenderer
     }
 
     private static void _renderShadows(
-        RenderConf conf,
+        LayerRenderConf conf,
         ShadowConf    shadow,
         Graphics2D    g2d
     ) {
@@ -1021,7 +1021,7 @@ final class StyleRenderer
     }
 
     private static void _renderImage(
-        RenderConf conf,
+        LayerRenderConf conf,
         ImageConf style,
         Size        componentSize,
         Graphics2D  g2d

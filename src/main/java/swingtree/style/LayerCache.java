@@ -14,22 +14,22 @@ import java.util.function.BiConsumer;
 
 /**
  *  A {@link BufferedImage} based cache for the rendering of a particular layer of a component's style. <br>
- *  So if the {@link RenderConf} of a component changes, the cache is invalidated and the layer
+ *  So if the {@link LayerRenderConf} of a component changes, the cache is invalidated and the layer
  *  is rendered again. <br>
- *  This is made possible by the fact that the {@link RenderConf} is deeply immutable and can be used
+ *  This is made possible by the fact that the {@link LayerRenderConf} is deeply immutable and can be used
  *  as a key data structure for caching.
  */
 final class LayerCache
 {
-    private static final Map<RenderConf, CachedImage> _CACHE = new WeakHashMap<>();
+    private static final Map<LayerRenderConf, CachedImage> _CACHE = new WeakHashMap<>();
 
 
     private static final class CachedImage extends BufferedImage
     {
-        private WeakReference<RenderConf> _key;
+        private WeakReference<LayerRenderConf> _key;
         private boolean _isRendered = false;
 
-        CachedImage( int width, int height, RenderConf cacheKey ) {
+        CachedImage( int width, int height, LayerRenderConf cacheKey ) {
             super(width, height, BufferedImage.TYPE_INT_ARGB);
             _key = new WeakReference<>(cacheKey);
         }
@@ -42,8 +42,8 @@ final class LayerCache
             return super.createGraphics();
         }
 
-        public RenderConf getKeyOrElse(RenderConf newFallbackKey ) {
-            RenderConf key = _key.get();
+        public LayerRenderConf getKeyOrElse(LayerRenderConf newFallbackKey ) {
+            LayerRenderConf key = _key.get();
             if ( key == null ) {
                 _key = new WeakReference<>(newFallbackKey);
                 key = newFallbackKey;
@@ -59,17 +59,17 @@ final class LayerCache
 
     private final UI.Layer   _layer;
     private CachedImage      _localCache;
-    private RenderConf       _strongRef; // The key must be referenced strongly so that the value is not garbage collected (the cached image)
+    private LayerRenderConf _strongRef; // The key must be referenced strongly so that the value is not garbage collected (the cached image)
     private boolean          _cachingMakesSense = false;
     private boolean          _isInitialized     = false;
 
 
     public LayerCache( UI.Layer layer ) {
         _layer     = Objects.requireNonNull(layer);
-        _strongRef = RenderConf.none();
+        _strongRef = LayerRenderConf.none();
     }
 
-    RenderConf getCurrentKey() {
+    LayerRenderConf getCurrentKey() {
         return _strongRef;
     }
 
@@ -77,25 +77,25 @@ final class LayerCache
         return _localCache != null;
     }
 
-    private void _allocateOrGetCachedBuffer( RenderConf renderConf)
+    private void _allocateOrGetCachedBuffer( LayerRenderConf layerRenderConf)
     {
-        Map<RenderConf, CachedImage> CACHE = _CACHE;
+        Map<LayerRenderConf, CachedImage> CACHE = _CACHE;
 
-        CachedImage bufferedImage = CACHE.get(renderConf);
+        CachedImage bufferedImage = CACHE.get(layerRenderConf);
 
         if ( bufferedImage == null ) {
-            Size size = renderConf.boxModel().size();
+            Size size = layerRenderConf.boxModel().size();
             bufferedImage = new CachedImage(
                                 size.width().map(Number::intValue).orElse(1),
                                 size.height().map(Number::intValue).orElse(1),
-                                renderConf
+                    layerRenderConf
                             );
-            CACHE.put(renderConf, bufferedImage);
-            _strongRef = renderConf;
+            CACHE.put(layerRenderConf, bufferedImage);
+            _strongRef = layerRenderConf;
         }
         else {
             // We keep a strong reference to the state so that the cached image is not garbage collected
-            _strongRef = bufferedImage.getKeyOrElse(renderConf);
+            _strongRef = bufferedImage.getKeyOrElse(layerRenderConf);
             /*
                 The reason why we take the key stored in the cached image as a strong reference is because this
                 key object is also the key in the global (weak) hash map based cache
@@ -118,12 +118,12 @@ final class LayerCache
     public final void validate( ComponentConf oldConf, ComponentConf newConf )
     {
         if ( newConf.currentBounds().hasWidth(0) || newConf.currentBounds().hasHeight(0) ) {
-            _strongRef = RenderConf.none();
+            _strongRef = LayerRenderConf.none();
             return;
         }
 
-        final RenderConf oldState = oldConf.toRenderConfFor(_layer);
-        final RenderConf newState = newConf.toRenderConfFor(_layer);
+        final LayerRenderConf oldState = oldConf.toRenderConfFor(_layer);
+        final LayerRenderConf newState = newConf.toRenderConfFor(_layer);
 
         boolean validationNeeded = ( !_isInitialized || !oldState.equals(newState) );
 
@@ -164,7 +164,7 @@ final class LayerCache
             _strongRef = newState;
     }
 
-    public final void paint( Graphics2D g, BiConsumer<RenderConf, Graphics2D> renderer )
+    public final void paint( Graphics2D g, BiConsumer<LayerRenderConf, Graphics2D> renderer )
     {
         Size size = _strongRef.boxModel().size();
 
@@ -202,7 +202,7 @@ final class LayerCache
         g.drawImage(_localCache, 0, 0, null);
     }
 
-    public boolean _cachingMakesSenseFor( RenderConf state )
+    public boolean _cachingMakesSenseFor( LayerRenderConf state )
     {
         Size size = state.boxModel().size();
         if ( !size.hasPositiveWidth() || !size.hasPositiveHeight() )
