@@ -37,7 +37,7 @@ final class LayerRenderConf
         BaseColorConf  base,
         StyleLayer     layers
     ) {
-        _boxModelConf = Objects.requireNonNull(boxModelConf);
+        _boxModelConf = ComponentAreas.intern(Objects.requireNonNull(boxModelConf));
         _baseColor    = Objects.requireNonNull(base);
         _layer        = Objects.requireNonNull(layers);
     }

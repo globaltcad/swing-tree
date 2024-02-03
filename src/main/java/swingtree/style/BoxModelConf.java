@@ -51,18 +51,17 @@ final class BoxModelConf
         )
             return _NONE;
         else {
-            BoxModelConf newConf = new BoxModelConf(
+            return new BoxModelConf(
                                         topLeftArc,    topRightArc,
                                         bottomLeftArc, bottomRightArc,
                                         borderWidths,  margin,
                                         padding,       baseOutline,
                                         size
                                     );
-            return ComponentAreas.intern(newConf);
         }
     }
 
-    static BoxModelConf of(BorderConf borderConf, Outline baseOutline, Size size )   {
+    static BoxModelConf of( BorderConf borderConf, Outline baseOutline, Size size )   {
         return BoxModelConf.of(
             borderConf.topLeftArc().orElse(Arc.none()),
             borderConf.topRightArc().orElse(Arc.none()),
@@ -227,12 +226,6 @@ final class BoxModelConf
         return Objects.equals(_topLeftArc, _topRightArc) &&
                Objects.equals(_topLeftArc, _bottomLeftArc) &&
                Objects.equals(_topLeftArc, _bottomRightArc);
-    }
-
-    boolean allSidesShareTheSameWidth() {
-        return Objects.equals(_borderWidths.top().orElse(null), _borderWidths.right().orElse(null)) &&
-               Objects.equals(_borderWidths.top().orElse(null), _borderWidths.bottom().orElse(null)) &&
-               Objects.equals(_borderWidths.top().orElse(null), _borderWidths.left().orElse(null));
     }
 
     @Override

@@ -68,8 +68,6 @@ final class StyleEngine
         g.setClip(oldClip);
     }
 
-
-
     Optional<Shape> componentArea() {
         Shape contentClip = null;
         ComponentAreas _areas = ComponentAreas.of(_boxModelConf);
