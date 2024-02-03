@@ -132,7 +132,7 @@ final class StyleRenderer
         // And that's it! We have rendered a style layer!
     }
 
-    private static void _drawBorder( RenderConf conf, Color color, Graphics2D g2d )
+    private static void _drawBorder(RenderConf conf, Color color, Graphics2D g2d )
     {
         if ( !Outline.none().equals(conf.boxModel().widths()) ) {
             try {
@@ -153,7 +153,7 @@ final class StyleRenderer
     }
 
     private static void _renderShadows(
-        RenderConf    conf,
+        RenderConf conf,
         ShadowConf    shadow,
         Graphics2D    g2d
     ) {

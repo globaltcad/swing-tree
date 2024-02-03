@@ -2,6 +2,7 @@ package swingtree.style;
 
 import swingtree.UI;
 import swingtree.layout.Bounds;
+import swingtree.layout.Size;
 
 import javax.swing.JComponent;
 import javax.swing.border.Border;
@@ -9,12 +10,8 @@ import java.awt.Insets;
 import java.util.Objects;
 
 /**
- *  An immutable snapshot of essential component state needed for rendering
- *  the style of a component.
- *  This is immutable to use it as a basis for caching.
- *  When the snapshot changes compared to the previous one, the image buffer based
- *  render cache is being invalidated and the component is rendered again
- *  (potentially with a new cached image buffer).
+ *  An immutable snapshot of all the essential component state needed for rendering
+ *  and configuring the component state.
  */
 final class ComponentConf
 {
@@ -35,7 +32,7 @@ final class ComponentConf
 
 
     private ComponentConf(
-        StyleConf styleConf,
+        StyleConf      styleConf,
         Bounds         currentBounds,
         Outline        baseOutline
     ) {
@@ -65,17 +62,19 @@ final class ComponentConf
         if ( sameStyle && sameBounds && sameOutline )
             return this;
 
-        ComponentConf newConf = new ComponentConf(
-                                    styleConf,
-                                    Bounds.of(component.getX(), component.getY(), component.getWidth(), component.getHeight()),
-                                    outline
-                                );
-
         return new ComponentConf(
-                        newConf._styleConf,
-                        newConf._currentBounds,
-                        newConf._baseOutline
-                );
+                   styleConf,
+                   Bounds.of(component.getX(), component.getY(), component.getWidth(), component.getHeight()),
+                   outline
+               );
+    }
+
+    ComponentConf withSize( int width, int height ) {
+        return new ComponentConf(
+                   _styleConf,
+                   Bounds.of(_currentBounds.location(), Size.of(width, height)),
+                   _baseOutline
+               );
     }
 
     /**
@@ -84,7 +83,7 @@ final class ComponentConf
      * @param layer The layer to retain.
      * @return A new {@link ComponentConf} instance which only contains style information relevant to the provided {@link UI.Layer}.
      */
-    RenderConf toRenderConfFor( UI.Layer layer ) {
+    RenderConf toRenderConfFor(UI.Layer layer ) {
         return RenderConf.of(layer,this);
     }
 

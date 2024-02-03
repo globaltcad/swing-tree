@@ -1,7 +1,6 @@
 package swingtree.style;
 
 import swingtree.UI;
-import swingtree.layout.Bounds;
 import swingtree.layout.Size;
 
 import javax.swing.ImageIcon;
@@ -43,7 +42,7 @@ final class LayerCache
             return super.createGraphics();
         }
 
-        public RenderConf getKeyOrElse( RenderConf newFallbackKey ) {
+        public RenderConf getKeyOrElse(RenderConf newFallbackKey ) {
             RenderConf key = _key.get();
             if ( key == null ) {
                 _key = new WeakReference<>(newFallbackKey);
@@ -66,18 +65,19 @@ final class LayerCache
 
 
     public LayerCache( UI.Layer layer ) {
-        _layer = Objects.requireNonNull(layer);
+        _layer     = Objects.requireNonNull(layer);
+        _strongRef = RenderConf.none();
     }
 
     RenderConf getCurrentKey() {
-        return _strongRef == null ? RenderConf.none() : _strongRef;
+        return _strongRef;
     }
 
     public boolean hasBufferedImage() {
         return _localCache != null;
     }
 
-    private void _allocateOrGetCachedBuffer( RenderConf renderConf )
+    private void _allocateOrGetCachedBuffer( RenderConf renderConf)
     {
         Map<RenderConf, CachedImage> CACHE = _CACHE;
 
@@ -110,7 +110,6 @@ final class LayerCache
     }
 
     private void _freeLocalCache() {
-        _strongRef         = null;
         _localCache        = null;
         _cachingMakesSense = false;
         _isInitialized     = false;
@@ -118,8 +117,10 @@ final class LayerCache
 
     public final void validate( ComponentConf oldConf, ComponentConf newConf )
     {
-        if ( newConf.currentBounds().hasWidth(0) || newConf.currentBounds().hasHeight(0) )
+        if ( newConf.currentBounds().hasWidth(0) || newConf.currentBounds().hasHeight(0) ) {
+            _strongRef = RenderConf.none();
             return;
+        }
 
         final RenderConf oldState = oldConf.toRenderConfFor(_layer);
         final RenderConf newState = newConf.toRenderConfFor(_layer);
@@ -133,6 +134,7 @@ final class LayerCache
 
         if ( !_cachingMakesSense ) {
             _freeLocalCache();
+            _strongRef = newState;
             return;
         }
 
@@ -151,22 +153,26 @@ final class LayerCache
             newBufferNeeded = true;
         }
 
-        if ( cacheIsFull )
+        if ( cacheIsFull ) {
+            _strongRef = newState;
             return;
+        }
 
         if ( newBufferNeeded )
             _allocateOrGetCachedBuffer(newState);
+        else
+            _strongRef = newState;
     }
 
-    public final void paint( ComponentConf conf, Graphics2D g, BiConsumer<RenderConf, Graphics2D> renderer )
+    public final void paint( Graphics2D g, BiConsumer<RenderConf, Graphics2D> renderer )
     {
-        Bounds componentBounds = conf.currentBounds();
+        Size size = _strongRef.boxModel().size();
 
-        if ( componentBounds.hasWidth(0) || componentBounds.hasHeight(0) )
+        if ( size.width().orElse(0f) == 0f || size.height().orElse(0f) == 0f )
             return;
 
         if ( !_cachingMakesSense ) {
-            renderer.accept(_strongRef == null ? RenderConf.of(_layer, conf) : _strongRef, g);
+            renderer.accept(_strongRef, g);
             return;
         }
 
@@ -188,7 +194,7 @@ final class LayerCache
             }
             catch (Exception ignored) {}
             finally {
-                renderer.accept(_strongRef == null ? RenderConf.of(_layer, conf) : _strongRef, g2);
+                renderer.accept(_strongRef, g2);
                 g2.dispose();
             }
         }

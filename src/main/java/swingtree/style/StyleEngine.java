@@ -10,7 +10,6 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Shape;
-import java.awt.geom.Area;
 import java.util.*;
 
 /**
@@ -197,7 +196,7 @@ final class StyleEngine
     }
 
     private void _render( UI.Layer layer, Graphics2D g2d ) {
-        _layerCaches[layer.ordinal()].paint(this._componentConf, g2d, (conf,graphics) -> {
+        _layerCaches[layer.ordinal()].paint(g2d, (conf, graphics) -> {
             StyleRenderer.renderStyleOn(layer, conf, graphics);
         });
     }

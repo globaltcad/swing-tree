@@ -6,6 +6,7 @@ import spock.lang.Title
 import swingtree.UI
 import swingtree.style.ComponentExtension
 
+import javax.swing.JButton
 import java.awt.*
 import java.awt.image.BufferedImage
 
@@ -62,7 +63,17 @@ class Render_Cache_Spec extends Specification
 
         when : 'We try to do an initial paint into the cache...'
             cache.validate(key0, key0)
-            cache.paint(key0, g,  (conf, g2) -> {g2.fillRect(0,0,10,10) })
+            cache.paint(g,  (conf, g2) -> {g2.fillRect(0,0,10,10) })
+        then : 'We did not render anything, because the component has no size!'
+            0 * g.fillRect(0,0,10,10)
+        and :
+            !cache.hasBufferedImage()
+
+        when : 'We change the size...'
+            key0 = key0.withSize(100, 100)
+        and : 'Try to do an initial paint into the cache...'
+            cache.validate(key0, key0)
+            cache.paint(g,  (conf, g2) -> {g2.fillRect(0,0,10,10) })
         then : 'We did not render into the cache, instead we just painted eagerly!'
             1 * g.fillRect(0,0,10,10)
         and :
@@ -70,7 +81,7 @@ class Render_Cache_Spec extends Specification
 
         when : 'We try to do it a second time...'
             cache.validate(key0, key0)
-            cache.paint(key0, g,  (conf, g2) -> {g2.fillRect(0,0,10,10) })
+            cache.paint(g,  (conf, g2) -> {g2.fillRect(0,0,10,10) })
         then : 'Still, we just painted eagerly!'
             1 * g.fillRect(0,0,10,10)
         and :
@@ -84,14 +95,14 @@ class Render_Cache_Spec extends Specification
                             .size(120, 80)
                             .borderRadius(40)
                         )
-                        .getComponent()
+                        .get(JButton)
                     )
                     .getConf();
 
         and : 'Then we do another round of validation and painting...'
             cache.validate(key0, key)
             var didRendering = false
-            cache.paint(key, g,  (conf, g2) -> {
+            cache.paint(g,  (conf, g2) -> {
                 g2.fillRect(0,0,10,10);
                 didRendering = true;
             })
@@ -106,7 +117,7 @@ class Render_Cache_Spec extends Specification
         when : 'We do it again...'
             cache.validate(key, key)
             didRendering = false
-            cache.paint(key, g,  (conf, g2) -> {
+            cache.paint(g,  (conf, g2) -> {
                 g2.fillRect(0,0,10,10);
                 didRendering = true;
             })
@@ -118,17 +129,17 @@ class Render_Cache_Spec extends Specification
         when : 'We repeat this process then the buffer will be used every time!'
             didRendering = false
             cache.validate(key, key)
-            cache.paint(key, g,  (conf, g2) -> {
+            cache.paint(g,  (conf, g2) -> {
                 g2.fillRect(0,0,10,10);
                 didRendering = true;
             })
             cache.validate(key, key)
-            cache.paint(key, g,  (conf, g2) -> {
+            cache.paint(g,  (conf, g2) -> {
                 g2.fillRect(0,0,10,10);
                 didRendering = true;
             })
             cache.validate(key, key)
-            cache.paint(key, g,  (conf, g2) -> {
+            cache.paint(g,  (conf, g2) -> {
                 g2.fillRect(0,0,10,10);
                 didRendering = true;
             })
@@ -152,7 +163,7 @@ class Render_Cache_Spec extends Specification
         and : 'And we revalidate the cache...'
             cache.validate(key, key2)
             didRendering = false
-            cache.paint(key2, g,  (conf, g2) -> {
+            cache.paint(g,  (conf, g2) -> {
                 g2.fillRect(0,0,10,10);
                 didRendering = true;
             })
@@ -165,11 +176,11 @@ class Render_Cache_Spec extends Specification
 
         when : 'We now repeat the process using the successor config...'
             cache.validate(key2, key2)
-            cache.paint(key2, g,  (conf, g2) -> {g2.fillRect(0,0,10,10) })
+            cache.paint(g,  (conf, g2) -> {g2.fillRect(0,0,10,10) })
             cache.validate(key2, key2)
-            cache.paint(key2, g,  (conf, g2) -> {g2.fillRect(0,0,10,10) })
+            cache.paint(g,  (conf, g2) -> {g2.fillRect(0,0,10,10) })
             cache.validate(key2, key2)
-            cache.paint(key2, g,  (conf, g2) -> {g2.fillRect(0,0,10,10) })
+            cache.paint(g,  (conf, g2) -> {g2.fillRect(0,0,10,10) })
         then : 'Instead of the painter lambda being called, the buffer was used again!'
             0 * g.fillRect(0,0,10,10)
             3 * g.drawImage({it instanceof BufferedImage},0,0,null)

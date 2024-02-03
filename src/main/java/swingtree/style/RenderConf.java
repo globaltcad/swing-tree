@@ -4,7 +4,6 @@ import swingtree.UI;
 
 import java.awt.Graphics;
 import java.awt.Shape;
-import java.awt.geom.Area;
 import java.util.Objects;
 
 /**
@@ -33,7 +32,6 @@ final class RenderConf
     private int     _hashCode         = 0; // cached hash code
 
 
-
     private RenderConf(
         BoxModelConf   boxModelConf,
         BaseColorConf  base,
@@ -59,7 +57,7 @@ final class RenderConf
             return new RenderConf(boxModelConf, base, layers);
     }
 
-    static RenderConf of(UI.Layer layer, ComponentConf fullConf) {
+    static RenderConf of(UI.Layer layer, ComponentConf fullConf ) {
         BoxModelConf boxModelConf = BoxModelConf.of(
                                         fullConf.style().border(),
                                         fullConf.baseOutline(),
