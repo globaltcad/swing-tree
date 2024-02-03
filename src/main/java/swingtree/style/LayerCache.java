@@ -42,7 +42,7 @@ final class LayerCache
             return super.createGraphics();
         }
 
-        public LayerRenderConf getKeyOrElse(LayerRenderConf newFallbackKey ) {
+        public LayerRenderConf getKeyOrElse( LayerRenderConf newFallbackKey ) {
             LayerRenderConf key = _key.get();
             if ( key == null ) {
                 _key = new WeakReference<>(newFallbackKey);
@@ -59,18 +59,18 @@ final class LayerCache
 
     private final UI.Layer   _layer;
     private CachedImage      _localCache;
-    private LayerRenderConf _strongRef; // The key must be referenced strongly so that the value is not garbage collected (the cached image)
+    private LayerRenderConf  _layerRenderData; // The key must be referenced strongly so that the value is not garbage collected (the cached image)
     private boolean          _cachingMakesSense = false;
     private boolean          _isInitialized     = false;
 
 
     public LayerCache( UI.Layer layer ) {
-        _layer     = Objects.requireNonNull(layer);
-        _strongRef = LayerRenderConf.none();
+        _layer           = Objects.requireNonNull(layer);
+        _layerRenderData = LayerRenderConf.none();
     }
 
-    LayerRenderConf getCurrentKey() {
-        return _strongRef;
+    LayerRenderConf getCurrentRenderInputData() {
+        return _layerRenderData;
     }
 
     public boolean hasBufferedImage() {
@@ -91,11 +91,11 @@ final class LayerCache
                     layerRenderConf
                             );
             CACHE.put(layerRenderConf, bufferedImage);
-            _strongRef = layerRenderConf;
+            _layerRenderData = layerRenderConf;
         }
         else {
             // We keep a strong reference to the state so that the cached image is not garbage collected
-            _strongRef = bufferedImage.getKeyOrElse(layerRenderConf);
+            _layerRenderData = bufferedImage.getKeyOrElse(layerRenderConf);
             /*
                 The reason why we take the key stored in the cached image as a strong reference is because this
                 key object is also the key in the global (weak) hash map based cache
@@ -118,7 +118,7 @@ final class LayerCache
     public final void validate( ComponentConf oldConf, ComponentConf newConf )
     {
         if ( newConf.currentBounds().hasWidth(0) || newConf.currentBounds().hasHeight(0) ) {
-            _strongRef = LayerRenderConf.none();
+            _layerRenderData = LayerRenderConf.none();
             return;
         }
 
@@ -134,7 +134,7 @@ final class LayerCache
 
         if ( !_cachingMakesSense ) {
             _freeLocalCache();
-            _strongRef = newState;
+            _layerRenderData = newState;
             return;
         }
 
@@ -154,25 +154,25 @@ final class LayerCache
         }
 
         if ( cacheIsFull ) {
-            _strongRef = newState;
+            _layerRenderData = newState;
             return;
         }
 
         if ( newBufferNeeded )
             _allocateOrGetCachedBuffer(newState);
         else
-            _strongRef = newState;
+            _layerRenderData = newState;
     }
 
     public final void paint( Graphics2D g, BiConsumer<LayerRenderConf, Graphics2D> renderer )
     {
-        Size size = _strongRef.boxModel().size();
+        Size size = _layerRenderData.boxModel().size();
 
         if ( size.width().orElse(0f) == 0f || size.height().orElse(0f) == 0f )
             return;
 
         if ( !_cachingMakesSense ) {
-            renderer.accept(_strongRef, g);
+            renderer.accept(_layerRenderData, g);
             return;
         }
 
@@ -194,7 +194,7 @@ final class LayerCache
             }
             catch (Exception ignored) {}
             finally {
-                renderer.accept(_strongRef, g2);
+                renderer.accept(_layerRenderData, g2);
                 g2.dispose();
             }
         }

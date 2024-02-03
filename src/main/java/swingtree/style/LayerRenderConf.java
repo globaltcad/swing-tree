@@ -57,7 +57,7 @@ final class LayerRenderConf
             return new LayerRenderConf(boxModelConf, base, layers);
     }
 
-    static LayerRenderConf of(UI.Layer layer, ComponentConf fullConf ) {
+    static LayerRenderConf of( UI.Layer layer, ComponentConf fullConf ) {
         BoxModelConf boxModelConf = BoxModelConf.of(
                                         fullConf.style().border(),
                                         fullConf.baseOutline(),

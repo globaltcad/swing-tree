@@ -26,30 +26,28 @@ final class StyleRenderer
     private StyleRenderer() {} // Un-instantiable!
 
 
-    public static void renderStyleOn(UI.Layer layer, LayerRenderConf conf, Graphics2D g2d )
+    public static void renderStyleOn( UI.Layer layer, LayerRenderConf conf, Graphics2D g2d )
     {
         // First up, we render things unique to certain layers:
 
-        if ( layer == UI.Layer.BACKGROUND ) {
-            conf.baseColors().foundationColor().ifPresent(outerColor -> {
-                if ( outerColor.getAlpha() > 0 ) { // Avoid rendering a fully transparent color!
-                    g2d.setColor(outerColor);
-                    g2d.fill(conf.areas().get(UI.ComponentArea.EXTERIOR));
-                }
-            });
-            conf.baseColors().backgroundColor().ifPresent(color -> {
-                if ( color.getAlpha() > 0 ) { // Avoid rendering a fully transparent color!
-                    g2d.setColor(color);
-                    g2d.fill(conf.areas().get(UI.ComponentArea.BODY));
-                }
-            });
-        }
+        // Background stuff:
+        conf.baseColors().foundationColor().ifPresent(outerColor -> {
+            if ( outerColor.getAlpha() > 0 ) { // Avoid rendering a fully transparent color!
+                g2d.setColor(outerColor);
+                g2d.fill(conf.areas().get(UI.ComponentArea.EXTERIOR));
+            }
+        });
+        conf.baseColors().backgroundColor().ifPresent(color -> {
+            if ( color.getAlpha() > 0 ) { // Avoid rendering a fully transparent color!
+                g2d.setColor(color);
+                g2d.fill(conf.areas().get(UI.ComponentArea.BODY));
+            }
+        });
 
-        if ( layer == UI.Layer.BORDER ) {
-            conf.baseColors().borderColor().ifPresent(color -> {
-                _drawBorder( conf, color, g2d);
-            });
-        }
+        // Border stuff:
+        conf.baseColors().borderColor().ifPresent(color -> {
+            _drawBorder( conf, color, g2d);
+        });
 
         // Now onto things every layer has in common:
 
