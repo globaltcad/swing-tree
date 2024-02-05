@@ -17,7 +17,25 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- *  Contains all the logic for installing a style on a component.
+ *  This contains all the logic needed for installing the SwingTree style
+ *  configurations on a particular component reasonably gracefully.
+ *  SwingTree adds a lot of features on top of
+ *  regular AWT/Swing.
+ *  But it turns out, this is actually fairly difficult,
+ *  because when it comes to rendering the UI, Swing has an all or nothing approach,
+ *  where you either completely reinstall the look and feel of a component ({@link javax.swing.plaf.ComponentUI}),
+ *  or you leave it be. Anything in between is a finicky situation which
+ *  is exactly where SwingTree is situated.
+ *  This is because the transition between a SwingTree style and the look and feel
+ *  and border of a raw Swing component should be as smooth as possible.
+ *  If the user defines a border radius for a component, then this should
+ *  not automatically lead to its look and feel being lost.
+ *  Instead, only parts of the original look and feel should applied.
+ *  This is also true for other component properties like the background color,
+ *  the foreground color, the font and the opacity flag.<br>
+ *  This last part is especially tricky, because the opacity flag is a very
+ *  important property for the performance of Swing components.
+ *
  * @param <C> The type of the component.
  */
 final class StyleInstaller<C extends JComponent>
