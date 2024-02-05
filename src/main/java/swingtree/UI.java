@@ -4804,6 +4804,32 @@ public final class UI extends UINamespaceUtilities
     /**
      *  Use this to create a builder for a new {@link JTextField} instance with
      *  the provided number property dynamically displaying its value on the text field
+     *  and a function which will be used to format the number as a string.
+     *  <p>
+     *  The number property will only receive values if the text in the text field can be parsed as a number,
+     *  in which case the provided formatter function will be used to convert the number to a string.
+     *  <p>
+     *  Note that the provided property is not allowed to contain {@code null} values,
+     *  as this would lead to a {@link NullPointerException} being thrown.
+     *
+     * @param number The number property which should be bound to the text field.
+     * @param formatter The function which will be used to format the number as a string.
+     * @param <N> The type of the number property which should be bound to the text field.
+     * @return A builder instance for the provided {@link JTextField}, which enables fluent method chaining.
+     */
+    public static <N extends Number> UIForTextField<JTextField> numericTextField( Var<N> number, Function<N,String> formatter ) {
+        NullUtil.nullArgCheck(number, "number", Var.class);
+        NullUtil.nullArgCheck(formatter, "formatter", Function.class);
+        NullUtil.nullPropertyCheck(number, "number", "Please use 0 instead of null!");
+        return textField()
+                .applyIf( !number.hasNoID(), it -> it.id(number.id()) )
+                .withNumber(number, formatter);
+    }
+
+
+    /**
+     *  Use this to create a builder for a new {@link JTextField} instance with
+     *  the provided number property dynamically displaying its value on the text field
      *  and a boolean property which will be set to {@code true} if the text field contains a valid number,
      *  and {@code false} otherwise.
      *  <p>
@@ -4829,6 +4855,38 @@ public final class UI extends UINamespaceUtilities
         return textField()
                 .applyIf( !number.hasNoID(), it -> it.id(number.id()) )
                 .withNumber(number, isValid);
+    }
+
+    /**
+     *  Use this to create a builder for a new {@link JTextField} instance with
+     *  the provided number property dynamically displaying its value on the text field
+     *  and a boolean property which will be set to {@code true} if the text field contains a valid number,
+     *  and {@code false} otherwise.
+     *  <p>
+     *  The number property will only receive values if the text in the text field can be parsed as a number,
+     *  in which case the provided {@link Var} will be set to {@code true}, otherwise it will be set to {@code false}.
+     *  <p>
+     *  Note that the two provided properties are not permitted to
+     *  contain {@code null} values, as this would lead to a {@link NullPointerException} being thrown.
+     *
+     * @param number The number property which should be bound to the text field.
+     * @param isValid A {@link Var} which will be set to {@code true} if the text field contains a valid number,
+     *                and {@code false} otherwise.
+     * @param formatter The function which will be used to format the number as a string.
+     * @param <N> The type of the number property which should be bound to the text field.
+     * @return A builder instance for the provided {@link JTextField}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code number} is {@code null}.
+     * @throws IllegalArgumentException if {@code isValid} is {@code null}.
+     */
+    public static <N extends Number> UIForTextField<JTextField> numericTextField( Var<N> number, Var<Boolean> isValid, Function<N,String> formatter ) {
+        NullUtil.nullArgCheck(number, "number", Var.class);
+        NullUtil.nullPropertyCheck(number, "number", "Please use 0 instead of null!");
+        NullUtil.nullArgCheck(isValid, "isValid", Var.class);
+        NullUtil.nullPropertyCheck(isValid, "isValid", "Please use false instead of null!");
+        NullUtil.nullArgCheck(formatter, "formatter", Function.class);
+        return textField()
+                .applyIf( !number.hasNoID(), it -> it.id(number.id()) )
+                .withNumber(number, isValid, formatter);
     }
 
 
