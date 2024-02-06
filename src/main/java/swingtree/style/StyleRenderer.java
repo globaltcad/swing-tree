@@ -61,41 +61,7 @@ final class StyleRenderer
         // They may transition vertically, horizontally or diagonally over various different colors:
         for ( GradientConf gradient : conf.layer().gradients().sortedByNames() )
             if ( gradient.colors().length > 0 ) {
-                if ( gradient.colors().length == 1 ) {
-                    g2d.setColor(gradient.colors()[0]);
-                    g2d.fill(conf.areas().get(UI.ComponentArea.BODY));
-                }
-                else {
-                    Outline insets = Outline.none();
-                    switch ( gradient.boundary() ) {
-                        case OUTER_TO_EXTERIOR:
-                            insets = Outline.none(); break;
-                        case EXTERIOR_TO_BORDER:
-                            insets = conf.boxModel().margin(); break;
-                        case BORDER_TO_INTERIOR:
-                            insets = conf.boxModel().margin().plus(conf.boxModel().widths()); break;
-                        case INTERIOR_TO_CONTENT:
-                            insets = conf.boxModel().margin().plus(conf.boxModel().widths()).plus(conf.boxModel().padding()); break;
-                        case CENTER_TO_CONTENT:
-                            float verticalInset = conf.boxModel().size().height().orElse(0f) / 2f;
-                            float horizontalInset = conf.boxModel().size().width().orElse(0f) / 2f;
-                            insets = Outline.of(verticalInset, horizontalInset);
-                            break;
-                    }
-
-                    final Size dimensions = conf.boxModel().size();
-
-                    final float width  = dimensions.width().orElse(0f)  - ( insets.right().orElse(0f)  + insets.left().orElse(0f) );
-                    final float height = dimensions.height().orElse(0f) - ( insets.bottom().orElse(0f) + insets.top().orElse(0f) );
-                    final float realX  = insets.left().orElse(0f) + gradient.offset().x();
-                    final float realY  = insets.top().orElse(0f)  + gradient.offset().y();
-                    Bounds bounds = Bounds.of(realX, realY, width, height);
-
-                    if ( gradient.transition().isDiagonal() )
-                        _renderDiagonalGradient(g2d, bounds, gradient, conf.areas().get(gradient.area()));
-                    else
-                        _renderVerticalOrHorizontalGradient(g2d, bounds, gradient, conf.areas().get(gradient.area()));
-                }
+                _renderGradient( gradient, conf, g2d );
             }
 
         // 3. Shadows, which are simple gradient based drop shadows that can go inwards or outwards
@@ -584,6 +550,81 @@ final class StyleRenderer
         return shadow.color()
                     .map(c -> new Color(c.getRed(), c.getGreen(), c.getBlue(), 0))
                     .orElse(new Color(0.5f, 0.5f, 0.5f, 0f));
+    }
+
+    private static void _renderGradient(
+        final GradientConf    gradient,
+        final LayerRenderConf conf,
+        final Graphics2D g2d
+    ) {
+        if ( gradient.colors().length == 1 ) {
+            g2d.setColor(gradient.colors()[0]);
+            g2d.fill(conf.areas().get(gradient.area()));
+        }
+        else {
+            Outline insets = Outline.none();
+            switch ( gradient.boundary() ) {
+                case OUTER_TO_EXTERIOR:
+                    insets = Outline.none(); break;
+                case EXTERIOR_TO_BORDER:
+                    insets = conf.boxModel().margin(); break;
+                case BORDER_TO_INTERIOR:
+                    insets = conf.boxModel().margin().plus(conf.boxModel().widths()); break;
+                case INTERIOR_TO_CONTENT:
+                    insets = conf.boxModel().margin().plus(conf.boxModel().widths()).plus(conf.boxModel().padding()); break;
+                case CENTER_TO_CONTENT:
+                    Outline contentIns = conf.boxModel().margin().plus(conf.boxModel().widths()).plus(conf.boxModel().padding());
+                    float verticalInset = conf.boxModel().size().height().orElse(0f) / 2f;
+                    float horizontalInset = conf.boxModel().size().width().orElse(0f) / 2f;
+                    insets = Outline.of(verticalInset, horizontalInset);
+                    switch ( gradient.transition() ) {
+                        case TOP_TO_BOTTOM:
+                            insets = insets.withBottom(contentIns.bottom().orElse(0f));
+                            break;
+                        case BOTTOM_TO_TOP:
+                            insets = insets.withTop(contentIns.top().orElse(0f));
+                            break;
+                        case LEFT_TO_RIGHT:
+                            insets = insets.withRight(contentIns.right().orElse(0f));
+                            break;
+                        case RIGHT_TO_LEFT:
+                            insets = insets.withLeft(contentIns.left().orElse(0f));
+                            break;
+                        case TOP_LEFT_TO_BOTTOM_RIGHT:
+                            insets = insets.withBottom(contentIns.bottom().orElse(0f))
+                                            .withRight(contentIns.right().orElse(0f));
+                            break;
+                        case BOTTOM_RIGHT_TO_TOP_LEFT:
+                            insets = insets.withTop(contentIns.top().orElse(0f))
+                                            .withLeft(contentIns.left().orElse(0f));
+                            break;
+                        case TOP_RIGHT_TO_BOTTOM_LEFT:
+                            insets = insets.withBottom(contentIns.bottom().orElse(0f))
+                                            .withLeft(contentIns.left().orElse(0f));
+                            break;
+                        case BOTTOM_LEFT_TO_TOP_RIGHT:
+                            insets = insets.withTop(contentIns.top().orElse(0f))
+                                            .withRight(contentIns.right().orElse(0f));
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+            }
+
+            final Size dimensions = conf.boxModel().size();
+
+            final float width  = dimensions.width().orElse(0f)  - ( insets.right().orElse(0f)  + insets.left().orElse(0f) );
+            final float height = dimensions.height().orElse(0f) - ( insets.bottom().orElse(0f) + insets.top().orElse(0f) );
+            final float realX  = insets.left().orElse(0f) + gradient.offset().x();
+            final float realY  = insets.top().orElse(0f)  + gradient.offset().y();
+            Bounds bounds = Bounds.of(realX, realY, width, height);
+
+            if ( gradient.transition().isDiagonal() )
+                _renderDiagonalGradient(g2d, bounds, gradient, conf.areas().get(gradient.area()));
+            else
+                _renderVerticalOrHorizontalGradient(g2d, bounds, gradient, conf.areas().get(gradient.area()));
+        }
     }
 
     /**
