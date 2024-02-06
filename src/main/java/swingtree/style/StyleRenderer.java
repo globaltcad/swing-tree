@@ -82,10 +82,19 @@ final class StyleRenderer
                             insets = Outline.of(verticalInset, horizontalInset);
                             break;
                     }
+
+                    final Size dimensions = conf.boxModel().size();
+
+                    final float width  = dimensions.width().orElse(0f)  - ( insets.right().orElse(0f)  + insets.left().orElse(0f) );
+                    final float height = dimensions.height().orElse(0f) - ( insets.bottom().orElse(0f) + insets.top().orElse(0f) );
+                    final float realX  = insets.left().orElse(0f) + gradient.offset().x();
+                    final float realY  = insets.top().orElse(0f)  + gradient.offset().y();
+                    Bounds bounds = Bounds.of(realX, realY, width, height);
+
                     if ( gradient.transition().isDiagonal() )
-                        _renderDiagonalGradient(g2d, conf.boxModel().size(), insets, gradient, conf.areas().get(gradient.area()));
+                        _renderDiagonalGradient(g2d, bounds, gradient, conf.areas().get(gradient.area()));
                     else
-                        _renderVerticalOrHorizontalGradient(g2d, conf.boxModel().size(), insets, gradient, conf.areas().get(gradient.area()));
+                        _renderVerticalOrHorizontalGradient(g2d, bounds, gradient, conf.areas().get(gradient.area()));
                 }
             }
 
@@ -581,26 +590,23 @@ final class StyleRenderer
      *  Renders a shade from the top left corner to the bottom right corner.
      *
      * @param g2d The graphics object to render to.
-     * @param componentSize The width and height of the component
-     * @param margin The margin of the component.
+     * @param bounds The margin of the component.
      * @param gradient The shade to render.
      */
     private static void _renderDiagonalGradient(
         Graphics2D    g2d,
-        Size          componentSize,
-        Outline       margin,
-        GradientConf gradient,
+        Bounds        bounds,
+        GradientConf  gradient,
         Area          specificArea
     ) {
-        UI.Transition       type       = gradient.transition();
-        final UI.Cycle      cycle      = gradient.cycle();
-        final Color[]       colors     = gradient.colors();
-        final Dimension     dimensions = componentSize.toDimension();
+        UI.Transition  type   = gradient.transition();
+        final UI.Cycle cycle  = gradient.cycle();
+        final Color[]  colors = gradient.colors();
 
-        final float width  = dimensions.width  - ( margin.right().orElse(0f)  + margin.left().orElse(0f) );
-        final float height = dimensions.height - ( margin.bottom().orElse(0f) + margin.top().orElse(0f) );
-        final float realX  = margin.left().orElse(0f) + gradient.offset().x();
-        final float realY  = margin.top().orElse(0f)  + gradient.offset().y();
+        final float width  = bounds.size().width().orElse(0f);
+        final float height = bounds.size().height().orElse(0f);
+        final float realX  = bounds.location().x();
+        final float realY  = bounds.location().y();
         final float size   = gradient.size();
 
         float corner1X;
@@ -783,20 +789,18 @@ final class StyleRenderer
 
     private static void _renderVerticalOrHorizontalGradient(
         Graphics2D    g2d,
-        Size          componentSize,
-        Outline       margin,
+        Bounds        bounds,
         GradientConf gradient,
         Area          specificArea
     ) {
         final UI.Transition type       = gradient.transition();
         final UI.Cycle      cycle      = gradient.cycle();
         final Color[]       colors     = gradient.colors();
-        final Dimension     dimensions = componentSize.toDimension();
 
-        final float width  = dimensions.width  - ( margin.right().orElse(0f)  + margin.left().orElse(0f) );
-        final float height = dimensions.height - ( margin.bottom().orElse(0f) + margin.top().orElse(0f)  );
-        final float realX  = margin.left().orElse(0f) + gradient.offset().x();
-        final float realY  = margin.top().orElse(0f)  + gradient.offset().y();
+        final float width  = bounds.size().width().orElse(0f);
+        final float height = bounds.size().height().orElse(0f);
+        final float realX  = bounds.location().x();
+        final float realY  = bounds.location().y();
         final float size   = gradient.size();
 
         float corner1X;
