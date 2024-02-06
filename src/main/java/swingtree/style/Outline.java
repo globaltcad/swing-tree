@@ -23,6 +23,10 @@ final class Outline
         return new Outline(top, right, bottom, left);
     }
 
+    static Outline of( float topAndBottom, float rightAndLeft ) {
+        return new Outline(topAndBottom, rightAndLeft, topAndBottom, rightAndLeft);
+    }
+
     static Outline of( double top, double right, double bottom, double left ) {
         return new Outline((float) top, (float) right, (float) bottom, (float) left);
     }

@@ -563,7 +563,8 @@ public final class UI extends UINamespaceUtilities
          * It represents the innermost boundary of the component, where the actual content of the component begins,
          * like for example the contents of a {@link JPanel} or {@link JScrollPane}.
          */
-        INTERIOR_TO_CONTENT // After the padding, before the content.
+        INTERIOR_TO_CONTENT, // After the padding, before the content.
+        CENTER_TO_CONTENT, // The center of the component.
     }
 
     /**

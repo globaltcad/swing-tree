@@ -68,10 +68,19 @@ final class StyleRenderer
                 else {
                     Outline insets = Outline.none();
                     switch ( gradient.boundary() ) {
-                        case OUTER_TO_EXTERIOR:   insets = Outline.none(); break;
-                        case EXTERIOR_TO_BORDER:  insets = conf.boxModel().margin(); break;
-                        case BORDER_TO_INTERIOR:  insets = conf.boxModel().margin().plus(conf.boxModel().widths()); break;
-                        case INTERIOR_TO_CONTENT: insets = conf.boxModel().margin().plus(conf.boxModel().widths()).plus(conf.boxModel().padding()); break;
+                        case OUTER_TO_EXTERIOR:
+                            insets = Outline.none(); break;
+                        case EXTERIOR_TO_BORDER:
+                            insets = conf.boxModel().margin(); break;
+                        case BORDER_TO_INTERIOR:
+                            insets = conf.boxModel().margin().plus(conf.boxModel().widths()); break;
+                        case INTERIOR_TO_CONTENT:
+                            insets = conf.boxModel().margin().plus(conf.boxModel().widths()).plus(conf.boxModel().padding()); break;
+                        case CENTER_TO_CONTENT:
+                            float verticalInset = conf.boxModel().size().height().orElse(0f) / 2f;
+                            float horizontalInset = conf.boxModel().size().width().orElse(0f) / 2f;
+                            insets = Outline.of(verticalInset, horizontalInset);
+                            break;
                     }
                     if ( gradient.transition().isDiagonal() )
                         _renderDiagonalGradient(g2d, conf.boxModel().size(), insets, gradient, conf.areas().get(gradient.area()));
@@ -603,32 +612,7 @@ final class StyleRenderer
         float diagonalCorner2X;
         float diagonalCorner2Y;
 
-        boolean revertColors = false;
-        if ( type == UI.Transition.TOP_RIGHT_TO_BOTTOM_LEFT ) {
-            type = UI.Transition.BOTTOM_LEFT_TO_TOP_RIGHT;
-            // We revert the colors
-            revertColors = true;
-        }
-        if ( type == UI.Transition.BOTTOM_RIGHT_TO_TOP_LEFT ) {
-            type = UI.Transition.TOP_LEFT_TO_BOTTOM_RIGHT;
-            revertColors = true;
-        }
-
-        if ( revertColors ) {// We revert the colors
-            if ( colors.length == 2 ) {
-                Color tmp = colors[0];
-                colors[0] = colors[1];
-                colors[1] = tmp;
-            } else
-                // We have more than 2 colors, so we need to revert the array
-                for ( int i = 0; i < colors.length / 2; i++ ) {
-                    Color tmp = colors[i];
-                    colors[i] = colors[colors.length - i - 1];
-                    colors[colors.length - i - 1] = tmp;
-                }
-        }
-
-        if ( type == UI.Transition.TOP_LEFT_TO_BOTTOM_RIGHT ) {
+        if ( type.isOneOf(UI.Transition.TOP_LEFT_TO_BOTTOM_RIGHT, UI.Transition.BOTTOM_RIGHT_TO_TOP_LEFT) ) {
             corner1X = realX;
             corner1Y = realY;
             corner2X = realX + width;
@@ -637,7 +621,22 @@ final class StyleRenderer
             diagonalCorner1Y = realY + height;
             diagonalCorner2X = realX + width;
             diagonalCorner2Y = realY;
-        } else if ( type == UI.Transition.BOTTOM_LEFT_TO_TOP_RIGHT ) {
+            if ( type == UI.Transition.BOTTOM_RIGHT_TO_TOP_LEFT ) {
+                // We simplify flip the corners:
+                float tempX = corner1X;
+                float tempY = corner1Y;
+                corner1X = corner2X;
+                corner1Y = corner2Y;
+                corner2X = tempX;
+                corner2Y = tempY;
+                tempX = diagonalCorner1X;
+                tempY = diagonalCorner1Y;
+                diagonalCorner1X = diagonalCorner2X;
+                diagonalCorner1Y = diagonalCorner2Y;
+                diagonalCorner2X = tempX;
+                diagonalCorner2Y = tempY;
+            }
+        } else if ( type.isOneOf(UI.Transition.BOTTOM_LEFT_TO_TOP_RIGHT, UI.Transition.TOP_RIGHT_TO_BOTTOM_LEFT) ) {
             corner1X = realX + width;
             corner1Y = realY;
             corner2X = realX;
@@ -646,6 +645,21 @@ final class StyleRenderer
             diagonalCorner1Y = realY + height;
             diagonalCorner2X = realX;
             diagonalCorner2Y = realY;
+            if ( type == UI.Transition.TOP_RIGHT_TO_BOTTOM_LEFT ) {
+                // We simplify flip the corners:
+                float tempX = corner1X;
+                float tempY = corner1Y;
+                corner1X = corner2X;
+                corner1Y = corner2Y;
+                corner2X = tempX;
+                corner2Y = tempY;
+                tempX = diagonalCorner1X;
+                tempY = diagonalCorner1Y;
+                diagonalCorner1X = diagonalCorner2X;
+                diagonalCorner1Y = diagonalCorner2Y;
+                diagonalCorner2X = tempX;
+                diagonalCorner2Y = tempY;
+            }
         }
         else {
             log.warn("Invalid transition type: " + type, new Throwable());
@@ -658,20 +672,12 @@ final class StyleRenderer
         float[] fractions = _fractionsFrom(gradient);
 
         if ( gradient.type() == UI.GradientType.RADIAL ) {
-            float startCornerX, startCornerY;
-            if ( type == UI.Transition.TOP_LEFT_TO_BOTTOM_RIGHT ) {
-                startCornerX = corner1X;
-                startCornerY = corner1Y;
-            } else {
-                startCornerX = corner2X;
-                startCornerY = corner2Y;
-            }
             float radius;
 
             if ( size < 0 )
                 radius = (float) Math.sqrt(
-                                     (diagonalCenterX - startCornerX) * (diagonalCenterX - startCornerX) +
-                                     (diagonalCenterY - startCornerY) * (diagonalCenterY - startCornerY)
+                                     (diagonalCenterX - corner1X) * (diagonalCenterX - corner1X) +
+                                     (diagonalCenterY - corner1Y) * (diagonalCenterY - corner1Y)
                                  );
             else
                 radius = size;
@@ -679,7 +685,7 @@ final class StyleRenderer
             if ( gradient.focus().equals(Offset.none()) ) {
                 if ( colors.length == 2 )
                     g2d.setPaint(new RadialGradientPaint(
-                            new Point2D.Float(startCornerX, startCornerY),
+                            new Point2D.Float(corner1X, corner1Y),
                             radius,
                             fractions,
                             colors,
@@ -687,18 +693,18 @@ final class StyleRenderer
                         ));
                 else
                     g2d.setPaint(new RadialGradientPaint(
-                            new Point2D.Float(startCornerX, startCornerY),
+                            new Point2D.Float(corner1X, corner1Y),
                             radius,
                             fractions,
                             colors,
                             _cycleMethodFrom(cycle)
                         ));
             } else {
-                float focusX = startCornerX + gradient.focus().x();
-                float focusY = startCornerY + gradient.focus().y();
+                float focusX = corner1X + gradient.focus().x();
+                float focusY = corner1Y + gradient.focus().y();
 
                 if ( gradient.rotation() % 360f != 0 ) {
-                    Point2D.Float p1 = new Point2D.Float(startCornerX, startCornerY);
+                    Point2D.Float p1 = new Point2D.Float(corner1X, corner1Y);
                     Point2D.Float p2 = new Point2D.Float(focusX, focusY);
                     p2 = _rotatePoint(p1, p2, gradient.rotation());
                     focusX = p2.x;
@@ -706,7 +712,7 @@ final class StyleRenderer
                 }
 
                 g2d.setPaint(new RadialGradientPaint(
-                        new Point2D.Float(startCornerX, startCornerY),
+                        new Point2D.Float(corner1X, corner1Y),
                         radius,
                         new Point2D.Float(focusX, focusY),
                         fractions,
