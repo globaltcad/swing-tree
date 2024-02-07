@@ -126,6 +126,8 @@ public final class StyleConf
 
     DimensionalityConf dimensionality() { return _dimensionality; }
 
+    StyleLayers layers() { return _layers; }
+
     StyleLayer layer(UI.Layer layer ) { return _layers.get(layer); }
 
     /**
@@ -530,10 +532,6 @@ public final class StyleConf
         return Objects.equals(_properties, otherStyle._properties);
     }
 
-    Report getReport() {
-        return new Report(this);
-    }
-
     @Override
     public int hashCode() {
         return Objects.hash(
@@ -572,80 +570,6 @@ public final class StyleConf
                     _layers          + ", " +
                     propertiesString +
                 "]";
-    }
-
-    static class Report
-    {
-        public final boolean noLayoutStyle;
-        public final boolean noPaddingAndMarginStyle;
-        public final boolean noBorderStyle;
-        public final boolean borderIsVisible;
-        public final boolean noBaseStyle;
-        public final boolean noFontStyle;
-        public final boolean noDimensionalityStyle;
-        public final boolean noShadowStyle;
-        public final boolean noPainters;
-        public final boolean noGradients;
-        public final boolean noImages;
-        public final boolean noProperties;
-
-        public final boolean allShadowsAreBorderShadows;
-        public final boolean allGradientsAreBorderGradients;
-        public final boolean allPaintersAreBorderPainters;
-        public final boolean allImagesAreBorderImages;
-
-
-        private Report( StyleConf styleConf) {
-            this.noLayoutStyle           = StyleConf.none().hasEqualLayoutAs(styleConf);
-            this.noPaddingAndMarginStyle = StyleConf.none().hasEqualMarginAndPaddingAs(styleConf);
-            this.noBorderStyle           = StyleConf.none().hasEqualBorderAs(styleConf);
-            this.noBaseStyle             = StyleConf.none().hasEqualBaseAs(styleConf);
-            this.noFontStyle             = StyleConf.none().hasEqualFontAs(styleConf);
-            this.noDimensionalityStyle   = StyleConf.none().hasEqualDimensionalityAs(styleConf);
-            this.noShadowStyle           = StyleConf.none().hasEqualShadowsAs(styleConf);
-            this.noPainters              = StyleConf.none().hasEqualPaintersAs(styleConf);
-            this.noGradients             = StyleConf.none().hasEqualGradientsAs(styleConf);
-            this.noImages                = StyleConf.none().hasEqualImagesAs(styleConf);
-            this.noProperties            = StyleConf.none().hasEqualPropertiesAs(styleConf);
-
-            this.borderIsVisible = styleConf.border().isVisible();
-
-            this.allShadowsAreBorderShadows     = styleConf._layers.everyNamedStyle( (layer, styleLayer) -> layer == UI.Layer.BORDER || styleLayer.shadows().everyNamedStyle(ns -> !ns.style().color().isPresent() ) );
-            this.allGradientsAreBorderGradients = styleConf._layers.everyNamedStyle( (layer, styleLayer) -> layer == UI.Layer.BORDER || styleLayer.gradients().everyNamedStyle(ns -> ns.style().colors().length == 0 ) );
-            this.allPaintersAreBorderPainters   = styleConf._layers.everyNamedStyle( (layer, styleLayer) -> layer == UI.Layer.BORDER || styleLayer.painters().everyNamedStyle(ns -> Painter.none().equals(ns.style().painter()) ) );
-            this.allImagesAreBorderImages       = styleConf._layers.everyNamedStyle( (layer, styleLayer) -> layer == UI.Layer.BORDER || styleLayer.images().everyNamedStyle(ns -> !ns.style().image().isPresent() && !ns.style().primer().isPresent() ) );
-        }
-
-        public boolean isNotStyled() {
-            return
-               noLayoutStyle           &&
-               noPaddingAndMarginStyle &&
-               noBorderStyle           &&
-               noBaseStyle             &&
-               noFontStyle             &&
-               noDimensionalityStyle   &&
-               noShadowStyle           &&
-               noPainters              &&
-               noGradients             &&
-               noImages                &&
-               noProperties;
-        }
-
-        public boolean onlyDimensionalityIsStyled() {
-            return
-               noLayoutStyle           &&
-               noPaddingAndMarginStyle &&
-               noBorderStyle           &&
-               noBaseStyle             &&
-               noFontStyle             &&
-               !noDimensionalityStyle  &&
-               noShadowStyle           &&
-               noPainters              &&
-               noGradients             &&
-               noImages                &&
-               noProperties;
-        }
-
     }
 
 }
