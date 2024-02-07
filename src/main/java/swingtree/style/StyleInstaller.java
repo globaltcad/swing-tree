@@ -68,18 +68,54 @@ final class StyleInstaller<C extends JComponent>
         StyleSource<C> styleSource,
         StyleEngine styleEngine
     ) {
-        final Report styleReport = new StyleInstaller.Report(newStyle);
+        final boolean noLayoutStyle           = StyleConf.none().hasEqualLayoutAs(newStyle);
+        final boolean noPaddingAndMarginStyle = StyleConf.none().hasEqualMarginAndPaddingAs(newStyle);
+        final boolean noBorderStyle           = StyleConf.none().hasEqualBorderAs(newStyle);
+        final boolean noBaseStyle             = StyleConf.none().hasEqualBaseAs(newStyle);
+        final boolean noFontStyle             = StyleConf.none().hasEqualFontAs(newStyle);
+        final boolean noDimensionalityStyle   = StyleConf.none().hasEqualDimensionalityAs(newStyle);
+        final boolean noShadowStyle           = StyleConf.none().hasEqualShadowsAs(newStyle);
+        final boolean noPainters              = StyleConf.none().hasEqualPaintersAs(newStyle);
+        final boolean noGradients             = StyleConf.none().hasEqualGradientsAs(newStyle);
+        final boolean noImages                = StyleConf.none().hasEqualImagesAs(newStyle);
+        final boolean noProperties            = StyleConf.none().hasEqualPropertiesAs(newStyle);
 
+        final boolean allShadowsAreBorderShadows     = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer == UI.Layer.BORDER || styleLayer.shadows().everyNamedStyle(ns -> !ns.style().color().isPresent() ) );
+        final boolean allGradientsAreBorderGradients = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer == UI.Layer.BORDER || styleLayer.gradients().everyNamedStyle(ns -> ns.style().colors().length == 0 ) );
+        final boolean allPaintersAreBorderPainters   = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer == UI.Layer.BORDER || styleLayer.painters().everyNamedStyle(ns -> Painter.none().equals(ns.style().painter()) ) );
+        final boolean allImagesAreBorderImages       = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer == UI.Layer.BORDER || styleLayer.images().everyNamedStyle(ns -> !ns.style().image().isPresent() && !ns.style().primer().isPresent() ) );
 
+        final boolean isNotStyled = noLayoutStyle           &&
+                                    noPaddingAndMarginStyle &&
+                                    noBorderStyle           &&
+                                    noBaseStyle             &&
+                                    noFontStyle             &&
+                                    noDimensionalityStyle   &&
+                                    noShadowStyle           &&
+                                    noPainters              &&
+                                    noGradients             &&
+                                    noImages                &&
+                                    noProperties;
 
-        final boolean isNotStyled                     = styleReport.isNotStyled();
-        final boolean onlyDimensionalityIsStyled      = styleReport.onlyDimensionalityIsStyled();
+        final boolean onlyDimensionalityIsStyled =
+                                   noLayoutStyle           &&
+                                   noPaddingAndMarginStyle &&
+                                   noBorderStyle           &&
+                                   noBaseStyle             &&
+                                   noFontStyle             &&
+                                   !noDimensionalityStyle  &&
+                                   noShadowStyle           &&
+                                   noPainters              &&
+                                   noGradients             &&
+                                   noImages                &&
+                                   noProperties;
+
         final boolean styleCanBeRenderedThroughBorder = (
-                                                       styleReport.noBaseStyle    &&
-                                                       (styleReport.noShadowStyle || styleReport.allShadowsAreBorderShadows)     &&
-                                                       (styleReport.noPainters    || styleReport.allPaintersAreBorderPainters)   &&
-                                                       (styleReport.noGradients   || styleReport.allGradientsAreBorderGradients) &&
-                                                       (styleReport.noImages      || styleReport.allImagesAreBorderImages)
+                                                       (noBaseStyle)    &&
+                                                       (noShadowStyle || allShadowsAreBorderShadows)     &&
+                                                       (noPainters    || allPaintersAreBorderPainters)   &&
+                                                       (noGradients   || allGradientsAreBorderGradients) &&
+                                                       (noImages      || allImagesAreBorderImages)
                                                    );
 
         Runnable backgroundSetter = ()->{};
@@ -658,77 +694,4 @@ final class StyleInstaller<C extends JComponent>
         }
     }
 
-    static class Report
-    {
-        public final boolean noLayoutStyle;
-        public final boolean noPaddingAndMarginStyle;
-        public final boolean noBorderStyle;
-        public final boolean borderIsVisible;
-        public final boolean noBaseStyle;
-        public final boolean noFontStyle;
-        public final boolean noDimensionalityStyle;
-        public final boolean noShadowStyle;
-        public final boolean noPainters;
-        public final boolean noGradients;
-        public final boolean noImages;
-        public final boolean noProperties;
-
-        public final boolean allShadowsAreBorderShadows;
-        public final boolean allGradientsAreBorderGradients;
-        public final boolean allPaintersAreBorderPainters;
-        public final boolean allImagesAreBorderImages;
-
-
-        private Report( StyleConf styleConf) {
-            this.noLayoutStyle           = StyleConf.none().hasEqualLayoutAs(styleConf);
-            this.noPaddingAndMarginStyle = StyleConf.none().hasEqualMarginAndPaddingAs(styleConf);
-            this.noBorderStyle           = StyleConf.none().hasEqualBorderAs(styleConf);
-            this.noBaseStyle             = StyleConf.none().hasEqualBaseAs(styleConf);
-            this.noFontStyle             = StyleConf.none().hasEqualFontAs(styleConf);
-            this.noDimensionalityStyle   = StyleConf.none().hasEqualDimensionalityAs(styleConf);
-            this.noShadowStyle           = StyleConf.none().hasEqualShadowsAs(styleConf);
-            this.noPainters              = StyleConf.none().hasEqualPaintersAs(styleConf);
-            this.noGradients             = StyleConf.none().hasEqualGradientsAs(styleConf);
-            this.noImages                = StyleConf.none().hasEqualImagesAs(styleConf);
-            this.noProperties            = StyleConf.none().hasEqualPropertiesAs(styleConf);
-
-            this.borderIsVisible = styleConf.border().isVisible();
-
-            this.allShadowsAreBorderShadows     = styleConf.layers().everyNamedStyle( (layer, styleLayer) -> layer == UI.Layer.BORDER || styleLayer.shadows().everyNamedStyle(ns -> !ns.style().color().isPresent() ) );
-            this.allGradientsAreBorderGradients = styleConf.layers().everyNamedStyle( (layer, styleLayer) -> layer == UI.Layer.BORDER || styleLayer.gradients().everyNamedStyle(ns -> ns.style().colors().length == 0 ) );
-            this.allPaintersAreBorderPainters   = styleConf.layers().everyNamedStyle( (layer, styleLayer) -> layer == UI.Layer.BORDER || styleLayer.painters().everyNamedStyle(ns -> Painter.none().equals(ns.style().painter()) ) );
-            this.allImagesAreBorderImages       = styleConf.layers().everyNamedStyle( (layer, styleLayer) -> layer == UI.Layer.BORDER || styleLayer.images().everyNamedStyle(ns -> !ns.style().image().isPresent() && !ns.style().primer().isPresent() ) );
-        }
-
-        public boolean isNotStyled() {
-            return
-               noLayoutStyle           &&
-               noPaddingAndMarginStyle &&
-               noBorderStyle           &&
-               noBaseStyle             &&
-               noFontStyle             &&
-               noDimensionalityStyle   &&
-               noShadowStyle           &&
-               noPainters              &&
-               noGradients             &&
-               noImages                &&
-               noProperties;
-        }
-
-        public boolean onlyDimensionalityIsStyled() {
-            return
-               noLayoutStyle           &&
-               noPaddingAndMarginStyle &&
-               noBorderStyle           &&
-               noBaseStyle             &&
-               noFontStyle             &&
-               !noDimensionalityStyle  &&
-               noShadowStyle           &&
-               noPainters              &&
-               noGradients             &&
-               noImages                &&
-               noProperties;
-        }
-
-    }
 }
