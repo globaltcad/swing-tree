@@ -80,10 +80,10 @@ final class StyleInstaller<C extends JComponent>
         final boolean noImages                = StyleConf.none().hasEqualImagesAs(newStyle);
         final boolean noProperties            = StyleConf.none().hasEqualPropertiesAs(newStyle);
 
-        final boolean allShadowsAreBorderShadows     = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer == UI.Layer.BORDER || styleLayer.shadows().everyNamedStyle(ns -> !ns.style().color().isPresent() ) );
-        final boolean allGradientsAreBorderGradients = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer == UI.Layer.BORDER || styleLayer.gradients().everyNamedStyle(ns -> ns.style().colors().length == 0 ) );
-        final boolean allPaintersAreBorderPainters   = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer == UI.Layer.BORDER || styleLayer.painters().everyNamedStyle(ns -> Painter.none().equals(ns.style().painter()) ) );
-        final boolean allImagesAreBorderImages       = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer == UI.Layer.BORDER || styleLayer.images().everyNamedStyle(ns -> !ns.style().image().isPresent() && !ns.style().primer().isPresent() ) );
+        final boolean allShadowsAreBorderShadows     = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) || styleLayer.shadows().everyNamedStyle(ns -> !ns.style().color().isPresent() ) );
+        final boolean allGradientsAreBorderGradients = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) || styleLayer.gradients().everyNamedStyle(ns -> ns.style().colors().length == 0 ) );
+        final boolean allPaintersAreBorderPainters   = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) || styleLayer.painters().everyNamedStyle(ns -> Painter.none().equals(ns.style().painter()) ) );
+        final boolean allImagesAreBorderImages       = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) || styleLayer.images().everyNamedStyle(ns -> !ns.style().image().isPresent() && !ns.style().primer().isPresent() ) );
 
         final boolean isNotStyled = noLayoutStyle           &&
                                     noPaddingAndMarginStyle &&
