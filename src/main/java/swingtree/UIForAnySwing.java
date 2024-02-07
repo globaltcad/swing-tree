@@ -3523,9 +3523,28 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                ._this();
     }
 
-    protected void _onKeyTyped(C component, BiConsumer<KeyEvent, KeyAdapter> action ) {
+    private void _onKeyTyped(C component, BiConsumer<KeyEvent, KeyAdapter> action ) {
         component.addKeyListener(new KeyAdapter() {
-            @Override public void keyTyped(KeyEvent e) {
+            private KeyEvent lastEvent;
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+                lastEvent = e;
+            }
+            @Override
+            public void keyReleased(KeyEvent e) {
+                if ( lastEvent != null && lastEvent.getKeyCode() == e.getKeyCode() ) {
+                    action.accept(lastEvent, this);
+                    lastEvent = null;
+                }
+            }
+        });
+    }
+
+    private void _onCharTyped(C component, BiConsumer<KeyEvent, KeyAdapter> action ) {
+        component.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
                 action.accept(e, this);
             }
         });
