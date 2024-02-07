@@ -111,7 +111,7 @@ final class StyleInstaller<C extends JComponent>
                                    noProperties;
 
         final boolean styleCanBeRenderedThroughBorder = (
-                                                       (noBaseStyle)    &&
+                                                       (noBaseStyle || !newStyle.base().hasAnyColors())    &&
                                                        (noShadowStyle || allShadowsAreBorderShadows)     &&
                                                        (noPainters    || allPaintersAreBorderPainters)   &&
                                                        (noGradients   || allGradientsAreBorderGradients) &&
@@ -349,6 +349,9 @@ final class StyleInstaller<C extends JComponent>
                                                 !hasBackground &&
                                                 !hasBackgroundGradients &&
                                                 !hasBackgroundPainters;
+
+                if ( _initialContentAreaFilled != null && !_initialContentAreaFilled )
+                    shouldButtonBeFilled = false;
 
                 if ( shouldButtonBeFilled != b.isContentAreaFilled() )
                     b.setContentAreaFilled( shouldButtonBeFilled );
