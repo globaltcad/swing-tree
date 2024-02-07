@@ -659,7 +659,7 @@ final class StyleRenderer
         float diagonalCorner2X;
         float diagonalCorner2Y;
 
-        if ( type.isOneOf(UI.Transition.TOP_LEFT_TO_BOTTOM_RIGHT, UI.Transition.BOTTOM_RIGHT_TO_TOP_LEFT) ) {
+        if ( type.isOneOf(UI.Transition.TOP_LEFT_TO_BOTTOM_RIGHT) ) {
             corner1X = realX;
             corner1Y = realY;
             corner2X = realX + width;
@@ -668,22 +668,7 @@ final class StyleRenderer
             diagonalCorner1Y = realY + height;
             diagonalCorner2X = realX + width;
             diagonalCorner2Y = realY;
-            if ( type == UI.Transition.BOTTOM_RIGHT_TO_TOP_LEFT ) {
-                // We simplify flip the corners:
-                float tempX = corner1X;
-                float tempY = corner1Y;
-                corner1X = corner2X;
-                corner1Y = corner2Y;
-                corner2X = tempX;
-                corner2Y = tempY;
-                tempX = diagonalCorner1X;
-                tempY = diagonalCorner1Y;
-                diagonalCorner1X = diagonalCorner2X;
-                diagonalCorner1Y = diagonalCorner2Y;
-                diagonalCorner2X = tempX;
-                diagonalCorner2Y = tempY;
-            }
-        } else if ( type.isOneOf(UI.Transition.BOTTOM_LEFT_TO_TOP_RIGHT, UI.Transition.TOP_RIGHT_TO_BOTTOM_LEFT) ) {
+        } else if ( type.isOneOf(UI.Transition.BOTTOM_LEFT_TO_TOP_RIGHT) ) {
             corner1X = realX + width;
             corner1Y = realY;
             corner2X = realX;
@@ -692,21 +677,24 @@ final class StyleRenderer
             diagonalCorner1Y = realY + height;
             diagonalCorner2X = realX;
             diagonalCorner2Y = realY;
-            if ( type == UI.Transition.TOP_RIGHT_TO_BOTTOM_LEFT ) {
-                // We simplify flip the corners:
-                float tempX = corner1X;
-                float tempY = corner1Y;
-                corner1X = corner2X;
-                corner1Y = corner2Y;
-                corner2X = tempX;
-                corner2Y = tempY;
-                tempX = diagonalCorner1X;
-                tempY = diagonalCorner1Y;
-                diagonalCorner1X = diagonalCorner2X;
-                diagonalCorner1Y = diagonalCorner2Y;
-                diagonalCorner2X = tempX;
-                diagonalCorner2Y = tempY;
-            }
+        } else if ( type.isOneOf(UI.Transition.TOP_RIGHT_TO_BOTTOM_LEFT) ) {
+            corner1X = realX + width;
+            corner1Y = realY + height;
+            corner2X = realX;
+            corner2Y = realY;
+            diagonalCorner1X = realX + width;
+            diagonalCorner1Y = realY;
+            diagonalCorner2X = realX;
+            diagonalCorner2Y = realY + height;
+        } else if ( type.isOneOf(UI.Transition.BOTTOM_RIGHT_TO_TOP_LEFT) ) {
+            corner1X = realX;
+            corner1Y = realY + height;
+            corner2X = realX + width;
+            corner2Y = realY;
+            diagonalCorner1X = realX;
+            diagonalCorner1Y = realY;
+            diagonalCorner2X = realX + width;
+            diagonalCorner2Y = realY + height;
         }
         else {
             log.warn("Invalid transition type: " + type, new Throwable());

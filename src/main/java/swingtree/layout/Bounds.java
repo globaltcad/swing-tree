@@ -71,6 +71,13 @@ public final class Bounds
         return new Bounds(Location.of(x, y), Size.of(width, height));
     }
 
+    public static Bounds of( float x, float y, float width, float height ) {
+        if ( width < 0 || height < 0 )
+            return EMPTY;
+
+        return new Bounds(Location.of(x, y), Size.of(width, height));
+    }
+
     private Bounds( Location location, Size size ) {
         _location = Objects.requireNonNull(location);
         _size     = Objects.requireNonNull(size);
