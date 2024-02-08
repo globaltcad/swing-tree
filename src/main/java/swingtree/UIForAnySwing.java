@@ -3541,6 +3541,57 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         });
     }
 
+    /**
+     *  Adds the supplied {@link Action} wrapped in a {@link KeyListener} to the component,
+     *  to receive key events triggered when the wrapped component receives a particular
+     *  keyboard input matching the provided character. <br>
+     *  This method is a logical extension of the {@link #onTyped(Keyboard.Key, Action)} method,
+     *  with the difference that it listens for any character instead of a specific key code.
+     *  This also works with special characters which are typed using the combination
+     *  of multiple keys (e.g. shift + number keys).
+     *  <br><br>
+     * @param character The character to listen for.
+     * @param onKeyTyped The action to execute when the character is typed.
+     * @return This very instance, which enables builder-style method chaining.
+     * @see #onKeyTyped(Action)
+     * @see #onTyped(Keyboard.Key, Action)
+     */
+    public final I onTyped( char character, Action<ComponentDelegate<C, KeyEvent>> onKeyTyped ) {
+        NullUtil.nullArgCheck(onKeyTyped, "onKeyTyped", Action.class);
+        return _with( thisComponent -> {
+                   _onCharTyped(thisComponent, (e, kl) -> {
+                       if ( e.getKeyChar() == character )
+                           _runInApp(()->onKeyTyped.accept(new ComponentDelegate<>(thisComponent, e )));
+                   });
+               })
+               ._this();
+    }
+
+    /**
+     *  Adds the supplied {@link Action} wrapped in a {@link KeyListener} to the component,
+     *  to receive key events triggered when the wrapped component receives a particular
+     *  keyboard input matching the provided character. <br>
+     *  This method is a logical extension of the {@link #onTyped(Keyboard.Key, Action)} method,
+     *  with the difference that it listens for any character instead of a specific key code.
+     *  This also works with special characters which are typed using the combination
+     *  of multiple keys (e.g. shift + number keys).
+     *  <br><br>
+     * @param onKeyTyped The action to execute when the character is typed.
+     * @return This very instance, which enables builder-style method chaining.
+     * @see #onKeyTyped(Action)
+     * @see #onKeyTyped(Action)
+     * @see #onTyped(Keyboard.Key, Action)
+     */
+    public final I onCharTyped( Action<ComponentDelegate<C, KeyEvent>> onKeyTyped ) {
+        NullUtil.nullArgCheck(onKeyTyped, "onKeyTyped", Action.class);
+        return _with( thisComponent -> {
+                   _onCharTyped(thisComponent, (e, kl) -> {
+                       _runInApp(()->onKeyTyped.accept(new ComponentDelegate<>(thisComponent, e )));
+                   });
+               })
+               ._this();
+    }
+
     private void _onCharTyped(C component, BiConsumer<KeyEvent, KeyAdapter> action ) {
         component.addKeyListener(new KeyAdapter() {
             @Override
