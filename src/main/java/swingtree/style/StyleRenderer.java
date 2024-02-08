@@ -669,6 +669,15 @@ final class StyleRenderer
             diagonalCorner2X = realX + width;
             diagonalCorner2Y = realY;
         } else if ( type.isOneOf(UI.Transition.BOTTOM_LEFT_TO_TOP_RIGHT) ) {
+            corner1X = realX;
+            corner1Y = realY + height;
+            corner2X = realX + width;
+            corner2Y = realY;
+            diagonalCorner1X = realX;
+            diagonalCorner1Y = realY;
+            diagonalCorner2X = realX + width;
+            diagonalCorner2Y = realY + height;
+        } else if ( type.isOneOf(UI.Transition.TOP_RIGHT_TO_BOTTOM_LEFT) ) {
             corner1X = realX + width;
             corner1Y = realY;
             corner2X = realX;
@@ -677,7 +686,7 @@ final class StyleRenderer
             diagonalCorner1Y = realY + height;
             diagonalCorner2X = realX;
             diagonalCorner2Y = realY;
-        } else if ( type.isOneOf(UI.Transition.TOP_RIGHT_TO_BOTTOM_LEFT) ) {
+        } else if ( type.isOneOf(UI.Transition.BOTTOM_RIGHT_TO_TOP_LEFT) ) {
             corner1X = realX + width;
             corner1Y = realY + height;
             corner2X = realX;
@@ -685,15 +694,6 @@ final class StyleRenderer
             diagonalCorner1X = realX + width;
             diagonalCorner1Y = realY;
             diagonalCorner2X = realX;
-            diagonalCorner2Y = realY + height;
-        } else if ( type.isOneOf(UI.Transition.BOTTOM_RIGHT_TO_TOP_LEFT) ) {
-            corner1X = realX;
-            corner1Y = realY + height;
-            corner2X = realX + width;
-            corner2Y = realY;
-            diagonalCorner1X = realX;
-            diagonalCorner1Y = realY;
-            diagonalCorner2X = realX + width;
             diagonalCorner2Y = realY + height;
         }
         else {
