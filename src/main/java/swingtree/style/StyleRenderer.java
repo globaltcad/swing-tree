@@ -613,6 +613,7 @@ final class StyleRenderer
             }
 
             final Size dimensions = conf.boxModel().size();
+            final UI.Transition type = gradient.transition();
 
             final float width  = dimensions.width().orElse(0f)  - ( insets.right().orElse(0f)  + insets.left().orElse(0f) );
             final float height = dimensions.height().orElse(0f) - ( insets.bottom().orElse(0f) + insets.top().orElse(0f) );
@@ -620,10 +621,65 @@ final class StyleRenderer
             final float realY  = insets.top().orElse(0f)  + gradient.offset().y();
             Bounds bounds = Bounds.of(realX, realY, width, height);
 
+            float corner1X;
+            float corner1Y;
+            float corner2X;
+            float corner2Y;
+
+            if ( type.isOneOf(UI.Transition.TOP_LEFT_TO_BOTTOM_RIGHT) ) {
+                corner1X = realX;
+                corner1Y = realY;
+                corner2X = realX + width;
+                corner2Y = realY + height;
+            } else if ( type.isOneOf(UI.Transition.BOTTOM_LEFT_TO_TOP_RIGHT) ) {
+                corner1X = realX;
+                corner1Y = realY + height;
+                corner2X = realX + width;
+                corner2Y = realY;
+            } else if ( type.isOneOf(UI.Transition.TOP_RIGHT_TO_BOTTOM_LEFT) ) {
+                corner1X = realX + width;
+                corner1Y = realY;
+                corner2X = realX;
+                corner2Y = realY + height;
+            } else if ( type.isOneOf(UI.Transition.BOTTOM_RIGHT_TO_TOP_LEFT) ) {
+                corner1X = realX + width;
+                corner1Y = realY + height;
+                corner2X = realX;
+                corner2Y = realY;
+            }
+            else if ( type == UI.Transition.TOP_TO_BOTTOM ) {
+                corner1X = realX;
+                corner1Y = realY;
+                corner2X = realX;
+                corner2Y = realY + height;
+            } else if ( type == UI.Transition.LEFT_TO_RIGHT ) {
+                corner1X = realX;
+                corner1Y = realY;
+                corner2X = realX + width;
+                corner2Y = realY;
+            } else if ( type == UI.Transition.BOTTOM_TO_TOP ) {
+                corner1X = realX;
+                corner1Y = realY + height;
+                corner2X = realX;
+                corner2Y = realY;
+            } else if ( type == UI.Transition.RIGHT_TO_LEFT ) {
+                corner1X = realX + width;
+                corner1Y = realY;
+                corner2X = realX;
+                corner2Y = realY;
+            }
+            else {
+                log.warn("Unknown gradient type: " + type, new Throwable());
+                return;
+            }
+
+            Point2D.Float corner1 = new Point2D.Float(corner1X, corner1Y);
+            Point2D.Float corner2 = new Point2D.Float(corner2X, corner2Y);
+
             if ( gradient.transition().isDiagonal() )
-                _renderDiagonalGradient(g2d, bounds, gradient, conf.areas().get(gradient.area()));
+                _renderDiagonalGradient(g2d, corner1, corner2, gradient, conf.areas().get(gradient.area()));
             else
-                _renderVerticalOrHorizontalGradient(g2d, bounds, gradient, conf.areas().get(gradient.area()));
+                _renderVerticalOrHorizontalGradient(g2d, corner1, corner2, gradient, conf.areas().get(gradient.area()));
         }
     }
 
@@ -631,55 +687,27 @@ final class StyleRenderer
      *  Renders a shade from the top left corner to the bottom right corner.
      *
      * @param g2d The graphics object to render to.
-     * @param bounds The margin of the component.
+     * @param corner1 The first corner of the shade.
+     * @param corner2 The second corner of the shade.
      * @param gradient The shade to render.
      */
     private static void _renderDiagonalGradient(
         Graphics2D    g2d,
-        Bounds        bounds,
+        Point2D.Float corner1,
+        Point2D.Float corner2,
         GradientConf  gradient,
         Area          specificArea
     ) {
-        UI.Transition  type   = gradient.transition();
         final UI.Cycle cycle  = gradient.cycle();
         final Color[]  colors = gradient.colors();
 
-        final float width  = bounds.size().width().orElse(0f);
-        final float height = bounds.size().height().orElse(0f);
-        final float realX  = bounds.location().x();
-        final float realY  = bounds.location().y();
         final float size   = gradient.size();
 
-        float corner1X;
-        float corner1Y;
-        float corner2X;
-        float corner2Y;
+        final float corner1X = corner1.x;
+        final float corner1Y = corner1.y;
+        float corner2X = corner2.x;
+        float corner2Y = corner2.y;
 
-        if ( type.isOneOf(UI.Transition.TOP_LEFT_TO_BOTTOM_RIGHT) ) {
-            corner1X = realX;
-            corner1Y = realY;
-            corner2X = realX + width;
-            corner2Y = realY + height;
-        } else if ( type.isOneOf(UI.Transition.BOTTOM_LEFT_TO_TOP_RIGHT) ) {
-            corner1X = realX;
-            corner1Y = realY + height;
-            corner2X = realX + width;
-            corner2Y = realY;
-        } else if ( type.isOneOf(UI.Transition.TOP_RIGHT_TO_BOTTOM_LEFT) ) {
-            corner1X = realX + width;
-            corner1Y = realY;
-            corner2X = realX;
-            corner2Y = realY + height;
-        } else if ( type.isOneOf(UI.Transition.BOTTOM_RIGHT_TO_TOP_LEFT) ) {
-            corner1X = realX + width;
-            corner1Y = realY + height;
-            corner2X = realX;
-            corner2Y = realY;
-        }
-        else {
-            log.warn("Invalid transition type: " + type, new Throwable());
-            return;
-        }
 
         float[] fractions = _fractionsFrom(gradient);
 
@@ -770,50 +798,20 @@ final class StyleRenderer
 
     private static void _renderVerticalOrHorizontalGradient(
         Graphics2D    g2d,
-        Bounds        bounds,
+        Point2D.Float corner1,
+        Point2D.Float corner2,
         GradientConf gradient,
         Area          specificArea
     ) {
-        final UI.Transition type       = gradient.transition();
         final UI.Cycle      cycle      = gradient.cycle();
         final Color[]       colors     = gradient.colors();
 
-        final float width  = bounds.size().width().orElse(0f);
-        final float height = bounds.size().height().orElse(0f);
-        final float realX  = bounds.location().x();
-        final float realY  = bounds.location().y();
         final float size   = gradient.size();
 
-        float corner1X;
-        float corner1Y;
-        float corner2X;
-        float corner2Y;
-
-        if ( type == UI.Transition.TOP_TO_BOTTOM ) {
-            corner1X = realX;
-            corner1Y = realY;
-            corner2X = realX;
-            corner2Y = realY + height;
-        } else if ( type == UI.Transition.LEFT_TO_RIGHT ) {
-            corner1X = realX;
-            corner1Y = realY;
-            corner2X = realX + width;
-            corner2Y = realY;
-        } else if ( type == UI.Transition.BOTTOM_TO_TOP ) {
-            corner1X = realX;
-            corner1Y = realY + height;
-            corner2X = realX;
-            corner2Y = realY;
-        } else if ( type == UI.Transition.RIGHT_TO_LEFT ) {
-            corner1X = realX + width;
-            corner1Y = realY;
-            corner2X = realX;
-            corner2Y = realY;
-        }
-        else {
-            log.warn("Unknown gradient type: " + type, new Throwable());
-            return;
-        }
+        final float corner1X = corner1.x;
+        final float corner1Y = corner1.y;
+        float corner2X = corner2.x;
+        float corner2Y = corner2.y;
 
         if ( gradient.type() == UI.GradientType.LINEAR ) {
             if ( size >= 0 ) {
