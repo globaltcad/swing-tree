@@ -6,6 +6,7 @@ import net.miginfocom.layout.DimConstraint;
 import net.miginfocom.layout.UnitValue;
 import net.miginfocom.swing.MigLayout;
 import swingtree.UI;
+import swingtree.api.Painter;
 import swingtree.components.JIcon;
 
 import javax.swing.*;
@@ -67,18 +68,57 @@ final class StyleInstaller<C extends JComponent>
         StyleSource<C> styleSource,
         StyleEngine styleEngine
     ) {
-        final StyleConf.Report styleReport = newStyle.getReport();
-        Runnable backgroundSetter = ()->{};
+        final boolean noLayoutStyle           = StyleConf.none().hasEqualLayoutAs(newStyle);
+        final boolean noPaddingAndMarginStyle = StyleConf.none().hasEqualMarginAndPaddingAs(newStyle);
+        final boolean noBorderStyle           = StyleConf.none().hasEqualBorderAs(newStyle);
+        final boolean noBaseStyle             = StyleConf.none().hasEqualBaseAs(newStyle);
+        final boolean noFontStyle             = StyleConf.none().hasEqualFontAs(newStyle);
+        final boolean noDimensionalityStyle   = StyleConf.none().hasEqualDimensionalityAs(newStyle);
+        final boolean noShadowStyle           = StyleConf.none().hasEqualShadowsAs(newStyle);
+        final boolean noPainters              = StyleConf.none().hasEqualPaintersAs(newStyle);
+        final boolean noGradients             = StyleConf.none().hasEqualGradientsAs(newStyle);
+        final boolean noImages                = StyleConf.none().hasEqualImagesAs(newStyle);
+        final boolean noProperties            = StyleConf.none().hasEqualPropertiesAs(newStyle);
 
-        final boolean isNotStyled                     = styleReport.isNotStyled();
-        final boolean onlyDimensionalityIsStyled      = styleReport.onlyDimensionalityIsStyled();
+        final boolean allShadowsAreBorderShadows     = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) || styleLayer.shadows().everyNamedStyle(ns -> !ns.style().color().isPresent() ) );
+        final boolean allGradientsAreBorderGradients = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) || styleLayer.gradients().everyNamedStyle(ns -> ns.style().colors().length == 0 ) );
+        final boolean allPaintersAreBorderPainters   = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) || styleLayer.painters().everyNamedStyle(ns -> Painter.none().equals(ns.style().painter()) ) );
+        final boolean allImagesAreBorderImages       = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) || styleLayer.images().everyNamedStyle(ns -> !ns.style().image().isPresent() && !ns.style().primer().isPresent() ) );
+
+        final boolean isNotStyled = noLayoutStyle           &&
+                                    noPaddingAndMarginStyle &&
+                                    noBorderStyle           &&
+                                    noBaseStyle             &&
+                                    noFontStyle             &&
+                                    noDimensionalityStyle   &&
+                                    noShadowStyle           &&
+                                    noPainters              &&
+                                    noGradients             &&
+                                    noImages                &&
+                                    noProperties;
+
+        final boolean onlyDimensionalityIsStyled =
+                                   noLayoutStyle           &&
+                                   noPaddingAndMarginStyle &&
+                                   noBorderStyle           &&
+                                   noBaseStyle             &&
+                                   noFontStyle             &&
+                                   !noDimensionalityStyle  &&
+                                   noShadowStyle           &&
+                                   noPainters              &&
+                                   noGradients             &&
+                                   noImages                &&
+                                   noProperties;
+
         final boolean styleCanBeRenderedThroughBorder = (
-                                                       styleReport.noBaseStyle    &&
-                                                       (styleReport.noShadowStyle || styleReport.allShadowsAreBorderShadows)     &&
-                                                       (styleReport.noPainters    || styleReport.allPaintersAreBorderPainters)   &&
-                                                       (styleReport.noGradients   || styleReport.allGradientsAreBorderGradients) &&
-                                                       (styleReport.noImages      || styleReport.allImagesAreBorderImages)
+                                                       (noBaseStyle || !newStyle.base().hasAnyColors())    &&
+                                                       (noShadowStyle || allShadowsAreBorderShadows)     &&
+                                                       (noPainters    || allPaintersAreBorderPainters)   &&
+                                                       (noGradients   || allGradientsAreBorderGradients) &&
+                                                       (noImages      || allImagesAreBorderImages)
                                                    );
+
+        Runnable backgroundSetter = ()->{};
 
         if ( !onlyDimensionalityIsStyled && !isNotStyled || styleEngine.hasAnimationPainters() ) {
             installCustomBorderBasedStyleAndAnimationRenderer(owner, newStyle);
@@ -106,6 +146,8 @@ final class StyleInstaller<C extends JComponent>
             if ( isNotStyled )
                 return newStyle;
         }
+
+        // The component is styled, so we can now apply the style to the component:
 
         if ( _initialIsOpaque == null )
             _initialIsOpaque = owner.isOpaque();
@@ -307,6 +349,9 @@ final class StyleInstaller<C extends JComponent>
                                                 !hasBackground &&
                                                 !hasBackgroundGradients &&
                                                 !hasBackgroundPainters;
+
+                if ( _initialContentAreaFilled != null && !_initialContentAreaFilled )
+                    shouldButtonBeFilled = false;
 
                 if ( shouldButtonBeFilled != b.isContentAreaFilled() )
                     b.setContentAreaFilled( shouldButtonBeFilled );

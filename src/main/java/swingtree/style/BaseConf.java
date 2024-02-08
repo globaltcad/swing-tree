@@ -74,6 +74,10 @@ final class BaseConf
 
     public UI.ComponentOrientation orientation() { return _orientation; }
 
+    boolean hasAnyColors() {
+        return _backgroundColor != null || _foundationColor != null || _foregroundColor != null;
+    }
+
     BaseConf icon(ImageIcon icon ) {
         return new BaseConf(icon, _fit, _foundationColor, _backgroundColor, _foregroundColor, _cursor, _orientation);
     }

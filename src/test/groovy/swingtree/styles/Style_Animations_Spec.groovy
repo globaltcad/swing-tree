@@ -141,8 +141,9 @@ class Style_Animations_Spec extends Specification
         then : 'The label will have a border and a background color.'
             label.border != null
             label.font.size > 13
-        and : 'SwingTree will haver overridden the default label UI in order to support the shadow.'
-            !(label.getUI() instanceof MetalLabelUI)
+        and : 'The UI of the component was not overridden, because the shadow can be rendered through the border of the component.'
+            (label.getUI() instanceof MetalLabelUI)
+            label.border != null
     }
 
 

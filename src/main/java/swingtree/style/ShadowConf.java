@@ -12,7 +12,7 @@ import java.util.Optional;
  *  designed for defining shadow styles
  *  as part of the full {@link StyleConf} configuration object.
  *  The state of this object can only be updated by using wither like update methods,
- *  like {@link #horizontalOffset(float)}, {@link #verticalOffset(float)}, {@link #blurRadius(float)}...
+ *  like {@link #horizontalOffset(double)}, {@link #verticalOffset(double)}, {@link #blurRadius(double)}...
  *  which return a new instance of this class with the updated state.
  *  <p>
  *  The following properties with their respective purpose are available:
@@ -140,8 +140,8 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
      *                               if negative the shadow will move to the left.
      * @return A new {@link ShadowConf} with the specified horizontal shadow offset.
      */
-    public ShadowConf horizontalOffset(float horizontalShadowOffset ) {
-        return ShadowConf.of(_offset.withX(horizontalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);
+    public ShadowConf horizontalOffset( double horizontalShadowOffset ) {
+        return ShadowConf.of(_offset.withX((float) horizontalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);
     }
 
     /**
@@ -149,8 +149,8 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
      *                             if negative the shadow will move up.
      * @return A new {@link ShadowConf} with the specified vertical shadow offset.
      */
-    public ShadowConf verticalOffset(float verticalShadowOffset ) {
-        return ShadowConf.of(_offset.withY(verticalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);
+    public ShadowConf verticalOffset( double verticalShadowOffset ) {
+        return ShadowConf.of(_offset.withY((float) verticalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);
     }
 
     /**
@@ -160,7 +160,7 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
      *                             if negative the shadow will move up.
      * @return A new {@link ShadowConf} with the specified horizontal and vertical shadow offsets.
      */
-    public ShadowConf offset(int horizontalShadowOffset, int verticalShadowOffset ) {
+    public ShadowConf offset( double horizontalShadowOffset, double verticalShadowOffset ) {
         return ShadowConf.of(Offset.of(horizontalShadowOffset, verticalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);
     }
 
@@ -171,7 +171,7 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
      *                     if negative the shadow will move to the left and up.
      * @return A new {@link ShadowConf} with the specified horizontal and vertical shadow offsets.
      */
-    public ShadowConf offset(int shadowOffset ) {
+    public ShadowConf offset( double shadowOffset ) {
         return ShadowConf.of(Offset.of(shadowOffset, shadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);
     }
 
@@ -181,8 +181,8 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
      *                         stretched over a wider area.
      * @return A new {@link ShadowConf} with the specified blur radius.
      */
-    public ShadowConf blurRadius(float shadowBlurRadius ) {
-        return ShadowConf.of(_offset, shadowBlurRadius, _spreadRadius, _color, _isOutset);
+    public ShadowConf blurRadius( double shadowBlurRadius ) {
+        return ShadowConf.of(_offset, (float) shadowBlurRadius, _spreadRadius, _color, _isOutset);
     }
 
     /**
@@ -193,15 +193,15 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
      *                           so that it either grows or shrinks in size.
      * @return A new {@link ShadowConf} with the specified spread radius.
      */
-    public ShadowConf spreadRadius(float shadowSpreadRadius ) {
-        return ShadowConf.of(_offset, _blurRadius, shadowSpreadRadius, _color, _isOutset);
+    public ShadowConf spreadRadius( double shadowSpreadRadius ) {
+        return ShadowConf.of(_offset, _blurRadius, (float) shadowSpreadRadius, _color, _isOutset);
     }
 
     /**
      * @param shadowColor The color of the shadow.
      * @return A new {@link ShadowConf} with the specified color.
      */
-    public ShadowConf color(Color shadowColor ) {
+    public ShadowConf color( Color shadowColor ) {
         Objects.requireNonNull(shadowColor, "Use UI.COLOR_UNDEFINED to specify no color instead of null");
         if ( shadowColor == UI.COLOR_UNDEFINED)
             shadowColor = null;
@@ -224,7 +224,7 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
      *                    </ul>
      * @return A new {@link ShadowConf} with the specified color.
      */
-    public ShadowConf color(String shadowColor ) {
+    public ShadowConf color( String shadowColor ) {
         Objects.requireNonNull(shadowColor);
         Color newColor;
         try {
@@ -242,7 +242,7 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
      * @param blue The blue component of the shadow color.
      * @return A new {@link ShadowConf} with the specified color.
      */
-    public ShadowConf color(double red, double green, double blue ) {
+    public ShadowConf color( double red, double green, double blue ) {
         return color(red, green, blue, 1.0);
     }
 
@@ -253,7 +253,7 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
      * @param alpha The alpha component of the shadow color.
      * @return A new {@link ShadowConf} with the specified color.
      */
-    public ShadowConf color(double red, double green, double blue, double alpha ) {
+    public ShadowConf color( double red, double green, double blue, double alpha ) {
         return color(new Color((float) red, (float) green, (float) blue, (float) alpha));
     }
 
@@ -275,11 +275,11 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
      *                     whereas inset shadows go inward, starting from the inner edge of the box (and its border).
      * @return A new {@link ShadowConf} with the specified outset/inset state.
      */
-    public ShadowConf isOutset(boolean shadowOutset ) {
+    public ShadowConf isOutset( boolean shadowOutset ) {
         return ShadowConf.of(_offset, _blurRadius, _spreadRadius, _color, shadowOutset);
     }
 
-    ShadowConf _scale(double scaleFactor ) {
+    ShadowConf _scale( double scaleFactor ) {
         return ShadowConf.of(
                             _offset.scale(scaleFactor),
                             (float) (_blurRadius * scaleFactor),
