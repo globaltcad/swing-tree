@@ -654,55 +654,32 @@ final class StyleRenderer
         float corner1Y;
         float corner2X;
         float corner2Y;
-        float diagonalCorner1X;
-        float diagonalCorner1Y;
-        float diagonalCorner2X;
-        float diagonalCorner2Y;
 
         if ( type.isOneOf(UI.Transition.TOP_LEFT_TO_BOTTOM_RIGHT) ) {
             corner1X = realX;
             corner1Y = realY;
             corner2X = realX + width;
             corner2Y = realY + height;
-            diagonalCorner1X = realX;
-            diagonalCorner1Y = realY + height;
-            diagonalCorner2X = realX + width;
-            diagonalCorner2Y = realY;
         } else if ( type.isOneOf(UI.Transition.BOTTOM_LEFT_TO_TOP_RIGHT) ) {
             corner1X = realX;
             corner1Y = realY + height;
             corner2X = realX + width;
             corner2Y = realY;
-            diagonalCorner1X = realX;
-            diagonalCorner1Y = realY;
-            diagonalCorner2X = realX + width;
-            diagonalCorner2Y = realY + height;
         } else if ( type.isOneOf(UI.Transition.TOP_RIGHT_TO_BOTTOM_LEFT) ) {
             corner1X = realX + width;
             corner1Y = realY;
             corner2X = realX;
             corner2Y = realY + height;
-            diagonalCorner1X = realX + width;
-            diagonalCorner1Y = realY + height;
-            diagonalCorner2X = realX;
-            diagonalCorner2Y = realY;
         } else if ( type.isOneOf(UI.Transition.BOTTOM_RIGHT_TO_TOP_LEFT) ) {
             corner1X = realX + width;
             corner1Y = realY + height;
             corner2X = realX;
             corner2Y = realY;
-            diagonalCorner1X = realX + width;
-            diagonalCorner1Y = realY;
-            diagonalCorner2X = realX;
-            diagonalCorner2Y = realY + height;
         }
         else {
             log.warn("Invalid transition type: " + type, new Throwable());
             return;
         }
-
-        float diagonalCenterX = (diagonalCorner1X + diagonalCorner2X) / 2;
-        float diagonalCenterY = (diagonalCorner1Y + diagonalCorner2Y) / 2;
 
         float[] fractions = _fractionsFrom(gradient);
 
@@ -711,8 +688,8 @@ final class StyleRenderer
 
             if ( size < 0 )
                 radius = (float) Math.sqrt(
-                                     (diagonalCenterX - corner1X) * (diagonalCenterX - corner1X) +
-                                     (diagonalCenterY - corner1Y) * (diagonalCenterY - corner1Y)
+                                     (corner2X - corner1X) * (corner2X - corner1X) +
+                                     (corner2Y - corner1Y) * (corner2Y - corner1Y)
                                  );
             else
                 radius = size;
@@ -756,59 +733,34 @@ final class StyleRenderer
                     ));
             }
         } else if ( gradient.type() == UI.GradientType.LINEAR ) {
-            float vector1X = diagonalCorner1X - diagonalCenterX;
-            float vector1Y = diagonalCorner1Y - diagonalCenterY;
-            float vector2X = diagonalCorner2X - diagonalCenterX;
-            float vector2Y = diagonalCorner2Y - diagonalCenterY;
-
-            float vectorLength = (float) Math.sqrt(vector1X * vector1X + vector1Y * vector1Y);
-            vector1X = (vector1X / vectorLength);
-            vector1Y = (vector1Y / vectorLength);
-
-            vectorLength = (float) Math.sqrt(vector2X * vector2X + vector2Y * vector2Y);
-            vector2X = (vector2X / vectorLength);
-            vector2Y = (vector2Y / vectorLength);
-
-            float nVector1X = -vector1Y;
-            float nVector1Y =  vector1X;
-            float nVector2X = -vector2Y;
-            float nVector2Y =  vector2X;
-
-            float distance1 = (corner1X - diagonalCenterX) * nVector1X + (corner1Y - diagonalCenterY) * nVector1Y;
-            float distance2 = (corner2X - diagonalCenterX) * nVector2X + (corner2Y - diagonalCenterY) * nVector2Y;
-
-            float gradientStartX = (diagonalCenterX + nVector1X * distance1);
-            float gradientStartY = (diagonalCenterY + nVector1Y * distance1);
-            float gradientEndX   = (diagonalCenterX + nVector2X * distance2);
-            float gradientEndY   = (diagonalCenterY + nVector2Y * distance2);
 
             if ( size >= 0 ) {
-                float vectorX = gradientEndX - gradientStartX;
-                float vectorY = gradientEndY - gradientStartY;
+                float vectorX = corner2X - corner1X;
+                float vectorY = corner2Y - corner1Y;
                 float vectorLength2 = (float) Math.sqrt(vectorX * vectorX + vectorY * vectorY);
                 vectorX = (vectorX / vectorLength2);
                 vectorY = (vectorY / vectorLength2);
-                gradientEndX = gradientStartX + vectorX * size;
-                gradientEndY = gradientStartY + vectorY * size;
+                corner2X = corner1X + vectorX * size;
+                corner2Y = corner1Y + vectorY * size;
             }
 
             if ( gradient.rotation() % 360f != 0 ) {
-                Point2D.Float p1 = new Point2D.Float(gradientStartX, gradientStartY);
-                Point2D.Float p2 = new Point2D.Float(gradientEndX, gradientEndY);
+                Point2D.Float p1 = new Point2D.Float(corner1X, corner1Y);
+                Point2D.Float p2 = new Point2D.Float(corner2X, corner2Y);
                 p2 = _rotatePoint(p1, p2, gradient.rotation());
-                gradientEndX = p2.x;
-                gradientEndY = p2.y;
+                corner2X = p2.x;
+                corner2Y = p2.y;
             }
 
             if ( colors.length == 2 && gradient.fractions().length == 0 && cycle == UI.Cycle.NONE )
                 g2d.setPaint(new GradientPaint(
-                                gradientStartX, gradientStartY, colors[0],
-                                gradientEndX, gradientEndY, colors[1]
+                                corner1X, corner1Y, colors[0],
+                                corner2X, corner2Y, colors[1]
                             ));
             else
                 g2d.setPaint(new LinearGradientPaint(
-                                gradientStartX, gradientStartY,
-                                gradientEndX, gradientEndY,
+                                corner1X, corner1Y,
+                                corner2X, corner2Y,
                                 fractions, colors,
                                 _cycleMethodFrom(cycle)
                             ));
