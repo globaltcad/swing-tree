@@ -35,14 +35,12 @@ package swingtree.style;
  *
  *  Adopted from https://github.com/kkieffer/jZELD/blob/master/src/main/java/com/github/kkieffer/jzeld/attributes/ConicalGradientPaint.java
  *  and incorporated into the SwingTree project in 2024.
+ *
+ *  Modifications 2014, by Daniel Nepp:
+ *  - Deletion of the error-prone method "recalculate" and introduction of a new rotation offset field variable.
  */
 
-import java.awt.Color;
-import java.awt.Paint;
-import java.awt.PaintContext;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
-import java.awt.Transparency;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
@@ -51,7 +49,7 @@ import java.awt.image.ColorModel;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.util.HashMap;
-import java.util.List;
+import java.util.LinkedHashMap;
 
 
 /**
@@ -105,6 +103,7 @@ final class ConicalGradientPaint implements Paint {
 
 
     private final Point2D CENTER;
+    private final float ANGLE_OFFSET;
     private final float[] FRACTION_ANGLES;
     private final float[] RED_STEP_LOOKUP;
     private final float[] GREEN_STEP_LOOKUP;
@@ -137,7 +136,15 @@ final class ConicalGradientPaint implements Paint {
      * @param GIVEN_COLORS
      * @throws IllegalArgumentException
      */
-    public ConicalGradientPaint(final boolean USE_DEGREES, final Point2D CENTER, final float GIVEN_OFFSET, final float[] GIVEN_FRACTIONS, final Color[] GIVEN_COLORS) throws IllegalArgumentException {
+    public ConicalGradientPaint(
+        final boolean USE_DEGREES,
+        final Point2D CENTER,
+        final float   GIVEN_OFFSET,
+        final float[] GIVEN_FRACTIONS,
+        final Color[] GIVEN_COLORS
+    )
+    throws IllegalArgumentException
+    {
         // Check that fractions and colors are of the same size
         if (GIVEN_FRACTIONS.length != GIVEN_COLORS.length) {
             throw new IllegalArgumentException("Fractions and colors must be equal in size");
@@ -185,6 +192,8 @@ final class ConicalGradientPaint implements Paint {
             throw new IllegalArgumentException("Offset has to be in the range of -0.5 to 0.5");
         }
 
+        this.ANGLE_OFFSET = GIVEN_OFFSET;
+
         // Adjust fractions and colors array in the case where startvalue != 0.0f and/or endvalue != 1.0f
         final java.util.List<Color> colorList = new java.util.ArrayList<Color>(GIVEN_COLORS.length);
         colorList.addAll(java.util.Arrays.asList(GIVEN_COLORS));
@@ -209,7 +218,11 @@ final class ConicalGradientPaint implements Paint {
         }
 
         // Recalculate the fractions and colors with the given offset
-        final java.util.Map<Float, Color> fractionColors = recalculate(fractionList, colorList, OFFSET);
+        final java.util.Map<Float, Color> fractionColors = new LinkedHashMap<>();//recalculate(fractionList, colorList, OFFSET);
+        for ( int i = 0; i < fractionList.size(); i++ )
+        {
+            fractionColors.put(fractionList.get(i), colorList.get(i));
+        }
 
         // Clear the original FRACTION_LIST and COLOR_LIST
         fractionList.clear();
@@ -245,73 +258,6 @@ final class ConicalGradientPaint implements Paint {
             BLUE_STEP_LOOKUP[i] = ((COLORS[i + 1].getBlue() - COLORS[i].getBlue()) * INT_TO_FLOAT_CONST) / (FRACTION_ANGLES[i + 1] - FRACTION_ANGLES[i]);
             ALPHA_STEP_LOOKUP[i] = ((COLORS[i + 1].getAlpha() - COLORS[i].getAlpha()) * INT_TO_FLOAT_CONST) / (FRACTION_ANGLES[i + 1] - FRACTION_ANGLES[i]);
         }
-    }
-
-    /**
-     * Recalculates the fractions in the FRACTION_LIST and their associated colors in the COLOR_LIST with a given OFFSET.
-     * Because the conical gradients always starts with 0 at the top and clockwise direction
-     * you could rotate the defined conical gradient from -180 to 180 degrees which equals values from -0.5 to +0.5
-     * @param fractionList
-     * @param colorList
-     * @param OFFSET
-     * @return Hashmap that contains the recalculated fractions and colors after a given rotation
-     */
-    private java.util.HashMap<Float, Color> recalculate(final List<Float> fractionList, final List<Color> colorList, final float OFFSET) {
-        // Recalculate the fractions and colors with the given offset
-        final int MAX_FRACTIONS = fractionList.size();
-        final HashMap<Float, Color> fractionColors = new HashMap<Float, Color>(MAX_FRACTIONS);
-        for (int i = 0; i < MAX_FRACTIONS; i++) {
-            // Add offset to fraction
-            final float TMP_FRACTION = fractionList.get(i) + OFFSET;
-
-            // Color related to current fraction
-            final Color TMP_COLOR = colorList.get(i);
-
-            // Check each fraction for limits (0...1)
-            if (TMP_FRACTION <= 0) {
-                fractionColors.put(1.0f + TMP_FRACTION + 0.0001f, TMP_COLOR);
-
-                final float NEXT_FRACTION;
-                final Color NEXT_COLOR;
-                if (i < MAX_FRACTIONS - 1) {
-                    NEXT_FRACTION = fractionList.get(i + 1) + OFFSET;
-                    NEXT_COLOR = colorList.get(i + 1);
-                } else {
-                    NEXT_FRACTION = 1 - fractionList.get(0) + OFFSET;
-                    NEXT_COLOR = colorList.get(0);
-                }
-                if (NEXT_FRACTION > 0) {
-                    final Color NEW_FRACTION_COLOR = getColorFromFraction(TMP_COLOR, NEXT_COLOR, (int) ((NEXT_FRACTION - TMP_FRACTION) * 10000), (int) ((-TMP_FRACTION) * 10000));
-                    fractionColors.put(0.0f, NEW_FRACTION_COLOR);
-                    fractionColors.put(1.0f, NEW_FRACTION_COLOR);
-                }
-            } else if (TMP_FRACTION >= 1) {
-                fractionColors.put(TMP_FRACTION - 1.0f - 0.0001f, TMP_COLOR);
-
-                final float PREVIOUS_FRACTION;
-                final Color PREVIOUS_COLOR;
-                if (i > 0) {
-                    PREVIOUS_FRACTION = fractionList.get(i - 1) + OFFSET;
-                    PREVIOUS_COLOR = colorList.get(i - 1);
-                } else {
-                    PREVIOUS_FRACTION = fractionList.get(MAX_FRACTIONS - 1) + OFFSET;
-                    PREVIOUS_COLOR = colorList.get(MAX_FRACTIONS - 1);
-                }
-                if (PREVIOUS_FRACTION < 1) {
-                    final Color NEW_FRACTION_COLOR = getColorFromFraction(TMP_COLOR, PREVIOUS_COLOR, (int) ((TMP_FRACTION - PREVIOUS_FRACTION) * 10000), (int) (TMP_FRACTION - 1.0f) * 10000);
-                    fractionColors.put(1.0f, NEW_FRACTION_COLOR);
-                    fractionColors.put(0.0f, NEW_FRACTION_COLOR);
-                }
-            } else {
-                fractionColors.put(TMP_FRACTION, TMP_COLOR);
-            }
-        }
-
-        // Clear the original FRACTION_LIST and COLOR_LIST
-        fractionList.clear();
-        colorList.clear();
-
-        return fractionColors;
     }
 
     /**
@@ -463,18 +409,17 @@ final class ConicalGradientPaint implements Paint {
                         dy = d.getY() - rotationCenter.getY();
 
                         //KK: simplify by just taking the arctangent
-                        //double distance = Math.sqrt(dx * dx + dy * dy);
+                        double distance = Math.sqrt(dx * dx + dy * dy);
 
                         // Avoid division by zero
-                        //if (distance == 0) {
-                        //    distance = 1;
-                        //}
+                        if (distance == 0) {
+                            distance = 1;
+                        }
 
                         // 0 degree on top
-                        //angle = Math.abs(Math.toDegrees(Math.acos(dx / distance)));
-                        angle = Math.abs(Math.toDegrees(-Math.atan2(dy, dx)));
+                        angle = Math.abs(Math.toDegrees(Math.acos(dx / distance)));
 
-
+                        //angle = Math.abs(Math.toDegrees(-Math.atan2(dy, dx)));
 
                         if (dx >= 0 && dy <= 0) {
                             angle = 90.0 - angle;
@@ -484,6 +429,14 @@ final class ConicalGradientPaint implements Paint {
                             angle += 90.0;
                         } else if (dx <= 0 && dy <= 0) {
                             angle = 450.0 - angle;
+                        }
+
+                        angle += ANGLE_OFFSET;
+
+                        if (angle > 360.0) {
+                            angle -= 360.0;
+                        } else if (angle < 0.0) {
+                            angle += 360.0;
                         }
 
                         // Check for each angle in fractionAngles array
@@ -511,7 +464,6 @@ final class ConicalGradientPaint implements Paint {
 
                 // Fill the raster with the data
                 //RASTER.setPixels(0, 0, TILE_WIDTH, TILE_HEIGHT, data);
-
 
                 cachedRasters.put(index, raster);
                 return raster;

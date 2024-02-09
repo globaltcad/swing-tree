@@ -653,13 +653,44 @@ final class StyleRenderer
                 return;
             }
 
-            if ( gradient.type() == UI.GradientType.RADIAL )
+            if ( gradient.type() == UI.GradientType.CONIC )
+                _renderConicGradient(g2d, corner1, corner2, gradient, conf.areas().get(gradient.area()));
+            else if ( gradient.type() == UI.GradientType.RADIAL )
                 _renderRadialGradient(g2d, corner1, corner2, gradient, conf.areas().get(gradient.area()));
             else if ( gradient.transition().isDiagonal() )
                 _renderDiagonalGradient(g2d, corner1, corner2, gradient, conf.areas().get(gradient.area()));
             else
                 _renderVerticalOrHorizontalGradient(g2d, corner1, corner2, gradient, conf.areas().get(gradient.area()));
         }
+    }
+
+    private static void _renderConicGradient(
+        Graphics2D    g2d,
+        Point2D.Float corner1,
+        Point2D.Float corner2,
+        GradientConf  gradient,
+        Area          specificArea
+    ) {
+        final Color[] colors    = gradient.colors();
+        final float[] fractions = _fractionsFrom(gradient);
+        float rotation = gradient.rotation() + _rotationBetween(corner1, corner2);
+
+        // we normalize the rotation to be between -180 and 180
+        rotation = ((((rotation+180f) % 360f + 360f) % 360f)-180f);
+
+        // Now we convert the fractions to rotations:
+        for ( int i = 0; i < fractions.length; i++ )
+            fractions[i] = (fractions[i] * 360f);// (((((fractions[i] * 360f)+180f) % 360f + 360f) % 360f)-180f);
+
+        g2d.setPaint(new ConicalGradientPaint(
+                        true,
+                        corner1,
+                        rotation,
+                        fractions,
+                        colors
+                    ));
+
+        g2d.fill(specificArea);
     }
 
     /**
@@ -671,11 +702,11 @@ final class StyleRenderer
      * @param gradient The shade to render.
      */
     private static void _renderDiagonalGradient(
-        Graphics2D    g2d,
-        Point2D.Float corner1,
-        Point2D.Float corner2,
-        GradientConf  gradient,
-        Area          specificArea
+        final Graphics2D    g2d,
+        Point2D.Float       corner1,
+        Point2D.Float       corner2,
+        final GradientConf  gradient,
+        final Area          specificArea
     ) {
         {
             final float cx = ( corner1.x + corner2.x ) / 2;
@@ -932,7 +963,7 @@ final class StyleRenderer
     private static Point2D.Float _rotatePoint(
         final Point2D.Float p1,
         final Point2D.Float p2,
-        final float         rotation
+        final float rotation
     ) {
         if ( rotation == 0f )
             return p2;
@@ -950,6 +981,23 @@ final class StyleRenderer
         final double newY = x * sin + y * cos;
 
         return new Point2D.Float((float) (p1.x + newX), (float) (p1.y + newY));
+    }
+
+    /**
+     *  Takes 2 points and calculates the rotation
+     *  of point 2 around point 1.
+     *
+     * @param p1 The first point which serves as the center of rotation.
+     * @param p2 The second point which is rotated around point 1.
+     * @return The rotation in degrees.
+     */
+    private static final float _rotationBetween(
+        final Point2D.Float p1,
+        final Point2D.Float p2
+    ){
+        final double x = p2.x - p1.x;
+        final double y = p2.y - p1.y;
+        return (float) Math.toDegrees(Math.atan2(y, x));
     }
 
     private static void _renderImage(

@@ -168,6 +168,10 @@ public final class GradientConf implements Simplifiable<GradientConf>
         float[]              fractions,
         UI.Cycle             cycle
     ) {
+        // The rotation may be any number
+        // which always has to be normalized to a value between -180 and 180
+        rotation = ( (((rotation+180f) % 360f + 360f) % 360f) - 180f );
+
         GradientConf none = none();
         if ( transition == none._transition &&
              type       == none._type       &&
@@ -448,7 +452,7 @@ public final class GradientConf implements Simplifiable<GradientConf>
      *
      *  @param rotation The rotation of the gradient in degrees.
      */
-    public GradientConf rotation(float rotation ) {
+    public GradientConf rotation( float rotation ) {
         return of(_transition, _type, _colors, _offset, _size, _area, _boundary, _focus, rotation, _fractions, _cycle);
     }
 

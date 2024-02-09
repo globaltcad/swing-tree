@@ -404,7 +404,7 @@ public final class UI extends UINamespaceUtilities
      */
     public enum GradientType implements UIEnum<GradientType>
     {
-        LINEAR, RADIAL
+        LINEAR, RADIAL, CONIC
     }
 
     /**

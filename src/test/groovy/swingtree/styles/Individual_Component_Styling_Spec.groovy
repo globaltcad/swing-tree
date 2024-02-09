@@ -2478,4 +2478,202 @@ class Individual_Component_Styling_Spec extends Specification
     }
 
 
+    def 'Render conic gradients as component backgrounds using the style API.'()
+    {
+        reportInfo """
+                Inside your `Styler` lambdas you may access another sub style
+                for configuring the gradient of a component.
+                <br>
+                Here you can see an example of multiple labels with different 
+                conic gradient styles. <br>
+                
+                ${Utility.linkSnapshot('components/conic-gradients-collage.png')}
+
+                They are all stitched together into a collage so that you can see them 
+                all at once and compare them with each other.
+            """
+
+        given : 'We pass the following style rules to a number of labels:'
+            var ui1 =
+                        UI.label("Center Left Right").withStyle( it -> it
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .border(2, Color.DARK_GRAY)
+                            .size(120, 120)
+                            .gradient( gradConf -> gradConf
+                                .colors(Color.BLACK, Color.CYAN, Color.GREEN, Color.MAGENTA)
+                                .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
+                                .transition(UI.Transition.LEFT_TO_RIGHT)
+                                .type(UI.GradientType.CONIC)
+                                .focus(26,16)
+                            )
+                        )
+            var ui2 =
+                         UI.label("Center Right Left").withStyle( it -> it
+                             .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .border(2, Color.DARK_GRAY)
+                             .size(120, 120)
+                             .gradient( gradConf -> gradConf
+                                 .colors(Color.BLACK, Color.CYAN, Color.GREEN, Color.MAGENTA)
+                                 .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
+                                 .transition(UI.Transition.RIGHT_TO_LEFT)
+                                 .type(UI.GradientType.CONIC)
+                                 .focus(26,16)
+                             )
+                         )
+            var ui3 =
+                         UI.label("Center Top Bottom").withStyle( it -> it
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .border(2, Color.DARK_GRAY)
+                             .size(120, 120)
+                             .gradient( gradConf -> gradConf
+                                 .colors(Color.BLACK, Color.CYAN, Color.GREEN, Color.MAGENTA)
+                                 .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
+                                 .transition(UI.Transition.TOP_TO_BOTTOM)
+                                 .type(UI.GradientType.CONIC)
+                                 .focus(26,16)
+                             )
+                         )
+            var ui4 =
+                         UI.label("Center Bottom TOP").withStyle( it -> it
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .border(2, Color.DARK_GRAY)
+                             .size(120, 120)
+                             .gradient( gradConf -> gradConf
+                                 .colors(Color.BLACK, Color.CYAN, Color.GREEN, Color.MAGENTA)
+                                 .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
+                                 .transition(UI.Transition.BOTTOM_TO_TOP)
+                                 .type(UI.GradientType.CONIC)
+                                 .focus(26,16)
+                             )
+                         )
+            var ui5 =
+                         UI.label("Center LT to BR").withStyle( it -> it
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .border(2, Color.DARK_GRAY)
+                             .size(120, 120)
+                             .gradient( gradConf -> gradConf
+                                 .colors(Color.BLACK, Color.CYAN, Color.GREEN, Color.MAGENTA)
+                                 .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
+                                 .transition(UI.Transition.TOP_LEFT_TO_BOTTOM_RIGHT)
+                                 .type(UI.GradientType.CONIC)
+                                 .focus(26,16)
+                             )
+                         )
+            var ui6 =
+                         UI.label("Center BR to LT").withStyle( it -> it
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .border(2, Color.DARK_GRAY)
+                             .size(120, 120)
+                             .gradient( gradConf -> gradConf
+                                 .colors(Color.BLACK, Color.CYAN, Color.GREEN, Color.MAGENTA)
+                                 .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
+                                 .transition(UI.Transition.BOTTOM_RIGHT_TO_TOP_LEFT)
+                                 .type(UI.GradientType.CONIC)
+                                 .focus(26,16)
+                             )
+                         )
+            var ui7 =
+                         UI.label("Center TR to BL").withStyle( it -> it
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .border(2, Color.DARK_GRAY)
+                             .size(120, 120)
+                             .gradient( gradConf -> gradConf
+                                 .colors(Color.BLACK, Color.CYAN, Color.GREEN, Color.MAGENTA)
+                                 .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
+                                 .transition(UI.Transition.TOP_RIGHT_TO_BOTTOM_LEFT)
+                                 .type(UI.GradientType.CONIC)
+                                 .focus(26,16)
+                             )
+                         )
+            var ui8 =
+                         UI.label("Center BL to TR").withStyle( it -> it
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .border(2, Color.DARK_GRAY)
+                             .size(120, 120)
+                             .gradient( gradConf -> gradConf
+                                 .colors(Color.BLACK, Color.CYAN, Color.GREEN, Color.MAGENTA)
+                                 .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
+                                 .transition(UI.Transition.BOTTOM_LEFT_TO_TOP_RIGHT)
+                                 .type(UI.GradientType.CONIC)
+                                 .focus(26,16)
+                             )
+                         )
+            var ui9 =
+                         UI.label("Full Top Bottom").withStyle( it -> it
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .border(2, Color.DARK_GRAY)
+                             .size(120, 120)
+                             .gradient( gradConf -> gradConf
+                                 .colors(Color.BLACK, Color.CYAN, Color.GREEN, Color.MAGENTA)
+                                 .boundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)
+                                 .transition(UI.Transition.TOP_TO_BOTTOM)
+                                 .type(UI.GradientType.CONIC)
+                                 .focus(26,16)
+                             )
+                         )
+            var ui10 =
+                         UI.label("Full Bottom TOP").withStyle( it -> it
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .border(2, Color.DARK_GRAY)
+                             .size(120, 120)
+                             .gradient( gradConf -> gradConf
+                                 .colors(Color.BLACK, Color.CYAN, Color.GREEN, Color.MAGENTA)
+                                 .boundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)
+                                 .transition(UI.Transition.BOTTOM_TO_TOP)
+                                 .type(UI.GradientType.CONIC)
+                                 .focus(26,16)
+                             )
+                         )
+            var ui11 =
+                         UI.label("Full Left Right").withStyle( it -> it
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .border(2, Color.DARK_GRAY)
+                             .size(120, 120)
+                             .gradient( gradConf -> gradConf
+                                 .colors(Color.BLACK, Color.CYAN, Color.GREEN, Color.MAGENTA)
+                                 .boundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)
+                                 .transition(UI.Transition.LEFT_TO_RIGHT)
+                                 .type(UI.GradientType.CONIC)
+                                 .focus(26,16)
+                             )
+                         )
+            var ui12 =
+                         UI.label("Full Right Left").withStyle( it -> it
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .border(2, Color.DARK_GRAY)
+                             .size(120, 120)
+                             .gradient( gradConf -> gradConf
+                                 .colors(Color.BLACK, Color.CYAN, Color.GREEN, Color.MAGENTA)
+                                 .boundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)
+                                 .transition(UI.Transition.RIGHT_TO_LEFT)
+                                 .type(UI.GradientType.CONIC)
+                                 .focus(26,16)
+                             )
+                         )
+
+
+        when : 'We render the UIs into BufferedImage instances.'
+            var image1 = Utility.renderSingleComponent(ui1.get(JLabel))
+            var image2 = Utility.renderSingleComponent(ui2.get(JLabel))
+            var image3 = Utility.renderSingleComponent(ui3.get(JLabel))
+            var image4 = Utility.renderSingleComponent(ui4.get(JLabel))
+            var image5 = Utility.renderSingleComponent(ui5.get(JLabel))
+            var image6 = Utility.renderSingleComponent(ui6.get(JLabel))
+            var image7 = Utility.renderSingleComponent(ui7.get(JLabel))
+            var image8 = Utility.renderSingleComponent(ui8.get(JLabel))
+            var image9 = Utility.renderSingleComponent(ui9.get(JLabel))
+            var image10 = Utility.renderSingleComponent(ui10.get(JLabel))
+            var image11 = Utility.renderSingleComponent(ui11.get(JLabel))
+            var image12 = Utility.renderSingleComponent(ui12.get(JLabel))
+            var images = new BufferedImage[] {image1, image2, image3, image4, image5, image6, image7, image8, image9, image10, image11, image12}
+
+
+        then : 'The collage of images is as expected (compared with the snapshot above).'
+            Utility.similarityBetween(images, "components/conic-gradients-collage.png", 99) > 99
+
+        where : 'We test this using the following scaling values:'
+            scale << [1f, 1.25f, 1.75f, 2f]
+    }
+
+
 }
