@@ -376,9 +376,8 @@ final class ConicalGradientPaint implements Paint {
 
                 // KK: use memory allocated by raster directly
                 // Create data array with place for red, green, blue and alpha values
-                //final int[] data = new int[(TILE_WIDTH * TILE_HEIGHT * 4)];
-
-                final int[] data = new int[4];
+                final int[] data = new int[(TILE_WIDTH * TILE_HEIGHT * 4)];
+                //final int[] data = new int[4];
 
                 double dx;
                 double dy;
@@ -408,7 +407,6 @@ final class ConicalGradientPaint implements Paint {
 
                         // 0 degree on top
                         angle = Math.abs(Math.toDegrees(Math.acos(dx / distance)));
-
                         //angle = Math.abs(Math.toDegrees(-Math.atan2(dy, dx)));
 
                         if (dx >= 0 && dy <= 0) {
@@ -432,26 +430,26 @@ final class ConicalGradientPaint implements Paint {
                         // Check for each angle in fractionAngles array
                         for (int i = 0; i < MAX; i++) {
                             if ((angle >= FRACTION_ANGLES[i])) {
-                                currentRed = COLORS[i].getRed() * INT_TO_FLOAT_CONST + (angle - FRACTION_ANGLES[i]) * RED_STEP_LOOKUP[i];
+                                currentRed   = COLORS[i].getRed() * INT_TO_FLOAT_CONST + (angle - FRACTION_ANGLES[i]) * RED_STEP_LOOKUP[i];
                                 currentGreen = COLORS[i].getGreen() * INT_TO_FLOAT_CONST + (angle - FRACTION_ANGLES[i]) * GREEN_STEP_LOOKUP[i];
-                                currentBlue = COLORS[i].getBlue() * INT_TO_FLOAT_CONST + (angle - FRACTION_ANGLES[i]) * BLUE_STEP_LOOKUP[i];
+                                currentBlue  = COLORS[i].getBlue() * INT_TO_FLOAT_CONST + (angle - FRACTION_ANGLES[i]) * BLUE_STEP_LOOKUP[i];
                                 currentAlpha = COLORS[i].getAlpha() * INT_TO_FLOAT_CONST + (angle - FRACTION_ANGLES[i]) * ALPHA_STEP_LOOKUP[i];
                             }
                         }
 
                         // Fill data array with calculated color values
-                        // final int BASE = (tileY * TILE_WIDTH + tileX) * 4;
+                        final int BASE = (tileY * TILE_WIDTH + tileX) * 4;
 
-                        data[0 + 0] = (int) (currentRed   * 255);
-                        data[0 + 1] = (int) (currentGreen * 255);
-                        data[0 + 2] = (int) (currentBlue  * 255);
-                        data[0 + 3] = (int) (currentAlpha * 255);
-                        raster.setPixel(tileX, tileY, data);
+                        data[BASE + 0] = (int) (currentRed   * 255);
+                        data[BASE + 1] = (int) (currentGreen * 255);
+                        data[BASE + 2] = (int) (currentBlue  * 255);
+                        data[BASE + 3] = (int) (currentAlpha * 255);
+                        //raster.setPixel(tileX, tileY, data);
                     }
                 }
 
                 // Fill the raster with the data
-                //RASTER.setPixels(0, 0, TILE_WIDTH, TILE_HEIGHT, data);
+                raster.setPixels(0, 0, TILE_WIDTH, TILE_HEIGHT, data);
 
                 cachedRasters.put(index, raster);
                 return raster;
