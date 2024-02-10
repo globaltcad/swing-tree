@@ -255,35 +255,40 @@ final class ConicalGradientPaint implements Paint {
      * @param VALUE
      * @return Color calculated from a range of values by given value
      */
-    public static Color getColorFromFraction(final Color START_COLOR, final Color DESTINATION_COLOR, final int RANGE, final int VALUE) {
-        final float SOURCE_RED = START_COLOR.getRed() * INT_TO_FLOAT_CONST;
+    public static Color getColorFromFraction(
+        final Color START_COLOR,
+        final Color DESTINATION_COLOR,
+        final int RANGE,
+        final int VALUE
+    ) {
+        final float SOURCE_RED   = START_COLOR.getRed()   * INT_TO_FLOAT_CONST;
         final float SOURCE_GREEN = START_COLOR.getGreen() * INT_TO_FLOAT_CONST;
-        final float SOURCE_BLUE = START_COLOR.getBlue() * INT_TO_FLOAT_CONST;
+        final float SOURCE_BLUE  = START_COLOR.getBlue()  * INT_TO_FLOAT_CONST;
         final float SOURCE_ALPHA = START_COLOR.getAlpha() * INT_TO_FLOAT_CONST;
 
-        final float DESTINATION_RED = DESTINATION_COLOR.getRed() * INT_TO_FLOAT_CONST;
+        final float DESTINATION_RED   = DESTINATION_COLOR.getRed()   * INT_TO_FLOAT_CONST;
         final float DESTINATION_GREEN = DESTINATION_COLOR.getGreen() * INT_TO_FLOAT_CONST;
-        final float DESTINATION_BLUE = DESTINATION_COLOR.getBlue() * INT_TO_FLOAT_CONST;
+        final float DESTINATION_BLUE  = DESTINATION_COLOR.getBlue()  * INT_TO_FLOAT_CONST;
         final float DESTINATION_ALPHA = DESTINATION_COLOR.getAlpha() * INT_TO_FLOAT_CONST;
 
-        final float RED_DELTA = DESTINATION_RED - SOURCE_RED;
+        final float RED_DELTA   = DESTINATION_RED   - SOURCE_RED;
         final float GREEN_DELTA = DESTINATION_GREEN - SOURCE_GREEN;
-        final float BLUE_DELTA = DESTINATION_BLUE - SOURCE_BLUE;
+        final float BLUE_DELTA  = DESTINATION_BLUE  - SOURCE_BLUE;
         final float ALPHA_DELTA = DESTINATION_ALPHA - SOURCE_ALPHA;
 
-        final float RED_FRACTION = RED_DELTA / RANGE;
+        final float RED_FRACTION   = RED_DELTA   / RANGE;
         final float GREEN_FRACTION = GREEN_DELTA / RANGE;
-        final float BLUE_FRACTION = BLUE_DELTA / RANGE;
+        final float BLUE_FRACTION  = BLUE_DELTA  / RANGE;
         final float ALPHA_FRACTION = ALPHA_DELTA / RANGE;
 
-        float red = SOURCE_RED + RED_FRACTION * VALUE;
+        float red   = SOURCE_RED   + RED_FRACTION   * VALUE;
         float green = SOURCE_GREEN + GREEN_FRACTION * VALUE;
-        float blue = SOURCE_BLUE + BLUE_FRACTION * VALUE;
+        float blue  = SOURCE_BLUE  + BLUE_FRACTION  * VALUE;
         float alpha = SOURCE_ALPHA + ALPHA_FRACTION * VALUE;
 
-        red = red < 0f ? 0f : (red > 1f ? 1f : red);
+        red   = red   < 0f ? 0f : (red   > 1f ? 1f : red);
         green = green < 0f ? 0f : (green > 1f ? 1f : green);
-        blue = blue < 0f ? 0f : (blue > 1f ? 1f : blue);
+        blue  = blue  < 0f ? 0f : (blue  > 1f ? 1f : blue);
         alpha = alpha < 0f ? 0f : (alpha > 1f ? 1f : alpha);
 
         return new Color(red, green, blue, alpha);
@@ -316,8 +321,8 @@ final class ConicalGradientPaint implements Paint {
         return Transparency.TRANSLUCENT;
     }
 
-    private final class ConicalGradientPaintContext implements PaintContext {
-
+    private final class ConicalGradientPaintContext implements PaintContext
+    {
         final private Point2D CENTER;
         private final HashMap<Long, WritableRaster> cachedRasters;
         private final AffineTransform transform;
@@ -353,7 +358,6 @@ final class ConicalGradientPaint implements Paint {
                 else
                     return raster;
 
-
                 //get the rotation center in device space
                 final double ROTATION_CENTER_X = -X + CENTER.getX();
                 final double ROTATION_CENTER_Y = -Y + CENTER.getY();
@@ -364,13 +368,11 @@ final class ConicalGradientPaint implements Paint {
 
                 final int MAX = FRACTION_ANGLES.length - 1;
 
-
                 // KK: use memory allocated by raster directly
                 // Create data array with place for red, green, blue and alpha values
                 //final int[] data = new int[(TILE_WIDTH * TILE_HEIGHT * 4)];
 
                 final int[] data = new int[4];
-
 
                 double dx;
                 double dy;
@@ -434,13 +436,11 @@ final class ConicalGradientPaint implements Paint {
                         // Fill data array with calculated color values
                         // final int BASE = (tileY * TILE_WIDTH + tileX) * 4;
 
-                        data[0] = (int) (currentRed * 255);
+                        data[0 + 0] = (int) (currentRed   * 255);
                         data[0 + 1] = (int) (currentGreen * 255);
-                        data[0 + 2] = (int) (currentBlue * 255);
+                        data[0 + 2] = (int) (currentBlue  * 255);
                         data[0 + 3] = (int) (currentAlpha * 255);
                         raster.setPixel(tileX, tileY, data);
-
-
                     }
                 }
 
