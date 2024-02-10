@@ -3,7 +3,6 @@ package swingtree.style;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.ColorModel;
@@ -51,67 +50,46 @@ final class NoiseGradientPaint implements Paint
     }
 
 
-    private final Point2D CENTER;
-    private final float ANGLE_OFFSET;
-    private final float[] FRACTION_ANGLES;
-    private final float[] RED_STEP_LOOKUP;
-    private final float[] GREEN_STEP_LOOKUP;
-    private final float[] BLUE_STEP_LOOKUP;
-    private final float[] ALPHA_STEP_LOOKUP;
-    private final Color[] COLORS;
+    private final Point2D center;
+    private final float scale;
+    private final float[] localFractions;
+    private final float[] redStepLookup;
+    private final float[] greenStepLookup;
+    private final float[] blueStepLookup;
+    private final float[] alphaStepLookup;
+    private final Color[] colors;
     private static final float INT_TO_FLOAT_CONST = 1f / 255f;
     private CachedContext cached;
 
 
     public NoiseGradientPaint(
-        final boolean USE_DEGREES,
-        final Point2D CENTER,
-        final float   GIVEN_OFFSET,
-        final float[] GIVEN_FRACTIONS,
-        final Color[] GIVEN_COLORS
+        final Point2D center,
+        final float   scale,
+        final float[] fractions,
+        final Color[] colors
     )
     throws IllegalArgumentException
     {
+        this.scale = scale;
+
         // Check that fractions and colors are of the same size
-        if (GIVEN_FRACTIONS.length != GIVEN_COLORS.length) {
+        if (fractions.length != colors.length) {
             throw new IllegalArgumentException("Fractions and colors must be equal in size");
         }
 
-        final java.util.List<Float> fractionList = new java.util.ArrayList<Float>(GIVEN_FRACTIONS.length);
-        final float OFFSET;
-        if (USE_DEGREES) {
-            final float DEG_FRACTION = 1f / 360f;
-            if (Float.compare((GIVEN_OFFSET * DEG_FRACTION), -0.5f) == 0) {
-                OFFSET = -0.5f;
-            } else if (Float.compare((GIVEN_OFFSET * DEG_FRACTION), 0.5f) == 0) {
-                OFFSET = 0.5f;
-            } else {
-                OFFSET = (GIVEN_OFFSET * DEG_FRACTION);
+        final java.util.List<Float> fractionList = new java.util.ArrayList<Float>(fractions.length);
+        for (float f : fractions) {
+            if (f < 0 || f > 1) {
+                throw new IllegalArgumentException("Fraction values must be in the range 0 to 1: " + f);
             }
-            for (final float fraction : GIVEN_FRACTIONS) {
-                fractionList.add((fraction * DEG_FRACTION));
-            }
-        } else {
-            {
-                OFFSET = GIVEN_OFFSET;
-            }
-            for (final float fraction : GIVEN_FRACTIONS) {
-                fractionList.add(fraction);
-            }
+            fractionList.add(f);
         }
-
-        // Check for valid offset
-        if ( OFFSET >= 0.5f || OFFSET <= -0.5f ) {
-            throw new IllegalArgumentException("Offset has to be in the range of -0.5 to 0.5");
-        }
-
-        this.ANGLE_OFFSET = GIVEN_OFFSET;
 
         // Adjust fractions and colors array in the case where startvalue != 0.0f and/or endvalue != 1.0f
-        final java.util.List<Color> colorList = new java.util.ArrayList<Color>(GIVEN_COLORS.length);
-        colorList.addAll(java.util.Arrays.asList(GIVEN_COLORS));
+        final java.util.List<Color> colorList = new java.util.ArrayList<Color>(colors.length);
+        colorList.addAll(java.util.Arrays.asList(colors));
 
-        //KK: Calculate the Color at the top dead center (mix between first and last)
+        // Calculate the Color at the top dead center (mix between first and last)
         final Color start = colorList.get(0);
         final Color last = colorList.get(colorList.size()-1);
         final float centerVal = 1.0f - fractionList.get(fractionList.size()-1);
@@ -137,27 +115,27 @@ final class NoiseGradientPaint implements Paint
         }
 
         // Set the values
-        this.CENTER = CENTER;
-        COLORS = colorList.toArray(new Color[0]);
+        this.center = center;
+        this.colors = colorList.toArray(new Color[0]);
 
         // Prepare lookup table for the angles of each fraction
         final int MAX_FRACTIONS = fractionList.size();
-        this.FRACTION_ANGLES = new float[MAX_FRACTIONS];
+        this.localFractions = new float[MAX_FRACTIONS];
         for (int i = 0; i < MAX_FRACTIONS; i++) {
-            FRACTION_ANGLES[i] = fractionList.get(i) * 360f;
+            localFractions[i] = fractionList.get(i);
         }
 
         // Prepare lookup tables for the color stepsize of each color
-        RED_STEP_LOOKUP = new float[COLORS.length];
-        GREEN_STEP_LOOKUP = new float[COLORS.length];
-        BLUE_STEP_LOOKUP = new float[COLORS.length];
-        ALPHA_STEP_LOOKUP = new float[COLORS.length];
+        this.redStepLookup   = new float[this.colors.length];
+        this.greenStepLookup = new float[this.colors.length];
+        this.blueStepLookup  = new float[this.colors.length];
+        this.alphaStepLookup = new float[this.colors.length];
 
-        for (int i = 0; i < (COLORS.length - 1); i++) {
-            RED_STEP_LOOKUP[i]   = ((COLORS[i + 1].getRed()   - COLORS[i].getRed()) * INT_TO_FLOAT_CONST)   / (FRACTION_ANGLES[i + 1] - FRACTION_ANGLES[i]);
-            GREEN_STEP_LOOKUP[i] = ((COLORS[i + 1].getGreen() - COLORS[i].getGreen()) * INT_TO_FLOAT_CONST) / (FRACTION_ANGLES[i + 1] - FRACTION_ANGLES[i]);
-            BLUE_STEP_LOOKUP[i]  = ((COLORS[i + 1].getBlue()  - COLORS[i].getBlue()) * INT_TO_FLOAT_CONST)  / (FRACTION_ANGLES[i + 1] - FRACTION_ANGLES[i]);
-            ALPHA_STEP_LOOKUP[i] = ((COLORS[i + 1].getAlpha() - COLORS[i].getAlpha()) * INT_TO_FLOAT_CONST) / (FRACTION_ANGLES[i + 1] - FRACTION_ANGLES[i]);
+        for (int i = 0; i < (this.colors.length - 1); i++) {
+            this.redStepLookup[i]   = ((this.colors[i + 1].getRed()   - this.colors[i].getRed()) * INT_TO_FLOAT_CONST)   / (localFractions[i + 1] - localFractions[i]);
+            this.greenStepLookup[i] = ((this.colors[i + 1].getGreen() - this.colors[i].getGreen()) * INT_TO_FLOAT_CONST) / (localFractions[i + 1] - localFractions[i]);
+            this.blueStepLookup[i]  = ((this.colors[i + 1].getBlue()  - this.colors[i].getBlue()) * INT_TO_FLOAT_CONST)  / (localFractions[i + 1] - localFractions[i]);
+            this.alphaStepLookup[i] = ((this.colors[i + 1].getAlpha() - this.colors[i].getAlpha()) * INT_TO_FLOAT_CONST) / (localFractions[i + 1] - localFractions[i]);
         }
     }
 
@@ -211,13 +189,13 @@ final class NoiseGradientPaint implements Paint
 
         //KK - speed up repaints by caching the context
         if (cached != null) {
-            ConicalGradientPaintContext c = cached.get(DEVICE_BOUNDS, CENTER, TRANSFORM);
+            ConicalGradientPaintContext c = cached.get(DEVICE_BOUNDS, center, TRANSFORM);
             if (c != null)
                 return c;
         }
 
-        ConicalGradientPaintContext context = new ConicalGradientPaintContext(CENTER, TRANSFORM);
-        cached = new CachedContext(DEVICE_BOUNDS, CENTER, TRANSFORM, context);
+        ConicalGradientPaintContext context = new ConicalGradientPaintContext(center, TRANSFORM);
+        cached = new CachedContext(DEVICE_BOUNDS, center, TRANSFORM, context);
 
         return context;
     }
@@ -259,6 +237,7 @@ final class NoiseGradientPaint implements Paint
             final int TILE_WIDTH,
             final int TILE_HEIGHT
         ) {
+            System.out.println("getRaster "+X+" "+Y+" "+TILE_WIDTH+" "+TILE_HEIGHT);
             try {
                 long index = ((long)X << 32) | (long)Y;
                 WritableRaster raster = cachedRasters.get(index);
@@ -268,20 +247,11 @@ final class NoiseGradientPaint implements Paint
                 else
                     return raster;
 
-                //get the rotation center in device space
-                final double ROTATION_CENTER_X = -X + CENTER.getX();
-                final double ROTATION_CENTER_Y = -Y + CENTER.getY();
-
-                //Convert to user space
-                Point2D rotationCenter = transform.inverseTransform(new Point2D.Double(ROTATION_CENTER_X, ROTATION_CENTER_Y), null); //device to user
-
-                final int MAX = FRACTION_ANGLES.length - 1;
+                final int MAX = localFractions.length - 1;
 
                 // Create data array with place for red, green, blue and alpha values
                 final int[] data = new int[(TILE_WIDTH * TILE_HEIGHT * 4)];
 
-                double dx;
-                double dy;
                 double angle;
                 double currentRed = 0;
                 double currentGreen = 0;
@@ -291,49 +261,17 @@ final class NoiseGradientPaint implements Paint
                 for (int tileY = 0; tileY < TILE_HEIGHT; tileY++) {
                     for (int tileX = 0; tileX < TILE_WIDTH; tileX++) {
 
-                        Point2D d = transform.inverseTransform(new Point2D.Double(tileX, tileY), null); //device to user
-
-                        // Calculate the distance between the current position and the rotation angle
-                        dx = d.getX() - rotationCenter.getX();
-                        dy = d.getY() - rotationCenter.getY();
-
-                        //KK: simplify by just taking the arctangent
-                        double distance = Math.sqrt(dx * dx + dy * dy);
-
-                        // Avoid division by zero
-                        if (distance == 0) {
-                            distance = 1;
-                        }
-
-                        // 0 degree on top
-                        angle = Math.abs(Math.toDegrees(Math.acos(dx / distance)));
-                        //angle = Math.abs(Math.toDegrees(-Math.atan2(dy, dx)));
-
-                        if (dx >= 0 && dy <= 0) {
-                            angle = 90.0 - angle;
-                        } else if (dx >= 0 && dy >= 0) {
-                            angle += 90.0;
-                        } else if (dx <= 0 && dy >= 0) {
-                            angle += 90.0;
-                        } else if (dx <= 0 && dy <= 0) {
-                            angle = 450.0 - angle;
-                        }
-
-                        angle += ANGLE_OFFSET;
-
-                        if (angle > 360.0) {
-                            angle -= 360.0;
-                        } else if (angle < 0.0) {
-                            angle += 360.0;
-                        }
+                        int x = (int) (X + tileX + CENTER.getX());
+                        int y = (int) (Y + tileY + CENTER.getY());
+                        angle = _coordinateToHeight(x, y);
 
                         // Check for each angle in fractionAngles array
                         for (int i = 0; i < MAX; i++) {
-                            if ((angle >= FRACTION_ANGLES[i])) {
-                                currentRed   = COLORS[i].getRed()   * INT_TO_FLOAT_CONST + (angle - FRACTION_ANGLES[i]) * RED_STEP_LOOKUP[i];
-                                currentGreen = COLORS[i].getGreen() * INT_TO_FLOAT_CONST + (angle - FRACTION_ANGLES[i]) * GREEN_STEP_LOOKUP[i];
-                                currentBlue  = COLORS[i].getBlue()  * INT_TO_FLOAT_CONST + (angle - FRACTION_ANGLES[i]) * BLUE_STEP_LOOKUP[i];
-                                currentAlpha = COLORS[i].getAlpha() * INT_TO_FLOAT_CONST + (angle - FRACTION_ANGLES[i]) * ALPHA_STEP_LOOKUP[i];
+                            if ((angle >= localFractions[i])) {
+                                currentRed   = colors[i].getRed()   * INT_TO_FLOAT_CONST + (angle - localFractions[i]) * redStepLookup[i];
+                                currentGreen = colors[i].getGreen() * INT_TO_FLOAT_CONST + (angle - localFractions[i]) * greenStepLookup[i];
+                                currentBlue  = colors[i].getBlue()  * INT_TO_FLOAT_CONST + (angle - localFractions[i]) * blueStepLookup[i];
+                                currentAlpha = colors[i].getAlpha() * INT_TO_FLOAT_CONST + (angle - localFractions[i]) * alphaStepLookup[i];
                             }
                         }
 
@@ -353,28 +291,51 @@ final class NoiseGradientPaint implements Paint
                 cachedRasters.put(index, raster);
                 return raster;
             }
-            catch (NoninvertibleTransformException ex) {
+            catch (Exception ex) {
                 System.err.println(ex);
                 return null;
             }
         }
 
     }
-    
+
+    double _coordinateToHeight( float x, float y ) {
+        final int subPixelDivision = 16;
+        final int maxDistance = subPixelDivision / 2;
+        double height = 0;
+        for ( int i0 = 0; i0 < subPixelDivision; i0++ ) {
+            for ( int i1 = 0; i1 < subPixelDivision; i1++ ) {
+                final float xi = ( i0 - maxDistance ) + x;
+                final float yi = ( i1 - maxDistance ) + y;
+                final int rx = Math.round( xi );
+                final int ry = Math.round( yi );
+                final boolean takeGaussian = 0.05 > _fractionFrom( _floatCoordinatesToLongBits( rx, ry ) );
+                if ( takeGaussian ) {
+                    final double vx = xi - x;
+                    final double vy = yi - y;
+                    final double distance = Math.sqrt( vx * vx + vy * vy );
+                    final double relevance = Math.max(0, 1.0 - distance / maxDistance);
+                    final double frac = _fractionFrom(_floatCoordinatesToLongBits(ry, rx));
+                    height = ( height * (1.0 - relevance) ) + ( frac * relevance );
+                }
+            }
+        }
+        return height;
+    }
+
     /**
      *  Takes 2 floats defining an x and y coordinate and returns a long
      *  which is the bits of the two floats consecutively concatenated.
      */
-    private static long _floatCoordinatesToLongBits(float x, float y ) {
-        int xi = Float.floatToRawIntBits(x);
-        int yi = Float.floatToRawIntBits(y);
-        return ( (long) xi << 32 ) | (long) yi;
-    }
-
-    private static long _seedFromCoordinates( float x, float y )
-    {
-        long seed = _baseScramble( _floatCoordinatesToLongBits( x, y ) );
-        return (( seed * RANDOM_1 + RANDOM_2     ) ^ seed) ^ RANDOM_3;
+    private static long _floatCoordinatesToLongBits( float x, float y ) {
+        long xi = _baseScramble(Float.floatToRawIntBits(x/42.6372813208714286f));
+        long yi = _baseScramble(Float.floatToRawIntBits(y*0.90982650387f));
+        long hash = 91;
+        hash = hash * 7 + xi;
+        hash = hash * 31 + yi;
+        hash = hash * 11 - xi;
+        hash = hash * 5 - yi;
+        return _baseScramble( hash );//( (long) xi << 32 ) | (long) yi;
     }
 
     public static long _baseScramble( long seed ) {
@@ -406,28 +367,11 @@ final class NoiseGradientPaint implements Paint
         return _next(1, _nextSeed(seed)) != 0;
     }
 
-    public static double _gaussianFrom( long seed )
+    public static double _fractionFrom(long seed )
     {
-        // See Knuth, ACP, Section 3.4.1 Algorithm C.
-        double v1, v2, s;
-        do {
-            long seed1 = _nextSeed(seed );
-            long seed2 = _nextSeed(seed1);
-            long seed3 = _nextSeed(seed2);
-            long seed4 = _nextSeed(seed3);
-            v1 = 2 * _nextDouble( seed1, seed2 ) - 1; // between -1 and 1
-            v2 = 2 * _nextDouble( seed3, seed4 ) - 1; // between -1 and 1
-            s = v1 * v1 + v2 * v2;
-            seed = seed4;
-        }
-        while ( s >= 1 || s == 0 );
-
-        double multiplier = StrictMath.sqrt( -2 * StrictMath.log(s) / s );
-
-        if ( _boolFrom(seed) )
-            return v1 * multiplier;
-        else
-            return v2 * multiplier;
+        long seed1 = _nextSeed(seed );
+        long seed2 = _nextSeed(seed1);
+        return ((2 * _nextDouble( seed1, seed2 ) - 1)+1)/2;
     }
 
 }
