@@ -217,24 +217,6 @@ final class ConicalGradientPaint implements Paint {
             colorList.add(centerColor);
         }
 
-        // Recalculate the fractions and colors with the given offset
-        final java.util.Map<Float, Color> fractionColors = new LinkedHashMap<>();//recalculate(fractionList, colorList, OFFSET);
-        for ( int i = 0; i < fractionList.size(); i++ )
-        {
-            fractionColors.put(fractionList.get(i), colorList.get(i));
-        }
-
-        // Clear the original FRACTION_LIST and COLOR_LIST
-        fractionList.clear();
-        colorList.clear();
-
-        // Sort the hashmap by fraction and add the values to the FRACION_LIST and COLOR_LIST
-        final java.util.SortedSet<Float> sortedFractions = new java.util.TreeSet<Float>(fractionColors.keySet());
-        for (final Float CURRENT_FRACTION : sortedFractions) {
-            fractionList.add(CURRENT_FRACTION);
-            colorList.add(fractionColors.get(CURRENT_FRACTION));
-        }
-
         // Set the values
         this.CENTER = CENTER;
         COLORS = colorList.toArray(new Color[colorList.size()]);
