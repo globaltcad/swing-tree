@@ -199,22 +199,28 @@ final class ConicalGradientPaint implements Paint {
         colorList.addAll(java.util.Arrays.asList(GIVEN_COLORS));
 
         //KK: Calculate the Color at the top dead center (mix between first and last)
-        Color start = colorList.get(0);
-        Color last = colorList.get(colorList.size()-1);
-        float centerVal = 1.0f - fractionList.get(fractionList.size()-1);
-        float lastToStartRange = centerVal + fractionList.get(0);
-        Color centerColor = getColorFromFraction(last, start, (int)(lastToStartRange * 10000), (int)(centerVal * 10000));
+        final Color start = colorList.get(0);
+        final Color last = colorList.get(colorList.size()-1);
+        final float centerVal = 1.0f - fractionList.get(fractionList.size()-1);
+        final float lastToStartRange = centerVal + fractionList.get(0);
 
-        // Assure that fractions start with 0.0f
-        if (fractionList.get(0) != 0.0f) {
-            fractionList.add(0, 0.0f);
-            colorList.add(0, centerColor);
-        }
+        final float firstFraction = fractionList.get(0);
+        final float lastFraction  = fractionList.get(fractionList.size()-1);
 
-        // Assure that fractions end with 1.0f
-        if (fractionList.get(fractionList.size() - 1) != 1.0f) {
-            fractionList.add(1.0f);
-            colorList.add(centerColor);
+        if ( firstFraction != 0f || lastFraction != 1f ) {
+            Color centerColor = getColorFromFraction(last, start, (int)(lastToStartRange * 10000), (int)(centerVal * 10000));
+
+            // Assure that fractions start with 0.0f
+            if (firstFraction != 0.0f) {
+                fractionList.add(0, 0.0f);
+                colorList.add(0, centerColor);
+            }
+
+            // Assure that fractions end with 1.0f
+            if (lastFraction != 1.0f) {
+                fractionList.add(1.0f);
+                colorList.add(centerColor);
+            }
         }
 
         // Set the values
