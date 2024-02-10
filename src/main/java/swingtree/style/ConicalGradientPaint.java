@@ -255,7 +255,7 @@ final class ConicalGradientPaint implements Paint {
      * @param VALUE
      * @return Color calculated from a range of values by given value
      */
-    public static Color getColorFromFraction(
+    private static Color getColorFromFraction(
         final Color START_COLOR,
         final Color DESTINATION_COLOR,
         final int RANGE,
