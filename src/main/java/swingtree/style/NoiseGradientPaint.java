@@ -240,7 +240,6 @@ final class NoiseGradientPaint implements Paint
             final int TILE_WIDTH,
             final int TILE_HEIGHT
         ) {
-            System.out.println("getRaster "+X+" "+Y+" "+TILE_WIDTH+" "+TILE_HEIGHT);
             try {
                 long index = ((long)X << 32) | (long)Y;
                 WritableRaster raster = cachedRasters.get(index);
@@ -264,8 +263,18 @@ final class NoiseGradientPaint implements Paint
                 for (int tileY = 0; tileY < TILE_HEIGHT; tileY++) {
                     for (int tileX = 0; tileX < TILE_WIDTH; tileX++) {
 
-                        int x = (int) (center.getX() + (X + tileX) / scale);
-                        int y = (int) (center.getY() + (Y + tileY) / scale);
+                        float localX = (X + tileX);
+                        float localY = (Y + tileY);
+                        if ( rotation != 0f && rotation % 360f != 0f ) {
+                            final double angle = Math.toRadians(rotation);
+                            final double sin = Math.sin(angle);
+                            final double cos = Math.cos(angle);
+                            localX = (float) (localX * cos - localY * sin);
+                            localY = (float) (localX * sin + localY * cos);
+                        }
+                        float x = (float) (center.getX() + localX / scale);
+                        float y = (float) (center.getY() + localY / scale);
+
                         onGradientRange = _coordinateToGradValue(x, y);
 
                         // Check for each angle in fractionAngles array
@@ -302,7 +311,7 @@ final class NoiseGradientPaint implements Paint
 
     }
 
-    double _coordinateToGradValue(float x, float y ) {
+    double _coordinateToGradValue( float x, float y ) {
         final int subPixelDivision = 16;
         final int maxDistance = subPixelDivision / 2;
         double height = 0;
