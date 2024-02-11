@@ -207,15 +207,15 @@ final class NoiseGradientPaint implements Paint
 
     private final class ConicalGradientPaintContext implements PaintContext
     {
-        final private Point2D CENTER;
+        final private Point2D center;
         private final HashMap<Long, WritableRaster> cachedRasters;
         private final AffineTransform transform;
 
-        public ConicalGradientPaintContext(final Point2D CENTER, AffineTransform transform) {
+        public ConicalGradientPaintContext(final Point2D center, AffineTransform transform) {
             this.cachedRasters = new HashMap<>();
             this.transform = transform;
             try {
-                this.CENTER = transform.transform(CENTER, null);  //user to device
+                this.center = transform.transform(center, null);  //user to device
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
@@ -261,8 +261,8 @@ final class NoiseGradientPaint implements Paint
                 for (int tileY = 0; tileY < TILE_HEIGHT; tileY++) {
                     for (int tileX = 0; tileX < TILE_WIDTH; tileX++) {
 
-                        int x = (int) (X + tileX + CENTER.getX());
-                        int y = (int) (Y + tileY + CENTER.getY());
+                        int x = (int) (center.getX() + (X + tileX) / scale);
+                        int y = (int) (center.getY() + (Y + tileY) / scale);
                         angle = _coordinateToHeight(x, y);
 
                         // Check for each angle in fractionAngles array
