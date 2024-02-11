@@ -323,8 +323,8 @@ final class NoiseGradientPaint implements Paint
                 final int ry = Math.round( yi );
                 final boolean takeGaussian = 0.05 > _fractionFrom( _floatCoordinatesToLongBits( rx, ry ) );
                 if ( takeGaussian ) {
-                    final double vx = xi - x;
-                    final double vy = yi - y;
+                    final double vx = rx - x;
+                    final double vy = ry - y;
                     final double distance = Math.sqrt( vx * vx + vy * vy );
                     final double relevance = Math.max(0, 1.0 - distance / maxDistance);
                     final double frac = _fractionFrom(_floatCoordinatesToLongBits(ry, rx));
