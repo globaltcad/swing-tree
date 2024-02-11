@@ -52,6 +52,7 @@ final class NoiseGradientPaint implements Paint
 
     private final Point2D center;
     private final float scale;
+    private final float rotation;
     private final float[] localFractions;
     private final float[] redStepLookup;
     private final float[] greenStepLookup;
@@ -65,12 +66,14 @@ final class NoiseGradientPaint implements Paint
     public NoiseGradientPaint(
         final Point2D center,
         final float   scale,
+        final float   rotation,
         final float[] fractions,
         final Color[] colors
     )
     throws IllegalArgumentException
     {
         this.scale = scale;
+        this.rotation = rotation;
 
         // Check that fractions and colors are of the same size
         if (fractions.length != colors.length) {
@@ -252,7 +255,7 @@ final class NoiseGradientPaint implements Paint
                 // Create data array with place for red, green, blue and alpha values
                 final int[] data = new int[(TILE_WIDTH * TILE_HEIGHT * 4)];
 
-                double angle;
+                double onGradientRange;
                 double currentRed = 0;
                 double currentGreen = 0;
                 double currentBlue = 0;
@@ -263,15 +266,15 @@ final class NoiseGradientPaint implements Paint
 
                         int x = (int) (center.getX() + (X + tileX) / scale);
                         int y = (int) (center.getY() + (Y + tileY) / scale);
-                        angle = _coordinateToHeight(x, y);
+                        onGradientRange = _coordinateToGradValue(x, y);
 
                         // Check for each angle in fractionAngles array
                         for (int i = 0; i < MAX; i++) {
-                            if ((angle >= localFractions[i])) {
-                                currentRed   = colors[i].getRed()   * INT_TO_FLOAT_CONST + (angle - localFractions[i]) * redStepLookup[i];
-                                currentGreen = colors[i].getGreen() * INT_TO_FLOAT_CONST + (angle - localFractions[i]) * greenStepLookup[i];
-                                currentBlue  = colors[i].getBlue()  * INT_TO_FLOAT_CONST + (angle - localFractions[i]) * blueStepLookup[i];
-                                currentAlpha = colors[i].getAlpha() * INT_TO_FLOAT_CONST + (angle - localFractions[i]) * alphaStepLookup[i];
+                            if ((onGradientRange >= localFractions[i])) {
+                                currentRed   = colors[i].getRed()   * INT_TO_FLOAT_CONST + (onGradientRange - localFractions[i]) * redStepLookup[i];
+                                currentGreen = colors[i].getGreen() * INT_TO_FLOAT_CONST + (onGradientRange - localFractions[i]) * greenStepLookup[i];
+                                currentBlue  = colors[i].getBlue()  * INT_TO_FLOAT_CONST + (onGradientRange - localFractions[i]) * blueStepLookup[i];
+                                currentAlpha = colors[i].getAlpha() * INT_TO_FLOAT_CONST + (onGradientRange - localFractions[i]) * alphaStepLookup[i];
                             }
                         }
 
@@ -299,7 +302,7 @@ final class NoiseGradientPaint implements Paint
 
     }
 
-    double _coordinateToHeight( float x, float y ) {
+    double _coordinateToGradValue(float x, float y ) {
         final int subPixelDivision = 16;
         final int maxDistance = subPixelDivision / 2;
         double height = 0;
