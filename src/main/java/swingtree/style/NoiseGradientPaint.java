@@ -18,9 +18,14 @@ final class NoiseGradientPaint implements Paint
     private static final long   ADDEND = 0xBL;
     private static final long   MASK = (1L << 48) - 1;
     private static final double DOUBLE_UNIT = 0x1.0p-53; // 1.0 / (1L << 53)
-    private static final long RANDOM_1 = 0x105139C0C031L;
-    private static final long RANDOM_2 = 0x4c0e1e9f367dL;
-    private static final long RANDOM_3 = 0xa785a819cd72c6fdL;
+    private static final long RANDOM_1 = 257251024006901L;
+    private static final long RANDOM_2 = -92458265371817L;
+    private static final long RANDOM_3 = 243389330257175L;
+    private static final long RANDOM_4 = -0x6a3c08e3f9a3dL;
+    private static final long PRIME_1 = 12055296811267L;
+    private static final long PRIME_2 = 17461204521323L;
+    private static final long PRIME_3 = 28871271685163L;
+    private static final long PRIME_4 = 53982894593057L;
 
 
     /**
@@ -323,13 +328,13 @@ final class NoiseGradientPaint implements Paint
                 final float yi = ( i1 - maxDistance ) + y;
                 final int rx = Math.round( xi );
                 final int ry = Math.round( yi );
-                final boolean takeGaussian = 0.05 > _fractionFrom( _floatCoordinatesToLongBits( rx, ry ) );
+                final boolean takeGaussian = 0.05 > _fractionFrom( _pseudoRandomSeedFrom( rx, ry ) );
                 if ( takeGaussian ) {
                     final double vx = rx - x;
                     final double vy = ry - y;
                     final double distance = Math.sqrt( vx * vx + vy * vy );
                     final double relevance = Math.max(0, 1.0 - distance / maxDistance);
-                    final double frac = _fractionFrom(_floatCoordinatesToLongBits(ry, rx));
+                    final double frac = _fractionFrom(_pseudoRandomSeedFrom(ry, rx));
                     height = ( height * (1.0 - relevance) ) + ( frac * relevance );
                 }
             }
@@ -341,15 +346,15 @@ final class NoiseGradientPaint implements Paint
      *  Takes 2 floats defining an x and y coordinate and returns a long
      *  which is the bits of the two floats consecutively concatenated.
      */
-    private static long _floatCoordinatesToLongBits( float x, float y ) {
+    private static long _pseudoRandomSeedFrom( float x, float y ) {
         long xi = _baseScramble(Float.floatToRawIntBits(x/42.6372813208714286f));
         long yi = _baseScramble(Float.floatToRawIntBits(y*0.90982650387f));
-        long hash = 91;
-        hash = hash * 7 + xi;
-        hash = hash * 31 + yi;
-        hash = hash * 11 - xi;
-        hash = hash * 5 - yi;
-        return _baseScramble( hash );//( (long) xi << 32 ) | (long) yi;
+        long hash = xi - yi;
+        hash = ( hash * PRIME_1 + xi ) ^ RANDOM_1;
+        hash = ( hash * PRIME_2 + yi ) ^ RANDOM_2;
+        hash = ( hash * PRIME_3 - xi ) ^ RANDOM_3;
+        hash = ( hash * PRIME_4 - yi ) ^ RANDOM_4;
+        return _baseScramble( hash );
     }
 
     public static long _baseScramble( long seed ) {
