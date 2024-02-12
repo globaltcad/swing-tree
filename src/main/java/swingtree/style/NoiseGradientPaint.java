@@ -263,14 +263,16 @@ final class NoiseGradientPaint implements Paint
                 for (int tileY = 0; tileY < TILE_HEIGHT; tileY++) {
                     for (int tileX = 0; tileX < TILE_WIDTH; tileX++) {
 
-                        float localX = (X + tileX);
-                        float localY = (Y + tileY);
+                        double localX = ( X + tileX );
+                        double localY = ( Y + tileY );
                         if ( rotation != 0f && rotation % 360f != 0f ) {
                             final double angle = Math.toRadians(rotation);
-                            final double sin = Math.sin(angle);
-                            final double cos = Math.cos(angle);
-                            localX = (float) (localX * cos - localY * sin);
-                            localY = (float) (localX * sin + localY * cos);
+                            final double sin   = Math.sin(angle);
+                            final double cos   = Math.cos(angle);
+                            final double newX = localX * cos - localY * sin;
+                            final double newY = localX * sin + localY * cos;
+                            localX = newX;
+                            localY = newY;
                         }
                         float x = (float) (center.getX() + localX / scale);
                         float y = (float) (center.getY() + localY / scale);
