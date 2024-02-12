@@ -268,8 +268,8 @@ final class NoiseGradientPaint implements Paint
                 for (int tileY = 0; tileY < TILE_HEIGHT; tileY++) {
                     for (int tileX = 0; tileX < TILE_WIDTH; tileX++) {
 
-                        double localX = ( X + tileX );
-                        double localY = ( Y + tileY );
+                        double localX = ( X + tileX ) / scale - center.getX();
+                        double localY = ( Y + tileY ) / scale - center.getY();
                         if ( rotation != 0f && rotation % 360f != 0f ) {
                             final double angle = Math.toRadians(rotation);
                             final double sin   = Math.sin(angle);
@@ -279,8 +279,8 @@ final class NoiseGradientPaint implements Paint
                             localX = newX;
                             localY = newY;
                         }
-                        float x = (float) (center.getX() + localX / scale);
-                        float y = (float) (center.getY() + localY / scale);
+                        float x = (float) localX;
+                        float y = (float) localY;
 
                         onGradientRange = _coordinateToGradValue(x, y);
 
@@ -328,13 +328,13 @@ final class NoiseGradientPaint implements Paint
                 final float yi = ( i1 - maxDistance ) + y;
                 final int rx = Math.round( xi );
                 final int ry = Math.round( yi );
-                final boolean takeGaussian = 0.05 > _fractionFrom( _pseudoRandomSeedFrom( rx, ry ) );
+                final boolean takeGaussian = 0.05 > _fractionFrom( _pseudoRandomSeedFrom( ry, rx ) );
                 if ( takeGaussian ) {
                     final double vx = rx - x;
                     final double vy = ry - y;
                     final double distance = Math.sqrt( vx * vx + vy * vy );
                     final double relevance = Math.max(0, 1.0 - distance / maxDistance);
-                    final double frac = _fractionFrom(_pseudoRandomSeedFrom(ry, rx));
+                    final double frac = _fractionFrom(_pseudoRandomSeedFrom(rx, ry));
                     height = ( height * (1.0 - relevance) ) + ( frac * relevance );
                 }
             }
@@ -347,14 +347,14 @@ final class NoiseGradientPaint implements Paint
      *  which is the bits of the two floats consecutively concatenated.
      */
     private static long _pseudoRandomSeedFrom( float x, float y ) {
-        long xi = _baseScramble(Float.floatToRawIntBits(x/42.6372813208714286f));
-        long yi = _baseScramble(Float.floatToRawIntBits(y*0.90982650387f));
-        long hash = xi - yi;
+        long xi = Float.floatToRawIntBits(x);
+        long yi = Float.floatToRawIntBits(y);
+        long hash = _baseScramble(xi - yi);
         hash = ( hash * PRIME_1 + xi ) ^ RANDOM_1;
         hash = ( hash * PRIME_2 + yi ) ^ RANDOM_2;
         hash = ( hash * PRIME_3 - xi ) ^ RANDOM_3;
         hash = ( hash * PRIME_4 - yi ) ^ RANDOM_4;
-        return _baseScramble( hash );
+        return hash;
     }
 
     public static long _baseScramble( long seed ) {
@@ -386,11 +386,11 @@ final class NoiseGradientPaint implements Paint
         return _next(1, _nextSeed(seed)) != 0;
     }
 
-    public static double _fractionFrom(long seed )
+    public static double _fractionFrom( long seed )
     {
         long seed1 = _nextSeed(seed );
         long seed2 = _nextSeed(seed1);
-        return ((2 * _nextDouble( seed1, seed2 ) - 1)+1)/2;
+        return _nextDouble( seed1, seed2 );
     }
 
 }
