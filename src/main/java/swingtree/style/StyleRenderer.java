@@ -653,7 +653,9 @@ final class StyleRenderer
                 return;
             }
 
-            if ( gradient.type() == UI.GradientType.CONIC )
+            if ( gradient.type() == UI.GradientType.NOISE )
+                _renderNoiseGradient(g2d, corner1, corner2, gradient, conf.areas().get(gradient.area()));
+            else if ( gradient.type() == UI.GradientType.CONIC )
                 _renderConicGradient(g2d, corner1, corner2, gradient, conf.areas().get(gradient.area()));
             else if ( gradient.type() == UI.GradientType.RADIAL )
                 _renderRadialGradient(g2d, corner1, corner2, gradient, conf.areas().get(gradient.area()));
@@ -692,6 +694,31 @@ final class StyleRenderer
 
         g2d.fill(specificArea);
     }
+
+
+    private static void _renderNoiseGradient(
+        final Graphics2D    g2d,
+        final Point2D.Float corner1,
+        final Point2D.Float corner2,
+        final GradientConf  gradient,
+        final Area          specificArea
+    ) {
+        final Color[] colors    = gradient.colors();
+        final float[] fractions = _fractionsFrom(gradient);
+        float rotation = gradient.rotation() + _rotationBetween(corner1, corner2);
+        float scale = gradient.size();
+
+        g2d.setPaint(new NoiseGradientPaint(
+                        corner1,
+                        scale,
+                        rotation,
+                        fractions,
+                        colors
+                    ));
+
+        g2d.fill(specificArea);
+    }
+
 
     /**
      *  Renders a shade from the top left corner to the bottom right corner.
