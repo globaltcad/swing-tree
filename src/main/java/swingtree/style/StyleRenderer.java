@@ -713,7 +713,8 @@ final class StyleRenderer
                         scale,
                         rotation,
                         fractions,
-                        colors
+                        colors,
+                        NoiseFunctions::_coordinateToGradValue
                     ));
 
         g2d.fill(specificArea);

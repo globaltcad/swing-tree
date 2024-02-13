@@ -9,25 +9,12 @@ import java.awt.image.ColorModel;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.stream.IntStream;
 
 
 final class NoiseGradientPaint implements Paint
 {
-    private static final long   MULTIPLIER = 0x5DEECE66DL;
-    private static final long   ADDEND = 0xBL;
-    private static final long   MASK = (1L << 48) - 1;
-    private static final double DOUBLE_UNIT = 0x1.0p-53; // 1.0 / (1L << 53)
-    private static final long RANDOM_1 = 257251024006901L;
-    private static final long RANDOM_2 = -92458265371817L;
-    private static final long RANDOM_3 = 243389330257175L;
-    private static final long RANDOM_4 = -0x6a3c08e3f9a3dL;
-    private static final long PRIME_1 = 12055296811267L;
-    private static final long PRIME_2 = 17461204521323L;
-    private static final long PRIME_3 = 28871271685163L;
-    private static final long PRIME_4 = 53982894593057L;
-
-
     /**
      * Cache for the context - when the bounds, center, and transform are unchanged, then the context is the same
      */
@@ -38,6 +25,7 @@ final class NoiseGradientPaint implements Paint
         private final AffineTransform transform;
 
         private final ConicalGradientPaintContext cachedContext;
+
 
         private CachedContext(Rectangle bounds, Point2D center, AffineTransform transform, ConicalGradientPaintContext context) {
             this.bounds = bounds;
@@ -58,6 +46,7 @@ final class NoiseGradientPaint implements Paint
     private final Point2D center;
     private final float scale;
     private final float rotation;
+    private final NoiseFunction noiseFunction;
     private final float[] localFractions;
     private final float[] redStepLookup;
     private final float[] greenStepLookup;
@@ -73,12 +62,14 @@ final class NoiseGradientPaint implements Paint
         final float   scale,
         final float   rotation,
         final float[] fractions,
-        final Color[] colors
+        final Color[] colors,
+        final NoiseFunction noiseFunction
     )
     throws IllegalArgumentException
     {
-        this.scale = scale;
-        this.rotation = rotation;
+        this.scale         = scale;
+        this.rotation      = rotation;
+        this.noiseFunction = Objects.requireNonNull(noiseFunction);
 
         // Check that fractions and colors are of the same size
         if (fractions.length != colors.length) {
@@ -188,14 +179,14 @@ final class NoiseGradientPaint implements Paint
 
 
     @Override
-    public PaintContext createContext(final ColorModel COLOR_MODEL,
-                                               final Rectangle DEVICE_BOUNDS,
-                                               final Rectangle2D USER_BOUNDS,
-                                               final AffineTransform TRANSFORM,
-                                               final RenderingHints HINTS) {
+    public PaintContext createContext(
+        final ColorModel      COLOR_MODEL,
+        final Rectangle       DEVICE_BOUNDS,
+        final Rectangle2D     USER_BOUNDS,
+        final AffineTransform TRANSFORM,
+        final RenderingHints  HINTS
+    ) {
 
-
-        //KK - speed up repaints by caching the context
         if (cached != null) {
             ConicalGradientPaintContext c = cached.get(DEVICE_BOUNDS, center, TRANSFORM);
             if (c != null)
@@ -217,11 +208,9 @@ final class NoiseGradientPaint implements Paint
     {
         final private Point2D center;
         private final HashMap<Long, WritableRaster> cachedRasters;
-        private final AffineTransform transform;
 
         public ConicalGradientPaintContext(final Point2D center, AffineTransform transform) {
             this.cachedRasters = new HashMap<>();
-            this.transform = transform;
             try {
                 this.center = transform.transform(center, null);  //user to device
             } catch (Exception ex) {
@@ -229,9 +218,7 @@ final class NoiseGradientPaint implements Paint
             }
         }
 
-        @Override
-        public void dispose() {
-        }
+        @Override public void dispose() {}
 
         @Override
         public ColorModel getColorModel() {
@@ -285,7 +272,7 @@ final class NoiseGradientPaint implements Paint
                             float x = (float) localX;
                             float y = (float) localY;
 
-                            onGradientRange = _coordinateToGradValue(x, y);
+                            onGradientRange = noiseFunction.getFractionAt( x, y );
 
                             // Check for each angle in fractionAngles array
                             for (int i = 0; i < MAX; i++) {
@@ -318,81 +305,6 @@ final class NoiseGradientPaint implements Paint
             }
         }
 
-    }
-
-    double _coordinateToGradValue( float x, float y ) {
-        final int subPixelDivision = 16;
-        final int maxDistance = subPixelDivision / 2;
-        double height = 0;
-        for ( int i0 = 0; i0 < subPixelDivision; i0++ ) {
-            for ( int i1 = 0; i1 < subPixelDivision; i1++ ) {
-                final float xi = ( i0 - maxDistance ) + x;
-                final float yi = ( i1 - maxDistance ) + y;
-                final int rx = Math.round( xi );
-                final int ry = Math.round( yi );
-                final boolean takeGaussian = 0.05 > _fractionFrom( _pseudoRandomSeedFrom( ry, rx ) );
-                if ( takeGaussian ) {
-                    final double vx = rx - x;
-                    final double vy = ry - y;
-                    final double distance = Math.sqrt( vx * vx + vy * vy );
-                    final double relevance = Math.max(0, 1.0 - distance / maxDistance);
-                    final double frac = _fractionFrom(_pseudoRandomSeedFrom(rx, ry));
-                    height = ( height * (1.0 - relevance) ) + ( frac * relevance );
-                }
-            }
-        }
-        return height;
-    }
-
-    /**
-     *  Takes 2 floats defining an x and y coordinate and returns a long
-     *  which is the bits of the two floats consecutively concatenated.
-     */
-    private static long _pseudoRandomSeedFrom( float x, float y ) {
-        long xi = Float.floatToRawIntBits(x);
-        long yi = Float.floatToRawIntBits(y);
-        long hash = _baseScramble(xi - yi);
-        hash = ( hash * PRIME_1 + xi ) ^ RANDOM_1;
-        hash = ( hash * PRIME_2 + yi ) ^ RANDOM_2;
-        hash = ( hash * PRIME_3 - xi ) ^ RANDOM_3;
-        hash = ( hash * PRIME_4 - yi ) ^ RANDOM_4;
-        return hash;
-    }
-
-    public static long _baseScramble( long seed ) {
-        return ADDEND + (seed ^ MULTIPLIER) & MASK;
-    }
-
-
-    private static double _nextDouble( long seed1, long seed2 ) {
-        return (((long)(_next(26, seed1)) << 27) + _next(27, seed2)) * DOUBLE_UNIT;
-    }
-
-    private static long _nextSeed( long currentSeed )
-    {
-        long oldseed, nextseed;
-        do {
-            oldseed = currentSeed;
-            nextseed = (oldseed * MULTIPLIER + ADDEND) & MASK;
-        } while ( oldseed == (currentSeed = nextseed) );
-        return nextseed;
-    }
-
-    private static int _intFrom( long seed ) {
-        return _next(32, _nextSeed(seed));
-    }
-
-    private static int _next( int bits, long seed ) { return (int)(seed >>> (48 - bits)); }
-
-    private static boolean _boolFrom( long seed ) {
-        return _next(1, _nextSeed(seed)) != 0;
-    }
-
-    public static double _fractionFrom( long seed )
-    {
-        long seed1 = _nextSeed(seed );
-        long seed2 = _nextSeed(seed1);
-        return _nextDouble( seed1, seed2 );
     }
 
 }
