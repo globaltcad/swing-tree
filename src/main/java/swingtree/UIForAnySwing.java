@@ -582,23 +582,41 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     /**
-     *  Use this to make the wrapped UI component opaque.
+     *  <s>Use this to make the wrapped UI component opaque.</s>
+     *  <br>
+     *  @deprecated The opaqueness flag is considered an implementation detail
+     *              which is managed by the SwingTree style engine automatically.
+     *              Setting this flag manually can lead to rendering artifacts
+     *              when a component does not fully paint over its area... <br>
+     *              <b>Please use a background with a transparent background instead of
+     *              using this flag for removing the background of a component!</b>
+     *
      *  @param isOpaque The truth value determining if the UI component should be opaque or not.
      *  @return This very instance, which enables builder-style method chaining.
      */
+    @Deprecated
     public final I isOpaqueIf( boolean isOpaque ) {
         return _with( c -> c.setOpaque( isOpaque ) )._this();
     }
 
     /**
-     *  Use this to dynamically make the wrapped UI component opaque.
+     *  <s>Use this</s> to dynamically make the wrapped UI component opaque.
      *  This is useful if you want to make a component opaque only if a certain condition is met.
      *  <br>
      *  <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
+     *  <br>
+     *  @deprecated The opaqueness flag is considered an implementation detail
+     *              which is managed by the SwingTree style engine automatically.
+     *              Setting this flag manually can lead to rendering artifacts
+     *              when a component does not fully paint over its area... <br>
+     *              <b>Please use a background with a transparent background instead of
+     *              using this flag for removing the background of a component!</b>
+     *
      *  @param isOpaque The truth value determining if the UI component should be opaque or not wrapped in a {@link Val}.
      *  @return This very instance, which enables builder-style method chaining.
      */
+    @Deprecated
     public final I isOpaqueIf( Val<Boolean> isOpaque ) {
         NullUtil.nullArgCheck( isOpaque, "isOpaque", Val.class );
         NullUtil.nullPropertyCheck(isOpaque, "isOpaque", "Null value for isOpaque is not allowed! A boolean should only have the values true or false!");
@@ -612,23 +630,41 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     /**
-     *  Use this to make the wrapped UI component opaque if the given condition is not met.
+     *  <s>Use this</s> to make the wrapped UI component opaque if the given condition is not met.
+     *  <br>
+     *  @deprecated The opaqueness flag is considered an implementation detail
+     *              which is managed by the SwingTree style engine automatically.
+     *              Setting this flag manually can lead to rendering artifacts
+     *              when a component does not fully paint over its area... <br>
+     *              <b>Please use a background with a transparent background instead of
+     *              using this flag for removing the background of a component!</b>
+     *
      *  @param notOpaque The truth value determining if the UI component should be opaque or not, where false means opaque.
      *  @return This very instance, which enables builder-style method chaining.
      */
+    @Deprecated
     public final I isOpaqueIfNot( boolean notOpaque ) {
         return _with( c -> c.setOpaque( !notOpaque ) )._this();
     }
 
     /**
-     *  Use this to dynamically make the wrapped UI component opaque if the boolean item of the given {@link Val} is false.
+     *  <s>Use this</s> to dynamically make the wrapped UI component opaque if the boolean item of the given {@link Val} is false.
      *  This is useful if you want to make a component opaque only if a certain condition is not met.
      *  <br>
      *  <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
+     *  <br>
+     *  @deprecated The opaqueness flag is considered an implementation detail
+     *              which is managed by the SwingTree style engine automatically.
+     *              Setting this flag manually can lead to rendering artifacts
+     *              when a component does not fully paint over its area... <br>
+     *              <b>Please use a background with a transparent background instead of
+     *              using this flag for removing the background of a component!</b>
+     *
      *  @param notOpaque The truth value determining if the UI component should be opaque or not, wrapped in a {@link Val}, where false means opaque.
      *  @return This very instance, which enables builder-style method chaining.
      */
+    @Deprecated
     public final I isOpaqueIfNot( Val<Boolean> notOpaque ) {
         NullUtil.nullArgCheck( notOpaque, "notOpaque", Val.class );
         NullUtil.nullPropertyCheck(notOpaque, "notOpaque", "Null value for isOpaque is not allowed! A boolean should only have the values true or false!");

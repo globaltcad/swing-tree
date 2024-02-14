@@ -47,7 +47,7 @@ class Styled_Component_Border_Inset_Spec extends Specification
                     UI.textField("I am fancy! :)").withLayout("fill, ins 0").withPrefSize(190, 25)
                     .withStyle( it -> it
                         .fontSize(16)
-                        .padding(0, 0, 0, 26)
+                        .paddingLeft(26)
                         .marginRight(25)
                         .paddingRight(-20)
                         .image(UI.Layer.BORDER, image -> image
@@ -60,18 +60,18 @@ class Styled_Component_Border_Inset_Spec extends Specification
                     .add("right",
                         UI.button(19, 19, new ImageIcon(trees))
                         .withStyle( it -> it
-                            .margin(0)
+                            .padding(0)
                             .cursor(UI.Cursor.HAND)
                         )
                         .makePlain()
                     );
         and : 'We unpack the component and its border:'
-            var component = ui.getComponent()
+            var component = ui.get(JTextField)
             var border = component.getBorder()
 
 
         expect : 'The insets are as expected.'
-            border.getBorderInsets(component) == new Insets(2, 2 + (int)(26*uiScale), 2, (int)(25*uiScale - 20*uiScale))
+            border.getBorderInsets(component) == new Insets(2, (int)(26*uiScale), 2, (int)(25*uiScale - 20*uiScale))
             border.getMarginInsets() == new Insets(0,0,0,(int)(25*uiScale))
             border.getPaddingInsets() == new Insets(0, (int)(26*uiScale), 0, (int)(-20*uiScale))
             border.getFullPaddingInsets() == new Insets(0, (int)(26*uiScale), 0, (int)(25*uiScale - 20*uiScale))
@@ -118,7 +118,7 @@ class Styled_Component_Border_Inset_Spec extends Specification
                     );
 
         and : 'We unpack the component and its border:'
-            var component = ui.getComponent()
+            var component = ui.get(JSlider)
             var border = component.getBorder()
 
 

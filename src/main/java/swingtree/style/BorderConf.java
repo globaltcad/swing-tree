@@ -261,8 +261,8 @@ final class BorderConf
         Arc simplifiedBottomLeftArc    = _bottomLeftArc.simplified();
         Arc simplifiedBottomRightArc   = _bottomRightArc.simplified();
         Outline simplifiedBorderWidths = _borderWidths.simplified();
-        Outline simplifiedMargin       = _margin; // Allowing the user to set an all 0 margin is needed for overriding the default margin (from former border!)
-        Outline simplifiedPadding      = _padding.simplified();
+        Outline simplifiedMargin       = _margin.simplified();
+        Outline simplifiedPadding      = _padding; // Allowing the user to set an all 0 padding is needed for overriding the default insets (from former border!)
         Color simplifiedBorderColor    = _borderColor != null && _borderColor.getAlpha() > 0 ? _borderColor : null;
 
         if ( simplifiedBorderColor == UI.COLOR_UNDEFINED)
