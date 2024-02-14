@@ -558,7 +558,7 @@ class Styles_Spec extends Specification
             uiScale << [ 1.0f, 1.5f, 2.0f, 2.25f, 3.0f ]
     }
 
-    def 'The border style will be simplified if padding and widths are all 0.'( float uiScale )
+    def 'The border style will be simplified if margin and widths are all 0.'( float uiScale )
     {
         reportInfo """
             Simplifying a style configuration means that if the properties of a style
@@ -581,7 +581,7 @@ class Styles_Spec extends Specification
                         UI.panel().withStyle(conf -> conf
                             .borderColor(Color.GREEN)
                             .borderWidths(0,0,0,0)
-                            .padding(0,0,0,0)
+                            .margin(0,0,0,0)
                             .borderRadiusAt(UI.Corner.TOP_LEFT, 0, 20)
                             .borderRadiusAt(UI.Corner.BOTTOM_LEFT, 10, 0)
                         )
@@ -640,7 +640,7 @@ class Styles_Spec extends Specification
                         "bottomWidth=?, " +
                         "leftWidth=" + String.valueOf(uiScale).replace(".0", "") + ", " +
                         "margin=Outline[top=?, right=?, bottom=?, left=${( uiScale % 1 == 0 ? "?" : 1 - uiScale % 1 )}], " +
-                        "padding=Outline[top=?, right=?, bottom=?, left=?], " +
+                        "padding=Outline[top=0, right=0, bottom=0, left=0], " +
                         "color=rgba(0,255,0,255)" +
                     "], " +
                     "BaseConf[" +

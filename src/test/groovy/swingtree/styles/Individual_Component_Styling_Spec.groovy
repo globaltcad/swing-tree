@@ -2032,7 +2032,7 @@ class Individual_Component_Styling_Spec extends Specification
                     UI.textField("I am fancy! :)").withLayout("fill, ins 0").withPrefSize(190, 25)
                     .withStyle( it -> it
                         .fontSize(16)
-                        .padding(0, 0, 0, 26)
+                        .paddingLeft(26)
                         .marginRight(25)
                         .paddingRight(-20)
                         .image(UI.Layer.BORDER, image -> image
@@ -2103,6 +2103,7 @@ class Individual_Component_Styling_Spec extends Specification
                     .withStyle( it -> it
                         .fontSize(16)
                         .fontAlignment(UI.HorizontalAlignment.LEFT)
+                        .padding(0)
                         .paddingLeft(10)
                         .margin(15)
                         .border(3, "orange")

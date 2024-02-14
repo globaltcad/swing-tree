@@ -171,10 +171,10 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
                 bottom = bottom / 2;
             }
 
-            float finalLeft   = conf.margin().left().isPresent()   ? 0f : left  ;
-            float finalTop    = conf.margin().top().isPresent()    ? 0f : top   ;
-            float finalRight  = conf.margin().right().isPresent()  ? 0f : right ;
-            float finalBottom = conf.margin().bottom().isPresent() ? 0f : bottom;
+            float finalLeft   = conf.padding().left().isPresent()   ? 0f : left  ;
+            float finalTop    = conf.padding().top().isPresent()    ? 0f : top   ;
+            float finalRight  = conf.padding().right().isPresent()  ? 0f : right ;
+            float finalBottom = conf.padding().bottom().isPresent() ? 0f : bottom;
             return Outline.of(finalTop, finalRight, finalBottom, finalLeft);
         }
     }
