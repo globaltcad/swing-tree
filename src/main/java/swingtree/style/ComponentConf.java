@@ -6,7 +6,6 @@ import swingtree.layout.Size;
 
 import javax.swing.JComponent;
 import javax.swing.border.Border;
-import java.awt.Insets;
 import java.util.Objects;
 
 /**
@@ -52,8 +51,7 @@ final class ComponentConf
         Outline outline = Outline.none();
         Border border = component.getBorder();
         if ( border instanceof StyleAndAnimationBorder ) {
-            Insets base = ((StyleAndAnimationBorder<?>) border).getBaseInsets(true);
-            outline = Outline.of(base.top, base.left, base.bottom, base.right);
+            outline = ((StyleAndAnimationBorder<?>) border).getDelegatedInsets(styleConf, true);
         }
 
         boolean sameStyle   = _styleConf.equals(styleConf);

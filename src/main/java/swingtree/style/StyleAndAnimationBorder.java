@@ -133,18 +133,18 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
     @Override
     public boolean isBorderOpaque() { return false; }
 
-    public Insets getBaseInsets(boolean adjust)
+    public Outline getDelegatedInsets( StyleConf conf, boolean adjust )
     {
         if ( !_canPaintFormerBorder() )
-            return new Insets(0, 0, 0, 0);
+            return Outline.of(0, 0, 0, 0);
 
         if ( _formerBorder == null )
-            return new Insets(0, 0, 0, 0);
+            return Outline.of(0, 0, 0, 0);
 
         boolean usesSwingTreeBorder = _compExt.getStyle().border().isVisible();
 
         if ( usesSwingTreeBorder )
-            return new Insets(0, 0, 0, 0);
+            return Outline.of(0, 0, 0, 0);
         else
         {
             Insets formerInsets = _formerBorder.getBorderInsets(_compExt.getOwner());
@@ -170,23 +170,28 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
                 right  = right  / 2;
                 bottom = bottom / 2;
             }
-            return new Insets(top, left, bottom, right);
+
+            float finalLeft   = conf.margin().left().isPresent()   ? 0f : left  ;
+            float finalTop    = conf.margin().top().isPresent()    ? 0f : top   ;
+            float finalRight  = conf.margin().right().isPresent()  ? 0f : right ;
+            float finalBottom = conf.margin().bottom().isPresent() ? 0f : bottom;
+            return Outline.of(finalTop, finalRight, finalBottom, finalLeft);
         }
     }
 
-    private void _calculateBorderInsets( StyleConf styleConf)
+    private void _calculateBorderInsets( StyleConf styleConf )
     {
-        Insets correction = getBaseInsets(false);
+        Outline correction = getDelegatedInsets(styleConf, false);
 
-        float left   = correction.left;
-        float top    = correction.top;
-        float right  = correction.right;
-        float bottom = correction.bottom;
+        float left   = correction.left().orElse(0f);
+        float top    = correction.top().orElse(0f);
+        float right  = correction.right().orElse(0f);
+        float bottom = correction.bottom().orElse(0f);
 
-        left   = styleConf.margin().left()  .orElse(left  );
-        top    = styleConf.margin().top()   .orElse(top   );
-        right  = styleConf.margin().right() .orElse(right );
-        bottom = styleConf.margin().bottom().orElse(bottom);
+        left   += styleConf.margin().left()  .orElse(0f);
+        top    += styleConf.margin().top()   .orElse(0f);
+        right  += styleConf.margin().right() .orElse(0f);
+        bottom += styleConf.margin().bottom().orElse(0f);
 
         // Add padding:
         left   += styleConf.padding().left().orElse(0f);
