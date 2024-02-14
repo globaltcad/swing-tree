@@ -67,11 +67,8 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
     {
         try {
             _compExt.paintBorderAndAnimations((Graphics2D) g, ()->{
-                if ( _formerBorder != null && !_borderWasNotPainted ) {
-                    BorderConf borderConf = _compExt.getStyle().border();
-                    if ( !borderConf.isVisible() )
-                        _paintFormerBorder(c, g, x, y, width, height);
-                }
+                if ( _canPaintFormerBorder() )
+                    _paintFormerBorder(c, g, x, y, width, height);
             });
         } catch ( Exception ex ) {
             /*
@@ -81,6 +78,15 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
             */
             log.error("Exception while painting border style '"+_compExt.getStyle().border()+"': ", ex);
         }
+    }
+
+    private boolean _canPaintFormerBorder() {
+        if ( _formerBorder != null && !_borderWasNotPainted ) {
+            BorderConf borderConf = _compExt.getStyle().border();
+            if ( !borderConf.isVisible() )
+                return true;
+        }
+        return false;
     }
 
     private void _paintFormerBorder( Component c, Graphics g, int x, int y, int width, int height ) {
@@ -129,6 +135,9 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
 
     public Insets getBaseInsets(boolean adjust)
     {
+        if ( !_canPaintFormerBorder() )
+            return new Insets(0, 0, 0, 0);
+
         if ( _formerBorder == null )
             return new Insets(0, 0, 0, 0);
 
@@ -206,7 +215,7 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
         }
     }
 
-    private void _calculateMarginInsets( StyleConf styleConf)
+    private void _calculateMarginInsets( StyleConf styleConf )
     {
         float left   = styleConf.margin().left().orElse(0f);
         float top    = styleConf.margin().top().orElse(0f);
