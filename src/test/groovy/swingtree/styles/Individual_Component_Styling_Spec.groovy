@@ -321,7 +321,7 @@ class Individual_Component_Styling_Spec extends Specification
         and : 'We create a panel with some custom styling!'
             var ui =
                        UI.panel().withBackground(UI.color("navy"))
-                       .isOpaqueIf(false) // We explicitly set the panel to be non-opaque.
+                       .peek( it -> it.setOpaque(false)) // We explicitly set the panel to be non-opaque.
                        .withStyle( it -> it
                            .borderRadius(42)
                            .size(180, 120)
@@ -357,7 +357,7 @@ class Individual_Component_Styling_Spec extends Specification
         """
             ui =
                 UI.panel()
-                .isOpaqueIf(false) // We explicitly set the panel to be non-opaque.
+                .peek( it -> it.setOpaque(false) ) // We explicitly set the panel to be non-opaque.
                 .withStyle( it -> it
                     .borderRadius(42)
                     .size(180, 120)
@@ -1900,7 +1900,7 @@ class Individual_Component_Styling_Spec extends Specification
         given : 'A hand full of UIs each with a single image painted repeatedly in a label.'
             var img = Utility.loadImage("img/trees.png")
             var ui1 =
-                        UI.label("Plain Repeat").isOpaqueIf(true)
+                        UI.label("Plain Repeat").peek( it -> it.setOpaque(true) )
                         .withStyle( it -> it
                             // No background color!
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
@@ -1914,7 +1914,7 @@ class Individual_Component_Styling_Spec extends Specification
                             )
                         )
             var ui2 =
-                        UI.label("Top Let Repeat").isOpaqueIf(false)
+                        UI.label("Top Let Repeat").peek( it -> it.setOpaque(false) )
                         .withStyle( it -> it
                             // No background color!
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
@@ -1929,7 +1929,7 @@ class Individual_Component_Styling_Spec extends Specification
                             )
                         )
             var ui3 =
-                        UI.label("Fill Height").isOpaqueIf(true)
+                        UI.label("Fill Height").peek( it -> it.setOpaque(true) )
                         .withStyle( it -> it
                             .backgroundColor("salmon") // Opacity is 1.0f
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
@@ -1943,7 +1943,7 @@ class Individual_Component_Styling_Spec extends Specification
                             )
                         )
             var ui4 =
-                        UI.label("Fill Width").isOpaqueIf(false)
+                        UI.label("Fill Width").peek( it -> it.setOpaque(false) )
                         .withStyle( it -> it
                             .backgroundColor("salmon") // Opacity is 1.0f
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
@@ -1958,7 +1958,7 @@ class Individual_Component_Styling_Spec extends Specification
                             )
                         )
             var ui5 =
-                        UI.label("Width 40").isOpaqueIf(true)
+                        UI.label("Width 40").peek( it -> it.setOpaque(true) )
                         .withStyle( it -> it
                             .backgroundColor(new Color(0,0,0,0)) // Opacity is 0.0f
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
@@ -1973,7 +1973,7 @@ class Individual_Component_Styling_Spec extends Specification
                             )
                         )
             var ui6 =
-                        UI.label("Height 40").isOpaqueIf(false)
+                        UI.label("Height 40").peek( it -> it.setOpaque(false) )
                         .withStyle( it -> it
                             .backgroundColor(new Color(0,0,0,0)) // Opacity is 0.0f
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
