@@ -169,6 +169,8 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
                 top    = top    / 2;
                 right  = right  / 2;
                 bottom = bottom / 2;
+
+                return Outline.of(top, right, bottom, left);
             }
 
             float finalLeft   = conf.padding().left().isPresent()   ? 0f : left  ;
