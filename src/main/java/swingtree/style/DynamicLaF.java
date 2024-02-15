@@ -96,10 +96,18 @@ final class DynamicLaF
                 If our style reveals what is behind it, then we need
                 to make the component non-opaque so that the previous rendering get's flushed out!
              */
-            result = _installCustomLaF(owner);
-        } else
-            if ( customLookAndFeelIsInstalled() )
+            try {
+                result = _installCustomLaF(owner);
+            } catch ( Exception e ) {
+                log.error("Failed to install custom LaF for component '"+owner+"'!", e);
+            }
+        } else if ( customLookAndFeelIsInstalled() ) {
+            try {
                 result = _uninstallCustomLaF(owner);
+            } catch ( Exception e ) {
+                log.error("Failed to uninstall custom LaF for component '"+owner+"'!", e);
+            }
+        }
 
         if ( _overrideWasNeeded != weNeedToOverrideLaF )
             return new DynamicLaF(result._styleLaF, result._formerLaF, weNeedToOverrideLaF);
@@ -243,8 +251,8 @@ final class DynamicLaF
             subcomponents.
         */
         try {
-            if ( owner instanceof SwingTreeComponent ) {
-                ((SwingTreeComponent) owner).setUISilently(laf);
+            if ( owner instanceof StylableComponent) {
+                ((StylableComponent) owner).setUISilently(laf);
                 laf.installUI(owner);
                 return true;
             }

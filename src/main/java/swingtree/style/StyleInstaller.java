@@ -164,7 +164,7 @@ final class StyleInstaller<C extends JComponent>
         final boolean hasBackground                      = newStyle.base().backgroundColor().isPresent();
         final boolean hasMargin                          = newStyle.margin().isPositive();
         final boolean hasOpaqueBorder                    = !(255 > newStyle.border().color().map(Color::getAlpha).orElse(0));
-        final boolean isSwingTreeComponent               = owner instanceof SwingTreeComponent;
+        final boolean isSwingTreeComponent               = owner instanceof StylableComponent;
         final boolean backgroundIsActuallyBackground =
                                     !( owner instanceof JTabbedPane ) &&
                                     !( owner instanceof JSlider     );

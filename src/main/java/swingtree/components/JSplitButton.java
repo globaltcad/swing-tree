@@ -24,7 +24,7 @@
 package swingtree.components;
 
 import swingtree.UI;
-import swingtree.style.SwingTreeComponent;
+import swingtree.style.StylableComponent;
 import swingtree.components.action.ButtonClickedActionListener;
 import swingtree.components.action.SplitButtonActionListener;
 import swingtree.components.action.SplitButtonClickedActionListener;
@@ -56,7 +56,7 @@ import java.io.Serializable;
  * @author Randall Wood 2016
  * @author Daniel Nepp 2023
  */
-public class JSplitButton extends JButton implements Serializable, SwingTreeComponent {
+public class JSplitButton extends JButton implements Serializable, StylableComponent {
 
     /**
      * Key used for serialization.
@@ -117,14 +117,12 @@ public class JSplitButton extends JButton implements Serializable, SwingTreeComp
 
     /** {@inheritDoc} */
     @Override public void paint(Graphics g){
-        ComponentExtension.from(this).paintBackgroundStyle( g, ()->{
-            super.paint(g);
-        });
+        paintBackground(g, ()->super.paint(g));
     }
 
     /** {@inheritDoc} */
-    @Override public void paintChildren(Graphics g){
-        ComponentExtension.from(this).paintForeground( (Graphics2D) g, ()->super.paintChildren(g) );
+    @Override public void paintChildren(Graphics g) {
+        paintForeground(g, ()->super.paintChildren(g));
     }
 
     @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }

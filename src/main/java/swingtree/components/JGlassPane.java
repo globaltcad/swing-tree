@@ -27,9 +27,11 @@ import java.util.Objects;
 
 import javax.swing.*;
 import javax.swing.event.EventListenerList;
+import javax.swing.plaf.ComponentUI;
 
 import net.miginfocom.swing.MigLayout;
 import swingtree.style.ComponentExtension;
+import swingtree.style.StylableComponent;
 
 /**
  *  A more advanced glass pane implementation than the default Swing
@@ -40,7 +42,7 @@ import swingtree.style.ComponentExtension;
  *  Also, cursors are handled as if the glass pane was invisible
  *  (if no cursor gets explicitly set to the glass pane).
  */
-public class JGlassPane extends JPanel implements AWTEventListener
+public class JGlassPane extends JPanel implements AWTEventListener, StylableComponent
 {
     private static final long serialVersionUID = 1L;
 
@@ -65,14 +67,16 @@ public class JGlassPane extends JPanel implements AWTEventListener
 
     /** {@inheritDoc} */
     @Override public void paint(Graphics g){
-        ComponentExtension.from(this).paintBackgroundStyle( g, ()->{
-            super.paint(g);
-        });
+        paintBackground(g, ()->super.paint(g));
     }
 
     /** {@inheritDoc} */
-    @Override public void paintChildren(Graphics g){
-        ComponentExtension.from(this).paintForeground( (Graphics2D) g, ()->super.paintChildren(g) );
+    @Override public void paintChildren(Graphics g) {
+        paintForeground(g, ()->super.paintChildren(g));
+    }
+
+    @Override public void setUISilently( ComponentUI ui ) {
+        this.ui = ui;
     }
 
     /**
