@@ -24,12 +24,14 @@
 package swingtree.components;
 
 import swingtree.UI;
+import swingtree.style.SwingTreeComponent;
 import swingtree.components.action.ButtonClickedActionListener;
 import swingtree.components.action.SplitButtonActionListener;
 import swingtree.components.action.SplitButtonClickedActionListener;
 import swingtree.style.ComponentExtension;
 
 import javax.swing.*;
+import javax.swing.plaf.ComponentUI;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
@@ -54,7 +56,7 @@ import java.io.Serializable;
  * @author Randall Wood 2016
  * @author Daniel Nepp 2023
  */
-public class JSplitButton extends JButton implements Serializable {
+public class JSplitButton extends JButton implements Serializable, SwingTreeComponent {
 
     /**
      * Key used for serialization.
@@ -124,6 +126,8 @@ public class JSplitButton extends JButton implements Serializable {
     @Override public void paintChildren(Graphics g){
         ComponentExtension.from(this).paintForeground( (Graphics2D) g, ()->super.paintChildren(g) );
     }
+
+    @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
 
     /**
      * Returns the JPopupMenu if set, null otherwise.

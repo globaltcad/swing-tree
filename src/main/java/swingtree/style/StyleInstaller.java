@@ -164,7 +164,7 @@ final class StyleInstaller<C extends JComponent>
         final boolean hasBackground                      = newStyle.base().backgroundColor().isPresent();
         final boolean hasMargin                          = newStyle.margin().isPositive();
         final boolean hasOpaqueBorder                    = !(255 > newStyle.border().color().map(Color::getAlpha).orElse(0));
-        final boolean isSwingTreeComponent               = _isNestedClassInUINamespace(owner);
+        final boolean isSwingTreeComponent               = owner instanceof SwingTreeComponent;
         final boolean backgroundIsActuallyBackground =
                                     !( owner instanceof JTabbedPane ) &&
                                     !( owner instanceof JSlider     );
@@ -632,21 +632,6 @@ final class StyleInstaller<C extends JComponent>
                 // ignore
             }
         }
-    }
-
-    private boolean _isNestedClassInUINamespace( C owner ) {
-        Class<UI> uiClass = UI.class;
-        Class<?>  componentClass = owner.getClass();
-        /*
-            Inside the UI namespace are nested classes extending various Swing components.
-            Here we check if the component is one of those nested classes.
-        */
-        while ( componentClass != null ) {
-            if ( componentClass.getEnclosingClass() == uiClass )
-                return true;
-            componentClass = componentClass.getSuperclass();
-        }
-        return false;
     }
 
     private void _uninstallCustomBorderBasedStyleAndAnimationRenderer( C owner ) {

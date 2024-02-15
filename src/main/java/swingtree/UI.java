@@ -15,6 +15,7 @@ import swingtree.api.*;
 import swingtree.api.model.BasicTableModel;
 import swingtree.api.model.TableListDataSource;
 import swingtree.api.model.TableMapDataSource;
+import swingtree.style.SwingTreeComponent;
 import swingtree.components.JBox;
 import swingtree.components.JIcon;
 import swingtree.components.JScrollPanels;
@@ -30,6 +31,7 @@ import swingtree.threading.EventProcessor;
 
 import javax.swing.*;
 import javax.swing.border.Border;
+import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.DimensionUIResource;
 import javax.swing.plaf.InsetsUIResource;
 import javax.swing.plaf.UIResource;
@@ -6593,67 +6595,80 @@ public final class UI extends UINamespaceUtilities
     }
 
     /** {inheritDoc} */
-    public static class Component extends JComponent {
+    public static class Component extends JComponent implements SwingTreeComponent {
         @Override public void paint(Graphics g){ _paintBackground(this, g, ()->super.paint(g)); }
         @Override public void paintChildren(Graphics g) { _paintForeground(this, g, ()->super.paintChildren(g)); }
+        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
-    public static class Panel extends JPanel {
+    public static class Panel extends JPanel implements SwingTreeComponent {
         @Override public void paint(Graphics g){ _paintBackground(this, g, ()->super.paint(g)); }
         @Override public void paintChildren(Graphics g) { _paintForeground(this, g, ()->super.paintChildren(g)); }
+
+        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
-    public static class Label extends JLabel {
+    public static class Label extends JLabel implements SwingTreeComponent {
         @Override public void paint(Graphics g){ _paintBackground(this, g, ()->super.paint(g)); }
         @Override public void paintChildren(Graphics g) { _paintForeground(this, g, ()->super.paintChildren(g)); }
+        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
-    public static class TextField extends JTextField {
+    public static class TextField extends JTextField implements SwingTreeComponent {
         @Override public void paint(Graphics g){ _paintBackground(this, g, ()->super.paint(g)); }
         @Override public void paintChildren(Graphics g) { _paintForeground(this, g, ()->super.paintChildren(g)); }
+        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
-    public static class TextArea extends JTextArea {
+    public static class TextArea extends JTextArea implements SwingTreeComponent {
         @Override public void paint(Graphics g){ _paintBackground(this, g, ()->super.paint(g)); }
         @Override public void paintChildren(Graphics g) { _paintForeground(this, g, ()->super.paintChildren(g)); }
+        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
-    public static class CheckBox extends JCheckBox {
+    public static class CheckBox extends JCheckBox implements SwingTreeComponent {
         @Override public void paint(Graphics g){ _paintBackground(this, g, ()->super.paint(g)); }
         @Override public void paintChildren(Graphics g) { _paintForeground(this, g, ()->super.paintChildren(g)); }
+        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
-    public static class Button extends JButton {
+    public static class Button extends JButton implements SwingTreeComponent {
         @Override public void paint(Graphics g){ _paintBackground(this, g, ()->super.paint(g)); }
         @Override public void paintChildren(Graphics g) { _paintForeground(this, g, ()->super.paintChildren(g)); }
+        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
-    public static class ToggleButton extends JToggleButton {
+    public static class ToggleButton extends JToggleButton implements SwingTreeComponent {
         @Override public void paint(Graphics g){ _paintBackground(this, g, ()->super.paint(g)); }
         @Override public void paintChildren(Graphics g) { _paintForeground(this, g, ()->super.paintChildren(g)); }
+        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
-    public static class RadioButton extends JRadioButton {
+    public static class RadioButton extends JRadioButton implements SwingTreeComponent {
         @Override public void paint(Graphics g){ _paintBackground(this, g, ()->super.paint(g)); }
         @Override public void paintChildren(Graphics g) { _paintForeground(this, g, ()->super.paintChildren(g)); }
+        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
-    public static class ComboBox<E> extends JComboBox<E> {
+    public static class ComboBox<E> extends JComboBox<E> implements SwingTreeComponent {
         @Override public void paint(Graphics g){ _paintBackground(this, g, ()->super.paint(g)); }
         @Override public void paintChildren(Graphics g) { _paintForeground(this, g, ()->super.paintChildren(g)); }
+        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
-    public static class List<E> extends JList<E> {
+    public static class List<E> extends JList<E> implements SwingTreeComponent {
         @Override public void paint(Graphics g){ _paintBackground(this, g, ()->super.paint(g)); }
         @Override public void paintChildren(Graphics g) { _paintForeground(this, g, ()->super.paintChildren(g)); }
+        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
-    public static class Table extends JTable {
+    public static class Table extends JTable implements SwingTreeComponent {
         @Override public void paint(Graphics g){ _paintBackground(this, g, ()->super.paint(g)); }
         @Override public void paintChildren(Graphics g) { _paintForeground(this, g, ()->super.paintChildren(g)); }
+        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
-    public static class TableHeader extends JTableHeader {
+    public static class TableHeader extends JTableHeader implements SwingTreeComponent {
         private Function<Integer, String> _toolTipTextSupplier;
         public TableHeader() { super(); }
         public TableHeader(TableColumnModel model) { super(model); }
@@ -6674,6 +6689,7 @@ public final class UI extends UINamespaceUtilities
         }
         @Override public void paint(Graphics g){ _paintBackground(this, g, ()->super.paint(g)); }
         @Override public void paintChildren(Graphics g) { _paintForeground(this, g, ()->super.paintComponent(g)); }
+        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
         @Override public String getToolTipText(MouseEvent e) {
             int col = columnAtPoint(e.getPoint());
             int modelCol = Optional.ofNullable(getTable())
@@ -6688,42 +6704,49 @@ public final class UI extends UINamespaceUtilities
         }
     }
     /** {inheritDoc} */
-    public static class Slider extends JSlider {
+    public static class Slider extends JSlider implements SwingTreeComponent {
         @Override public void paint(Graphics g){ _paintBackground(this, g, ()->super.paint(g)); }
         @Override public void paintChildren(Graphics g) { _paintForeground(this, g, ()->super.paintChildren(g)); }
+        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
-    public static class PopupMenu extends JPopupMenu {
+    public static class PopupMenu extends JPopupMenu implements SwingTreeComponent {
         @Override public void paint(Graphics g){ _paintBackground(this, g, ()->super.paint(g)); }
         @Override public void paintChildren(Graphics g) { _paintForeground(this, g, ()->super.paintChildren(g)); }
+        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
-    public static class MenuItem extends JMenuItem {
+    public static class MenuItem extends JMenuItem implements SwingTreeComponent {
         @Override public void paint(Graphics g){ _paintBackground(this, g, ()->super.paint(g)); }
         @Override public void paintChildren(Graphics g) { _paintForeground(this, g, ()->super.paintChildren(g)); }
+        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
-    public static class RadioButtonMenuItem extends JRadioButtonMenuItem {
+    public static class RadioButtonMenuItem extends JRadioButtonMenuItem implements SwingTreeComponent {
         @Override public void paint(Graphics g){ _paintBackground(this, g, ()->super.paint(g)); }
         @Override public void paintChildren(Graphics g) { _paintForeground(this, g, ()->super.paintChildren(g)); }
+        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
-     public static class CheckBoxMenuItem extends JCheckBoxMenuItem {
+     public static class CheckBoxMenuItem extends JCheckBoxMenuItem implements SwingTreeComponent {
          @Override public void paint(Graphics g){ _paintBackground(this, g, ()->super.paint(g)); }
          @Override public void paintChildren(Graphics g) { _paintForeground(this, g, ()->super.paintChildren(g)); }
+        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
      }
     /** {inheritDoc} */
-    public static class Menu extends JMenu {
+    public static class Menu extends JMenu implements SwingTreeComponent {
         @Override public void paint(Graphics g){ _paintBackground(this, g, ()->super.paint(g)); }
         @Override public void paintChildren(Graphics g) { _paintForeground(this, g, ()->super.paintChildren(g)); }
+        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
-    public static class MenuBar extends JMenuBar {
+    public static class MenuBar extends JMenuBar implements SwingTreeComponent {
         @Override public void paint(Graphics g){ _paintBackground(this, g, ()->super.paint(g)); }
         @Override public void paintChildren(Graphics g) { _paintForeground(this, g, ()->super.paintChildren(g)); }
+        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
-    public static class ScrollPane extends JScrollPane {
+    public static class ScrollPane extends JScrollPane implements SwingTreeComponent {
         public ScrollPane() { this(null); }
         public ScrollPane(java.awt.Component view) {
             super(view);
@@ -6731,62 +6754,74 @@ public final class UI extends UINamespaceUtilities
         }
         @Override public void paint(Graphics g){ _paintBackground(this, g, ()->super.paint(g)); }
         @Override public void paintChildren(Graphics g) { _paintForeground(this, g, ()->super.paintChildren(g)); }
+        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
-    public static class TabbedPane extends JTabbedPane {
+    public static class TabbedPane extends JTabbedPane implements SwingTreeComponent {
         @Override public void paint(Graphics g){ _paintBackground(this, g, ()->super.paint(g)); }
         @Override public void paintChildren(Graphics g) { _paintForeground(this, g, ()->super.paintChildren(g)); }
+        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
-    public static class ToolBar extends JToolBar {
+    public static class ToolBar extends JToolBar implements SwingTreeComponent {
         @Override public void paint(Graphics g){ _paintBackground(this, g, ()->super.paint(g)); }
         @Override public void paintChildren(Graphics g) { _paintForeground(this, g, ()->super.paintChildren(g)); }
+        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
-    public static class ToolTip extends JToolTip {
+    public static class ToolTip extends JToolTip implements SwingTreeComponent {
         @Override public void paint(Graphics g){ _paintBackground(this, g, ()->super.paint(g)); }
         @Override public void paintChildren(Graphics g) { _paintForeground(this, g, ()->super.paintChildren(g)); }
+        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
-    public static class Tree extends JTree {
+    public static class Tree extends JTree implements SwingTreeComponent {
         @Override public void paint(Graphics g){ _paintBackground(this, g, ()->super.paint(g)); }
         @Override public void paintChildren(Graphics g) { _paintForeground(this, g, ()->super.paintChildren(g)); }
+        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
-    public static class TextPane extends JTextPane {
+    public static class TextPane extends JTextPane implements SwingTreeComponent {
         @Override public void paint(Graphics g){ _paintBackground(this, g, ()->super.paint(g)); }
         @Override public void paintChildren(Graphics g) { _paintForeground(this, g, ()->super.paintChildren(g)); }
+        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
-    public static class Spinner extends JSpinner {
+    public static class Spinner extends JSpinner implements SwingTreeComponent {
         @Override public void paint(Graphics g){ _paintBackground(this, g, ()->super.paint(g)); }
         @Override public void paintChildren(Graphics g) { _paintForeground(this, g, ()->super.paintChildren(g)); }
+        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
-    public static class SplitPane extends JSplitPane {
+    public static class SplitPane extends JSplitPane implements SwingTreeComponent {
         SplitPane( Align align ) { super(align.forSplitPane()); }
         @Override public void paint(Graphics g){ _paintBackground(this, g, ()->super.paint(g)); }
         @Override public void paintChildren(Graphics g) { _paintForeground(this, g, ()->super.paintChildren(g)); }
+        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
-    public static class PasswordField extends JPasswordField {
+    public static class PasswordField extends JPasswordField implements SwingTreeComponent {
         @Override public void paint(Graphics g){ _paintBackground(this, g, ()->super.paint(g)); }
         @Override public void paintChildren(Graphics g) { _paintForeground(this, g, ()->super.paintChildren(g)); }
+        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
-    public static class ProgressBar extends JProgressBar {
+    public static class ProgressBar extends JProgressBar implements SwingTreeComponent {
         @Override public void paint(Graphics g){ _paintBackground(this, g, ()->super.paint(g)); }
         @Override public void paintChildren(Graphics g) { _paintForeground(this, g, ()->super.paintChildren(g)); }
+        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
-    public static class EditorPane extends JEditorPane {
+    public static class EditorPane extends JEditorPane implements SwingTreeComponent {
         @Override public void paint(Graphics g){ _paintBackground(this, g, ()->super.paint(g)); }
         @Override public void paintChildren(Graphics g) { _paintForeground(this, g, ()->super.paintChildren(g)); }
+        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {@inheritDoc} */
-    public static class FormattedTextField extends JFormattedTextField {
+    public static class FormattedTextField extends JFormattedTextField implements SwingTreeComponent {
         @Override public void paint(Graphics g){ _paintBackground(this, g, ()->super.paint(g)); }
         @Override public void paintChildren(Graphics g){ _paintForeground(this, g, ()->super.paintChildren(g)); }
+        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
     public static class Box extends JBox {/* Already implemented */}
