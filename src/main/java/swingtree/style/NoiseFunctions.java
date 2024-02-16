@@ -22,92 +22,59 @@ final class NoiseFunctions
     private NoiseFunctions(){}
 
 
-    static double _coordinateToGradValue( float x, float y ) {
-        final int subPixelDivision = 8;
-        final int maxDistance = subPixelDivision / 2;
-        double height = 0.5;
-        double sum = 0.0;
-        int samples = 0;
-        final int numberOfPoints = subPixelDivision*subPixelDivision;
-        final int padLeft = 0;
-        final int padRight = 1;
-        int xmin = 0;
-        int xmax = subPixelDivision;
-        int ymin = 0;
-        int ymax = subPixelDivision;
-        int i0 = 0;
-        int i1 = 0;
-        int nextLayerStartIndex = 0;
-        int lastLayerIndex = 0;
-
-        for ( int i = 0; i < numberOfPoints; i++ ) {
-            final int w  = Math.max(xmax - xmin - (padLeft+padRight), 0); // Minus 1 because one side is already taken
-            final int h = Math.max(ymax - ymin - (padLeft+padRight), 0);
-            final int currentLayerSize = ( w * 2 + h * 2 );
-            final int li = i - lastLayerIndex;
-            final int si = li / 4;
-            final int mode = li % 4;
-            final boolean top    = mode == 0;
-            final boolean bottom = mode == 1;
-            final boolean left   = mode == 2;
-            final boolean right  = mode == 3;
-
-            if ( nextLayerStartIndex == 0 )
-                nextLayerStartIndex = currentLayerSize;
-
-            boolean milestoneReached = ( i == nextLayerStartIndex - 1 );
-            int upcomingMilestone = nextLayerStartIndex;
-
-            if ( i == nextLayerStartIndex ) {
-                upcomingMilestone += currentLayerSize;
-            }
-            nextLayerStartIndex = upcomingMilestone;
-
-            if ( top ) {
-                i0 = xmin + ( si % w ) + padLeft; // from left to right
-                i1 = ymin;
-            }
-            if ( bottom ) {
-                i0 = xmax - ( si % w ) - 1 - padLeft; // from right to left
-                i1 = ymax - 1;
-            }
-            if ( left ) {
-                i0 = xmin;
-                i1 = ymax - ( si % h ) - 1 - padLeft; // from bottom to top
-            }
-            if ( right ) {
-                i0 = xmax - 1;
-                i1 = ymin + ( si % h ) + padLeft; // from top to bottom
-            }
-            if ( milestoneReached ) {
-                lastLayerIndex = i + 1;
-                xmin++;
-                xmax--;
-                ymin++;
-                ymax--;
-            }
-
-                final float xi = ( i0 - maxDistance ) + x;
-                final float yi = ( i1 - maxDistance ) + y;
+    static double _coordinateToGradValue( float xIn, float yIn ) {
+        final int kernelSize = 12;
+        final int maxDistance = kernelSize / 2;
+        double average = 0;
+        double sampleRate = 0.5;
+        double samplingSum = 1e-6;
+        for ( int x = 0; x < kernelSize; x++ ) {
+            for ( int y = 0; y < kernelSize; y++ ) {
+                final float xi = ( x - maxDistance ) + xIn;
+                final float yi = ( y - maxDistance ) + yIn;
                 final int rx = Math.round( xi );
                 final int ry = Math.round( yi );
-                byte b = _fastPseudoRandomByteSeedFrom( rx, ry );
-                final boolean takeGaussian = b < -100;//0.45 > _fractionFrom( _pseudoRandomSeedFrom( ry, rx ) );
+                final byte score = _fastPseudoRandomByteSeedFrom( rx, ry );
+                final boolean takeGaussian = (255 * sampleRate -128) > score;
                 if ( takeGaussian ) {
-                    final double vx = rx - x;
-                    final double vy = ry - y;
+                    final double vx = rx - xIn;
+                    final double vy = ry - yIn;
                     final double distance = Math.sqrt( vx * vx + vy * vy );
                     final double relevance = Math.max(0, 1.0 - distance / maxDistance);
-                    final double frac = _fractionFrom(_pseudoRandomSeedFrom(rx, ry));
-                    sum += (frac * relevance);
-                    samples++;
-                    height = ( height * (1.0 - relevance) ) + ( frac * relevance );
+                    final double frac = _fastPseudoRandomDoubleFrom(rx, ry) - 0.5;
+                    average += ( frac * relevance );
+                    samplingSum += relevance;
                 }
+            }
         }
-        return height;
-        //height = 1 - sum/samples;
-        // We increase the contrast of the noise by squaring the value
-        //return 1-Math.pow(height, Math.max(1,samples/3));
+        double scaler = 0.75 / ( sampleRate * samplingSum / kernelSize );
+        return fastPseudoSig(average * scaler);
+    }
+
+    private static double fastPseudoSig( double x ) {
+        return ( 1 + x * _invSqrt( 1d + x * x ) ) / 2;
+    }
+
+
+    /**
+     *  This is extremely fast and has virtually the same accuracy as {@code 1 / Math.pow(x, 0.5)}.
+     */
+    private static double _invSqrt(double x) {
+        double xhalf = 0.5d * x;
+        long i = Double.doubleToLongBits(x);
+        i = 0x5fe6ec85e7de30daL - (i >> 1);
+        x = Double.longBitsToDouble(i);
+        x *= (1.5d - xhalf * x * x);
+        x *= (1.5d - xhalf * x * x); // more accuracy...
+        x *= (1.5d - xhalf * x * x); // more accuracy...
+        x *= (1.5d - xhalf * x * x); // more accuracy...
+        return x;
+    }
+
+    private static double _fastPseudoRandomDoubleFrom( float x, float y ) {
+        final byte randomByte = (byte) (_fastPseudoRandomByteSeedFrom(x, y) + _fastPseudoRandomByteSeedFrom(y, x));
+        // The byte is in the range -128 to 127, so -128 is 0.0 and 127 is 1.0
+        return (randomByte + 128) / 255.0;
     }
 
     /**
@@ -125,9 +92,9 @@ final class NoiseFunctions
         return hash;
     }
 
-    private static byte _fastPseudoRandomByteSeedFrom(float x, float y ) {
+    private static byte _fastPseudoRandomByteSeedFrom( float x, float y ) {
         long part1 = Float.floatToRawIntBits(x) * PRIME_1;
-        long part2 = Float.floatToRawIntBits(y) * PRIME_2;
+        long part2 = Float.floatToRawIntBits(y) * part1;
         return _longSeedToByte(part1 ^ part2);
 
     }
@@ -172,80 +139,6 @@ final class NoiseFunctions
         long seed1 = _nextSeed(seed );
         long seed2 = _nextSeed(seed1);
         return _nextDouble( seed1, seed2 );
-    }
-
-    public static void main(String[] args) {
-
-        Set<Long> visited = new HashSet<>();
-
-        final int size = 16;
-        final int numberOfPoints = size*size;
-        final int padLeft = 0;
-        final int padRight = 1;
-        int xmin = 0;
-        int xmax = size;
-        int ymin = 0;
-        int ymax = size;
-        int x = 0;
-        int y = 0;
-        int nextLayerStartIndex = 0;
-        int lastLayerIndex = 0;
-
-        for ( int i = 0; i < numberOfPoints; i++ ) {
-            final int width  = Math.max(xmax - xmin - (padLeft+padRight), 0); // Minus 1 because one side is already taken
-            final int height = Math.max(ymax - ymin - (padLeft+padRight), 0);
-            final int currentLayerSize = ( width * 2 + height * 2 );
-            final int li = i - lastLayerIndex;
-            final int si = li / 4;
-            final int mode = li % 4;
-            final boolean top    = mode == 0;
-            final boolean bottom = mode == 1;
-            final boolean left   = mode == 2;
-            final boolean right  = mode == 3;
-
-            if ( nextLayerStartIndex == 0 )
-                nextLayerStartIndex = currentLayerSize;
-
-            boolean milestoneReached = ( i == nextLayerStartIndex - 1 );
-            int upcomingMilestone = nextLayerStartIndex;
-
-            if ( i == nextLayerStartIndex ) {
-                upcomingMilestone += currentLayerSize;
-            }
-            nextLayerStartIndex = upcomingMilestone;
-
-            if ( top ) {
-                x = xmin + ( si % width ) + padLeft; // from left to right
-                y = ymin;
-            }
-            if ( bottom ) {
-                x = xmax - ( si % width ) - 1 - padLeft; // from right to left
-                y = ymax - 1;
-            }
-            if ( left ) {
-                x = xmin;
-                y = ymax - ( si % height ) - 1 - padLeft; // from bottom to top
-            }
-            if ( right ) {
-                x = xmax - 1;
-                y = ymin + ( si % height ) + padLeft; // from top to bottom
-            }
-            //System.out.println( (1+i)+"/"+(size*size)+"-> " + mode + " : "+si+"?"+height+"->( " + x + " " + y + " ) |"+rowIsDone+"|"+i+":"+(nextLayerStartIndex)+"| xminmax: " + xmin + "<" + xmax + " yminmax: " + ymin + "<" + ymax + " || "+si+"=("+i+"-"+lastLayerIndex+")/4" );
-            if ( milestoneReached ) {
-                lastLayerIndex = i + 1;
-                xmin++;
-                xmax--;
-                ymin++;
-                ymax--;
-                System.out.println("We go to next segment!!");
-            }
-
-            long posAsLong = ((long)x << 32) | (long)y;
-            if ( visited.contains(posAsLong) ) {
-                System.out.println("Already visited: " + x + " " + y);
-            }
-            visited.add(posAsLong);
-        }
     }
 
 }
