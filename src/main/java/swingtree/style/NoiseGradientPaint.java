@@ -287,10 +287,10 @@ final class NoiseGradientPaint implements Paint
                             // Fill data array with calculated color values
                             final int BASE = (tileY * TILE_WIDTH + tileX) * 4;
 
-                            data[BASE + 0] = (int) (currentRed   * 255);
-                            data[BASE + 1] = (int) (currentGreen * 255);
-                            data[BASE + 2] = (int) (currentBlue  * 255);
-                            data[BASE + 3] = (int) (currentAlpha * 255);
+                            data[BASE + 0] = (int) Math.round(currentRed   * 255);
+                            data[BASE + 1] = (int) Math.round(currentGreen * 255);
+                            data[BASE + 2] = (int) Math.round(currentBlue  * 255);
+                            data[BASE + 3] = (int) Math.round(currentAlpha * 255);
                         });
 
                 // Fill the raster with the data
