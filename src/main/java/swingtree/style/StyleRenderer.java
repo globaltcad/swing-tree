@@ -711,6 +711,7 @@ final class StyleRenderer
         g2d.setPaint(new NoiseGradientPaint(
                         corner1,
                         scale,
+                        scale,
                         rotation,
                         fractions,
                         colors,

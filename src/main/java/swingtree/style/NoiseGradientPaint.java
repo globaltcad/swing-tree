@@ -44,7 +44,8 @@ final class NoiseGradientPaint implements Paint
 
 
     private final Point2D center;
-    private final float scale;
+    private final float scaleX;
+    private final float scaleY;
     private final float rotation;
     private final NoiseFunction noiseFunction;
     private final float[] localFractions;
@@ -59,7 +60,8 @@ final class NoiseGradientPaint implements Paint
 
     public NoiseGradientPaint(
         final Point2D center,
-        final float   scale,
+        final float   scaleX,
+        final float   scaleY,
         final float   rotation,
         final float[] fractions,
         final Color[] colors,
@@ -67,7 +69,8 @@ final class NoiseGradientPaint implements Paint
     )
     throws IllegalArgumentException
     {
-        this.scale         = scale;
+        this.scaleX        = scaleX;
+        this.scaleY        = scaleY;
         this.rotation      = rotation;
         this.noiseFunction = Objects.requireNonNull(noiseFunction);
 
@@ -258,8 +261,8 @@ final class NoiseGradientPaint implements Paint
                             int tileY = tileIndex / TILE_WIDTH;
                             int tileX = tileIndex % TILE_WIDTH;
 
-                            double localX = ( X + tileX - center.getX() ) / scale;
-                            double localY = ( Y + tileY - center.getY() ) / scale;
+                            double localX = ( X + tileX - center.getX() ) / scaleX;
+                            double localY = ( Y + tileY - center.getY() ) / scaleY;
                             if ( rotation != 0f && rotation % 360f != 0f ) {
                                 final double angle = Math.toRadians(rotation);
                                 final double sin   = Math.sin(angle);
