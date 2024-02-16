@@ -1,12 +1,14 @@
 package swingtree.components;
 
 import net.miginfocom.swing.MigLayout;
+import swingtree.style.StylableComponent;
 import swingtree.style.ComponentExtension;
 
 import javax.accessibility.Accessible;
 import javax.accessibility.AccessibleContext;
 import javax.accessibility.AccessibleRole;
 import javax.swing.*;
+import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.PanelUI;
 import java.awt.*;
 
@@ -27,7 +29,7 @@ import java.awt.*;
  *
  * @author Daniel Nepp
  */
-public class JBox extends JComponent implements Accessible
+public class JBox extends JComponent implements Accessible, StylableComponent
 {
     /**
      * @see #getUIClassID
@@ -84,14 +86,16 @@ public class JBox extends JComponent implements Accessible
 
     /** {@inheritDoc} */
     @Override public void paint(Graphics g){
-        ComponentExtension.from(this).paintBackgroundStyle( g, ()-> {
-            super.paint(g);
-        });
+        paintBackground(g, ()->super.paint(g));
     }
 
     /** {@inheritDoc} */
-    @Override public void paintChildren(Graphics g){
-        ComponentExtension.from(this).paintForeground( (Graphics2D) g, ()->super.paintChildren(g) );
+    @Override public void paintChildren(Graphics g) {
+        paintForeground(g, ()->super.paintChildren(g));
+    }
+
+    @Override public void setUISilently( ComponentUI ui ) {
+        this.ui = ui;
     }
 
     /**

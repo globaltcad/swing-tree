@@ -4,8 +4,10 @@ import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.api.IconDeclaration;
 import swingtree.style.ComponentExtension;
+import swingtree.style.StylableComponent;
 
 import javax.swing.*;
+import javax.swing.plaf.ComponentUI;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.util.Map;
@@ -16,7 +18,7 @@ import java.util.Map;
  *  this class is useful for styling purposes, as it is possible to specifically
  *  target icons inside of {@link swingtree.style.StyleSheet}s.
  */
-public class JIcon extends JLabel
+public class JIcon extends JLabel implements StylableComponent
 {
     public JIcon(String path) {
         super(_getFromCacheOrLoadFrom(IconDeclaration.of(path)));
@@ -54,15 +56,15 @@ public class JIcon extends JLabel
 
     /** {@inheritDoc} */
     @Override public void paint(Graphics g){
-        ComponentExtension.from(this).paintBackgroundStyle( g, ()->{
-            super.paint(g);
-        });
+        paintBackground(g, ()->super.paint(g));
     }
 
     /** {@inheritDoc} */
-    @Override public void paintChildren(Graphics g){
-        ComponentExtension.from(this).paintForeground( (Graphics2D) g, ()->super.paintChildren(g) );
+    @Override public void paintChildren(Graphics g) {
+        paintForeground(g, ()->super.paintChildren(g));
     }
+
+    @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
 
     @Override
     public void updateUI() {

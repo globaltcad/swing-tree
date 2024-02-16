@@ -24,12 +24,14 @@
 package swingtree.components;
 
 import swingtree.UI;
+import swingtree.style.StylableComponent;
 import swingtree.components.action.ButtonClickedActionListener;
 import swingtree.components.action.SplitButtonActionListener;
 import swingtree.components.action.SplitButtonClickedActionListener;
 import swingtree.style.ComponentExtension;
 
 import javax.swing.*;
+import javax.swing.plaf.ComponentUI;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
@@ -54,7 +56,7 @@ import java.io.Serializable;
  * @author Randall Wood 2016
  * @author Daniel Nepp 2023
  */
-public class JSplitButton extends JButton implements Serializable {
+public class JSplitButton extends JButton implements Serializable, StylableComponent {
 
     /**
      * Key used for serialization.
@@ -115,15 +117,15 @@ public class JSplitButton extends JButton implements Serializable {
 
     /** {@inheritDoc} */
     @Override public void paint(Graphics g){
-        ComponentExtension.from(this).paintBackgroundStyle( g, ()->{
-            super.paint(g);
-        });
+        paintBackground(g, ()->super.paint(g));
     }
 
     /** {@inheritDoc} */
-    @Override public void paintChildren(Graphics g){
-        ComponentExtension.from(this).paintForeground( (Graphics2D) g, ()->super.paintChildren(g) );
+    @Override public void paintChildren(Graphics g) {
+        paintForeground(g, ()->super.paintChildren(g));
     }
+
+    @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
 
     /**
      * Returns the JPopupMenu if set, null otherwise.

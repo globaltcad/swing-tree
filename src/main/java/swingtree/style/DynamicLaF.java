@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import org.slf4j.Logger;
 import swingtree.UI;
 import swingtree.components.JBox;
 import swingtree.components.JIcon;
@@ -23,6 +24,8 @@ import java.util.function.Supplier;
  */
 final class DynamicLaF
 {
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(DynamicLaF.class);
+
     private static final DynamicLaF _NONE = new DynamicLaF(null, null, false);
 
     static DynamicLaF none() { return _NONE; }
@@ -93,10 +96,18 @@ final class DynamicLaF
                 If our style reveals what is behind it, then we need
                 to make the component non-opaque so that the previous rendering get's flushed out!
              */
-            result = _installCustomLaF(owner);
-        } else
-            if ( customLookAndFeelIsInstalled() )
+            try {
+                result = _installCustomLaF(owner);
+            } catch ( Exception e ) {
+                log.error("Failed to install custom LaF for component '"+owner+"'!", e);
+            }
+        } else if ( customLookAndFeelIsInstalled() ) {
+            try {
                 result = _uninstallCustomLaF(owner);
+            } catch ( Exception e ) {
+                log.error("Failed to uninstall custom LaF for component '"+owner+"'!", e);
+            }
+        }
 
         if ( _overrideWasNeeded != weNeedToOverrideLaF )
             return new DynamicLaF(result._styleLaF, result._formerLaF, weNeedToOverrideLaF);
@@ -111,60 +122,68 @@ final class DynamicLaF
         ComponentUI styleLaF  = _styleLaF;
 
         if ( !customLookAndFeelIsInstalled() ) {
-            if (owner instanceof JBox) { // This is a SwinTree component, so it already has a custom LaF.
+            if (owner instanceof JBox) { // This is a SwingTree component, so it already has a custom LaF.
                 JBox p = (JBox) owner;
                 formerLaF = p.getUI();
-                //PanelUI laf = createJBoxUI();
-                //p.setUI(laf);
                 styleLaF = formerLaF;
-            } else if (owner instanceof JIcon) { // This is a SwinTree component, so it already has a custom LaF.
+            } else if (owner instanceof JIcon) { // This is a SwingTree component, so it already has a custom LaF.
                 JIcon i = (JIcon) owner;
                 formerLaF = i.getUI();
-                //LabelUI laf = createJIconUI();
-                //i.setUI(laf);
                 styleLaF = formerLaF;
             } else if (owner instanceof JPanel) {
                 JPanel p = (JPanel) owner;
                 formerLaF = p.getUI();
                 PanelStyler laf = PanelStyler.INSTANCE;
-                p.setUI(laf);
-                styleLaF = laf;
-                if ( formerLaF != null ) {
-                    PanelUI panelUI = (PanelUI) formerLaF;
-                    panelUI.installUI(p);
-                    // We make the former LaF believe that it is still in charge of the component.
+                boolean success = _tryInstallingUISilently(p, laf);
+                if ( !success ) {
+                    p.setUI(laf);
+                    if (formerLaF != null) {
+                        PanelUI panelUI = (PanelUI) formerLaF;
+                        panelUI.installUI(p);
+                        // We make the former LaF believe that it is still in charge of the component.
+                    }
                 }
+                styleLaF = laf;
             } else if (owner instanceof AbstractButton) {
                 AbstractButton b = (AbstractButton) owner;
                 formerLaF = b.getUI();
                 ButtonStyler laf = new ButtonStyler(b.getUI());
-                b.setUI(laf);
-                if ( formerLaF != null ) {
-                    ButtonUI buttonUI = (ButtonUI) formerLaF;
-                    buttonUI.installUI(b);
-                    // We make the former LaF believe that it is still in charge of the component.
+                boolean success = _tryInstallingUISilently(b, laf);
+                if ( !success ) {
+                    b.setUI(laf);
+                    if ( formerLaF != null ) {
+                        ButtonUI buttonUI = (ButtonUI) formerLaF;
+                        buttonUI.installUI(b);
+                        // We make the former LaF believe that it is still in charge of the component.
+                    }
                 }
                 styleLaF = laf;
             } else if (owner instanceof JLabel) {
                 JLabel l = (JLabel) owner;
                 formerLaF = l.getUI();
                 LabelStyler laf = new LabelStyler(l.getUI());
-                l.setUI(laf);
-                if (formerLaF != null) {
-                    LabelUI labelUI = (LabelUI) formerLaF;
-                    labelUI.installUI(l);
-                    // We make the former LaF believe that it is still in charge of the component.
+                boolean success = _tryInstallingUISilently(l, laf);
+                if ( !success ) {
+                    l.setUI(laf);
+                    if (formerLaF != null) {
+                        LabelUI labelUI = (LabelUI) formerLaF;
+                        labelUI.installUI(l);
+                        // We make the former LaF believe that it is still in charge of the component.
+                    }
                 }
                 styleLaF = laf;
             } else if (owner instanceof JTextField && !(owner instanceof JPasswordField)) {
                 JTextField t = (JTextField) owner;
                 formerLaF = t.getUI();
                 TextFieldStyler laf = new TextFieldStyler(t.getUI());
-                t.setUI(laf);
-                if ( formerLaF != null ) {
-                    TextUI textFieldUI = (TextUI) formerLaF;
-                    textFieldUI.installUI(t);
-                    // We make the former LaF believe that it is still in charge of the component.
+                boolean success = _tryInstallingUISilently(t, laf);
+                if ( !success ) {
+                    t.setUI(laf);
+                    if ( formerLaF != null ) {
+                        TextUI textFieldUI = (TextUI) formerLaF;
+                        textFieldUI.installUI(t);
+                        // We make the former LaF believe that it is still in charge of the component.
+                    }
                 }
                 styleLaF = laf;
             }
@@ -180,37 +199,70 @@ final class DynamicLaF
         if ( customLookAndFeelIsInstalled() ) {
             if ( _owner instanceof JPanel ) {
                 JPanel p = (JPanel) _owner;
-                p.setUI((PanelUI) _formerLaF);
+                boolean success = _tryInstallingUISilently(p, _formerLaF);
+                if ( !success )
+                    p.setUI((PanelUI) _formerLaF);
                 styleLaF = null;
             }
             if ( _owner instanceof JBox ) {
-                //JBox p = (JBox) _owner;
-                //p.setUI((PanelUI) _formerLaF);
+                // The JBox is a SwingTree native type, so it also enjoys the perks of having a SwingTree look and feel!
                 styleLaF = null;
             }
             if ( _owner instanceof JIcon ) {
-                //JBox p = (JBox) _owner;
-                //p.setUI((PanelUI) _formerLaF);
+                // The JIcon is a SwingTree native type, so it also enjoys the perks of having a SwingTree look and feel!
                 styleLaF = null;
             }
             else if ( _owner instanceof AbstractButton ) {
                 AbstractButton b = (AbstractButton) _owner;
-                b.setUI((ButtonUI) _formerLaF);
+                boolean success = _tryInstallingUISilently(b, _formerLaF);
+                if ( !success )
+                    b.setUI((ButtonUI) _formerLaF);
                 styleLaF = null;
             }
             else if ( _owner instanceof JLabel ) {
                 JLabel l = (JLabel) _owner;
-                l.setUI((LabelUI) _formerLaF);
+                boolean success = _tryInstallingUISilently(l, _formerLaF);
+                if ( !success )
+                    l.setUI((LabelUI) _formerLaF);
                 styleLaF = null;
             }
             else if ( _owner instanceof JTextField && !(_owner instanceof JPasswordField) ) {
                 JTextField t = (JTextField) _owner;
-                t.setUI((TextUI) _formerLaF);
+                boolean success = _tryInstallingUISilently(t, _formerLaF);
+                if ( !success )
+                    t.setUI((TextUI) _formerLaF);
                 styleLaF = null;
             }
         }
         return new DynamicLaF(styleLaF, _formerLaF, false);
     }
+
+    private static boolean _tryInstallingUISilently(
+        final JComponent  owner,
+        final ComponentUI laf
+    ) {
+        /*
+            We wish installing the UI by simply calling setUI(..) was so easy,
+            but it is not due to the fact that this method has a lot of unwanted side effects.
+            The biggest side effect is that it triggers a call to 'uninstallUI' on the former UI,
+            which in turn triggers more unwanted side effects.
+            Believe it or not, the BasicTextUI for example call the removeAll() method on the component
+            when it is uninstalled, which is a big problem when you have custom text fields with custom
+            subcomponents.
+        */
+        try {
+            if ( owner instanceof StylableComponent) {
+                ((StylableComponent) owner).setUISilently(laf);
+                laf.installUI(owner);
+                return true;
+            }
+        } catch (Exception e) {
+            log.error("Failed to install custom SwingTree UI for component '"+owner+"'!", e);
+        }
+        return false;
+    }
+
+
 
     void installCustomUIFor(JComponent owner )
     {
@@ -343,6 +395,7 @@ final class DynamicLaF
                 }
             }
         } catch ( Exception ex ) {
+            log.error("Failed to paint component through former UI", ex);
             ex.printStackTrace();
         }
     }

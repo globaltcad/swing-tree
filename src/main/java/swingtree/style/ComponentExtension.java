@@ -278,7 +278,7 @@ public final class ComponentExtension<C extends JComponent>
      * @param g The {@link Graphics} object to use for rendering.
      * @param lookAndFeelPaint A {@link Runnable} which is used to paint the look and feel of the component.
      */
-    public void paintBackgroundStyle( Graphics g, Runnable lookAndFeelPaint )
+    void paintBackgroundStyle( Graphics g, Runnable lookAndFeelPaint )
     {
         if ( _styleInstaller.customLookAndFeelIsInstalled() ) {
             if ( lookAndFeelPaint != null )
@@ -295,7 +295,7 @@ public final class ComponentExtension<C extends JComponent>
      * @param g2d The {@link Graphics2D} object to use for rendering.
      * @param superPaint A {@link Runnable} which is used to paint the look and feel of the component.
      */
-    public void paintForeground( Graphics2D g2d, Runnable superPaint )
+    void paintForeground( Graphics2D g2d, Runnable superPaint )
     {
         gatherApplyAndInstallStyleConfig();
 
