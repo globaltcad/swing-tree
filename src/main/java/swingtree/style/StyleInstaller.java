@@ -77,11 +77,13 @@ final class StyleInstaller<C extends JComponent>
         final boolean noShadowStyle           = StyleConf.none().hasEqualShadowsAs(newStyle);
         final boolean noPainters              = StyleConf.none().hasEqualPaintersAs(newStyle);
         final boolean noGradients             = StyleConf.none().hasEqualGradientsAs(newStyle);
+        final boolean noNoises                = StyleConf.none().hasEqualNoisesAs(newStyle);
         final boolean noImages                = StyleConf.none().hasEqualImagesAs(newStyle);
         final boolean noProperties            = StyleConf.none().hasEqualPropertiesAs(newStyle);
 
         final boolean allShadowsAreBorderShadows     = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) || styleLayer.shadows().everyNamedStyle(ns -> !ns.style().color().isPresent() ) );
         final boolean allGradientsAreBorderGradients = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) || styleLayer.gradients().everyNamedStyle(ns -> ns.style().colors().length == 0 ) );
+        final boolean allNoisesAreBorderNoises       = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) || styleLayer.noises().everyNamedStyle(ns -> ns.style().colors().length == 0 ) );
         final boolean allPaintersAreBorderPainters   = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) || styleLayer.painters().everyNamedStyle(ns -> Painter.none().equals(ns.style().painter()) ) );
         final boolean allImagesAreBorderImages       = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) || styleLayer.images().everyNamedStyle(ns -> !ns.style().image().isPresent() && !ns.style().primer().isPresent() ) );
 
@@ -94,6 +96,7 @@ final class StyleInstaller<C extends JComponent>
                                     noShadowStyle           &&
                                     noPainters              &&
                                     noGradients             &&
+                                    noNoises                &&
                                     noImages                &&
                                     noProperties;
 
@@ -107,14 +110,16 @@ final class StyleInstaller<C extends JComponent>
                                    noShadowStyle           &&
                                    noPainters              &&
                                    noGradients             &&
+                                   noNoises                &&
                                    noImages                &&
                                    noProperties;
 
         final boolean styleCanBeRenderedThroughBorder = (
-                                                       (noBaseStyle || !newStyle.base().hasAnyColors())    &&
+                                                       (noBaseStyle || !newStyle.base().hasAnyColors())  &&
                                                        (noShadowStyle || allShadowsAreBorderShadows)     &&
                                                        (noPainters    || allPaintersAreBorderPainters)   &&
                                                        (noGradients   || allGradientsAreBorderGradients) &&
+                                                       (noNoises      || allNoisesAreBorderNoises)       &&
                                                        (noImages      || allImagesAreBorderImages)
                                                    );
 

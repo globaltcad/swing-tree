@@ -406,7 +406,31 @@ public final class UI extends UINamespaceUtilities
      */
     public enum GradientType implements UIEnum<GradientType>
     {
-        LINEAR, RADIAL, CONIC, NOISE
+        LINEAR, RADIAL, CONIC
+    }
+
+    public enum NoiseType implements UIEnum<NoiseType>, NoiseFunction
+    {
+        STOCHASTIC(NoiseFunctions::stochastic),
+        SMOOTH_TOPOLOGY(NoiseFunctions::smoothTopology),
+        HARD_TOPOLOGY(NoiseFunctions::hardTopology),
+        SMOOTH_SPOTS(NoiseFunctions::smoothSpots),
+        HARD_SPOTS(NoiseFunctions::hardSpots),
+        GRAINY(NoiseFunctions::grainy),
+        TILES(NoiseFunctions::tiles),
+        FIBERS(NoiseFunctions::fibery);
+
+
+        private final NoiseFunction function;
+
+        NoiseType( NoiseFunction function ) {
+            this.function = function;
+        }
+
+        @Override
+        public double getFractionAt(float x, float y) {
+            return function.getFractionAt(x, y);
+        }
     }
 
     /**

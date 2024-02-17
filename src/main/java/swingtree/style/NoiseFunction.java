@@ -1,6 +1,6 @@
 package swingtree.style;
 
-interface NoiseFunction
+public interface NoiseFunction
 {
     double getFractionAt( float x, float y );
 }

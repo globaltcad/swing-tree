@@ -266,6 +266,25 @@ public final class GradientConf implements Simplifiable<GradientConf>
         return !foundTransparentColor;
     }
 
+    GradientConf _scale( double scale ) {
+        if ( _size > 0 && scale != 1 )
+            return of(
+                        _transition,
+                        _type,
+                        _colors,
+                        _offset.scale(scale),
+                        (float) (_size * scale),
+                        _area,
+                        _boundary,
+                        _focus.scale(scale),
+                        _rotation,
+                        _fractions,
+                        _cycle
+                    );
+        else
+            return this;
+    }
+
     /**
      *  Define a list of colors which will, as part of the gradient, transition from one
      *  to the next in the order they are specified.

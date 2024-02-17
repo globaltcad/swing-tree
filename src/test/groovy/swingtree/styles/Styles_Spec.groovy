@@ -215,6 +215,7 @@ class Styles_Spec extends Specification
                                                 "], " +
                                                 "painters=PainterConf[NONE], " +
                                                 "gradients=GradientConf[NONE], " +
+                                                "noises=NoiseConf[NONE], " +
                                                 "images=ImageConf[NONE]" +
                                             "], " +
                                             "border=StyleLayer[EMPTY], " +
@@ -276,6 +277,7 @@ class Styles_Spec extends Specification
                                                 "shadows=ShadowConf[NONE], " +
                                                 "painters=PainterConf[NONE], " +
                                                 "gradients=GradientConf[NONE], " +
+                                                "noises=NoiseConf[NONE], " +
                                                 "images=NamedConfigs[" +
                                                     "default=ImageConf[NONE], " +
                                                     "bubbles=ImageConf[" +
@@ -359,12 +361,13 @@ class Styles_Spec extends Specification
                                                         "cycle=NONE" +
                                                     "]" +
                                                 "], " +
-                                            "images=ImageConf[NONE]" +
+                                                "noises=NoiseConf[NONE], " +
+                                                "images=ImageConf[NONE]" +
+                                            "], " +
+                                            "foreground=StyleLayer[EMPTY]" +
                                         "], " +
-                                        "foreground=StyleLayer[EMPTY]" +
-                                    "], " +
-                                    "properties=[]" +
-                                "]"
+                                        "properties=[]" +
+                                    "]"
         where :
             uiScale << [ 1.0f, 1.5f, 2.0f, 2.25f, 3.0f ]
     }

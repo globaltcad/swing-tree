@@ -1341,6 +1341,20 @@ public final class ComponentStyleDelegate<C extends JComponent>
         return _withStyle(_styleConf.gradient(layer, StyleUtility.DEFAULT_KEY, styler));
     }
 
+    public ComponentStyleDelegate<C> noise( String noiseName, Function<NoiseConf, NoiseConf> styler ) {
+        return noise(NoiseConf.DEFAULT_LAYER, noiseName, styler);
+    }
+
+    public ComponentStyleDelegate<C> noise( UI.Layer layer, String noiseName, Function<NoiseConf, NoiseConf> styler ) {
+        Objects.requireNonNull(noiseName);
+        Objects.requireNonNull(styler);
+        return _withStyle(_styleConf.noise(layer, noiseName, styler));
+    }
+
+    public ComponentStyleDelegate<C> noise( Function<NoiseConf, NoiseConf> styler ) {
+        return noise(NoiseConf.DEFAULT_LAYER, StyleUtility.DEFAULT_KEY, styler);
+    }
+
     /**
      *  This method makes it possible to define multiple background styles for a single component
      *  rendered on the {@link UI.Layer#BACKGROUND} layer, by giving the background config a unique name.

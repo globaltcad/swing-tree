@@ -344,6 +344,11 @@ public final class StyleConf
         return StyleConf.of(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withGradients(shades)), _properties);
     }
 
+    StyleConf _withNoises(UI.Layer layer, NamedConfigs<NoiseConf> noises ) {
+        Objects.requireNonNull(noises);
+        return StyleConf.of(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withNoises(noises)), _properties);
+    }
+
     StyleConf _withLayers(StyleLayers layers ) {
         if ( layers == _layers )
             return this;
@@ -381,6 +386,15 @@ public final class StyleConf
     GradientConf gradient(UI.Layer layer, String shadeName ) {
         Objects.requireNonNull(shadeName);
         return _layers.get(layer).gradients().get(shadeName);
+    }
+
+    StyleConf noise(UI.Layer layer, String noiseName, Function<NoiseConf, NoiseConf> styler ) {
+        Objects.requireNonNull(noiseName);
+        Objects.requireNonNull(styler);
+        NoiseConf noise = Optional.ofNullable(_layers.get(layer).noises().get(noiseName)).orElse(NoiseConf.none());
+        // We clone the noise map:
+        NamedConfigs<NoiseConf> newNoises = _layers.get(layer).noises().withNamedStyle(noiseName, styler.apply(noise));
+        return _withNoises(layer, newNoises);
     }
 
     StyleConf images(UI.Layer layer, String imageName, Function<ImageConf, ImageConf> styler ) {
@@ -507,6 +521,27 @@ public final class StyleConf
         return thisLayer.hasEqualGradientsAs(otherLayer);
     }
 
+    boolean hasEqualNoisesAs( StyleConf otherStyle ) {
+        boolean allLayersAreEqual = true;
+        for ( UI.Layer layer : UI.Layer.values() ) {
+            if ( !hasEqualNoisesAs(layer, otherStyle) ) {
+                allLayersAreEqual = false;
+                break;
+            }
+        }
+        return allLayersAreEqual;
+    }
+
+    boolean hasEqualNoisesAs( UI.Layer layer, StyleConf otherStyle ) {
+        StyleLayer thisLayer = _layers.get(layer);
+        StyleLayer otherLayer = otherStyle._layers.get(layer);
+        if ( thisLayer == null && otherLayer == null )
+            return true;
+        if ( thisLayer == null || otherLayer == null )
+            return false;
+        return thisLayer.hasEqualNoisesAs(otherLayer);
+    }
+
     boolean hasEqualImagesAs(StyleConf otherStyle ) {
         boolean allLayersAreEqual = true;
         for ( UI.Layer layer : UI.Layer.values() ) {
@@ -553,6 +588,7 @@ public final class StyleConf
                hasEqualShadowsAs(other)        &&
                hasEqualPaintersAs(other)       &&
                hasEqualGradientsAs(other)      &&
+               hasEqualNoisesAs(other)         &&
                hasEqualImagesAs(other)         &&
                hasEqualPropertiesAs(other);
     }

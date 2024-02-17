@@ -64,11 +64,17 @@ final class StyleRenderer
                 _renderGradient( gradient, conf, g2d );
             }
 
-        // 3. Shadows, which are simple gradient based drop shadows that can go inwards or outwards
+        // 3. Noise, which is a simple way to add a bit of texture to a component:
+        for ( NoiseConf noise : conf.layer().noises().sortedByNames() )
+            if ( noise.colors().length > 0 ) {
+                _renderNoise( noise, conf, g2d );
+            }
+
+        // 4. Shadows, which are simple gradient based drop shadows that can go inwards or outwards
         for ( ShadowConf shadow : conf.layer().shadows().sortedByNames() )
             _renderShadows(conf, shadow, g2d);
 
-        // 4. Painters, which are provided by the user and can be anything
+        // 5. Painters, which are provided by the user and can be anything
         List<PainterConf> painters = conf.layer().painters().sortedByNames();
 
         if ( !painters.isEmpty() )
@@ -613,7 +619,6 @@ final class StyleRenderer
             }
 
             final Size dimensions = conf.boxModel().size();
-            final UI.Transition type = gradient.transition();
 
             final float width  = dimensions.width().orElse(0f)  - ( insets.right().orElse(0f)  + insets.left().orElse(0f) );
             final float height = dimensions.height().orElse(0f) - ( insets.bottom().orElse(0f) + insets.top().orElse(0f) );
@@ -623,6 +628,7 @@ final class StyleRenderer
             Point2D.Float corner1;
             Point2D.Float corner2;
 
+            final UI.Transition type = gradient.transition();
             if ( type.isOneOf(UI.Transition.TOP_LEFT_TO_BOTTOM_RIGHT) ) {
                 corner1 = new Point2D.Float(realX, realY);
                 corner2 = new Point2D.Float(realX + width, realY + height);
@@ -653,9 +659,7 @@ final class StyleRenderer
                 return;
             }
 
-            if ( gradient.type() == UI.GradientType.NOISE )
-                _renderNoiseGradient(g2d, corner1, corner2, gradient, conf.areas().get(gradient.area()));
-            else if ( gradient.type() == UI.GradientType.CONIC )
+            if ( gradient.type() == UI.GradientType.CONIC )
                 _renderConicGradient(g2d, corner1, corner2, gradient, conf.areas().get(gradient.area()));
             else if ( gradient.type() == UI.GradientType.RADIAL )
                 _renderRadialGradient(g2d, corner1, corner2, gradient, conf.areas().get(gradient.area()));
@@ -696,26 +700,60 @@ final class StyleRenderer
     }
 
 
+    private static void _renderNoise(
+        final NoiseConf       noise,
+        final LayerRenderConf conf,
+        final Graphics2D g2d
+    ) {
+        if ( noise.colors().length == 1 ) {
+            g2d.setColor(noise.colors()[0]);
+            g2d.fill(conf.areas().get(noise.area()));
+        }
+        else {
+            Outline insets = Outline.none();
+            switch ( noise.boundary() ) {
+                case OUTER_TO_EXTERIOR:
+                    insets = Outline.none(); break;
+                case EXTERIOR_TO_BORDER:
+                    insets = conf.boxModel().margin(); break;
+                case BORDER_TO_INTERIOR:
+                    insets = conf.boxModel().margin().plus(conf.boxModel().widths()); break;
+                case INTERIOR_TO_CONTENT:
+                    insets = conf.boxModel().margin().plus(conf.boxModel().widths()).plus(conf.boxModel().padding()); break;
+                case CENTER_TO_CONTENT:
+                    float verticalInset = conf.boxModel().size().height().orElse(0f) / 2f;
+                    float horizontalInset = conf.boxModel().size().width().orElse(0f) / 2f;
+                    insets = Outline.of(verticalInset, horizontalInset);
+            }
+
+            Point2D.Float corner1 = new Point2D.Float(
+                                        insets.left().orElse(0f) + noise.offset().x(),
+                                        insets.top().orElse(0f) + noise.offset().y()
+                                    );
+
+            _renderNoiseGradient(g2d, corner1, noise, conf.areas().get(noise.area()));
+        }
+    }
+
     private static void _renderNoiseGradient(
         final Graphics2D    g2d,
         final Point2D.Float corner1,
-        final Point2D.Float corner2,
-        final GradientConf  gradient,
+        final NoiseConf     noise,
         final Area          specificArea
     ) {
-        final Color[] colors    = gradient.colors();
-        final float[] fractions = _fractionsFrom(gradient);
-        float rotation = gradient.rotation() + _rotationBetween(corner1, corner2);
-        float scale = gradient.size();
+        final Color[] colors    = noise.colors();
+        final float[] fractions = _fractionsFrom(colors, noise.fractions());
+        float rotation = noise.rotation();
+        Offset scale = noise.scale();
 
         g2d.setPaint(new NoiseGradientPaint(
                         corner1,
-                        scale,
-                        scale,
+                        scale.x(),
+                        scale.y(),
                         rotation,
                         fractions,
                         colors,
-                        NoiseFunctions::_coordinateToGradValue
+                        noise.function()
                     ));
 
         g2d.fill(specificArea);
@@ -953,9 +991,15 @@ final class StyleRenderer
     }
 
     private static float[] _fractionsFrom(GradientConf style ) {
-        Color[] colors = style.colors();
+        Color[] colors   = style.colors();
         float[] fractions = style.fractions();
+        return _fractionsFrom(colors, fractions);
+    }
 
+    private static float[] _fractionsFrom(
+        Color[] colors,
+        float[] fractions
+    ) {
         if ( fractions.length == colors.length )
             return fractions;
         else if ( fractions.length > colors.length ) {
