@@ -1330,7 +1330,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *    )
      * }</pre>
      * Note that this method translates to {@link #gradient(UI.Layer, String, Function)} but with the
-     * name being the "default" style name
+     * name being the "default" style name.
      *
      * @param layer The layer on which the gradient should be rendered.
      * @param styler A function that takes a {@link GradientConf} and returns a new {@link GradientConf}.
@@ -1341,16 +1341,81 @@ public final class ComponentStyleDelegate<C extends JComponent>
         return _withStyle(_styleConf.gradient(layer, StyleUtility.DEFAULT_KEY, styler));
     }
 
+    /**
+     *  This method makes it possible to define a background noise for your components.
+     *  This is useful when you want to give component surfaces some naturally looking texture
+     *  or special effects. <br>
+     *  <br>
+     *  Here is an example of how to use this method:
+     *  <pre>{@code
+     *    UI.panel()
+     *    .withStyle( it -> it
+     *        .noise("my-noise" conf -> conf
+                  .scale(2, 3).rotation(45)
+                  .colors(Color.BLACK, Color.WHITE)
+                  .offset(64,85)
+     *        )
+     *    )
+     * }</pre>
+     * Note that this method translates to {@link #noise(UI.Layer, String, Function)} but with the
+     * layer set to {@link UI.Layer#BACKGROUND}.
+     *
+     * @param styler A function that takes a {@link NoiseConf} and returns a new {@link NoiseConf}.
+     * @return A new {@link ComponentStyleDelegate} with a background noise defined by the provided styler lambda.
+     */
     public ComponentStyleDelegate<C> noise( String noiseName, Function<NoiseConf, NoiseConf> styler ) {
         return noise(NoiseConf.DEFAULT_LAYER, noiseName, styler);
     }
 
+    /**
+     *  This method makes it possible to define a background noise for your components.
+     *  This is useful when you want to give component surfaces some naturally looking texture
+     *  or special effects. <br>
+     *  <br>
+     *  Here is an example of how to use this method:
+     *  <pre>{@code
+     *    UI.panel()
+     *    .withStyle( it -> it
+     *        .noise(UI.Layer.BACKGROUND, "my-noise" conf -> conf
+                  .scale(2, 3).rotation(45)
+                  .colors(Color.BLACK, Color.WHITE)
+                  .offset(64,85)
+     *        )
+     *    )
+     * }</pre>
+     *
+     * @param layer The layer on which the noise should be rendered.
+     * @param styler A function that takes a {@link NoiseConf} and returns a new {@link NoiseConf}.
+     * @return A new {@link ComponentStyleDelegate} with a background noise defined by the provided styler lambda.
+     */
     public ComponentStyleDelegate<C> noise( UI.Layer layer, String noiseName, Function<NoiseConf, NoiseConf> styler ) {
         Objects.requireNonNull(noiseName);
         Objects.requireNonNull(styler);
         return _withStyle(_styleConf.noise(layer, noiseName, styler));
     }
 
+    /**
+     *  This method makes it possible to define a background noise for your components.
+     *  This is useful when you want to give component surfaces some naturally looking texture
+     *  or special effects. <br>
+     *  <br>
+     *  Here is an example of how to use this method:
+     *  <pre>{@code
+     *    UI.panel()
+     *    .withStyle( it -> it
+     *        .noise( conf -> conf
+                  .scale(2, 3).rotation(45)
+                  .colors(Color.BLACK, Color.WHITE)
+                  .offset(64,85)
+     *        )
+     *    )
+     * }</pre>
+     * Note that this method translates to {@link #noise(UI.Layer, String, Function)} but with the
+     * layer set to {@link UI.Layer#BACKGROUND} and the name being the "default" style name.
+     *
+     * @param styler A function that takes a {@link NoiseConf} and returns a new {@link NoiseConf}.
+     * @return A new {@link ComponentStyleDelegate} with a background noise defined by the provided styler lambda.
+     */
     public ComponentStyleDelegate<C> noise( Function<NoiseConf, NoiseConf> styler ) {
         return noise(NoiseConf.DEFAULT_LAYER, StyleUtility.DEFAULT_KEY, styler);
     }

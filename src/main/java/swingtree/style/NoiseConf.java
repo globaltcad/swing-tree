@@ -160,11 +160,12 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
     }
 
     /**
-     *  Define the noise function which is a function that takes a coordinate and returns a value
+     *  Accepts the {@link NoiseFunction}, which takes a coordinate and returns a value
      *  between 0 and 1. <br>
      *  The noise function is used to define the noise gradient.
      *
-     * @param function The noise function.
+     * @param function The noise function mapping the translated, scaled and rotated virtual space
+     *                 to a gradient value of a pixel in the color space / view space of the screen.
      * @return A new noise gradient style with the specified noise function.
      */
     public NoiseConf function( NoiseFunction function ) {
@@ -226,12 +227,8 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
     }
 
     /**
-     *  Define the size of the noise gradient which is the size of the noise gradient
-     *  in terms of the distance from the start position of the noise gradient
-     *  to the end position of the noise gradient.
-     *  <p>
-     *  Note that if no size is specified, the size of the noise gradient will be
-     *  based on the size of the component that the noise gradient is applied to.
+     *  Define the scale of the noise gradient in terms of its size / granularity.
+     *  It scales the input space of the noise function.
      *
      * @param scale The noise gradient size.
      * @return A new noise gradient style with the specified size.
@@ -240,6 +237,14 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
         return of(_function, _colors, _offset, Offset.of(scale, scale), _area, _boundary, _rotation, _fractions);
     }
 
+    /**
+     *  Define the x and y scale of the noise gradient in terms of its size / granularity.
+     *  It scales the input space of the noise function.
+     *
+     * @param x The noise gradient size on the x-axis.
+     * @param y The noise gradient size on the y-axis.
+     * @return A new noise gradient style with the specified size.
+     */
     public NoiseConf scale( double x, double y ) {
         return of(_function, _colors, _offset, Offset.of(x,y), _area, _boundary, _rotation, _fractions);
     }
@@ -303,6 +308,7 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
 
     /**
      *  Define the rotation of the noise gradient in degrees.
+     *  This will rotate the input space of the noise function.
      *
      *  @param rotation The rotation of the noise gradient in degrees.
      */
