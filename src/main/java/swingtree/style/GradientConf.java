@@ -295,7 +295,7 @@ public final class GradientConf implements Simplifiable<GradientConf>
      * @return A new gradient style with the specified colors.
      * @throws NullPointerException if any of the colors is {@code null}.
      */
-    public GradientConf colors(Color... colors ) {
+    public GradientConf colors( Color... colors ) {
         Objects.requireNonNull(colors);
         for ( Color color : colors )
             Objects.requireNonNull(color, "Use UI.COLOR_UNDEFINED instead of null to represent the absence of a color.");
@@ -312,7 +312,7 @@ public final class GradientConf implements Simplifiable<GradientConf>
      * @return A new gradient style with the specified colors.
      * @throws NullPointerException if any of the colors is {@code null}.
      */
-    public GradientConf colors(String... colors ) {
+    public GradientConf colors( String... colors ) {
         Objects.requireNonNull(colors);
         try {
             Color[] actualColors = new Color[colors.length];
@@ -344,7 +344,7 @@ public final class GradientConf implements Simplifiable<GradientConf>
      * @return A new gradient style with the specified alignment.
      * @throws NullPointerException if the alignment is {@code null}.
      */
-    public GradientConf span(UI.Span span) {
+    public GradientConf span( UI.Span span ) {
         Objects.requireNonNull(span);
         return of(span, _type, _colors, _offset, _size, _area, _boundary, _focus, _rotation, _fractions, _cycle);
     }
@@ -375,7 +375,7 @@ public final class GradientConf implements Simplifiable<GradientConf>
      * @param y The gradient start offset on the y-axis.
      * @return A new gradient style with the specified offset.
      */
-    public GradientConf offset(double x, double y ) {
+    public GradientConf offset( double x, double y ) {
         return of(_span, _type, _colors, Offset.of(x,y), _size, _area, _boundary, _focus, _rotation, _fractions, _cycle);
     }
 
@@ -402,7 +402,7 @@ public final class GradientConf implements Simplifiable<GradientConf>
      * @param area The area of the component to which the gradient is clipped to.
      * @return A new gradient style with the specified area.
      */
-    public GradientConf clipTo(UI.ComponentArea area ) {
+    public GradientConf clipTo( UI.ComponentArea area ) {
         return of(_span, _type, _colors, _offset, _size, area, _boundary, _focus, _rotation, _fractions, _cycle);
     }
 
@@ -450,7 +450,7 @@ public final class GradientConf implements Simplifiable<GradientConf>
      * @param boundary The boundary at which the gradient should start in terms of its offset.
      * @return A new gradient style with the specified boundary.
      */
-    public GradientConf boundary(UI.ComponentBoundary boundary ) {
+    public GradientConf boundary( UI.ComponentBoundary boundary ) {
         return of(_span, _type, _colors, _offset, _size, _area, boundary, _focus, _rotation, _fractions, _cycle);
     }
 
@@ -464,7 +464,7 @@ public final class GradientConf implements Simplifiable<GradientConf>
      *  @param x The focus offset on the x-axis.
      *  @param y The focus offset on the y-axis.
      */
-    public GradientConf focus(double x, double y ) {
+    public GradientConf focus( double x, double y ) {
         return of(_span, _type, _colors, _offset, _size, _area, _boundary, Offset.of(x,y), _rotation, _fractions, _cycle);
     }
 
@@ -487,7 +487,7 @@ public final class GradientConf implements Simplifiable<GradientConf>
      *
      *  @param fractions The fractions of the gradient.
      */
-    public GradientConf fractions(double... fractions ) {
+    public GradientConf fractions( double... fractions ) {
         float[] actualFractions = new float[fractions.length];
         for ( int i = 0; i < fractions.length; i++ )
             actualFractions[i] = (float) fractions[i];
