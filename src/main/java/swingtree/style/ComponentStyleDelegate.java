@@ -1235,11 +1235,11 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  <pre>{@code
      *    UI.panel()
      *    .withStyle( it -> it
-     *      .gradient("dark shading", grad -> grad
+     *      .gradient("dark shading", conf -> conf
      *        .colors("#000000", "#000000")
      *        .transition(UI.Transition.TOP_TO_BOTTOM)
      *      )
-     *      .gradient("light shading", grad -> grad
+     *      .gradient("light shading", conf -> conf
      *        .colors("#ffffff", "#ffffff")
      *        .transition(UI.Transition.TOP_TO_BOTTOM))
      *      )
@@ -1265,11 +1265,11 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  <pre>{@code
      *    UI.panel()
      *    .withStyle( it -> it
-     *      .gradient(UI.Layer.BACKGROUND, "dark shading", grad -> grad
+     *      .gradient(UI.Layer.BACKGROUND, "dark shading", conf -> conf
      *        .colors("#000000", "#000000")
      *        .transition(UI.Transition.TOP_TO_BOTTOM)
      *      )
-     *      .gradient(UI.Layer.BACKGROUND, "light shading", grad -> grad
+     *      .gradient(UI.Layer.BACKGROUND, "light shading", conf -> conf
      *        .colors("#ffffff", "#ffffff")
      *        .transition(UI.Transition.TOP_TO_BOTTOM))
      *      )
@@ -1300,7 +1300,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  <pre>{@code
      *    UI.panel()
      *    .withStyle( it -> it
-     *        .gradient( grad -> grad
+     *        .gradient( conf -> conf
      *            .colors("#000000", "#000000")
      *            .transition(UI.Transition.TOP_TO_BOTTOM)
      *        )
@@ -1323,7 +1323,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  <pre>{@code
      *    UI.panel()
      *    .withStyle( it -> it
-     *        .gradient(UI.Layer.BACKGROUND, grad -> grad
+     *        .gradient(UI.Layer.BACKGROUND, conf -> conf
      *            .colors("#000000", "#000000")
      *            .transition(UI.Transition.TOP_TO_BOTTOM)
      *        )
@@ -1346,14 +1346,14 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  This is useful when you want to give component surfaces some naturally looking texture
      *  or special effects. <br>
      *  <br>
-     *  Here is an example of how to use this method:
+     *  Here is an example of how to use it:
      *  <pre>{@code
      *    UI.panel()
      *    .withStyle( it -> it
      *        .noise("my-noise" conf -> conf
-                  .scale(2, 3).rotation(45)
-                  .colors(Color.BLACK, Color.WHITE)
-                  .offset(64,85)
+     *            .scale(2, 3).rotation(45)
+     *            .colors(Color.BLACK, Color.WHITE)
+     *            .offset(64,85)
      *        )
      *    )
      * }</pre>
@@ -1372,14 +1372,14 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  This is useful when you want to give component surfaces some naturally looking texture
      *  or special effects. <br>
      *  <br>
-     *  Here is an example of how to use this method:
+     *  Here is an example of how to use the method:
      *  <pre>{@code
      *    UI.panel()
      *    .withStyle( it -> it
      *        .noise(UI.Layer.BACKGROUND, "my-noise" conf -> conf
-                  .scale(2, 3).rotation(45)
-                  .colors(Color.BLACK, Color.WHITE)
-                  .offset(64,85)
+     *            .scale(2, 3).rotation(45)
+     *            .colors(Color.BLACK, Color.WHITE)
+     *            .offset(64,85)
      *        )
      *    )
      * }</pre>
@@ -1404,9 +1404,9 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *    UI.panel()
      *    .withStyle( it -> it
      *        .noise( conf -> conf
-                  .scale(2, 3).rotation(45)
-                  .colors(Color.BLACK, Color.WHITE)
-                  .offset(64,85)
+     *            .scale(2, 3).rotation(45)
+     *            .colors(Color.BLACK, Color.WHITE)
+     *            .offset(64,85)
      *        )
      *    )
      * }</pre>
