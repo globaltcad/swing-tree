@@ -409,6 +409,12 @@ public final class UI extends UINamespaceUtilities
         LINEAR, RADIAL, CONIC
     }
 
+    /**
+     *  Defines the different types of noise functions that can be used to render
+     *  a {@link NoiseConf} style. <br>
+     *  Pass instances of this to {@link NoiseConf#function(NoiseFunction)} to configure the noise behaviour
+     *  as part of the style API (see {@link UIForAnySwing#withStyle(Styler)}).
+     */
     public enum NoiseType implements UIEnum<NoiseType>, NoiseFunction
     {
         STOCHASTIC(NoiseFunctions::stochastic),
