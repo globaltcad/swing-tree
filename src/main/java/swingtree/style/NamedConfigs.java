@@ -116,7 +116,7 @@ final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
         return _styles[foundIndex].style();
     }
 
-    public Optional<S> style( String name ) {
+    public Optional<S> find( String name ) {
         Objects.requireNonNull(name);
         return Optional.ofNullable(get(name));
     }

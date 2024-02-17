@@ -144,7 +144,7 @@ public final class StyleConf
      * @param shadowName The name of the shadow style to retrieve.
      * @return The shadow style with the provided name.
      */
-    public ShadowConf shadow(UI.Layer layer, String shadowName ) {
+    public ShadowConf shadow( UI.Layer layer, String shadowName ) {
         Objects.requireNonNull(shadowName);
         return _layers.get(layer).shadows().get(shadowName);
     }
@@ -152,7 +152,7 @@ public final class StyleConf
     /**
      * @return An unmodifiable list of all shadow styles sorted by their names in ascending alphabetical order.
      */
-    List<ShadowConf> shadows(UI.Layer layer ) {
+    List<ShadowConf> shadows( UI.Layer layer ) {
         return Collections.unmodifiableList(
                         _layers.get(layer)
                         .shadows()
@@ -374,24 +374,24 @@ public final class StyleConf
                             .collect(Collectors.toList());
     }
 
-    StyleConf gradient(UI.Layer layer, String shadeName, Function<GradientConf, GradientConf> styler ) {
+    StyleConf gradient( UI.Layer layer, String shadeName, Function<GradientConf, GradientConf> styler ) {
         Objects.requireNonNull(shadeName);
         Objects.requireNonNull(styler);
-        GradientConf shadow = Optional.ofNullable(_layers.get(layer).gradients().get(shadeName)).orElse(GradientConf.none());
+        GradientConf gradConf = _layers.get(layer).gradients().find(shadeName).orElse(GradientConf.none());
         // We clone the shadow map:
-        NamedConfigs<GradientConf> newShadows = _layers.get(layer).gradients().withNamedStyle(shadeName, styler.apply(shadow));
+        NamedConfigs<GradientConf> newShadows = _layers.get(layer).gradients().withNamedStyle(shadeName, styler.apply(gradConf));
         return _withGradients(layer, newShadows);
     }
 
-    GradientConf gradient(UI.Layer layer, String shadeName ) {
-        Objects.requireNonNull(shadeName);
-        return _layers.get(layer).gradients().get(shadeName);
+    GradientConf gradient( UI.Layer layer, String gradName ) {
+        Objects.requireNonNull(gradName);
+        return _layers.get(layer).gradients().get(gradName);
     }
 
-    StyleConf noise(UI.Layer layer, String noiseName, Function<NoiseConf, NoiseConf> styler ) {
+    StyleConf noise( UI.Layer layer, String noiseName, Function<NoiseConf, NoiseConf> styler ) {
         Objects.requireNonNull(noiseName);
         Objects.requireNonNull(styler);
-        NoiseConf noise = Optional.ofNullable(_layers.get(layer).noises().get(noiseName)).orElse(NoiseConf.none());
+        NoiseConf noise = _layers.get(layer).noises().find(noiseName).orElse(NoiseConf.none());
         // We clone the noise map:
         NamedConfigs<NoiseConf> newNoises = _layers.get(layer).noises().withNamedStyle(noiseName, styler.apply(noise));
         return _withNoises(layer, newNoises);
@@ -400,17 +400,17 @@ public final class StyleConf
     StyleConf images(UI.Layer layer, String imageName, Function<ImageConf, ImageConf> styler ) {
         Objects.requireNonNull(imageName);
         Objects.requireNonNull(styler);
-        ImageConf ground = _layers.get(layer).images().style(imageName).orElse(ImageConf.none());
+        ImageConf ground = _layers.get(layer).images().find(imageName).orElse(ImageConf.none());
         // We clone the ground map:
         NamedConfigs<ImageConf> newImages = _layers.get(layer).images().withNamedStyle(imageName, styler.apply(ground));
         return _withImages( layer, newImages );
     }
 
-    List<ImageConf> images(UI.Layer layer ) {
+    List<ImageConf> images( UI.Layer layer ) {
         return _layers.get(layer).images().sortedByNames();
     }
 
-    StyleConf scale(double scale ) {
+    StyleConf scale( double scale ) {
         return StyleConf.of(
                     _layout,
                     _border._scale(scale),
