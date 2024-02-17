@@ -44,7 +44,9 @@ public interface StylableComponent
     void setUISilently( ComponentUI ui );
 
     /**
-     *  This method is expected to be implemented as follows:
+     *  This method is expected to be implemented as follows
+     *  within a component extension which ought to be made compatible
+     *  with SwingTree.
      *  <pre>
      *      {@literal @}Override
      *      public void paint(Graphics g){

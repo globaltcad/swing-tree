@@ -23,6 +23,8 @@
 
 package swingtree.components;
 
+import sprouts.Event;
+import sprouts.Var;
 import swingtree.UI;
 import swingtree.style.StylableComponent;
 import swingtree.components.action.ButtonClickedActionListener;
@@ -38,9 +40,12 @@ import java.awt.image.BufferedImage;
 import java.io.Serializable;
 
 /**
- * An implementation of a "split" button.The left side acts like a normal
- * button, right side has a jPopupMenu attached.
- *
+ * An implementation of a "split button" where the left (larger) side acts like a normal
+ * button and the right side down arrow based button opens an attached {@link JPopupMenu}.
+ * See {@link UI#splitButton(String)}, {@link UI#splitButton(Var)} and {@link UI#splitButton(Var, Event)}
+ * for usage in you UIs as well as the {@link swingtree.UIForSplitButton} for more in-depth
+ * configuration (like adding options to the split button for example).
+ * <p>
  * This class raises two events:
  * <ol>
  * <li>{@link swingtree.components.action.SplitButtonActionListener#buttonClicked(java.awt.event.ActionEvent)}
@@ -48,13 +53,13 @@ import java.io.Serializable;
  * <li>{@link swingtree.components.action.SplitButtonActionListener#splitButtonClicked(java.awt.event.ActionEvent)}
  * when the split part of the button is clicked</li>
  * </ol>
- * You need to implement
- * {@link swingtree.components.action.SplitButtonActionListener} to
- * handle these events.
+ * You can implement {@link swingtree.components.action.SplitButtonActionListener} to
+ * handle these events, however, it is advised to
+ * register events as part of the {@link swingtree.UIForSplitButton} API!
  *
  * @author Naveed Quadri 2012
  * @author Randall Wood 2016
- * @author Daniel Nepp 2023
+ * @author Daniel Nepp 2023/2024
  */
 public class JSplitButton extends JButton implements Serializable, StylableComponent {
 
@@ -125,6 +130,7 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
         paintForeground(g, ()->super.paintChildren(g));
     }
 
+    /** {@inheritDoc} */
     @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
 
     /**
