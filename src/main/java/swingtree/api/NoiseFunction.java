@@ -1,5 +1,7 @@
-package swingtree.style;
+package swingtree.api;
 
+
+import swingtree.style.NoiseConf;
 
 /**
  * A noise function is used to render {@link NoiseConf} styles

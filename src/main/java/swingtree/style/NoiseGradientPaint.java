@@ -1,6 +1,8 @@
 package swingtree.style;
 
 
+import swingtree.api.NoiseFunction;
+
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;

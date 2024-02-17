@@ -2,6 +2,7 @@ package swingtree.style;
 
 import org.slf4j.Logger;
 import swingtree.UI;
+import swingtree.api.NoiseFunction;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
