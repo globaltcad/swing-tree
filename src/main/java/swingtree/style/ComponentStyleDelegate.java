@@ -2,10 +2,8 @@ package swingtree.style;
 
 import org.slf4j.Logger;
 import swingtree.UI;
-import swingtree.api.IconDeclaration;
+import swingtree.api.*;
 import swingtree.api.Painter;
-import swingtree.api.Peeker;
-import swingtree.api.Styler;
 import swingtree.layout.LayoutConstraint;
 import swingtree.layout.Size;
 

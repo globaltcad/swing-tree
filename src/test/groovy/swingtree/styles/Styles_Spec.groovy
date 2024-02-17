@@ -8,7 +8,7 @@ import swingtree.SwingTree
 import swingtree.UI
 import swingtree.components.JBox
 import swingtree.style.ComponentExtension
-import swingtree.style.Layout
+import swingtree.api.Layout
 import swingtree.threading.EventProcessor
 import swingtree.style.StyleConf
 import swingtree.style.ComponentStyleDelegate

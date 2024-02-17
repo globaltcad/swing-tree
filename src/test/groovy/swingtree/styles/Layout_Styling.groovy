@@ -6,7 +6,7 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
 import swingtree.UI
-import swingtree.style.Layout
+import swingtree.api.Layout
 
 import java.awt.*
 

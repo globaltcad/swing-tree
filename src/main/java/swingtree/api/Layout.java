@@ -1,10 +1,17 @@
-package swingtree.style;
+package swingtree.api;
 
 import net.miginfocom.swing.MigLayout;
 import swingtree.UI;
+import swingtree.style.ComponentExtension;
+import swingtree.style.ComponentStyleDelegate;
+import swingtree.style.StyleConf;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.BoxLayout;
+import javax.swing.JComponent;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
+import java.awt.LayoutManager;
 import java.util.Objects;
 
 /**
@@ -51,12 +58,12 @@ public interface Layout
     /**
      * @return A layout that does nothing, i.e. it does not install any layout for a component.
      */
-    static Layout unspecific() { return StyleUtility.UNSPECIFIC_LAYOUT_CONSTANT; }
+    static Layout unspecific() { return Constants.UNSPECIFIC_LAYOUT_CONSTANT; }
 
     /**
      * @return A layout that removes any existing layout from a component.
      */
-    static Layout none() { return StyleUtility.NONE_LAYOUT_CONSTANT; }
+    static Layout none() { return Constants.NONE_LAYOUT_CONSTANT; }
 
     /**
      * @param constr The layout constraints for the layout.
@@ -308,13 +315,13 @@ public interface Layout
             _rowConstr = Objects.requireNonNull(rowConstr);
         }
 
-        ForMigLayout withConstraint( String constr ) { return new ForMigLayout( constr, _colConstr, _rowConstr ); }
+        public ForMigLayout withConstraint( String constr ) { return new ForMigLayout( constr, _colConstr, _rowConstr ); }
 
-        ForMigLayout withRowConstraint( String rowConstr ) { return new ForMigLayout( _constr, _colConstr, rowConstr ); }
+        public ForMigLayout withRowConstraint( String rowConstr ) { return new ForMigLayout( _constr, _colConstr, rowConstr ); }
 
-        ForMigLayout withColumnConstraint( String colConstr ) { return new ForMigLayout( _constr, colConstr, _rowConstr ); }
+        public ForMigLayout withColumnConstraint( String colConstr ) { return new ForMigLayout( _constr, colConstr, _rowConstr ); }
 
-        ForMigLayout withComponentConstraint( String componentConstr ) { return new ForMigLayout( _constr, _colConstr, _rowConstr ); }
+        public ForMigLayout withComponentConstraint( String componentConstr ) { return new ForMigLayout( _constr, _colConstr, _rowConstr ); }
 
         @Override public int hashCode() { return Objects.hash(_constr, _rowConstr, _colConstr); }
 
@@ -333,12 +340,12 @@ public interface Layout
         public void installFor( JComponent component ) {
             ComponentExtension<?> extension = ComponentExtension.from(component);
             StyleConf styleConf = extension.getStyle();
-            if ( styleConf.layout().constraint().isPresent() ) {
+            if ( styleConf.layoutConstraint().isPresent() ) {
                 // We ensure that the parent layout has the correct component constraints for the component:
                 LayoutManager parentLayout = ( component.getParent() == null ? null : component.getParent().getLayout() );
                 if ( parentLayout instanceof MigLayout) {
                     MigLayout migLayout = (MigLayout) parentLayout;
-                    Object componentConstraints = styleConf.layout().constraint().get();
+                    Object componentConstraints = styleConf.layoutConstraint().get();
                     Object currentComponentConstraints = migLayout.getComponentConstraints(component);
                     //     ^ can be a String or a CC object, we want to compare it to the new constraints:
                     if ( !componentConstraints.equals(currentComponentConstraints) ) {

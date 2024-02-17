@@ -1,6 +1,7 @@
 package swingtree.style;
 
 import swingtree.UI;
+import swingtree.api.Layout;
 import swingtree.api.Painter;
 
 import java.awt.*;
@@ -17,8 +18,7 @@ import java.util.Objects;
 final class StyleUtility
 {
     static final String DEFAULT_KEY = "default";
-    static final Layout UNSPECIFIC_LAYOUT_CONSTANT = new Layout.Unspecific();
-    static final Layout NONE_LAYOUT_CONSTANT = new Layout.None();
+
 
     private StyleUtility() {} // No instantiation, just a utility class
 

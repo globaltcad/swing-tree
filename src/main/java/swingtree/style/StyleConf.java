@@ -114,7 +114,7 @@ public final class StyleConf
 
     public Optional<Object> layoutConstraint() { return _layout.constraint(); }
 
-    LayoutConf layout() { return _layout; }
+    public LayoutConf layout() { return _layout; }
 
     Outline padding() { return _border.padding(); }
 

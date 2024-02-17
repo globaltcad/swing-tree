@@ -1,5 +1,7 @@
 package swingtree.style;
 
+import swingtree.api.Layout;
+
 import java.util.Objects;
 import java.util.Optional;
 
@@ -36,7 +38,7 @@ final class LayoutConf
 
     Layout layout() { return _layout; }
 
-    public Optional<Object> constraint() { return Optional.ofNullable(_constraint); }
+    Optional<Object> constraint() { return Optional.ofNullable(_constraint); }
 
     Optional<Float> alignmentX() { return Optional.ofNullable(_alignmentX); }
 
