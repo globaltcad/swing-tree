@@ -39,7 +39,7 @@ class Invariant_Styles_Spec extends Specification
                         .margin(10)
                         .gradient( gradConf -> gradConf
                             .colors(Color.RED, Color.BLUE)
-                            .transition(UI.Transition.TOP_LEFT_TO_BOTTOM_RIGHT)
+                            .span(UI.Span.TOP_LEFT_TO_BOTTOM_RIGHT)
                         )
                     )
         and :
@@ -50,7 +50,7 @@ class Invariant_Styles_Spec extends Specification
                         .margin(10)
                         .gradient( gradConf -> gradConf
                             .colors(Color.BLUE, Color.RED)
-                            .transition(UI.Transition.BOTTOM_RIGHT_TO_TOP_LEFT)
+                            .span(UI.Span.BOTTOM_RIGHT_TO_TOP_LEFT)
                         )
                     )
 
@@ -75,7 +75,7 @@ class Invariant_Styles_Spec extends Specification
                         .margin(10)
                         .gradient( gradConf -> gradConf
                             .colors(Color.PINK, Color.GREEN)
-                            .transition(UI.Transition.BOTTOM_LEFT_TO_TOP_RIGHT)
+                            .span(UI.Span.BOTTOM_LEFT_TO_TOP_RIGHT)
                         )
                     )
         and :
@@ -87,7 +87,7 @@ class Invariant_Styles_Spec extends Specification
                         .margin(10)
                         .gradient( gradConf -> gradConf
                             .colors(Color.GREEN, Color.PINK)
-                            .transition(UI.Transition.TOP_RIGHT_TO_BOTTOM_LEFT)
+                            .span(UI.Span.TOP_RIGHT_TO_BOTTOM_LEFT)
                         )
                     )
 
@@ -123,7 +123,7 @@ class Invariant_Styles_Spec extends Specification
                         .margin(10)
                         .gradient( gradConf -> gradConf
                             .colors(Color.RED, Color.BLUE)
-                            .transition(UI.Transition.LEFT_TO_RIGHT)
+                            .span(UI.Span.LEFT_TO_RIGHT)
                         )
                     )
         and :
@@ -134,7 +134,7 @@ class Invariant_Styles_Spec extends Specification
                         .margin(10)
                         .gradient( gradConf -> gradConf
                             .colors(Color.BLUE, Color.RED)
-                            .transition(UI.Transition.RIGHT_TO_LEFT)
+                            .span(UI.Span.RIGHT_TO_LEFT)
                         )
                     )
         and : 'We render the two widgets into a BufferedImage.'
@@ -158,7 +158,7 @@ class Invariant_Styles_Spec extends Specification
                         .margin(10)
                         .gradient( gradConf -> gradConf
                             .colors(Color.PINK, Color.GREEN)
-                            .transition(UI.Transition.TOP_TO_BOTTOM)
+                            .span(UI.Span.TOP_TO_BOTTOM)
                         )
                     )
         and :
@@ -170,7 +170,7 @@ class Invariant_Styles_Spec extends Specification
                         .margin(10)
                         .gradient( gradConf -> gradConf
                             .colors(Color.GREEN, Color.PINK)
-                            .transition(UI.Transition.BOTTOM_TO_TOP)
+                            .span(UI.Span.BOTTOM_TO_TOP)
                         )
                     )
         and : 'We render the two widgets into a BufferedImage.'
@@ -206,7 +206,7 @@ class Invariant_Styles_Spec extends Specification
                         .gradient( gradConf -> gradConf
                             .colors(Color.BLACK, Color.CYAN, Color.GREEN, Color.MAGENTA)
                             .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
-                            .transition(UI.Transition.TOP_LEFT_TO_BOTTOM_RIGHT)
+                            .span(UI.Span.TOP_LEFT_TO_BOTTOM_RIGHT)
                             .type(UI.GradientType.RADIAL)
                             .focus(26,16)
                         )
@@ -220,7 +220,7 @@ class Invariant_Styles_Spec extends Specification
                         .gradient( gradConf -> gradConf
                             .colors(Color.BLACK, Color.CYAN, Color.GREEN, Color.MAGENTA)
                             .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
-                            .transition(UI.Transition.BOTTOM_RIGHT_TO_TOP_LEFT)
+                            .span(UI.Span.BOTTOM_RIGHT_TO_TOP_LEFT)
                             .type(UI.GradientType.RADIAL)
                             .focus(26,16)
                         )
@@ -247,7 +247,7 @@ class Invariant_Styles_Spec extends Specification
                         .gradient( gradConf -> gradConf
                             .colors(Color.PINK, Color.GREEN, Color.BLUE)
                             .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
-                            .transition(UI.Transition.BOTTOM_LEFT_TO_TOP_RIGHT)
+                            .span(UI.Span.BOTTOM_LEFT_TO_TOP_RIGHT)
                             .type(UI.GradientType.RADIAL)
                             .focus(16,16)
                         )
@@ -261,7 +261,7 @@ class Invariant_Styles_Spec extends Specification
                         .gradient( gradConf -> gradConf
                             .colors(Color.PINK, Color.GREEN, Color.BLUE)
                             .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
-                            .transition(UI.Transition.TOP_RIGHT_TO_BOTTOM_LEFT)
+                            .span(UI.Span.TOP_RIGHT_TO_BOTTOM_LEFT)
                             .type(UI.GradientType.RADIAL)
                             .focus(16,16)
                         )

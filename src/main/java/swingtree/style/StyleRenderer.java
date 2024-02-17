@@ -583,7 +583,7 @@ final class StyleRenderer
                     float verticalInset = conf.boxModel().size().height().orElse(0f) / 2f;
                     float horizontalInset = conf.boxModel().size().width().orElse(0f) / 2f;
                     insets = Outline.of(verticalInset, horizontalInset);
-                    switch ( gradient.transition() ) {
+                    switch ( gradient.span() ) {
                         case TOP_TO_BOTTOM:
                             insets = insets.withBottom(contentIns.bottom().orElse(0f));
                             break;
@@ -628,29 +628,29 @@ final class StyleRenderer
             Point2D.Float corner1;
             Point2D.Float corner2;
 
-            final UI.Transition type = gradient.transition();
-            if ( type.isOneOf(UI.Transition.TOP_LEFT_TO_BOTTOM_RIGHT) ) {
+            final UI.Span type = gradient.span();
+            if ( type.isOneOf(UI.Span.TOP_LEFT_TO_BOTTOM_RIGHT) ) {
                 corner1 = new Point2D.Float(realX, realY);
                 corner2 = new Point2D.Float(realX + width, realY + height);
-            } else if ( type.isOneOf(UI.Transition.BOTTOM_LEFT_TO_TOP_RIGHT) ) {
+            } else if ( type.isOneOf(UI.Span.BOTTOM_LEFT_TO_TOP_RIGHT) ) {
                 corner1 = new Point2D.Float(realX, realY + height);
                 corner2 = new Point2D.Float(realX + width, realY);
-            } else if ( type.isOneOf(UI.Transition.TOP_RIGHT_TO_BOTTOM_LEFT) ) {
+            } else if ( type.isOneOf(UI.Span.TOP_RIGHT_TO_BOTTOM_LEFT) ) {
                 corner1 = new Point2D.Float(realX + width, realY);
                 corner2 = new Point2D.Float(realX, realY + height);
-            } else if ( type.isOneOf(UI.Transition.BOTTOM_RIGHT_TO_TOP_LEFT) ) {
+            } else if ( type.isOneOf(UI.Span.BOTTOM_RIGHT_TO_TOP_LEFT) ) {
                 corner1 = new Point2D.Float(realX + width, realY + height);
                 corner2 = new Point2D.Float(realX, realY);
-            } else if ( type == UI.Transition.TOP_TO_BOTTOM ) {
+            } else if ( type == UI.Span.TOP_TO_BOTTOM ) {
                 corner1 = new Point2D.Float(realX, realY);
                 corner2 = new Point2D.Float(realX, realY + height);
-            } else if ( type == UI.Transition.LEFT_TO_RIGHT ) {
+            } else if ( type == UI.Span.LEFT_TO_RIGHT ) {
                 corner1 = new Point2D.Float(realX, realY);
                 corner2 = new Point2D.Float(realX + width, realY);
-            } else if ( type == UI.Transition.BOTTOM_TO_TOP ) {
+            } else if ( type == UI.Span.BOTTOM_TO_TOP ) {
                 corner1 = new Point2D.Float(realX, realY + height);
                 corner2 = new Point2D.Float(realX, realY);
-            } else if ( type == UI.Transition.RIGHT_TO_LEFT ) {
+            } else if ( type == UI.Span.RIGHT_TO_LEFT ) {
                 corner1 = new Point2D.Float(realX + width, realY);
                 corner2 = new Point2D.Float(realX, realY);
             }
@@ -663,7 +663,7 @@ final class StyleRenderer
                 _renderConicGradient(g2d, corner1, corner2, gradient, conf.areas().get(gradient.area()));
             else if ( gradient.type() == UI.GradientType.RADIAL )
                 _renderRadialGradient(g2d, corner1, corner2, gradient, conf.areas().get(gradient.area()));
-            else if ( gradient.transition().isDiagonal() )
+            else if ( gradient.span().isDiagonal() )
                 _renderDiagonalGradient(g2d, corner1, corner2, gradient, conf.areas().get(gradient.area()));
             else
                 _renderVerticalOrHorizontalGradient(g2d, corner1, corner2, gradient, conf.areas().get(gradient.area()));

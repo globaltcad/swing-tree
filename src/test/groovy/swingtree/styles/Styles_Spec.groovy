@@ -308,7 +308,7 @@ class Styles_Spec extends Specification
                                     .prefWidth(400)
                                     .gradient(UI.Layer.BORDER, "gradient", imgConf -> imgConf
                                         .colors(Color.RED, Color.GREEN, Color.BLUE)
-                                        .transition(UI.Transition.BOTTOM_TO_TOP)
+                                        .span(UI.Span.BOTTOM_TO_TOP)
                                         .type(UI.GradientType.RADIAL)
                                     )
                                 )
@@ -490,7 +490,7 @@ class Styles_Spec extends Specification
                             )
                             .gradient(UI.Layer.BACKGROUND, g -> g
                                 .colors(new Color(100, 50, 200, 0), new Color(255, 00, 250, 0))
-                                .transition(UI.Transition.TOP_TO_BOTTOM)
+                                .span(UI.Span.TOP_TO_BOTTOM)
                                 .type(UI.GradientType.LINEAR)
                             )
                         )

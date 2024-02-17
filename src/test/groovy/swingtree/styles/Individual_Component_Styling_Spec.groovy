@@ -3,7 +3,6 @@ package swingtree.styles
 import com.formdev.flatlaf.FlatLightLaf
 import examples.stylish.MyTabsView
 import examples.stylish.MyTabsViewModel
-import groovyjarjarantlr4.v4.runtime.atn.Transition
 import net.miginfocom.swing.MigLayout
 import spock.lang.Narrative
 import spock.lang.Specification
@@ -127,7 +126,7 @@ class Individual_Component_Styling_Spec extends Specification
                         .shadowSpreadRadius(-5 * state.progress())
                         .shadowIsInset(false)
                         .gradient(UI.Layer.BORDER, "border-grad", grad -> grad
-                            .transition(UI.Transition.TOP_LEFT_TO_BOTTOM_RIGHT)
+                            .span(UI.Span.TOP_LEFT_TO_BOTTOM_RIGHT)
                             .colors(
                                 UI.color(0.75, 0.5, 1, state.progress()),
                                 UI.color(0.5, 1, 1, 0)
@@ -654,7 +653,7 @@ class Individual_Component_Styling_Spec extends Specification
                         .margin(22)
                         .border(15, Color.CYAN)
                         .gradient(UI.Layer.BORDER, "border gradient", s -> s
-                            .transition(UI.Transition.BOTTOM_RIGHT_TO_TOP_LEFT)
+                            .span(UI.Span.BOTTOM_RIGHT_TO_TOP_LEFT)
                             .colors(Color.YELLOW, new Color(255,255,255,0))
                             .clipTo(UI.ComponentArea.BORDER)
                         )
@@ -693,7 +692,7 @@ class Individual_Component_Styling_Spec extends Specification
                     .withStyle( it -> it
                         .size(205, 60)
                         .gradient(shade -> shade
-                           .transition(UI.Transition.TOP_LEFT_TO_BOTTOM_RIGHT)
+                           .span(UI.Span.TOP_LEFT_TO_BOTTOM_RIGHT)
                            .colors(
                                it.component().getModel().isSelected()
                                    ? new Color[]{ Color.YELLOW, Color.CYAN   }
@@ -735,7 +734,7 @@ class Individual_Component_Styling_Spec extends Specification
                         .padding(12)
                         .margin(6)
                         .gradient(UI.Layer.BACKGROUND, shade -> shade
-                           .transition(UI.Transition.LEFT_TO_RIGHT)
+                           .span(UI.Span.LEFT_TO_RIGHT)
                            .colors(
                               new Color(255,0,0,64),
                               new Color(0,255,0,64),
@@ -2305,7 +2304,7 @@ class Individual_Component_Styling_Spec extends Specification
                             .gradient( gradConf -> gradConf
                                 .colors(Color.BLACK, Color.CYAN, Color.GREEN, Color.MAGENTA)
                                 .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
-                                .transition(UI.Transition.LEFT_TO_RIGHT)
+                                .span(UI.Span.LEFT_TO_RIGHT)
                                 .type(UI.GradientType.LINEAR)
                                 .focus(26,16)
                             )
@@ -2318,7 +2317,7 @@ class Individual_Component_Styling_Spec extends Specification
                              .gradient( gradConf -> gradConf
                                  .colors(Color.BLACK, Color.CYAN, Color.GREEN, Color.MAGENTA)
                                  .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
-                                 .transition(UI.Transition.RIGHT_TO_LEFT)
+                                 .span(UI.Span.RIGHT_TO_LEFT)
                                  .type(UI.GradientType.LINEAR)
                                  .focus(26,16)
                              )
@@ -2331,7 +2330,7 @@ class Individual_Component_Styling_Spec extends Specification
                              .gradient( gradConf -> gradConf
                                  .colors(Color.BLACK, Color.CYAN, Color.GREEN, Color.MAGENTA)
                                  .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
-                                 .transition(UI.Transition.TOP_TO_BOTTOM)
+                                 .span(UI.Span.TOP_TO_BOTTOM)
                                  .type(UI.GradientType.LINEAR)
                                  .focus(26,16)
                              )
@@ -2344,7 +2343,7 @@ class Individual_Component_Styling_Spec extends Specification
                              .gradient( gradConf -> gradConf
                                  .colors(Color.BLACK, Color.CYAN, Color.GREEN, Color.MAGENTA)
                                  .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
-                                 .transition(UI.Transition.BOTTOM_TO_TOP)
+                                 .span(UI.Span.BOTTOM_TO_TOP)
                                  .type(UI.GradientType.LINEAR)
                                  .focus(26,16)
                              )
@@ -2357,7 +2356,7 @@ class Individual_Component_Styling_Spec extends Specification
                              .gradient( gradConf -> gradConf
                                  .colors(Color.BLACK, Color.CYAN, Color.GREEN, Color.MAGENTA)
                                  .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
-                                 .transition(UI.Transition.TOP_LEFT_TO_BOTTOM_RIGHT)
+                                 .span(UI.Span.TOP_LEFT_TO_BOTTOM_RIGHT)
                                  .type(UI.GradientType.LINEAR)
                                  .focus(26,16)
                              )
@@ -2370,7 +2369,7 @@ class Individual_Component_Styling_Spec extends Specification
                              .gradient( gradConf -> gradConf
                                  .colors(Color.BLACK, Color.CYAN, Color.GREEN, Color.MAGENTA)
                                  .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
-                                 .transition(UI.Transition.BOTTOM_RIGHT_TO_TOP_LEFT)
+                                 .span(UI.Span.BOTTOM_RIGHT_TO_TOP_LEFT)
                                  .type(UI.GradientType.LINEAR)
                                  .focus(26,16)
                              )
@@ -2383,7 +2382,7 @@ class Individual_Component_Styling_Spec extends Specification
                              .gradient( gradConf -> gradConf
                                  .colors(Color.BLACK, Color.CYAN, Color.GREEN, Color.MAGENTA)
                                  .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
-                                 .transition(UI.Transition.TOP_RIGHT_TO_BOTTOM_LEFT)
+                                 .span(UI.Span.TOP_RIGHT_TO_BOTTOM_LEFT)
                                  .type(UI.GradientType.LINEAR)
                                  .focus(26,16)
                              )
@@ -2396,7 +2395,7 @@ class Individual_Component_Styling_Spec extends Specification
                              .gradient( gradConf -> gradConf
                                  .colors(Color.BLACK, Color.CYAN, Color.GREEN, Color.MAGENTA)
                                  .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
-                                 .transition(UI.Transition.BOTTOM_LEFT_TO_TOP_RIGHT)
+                                 .span(UI.Span.BOTTOM_LEFT_TO_TOP_RIGHT)
                                  .type(UI.GradientType.LINEAR)
                                  .focus(26,16)
                              )
@@ -2409,7 +2408,7 @@ class Individual_Component_Styling_Spec extends Specification
                              .gradient( gradConf -> gradConf
                                  .colors(Color.BLACK, Color.CYAN, Color.GREEN, Color.MAGENTA)
                                  .boundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)
-                                 .transition(UI.Transition.TOP_TO_BOTTOM)
+                                 .span(UI.Span.TOP_TO_BOTTOM)
                                  .type(UI.GradientType.LINEAR)
                                  .focus(26,16)
                              )
@@ -2422,7 +2421,7 @@ class Individual_Component_Styling_Spec extends Specification
                              .gradient( gradConf -> gradConf
                                  .colors(Color.BLACK, Color.CYAN, Color.GREEN, Color.MAGENTA)
                                  .boundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)
-                                 .transition(UI.Transition.BOTTOM_TO_TOP)
+                                 .span(UI.Span.BOTTOM_TO_TOP)
                                  .type(UI.GradientType.LINEAR)
                                  .focus(26,16)
                              )
@@ -2435,7 +2434,7 @@ class Individual_Component_Styling_Spec extends Specification
                              .gradient( gradConf -> gradConf
                                  .colors(Color.BLACK, Color.CYAN, Color.GREEN, Color.MAGENTA)
                                  .boundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)
-                                 .transition(UI.Transition.LEFT_TO_RIGHT)
+                                 .span(UI.Span.LEFT_TO_RIGHT)
                                  .type(UI.GradientType.LINEAR)
                                  .focus(26,16)
                              )
@@ -2448,7 +2447,7 @@ class Individual_Component_Styling_Spec extends Specification
                              .gradient( gradConf -> gradConf
                                  .colors(Color.BLACK, Color.CYAN, Color.GREEN, Color.MAGENTA)
                                  .boundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)
-                                 .transition(UI.Transition.RIGHT_TO_LEFT)
+                                 .span(UI.Span.RIGHT_TO_LEFT)
                                  .type(UI.GradientType.LINEAR)
                                  .focus(26,16)
                              )
@@ -2503,7 +2502,7 @@ class Individual_Component_Styling_Spec extends Specification
                             .gradient( gradConf -> gradConf
                                 .colors(Color.BLACK, Color.CYAN, Color.GREEN, Color.MAGENTA)
                                 .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
-                                .transition(UI.Transition.LEFT_TO_RIGHT)
+                                .span(UI.Span.LEFT_TO_RIGHT)
                                 .type(UI.GradientType.CONIC)
                                 .focus(26,16)
                             )
@@ -2516,7 +2515,7 @@ class Individual_Component_Styling_Spec extends Specification
                              .gradient( gradConf -> gradConf
                                  .colors(Color.BLACK, Color.CYAN, Color.GREEN, Color.MAGENTA)
                                  .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
-                                 .transition(UI.Transition.RIGHT_TO_LEFT)
+                                 .span(UI.Span.RIGHT_TO_LEFT)
                                  .type(UI.GradientType.CONIC)
                                  .focus(26,16)
                              )
@@ -2529,7 +2528,7 @@ class Individual_Component_Styling_Spec extends Specification
                              .gradient( gradConf -> gradConf
                                  .colors(Color.BLACK, Color.CYAN, Color.GREEN, Color.MAGENTA)
                                  .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
-                                 .transition(UI.Transition.TOP_TO_BOTTOM)
+                                 .span(UI.Span.TOP_TO_BOTTOM)
                                  .type(UI.GradientType.CONIC)
                                  .focus(26,16)
                              )
@@ -2542,7 +2541,7 @@ class Individual_Component_Styling_Spec extends Specification
                              .gradient( gradConf -> gradConf
                                  .colors(Color.BLACK, Color.CYAN, Color.GREEN, Color.MAGENTA)
                                  .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
-                                 .transition(UI.Transition.BOTTOM_TO_TOP)
+                                 .span(UI.Span.BOTTOM_TO_TOP)
                                  .type(UI.GradientType.CONIC)
                                  .focus(26,16)
                              )
@@ -2555,7 +2554,7 @@ class Individual_Component_Styling_Spec extends Specification
                              .gradient( gradConf -> gradConf
                                  .colors(Color.BLACK, Color.CYAN, Color.GREEN, Color.MAGENTA)
                                  .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
-                                 .transition(UI.Transition.TOP_LEFT_TO_BOTTOM_RIGHT)
+                                 .span(UI.Span.TOP_LEFT_TO_BOTTOM_RIGHT)
                                  .type(UI.GradientType.CONIC)
                                  .focus(26,16)
                              )
@@ -2568,7 +2567,7 @@ class Individual_Component_Styling_Spec extends Specification
                              .gradient( gradConf -> gradConf
                                  .colors(Color.BLACK, Color.CYAN, Color.GREEN, Color.MAGENTA)
                                  .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
-                                 .transition(UI.Transition.BOTTOM_RIGHT_TO_TOP_LEFT)
+                                 .span(UI.Span.BOTTOM_RIGHT_TO_TOP_LEFT)
                                  .type(UI.GradientType.CONIC)
                                  .focus(26,16)
                              )
@@ -2581,7 +2580,7 @@ class Individual_Component_Styling_Spec extends Specification
                              .gradient( gradConf -> gradConf
                                  .colors(Color.BLACK, Color.CYAN, Color.GREEN, Color.MAGENTA)
                                  .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
-                                 .transition(UI.Transition.TOP_RIGHT_TO_BOTTOM_LEFT)
+                                 .span(UI.Span.TOP_RIGHT_TO_BOTTOM_LEFT)
                                  .type(UI.GradientType.CONIC)
                                  .focus(26,16)
                              )
@@ -2594,7 +2593,7 @@ class Individual_Component_Styling_Spec extends Specification
                              .gradient( gradConf -> gradConf
                                  .colors(Color.BLACK, Color.CYAN, Color.GREEN, Color.MAGENTA)
                                  .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
-                                 .transition(UI.Transition.BOTTOM_LEFT_TO_TOP_RIGHT)
+                                 .span(UI.Span.BOTTOM_LEFT_TO_TOP_RIGHT)
                                  .type(UI.GradientType.CONIC)
                                  .focus(26,16)
                              )
@@ -2607,7 +2606,7 @@ class Individual_Component_Styling_Spec extends Specification
                              .gradient( gradConf -> gradConf
                                  .colors(Color.BLACK, Color.CYAN, Color.GREEN, Color.MAGENTA)
                                  .boundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)
-                                 .transition(UI.Transition.TOP_TO_BOTTOM)
+                                 .span(UI.Span.TOP_TO_BOTTOM)
                                  .type(UI.GradientType.CONIC)
                                  .focus(26,16)
                              )
@@ -2620,7 +2619,7 @@ class Individual_Component_Styling_Spec extends Specification
                              .gradient( gradConf -> gradConf
                                  .colors(Color.BLACK, Color.CYAN, Color.GREEN, Color.MAGENTA)
                                  .boundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)
-                                 .transition(UI.Transition.BOTTOM_TO_TOP)
+                                 .span(UI.Span.BOTTOM_TO_TOP)
                                  .type(UI.GradientType.CONIC)
                                  .focus(26,16)
                              )
@@ -2633,7 +2632,7 @@ class Individual_Component_Styling_Spec extends Specification
                              .gradient( gradConf -> gradConf
                                  .colors(Color.BLACK, Color.CYAN, Color.GREEN, Color.MAGENTA)
                                  .boundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)
-                                 .transition(UI.Transition.LEFT_TO_RIGHT)
+                                 .span(UI.Span.LEFT_TO_RIGHT)
                                  .type(UI.GradientType.CONIC)
                                  .focus(26,16)
                              )
@@ -2646,7 +2645,7 @@ class Individual_Component_Styling_Spec extends Specification
                              .gradient( gradConf -> gradConf
                                  .colors(Color.BLACK, Color.CYAN, Color.GREEN, Color.MAGENTA)
                                  .boundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)
-                                 .transition(UI.Transition.RIGHT_TO_LEFT)
+                                 .span(UI.Span.RIGHT_TO_LEFT)
                                  .type(UI.GradientType.CONIC)
                                  .focus(26,16)
                              )

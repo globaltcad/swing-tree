@@ -444,10 +444,10 @@ public final class UI extends UINamespaceUtilities
      *  like for example the gradient style API exposed by {@link ComponentStyleDelegate#gradient(Function)}
      *  or {@link ComponentStyleDelegate#gradient(Function)} methods (see {@link UIForAnySwing#withStyle(Styler)}).
      * <p>
-     *  {@link GradientConf#transition(Transition)} method exposed by methods like
+     *  {@link GradientConf#span(Span)} method exposed by methods like
      *  {@link ComponentStyleDelegate#gradient(String, Function)} or {@link ComponentStyleDelegate#gradient(Layer, String, Function)}.
      */
-    public enum Transition implements UIEnum<Transition>
+    public enum Span implements UIEnum<Span>
     {
         TOP_LEFT_TO_BOTTOM_RIGHT, BOTTOM_LEFT_TO_TOP_RIGHT,
         TOP_RIGHT_TO_BOTTOM_LEFT, BOTTOM_RIGHT_TO_TOP_LEFT,
