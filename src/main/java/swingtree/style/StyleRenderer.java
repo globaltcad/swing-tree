@@ -1192,7 +1192,7 @@ final class StyleRenderer
             Shape newClip = conf.areas().get(style.clipArea());
             // We merge the new clip with the old one:
             if ( newClip != null && oldClip != null )
-                newClip = StyleUtility.intersect( newClip, oldClip );
+                newClip = StyleUtil.intersect( newClip, oldClip );
 
             g2d.setClip(newClip);
 

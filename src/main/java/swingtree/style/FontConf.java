@@ -667,9 +667,9 @@ final class FontConf
                     "spacing="             + _spacing                                + ", " +
                     "underlined="          + underline                               + ", " +
                     "strikeThrough="       + strike                                  + ", " +
-                    "color="               + StyleUtility.toString(_color)           + ", " +
-                    "backgroundColor="     + StyleUtility.toString(_backgroundColor) + ", " +
-                    "selectionColor="      + StyleUtility.toString(_selectionColor)  + ", " +
+                    "color="               + StyleUtil.toString(_color)           + ", " +
+                    "backgroundColor="     + StyleUtil.toString(_backgroundColor) + ", " +
+                    "selectionColor="      + StyleUtil.toString(_selectionColor)  + ", " +
                     "transform="           + transform                               + ", " +
                     "paint="               + paint                                   + ", " +
                     "backgroundPaint="     + backgroundPaint                         + ", " +

@@ -668,7 +668,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
     public String toString() {
         if ( this == _NONE ) return this.getClass().getSimpleName()+"[NONE]";
         return this.getClass().getSimpleName() + "[" +
-                    "primer="        + StyleUtility.toString(_primer)                          + ", " +
+                    "primer="        + StyleUtil.toString(_primer)                          + ", " +
                     "image="         + ( _image == null ? "?" : _image.toString() )            + ", " +
                     "placement="     + _placement                                              + ", " +
                     "repeat="        + _repeat                                                 + ", " +

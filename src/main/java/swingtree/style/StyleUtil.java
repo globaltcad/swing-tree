@@ -1,7 +1,6 @@
 package swingtree.style;
 
 import swingtree.UI;
-import swingtree.api.Layout;
 import swingtree.api.Painter;
 
 import java.awt.*;
@@ -15,12 +14,12 @@ import java.util.Objects;
  *  <br><br>
  *  Dear future maintainer(s): Please keep it private!</b>
  */
-final class StyleUtility
+final class StyleUtil
 {
     static final String DEFAULT_KEY = "default";
 
 
-    private StyleUtility() {} // No instantiation, just a utility class
+    private StyleUtil() {} // No instantiation, just a utility class
 
 
     static Shape intersect( Shape clipA, Shape clipB )

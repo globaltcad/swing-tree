@@ -74,7 +74,7 @@ public final class StyleTrait<C extends JComponent>
      * @return A new {@link StyleTrait} with the same properties as this one,
      *         but with the given group name.
      */
-    public <E extends Enum<E>> StyleTrait<C> group( E group ) { return group(StyleUtility.toString(Objects.requireNonNull(group))); }
+    public <E extends Enum<E>> StyleTrait<C> group( E group ) { return group(StyleUtil.toString(Objects.requireNonNull(group))); }
 
     /**
      *  Creates a new {@link StyleTrait} with the same properties as this one,
@@ -100,7 +100,7 @@ public final class StyleTrait<C extends JComponent>
      * @return A new {@link StyleTrait} with the same properties as this one,
      *         but with the given id.
      */
-    public <E extends Enum<E>> StyleTrait<C> id( E id ) { return id(StyleUtility.toString(Objects.requireNonNull(id))); }
+    public <E extends Enum<E>> StyleTrait<C> id( E id ) { return id(StyleUtil.toString(Objects.requireNonNull(id))); }
 
     /**
      *  Creates a new {@link StyleTrait} with the same properties as this one,
@@ -132,7 +132,7 @@ public final class StyleTrait<C extends JComponent>
         String[] superGroupNames = new String[superGroups.length];
         for ( int i = 0; i < superGroups.length; i++ ) {
             E superGroup = Objects.requireNonNull(superGroups[i]);
-            superGroupNames[i] = StyleUtility.toString(superGroup);
+            superGroupNames[i] = StyleUtil.toString(superGroup);
         }
         return inherits(superGroupNames);
     }

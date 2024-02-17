@@ -53,7 +53,7 @@ public final class StyleConf
                                             BaseConf.none(),
                                             FontConf.none(),
                                             DimensionalityConf.none(),
-                                            StyleLayers.empty(),
+                                            StyleConfLayers.empty(),
                                             NamedConfigs.empty()
                                         );
 
@@ -68,7 +68,7 @@ public final class StyleConf
         BaseConf base,
         FontConf font,
         DimensionalityConf dimensionality,
-        StyleLayers         layers,
+        StyleConfLayers layers,
         NamedConfigs<String> properties
     ) {
         if (
@@ -86,22 +86,22 @@ public final class StyleConf
     }
 
 
-    private final LayoutConf _layout;
-    private final BorderConf _border;
-    private final BaseConf _base;
-    private final FontConf _font;
-    private final DimensionalityConf _dimensionality;
-    private final StyleLayers                _layers;
+    private final LayoutConf           _layout;
+    private final BorderConf           _border;
+    private final BaseConf             _base;
+    private final FontConf             _font;
+    private final DimensionalityConf   _dimensionality;
+    private final StyleConfLayers      _layers;
     private final NamedConfigs<String> _properties;
 
 
     private StyleConf(
-        LayoutConf layout,
-        BorderConf border,
-        BaseConf base,
-        FontConf font,
-        DimensionalityConf dimensionality,
-        StyleLayers         layers,
+        LayoutConf           layout,
+        BorderConf           border,
+        BaseConf             base,
+        FontConf             font,
+        DimensionalityConf   dimensionality,
+        StyleConfLayers      layers,
         NamedConfigs<String> properties
     ) {
         _layout         = Objects.requireNonNull(layout);
@@ -127,9 +127,9 @@ public final class StyleConf
 
     DimensionalityConf dimensionality() { return _dimensionality; }
 
-    StyleLayers layers() { return _layers; }
+    StyleConfLayers layers() { return _layers; }
 
-    StyleLayer layer(UI.Layer layer ) { return _layers.get(layer); }
+    StyleConfLayer layer(UI.Layer layer ) { return _layers.get(layer); }
 
     /**
      * @return The default shadow style.
@@ -137,7 +137,7 @@ public final class StyleConf
     public ShadowConf shadow() {
         return _layers.get(ShadowConf.DEFAULT_LAYER)
                         .shadows()
-                        .get(StyleUtility.DEFAULT_KEY);
+                        .get(StyleUtil.DEFAULT_KEY);
     }
 
     /**
@@ -232,7 +232,7 @@ public final class StyleConf
 
     boolean hasCustomGradients( UI.Layer layer ) {
         NamedConfigs<GradientConf> gradients = _layers.get(layer).gradients();
-        return !( gradients.size() == 1 && GradientConf.none().equals(gradients.get(StyleUtility.DEFAULT_KEY)) );
+        return !( gradients.size() == 1 && GradientConf.none().equals(gradients.get(StyleUtil.DEFAULT_KEY)) );
     }
 
     boolean hasVisibleGradientsOnLayer( UI.Layer layer ) {
@@ -245,10 +245,10 @@ public final class StyleConf
         return gradientCoveredAreas(UI.Layer.values());
     }
 
-    List<UI.ComponentArea> gradientCoveredAreas(UI.Layer... layers) {
+    List<UI.ComponentArea> gradientCoveredAreas( UI.Layer... layers ) {
         return Arrays.stream(layers)
                 .map(_layers::get)
-                .map(StyleLayer::gradients)
+                .map(StyleConfLayer::gradients)
                 .flatMap( g -> g
                     .stylesStream()
                     .map( grad -> grad.isOpaque() ? grad.area() : null )
@@ -258,93 +258,93 @@ public final class StyleConf
                 .collect(Collectors.toList());
     }
 
-    public StyleConf foundationColor(Color color ) { return _withBase(base().foundationColor(color)); }
+    public StyleConf foundationColor( Color color ) { return _withBase(base().foundationColor(color)); }
 
-    public StyleConf backgroundColor(Color color ) { return _withBase(base().backgroundColor(color)); }
+    public StyleConf backgroundColor( Color color ) { return _withBase(base().backgroundColor(color)); }
 
-    StyleConf _withLayout(LayoutConf layout ) {
+    StyleConf _withLayout( LayoutConf layout ) {
         if ( layout == _layout )
             return this;
 
         return StyleConf.of(layout, _border, _base, _font, _dimensionality, _layers, _properties);
     }
 
-    StyleConf _withBorder(BorderConf border ) {
+    StyleConf _withBorder( BorderConf border ) {
         if ( border == _border )
             return this;
 
         return StyleConf.of(_layout, border, _base, _font, _dimensionality, _layers, _properties);
     }
 
-    StyleConf _withBase(BaseConf background ) {
+    StyleConf _withBase( BaseConf background ) {
         if ( background == _base )
             return this;
 
         return StyleConf.of(_layout, _border, background, _font, _dimensionality, _layers, _properties);
     }
 
-    StyleConf _withFont(FontConf font ) {
+    StyleConf _withFont( FontConf font ) {
         if ( font == _font )
             return this;
 
         return StyleConf.of(_layout, _border, _base, font, _dimensionality, _layers, _properties);
     }
 
-    StyleConf _withDimensionality(DimensionalityConf dimensionality ) {
+    StyleConf _withDimensionality( DimensionalityConf dimensionality ) {
         if ( dimensionality == _dimensionality )
             return this;
 
         return StyleConf.of(_layout, _border, _base, _font, dimensionality, _layers, _properties);
     }
 
-    StyleConf _withShadow(UI.Layer layer, NamedConfigs<ShadowConf> shadows ) {
+    StyleConf _withShadow( UI.Layer layer, NamedConfigs<ShadowConf> shadows ) {
         return StyleConf.of(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withShadows(shadows)), _properties);
     }
 
-    StyleConf _withProperties(NamedConfigs<String> properties ) {
+    StyleConf _withProperties( NamedConfigs<String> properties ) {
         if ( properties == _properties )
             return this;
 
         return StyleConf.of(_layout, _border, _base, _font, _dimensionality, _layers, properties);
     }
 
-    StyleConf _withShadow(UI.Layer layer, Function<ShadowConf, ShadowConf> styler ) {
+    StyleConf _withShadow( UI.Layer layer, Function<ShadowConf, ShadowConf> styler ) {
         // A new map is created where all the styler is applied to all the values:
         NamedConfigs<ShadowConf> styledShadows = _layers.get(layer).shadows().mapStyles(styler::apply);
         return _withShadow(layer, styledShadows);
     }
 
-    StyleConf _withShadow(Function<ShadowConf, ShadowConf> styler ) {
+    StyleConf _withShadow( Function<ShadowConf, ShadowConf> styler ) {
         return _withLayers(_layers.map( layer -> layer.withShadows(layer.shadows().mapStyles(styler::apply)) ));
     }
 
-    StyleConf _withImages(UI.Layer layer, NamedConfigs<ImageConf> images ) {
+    StyleConf _withImages( UI.Layer layer, NamedConfigs<ImageConf> images ) {
         return StyleConf.of(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withImages(images)), _properties);
     }
 
-    StyleConf _withGradients(UI.Layer layer, NamedConfigs<GradientConf> shades ) {
+    StyleConf _withGradients( UI.Layer layer, NamedConfigs<GradientConf> shades ) {
         Objects.requireNonNull(shades);
         return StyleConf.of(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withGradients(shades)), _properties);
     }
 
-    StyleConf _withNoises(UI.Layer layer, NamedConfigs<NoiseConf> noises ) {
+    StyleConf _withNoises( UI.Layer layer, NamedConfigs<NoiseConf> noises ) {
         Objects.requireNonNull(noises);
         return StyleConf.of(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withNoises(noises)), _properties);
     }
 
-    StyleConf _withLayers(StyleLayers layers ) {
+    StyleConf _withLayers( StyleConfLayers layers ) {
         if ( layers == _layers )
             return this;
 
         return StyleConf.of(_layout, _border, _base, _font, _dimensionality, layers, _properties);
     }
 
-    StyleConf _withPainters(UI.Layer layer, NamedConfigs<PainterConf> painters ) {
+    StyleConf _withPainters( UI.Layer layer, NamedConfigs<PainterConf> painters ) {
         Objects.requireNonNull(painters);
         return StyleConf.of(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withPainters(painters)), _properties);
     }
 
-    StyleConf property(String key, String value ) {
+    StyleConf property( String key, String value ) {
         Objects.requireNonNull(key);
         Objects.requireNonNull(value);
         return _withProperties(_properties.withNamedStyle(key, value));
@@ -453,8 +453,8 @@ public final class StyleConf
     }
 
     boolean hasEqualShadowsAs( UI.Layer layer, StyleConf otherStyle ) {
-        StyleLayer thisLayer = _layers.get(layer);
-        StyleLayer otherLayer = otherStyle._layers.get(layer);
+        StyleConfLayer thisLayer = _layers.get(layer);
+        StyleConfLayer otherLayer = otherStyle._layers.get(layer);
         if ( thisLayer == null && otherLayer == null )
             return true;
         if ( thisLayer == null || otherLayer == null )
@@ -474,8 +474,8 @@ public final class StyleConf
     }
 
     boolean hasEqualPaintersAs( UI.Layer layer, StyleConf otherStyle ) {
-        StyleLayer thisLayer = _layers.get(layer);
-        StyleLayer otherLayer = otherStyle._layers.get(layer);
+        StyleConfLayer thisLayer = _layers.get(layer);
+        StyleConfLayer otherLayer = otherStyle._layers.get(layer);
         if ( thisLayer == null && otherLayer == null )
             return true;
         if ( thisLayer == null || otherLayer == null )
@@ -495,8 +495,8 @@ public final class StyleConf
     }
 
     boolean hasEqualGradientsAs( UI.Layer layer, StyleConf otherStyle ) {
-        StyleLayer thisLayer = _layers.get(layer);
-        StyleLayer otherLayer = otherStyle._layers.get(layer);
+        StyleConfLayer thisLayer = _layers.get(layer);
+        StyleConfLayer otherLayer = otherStyle._layers.get(layer);
         if ( thisLayer == null && otherLayer == null )
             return true;
         if ( thisLayer == null || otherLayer == null )
@@ -516,8 +516,8 @@ public final class StyleConf
     }
 
     boolean hasEqualNoisesAs( UI.Layer layer, StyleConf otherStyle ) {
-        StyleLayer thisLayer = _layers.get(layer);
-        StyleLayer otherLayer = otherStyle._layers.get(layer);
+        StyleConfLayer thisLayer = _layers.get(layer);
+        StyleConfLayer otherLayer = otherStyle._layers.get(layer);
         if ( thisLayer == null && otherLayer == null )
             return true;
         if ( thisLayer == null || otherLayer == null )
@@ -537,8 +537,8 @@ public final class StyleConf
     }
 
     boolean hasEqualImagesAs( UI.Layer layer, StyleConf otherStyle ) {
-        StyleLayer thisLayer = _layers.get(layer);
-        StyleLayer otherLayer = otherStyle._layers.get(layer);
+        StyleConfLayer thisLayer = _layers.get(layer);
+        StyleConfLayer otherLayer = otherStyle._layers.get(layer);
         if ( thisLayer == null && otherLayer == null )
             return true;
         if ( thisLayer == null || otherLayer == null )
@@ -578,7 +578,7 @@ public final class StyleConf
 
     @Override
     public String toString() {
-        String propertiesString = _properties.toString(StyleUtility.DEFAULT_KEY, "properties");
+        String propertiesString = _properties.toString(StyleUtil.DEFAULT_KEY, "properties");
 
         return this.getClass().getSimpleName() + "[" +
                     _layout          + ", " +

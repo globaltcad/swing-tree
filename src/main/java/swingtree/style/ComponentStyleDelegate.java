@@ -794,7 +794,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided background renderer.
      */
     public ComponentStyleDelegate<C> painter( UI.Layer layer, swingtree.api.Painter painter ) {
-        return _withStyle(_styleConf.painter(layer, UI.ComponentArea.BODY, StyleUtility.DEFAULT_KEY, painter));
+        return _withStyle(_styleConf.painter(layer, UI.ComponentArea.BODY, StyleUtil.DEFAULT_KEY, painter));
     }
 
     /**
@@ -832,7 +832,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
         UI.ComponentArea      clipArea,
         swingtree.api.Painter painter
     ) {
-        return _withStyle(_styleConf.painter(layer, clipArea, StyleUtility.DEFAULT_KEY, painter));
+        return _withStyle(_styleConf.painter(layer, clipArea, StyleUtil.DEFAULT_KEY, painter));
     }
 
 
@@ -1311,7 +1311,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with a background shade defined by the provided styler lambda.
      */
     public ComponentStyleDelegate<C> gradient( Function<GradientConf, GradientConf> styler ) {
-        return gradient(GradientConf.DEFAULT_LAYER, StyleUtility.DEFAULT_KEY, styler);
+        return gradient(GradientConf.DEFAULT_LAYER, StyleUtil.DEFAULT_KEY, styler);
     }
 
     /**
@@ -1336,7 +1336,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      */
     public ComponentStyleDelegate<C> gradient( UI.Layer layer, Function<GradientConf, GradientConf> styler ) {
         Objects.requireNonNull(styler);
-        return _withStyle(_styleConf.gradient(layer, StyleUtility.DEFAULT_KEY, styler));
+        return _withStyle(_styleConf.gradient(layer, StyleUtil.DEFAULT_KEY, styler));
     }
 
     /**
@@ -1415,7 +1415,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with a background noise defined by the provided styler lambda.
      */
     public ComponentStyleDelegate<C> noise( Function<NoiseConf, NoiseConf> styler ) {
-        return noise(NoiseConf.DEFAULT_LAYER, StyleUtility.DEFAULT_KEY, styler);
+        return noise(NoiseConf.DEFAULT_LAYER, StyleUtil.DEFAULT_KEY, styler);
     }
 
     /**
@@ -1504,7 +1504,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with a background image defined by the provided styler lambda.
      */
     public ComponentStyleDelegate<C> image( Function<ImageConf, ImageConf> styler ) {
-        return image(ImageConf.DEFAULT_LAYER, StyleUtility.DEFAULT_KEY, styler);
+        return image(ImageConf.DEFAULT_LAYER, StyleUtil.DEFAULT_KEY, styler);
     }
 
     /**
@@ -1530,7 +1530,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      */
     public ComponentStyleDelegate<C> image( UI.Layer layer, Function<ImageConf, ImageConf> styler ) {
         Objects.requireNonNull(styler);
-        return _withStyle(_styleConf.images(layer, StyleUtility.DEFAULT_KEY, styler));
+        return _withStyle(_styleConf.images(layer, StyleUtil.DEFAULT_KEY, styler));
     }
 
     /**

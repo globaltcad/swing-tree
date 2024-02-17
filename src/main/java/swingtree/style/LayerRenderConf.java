@@ -19,14 +19,14 @@ final class LayerRenderConf
     private static final LayerRenderConf _NONE = new LayerRenderConf(
                                                     BoxModelConf.none(),
                                                     BaseColorConf.none(),
-                                                    StyleLayer.empty()
+                                                    StyleConfLayer.empty()
                                                 );
 
     public static LayerRenderConf none() { return _NONE; }
 
     private final BoxModelConf   _boxModelConf;
     private final BaseColorConf  _baseColor;
-    private final StyleLayer     _layer;
+    private final StyleConfLayer _layer;
 
     private boolean _wasAlreadyHashed = false;
     private int     _hashCode         = 0; // cached hash code
@@ -35,7 +35,7 @@ final class LayerRenderConf
     private LayerRenderConf(
         BoxModelConf   boxModelConf,
         BaseColorConf  base,
-        StyleLayer     layers
+        StyleConfLayer layers
     ) {
         _boxModelConf = ComponentAreas.intern(Objects.requireNonNull(boxModelConf));
         _baseColor    = Objects.requireNonNull(base);
@@ -45,7 +45,7 @@ final class LayerRenderConf
     static LayerRenderConf of(
         BoxModelConf   boxModelConf,
         BaseColorConf  base,
-        StyleLayer     layers
+        StyleConfLayer layers
     ) {
         if (
             boxModelConf == BoxModelConf.none() &&
@@ -83,7 +83,7 @@ final class LayerRenderConf
 
     BaseColorConf baseColors() { return _baseColor; }
 
-    StyleLayer layer() { return _layer; }
+    StyleConfLayer layer() { return _layer; }
 
     ComponentAreas areas() { return ComponentAreas.of(_boxModelConf); }
 
@@ -93,7 +93,7 @@ final class LayerRenderConf
 
         Shape newClip = areas().get(area);
         if ( newClip != null && newClip != oldClip ) {
-            newClip = StyleUtility.intersect(newClip, oldClip);
+            newClip = StyleUtil.intersect(newClip, oldClip);
             g.setClip(newClip);
         }
 

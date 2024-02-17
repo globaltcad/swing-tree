@@ -59,7 +59,7 @@ final class StyleEngine
 
         Shape newClip = ComponentAreas.of(_boxModelConf).get(area);
         if ( newClip != null && newClip != oldClip ) {
-            newClip = StyleUtility.intersect(newClip, oldClip);
+            newClip = StyleUtil.intersect(newClip, oldClip);
             g.setClip(newClip);
         }
 

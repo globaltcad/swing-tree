@@ -153,9 +153,9 @@ final class BaseConf
         return this.getClass().getSimpleName() + "[" +
                     "icon="            + ( _icon       == null ? "?" : _icon.toString()  ) + ", " +
                     "fitComponent="    + _fit                                              + ", " +
-                    "backgroundColor=" + StyleUtility.toString(_backgroundColor)           + ", " +
-                    "foundationColor=" + StyleUtility.toString(_foundationColor)           + ", " +
-                    "foregroundColor=" + StyleUtility.toString(_foregroundColor)           + ", " +
+                    "backgroundColor=" + StyleUtil.toString(_backgroundColor)           + ", " +
+                    "foundationColor=" + StyleUtil.toString(_foundationColor)           + ", " +
+                    "foregroundColor=" + StyleUtil.toString(_foregroundColor)           + ", " +
                     "cursor="          + ( _cursor == null ? "?" : _cursor.toString() )    + ", " +
                     "orientation="     + _orientation                                      +
                 "]";
