@@ -624,10 +624,10 @@ class Style_Sheet_Spec extends Specification
             s.border().widths().right().get() == 10
             s.border().color().get() == Color.GREEN
         and : 'Note that only the default border shade will be overridden, not the named one.'
-            s.gradient(UI.Layer.BORDER, "default").transition() == UI.Span.BOTTOM_TO_TOP
+            s.gradient(UI.Layer.BORDER, "default").span() == UI.Span.BOTTOM_TO_TOP
             s.gradient(UI.Layer.BORDER, "default").colors() as java.util.List == [Color.RED, Color.BLUE]
             s.gradient(UI.Layer.BORDER, "default").area() == UI.ComponentArea.BORDER
-            s.gradient(UI.Layer.BORDER, "named shade").transition() == UI.Span.TOP_TO_BOTTOM
+            s.gradient(UI.Layer.BORDER, "named shade").span() == UI.Span.TOP_TO_BOTTOM
             s.gradient(UI.Layer.BORDER, "named shade").colors() as java.util.List == [Color.CYAN, Color.MAGENTA]
             s.gradient(UI.Layer.BORDER, "named shade").area() == UI.ComponentArea.BORDER
     }
@@ -709,7 +709,7 @@ class Style_Sheet_Spec extends Specification
             s.border().widths().right().get() == 5
             s.border().color().get() == Color.MAGENTA
             s.base().backgroundColor().get() == Color.RED
-            s.gradient(Layer.BORDER, "default").transition() == UI.Span.BOTTOM_TO_TOP
+            s.gradient(Layer.BORDER, "default").span() == UI.Span.BOTTOM_TO_TOP
             s.gradient(Layer.BORDER, "default").colors() as java.util.List == [Color.RED, Color.BLUE]
             s.shadow(UI.Layer.BACKGROUND, "named shadow") == null
             s.shadow(UI.Layer.CONTENT, "named shadow").spreadRadius() == 42

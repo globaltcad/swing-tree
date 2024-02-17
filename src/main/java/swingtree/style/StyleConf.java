@@ -94,6 +94,7 @@ public final class StyleConf
     private final StyleLayers                _layers;
     private final NamedConfigs<String> _properties;
 
+
     private StyleConf(
         LayoutConf layout,
         BorderConf border,
@@ -184,7 +185,7 @@ public final class StyleConf
     /**
      * @return An unmodifiable list of painters sorted by their names in ascending alphabetical order.
      */
-    List<PainterConf> painters(UI.Layer layer ) {
+    List<PainterConf> painters( UI.Layer layer ) {
         return Collections.unmodifiableList(
                             new ArrayList<>(_layers.get(layer)
                                 .painters()
@@ -204,24 +205,6 @@ public final class StyleConf
                                                         PainterConf.of(painter, area)
                                                     ); 
         return _withPainters(layer, newPainters);
-    }
-
-    /**
-     *  Returns a new {@link StyleConf} instance which only contains style information relevant
-     *  for rendering the provided {@link UI.Layer}. Style information on other layers is discarded.
-     * @param layer The layer to retain.
-     * @return A new {@link StyleConf} instance which only contains style information relevant to the provided {@link UI.Layer}.
-     */
-    public StyleConf onlyRetainingRenderCacheRelevantConfForLayer(UI.Layer layer ) {
-        return StyleConf.of(
-                    LayoutConf.none(),
-                    ( layer == UI.Layer.BORDER     ? _border : _border.withColor(null) ),
-                    ( layer == UI.Layer.BACKGROUND ? _base   : BaseConf.none() ),
-                    FontConf.none(),
-                    DimensionalityConf.none(),
-                    _layers.onlyRetainingAsUnnamedLayer(layer),
-                    NamedConfigs.empty()
-                );
     }
 
     boolean hasPaintersOnLayer(UI.Layer layer ) {
