@@ -241,10 +241,10 @@ public final class StyleConf
         return _layers.get(layer).noises().sortedByNames();
     }
 
-    boolean hasVisibleNoisesOnLayer(UI.Layer layer ) {
+    boolean hasVisibleNoisesOnLayer( UI.Layer layer ) {
         List<NoiseConf> noises = noises(layer);
         if ( noises.isEmpty() ) return false;
-        return noises.stream().anyMatch( s -> !s.scale().equals(Offset.none()) );
+        return noises.stream().anyMatch( s -> !s.equals(NoiseConf.none()) );
     }
 
     List<UI.ComponentArea> gradientCoveredAreas() {
