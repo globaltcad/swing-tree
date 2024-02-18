@@ -154,7 +154,7 @@ final class StyleConfLayer implements Simplifiable<StyleConfLayer>
     @Override
     public String toString() {
         if ( this == _EMPTY )
-            return "StyleLayer[EMPTY]";
+            return this.getClass().getSimpleName() + "[EMPTY]";
         String shadowString     = _shadows.toString(StyleUtil.DEFAULT_KEY, "");
         String painterString    = _painters.toString(StyleUtil.DEFAULT_KEY, "");
         String gradientString   = _gradients.toString(StyleUtil.DEFAULT_KEY, "");
