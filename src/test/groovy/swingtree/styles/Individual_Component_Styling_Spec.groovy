@@ -2676,4 +2676,190 @@ class Individual_Component_Styling_Spec extends Specification
     }
 
 
+    def 'Render noise gradients as component backgrounds using the style API.'()
+    {
+        reportInfo """
+                Inside your `Styler` lambdas you may access another sub style
+                for configuring the gradient of a component.
+                <br>
+                Here you can see an example of multiple labels with different 
+                types noise gradient styles applied. <br>
+                
+                ${Utility.linkSnapshot('components/noise-gradients-collage.png')}
+
+                They are all stitched together into a collage so that you can see them 
+                all at once and compare them with each other.
+            """
+
+        given : 'We pass the following style rules to a number of labels:'
+            var ui1 =
+                        UI.label("Center Left Right").withStyle( it -> it
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                            .border(2, Color.DARK_GRAY)
+                            .size(120, 120)
+                            .noise( conf -> conf
+                                .colors("black", "lime", "white")
+                                .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
+                                .function(UI.NoiseType.STOCHASTIC)
+                                .offset(10, 15)
+                            )
+                        )
+            var ui2 =
+                         UI.label("Center Right Left").withStyle( it -> it
+                             .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .border(2, Color.DARK_GRAY)
+                             .size(120, 120)
+                             .noise( conf -> conf
+                                 .colors("black", "lime", "white")
+                                 .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
+                                 .function(UI.NoiseType.SMOOTH_TOPOLOGY)
+                                 .offset(10, 15)
+                             )
+                         )
+            var ui3 =
+                         UI.label("Center Top Bottom").withStyle( it -> it
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .border(2, Color.DARK_GRAY)
+                             .size(120, 120)
+                             .noise( conf -> conf
+                                 .colors("black", "lime", "white")
+                                 .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
+                                 .function(UI.NoiseType.HARD_TOPOLOGY)
+                                 .offset(10, 15)
+                             )
+                         )
+            var ui4 =
+                         UI.label("Center Bottom TOP").withStyle( it -> it
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .border(2, Color.DARK_GRAY)
+                             .size(120, 120)
+                             .noise( conf -> conf
+                                 .colors("black", "lime", "white")
+                                 .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
+                                 .function(UI.NoiseType.SMOOTH_SPOTS)
+                                 .offset(10, 15)
+                             )
+                         )
+            var ui5 =
+                         UI.label("Center LT to BR").withStyle( it -> it
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .border(2, Color.DARK_GRAY)
+                             .size(120, 120)
+                             .noise( conf -> conf
+                                 .colors("black", "lime", "white")
+                                 .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
+                                 .function(UI.NoiseType.HARD_SPOTS)
+                                 .offset(10, 15)
+                             )
+                         )
+            var ui6 =
+                         UI.label("Center BR to LT").withStyle( it -> it
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .border(2, Color.DARK_GRAY)
+                             .size(120, 120)
+                             .noise( conf -> conf
+                                 .colors("dark sky", "sky", "white")
+                                 .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
+                                 .function(UI.NoiseType.TILES)
+                                 .offset(10, 15)
+                             )
+                         )
+            var ui7 =
+                         UI.label("Center TR to BL").withStyle( it -> it
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .border(2, Color.DARK_GRAY)
+                             .size(120, 120)
+                             .noise( conf -> conf
+                                 .colors("dark purple", "dark sky", "bright sky")
+                                 .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
+                                 .function(UI.NoiseType.FIBERS)
+                                 .offset(10, 15)
+                             )
+                         )
+            var ui8 =
+                         UI.label("Center BL to TR").withStyle( it -> it
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .border(2, Color.DARK_GRAY)
+                             .size(120, 120)
+                             .noise( conf -> conf
+                                 .colors("black", "tan", "white")
+                                 .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
+                                 .function(UI.NoiseType.GRAINY)
+                                 .offset(10, 15)
+                             )
+                         )
+            var ui9 =
+                         UI.label("Full Top Bottom").withStyle( it -> it
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .border(2, Color.DARK_GRAY)
+                             .size(120, 120)
+                             .noise( conf -> conf
+                                 .colors("black", "lime", "white")
+                                 .boundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)
+                                 .function(UI.NoiseType.STOCHASTIC)
+                                 .offset(10, 15)
+                             )
+                         )
+            var ui10 =
+                         UI.label("Full Bottom TOP").withStyle( it -> it
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .border(2, Color.DARK_GRAY)
+                             .size(120, 120)
+                             .noise( conf -> conf
+                                 .colors("black", "lime", "white")
+                                 .boundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)
+                                 .function(UI.NoiseType.STOCHASTIC)
+                                 .offset(10, 15)
+                             )
+                         )
+            var ui11 =
+                         UI.label("Full Left Right").withStyle( it -> it
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .border(2, Color.DARK_GRAY)
+                             .size(120, 120)
+                             .noise( conf -> conf
+                                 .colors("black", "lime", "white")
+                                 .boundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)
+                                 .function(UI.NoiseType.STOCHASTIC)
+                                 .offset(10, 15)
+                             )
+                         )
+            var ui12 =
+                         UI.label("Full Right Left").withStyle( it -> it
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .border(2, Color.DARK_GRAY)
+                             .size(120, 120)
+                             .noise( conf -> conf
+                                 .colors("black", "lime", "white")
+                                 .boundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)
+                                 .function(UI.NoiseType.STOCHASTIC)
+                                 .offset(10, 15)
+                             )
+                         )
+
+
+        when : 'We render the UIs into BufferedImage instances.'
+            var image1 = Utility.renderSingleComponent(ui1.get(JLabel))
+            var image2 = Utility.renderSingleComponent(ui2.get(JLabel))
+            var image3 = Utility.renderSingleComponent(ui3.get(JLabel))
+            var image4 = Utility.renderSingleComponent(ui4.get(JLabel))
+            var image5 = Utility.renderSingleComponent(ui5.get(JLabel))
+            var image6 = Utility.renderSingleComponent(ui6.get(JLabel))
+            var image7 = Utility.renderSingleComponent(ui7.get(JLabel))
+            var image8 = Utility.renderSingleComponent(ui8.get(JLabel))
+            var image9 = Utility.renderSingleComponent(ui9.get(JLabel))
+            var image10 = Utility.renderSingleComponent(ui10.get(JLabel))
+            var image11 = Utility.renderSingleComponent(ui11.get(JLabel))
+            var image12 = Utility.renderSingleComponent(ui12.get(JLabel))
+            var images = new BufferedImage[] {image1, image2, image3, image4, image5, image6, image7, image8, image9, image10, image11, image12}
+
+
+        then : 'The collage of images is as expected (compared with the snapshot above).'
+            Utility.similarityBetween(images, "components/noise-gradients-collage.png", 99) > 99
+
+        where : 'We test this using the following scaling values:'
+            scale << [1f, 1.25f, 1.75f, 2f]
+    }
+
+
 }

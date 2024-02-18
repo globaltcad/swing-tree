@@ -745,11 +745,13 @@ final class StyleRenderer
         final float[] fractions = _fractionsFrom(colors, noise.fractions());
         float rotation = noise.rotation();
         Offset scale = noise.scale();
+        float scaleX = scale.x();
+        float scaleY = scale.y();
 
         g2d.setPaint(new NoiseGradientPaint(
                         corner1,
-                        scale.x(),
-                        scale.y(),
+                        scaleX,
+                        scaleY,
                         rotation,
                         fractions,
                         colors,

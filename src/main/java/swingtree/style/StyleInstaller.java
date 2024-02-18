@@ -162,6 +162,7 @@ final class StyleInstaller<C extends JComponent>
 
         final List<UI.ComponentArea> opaqueGradientAreas = newStyle.gradientCoveredAreas();
         final boolean hasBackgroundGradients             = newStyle.hasVisibleGradientsOnLayer(UI.Layer.BACKGROUND);
+        final boolean hasBackgroundNoise                 = newStyle.hasVisibleNoisesOnLayer(UI.Layer.BACKGROUND);
         final boolean hasBackgroundPainters              = newStyle.hasPaintersOnLayer(UI.Layer.BACKGROUND);
         final boolean hasBackgroundImages                = newStyle.hasImagesOnLayer(UI.Layer.BACKGROUND);
         final boolean hasBackgroundShadows               = newStyle.hasVisibleShadows(UI.Layer.BACKGROUND);
@@ -252,6 +253,7 @@ final class StyleInstaller<C extends JComponent>
         final boolean customLookAndFeelInstalled = _dynamicLaF.customLookAndFeelIsInstalled();
         final boolean requiresBackgroundPainting =
                                              hasBackgroundGradients ||
+                                             hasBackgroundNoise     ||
                                              hasBackgroundShadows   ||
                                              hasBackgroundPainters  ||
                                              hasBackgroundImages    ||

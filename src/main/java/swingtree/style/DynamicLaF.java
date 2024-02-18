@@ -63,13 +63,16 @@ final class DynamicLaF
         if ( styleConf.margin().isPositive() )
             weNeedToOverrideLaF = true;
 
-        if ( styleConf.hasCustomGradients() )
+        if ( styleConf.hasVisibleGradientsOnLayer(UI.Layer.BACKGROUND) )
+            weNeedToOverrideLaF = true;
+
+        if ( styleConf.hasVisibleNoisesOnLayer(UI.Layer.BACKGROUND) )
             weNeedToOverrideLaF = true;
 
         if ( styleConf.hasPaintersOnLayer(UI.Layer.BACKGROUND) )
             weNeedToOverrideLaF = true;
 
-        if ( styleConf.hasVisibleShadows() )
+        if ( styleConf.hasVisibleShadows(UI.Layer.BACKGROUND) )
             weNeedToOverrideLaF = true;
 
         if ( weNeedToOverrideLaF ) {

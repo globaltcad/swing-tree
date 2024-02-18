@@ -169,10 +169,6 @@ public final class StyleConf
         return _layers.get(layer).shadows();
     }
 
-    boolean hasVisibleShadows() {
-        return Arrays.stream(UI.Layer.values()).anyMatch(this::hasVisibleShadows);
-    }
-
     boolean hasVisibleShadows(UI.Layer layer) {
         return _layers.get(layer)
                 .shadows()
@@ -239,6 +235,16 @@ public final class StyleConf
         List<GradientConf> gradients = gradients(layer);
         if ( gradients.isEmpty() ) return false;
         return gradients.stream().anyMatch( s -> s.colors().length > 0 );
+    }
+
+    List<NoiseConf> noises(UI.Layer layer ) {
+        return _layers.get(layer).noises().sortedByNames();
+    }
+
+    boolean hasVisibleNoisesOnLayer(UI.Layer layer ) {
+        List<NoiseConf> noises = noises(layer);
+        if ( noises.isEmpty() ) return false;
+        return noises.stream().anyMatch( s -> !s.scale().equals(Offset.none()) );
     }
 
     List<UI.ComponentArea> gradientCoveredAreas() {

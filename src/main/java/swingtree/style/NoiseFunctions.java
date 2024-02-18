@@ -40,7 +40,10 @@ public final class NoiseFunctions
         float scale = 2;
         int kernelSize = 4;
         double sum = _coordinateToGradValue(kernelSize, xIn/scale, yIn/scale);
-        return (Math.sin(sum * (12.0/kernelSize)) + 1)/2;
+        double stochastic = (Math.sin(sum * (12.0/kernelSize)) + 1)/2;
+        // We make the smallest and largest values both the largest,
+        // and the values around 0.5 become close to 0
+        return Math.abs((stochastic-0.5)*2);
     }
 
     public static double tiles(float xIn, float yIn ) {
@@ -133,9 +136,10 @@ public final class NoiseFunctions
                 final double vx = rx - xIn;
                 final double vy = ry - yIn;
                 final double distance = Math.sqrt( vx*vx % 2 + vy*vy % 2);
-                final double relevance = Math.max(0, 1.0 - distance / maxDistance);
+                double relevance = Math.max(0, 1.0 - distance / maxDistance);
                 final double frac = _fastPseudoRandomDoubleFrom(rx, ry) - 0.5;
-                sum += ( frac * ( relevance * relevance ) );
+                relevance = Math.min(1, (relevance * relevance) * 1.5);
+                sum += ( frac * relevance );
             }
         }
         return sum;

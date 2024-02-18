@@ -28,7 +28,7 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
                                                         NoiseFunctions::stochastic,
                                                         new Color[0],
                                                         Offset.none(),
-                                                        Offset.none(),
+                                                        Offset.of(1f, 1f),
                                                         UI.ComponentArea.BODY,
                                                         UI.ComponentBoundary.EXTERIOR_TO_BORDER,
                                                         0f,
