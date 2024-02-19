@@ -259,6 +259,26 @@ final class StyleInstaller<C extends JComponent>
                                              hasBackgroundImages    ||
                                              hasBorderRadius        ||
                                              hasMargin;
+
+        if ( _dynamicLaF.overrideWasNeeded() ) {
+            if ( owner instanceof AbstractButton) {
+                AbstractButton b = (AbstractButton) owner;
+
+                boolean shouldButtonBeFilled =  !hasBackgroundImages &&
+                        !hasBackgroundShadows &&
+                        !hasBackground &&
+                        !hasBackgroundGradients &&
+                        !hasBackgroundNoise &&
+                        !hasBackgroundPainters;
+
+                if ( _initialContentAreaFilled != null && !_initialContentAreaFilled )
+                    shouldButtonBeFilled = false;
+
+                if ( shouldButtonBeFilled != b.isContentAreaFilled() )
+                    b.setContentAreaFilled( shouldButtonBeFilled );
+            }
+        }
+
         if ( !canBeOpaque )
         {
             if ( owner.isOpaque() )
@@ -346,24 +366,6 @@ final class StyleInstaller<C extends JComponent>
 
         if ( !backgroundWasSetSomewhereElse )
             _currentBackgroundColor = owner.getBackground();
-
-        if ( _dynamicLaF.overrideWasNeeded() ) {
-            if ( owner instanceof AbstractButton) {
-                AbstractButton b = (AbstractButton) owner;
-
-                boolean shouldButtonBeFilled =  !hasBackgroundImages &&
-                                                !hasBackgroundShadows &&
-                                                !hasBackground &&
-                                                !hasBackgroundGradients &&
-                                                !hasBackgroundPainters;
-
-                if ( _initialContentAreaFilled != null && !_initialContentAreaFilled )
-                    shouldButtonBeFilled = false;
-
-                if ( shouldButtonBeFilled != b.isContentAreaFilled() )
-                    b.setContentAreaFilled( shouldButtonBeFilled );
-            }
-        }
 
         return newStyle;
     }
