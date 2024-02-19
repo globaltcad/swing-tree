@@ -25,7 +25,7 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
     static final UI.Layer DEFAULT_LAYER = UI.Layer.BACKGROUND;
 
     private static final NoiseConf _NONE = new NoiseConf(
-                                                        NoiseFunctions::stochastic,
+                                                        UI.NoiseType.STOCHASTIC,
                                                         new Color[0],
                                                         Offset.none(),
                                                         Offset.of(1f, 1f),
@@ -146,6 +146,9 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
     NoiseConf _scale( double scale ) {
         if ( scale == 1 )
             return this;
+
+        if ( this == _NONE )
+            return _NONE;
 
         return of(
             _function,

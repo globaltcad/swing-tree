@@ -160,7 +160,7 @@ final class StyleInstaller<C extends JComponent>
         if ( owner instanceof AbstractButton && _initialContentAreaFilled == null )
             _initialContentAreaFilled = ((AbstractButton) owner).isContentAreaFilled();
 
-        final List<UI.ComponentArea> opaqueGradientAreas = newStyle.gradientCoveredAreas();
+        final List<UI.ComponentArea> opaqueGradAreas     = newStyle.noiseAndGradientCoveredAreas();
         final boolean hasBackgroundGradients             = newStyle.hasVisibleGradientsOnLayer(UI.Layer.BACKGROUND);
         final boolean hasBackgroundNoise                 = newStyle.hasVisibleNoisesOnLayer(UI.Layer.BACKGROUND);
         final boolean hasBackgroundPainters              = newStyle.hasPaintersOnLayer(UI.Layer.BACKGROUND);
@@ -224,25 +224,25 @@ final class StyleInstaller<C extends JComponent>
 
         boolean canBeOpaque = true;
 
-        if ( !opaqueGradientAreas.contains(UI.ComponentArea.ALL) ) {
+        if ( !opaqueGradAreas.contains(UI.ComponentArea.ALL) ) {
             boolean hasOpaqueFoundation = 255 == newStyle.base().foundationColor().map(Color::getAlpha).orElse(0);
             boolean hasOpaqueBackground = 255 == newStyle.base().backgroundColor().map( c -> c != UI.COLOR_UNDEFINED ? c : _initialBackgroundColor ).map(Color::getAlpha).orElse(255);
             boolean hasBorder           = newStyle.border().widths().isPositive();
 
-            if ( !hasOpaqueFoundation && !opaqueGradientAreas.contains(UI.ComponentArea.EXTERIOR) ) {
+            if ( !hasOpaqueFoundation && !opaqueGradAreas.contains(UI.ComponentArea.EXTERIOR) ) {
                 if ( hasBorderRadius )
                     canBeOpaque = false;
                 else if ( hasMargin )
                     canBeOpaque = false;
             }
 
-            if ( hasBorder && (!hasOpaqueBorder && !opaqueGradientAreas.contains(UI.ComponentArea.BORDER)) )
+            if ( hasBorder && (!hasOpaqueBorder && !opaqueGradAreas.contains(UI.ComponentArea.BORDER)) )
                 canBeOpaque = false;
 
             if (
                 !hasOpaqueBackground &&
-                !opaqueGradientAreas.contains(UI.ComponentArea.INTERIOR) &&
-                !opaqueGradientAreas.contains(UI.ComponentArea.BODY)
+                !opaqueGradAreas.contains(UI.ComponentArea.INTERIOR) &&
+                !opaqueGradAreas.contains(UI.ComponentArea.BODY)
             )
                 canBeOpaque = false;
         }

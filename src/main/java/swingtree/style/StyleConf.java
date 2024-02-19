@@ -211,7 +211,7 @@ public final class StyleConf
         return _layers.get(layer).images().stylesStream().anyMatch(i -> i.image().isPresent() || i.primer().isPresent());
     }
 
-    List<GradientConf> gradients(UI.Layer layer ) {
+    List<GradientConf> gradients( UI.Layer layer ) {
         return _layers.get(layer).gradients().sortedByNames();
     }
 
@@ -237,7 +237,7 @@ public final class StyleConf
         return gradients.stream().anyMatch( s -> s.colors().length > 0 );
     }
 
-    List<NoiseConf> noises(UI.Layer layer ) {
+    List<NoiseConf> noises( UI.Layer layer ) {
         return _layers.get(layer).noises().sortedByNames();
     }
 
@@ -262,6 +262,29 @@ public final class StyleConf
                 )
                 .distinct()
                 .collect(Collectors.toList());
+    }
+
+    List<UI.ComponentArea> noiseCoveredAreas() {
+        return noiseCoveredAreas(UI.Layer.values());
+    }
+
+    List<UI.ComponentArea> noiseCoveredAreas( UI.Layer... layers ) {
+        return Arrays.stream(layers)
+                .map(_layers::get)
+                .map(StyleConfLayer::noises)
+                .flatMap( n -> n
+                    .stylesStream()
+                    .map( noise -> noise.isOpaque() ? noise.area() : null )
+                    .filter(Objects::nonNull)
+                )
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
+    List<UI.ComponentArea> noiseAndGradientCoveredAreas() {
+        List<UI.ComponentArea> areas = new ArrayList<>(gradientCoveredAreas());
+        areas.addAll(noiseCoveredAreas());
+        return areas;
     }
 
     public StyleConf foundationColor( Color color ) { return _withBase(base().foundationColor(color)); }
