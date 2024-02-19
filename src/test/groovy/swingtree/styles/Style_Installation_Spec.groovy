@@ -76,13 +76,27 @@ class Style_Installation_Spec extends Specification
             false    | { it.shadow(UI.Layer.BORDER, "myShadow", conf->conf.color("red").spreadRadius(1).blurRadius(5)) }
             true     | { it.shadow(UI.Layer.BACKGROUND, "myShadow", conf->conf.color("black").offset(1,2).blurRadius(5)) }
             true     | { it.shadow(UI.Layer.BACKGROUND, "myShadow", conf->conf.color("red").spreadRadius(7).isOutset(true)) }
+            false    | { it.shadow(UI.Layer.BACKGROUND, "myShadow", conf->conf.color(UI.COLOR_UNDEFINED).offset(1,2).blurRadius(5)) }
+            false    | { it.shadow(UI.Layer.BACKGROUND, "myShadow", conf->conf.color(UI.COLOR_UNDEFINED).spreadRadius(7).isOutset(true)) }
             false    | { it.shadow(UI.Layer.FOREGROUND, "myShadow", conf->conf.color("red").spreadRadius(1).blurRadius(5)) }
+
             true     | { it.gradient(UI.Layer.BACKGROUND, "myGradient", conf->conf.colors(Color.RED, Color.BLUE)) }
+            false    | { it.gradient(UI.Layer.BACKGROUND, "myGradient", conf->conf.colors([])) }
             false    | { it.gradient(UI.Layer.FOREGROUND, "myGradient", conf->conf.colors(Color.RED, Color.BLUE)) }
             false    | { it.gradient(UI.Layer.CONTENT, "myGradient", conf->conf.colors(Color.RED, Color.BLUE)) }
             false    | { it.gradient(UI.Layer.CONTENT, "myGradient", conf->conf.colors(Color.RED, Color.BLUE)) }
             false    | { it.gradient(UI.Layer.BORDER, "myGradient", conf->conf.colors(Color.RED, Color.BLUE)) }
             false    | { it.gradient(UI.Layer.BORDER, "myGradient", conf->conf.colors(Color.RED, Color.BLUE)) }
+
+            true     | { it.noise(UI.Layer.BACKGROUND, "myNoise", conf->conf.scale(1,2).colors(Color.RED, Color.BLUE)) }
+            true     | { it.noise(UI.Layer.BACKGROUND, "myNoise", conf->conf.colors(Color.GREEN, Color.RED)) }
+            false    | { it.noise(UI.Layer.BACKGROUND, "myNoise", conf->conf.colors([])) }
+            false    | { it.noise(UI.Layer.FOREGROUND, "myNoise", conf->conf.rotation(102).colors(Color.RED, Color.BLUE)) }
+            false    | { it.noise(UI.Layer.CONTENT, "myNoise", conf->conf.colors(Color.RED, Color.BLUE)) }
+            false    | { it.noise(UI.Layer.CONTENT, "myNoise", conf->conf.colors(Color.RED, Color.BLUE)) }
+            false    | { it.noise(UI.Layer.BORDER, "myNoise", conf->conf.colors(Color.RED, Color.BLUE)) }
+            false    | { it.noise(UI.Layer.BORDER, "myNoise", conf->conf.colors(Color.RED, Color.BLUE)) }
+
             true     | { it.painter(UI.Layer.BACKGROUND, "myPainter", g2d -> {}) }
             false    | { it.painter(UI.Layer.FOREGROUND, "myPainter", g2d -> {}) }
             false    | { it.painter(UI.Layer.CONTENT, "myPainter", g2d -> {}) }
