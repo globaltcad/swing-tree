@@ -66,7 +66,7 @@ class Style_Installation_Spec extends Specification
             false    | { it.border(2, "black") }
             false    | { it.margin(5).border(3, "red").cursor(UI.Cursor.CROSS) }
             false    | { it.shadowColor("green") }
-            false    | { it.shadowColor("blue").blurRadius(5) }
+            false    | { it.shadowColor("blue").shadowBlurRadius(5) }
             false    | { it.shadowColor("pink").shadowBlurRadius(2).shadowSpreadRadius(7) }
             false    | { it.shadow(UI.Layer.CONTENT, "myShadow", conf->conf.color("black").offset(1,2).blurRadius(5)) }
             false    | { it.shadow(UI.Layer.CONTENT, "myShadow", conf->conf.color("red").spreadRadius(7).isOutset(true)) }
