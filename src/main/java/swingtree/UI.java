@@ -3529,19 +3529,23 @@ public final class UI extends UINamespaceUtilities
     }
 
     /**
-     *  Use this to create a builder for a new {@link JComboBox} UI component.
+     *  Use this to declare a builder for a new {@link JComboBox} UI component.
      *  This is in essence a convenience method for {@code UI.of(new JComboBox())}.
      *
      * @param <E> The type of the elements in the {@link JComboBox}.
      * @return A builder instance for a new {@link JComboBox}, which enables fluent method chaining.
      */
     public static <E> UIForCombo<E,JComboBox<E>> comboBox() {
-        return new UIForCombo<>(new BuilderState<>((Class) JComboBox.class,()->new ComboBox<>()));
+        return new UIForCombo<>(new BuilderState<>(JComboBox.class, ComboBox::new));
     }
 
     /**
-     *  Use this to create a builder for a new {@link JComboBox} instance
-     *  with the provided array of elements as selectable items.
+     *  Use this to declare a UI builder for the {@link JComboBox} component type
+     *  with the provided array of elements as selectable items. <br>
+     *  Note that the user may modify the items in the provided array
+     *  (if the combo box is editable), if you do not want that,
+     *  consider using {@link UI#comboBoxWithUnmodifiable(Object[])}
+     *  or {@link UI#comboBoxWithUnmodifiable(java.util.List)}.
      *
      * @param items The array of elements to be selectable in the {@link JComboBox}.
      * @param <E> The type of the elements in the {@link JComboBox}.
@@ -3555,7 +3559,7 @@ public final class UI extends UINamespaceUtilities
     }
 
     /**
-     *  Use this to create a builder for a new {@link JComboBox} instance
+     *  Use this to declare a UI builder for the {@link JComboBox} type
      *  with the provided array of elements as selectable items which
      *  may not be modified by the user.
      *
@@ -3608,7 +3612,7 @@ public final class UI extends UINamespaceUtilities
     }
 
     /**
-     *  Use this to create a builder for a new  {@link JComboBox} instance
+     *  Use this to declare a builder for a new {@link JComboBox} instance
      *  with the provided list of elements as selectable items.
      *
      * @param items The list of elements to be selectable in the {@link JComboBox}.
