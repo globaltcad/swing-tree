@@ -5,8 +5,11 @@ import java.util.concurrent.TimeUnit;
 
 /**
  *  The lifespan defines when an {@link Animation} starts and for how long it should run.
- *  It consists of a start time and {@link LifeTime}, which defines a delay time and duration as well as a unique id
- *  which ensures that two instances of this class are never equal.
+ *  It consists of a start time and {@link LifeTime}, which defines a delay, interval and duration
+ *  as well as a unique id which ensures that two instances of this class are never equal.
+ *  <br>
+ *  This object is intended to be accessed as part of an {@link AnimationState} within
+ *  an {@link Animation} and is typically used to decide how an animation should behave.
  */
 public final class LifeSpan
 {

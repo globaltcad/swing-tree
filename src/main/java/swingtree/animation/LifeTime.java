@@ -2,6 +2,7 @@ package swingtree.animation;
 
 import sprouts.Event;
 import sprouts.Val;
+import swingtree.SwingTree;
 import swingtree.api.AnimatedStyler;
 
 import java.awt.Component;
@@ -41,17 +42,6 @@ import java.util.concurrent.TimeUnit;
  */
 public final class LifeTime
 {
-    /*
-        We want the refresh rate to be as high as possible so that the animation
-        looks smooth, but we don't want to use 100% of the CPU.
-        The ideal refresh rate is 60 fps which is 16.6 ms per frame.
-        So we set the timer to 16 ms.
-        This does of course not account for the time it takes to run the animation
-        code, but that should be negligible, and in the worst case
-        the animation will be a bit slower than 60 fps.
-    */
-    private static final long DEFAULT_INTERVAL = 16;
-    
     private static long _instances = 0;
 
     private final long _id = _instances++;
@@ -67,7 +57,7 @@ public final class LifeTime
      */
     public static LifeTime of( long time, TimeUnit unit ) {
         Objects.requireNonNull(unit);
-        return new LifeTime(0, unit.toMillis(time), DEFAULT_INTERVAL);
+        return new LifeTime(0, unit.toMillis(time), SwingTree.get().getDefaultAnimationInterval());
     }
 
     /**
@@ -78,7 +68,7 @@ public final class LifeTime
      */
     public static LifeTime of( double time, TimeUnit unit ) {
         long millis = _convertTimeFromDoublePrecisely(time, unit, TimeUnit.MILLISECONDS);
-        return new LifeTime(0, millis, DEFAULT_INTERVAL);
+        return new LifeTime(0, millis, SwingTree.get().getDefaultAnimationInterval());
     }
 
     /**
@@ -90,7 +80,7 @@ public final class LifeTime
      * @return A new lifetime that will start after the given delay and run for the given duration.
      */
     public static LifeTime of( long startDelay, TimeUnit startUnit, long duration, TimeUnit durationUnit ) {
-        return new LifeTime(startUnit.toMillis(startDelay), durationUnit.toMillis(duration), DEFAULT_INTERVAL);
+        return new LifeTime(startUnit.toMillis(startDelay), durationUnit.toMillis(duration), SwingTree.get().getDefaultAnimationInterval());
     }
 
     /**
@@ -104,7 +94,7 @@ public final class LifeTime
     public static LifeTime of( double startDelay, TimeUnit startUnit, double duration, TimeUnit durationUnit ) {
         long startMillis    = _convertTimeFromDoublePrecisely(startDelay, startUnit, TimeUnit.MILLISECONDS);
         long durationMillis = _convertTimeFromDoublePrecisely(duration, durationUnit, TimeUnit.MILLISECONDS);
-        return new LifeTime(startMillis, durationMillis, DEFAULT_INTERVAL);
+        return new LifeTime(startMillis, durationMillis, SwingTree.get().getDefaultAnimationInterval());
     }
 
     private static long _convertTimeFromDoublePrecisely( double time, TimeUnit from, TimeUnit to ) {

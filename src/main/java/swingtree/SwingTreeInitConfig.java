@@ -82,10 +82,20 @@ public final class SwingTreeInitConfig
                         FontInstallation.SOFT,
                         EventProcessor.COUPLED_STRICT,
                         StyleSheet.none(),
-                        SystemProperties.parseScaleFactor(System.getProperty( SystemProperties.UI_SCALE )),
-                        SystemProperties.getBoolean( SystemProperties.UI_SCALE_ENABLED, true ),
-                        SystemProperties.getBoolean( SystemProperties.UI_SCALE_ALLOW_SCALE_DOWN, false )
+                        SystemProperties.getFloat(SystemProperties.UI_SCALE,                 -1    ),
+                        SystemProperties.getBool(SystemProperties.UI_SCALE_ENABLED,          true  ),
+                        SystemProperties.getBool(SystemProperties.UI_SCALE_ALLOW_SCALE_DOWN, false ),
+                        SystemProperties.getLong(SystemProperties.ANIMATION_INTERVAL,        16    )
                     );
+                    /*
+                        Nte that we want the refresh rate to be as high as possible so that the animation
+                        looks smooth, but we don't want to use 100% of the CPU.
+                        The ideal refresh rate is 60 fps which is 16.6 ms per frame.
+                        So we set the timer to 16 ms.
+                        This does of course not account for the time it takes to run the animation
+                        code, but that should be negligible, and in the worst case
+                        the animation will be a bit slower than 60 fps.
+                    */
     }
 
 
@@ -96,6 +106,7 @@ public final class SwingTreeInitConfig
     private final float            _uiScale;
     private final boolean          _uiScaleEnabled;
     private final boolean          _uiScaleAllowScaleDown;
+    private final long             _defaultAnimationInterval;
 
 
     private SwingTreeInitConfig(
@@ -105,15 +116,17 @@ public final class SwingTreeInitConfig
         StyleSheet       styleSheet,
         float            uiScale,
         boolean          uiScaleEnabled,
-        boolean          uiScaleAllowScaleDown
+        boolean          uiScaleAllowScaleDown,
+        long             defaultAnimationInterval
     ) {
-        _defaultFont           = defaultFont;
-        _fontInstallation      = Objects.requireNonNull(fontInstallation);
-        _eventProcessor        = Objects.requireNonNull(eventProcessor);
-        _styleSheet            = Objects.requireNonNull(styleSheet);
-        _uiScale               = uiScale;
-        _uiScaleEnabled        = uiScaleEnabled;
-        _uiScaleAllowScaleDown = uiScaleAllowScaleDown;
+        _defaultFont              = defaultFont;
+        _fontInstallation         = Objects.requireNonNull(fontInstallation);
+        _eventProcessor           = Objects.requireNonNull(eventProcessor);
+        _styleSheet               = Objects.requireNonNull(styleSheet);
+        _uiScale                  = uiScale;
+        _uiScaleEnabled           = uiScaleEnabled;
+        _uiScaleAllowScaleDown    = uiScaleAllowScaleDown;
+        _defaultAnimationInterval = defaultAnimationInterval;
     }
 
     /**
@@ -201,6 +214,23 @@ public final class SwingTreeInitConfig
     }
 
     /**
+     *  Returns the default animation interval in milliseconds,
+     *  which is a property that
+     *  determines the delay between two consecutive animation steps.
+     *  You can think of it as the time between the heartbeats of the animation.
+     *  The smaller the interval, the higher the refresh rate and
+     *  the smoother the animation will look.
+     *  However, the smaller the interval, the more CPU time will be used.
+     *  The default interval is 16 ms which corresponds to 60 fps.
+     *  See {@link #standard()}, returning an instance of this config with the default value. <br>
+     *  This property is used as default value by the {@link swingtree.animation.LifeTime}
+     *  object which is used to define the duration of an {@link swingtree.animation.Animation}.
+     */
+    long defaultAnimationInterval() {
+        return _defaultAnimationInterval;
+    }
+
+    /**
      *  Used to configure the default font, which may be used by the {@link SwingTree}
      *  to derive the UI scaling factor and or to install the font in the {@link javax.swing.UIManager}
      *  depending on the {@link FontInstallation} mode (see {@link #defaultFont(Font, FontInstallation)}).
@@ -208,7 +238,7 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new default font.
      */
     public SwingTreeInitConfig defaultFont( Font newDefaultFont ) {
-        return new SwingTreeInitConfig(newDefaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown);
+        return new SwingTreeInitConfig(newDefaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown, _defaultAnimationInterval);
     }
 
     /**
@@ -228,7 +258,7 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new default font and {@link FontInstallation} mode.
      */
     public SwingTreeInitConfig defaultFont( Font newDefaultFont, FontInstallation newFontInstallation ) {
-        return new SwingTreeInitConfig(newDefaultFont, newFontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown);
+        return new SwingTreeInitConfig(newDefaultFont, newFontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown, _defaultAnimationInterval);
     }
 
     /**
@@ -242,7 +272,7 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new {@link EventProcessor}.
      */
     public SwingTreeInitConfig eventProcessor( EventProcessor newEventProcessor ) {
-        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, newEventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown);
+        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, newEventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown, _defaultAnimationInterval);
     }
 
     /**
@@ -253,7 +283,7 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new {@link StyleSheet}.
      */
     public SwingTreeInitConfig styleSheet( StyleSheet newStyleSheet ) {
-        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _eventProcessor, newStyleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown);
+        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _eventProcessor, newStyleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown, _defaultAnimationInterval);
     }
 
     /**
@@ -272,7 +302,7 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new UI scaling factor.
      */
     public SwingTreeInitConfig uiScaleFactor( float newUiScale ) {
-        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _eventProcessor, _styleSheet, newUiScale, _uiScaleEnabled, _uiScaleAllowScaleDown);
+        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _eventProcessor, _styleSheet, newUiScale, _uiScaleEnabled, _uiScaleAllowScaleDown, _defaultAnimationInterval);
     }
 
     /**
@@ -286,7 +316,7 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new UI scaling mode.
      */
     public SwingTreeInitConfig isUiScaleFactorEnabled( boolean newUiScaleEnabled ) {
-        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, newUiScaleEnabled, _uiScaleAllowScaleDown);
+        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, newUiScaleEnabled, _uiScaleAllowScaleDown, _defaultAnimationInterval);
     }
 
     /**
@@ -300,9 +330,28 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new UI scaling mode.
      */
     public SwingTreeInitConfig isUiScaleDownAllowed( boolean newUiScaleAllowScaleDown ) {
-        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, newUiScaleAllowScaleDown);
+        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, newUiScaleAllowScaleDown, _defaultAnimationInterval);
     }
 
+    /**
+     *  Used to configure the default animation interval in milliseconds,
+     *  which is a property that
+     *  determines the delay between two consecutive animation steps.
+     *  You can think of it as the time between the heartbeats of the animation.
+     *  The smaller the interval, the higher the refresh rate and
+     *  the smoother the animation will look.
+     *  However, the smaller the interval, the more CPU time will be used.
+     *  The default interval is 16 ms which corresponds to 60 fps.
+     *  See {@link #standard()}, returning an instance of this config with the default value. <br>
+     *  This property is used as default value by the {@link swingtree.animation.LifeTime}
+     *  object which is used to define the duration of an {@link swingtree.animation.Animation}.
+     *
+     * @param newDefaultAnimationInterval The new default animation interval.
+     * @return A new {@link SwingTreeInitConfig} instance with the new default animation interval.
+     */
+    public SwingTreeInitConfig defaultAnimationInterval( long newDefaultAnimationInterval ) {
+        return new SwingTreeInitConfig(_defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled, _uiScaleAllowScaleDown, newDefaultAnimationInterval);
+    }
 
     /**
      * Defines/documents own system properties used in SwingTree.
@@ -342,11 +391,22 @@ public final class SwingTreeInitConfig
         String UI_SCALE_ALLOW_SCALE_DOWN = "swingtree.uiScale.allowScaleDown";
 
         /**
+         * Specifies the default animation interval in milliseconds.
+         * <p>
+         * This property is used as default value by the {@link swingtree.animation.LifeTime}
+         * object which is used to define the duration of an {@link swingtree.animation.Animation}.
+         * <p>
+         * <strong>Allowed Values</strong> must be a positive integer<br>
+         * <strong>Default</strong> {@code 16}
+         */
+        String ANIMATION_INTERVAL = "swingtree.animationInterval";
+
+        /**
          * Checks whether a system property is set and returns {@code true} if its value
          * is {@code "true"} (case-insensitive), otherwise it returns {@code false}.
          * If the system property is not set, {@code defaultValue} is returned.
          */
-        static boolean getBoolean( String key, boolean defaultValue ) {
+        static boolean getBool(String key, boolean defaultValue ) {
             String value = System.getProperty( key );
             return (value != null) ? Boolean.parseBoolean( value ) : defaultValue;
         }
@@ -354,9 +414,11 @@ public final class SwingTreeInitConfig
         /**
          * Similar to sun.java2d.SunGraphicsEnvironment.getScaleFactor(String)
          */
-        static float parseScaleFactor( String s ) {
+        static float getFloat(String key, float defaultValue ) {
+            String s = System.getProperty( key );
+
             if ( s == null )
-                return -1;
+                return defaultValue;
 
             float units = 1;
             if ( s.endsWith( "x" ) )
@@ -373,7 +435,21 @@ public final class SwingTreeInitConfig
                 float scale = Float.parseFloat( s );
                 return scale > 0 ? scale / units : -1;
             } catch( NumberFormatException ex ) {
-                return -1;
+                return defaultValue;
+            }
+        }
+
+        static long getLong(String key, long defaultValue ) {
+            String s = System.getProperty( key );
+
+            if ( s == null )
+                return defaultValue;
+
+            try {
+                long interval = Long.parseLong( s );
+                return interval > 0 ? interval : defaultValue;
+            } catch( NumberFormatException ex ) {
+                return defaultValue;
             }
         }
     }

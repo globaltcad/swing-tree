@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 /**
@@ -90,7 +91,7 @@ public final class SwingTree
 
     private SwingTreeInitConfig _config;
 
-    private final LazyRef<UiScale> uiScale;
+    private final LazyRef<UiScale> _uiScale;
     private final Map<IconDeclaration, ImageIcon> _iconCache = new HashMap<>();
 
 
@@ -98,7 +99,7 @@ public final class SwingTree
 
 	private SwingTree( SwingTreeConfigurator configurator ) {
         _config = _resolveConfiguration(configurator);
-        this.uiScale = new LazyRef<>( () -> new UiScale(_config) );
+        _uiScale = new LazyRef<>( () -> new UiScale(_config) );
         _establishMainFont(_config);
     }
 
@@ -164,7 +165,7 @@ public final class SwingTree
      * @return The user scale factor.
      */
     public float getUiScaleFactor() {
-        return uiScale.get().getUserScaleFactor();
+        return _uiScale.get().getUserScaleFactor();
     }
 
     /**
@@ -185,8 +186,8 @@ public final class SwingTree
      * @param scaleFactor The user scale factor.
      */
     public void setUiScaleFactor( float scaleFactor ) {
-        log.debug("Changing UI scale factor from {} to {} now.", uiScale.get().getUserScaleFactor(), scaleFactor);
-        uiScale.get().setUserScaleFactor(scaleFactor);
+        log.debug("Changing UI scale factor from {} to {} now.", _uiScale.get().getUserScaleFactor(), scaleFactor);
+        _uiScale.get().setUserScaleFactor(scaleFactor);
     }
 
     /**
@@ -209,7 +210,7 @@ public final class SwingTree
      * @param listener The property change listener to add.
      */
     public void addUiScaleChangeListener(PropertyChangeListener listener) {
-        uiScale.get().addPropertyChangeListener(listener);
+        _uiScale.get().addPropertyChangeListener(listener);
     }
 
     /**
@@ -232,7 +233,7 @@ public final class SwingTree
      * @param listener The property change listener to remove.
      */
     public void removeUiScaleChangeListener(PropertyChangeListener listener) {
-        uiScale.get().removePropertyChangeListener(listener);
+        _uiScale.get().removePropertyChangeListener(listener);
     }
 
     /**
@@ -315,6 +316,46 @@ public final class SwingTree
             ex.printStackTrace();
         }
 	}
+
+    /**
+     *  Returns the default animation interval in milliseconds
+     *  which is a property that
+     *  determines the delay between two consecutive animation steps.
+     *  You can think of it as the time between the heartbeats of the animation.
+     *  The smaller the interval, the higher the refresh rate and
+     *  the smoother the animation will look.
+     *  However, the smaller the interval, the more CPU time will be used.
+     *  The default interval is 16 ms which corresponds to almost 60 fps.
+     *  <br>
+     *  This property is used as default value by the {@link swingtree.animation.LifeTime}
+     *  object which is used to define the duration of an {@link swingtree.animation.Animation}.
+     *  The value returned by this is used by animations
+     *  if no other interval is specified through {@link swingtree.animation.LifeTime#withInterval(long, TimeUnit)}.
+     * @return The default animation interval in milliseconds.
+     */
+    public long getDefaultAnimationInterval() {
+        return _config.defaultAnimationInterval();
+    }
+
+    /**
+     *  Sets the default animation interval in milliseconds
+     *  which is a property that
+     *  determines the delay between two consecutive animation steps.
+     *  You can think of it as the time between the heartbeats of the animation.
+     *  The smaller the interval, the higher the refresh rate and
+     *  the smoother the animation will look.
+     *  However, the smaller the interval, the more CPU time will be used.
+     *  The default interval is 16 ms which corresponds to almost 60 fps.
+     *  <br>
+     *  This property is used as default value by the {@link swingtree.animation.LifeTime}
+     *  object which is used to define the duration of an {@link swingtree.animation.Animation}.
+     *  The value returned by this is used by animations
+     *  if no other interval is specified through {@link swingtree.animation.LifeTime#withInterval(long, TimeUnit)}.
+     * @param defaultAnimationInterval The default animation interval in milliseconds.
+     */
+    public void setDefaultAnimationInterval( long defaultAnimationInterval ) {
+        _config = _config.defaultAnimationInterval(defaultAnimationInterval);
+    }
 
     /**
      * This class handles scaling in SwingTree UIs.
