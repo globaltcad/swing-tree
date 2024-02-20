@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- *  Runs an {@link Animation} on a {@link Component} according to a {@link LifeTime} and a {@link RunCondition}.
+ *  Runs an {@link Animation} on a {@link Component} according to a {@link LifeSpan} and a {@link RunCondition}.
  */
 class ComponentAnimator
 {
@@ -41,6 +41,8 @@ class ComponentAnimator
         _condition = Objects.requireNonNull(condition);
         _animation = Objects.requireNonNull(animation);
     }
+
+    public LifeSpan lifeSpan() { return _lifeSpan; }
 
     public Optional<JComponent> component() {
         if ( _compRef == null ) return Optional.empty();

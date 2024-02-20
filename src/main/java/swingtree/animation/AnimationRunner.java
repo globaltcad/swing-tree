@@ -3,10 +3,10 @@ package swingtree.animation;
 import swingtree.style.ComponentExtension;
 
 import javax.swing.*;
+import javax.swing.Timer;
 import java.awt.event.ActionEvent;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  *  This is a singleton class responsible for running {@link ComponentAnimator}
@@ -16,34 +16,32 @@ import java.util.Objects;
  */
 class AnimationRunner
 {
-    /*
-        We want the refresh rate to be as high as possible so that the animation
-        looks smooth, but we don't want to use 100% of the CPU.
-        The ideal refresh rate is 60 fps which is 16.6 ms per frame.
-        So we set the timer to 16 ms.
-        This does of course not account for the time it takes to run the animation
-        code, but that should be negligible, and in the worst case
-        the animation will be a bit slower than 60 fps.
-    */
-    private final static int TIMER_DELAY = 16;
-
-    private static final AnimationRunner _INSTANCE = new AnimationRunner();
+    private static final Map<Integer,AnimationRunner> _INSTANCES = new HashMap<>();
 
 
-    public static void add( ComponentAnimator animator ) { _INSTANCE._add(Objects.requireNonNull(animator)); }
+    public static void add( ComponentAnimator animator ) {
+        Objects.requireNonNull(animator);
+        int interval = (int) animator.lifeSpan().lifeTime().getIntervalIn(TimeUnit.MILLISECONDS);
+        AnimationRunner runner = _INSTANCES.computeIfAbsent(interval, it -> new AnimationRunner(interval));
+        runner._add(animator);
+    }
 
 
-    private final Timer _timer = new Timer( TIMER_DELAY, this::_run );
+    private final Timer _timer;
 
 
     private final List<ComponentAnimator> _animators = new ArrayList<>();
 
 
-    private AnimationRunner() {}
+    private AnimationRunner( int delay ) {
+         _timer = new Timer( delay, this::_run );
+    }
 
     private void _run( ActionEvent event ) {
         if ( _animators.isEmpty() ) {
             _timer.stop();
+            // We can remove the instance from the map since it's not needed anymore
+            _INSTANCES.remove(_timer.getDelay());
             return;
         }
 
