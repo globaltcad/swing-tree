@@ -51,7 +51,8 @@ public final class LifeTime
     private final long _interval;
 
     /**
-     *  Creates a new lifetime that will start immediately and run for the given duration.
+     *  Creates a new lifetime that will run for the given duration
+     *  and without any start delay.
      * @param time The duration of the animation.
      * @param unit The time unit of the duration.
      * @return A new lifetime that will start immediately and run for the given duration.
@@ -62,7 +63,11 @@ public final class LifeTime
     }
 
     /**
-     *  Creates a new lifetime that will start immediately and run for the given duration.
+     *  Creates a new lifetime that will run for the given duration
+     *  in the given time unit and without any start delay. <br>
+     *  Contrary to the {@link #of(long, TimeUnit)} method, this method
+     *  uses a {@code double} type to allow for fractional time values.
+     *
      * @param time The duration of the animation.
      * @param unit The time unit of the duration.
      * @return A new lifetime that will start immediately and run for the given duration.
@@ -86,6 +91,8 @@ public final class LifeTime
 
     /**
      *  Creates a new lifetime that will start after the given delay and run for the given duration.
+     *  Contrary to the {@link #of(long, TimeUnit, long, TimeUnit)} method, this method
+     *  uses a {@code double} type to allow for fractional time values.
      * @param startDelay The delay after which the animation should start.
      * @param startUnit The time unit of the delay.
      * @param duration The duration of the animation.
@@ -111,8 +118,10 @@ public final class LifeTime
         _interval = interval;
     }
 
+
     /**
-     *  Creates a new lifetime that will start after the given delay and run for the given duration.
+     *  Creates a new lifetime that will start after the given delay
+     *  in the given time unit.
      * @param delay The delay after which the animation should start.
      * @param unit The time unit of the delay.
      * @return A new lifetime that will start after the given delay.
@@ -169,7 +178,7 @@ public final class LifeTime
 
     /**
      *  Returns the interval in the given time unit,
-     *  which is a determines the delay between two consecutive animation steps.
+     *  which is a number that determines the delay between two consecutive animation steps.
      *  You can think of it as the time between the heartbeats of an animation.
      *  The smaller the interval, the higher the refresh rate and
      *  the smoother the animation will look.
@@ -196,12 +205,13 @@ public final class LifeTime
         LifeTime lifeTime = (LifeTime) o;
         return _id        == lifeTime._id       &&
                _delay     == lifeTime._delay    &&
-               _duration  == lifeTime._duration;
+               _duration  == lifeTime._duration &&
+               _interval  == lifeTime._interval;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(_id, _delay, _duration);
+        return Objects.hash(_id, _delay, _duration, _interval);
     }
 
 }
