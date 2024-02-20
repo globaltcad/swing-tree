@@ -88,7 +88,7 @@ public final class SwingTreeInitConfig
                         SystemProperties.getLong(SystemProperties.ANIMATION_INTERVAL,        16    )
                     );
                     /*
-                        Nte that we want the refresh rate to be as high as possible so that the animation
+                        Note that we want the refresh rate to be as high as possible so that the animation
                         looks smooth, but we don't want to use 100% of the CPU.
                         The ideal refresh rate is 60 fps which is 16.6 ms per frame.
                         So we set the timer to 16 ms.
@@ -406,7 +406,7 @@ public final class SwingTreeInitConfig
          * is {@code "true"} (case-insensitive), otherwise it returns {@code false}.
          * If the system property is not set, {@code defaultValue} is returned.
          */
-        static boolean getBool(String key, boolean defaultValue ) {
+        static boolean getBool( String key, boolean defaultValue ) {
             String value = System.getProperty( key );
             return (value != null) ? Boolean.parseBoolean( value ) : defaultValue;
         }
@@ -414,7 +414,7 @@ public final class SwingTreeInitConfig
         /**
          * Similar to sun.java2d.SunGraphicsEnvironment.getScaleFactor(String)
          */
-        static float getFloat(String key, float defaultValue ) {
+        static float getFloat( String key, float defaultValue ) {
             String s = System.getProperty( key );
 
             if ( s == null )
@@ -439,7 +439,7 @@ public final class SwingTreeInitConfig
             }
         }
 
-        static long getLong(String key, long defaultValue ) {
+        static long getLong( String key, long defaultValue ) {
             String s = System.getProperty( key );
 
             if ( s == null )

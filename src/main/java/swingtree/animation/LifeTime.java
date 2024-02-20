@@ -3,6 +3,7 @@ package swingtree.animation;
 import sprouts.Event;
 import sprouts.Val;
 import swingtree.SwingTree;
+import swingtree.SwingTreeConfigurator;
 import swingtree.api.AnimatedStyler;
 
 import java.awt.Component;
@@ -104,7 +105,7 @@ public final class LifeTime
     }
 
 
-    private LifeTime(long delay, long duration, long interval) {
+    private LifeTime( long delay, long duration, long interval ) {
         _delay     = delay;
         _duration  = duration;
         _interval = interval;
@@ -132,6 +133,11 @@ public final class LifeTime
      *  the smoother the animation will look.
      *  However, the smaller the interval, the more CPU time will be used.
      *  The default interval is 16 ms which corresponds to 60 fps.
+     *  <br>
+     *  If you want a custom interval default, you can configure it
+     *  during library initialization through the {@link SwingTree#initialiseUsing(SwingTreeConfigurator)}
+     *  method or change it at any other time using the
+     *  {@link SwingTree#setDefaultAnimationInterval(long)} method.
      *  
      * @param interval The interval in the given time unit.
      * @param unit The time unit of the interval, typically {@link TimeUnit#MILLISECONDS}.
@@ -169,6 +175,11 @@ public final class LifeTime
      *  the smoother the animation will look.
      *  However, the smaller the interval, the more CPU time will be used.
      *  The default interval is 16 ms which corresponds to 60 fps.
+     *  <br>
+     *  If you want a custom interval default, you can configure it
+     *  during library initialization through the {@link SwingTree#initialiseUsing(SwingTreeConfigurator)}
+     *  method or change it at any other time using the
+     *  {@link SwingTree#setDefaultAnimationInterval(long)} method.
      *  
      * @param unit The time unit in which the interval should be returned.
      * @return The interval in the given time unit.

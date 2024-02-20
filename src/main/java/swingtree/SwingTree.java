@@ -31,6 +31,8 @@ import java.util.function.Supplier;
  *  A {@link SwingTree} is a singleton that holds global configuration context for the SwingTree library.
  *  This includes the {@link EventProcessor} that is used to process events, as well as the
  *  {@link StyleSheet} that is used to style components.
+ *  <br>
+ *  You may access the singleton instance of the {@link SwingTree} class through the {@link #get()} method.
  *
  * @author Daniel Nepp
  */
