@@ -43,9 +43,6 @@ import java.util.concurrent.TimeUnit;
  */
 public final class LifeTime
 {
-    private static long _instances = 0;
-
-    private final long _id = _instances++;
     private final long _delay; // in milliseconds
     private final long _duration;
     private final long _interval;
@@ -203,15 +200,14 @@ public final class LifeTime
         if ( this == o ) return true;
         if ( !(o instanceof LifeTime) ) return false;
         LifeTime lifeTime = (LifeTime) o;
-        return _id        == lifeTime._id       &&
-               _delay     == lifeTime._delay    &&
+        return _delay     == lifeTime._delay    &&
                _duration  == lifeTime._duration &&
                _interval  == lifeTime._interval;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(_id, _delay, _duration, _interval);
+        return Objects.hash(_delay, _duration, _interval);
     }
 
 }
