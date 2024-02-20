@@ -63,7 +63,7 @@ final class PainterConf
             return this.getClass().getSimpleName() + "[NONE]";
         else
             return this.getClass().getSimpleName() + "[" +
-                    "painter=" + StyleUtility.toString(_painter) + ", " +
+                    "painter=" + StyleUtil.toString(_painter) + ", " +
                     "clipArea=" + _clipArea +
                 ']';
     }

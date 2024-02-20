@@ -77,11 +77,13 @@ final class StyleInstaller<C extends JComponent>
         final boolean noShadowStyle           = StyleConf.none().hasEqualShadowsAs(newStyle);
         final boolean noPainters              = StyleConf.none().hasEqualPaintersAs(newStyle);
         final boolean noGradients             = StyleConf.none().hasEqualGradientsAs(newStyle);
+        final boolean noNoises                = StyleConf.none().hasEqualNoisesAs(newStyle);
         final boolean noImages                = StyleConf.none().hasEqualImagesAs(newStyle);
         final boolean noProperties            = StyleConf.none().hasEqualPropertiesAs(newStyle);
 
         final boolean allShadowsAreBorderShadows     = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) || styleLayer.shadows().everyNamedStyle(ns -> !ns.style().color().isPresent() ) );
         final boolean allGradientsAreBorderGradients = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) || styleLayer.gradients().everyNamedStyle(ns -> ns.style().colors().length == 0 ) );
+        final boolean allNoisesAreBorderNoises       = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) || styleLayer.noises().everyNamedStyle(ns -> ns.style().colors().length == 0 ) );
         final boolean allPaintersAreBorderPainters   = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) || styleLayer.painters().everyNamedStyle(ns -> Painter.none().equals(ns.style().painter()) ) );
         final boolean allImagesAreBorderImages       = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) || styleLayer.images().everyNamedStyle(ns -> !ns.style().image().isPresent() && !ns.style().primer().isPresent() ) );
 
@@ -94,6 +96,7 @@ final class StyleInstaller<C extends JComponent>
                                     noShadowStyle           &&
                                     noPainters              &&
                                     noGradients             &&
+                                    noNoises                &&
                                     noImages                &&
                                     noProperties;
 
@@ -107,14 +110,16 @@ final class StyleInstaller<C extends JComponent>
                                    noShadowStyle           &&
                                    noPainters              &&
                                    noGradients             &&
+                                   noNoises                &&
                                    noImages                &&
                                    noProperties;
 
         final boolean styleCanBeRenderedThroughBorder = (
-                                                       (noBaseStyle || !newStyle.base().hasAnyColors())    &&
+                                                       (noBaseStyle || !newStyle.base().hasAnyColors())  &&
                                                        (noShadowStyle || allShadowsAreBorderShadows)     &&
                                                        (noPainters    || allPaintersAreBorderPainters)   &&
                                                        (noGradients   || allGradientsAreBorderGradients) &&
+                                                       (noNoises      || allNoisesAreBorderNoises)       &&
                                                        (noImages      || allImagesAreBorderImages)
                                                    );
 
@@ -155,8 +160,9 @@ final class StyleInstaller<C extends JComponent>
         if ( owner instanceof AbstractButton && _initialContentAreaFilled == null )
             _initialContentAreaFilled = ((AbstractButton) owner).isContentAreaFilled();
 
-        final List<UI.ComponentArea> opaqueGradientAreas = newStyle.gradientCoveredAreas();
+        final List<UI.ComponentArea> opaqueGradAreas     = newStyle.noiseAndGradientCoveredAreas();
         final boolean hasBackgroundGradients             = newStyle.hasVisibleGradientsOnLayer(UI.Layer.BACKGROUND);
+        final boolean hasBackgroundNoise                 = newStyle.hasVisibleNoisesOnLayer(UI.Layer.BACKGROUND);
         final boolean hasBackgroundPainters              = newStyle.hasPaintersOnLayer(UI.Layer.BACKGROUND);
         final boolean hasBackgroundImages                = newStyle.hasImagesOnLayer(UI.Layer.BACKGROUND);
         final boolean hasBackgroundShadows               = newStyle.hasVisibleShadows(UI.Layer.BACKGROUND);
@@ -218,25 +224,25 @@ final class StyleInstaller<C extends JComponent>
 
         boolean canBeOpaque = true;
 
-        if ( !opaqueGradientAreas.contains(UI.ComponentArea.ALL) ) {
+        if ( !opaqueGradAreas.contains(UI.ComponentArea.ALL) ) {
             boolean hasOpaqueFoundation = 255 == newStyle.base().foundationColor().map(Color::getAlpha).orElse(0);
             boolean hasOpaqueBackground = 255 == newStyle.base().backgroundColor().map( c -> c != UI.COLOR_UNDEFINED ? c : _initialBackgroundColor ).map(Color::getAlpha).orElse(255);
             boolean hasBorder           = newStyle.border().widths().isPositive();
 
-            if ( !hasOpaqueFoundation && !opaqueGradientAreas.contains(UI.ComponentArea.EXTERIOR) ) {
+            if ( !hasOpaqueFoundation && !opaqueGradAreas.contains(UI.ComponentArea.EXTERIOR) ) {
                 if ( hasBorderRadius )
                     canBeOpaque = false;
                 else if ( hasMargin )
                     canBeOpaque = false;
             }
 
-            if ( hasBorder && (!hasOpaqueBorder && !opaqueGradientAreas.contains(UI.ComponentArea.BORDER)) )
+            if ( hasBorder && (!hasOpaqueBorder && !opaqueGradAreas.contains(UI.ComponentArea.BORDER)) )
                 canBeOpaque = false;
 
             if (
                 !hasOpaqueBackground &&
-                !opaqueGradientAreas.contains(UI.ComponentArea.INTERIOR) &&
-                !opaqueGradientAreas.contains(UI.ComponentArea.BODY)
+                !opaqueGradAreas.contains(UI.ComponentArea.INTERIOR) &&
+                !opaqueGradAreas.contains(UI.ComponentArea.BODY)
             )
                 canBeOpaque = false;
         }
@@ -247,11 +253,32 @@ final class StyleInstaller<C extends JComponent>
         final boolean customLookAndFeelInstalled = _dynamicLaF.customLookAndFeelIsInstalled();
         final boolean requiresBackgroundPainting =
                                              hasBackgroundGradients ||
+                                             hasBackgroundNoise     ||
                                              hasBackgroundShadows   ||
                                              hasBackgroundPainters  ||
                                              hasBackgroundImages    ||
                                              hasBorderRadius        ||
                                              hasMargin;
+
+        if ( _dynamicLaF.overrideWasNeeded() ) {
+            if ( owner instanceof AbstractButton) {
+                AbstractButton b = (AbstractButton) owner;
+
+                boolean shouldButtonBeFilled =  !hasBackgroundImages &&
+                        !hasBackgroundShadows &&
+                        !hasBackground &&
+                        !hasBackgroundGradients &&
+                        !hasBackgroundNoise &&
+                        !hasBackgroundPainters;
+
+                if ( _initialContentAreaFilled != null && !_initialContentAreaFilled )
+                    shouldButtonBeFilled = false;
+
+                if ( shouldButtonBeFilled != b.isContentAreaFilled() )
+                    b.setContentAreaFilled( shouldButtonBeFilled );
+            }
+        }
+
         if ( !canBeOpaque )
         {
             if ( owner.isOpaque() )
@@ -339,24 +366,6 @@ final class StyleInstaller<C extends JComponent>
 
         if ( !backgroundWasSetSomewhereElse )
             _currentBackgroundColor = owner.getBackground();
-
-        if ( _dynamicLaF.overrideWasNeeded() ) {
-            if ( owner instanceof AbstractButton) {
-                AbstractButton b = (AbstractButton) owner;
-
-                boolean shouldButtonBeFilled =  !hasBackgroundImages &&
-                                                !hasBackgroundShadows &&
-                                                !hasBackground &&
-                                                !hasBackgroundGradients &&
-                                                !hasBackgroundPainters;
-
-                if ( _initialContentAreaFilled != null && !_initialContentAreaFilled )
-                    shouldButtonBeFilled = false;
-
-                if ( shouldButtonBeFilled != b.isContentAreaFilled() )
-                    b.setContentAreaFilled( shouldButtonBeFilled );
-            }
-        }
 
         return newStyle;
     }

@@ -28,14 +28,14 @@ import java.util.function.Function;
  *          <br>
  *          The following transitions are available:
  *          <ul>
- *              <li>{@link UI.Transition#TOP_LEFT_TO_BOTTOM_RIGHT}</li>
- *              <li>{@link UI.Transition#BOTTOM_LEFT_TO_TOP_RIGHT}</li>
- *              <li>{@link UI.Transition#TOP_RIGHT_TO_BOTTOM_LEFT}</li>
- *              <li>{@link UI.Transition#BOTTOM_RIGHT_TO_TOP_LEFT}</li>
- *              <li>{@link UI.Transition#TOP_TO_BOTTOM}</li>
- *              <li>{@link UI.Transition#LEFT_TO_RIGHT}</li>
- *              <li>{@link UI.Transition#BOTTOM_TO_TOP}</li>
- *              <li>{@link UI.Transition#RIGHT_TO_LEFT}</li>
+ *              <li>{@link UI.Span#TOP_LEFT_TO_BOTTOM_RIGHT}</li>
+ *              <li>{@link UI.Span#BOTTOM_LEFT_TO_TOP_RIGHT}</li>
+ *              <li>{@link UI.Span#TOP_RIGHT_TO_BOTTOM_LEFT}</li>
+ *              <li>{@link UI.Span#BOTTOM_RIGHT_TO_TOP_LEFT}</li>
+ *              <li>{@link UI.Span#TOP_TO_BOTTOM}</li>
+ *              <li>{@link UI.Span#LEFT_TO_RIGHT}</li>
+ *              <li>{@link UI.Span#BOTTOM_TO_TOP}</li>
+ *              <li>{@link UI.Span#RIGHT_TO_LEFT}</li>
  *          </ul>
  *      </li>
  *      <li><h3>Type</h3>
@@ -54,7 +54,7 @@ import java.util.function.Function;
  *      <li><h3>Offset</h3>
  *          The offset defines the start position of the gradient
  *          on the x and y axis.
- *          This property, together with the {@link #transition(UI.Transition)}
+ *          This property, together with the {@link #span(UI.Span)}
  *          property, defines the start position and direction of the gradient.
  *      </li>
  *      <li><h3>Size</h3>
@@ -134,7 +134,7 @@ public final class GradientConf implements Simplifiable<GradientConf>
     static final UI.Layer DEFAULT_LAYER = UI.Layer.BACKGROUND;
 
     private static final GradientConf _NONE = new GradientConf(
-                                                        UI.Transition.TOP_TO_BOTTOM,
+                                                        UI.Span.TOP_TO_BOTTOM,
                                                         UI.GradientType.LINEAR,
                                                         new Color[0],
                                                         Offset.none(),
@@ -156,7 +156,7 @@ public final class GradientConf implements Simplifiable<GradientConf>
     public static GradientConf none() { return _NONE; }
     
     static GradientConf of(
-        UI.Transition        transition,
+        UI.Span span,
         UI.GradientType      type,
         Color[]              colors,
         Offset               offset,
@@ -168,8 +168,12 @@ public final class GradientConf implements Simplifiable<GradientConf>
         float[]              fractions,
         UI.Cycle             cycle
     ) {
+        // The rotation may be any number
+        // which always has to be normalized to a value between -180 and 180
+        rotation = ( (((rotation+180f) % 360f + 360f) % 360f) - 180f );
+
         GradientConf none = none();
-        if ( transition == none._transition &&
+        if ( span == none._span &&
              type       == none._type       &&
              colors     == none._colors     &&
              offset     == none._offset     &&
@@ -183,11 +187,11 @@ public final class GradientConf implements Simplifiable<GradientConf>
         )
             return none;
 
-        return new GradientConf(transition, type, colors, offset, size, area, boundary, focus, rotation, fractions, cycle);
+        return new GradientConf(span, type, colors, offset, size, area, boundary, focus, rotation, fractions, cycle);
     }
 
 
-    private final UI.Transition        _transition;
+    private final UI.Span _span;
     private final UI.GradientType      _type;
     private final Color[]              _colors;
     private final Offset               _offset;
@@ -201,7 +205,7 @@ public final class GradientConf implements Simplifiable<GradientConf>
 
 
     private GradientConf(
-        UI.Transition        transition,
+        UI.Span span,
         UI.GradientType      type,
         Color[]              colors,
         Offset               offset,
@@ -213,7 +217,7 @@ public final class GradientConf implements Simplifiable<GradientConf>
         float[]              fractions,
         UI.Cycle             cycle
     ) {
-        _transition = Objects.requireNonNull(transition);
+        _span = Objects.requireNonNull(span);
         _type       = Objects.requireNonNull(type);
         _colors     = Objects.requireNonNull(colors);
         _offset     = Objects.requireNonNull(offset);
@@ -226,7 +230,7 @@ public final class GradientConf implements Simplifiable<GradientConf>
         _cycle      = Objects.requireNonNull(cycle);
     }
 
-    UI.Transition transition() { return _transition; }
+    UI.Span span() { return _span; }
 
     UI.GradientType type() { return _type; }
 
@@ -262,6 +266,25 @@ public final class GradientConf implements Simplifiable<GradientConf>
         return !foundTransparentColor;
     }
 
+    GradientConf _scale( double scale ) {
+        if ( _size > 0 && scale != 1 )
+            return of(
+                    _span,
+                        _type,
+                        _colors,
+                        _offset.scale(scale),
+                        (float) (_size * scale),
+                        _area,
+                        _boundary,
+                        _focus.scale(scale),
+                        _rotation,
+                        _fractions,
+                        _cycle
+                    );
+        else
+            return this;
+    }
+
     /**
      *  Define a list of colors which will, as part of the gradient, transition from one
      *  to the next in the order they are specified.
@@ -272,11 +295,11 @@ public final class GradientConf implements Simplifiable<GradientConf>
      * @return A new gradient style with the specified colors.
      * @throws NullPointerException if any of the colors is {@code null}.
      */
-    public GradientConf colors(Color... colors ) {
+    public GradientConf colors( Color... colors ) {
         Objects.requireNonNull(colors);
         for ( Color color : colors )
             Objects.requireNonNull(color, "Use UI.COLOR_UNDEFINED instead of null to represent the absence of a color.");
-        return of(_transition, _type, colors, _offset, _size, _area, _boundary, _focus, _rotation, _fractions, _cycle);
+        return of(_span, _type, colors, _offset, _size, _area, _boundary, _focus, _rotation, _fractions, _cycle);
     }
 
     /**
@@ -289,14 +312,14 @@ public final class GradientConf implements Simplifiable<GradientConf>
      * @return A new gradient style with the specified colors.
      * @throws NullPointerException if any of the colors is {@code null}.
      */
-    public GradientConf colors(String... colors ) {
+    public GradientConf colors( String... colors ) {
         Objects.requireNonNull(colors);
         try {
             Color[] actualColors = new Color[colors.length];
             for ( int i = 0; i < colors.length; i++ )
                 actualColors[i] = UI.color(colors[i]);
 
-            return of(_transition, _type, actualColors, _offset, _size, _area, _boundary, _focus, _rotation, _fractions, _cycle);
+            return of(_span, _type, actualColors, _offset, _size, _area, _boundary, _focus, _rotation, _fractions, _cycle);
         } catch ( Exception e ) {
             log.error("Failed to parse color strings: " + Arrays.toString(colors), e);
             return this; // We want to avoid side effects other than a wrong color
@@ -304,25 +327,26 @@ public final class GradientConf implements Simplifiable<GradientConf>
     }
 
     /**
-     *  Define the alignment of the gradient which is one of the following:
+     *  Define from where and to where the gradient should transition to
+     *  within the {@link UI.ComponentBoundary} of the component.
      *  <ul>
-     *     <li>{@link UI.Transition#TOP_LEFT_TO_BOTTOM_RIGHT}</li>
-     *     <li>{@link UI.Transition#BOTTOM_LEFT_TO_TOP_RIGHT}</li>
-     *     <li>{@link UI.Transition#TOP_RIGHT_TO_BOTTOM_LEFT}</li>
-     *     <li>{@link UI.Transition#BOTTOM_RIGHT_TO_TOP_LEFT}</li>
-     *     <li>{@link UI.Transition#TOP_TO_BOTTOM}</li>
-     *     <li>{@link UI.Transition#LEFT_TO_RIGHT}</li>
-     *     <li>{@link UI.Transition#BOTTOM_TO_TOP}</li>
-     *     <li>{@link UI.Transition#RIGHT_TO_LEFT}</li>
+     *     <li>{@link UI.Span#TOP_LEFT_TO_BOTTOM_RIGHT}</li>
+     *     <li>{@link UI.Span#BOTTOM_LEFT_TO_TOP_RIGHT}</li>
+     *     <li>{@link UI.Span#TOP_RIGHT_TO_BOTTOM_LEFT}</li>
+     *     <li>{@link UI.Span#BOTTOM_RIGHT_TO_TOP_LEFT}</li>
+     *     <li>{@link UI.Span#TOP_TO_BOTTOM}</li>
+     *     <li>{@link UI.Span#LEFT_TO_RIGHT}</li>
+     *     <li>{@link UI.Span#BOTTOM_TO_TOP}</li>
+     *     <li>{@link UI.Span#RIGHT_TO_LEFT}</li>
      *  </ul>
      *
-     * @param transition The alignment of the gradient.
+     * @param span The span policy of the gradient, which defines the direction of the gradient.
      * @return A new gradient style with the specified alignment.
      * @throws NullPointerException if the alignment is {@code null}.
      */
-    public GradientConf transition(UI.Transition transition ) {
-        Objects.requireNonNull(transition);
-        return of(transition, _type, _colors, _offset, _size, _area, _boundary, _focus, _rotation, _fractions, _cycle);
+    public GradientConf span( UI.Span span ) {
+        Objects.requireNonNull(span);
+        return of(span, _type, _colors, _offset, _size, _area, _boundary, _focus, _rotation, _fractions, _cycle);
     }
 
     /**
@@ -330,15 +354,16 @@ public final class GradientConf implements Simplifiable<GradientConf>
      *  <ul>
      *     <li>{@link UI.GradientType#LINEAR}</li>
      *     <li>{@link UI.GradientType#RADIAL}</li>
+     *     <li>{@link UI.GradientType#CONIC}</li>
      *  </ul>
      *
      * @param type The type of the gradient.
      * @return A new gradient style with the specified type.
      * @throws NullPointerException if the type is {@code null}.
      */
-    public GradientConf type(UI.GradientType type ) {
+    public GradientConf type( UI.GradientType type ) {
         Objects.requireNonNull(type);
-        return of(_transition, type, _colors, _offset, _size, _area, _boundary, _focus, _rotation, _fractions, _cycle);
+        return of(_span, type, _colors, _offset, _size, _area, _boundary, _focus, _rotation, _fractions, _cycle);
     }
 
     /**
@@ -350,8 +375,8 @@ public final class GradientConf implements Simplifiable<GradientConf>
      * @param y The gradient start offset on the y-axis.
      * @return A new gradient style with the specified offset.
      */
-    public GradientConf offset(double x, double y ) {
-        return of(_transition, _type, _colors, Offset.of(x,y), _size, _area, _boundary, _focus, _rotation, _fractions, _cycle);
+    public GradientConf offset( double x, double y ) {
+        return of(_span, _type, _colors, Offset.of(x,y), _size, _area, _boundary, _focus, _rotation, _fractions, _cycle);
     }
 
     /**
@@ -365,8 +390,8 @@ public final class GradientConf implements Simplifiable<GradientConf>
      * @param size The gradient size.
      * @return A new gradient style with the specified size.
      */
-    public GradientConf size(double size ) {
-        return of(_transition, _type, _colors, _offset, (float) size, _area, _boundary, _focus, _rotation, _fractions, _cycle);
+    public GradientConf size( double size ) {
+        return of(_span, _type, _colors, _offset, (float) size, _area, _boundary, _focus, _rotation, _fractions, _cycle);
     }
 
     /**
@@ -377,8 +402,8 @@ public final class GradientConf implements Simplifiable<GradientConf>
      * @param area The area of the component to which the gradient is clipped to.
      * @return A new gradient style with the specified area.
      */
-    public GradientConf clipTo(UI.ComponentArea area ) {
-        return of(_transition, _type, _colors, _offset, _size, area, _boundary, _focus, _rotation, _fractions, _cycle);
+    public GradientConf clipTo( UI.ComponentArea area ) {
+        return of(_span, _type, _colors, _offset, _size, area, _boundary, _focus, _rotation, _fractions, _cycle);
     }
 
     /**
@@ -418,15 +443,15 @@ public final class GradientConf implements Simplifiable<GradientConf>
      *  {@link UI.ComponentBoundary#OUTER_TO_EXTERIOR}, which will cause the gradient to be positioned
      *  at the outermost edge of the component, and then use the {@link #offset(double, double)} method
      *  to define the exact position of the gradient.
-     *  (You may also want to set the {@link #transition(UI.Transition)}
-     *  property to {@link UI.Transition#TOP_LEFT_TO_BOTTOM_RIGHT} to make sure that the gradient
+     *  (You may also want to set the {@link #span(UI.Span)}
+     *  property to {@link UI.Span#TOP_LEFT_TO_BOTTOM_RIGHT} to make sure that the gradient
      *  is positioned in the top left corner (origin position) of the component)
      *
      * @param boundary The boundary at which the gradient should start in terms of its offset.
      * @return A new gradient style with the specified boundary.
      */
-    public GradientConf boundary(UI.ComponentBoundary boundary ) {
-        return of(_transition, _type, _colors, _offset, _size, _area, boundary, _focus, _rotation, _fractions, _cycle);
+    public GradientConf boundary( UI.ComponentBoundary boundary ) {
+        return of(_span, _type, _colors, _offset, _size, _area, boundary, _focus, _rotation, _fractions, _cycle);
     }
 
     /**
@@ -439,8 +464,8 @@ public final class GradientConf implements Simplifiable<GradientConf>
      *  @param x The focus offset on the x-axis.
      *  @param y The focus offset on the y-axis.
      */
-    public GradientConf focus(double x, double y ) {
-        return of(_transition, _type, _colors, _offset, _size, _area, _boundary, Offset.of(x,y), _rotation, _fractions, _cycle);
+    public GradientConf focus( double x, double y ) {
+        return of(_span, _type, _colors, _offset, _size, _area, _boundary, Offset.of(x,y), _rotation, _fractions, _cycle);
     }
 
     /**
@@ -448,8 +473,8 @@ public final class GradientConf implements Simplifiable<GradientConf>
      *
      *  @param rotation The rotation of the gradient in degrees.
      */
-    public GradientConf rotation(float rotation ) {
-        return of(_transition, _type, _colors, _offset, _size, _area, _boundary, _focus, rotation, _fractions, _cycle);
+    public GradientConf rotation( float rotation ) {
+        return of(_span, _type, _colors, _offset, _size, _area, _boundary, _focus, rotation, _fractions, _cycle);
     }
 
     /**
@@ -462,12 +487,12 @@ public final class GradientConf implements Simplifiable<GradientConf>
      *
      *  @param fractions The fractions of the gradient.
      */
-    public GradientConf fractions(double... fractions ) {
+    public GradientConf fractions( double... fractions ) {
         float[] actualFractions = new float[fractions.length];
         for ( int i = 0; i < fractions.length; i++ )
             actualFractions[i] = (float) fractions[i];
 
-        return of(_transition, _type, _colors, _offset, _size, _area, _boundary, _focus, _rotation, actualFractions, _cycle);
+        return of(_span, _type, _colors, _offset, _size, _area, _boundary, _focus, _rotation, actualFractions, _cycle);
     }
 
     /**
@@ -501,7 +526,7 @@ public final class GradientConf implements Simplifiable<GradientConf>
      */
     public GradientConf cycle(UI.Cycle cycle ) {
         Objects.requireNonNull(cycle);
-        return of(_transition, _type, _colors, _offset, _size, _area, _boundary, _focus, _rotation, _fractions, cycle);
+        return of(_span, _type, _colors, _offset, _size, _area, _boundary, _focus, _rotation, _fractions, cycle);
     }
 
 
@@ -510,7 +535,7 @@ public final class GradientConf implements Simplifiable<GradientConf>
         if ( this == _NONE )
             return getClass().getSimpleName() + "[NONE]";
         return getClass().getSimpleName() + "[" +
-                    "transition=" + _transition + ", " +
+                    "transition=" + _span + ", " +
                     "type="       + _type + ", " +
                     "colors="     + Arrays.toString(_colors) + ", " +
                     "offset="     + _offset + ", " +
@@ -529,7 +554,7 @@ public final class GradientConf implements Simplifiable<GradientConf>
         if ( this == o ) return true;
         if ( !(o instanceof GradientConf) ) return false;
         GradientConf that = (GradientConf) o;
-        return _transition == that._transition       &&
+        return _span == that._span &&
                _type       == that._type             &&
                Arrays.equals(_colors, that._colors)  &&
                Objects.equals(_offset, that._offset) &&
@@ -545,7 +570,7 @@ public final class GradientConf implements Simplifiable<GradientConf>
     @Override
     public int hashCode() {
         return Objects.hash(
-                _transition,
+                _span,
                 _type,
                 Arrays.hashCode(_colors),
                 _offset,
@@ -591,11 +616,11 @@ public final class GradientConf implements Simplifiable<GradientConf>
                 if ( color != UI.COLOR_UNDEFINED)
                     realColors[index++] = color;
 
-            return of(_transition, _type, realColors, _offset, _size, _area, _boundary, focus, rotation, _fractions, _cycle);
+            return of(_span, _type, realColors, _offset, _size, _area, _boundary, focus, rotation, _fractions, _cycle);
         }
 
         if ( focus != _focus )
-            return of(_transition, _type, _colors, _offset, _size, _area, _boundary, focus, rotation, _fractions, _cycle);
+            return of(_span, _type, _colors, _offset, _size, _area, _boundary, focus, rotation, _fractions, _cycle);
 
         return this;
     }

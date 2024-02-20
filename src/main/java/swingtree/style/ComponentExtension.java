@@ -134,7 +134,7 @@ public final class ComponentExtension<C extends JComponent>
         for ( int i = 0; i < groupTags.length; i++ ) {
             E group = groupTags[i];
             Objects.requireNonNull(group);
-            stringTags[i] = StyleUtility.toString(group);
+            stringTags[i] = StyleUtil.toString(group);
         }
         setStyleGroups(stringTags);
     }
@@ -144,7 +144,7 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     public final <E extends Enum<E>> void setId( E id ) {
-        this.setId(StyleUtility.toString(id));
+        this.setId(StyleUtil.toString(id));
     }
 
     public final boolean hasId( String id ) {
@@ -152,7 +152,7 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     public final boolean hasId( Enum<?> id ) {
-        return hasId(StyleUtility.toString(id));
+        return hasId(StyleUtil.toString(id));
     }
 
     final UI.Placement preferredIconPlacement() {
@@ -201,7 +201,7 @@ public final class ComponentExtension<C extends JComponent>
      * @return {@code true} if the component belongs to the given group.
      */
     public boolean belongsToGroup( Enum<?> group ) {
-        return belongsToGroup(StyleUtility.toString(group));
+        return belongsToGroup(StyleUtil.toString(group));
     }
 
     /**
@@ -308,7 +308,7 @@ public final class ComponentExtension<C extends JComponent>
                 children to be clipped by the round border (and the viewport).
                 So we use the inner component area as the clip for the children.
             */
-            clip = StyleUtility.intersect( _styleEngine.componentArea().orElse(clip), clip );
+            clip = StyleUtil.intersect( _styleEngine.componentArea().orElse(clip), clip );
         }
         paintWithClip(g2d, clip, ()->{
             superPaint.run();
@@ -423,7 +423,7 @@ public final class ComponentExtension<C extends JComponent>
         if ( lookAndFeelPainting != null ) {
             Shape contentClip = _styleEngine.componentArea().orElse(null);
 
-            contentClip = StyleUtility.intersect( contentClip, _outerBaseClip );
+            contentClip = StyleUtil.intersect( contentClip, _outerBaseClip );
 
             paintWithClip((Graphics2D) g, contentClip, () -> {
                 try {

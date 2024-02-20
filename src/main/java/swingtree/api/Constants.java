@@ -6,6 +6,8 @@ class Constants
 {
     static final Styler<?> STYLER_NONE = delegate -> delegate;
     static final AnimatedStyler<?> ANIMATED_STYLER_NONE = (state, delegate) -> delegate;
+    static final Layout UNSPECIFIC_LAYOUT_CONSTANT = new Layout.Unspecific();
+    static final Layout NONE_LAYOUT_CONSTANT = new Layout.None();
 
     static final Painter PAINTER_NONE = new Painter() {
                                             @Override

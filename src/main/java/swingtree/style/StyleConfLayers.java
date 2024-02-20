@@ -6,36 +6,36 @@ import java.util.Objects;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 
-final class StyleLayers
+final class StyleConfLayers
 {
-    private static final StyleLayers _EMPTY = new StyleLayers(
-                                                    StyleLayer.empty(),
-                                                    StyleLayer.empty(),
-                                                    StyleLayer.empty(),
-                                                    StyleLayer.empty(),
+    private static final StyleConfLayers _EMPTY = new StyleConfLayers(
+                                                    StyleConfLayer.empty(),
+                                                    StyleConfLayer.empty(),
+                                                    StyleConfLayer.empty(),
+                                                    StyleConfLayer.empty(),
                                                     null
                                                 );
 
-    static StyleLayers empty() {
+    static StyleConfLayers empty() {
         return _EMPTY;
     }
 
-    private final StyleLayer _background;
-    private final StyleLayer _content;
-    private final StyleLayer _border;
-    private final StyleLayer _foreground;
+    private final StyleConfLayer _background;
+    private final StyleConfLayer _content;
+    private final StyleConfLayer _border;
+    private final StyleConfLayer _foreground;
 
-    private final StyleLayer _any;
+    private final StyleConfLayer _any;
 
 
-    static StyleLayers of(
-        StyleLayer background,
-        StyleLayer content,
-        StyleLayer border,
-        StyleLayer foreground,
-        StyleLayer any
+    static StyleConfLayers of(
+        StyleConfLayer background,
+        StyleConfLayer content,
+        StyleConfLayer border,
+        StyleConfLayer foreground,
+        StyleConfLayer any
     ) {
-        StyleLayer empty = StyleLayer.empty();
+        StyleConfLayer empty = StyleConfLayer.empty();
         if (
             background == empty &&
             content    == empty &&
@@ -45,15 +45,15 @@ final class StyleLayers
         )
             return _EMPTY;
 
-        return new StyleLayers( background, content, border, foreground, any );
+        return new StyleConfLayers( background, content, border, foreground, any );
     }
 
-    StyleLayers(
-        StyleLayer background,
-        StyleLayer content,
-        StyleLayer border,
-        StyleLayer foreground,
-        StyleLayer any
+    StyleConfLayers(
+        StyleConfLayer background,
+        StyleConfLayer content,
+        StyleConfLayer border,
+        StyleConfLayer foreground,
+        StyleConfLayer any
     ) {
         _background = Objects.requireNonNull(background);
         _content    = Objects.requireNonNull(content);
@@ -62,7 +62,7 @@ final class StyleLayers
         _any        = any;
     }
 
-    StyleLayer get( UI.Layer layer ) {
+    StyleConfLayer get(UI.Layer layer ) {
         if ( _any != null )
             return _any;
 
@@ -76,7 +76,7 @@ final class StyleLayers
         }
     }
 
-    StyleLayers with(UI.Layer layer, StyleLayer style) {
+    StyleConfLayers with(UI.Layer layer, StyleConfLayer style) {
         switch (layer) {
             case BACKGROUND: return of(style,       _content, _border,  _foreground, _any);
             case CONTENT:    return of(_background,  style,    _border, _foreground, _any);
@@ -87,7 +87,7 @@ final class StyleLayers
         }
     }
 
-    boolean everyNamedStyle( BiPredicate<UI.Layer, StyleLayer> predicate ) {
+    boolean everyNamedStyle( BiPredicate<UI.Layer, StyleConfLayer> predicate ) {
         if ( _any != null )
             return  predicate.test(UI.Layer.BACKGROUND,    _any)
                     && predicate.test(UI.Layer.CONTENT,    _any)
@@ -100,30 +100,30 @@ final class StyleLayers
             && predicate.test(UI.Layer.FOREGROUND, _foreground);
     }
 
-    public StyleLayers onlyRetainingAsUnnamedLayer( UI.Layer layer ){
+    public StyleConfLayers onlyRetainingAsUnnamedLayer(UI.Layer layer ){
         switch (layer) {
-            case BACKGROUND: return of(StyleLayer.empty(), StyleLayer.empty(), StyleLayer.empty(), StyleLayer.empty(), _background);
-            case CONTENT:    return of(StyleLayer.empty(), StyleLayer.empty(), StyleLayer.empty(), StyleLayer.empty(), _content);
-            case BORDER:     return of(StyleLayer.empty(), StyleLayer.empty(), StyleLayer.empty(), StyleLayer.empty(), _border);
-            case FOREGROUND: return of(StyleLayer.empty(), StyleLayer.empty(), StyleLayer.empty(), StyleLayer.empty(), _foreground);
+            case BACKGROUND: return of(StyleConfLayer.empty(), StyleConfLayer.empty(), StyleConfLayer.empty(), StyleConfLayer.empty(), _background);
+            case CONTENT:    return of(StyleConfLayer.empty(), StyleConfLayer.empty(), StyleConfLayer.empty(), StyleConfLayer.empty(), _content);
+            case BORDER:     return of(StyleConfLayer.empty(), StyleConfLayer.empty(), StyleConfLayer.empty(), StyleConfLayer.empty(), _border);
+            case FOREGROUND: return of(StyleConfLayer.empty(), StyleConfLayer.empty(), StyleConfLayer.empty(), StyleConfLayer.empty(), _foreground);
             default:
                 throw new IllegalArgumentException("Unknown layer: " + layer);
         }
     }
 
-    StyleLayers map( Function<StyleLayer, StyleLayer> f ) {
+    StyleConfLayers map(Function<StyleConfLayer, StyleConfLayer> f ) {
         return of(f.apply(_background), f.apply(_content), f.apply(_border), f.apply(_foreground), _any == null ? null : f.apply(_any));
     }
 
-    StyleLayers simplified() {
+    StyleConfLayers simplified() {
         if ( this == _EMPTY )
             return this;
 
-        StyleLayer background = _background.simplified();
-        StyleLayer content    = _content.simplified();
-        StyleLayer border     = _border.simplified();
-        StyleLayer foreground = _foreground.simplified();
-        StyleLayer any        = ( _any == null ? null : _any.simplified() );
+        StyleConfLayer background = _background.simplified();
+        StyleConfLayer content    = _content.simplified();
+        StyleConfLayer border     = _border.simplified();
+        StyleConfLayer foreground = _foreground.simplified();
+        StyleConfLayer any        = ( _any == null ? null : _any.simplified() );
 
         if (
              background == _background &&
@@ -158,9 +158,9 @@ final class StyleLayers
     @Override
     public boolean equals(Object obj) {
         if (obj == this) return true;
-        if (!(obj instanceof StyleLayers)) return false;
+        if (!(obj instanceof StyleConfLayers)) return false;
 
-        StyleLayers other = (StyleLayers) obj;
+        StyleConfLayers other = (StyleConfLayers) obj;
         return Objects.equals(_background, other._background)
             && Objects.equals(_content,    other._content)
             && Objects.equals(_border,     other._border)

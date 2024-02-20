@@ -61,30 +61,20 @@ final class StyleRenderer
         // They may transition vertically, horizontally or diagonally over various different colors:
         for ( GradientConf gradient : conf.layer().gradients().sortedByNames() )
             if ( gradient.colors().length > 0 ) {
-                if ( gradient.colors().length == 1 ) {
-                    g2d.setColor(gradient.colors()[0]);
-                    g2d.fill(conf.areas().get(UI.ComponentArea.BODY));
-                }
-                else {
-                    Outline insets = Outline.none();
-                    switch ( gradient.boundary() ) {
-                        case OUTER_TO_EXTERIOR:   insets = Outline.none(); break;
-                        case EXTERIOR_TO_BORDER:  insets = conf.boxModel().margin(); break;
-                        case BORDER_TO_INTERIOR:  insets = conf.boxModel().margin().plus(conf.boxModel().widths()); break;
-                        case INTERIOR_TO_CONTENT: insets = conf.boxModel().margin().plus(conf.boxModel().widths()).plus(conf.boxModel().padding()); break;
-                    }
-                    if ( gradient.transition().isDiagonal() )
-                        _renderDiagonalGradient(g2d, conf.boxModel().size(), insets, gradient, conf.areas().get(gradient.area()));
-                    else
-                        _renderVerticalOrHorizontalGradient(g2d, conf.boxModel().size(), insets, gradient, conf.areas().get(gradient.area()));
-                }
+                _renderGradient( gradient, conf, g2d );
             }
 
-        // 3. Shadows, which are simple gradient based drop shadows that can go inwards or outwards
+        // 3. Noise, which is a simple way to add a bit of texture to a component:
+        for ( NoiseConf noise : conf.layer().noises().sortedByNames() )
+            if ( noise.colors().length > 0 ) {
+                _renderNoise( noise, conf, g2d );
+            }
+
+        // 4. Shadows, which are simple gradient based drop shadows that can go inwards or outwards
         for ( ShadowConf shadow : conf.layer().shadows().sortedByNames() )
             _renderShadows(conf, shadow, g2d);
 
-        // 4. Painters, which are provided by the user and can be anything
+        // 5. Painters, which are provided by the user and can be anything
         List<PainterConf> painters = conf.layer().painters().sortedByNames();
 
         if ( !painters.isEmpty() )
@@ -568,261 +558,303 @@ final class StyleRenderer
                     .orElse(new Color(0.5f, 0.5f, 0.5f, 0f));
     }
 
+    private static void _renderGradient(
+        final GradientConf    gradient,
+        final LayerRenderConf conf,
+        final Graphics2D g2d
+    ) {
+        if ( gradient.colors().length == 1 ) {
+            g2d.setColor(gradient.colors()[0]);
+            g2d.fill(conf.areas().get(gradient.area()));
+        }
+        else {
+            Outline insets = Outline.none();
+            switch ( gradient.boundary() ) {
+                case OUTER_TO_EXTERIOR:
+                    insets = Outline.none(); break;
+                case EXTERIOR_TO_BORDER:
+                    insets = conf.boxModel().margin(); break;
+                case BORDER_TO_INTERIOR:
+                    insets = conf.boxModel().margin().plus(conf.boxModel().widths()); break;
+                case INTERIOR_TO_CONTENT:
+                    insets = conf.boxModel().margin().plus(conf.boxModel().widths()).plus(conf.boxModel().padding()); break;
+                case CENTER_TO_CONTENT:
+                    Outline contentIns = conf.boxModel().margin().plus(conf.boxModel().widths()).plus(conf.boxModel().padding());
+                    float verticalInset = conf.boxModel().size().height().orElse(0f) / 2f;
+                    float horizontalInset = conf.boxModel().size().width().orElse(0f) / 2f;
+                    insets = Outline.of(verticalInset, horizontalInset);
+                    switch ( gradient.span() ) {
+                        case TOP_TO_BOTTOM:
+                            insets = insets.withBottom(contentIns.bottom().orElse(0f));
+                            break;
+                        case BOTTOM_TO_TOP:
+                            insets = insets.withTop(contentIns.top().orElse(0f));
+                            break;
+                        case LEFT_TO_RIGHT:
+                            insets = insets.withRight(contentIns.right().orElse(0f));
+                            break;
+                        case RIGHT_TO_LEFT:
+                            insets = insets.withLeft(contentIns.left().orElse(0f));
+                            break;
+                        case TOP_LEFT_TO_BOTTOM_RIGHT:
+                            insets = insets.withBottom(contentIns.bottom().orElse(0f))
+                                            .withRight(contentIns.right().orElse(0f));
+                            break;
+                        case BOTTOM_RIGHT_TO_TOP_LEFT:
+                            insets = insets.withTop(contentIns.top().orElse(0f))
+                                            .withLeft(contentIns.left().orElse(0f));
+                            break;
+                        case TOP_RIGHT_TO_BOTTOM_LEFT:
+                            insets = insets.withBottom(contentIns.bottom().orElse(0f))
+                                            .withLeft(contentIns.left().orElse(0f));
+                            break;
+                        case BOTTOM_LEFT_TO_TOP_RIGHT:
+                            insets = insets.withTop(contentIns.top().orElse(0f))
+                                            .withRight(contentIns.right().orElse(0f));
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+            }
+
+            final Size dimensions = conf.boxModel().size();
+
+            final float width  = dimensions.width().orElse(0f)  - ( insets.right().orElse(0f)  + insets.left().orElse(0f) );
+            final float height = dimensions.height().orElse(0f) - ( insets.bottom().orElse(0f) + insets.top().orElse(0f) );
+            final float realX  = insets.left().orElse(0f) + gradient.offset().x();
+            final float realY  = insets.top().orElse(0f)  + gradient.offset().y();
+
+            Point2D.Float corner1;
+            Point2D.Float corner2;
+
+            final UI.Span type = gradient.span();
+            if ( type.isOneOf(UI.Span.TOP_LEFT_TO_BOTTOM_RIGHT) ) {
+                corner1 = new Point2D.Float(realX, realY);
+                corner2 = new Point2D.Float(realX + width, realY + height);
+            } else if ( type.isOneOf(UI.Span.BOTTOM_LEFT_TO_TOP_RIGHT) ) {
+                corner1 = new Point2D.Float(realX, realY + height);
+                corner2 = new Point2D.Float(realX + width, realY);
+            } else if ( type.isOneOf(UI.Span.TOP_RIGHT_TO_BOTTOM_LEFT) ) {
+                corner1 = new Point2D.Float(realX + width, realY);
+                corner2 = new Point2D.Float(realX, realY + height);
+            } else if ( type.isOneOf(UI.Span.BOTTOM_RIGHT_TO_TOP_LEFT) ) {
+                corner1 = new Point2D.Float(realX + width, realY + height);
+                corner2 = new Point2D.Float(realX, realY);
+            } else if ( type == UI.Span.TOP_TO_BOTTOM ) {
+                corner1 = new Point2D.Float(realX, realY);
+                corner2 = new Point2D.Float(realX, realY + height);
+            } else if ( type == UI.Span.LEFT_TO_RIGHT ) {
+                corner1 = new Point2D.Float(realX, realY);
+                corner2 = new Point2D.Float(realX + width, realY);
+            } else if ( type == UI.Span.BOTTOM_TO_TOP ) {
+                corner1 = new Point2D.Float(realX, realY + height);
+                corner2 = new Point2D.Float(realX, realY);
+            } else if ( type == UI.Span.RIGHT_TO_LEFT ) {
+                corner1 = new Point2D.Float(realX + width, realY);
+                corner2 = new Point2D.Float(realX, realY);
+            }
+            else {
+                log.warn("Unknown gradient type: " + type, new Throwable());
+                return;
+            }
+
+            if ( gradient.type() == UI.GradientType.CONIC )
+                _renderConicGradient(g2d, corner1, corner2, gradient, conf.areas().get(gradient.area()));
+            else if ( gradient.type() == UI.GradientType.RADIAL )
+                _renderRadialGradient(g2d, corner1, corner2, gradient, conf.areas().get(gradient.area()));
+            else if ( gradient.span().isDiagonal() )
+                _renderDiagonalGradient(g2d, corner1, corner2, gradient, conf.areas().get(gradient.area()));
+            else
+                _renderVerticalOrHorizontalGradient(g2d, corner1, corner2, gradient, conf.areas().get(gradient.area()));
+        }
+    }
+
+    private static void _renderConicGradient(
+        Graphics2D    g2d,
+        Point2D.Float corner1,
+        Point2D.Float corner2,
+        GradientConf  gradient,
+        Area          specificArea
+    ) {
+        final Color[] colors    = gradient.colors();
+        final float[] fractions = _fractionsFrom(gradient);
+        float rotation = gradient.rotation() + _rotationBetween(corner1, corner2);
+
+        // we normalize the rotation to be between -180 and 180
+        rotation = ((((rotation+180f) % 360f + 360f) % 360f)-180f);
+
+        // Now we convert the fractions to rotations:
+        for ( int i = 0; i < fractions.length; i++ )
+            fractions[i] = (fractions[i] * 360f);// (((((fractions[i] * 360f)+180f) % 360f + 360f) % 360f)-180f);
+
+        g2d.setPaint(new ConicalGradientPaint(
+                        true,
+                        corner1,
+                        rotation,
+                        fractions,
+                        colors
+                    ));
+
+        g2d.fill(specificArea);
+    }
+
+
+    private static void _renderNoise(
+        final NoiseConf       noise,
+        final LayerRenderConf conf,
+        final Graphics2D g2d
+    ) {
+        if ( noise.colors().length == 1 ) {
+            g2d.setColor(noise.colors()[0]);
+            g2d.fill(conf.areas().get(noise.area()));
+        }
+        else {
+            Outline insets = Outline.none();
+            switch ( noise.boundary() ) {
+                case OUTER_TO_EXTERIOR:
+                    insets = Outline.none(); break;
+                case EXTERIOR_TO_BORDER:
+                    insets = conf.boxModel().margin(); break;
+                case BORDER_TO_INTERIOR:
+                    insets = conf.boxModel().margin().plus(conf.boxModel().widths()); break;
+                case INTERIOR_TO_CONTENT:
+                    insets = conf.boxModel().margin().plus(conf.boxModel().widths()).plus(conf.boxModel().padding()); break;
+                case CENTER_TO_CONTENT:
+                    float verticalInset = conf.boxModel().size().height().orElse(0f) / 2f;
+                    float horizontalInset = conf.boxModel().size().width().orElse(0f) / 2f;
+                    insets = Outline.of(verticalInset, horizontalInset);
+            }
+
+            Point2D.Float corner1 = new Point2D.Float(
+                                        insets.left().orElse(0f) + noise.offset().x(),
+                                        insets.top().orElse(0f) + noise.offset().y()
+                                    );
+
+            _renderNoiseGradient(g2d, corner1, noise, conf.areas().get(noise.area()));
+        }
+    }
+
+    private static void _renderNoiseGradient(
+        final Graphics2D    g2d,
+        final Point2D.Float corner1,
+        final NoiseConf     noise,
+        final Area          specificArea
+    ) {
+        final Color[] colors    = noise.colors();
+        final float[] fractions = _fractionsFrom(colors, noise.fractions());
+        float rotation = noise.rotation();
+        Offset scale = noise.scale();
+        float scaleX = scale.x();
+        float scaleY = scale.y();
+
+        g2d.setPaint(new NoiseGradientPaint(
+                        corner1,
+                        scaleX,
+                        scaleY,
+                        rotation,
+                        fractions,
+                        colors,
+                        noise.function()
+                    ));
+
+        g2d.fill(specificArea);
+    }
+
+
     /**
      *  Renders a shade from the top left corner to the bottom right corner.
      *
      * @param g2d The graphics object to render to.
-     * @param componentSize The width and height of the component
-     * @param margin The margin of the component.
+     * @param corner1 The first corner of the shade.
+     * @param corner2 The second corner of the shade.
      * @param gradient The shade to render.
      */
     private static void _renderDiagonalGradient(
-        Graphics2D    g2d,
-        Size          componentSize,
-        Outline       margin,
-        GradientConf gradient,
-        Area          specificArea
+        final Graphics2D    g2d,
+        Point2D.Float       corner1,
+        Point2D.Float       corner2,
+        final GradientConf  gradient,
+        final Area          specificArea
     ) {
-        UI.Transition       type       = gradient.transition();
-        final UI.Cycle      cycle      = gradient.cycle();
-        final Color[]       colors     = gradient.colors();
-        final Dimension     dimensions = componentSize.toDimension();
+        {
+            final float cx = ( corner1.x + corner2.x ) / 2;
+            final float cy = ( corner1.y + corner2.y ) / 2;
+            final float nx = ( corner2.x - corner1.x );
+            final float ny = ( corner1.y - corner2.y );
+            /*
+                The above variables form 2 lines:
+                    1. The line with direction n going through corner1.
+                    2. The line with direction n going through corner2.
+            */
 
-        final float width  = dimensions.width  - ( margin.right().orElse(0f)  + margin.left().orElse(0f) );
-        final float height = dimensions.height - ( margin.bottom().orElse(0f) + margin.top().orElse(0f) );
-        final float realX  = margin.left().orElse(0f) + gradient.offset().x();
-        final float realY  = margin.top().orElse(0f)  + gradient.offset().y();
+            // project the center (cx,cy) onto the lines:
+            corner1 = projectPointOntoLine(corner1, new Point2D.Float(nx, ny), new Point2D.Float(cx, cy));
+            corner2 = projectPointOntoLine(corner2, new Point2D.Float(nx, ny), new Point2D.Float(cx, cy));
+        }
+
+        final UI.Cycle cycle  = gradient.cycle();
+        final Color[]  colors = gradient.colors();
+
         final float size   = gradient.size();
 
-        float corner1X;
-        float corner1Y;
-        float corner2X;
-        float corner2Y;
-        float diagonalCorner1X;
-        float diagonalCorner1Y;
-        float diagonalCorner2X;
-        float diagonalCorner2Y;
-
-        boolean revertColors = false;
-        if ( type == UI.Transition.TOP_RIGHT_TO_BOTTOM_LEFT ) {
-            type = UI.Transition.BOTTOM_LEFT_TO_TOP_RIGHT;
-            // We revert the colors
-            revertColors = true;
-        }
-        if ( type == UI.Transition.BOTTOM_RIGHT_TO_TOP_LEFT ) {
-            type = UI.Transition.TOP_LEFT_TO_BOTTOM_RIGHT;
-            revertColors = true;
-        }
-
-        if ( revertColors ) {// We revert the colors
-            if ( colors.length == 2 ) {
-                Color tmp = colors[0];
-                colors[0] = colors[1];
-                colors[1] = tmp;
-            } else
-                // We have more than 2 colors, so we need to revert the array
-                for ( int i = 0; i < colors.length / 2; i++ ) {
-                    Color tmp = colors[i];
-                    colors[i] = colors[colors.length - i - 1];
-                    colors[colors.length - i - 1] = tmp;
-                }
-        }
-
-        if ( type == UI.Transition.TOP_LEFT_TO_BOTTOM_RIGHT ) {
-            corner1X = realX;
-            corner1Y = realY;
-            corner2X = realX + width;
-            corner2Y = realY + height;
-            diagonalCorner1X = realX;
-            diagonalCorner1Y = realY + height;
-            diagonalCorner2X = realX + width;
-            diagonalCorner2Y = realY;
-        } else if ( type == UI.Transition.BOTTOM_LEFT_TO_TOP_RIGHT ) {
-            corner1X = realX + width;
-            corner1Y = realY;
-            corner2X = realX;
-            corner2Y = realY + height;
-            diagonalCorner1X = realX + width;
-            diagonalCorner1Y = realY + height;
-            diagonalCorner2X = realX;
-            diagonalCorner2Y = realY;
-        }
-        else {
-            log.warn("Invalid transition type: " + type, new Throwable());
-            return;
-        }
-
-        float diagonalCenterX = (diagonalCorner1X + diagonalCorner2X) / 2;
-        float diagonalCenterY = (diagonalCorner1Y + diagonalCorner2Y) / 2;
+        final float corner1X = corner1.x;
+        final float corner1Y = corner1.y;
+        float corner2X = corner2.x;
+        float corner2Y = corner2.y;
 
         float[] fractions = _fractionsFrom(gradient);
 
-        if ( gradient.type() == UI.GradientType.RADIAL ) {
-            float startCornerX, startCornerY;
-            if ( type == UI.Transition.TOP_LEFT_TO_BOTTOM_RIGHT ) {
-                startCornerX = corner1X;
-                startCornerY = corner1Y;
-            } else {
-                startCornerX = corner2X;
-                startCornerY = corner2Y;
-            }
-            float radius;
-
-            if ( size < 0 )
-                radius = (float) Math.sqrt(
-                                     (diagonalCenterX - startCornerX) * (diagonalCenterX - startCornerX) +
-                                     (diagonalCenterY - startCornerY) * (diagonalCenterY - startCornerY)
-                                 );
-            else
-                radius = size;
-
-            if ( gradient.focus().equals(Offset.none()) ) {
-                if ( colors.length == 2 )
-                    g2d.setPaint(new RadialGradientPaint(
-                            new Point2D.Float(startCornerX, startCornerY),
-                            radius,
-                            fractions,
-                            colors,
-                            _cycleMethodFrom(cycle)
-                        ));
-                else
-                    g2d.setPaint(new RadialGradientPaint(
-                            new Point2D.Float(startCornerX, startCornerY),
-                            radius,
-                            fractions,
-                            colors,
-                            _cycleMethodFrom(cycle)
-                        ));
-            } else {
-                float focusX = startCornerX + gradient.focus().x();
-                float focusY = startCornerY + gradient.focus().y();
-
-                if ( gradient.rotation() % 360f != 0 ) {
-                    Point2D.Float p1 = new Point2D.Float(startCornerX, startCornerY);
-                    Point2D.Float p2 = new Point2D.Float(focusX, focusY);
-                    p2 = _rotatePoint(p1, p2, gradient.rotation());
-                    focusX = p2.x;
-                    focusY = p2.y;
-                }
-
-                g2d.setPaint(new RadialGradientPaint(
-                        new Point2D.Float(startCornerX, startCornerY),
-                        radius,
-                        new Point2D.Float(focusX, focusY),
-                        fractions,
-                        colors,
-                        _cycleMethodFrom(cycle)
-                    ));
-            }
-        } else if ( gradient.type() == UI.GradientType.LINEAR ) {
-            float vector1X = diagonalCorner1X - diagonalCenterX;
-            float vector1Y = diagonalCorner1Y - diagonalCenterY;
-            float vector2X = diagonalCorner2X - diagonalCenterX;
-            float vector2Y = diagonalCorner2Y - diagonalCenterY;
-
-            float vectorLength = (float) Math.sqrt(vector1X * vector1X + vector1Y * vector1Y);
-            vector1X = (vector1X / vectorLength);
-            vector1Y = (vector1Y / vectorLength);
-
-            vectorLength = (float) Math.sqrt(vector2X * vector2X + vector2Y * vector2Y);
-            vector2X = (vector2X / vectorLength);
-            vector2Y = (vector2Y / vectorLength);
-
-            float nVector1X = -vector1Y;
-            float nVector1Y =  vector1X;
-            float nVector2X = -vector2Y;
-            float nVector2Y =  vector2X;
-
-            float distance1 = (corner1X - diagonalCenterX) * nVector1X + (corner1Y - diagonalCenterY) * nVector1Y;
-            float distance2 = (corner2X - diagonalCenterX) * nVector2X + (corner2Y - diagonalCenterY) * nVector2Y;
-
-            float gradientStartX = (diagonalCenterX + nVector1X * distance1);
-            float gradientStartY = (diagonalCenterY + nVector1Y * distance1);
-            float gradientEndX   = (diagonalCenterX + nVector2X * distance2);
-            float gradientEndY   = (diagonalCenterY + nVector2Y * distance2);
-
-            if ( size >= 0 ) {
-                float vectorX = gradientEndX - gradientStartX;
-                float vectorY = gradientEndY - gradientStartY;
-                float vectorLength2 = (float) Math.sqrt(vectorX * vectorX + vectorY * vectorY);
-                vectorX = (vectorX / vectorLength2);
-                vectorY = (vectorY / vectorLength2);
-                gradientEndX = gradientStartX + vectorX * size;
-                gradientEndY = gradientStartY + vectorY * size;
-            }
-
-            if ( gradient.rotation() % 360f != 0 ) {
-                Point2D.Float p1 = new Point2D.Float(gradientStartX, gradientStartY);
-                Point2D.Float p2 = new Point2D.Float(gradientEndX, gradientEndY);
-                p2 = _rotatePoint(p1, p2, gradient.rotation());
-                gradientEndX = p2.x;
-                gradientEndY = p2.y;
-            }
-
-            if ( colors.length == 2 && gradient.fractions().length == 0 && cycle == UI.Cycle.NONE )
-                g2d.setPaint(new GradientPaint(
-                                gradientStartX, gradientStartY, colors[0],
-                                gradientEndX, gradientEndY, colors[1]
-                            ));
-            else
-                g2d.setPaint(new LinearGradientPaint(
-                                gradientStartX, gradientStartY,
-                                gradientEndX, gradientEndY,
-                                fractions, colors,
-                                _cycleMethodFrom(cycle)
-                            ));
+        if ( size >= 0 ) {
+            float vectorX = corner2X - corner1X;
+            float vectorY = corner2Y - corner1Y;
+            float vectorLength2 = (float) Math.sqrt(vectorX * vectorX + vectorY * vectorY);
+            vectorX = (vectorX / vectorLength2);
+            vectorY = (vectorY / vectorLength2);
+            corner2X = corner1X + vectorX * size;
+            corner2Y = corner1Y + vectorY * size;
         }
+
+        if ( gradient.rotation() % 360f != 0 ) {
+            Point2D.Float p1 = new Point2D.Float(corner1X, corner1Y);
+            Point2D.Float p2 = new Point2D.Float(corner2X, corner2Y);
+            p2 = _rotatePoint(p1, p2, gradient.rotation());
+            corner2X = p2.x;
+            corner2Y = p2.y;
+        }
+
+        if ( colors.length == 2 && gradient.fractions().length == 0 && cycle == UI.Cycle.NONE )
+            g2d.setPaint(new GradientPaint(
+                            corner1X, corner1Y, colors[0],
+                            corner2X, corner2Y, colors[1]
+                        ));
+        else
+            g2d.setPaint(new LinearGradientPaint(
+                            corner1X, corner1Y,
+                            corner2X, corner2Y,
+                            fractions, colors,
+                            _cycleMethodFrom(cycle)
+                        ));
+
         g2d.fill(specificArea);
     }
 
     private static void _renderVerticalOrHorizontalGradient(
         Graphics2D    g2d,
-        Size          componentSize,
-        Outline       margin,
+        Point2D.Float corner1,
+        Point2D.Float corner2,
         GradientConf gradient,
         Area          specificArea
     ) {
-        final UI.Transition type       = gradient.transition();
         final UI.Cycle      cycle      = gradient.cycle();
         final Color[]       colors     = gradient.colors();
-        final Dimension     dimensions = componentSize.toDimension();
 
-        final float width  = dimensions.width  - ( margin.right().orElse(0f)  + margin.left().orElse(0f) );
-        final float height = dimensions.height - ( margin.bottom().orElse(0f) + margin.top().orElse(0f)  );
-        final float realX  = margin.left().orElse(0f) + gradient.offset().x();
-        final float realY  = margin.top().orElse(0f)  + gradient.offset().y();
         final float size   = gradient.size();
 
-        float corner1X;
-        float corner1Y;
-        float corner2X;
-        float corner2Y;
-
-        if ( type == UI.Transition.TOP_TO_BOTTOM ) {
-            corner1X = realX;
-            corner1Y = realY;
-            corner2X = realX;
-            corner2Y = realY + height;
-        } else if ( type == UI.Transition.LEFT_TO_RIGHT ) {
-            corner1X = realX;
-            corner1Y = realY;
-            corner2X = realX + width;
-            corner2Y = realY;
-        } else if ( type == UI.Transition.BOTTOM_TO_TOP ) {
-            corner1X = realX;
-            corner1Y = realY + height;
-            corner2X = realX;
-            corner2Y = realY;
-        } else if ( type == UI.Transition.RIGHT_TO_LEFT ) {
-            corner1X = realX + width;
-            corner1Y = realY;
-            corner2X = realX;
-            corner2Y = realY;
-        }
-        else {
-            log.warn("Unknown gradient type: " + type, new Throwable());
-            return;
-        }
+        final float corner1X = corner1.x;
+        final float corner1Y = corner1.y;
+        float corner2X = corner2.x;
+        float corner2Y = corner2.y;
 
         if ( gradient.type() == UI.GradientType.LINEAR ) {
             if ( size >= 0 ) {
@@ -836,20 +868,9 @@ final class StyleRenderer
             }
         }
 
-        float radius = size;
-
-        if ( gradient.type() == UI.GradientType.RADIAL ) {
-            if ( size < 0 )
-                radius = (float) Math.sqrt(
-                                        (corner2X - corner1X) * (corner2X - corner1X) +
-                                        (corner2Y - corner1Y) * (corner2Y - corner1Y)
-                                    );
-        }
-
         if (
             colors.length == 2 &&
             gradient.fractions().length == 0 &&
-            gradient.type() == UI.GradientType.LINEAR &&
             cycle == UI.Cycle.NONE
         ) {
             g2d.setPaint(
@@ -858,36 +879,6 @@ final class StyleRenderer
                         corner2X, corner2Y, colors[1]
                     )
                 );
-        } else if ( colors.length == 2 && gradient.fractions().length == 0 && gradient.type() == UI.GradientType.RADIAL ) {
-            if ( gradient.focus().equals(Offset.none()) ) {
-                g2d.setPaint(new RadialGradientPaint(
-                            new Point2D.Float(corner1X, corner1Y),
-                            radius,
-                            new float[] {0f, 1f},
-                            colors,
-                            _cycleMethodFrom(cycle)
-                        ));
-            } else {
-                float focusX = corner1X + gradient.focus().x();
-                float focusY = corner1Y + gradient.focus().y();
-
-                if ( gradient.rotation() % 360f != 0 ) {
-                    Point2D.Float p1 = new Point2D.Float(corner1X, corner1Y);
-                    Point2D.Float p2 = new Point2D.Float(focusX, focusY);
-                    p2 = _rotatePoint(p1, p2, gradient.rotation());
-                    focusX = p2.x;
-                    focusY = p2.y;
-                }
-
-                g2d.setPaint(new RadialGradientPaint(
-                            new Point2D.Float(corner1X, corner1Y),
-                            radius,
-                            new Point2D.Float(focusX, focusY),
-                            new float[] {0f, 1f},
-                            colors,
-                            _cycleMethodFrom(cycle)
-                        ));
-            }
         } else {
             float[] fractions = _fractionsFrom(gradient);
 
@@ -899,51 +890,94 @@ final class StyleRenderer
                 corner2Y = p2.y;
             }
 
-            if ( gradient.type() == UI.GradientType.LINEAR ) {
-                g2d.setPaint(
-                    new LinearGradientPaint(
-                            corner1X, corner1Y,
-                            corner2X, corner2Y,
-                            fractions, colors,
-                            _cycleMethodFrom(cycle)
-                        )
-                );
-            } else if ( gradient.type() == UI.GradientType.RADIAL ) {
-                if ( gradient.focus().equals(Offset.none()) ) {
-                    g2d.setPaint(new RadialGradientPaint(
-                                new Point2D.Float(corner1X, corner1Y),
-                                radius,
-                                fractions,
-                                colors,
-                                _cycleMethodFrom(cycle)
-                            ));
-                } else {
-                    float focusX = corner1X + gradient.focus().x();
-                    float focusY = corner1Y + gradient.focus().y();
+            g2d.setPaint(
+                new LinearGradientPaint(
+                        corner1X, corner1Y,
+                        corner2X, corner2Y,
+                        fractions, colors,
+                        _cycleMethodFrom(cycle)
+                    )
+            );
 
-                    if ( gradient.rotation() % 360f != 0 ) {
-                        Point2D.Float p1 = new Point2D.Float(corner1X, corner1Y);
-                        Point2D.Float p2 = new Point2D.Float(focusX, focusY);
-                        p2 = _rotatePoint(p1, p2, gradient.rotation());
-                        focusX = p2.x;
-                        focusY = p2.y;
-                    }
-
-                    g2d.setPaint(new RadialGradientPaint(
-                                new Point2D.Float(corner1X, corner1Y),
-                                radius,
-                                new Point2D.Float(focusX, focusY),
-                                fractions,
-                                colors,
-                                _cycleMethodFrom(cycle)
-                            ));
-                }
-            }
-            else {
-                log.warn("Unknown gradient type: " + gradient.type(), new Throwable());
-                return;
-            }
         }
+        g2d.fill(specificArea);
+    }
+
+    private static Point2D.Float projectPointOntoLine(Point2D.Float A, Point2D.Float n, Point2D.Float C) {
+        Point2D.Float B = new Point2D.Float(A.x + n.x, A.y + n.y);
+        float t = ((C.x - A.x) * (B.x - A.x) + (C.y - A.y) * (B.y - A.y)) / ((B.x - A.x) * (B.x - A.x) + (B.y - A.y) * (B.y - A.y));
+        return new Point2D.Float(A.x + t * (B.x - A.x), A.y + t * (B.y - A.y));
+    }
+
+    private static void _renderRadialGradient(
+        Graphics2D    g2d,
+        Point2D.Float corner1,
+        Point2D.Float corner2,
+        GradientConf  gradient,
+        Area          specificArea
+    ) {
+        final UI.Cycle cycle  = gradient.cycle();
+        final Color[]  colors = gradient.colors();
+
+        final float size   = gradient.size();
+
+        final float corner1X = corner1.x;
+        final float corner1Y = corner1.y;
+        float corner2X = corner2.x;
+        float corner2Y = corner2.y;
+
+
+        float[] fractions = _fractionsFrom(gradient);
+
+        float radius;
+
+        if ( size < 0 )
+            radius = (float) Math.sqrt(
+                                 (corner2X - corner1X) * (corner2X - corner1X) +
+                                 (corner2Y - corner1Y) * (corner2Y - corner1Y)
+                             );
+        else
+            radius = size;
+
+        if ( gradient.focus().equals(Offset.none()) ) {
+            if ( colors.length == 2 )
+                g2d.setPaint(new RadialGradientPaint(
+                        new Point2D.Float(corner1X, corner1Y),
+                        radius,
+                        fractions,
+                        colors,
+                        _cycleMethodFrom(cycle)
+                    ));
+            else
+                g2d.setPaint(new RadialGradientPaint(
+                        new Point2D.Float(corner1X, corner1Y),
+                        radius,
+                        fractions,
+                        colors,
+                        _cycleMethodFrom(cycle)
+                    ));
+        } else {
+            float focusX = corner1X + gradient.focus().x();
+            float focusY = corner1Y + gradient.focus().y();
+
+            if ( gradient.rotation() % 360f != 0 ) {
+                Point2D.Float p1 = new Point2D.Float(corner1X, corner1Y);
+                Point2D.Float p2 = new Point2D.Float(focusX, focusY);
+                p2 = _rotatePoint(p1, p2, gradient.rotation());
+                focusX = p2.x;
+                focusY = p2.y;
+            }
+
+            g2d.setPaint(new RadialGradientPaint(
+                    new Point2D.Float(corner1X, corner1Y),
+                    radius,
+                    new Point2D.Float(focusX, focusY),
+                    fractions,
+                    colors,
+                    _cycleMethodFrom(cycle)
+                ));
+        }
+
         g2d.fill(specificArea);
     }
 
@@ -959,9 +993,15 @@ final class StyleRenderer
     }
 
     private static float[] _fractionsFrom(GradientConf style ) {
-        Color[] colors = style.colors();
+        Color[] colors   = style.colors();
         float[] fractions = style.fractions();
+        return _fractionsFrom(colors, fractions);
+    }
 
+    private static float[] _fractionsFrom(
+        Color[] colors,
+        float[] fractions
+    ) {
         if ( fractions.length == colors.length )
             return fractions;
         else if ( fractions.length > colors.length ) {
@@ -998,7 +1038,7 @@ final class StyleRenderer
     private static Point2D.Float _rotatePoint(
         final Point2D.Float p1,
         final Point2D.Float p2,
-        final float         rotation
+        final float rotation
     ) {
         if ( rotation == 0f )
             return p2;
@@ -1016,6 +1056,23 @@ final class StyleRenderer
         final double newY = x * sin + y * cos;
 
         return new Point2D.Float((float) (p1.x + newX), (float) (p1.y + newY));
+    }
+
+    /**
+     *  Takes 2 points and calculates the rotation
+     *  of point 2 around point 1.
+     *
+     * @param p1 The first point which serves as the center of rotation.
+     * @param p2 The second point which is rotated around point 1.
+     * @return The rotation in degrees.
+     */
+    private static final float _rotationBetween(
+        final Point2D.Float p1,
+        final Point2D.Float p2
+    ){
+        final double x = p2.x - p1.x;
+        final double y = p2.y - p1.y;
+        return (float) Math.toDegrees(Math.atan2(y, x));
     }
 
     private static void _renderImage(
@@ -1137,7 +1194,7 @@ final class StyleRenderer
             Shape newClip = conf.areas().get(style.clipArea());
             // We merge the new clip with the old one:
             if ( newClip != null && oldClip != null )
-                newClip = StyleUtility.intersect( newClip, oldClip );
+                newClip = StyleUtil.intersect( newClip, oldClip );
 
             g2d.setClip(newClip);
 

@@ -2,10 +2,8 @@ package swingtree.style;
 
 import org.slf4j.Logger;
 import swingtree.UI;
-import swingtree.api.IconDeclaration;
+import swingtree.api.*;
 import swingtree.api.Painter;
-import swingtree.api.Peeker;
-import swingtree.api.Styler;
 import swingtree.layout.LayoutConstraint;
 import swingtree.layout.Size;
 
@@ -796,7 +794,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided background renderer.
      */
     public ComponentStyleDelegate<C> painter( UI.Layer layer, swingtree.api.Painter painter ) {
-        return _withStyle(_styleConf.painter(layer, UI.ComponentArea.BODY, StyleUtility.DEFAULT_KEY, painter));
+        return _withStyle(_styleConf.painter(layer, UI.ComponentArea.BODY, StyleUtil.DEFAULT_KEY, painter));
     }
 
     /**
@@ -834,7 +832,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
         UI.ComponentArea      clipArea,
         swingtree.api.Painter painter
     ) {
-        return _withStyle(_styleConf.painter(layer, clipArea, StyleUtility.DEFAULT_KEY, painter));
+        return _withStyle(_styleConf.painter(layer, clipArea, StyleUtil.DEFAULT_KEY, painter));
     }
 
 
@@ -1235,11 +1233,11 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  <pre>{@code
      *    UI.panel()
      *    .withStyle( it -> it
-     *      .gradient("dark shading", grad -> grad
+     *      .gradient("dark shading", conf -> conf
      *        .colors("#000000", "#000000")
      *        .transition(UI.Transition.TOP_TO_BOTTOM)
      *      )
-     *      .gradient("light shading", grad -> grad
+     *      .gradient("light shading", conf -> conf
      *        .colors("#ffffff", "#ffffff")
      *        .transition(UI.Transition.TOP_TO_BOTTOM))
      *      )
@@ -1265,11 +1263,11 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  <pre>{@code
      *    UI.panel()
      *    .withStyle( it -> it
-     *      .gradient(UI.Layer.BACKGROUND, "dark shading", grad -> grad
+     *      .gradient(UI.Layer.BACKGROUND, "dark shading", conf -> conf
      *        .colors("#000000", "#000000")
      *        .transition(UI.Transition.TOP_TO_BOTTOM)
      *      )
-     *      .gradient(UI.Layer.BACKGROUND, "light shading", grad -> grad
+     *      .gradient(UI.Layer.BACKGROUND, "light shading", conf -> conf
      *        .colors("#ffffff", "#ffffff")
      *        .transition(UI.Transition.TOP_TO_BOTTOM))
      *      )
@@ -1300,7 +1298,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  <pre>{@code
      *    UI.panel()
      *    .withStyle( it -> it
-     *        .gradient( grad -> grad
+     *        .gradient( conf -> conf
      *            .colors("#000000", "#000000")
      *            .transition(UI.Transition.TOP_TO_BOTTOM)
      *        )
@@ -1313,7 +1311,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with a background shade defined by the provided styler lambda.
      */
     public ComponentStyleDelegate<C> gradient( Function<GradientConf, GradientConf> styler ) {
-        return gradient(GradientConf.DEFAULT_LAYER, StyleUtility.DEFAULT_KEY, styler);
+        return gradient(GradientConf.DEFAULT_LAYER, StyleUtil.DEFAULT_KEY, styler);
     }
 
     /**
@@ -1323,14 +1321,14 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  <pre>{@code
      *    UI.panel()
      *    .withStyle( it -> it
-     *        .gradient(UI.Layer.BACKGROUND, grad -> grad
+     *        .gradient(UI.Layer.BACKGROUND, conf -> conf
      *            .colors("#000000", "#000000")
      *            .transition(UI.Transition.TOP_TO_BOTTOM)
      *        )
      *    )
      * }</pre>
      * Note that this method translates to {@link #gradient(UI.Layer, String, Function)} but with the
-     * name being the "default" style name
+     * name being the "default" style name.
      *
      * @param layer The layer on which the gradient should be rendered.
      * @param styler A function that takes a {@link GradientConf} and returns a new {@link GradientConf}.
@@ -1338,7 +1336,86 @@ public final class ComponentStyleDelegate<C extends JComponent>
      */
     public ComponentStyleDelegate<C> gradient( UI.Layer layer, Function<GradientConf, GradientConf> styler ) {
         Objects.requireNonNull(styler);
-        return _withStyle(_styleConf.gradient(layer, StyleUtility.DEFAULT_KEY, styler));
+        return _withStyle(_styleConf.gradient(layer, StyleUtil.DEFAULT_KEY, styler));
+    }
+
+    /**
+     *  This method makes it possible to define a background noise for your components.
+     *  This is useful when you want to give component surfaces some naturally looking texture
+     *  or special effects. <br>
+     *  <br>
+     *  Here is an example of how to use it:
+     *  <pre>{@code
+     *    UI.panel()
+     *    .withStyle( it -> it
+     *        .noise("my-noise" conf -> conf
+     *            .scale(2, 3).rotation(45)
+     *            .colors(Color.BLACK, Color.WHITE)
+     *            .offset(64,85)
+     *        )
+     *    )
+     * }</pre>
+     * Note that this method translates to {@link #noise(UI.Layer, String, Function)} but with the
+     * layer set to {@link UI.Layer#BACKGROUND}.
+     *
+     * @param styler A function that takes a {@link NoiseConf} and returns a new {@link NoiseConf}.
+     * @return A new {@link ComponentStyleDelegate} with a background noise defined by the provided styler lambda.
+     */
+    public ComponentStyleDelegate<C> noise( String noiseName, Function<NoiseConf, NoiseConf> styler ) {
+        return noise(NoiseConf.DEFAULT_LAYER, noiseName, styler);
+    }
+
+    /**
+     *  This method makes it possible to define a background noise for your components.
+     *  This is useful when you want to give component surfaces some naturally looking texture
+     *  or special effects. <br>
+     *  <br>
+     *  Here is an example of how to use the method:
+     *  <pre>{@code
+     *    UI.panel()
+     *    .withStyle( it -> it
+     *        .noise(UI.Layer.BACKGROUND, "my-noise" conf -> conf
+     *            .scale(2, 3).rotation(45)
+     *            .colors(Color.BLACK, Color.WHITE)
+     *            .offset(64,85)
+     *        )
+     *    )
+     * }</pre>
+     *
+     * @param layer The layer on which the noise should be rendered.
+     * @param styler A function that takes a {@link NoiseConf} and returns a new {@link NoiseConf}.
+     * @return A new {@link ComponentStyleDelegate} with a background noise defined by the provided styler lambda.
+     */
+    public ComponentStyleDelegate<C> noise( UI.Layer layer, String noiseName, Function<NoiseConf, NoiseConf> styler ) {
+        Objects.requireNonNull(noiseName);
+        Objects.requireNonNull(styler);
+        return _withStyle(_styleConf.noise(layer, noiseName, styler));
+    }
+
+    /**
+     *  This method makes it possible to define a background noise for your components.
+     *  This is useful when you want to give component surfaces some naturally looking texture
+     *  or special effects. <br>
+     *  <br>
+     *  Here is an example of how to use this method:
+     *  <pre>{@code
+     *    UI.panel()
+     *    .withStyle( it -> it
+     *        .noise( conf -> conf
+     *            .scale(2, 3).rotation(45)
+     *            .colors(Color.BLACK, Color.WHITE)
+     *            .offset(64,85)
+     *        )
+     *    )
+     * }</pre>
+     * Note that this method translates to {@link #noise(UI.Layer, String, Function)} but with the
+     * layer set to {@link UI.Layer#BACKGROUND} and the name being the "default" style name.
+     *
+     * @param styler A function that takes a {@link NoiseConf} and returns a new {@link NoiseConf}.
+     * @return A new {@link ComponentStyleDelegate} with a background noise defined by the provided styler lambda.
+     */
+    public ComponentStyleDelegate<C> noise( Function<NoiseConf, NoiseConf> styler ) {
+        return noise(NoiseConf.DEFAULT_LAYER, StyleUtil.DEFAULT_KEY, styler);
     }
 
     /**
@@ -1427,7 +1504,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with a background image defined by the provided styler lambda.
      */
     public ComponentStyleDelegate<C> image( Function<ImageConf, ImageConf> styler ) {
-        return image(ImageConf.DEFAULT_LAYER, StyleUtility.DEFAULT_KEY, styler);
+        return image(ImageConf.DEFAULT_LAYER, StyleUtil.DEFAULT_KEY, styler);
     }
 
     /**
@@ -1453,7 +1530,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      */
     public ComponentStyleDelegate<C> image( UI.Layer layer, Function<ImageConf, ImageConf> styler ) {
         Objects.requireNonNull(styler);
-        return _withStyle(_styleConf.images(layer, StyleUtility.DEFAULT_KEY, styler));
+        return _withStyle(_styleConf.images(layer, StyleUtil.DEFAULT_KEY, styler));
     }
 
     /**

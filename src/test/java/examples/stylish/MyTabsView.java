@@ -58,7 +58,7 @@ public class MyTabsView extends Panel
                 )
                 .withStyle( it -> it
                     .gradient( gradient -> gradient
-                        .transition(Transition.TOP_TO_BOTTOM)
+                        .span(Span.TOP_TO_BOTTOM)
                         .colors(determineTabButtonColorsFor(tabModel, it.component(), vm))
                     )
                     .applyIf(vm.getCurrentTab().is(tabModel), it2 -> it2

@@ -406,7 +406,37 @@ public final class UI extends UINamespaceUtilities
      */
     public enum GradientType implements UIEnum<GradientType>
     {
-        LINEAR, RADIAL
+        LINEAR, RADIAL, CONIC
+    }
+
+    /**
+     *  Defines the different types of noise functions that can be used to render
+     *  a {@link NoiseConf} style. <br>
+     *  Pass instances of this to {@link NoiseConf#function(NoiseFunction)} to configure the noise behaviour
+     *  as part of the style API (see {@link UIForAnySwing#withStyle(Styler)}).
+     */
+    public enum NoiseType implements UIEnum<NoiseType>, NoiseFunction
+    {
+        STOCHASTIC(NoiseFunctions::stochastic),
+        SMOOTH_TOPOLOGY(NoiseFunctions::smoothTopology),
+        HARD_TOPOLOGY(NoiseFunctions::hardTopology),
+        SMOOTH_SPOTS(NoiseFunctions::smoothSpots),
+        HARD_SPOTS(NoiseFunctions::hardSpots),
+        GRAINY(NoiseFunctions::grainy),
+        TILES(NoiseFunctions::tiles),
+        FIBERS(NoiseFunctions::fibery);
+
+
+        private final NoiseFunction function;
+
+        NoiseType( NoiseFunction function ) {
+            this.function = function;
+        }
+
+        @Override
+        public double getFractionAt(float x, float y) {
+            return function.getFractionAt(x, y);
+        }
     }
 
     /**
@@ -414,10 +444,10 @@ public final class UI extends UINamespaceUtilities
      *  like for example the gradient style API exposed by {@link ComponentStyleDelegate#gradient(Function)}
      *  or {@link ComponentStyleDelegate#gradient(Function)} methods (see {@link UIForAnySwing#withStyle(Styler)}).
      * <p>
-     *  {@link GradientConf#transition(Transition)} method exposed by methods like
+     *  {@link GradientConf#span(Span)} method exposed by methods like
      *  {@link ComponentStyleDelegate#gradient(String, Function)} or {@link ComponentStyleDelegate#gradient(Layer, String, Function)}.
      */
-    public enum Transition implements UIEnum<Transition>
+    public enum Span implements UIEnum<Span>
     {
         TOP_LEFT_TO_BOTTOM_RIGHT, BOTTOM_LEFT_TO_TOP_RIGHT,
         TOP_RIGHT_TO_BOTTOM_LEFT, BOTTOM_RIGHT_TO_TOP_LEFT,
@@ -565,7 +595,8 @@ public final class UI extends UINamespaceUtilities
          * It represents the innermost boundary of the component, where the actual content of the component begins,
          * like for example the contents of a {@link JPanel} or {@link JScrollPane}.
          */
-        INTERIOR_TO_CONTENT // After the padding, before the content.
+        INTERIOR_TO_CONTENT, // After the padding, before the content.
+        CENTER_TO_CONTENT, // The center of the component.
     }
 
     /**
@@ -3498,19 +3529,23 @@ public final class UI extends UINamespaceUtilities
     }
 
     /**
-     *  Use this to create a builder for a new {@link JComboBox} UI component.
+     *  Use this to declare a builder for a new {@link JComboBox} UI component.
      *  This is in essence a convenience method for {@code UI.of(new JComboBox())}.
      *
      * @param <E> The type of the elements in the {@link JComboBox}.
      * @return A builder instance for a new {@link JComboBox}, which enables fluent method chaining.
      */
     public static <E> UIForCombo<E,JComboBox<E>> comboBox() {
-        return new UIForCombo<>(new BuilderState<>((Class) JComboBox.class,()->new ComboBox<>()));
+        return new UIForCombo<>(new BuilderState<>(JComboBox.class, ComboBox::new));
     }
 
     /**
-     *  Use this to create a builder for a new {@link JComboBox} instance
-     *  with the provided array of elements as selectable items.
+     *  Use this to declare a UI builder for the {@link JComboBox} component type
+     *  with the provided array of elements as selectable items. <br>
+     *  Note that the user may modify the items in the provided array
+     *  (if the combo box is editable), if you do not want that,
+     *  consider using {@link UI#comboBoxWithUnmodifiable(Object[])}
+     *  or {@link UI#comboBoxWithUnmodifiable(java.util.List)}.
      *
      * @param items The array of elements to be selectable in the {@link JComboBox}.
      * @param <E> The type of the elements in the {@link JComboBox}.
@@ -3524,7 +3559,7 @@ public final class UI extends UINamespaceUtilities
     }
 
     /**
-     *  Use this to create a builder for a new {@link JComboBox} instance
+     *  Use this to declare a UI builder for the {@link JComboBox} type
      *  with the provided array of elements as selectable items which
      *  may not be modified by the user.
      *
@@ -3577,7 +3612,7 @@ public final class UI extends UINamespaceUtilities
     }
 
     /**
-     *  Use this to create a builder for a new  {@link JComboBox} instance
+     *  Use this to declare a builder for a new {@link JComboBox} instance
      *  with the provided list of elements as selectable items.
      *
      * @param items The list of elements to be selectable in the {@link JComboBox}.

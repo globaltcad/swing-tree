@@ -8,7 +8,7 @@ import swingtree.SwingTree
 import swingtree.UI
 import swingtree.components.JBox
 import swingtree.style.ComponentExtension
-import swingtree.style.Layout
+import swingtree.api.Layout
 import swingtree.threading.EventProcessor
 import swingtree.style.StyleConf
 import swingtree.style.ComponentStyleDelegate
@@ -202,9 +202,9 @@ class Styles_Spec extends Specification
                                             "verticalAlignment=?" +
                                         "], " +
                                         "DimensionalityConf[NONE], " +
-                                        "StyleLayers[" +
-                                            "background=StyleLayer[EMPTY], " +
-                                            "content=StyleLayer[" +
+                                        "StyleConfLayers[" +
+                                            "background=StyleConfLayer[EMPTY], " +
+                                            "content=StyleConfLayer[" +
                                                 "shadows=ShadowConf[" +
                                                     "horizontalOffset=0, " +
                                                     "verticalOffset=0, " +
@@ -215,10 +215,11 @@ class Styles_Spec extends Specification
                                                 "], " +
                                                 "painters=PainterConf[NONE], " +
                                                 "gradients=GradientConf[NONE], " +
+                                                "noises=NoiseConf[NONE], " +
                                                 "images=ImageConf[NONE]" +
                                             "], " +
-                                            "border=StyleLayer[EMPTY], " +
-                                            "foreground=StyleLayer[EMPTY]" +
+                                            "border=StyleConfLayer[EMPTY], " +
+                                            "foreground=StyleConfLayer[EMPTY]" +
                                         "], " +
                                         "properties=[]" +
                                     "]"
@@ -268,14 +269,15 @@ class Styles_Spec extends Specification
                                             "verticalAlignment=CENTER" +
                                         "], " +
                                         "DimensionalityConf[NONE], " +
-                                        "StyleLayers[" +
-                                            "background=StyleLayer[EMPTY], " +
-                                            "content=StyleLayer[EMPTY], " +
-                                            "border=StyleLayer[EMPTY], " +
-                                            "foreground=StyleLayer[" +
+                                        "StyleConfLayers[" +
+                                            "background=StyleConfLayer[EMPTY], " +
+                                            "content=StyleConfLayer[EMPTY], " +
+                                            "border=StyleConfLayer[EMPTY], " +
+                                            "foreground=StyleConfLayer[" +
                                                 "shadows=ShadowConf[NONE], " +
                                                 "painters=PainterConf[NONE], " +
                                                 "gradients=GradientConf[NONE], " +
+                                                "noises=NoiseConf[NONE], " +
                                                 "images=NamedConfigs[" +
                                                     "default=ImageConf[NONE], " +
                                                     "bubbles=ImageConf[" +
@@ -306,7 +308,7 @@ class Styles_Spec extends Specification
                                     .prefWidth(400)
                                     .gradient(UI.Layer.BORDER, "gradient", imgConf -> imgConf
                                         .colors(Color.RED, Color.GREEN, Color.BLUE)
-                                        .transition(UI.Transition.BOTTOM_TO_TOP)
+                                        .span(UI.Span.BOTTOM_TO_TOP)
                                         .type(UI.GradientType.RADIAL)
                                     )
                                 )
@@ -335,10 +337,10 @@ class Styles_Spec extends Specification
                                             "width=" + roundScaledToString(100) + ", " +
                                             "height=" + roundScaledToString(200) +
                                         "], " +
-                                        "StyleLayers[" +
-                                            "background=StyleLayer[EMPTY], " +
-                                            "content=StyleLayer[EMPTY], " +
-                                            "border=StyleLayer[" +
+                                        "StyleConfLayers[" +
+                                            "background=StyleConfLayer[EMPTY], " +
+                                            "content=StyleConfLayer[EMPTY], " +
+                                            "border=StyleConfLayer[" +
                                                 "shadows=ShadowConf[NONE], " +
                                                 "painters=PainterConf[NONE], " +
                                                 "gradients=NamedConfigs[" +
@@ -359,12 +361,13 @@ class Styles_Spec extends Specification
                                                         "cycle=NONE" +
                                                     "]" +
                                                 "], " +
-                                            "images=ImageConf[NONE]" +
+                                                "noises=NoiseConf[NONE], " +
+                                                "images=ImageConf[NONE]" +
+                                            "], " +
+                                            "foreground=StyleConfLayer[EMPTY]" +
                                         "], " +
-                                        "foreground=StyleLayer[EMPTY]" +
-                                    "], " +
-                                    "properties=[]" +
-                                "]"
+                                        "properties=[]" +
+                                    "]"
         where :
             uiScale << [ 1.0f, 1.5f, 2.0f, 2.25f, 3.0f ]
     }
@@ -487,7 +490,7 @@ class Styles_Spec extends Specification
                             )
                             .gradient(UI.Layer.BACKGROUND, g -> g
                                 .colors(new Color(100, 50, 200, 0), new Color(255, 00, 250, 0))
-                                .transition(UI.Transition.TOP_TO_BOTTOM)
+                                .span(UI.Span.TOP_TO_BOTTOM)
                                 .type(UI.GradientType.LINEAR)
                             )
                         )
@@ -499,11 +502,11 @@ class Styles_Spec extends Specification
                     "BaseConf[NONE], " +
                     "FontConf[NONE], " +
                     "DimensionalityConf[NONE], " +
-                    "StyleLayers[" +
-                        "background=StyleLayer[EMPTY], " +
-                        "content=StyleLayer[EMPTY], " +
-                        "border=StyleLayer[EMPTY], " +
-                        "foreground=StyleLayer[EMPTY]" +
+                    "StyleConfLayers[" +
+                        "background=StyleConfLayer[EMPTY], " +
+                        "content=StyleConfLayer[EMPTY], " +
+                        "border=StyleConfLayer[EMPTY], " +
+                        "foreground=StyleConfLayer[EMPTY]" +
                     "], " +
                     "properties=[]" +
                 "]"
@@ -546,11 +549,11 @@ class Styles_Spec extends Specification
                         "width=" + roundScaledToString(120) + ", " +
                         "height=" + roundScaledToString(80) +
                     "], " +
-                    "StyleLayers[" +
-                        "background=StyleLayer[EMPTY], " +
-                        "content=StyleLayer[EMPTY], " +
-                        "border=StyleLayer[EMPTY], " +
-                        "foreground=StyleLayer[EMPTY]" +
+                    "StyleConfLayers[" +
+                        "background=StyleConfLayer[EMPTY], " +
+                        "content=StyleConfLayer[EMPTY], " +
+                        "border=StyleConfLayer[EMPTY], " +
+                        "foreground=StyleConfLayer[EMPTY]" +
                     "], " +
                     "properties=[]" +
                 "]"
@@ -598,11 +601,11 @@ class Styles_Spec extends Specification
                     "BaseConf[NONE], " +
                     "FontConf[NONE], " +
                     "DimensionalityConf[NONE], " +
-                    "StyleLayers[" +
-                        "background=StyleLayer[EMPTY], " +
-                        "content=StyleLayer[EMPTY], " +
-                        "border=StyleLayer[EMPTY], " +
-                        "foreground=StyleLayer[EMPTY]" +
+                    "StyleConfLayers[" +
+                        "background=StyleConfLayer[EMPTY], " +
+                        "content=StyleConfLayer[EMPTY], " +
+                        "border=StyleConfLayer[EMPTY], " +
+                        "foreground=StyleConfLayer[EMPTY]" +
                     "], " +
                     "properties=[]" +
                 "]"
@@ -658,11 +661,11 @@ class Styles_Spec extends Specification
                     "], " +
                     "FontConf[NONE], " +
                     "DimensionalityConf[NONE], " +
-                    "StyleLayers[" +
-                        "background=StyleLayer[EMPTY], " +
-                        "content=StyleLayer[EMPTY], " +
-                        "border=StyleLayer[EMPTY], " +
-                        "foreground=StyleLayer[EMPTY]" +
+                    "StyleConfLayers[" +
+                        "background=StyleConfLayer[EMPTY], " +
+                        "content=StyleConfLayer[EMPTY], " +
+                        "border=StyleConfLayer[EMPTY], " +
+                        "foreground=StyleConfLayer[EMPTY]" +
                     "], " +
                     "properties=[]" +
                 "]"
@@ -722,11 +725,11 @@ class Styles_Spec extends Specification
                     "], " +
                     "FontConf[NONE], " +
                     "DimensionalityConf[NONE], " +
-                    "StyleLayers[" +
-                        "background=StyleLayer[EMPTY], " +
-                        "content=StyleLayer[EMPTY], " +
-                        "border=StyleLayer[EMPTY], " +
-                        "foreground=StyleLayer[EMPTY]" +
+                    "StyleConfLayers[" +
+                        "background=StyleConfLayer[EMPTY], " +
+                        "content=StyleConfLayer[EMPTY], " +
+                        "border=StyleConfLayer[EMPTY], " +
+                        "foreground=StyleConfLayer[EMPTY]" +
                     "], " +
                     "properties=[]" +
                 "]"
@@ -770,11 +773,11 @@ class Styles_Spec extends Specification
                     "BaseConf[NONE], " +
                     "FontConf[NONE], " +
                     "DimensionalityConf[NONE], " +
-                    "StyleLayers[" +
-                        "background=StyleLayer[EMPTY], " +
-                        "content=StyleLayer[EMPTY], " +
-                        "border=StyleLayer[EMPTY], " +
-                        "foreground=StyleLayer[EMPTY]" +
+                    "StyleConfLayers[" +
+                        "background=StyleConfLayer[EMPTY], " +
+                        "content=StyleConfLayer[EMPTY], " +
+                        "border=StyleConfLayer[EMPTY], " +
+                        "foreground=StyleConfLayer[EMPTY]" +
                     "], " +
                     "properties=[]" +
                 "]"
@@ -807,11 +810,11 @@ class Styles_Spec extends Specification
                     "BaseConf[NONE], " +
                     "FontConf[NONE], " +
                     "DimensionalityConf[NONE], " +
-                    "StyleLayers[" +
-                        "background=StyleLayer[EMPTY], " +
-                        "content=StyleLayer[EMPTY], " +
-                        "border=StyleLayer[EMPTY], " +
-                        "foreground=StyleLayer[EMPTY]" +
+                    "StyleConfLayers[" +
+                        "background=StyleConfLayer[EMPTY], " +
+                        "content=StyleConfLayer[EMPTY], " +
+                        "border=StyleConfLayer[EMPTY], " +
+                        "foreground=StyleConfLayer[EMPTY]" +
                     "], " +
                     "properties=[]" +
                 "]"

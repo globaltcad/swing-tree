@@ -322,7 +322,7 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
                     "verticalOffset="   + _toString(_offset.y()  ) + ", " +
                     "blurRadius="       + _toString(_blurRadius  ) + ", " +
                     "spreadRadius="     + _toString(_spreadRadius) + ", " +
-                    "color="            + StyleUtility.toString(_color) + ", " +
+                    "color="            + StyleUtil.toString(_color) + ", " +
                     "isInset="          + !_isOutset +
                 "]";
     }

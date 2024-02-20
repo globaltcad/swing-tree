@@ -355,10 +355,10 @@ final class BorderConf
                     );
         } else {
             arcsString =
-                    "topLeftArc="       + StyleUtility.toString(_topLeftArc)     +
-                    ", topRightArc="    + StyleUtility.toString(_topRightArc)    +
-                    ", bottomLeftArc="  + StyleUtility.toString(_bottomLeftArc)  +
-                    ", bottomRightArc=" + StyleUtility.toString(_bottomRightArc);
+                    "topLeftArc="       + StyleUtil.toString(_topLeftArc)     +
+                    ", topRightArc="    + StyleUtil.toString(_topRightArc)    +
+                    ", bottomLeftArc="  + StyleUtil.toString(_bottomLeftArc)  +
+                    ", bottomRightArc=" + StyleUtil.toString(_bottomRightArc);
         }
 
         String borderWidthsString;
@@ -377,7 +377,7 @@ final class BorderConf
                     borderWidthsString + ", " +
                     "margin=" + _margin + ", " +
                     "padding=" + _padding + ", " +
-                    "color=" + StyleUtility.toString(_borderColor) +
+                    "color=" + StyleUtil.toString(_borderColor) +
                 "]";
     }
 

@@ -46,7 +46,7 @@ public final class TransitionalAnimation extends Panel
                         .shadowSpreadRadius(-5 * state.progress())
                         .shadowIsInset(false)
                         .gradient(Layer.BORDER, "border-gradient", grad -> grad
-                            .transition(Transition.TOP_LEFT_TO_BOTTOM_RIGHT)
+                            .span(Span.TOP_LEFT_TO_BOTTOM_RIGHT)
                             .colors(
                                 color(0.75, 1, 0.5, state.progress()),
                                 color(0.5, 1, 1, 0)

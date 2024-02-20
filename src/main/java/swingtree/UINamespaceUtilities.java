@@ -331,6 +331,7 @@ public abstract class UINamespaceUtilities extends UILayoutConstants
         if ( maybeColorName.equalsIgnoreCase("magenta")     ) return Color.MAGENTA;
         if ( maybeColorName.equalsIgnoreCase("cyan")        ) return Color.CYAN;
         if ( maybeColorName.equalsIgnoreCase("blue")        ) return Color.BLUE;
+        if ( maybeColorName.equalsIgnoreCase("brown")       ) return new Color(165,42,42);
         if ( maybeColorName.equalsIgnoreCase("purple")      ) return new Color(128, 0, 128);
         if ( maybeColorName.equalsIgnoreCase("salmon")      ) return new Color(250, 128, 114);
         if ( maybeColorName.equalsIgnoreCase("gold")        ) return new Color(255, 215, 0);
@@ -341,6 +342,19 @@ public abstract class UINamespaceUtilities extends UILayoutConstants
         if ( maybeColorName.equalsIgnoreCase("maroon")      ) return new Color(128, 0, 0);
         if ( maybeColorName.equalsIgnoreCase("peach")       ) return new Color(255, 218, 185);
         if ( maybeColorName.equalsIgnoreCase("indigo")      ) return new Color(75, 0, 130);
+        if ( maybeColorName.equalsIgnoreCase("tan")         ) return new Color(210, 180, 140);
+        if ( maybeColorName.equalsIgnoreCase("teal")        ) return new Color(0, 128, 128);
+        if ( maybeColorName.equalsIgnoreCase("sky")         ) return new Color(135, 206, 235);
+        if ( maybeColorName.equalsIgnoreCase("violet")      ) return new Color(238, 130, 238);
+        if ( maybeColorName.equalsIgnoreCase("turquoise")   ) return new Color(64, 224, 208);
+        if ( maybeColorName.equalsIgnoreCase("silver")      ) return new Color(192, 192, 192);
+        if ( maybeColorName.equalsIgnoreCase("beige")       ) return new Color(245, 245, 220);
+        if ( maybeColorName.equalsIgnoreCase("ivory")       ) return new Color(255, 255, 240);
+        if ( maybeColorName.equalsIgnoreCase("khaki")       ) return new Color(240, 230, 140);
+        if ( maybeColorName.equalsIgnoreCase("coral")       ) return new Color(255, 127, 80);
+        if ( maybeColorName.equalsIgnoreCase("orchid")      ) return new Color(218, 112, 214);
+        if ( maybeColorName.equalsIgnoreCase("plum")        ) return new Color(221, 160, 221);
+        if ( maybeColorName.equalsIgnoreCase("oak")         ) return new Color(216, 181, 137);
         if ( maybeColorName.equalsIgnoreCase("transparent") ) return new Color(0, 0, 0, 0);
         return null;
     }
