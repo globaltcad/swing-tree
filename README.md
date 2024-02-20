@@ -9,13 +9,9 @@ Think [Jetpack Compose](https://developer.android.com/jetpack/compose), [SwiftUI
 
 <table>
 <tr>
-<th style="padding:0;color:lightgray;background-color: rgba(0,0,0,10%);">
-    <div style="padding:0 0 0 3px;font-size: 12px;float:left;">▢</div>
-    <div style="padding:2px 0 0 3px;font-size: 11px;float:left;">☰</div>
-    <div style="padding:0;font-size: 10px;">Features</div>
+<th style="background-color: rgba(0,0,0,10%);">
 </th>
-<th style="font-size: 10px;padding:0 2px;margin:-5px;color:lightgray;text-align: right; letter-spacing: 4px;background-color: rgba(0,0,0,10%);">
-⬤⬤⬤
+<th style="background-color: rgba(0,0,0,10%);">
 </th>
 </tr>
 <tr>
