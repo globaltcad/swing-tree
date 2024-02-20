@@ -9,8 +9,14 @@ Think [Jetpack Compose](https://developer.android.com/jetpack/compose), [SwiftUI
 
 <table>
 <tr>
-<th></th>
-<th></th>
+<th style="padding:0;color:lightgray;background-color: rgba(0,0,0,10%);">
+    <div style="padding:0 0 0 3px;font-size: 12px;float:left;">▢</div>
+    <div style="padding:2px 0 0 3px;font-size: 11px;float:left;">☰</div>
+    <div style="padding:0;font-size: 10px;">Features</div>
+</th>
+<th style="font-size: 10px;padding:0 2px;margin:-5px;color:lightgray;text-align: right; letter-spacing: 4px;background-color: rgba(0,0,0,10%);">
+⬤⬤⬤
+</th>
 </tr>
 <tr>
 <td> 
@@ -20,15 +26,8 @@ Think [Jetpack Compose](https://developer.android.com/jetpack/compose), [SwiftUI
 - compatible with custom swing components and legacy Swing code
 - advanced styling through a CSS like DSL API
 - [animated styling](docs/markdown/An-Advanced-Style-Animation.md)
-
-</td>
-<td> 
-
 - a functional lambda friendly API for peeking into the underlying UI tree and manipulating swing components freely
 - concise event registration through `onClick`, `onChange` methods...
-- built-in [MVVM property](https://github.com/globaltcad/sprouts) support for dynamic [UI design decoupled from business logic](docs/markdown/Advanced-MVVM.md) 
-- user friendly [stability oriented error handling](docs/markdown/Sane-Error-Handling.md)
-- tried, tested and used extensively in production
 
 </td>
 <td>
@@ -36,12 +35,24 @@ Think [Jetpack Compose](https://developer.android.com/jetpack/compose), [SwiftUI
 <img href="https://www.flaticon.com/free-icons/swing" title="swing icons" src="docs/img/swing.png" style="width:200px;"/>
 </td>
 </tr>
-</table>
+<tr>
+<td> 
 
+- built-in [MVVM property](https://github.com/globaltcad/sprouts) support for dynamic [UI design decoupled from business logic](docs/markdown/Advanced-MVVM.md)
+- user friendly [stability oriented error handling](docs/markdown/Sane-Error-Handling.md)
+- tried, tested and used extensively in production
+
+</td>
+<td>
 
 - [Motivation](docs/markdown/Motivation.md)
 - [Getting Started](docs/markdown/Climbing-Swing-Tree.md)
 - [Living Documentation](https://globaltcad.github.io/swing-tree/)
+
+</td>
+</tr>
+</table>
+
 
 ---
 
