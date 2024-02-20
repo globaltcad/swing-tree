@@ -10,32 +10,35 @@ import java.util.concurrent.TimeUnit;
  */
 public final class LifeTime
 {
+    private static final long DEFAULT_INTERVAL = 16;
+    
     private static long _instances = 0;
 
     private final long _id = _instances++;
     private final long _delay; // in milliseconds
     private final long _duration;
+    private final long _interval;
 
     /**
      *  Creates a new schedule that will start immediately and run for the given duration.
      * @param time The duration of the animation.
      * @param unit The time unit of the duration.
-     * @return A new schedule that will start immediately and run for the given duration.
+     * @return A new lifetime that will start immediately and run for the given duration.
      */
     public static LifeTime of( long time, TimeUnit unit ) {
         Objects.requireNonNull(unit);
-        return new LifeTime(0, unit.toMillis(time));
+        return new LifeTime(0, unit.toMillis(time), DEFAULT_INTERVAL);
     }
 
     /**
      *  Creates a new schedule that will start immediately and run for the given duration.
      * @param time The duration of the animation.
      * @param unit The time unit of the duration.
-     * @return A new schedule that will start immediately and run for the given duration.
+     * @return A new lifetime that will start immediately and run for the given duration.
      */
     public static LifeTime of( double time, TimeUnit unit ) {
         long millis = _convertTimeFromDoublePrecisely(time, unit, TimeUnit.MILLISECONDS);
-        return new LifeTime(0, millis);
+        return new LifeTime(0, millis, DEFAULT_INTERVAL);
     }
 
     /**
@@ -44,10 +47,10 @@ public final class LifeTime
      * @param startUnit The time unit of the delay.
      * @param duration The duration of the animation.
      * @param durationUnit The time unit of the duration.
-     * @return A new schedule that will start after the given delay and run for the given duration.
+     * @return A new lifetime that will start after the given delay and run for the given duration.
      */
     public static LifeTime of( long startDelay, TimeUnit startUnit, long duration, TimeUnit durationUnit ) {
-        return new LifeTime(startUnit.toMillis(startDelay), durationUnit.toMillis(duration));
+        return new LifeTime(startUnit.toMillis(startDelay), durationUnit.toMillis(duration), DEFAULT_INTERVAL);
     }
 
     /**
@@ -56,12 +59,12 @@ public final class LifeTime
      * @param startUnit The time unit of the delay.
      * @param duration The duration of the animation.
      * @param durationUnit The time unit of the duration.
-     * @return A new schedule that will start after the given delay and run for the given duration.
+     * @return A new lifetime that will start after the given delay and run for the given duration.
      */
     public static LifeTime of( double startDelay, TimeUnit startUnit, double duration, TimeUnit durationUnit ) {
         long startMillis    = _convertTimeFromDoublePrecisely(startDelay, startUnit, TimeUnit.MILLISECONDS);
         long durationMillis = _convertTimeFromDoublePrecisely(duration, durationUnit, TimeUnit.MILLISECONDS);
-        return new LifeTime(startMillis, durationMillis);
+        return new LifeTime(startMillis, durationMillis, DEFAULT_INTERVAL);
     }
 
     private static long _convertTimeFromDoublePrecisely( double time, TimeUnit from, TimeUnit to ) {
@@ -71,16 +74,17 @@ public final class LifeTime
     }
 
 
-    private LifeTime( long delay, long duration ) {
+    private LifeTime(long delay, long duration, long interval) {
         _delay     = delay;
         _duration  = duration;
+        _interval = interval;
     }
 
     /**
      *  Creates a new schedule that will start after the given delay and run for the given duration.
      * @param delay The delay after which the animation should start.
      * @param unit The time unit of the delay.
-     * @return A new schedule that will start after the given delay.
+     * @return A new lifetime that will start after the given delay.
      */
     public LifeTime startingIn( long delay, TimeUnit unit ) {
         long offset = unit.toMillis( delay );
@@ -88,6 +92,15 @@ public final class LifeTime
                     offset,    TimeUnit.MILLISECONDS,
                     _duration, TimeUnit.MILLISECONDS
                 );
+    }
+
+    /**
+     * @param interval The interval in the given time unit.
+     * @param unit The time unit of the interval.
+     * @return A new lifetime that will start after the given delay and run for the given duration.
+     */
+    public LifeTime withInterval( long interval, TimeUnit unit ) {
+        return new LifeTime(_delay, _duration, unit.toMillis(interval));
     }
 
     /**
@@ -108,6 +121,16 @@ public final class LifeTime
     public long getDelayIn( TimeUnit unit ) {
         Objects.requireNonNull(unit);
         return unit.convert(_delay, TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     *  Returns the interval in the given time unit.
+     * @param unit The time unit in which the interval should be returned.
+     * @return The interval in the given time unit.
+     */
+    public long getIntervalIn( TimeUnit unit ) {
+        Objects.requireNonNull(unit);
+        return unit.convert(_interval, TimeUnit.MILLISECONDS);
     }
 
     @Override

@@ -26,6 +26,7 @@ public final class LifeSpan
     private final LifeTime _lifeTime;
     private final long _startTime;
 
+
     LifeSpan( LifeTime lifeTime, long startTime ) {
         _lifeTime = Objects.requireNonNull(lifeTime);
         _startTime = startTime;
