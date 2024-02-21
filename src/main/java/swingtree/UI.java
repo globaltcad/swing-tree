@@ -451,7 +451,10 @@ public final class UI extends UINamespaceUtilities
         HARD_SPOTS(NoiseFunctions::hardSpots),
         GRAINY(NoiseFunctions::grainy),
         TILES(NoiseFunctions::tiles),
-        FIBERS(NoiseFunctions::fibery);
+        FIBERS(NoiseFunctions::fibery),
+        RETRO(NoiseFunctions::retro),
+        CELLS(NoiseFunctions::cells),
+        HAZE(NoiseFunctions::haze);
 
 
         private final NoiseFunction function;
