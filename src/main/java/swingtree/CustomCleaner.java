@@ -34,7 +34,6 @@ final class CustomCleaner
 
 
     private final ReferenceQueue<Object> _referenceQueue = new ReferenceQueue<>();
-    private int _registered = 0;
 
     private final List<ReferenceWithCleanup<Object>> _toBeCleaned = new ArrayList<>();
     private Thread _thread = null;
@@ -92,7 +91,6 @@ final class CustomCleaner
                     log.error("Failed to perform cleanup!", e);
                 } finally {
                     _toBeCleaned.remove(ref);
-                    _registered--;
                 }
             }
         } catch ( Throwable e ) {
@@ -103,7 +101,7 @@ final class CustomCleaner
     @Override
     public String toString() {
         return this.getClass().getSimpleName()+"@"+Integer.toHexString(this.hashCode())+"[" +
-                    "registered=" + _registered +
+                    "registered=" + _toBeCleaned.size() +
                 "]";
     }
 
