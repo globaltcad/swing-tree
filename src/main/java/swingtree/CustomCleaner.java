@@ -1,6 +1,9 @@
 package swingtree;
 
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.ref.PhantomReference;
 import java.lang.ref.ReferenceQueue;
 import java.util.ArrayList;
@@ -18,17 +21,23 @@ import java.util.List;
  */
 final class CustomCleaner
 {
-    private static final CustomCleaner _instance = new CustomCleaner();
+    private static final Logger log = LoggerFactory.getLogger(CustomCleaner.class);
+
+    private static final CustomCleaner _INSTANCE = new CustomCleaner();
+
+    private static final long _QUEUE_TIMEOUT = 60 * 1000;
+
 
     public static CustomCleaner getInstance() {
-        return _instance;
+        return _INSTANCE;
     }
 
+
     private final ReferenceQueue<Object> _referenceQueue = new ReferenceQueue<>();
-    private final long _timeout = 60 * 1000;
     private int _registered = 0;
 
-    private final List<Object> list = new ArrayList<>();
+    private final List<ReferenceWithCleanup<Object>> _toBeCleaned = new ArrayList<>();
+    private Thread _thread = null;
 
 
     private CustomCleaner() {}
@@ -36,42 +45,58 @@ final class CustomCleaner
 
     static class ReferenceWithCleanup<T> extends PhantomReference<T>
     {
-        private final Runnable _action;
+        private Runnable _action;
 
-        ReferenceWithCleanup(T o, Runnable action, ReferenceQueue<T> queue) {
+        ReferenceWithCleanup( T o, Runnable action, ReferenceQueue<T> queue ) {
             super( o, queue );
             _action = action;
         }
         public void cleanup() {
-            _action.run();
+            if ( _action != null ) {
+                try {
+                    _action.run();
+                } catch (Exception e) {
+                    log.error("Failed to execute cleanup action '"+_action+"'.", e);
+                } finally {
+                    _action = null;
+                }
+            }
         }
     }
 
-    public void register(Object o, Runnable action) {
+    public void register( Object o, Runnable action ) {
         synchronized ( _referenceQueue ) {
-            list.add(new ReferenceWithCleanup<Object>(o, action, _referenceQueue));
-            _registered++;
-            if ( _registered == 1 ) new Thread( this::run ).start();
+            _toBeCleaned.add(new ReferenceWithCleanup<>(o, action, _referenceQueue));
+            if ( _toBeCleaned.size() == 1 && _thread == null ) {
+                _thread = new Thread( this::run, "SwingTree-Cleaner" );
+                _thread.start();
+            }
         }
     }
 
-    public void run() {
-        while ( _registered > 0 ) {
-            try {
-                ReferenceWithCleanup ref = (ReferenceWithCleanup) _referenceQueue.remove(_timeout);
-                if ( ref != null ) {
-                    try {
-                        ref.cleanup();
-                    } catch ( Throwable e ) {
-                        e.printStackTrace();
-                        // ignore exceptions from the cleanup action
-                        // (including interruption of cleanup thread)
-                    }
+    private void run() {
+        while ( _thread.isAlive() ) {
+            while ( !_toBeCleaned.isEmpty() ) {
+                checkCleanup();
+            }
+        }
+    }
+
+    private void checkCleanup() {
+        try {
+            ReferenceWithCleanup<Object> ref = (ReferenceWithCleanup<Object>) _referenceQueue.remove(_QUEUE_TIMEOUT);
+            if ( ref != null ) {
+                try {
+                    ref.cleanup();
+                } catch ( Throwable e ) {
+                    log.error("Failed to perform cleanup!", e);
+                } finally {
+                    _toBeCleaned.remove(ref);
                     _registered--;
                 }
-            } catch ( Throwable e ) {
-                e.printStackTrace(); // The queue failed
             }
+        } catch ( Throwable e ) {
+            log.error("Failed to call 'remove()' on cleaner internal queue.", e);
         }
     }
 
