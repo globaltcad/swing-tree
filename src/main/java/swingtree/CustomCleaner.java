@@ -66,9 +66,13 @@ final class CustomCleaner
     public void register( Object o, Runnable action ) {
         synchronized ( _referenceQueue ) {
             _toBeCleaned.add(new ReferenceWithCleanup<>(o, action, _referenceQueue));
-            if ( _toBeCleaned.size() == 1 && _thread == null ) {
-                _thread = new Thread( this::run, "SwingTree-Cleaner" );
-                _thread.start();
+            if ( _toBeCleaned.size() == 1 ) {
+                if ( _thread == null ) {
+                    _thread = new Thread(this::run, "SwingTree-Cleaner");
+                    _thread.start();
+                }
+                else
+                    _thread.notify();
             }
         }
     }
@@ -77,6 +81,11 @@ final class CustomCleaner
         while ( _thread.isAlive() ) {
             while ( !_toBeCleaned.isEmpty() ) {
                 checkCleanup();
+            }
+            try {
+                _thread.wait();
+            } catch (Exception e) {
+                log.error("Failed to make cleaner thread wait for cleaning notification!", e);
             }
         }
     }
