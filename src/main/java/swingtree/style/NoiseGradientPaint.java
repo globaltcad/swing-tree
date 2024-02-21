@@ -258,7 +258,7 @@ final class NoiseGradientPaint implements Paint
                             double currentGreen = 0;
                             double currentBlue  = 0;
                             double currentAlpha = 0;
-                            double onGradientRange;
+                            float onGradientRange;
 
                             int tileY = tileIndex / TILE_WIDTH;
                             int tileX = tileIndex % TILE_WIDTH;

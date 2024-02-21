@@ -8,56 +8,56 @@ public final class NoiseFunctions
     private NoiseFunctions(){}
 
 
-    public static double stochastic( float xIn, float yIn ) {
+    public static float stochastic( float xIn, float yIn ) {
         int kernelSize = 8;
         double sum = _coordinateToGradValue(kernelSize, xIn, yIn);
-        return (Math.sin(sum * (12.0/kernelSize)) + 1)/2;
+        return (float) ((Math.sin(sum * (12.0/kernelSize)) + 1)/2);
     }
 
-    public static double smoothTopology( float xIn, float yIn ) {
+    public static float smoothTopology( float xIn, float yIn ) {
         float scale = 6;
-        return (Math.sin(stochastic(xIn/scale, yIn/scale) * 6 * Math.PI) + 1)/2;
+        return (float) ((Math.sin(stochastic(xIn/scale, yIn/scale) * 6 * Math.PI) + 1)/2);
     }
 
-    public static double hardTopology( float xIn, float yIn ) {
+    public static float hardTopology( float xIn, float yIn ) {
         float scale = 6;
         return (stochastic(xIn/scale, yIn/scale)*6)%1;
     }
 
-    public static double hardSpots( float xIn, float yIn ) {
+    public static float hardSpots( float xIn, float yIn ) {
         float scale = 4;
         return Math.round(stochastic(xIn/scale, yIn/scale));
     }
 
-    public static double smoothSpots( float xIn, float yIn ) {
+    public static float smoothSpots( float xIn, float yIn ) {
         float scale = 6;
         int kernelSize = 6;
         double sum = _coordinateToGradValue(kernelSize, xIn/scale, yIn/scale);
-        return _sigmoid(sum * 64 / kernelSize);
+        return (float) _sigmoid(sum * 64 / kernelSize);
     }
 
-    public static double grainy(float xIn, float yIn ) {
+    public static float grainy(float xIn, float yIn ) {
         float scale = 2;
         int kernelSize = 4;
         double sum = _coordinateToGradValue(kernelSize, xIn/scale, yIn/scale);
         double stochastic = (Math.sin(sum * (12.0/kernelSize)) + 1)/2;
         // We make the smallest and largest values both the largest,
         // and the values around 0.5 become close to 0
-        return Math.abs((stochastic-0.5)*2);
+        return (float) Math.abs((stochastic-0.5)*2);
     }
 
-    public static double tiles(float xIn, float yIn ) {
+    public static float tiles(float xIn, float yIn ) {
         float scale = 10;
         int kernelSize = 8;
         double sum = _coordinateToGradTileValue(kernelSize, xIn/scale, yIn/scale);
-        return (Math.sin(sum * (12.0/kernelSize)) + 1)/2;
+        return (float) ((Math.sin(sum * (12.0/kernelSize)) + 1)/2);
     }
 
-    public static double fibery( float xIn, float yIn ) {
+    public static float fibery( float xIn, float yIn ) {
         float scale = 5;
         int kernelSize = 4;
         double sum = _coordinateToFiberValue(kernelSize, xIn/scale, yIn/scale);
-        return (Math.sin(sum * (12.0/kernelSize)) + 1)/2;
+        return (float) ((Math.sin(sum * (12.0/kernelSize)) + 1)/2);
     }
 
     private static double _sigmoid( double x ) {

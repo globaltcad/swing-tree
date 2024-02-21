@@ -23,7 +23,7 @@ final class BorderConf
                                                 Outline.none(),
                                                 Outline.none(),
                                                 null
-    );
+                                            );
 
     public static BorderConf none() { return _NONE; }
 
@@ -115,25 +115,25 @@ final class BorderConf
 
     public Optional<Color> color() { return Optional.ofNullable(_borderColor); }
 
-    BorderConf withWidths(Outline borderWidths ) {
+    BorderConf withWidths( Outline borderWidths ) {
         if ( borderWidths == _borderWidths )
             return this;
         return BorderConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, borderWidths, _margin, _padding, _borderColor);
     }
 
-    BorderConf withMargin(Outline margin ) {
+    BorderConf withMargin( Outline margin ) {
         if ( margin == _margin )
             return this;
         return BorderConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, margin, _padding, _borderColor);
     }
 
-    BorderConf withPadding(Outline padding ) {
+    BorderConf withPadding( Outline padding ) {
         if ( padding == _padding )
             return this;
         return BorderConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, padding, _borderColor);
     }
 
-    BorderConf withArcWidthAt(UI.Corner corner, double borderArcWidth ) {
+    BorderConf withArcWidthAt( UI.Corner corner, double borderArcWidth ) {
         if ( corner == UI.Corner.EVERY )
             return this.withArcWidth(borderArcWidth);
         float arcHeight;
@@ -155,14 +155,14 @@ final class BorderConf
         }
     }
 
-    BorderConf withArcWidth(double borderArcWidth ) {
+    BorderConf withArcWidth( double borderArcWidth ) {
         return this.withArcWidthAt(UI.Corner.TOP_LEFT,     borderArcWidth)
                    .withArcWidthAt(UI.Corner.TOP_RIGHT,    borderArcWidth)
                    .withArcWidthAt(UI.Corner.BOTTOM_LEFT,  borderArcWidth)
                    .withArcWidthAt(UI.Corner.BOTTOM_RIGHT, borderArcWidth);
     }
 
-    BorderConf withArcHeightAt(UI.Corner corner, double borderArcHeight ) {
+    BorderConf withArcHeightAt( UI.Corner corner, double borderArcHeight ) {
         if ( corner == UI.Corner.EVERY )
             return this.withArcHeight(borderArcHeight);
         float arcWidth;
@@ -184,14 +184,14 @@ final class BorderConf
         }
     }
 
-    BorderConf withArcHeight(double borderArcHeight ) {
+    BorderConf withArcHeight( double borderArcHeight ) {
         return this.withArcHeightAt(UI.Corner.TOP_LEFT,     borderArcHeight)
                    .withArcHeightAt(UI.Corner.TOP_RIGHT,    borderArcHeight)
                    .withArcHeightAt(UI.Corner.BOTTOM_LEFT,  borderArcHeight)
                    .withArcHeightAt(UI.Corner.BOTTOM_RIGHT, borderArcHeight);
     }
 
-    BorderConf withWidthAt(UI.Edge edge, float borderWidth ) {
+    BorderConf withWidthAt( UI.Edge edge, float borderWidth ) {
         if ( edge == UI.Edge.EVERY )
             return this.withWidth(borderWidth);
         switch (edge) {
@@ -204,14 +204,14 @@ final class BorderConf
         }
     }
 
-    BorderConf withWidth(double borderWidth ) {
+    BorderConf withWidth( double borderWidth ) {
         return this.withWidthAt(UI.Edge.TOP,    (float) borderWidth)
                    .withWidthAt(UI.Edge.RIGHT,  (float) borderWidth)
                    .withWidthAt(UI.Edge.BOTTOM, (float) borderWidth)
                    .withWidthAt(UI.Edge.LEFT,   (float) borderWidth);
     }
 
-    BorderConf withColor(Color borderColor ) {
+    BorderConf withColor( Color borderColor ) {
         return BorderConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, borderColor);
     }
 
@@ -234,7 +234,7 @@ final class BorderConf
         return hasAnyNonZeroArcs || hasAnyNonZeroWidths || hasAVisibleColor;
     }
 
-    BorderConf _scale(double scale ) {
+    BorderConf _scale( double scale ) {
         if ( scale == 1.0 )
             return this;
         else if ( this == _NONE )
@@ -318,7 +318,7 @@ final class BorderConf
         hash = 97 * hash + _borderWidths.hashCode();
         hash = 97 * hash + _margin.hashCode();
         hash = 97 * hash + _padding.hashCode();
-        hash = 97 * hash + ( _borderColor != null ? _borderColor.hashCode()    : 0 );
+        hash = 97 * hash + ( _borderColor != null ? _borderColor.hashCode() : 0 );
         return hash;
     }
 

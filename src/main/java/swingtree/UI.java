@@ -390,9 +390,25 @@ public final class UI extends UINamespaceUtilities
      */
     public enum Layer implements UIEnum<Layer>
     {
+        /**
+         *  This layer is applied through the {@link StylableComponent#paintBackground(Graphics, Runnable)} method.
+         *  When using custom components, please make sure your component implements this interface!
+         */
         BACKGROUND,
+        /**
+         *  This layer is rendered right after the background layer through the {@link Border} of a component.
+         *  Every component supports this layer.
+         */
         CONTENT,
+        /**
+         *  This layer is rendered right after the content layer through the {@link Border} of a component.
+         *  Every component supports this layer.
+         */
         BORDER,
+        /**
+         *  The foreground is painted through the {@link StylableComponent#paintForeground(Graphics, Runnable)} method.
+         *  When using custom components, please make sure your component implements this interface!
+         */
         FOREGROUND
     }
 
@@ -406,7 +422,18 @@ public final class UI extends UINamespaceUtilities
      */
     public enum GradientType implements UIEnum<GradientType>
     {
-        LINEAR, RADIAL, CONIC
+        /**
+         *  A linear gradient is a gradient that follows a straight line.
+         */
+        LINEAR,
+        /**
+         *  A radial gradient is a gradient that follows a circular pattern by growing from a central point outwards.
+         */
+        RADIAL,
+        /**
+         *  A conic gradient paints the color transition like the hands of a clock move around its center.
+         */
+        CONIC
     }
 
     /**
@@ -434,7 +461,7 @@ public final class UI extends UINamespaceUtilities
         }
 
         @Override
-        public double getFractionAt(float x, float y) {
+        public float getFractionAt(float x, float y) {
             return function.getFractionAt(x, y);
         }
     }
