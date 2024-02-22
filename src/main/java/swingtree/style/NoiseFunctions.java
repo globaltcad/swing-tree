@@ -243,6 +243,48 @@ public final class NoiseFunctions
         return sum;
     }
 
+    public static float spirals(float xIn, float yIn ) {
+        float scale = 8;
+        int kernelSize = 6;
+        double sum = _coordinateToSpiralValue(kernelSize, xIn/scale, yIn/scale);
+        return (float) _sigmoid(sum*3);
+    }
+
+    private static double _coordinateToSpiralValue(int kernelSize, float xIn, float yIn ) {
+        final int maxDistance  = kernelSize / 2;
+        final int kernelPoints = kernelSize * kernelSize;
+        final double sampleRate = 0.75;
+        double result = 0;
+        for ( int i = 0; i < kernelPoints; i++ ) {
+            final int x = i % kernelSize;
+            final int y = i / kernelSize;
+            final float xi = ( x - maxDistance ) + xIn;
+            final float yi = ( y - maxDistance ) + yIn;
+            final int rx = Math.round( xi );
+            final int ry = Math.round( yi );
+            final double vx = rx - xIn;
+            final double vy = ry - yIn;
+            final double distance = Math.sqrt( vx * vx + vy * vy );
+            final double relevance = 1.0 - distance / maxDistance;
+            if ( relevance >= 0 ) {
+                final byte score = _fastPseudoRandomByteSeedFrom( ry, rx );
+                final boolean takeSample = (255 * sampleRate - 128) < score;
+                if ( takeSample ) {
+                    final double frac = _fastPseudoRandomDoubleFrom(rx, ry) - 0.5;
+                    final double relevance2 = relevance * relevance;
+                    // We are calculating the angle between (xIn,yIn) and (rx,ry):
+                    final double angle = Math.atan2(vy, vx);
+                    int numberOfCones = 1+Math.abs(score)/25;
+                    int spiralSign = (Math.abs(score) % 2 == 0 ? 1 : -1);
+                    double angleOffset = (frac*Math.PI*numberOfCones+relevance2*6*Math.PI*spiralSign);
+                    double conePattern =  (Math.cos(angle*numberOfCones+angleOffset)/2)+0.5;
+                    result += ( conePattern * relevance2 ) + frac * relevance2;
+                }
+            }
+        }
+        return result;
+    }
+
 
     private static double _sigmoid( double x ) {
         return 1 / (1 + Math.exp(-x));

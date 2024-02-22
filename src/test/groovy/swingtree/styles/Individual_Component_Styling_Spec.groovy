@@ -2794,9 +2794,9 @@ class Individual_Component_Styling_Spec extends Specification
                              .border(2, Color.DARK_GRAY)
                              .size(120, 120)
                              .noise( conf -> conf
-                                 .colors("black", "lime", "white")
+                                 .colors("black", "white")
                                  .boundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)
-                                 .function(UI.NoiseType.STOCHASTIC)
+                                 .function(UI.NoiseType.SPIRALS)
                                  .offset(10, 15)
                              )
                          )

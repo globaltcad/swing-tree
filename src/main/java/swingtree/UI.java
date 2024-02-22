@@ -454,7 +454,8 @@ public final class UI extends UINamespaceUtilities
         FIBERS(NoiseFunctions::fibery),
         RETRO(NoiseFunctions::retro),
         CELLS(NoiseFunctions::cells),
-        HAZE(NoiseFunctions::haze);
+        HAZE(NoiseFunctions::haze),
+        SPIRALS(NoiseFunctions::spirals);
 
 
         private final NoiseFunction function;
