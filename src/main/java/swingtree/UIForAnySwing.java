@@ -3799,12 +3799,16 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     @Override
-    protected void _addComponentTo(C thisComponent, JComponent addedComponent, Object constraints) {
+    protected void _addComponentTo(
+        C          thisComponent,
+        JComponent addedComponent,
+        Object     constraints
+    ) {
         NullUtil.nullArgCheck(addedComponent, "component", JComponent.class);
         if ( constraints == null )
-            thisComponent.add(addedComponent);
+            thisComponent.add( addedComponent );
         else
-            thisComponent.add(addedComponent, constraints);
+            thisComponent.add( addedComponent, constraints );
     }
 
     /**
@@ -3848,6 +3852,16 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  be passed to the {@link LayoutManager} of the underlying {@link JComponent}.
      *  through the {@link JComponent#add(Component, Object)} method.
      *  <br><br>
+     *  This may look like this:
+     *  <pre>{@code
+     *    UI.panel()
+     *    .add("wrap", UI.label("A"), UI.label("B"))
+     *    .add("grow", UI.label("C"), UI.label("D"))
+     *  }</pre>
+     *  Note that the first argument, "wrap" and "grow" in this case, are
+     *  used as layout constraints for all the {@link JComponent}s which are added
+     *  in the subsequent arguments of a single call to this method.
+     *
      *
      * @param attr The additional mig-layout information which should be passed to the UI tree.
      * @param builders An array of builders for a corresponding number of {@link JComponent} 
@@ -3878,7 +3892,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  Use this to nest builder types into this builder to effectively plug the wrapped {@link JComponent}s
      *  into the {@link JComponent} type wrapped by this builder instance.
      *  The first argument will be passed to the {@link LayoutManager}
-     *  of the underlying {@link JComponent} to serve as layout constraints.
+     *  of the underlying {@link JComponent} to serve as layout constraints
      *  through the {@link JComponent#add(Component, Object)} method.
      *  <br><br>
      *
@@ -3890,6 +3904,8 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      */
     @SafeVarargs
     public final <B extends UIForAnySwing<?, ?>> I add( AddConstraint attr, B... builders ) {
+        Objects.requireNonNull(attr, "attr");
+        Objects.requireNonNull(builders, "builders");
         return this.add( attr.toString(), builders );
     }
 
@@ -3898,7 +3914,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  wrapped by the provided builders
      *  into the {@link JComponent} type wrapped by this builder instance.
      *  The first argument represents placement constraints for the provided components which will
-     *  be passed to the {@link MigLayout} of the underlying {@link JComponent}.
+     *  be passed to the {@link MigLayout} of the underlying {@link JComponent}
      *  through the {@link JComponent#add(Component, Object)} method.
      *  <br><br>
      *
@@ -3910,6 +3926,8 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      */
     @SafeVarargs
     public final <B extends UIForAnySwing<?, ?>> I add( CC attr, B... builders ) {
+        Objects.requireNonNull(attr, "attr");
+        Objects.requireNonNull(builders, "builders");
         return _with( thisComponent -> {
                    LayoutManager layout = thisComponent.getLayout();
                    if ( !(layout instanceof MigLayout) )
@@ -3927,6 +3945,15 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  The first argument represents layout attributes/constraints which will
      *  be applied to the subsequently provided {@link JComponent} types.
      *  <br><br>
+     *  This may look like this:
+     *  <pre>{@code
+     *    UI.panel()
+     *    .add("wrap", new JLabel("A"), new JLabel("B"))
+     *    .add("grow", new JLabel("C"), new JLabel("D"))
+     *  }</pre>
+     *  Note that the first argument, "wrap" and "grow" in this case, are
+     *  used as layout constraints for all the {@link JComponent}s which are added
+     *  in the subsequent arguments of a single call to this method.
      *
      * @param attr The additional layout information which should be passed to the UI tree.
      * @param components A {@link JComponent}s array which ought to be added to the wrapped component type.
@@ -3935,8 +3962,8 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      */
     @SafeVarargs
     public final <E extends JComponent> I add( String attr, E... components ) {
-        NullUtil.nullArgCheck(attr, "conf", Object.class);
-        NullUtil.nullArgCheck(components, "components", Object[].class);
+        NullUtil.nullArgCheck(attr, "attr", String.class);
+        NullUtil.nullArgCheck(components, "components", JComponent[].class);
         return _with( thisComponent -> {
                    _addComponentsTo( thisComponent, attr, components );
                })
