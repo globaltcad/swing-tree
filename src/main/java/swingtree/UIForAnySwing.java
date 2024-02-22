@@ -3638,9 +3638,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     /**
-     *  Use this to register a {@link Observable} event handler which will be called
-     *  on the UI thread when the {@link Observable} event is fired and irrespective of
+     *  Allows you to cause an effect inside your UI when an observable event is fired.
+     *  The provided {@link Action} event handler will be called
+     *  on the UI thread when the {@link Observable} event is fired, irrespective of
      *  what thread the {@link Observable} event is fired on.
+     *  However, it is expected that the {@link Observable} event is fired on the application thread
+     *  and <b>the concrete implementation of the {@link Observable} is intended to
+     *  be part of your view model</b>.
      *  <br><br>
      *  Here an example:
      *  <pre>{@code
@@ -3655,20 +3659,31 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  )
      *  }</pre>
      *
-     * @param noticeableEvent The {@link Observable} event to which the {@link Action} should be attached.
-     * @param action The {@link Action} which is invoked by the UI thread after the {@link Observable} event was fired.
+     * @param observableEvent The {@link Observable} event to which the {@link Action} should be attached
+     *                        and called on the UI thread when the event is fired in the view model.
+     * @param action The {@link Action} which is invoked by the UI thread after the {@link Observable} event was fired
+     *               by the business logic of the view model.
      * @return This very instance, which enables builder-style method chaining.
      * @param <E> The type of the {@link Observable} event.
      */
-    public final <E extends Observable> I onView( E noticeableEvent, Action<ComponentDelegate<C, E>> action ) {
-        return this.on(noticeableEvent, it -> _runInUI(() -> action.accept(it)));
-    }
+    public final <E extends Observable> I onView( E observableEvent, Action<ComponentDelegate<C, E>> action ) {
+        NullUtil.nullArgCheck(observableEvent, "observableEvent", Observable.class);
+        NullUtil.nullArgCheck(action, "action", Action.class);
+        return _with( thisComponent -> {
+                   observableEvent.subscribe(() -> {
+                       _runInUI(() -> action.accept(new ComponentDelegate<>(thisComponent, observableEvent )));
+                   });
+               })
+               ._this();    }
 
     /**
      *  Use this to attach a component {@link Action} event handler to a functionally supplied
-     *  {@link Observable} event.
-     *  The action is executed on the application thread when the {@link Observable} event is fired and
-     *  irrespective of the thread that {@link Observable} fired the event.
+     *  {@link Observable} event in order to implement a custom user event system.
+     *  The supplied {@link Action} is executed on the application thread when the {@link Observable} event is fired and
+     *  irrespective of the thread that {@link Observable} fired the event. <br>
+     *  The {@link Action} is expected to perform an effect on the view model or the application state,
+     *  <b>but not on the UI directly</b>. <br>
+     *  (see {@link #onView(Observable, Action)} if you want your view model to affect the UI through an observable event)
      *  <br><br>
      *  Consider the following example:
      *  <pre>{@code
@@ -3679,18 +3694,25 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  which will be called on the application thread when the touch gesture event is fired.
      *  Although neither Swing nor SwingTree have a touch gesture event system, this example illustrates
      *  how one could easily integrate a custom event system into SwingTree UIs.
+     *  <br><br>
+     *  <b>
+     *      Note that the provided {@link Observable} event is NOT expected to be part of the view model,
+     *      but rather part of a custom event system that captures user input or other input
+     *      which is not directly related to the business logic of the view model.
+     *  </b>
      *
-     * @param noticeableEvent The {@link Observable} event to which the {@link Action} should be attached.
+     * @param observableEvent The {@link Observable} event to which the {@link Action} should be attached.
      * @param action The {@link Action} which is invoked by the application thread after the {@link Observable} event was fired.
      * @return This very instance, which enables builder-style method chaining.
      * @param <E> The type of the {@link Observable} event.
+     * @see #onView(Observable, Action) for a similar method which is intended to be used with view model events.
      */
-    public final <E extends Observable> I on( E noticeableEvent, Action<ComponentDelegate<C, E>> action ) {
-        NullUtil.nullArgCheck(noticeableEvent, "noticeableEvent", Observable.class);
+    public final <E extends Observable> I on( E observableEvent, Action<ComponentDelegate<C, E>> action ) {
+        NullUtil.nullArgCheck(observableEvent, "observableEvent", Observable.class);
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
-                   noticeableEvent.subscribe(() -> {
-                       _runInApp(() -> action.accept(new ComponentDelegate<>(thisComponent, noticeableEvent )));
+                   observableEvent.subscribe(() -> {
+                       _runInApp(() -> action.accept(new ComponentDelegate<>(thisComponent, observableEvent )));
                    });
                })
                ._this();
@@ -3700,8 +3722,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  This is a logical extension of the {@link #on(Observable, Action)} method.
      *  Use this to attach a component {@link Action} event handler to a functionally supplied
      *  {@link Observable} event.
-     *  The handler will be called on the application thread when the {@link Observable} event
-     *  is fired and irrespective of the thread that fired the {@link Observable} event.
+     *  The {@link Action} will be called on the application thread when the {@link Observable} event
+     *  is fired, irrespective of the thread that fired the {@link Observable} event.
+     *  The {@link Action} is expected to perform an effect on the view model or the application state,
+     *  <b>but not on the UI directly</b>. <br>
+     *  (see {@link #onView(Observable, Action)} if you want your view model to affect the UI through an observable event)
      *  <br><br>
      *  Consider the following example:
      *  <pre>{@code
@@ -3717,14 +3742,22 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  touch gesture event handler which will be called on the application thread when the touch gesture event is fired.
      *  Although neither Swing nor SwingTree have a touch gesture event system, this example illustrates
      *  how one could easily integrate a custom event system into SwingTree UIs.
+     *  <br><br>
+     *  <b>
+     *      Note that the {@link Observable} event supplied by the function
+     *      is NOT expected to be part of the view model,
+     *      but rather be part of a custom event system that captures user input or other input
+     *      which is not directly related to the business logic of the view model.
+     *  </b>
      *
      * @param eventSource The {@link Observable} event to which the {@link Action} should be attached.
      * @param action The {@link Action} which is invoked by the application thread after the {@link Observable} event was fired.
      * @return This very instance, which enables builder-style method chaining.
      * @param <E> The type of the {@link Observable} event.
+     * @see #onView(Observable, Action) for a similar method which is intended to be used with view model events.
      */
     public final <E extends Observable> I on( Function<C, E> eventSource, Action<ComponentDelegate<C, E>> action ) {
-        NullUtil.nullArgCheck(eventSource, "noticeableEvent", Observable.class);
+        NullUtil.nullArgCheck(eventSource, "eventSource", Function.class);
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
                    E observableEvent = eventSource.apply(thisComponent);
