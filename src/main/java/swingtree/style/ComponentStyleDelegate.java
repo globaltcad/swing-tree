@@ -794,7 +794,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided background renderer.
      */
     public ComponentStyleDelegate<C> painter( UI.Layer layer, swingtree.api.Painter painter ) {
-        return _withStyle(_styleConf.painter(layer, UI.ComponentArea.BODY, StyleUtil.DEFAULT_KEY, painter));
+        return _withStyle(_styleConf.painter(layer, UI.ComponentArea.INTERIOR, StyleUtil.DEFAULT_KEY, painter));
     }
 
     /**
@@ -862,7 +862,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided background renderer.
      */
     public ComponentStyleDelegate<C> painter( UI.Layer layer, String painterName, swingtree.api.Painter painter ) {
-        return _withStyle(_styleConf.painter(layer, UI.ComponentArea.BODY, painterName, painter));
+        return _withStyle(_styleConf.painter(layer, UI.ComponentArea.INTERIOR, painterName, painter));
     }
 
     /**
