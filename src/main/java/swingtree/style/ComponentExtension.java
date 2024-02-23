@@ -19,6 +19,8 @@ import java.util.function.Supplier;
  */
 public final class ComponentExtension<C extends JComponent>
 {
+    private static long _anonymousPainterCounter = 0;
+
     /**
      * Returns the {@link ComponentExtension} associated with the given component.
      * If the component does not have an extension, a new one is created and associated with the component.
@@ -231,8 +233,19 @@ public final class ComponentExtension<C extends JComponent>
      * @param state The {@link AnimationState} which defines when the animation is active.
      * @param painter The {@link Painter} which defines how the animation is rendered.
      */
-    public void addAnimationPainter( AnimationState state, swingtree.api.Painter painter ) {
-        _styleEngine = _styleEngine.withAnimationPainter(state.lifeSpan(), Objects.requireNonNull(painter));
+    public void addAnimatedPainter(
+        AnimationState        state,
+        UI.Layer              layer,
+        UI.ComponentArea      clipArea,
+        String                painterName,
+        swingtree.api.Painter painter
+    ) {
+        if ( painterName.isEmpty() ) {
+            _anonymousPainterCounter++;
+            painterName = "anonymous-painter-"+_anonymousPainterCounter;
+        }
+        String finalPainterName = painterName;
+        _styleSource = _styleSource.withAnimationStyler(state.lifeSpan(), it -> it.painter(layer, clipArea, finalPainterName, painter));
         _styleInstaller.installCustomBorderBasedStyleAndAnimationRenderer(_owner, _styleEngine.getComponentConf().style());
         /*
             We need to install the custom SwingTree border which is used to render the animations!
@@ -245,7 +258,7 @@ public final class ComponentExtension<C extends JComponent>
      * @param state The {@link AnimationState} which defines when the animation is active.
      * @param styler The {@link Styler} which defines how the style of the component is changed during the animation.
      */
-    public void addAnimationStyler( AnimationState state, Styler<C> styler ) {
+    public void addAnimatedStyler( AnimationState state, Styler<C> styler ) {
         _styleSource = _styleSource.withAnimationStyler(state.lifeSpan(), styler);
     }
 
@@ -437,7 +450,7 @@ public final class ComponentExtension<C extends JComponent>
         g.setClip(baseClip);
     }
 
-    void paintBorderAndAnimations( Graphics2D g2d, Runnable formerBorderPainter )
+    void paintBorder( Graphics2D g2d, Runnable formerBorderPainter )
     {
         gatherApplyAndInstallStyleConfig();
 
@@ -447,8 +460,6 @@ public final class ComponentExtension<C extends JComponent>
                 g2d.setClip(_outerBaseClip);
 
             _styleEngine.paintBorder(g2d, formerBorderPainter);
-            _styleEngine.paintAnimations(g2d);
-            _styleEngine = _styleEngine.withoutExpiredAnimationPainters();
         } finally {
             g2d.setClip(former);
         }

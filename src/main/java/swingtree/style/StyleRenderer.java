@@ -91,6 +91,9 @@ final class StyleRenderer
                     AffineTransform currentTransform = new AffineTransform(g2d.getTransform());
                     Shape           currentClip      = g2d.getClip();
 
+                    // We remember if antialiasing was enabled before we render:
+                    boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
+
                     try {
                         backgroundPainter.paint(g2d);
                     } catch (Exception e) {
@@ -113,6 +116,9 @@ final class StyleRenderer
                         // We do not know what the painter did to the graphics object, so we reset it:
                         g2d.setTransform(currentTransform);
                         g2d.setClip(currentClip);
+
+                        // Reset antialiasing to its previous state:
+                        g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
                     }
                 });
             }

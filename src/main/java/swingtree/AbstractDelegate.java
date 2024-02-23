@@ -1194,7 +1194,7 @@ abstract class AbstractDelegate<C extends JComponent>
         Objects.requireNonNull(painter);
         UI.run(()->{ // This method might be called by the application thread, so we need to run on the EDT!
             // We do the rendering later in the paint method of a custom border implementation!
-            ComponentExtension.from(_component).addAnimationPainter(state, painter);
+            ComponentExtension.from(_component).addAnimatedPainter(state, UI.Layer.BORDER, UI.ComponentArea.BODY, "", painter);
         });
     }
 
@@ -1243,7 +1243,7 @@ abstract class AbstractDelegate<C extends JComponent>
         UI.run(()->{ // This method might be called by the application thread, so we need to run on the EDT!
             // We do the styling later in the paint method of a custom border implementation!
             this.animateFor(duration, unit, state ->
-                ComponentExtension.from(_component).addAnimationStyler(state, conf -> styler.style(state, conf))
+                ComponentExtension.from(_component).addAnimatedStyler(state, conf -> styler.style(state, conf))
             );
         });
     }
@@ -1293,7 +1293,7 @@ abstract class AbstractDelegate<C extends JComponent>
         UI.run(()->{ // This method might be called by the application thread, so we need to run on the EDT!
             // We do the styling later in the paint method of a custom border implementation!
             this.animateFor(lifetime, state ->
-                ComponentExtension.from(_component).addAnimationStyler(state, conf -> styler.style(state, conf))
+                ComponentExtension.from(_component).addAnimatedStyler(state, conf -> styler.style(state, conf))
             );
         });
     }
@@ -1326,7 +1326,7 @@ abstract class AbstractDelegate<C extends JComponent>
         Objects.requireNonNull(styler);
         UI.run(()->{ // This method might be called by the application thread, so we need to run on the EDT!
             // We do the styling later in the paint method of a custom border implementation!
-            ComponentExtension.from(_component).addAnimationStyler(state, styler);
+            ComponentExtension.from(_component).addAnimatedStyler(state, styler);
         });
     }
 

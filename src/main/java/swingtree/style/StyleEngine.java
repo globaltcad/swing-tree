@@ -21,7 +21,7 @@ final class StyleEngine
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(StyleEngine.class);
 
     static StyleEngine create() {
-        return new StyleEngine(BoxModelConf.none(), ComponentConf.none(), new Expirable[0], null);
+        return new StyleEngine(BoxModelConf.none(), ComponentConf.none(), null);
     }
 
     static boolean IS_ANTIALIASING_ENABLED(){
@@ -30,19 +30,16 @@ final class StyleEngine
 
     private final BoxModelConf         _boxModelConf;
     private final ComponentConf        _componentConf;
-    private final Expirable<Painter>[] _animationPainters;
     private final LayerCache[]         _layerCaches;
 
 
     private StyleEngine(
         BoxModelConf          boxModelConf,
         ComponentConf         componentConf,
-        Expirable<Painter>[]  animationPainters,
         LayerCache[]          layerCaches // Null when the style engine is freshly created
     ) {
         _boxModelConf      = Objects.requireNonNull(boxModelConf);
         _componentConf     = Objects.requireNonNull(componentConf);
-        _animationPainters = Objects.requireNonNull(animationPainters);
         if ( layerCaches == null ) {
             layerCaches = new LayerCache[UI.Layer.values().length];
             for ( int i = 0; i < layerCaches.length; i++ )
@@ -82,23 +79,11 @@ final class StyleEngine
         BoxModelConf newBoxModelConf = BoxModelConf.of(newConf.style().border(), newConf.baseOutline(), newConf.currentBounds().size());
         for ( LayerCache layerCache : _layerCaches )
             layerCache.validate(_componentConf, newConf);
-        return new StyleEngine(newBoxModelConf, newConf, _animationPainters, _layerCaches);
-    }
-
-    StyleEngine withAnimationPainter( LifeSpan lifeSpan, Painter animationPainter ) {
-        java.util.List<Expirable<Painter>> animationPainters = new ArrayList<>(Arrays.asList(_animationPainters));
-        animationPainters.add(new Expirable<>(lifeSpan, animationPainter));
-        return new StyleEngine(_boxModelConf, _componentConf, animationPainters.toArray(new Expirable[0]), _layerCaches);
+        return new StyleEngine(newBoxModelConf, newConf, _layerCaches);
     }
 
     StyleEngine withoutAnimationPainters() {
-        return new StyleEngine(_boxModelConf, _componentConf, new Expirable[0], _layerCaches);
-    }
-
-    StyleEngine withoutExpiredAnimationPainters() {
-        List<Expirable<Painter>> animationPainters = new ArrayList<>(Arrays.asList(_animationPainters));
-        animationPainters.removeIf(Expirable::isExpired);
-        return new StyleEngine(_boxModelConf, _componentConf, animationPainters.toArray(new Expirable[0]), _layerCaches);
+        return new StyleEngine(_boxModelConf, _componentConf, _layerCaches);
     }
 
     void renderBackgroundStyle( Graphics2D g2d )
@@ -111,37 +96,6 @@ final class StyleEngine
             g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
         _render(UI.Layer.BACKGROUND, g2d);
-
-        // Reset antialiasing to its previous state:
-        g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
-    }
-
-    void paintAnimations( Graphics2D g2d )
-    {
-        // We remember if antialiasing was enabled before we render:
-        boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
-
-        // We enable antialiasing:
-        if ( StyleEngine.IS_ANTIALIASING_ENABLED() )
-            g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
-
-        // Animations are last: they are rendered on top of everything else:
-        for ( Expirable<Painter> expirablePainter : _animationPainters )
-            if ( !expirablePainter.isExpired() ) {
-                try {
-                    expirablePainter.get().paint(g2d);
-                } catch ( Exception e ) {
-                    e.printStackTrace();
-                    log.warn(
-                        "Exception while painting animation '" + expirablePainter.get() + "' " +
-                        "with lifetime " + expirablePainter.getLifeSpan()+ ".",
-                        e
-                    );
-                    // An exception inside a painter should not prevent everything else from being painted!
-                    // Note that we log as warning because exceptions during rendering are not considered
-                    // as harmful as elsewhere!
-                }
-            }
 
         // Reset antialiasing to its previous state:
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );

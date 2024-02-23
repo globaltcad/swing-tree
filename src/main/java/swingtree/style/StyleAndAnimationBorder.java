@@ -66,7 +66,7 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
     public void paintBorder( Component c, Graphics g, int x, int y, int width, int height )
     {
         try {
-            _compExt.paintBorderAndAnimations((Graphics2D) g, ()->{
+            _compExt.paintBorder((Graphics2D) g, ()->{
                 if ( _canPaintFormerBorder() )
                     _paintFormerBorder(c, g, x, y, width, height);
             });

@@ -337,10 +337,10 @@ public final class AnimationState
     @Override
     public String toString() {
         return this.getClass().getSimpleName()+"[" +
-                "progress=" + progress +
-                ", repeats=" + howManyLoops +
+                "progress="   + progress +
+                ", repeats="  + howManyLoops +
                 ", lifeSpan=" + lifeSpan +
-                ", event=" + event +
+                ", event="    + event +
                 "]";
     }
 

@@ -2321,7 +2321,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     styleEvent.subscribe( ()->{
                         Animator.animateFor(styleLifeTime, thisComponent).go( state ->
                             ComponentExtension.from(thisComponent)
-                                .addAnimationStyler(state, conf -> styler.style(state, conf))
+                                .addAnimatedStyler(state, conf -> styler.style(state, conf))
                         );
                     });
                 })
