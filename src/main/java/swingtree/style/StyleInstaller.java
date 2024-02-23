@@ -115,7 +115,7 @@ final class StyleInstaller<C extends JComponent>
                                    noProperties;
 
         final boolean styleCanBeRenderedThroughBorder = (
-                                                       (noBaseStyle || !newStyle.base().hasAnyColors())  &&
+                                                       (noBaseStyle   || !newStyle.base().hasAnyColors())&&
                                                        (noShadowStyle || allShadowsAreBorderShadows)     &&
                                                        (noPainters    || allPaintersAreBorderPainters)   &&
                                                        (noGradients   || allGradientsAreBorderGradients) &&
@@ -125,7 +125,7 @@ final class StyleInstaller<C extends JComponent>
 
         Runnable backgroundSetter = ()->{};
 
-        if ( !onlyDimensionalityIsStyled && !isNotStyled || styleEngine.hasAnimationPainters() ) {
+        if ( !onlyDimensionalityIsStyled && !isNotStyled ) {
             installCustomBorderBasedStyleAndAnimationRenderer(owner, newStyle);
         } else if ( styleSource.hasNoAnimationStylers() ) {
             _uninstallCustomBorderBasedStyleAndAnimationRenderer(owner);

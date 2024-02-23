@@ -77,10 +77,6 @@ final class StyleEngine
         return Optional.ofNullable(contentClip);
     }
 
-    public boolean hasAnimationPainters() {
-        return _animationPainters.length > 0;
-    }
-
     StyleEngine withNewStyleAndComponent(StyleConf newStyle, JComponent component ) {
         ComponentConf newConf = _componentConf.with(newStyle, component);
         BoxModelConf newBoxModelConf = BoxModelConf.of(newConf.style().border(), newConf.baseOutline(), newConf.currentBounds().size());
