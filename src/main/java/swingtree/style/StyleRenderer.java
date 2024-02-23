@@ -84,7 +84,7 @@ final class StyleRenderer
                 Painter backgroundPainter = painterConf.painter();
 
                 if ( backgroundPainter == Painter.none() )
-                    break;
+                    continue;
 
                 conf.paintClippedTo( painterConf.clipArea(), g2d, () -> {
                     // We remember the current transform and clip so that we can reset them after each painter:
