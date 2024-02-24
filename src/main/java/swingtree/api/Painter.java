@@ -5,7 +5,10 @@ import swingtree.UI;
 import swingtree.animation.Animation;
 import swingtree.animation.AnimationState;
 
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Graphics2D;
+import java.awt.Insets;
+import java.awt.Rectangle;
 import java.awt.geom.RoundRectangle2D;
 import java.util.concurrent.TimeUnit;
 
@@ -34,7 +37,15 @@ import java.util.concurrent.TimeUnit;
  *      <li>{@link UI#scale(Rectangle)} - scales the given rectangle according to the current UI scale factor.</li>
  *      <li>{@link UI#scale(RoundRectangle2D)} - scales the given round rectangle according to the current UI scale factor.</li>
  *  </ul><br>
- *
+ *  <br>
+ *  Note that your custom painters will yield the best performance if they are stateless and immutable
+ *  as well has if they have a good {@link Object#hashCode()} and {@link Object#equals(Object)} implementation.
+ *  This is because it allows SwingTree to cache the rendering of the painters and avoid unnecessary repaints. <br>
+ *  <b>If you do not want to create a custom class just for painting but instead
+ *  just want to pass an immutable cache key to a painter, then consider using the
+ *  {@link #of(Object, Painter)} factory method to create a painter that has the
+ *  with {@link Object#hashCode()} and {@link Object#equals(Object)} implemented as a delegate to the data object.</b>
+ *  <p>
  *  <b>Also consider taking a look at the <br> <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
  *  where you can browse a large collection of examples demonstrating how to use the API of Swing-Tree in general.</b>
  *
@@ -42,7 +53,15 @@ import java.util.concurrent.TimeUnit;
 @FunctionalInterface
 public interface Painter
 {
+    /**
+     * @return A painter that paints nothing.
+     */
     static Painter none() { return Constants.PAINTER_NONE; }
+
+    static <D> Painter of( D data, Painter painter ) {
+        return new CachablePainter(data, painter);
+    }
+
 
     /**
      * Paints a custom style on a component using the given graphics context.
@@ -55,7 +74,7 @@ public interface Painter
      * @param after the painter to paint after this painter.
      * @return a new painter that paints this painter's style and then the given painter's style.
      */
-    default Painter andThen(Painter after) {
+    default Painter andThen( Painter after ) {
         return g2d -> {
                     try {
                         paint(g2d);
@@ -83,4 +102,5 @@ public interface Painter
                     */
                 };
     }
+
 }

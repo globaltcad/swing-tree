@@ -777,6 +777,19 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  Returns a new {@link StyleConf} with the provided custom {@link swingtree.api.Painter}, which
      *  will be called using the {@link Graphics2D} of the current component.
      *  You may use this to render a custom background for the component.
+     *  <br><br>
+     *  <b>
+     *    Note that your custom painter will yield the best performance if they are value based in the sense that
+     *    they have {@link Object#hashCode()} and {@link Object#equals(Object)} implementation which
+     *    are based on the data that the painter uses to render the component.
+     *    This is because it allows SwingTree to cache the rendering of the painters and avoid unnecessary repaints. <br>
+     *    If you do not want to create a custom class just for painting but instead
+     *    just want to pass an immutable cache key to a painter, then consider using the
+     *    {@link Painter#of(Object, Painter)} factory method to create a painter that has the
+     *    with {@link Object#hashCode()} and {@link Object#equals(Object)} implemented
+     *    based on the provided cache key.
+     *  </b>
+     *
      * @param layer The layer on which the painter should do its work.
      *              It is an enum instance which
      *              gives the painter a particular rank in the painting order.
@@ -802,6 +815,18 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  will be called using the {@link Graphics2D} of the current component.
      *  You may use this to render a custom background for the component on the specified {@link swingtree.UI.Layer}
      *  and {@link swingtree.UI.ComponentArea}.
+     *  <br><br>
+     *  <b>
+     *    Note that your custom painter will yield the best performance if they are value based in the sense that
+     *    they have {@link Object#hashCode()} and {@link Object#equals(Object)} implementation which
+     *    are based on the data that the painter uses to render the component.
+     *    This is because it allows SwingTree to cache the rendering of the painters and avoid unnecessary repaints. <br>
+     *    If you do not want to create a custom class just for painting but instead
+     *    just want to pass an immutable cache key to a painter, then consider using the
+     *    {@link Painter#of(Object, Painter)} factory method to create a painter that has the
+     *    with {@link Object#hashCode()} and {@link Object#equals(Object)} implemented
+     *    based on the provided cache key.
+     *  </b>
      * @param layer The layer on which the painter should do its work.
      *              It is an enum instance which
      *              gives the painter a particular rank in the painting order.
@@ -843,6 +868,18 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  The name can be used to override {@link swingtree.api.Painter} instances with that same name
      *  or use a unique name to ensure that you style is not overridden by another style.
      *  This allows you to attach an arbitrary number of custom painters to a component.
+     *  <br><br>
+     *  <b>
+     *    Note that your custom painter will yield the best performance if they are value based in the sense that
+     *    they have {@link Object#hashCode()} and {@link Object#equals(Object)} implementation which
+     *    are based on the data that the painter uses to render the component.
+     *    This is because it allows SwingTree to cache the rendering of the painters and avoid unnecessary repaints. <br>
+     *    If you do not want to create a custom class just for painting but instead
+     *    just want to pass an immutable cache key to a painter, then consider using the
+     *    {@link Painter#of(Object, Painter)} factory method to create a painter that has the
+     *    with {@link Object#hashCode()} and {@link Object#equals(Object)} implemented
+     *    based on the provided cache key.
+     *  </b>
      *
      * @param layer The layer on which the painter should do its work.
      *              It is an enum instance which
@@ -872,6 +909,18 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  The name can be used to override {@link swingtree.api.Painter} instances with that same name
      *  or use a unique name to ensure that you style is not overridden by another style.
      *  This allows you to attach an arbitrary number of custom painters to a component.
+     *  <br><br>
+     *  <b>
+     *    Note that your custom painter will yield the best performance if they are value based in the sense that
+     *    they have {@link Object#hashCode()} and {@link Object#equals(Object)} implementation which
+     *    are based on the data that the painter uses to render the component.
+     *    This is because it allows SwingTree to cache the rendering of the painters and avoid unnecessary repaints. <br>
+     *    If you do not want to create a custom class just for painting but instead
+     *    just want to pass an immutable cache key to a painter, then consider using the
+     *    {@link Painter#of(Object, Painter)} factory method to create a painter that has the
+     *    with {@link Object#hashCode()} and {@link Object#equals(Object)} implemented
+     *    based on the provided cache key.
+     *  </b>
      *
      * @param layer The layer on which the painter should do its work.
      *              It is an enum instance which
