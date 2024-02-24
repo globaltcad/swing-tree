@@ -103,5 +103,12 @@ class Style_Installation_Spec extends Specification
             false    | { it.painter(UI.Layer.CONTENT, "myPainter", g2d -> {}) }
             false    | { it.painter(UI.Layer.BORDER, "myPainter", g2d -> {}) }
             false    | { it.painter(UI.Layer.BORDER, "myPainter", g2d -> {}) }
+
+            true     | { it.painter(UI.Layer.BACKGROUND, UI.ComponentArea.EXTERIOR, "myPainter", g2d -> {}) }
+            false    | { it.painter(UI.Layer.FOREGROUND, UI.ComponentArea.INTERIOR, "myPainter", g2d -> {}) }
+            false    | { it.painter(UI.Layer.CONTENT, UI.ComponentArea.BORDER, "myPainter", g2d -> {}) }
+            false    | { it.painter(UI.Layer.CONTENT, UI.ComponentArea.ALL, "myPainter", g2d -> {}) }
+            false    | { it.painter(UI.Layer.BORDER, UI.ComponentArea.BODY, "myPainter", g2d -> {}) }
+            false    | { it.painter(UI.Layer.BORDER, UI.ComponentArea.BORDER, "myPainter", g2d -> {}) }
     }
 }
