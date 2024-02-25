@@ -93,6 +93,9 @@ public final class UIForSeparator<S extends JSeparator> extends UIForAnySwing<UI
     }
 
     /**
+     *  Binds the provided integer property to the length of the separation line.,
+     *  which means that whenever the property changes, the length of the separation line will be updated accordingly.
+     *
      * @param separatorLength The property dynamically determining the length of the separation line.
      * @return This very builder to allow for method chaining.
      */
