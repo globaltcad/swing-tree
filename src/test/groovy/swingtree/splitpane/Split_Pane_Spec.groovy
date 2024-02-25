@@ -34,7 +34,7 @@ class Split_Pane_Spec extends Specification
         given : 'We create a horizontally aligned split pane UI node.'
             var ui = UI.splitPane(UI.Align.HORIZONTAL)
         and : 'We actually build the component:'
-            var splitPane = ui.component
+            var splitPane = ui.get(JSplitPane)
         expect : 'The split pane is a JSplitPane.'
             splitPane instanceof JSplitPane
         and : 'The split pane is horizontally aligned b, meaning it splits vertically.'
@@ -46,7 +46,7 @@ class Split_Pane_Spec extends Specification
         given : 'We create a vertically aligned split pane UI node.'
             var ui = UI.splitPane(UI.Align.VERTICAL)
         and : 'We actually build the component:'
-            var splitPane = ui.component
+            var splitPane = ui.get(JSplitPane)
         expect : 'The split pane is a JSplitPane.'
             splitPane instanceof JSplitPane
         and : 'The split pane is vertically aligned, meaning it splits horizontally.'
@@ -65,7 +65,7 @@ class Split_Pane_Spec extends Specification
         and : 'We create a split pane UI node bound to the property.'
             var ui = UI.splitPane(alignment)
         and : 'We actually build the component:'
-            var splitPane = ui.component
+            var splitPane = ui.get(JSplitPane)
         expect : 'The split pane is a JSplitPane.'
             splitPane instanceof JSplitPane
         and : 'The split pane is horizontally aligned, meaning it splits vertically.'
@@ -92,7 +92,7 @@ class Split_Pane_Spec extends Specification
         and : 'We create a split pane UI node with a divider size of 10.'
             var ui = UI.splitPane(UI.Align.HORIZONTAL).withDividerSize(10)
         and : 'We actually build the component:'
-            var splitPane = ui.component
+            var splitPane = ui.get(JSplitPane)
         expect : 'The split pane is a JSplitPane.'
             splitPane instanceof JSplitPane
         and : 'The split pane is horizontally aligned, meaning it splits vertically.'
@@ -108,7 +108,7 @@ class Split_Pane_Spec extends Specification
         given : 'We create a split pane UI node with a divider location of 10.'
             var ui = UI.splitPane(UI.Align.HORIZONTAL).withDividerAt(10)
         and : 'We actually build the component:'
-            var splitPane = ui.component
+            var splitPane = ui.get(JSplitPane)
         expect : 'The split pane is a JSplitPane.'
             splitPane instanceof JSplitPane
         and : 'The split pane is horizontally aligned, meaning it splits vertically.'
@@ -131,7 +131,7 @@ class Split_Pane_Spec extends Specification
             var ui = UI.splitPane(UI.Align.HORIZONTAL)
                             .withDividerAt(dividerLocation)
         and : 'We actually build the component:'
-            var splitPane = ui.component
+            var splitPane = ui.get(JSplitPane)
         expect : 'The split pane exists and it is indeed a horizontally aligned split pane splitting the vertical axis.'
             splitPane instanceof JSplitPane
             splitPane.orientation == JSplitPane.VERTICAL_SPLIT
@@ -162,7 +162,7 @@ class Split_Pane_Spec extends Specification
                         .withHeight(100)
                         .withDivisionOf(0.5)
         and : 'We actually build the component:'
-            var splitPane = ui.component
+            var splitPane = ui.get(JSplitPane)
         expect : 'The split pane is a JSplitPane.'
             splitPane instanceof JSplitPane
         and : 'The split pane is horizontally aligned, meaning it splits vertically.'
@@ -191,7 +191,7 @@ class Split_Pane_Spec extends Specification
                         .withHeight(42)
                         .withDivisionOf(0.5)
         and : 'We actually build the component:'
-            var splitPane = ui.component
+            var splitPane = ui.get(JSplitPane)
         expect : 'The split pane is a JSplitPane.'
             splitPane instanceof JSplitPane
         and : 'The split pane is vertically aligned, meaning it splits horizontally.'
@@ -225,7 +225,7 @@ class Split_Pane_Spec extends Specification
                         .withDivisionOf(divisionPercentage)
 
         and : 'We actually build the component:'
-            var splitPane = ui.component
+            var splitPane = ui.get(JSplitPane)
         expect : 'The split pane exists and it is indeed a horizontally aligned split pane splitting the vertical axis.'
             splitPane instanceof JSplitPane
             splitPane.orientation == JSplitPane.VERTICAL_SPLIT
@@ -270,7 +270,7 @@ class Split_Pane_Spec extends Specification
         and : 'We create a vertically aligned split pane UI node bound to the property.'
             var ui = UI.splitPane(UI.Align.VERTICAL).withDividerSize(dividerSize)
         and : 'We actually build the component:'
-            var splitPane = ui.component
+            var splitPane = ui.get(JSplitPane)
         expect : 'The split pane exists and it is indeed a vertically aligned split pane splitting the horizontal axis.'
             splitPane instanceof JSplitPane
             splitPane.orientation == JSplitPane.HORIZONTAL_SPLIT
