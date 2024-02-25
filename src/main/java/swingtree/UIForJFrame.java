@@ -5,6 +5,12 @@ import java.awt.*;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * A declarative builder for {@link JFrame} components.
+ * Use {@link #show()} at the end of your declaration to display the {@link JFrame} window on the screen.
+ *
+ * @param <F> The type of the {@link JFrame} that this builder is responsible for.
+ */
 public final class UIForJFrame<F extends JFrame> extends UIForAnyWindow<UIForJFrame<F>, F>
 {
 	private final BuilderState<F> _state;
