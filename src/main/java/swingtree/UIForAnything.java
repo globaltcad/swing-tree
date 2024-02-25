@@ -102,26 +102,27 @@ abstract class UIForAnything<I, C extends E, E extends Component>
     }
 
     /**
-     *  Use this to build or not build UI, based on a boolean condition value and a consumer
-     *  lambda which continues the building process if the previous boolean is true.
-     *  This builder instance will simply be supplied to the provided consumer lambda.
-     *  Inside the second lambda, one can then continue building the UI while also not
+     *  Use this to only build a certain part of the UI if the provided boolean condition is true.
+     *  Which is to say, if the condition is false, then the second lambda is ignored, if
+     *  on the other hand the condition is true, then the second lambda is executed
+     *  with the current builder instance passed to it as a parameter.
+     *  Inside the lambda, one can then continue building the UI while also not
      *  breaking the benefits of nesting and method chaining provided by this builder...
      *  <p>
      *  This is in essence a more advanced version of {@link #apply(Consumer)}.
      *  <br>
      *  Here a simple usage example:
      *  <pre>{@code
-     *      UI.panel()
-     *      .applyIf( userIsLoggedIn, ui -> ui
-     *          .add( UI.label("Welcome back!") )
-     *          .add( UI.button("Logout")).onClick( () -> logout() )
-     *          .add( UI.button("Settings")).onClick( () -> showSettings() )
-     *      )
-     *      .applyIf( !userIsLoggedIn, ui -> ui
-     *          .add( UI.label("Please login to continue.") )
-     *          .add( UI.button("Login")).onClick( () -> login() );
-     *      );
+     *    UI.panel()
+     *    .applyIf( userIsLoggedIn, ui -> ui
+     *      .add( UI.label("Welcome back!") )
+     *      .add( UI.button("Logout")).onClick( () -> logout() )
+     *      .add( UI.button("Settings")).onClick( () -> showSettings() )
+     *    )
+     *    .applyIf( !userIsLoggedIn, ui -> ui
+     *      .add( UI.label("Please login to continue.") )
+     *      .add( UI.button("Login")).onClick( () -> login() );
+     *    );
      *  }</pre>
      *  Here we use theis method to build a panel
      *  with different content depending on whether the user is logged in or not.
