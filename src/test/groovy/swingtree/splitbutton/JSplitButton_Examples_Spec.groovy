@@ -67,7 +67,7 @@ class JSplitButton_Examples_Spec extends Specification
                 .add(UI.splitItem("I am the second item."))
                 .add(UI.splitItem("And I am the third."))
         and : 'We get the built split button component.'
-            var button = ui.component
+            var button = ui.get(JSplitButton)
 
         expect : 'The component wrapped by the UI builder is in fact a split button:'
             button instanceof JSplitButton
@@ -90,7 +90,7 @@ class JSplitButton_Examples_Spec extends Specification
                 .add(UI.splitItem("second"))
                 .add(UI.splitItem("third"))
         and : 'We get the built split button component.'
-            var button = ui.component
+            var button = ui.get(JSplitButton)
 
         expect : 'The split button has the correct text displayed'
             button.text == "I will be replaced!"
@@ -112,7 +112,7 @@ class JSplitButton_Examples_Spec extends Specification
                 .add(UI.splitItem("second").onSelection( it -> it.displayCurrentItemText() ))
                 .add(UI.splitItem("third"))
         and : 'We get the built split button component.'
-            var button = ui.component
+            var button = ui.get(JSplitButton)
         expect : 'The split button has the correct text displayed'
             button.text == "I may be replaced!"
 
@@ -143,7 +143,7 @@ class JSplitButton_Examples_Spec extends Specification
                 .add(UI.splitItem("second").onButtonClick( it -> it.setButtonText("text by second item") ))
                 .add(UI.splitItem("third"))
         and : 'We get the built split button component.'
-            var button = ui.component
+            var button = ui.get(JSplitButton)
         expect : 'The split button has the correct text displayed'
             button.text == "I may be replaced!"
 
@@ -176,7 +176,7 @@ class JSplitButton_Examples_Spec extends Specification
                 .add(UI.splitItem("second").makeSelected().onButtonClick( it -> it.setButtonText("2") ))
                 .add(UI.splitItem("third").onButtonClick( it -> it.setButtonText("3")) )
         and : 'We get the built split button component.'
-            var button = ui.component
+            var button = ui.get(JSplitButton)
 
         when : 'We click the button.'
             UI.runNow( () -> button.doClick() );
@@ -194,7 +194,7 @@ class JSplitButton_Examples_Spec extends Specification
                 .add(UI.splitItem("second").makeSelected().onButtonClick( it -> it.appendToButtonText(" 2") ))
                 .add(UI.splitItem("third").makeSelected().onButtonClick( it -> it.appendToButtonText(" 3") ))
         and : 'We get the built split button component.'
-            var button = ui.component
+            var button = ui.get(JSplitButton)
 
         when : 'We click the button.'
             UI.runNow( () -> button.doClick() );
@@ -216,7 +216,7 @@ class JSplitButton_Examples_Spec extends Specification
                 )
                 .add(UI.splitItem("third").makeSelected().onButtonClick( it -> it.appendToButtonText(" 3") ))
         and : 'We get the built split button component.'
-            var button = ui.component
+            var button = ui.get(JSplitButton)
 
         when : 'We click the button.'
             UI.runNow( () -> button.doClick() );
@@ -248,7 +248,7 @@ class JSplitButton_Examples_Spec extends Specification
         given : 'We create a UI builder node containing a simple split button.'
             var ui = UI.splitButton("")
         and : 'We get the built split button component.'
-            var button = ui.component
+            var button = ui.get(JSplitButton)
         expect : 'It wraps a JSplitButton.'
             button instanceof JSplitButton
 
@@ -305,7 +305,7 @@ class JSplitButton_Examples_Spec extends Specification
         and : 'We create a UI builder node for the enum states.'
             var ui = UI.splitButton(selection)
         and : 'We get the built split button component.'
-            var button = ui.component
+            var button = ui.get(JSplitButton)
 
         expect : 'It wraps a JSplitButton.'
             button instanceof JSplitButton
@@ -342,7 +342,7 @@ class JSplitButton_Examples_Spec extends Specification
         and : 'We create a UI builder node for the enum states.'
             var ui = UI.splitButton(selection, event)
         and : 'We get the built split button component.'
-            var button = ui.component
+            var button = ui.get(JSplitButton)
         expect : 'It wraps a JSplitButton.'
             button instanceof JSplitButton
         and : 'There are 3 options.'
