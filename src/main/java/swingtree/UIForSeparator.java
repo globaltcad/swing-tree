@@ -20,7 +20,7 @@ public final class UIForSeparator<S extends JSeparator> extends UIForAnySwing<UI
      * Instances of ths {@link UIForSeparator} always wrap
      * a single {@link JSeparator} for which they are responsible and expose helpful utility methods.
      *
-     * @param component The JComponent type which will be managed by this builder.
+     * @param state The state of the builder.
      */
     UIForSeparator( BuilderState<S> state ) {
         Objects.requireNonNull(state);
