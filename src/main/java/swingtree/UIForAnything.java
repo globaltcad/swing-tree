@@ -155,6 +155,8 @@ abstract class UIForAnything<I, C extends E, E extends Component>
     /**
      *  Allows you to build declarative UI conditionally,
      *  meaning that the UI is only built if the provided {@link Optional} value is present.
+     *  If the value is not present, meaning it is null, then the second lambda
+     *  (containing UI declarations relevant to the value) is simply ignored.
      *  <p>
      *  Consider the following example:
      *  <pre>{@code
