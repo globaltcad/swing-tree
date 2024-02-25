@@ -6568,7 +6568,16 @@ public final class UI extends UINamespaceUtilities
     public static void showUsing( EventProcessor eventProcessor, Function<JFrame, java.awt.Component> uiSupplier ) {
         Objects.requireNonNull( eventProcessor );
         Objects.requireNonNull( uiSupplier );
-        show(frame -> use(eventProcessor, () -> uiSupplier.apply(frame)));
+        show(frame -> use(eventProcessor, () -> {
+            try {
+                return uiSupplier.apply(frame);
+            } catch (Exception e) {
+                log.error("Error trying to create a UI component for a new JFrame.", e);
+                return panel("fill")
+                       .add("grow", label("Error: " + e.getMessage()) )
+                       .get(JPanel.class);
+            }
+        }));
     }
 
     /**
