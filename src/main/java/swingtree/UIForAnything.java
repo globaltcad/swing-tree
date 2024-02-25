@@ -196,6 +196,7 @@ abstract class UIForAnything<I, C extends E, E extends Component>
      * @param building An optional consumer lambda which simply consumes this builder node.
      * @return This very instance, which enables builder-style method chaining.
      */
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     public final I applyIfPresent( Optional<Consumer<I>> building ) {
         NullUtil.nullArgCheck(building, "building", Optional.class);
         return _with( thisComponent -> {
