@@ -1,8 +1,8 @@
 package swingtree;
 
 import sprouts.Val;
+import sprouts.Var;
 
-import javax.swing.JComponent;
 import javax.swing.JSplitPane;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -161,18 +161,35 @@ public final class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UI
         p.setDividerLocation(loc);
     }
 
+    private double _calculatePercentageFrom( P p ) {
+        return p.getOrientation() == JSplitPane.HORIZONTAL_SPLIT
+                ? (double) p.getDividerLocation() / p.getWidth()
+                : (double) p.getDividerLocation() / p.getHeight();
+    }
+
     /**
      * Sets the location of the divider based on a percentage value.
      * So if the split pane split is aligned horizontally, the divider
      * will be set to the percentage of the height of the split pane.
      * If the split pane is aligned vertically, the divider will be set
      * to the percentage of the width of the split pane.
-     * This is ultimately passed off to the
-     * look and feel implementation, and then listeners are notified. A value
+     * <p>
+     * Note that a component listener is installed to the split pane's size temporarily,
+     * so that the divider location can be calculated when the split pane is sized
+     * by the layout manager for the first time.
+     * This is because before the layout manager did its thing, there was no way to know the actual
+     * location of the divider based on the percentage.
+     * <b>
+     *     So keep in mind that changes to the divider location immediately after this
+     *     method is called will be overridden by said listener!
+     * </b>
+     * <p>
+     * A change of the divider location is ultimately passed off to the
+     * look and feel implementation, where listeners are then notified. A value
      * less than 0 implies the divider should be reset to a value that
      * attempts to honor the preferred size of the left/top component.
      * After notifying the listeners, the last divider location is updated,
-     * via <code>setLastDividerLocation</code>.
+     * via {@link JSplitPane#setLastDividerLocation(int)}.
      *
      * @param percentage A double value between 0 and 1, representing the percentage of the split pane's
      * @return This very instance, which enables builder-style method chaining.
@@ -180,27 +197,47 @@ public final class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UI
     public final UIForSplitPane<P> withDivisionOf( double percentage ) {
         return _with( thisComponent -> {
                     _calculateDividerLocationFrom(thisComponent, percentage);
+                    /*
+                        Before the layout manager did its thing, there was no way to know the actual
+                        location of the divider.
+                        So we install a listener to the split pane's size, so that we can recalculate
+                        the divider location when the split pane is resized.
+                        Then it removes itself after the first time it's called.
+                     */
+                    thisComponent.addComponentListener(new ComponentAdapter() {
+                        @Override
+                        public void componentResized( ComponentEvent e ) {
+                            _calculateDividerLocationFrom(thisComponent, percentage);
+                            thisComponent.removeComponentListener(this);
+                        }
+                    });
                 })
                 ._this();
     }
 
     /**
-     * Dynamically sets the location of the divider based on a percentage property.
-     * So if the split pane split is aligned horizontally, the divider
-     * will be set to the percentage of the height of the split pane.
-     * If the split pane is aligned vertically, the divider will be set
+     * Updates the location of the divider based on a percentage property which means
+     * that if the split pane split is aligned horizontally, the divider
+     * will be set to the percentage of the height of the split pane and
+     * if the split pane is aligned vertically, the divider will be set
      * to the percentage of the width of the split pane.
-     * This is ultimately passed off to the
-     * look and feel implementation, and then listeners are notified. A value
+     * <p>
+     * This method binds the property uni-directionally,
+     * which means that the property will be observed by the
+     * split pane, but the split pane will not change the property
+     * (see {@link #withDivisionOf(Var)} for a bidirectional variant).
+     * <p>
+     * A change of the divider location is ultimately passed off to the
+     * look and feel implementation, where listeners are then notified. A value
      * less than 0 implies the divider should be reset to a value that
      * attempts to honor the preferred size of the left/top component.
      * After notifying the listeners, the last divider location is updated,
-     * via <code>setLastDividerLocation</code>.
+     * via {@link JSplitPane#setLastDividerLocation(int)}.
      * <p>
      *     Note that the percentage is calculated based on the split pane's
      *     current size, so if the split pane is resized, the divider location
-     *     will be recalculated.
-     * <p>
+     *     will be recalculated in order to honor the percentage.
+     * </p>
      * @param percentage A property dynamically determining a double value between 0 and 1, representing the percentage of the split pane's
      * @return This very instance, which enables builder-style method chaining.
      */
@@ -220,6 +257,59 @@ public final class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UI
                         }
                     });
                     _calculateDividerLocationFrom(thisComponent, percentage.orElseThrow());
+                })
+                ._this();
+    }
+
+    /**
+     * Updates the location of the divider based on a percentage property which means
+     * that if the split pane split is aligned horizontally, the divider
+     * will be set to the percentage of the height of the split pane.
+     * If, however, the split pane is aligned vertically, then the divider will be set
+     * to the percentage of the width of the split pane.
+     * <p>
+     * Note that this binds the property to the location of the divider
+     * bidirectionally, which means that the value inside the property will be updated when the
+     * divider location is changed by the user and the divider location will be updated when the
+     * property changes in the business logic. <br>
+     * <p>
+     * A change of the divider location is ultimately passed off to the
+     * look and feel implementation, where listeners are then notified. A value
+     * less than 0 implies the divider should be reset to a value that
+     * attempts to honor the preferred size of the left/top component.
+     * After notifying the listeners, the last divider location is updated,
+     * via {@link JSplitPane#setLastDividerLocation(int)}.
+     * <p>
+     *     Note that the percentage is calculated based on the split pane's
+     *     current size, so if the split pane is resized, the divider location
+     *     will be recalculated.
+     * <p>
+     * @param percentage A property dynamically determining a double value between 0 and 1, representing the percentage of the split pane's
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final UIForSplitPane<P> withDivisionOf( Var<Double> percentage ) {
+        NullUtil.nullArgCheck( percentage, "percentage", Var.class );
+        NullUtil.nullPropertyCheck( percentage, "percentage", "Null is not a valid percentage." );
+        return _withOnShow( percentage, (thisComponent,v) -> {
+                    _calculateDividerLocationFrom(thisComponent, v);
+               })
+                ._with( thisComponent -> {
+                    _calculateDividerLocationFrom(thisComponent, percentage.orElseThrow());
+                    // Now we need to register a listener to the split pane's size, so that we can recalculate the divider location
+                    // when the split pane is resized:
+                    thisComponent.addComponentListener(new ComponentAdapter() {
+                        @Override
+                        public void componentResized( ComponentEvent e ) {
+                            _calculateDividerLocationFrom(thisComponent, percentage.orElseThrow());
+                        }
+                    });
+                    // We listen for slider movement as well, so that we can recalculate the divider location
+                    thisComponent.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY, evt -> {
+                        if ( evt.getNewValue() != null ) {
+                            double newPercentage = _calculatePercentageFrom(thisComponent);
+                            percentage.set(newPercentage);
+                        }
+                    });
                 })
                 ._this();
     }
