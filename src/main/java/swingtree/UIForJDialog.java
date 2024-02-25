@@ -38,7 +38,7 @@ public final class UIForJDialog<D extends JDialog> extends UIForAnyWindow<UIForJ
 
 	@Override
 	public void show() {
-		JDialog dialog = getComponent();
+		JDialog dialog = get(_state.componentType());
 		Component[] components = dialog.getComponents();
 		dialog.setLocationRelativeTo(null); // Initial centering!v
 		dialog.pack(); // Otherwise some components resize strangely or are not shown at all...

@@ -34,7 +34,7 @@ public final class UIForJFrame<F extends JFrame> extends UIForAnyWindow<UIForJFr
 
 	@Override
 	public void show() {
-		JFrame frame = getComponent();
+		JFrame frame = get(_state.componentType());
 		Component[] components = frame.getComponents();
 		frame.setLocationRelativeTo(null); // Initial centering!v
 		frame.pack(); // Otherwise some components resize strangely or are not shown at all...

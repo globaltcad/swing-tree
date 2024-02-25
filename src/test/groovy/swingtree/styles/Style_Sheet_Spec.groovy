@@ -93,13 +93,13 @@ class Style_Sheet_Spec extends Specification
                          }
                      }
         and : 'A few components we are going to style'
-            var button = UI.button("hi").id("unique id!")
-            var button2 = UI.button("wassup?")
-            var panel = UI.panel()
+            var button = UI.button("hi").id("unique id!").get(JButton)
+            var button2 = UI.button("wassup?").get(JButton)
+            var panel = UI.panel().get(JPanel)
         when :
-            var s1 = ss.applyTo(button.component)
-            var s2 = ss.applyTo(button2.component)
-            var s3 = ss.applyTo(panel.component)
+            var s1 = ss.applyTo(button)
+            var s2 = ss.applyTo(button2)
+            var s3 = ss.applyTo(panel)
         then :
             s1.border().topLeftArc().get() == Arc.of(3, 3)
             s1.border().topRightArc().get() == Arc.of(3, 3)

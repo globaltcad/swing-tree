@@ -271,7 +271,7 @@ class JSplitButton_Examples_Spec extends Specification
             button.popupMenu.components.length == 3
 
         when : 'We add a split radio button to the split button.'
-            button = ui.add(UI.splitRadioItem("Fourth")).component
+            button = ui.add(UI.splitRadioItem("Fourth")).get(JSplitButton)
         then : 'The split button has a popup menu with four components.'
             button.popupMenu.components.length == 4
         and :
