@@ -18,6 +18,13 @@ import java.util.Objects;
  *              which is used to paint onto the inner area of a component.
  *          </p>
  *      </li>
+ *      <li><h3>Clip Area</h3>
+ *          <p>
+ *              The clip area specifies the area of the component that the painter
+ *              should be clipped to, which means that the things painted
+ *              will only be visible within the specified area.
+ *          </p>
+ *      </li>*
  *  </ol>
  *  <p>
  *  Note that you can use the {@link #none()} method to specify that no painter should be used,
@@ -30,9 +37,9 @@ final class PainterConf
     private static final PainterConf _NONE = new PainterConf(Painter.none(), UI.ComponentArea.BODY);
 
 
-    public static PainterConf none() { return _NONE; }
+    static PainterConf none() { return _NONE; }
 
-    public static PainterConf of(Painter painter, UI.ComponentArea area ) {
+    static PainterConf of( Painter painter, UI.ComponentArea area ) {
         if ( painter == Painter.none() )
             return none();
         else
@@ -46,7 +53,7 @@ final class PainterConf
 
     private PainterConf(Painter painter, UI.ComponentArea area )
     {
-        _painter = Objects.requireNonNull(painter);
+        _painter  = Objects.requireNonNull(painter);
         _clipArea = Objects.requireNonNull(area);
     }
 
@@ -70,14 +77,19 @@ final class PainterConf
 
     @Override
     public boolean equals(Object o) {
-        if ( this == o ) return true;
-        if ( !(o instanceof PainterConf) ) return false;
+        if ( this == o )
+            return true;
+        if ( !(o instanceof PainterConf) )
+            return false;
+
         PainterConf that = (PainterConf) o;
-        return _painter == that._painter;
+
+        return _painter.equals(that._painter) &&
+               _clipArea == that._clipArea;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(_painter);
+        return Objects.hash(_painter, _clipArea);
     }
 }
