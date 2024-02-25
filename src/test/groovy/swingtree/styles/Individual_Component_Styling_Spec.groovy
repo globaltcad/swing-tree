@@ -400,9 +400,9 @@ class Individual_Component_Styling_Spec extends Specification
         and : 'We create a panel with some custom styling!'
             var panel =
                         UI.panel()
-                        .withStyle( it ->
-                            it.marginRight(42)
-                              .marginLeft(64)
+                        .withStyle( it -> it
+                            .marginRight(42)
+                            .marginLeft(64)
                         )
                         .get(JPanel)
         expect : """
@@ -664,7 +664,7 @@ class Individual_Component_Styling_Spec extends Specification
                     )
 
         when : 'We then render the panel into a BufferedImage...'
-            var image = Utility.renderSingleComponent(ui.getComponent())
+            var image = Utility.renderSingleComponent(ui.get(JPanel))
 
         then : 'The image is rendered as expected (compare with the snapshot above).'
             Utility.similarityBetween(image, "components/shaded-border-JPanel.png", 99.5) > 99.5
@@ -747,7 +747,7 @@ class Individual_Component_Styling_Spec extends Specification
                     )
 
         when : 'We render the text area into a BufferedImage.'
-            var image = Utility.renderSingleComponent(ui.getComponent())
+            var image = Utility.renderSingleComponent(ui.get(JTextArea))
 
         then : 'The image is as expected.'
             Utility.similarityBetween(image, "components/left-to-right-shaded-JTextArea.png", 99.95) > 99.95
@@ -781,7 +781,7 @@ class Individual_Component_Styling_Spec extends Specification
                     )
 
         when : 'We render the text area into a BufferedImage.'
-            var image = Utility.renderSingleComponent(ui.getComponent())
+            var image = Utility.renderSingleComponent(ui.get(JTextArea))
 
         then : 'The image is as expected.'
             Utility.similarityBetween(image, "components/sunken-JTextArea.png", 99.9) > 99.9
@@ -828,7 +828,7 @@ class Individual_Component_Styling_Spec extends Specification
                     )
 
         when : 'We render the slider into a BufferedImage.'
-            var image = Utility.renderSingleComponent(ui.getComponent())
+            var image = Utility.renderSingleComponent(ui.get(JSlider))
 
         then : 'The image is as expected.'
             Utility.similarityBetween(image, "components/soft-JSlider.png", 99.8) > 99.8
@@ -875,7 +875,7 @@ class Individual_Component_Styling_Spec extends Specification
                     )
 
         when : 'We render the bar into a BufferedImage.'
-            var image = Utility.renderSingleComponent(ui.getComponent())
+            var image = Utility.renderSingleComponent(ui.get(JProgressBar))
 
         then : 'The image is as expected.'
             Utility.similarityBetween(image, "components/soft-raised-JProgressBar.png", 99.8) > 99.8
@@ -908,7 +908,7 @@ class Individual_Component_Styling_Spec extends Specification
                     )
 
         when : 'We render the button into a BufferedImage.'
-            var image = Utility.renderSingleComponent(ui.getComponent())
+            var image = Utility.renderSingleComponent(ui.get(JButton))
 
         then : 'The image is as expected.'
             Utility.similarityBetween(image, "components/rounded-metal-JButton.png", 99.9) > 99.9
@@ -937,7 +937,7 @@ class Individual_Component_Styling_Spec extends Specification
                     )
 
         when : 'We render the panel into a BufferedImage.'
-            var image = Utility.renderSingleComponent(ui.getComponent())
+            var image = Utility.renderSingleComponent(ui.get(JPanel))
 
         then : 'The image is as expected.'
             Utility.similarityBetween(image, "components/banner-JPanel.png", 99) > 99
@@ -967,7 +967,7 @@ class Individual_Component_Styling_Spec extends Specification
                     )
 
         when : 'We render the text area into a BufferedImage.'
-            var image = Utility.renderSingleComponent(ui.getComponent())
+            var image = Utility.renderSingleComponent(ui.get(JTextArea))
 
         then : 'The image is as expected.'
             Utility.similarityBetween(image, "components/custom-font-JTextArea.png", 99.4) > 99.4
@@ -998,7 +998,7 @@ class Individual_Component_Styling_Spec extends Specification
                     )
 
         when : 'We unpack the text field.'
-            var textField = ui.getComponent()
+            var textField = ui.get(JTextField)
         then : 'The selection color is blue.'
             textField.selectionColor == Color.BLUE
 
@@ -1077,9 +1077,11 @@ class Individual_Component_Styling_Spec extends Specification
         """
         given : 'We create a SwingTree builder node using the `of`method and apply the cursor in the style API.'
             var ui = UI.of(component).withStyle( it -> it.cursor(cursor) )
+        and : 'We build the component:'
+            var comp = ui.get(JComponent)
 
         expect : 'The component indeed has the specified cursor!'
-            ui.component.cursor == cursor.toAWTCursor()
+            comp.cursor == cursor.toAWTCursor()
 
         where :
             component        | cursor
