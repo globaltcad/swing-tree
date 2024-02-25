@@ -254,19 +254,19 @@ class JSplitButton_Examples_Spec extends Specification
 
         when : 'We add a menu item to the split button.'
             ui = ui.add(new JMenuItem("First"))
-            button = ui.component
+            button = ui.get(JSplitButton)
         then : 'The split button has a popup menu with one component.'
             button.popupMenu.components.length == 1
 
         when : 'We add another menu item to the split button.'
             ui = ui.add(UI.menuItem("Second"))
-            button = ui.component
+            button = ui.get(JSplitButton)
         then : 'The split button has a popup menu with two components.'
             button.popupMenu.components.length == 2
 
         when : 'We add a split item to the split button.'
             ui = ui.add(UI.splitItem("Second"))
-            button = ui.component
+            button = ui.get(JSplitButton)
         then : 'The split button has a popup menu with three components.'
             button.popupMenu.components.length == 3
 
