@@ -5,14 +5,16 @@ import examples.mvvm.SomeSettingsView;
 import examples.mvvm.SomeSettingsViewModel;
 import swingtree.UI;
 import swingtree.UIForAnySwing;
+import swingtree.components.JBox;
 
 import javax.swing.*;
-import java.awt.*;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.InputStream;
-import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -61,7 +63,7 @@ public class Utility {
         public Query(Component current) { _current = current; }
 
         public Query(UIForAnySwing ui) {
-            this(ui.getComponent());
+            this(ui.get(ui.getType()));
         }
 
         public <C extends Component> Optional<C> find(Class<C> type, String id) {
@@ -219,7 +221,7 @@ public class Utility {
                         .add(wrongImage)
                         .add(UI.label("=|=").withFontSize(26))
                         .add(expectedImage)
-                        .getComponent()
+                        .get(JBox.class)
                     );
                     frame.pack();
                     frame.setVisible(true);

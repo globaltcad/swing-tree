@@ -1059,7 +1059,7 @@ class Individual_Component_Styling_Spec extends Specification
                     )
 
         when : 'We render the label into a BufferedImage.'
-            var image = Utility.renderSingleComponent(ui.getComponent())
+            var image = Utility.renderSingleComponent(ui.get(JLabel))
 
         then : 'The image is as expected.'
             Utility.similarityBetween(image, "components/custom-painter-JLabel.png", 99.5) > 99.5
@@ -1102,9 +1102,11 @@ class Individual_Component_Styling_Spec extends Specification
         """
         given : 'We create a SwingTree builder node using the `of`method and apply the background color in the style API.'
             var ui = UI.of(component).withStyle( it -> it.backgroundColor(color) )
+        and : 'We build the component:'
+            var comp = ui.get(JComponent)
 
         expect : 'The component indeed has the specified background color!'
-            ui.component.background == color
+            comp.background == color
 
         where :
             component        | color
@@ -1125,9 +1127,11 @@ class Individual_Component_Styling_Spec extends Specification
         """
         given : 'We create a SwingTree builder node using the `of`method and apply the foreground color in the style API.'
             var ui = UI.of(component).withStyle( it -> it.foregroundColor(color) )
+        and : 'We build the component:'
+            var comp = ui.get(JComponent)
 
         expect : 'The component indeed has the specified foreground color!'
-            ui.component.foreground == color
+            comp.foreground == color
 
         where :
             component        | color
@@ -1148,9 +1152,11 @@ class Individual_Component_Styling_Spec extends Specification
         """
         given : 'We create a SwingTree builder node using the `of`method and apply the horizontal text alignment in the style API.'
             var ui = UI.of(component).withStyle( it -> it.fontAlignment(alignment) )
+        and : 'We build the component:'
+            var comp = ui.get(JComponent)
 
         expect : 'The component indeed has the specified horizontal text alignment!'
-            ui.component.horizontalAlignment == alignment.forSwing()
+            comp.horizontalAlignment == alignment.forSwing()
 
         where :
             component               | alignment
@@ -1329,18 +1335,18 @@ class Individual_Component_Styling_Spec extends Specification
 
 
         when : 'We render the UIs into BufferedImage instances.'
-            var image1 = Utility.renderSingleComponent(ui1.getComponent())
-            var image2 = Utility.renderSingleComponent(ui2.getComponent())
-            var image3 = Utility.renderSingleComponent(ui3.getComponent())
-            var image4 = Utility.renderSingleComponent(ui4.getComponent())
-            var image5 = Utility.renderSingleComponent(ui5.getComponent())
-            var image6 = Utility.renderSingleComponent(ui6.getComponent())
-            var image7 = Utility.renderSingleComponent(ui7.getComponent())
-            var image8 = Utility.renderSingleComponent(ui8.getComponent())
-            var image9 = Utility.renderSingleComponent(ui9.getComponent())
-            var image10 = Utility.renderSingleComponent(ui10.getComponent())
-            var image11 = Utility.renderSingleComponent(ui11.getComponent())
-            var image12 = Utility.renderSingleComponent(ui12.getComponent())
+            var image1 = Utility.renderSingleComponent(ui1.get(JLabel))
+            var image2 = Utility.renderSingleComponent(ui2.get(JLabel))
+            var image3 = Utility.renderSingleComponent(ui3.get(JLabel))
+            var image4 = Utility.renderSingleComponent(ui4.get(JLabel))
+            var image5 = Utility.renderSingleComponent(ui5.get(JLabel))
+            var image6 = Utility.renderSingleComponent(ui6.get(JLabel))
+            var image7 = Utility.renderSingleComponent(ui7.get(JLabel))
+            var image8 = Utility.renderSingleComponent(ui8.get(JLabel))
+            var image9 = Utility.renderSingleComponent(ui9.get(JLabel))
+            var image10 = Utility.renderSingleComponent(ui10.get(JLabel))
+            var image11 = Utility.renderSingleComponent(ui11.get(JLabel))
+            var image12 = Utility.renderSingleComponent(ui12.get(JLabel))
             var images = new BufferedImage[] {image1, image2, image3, image4, image5, image6, image7, image8, image9, image10, image11, image12}
 
 
@@ -1578,21 +1584,21 @@ class Individual_Component_Styling_Spec extends Specification
 
 
         when : 'We render the UIs into BufferedImage instances.'
-            var image1 = Utility.renderSingleComponent(ui1.getComponent())
-            var image2 = Utility.renderSingleComponent(ui2.getComponent())
-            var image3 = Utility.renderSingleComponent(ui3.getComponent())
-            var image4 = Utility.renderSingleComponent(ui4.getComponent())
-            var image5 = Utility.renderSingleComponent(ui5.getComponent())
-            var image6 = Utility.renderSingleComponent(ui6.getComponent())
-            var image7 = Utility.renderSingleComponent(ui7.getComponent())
-            var image8 = Utility.renderSingleComponent(ui8.getComponent())
-            var image9 = Utility.renderSingleComponent(ui9.getComponent())
-            var image10 = Utility.renderSingleComponent(ui10.getComponent())
-            var image11 = Utility.renderSingleComponent(ui11.getComponent())
-            var image12 = Utility.renderSingleComponent(ui12.getComponent())
-            var image13 = Utility.renderSingleComponent(ui13.getComponent())
-            var image14 = Utility.renderSingleComponent(ui14.getComponent())
-            var image15 = Utility.renderSingleComponent(ui15.getComponent())
+            var image1 = Utility.renderSingleComponent(ui1.get(JLabel))
+            var image2 = Utility.renderSingleComponent(ui2.get(JLabel))
+            var image3 = Utility.renderSingleComponent(ui3.get(JLabel))
+            var image4 = Utility.renderSingleComponent(ui4.get(JLabel))
+            var image5 = Utility.renderSingleComponent(ui5.get(JLabel))
+            var image6 = Utility.renderSingleComponent(ui6.get(JLabel))
+            var image7 = Utility.renderSingleComponent(ui7.get(JLabel))
+            var image8 = Utility.renderSingleComponent(ui8.get(JLabel))
+            var image9 = Utility.renderSingleComponent(ui9.get(JLabel))
+            var image10 = Utility.renderSingleComponent(ui10.get(JLabel))
+            var image11 = Utility.renderSingleComponent(ui11.get(JLabel))
+            var image12 = Utility.renderSingleComponent(ui12.get(JLabel))
+            var image13 = Utility.renderSingleComponent(ui13.get(JLabel))
+            var image14 = Utility.renderSingleComponent(ui14.get(JLabel))
+            var image15 = Utility.renderSingleComponent(ui15.get(JLabel))
             var images = new BufferedImage[] {image1, image2, image3, image4, image5, image6, image7, image8, image9, image10, image11, image12, image13, image14, image15}
 
         then : 'The image is rendered as expected (compared to the snapshot above).'
@@ -1866,18 +1872,18 @@ class Individual_Component_Styling_Spec extends Specification
 
 
         when : 'We paint the UIs into BufferedImage instances.'
-            var image1  = Utility.renderSingleComponent(ui1.getComponent())
-            var image2  = Utility.renderSingleComponent(ui2.getComponent())
-            var image3  = Utility.renderSingleComponent(ui3.getComponent())
-            var image4  = Utility.renderSingleComponent(ui4.getComponent())
-            var image5  = Utility.renderSingleComponent(ui5.getComponent())
-            var image6  = Utility.renderSingleComponent(ui6.getComponent())
-            var image7  = Utility.renderSingleComponent(ui7.getComponent())
-            var image8  = Utility.renderSingleComponent(ui8.getComponent())
-            var image9  = Utility.renderSingleComponent(ui9.getComponent())
-            var image10 = Utility.renderSingleComponent(ui10.getComponent())
-            var image11 = Utility.renderSingleComponent(ui11.getComponent())
-            var image12 = Utility.renderSingleComponent(ui12.getComponent())
+            var image1  = Utility.renderSingleComponent(ui1.get(JLabel))
+            var image2  = Utility.renderSingleComponent(ui2.get(JLabel))
+            var image3  = Utility.renderSingleComponent(ui3.get(JLabel))
+            var image4  = Utility.renderSingleComponent(ui4.get(JLabel))
+            var image5  = Utility.renderSingleComponent(ui5.get(JLabel))
+            var image6  = Utility.renderSingleComponent(ui6.get(JLabel))
+            var image7  = Utility.renderSingleComponent(ui7.get(JLabel))
+            var image8  = Utility.renderSingleComponent(ui8.get(JLabel))
+            var image9  = Utility.renderSingleComponent(ui9.get(JLabel))
+            var image10 = Utility.renderSingleComponent(ui10.get(JLabel))
+            var image11 = Utility.renderSingleComponent(ui11.get(JLabel))
+            var image12 = Utility.renderSingleComponent(ui12.get(JLabel))
             var images = new BufferedImage[] {image1, image2, image3, image4, image5, image6, image7, image8, image9, image10, image11, image12}
 
 
@@ -2065,7 +2071,7 @@ class Individual_Component_Styling_Spec extends Specification
                     );
 
         expect : 'The image is as expected.'
-            Utility.similarityBetween(ui.getComponent(), "components/heavily-customized-text-field.png", 99.5) > 99.5
+            Utility.similarityBetween(ui.get(JTextField), "components/heavily-customized-text-field.png", 99.5) > 99.5
 
         where :
             uiScale << [3]
@@ -2123,7 +2129,7 @@ class Individual_Component_Styling_Spec extends Specification
                     );
 
         expect : 'The image is as expected.'
-            Utility.similarityBetween(ui.getComponent(), "components/nested-buttons.png", 99.5) > 99.5
+            Utility.similarityBetween(ui.get(JButton), "components/nested-buttons.png", 99.5) > 99.5
 
         where :
             uiScale << [1]
@@ -2205,7 +2211,7 @@ class Individual_Component_Styling_Spec extends Specification
                     )
 
         expect : 'The image is as expected.'
-            Utility.similarityBetween(ui.getComponent(), "components/font-style-inheritance.png", 99.5) > 99.5
+            Utility.similarityBetween(ui.get(JPanel), "components/font-style-inheritance.png", 99.5) > 99.5
 
         where :
             uiScale << [1]
