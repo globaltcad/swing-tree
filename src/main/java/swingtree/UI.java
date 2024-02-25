@@ -41,6 +41,7 @@ import javax.swing.table.TableColumnModel;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.RoundRectangle2D;
 import java.io.File;
 import java.net.MalformedURLException;
@@ -819,8 +820,9 @@ public final class UI extends UINamespaceUtilities
      * @return The scaled dimension.
      */
     public static Dimension scale( Dimension dimension ) {
+        Objects.requireNonNull(dimension);
         float scaleFactor = SwingTree.get().getUiScaleFactor();
-        return (dimension == null || scaleFactor == 1f)
+        return ( scaleFactor == 1f)
                 ? dimension
                 : (dimension instanceof UIResource
                     ? new DimensionUIResource( UI.scale( dimension.width ), UI.scale( dimension.height ) )
@@ -837,8 +839,9 @@ public final class UI extends UINamespaceUtilities
      * @return The scaled rectangle.
      */
     public static Rectangle scale( Rectangle rectangle ) {
+        Objects.requireNonNull(rectangle);
         float scaleFactor = SwingTree.get().getUiScaleFactor();
-        return (rectangle == null || scaleFactor == 1f)
+        return ( scaleFactor == 1f )
                 ? rectangle
                 : new Rectangle(
                         UI.scale( rectangle.x ),     UI.scale( rectangle.y ),
@@ -857,8 +860,10 @@ public final class UI extends UINamespaceUtilities
      * @return The scaled rectangle.
      */
     public static RoundRectangle2D scale( RoundRectangle2D rectangle ) {
+        Objects.requireNonNull(rectangle);
         float scaleFactor = SwingTree.get().getUiScaleFactor();
-        if ( rectangle == null || scaleFactor == 1f ) return rectangle;
+        if ( scaleFactor == 1f )
+            return rectangle;
         if ( rectangle instanceof RoundRectangle2D.Float )
             return new RoundRectangle2D.Float(
                     (float) UI.scale( rectangle.getX() ),        (float) UI.scale( rectangle.getY() ),
@@ -874,6 +879,29 @@ public final class UI extends UINamespaceUtilities
     }
 
     /**
+     *  Takes an ellipse and scales it with the user scale factor
+     *  or returns the provided ellipse if the user scale factor is 1.
+     * @param ellipse The ellipse to scale to the current UI scale factor.
+     * @return The scaled ellipse.
+     */
+    public static Ellipse2D scale( Ellipse2D ellipse ) {
+        Objects.requireNonNull(ellipse);
+        float scaleFactor = SwingTree.get().getUiScaleFactor();
+        if ( scaleFactor == 1f)
+            return ellipse;
+        if ( ellipse instanceof Ellipse2D.Float )
+            return new Ellipse2D.Float(
+                    (float) UI.scale( ellipse.getX() ), (float) UI.scale( ellipse.getY() ),
+                    (float) UI.scale( ellipse.getWidth() ), (float) UI.scale( ellipse.getHeight() )
+                );
+        else
+            return new Ellipse2D.Double(
+                    UI.scale( ellipse.getX() ), UI.scale( ellipse.getY() ),
+                    UI.scale( ellipse.getWidth() ), UI.scale( ellipse.getHeight() )
+                );
+    }
+
+    /**
      * Scales the given insets with the user scale factor.
      * <p>
      * If user scale factor is 1, then the given insets is simply returned.
@@ -884,8 +912,9 @@ public final class UI extends UINamespaceUtilities
      * @return The scaled insets.
      */
     public static Insets scale( Insets insets ) {
+        Objects.requireNonNull(insets);
         float scaleFactor = SwingTree.get().getUiScaleFactor();
-        return (insets == null || scaleFactor == 1f)
+        return ( scaleFactor == 1f )
                 ? insets
                 : (insets instanceof UIResource
                     ? new InsetsUIResource( UI.scale( insets.top ), UI.scale( insets.left ), UI.scale( insets.bottom ), UI.scale( insets.right ) )
