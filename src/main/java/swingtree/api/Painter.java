@@ -13,19 +13,38 @@ import java.awt.geom.RoundRectangle2D;
 import java.util.concurrent.TimeUnit;
 
 /**
- *  Implement this functional interface to either paint <b>custom styles on components</b>
- *  by registering painters on the style API using methods like <br>
- *  {@link swingtree.style.ComponentStyleDelegate#painter(UI.Layer, Painter)} and <br>
- *  {@link swingtree.style.ComponentStyleDelegate#painter(UI.Layer, String, Painter)} <br>
- *  or <br>
- *  for <b>defining custom animations</b> by registering painters in the animation API using the
+ *  A functional interface for doing custom painting on a component
+ *  using the {@link Graphics2D} API.
+ *  This is typically used to paint <b>custom styles on components</b> as part of the style API
+ *  exposed by {@link swingtree.UIForAnySwing#withStyle(Styler)}, like so:
+ *  <pre>{@code
+ *  UI.label("I am a label")
+ *  .withStyle( it -> it
+ *    .size(120, 50)
+ *    .padding(6)
+ *    .painter(UI.Layer.BACKGROUND, g -> {
+ *      g.setColor(Color.ORANGE);
+ *      var e = new Ellipse2D.Double(5,5,25,25);
+ *      g.fill(UI.scale(e);
+ *    })
+ *    .fontSize(12)
+ *  )
+ *  }</pre>
+ *  Which is based on the {@link swingtree.style.ComponentStyleDelegate#painter(UI.Layer, Painter)}.
+ *  You may also want to take a look at <br>
+ *  {@link swingtree.style.ComponentStyleDelegate#painter(UI.Layer, UI.ComponentArea, Painter)}, <br>
+ *  {@link swingtree.style.ComponentStyleDelegate#painter(UI.Layer, String, Painter)} and <br>
+ *  {@link swingtree.style.ComponentStyleDelegate#painter(UI.Layer, UI.ComponentArea, String, Painter)}. <br>
+ *  <br>
+ *  You can also use painter implementations
+ *  for <b>defining custom component event based animations</b> by registering through the
  *  {@link swingtree.ComponentDelegate#paint(AnimationState, Painter)} method
  *  inside of an {@link Animation} registered through
  *  {@link swingtree.ComponentDelegate#animateFor(double, TimeUnit, Animation)}.
  *  <br><br>
  *  Note that inside the painter the {@link Graphics2D} context may not
  *  be scaled according to the current UI scale factor (for high DPI displays). <br>
- *  Check out the following methods for scaling you paint operations: <br>
+ *  Check out the following methods for scaling your paint operations: <br>
  *  <ul>
  *      <li>{@link UI#scale()} - returns the current UI scale factor.</li>
  *      <li>{@link UI#scale(Graphics2D)} - scales the given graphics context according to the current UI scale factor.</li>
@@ -36,6 +55,7 @@ import java.util.concurrent.TimeUnit;
  *      <li>{@link UI#scale(Dimension)} - scales the given dimension according to the current UI scale factor.</li>
  *      <li>{@link UI#scale(Rectangle)} - scales the given rectangle according to the current UI scale factor.</li>
  *      <li>{@link UI#scale(RoundRectangle2D)} - scales the given round rectangle according to the current UI scale factor.</li>
+ *      <li>{@link UI#scale(java.awt.geom.Ellipse2D)} - scales the given ellipse according to the current UI scale factor.</li>
  *  </ul><br>
  *  <br>
  *  Note that your custom painters will yield the best performance if they are stateless and immutable
