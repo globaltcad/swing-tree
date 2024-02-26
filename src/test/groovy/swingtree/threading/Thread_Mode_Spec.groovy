@@ -45,13 +45,13 @@ class Thread_Mode_Spec extends Specification
         """
         given: 'A UI built with the decoupled thread mode.'
             var eventWasHandled = false
-            var node =
+            var ui =
                     UI.use(EventProcessor.DECOUPLED,
                         ()-> UI.button("Click Me")
                                 .onClick({ eventWasHandled = true })
                     )
         when: 'We click the button.'
-            UI.runNow(()->node.component.doClick())
+            UI.runNow(()->ui.get(JButton).doClick())
         then: 'The event is queued up, waiting to be handled.'
             !eventWasHandled
 
@@ -77,13 +77,15 @@ class Thread_Mode_Spec extends Specification
         """
         given: 'A UI built with the coupled thread mode.'
             var eventWasHandled = false
-            var node =
+            var ui =
                     UI.use(EventProcessor.COUPLED, ()->
                         UI.button("Click Me")
                         .onClick({ eventWasHandled = true })
                     )
+        and : 'Then we build the component.'
+            var button = ui.get(JButton)
         when: 'We click the button.'
-            node.component.doClick()
+            button.doClick()
         then: 'The event is handled immediately by the swing thread.'
             eventWasHandled
     }
@@ -110,7 +112,7 @@ class Thread_Mode_Spec extends Specification
                         UI.button("X").onClick(safeAccess)
                     )
         when : 'We click the button and process the event queue (by this current non-swing thread).'
-            UI.runNow( () -> ui1.component.doClick() )
+            UI.runNow( () -> ui1.get(JButton).doClick() )
             EventProcessor.DECOUPLED.joinUntilDoneOrException() // This is done by a custom thread in a real world application.
 
         then: 'The delegate throws an exception!'
@@ -118,7 +120,7 @@ class Thread_Mode_Spec extends Specification
             e.message.contains(problem)
 
         when : 'We click the button second button and then process the event queue (by this current non-swing thread).'
-            UI.runNow( () -> ui2.component.doClick() )
+            UI.runNow( () -> ui2.get(JButton).doClick() )
             EventProcessor.DECOUPLED.joinUntilDoneOrException() // This is done by a custom thread in a real world application.
         then: 'The delegate does not throw an exception!'
             noExceptionThrown()
@@ -144,7 +146,7 @@ class Thread_Mode_Spec extends Specification
                         })
                     )
         when : 'We check the check box and process the event queue (by this current non-swing thread).'
-            UI.runNow( () -> ui.component.doClick() )
+            UI.runNow( () -> ui.get(JCheckBox).doClick() )
             EventProcessor.DECOUPLED.joinFor(1) // This is done by a custom thread in a real world application.
         then: 'The delegate does not throw an exception!'
             noExceptionThrown()
@@ -160,7 +162,7 @@ class Thread_Mode_Spec extends Specification
         given : 'A UI built with the decoupled thread mode:'
             var ui = UI.use(EventProcessor.DECOUPLED, ()-> UI.panel())
         when : 'We try to access the component by this current non-swing thread.'
-            ui.get(JPanel)
+            var panel = ui.get(JPanel)
         then: 'An exception is thrown!'
             var e = thrown(Exception)
             e.message == "This UI is configured to be decoupled from the application thread, " +
@@ -168,9 +170,9 @@ class Thread_Mode_Spec extends Specification
                          "Please use 'UI.run(()->...)' method to execute your modifications on the EDT."
 
         when : 'We want to still access the component from this current non-swing thread, we can use the "UI.run(()->{..})" method.'
-            UI.run(()-> ui.component )
+            UI.run(()-> ui.get(JPanel) )
         and : 'Alternatively we can also use "UI.runAndGet(()->{..})".'
-            var panel = UI.runAndGet(()-> ui.component )
+            panel = UI.runAndGet(()-> ui.get(JPanel) )
             panel.updateUI()
         then: 'No exception is thrown!'
             noExceptionThrown()

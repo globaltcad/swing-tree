@@ -8,6 +8,7 @@ import spock.lang.Title
 import swingtree.UI
 import swingtree.api.Layout
 
+import javax.swing.JPanel
 import java.awt.*
 
 @Title("Layout Styling")
@@ -44,8 +45,8 @@ class Layout_Styling extends Specification
                             .alignmentY(0.73f)
                         )
                     )
-        and : 'We unpack the Swing tree:'
-            var panel = ui.component
+        and : 'We build the root component of the SwingTree declaration and unpack the first sub-component:'
+            var panel = ui.get(JPanel)
             var button = panel.getComponent(0)
 
         expect : 'The alignment values of the button are set to the values we specified in the styling API:'
@@ -81,7 +82,7 @@ class Layout_Styling extends Specification
                         )
                     )
         and : 'We unpack the Swing tree:'
-            var panel = ui.component
+            var panel = ui.get(JPanel)
             var button = panel.getComponent(0)
 
         expect : 'The layout manager of the panel is a MigLayout manager:'
@@ -114,7 +115,7 @@ class Layout_Styling extends Specification
                         )
                     )
         and : 'We unpack the Swing tree:'
-            var panel = ui.component
+            var panel = ui.get(JPanel)
             var button = panel.getComponent(0)
 
         expect : 'The layout manager of the panel is a FlowLayout manager:'
@@ -156,7 +157,7 @@ class Layout_Styling extends Specification
                         )
                     )
         and : 'We unpack the Swing tree:'
-            var panel = ui.component
+            var panel = ui.get(JPanel)
             var slider = panel.getComponent(0)
             var textArea = panel.getComponent(1)
             var button = panel.getComponent(2)
@@ -188,7 +189,7 @@ class Layout_Styling extends Specification
                         UI.button()
                     )
         and : 'We unpack the Swing tree:'
-            var panel = ui.component
+            var panel = ui.get(JPanel)
 
         expect : 'The layout manager of the panel is null:'
             panel.layout == null
@@ -225,7 +226,7 @@ class Layout_Styling extends Specification
                     )
 
         and : 'We unpack the Swing tree:'
-            var panel = ui.component
+            var panel = ui.get(JPanel)
             var menuItem1 = panel.getComponent(0)
             var menuItem2 = panel.getComponent(1)
             var menuItem3 = panel.getComponent(2)

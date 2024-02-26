@@ -93,13 +93,13 @@ class Style_Sheet_Spec extends Specification
                          }
                      }
         and : 'A few components we are going to style'
-            var button = UI.button("hi").id("unique id!")
-            var button2 = UI.button("wassup?")
-            var panel = UI.panel()
+            var button = UI.button("hi").id("unique id!").get(JButton)
+            var button2 = UI.button("wassup?").get(JButton)
+            var panel = UI.panel().get(JPanel)
         when :
-            var s1 = ss.applyTo(button.component)
-            var s2 = ss.applyTo(button2.component)
-            var s3 = ss.applyTo(panel.component)
+            var s1 = ss.applyTo(button)
+            var s2 = ss.applyTo(button2)
+            var s3 = ss.applyTo(panel)
         then :
             s1.border().topLeftArc().get() == Arc.of(3, 3)
             s1.border().topRightArc().get() == Arc.of(3, 3)
@@ -249,11 +249,14 @@ class Style_Sheet_Spec extends Specification
                          }
                      }
         and : 'A few components we are going to style'
-            var textField = UI.textField("hi").group("group1")
-            var textArea = UI.textArea("wassup?").group("group2")
+            var ui1 = UI.textField("hi").group("group1")
+            var ui2 = UI.textArea("wassup?").group("group2")
+        and : 'We build the components:'
+            var textField = ui1.get(JTextField)
+            var textArea = ui2.get(JTextArea)
         when : 'We run them all through the style sheet...'
-            var s1 = ss.applyTo(textField.component)
-            var s2 = ss.applyTo(textArea.component)
+            var s1 = ss.applyTo(textField)
+            var s2 = ss.applyTo(textArea)
         then : 'We can indeed verify that style 2 inherits from style 1.'
             s1.padding() == Outline.of(1, 2, 3, 4)
             s2.padding() == Outline.of(1, 2, 3, 4)
@@ -381,17 +384,17 @@ class Style_Sheet_Spec extends Specification
                          }
                      }
         when : 'We create a few UI components:'
-            var slider1 = UI.slider(UI.Align.HORIZONTAL).group("A", "B")
-            var slider2 = UI.slider(UI.Align.HORIZONTAL).group("A")
-            var slider3 = UI.slider(UI.Align.HORIZONTAL).group("B")
-            var label1 = UI.label(":)").group("A")
-            var label2 = UI.label(":D").group("B")
+            var slider1 = UI.slider(UI.Align.HORIZONTAL).group("A", "B").get(JSlider)
+            var slider2 = UI.slider(UI.Align.HORIZONTAL).group("A").get(JSlider)
+            var slider3 = UI.slider(UI.Align.HORIZONTAL).group("B").get(JSlider)
+            var label1 = UI.label(":)").group("A").get(JLabel)
+            var label2 = UI.label(":D").group("B").get(JLabel)
         and : 'We run them through the style sheet...'
-            var s1 = ss.applyTo(slider1.component)
-            var s2 = ss.applyTo(slider2.component)
-            var s3 = ss.applyTo(slider3.component)
-            var s4 = ss.applyTo(label1.component)
-            var s5 = ss.applyTo(label2.component)
+            var s1 = ss.applyTo(slider1)
+            var s2 = ss.applyTo(slider2)
+            var s3 = ss.applyTo(slider3)
+            var s4 = ss.applyTo(label1)
+            var s5 = ss.applyTo(label2)
         then : '...and we check the results'
             s1.base().foundationColor().get() == Color.BLUE
             s1.border().widths().top().get() == 11
@@ -491,17 +494,17 @@ class Style_Sheet_Spec extends Specification
                 }
             }
         and : 'We create a few UI components:'
-            var label1 = UI.label(":)").group("A")
-            var label2 = UI.label(":D").group("B")
-            var label3 = UI.label(":(") // No group
-            var textField = UI.textField().group("A")
-            var textArea = UI.textArea("").group("B")
+            var label1 = UI.label(":)").group("A").get(JLabel)
+            var label2 = UI.label(":D").group("B").get(JLabel)
+            var label3 = UI.label(":(").get(JLabel) // No group
+            var textField = UI.textField().group("A").get(JTextField)
+            var textArea = UI.textArea("").group("B").get(JTextArea)
         when : 'We run them through the style sheet...'
-            var s1 = ss.applyTo(label1.component)
-            var s2 = ss.applyTo(label2.component)
-            var s3 = ss.applyTo(label3.component)
-            var s4 = ss.applyTo(textField.component)
-            var s5 = ss.applyTo(textArea.component)
+            var s1 = ss.applyTo(label1)
+            var s2 = ss.applyTo(label2)
+            var s3 = ss.applyTo(label3)
+            var s4 = ss.applyTo(textField)
+            var s5 = ss.applyTo(textArea)
         then : '...and we check the results'
             s1.font().family() == "Arial"
             s1.font().size() == 12
@@ -552,11 +555,11 @@ class Style_Sheet_Spec extends Specification
                 }
             }
         when : 'We create a few UI components:'
-            var label1 = UI.label(":)").group("Gradient")
-            var label2 = UI.label(":D").group("ChessBoard")
+            var label1 = UI.label(":)").group("Gradient").get(JLabel)
+            var label2 = UI.label(":D").group("ChessBoard").get(JLabel)
         and : 'We run them through the style sheet...'
-            var s1 = ss.applyTo(label1.component)
-            var s2 = ss.applyTo(label2.component)
+            var s1 = ss.applyTo(label1)
+            var s2 = ss.applyTo(label2)
         then : '...and we check the results'
             s1.hasPaintersOnLayer(UI.Layer.BACKGROUND)
             s1.painters(UI.Layer.BACKGROUND).size() == 1
@@ -614,9 +617,9 @@ class Style_Sheet_Spec extends Specification
                 }
             }
         when : 'We create a single UI component using style group "A":'
-            var label = UI.label(":)").group("A")
+            var label = UI.label(":)").group("A").get(JLabel)
         and : 'We run it through the style sheet...'
-            var s = ss.applyTo(label.component)
+            var s = ss.applyTo(label)
         then : '...and we check the results'
             s.border().widths().top().get() == 10
             s.border().widths().left().get() == 10
@@ -699,9 +702,9 @@ class Style_Sheet_Spec extends Specification
                 }
             }
         when : 'We create a single UI component using style group "A":'
-            var button = UI.toggleButton(":)").group("A")
+            var button = UI.toggleButton(":)").group("A").get(JToggleButton)
         and : 'We run it through the style sheet...'
-            var s = ss.applyTo(button.component)
+            var s = ss.applyTo(button)
         then : '...and we check the results'
             s.border().widths().top().get() == 5
             s.border().widths().left().get() == 5

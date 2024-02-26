@@ -3,6 +3,7 @@ package examples;
 import swingtree.UI;
 
 import javax.imageio.ImageIO;
+import javax.swing.JPanel;
 import java.awt.*;
 import java.io.IOException;
 
@@ -85,7 +86,7 @@ public final class FancyTextField extends TextField
             .add(GROW_X,
                 UI.of(new FancyTextField()).withMaxWidth(80)
             )
-            .getComponent()
+            .get(JPanel.class)
         );
     }
 }
