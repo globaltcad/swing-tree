@@ -83,7 +83,7 @@ public class SomeComponentsView extends Panel
 				comboBox("A", "B", "C").isEditableIf(true)
 			)
 			.add(GROW,
-				UI.comboBoxWithUnmodifiable("X", "Y", "Z").isEditableIf(true)
+				comboBoxWithUnmodifiable("X", "Y", "Z").isEditableIf(true)
 			)
 			.add(GROW,
 				comboBoxWithUnmodifiable(1, 2, 4, 6, 8, 12, 16)
@@ -96,11 +96,11 @@ public class SomeComponentsView extends Panel
 					cb.setComponentPopupMenu(new JPopupMenu());
 					for (String currentDeviceFile : new String[]{"A", "B", "C"})
 						cb.getComponentPopupMenu().add(
-							UI.radioButton(currentDeviceFile)
+							radioButton(currentDeviceFile)
 							.onClick(it -> {
 
 							})
-							.getComponent()
+							.get(JRadioButton.class)
 						);
 					makeComboBoxStayOpen(cb);
 				})

@@ -39,7 +39,7 @@ class Declarative_Tables_Spec extends Specification
             var ui =
                     UI.table(UI.MapData.EDITABLE, { ["X":["a", "b", "c"], "Y":["1", "2", "3"]] })
         and : 'We actually build the component:'
-            var table = ui.component
+            var table = ui.get(JTable)
 
         expect : 'The table UI has the following state:'
             table.getColumnName(0) == "X"
@@ -60,7 +60,7 @@ class Declarative_Tables_Spec extends Specification
         given :
             var ui = UI.table(UI.ListData.COLUMN_MAJOR_EDITABLE, { [["a", "b", "c"], ["x", "y", "z"]] })
         and : 'We actually build the component:'
-            var table = ui.component
+            var table = ui.get(JTable)
 
         expect : 'The table UI has the following state:'
             table.getColumnName(0) == "A" // default column names

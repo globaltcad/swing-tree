@@ -1,10 +1,10 @@
 package swingtree.splitbutton
 
+import spock.lang.Specification
 import swingtree.SwingTree
+import swingtree.UI
 import swingtree.components.JSplitButton
 import swingtree.threading.EventProcessor
-import swingtree.UI
-import spock.lang.Specification
 
 class JSplitButton_Exception_Spec extends Specification
 {
@@ -24,7 +24,7 @@ class JSplitButton_Exception_Spec extends Specification
         given : 'We create a UI builder node containing a simple split button.'
             var ui = UI.splitButton("")
         expect : 'It wraps a JSplitButton.'
-            ui.component instanceof JSplitButton
+            ui.get(JSplitButton) instanceof JSplitButton
 
         when :
             ui.onSplitClick(null)

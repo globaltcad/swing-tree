@@ -102,8 +102,10 @@ class Panel_Spec extends Specification
     {
         given : 'We create a panel...'
             def ui = UI.panel()
+        and : 'We build the panel:'
+            def panel = ui.get(JPanel)
         expect : 'The panel has a MigLayout.'
-            ui.component.layout instanceof MigLayout
+            panel.layout instanceof MigLayout
     }
 
     def 'Panels can be nested using the `add(..) method.'()

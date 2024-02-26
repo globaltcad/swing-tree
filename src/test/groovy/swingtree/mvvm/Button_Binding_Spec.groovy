@@ -11,6 +11,7 @@ import spock.lang.Title
 
 import javax.swing.ButtonGroup
 import javax.swing.JButton
+import javax.swing.JRadioButton
 
 
 @Title("Button Binding")
@@ -130,9 +131,9 @@ class Button_Binding_Spec extends Specification
             var ui2 = UI.radioButton("2").withButtonGroup(buttonGroup).isSelectedIf(selected2)
             var ui3 = UI.radioButton("3").withButtonGroup(buttonGroup).isSelectedIf(selected3)
         and : 'We create the three buttons:'
-            var button1 = ui1.component
-            var button2 = ui2.component
-            var button3 = ui3.component
+            var button1 = ui1.get(JRadioButton)
+            var button2 = ui2.get(JRadioButton)
+            var button3 = ui3.get(JRadioButton)
 
         when : 'We select the first radio button...'
             button1.selected = true

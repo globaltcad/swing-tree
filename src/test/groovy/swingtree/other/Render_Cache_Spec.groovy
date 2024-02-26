@@ -157,7 +157,7 @@ class Render_Cache_Spec extends Specification
                             .borderRadius(40)
                             .foundationColor(Color.GREEN)
                         )
-                        .getComponent()
+                        .get(JButton)
                     )
                     .getConf();
         and : 'And we revalidate the cache...'

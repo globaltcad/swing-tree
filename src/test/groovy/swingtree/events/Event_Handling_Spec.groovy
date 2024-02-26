@@ -10,6 +10,7 @@ import swingtree.UI
 import swingtree.threading.EventProcessor
 
 import javax.swing.JButton
+import javax.swing.JComboBox
 import javax.swing.JFormattedTextField
 import javax.swing.JPanel
 import javax.swing.JRadioButton
@@ -251,9 +252,11 @@ class Event_Handling_Spec extends Specification
                     .onSelection( it -> trace.add("5") )
                     .onSelection( it -> trace.add("6") )
                     .onSelection( it -> trace.add("7") )
+        and : 'We build the combo box:'
+            var comboBox = ui.get(JComboBox)
 
         when : 'An item is selected in the combo box.'
-            ui.component.setSelectedIndex(1)
+            comboBox.setSelectedIndex(1)
             UI.sync()
 
         then : 'The handlers are triggered in the same order as they were registered.'

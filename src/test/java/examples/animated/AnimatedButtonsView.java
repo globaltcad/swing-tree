@@ -6,6 +6,7 @@ import swingtree.animation.Animation;
 import swingtree.animation.AnimationState;
 
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -130,7 +131,7 @@ public class AnimatedButtonsView extends Panel
             panel(FILL.and(WRAP(1)))
             .add(
                 button("I pop when you hover over me").apply( ui -> {
-                    Dimension prefSize = ui.getComponent().getPreferredSize();
+                    Dimension prefSize = ui.get(JButton.class).getPreferredSize();
                     ui.onMouseEnter(it -> it.animateFor(0.2, TimeUnit.SECONDS, state -> {
                         int bump = (int) (state.pulse() * 15);
                         it.setPrefSize(prefSize.width + bump, prefSize.height + bump);
@@ -139,7 +140,7 @@ public class AnimatedButtonsView extends Panel
             )
             .add(
                 button("I swell when you hover over me").apply( ui -> {
-                    Dimension prefSize = ui.getComponent().getPreferredSize();
+                    Dimension prefSize = ui.get(JButton.class).getPreferredSize();
                     ui.onMouseEnter( it -> it.animateFor(0.2, TimeUnit.SECONDS, state -> {
                         int bump = (int) (state.progress() * 15);
                         it.setPrefSize(prefSize.width + bump, prefSize.height + bump);
@@ -153,7 +154,7 @@ public class AnimatedButtonsView extends Panel
             .add(
                 button("I shrink when you hover hover me")
                 .apply( ui -> {
-                    Dimension prefSize = ui.getComponent().getPreferredSize();
+                    Dimension prefSize = ui.get(JButton.class).getPreferredSize();
                     ui.withPrefSize(prefSize.width + 15, prefSize.height + 15);
                     ui.onMouseEnter( it -> it.animateFor(0.2, TimeUnit.SECONDS, state -> {
                         int bump = (int) ((1-state.progress()) * 15);
@@ -168,7 +169,7 @@ public class AnimatedButtonsView extends Panel
             .add(
                 button("My text grows when you hover over me")
                 .apply( ui -> {
-                    Font f = ui.getComponent().getFont();
+                    Font f = ui.get(JButton.class).getFont();
                     ui.onMouseEnter( it -> it.animateFor(0.2, TimeUnit.SECONDS, state -> {
                         float scale = (float) (1 + state.progress() * 0.5);
                         AffineTransform at = AffineTransform.getScaleInstance(scale, scale);
