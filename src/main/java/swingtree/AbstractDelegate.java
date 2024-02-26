@@ -1192,9 +1192,45 @@ abstract class AbstractDelegate<C extends JComponent>
     public final void paint( AnimationState state, Painter painter ) {
         Objects.requireNonNull(state);
         Objects.requireNonNull(painter);
+        paint(UI.ComponentArea.BODY, state, painter);
+    }
+
+    /**
+     *  A common use case is to render something on top of the component
+     *  using the {@link Graphics2D} instance of the component.
+     *  This method allows you to attach a paint task to the component, which
+     *  the EDT will process in the next repaint event cycle, and remove when the animation expires.
+     *  This ensures that custom rendering
+     *  is not erased by a potential repaint of the component after a user event. <br>
+     *  Additionally, you can specify the area of the component which should be painted.
+     *  <p>
+     *  Here is an example of how to use this method as part of a button animation:
+     *  <pre>{@code
+     *      UI.button("Click me").withPrefSize(400, 400)
+     *      .onMouseClick( it -> it.animateFor(2, TimeUnit.SECONDS, state -> {
+     *          double r = 300 * state.progress() * it.scale();
+     *          double x = it.mouseX() - r / 2;
+     *          double y = it.mouseY() - r / 2;
+     *          it.paint(UI.ComponentArea.BORDER, state, g -> {
+     *              g.setColor(new Color(1f, 1f, 0f, (float) (1 - state.progress())));
+     *              g.fillOval((int) x, (int) y, (int) r, (int) r);
+     *          });
+     *      }))
+     *  }</pre>
+     *  You may also be interested in doing style animations, if so, maybe consider taking a look at
+     *  {@link UIForAnySwing#withTransitoryStyle(Event, LifeTime, AnimatedStyler)} to see how to do event based styling animations
+     *  and {@link UIForAnySwing#withTransitionalStyle(Val, LifeTime, AnimatedStyler)} to see how to do 2 state switch based styling animations.
+     *
+     * @param area The area of the component which should be painted.
+     * @param state The current animation state, which is important so that the rendering can be synchronized with the animation.
+     * @param painter The rendering task which should be executed on the EDT at the end of the current event cycle.
+     */
+    public final void paint( UI.ComponentArea area, AnimationState state, Painter painter ) {
+        Objects.requireNonNull(state);
+        Objects.requireNonNull(painter);
         UI.run(()->{ // This method might be called by the application thread, so we need to run on the EDT!
             // We do the rendering later in the paint method of a custom border implementation!
-            ComponentExtension.from(_component).addAnimatedPainter(state, UI.Layer.BORDER, UI.ComponentArea.BODY, "", painter);
+            ComponentExtension.from(_component).addAnimatedPainter(state, UI.Layer.BORDER, area, "", painter);
         });
     }
 
