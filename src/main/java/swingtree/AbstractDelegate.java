@@ -1230,7 +1230,7 @@ abstract class AbstractDelegate<C extends JComponent>
         Objects.requireNonNull(painter);
         UI.run(()->{ // This method might be called by the application thread, so we need to run on the EDT!
             // We do the rendering later in the paint method of a custom border implementation!
-            ComponentExtension.from(_component).addAnimatedPainter(state, UI.Layer.BORDER, area, "", painter);
+            ComponentExtension.from(_component).addAnimatedPainter(state, UI.Layer.BORDER, area, painter);
         });
     }
 

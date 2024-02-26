@@ -231,21 +231,19 @@ public final class ComponentExtension<C extends JComponent>
      *  Use this to add a {@link Painter} based animation to the component.
      *
      * @param state The {@link AnimationState} which defines when the animation is active.
+     * @param layer The {@link UI.Layer} which defines the layer on which the animation is rendered.
+     * @param clipArea The {@link UI.ComponentArea} which defines the area of the component which is animated.
      * @param painter The {@link Painter} which defines how the animation is rendered.
      */
     public void addAnimatedPainter(
         AnimationState        state,
         UI.Layer              layer,
         UI.ComponentArea      clipArea,
-        String                painterName,
         swingtree.api.Painter painter
     ) {
-        if ( painterName.isEmpty() ) {
-            _anonymousPainterCounter++;
-            painterName = "anonymous-painter-"+_anonymousPainterCounter;
-        }
-        String finalPainterName = painterName;
-        _styleSource = _styleSource.withAnimationStyler(state.lifeSpan(), it -> it.painter(layer, clipArea, finalPainterName, painter));
+        _anonymousPainterCounter++;
+        String painterName = "anonymous-painter-"+_anonymousPainterCounter;
+        _styleSource = _styleSource.withAnimationStyler(state.lifeSpan(), it -> it.painter(layer, clipArea, painterName, painter));
         _styleInstaller.installCustomBorderBasedStyleAndAnimationRenderer(_owner, _styleEngine.getComponentConf().style());
         /*
             We need to install the custom SwingTree border which is used to render the animations!
