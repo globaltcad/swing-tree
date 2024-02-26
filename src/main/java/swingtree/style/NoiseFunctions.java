@@ -285,6 +285,22 @@ public final class NoiseFunctions
         return result;
     }
 
+    public static float mandelbrot( float xIn, float yIn ) {
+        final int MAX_ITERATIONS = 5000;
+        double x = xIn/100.0;
+        double y = yIn/100.0;
+        double ix = 0;
+        double iy = 0;
+        int iteration = 0;
+        while (ix * ix + iy * iy < 4 && iteration < MAX_ITERATIONS) {
+            double xtemp = ix * ix - iy * iy + x;
+            iy = 2 * ix * iy + y;
+            ix = xtemp;
+            iteration++;
+        }
+        return (float) (1 - Math.log(iteration) / Math.log(MAX_ITERATIONS));
+    }
+
 
     private static double _sigmoid( double x ) {
         return 1 / (1 + Math.exp(-x));
