@@ -44,8 +44,8 @@ dependencies {
     testImplementation platform('org.spockframework:spock-bom:2.1-groovy-3.0')
     testImplementation 'org.spockframework:spock-core:2.1-groovy-3.0'
     testImplementation 'com.athaydes:spock-reports:2.3.2-groovy-3.0'
-    testImplementation 'org.slf4j:slf4j-api:1.7.30'
-    testImplementation 'org.slf4j:slf4j-simple:1.7.30'
+    testImplementation 'org.slf4j:slf4j-api:1.7.36'
+    testImplementation 'org.slf4j:slf4j-simple:1.7.36'
 
     testRuntimeOnly group: 'net.bytebuddy', name: 'byte-buddy', version: '1.11.15' // allows mocking of classes (in addition to interfaces)
     testRuntimeOnly group: 'org.objenesis', name: 'objenesis',  version: '3.2'     // allows mocking of classes without default constructor (together with ByteBuddy or CGLIB)
