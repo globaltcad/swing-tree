@@ -36,7 +36,8 @@ dependencies {
     api group: 'com.github.weisj',     name: 'jsvg',            version: '1.4.0'
 
     // Logging :
-    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.36'
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: '[1+, )'
+    // Note that we are lenient with the version of slf4j, as we do not want to force a specific version on the user.
 
     // Testing :
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
