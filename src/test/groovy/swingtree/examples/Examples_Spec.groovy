@@ -10,6 +10,7 @@ import examples.games.NoteGuesserView
 import examples.games.NoteGuesserViewModel
 import examples.games.SymbolGuesserView
 import examples.games.SymbolGuesserViewModel
+import examples.lists.ListTestExample
 import examples.mvvm.*
 import examples.simple.Form
 import examples.simple.ListRendering
@@ -310,6 +311,11 @@ class Examples_Spec extends Specification
     def 'The `NamedFieldsView` example UI defined in the examples can be created.'()
     {
         expect : new NamedFieldsView()
+    }
+
+    def 'The `ListTestExample` class can be created.'()
+    {
+        expect : new ListTestExample()
     }
 
     def 'How SwingTree compares to a GUI Editor based implementation.'()
