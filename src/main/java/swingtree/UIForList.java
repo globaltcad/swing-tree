@@ -287,6 +287,10 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
         @Override public E getElementAt( int i ) { return _entries.at( i ).orElseNull(); }
 
         public void fire( ValsDelegate<E> v ) {
+            if ( v.index() < 0 ) {
+                fireContentsChanged( this, 0, _entries.size() );
+                return;
+            }
             switch ( v.changeType() ) {
                 case ADD:    fireIntervalAdded( this, v.index(), v.index() ); break;
                 case REMOVE: fireIntervalRemoved( this, v.index(), v.index() ); break;
