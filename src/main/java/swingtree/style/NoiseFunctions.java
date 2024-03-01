@@ -2,7 +2,8 @@ package swingtree.style;
 
 public final class NoiseFunctions
 {
-    private static final long PRIME = 12055296811267L;
+    private static final long PRIME_1 = 12055296811267L;
+    private static final long PRIME_2 = 53982894593057L;
 
 
     private NoiseFunctions(){}
@@ -308,16 +309,22 @@ public final class NoiseFunctions
 
 
     private static double _fastPseudoRandomDoubleFrom( float x, float y ) {
-        final byte randomByte = (byte) (_fastPseudoRandomByteSeedFrom(x, y) + _fastPseudoRandomByteSeedFrom(y, x));
+        final byte randomByte = _fastPseudoRandomByteSeedFrom(x, y);
         // The byte is in the range -128 to 127, so -128 is 0.0 and 127 is 1.0
         return (randomByte + 128) / 255.0;
     }
 
     private static byte _fastPseudoRandomByteSeedFrom( float a, float b ) {
-        long part1 = Float.floatToRawIntBits(a) * PRIME;
-        long part2 = Float.floatToRawIntBits(b) * part1;
-        return _longSeedToByte(part1 ^ part2);
+        return _fastPseudoRandomByteSeedFrom(
+                    Float.floatToRawIntBits(a),
+                    Float.floatToRawIntBits(b)
+                 );
+    }
 
+    private static byte _fastPseudoRandomByteSeedFrom( int a, int b ) {
+        long x = PRIME_1 * a;
+        long y = PRIME_2 * (x + b);
+        return _longSeedToByte(x ^ y);
     }
 
     private static byte _longSeedToByte(long seed) {

@@ -71,8 +71,12 @@ final class CustomCleaner
                     _thread = new Thread(this::run, "SwingTree-Cleaner");
                     _thread.start();
                 }
-                else
-                    _thread.notify();
+                else {
+                    // We notify the cleaner thread that there are new items to be cleaned
+                    synchronized ( _thread ) {
+                        _thread.notify();
+                    }
+                }
             }
         }
     }
@@ -83,7 +87,9 @@ final class CustomCleaner
                 checkCleanup();
             }
             try {
-                _thread.wait();
+                synchronized ( _thread ) {
+                    _thread.wait();
+                }
             } catch (Exception e) {
                 log.error("Failed to make cleaner thread wait for cleaning notification!", e);
             }
