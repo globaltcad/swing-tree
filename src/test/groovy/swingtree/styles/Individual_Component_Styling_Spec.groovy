@@ -1353,7 +1353,7 @@ class Individual_Component_Styling_Spec extends Specification
         then : 'The collage of images is as expected (compared with the snapshot above).'
             Utility.similarityBetween(images, "components/image-panels-collage.png", 99) > 99
 
-        where : 'We test this using the following scaling values:'
+        where : 'We test this using the following UI scaling values:'
             scale << [1f, 1.25f, 1.75f, 2f]
     }
 
