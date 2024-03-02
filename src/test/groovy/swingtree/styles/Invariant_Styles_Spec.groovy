@@ -4,6 +4,7 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
+import swingtree.SwingTree
 import swingtree.UI
 import swingtree.api.Styler
 import swingtree.components.JBox
@@ -19,7 +20,7 @@ import java.awt.Color
 @Subject([UI, Styler])
 class Invariant_Styles_Spec extends Specification
 {
-    def 'Diagonally linear gradients can be invariant in certain cases.'()
+    def 'Diagonally linear gradients can be invariant in certain cases.'( float uiScale )
     {
         reportInfo """
             This test demonstrates how various pairs of different gradient styles 
@@ -28,7 +29,17 @@ class Invariant_Styles_Spec extends Specification
             Diagonally linear menus that a gradient transitions from one corner
             of a component to the opposite corner.
         """
-        given : 'We declare to variables for storing pairs of identical widgets with different styles.'
+        given : """
+            We first set the UI scaling factor to simulate a platform with higher DPI.
+            So when your screen has a higher pixel density then this factor
+            is used by SwingTree to ensure that the UI is upscaled accordingly! 
+            Please note that the line below only exists for testing purposes, 
+            SwingTree will determine a suitable 
+            scaling factor for the current system automatically for you,
+            so you do not have to specify this factor manually. 
+        """
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'We declare to variables for storing pairs of identical widgets with different styles.'
             var ui1
             var ui2
         when : 'We create two widgets with different styles.'
@@ -59,10 +70,10 @@ class Invariant_Styles_Spec extends Specification
             var image2 = Utility.renderSingleComponent(ui2.get(JBox))
 
         then : 'They both have the expected size:'
-            image1.width == 280
-            image1.height == 38
-            image2.width == 280
-            image2.height == 38
+            image1.width  == Math.round( 280 * uiScale )
+            image1.height == Math.round( 38  * uiScale )
+            image2.width  == Math.round( 280 * uiScale )
+            image2.height == Math.round( 38  * uiScale )
         and : 'The images are identical even though they have different styles:'
             Utility.similarityBetween(image1, image2) > 99.9
 
@@ -96,15 +107,18 @@ class Invariant_Styles_Spec extends Specification
             image2 = Utility.renderSingleComponent(ui2.get(JBox))
 
         then :  'They both have the expected size:'
-            image1.width == 280
-            image1.height == 38
-            image2.width == 280
-            image2.height == 38
+            image1.width  == Math.round( 280 * uiScale )
+            image1.height == Math.round( 38  * uiScale )
+            image2.width  == Math.round( 280 * uiScale )
+            image2.height == Math.round( 38  * uiScale )
         and : 'The images are identical even though they have different styles:'
             Utility.similarityBetween(image1, image2) > 99.9
+
+        where : 'We test this using the following scaling values:'
+            uiScale << [1f, 1.25f, 1.75f, 2f]
     }
 
-    def 'Vertically and horizontally linear gradients can be invariant in certain cases.'()
+    def 'Vertically and horizontally linear gradients can be invariant in certain cases.'( float uiScale )
     {
         reportInfo """
             This test demonstrates how various pairs of different styles 
@@ -112,7 +126,17 @@ class Invariant_Styles_Spec extends Specification
             Their invariant emerges from the order of the colors and the direction of the gradients
             transitioning from one color to the other being reversed.
         """
-        given : 'We declare to variables for storing pairs of identical widgets with different styles.'
+        given : """
+            We first set the UI scaling factor to simulate a platform with higher DPI.
+            So when your screen has a higher pixel density then this factor
+            is used by SwingTree to ensure that the UI is upscaled accordingly! 
+            Please note that the line below only exists for testing purposes, 
+            SwingTree will determine a suitable 
+            scaling factor for the current system automatically for you,
+            so you do not have to specify this factor manually. 
+        """
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'We declare to variables for storing pairs of identical widgets with different styles.'
             var ui1
             var ui2
         when : 'We create two widgets with different styles.'
@@ -142,10 +166,10 @@ class Invariant_Styles_Spec extends Specification
             var image2 = Utility.renderSingleComponent(ui2.get(JBox))
 
         then : 'They both have the expected size:'
-            image1.width == 280
-            image1.height == 38
-            image2.width == 280
-            image2.height == 38
+            image1.width  == Math.round( 280 * uiScale )
+            image1.height == Math.round( 38  * uiScale )
+            image2.width  == Math.round( 280 * uiScale )
+            image2.height == Math.round( 38  * uiScale )
         and : 'The images are identical even though they have different styles:'
             Utility.similarityBetween(image1, image2) > 99.9
 
@@ -178,15 +202,18 @@ class Invariant_Styles_Spec extends Specification
             image2 = Utility.renderSingleComponent(ui2.get(JBox))
 
         then :  'They both have the expected size:'
-            image1.width == 280
-            image1.height == 38
-            image2.width == 280
-            image2.height == 38
+            image1.width  == Math.round( 280 * uiScale )
+            image1.height == Math.round( 38  * uiScale )
+            image2.width  == Math.round( 280 * uiScale )
+            image2.height == Math.round( 38  * uiScale )
         and : 'The images are identical even though they have different styles:'
             Utility.similarityBetween(image1, image2) > 99.9
+
+        where : 'We test this using the following scaling values:'
+            uiScale << [1f, 1.25f, 1.75f, 2f]
     }
 
-    def 'A diagonally aligned radial gradient with an offset focus point can be invariant in certain cases.'()
+    def 'A diagonally aligned radial gradient with an offset focus point can be invariant in certain cases.'( float uiScale )
     {
         reportInfo """
             This test demonstrates how various pairs of different styles 
@@ -194,7 +221,17 @@ class Invariant_Styles_Spec extends Specification
             Their invariant emerges from the order of the colors and the direction of the gradients
             transitioning from one color to the other being reversed.
         """
-        given : 'We declare to variables for storing pairs of identical widgets with different styles.'
+        given : """
+            We first set the UI scaling factor to simulate a platform with higher DPI.
+            So when your screen has a higher pixel density then this factor
+            is used by SwingTree to ensure that the UI is upscaled accordingly! 
+            Please note that the line below only exists for testing purposes, 
+            SwingTree will determine a suitable 
+            scaling factor for the current system automatically for you,
+            so you do not have to specify this factor manually. 
+        """
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'We declare to variables for storing pairs of identical widgets with different styles.'
             var ui1
             var ui2
         when : 'We create two widgets with different styles.'
@@ -231,10 +268,10 @@ class Invariant_Styles_Spec extends Specification
             var image2 = Utility.renderSingleComponent(ui2.get(JBox))
 
         then : 'They both have the expected size:'
-            image1.width == 280
-            image1.height == 138
-            image2.width == 280
-            image2.height == 138
+            image1.width  == Math.round( 280 * uiScale )
+            image1.height == Math.round( 138 * uiScale )
+            image2.width  == Math.round( 280 * uiScale )
+            image2.height == Math.round( 138 * uiScale )
         and : 'The images are identical even though they have different styles:'
             Utility.similarityBetween(image1, image2) > 99.9
 
@@ -272,12 +309,15 @@ class Invariant_Styles_Spec extends Specification
             image2 = Utility.renderSingleComponent(ui2.get(JBox))
 
         then :  'They both have the expected size:'
-            image1.width == 280
-            image1.height == 138
-            image2.width == 280
-            image2.height == 138
+            image1.width  == Math.round( 280 * uiScale )
+            image1.height == Math.round( 138 * uiScale )
+            image2.width  == Math.round( 280 * uiScale )
+            image2.height == Math.round( 138 * uiScale )
         and : 'The images are identical even though they have different styles:'
             Utility.similarityBetween(image1, image2) > 99.9
+
+        where : 'We test this using the following scaling values:'
+            uiScale << [1f, 1.25f, 1.75f, 2f]
     }
 
 }

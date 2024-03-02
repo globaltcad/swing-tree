@@ -80,7 +80,8 @@ class Configuring_UI_Components_Spec extends Specification
         and : 'We build the component tree.'
             var frame = ui.get(JFrame)
         and : 'We wait for the UI thread to do its thing.'
-            Thread.sleep(1000)
+            UI.sync()
+            Thread.sleep(1_000)
             UI.sync()
         expect :
             new Utility.Query(frame).find(JTextArea,     "C1").isPresent()

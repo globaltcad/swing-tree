@@ -40,21 +40,20 @@ dependencies {
     // Note that we are lenient with the version of slf4j, as we do not want to force a specific version on the user.
 
     // Testing :
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
-    testImplementation platform('org.spockframework:spock-bom:2.1-groovy-3.0')
-    testImplementation 'org.spockframework:spock-core:2.1-groovy-3.0'
-    testImplementation 'com.athaydes:spock-reports:2.3.2-groovy-3.0'
-    testImplementation 'org.slf4j:slf4j-api:1.7.36'
-    testImplementation 'org.slf4j:slf4j-simple:1.7.36'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
+    testImplementation platform('org.spockframework:spock-bom:2.3-groovy-4.0')
+    testImplementation 'org.spockframework:spock-core:2.3-groovy-4.0'
+    testImplementation 'com.athaydes:spock-reports:2.5.1-groovy-4.0'
+    testImplementation 'org.slf4j:slf4j-api:2.0.12'
+    testImplementation 'org.slf4j:slf4j-simple:2.0.12'
 
     testRuntimeOnly group: 'net.bytebuddy', name: 'byte-buddy', version: '1.11.15' // allows mocking of classes (in addition to interfaces)
     testRuntimeOnly group: 'org.objenesis', name: 'objenesis',  version: '3.2'     // allows mocking of classes without default constructor (together with ByteBuddy or CGLIB)
 
 
-    testImplementation 'com.formdev:flatlaf-intellij-themes:2.2'
-    testImplementation 'com.formdev:flatlaf:2.2' // Looks better than regular swing :)
-    testImplementation group: 'com.metsci.ext.com.kitfox.svg', name: 'svg-salamander', version: '0.1.19'
+    testImplementation 'com.formdev:flatlaf-intellij-themes:3.4'
+    testImplementation 'com.formdev:flatlaf:3.4' // Looks better than regular swing :)
 
 }
 
@@ -65,7 +64,7 @@ test {
 // CONFIGURING TEST REPORTING :
 
 jacoco {
-    toolVersion = "0.8.5"
+    toolVersion = "0.8.11"
     reportsDirectory.set(file("docs/coverage"))
 }
 
