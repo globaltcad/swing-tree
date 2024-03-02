@@ -18,7 +18,10 @@ import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Utility {
+public class Utility
+{
+    private static final String SNAPSHOTS_DIR_NAME = "snapshots";
+    private static final String FAILURE_POSTFIX = "-FAILURE";
 
     public enum LaF {
         DEFAULT, NIMBUS, FLAT_BRIGHT
@@ -148,13 +151,7 @@ public class Utility {
         JWindow f = new JWindow();
         f.add(ui);
         f.pack();
-        safeUIAsImage(ui, "src/test/resources/snapshots/views/vertical-settings-UI.png");
-        //BufferedImage image = offscreenRender(ui);
-        //JFrame frame = new JFrame();
-        //frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        //frame.getContentPane().add(new JLabel(new ImageIcon(image)));
-        //frame.pack();
-        //frame.setVisible(true);
+        safeUIAsImage(ui, "src/test/resources/"+SNAPSHOTS_DIR_NAME+"/views/vertical-settings-UI.png");
         System.exit(0);
     }
 
@@ -186,8 +183,57 @@ public class Utility {
         return similarityBetween(image, imageFile, expectedSimilarity);
     }
 
-    public static double similarityBetween(BufferedImage image, String imageFile, double expectedSimilarity) {
-        imageFile = "/snapshots/" + imageFile;
+    public static double similarityBetween(BufferedImage image, String imageFile, double expectedSimilarity)
+    {
+        imageFile = "/"+SNAPSHOTS_DIR_NAME+"/" + imageFile;
+        List<String> variants = _findAllVariantsOf(imageFile);
+        MatchResult result;
+        if ( variants.isEmpty() ) {
+            result = similarityBetween(image, imageFile);
+        } else {
+            List<MatchResult> results = new ArrayList<>();
+            for ( String variant : variants ) {
+                results.add(similarityBetween(image, variant));
+            }
+            // We sort the results by similarity
+            results.sort(Comparator.comparingDouble(MatchResult::similarity));
+            // Best match is the last one
+            result = results.get(results.size() - 1);
+        }
+        if ( result.similarity() < expectedSimilarity ) {
+            result.displayAction().run();
+        }
+        return result.similarity();
+    }
+
+    private static List<String> _findAllVariantsOf(String imagePath) {
+        String[] parts     = imagePath.split("\\.");
+        String   base      = parts[0];
+        String   extension = parts[1];
+        String   directory = base.substring(0, base.lastIndexOf("/"));
+        String   rawName   = base.substring(base.lastIndexOf("/") + 1);
+        List<String> variants = new ArrayList<>();
+        java.net.URL url = Objects.requireNonNull(Utility.class.getResource(directory));
+        File dir = new File(url.getFile());
+        for ( File file : Objects.requireNonNull(dir.listFiles()) ) {
+            String currentFileName = file.getName();
+            if ( currentFileName.startsWith(rawName) && currentFileName.endsWith(extension) ) {
+                String delta = currentFileName.substring(rawName.length(), currentFileName.length() - extension.length() - 1);
+                // Should be an underscore followed by a number and another underscore
+                if ( delta.matches("_\\d+_") )
+                    variants.add(directory + "/" + file.getName());
+                else if ( !delta.equals(FAILURE_POSTFIX) ) // Warn about the file that does not follow the naming convention
+                    System.out.println("File " + currentFileName + " does not follow the naming convention!");
+
+            }
+        }
+        return variants;
+    }
+
+    private static MatchResult similarityBetween(
+        BufferedImage image,
+        String imageFile
+    ) {
         BufferedImage originalImage = image;
         BufferedImage imageFromFile = null;
         try {
@@ -206,11 +252,15 @@ public class Utility {
             image = _stretchFirstToSecondSize(image, imageFromFile);
         }
         double similarity = similarityBetween(image, imageFromFile);
-        if ( similarity < expectedSimilarity ) {
+
+        String finalImageFile = imageFile;
+        BufferedImage finalImageFromFile1 = imageFromFile;
+
+        return new MatchResult(imageFile, similarity, ()->{
             try {
-                String newPath = "build/resources/test" + imageFile.replace(".png", "-FAILURE.png");
+                String newPath = "build/resources/test" + finalImageFile.replace(".png", FAILURE_POSTFIX+".png");
                 safeUIImage(originalImage, newPath);
-                BufferedImage finalImageFromFile = imageFromFile;
+                BufferedImage finalImageFromFile = finalImageFromFile1;
                 SwingUtilities.invokeLater(()-> {
                     JLabel wrongImage = new JLabel(new ImageIcon(originalImage));
                     JLabel expectedImage = new JLabel(new ImageIcon(finalImageFromFile));
@@ -219,7 +269,7 @@ public class Utility {
                     frame.getContentPane().add(
                         UI.box()
                         .add(wrongImage)
-                        .add(UI.label("=|=").withFontSize(26))
+                        .add(UI.label("=?=").withFontSize(26))
                         .add(expectedImage)
                         .get(JBox.class)
                     );
@@ -229,8 +279,7 @@ public class Utility {
             } catch (Exception e) {
                 e.printStackTrace();// Probably a headless exception
             }
-        }
-        return similarity;
+        });
     }
 
     /**
@@ -333,8 +382,58 @@ public class Utility {
     }
 
     public static String linkSnapshot(String filename) {
-        String pathBase = "https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/";
-        //return "![" + filename + "](" + pathBase + filename + ")"; // old way
+        filename = "/"+SNAPSHOTS_DIR_NAME+"/" + filename;
+        filename = _findActual(filename);
+        String pathBase = "https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources";
         return "<img src=\"" + pathBase + filename + "\" alt=\"" + filename + "\" style=\"max-width: 50%;\" />";
+    }
+
+    /**
+     *  The file might be variant based which means that instead of a file name
+     *  with the name, let's say "file.png", we might have "file_1_.png", "file_2_.png", etc.
+     */
+    private static String _findActual(String filename) {
+        List<String> variants = _findAllVariantsOf(filename);
+        String result;
+        if ( variants.isEmpty() )
+            result = filename;
+        else
+            result = variants.get(0); // The first one is the actual one
+
+        // Sanity check, does the file exist?
+        InputStream stream = Utility.class.getResourceAsStream(result);
+        if ( stream == null )
+            throw new RuntimeException("File " + result + " does not exist!");
+        else {
+            try {
+                stream.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return result;
+    }
+
+    private static class MatchResult
+    {
+        private final String filename;
+        private final double similarity;
+        private final Runnable displayAction;
+
+        public MatchResult(
+            String filename,
+            double similarity,
+            Runnable displayAction
+        ) {
+            this.filename      = Objects.requireNonNull(filename);
+            this.similarity    = similarity;
+            this.displayAction = Objects.requireNonNull(displayAction);
+        }
+
+        public String filename() { return filename; }
+
+        public double similarity() { return similarity; }
+
+        public Runnable displayAction() { return displayAction; }
     }
 }

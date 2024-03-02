@@ -180,7 +180,7 @@ class Individual_Component_Styling_Spec extends Specification
             Now the label has transitioned back to its initial state.
             An it looks as expected.
         """
-            Utility.similarityBetween(image, "components/pre-transitioning-label.png", 99.5) > 99.5
+            Utility.similarityBetween(image, "components/pre-transitioning-label.png", 99.95) > 99.95
     }
 
 
@@ -336,7 +336,7 @@ class Individual_Component_Styling_Spec extends Specification
             var image = Utility.renderSingleComponent(panel)
 
         then : 'The rendered image of the panel is as expected, a fully transparent image.'
-            Utility.similarityBetween(image, "components/rounded-non-opaque-panel.png", 99.5) > 99.5
+            Utility.similarityBetween(image, "components/rounded-non-opaque-panel.png", 99.95) > 99.95
 
         when : """
             We specify the background color of the panel through the style API instead of the UI API.
@@ -624,7 +624,7 @@ class Individual_Component_Styling_Spec extends Specification
             var image = Utility.renderSingleComponent(ui.get(JLabel))
 
         then : 'The image is as expected.'
-            Utility.similarityBetween(image, "components/rounded-green-JLabel.png", 99.5) > 99.5
+            Utility.similarityBetween(image, "components/rounded-green-JLabel.png", 99.95) > 99.95
     }
 
     def 'This is how you can create a JPanel with a gradient border.'()
@@ -667,7 +667,7 @@ class Individual_Component_Styling_Spec extends Specification
             var image = Utility.renderSingleComponent(ui.get(JPanel))
 
         then : 'The image is rendered as expected (compare with the snapshot above).'
-            Utility.similarityBetween(image, "components/shaded-border-JPanel.png", 99.5) > 99.5
+            Utility.similarityBetween(image, "components/shaded-border-JPanel.png", 99.95) > 99.95
     }
 
     def 'You can style a toggle button to have a custom selection shading.'()
@@ -745,9 +745,11 @@ class Individual_Component_Styling_Spec extends Specification
                            )
                         )
                     )
+        and : 'We build the text area:'
+            var textArea = ui.get(JTextArea)
 
         when : 'We render the text area into a BufferedImage.'
-            var image = Utility.renderSingleComponent(ui.get(JTextArea))
+            var image = Utility.renderSingleComponent(textArea)
 
         then : 'The image is as expected.'
             Utility.similarityBetween(image, "components/left-to-right-shaded-JTextArea.png", 99.95) > 99.95
@@ -2863,7 +2865,7 @@ class Individual_Component_Styling_Spec extends Specification
 
 
         then : 'The collage of images is as expected (compared with the snapshot above).'
-            Utility.similarityBetween(images, "components/noise-gradients-collage.png", 99) > 99
+            Utility.similarityBetween(images, "components/noise-gradients-collage.png", 99.9) > 99.9
 
         where : 'We test this using the following scaling values:'
             scale << [1f, 1.25f, 1.75f, 2f]
