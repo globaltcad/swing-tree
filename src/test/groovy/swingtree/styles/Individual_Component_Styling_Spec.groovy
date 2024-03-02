@@ -871,7 +871,7 @@ class Individual_Component_Styling_Spec extends Specification
                         .shadowBlurRadius(13)
                         .shadowSpreadRadius(-5)
                         .shadowIsInset(false)
-                        .padding(30)
+                        .padding(0)
                         .margin(10)
                         .size(230, 30)
                     )

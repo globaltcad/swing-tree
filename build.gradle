@@ -52,9 +52,8 @@ dependencies {
     testRuntimeOnly group: 'org.objenesis', name: 'objenesis',  version: '3.2'     // allows mocking of classes without default constructor (together with ByteBuddy or CGLIB)
 
 
-    testImplementation 'com.formdev:flatlaf-intellij-themes:2.2'
-    testImplementation 'com.formdev:flatlaf:2.2' // Looks better than regular swing :)
-    testImplementation group: 'com.metsci.ext.com.kitfox.svg', name: 'svg-salamander', version: '0.1.19'
+    testImplementation 'com.formdev:flatlaf-intellij-themes:3.4'
+    testImplementation 'com.formdev:flatlaf:3.4' // Looks better than regular swing :)
 
 }
 

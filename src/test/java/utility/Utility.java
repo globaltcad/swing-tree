@@ -134,8 +134,13 @@ public class Utility
     }
 
     public static BufferedImage renderSingleComponent(Component component) {
-        int w = Math.max(component.getWidth(), component.getPreferredSize().width);
-        int h = Math.max(component.getHeight(), component.getPreferredSize().height);
+        int w = component.getWidth();
+        int h = component.getHeight();
+        if ( w < 1 ) w = Math.max(w, component.getMinimumSize().width);
+        if ( h < 1 ) h = Math.max(h, component.getMinimumSize().height);
+        if ( w < 1 ) w = Math.max(component.getWidth() , component.getPreferredSize().width);
+        if ( h < 1 ) h = Math.max(component.getHeight(), component.getPreferredSize().height);
+
         BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = image.createGraphics();
         component.paint(g2d);
