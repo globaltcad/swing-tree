@@ -141,13 +141,11 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
                      });
                 })
                 ._withOnShow( selection, (thisComponent,v) -> {
-                    if (v == null) {
+                    if (v == null)
                         // Necessary because Java 8 does not handle null properly.
                         thisComponent.clearSelection();
-                        thisComponent.repaint();
-                    } else {
-                        thisComponent.setSelectedValue( v, true );
-                    }
+                    else
+                        thisComponent.setSelectedValue(v, true);
                 })
                 ._with( thisComponent -> {
                     thisComponent.setSelectedValue( selection.orElseNull(), true );
