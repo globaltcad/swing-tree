@@ -3,14 +3,16 @@ package swingtree.style;
 import swingtree.UI;
 
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.util.Objects;
 
 /**
  *  An immutable snapshot of essential component state needed for rendering
- *  the style of a particular component layer. <br>
- *  This is immutable to use it as a basis for caching.
- *  When the snapshot changes compared to the previous one, the image buffer based
+ *  the style of a particular component layer using the {@link StyleRenderer} and its
+ *  {@link StyleRenderer#renderStyleOn(UI.Layer, LayerRenderConf, Graphics2D)} ethod. <br>
+ *  This (and all of its parts) is immutable to use it as a basis for caching.
+ *  When the config changes compared to the previous one, the image buffer based
  *  render cache is being invalidated and the component is rendered again
  *  (potentially with a new cached image buffer).
  */
@@ -87,20 +89,6 @@ final class LayerRenderConf
 
     ComponentAreas areas() { return ComponentAreas.of(_boxModelConf); }
 
-
-    void paintClippedTo(UI.ComponentArea area, Graphics g, Runnable painter ) {
-        Shape oldClip = g.getClip();
-
-        Shape newClip = areas().get(area);
-        if ( newClip != null && newClip != oldClip ) {
-            newClip = StyleUtil.intersect(newClip, oldClip);
-            g.setClip(newClip);
-        }
-
-        painter.run();
-
-        g.setClip(oldClip);
-    }
 
     @Override
     public int hashCode() {
