@@ -60,6 +60,11 @@ public class ListTestExample extends JPanel {
                 })
             )
             .add(
+                UI.button("Clear selection").onClick(f -> {
+                    selectedFile.set(null);
+                })
+            )
+            .add(
                 UI.button("Add file").onClick(f -> {
                     files.add(new File("file" + files.size() + ".txt"));
                 })
@@ -92,6 +97,11 @@ public class ListTestExample extends JPanel {
             .add(
                 UI.button("Select string").onClick(f -> {
                     selectedString.set(strings.at(0).get());
+                })
+            )
+            .add(
+                UI.button("Clear selection").onClick(f -> {
+                    selectedString.set(null);
                 })
             )
             .add(

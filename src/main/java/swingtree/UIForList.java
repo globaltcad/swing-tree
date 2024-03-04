@@ -133,16 +133,19 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
         return _with( thisComponent -> {
                      thisComponent.addListSelectionListener( e -> {
                          if ( !e.getValueIsAdjusting() )
-                             if ( !e.getValueIsAdjusting() )
-                                 // Necessary because Java 8 does not check if index is out of bounds.
-                                 if (thisComponent.getMinSelectionIndex() >= thisComponent.getModel().getSize())
-                                     selection.set( From.VIEW, null );
-                                 else
-                                     selection.set( From.VIEW,  thisComponent.getSelectedValue() );
+                             // Necessary because Java 8 does not check if index is out of bounds.
+                             if (thisComponent.getMinSelectionIndex() >= thisComponent.getModel().getSize())
+                                 selection.set( From.VIEW, null );
+                             else
+                                 selection.set( From.VIEW,  thisComponent.getSelectedValue() );
                      });
                 })
                 ._withOnShow( selection, (thisComponent,v) -> {
-                    thisComponent.setSelectedValue( v, true );
+                    if (v == null)
+                        // Necessary because Java 8 does not handle null properly.
+                        thisComponent.clearSelection();
+                    else
+                        thisComponent.setSelectedValue(v, true);
                 })
                 ._with( thisComponent -> {
                     thisComponent.setSelectedValue( selection.orElseNull(), true );
