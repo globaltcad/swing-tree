@@ -12,6 +12,7 @@ import swingtree.SwingTree
 import swingtree.UI
 import swingtree.animation.LifeTime
 import swingtree.components.JBox
+import swingtree.components.JSplitButton
 import swingtree.threading.EventProcessor
 import utility.SwingTreeTestConfigurator
 import utility.Utility
@@ -183,7 +184,6 @@ class Individual_Component_Styling_Spec extends Specification
             Utility.similarityBetween(image, "components/pre-transitioning-label.png", 99.95) > 99.95
     }
 
-
     def 'The functional style API changes the state of your components to reflect the desired looks.'( int uiScale )
     {
         reportInfo """
@@ -214,7 +214,94 @@ class Individual_Component_Styling_Spec extends Specification
             SwingTree.get().setUiScaleFactor(uiScale)
         and : 'We create a panel with some custom styling!'
             var ui =
-                        UI.panel()
+                     UI.panel()
+                     .withStyle( it -> it
+                         .foundationColor("green")
+                         .backgroundColor("cyan")
+                         .foregroundColor("blue")
+                         .borderColor("blue")
+                         .borderWidth(5)
+                         .shadowColor("black")
+                         .shadowSpreadRadius(10)
+                         .shadowOffset(10)
+                         .font("Papyrus", 42)
+                     )
+        and : 'We build the panel:'
+            var panel = ui.get(JPanel)
+        expect : """
+                Now!
+                The below line looks very strange, but it is actually the correct assertion!
+                The background color should not be cyan, but fully transparent instead.
+                To understand what is going on here, you have to know that when a component is
+                flagged to be opaque, then every Swing look and feel will, before painting
+                anything else, first fill out the entire background of the component with
+                the background color of the component.
+
+                Now this is a problem when you have the background layer of your SwingTree component
+                styled using various things like gradients, shadows, images, etc.
+
+                We could simply set the opaque flag to false, but then we would lose the
+                performance benefits of having the opaque flag set to true (avoiding the
+                traversal repaint of parent components, and their parent components, etc).
+
+                The style configuration of this particular component
+                leads to an opaque panel, and we also have the ability to render
+                the background of the component ourselves due to the
+                component being a SwingTree component (it has the paint method overridden).
+
+                So what we do here is we set the background color of the component to
+                UI.COLOR_UNDEFINED, which is a special color that is actually fully transparent.
+
+                This way, when the Swing look and feel tries to paint the background of the
+                component, it will actually paint nothing, and we can do the background
+                painting ourselves in the paint method of the component.
+        """
+            panel.background == new Color(0,0,0,0)
+        and : 'The foreground color of the panel will be set to blue.'
+            panel.foreground == Color.blue
+        and : 'The insets of the border will be increased by the border width (because the border grows inwards).'
+            panel.border.getBorderInsets(panel) == new Insets(5 * uiScale, 5 * uiScale, 5 * uiScale, 5 * uiScale)
+        and : 'The font of the panel will be set to Papyrus with a size of 42 * uiScale.'
+            panel.font.toString().contains("family=Dialog,name=Papyrus,style=plain,size=" + 42 * uiScale)
+        where : """
+            We use the following integer scaling factors simulating different high DPI scenarios.
+            Note that usually the UI is scaled by 1, 1.5 an 2 (for 4k screens for example).
+            A scaling factor of 3 is rather unusual, however it is possible to scale it by 3 nonetheless.
+        """
+            uiScale << [1, 2, 3]
+    }
+
+    def 'The functional style API changes the state of raw Swing components to reflect the desired looks.'( int uiScale )
+    {
+        reportInfo """
+            Fun-Fact: 
+            Styling in SwingTree is fully functional, which means 
+            that the style config objects are all immutable. 
+            They are not modified in place, but instead transformed
+            by so called "`Styler` lambdas".
+            Not only does this architecture make it easy to compose, reuse and share
+            styles, but it also makes it possible to have an extensive hierarchy of
+            styles without the need for complicated code at all.
+            In practice, this means that your styles become part
+            of a compositional tree of `Styler` lambdas.
+            The fact that they are side effect free lambdas makes it possible to
+            evaluate the styles every repaint so that they can then be applied to
+            the components of the component tree completely dynamically.
+            How cool is that? :)
+        """
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+            So when your screen has a higher pixel density then this factor
+            is used by SwingTree to ensure that the UI is upscaled accordingly! 
+            Please note that the line below only exists for testing purposes, 
+            SwingTree will determine a suitable 
+            scaling factor for the current system automatically for you,
+            so you do not have to specify this factor manually. 
+        """
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'We create a panel with some custom styling!'
+            var ui =
+                        UI.of(new JPanel())
                         .withStyle( it -> it
                             .foundationColor("green")
                             .backgroundColor("cyan")
@@ -1096,7 +1183,7 @@ class Individual_Component_Styling_Spec extends Specification
     }
 
     def 'The background color of any component can be configured through the style API.'(
-        JComponent component, Color color
+        JComponent component, Color color, Color expected
     ) {
         reportInfo """
             The background color of any component can be configured through the style API
@@ -1108,16 +1195,73 @@ class Individual_Component_Styling_Spec extends Specification
             var comp = ui.get(JComponent)
 
         expect : 'The component indeed has the specified background color!'
-            comp.background == color
+            comp.background == expected
 
-        where :
-            component        | color
-            new JButton()    | Color.RED
-            new JTextArea()  | Color.GREEN
-            new JTextField() | Color.BLUE
-            new JBox()       | Color.YELLOW
-            new JSlider()    | Color.CYAN
-            new JSpinner()   | Color.MAGENTA
+        where : """
+            We are using a set of raw Swing components as well as SwingTree native components
+            together with a variety of colors.
+            
+            Note that some of the linea looks very strange, 
+            they expect the component to return a fully transparent background
+            color, after a normal color was specified in the style API.
+            But this is not an error, it is completely intentionally by design!
+            
+            So as you may have noticed, 
+            the SwingTree native components all report the "wrong" color.
+            
+            To understand what is going on here, you have to know that when a component is
+            flagged to be opaque, then every Swing look and feel will, before painting
+            anything else, first fill out the entire background of the component with
+            the background color of the component.
+            It does this to ensure that rendering artefacts from the parent
+            are overridden.
+
+            Now this is a problem when you have the background layer of your SwingTree component
+            styled using various things like gradients, shadows, images, etc.
+            This is because SwingTree cannot hijack the internals of the ComponentUI,
+            it can however do some painting before the ComponentUI
+            through an overridden `paint(Graphics2D)` method!
+
+            Now, we could simply set the opaque flag to false to prevent the ComponentUI
+            from filling the component bounds,
+            but then we would lose the
+            performance benefits of having the opaque flag set to true (avoiding the
+            traversal repaint of parent components, and their parent components, etc).
+
+            The style configuration of this particular component
+            leads to an opaque panel, and we also have the ability to render
+            the background of the component ourselves due to the
+            component being a SwingTree component (it has the paint method overridden).
+
+            So what we do here is we set the background color of the component to
+            UI.COLOR_UNDEFINED, which is a special color that is actually fully transparent.
+
+            This way, when the Swing look and feel tries to paint the background of the
+            component, it will actually paint nothing, and we can do the background
+            painting ourselves in the paint method of the component.
+       
+        """
+            component            | color              ||  expected
+            new JButton()        | Color.RED          ||  Color.RED
+            new JTextArea()      | Color.GREEN        ||  Color.GREEN
+            new JTextField()     | Color.BLUE         ||  Color.BLUE
+            new JSpinner()       | Color.MAGENTA      ||  Color.MAGENTA
+            new JPanel()         | Color.YELLOW       ||  Color.YELLOW
+            new JSlider()        | Color.CYAN         ||  Color.CYAN
+            new JProgressBar()   | Color.ORANGE       ||  Color.ORANGE
+            new JTabbedPane()    | Color.BLACK        ||  Color.BLACK
+
+            new UI.Button()      | Color.RED          ||  new Color(0,0,0,0)
+            new UI.TextArea()    | Color.GREEN        ||  new Color(0,0,0,0)
+            new UI.TextField()   | Color.BLUE         ||  new Color(0,0,0,0)
+            new UI.Panel()       | Color.YELLOW       ||  new Color(0,0,0,0)
+            new JBox()           | Color.ORANGE       ||  new Color(0,0,0,0)
+            new JSplitButton()   | Color.WHITE        ||  new Color(0,0,0,0)
+            new UI.Spinner()     | Color.MAGENTA      ||  new Color(0,0,0,0)
+
+            new UI.Slider()      | Color.CYAN         ||  Color.CYAN
+            new UI.ProgressBar() | Color.ORANGE       ||  Color.ORANGE
+            new UI.TabbedPane()  | Color.BLACK        ||  Color.BLACK
     }
 
     def 'The foreground color of any component can be configured through the style API.'(
