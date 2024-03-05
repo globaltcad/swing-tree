@@ -896,6 +896,71 @@ class Opaqueness_Styles_Spec extends Specification
             slider.getBackground() == null
     }
 
+    def 'A toggle button (which typically opaque) will become non-opaque when transitioning to a transparent background color.'()
+    {
+        reportInfo """
+            A toggle button is a component that is opaque by default as it has a default background
+            color. When it receives a transparent background color, than it will no longer be opaque however.
+            This test demonstrates that it will become non opaque when transitioning
+            to a transparent background color.
+
+        """
+        given : 'We first define a boolean flag property that we will use to control the transition:'
+            var isOn = Var.of(false)
+        and : 'Then we create the button based UI declaration, which is styled to either have an undefined or transparent background color:'
+            var ui =
+                    UI.toggleButton("Toggle Me!")
+                    .withTransitionalStyle(isOn, LifeTime.of(1, TimeUnit.MILLISECONDS), (state, it) -> it
+                        .backgroundColor(
+                            state.progress() == 0
+                                ? UI.COLOR_UNDEFINED
+                                : new Color(0,0,0,0)
+                        )
+                    )
+
+        and : 'We build the underlying `JToggleButton`:'
+            var toggleButton = ui.get(javax.swing.JToggleButton)
+
+        expect : """
+            The component has to be opaque because the "undefined" background color 
+            is conceptually equivalent to "no color specified" and therefore 
+            causes the slider to have its default background color, which is opaque.
+        """
+            toggleButton.isOpaque() == true
+        and : 'Due to the usage of `UI.COLOR_UNDEFINED`, the background color of the button is now undefined:'
+            toggleButton.getBackground() == UI.COLOR_UNDEFINED
+
+        when : 'We set the `isOn` flag to true in order to start the transition:'
+            isOn.set(true)
+        and : 'We wait for the transition to complete:'
+            Thread.sleep(50)
+            UI.sync()
+
+        then : """
+            The button is now non opaque because the `isOn` flag is true, which translates to 
+            an animation progress transitioning to 1,
+            causing the background color to have a transparent alpha channel of 0.
+        """
+            toggleButton.isOpaque() == false
+        and : 'We confirm, the background color of the button is transparent:'
+            toggleButton.getBackground().getAlpha() == 0
+
+        when : """
+            We now want to go back to the initial state, so we set the `isOn` flag to false again...
+        """
+            isOn.set(false)
+        and : '...again we wait for the transition to complete...'
+            Thread.sleep(50)
+            UI.sync()
+        then : """
+            We are back to the initial state where the button is opaque again
+            due to the background color being undefined (which causes the slider to have its default background color).
+        """
+            toggleButton.isOpaque() == true
+        and : 'Due to the usage of `UI.COLOR_UNDEFINED`, the background color of the slider is undefined again:'
+            toggleButton.getBackground() == UI.COLOR_UNDEFINED
+    }
+
     def 'A check box (which typically opaque) may become non-opaque when transitioning to various styles.'(
         boolean opaque, int margin, int radius, int border, String borderColor, String foundation, String background, String[] gradient
     ) {

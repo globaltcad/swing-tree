@@ -27,7 +27,7 @@ import java.util.Optional;
  *  where you either completely reinstall the look and feel of a component ({@link javax.swing.plaf.ComponentUI}),
  *  or you leave it be. Anything in between is a finicky situation which
  *  is exactly where SwingTree is situated.
- *  This is because the transition between a SwingTree style and the look and feel
+ *  The core problem here is that the transition between a SwingTree style and the look and feel
  *  and border of a raw Swing component should be as smooth as possible.
  *  If the user defines a border radius for a component, then this should
  *  not automatically lead to its look and feel being lost.
@@ -36,15 +36,18 @@ import java.util.Optional;
  *  the foreground color, the font and the opacity flag.<br>
  *  This last part is especially tricky, because the opacity flag is a very
  *  important property for the performance of Swing components.
+ *  <p>
+ *  So this class orchestrates under which precise condition, and how, the component should be mutated to
+ *  enable the SwingTree style to be effective.
  *
  * @param <C> The type of the component.
  */
 final class StyleInstaller<C extends JComponent>
 {
     private DynamicLaF _dynamicLaF = DynamicLaF.none(); // Not null, but can be DynamicLaF.none().
-    private Color      _initialBackgroundColor = null;
-    private Color      _currentBackgroundColor = null;
-    private Boolean    _initialIsOpaque = null;
+    private Color      _initialBackgroundColor   = null;
+    private Color      _currentBackgroundColor   = null;
+    private Boolean    _initialIsOpaque          = null;
     private Boolean    _initialContentAreaFilled = null;
 
 
@@ -63,10 +66,9 @@ final class StyleInstaller<C extends JComponent>
     }
 
     StyleConf applyStyleToComponentState(
-        C owner,
-        StyleConf newStyle,
-        StyleSource<C> styleSource,
-        StyleEngine styleEngine
+        C              owner, // <- The component we want to style.
+        StyleConf      newStyle,
+        StyleSource<C> styleSource
     ) {
         final boolean noLayoutStyle           = StyleConf.none().hasEqualLayoutAs(newStyle);
         final boolean noPaddingAndMarginStyle = StyleConf.none().hasEqualMarginAndPaddingAs(newStyle);
@@ -125,11 +127,11 @@ final class StyleInstaller<C extends JComponent>
 
         Runnable backgroundSetter = ()->{};
 
-        if ( !onlyDimensionalityIsStyled && !isNotStyled ) {
+        if ( !onlyDimensionalityIsStyled && !isNotStyled )
             installCustomBorderBasedStyleAndAnimationRenderer(owner, newStyle);
-        } else if ( styleSource.hasNoAnimationStylers() ) {
+        else if ( styleSource.hasNoAnimationStylers() )
             _uninstallCustomBorderBasedStyleAndAnimationRenderer(owner);
-        }
+
 
         if ( !onlyDimensionalityIsStyled ) {
             if ( !styleCanBeRenderedThroughBorder )
@@ -140,7 +142,7 @@ final class StyleInstaller<C extends JComponent>
             _dynamicLaF = _dynamicLaF._uninstallCustomLaF(owner);
             if ( _initialBackgroundColor != null ) {
                 if ( !Objects.equals( owner.getBackground(), _initialBackgroundColor ) )
-                    backgroundSetter = ()->owner.setBackground(_initialBackgroundColor);
+                    backgroundSetter = () -> owner.setBackground(_initialBackgroundColor);
                 _initialBackgroundColor = null;
             }
             if ( _initialIsOpaque != null ) {
@@ -172,9 +174,10 @@ final class StyleInstaller<C extends JComponent>
         final boolean hasOpaqueBorder                    = !(255 > newStyle.border().color().map(Color::getAlpha).orElse(0));
         final boolean isSwingTreeComponent               = owner instanceof StylableComponent;
         final boolean backgroundIsActuallyBackground =
-                                    !( owner instanceof JTabbedPane ) &&
-                                    !( owner instanceof JSlider     );
-
+                                    !( owner instanceof JTabbedPane  ) && // The LaFs interpret ths tab buttons as background
+                                    !( owner instanceof JSlider      ) && // The track color is usually considered the background
+                                    !( owner instanceof JProgressBar );   // also the track color is usually considered the background
+                                    // TODO: Find and add more cases!
 
         if ( !hasBackground && _initialIsOpaque ) {
             // If the style has a border radius set we need to make sure that we have a background color:
@@ -191,32 +194,26 @@ final class StyleInstaller<C extends JComponent>
             if ( !backgroundIsAlreadySet || newStyle.base().backgroundColor().get() == UI.COLOR_UNDEFINED )
             {
                 _initialBackgroundColor = _initialBackgroundColor != null ? _initialBackgroundColor :  owner.getBackground();
-                Color newColor =  newStyle.base().backgroundColor().get();
-                if ( newColor == UI.COLOR_UNDEFINED)
-                    newColor = null;
+                Color newColor = newStyle.base().backgroundColor()
+                                                .filter( c -> c != UI.COLOR_UNDEFINED )
+                                                .orElse(null);
 
-                if ( !Objects.equals( owner.getBackground(), newColor ) ) {
-                    if ( !isSwingTreeComponent && backgroundIsActuallyBackground ) {
-                        Color finalNewColor = newColor;
-                        backgroundSetter = ()->owner.setBackground(finalNewColor);
-                        /*
-                            This component is not a SwingTree component, which means that
-                            the paint method is not overridden, and the style engine
-                            cannot render the background of the component itself.
-                            So we delegate this task to the look and feel.
-                        */
-                    }
-                    if ( owner instanceof JScrollPane ) {
-                        JScrollPane scrollPane = (JScrollPane) owner;
-                        if ( scrollPane.getViewport() != null ) {
-                            newColor = newStyle.base().backgroundColor().get();
-                            if ( newColor == UI.COLOR_UNDEFINED)
-                                newColor = null;
-
-                            JViewport viewport = scrollPane.getViewport();
-                            if ( !Objects.equals( viewport.getBackground(), newColor ) )
-                                viewport.setBackground( newColor );
-                        }
+                backgroundSetter = () -> {
+                    if ( !Objects.equals( owner.getBackground(), newColor ) )
+                        owner.setBackground(newColor);
+                };
+                /*
+                    This component is not a SwingTree component, which means that
+                    the paint method is not overridden, and the style engine
+                    cannot render the background of the component itself.
+                    So we delegate this task to the look and feel.
+                */
+                if ( owner instanceof JScrollPane ) {
+                    JScrollPane scrollPane = (JScrollPane) owner;
+                    if ( scrollPane.getViewport() != null ) {
+                        JViewport viewport = scrollPane.getViewport();
+                        if ( !Objects.equals( viewport.getBackground(), newColor ) )
+                            viewport.setBackground( newColor );
                     }
                 }
             }
@@ -310,19 +307,30 @@ final class StyleInstaller<C extends JComponent>
 
             boolean bypassLaFBackgroundPainting = requiresBackgroundPainting || (hasBackground && isSwingTreeComponent);
 
-            if ( bypassLaFBackgroundPainting && !Objects.equals( owner.getBackground(), UI.COLOR_UNDEFINED ) )
-                backgroundSetter = ()->owner.setBackground(UI.COLOR_UNDEFINED);
+            if ( bypassLaFBackgroundPainting )
+                if ( backgroundIsActuallyBackground )
+                    backgroundSetter = () -> {
+                        if ( !Objects.equals( owner.getBackground(), UI.COLOR_UNDEFINED ) )
+                            owner.setBackground(UI.COLOR_UNDEFINED);
+                    };
             /*
                 The above line looks very strange, but it is very important!
+
                 To understand what is going on here, you have to know that when a component is
-                flagged to be opaque, then every Swing look and feel will, before painting
+                flagged as opaque, then every Swing look and feel will, before painting
                 anything else, first fill out the entire background of the component with
                 the background color of the component.
+                It does this to ensure that rendering artifacts from the parent
+                are overridden.
 
                 Now this is a problem when you have the background layer of your SwingTree component
                 styled using various things like gradients, shadows, images, etc.
+                Because SwingTree, unfortunately, cannot hijack the internals of the ComponentUI,
+                it can however do some painting before the ComponentUI
+                through an overridden `paint(Graphics2D)` method!
 
-                We could simply set the opaque flag to false, but then we would lose the
+                Now, we could simply set the opaque flag to false in order to prevent the ComponentUI
+                from filling the component bounds, but then we would lose the
                 performance benefits of having the opaque flag set to true (avoiding the
                 traversal repaint of parent components, and their parent components, etc).
 
@@ -338,17 +346,6 @@ final class StyleInstaller<C extends JComponent>
                 component, it will actually paint nothing, and we can do the background
                 painting ourselves in the paint method of the component.
             */
-        }
-
-        if ( hasBackground ) {
-            Color newColor = newStyle.base().backgroundColor()
-                                            .filter( c -> c != UI.COLOR_UNDEFINED )
-                                            .orElse(null);
-
-            backgroundSetter = ()->{
-                if ( !Objects.equals( owner.getBackground(), newColor ) )
-                    owner.setBackground(newColor);
-            };
         }
 
         _applyGenericBaseStyleTo(owner, newStyle);

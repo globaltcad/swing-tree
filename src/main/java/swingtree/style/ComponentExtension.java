@@ -483,7 +483,7 @@ public final class ComponentExtension<C extends JComponent>
                 return newStyle;
         }
 
-        return _styleInstaller.applyStyleToComponentState(_owner, newStyle, _styleSource, _styleEngine);
+        return _styleInstaller.applyStyleToComponentState(_owner, newStyle, _styleSource);
     }
 
     static void paintWithClip( Graphics2D g2d, Shape clip, Runnable paintTask ) {

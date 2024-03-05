@@ -86,7 +86,9 @@ final class StyleRenderer
                 if ( backgroundPainter == Painter.none() )
                     continue;
 
-                conf.paintClippedTo( painterConf.clipArea(), g2d, () -> {
+                Shape allowedArea = conf.areas().get(painterConf.clipArea());
+
+                _paintClippedTo( allowedArea, g2d, () -> {
                     // We remember the current transform and clip so that we can reset them after each painter:
                     AffineTransform currentTransform = new AffineTransform(g2d.getTransform());
                     Shape           currentClip      = g2d.getClip();
@@ -124,6 +126,20 @@ final class StyleRenderer
             }
         }
         // And that's it! We have rendered a style layer!
+    }
+
+
+    private static void _paintClippedTo( Shape newClip, Graphics g, Runnable painter ) {
+        Shape oldClip = g.getClip();
+
+        if ( newClip != null && newClip != oldClip ) {
+            newClip = StyleUtil.intersect(newClip, oldClip);
+            g.setClip(newClip);
+        }
+
+        painter.run();
+
+        g.setClip(oldClip);
     }
 
     private static void _drawBorder(LayerRenderConf conf, Color color, Graphics2D g2d )
