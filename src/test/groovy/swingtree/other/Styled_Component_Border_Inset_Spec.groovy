@@ -171,9 +171,9 @@ class Styled_Component_Border_Inset_Spec extends Specification
             2       | { it -> it }
             3       | { it -> it }
 
-            //1       | { it -> it.foregroundColor(Color.BLUE) } // WIP
-            //2       | { it -> it.foregroundColor(Color.BLUE) }
-            //3       | { it -> it.foregroundColor(Color.BLUE) }
+            1       | { it -> it.foregroundColor(Color.BLUE) }
+            2       | { it -> it.foregroundColor(Color.BLUE) }
+            3       | { it -> it.foregroundColor(Color.BLUE) }
     }
 
 }
