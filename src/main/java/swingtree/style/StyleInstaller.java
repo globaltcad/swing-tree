@@ -83,6 +83,8 @@ final class StyleInstaller<C extends JComponent>
         final boolean noImages                = StyleConf.none().hasEqualImagesAs(newStyle);
         final boolean noProperties            = StyleConf.none().hasEqualPropertiesAs(newStyle);
 
+        final boolean baseStyleIsBasic = newStyle.base().isBasic();
+
         final boolean allShadowsAreBorderShadows     = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) || styleLayer.shadows().everyNamedStyle(ns -> !ns.style().color().isPresent() ) );
         final boolean allGradientsAreBorderGradients = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) || styleLayer.gradients().everyNamedStyle(ns -> ns.style().colors().length == 0 ) );
         final boolean allNoisesAreBorderNoises       = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) || styleLayer.noises().everyNamedStyle(ns -> ns.style().colors().length == 0 ) );
@@ -102,19 +104,18 @@ final class StyleInstaller<C extends JComponent>
                                     noImages                &&
                                     noProperties;
 
-        final boolean onlyDimensionalityIsStyled =
-                                   noLayoutStyle           &&
-                                   noPaddingAndMarginStyle &&
-                                   noBorderStyle           &&
-                                   noBaseStyle             &&
-                                   noFontStyle             &&
-                                   !noDimensionalityStyle  &&
-                                   noShadowStyle           &&
-                                   noPainters              &&
-                                   noGradients             &&
-                                   noNoises                &&
-                                   noImages                &&
-                                   noProperties;
+        final boolean pluginsNeeded = !(// A plugin is either a Border or ComponentUI!
+                                   noLayoutStyle                              &&
+                                   noPaddingAndMarginStyle                    &&
+                                   noBorderStyle                              &&
+                                   (noBaseStyle || baseStyleIsBasic)          &&
+                                   noFontStyle                                &&
+                                   noShadowStyle                              &&
+                                   noPainters                                 &&
+                                   noGradients                                &&
+                                   noNoises                                   &&
+                                   noImages                                   &&
+                                   noProperties );
 
         final boolean styleCanBeRenderedThroughBorder = (
                                                        (noBaseStyle   || !newStyle.base().hasAnyColors())&&
@@ -127,18 +128,17 @@ final class StyleInstaller<C extends JComponent>
 
         Runnable backgroundSetter = ()->{};
 
-        if ( !onlyDimensionalityIsStyled && !isNotStyled )
+        if ( pluginsNeeded )
             installCustomBorderBasedStyleAndAnimationRenderer(owner, newStyle);
         else if ( styleSource.hasNoAnimationStylers() )
             _uninstallCustomBorderBasedStyleAndAnimationRenderer(owner);
 
-
-        if ( !onlyDimensionalityIsStyled ) {
+        if ( pluginsNeeded ) {
             if ( !styleCanBeRenderedThroughBorder )
                 _dynamicLaF = _dynamicLaF.establishLookAndFeelFor(newStyle, owner);
         }
 
-        if ( isNotStyled || onlyDimensionalityIsStyled ) {
+        if ( isNotStyled || !pluginsNeeded ) {
             _dynamicLaF = _dynamicLaF._uninstallCustomLaF(owner);
             if ( _initialBackgroundColor != null ) {
                 if ( !Objects.equals( owner.getBackground(), _initialBackgroundColor ) )

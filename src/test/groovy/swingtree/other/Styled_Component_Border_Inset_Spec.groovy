@@ -9,6 +9,7 @@ import swingtree.api.Styler
 import utility.Utility
 
 import javax.swing.*
+import javax.swing.border.Border
 import java.awt.*
 
 @Title("The SwingTree Border Insets")
@@ -138,7 +139,7 @@ class Styled_Component_Border_Inset_Spec extends Specification
     }
 
     def 'A `JMenuItem` will not loose its default Nimbus border insets when styled!'(
-        float uiScale, Styler<JMenuItem> styler
+        float uiScale, Styler<JMenuItem> styler, Class<? extends Border> borderType
     ) {
         reportInfo """
             Many components have default borders with default insets. 
@@ -163,17 +164,27 @@ class Styled_Component_Border_Inset_Spec extends Specification
             var border = component.getBorder()
         expect : 'The insets are as expected.'
             border.getBorderInsets(component) == new Insets(1, 12, 2, 13)
+        and : 'It has the expected border type:'
+            borderType.isAssignableFrom(border.getClass())
 
         where :
-            uiScale | styler
+            uiScale | styler                                     || borderType
 
-            1       | { it -> it }
-            2       | { it -> it }
-            3       | { it -> it }
+            1       | { it -> it }                               || javax.swing.plaf.synth.SynthBorder
+            2       | { it -> it }                               || javax.swing.plaf.synth.SynthBorder
+            3       | { it -> it }                               || javax.swing.plaf.synth.SynthBorder
 
-            1       | { it -> it.foregroundColor(Color.BLUE) }
-            2       | { it -> it.foregroundColor(Color.BLUE) }
-            3       | { it -> it.foregroundColor(Color.BLUE) }
+            1       | { it -> it.foregroundColor(Color.BLUE) }   || javax.swing.plaf.synth.SynthBorder
+            2       | { it -> it.foregroundColor(Color.BLUE) }   || javax.swing.plaf.synth.SynthBorder
+            3       | { it -> it.foregroundColor(Color.BLUE) }   || javax.swing.plaf.synth.SynthBorder
+
+            1       | { it -> it.cursor(UI.Cursor.HAND) }        || javax.swing.plaf.synth.SynthBorder
+            2       | { it -> it.cursor(UI.Cursor.HAND) }        || javax.swing.plaf.synth.SynthBorder
+            3       | { it -> it.cursor(UI.Cursor.HAND) }        || javax.swing.plaf.synth.SynthBorder
+
+            1       | { it -> it.foundationColor(Color.BLUE) }   || swingtree.style.StyleAndAnimationBorder
+            2       | { it -> it.foundationColor(Color.BLUE) }   || swingtree.style.StyleAndAnimationBorder
+            3       | { it -> it.foundationColor(Color.BLUE) }   || swingtree.style.StyleAndAnimationBorder
     }
 
 }
