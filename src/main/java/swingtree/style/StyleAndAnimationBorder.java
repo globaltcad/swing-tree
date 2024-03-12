@@ -89,6 +89,15 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
         return false;
     }
 
+    private boolean _canUseFormerBorderInsets() {
+        if ( _formerBorder != null ) {
+            BorderConf borderConf = _compExt.getStyle().border();
+            if ( !borderConf.isVisible() )
+                return true;
+        }
+        return false;
+    }
+
     private void _paintFormerBorder( Component c, Graphics g, int x, int y, int width, int height ) {
         try {
             x = x + _marginInsets.left;
@@ -135,7 +144,7 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
 
     public Outline getDelegatedInsets( StyleConf conf, boolean adjust )
     {
-        if ( !_canPaintFormerBorder() )
+        if ( !_canUseFormerBorderInsets() )
             return Outline.of(0, 0, 0, 0);
 
         if ( _formerBorder == null )

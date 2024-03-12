@@ -5,9 +5,11 @@ import spock.lang.Specification
 import spock.lang.Title
 import swingtree.SwingTree
 import swingtree.UI
+import swingtree.api.Styler
 import utility.Utility
 
 import javax.swing.*
+import javax.swing.border.Border
 import java.awt.*
 
 @Title("The SwingTree Border Insets")
@@ -26,6 +28,10 @@ import java.awt.*
 ''')
 class Styled_Component_Border_Inset_Spec extends Specification
 {
+    def cleanup() {
+        UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
+    }
+
 
     def 'A heavily styled text field will have the correct border insets!'(
         float uiScale
@@ -130,6 +136,55 @@ class Styled_Component_Border_Inset_Spec extends Specification
 
         where :
             uiScale << [1, 2, 3]
+    }
+
+    def 'A `JMenuItem` will not loose its default Nimbus border insets when styled!'(
+        float uiScale, Styler<JMenuItem> styler, Class<? extends Border> borderType
+    ) {
+        reportInfo """
+            Many components have default borders with default insets. 
+            When using the nimbus look and feel, then the menu item 
+            will have a default border with default insets.
+            When you then style the menu item 
+            (which SwingTree largely does through the border), 
+            then you should not loose these default insets provided by the nimbus look and feel.
+        """
+        given : 'We first switch to the nimbus look and feel'
+            Utility.setLaF(Utility.LaF.NIMBUS)
+        and : """
+            Then we create a menu item saying "SwingTree" in japanese and 
+            then we style it with a custom styler lambda.
+        """
+            var ui =
+                    UI.menuItem("ブランコツリー")
+                    .withStyle( styler);
+
+        and : 'We unpack the component and its border:'
+            var component = ui.get(JMenuItem)
+            var border = component.getBorder()
+        expect : 'The insets are as expected.'
+            border.getBorderInsets(component) == new Insets(1, 12, 2, 13)
+        and : 'It has the expected border type:'
+            borderType.isAssignableFrom(border.getClass())
+
+        where :
+            uiScale | styler                                     || borderType
+
+            1       | { it -> it }                               || javax.swing.plaf.synth.SynthBorder
+            2       | { it -> it }                               || javax.swing.plaf.synth.SynthBorder
+            3       | { it -> it }                               || javax.swing.plaf.synth.SynthBorder
+
+            1       | { it -> it.foregroundColor(Color.BLUE) }   || javax.swing.plaf.synth.SynthBorder
+            2       | { it -> it.foregroundColor(Color.BLUE) }   || javax.swing.plaf.synth.SynthBorder
+            3       | { it -> it.foregroundColor(Color.BLUE) }   || javax.swing.plaf.synth.SynthBorder
+
+            1       | { it -> it.cursor(UI.Cursor.HAND) }        || javax.swing.plaf.synth.SynthBorder
+            2       | { it -> it.cursor(UI.Cursor.HAND) }        || javax.swing.plaf.synth.SynthBorder
+            3       | { it -> it.cursor(UI.Cursor.HAND) }        || javax.swing.plaf.synth.SynthBorder
+
+            1       | { it -> it.foundationColor(Color.BLUE) }   || swingtree.style.StyleAndAnimationBorder
+            2       | { it -> it.foundationColor(Color.BLUE) }   || swingtree.style.StyleAndAnimationBorder
+            3       | { it -> it.foundationColor(Color.BLUE) }   || swingtree.style.StyleAndAnimationBorder
     }
 
 }

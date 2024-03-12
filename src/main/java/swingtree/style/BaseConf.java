@@ -60,6 +60,11 @@ final class BaseConf
         _orientation     = orientation;
     }
 
+    boolean isBasic() {
+        return Objects.equals(_foundationColor, _NONE._foundationColor) &&
+               Objects.equals(_backgroundColor, _NONE._backgroundColor);
+    }
+
     public Optional<ImageIcon> icon() { return Optional.ofNullable(_icon); }
 
     public UI.FitComponent fit() { return _fit; }
@@ -78,31 +83,31 @@ final class BaseConf
         return _backgroundColor != null || _foundationColor != null || _foregroundColor != null;
     }
 
-    BaseConf icon(ImageIcon icon ) {
+    BaseConf icon( ImageIcon icon ) {
         return new BaseConf(icon, _fit, _foundationColor, _backgroundColor, _foregroundColor, _cursor, _orientation);
     }
 
-    BaseConf fit(UI.FitComponent fit ) {
+    BaseConf fit( UI.FitComponent fit ) {
         return new BaseConf(_icon, fit, _foundationColor, _backgroundColor, _foregroundColor, _cursor, _orientation);
     }
 
-    BaseConf foundationColor(Color foundation ) {
+    BaseConf foundationColor( Color foundation ) {
         return new BaseConf(_icon, _fit, foundation, _backgroundColor, _foregroundColor, _cursor, _orientation);
     }
 
-    BaseConf backgroundColor(Color color ) {
+    BaseConf backgroundColor( Color color ) {
         return new BaseConf(_icon, _fit, _foundationColor, color, _foregroundColor, _cursor, _orientation);
     }
 
-    BaseConf foregroundColor(Color color ) {
+    BaseConf foregroundColor( Color color ) {
         return new BaseConf(_icon, _fit, _foundationColor, _backgroundColor, color, _cursor, _orientation);
     }
 
-    BaseConf cursor(Cursor cursor ) {
+    BaseConf cursor( Cursor cursor ) {
         return new BaseConf(_icon, _fit, _foundationColor, _backgroundColor, _foregroundColor, cursor, _orientation);
     }
 
-    BaseConf orientation(UI.ComponentOrientation orientation ) {
+    BaseConf orientation( UI.ComponentOrientation orientation ) {
         return new BaseConf(_icon, _fit, _foundationColor, _backgroundColor, _foregroundColor, _cursor, orientation);
     }
 
