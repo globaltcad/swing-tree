@@ -1,5 +1,6 @@
 package swingtree.animation;
 
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import swingtree.style.ComponentExtension;
 
@@ -11,7 +12,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  *  Runs an {@link Animation} on a {@link Component} according to a {@link LifeSpan} and a {@link RunCondition}.
@@ -20,7 +20,7 @@ class ComponentAnimator
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(ComponentAnimator.class);
 
-    private final WeakReference<Component> _compRef;
+    private final @Nullable WeakReference<Component> _compRef;
     private final LifeSpan      _lifeSpan;
     private final Stride        _stride;
     private final RunCondition _condition;
@@ -29,11 +29,11 @@ class ComponentAnimator
 
 
     ComponentAnimator(
-        Component     component, // may be null if the animation is not associated with a specific component
-        LifeSpan      lifeSpan,
-        Stride        stride,
-        RunCondition  condition,
-        Animation     animation
+            @Nullable Component component, // may be null if the animation is not associated with a specific component
+            LifeSpan            lifeSpan,
+            Stride              stride,
+            RunCondition        condition,
+            Animation           animation
     ) {
         _compRef   = component == null ? null : new WeakReference<>(component);
         _lifeSpan  = Objects.requireNonNull(lifeSpan);

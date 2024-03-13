@@ -1,5 +1,6 @@
 package swingtree.animation;
 
+import org.jspecify.annotations.Nullable;
 import swingtree.ComponentDelegate;
 
 import java.awt.*;
@@ -37,10 +38,10 @@ import java.util.function.Predicate;
  */
 public class Animator
 {
-    private final LifeTime      _lifeTime;  // Never null
-    private final Stride        _stride;    // Never null
-    private final Component     _component; // may be null
-    private final RunCondition _condition; // may be null
+    private final LifeTime                _lifeTime;  // Never null
+    private final Stride                  _stride;    // Never null
+    private final @Nullable Component     _component; // may be null
+    private final @Nullable RunCondition _condition; // may be null
 
 
     /**
@@ -97,7 +98,12 @@ public class Animator
     }
 
 
-    private Animator( LifeTime lifeTime, Stride stride, Component component, RunCondition animation ) {
+    private Animator(
+        LifeTime               lifeTime,
+        Stride                 stride,
+        @Nullable Component    component,
+        @Nullable RunCondition animation
+    ) {
         _lifeTime  = Objects.requireNonNull(lifeTime);
         _stride    = Objects.requireNonNull(stride);
         _component = component; // may be null
