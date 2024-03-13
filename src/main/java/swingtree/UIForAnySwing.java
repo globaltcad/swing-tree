@@ -2356,7 +2356,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 })
                 ._with( c -> {
                     Color newColor = condition.get() ? colorIfTrue : colorIfFalse;
-                    if ( newColor == UI.COLOR_UNDEFINED)
+                    if ( newColor == UI.COLOR_UNDEFINED )
                         newColor = null;
                     c.setForeground( newColor );
                 })
