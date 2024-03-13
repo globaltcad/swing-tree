@@ -1,5 +1,6 @@
 package swingtree.dialogs;
 
+import org.jspecify.annotations.Nullable;
 import swingtree.UI;
 
 import javax.swing.Icon;
@@ -29,19 +30,19 @@ public final class MessageDialog
                 );
     }
 
-    private final int       _type;
-    private final String    _title;
-    private final String    _message;
-    private final Icon      _icon;
-    private final Component _parent;
+    private final int                 _type;
+    private final String              _title;
+    private final String              _message;
+    private final @Nullable Icon      _icon;
+    private final @Nullable Component _parent;
 
 
     private MessageDialog(
-        int type,
-        String title,
-        String message,
-        Icon icon,
-        Component parent
+        int                 type,
+        String              title,
+        String              message,
+        @Nullable Icon      icon,
+        @Nullable Component parent
     ) {
         _type    = type;
         _title   = title;
