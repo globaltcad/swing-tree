@@ -5,6 +5,7 @@ import net.miginfocom.layout.ConstraintParser;
 import net.miginfocom.layout.DimConstraint;
 import net.miginfocom.layout.UnitValue;
 import net.miginfocom.swing.MigLayout;
+import org.jspecify.annotations.Nullable;
 import swingtree.UI;
 import swingtree.api.Painter;
 import swingtree.components.JIcon;
@@ -44,11 +45,11 @@ import java.util.Optional;
  */
 final class StyleInstaller<C extends JComponent>
 {
-    private DynamicLaF _dynamicLaF = DynamicLaF.none(); // Not null, but can be DynamicLaF.none().
-    private Color      _initialBackgroundColor   = null;
-    private Color      _currentBackgroundColor   = null;
-    private Boolean    _initialIsOpaque          = null;
-    private Boolean    _initialContentAreaFilled = null;
+    private DynamicLaF        _dynamicLaF = DynamicLaF.none(); // Not null, but can be DynamicLaF.none().
+    private @Nullable Color   _initialBackgroundColor   = null;
+    private @Nullable Color   _currentBackgroundColor   = null;
+    private @Nullable Boolean _initialIsOpaque          = null;
+    private @Nullable Boolean _initialContentAreaFilled = null;
 
 
     void installCustomBorderBasedStyleAndAnimationRenderer( C owner, StyleConf styleConf) {

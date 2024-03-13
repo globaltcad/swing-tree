@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import org.jspecify.annotations.Nullable;
 import swingtree.api.Layout;
 
 import java.util.Objects;
@@ -17,18 +18,18 @@ final class LayoutConf
     static LayoutConf none() { return _NONE; }
 
 
-    private final Layout _layout;
+    private final Layout          _layout;
 
-    private final Object _constraint;
-    private final Float  _alignmentX;
-    private final Float  _alignmentY;
+    private final @Nullable Object _constraint;
+    private final @Nullable Float  _alignmentX;
+    private final @Nullable Float  _alignmentY;
 
 
     private LayoutConf(
-        Layout layout,
-        Object constraint,
-        Float alignmentX,
-        Float alignmentY
+        Layout           layout,
+        @Nullable Object constraint,
+        @Nullable Float  alignmentX,
+        @Nullable Float  alignmentY
     ) {
         _layout     = Objects.requireNonNull(layout);
         _constraint = constraint;
@@ -53,7 +54,7 @@ final class LayoutConf
     LayoutConf alignmentY(Float alignmentY ) { return new LayoutConf(_layout, _constraint, _alignmentX, alignmentY); }
 
     @Override
-    public int hashCode() { return Objects.hash(_layout, _alignmentX, _alignmentY); }
+    public int hashCode() { return Objects.hash(_layout, _constraint, _alignmentX, _alignmentY); }
 
     @Override
     public boolean equals( Object obj ) {

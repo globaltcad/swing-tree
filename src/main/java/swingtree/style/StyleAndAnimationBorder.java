@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import swingtree.UI;
 import swingtree.api.Styler;
@@ -32,7 +33,7 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
     private final Border                _formerBorder;
     private final boolean               _borderWasNotPainted;
 
-    private Insets _insets;
+    private @Nullable Insets _insets;
     private final Insets _marginInsets      = new Insets(0, 0, 0, 0);
     private final Insets _paddingInsets     = new Insets(0, 0, 0, 0);
     private final Insets _fullPaddingInsets = new Insets(0, 0, 0, 0);
@@ -128,7 +129,10 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
     public Insets getBorderInsets( Component c ) {
         if ( _insets == null )
             _compExt.gatherApplyAndInstallStyle(false);
-        return _insets;
+        if ( _insets == null )
+            return new Insets(0, 0, 0, 0);
+        else
+            return _insets;
     }
 
     void recalculateInsets(StyleConf styleConf)

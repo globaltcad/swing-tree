@@ -1,5 +1,7 @@
 package swingtree.style;
 
+import org.jspecify.annotations.Nullable;
+
 import java.awt.Color;
 import java.util.Objects;
 import java.util.Optional;
@@ -10,14 +12,14 @@ final class BaseColorConf
 
     static BaseColorConf none() { return _NONE; }
 
-    private final Color _foundationColor;
-    private final Color _backgroundColor;
-    private final Color _borderColor;
+    private final @Nullable Color _foundationColor;
+    private final @Nullable Color _backgroundColor;
+    private final @Nullable Color _borderColor;
 
     static BaseColorConf of(
-        Color foundationColor,
-        Color backgroundColor,
-        Color borderColor
+        @Nullable Color foundationColor,
+        @Nullable Color backgroundColor,
+        @Nullable Color borderColor
     ) {
         if (
             foundationColor == null &&
@@ -30,9 +32,9 @@ final class BaseColorConf
     }
 
     BaseColorConf(
-        Color foundationColor,
-        Color backgroundColor,
-        Color borderColor
+        @Nullable Color foundationColor,
+        @Nullable Color backgroundColor,
+        @Nullable Color borderColor
     ) {
         _foundationColor = foundationColor;
         _backgroundColor = backgroundColor;

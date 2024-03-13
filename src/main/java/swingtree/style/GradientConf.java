@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import swingtree.UI;
 
@@ -550,7 +551,7 @@ public final class GradientConf implements Simplifiable<GradientConf>
     }
 
     @Override
-    public boolean equals( Object o ) {
+    public boolean equals( @Nullable Object o ) {
         if ( this == o ) return true;
         if ( !(o instanceof GradientConf) ) return false;
         GradientConf that = (GradientConf) o;

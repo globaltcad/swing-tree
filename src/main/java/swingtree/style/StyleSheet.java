@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import swingtree.api.Styler;
 
@@ -367,17 +368,19 @@ public abstract class StyleSheet
         for ( int i = subToSuper.size() - 1; i >= 0; i-- ) {
             StyleTrait<?> trait = subToSuper.get(i);
             ComponentStyleDelegate delegate = new ComponentStyleDelegate<>(toBeStyled, startingStyle);
-            startingStyle = _styleDeclarations.get(trait).style(delegate).style();
+            Styler<?> styler = _styleDeclarations.get(trait);
+            if ( styler != null )
+                startingStyle = styler.style(delegate).style();
         }
 
         return startingStyle;
     }
 
-    private StyleTrait<?> _merge(
-        StyleTrait<?>       currentTrait,
-        StyleTrait<?>       lastAdded,
-        List<StyleTrait<?>> subToSuper,
-        List<String>        inheritedTraits
+    private @Nullable StyleTrait<?> _merge(
+        StyleTrait<?>           currentTrait,
+        @Nullable StyleTrait<?> lastAdded,
+        List<StyleTrait<?>>     subToSuper,
+        List<String>            inheritedTraits
     ) {
         boolean lastIsSuper = lastAdded != null && lastAdded.group().isEmpty() && !lastAdded.thisInherits(currentTrait);
         if ( lastIsSuper )
@@ -458,8 +461,11 @@ public abstract class StyleSheet
             visited.add(current);
 
             // We recursively call the dfs method on each of the current trait's extensions.
-            for ( StyleTrait<?> extension : _traitGraph.get(current) )
-                _depthFirstSearch(extension, visited);
+
+            List<StyleTrait<?>> traits = _traitGraph.get(current);
+            if ( traits != null )
+                for ( StyleTrait<?> extension : traits )
+                    _depthFirstSearch(extension, visited);
 
             // We remove the current trait from the visited list.
             visited.remove(current);
@@ -503,17 +509,20 @@ public abstract class StyleSheet
                 List<StyleTrait<?>> stack
         ) {
             stack.add(current);
-            if ( _traitGraph.get(current).isEmpty() ) {
-                List<List<StyleTrait<?>>> newPath = Collections.singletonList(new ArrayList<>(stack));
-                // We remove the last trait from the stack.
-                stack.remove(stack.size() - 1);
-                paths.addAll(newPath);
-                return;
-            }
+            List<StyleTrait<?>> traits = _traitGraph.get(current);
+            if ( traits != null ) {
+                if ( traits.isEmpty() ) {
+                    List<List<StyleTrait<?>>> newPath = Collections.singletonList(new ArrayList<>(stack));
+                    // We remove the last trait from the stack.
+                    stack.remove(stack.size() - 1);
+                    paths.addAll(newPath);
+                    return;
+                }
 
-            for ( StyleTrait<?> extension : _traitGraph.get(current) )
-                if ( extension != current )
-                    _traverse(extension, paths, stack);
+                for ( StyleTrait<?> extension : traits )
+                    if ( extension != current )
+                        _traverse(extension, paths, stack);
+            }
 
             // We remove the last trait from the stack.
             stack.remove(stack.size() - 1);

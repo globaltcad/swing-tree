@@ -4,6 +4,7 @@ import com.github.weisj.jsvg.SVGDocument;
 import com.github.weisj.jsvg.attributes.ViewBox;
 import com.github.weisj.jsvg.geometry.size.FloatSize;
 import com.github.weisj.jsvg.parser.SVGLoader;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import swingtree.UI;
 import swingtree.layout.Size;
@@ -53,7 +54,7 @@ public final class SvgIcon extends ImageIcon
     private static final Insets          ZERO_INSETS           = new Insets(0,0,0,0);
 
 
-    private final SVGDocument _svgDocument;
+    private final @Nullable SVGDocument _svgDocument;
 
     private final int _width;
     private final int _height;
@@ -61,15 +62,15 @@ public final class SvgIcon extends ImageIcon
     private final UI.FitComponent _fitComponent;
     private final UI.Placement    _preferredPlacement;
 
-    private BufferedImage _cache = null;
+    private @Nullable BufferedImage _cache = null;
 
 
     private SvgIcon(
-        SVGDocument     svgDocument, // nullable
-        int             width,
-        int             height,
-        UI.FitComponent fitComponent,
-        UI.Placement    preferredPlacement
+        @Nullable SVGDocument svgDocument, // nullable
+        int                   width,
+        int                   height,
+        UI.FitComponent       fitComponent,
+        UI.Placement          preferredPlacement
     ) {
         super();
         _svgDocument        = svgDocument;
@@ -140,7 +141,7 @@ public final class SvgIcon extends ImageIcon
     }
 
 
-    private static SVGDocument _loadSvgDocument( URL svgUrl ) {
+    private static @Nullable SVGDocument _loadSvgDocument( URL svgUrl ) {
         SVGDocument tempSVGDocument = null;
         try {
             SVGLoader loader = new SVGLoader();
@@ -151,7 +152,7 @@ public final class SvgIcon extends ImageIcon
         return tempSVGDocument;
     }
 
-    private static SVGDocument _loadSvgDocument( InputStream stream ) {
+    private static @Nullable SVGDocument _loadSvgDocument( InputStream stream ) {
         SVGDocument tempSVGDocument = null;
         try {
             SVGLoader loader = new SVGLoader();
@@ -256,7 +257,11 @@ public final class SvgIcon extends ImageIcon
         if ( width < 0 )
             return this.withIconSize(NO_SIZE, NO_SIZE);
 
-        double ratio = (double) _svgDocument.size().height / (double) _svgDocument.size().width;
+        double ratio = 1d;
+
+        if ( _svgDocument != null )
+            ratio = (double) _svgDocument.size().height / (double) _svgDocument.size().width;
+
         int logicalHeight = (int) Math.ceil( width * ratio );
 
         if ( width == _width && logicalHeight == _height )
@@ -285,7 +290,11 @@ public final class SvgIcon extends ImageIcon
         if ( height < 0 )
             return this.withIconSize(NO_SIZE, NO_SIZE);
 
-        double ratio = (double) _svgDocument.size().width / (double) _svgDocument.size().height;
+        double ratio = 1d;
+
+        if ( _svgDocument != null )
+            ratio = (double) _svgDocument.size().width / (double) _svgDocument.size().height;
+
         int logicalWidth = (int) Math.ceil( height * ratio );
 
         if ( logicalWidth == _width && height == _height )
@@ -299,13 +308,15 @@ public final class SvgIcon extends ImageIcon
      *         a subclass of {@link java.awt.geom.Dimension2D}.
      */
     public FloatSize getSvgSize() {
+        if ( _svgDocument == null )
+            return new FloatSize(0, 0);
         return _svgDocument.size();
     }
 
     /**
      * @return The underlying {@link SVGDocument} that is used to render the icon.
      */
-    public SVGDocument getSvgDocument() {
+    public @Nullable SVGDocument getSvgDocument() {
         return _svgDocument;
     }
 
@@ -483,7 +494,7 @@ public final class SvgIcon extends ImageIcon
     }
 
     void paintIcon(
-            final java.awt.Component c,
+            final @Nullable Component c,
             final java.awt.Graphics g,
             int x,
             int y,
@@ -494,7 +505,7 @@ public final class SvgIcon extends ImageIcon
     }
 
     private void _paintIcon(
-        final java.awt.Component c,
+        final @Nullable Component c,
         final java.awt.Graphics g,
         int x,
         int y,

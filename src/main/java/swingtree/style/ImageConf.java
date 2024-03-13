@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import org.jspecify.annotations.Nullable;
 import swingtree.UI;
 import swingtree.api.IconDeclaration;
 import swingtree.layout.Size;
@@ -171,16 +172,16 @@ public final class ImageConf implements Simplifiable<ImageConf>
     static ImageConf none() { return _NONE; }
 
     static ImageConf of(
-        Color            primer,
-        ImageIcon        image,
-        UI.Placement     placement,
-        boolean          repeat,
-        UI.FitComponent  fitMode,
-        Size             size,
-        float            opacity,
-        Outline          padding,
-        Offset           offset,
-        UI.ComponentArea clipArea
+        @Nullable Color     primer,
+        @Nullable ImageIcon image,
+        UI.Placement        placement,
+        boolean             repeat,
+        UI.FitComponent     fitMode,
+        Size                size,
+        float               opacity,
+        Outline             padding,
+        Offset              offset,
+        UI.ComponentArea    clipArea
     ) {
         if (
             primer    == _NONE._primer    &&
@@ -200,30 +201,29 @@ public final class ImageConf implements Simplifiable<ImageConf>
     }
 
 
-    private final Color            _primer;
-
-    private final ImageIcon        _image;
-    private final UI.Placement     _placement;
-    private final boolean          _repeat;
-    private final UI.FitComponent  _fitMode;
-    private final Size             _size;
-    private final float            _opacity;
-    private final Outline          _padding;
-    private final Offset           _offset;
-    private final UI.ComponentArea _clipArea;
+    private final @Nullable Color     _primer;
+    private final @Nullable ImageIcon _image;
+    private final UI.Placement        _placement;
+    private final boolean             _repeat;
+    private final UI.FitComponent     _fitMode;
+    private final Size                _size;
+    private final float               _opacity;
+    private final Outline             _padding;
+    private final Offset              _offset;
+    private final UI.ComponentArea    _clipArea;
 
 
     private ImageConf(
-        Color            primer,
-        ImageIcon        image,
-        UI.Placement     placement,
-        boolean          repeat,
-        UI.FitComponent  fitMode,
-        Size             size,
-        float            opacity,
-        Outline          padding,
-        Offset           offset,
-        UI.ComponentArea clipArea
+        @Nullable Color      primer,
+        @Nullable ImageIcon  image,
+        UI.Placement         placement,
+        boolean              repeat,
+        UI.FitComponent      fitMode,
+        Size                 size,
+        float                opacity,
+        Outline              padding,
+        Offset               offset,
+        UI.ComponentArea     clipArea
     ) {
         _primer    = primer;
         _image     = image;
@@ -276,7 +276,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
      * @param color The primer color of the image style.
      * @return A new {@link ImageConf} instance with the specified primer color.
      */
-    public ImageConf primer(Color color ) {
+    public ImageConf primer( Color color ) {
         Objects.requireNonNull(color, "Use UI.COLOR_UNDEFINED instead of null to represent the absence of a color.");
         if ( color == UI.COLOR_UNDEFINED)
             color = null;

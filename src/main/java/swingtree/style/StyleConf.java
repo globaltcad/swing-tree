@@ -135,9 +135,12 @@ public final class StyleConf
      * @return The default shadow style.
      */
     public ShadowConf shadow() {
-        return _layers.get(ShadowConf.DEFAULT_LAYER)
+        ShadowConf found =
+                        _layers.get(ShadowConf.DEFAULT_LAYER)
                         .shadows()
                         .get(StyleUtil.DEFAULT_KEY);
+
+        return found != null ? found : ShadowConf.none();
     }
 
     /**
@@ -147,7 +150,10 @@ public final class StyleConf
      */
     public ShadowConf shadow( UI.Layer layer, String shadowName ) {
         Objects.requireNonNull(shadowName);
-        return _layers.get(layer).shadows().get(shadowName);
+        StyleConfLayer layerConf = _layers.get(layer);
+        NamedConfigs<ShadowConf> shadows = layerConf.shadows();
+        ShadowConf found = shadows.get(shadowName);
+        return found != null ? found : ShadowConf.none();
     }
 
     /**
@@ -397,7 +403,10 @@ public final class StyleConf
 
     GradientConf gradient( UI.Layer layer, String gradName ) {
         Objects.requireNonNull(gradName);
-        return _layers.get(layer).gradients().get(gradName);
+        StyleConfLayer layerConf = _layers.get(layer);
+        NamedConfigs<GradientConf> gradients = layerConf.gradients();
+        GradientConf found = gradients.get(gradName);
+        return found != null ? found : GradientConf.none();
     }
 
     StyleConf noise( UI.Layer layer, String noiseName, Function<NoiseConf, NoiseConf> styler ) {

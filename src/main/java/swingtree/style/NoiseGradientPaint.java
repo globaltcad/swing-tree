@@ -1,6 +1,7 @@
 package swingtree.style;
 
 
+import org.jspecify.annotations.Nullable;
 import swingtree.api.NoiseFunction;
 
 import java.awt.*;
@@ -36,7 +37,7 @@ final class NoiseGradientPaint implements Paint
             cachedContext = context;
         }
 
-        private ConicalGradientPaintContext get(Rectangle bounds, Point2D center, AffineTransform transform) {
+        private @Nullable ConicalGradientPaintContext get(Rectangle bounds, Point2D center, AffineTransform transform) {
             if (this.bounds.equals(bounds) && this.center.equals(center) && this.transform.equals(transform))
                 return cachedContext;
             else
@@ -57,7 +58,7 @@ final class NoiseGradientPaint implements Paint
     private final float[] alphaStepLookup;
     private final Color[] colors;
     private static final float INT_TO_FLOAT_CONST = 1f / 255f;
-    private CachedContext cached;
+    private @Nullable CachedContext cached;
 
 
     public NoiseGradientPaint(
@@ -231,7 +232,7 @@ final class NoiseGradientPaint implements Paint
         }
 
         @Override
-        public Raster getRaster(
+        public @Nullable Raster getRaster(
             final int X,
             final int Y,
             final int TILE_WIDTH,

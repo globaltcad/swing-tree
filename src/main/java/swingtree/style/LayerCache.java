@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import org.jspecify.annotations.Nullable;
 import swingtree.UI;
 import swingtree.layout.Size;
 
@@ -57,11 +58,11 @@ final class LayerCache
     }
 
 
-    private final UI.Layer   _layer;
-    private CachedImage      _localCache;
-    private LayerRenderConf  _layerRenderData; // The key must be referenced strongly so that the value is not garbage collected (the cached image)
-    private boolean          _cachingMakesSense = false;
-    private boolean          _isInitialized     = false;
+    private final UI.Layer        _layer;
+    private @Nullable CachedImage _localCache;
+    private LayerRenderConf       _layerRenderData; // The key must be referenced strongly so that the value is not garbage collected (the cached image)
+    private boolean               _cachingMakesSense = false;
+    private boolean               _isInitialized     = false;
 
 
     public LayerCache( UI.Layer layer ) {

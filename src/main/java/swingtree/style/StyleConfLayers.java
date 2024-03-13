@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import org.jspecify.annotations.Nullable;
 import swingtree.UI;
 
 import java.util.Objects;
@@ -20,20 +21,21 @@ final class StyleConfLayers
         return _EMPTY;
     }
 
-    private final StyleConfLayer _background;
-    private final StyleConfLayer _content;
-    private final StyleConfLayer _border;
-    private final StyleConfLayer _foreground;
 
-    private final StyleConfLayer _any;
+    private final StyleConfLayer           _background;
+    private final StyleConfLayer           _content;
+    private final StyleConfLayer           _border;
+    private final StyleConfLayer           _foreground;
+
+    private final @Nullable StyleConfLayer _any;
 
 
     static StyleConfLayers of(
-        StyleConfLayer background,
-        StyleConfLayer content,
-        StyleConfLayer border,
-        StyleConfLayer foreground,
-        StyleConfLayer any
+        StyleConfLayer           background,
+        StyleConfLayer           content,
+        StyleConfLayer           border,
+        StyleConfLayer           foreground,
+        @Nullable StyleConfLayer any
     ) {
         StyleConfLayer empty = StyleConfLayer.empty();
         if (
@@ -49,11 +51,11 @@ final class StyleConfLayers
     }
 
     StyleConfLayers(
-        StyleConfLayer background,
-        StyleConfLayer content,
-        StyleConfLayer border,
-        StyleConfLayer foreground,
-        StyleConfLayer any
+        StyleConfLayer           background,
+        StyleConfLayer           content,
+        StyleConfLayer           border,
+        StyleConfLayer           foreground,
+        @Nullable StyleConfLayer any
     ) {
         _background = Objects.requireNonNull(background);
         _content    = Objects.requireNonNull(content);

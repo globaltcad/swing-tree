@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import swingtree.UI;
 
@@ -82,11 +83,11 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
     public static ShadowConf none() { return _NONE; }
     
     static ShadowConf of(
-        Offset  offset,
-        float   shadowBlurRadius,
-        float   shadowSpreadRadius,
-        Color   shadowColor,
-        boolean isOutset
+        Offset          offset,
+        float           shadowBlurRadius,
+        float           shadowSpreadRadius,
+        @Nullable Color shadowColor,
+        boolean         isOutset
     ) {
         if ( 
             offset == _NONE._offset &&
@@ -100,19 +101,19 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
             return new ShadowConf(offset, shadowBlurRadius, shadowSpreadRadius, shadowColor, isOutset);
     }
 
-    private final Offset  _offset;
-    private final float   _blurRadius;
-    private final float   _spreadRadius;
-    private final Color   _color;
-    private final boolean _isOutset;
+    private final Offset          _offset;
+    private final float           _blurRadius;
+    private final float           _spreadRadius;
+    private final @Nullable Color _color;
+    private final boolean         _isOutset;
 
 
     private ShadowConf(
-        Offset  offset,
-        float   shadowBlurRadius,
-        float   shadowSpreadRadius,
-        Color   shadowColor,
-        boolean isOutset
+        Offset          offset,
+        float           shadowBlurRadius,
+        float           shadowSpreadRadius,
+        @Nullable Color shadowColor,
+        boolean         isOutset
     ) {
         _offset           = Objects.requireNonNull(offset);
         _blurRadius       = shadowBlurRadius;

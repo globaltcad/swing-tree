@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import swingtree.UI;
 
@@ -171,21 +172,21 @@ final class FontConf
     public static FontConf none() { return _NONE; }
 
     static FontConf of(
-        String                 name,
-        int                    fontSize,
-        float                  posture,
-        float                  weight,
-        float                  spacing,
-        Color                  color,
-        Color                  backgroundColor,
-        Color                  selectionColor,
-        Boolean                isUnderline,
-        Boolean                isStrike,
-        AffineTransform        transform,
-        Paint                  paint,
-        Paint                  backgroundPaint,
-        UI.HorizontalAlignment horizontalAlignment,
-        UI.VerticalAlignment   verticalAlignment
+        String                           name,
+        int                              fontSize,
+        float                            posture,
+        float                            weight,
+        float                            spacing,
+        @Nullable Color                  color,
+        @Nullable Color                  backgroundColor,
+        @Nullable Color                  selectionColor,
+        @Nullable Boolean                isUnderline,
+        @Nullable Boolean                isStrike,
+        @Nullable AffineTransform        transform,
+        @Nullable Paint                  paint,
+        @Nullable Paint                  backgroundPaint,
+        UI.@Nullable HorizontalAlignment horizontalAlignment,
+        UI.@Nullable VerticalAlignment   verticalAlignment
     ) {
         if (
             name.isEmpty() &&
@@ -230,34 +231,34 @@ final class FontConf
     private final float   _posture;
     private final float   _weight;
     private final float   _spacing;
-    private final Color   _color;
-    private final Color   _backgroundColor;
-    private final Color   _selectionColor; // Only relevant for text components with selection support.
-    private final Boolean _isUnderlined;
-    private final Boolean _isStrike;
-    private final Paint   _paint;
-    private final Paint   _backgroundPaint;
-    private final AffineTransform        _transform;
-    private final UI.HorizontalAlignment _horizontalAlignment;
-    private final UI.VerticalAlignment   _verticalAlignment;
+    private final @Nullable Color   _color;
+    private final @Nullable Color   _backgroundColor;
+    private final @Nullable Color   _selectionColor; // Only relevant for text components with selection support.
+    private final @Nullable Boolean _isUnderlined;
+    private final @Nullable Boolean _isStrike;
+    private final @Nullable Paint   _paint;
+    private final @Nullable Paint   _backgroundPaint;
+    private final @Nullable AffineTransform        _transform;
+    private final UI.@Nullable HorizontalAlignment _horizontalAlignment;
+    private final UI.@Nullable VerticalAlignment   _verticalAlignment;
 
 
     private FontConf(
-        String                 name,
-        int                    fontSize,
-        float                  posture,
-        float                  weight,
-        float                  spacing,
-        Color                  color,
-        Color                  backgroundColor,
-        Color                  selectionColor,
-        Boolean                isUnderline,
-        Boolean                isStrike,
-        AffineTransform        transform,
-        Paint                  paint,
-        Paint                  backgroundPaint,
-        UI.HorizontalAlignment horizontalAlignment,
-        UI.VerticalAlignment   verticalAlignment
+        String                           name,
+        int                              fontSize,
+        float                            posture,
+        float                            weight,
+        float                            spacing,
+        @Nullable Color                  color,
+        @Nullable Color                  backgroundColor,
+        @Nullable Color                  selectionColor,
+        @Nullable Boolean                isUnderline,
+        @Nullable Boolean                isStrike,
+        @Nullable AffineTransform        transform,
+        @Nullable Paint                  paint,
+        @Nullable Paint                  backgroundPaint,
+        UI.@Nullable HorizontalAlignment horizontalAlignment,
+        UI.@Nullable VerticalAlignment   verticalAlignment
     ) {
         _familyName = Objects.requireNonNull(name);
         _size    = fontSize;
@@ -292,7 +293,7 @@ final class FontConf
 
     Optional<Color> selectionColor() { return Optional.ofNullable(_selectionColor); }
 
-    boolean isUnderlined() { return _isUnderlined; }
+    boolean isUnderlined() { return _isUnderlined != null ? _isUnderlined : false; }
 
     Optional<AffineTransform> transform() { return Optional.ofNullable(_transform); }
 
