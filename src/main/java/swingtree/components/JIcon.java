@@ -1,5 +1,6 @@
 package swingtree.components;
 
+import org.jspecify.annotations.Nullable;
 import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.api.IconDeclaration;
@@ -75,7 +76,7 @@ public class JIcon extends JLabel implements StylableComponent
         */
     }
 
-    private static ImageIcon _getFromCacheOrLoadFrom( IconDeclaration declaration ) {
+    private static @Nullable ImageIcon _getFromCacheOrLoadFrom(IconDeclaration declaration ) {
         Map<IconDeclaration, ImageIcon> cache = SwingTree.get().getIconCache();
         ImageIcon icon = cache.get(declaration);
         if ( icon == null ) {

@@ -1,6 +1,7 @@
 package swingtree.components;
 
 import net.miginfocom.swing.MigLayout;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import sprouts.From;
 import swingtree.UI;
@@ -58,7 +59,7 @@ public class JScrollPanels extends UI.ScrollPane
 	 * @return A new {@link JScrollPanels} instance.
 	 */
 	public static JScrollPanels of(
-		UI.Align align, Dimension size
+		UI.Align align, @Nullable Dimension size
 	) {
 		Objects.requireNonNull(align);
 		return _construct(align, size, Collections.emptyList(), null, m -> UI.panel());
@@ -66,13 +67,13 @@ public class JScrollPanels extends UI.ScrollPane
 
 	private static JScrollPanels _construct(
 		UI.Align align,
-		Dimension shape,
+		@Nullable Dimension shape,
 		List<EntryViewModel> models,
-		String constraints,
+		@Nullable String constraints,
 		ViewSupplier<EntryViewModel> viewSupplier
 	) {
 		UI.Align type = align;
-		InternalPanel[] forwardReference = {null};
+		@Nullable InternalPanel[] forwardReference = {null};
 		List<EntryPanel> entries =
 				IntStream.range(0,models.size())
 						.mapToObj( i ->
@@ -237,7 +238,7 @@ public class JScrollPanels extends UI.ScrollPane
 	 * @param <T> The component type which ought to be found.
 	 * @return The found entry panel matching the provided type class and predicate lambda.
 	 */
-	private <T extends JComponent> EntryPanel get(
+	private <T extends JComponent> @Nullable EntryPanel get(
 			Class<T> type, Predicate<EntryPanel> condition
 	) {
 		Objects.requireNonNull(type);
@@ -305,7 +306,7 @@ public class JScrollPanels extends UI.ScrollPane
 	}
 
 	private <M extends EntryViewModel> EntryPanel _createEntryPanel(
-		String constraints,
+	    @Nullable String constraints,
 		M entryProvider,
 		ViewSupplier<M> viewSupplier,
 		int index
@@ -334,7 +335,7 @@ public class JScrollPanels extends UI.ScrollPane
 
 		private InternalPanel(
 		    List<EntryPanel> entryPanels,
-		    Dimension shape,
+			@Nullable Dimension shape,
 		    UI.Align type
 		) {
 			shape = ( shape == null ? new Dimension(120, 100) : shape );
@@ -445,7 +446,7 @@ public class JScrollPanels extends UI.ScrollPane
 			int position,
 			M provider,
 			ViewSupplier<M> viewSupplier,
-			String constraints
+			@Nullable String constraints
 		) {
 			Objects.requireNonNull(components);
 			Objects.requireNonNull(provider);
