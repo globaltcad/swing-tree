@@ -157,7 +157,7 @@ public class JScrollPanels extends UI.ScrollPane
 	 * @param viewSupplier A provider lambda which ought to turn a context object into a fitting UI.
 	 * @param <M> The type of the entry view model.
 	 */
-	public <M extends EntryViewModel> void addAllEntries( String constraints, List<M> entryViewModels, ViewSupplier<M> viewSupplier) {
+	public <M extends EntryViewModel> void addAllEntries( @Nullable String constraints, List<M> entryViewModels, ViewSupplier<M> viewSupplier) {
 		Objects.requireNonNull(entryViewModels);
 		List<EntryPanel> entryPanels = IntStream.range(0, entryViewModels.size())
 				.mapToObj(
@@ -200,7 +200,7 @@ public class JScrollPanels extends UI.ScrollPane
 	 *  @param viewSupplier The supplier which is used to create the view for the given entry view model.
 	 *  @param <M> The type of the entry view model.
 	 */
-	public <M extends EntryViewModel> void addEntryAt( int index, String attr, M entryViewModel, ViewSupplier<M> viewSupplier) {
+	public <M extends EntryViewModel> void addEntryAt( int index, @Nullable String attr, M entryViewModel, ViewSupplier<M> viewSupplier) {
 		Objects.requireNonNull(entryViewModel);
 		EntryPanel entryPanel = _createEntryPanel(attr, entryViewModel, viewSupplier, index);
 		_internal.add(entryPanel, index);
@@ -217,7 +217,7 @@ public class JScrollPanels extends UI.ScrollPane
 	 *  @param viewSupplier The supplier which is used to create the view for the given entry view model.
 	 *  @param <M> The type of the entry view model.
 	 */
-	public <M extends EntryViewModel> void setEntryAt( int index, String attr, M entryViewModel, ViewSupplier<M> viewSupplier) {
+	public <M extends EntryViewModel> void setEntryAt( int index, @Nullable String attr, M entryViewModel, ViewSupplier<M> viewSupplier) {
 		Objects.requireNonNull(entryViewModel);
 		EntryPanel entryPanel = _createEntryPanel(attr, entryViewModel, viewSupplier, index);
 		// We first remove the old entry panel and then add the new one.

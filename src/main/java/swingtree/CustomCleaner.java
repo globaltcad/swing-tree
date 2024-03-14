@@ -1,6 +1,7 @@
 package swingtree;
 
 
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +37,7 @@ final class CustomCleaner
     private final ReferenceQueue<Object> _referenceQueue = new ReferenceQueue<>();
 
     private final List<ReferenceWithCleanup<Object>> _toBeCleaned = new ArrayList<>();
-    private Thread _thread = null;
+    private @Nullable Thread _thread = null;
 
 
     private CustomCleaner() {}
@@ -44,7 +45,7 @@ final class CustomCleaner
 
     static class ReferenceWithCleanup<T> extends PhantomReference<T>
     {
-        private Runnable _action;
+        private @Nullable Runnable _action;
 
         ReferenceWithCleanup( T o, Runnable action, ReferenceQueue<T> queue ) {
             super( o, queue );
@@ -63,7 +64,16 @@ final class CustomCleaner
         }
     }
 
-    public void register( Object o, Runnable action ) {
+    public void register( @Nullable Object o, Runnable action ) {
+        if ( o == null ) {
+            log.warn("Attempt to register a null object for cleanup. This is not allowed!");
+            try {
+                action.run();
+            } catch (Exception e) {
+                log.error("Failed to execute cleanup action '"+action+"'.", e);
+            }
+            return;
+        }
         synchronized ( _referenceQueue ) {
             _toBeCleaned.add(new ReferenceWithCleanup<>(o, action, _referenceQueue));
             if ( _toBeCleaned.size() == 1 ) {
@@ -82,6 +92,10 @@ final class CustomCleaner
     }
 
     private void run() {
+        if ( _thread == null ) {
+            log.error("Cleaner thread is null! This should not happen!");
+            return;
+        }
         while ( _thread.isAlive() ) {
             while ( !_toBeCleaned.isEmpty() ) {
                 checkCleanup();

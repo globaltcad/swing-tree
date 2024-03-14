@@ -1,6 +1,7 @@
 package swingtree;
 
 
+import org.jspecify.annotations.Nullable;
 import sprouts.Action;
 import sprouts.Val;
 import sprouts.Var;
@@ -69,9 +70,9 @@ public final class SplitItem<I extends JMenuItem>
     }
 
     private final I _item;
-    private final Action<SplitItemDelegate<I>> _onButtonClick;
-    private final Action<SplitItemDelegate<I>> _onItemSelected;
-    private final Val<Boolean> _isEnabled;
+    private final @Nullable Action<SplitItemDelegate<I>> _onButtonClick;
+    private final @Nullable Action<SplitItemDelegate<I>> _onItemSelected;
+    private final @Nullable Val<Boolean> _isEnabled;
 
 
     private SplitItem( I item ) {
@@ -83,9 +84,9 @@ public final class SplitItem<I extends JMenuItem>
 
     private SplitItem(
         I item,
-        Action<SplitItemDelegate<I>> onClick,
-        Action<SplitItemDelegate<I>> onSelected,
-        Val<Boolean> isEnabled
+        @Nullable Action<SplitItemDelegate<I>> onClick,
+        @Nullable Action<SplitItemDelegate<I>> onSelected,
+        @Nullable Val<Boolean> isEnabled
     ) {
         _item           = Objects.requireNonNull(item);
         _onButtonClick  = onClick;

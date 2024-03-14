@@ -1,5 +1,6 @@
 package swingtree;
 
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import swingtree.api.IconDeclaration;
 import swingtree.api.Painter;
@@ -42,7 +43,7 @@ public final class SwingTree
 
     private static final String _DEFAULT_FONT = "defaultFont";
 
-	private static LazyRef<SwingTree> _INSTANCE = new LazyRef<>(SwingTree::new);
+	private static @Nullable LazyRef<SwingTree> _INSTANCE = new LazyRef<>(SwingTree::new);
 
 	/**
 	 * Returns the singleton instance of the {@link SwingTree}.
@@ -52,6 +53,8 @@ public final class SwingTree
 	public static SwingTree get() {
         if ( _INSTANCE == null )
             initialize();
+        if ( _INSTANCE == null )
+            throw new IllegalStateException("Failed to initialize SwingTree singleton!");
 
         return _INSTANCE.get();
     }
@@ -395,9 +398,9 @@ public final class SwingTree
     static final class UiScale
     {
         private final SwingTreeInitConfig config;
-        private PropertyChangeSupport changeSupport;
+        private @Nullable PropertyChangeSupport changeSupport;
 
-        private static Boolean jreHiDPI;
+        private static @Nullable Boolean jreHiDPI;
 
         private float scaleFactor = 1;
         private boolean initialized;
@@ -1120,7 +1123,7 @@ public final class SwingTree
         /**
          * map GTK/fontconfig names to equivalent JDK logical font name
          */
-        private static String mapFcName( String name ) {
+        private static @Nullable String mapFcName( String name ) {
             switch( name ) {
                 case "sans":		return "sansserif";
                 case "sans-serif":	return "sansserif";
@@ -1208,7 +1211,7 @@ public final class SwingTree
                 if( file.isFile() )
                     break;
             }
-            if( !file.isFile() )
+            if( file == null || !file.isFile() )
                 return Collections.emptyList();
 
             // read config file
@@ -1224,7 +1227,7 @@ public final class SwingTree
             return lines;
         }
 
-        private static String getConfigEntry( List<String> config, String group, String key ) {
+        private static @Nullable String getConfigEntry( List<String> config, String group, String key ) {
             int groupLength = group.length();
             int keyLength = key.length();
             boolean inGroup = false;
@@ -1256,14 +1259,14 @@ public final class SwingTree
 
     private static class LazyRef<T> {
         private final Supplier<T> supplier;
-        private volatile T value;
+        private volatile @Nullable T value;
 
         LazyRef( Supplier<T> supplier ) {
             this.supplier = Objects.requireNonNull( supplier );
         }
 
         T get() {
-            T value = this.value;
+            @Nullable T value = this.value;
             if( value == null ) {
                 synchronized( this ) {
                     value = this.value;

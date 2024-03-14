@@ -1,5 +1,6 @@
 package swingtree;
 
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import swingtree.style.ComponentExtension;
@@ -68,7 +69,7 @@ final class BuilderState<C extends java.awt.Component>
      *  A supplier for the component managed by this builder.
      *  The supplier is null when the builder is disposed.
      */
-    private Supplier<C> _componentFetcher; // Is null when the builder is disposed.
+    private @Nullable Supplier<C> _componentFetcher; // Is null when the builder is disposed.
 
 
     <T extends C> BuilderState( Class<T> type, Supplier<C> componentSource )
@@ -92,10 +93,10 @@ final class BuilderState<C extends java.awt.Component>
     }
 
     BuilderState(
-        EventProcessor eventProcessor,
-        Mode           mode,
-        Class<C>       type,
-        Supplier<C>    componentFetcher
+        EventProcessor        eventProcessor,
+        Mode                  mode,
+        Class<C>              type,
+        @Nullable Supplier<C> componentFetcher
     ) {
         Objects.requireNonNull(eventProcessor,   "eventProcessor");
         Objects.requireNonNull(mode,             "mode");
@@ -130,6 +131,8 @@ final class BuilderState<C extends java.awt.Component>
                     "If you need to access the component of a builder node, " +
                     "you may only do so through the builder instance returned by the most recent builder method call."
                 );
+        if ( _componentFetcher == null )
+            throw new IllegalStateException("This builder state is disposed and cannot be used for building.");
 
         return _componentType.cast(_componentFetcher.get());
     }
@@ -198,7 +201,8 @@ final class BuilderState<C extends java.awt.Component>
 
         if ( _mode != Mode.FUNCTIONAL_FACTORY_BUILDER)
             try {
-                componentMutator.accept(_componentFetcher.get());
+                if ( _componentFetcher != null )
+                    componentMutator.accept(_componentFetcher.get());
             } catch ( Exception e ) {
                 e.printStackTrace();
                 log.error(
@@ -222,6 +226,8 @@ final class BuilderState<C extends java.awt.Component>
                         _mode,
                         _componentType,
                         () -> {
+                            if ( componentFactory == null )
+                                throw new IllegalStateException("This builder state is disposed and cannot be used for building.");
                             C newComponent = componentFactory.get();
                             componentMutator.accept(newComponent);
                             return newComponent;
@@ -230,7 +236,7 @@ final class BuilderState<C extends java.awt.Component>
             }
             case DECLARATIVE_ONLY:
             {
-                Supplier<C> componentFactory = _componentFetcher;
+                @Nullable Supplier<C> componentFactory = _componentFetcher;
                 this.dispose(); // detach strong reference to the component to allow it to be garbage collected.
                 return new BuilderState<>(
                         _eventProcessor,

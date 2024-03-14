@@ -1,5 +1,7 @@
 package swingtree;
 
+import org.jspecify.annotations.Nullable;
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.Objects;
@@ -32,7 +34,7 @@ public final class UIForJDialog<D extends JDialog> extends UIForAnyWindow<UIForJ
 
 
 	@Override
-	protected void _addComponentTo(D thisComponent, Component addedComponent, Object constraints) {
+	protected void _addComponentTo(D thisComponent, Component addedComponent, @Nullable Object constraints) {
 		thisComponent.add( constraints == null ? null : constraints.toString(), addedComponent);
 	}
 

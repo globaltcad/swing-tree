@@ -1,5 +1,6 @@
 package swingtree;
 
+import org.jspecify.annotations.Nullable;
 import swingtree.style.StyleSheet;
 import swingtree.threading.EventProcessor;
 
@@ -99,7 +100,7 @@ public final class SwingTreeInitConfig
     }
 
 
-    private final Font             _defaultFont; // may be null
+    private final @Nullable Font   _defaultFont; // may be null
     private final FontInstallation _fontInstallation;
     private final EventProcessor   _eventProcessor;
     private final StyleSheet       _styleSheet;
@@ -110,7 +111,7 @@ public final class SwingTreeInitConfig
 
 
     private SwingTreeInitConfig(
-        Font             defaultFont,
+        @Nullable Font   defaultFont,
         FontInstallation fontInstallation,
         EventProcessor   eventProcessor,
         StyleSheet       styleSheet,

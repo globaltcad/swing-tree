@@ -1,5 +1,6 @@
 package swingtree;
 
+import org.jspecify.annotations.Nullable;
 import sprouts.Val;
 import swingtree.input.Keyboard;
 
@@ -364,10 +365,10 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 			   ._this();
 	}
 
-	private <E> WindowDelegate<W, E> _createDelegate( W window, E event ) {
+	private <E> WindowDelegate<W, E> _createDelegate( W window, @Nullable E event ) {
 		return new WindowDelegate<W, E>() {
 			@Override public W get() { return window; }
-			@Override public E getEvent() { return event; }
+			@Override public @Nullable E getEvent() { return event; }
 		};
 	}
 

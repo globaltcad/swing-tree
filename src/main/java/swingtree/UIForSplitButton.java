@@ -268,7 +268,10 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
     }
 
     private void _onPopupOpen( B thisComponent, Consumer<PopupMenuEvent> consumer ) {
-        thisComponent.getPopupMenu().addPopupMenuListener(new PopupMenuListener() {
+        JPopupMenu popupMenu = thisComponent.getPopupMenu();
+        if ( popupMenu == null )
+            return;
+        popupMenu.addPopupMenuListener(new PopupMenuListener() {
             public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
                 // This method is called before the popup menu becomes visible.
                 consumer.accept(e);
@@ -297,7 +300,10 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
     }
 
     private void _onPopupClose( B thisComponent, Consumer<PopupMenuEvent> consumer ) {
-        thisComponent.getPopupMenu().addPopupMenuListener(new PopupMenuListener() {
+        JPopupMenu popupMenu = thisComponent.getPopupMenu();
+        if ( popupMenu == null )
+            return;
+        popupMenu.addPopupMenuListener(new PopupMenuListener() {
             public void popupMenuWillBecomeVisible(PopupMenuEvent e) {/* Not relevant here */}
             public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
                 // This method is called before the popup menu becomes invisible.
@@ -325,7 +331,10 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
     }
 
     private void _onPopupCancel( B thisComponent, Consumer<PopupMenuEvent> consumer ) {
-        thisComponent.getPopupMenu().addPopupMenuListener(new PopupMenuListener() {
+        JPopupMenu popupMenu = thisComponent.getPopupMenu();
+        if ( popupMenu == null )
+            return;
+        popupMenu.addPopupMenuListener(new PopupMenuListener() {
             public void popupMenuWillBecomeVisible(PopupMenuEvent e) {/* Not relevant here */}
             public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {/* Not relevant here */}
             public void popupMenuCanceled(PopupMenuEvent e) {

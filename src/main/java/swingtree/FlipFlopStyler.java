@@ -1,5 +1,6 @@
 package swingtree;
 
+import org.jspecify.annotations.Nullable;
 import swingtree.animation.*;
 import swingtree.api.AnimatedStyler;
 import swingtree.style.ComponentStyleDelegate;
@@ -17,15 +18,15 @@ public class FlipFlopStyler<C extends JComponent>
     private final AnimatedStyler<C> _styler;
     private final WeakReference<C>  _owner;
 
-    private AnimationState _state = null;
+    private @Nullable AnimationState _state = null;
     private boolean _isOn = false;
     private boolean _isCurrentlyRunningAnimation = false;
-    private DisposableAnimation _animation = null;
+    private @Nullable DisposableAnimation _animation = null;
 
 
     FlipFlopStyler( C owner, LifeTime lifetime, AnimatedStyler<C> styler ) {
         _owner     = new WeakReference<>(Objects.requireNonNull(owner));
-        _lifetime = Objects.requireNonNull(lifetime);
+        _lifetime  = Objects.requireNonNull(lifetime);
         _styler    = Objects.requireNonNull(styler);
     }
 
@@ -63,7 +64,7 @@ public class FlipFlopStyler<C extends JComponent>
                 of the current animation. So we need to calculate the time offset for the new animation
                 based on the progress of the current animation.
             */
-            double progress = _state.progress();
+            double progress = _state == null ? 0 : _state.progress();
             if ( _isOn )
                 progress = 1 - progress;
             long animationDuration = lifetime.getDurationIn(TimeUnit.MILLISECONDS);
@@ -92,7 +93,7 @@ public class FlipFlopStyler<C extends JComponent>
 
     static class DisposableAnimation implements Animation
     {
-        private Animation _animation;
+        private @Nullable Animation _animation;
 
         DisposableAnimation( Animation animation ) {
             _animation = Objects.requireNonNull(animation);

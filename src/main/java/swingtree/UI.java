@@ -4,6 +4,7 @@ import com.github.weisj.jsvg.SVGDocument;
 import com.github.weisj.jsvg.parser.SVGLoader;
 import net.miginfocom.layout.LC;
 import net.miginfocom.swing.MigLayout;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sprouts.Event;
@@ -1100,7 +1101,7 @@ public final class UI extends UINamespaceUtilities
      * @return The icon.
      * @throws NullPointerException if {@code path} is {@code null}.
      */
-    private static ImageIcon _tryLoadIcon( IconDeclaration declaration )
+    private static @Nullable ImageIcon _tryLoadIcon(IconDeclaration declaration )
     {
         ImageIcon icon = null;
         try {
@@ -1118,7 +1119,7 @@ public final class UI extends UINamespaceUtilities
      * @return The icon.
      * @throws NullPointerException if {@code path} is {@code null}.
      */
-    private static ImageIcon _loadIcon( IconDeclaration declaration )
+    private static @Nullable ImageIcon _loadIcon( IconDeclaration declaration )
     {
         Objects.requireNonNull(declaration, "declaration");
         String path = declaration.path();
@@ -4258,7 +4259,7 @@ public final class UI extends UINamespaceUtilities
      */
     public static UIForIcon<JIcon> icon( int width, int height, String iconPath ) {
         NullUtil.nullArgCheck(iconPath, "iconPath", String.class);
-        return icon(width, height, findIcon(iconPath).orElse(null));
+        return icon(width, height, findIcon(iconPath).orElse(new ImageIcon()));
     }
 
     /**
@@ -6638,7 +6639,7 @@ public final class UI extends UINamespaceUtilities
     private static class TestWindow
     {
         private final JFrame frame;
-        private final java.awt.Component component;
+        private final java.awt.@Nullable Component component;
 
         private TestWindow( String title, Function<JFrame, java.awt.Component> uiSupplier ) {
             Objects.requireNonNull( title );
@@ -6668,15 +6669,16 @@ public final class UI extends UINamespaceUtilities
         }
         private void _determineSize() {
             Dimension size = frame.getSize();
-            if ( size == null ) // The frame has no size! It is best to set the size to the preferred size of the component:
-                size = component.getPreferredSize();
+            if ( component != null ) {
+                if ( size == null ) // The frame has no size! It is best to set the size to the preferred size of the component:
+                    size = component.getPreferredSize();
 
-            if ( size == null ) // The component has no preferred size! It is best to set the size to the minimum size of the component:
-                size = component.getMinimumSize();
+                if ( size == null ) // The component has no preferred size! It is best to set the size to the minimum size of the component:
+                    size = component.getMinimumSize();
 
-            if ( size == null ) // The component has no minimum size! Let's just look up the size of the component:
-                size = component.getSize();
-
+                if ( size == null ) // The component has no minimum size! Let's just look up the size of the component:
+                    size = component.getSize();
+            }
             frame.setSize(size);
         }
     }
@@ -6767,7 +6769,7 @@ public final class UI extends UINamespaceUtilities
     }
     /** {inheritDoc} */
     public static class TableHeader extends JTableHeader implements StylableComponent {
-        private Function<Integer, String> _toolTipTextSupplier;
+        private @Nullable Function<Integer, String> _toolTipTextSupplier;
         public TableHeader() { super(); }
         public TableHeader(TableColumnModel model) { super(model); }
         /**
@@ -6793,8 +6795,11 @@ public final class UI extends UINamespaceUtilities
             int modelCol = Optional.ofNullable(getTable())
                                     .map( t -> t.convertColumnIndexToModel(col) )
                                     .orElse(col);
-            String retStr;
-            try { retStr = _toolTipTextSupplier.apply(modelCol); }
+            String retStr = "";
+            try {
+                if ( _toolTipTextSupplier != null )
+                    retStr = _toolTipTextSupplier.apply(modelCol);
+            }
             catch ( NullPointerException | ArrayIndexOutOfBoundsException ex ) {
                 retStr = "";
             }
@@ -6846,7 +6851,7 @@ public final class UI extends UINamespaceUtilities
     /** {inheritDoc} */
     public static class ScrollPane extends JScrollPane implements StylableComponent {
         public ScrollPane() { this(null); }
-        public ScrollPane(java.awt.Component view) {
+        public ScrollPane(java.awt.@Nullable Component view) {
             super(view);
             addMouseWheelListener(new NestedJScrollPanelScrollCorrection(this));
         }

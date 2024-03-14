@@ -1,5 +1,6 @@
 package swingtree;
 
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sprouts.Action;
@@ -431,13 +432,13 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
         private final List<WeakReference<JComponent>> ownerRefs = new ArrayList<>();
         private final WeakReference<JTabbedPane> paneRef;
         private final Supplier<Integer> indexFinder;
-        private final Action<ComponentDelegate<JTabbedPane, MouseEvent>> mouseClickAction;
+        private final @Nullable Action<ComponentDelegate<JTabbedPane, MouseEvent>> mouseClickAction;
 
 
         private TabMouseClickListener(
             JTabbedPane pane,
             Supplier<Integer> indexFinder,
-            Action<ComponentDelegate<JTabbedPane, MouseEvent>> mouseClickAction
+            @Nullable Action<ComponentDelegate<JTabbedPane, MouseEvent>> mouseClickAction
         ) {
             this.paneRef = new WeakReference<>(pane);
             this.indexFinder = Objects.requireNonNull(indexFinder);
@@ -541,7 +542,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
         }
 
         final List<Consumer<Integer>> selectionListeners = new ArrayList<>();
-        Var<Integer> selectedTabIndex = null;
+        private @Nullable Var<Integer> selectedTabIndex = null;
         
         @Override public void setSelectedIndex(int index) {
             super.setSelectedIndex(index);

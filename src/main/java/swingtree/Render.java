@@ -1,5 +1,6 @@
 package swingtree;
 
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
 import javax.swing.*;
@@ -23,22 +24,22 @@ public final class Render<C extends JComponent,E>
 	private static final Logger log = org.slf4j.LoggerFactory.getLogger(Render.class);
 
 	private final Class<C> _componentType;
-	private final Supplier<Border> _borderSupplier;
+	private final @Nullable Supplier<Border> _borderSupplier;
 
-	static <E> Render<JList<E>,E> forList(Class<E> elementType, Supplier<Border> borderSupplier) {
+	static <E> Render<JList<E>,E> forList(Class<E> elementType, @Nullable Supplier<Border> borderSupplier) {
 		Render r = new Render<>(JList.class, elementType, borderSupplier);
 		return (Render<JList<E>,E>) r;
 	}
-	static <E> Render<JComboBox<E>,E> forCombo(Class<E> elementType, Supplier<Border> borderSupplier) {
+	static <E> Render<JComboBox<E>,E> forCombo(Class<E> elementType, @Nullable Supplier<Border> borderSupplier) {
 		Render r = new Render<>(JComboBox.class, elementType, borderSupplier);
 		return (Render<JComboBox<E>,E>) r;
 	}
-	static <E> Render<JTable,E> forTable(Class<E> elementType, Supplier<Border> borderSupplier) {
+	static <E> Render<JTable,E> forTable(Class<E> elementType, @Nullable Supplier<Border> borderSupplier) {
 		Render r = new Render<>(JTable.class, elementType, borderSupplier);
 		return (Render<JTable,E>) r;
 	}
 
-	private Render(Class<C> componentType, Class<E> elementType, Supplier<Border> borderSupplier) {
+	private Render(Class<C> componentType, Class<E> elementType, @Nullable Supplier<Border> borderSupplier) {
 		_componentType = componentType;
 		_borderSupplier = borderSupplier;
 	}
@@ -342,15 +343,15 @@ public final class Render<C extends JComponent,E>
 	public static class Builder<C extends JComponent, E> {
 
 		private final Class<C> _componentType;
-		private final Supplier<Border> _border;
+		private final @Nullable Supplier<Border> _border;
 		private final Map<Class<?>, java.util.List<Consumer<Cell<C,?>>>> _rendererLookup = new LinkedHashMap<>(16);
 
 		public Builder(
-				Class<C> componentType,
-				Class<E> valueType,
-				Predicate<Cell<C,E>> valueValidator,
-				Cell.Interpreter<C, E> valueInterpreter,
-				Supplier<Border> border
+				Class<C>                   componentType,
+				Class<E>                   valueType,
+				Predicate<Cell<C,E>>       valueValidator,
+				Cell.Interpreter<C, E>     valueInterpreter,
+				@Nullable Supplier<Border> border
 		) {
 			NullUtil.nullArgCheck(valueType, "valueType", Class.class);
 			NullUtil.nullArgCheck(valueValidator, "valueValidator", Predicate.class);

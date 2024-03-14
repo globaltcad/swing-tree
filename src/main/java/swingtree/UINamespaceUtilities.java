@@ -1,5 +1,6 @@
 package swingtree;
 
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -313,7 +314,7 @@ public abstract class UINamespaceUtilities extends UILayoutConstants
         return UI.COLOR_UNDEFINED;
     }
 
-    private static Color _tryFromName( String maybeColorName ) {
+    private static @Nullable Color _tryFromName(String maybeColorName ) {
         if ( maybeColorName.equalsIgnoreCase("white")       ) return Color.WHITE;
         if ( maybeColorName.equalsIgnoreCase("black")       ) return Color.BLACK;
         if ( maybeColorName.equalsIgnoreCase("gray")        ) return Color.GRAY;
