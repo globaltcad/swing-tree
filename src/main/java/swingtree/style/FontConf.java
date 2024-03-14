@@ -361,27 +361,27 @@ final class FontConf
         return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, strike, _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);
     }
 
-    FontConf withTransform(AffineTransform transform ) {
+    FontConf withTransform(@Nullable AffineTransform transform ) {
         return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike, transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);
     }
 
-    FontConf withPaint(Paint paint ) {
+    FontConf withPaint( @Nullable Paint paint ) {
         return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);
     }
 
-    FontConf withBackgroundPaint(Paint backgroundPaint ) {
+    FontConf withBackgroundPaint( @Nullable Paint backgroundPaint ) {
         return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, backgroundPaint, _horizontalAlignment, _verticalAlignment);
     }
 
-    FontConf withHorizontalAlignment(UI.HorizontalAlignment horizontalAlignment ) {
+    FontConf withHorizontalAlignment( UI.HorizontalAlignment horizontalAlignment ) {
         return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, horizontalAlignment, _verticalAlignment);
     }
 
-    FontConf withVerticalAlignment(UI.VerticalAlignment verticalAlignment ) {
+    FontConf withVerticalAlignment( UI.VerticalAlignment verticalAlignment ) {
         return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, _horizontalAlignment, verticalAlignment);
     }
 
-    FontConf withPropertiesFromFont(Font font )
+    FontConf withPropertiesFromFont( Font font )
     {
         if ( font == UI.FONT_UNDEFINED )
             return this;
