@@ -219,23 +219,15 @@ public final class UI extends UINamespaceUtilities
      *  Different positions along a vertically aligned UI component.
      */
     public enum VerticalAlignment implements UIEnum<VerticalAlignment>{
-        TOP, CENTER, BOTTOM;
+        UNDEFINED, TOP, CENTER, BOTTOM;
 
-        public int forSwing() {
+        public Optional<Integer> forSwing() {
             switch ( this ) {
-                case TOP:    return SwingConstants.TOP;
-                case CENTER: return SwingConstants.CENTER;
-                case BOTTOM: return SwingConstants.BOTTOM;
+                case TOP:    return Optional.of(SwingConstants.TOP);
+                case CENTER: return Optional.of(SwingConstants.CENTER);
+                case BOTTOM: return Optional.of(SwingConstants.BOTTOM);
             }
-            throw new RuntimeException();
-        }
-        public float forY() {
-            switch ( this ) {
-                case TOP:    return 0f;
-                case CENTER: return 0.5f;
-                case BOTTOM: return 1f;
-            }
-            throw new RuntimeException();
+            return Optional.empty();
         }
     }
 
@@ -244,39 +236,29 @@ public final class UI extends UINamespaceUtilities
      */
     public enum HorizontalAlignment implements UIEnum<HorizontalAlignment>
     {
+        UNDEFINED,
         LEFT, CENTER, RIGHT, LEADING, TRAILING;
 
-        public final int forSwing() {
+        public final Optional<Integer> forSwing() {
             switch ( this ) {
-                case LEFT:     return SwingConstants.LEFT;
-                case CENTER:   return SwingConstants.CENTER;
-                case RIGHT:    return SwingConstants.RIGHT;
-                case LEADING:  return SwingConstants.LEADING;
-                case TRAILING: return SwingConstants.TRAILING;
+                case LEFT:     return Optional.of(SwingConstants.LEFT);
+                case CENTER:   return Optional.of(SwingConstants.CENTER);
+                case RIGHT:    return Optional.of(SwingConstants.RIGHT);
+                case LEADING:  return Optional.of(SwingConstants.LEADING);
+                case TRAILING: return Optional.of(SwingConstants.TRAILING);
             }
-            throw new RuntimeException();
-        }
-        public final float forX() {
-            switch ( this ) {
-                case LEFT: case LEADING:
-                    return 0f;
-                case CENTER:
-                    return 0.5f;
-                case RIGHT: case TRAILING:
-                    return 1f;
-            }
-            throw new RuntimeException();
+            return Optional.empty();
         }
 
-        public final int forFlowLayout() {
+        public final Optional<Integer> forFlowLayout() {
             switch ( this ) {
-                case LEFT:     return FlowLayout.LEFT;
-                case CENTER:   return FlowLayout.CENTER;
-                case RIGHT:    return FlowLayout.RIGHT;
-                case LEADING:  return FlowLayout.LEADING;
-                case TRAILING: return FlowLayout.TRAILING;
+                case LEFT:     return Optional.of(FlowLayout.LEFT);
+                case CENTER:   return Optional.of(FlowLayout.CENTER);
+                case RIGHT:    return Optional.of(FlowLayout.RIGHT);
+                case LEADING:  return Optional.of(FlowLayout.LEADING);
+                case TRAILING: return Optional.of(FlowLayout.TRAILING);
             }
-            throw new RuntimeException();
+            return Optional.empty();
         }
     }
 
@@ -285,12 +267,14 @@ public final class UI extends UINamespaceUtilities
      */
     public enum Alignment implements UIEnum<Alignment>
     {
+        UNDEFINED,
         TOP_LEFT,    TOP_CENTER, TOP_RIGHT, TOP_LEADING, TOP_TRAILING,
         CENTER_LEFT, CENTER, CENTER_RIGHT, CENTER_LEADING, CENTER_TRAILING,
         BOTTOM_LEFT, BOTTOM_CENTER, BOTTOM_RIGHT, BOTTOM_LEADING, BOTTOM_TRAILING;
 
         public VerticalAlignment getVertical() {
             switch ( this ) {
+                case UNDEFINED : return VerticalAlignment.UNDEFINED;
                 case TOP_LEFT: case TOP_CENTER: case TOP_RIGHT: case TOP_LEADING: case TOP_TRAILING:
                     return VerticalAlignment.TOP;
                 case CENTER_LEFT: case CENTER: case CENTER_RIGHT: case CENTER_LEADING: case CENTER_TRAILING:
@@ -303,6 +287,7 @@ public final class UI extends UINamespaceUtilities
 
         public HorizontalAlignment getHorizontal() {
             switch ( this ) {
+                case UNDEFINED : return HorizontalAlignment.UNDEFINED;
                 case TOP_LEFT: case CENTER_LEFT: case BOTTOM_LEFT:
                     return HorizontalAlignment.LEFT;
                 case TOP_CENTER: case CENTER: case BOTTOM_CENTER:

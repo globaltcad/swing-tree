@@ -1887,6 +1887,8 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  @param alignment The horizontal alignment of the font.
      *                   See {@link UI.HorizontalAlignment} for more information.
      *  @return A new {@link ComponentStyleDelegate} with the provided font alignment.
+     * @throws NullPointerException If the alignment is {@code null}.
+     *         Use {@link UI.HorizontalAlignment#UNDEFINED} to remove the font alignment style.
      */
     public ComponentStyleDelegate<C> fontAlignment( UI.HorizontalAlignment alignment ) {
         Objects.requireNonNull(alignment);
@@ -1901,6 +1903,8 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  @param alignment The vertical alignment of the font.
      *                   See {@link UI.VerticalAlignment} for more information.
      *  @return A new {@link ComponentStyleDelegate} with the provided font alignment.
+     *  throws NullPointerException If the alignment is {@code null}.
+     *       Use {@link UI.VerticalAlignment#UNDEFINED} to remove the font alignment style.
      */
     public ComponentStyleDelegate<C> fontAlignment( UI.VerticalAlignment alignment ) {
         Objects.requireNonNull(alignment);
@@ -1915,6 +1919,8 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  @param alignment The horizontal and vertical alignment of the font.
      *                   See {@link UI.Alignment} for more information.
      *  @return A new {@link ComponentStyleDelegate} with the provided font alignment.
+     *  throws NullPointerException If the alignment is {@code null}.
+     *          Use {@link UI.Alignment#UNDEFINED} to remove the font alignment style.
      */
     public ComponentStyleDelegate<C> fontAlignment( UI.Alignment alignment ) {
         Objects.requireNonNull(alignment);

@@ -655,7 +655,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     public final I withHorizontalAlignment( UI.HorizontalAlignment horizontalAlign ) {
         NullUtil.nullArgCheck(horizontalAlign, "horizontalAlign", UI.HorizontalAlignment.class);
         return _with( c ->
-                    c.setHorizontalAlignment(horizontalAlign.forSwing())
+                    horizontalAlign.forSwing().ifPresent(c::setHorizontalAlignment)
                 )
                 ._this();
     }
@@ -680,11 +680,13 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     public final I withHorizontalAlignment( Val<UI.HorizontalAlignment> horizontalAlign ) {
         NullUtil.nullArgCheck(horizontalAlign, "horizontalAlign", Val.class);
         NullUtil.nullPropertyCheck(horizontalAlign, "horizontalAlign");
-        return _withOnShow( horizontalAlign, (c, align) -> c.setHorizontalAlignment(align.forSwing()) )
-               ._with( c ->
-                   c.setHorizontalAlignment(horizontalAlign.orElseThrow().forSwing())
-               )
-               ._this();
+        return _withOnShow( horizontalAlign, (c, align) -> {
+                    align.forSwing().ifPresent(c::setHorizontalAlignment);
+                })
+                ._with( c ->
+                    horizontalAlign.orElseThrow().forSwing().ifPresent(c::setHorizontalAlignment)
+                )
+                ._this();
     }
 
     /**
@@ -702,7 +704,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     public final I withVerticalAlignment( UI.VerticalAlignment verticalAlign ) {
         NullUtil.nullArgCheck(verticalAlign, "verticalAlign", UI.VerticalAlignment.class);
         return _with( c ->
-                    c.setVerticalAlignment(verticalAlign.forSwing())
+                    verticalAlign.forSwing().ifPresent(c::setVerticalAlignment)
                 )
                 ._this();
     }
@@ -727,11 +729,13 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     public final I withVerticalAlignment( Val<UI.VerticalAlignment> verticalAlign ) {
         NullUtil.nullArgCheck(verticalAlign, "verticalAlign", Val.class);
         NullUtil.nullPropertyCheck(verticalAlign, "verticalAlign");
-        return _withOnShow( verticalAlign, (c, align) -> c.setVerticalAlignment(align.forSwing()) )
-               ._with( c ->
-                   c.setVerticalAlignment(verticalAlign.orElseThrow().forSwing())
-               )
-               ._this();
+        return _withOnShow( verticalAlign, (c, align) -> {
+                    align.forSwing().ifPresent(c::setVerticalAlignment);
+                })
+                ._with( c ->
+                    verticalAlign.orElseThrow().forSwing().ifPresent(c::setVerticalAlignment)
+                )
+                ._this();
     }
 
     /**
@@ -749,7 +753,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     public final I withHorizontalTextAlignment( UI.HorizontalAlignment horizontalAlign ) {
         NullUtil.nullArgCheck(horizontalAlign, "horizontalAlign", UI.HorizontalAlignment.class);
         return _with( c ->
-                    c.setHorizontalTextPosition(horizontalAlign.forSwing())
+                    horizontalAlign.forSwing().ifPresent(c::setHorizontalTextPosition)
                 )
                 ._this();
     }
@@ -773,9 +777,11 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      */
     public final I withHorizontalTextAlignment( Val<UI.HorizontalAlignment> horizontalAlign ) {
         NullUtil.nullArgCheck(horizontalAlign, "horizontalAlign", Val.class);
-        return _withOnShow( horizontalAlign, (c, align) -> c.setHorizontalTextPosition(align.forSwing()) )
+        return _withOnShow( horizontalAlign, (c, align) -> {
+                    align.forSwing().ifPresent(c::setHorizontalTextPosition);
+                })
                 ._with( c ->
-                    c.setHorizontalTextPosition(horizontalAlign.orElseThrow().forSwing())
+                    horizontalAlign.orElseThrow().forSwing().ifPresent(c::setHorizontalTextPosition)
                 )
                 ._this();
     }
@@ -795,7 +801,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     public final I withVerticalTextAlignment( UI.VerticalAlignment verticalAlign ) {
         NullUtil.nullArgCheck(verticalAlign, "verticalAlign", UI.VerticalAlignment.class);
         return _with( c ->
-                    c.setVerticalTextPosition(verticalAlign.forSwing())
+                    verticalAlign.forSwing().ifPresent(c::setVerticalTextPosition)
                 )
                 ._this();
     }
@@ -819,9 +825,11 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      */
     public final I withVerticalTextAlignment( Val<UI.VerticalAlignment> verticalAlign ) {
         NullUtil.nullArgCheck(verticalAlign, "verticalAlign", Val.class);
-        return _withOnShow( verticalAlign, (c, align) -> c.setVerticalTextPosition(align.forSwing()) )
+        return _withOnShow( verticalAlign, (c, align) -> {
+                    align.forSwing().ifPresent(c::setVerticalTextPosition);
+                })
                 ._with( c ->
-                    c.setVerticalTextPosition(verticalAlign.orElseThrow().forSwing())
+                    verticalAlign.orElseThrow().forSwing().ifPresent(c::setVerticalTextPosition)
                 )
                 ._this();
     }

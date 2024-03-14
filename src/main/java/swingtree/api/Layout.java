@@ -410,7 +410,7 @@ public interface Layout
         private final int _vgap;
 
         ForFlowLayout( UI.HorizontalAlignment align, int hgap, int vgap ) {
-            _align = align.forFlowLayout();
+            _align = align.forFlowLayout().orElse(FlowLayout.CENTER);
             _hgap  = hgap;
             _vgap  = vgap;
         }

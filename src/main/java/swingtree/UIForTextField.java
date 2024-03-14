@@ -207,13 +207,13 @@ public final class UIForTextField<F extends JTextField> extends UIForAnyTextComp
      * Note: This method indirectly changes layout-related information, and therefore,
      * invalidates the component hierarchy.
      *
-     * @param direction The text orientation type which should be used.
+     * @param orientation The text orientation type which should be used.
      * @return This very builder to allow for method chaining.
      */
-    public final UIForTextField<F> withTextOrientation( UI.HorizontalAlignment direction ) {
-        NullUtil.nullArgCheck(direction, "direction", UI.HorizontalAlignment.class);
+    public final UIForTextField<F> withTextOrientation( UI.HorizontalAlignment orientation ) {
+        NullUtil.nullArgCheck(orientation, "direction", UI.HorizontalAlignment.class);
         return _with( thisComponent -> {
-                   thisComponent.setHorizontalAlignment(direction.forSwing());
+                    orientation.forSwing().ifPresent(thisComponent::setHorizontalAlignment);
                })
                ._this();
     }

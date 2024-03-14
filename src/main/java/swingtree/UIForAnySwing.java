@@ -1537,7 +1537,9 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      */
     public final I withFlowLayout( UI.HorizontalAlignment alignment ) {
         NullUtil.nullArgCheck( alignment, "alignment", UI.HorizontalAlignment.class );
-        return this.withLayout(new FlowLayout(alignment.forFlowLayout()));
+        return this.withLayout(
+                    alignment.forFlowLayout().map( FlowLayout::new ).orElse(new FlowLayout())
+                );
     }
 
     /**
@@ -1556,7 +1558,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      */
     public final I withFlowLayout( UI.HorizontalAlignment alignment, int hgap, int vgap ) {
         NullUtil.nullArgCheck( alignment, "alignment", UI.HorizontalAlignment.class );
-        return this.withLayout(new FlowLayout(alignment.forFlowLayout(), hgap, vgap));
+        return this.withLayout(
+                    alignment.forFlowLayout()
+                                .map( a -> new FlowLayout(a, hgap, vgap) )
+                                .orElse(new FlowLayout(FlowLayout.CENTER, hgap, vgap))
+                );
     }
 
     /**

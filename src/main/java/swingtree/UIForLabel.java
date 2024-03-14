@@ -229,7 +229,7 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
     public UIForLabel<L> withHorizontalAlignment( UI.HorizontalAlignment horizontalAlign ) {
         NullUtil.nullArgCheck( horizontalAlign, "horizontalAlign", UI.HorizontalAlignment.class );
         return _with( thisComponent -> {
-                    thisComponent.setHorizontalAlignment(horizontalAlign.forSwing());
+                    horizontalAlign.forSwing().ifPresent(thisComponent::setHorizontalAlignment);
                 })
                 ._this();
     }
@@ -248,10 +248,10 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
         NullUtil.nullArgCheck( horizontalAlign, "horizontalAlign", Val.class );
         NullUtil.nullPropertyCheck( horizontalAlign, "horizontalAlign", "Null is not a valid alignment." );
         return _withOnShow( horizontalAlign, (thisComponent,v) -> {
-                    thisComponent.setHorizontalAlignment(v.forSwing());
+                    v.forSwing().ifPresent(thisComponent::setHorizontalAlignment);
                 })
                 ._with( thisComponent -> {
-                    thisComponent.setHorizontalAlignment(horizontalAlign.orElseThrow().forSwing());
+                    horizontalAlign.orElseThrow().forSwing().ifPresent(thisComponent::setHorizontalAlignment);
                 })
                 ._this();
     }
@@ -271,7 +271,7 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
     public UIForLabel<L> withVerticalAlignment( UI.VerticalAlignment verticalAlign ) {
         NullUtil.nullArgCheck( verticalAlign, "verticalAlign", UI.VerticalAlignment.class );
         return _with( thisComponent -> {
-                    thisComponent.setVerticalAlignment(verticalAlign.forSwing());
+                    verticalAlign.forSwing().ifPresent(thisComponent::setVerticalAlignment);
                 })
                 ._this();
     }
@@ -289,10 +289,10 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
         NullUtil.nullArgCheck( verticalAlign, "verticalAlign", Val.class );
         NullUtil.nullPropertyCheck( verticalAlign, "verticalAlign", "Null is not a valid alignment." );
         return _withOnShow( verticalAlign, (thisComponent,v) -> {
-                    thisComponent.setVerticalAlignment(v.forSwing());
+                    v.forSwing().ifPresent(thisComponent::setVerticalAlignment);
                 })
                 ._with( thisComponent -> {
-                    thisComponent.setVerticalAlignment(verticalAlign.orElseThrow().forSwing());
+                    verticalAlign.orElseThrow().forSwing().ifPresent(thisComponent::setVerticalAlignment);
                 })
                 ._this();
     }
@@ -312,8 +312,8 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
     public UIForLabel<L> withAlignment( UI.Alignment alignment ) {
         NullUtil.nullArgCheck( alignment, "alignment", UI.Alignment.class );
         return _with( thisComponent -> {
-                    thisComponent.setHorizontalAlignment(alignment.getHorizontal().forSwing());
-                    thisComponent.setVerticalAlignment(alignment.getVertical().forSwing());
+                    alignment.getHorizontal().forSwing().ifPresent(thisComponent::setHorizontalAlignment);
+                    alignment.getVertical().forSwing().ifPresent(thisComponent::setVerticalAlignment);
                 })
                 ._this();
     }
@@ -331,13 +331,13 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
         NullUtil.nullArgCheck( alignment, "alignment", Val.class );
         NullUtil.nullPropertyCheck( alignment, "alignment", "Null is not a valid alignment." );
         return _withOnShow( alignment, (thisComponent,v) -> {
-                    thisComponent.setHorizontalAlignment(v.getHorizontal().forSwing());
-                    thisComponent.setVerticalAlignment(v.getVertical().forSwing());
+                    v.getHorizontal().forSwing().ifPresent(thisComponent::setHorizontalAlignment);
+                    v.getVertical().forSwing().ifPresent(thisComponent::setVerticalAlignment);
                 })
                 ._with( thisComponent -> {
                     UI.Alignment a = alignment.orElseThrow();
-                    thisComponent.setHorizontalAlignment(a.getHorizontal().forSwing());
-                    thisComponent.setVerticalAlignment(a.getVertical().forSwing());
+                    a.getHorizontal().forSwing().ifPresent(thisComponent::setHorizontalAlignment);
+                    a.getVertical().forSwing().ifPresent(thisComponent::setVerticalAlignment);
                 })
                 ._this();
     }
@@ -358,7 +358,7 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
     public UIForLabel<L> withHorizontalTextPosition( UI.HorizontalAlignment horizontalAlign ) {
         NullUtil.nullArgCheck( horizontalAlign, "horizontalAlign", UI.HorizontalAlignment.class );
         return _with( thisComponent -> {
-                    thisComponent.setHorizontalTextPosition(horizontalAlign.forSwing());
+                    horizontalAlign.forSwing().ifPresent(thisComponent::setHorizontalTextPosition);
                 })
                 ._this();
     }
@@ -376,10 +376,10 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
         NullUtil.nullArgCheck( horizontalAlign, "horizontalAlign", Val.class );
         NullUtil.nullPropertyCheck( horizontalAlign, "horizontalAlign", "Null is not a valid alignment." );
         return _withOnShow( horizontalAlign, (thisComponent, v) -> {
-                    thisComponent.setHorizontalTextPosition(v.forSwing());
+                    v.forSwing().ifPresent(thisComponent::setHorizontalTextPosition);
                 })
                 ._with( thisComponent -> {
-                    thisComponent.setHorizontalTextPosition(horizontalAlign.orElseThrow().forSwing());
+                    horizontalAlign.orElseThrow().forSwing().ifPresent(thisComponent::setHorizontalTextPosition);
                 })
                 ._this();
     }
@@ -399,7 +399,7 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
     public UIForLabel<L> withVerticalTextPosition( UI.VerticalAlignment verticalAlign ) {
         NullUtil.nullArgCheck( verticalAlign, "verticalAlign", UI.VerticalAlignment.class );
         return _with( thisComponent -> {
-                    thisComponent.setVerticalTextPosition(verticalAlign.forSwing());
+                    verticalAlign.forSwing().ifPresent(thisComponent::setVerticalTextPosition);
                 })
                 ._this();
     }
@@ -417,10 +417,10 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
         NullUtil.nullArgCheck( verticalAlign, "verticalAlign", Val.class );
         NullUtil.nullPropertyCheck( verticalAlign, "verticalAlign", "Null is not a valid alignment." );
         return _withOnShow( verticalAlign, (thisComponent,v) -> {
-                    thisComponent.setVerticalTextPosition(v.forSwing());
+                    v.forSwing().ifPresent(thisComponent::setVerticalTextPosition);
                 })
                 ._with( thisComponent -> {
-                    thisComponent.setVerticalTextPosition(verticalAlign.orElseThrow().forSwing());
+                    verticalAlign.orElseThrow().forSwing().ifPresent(thisComponent::setVerticalTextPosition);
                 })
                 ._this();
     }
@@ -440,8 +440,8 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
     public UIForLabel<L> withTextPosition( UI.Alignment alignment ) {
         NullUtil.nullArgCheck( alignment, "alignment", UI.Alignment.class );
         return _with( thisComponent -> {
-                    thisComponent.setHorizontalTextPosition(alignment.getHorizontal().forSwing());
-                    thisComponent.setVerticalTextPosition(alignment.getVertical().forSwing());
+                    alignment.getHorizontal().forSwing().ifPresent(thisComponent::setHorizontalTextPosition);
+                    alignment.getVertical().forSwing().ifPresent(thisComponent::setVerticalTextPosition);
                 })
                 ._this();
     }
