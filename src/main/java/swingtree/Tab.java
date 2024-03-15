@@ -1,5 +1,6 @@
 package swingtree;
 
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import sprouts.Action;
 import sprouts.From;
@@ -35,27 +36,27 @@ public final class Tab
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(Tab.class);
 
-    private final JComponent   _contents;
-    private final JComponent   _headerComponent;
-    private final Val<String>  _title;
-    private final Var<Boolean> _isSelected;
-    private final Val<Boolean> _isEnabled;
-    private final Val<Icon>    _icon;
-    private final Val<String>  _tip;
-    private final Action<ComponentDelegate<JTabbedPane, ChangeEvent>> _onSelected;
+    @Nullable private final JComponent   _contents;
+    @Nullable private final JComponent   _headerComponent;
+    @Nullable private final Val<String>  _title;
+    @Nullable private final Var<Boolean> _isSelected;
+    @Nullable private final Val<Boolean> _isEnabled;
+    @Nullable private final Val<Icon>    _icon;
+    @Nullable private final Val<String>  _tip;
+    @Nullable private final Action<ComponentDelegate<JTabbedPane, ChangeEvent>> _onSelected;
+    @Nullable private final Action<ComponentDelegate<JTabbedPane, MouseEvent>>  _onMouseClick;
 
-    private final Action<ComponentDelegate<JTabbedPane, MouseEvent>>  _onMouseClick;
 
     Tab(
-        JComponent   contents,
-        JComponent   headerComponent,
-        Val<String>  title,
-        Var<Boolean> isSelected,
-        Val<Boolean> isEnabled,
-        Val<Icon>    icon,
-        Val<String>  tip,
-        Action<ComponentDelegate<JTabbedPane, ChangeEvent>> onSelected,
-        Action<ComponentDelegate<JTabbedPane, MouseEvent>>  onMouseClick
+        @Nullable JComponent   contents,
+        @Nullable JComponent   headerComponent,
+        @Nullable Val<String>  title,
+        @Nullable Var<Boolean> isSelected,
+        @Nullable Val<Boolean> isEnabled,
+        @Nullable Val<Icon>    icon,
+        @Nullable Val<String>  tip,
+        @Nullable Action<ComponentDelegate<JTabbedPane, ChangeEvent>> onSelected,
+        @Nullable Action<ComponentDelegate<JTabbedPane, MouseEvent>>  onMouseClick
     ) {
         if ( headerComponent == null )
             NullUtil.nullArgCheck(title,"title",String.class);

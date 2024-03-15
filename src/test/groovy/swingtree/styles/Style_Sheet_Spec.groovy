@@ -6,6 +6,7 @@ import spock.lang.Subject
 import spock.lang.Title
 import swingtree.SwingTree
 import swingtree.UI.Layer
+import swingtree.style.ShadowConf
 import swingtree.threading.EventProcessor
 import swingtree.UI
 import swingtree.style.Arc
@@ -714,12 +715,12 @@ class Style_Sheet_Spec extends Specification
             s.base().backgroundColor().get() == Color.RED
             s.gradient(Layer.BORDER, "default").span() == UI.Span.BOTTOM_TO_TOP
             s.gradient(Layer.BORDER, "default").colors() as java.util.List == [Color.RED, Color.BLUE]
-            s.shadow(UI.Layer.BACKGROUND, "named shadow") == null
+            s.shadow(UI.Layer.BACKGROUND, "named shadow") == ShadowConf.none()
             s.shadow(UI.Layer.CONTENT, "named shadow").spreadRadius() == 42
             s.shadow(UI.Layer.CONTENT, "named shadow").color().get() == Color.CYAN
             s.shadow(UI.Layer.CONTENT, "named shadow").isInset() == false
-            s.shadow(UI.Layer.BORDER, "named shadow") == null
-            s.shadow(UI.Layer.FOREGROUND, "named shadow") == null
+            s.shadow(UI.Layer.BORDER, "named shadow") == ShadowConf.none()
+            s.shadow(UI.Layer.FOREGROUND, "named shadow") == ShadowConf.none()
             s.font().family() == "Arial"
             s.font().size() == 12
             s.font().posture() == 0

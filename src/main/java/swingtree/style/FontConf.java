@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import swingtree.UI;
 
@@ -164,28 +165,28 @@ final class FontConf
                                                         null,  // transform
                                                         null,  // paint
                                                         null,
-                                                        null,  // horizontal alignment
-                                                        null   // vertical alignment
+                                                        UI.HorizontalAlignment.UNDEFINED,  // horizontal alignment
+                                                        UI.VerticalAlignment.UNDEFINED   // vertical alignment
                                                     );
 
     public static FontConf none() { return _NONE; }
 
     static FontConf of(
-        String                 name,
-        int                    fontSize,
-        float                  posture,
-        float                  weight,
-        float                  spacing,
-        Color                  color,
-        Color                  backgroundColor,
-        Color                  selectionColor,
-        Boolean                isUnderline,
-        Boolean                isStrike,
-        AffineTransform        transform,
-        Paint                  paint,
-        Paint                  backgroundPaint,
-        UI.HorizontalAlignment horizontalAlignment,
-        UI.VerticalAlignment   verticalAlignment
+        String                     name,
+        int                        fontSize,
+        float                      posture,
+        float                      weight,
+        float                      spacing,
+        @Nullable Color            color,
+        @Nullable Color            backgroundColor,
+        @Nullable Color            selectionColor,
+        @Nullable Boolean          isUnderline,
+        @Nullable Boolean          isStrike,
+        @Nullable AffineTransform  transform,
+        @Nullable Paint            paint,
+        @Nullable Paint            backgroundPaint,
+        UI.HorizontalAlignment     horizontalAlignment,
+        UI.VerticalAlignment       verticalAlignment
     ) {
         if (
             name.isEmpty() &&
@@ -201,8 +202,8 @@ final class FontConf
             transform == null &&
             paint == null &&
             backgroundPaint == null &&
-            horizontalAlignment == null &&
-            verticalAlignment == null
+            horizontalAlignment == _NONE._horizontalAlignment &&
+            verticalAlignment == _NONE._verticalAlignment
         )
             return _NONE;
         else
@@ -225,39 +226,39 @@ final class FontConf
                 );
     }
 
-    private final String _familyName;
-    private final int     _size;
-    private final float   _posture;
-    private final float   _weight;
-    private final float   _spacing;
-    private final Color   _color;
-    private final Color   _backgroundColor;
-    private final Color   _selectionColor; // Only relevant for text components with selection support.
-    private final Boolean _isUnderlined;
-    private final Boolean _isStrike;
-    private final Paint   _paint;
-    private final Paint   _backgroundPaint;
-    private final AffineTransform        _transform;
-    private final UI.HorizontalAlignment _horizontalAlignment;
-    private final UI.VerticalAlignment   _verticalAlignment;
+    private final String                    _familyName;
+    private final int                       _size;
+    private final float                     _posture;
+    private final float                     _weight;
+    private final float                     _spacing;
+    private final @Nullable Color           _color;
+    private final @Nullable Color           _backgroundColor;
+    private final @Nullable Color           _selectionColor; // Only relevant for text components with selection support.
+    private final @Nullable Boolean         _isUnderlined;
+    private final @Nullable Boolean         _isStrike;
+    private final @Nullable Paint           _paint;
+    private final @Nullable Paint           _backgroundPaint;
+    private final @Nullable AffineTransform _transform;
+    private final UI.HorizontalAlignment    _horizontalAlignment;
+    private final UI.VerticalAlignment      _verticalAlignment;
 
 
     private FontConf(
-        String                 name,
-        int                    fontSize,
-        float                  posture,
-        float                  weight,
-        float                  spacing,
-        Color                  color,
-        Color                  backgroundColor,
-        Color                  selectionColor,
-        Boolean                isUnderline,
-        Boolean                isStrike,
-        AffineTransform        transform,
-        Paint                  paint,
-        Paint                  backgroundPaint,
-        UI.HorizontalAlignment horizontalAlignment,
-        UI.VerticalAlignment   verticalAlignment
+        String                    name,
+        int                       fontSize,
+        float                     posture,
+        float                     weight,
+        float                     spacing,
+        @Nullable Color           color,
+        @Nullable Color           backgroundColor,
+        @Nullable Color           selectionColor,
+        @Nullable Boolean         isUnderline,
+        @Nullable Boolean         isStrike,
+        @Nullable AffineTransform transform,
+        @Nullable Paint           paint,
+        @Nullable Paint           backgroundPaint,
+        UI.HorizontalAlignment    horizontalAlignment,
+        UI.VerticalAlignment      verticalAlignment
     ) {
         _familyName = Objects.requireNonNull(name);
         _size    = fontSize;
@@ -292,7 +293,7 @@ final class FontConf
 
     Optional<Color> selectionColor() { return Optional.ofNullable(_selectionColor); }
 
-    boolean isUnderlined() { return _isUnderlined; }
+    boolean isUnderlined() { return _isUnderlined != null ? _isUnderlined : false; }
 
     Optional<AffineTransform> transform() { return Optional.ofNullable(_transform); }
 
@@ -300,9 +301,9 @@ final class FontConf
 
     Optional<Paint> backgroundPaint() { return Optional.ofNullable(_backgroundPaint); }
 
-    Optional<UI.HorizontalAlignment> horizontalAlignment() { return Optional.ofNullable(_horizontalAlignment); }
+    UI.HorizontalAlignment horizontalAlignment() { return _horizontalAlignment; }
 
-    Optional<UI.VerticalAlignment> verticalAlignment() { return Optional.ofNullable(_verticalAlignment); }
+    UI.VerticalAlignment verticalAlignment() { return _verticalAlignment; }
 
     FontConf withFamily(String fontFamily ) {
         return FontConf.of(fontFamily, _size, _posture, _weight, _spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);
@@ -360,27 +361,27 @@ final class FontConf
         return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, strike, _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);
     }
 
-    FontConf withTransform(AffineTransform transform ) {
+    FontConf withTransform(@Nullable AffineTransform transform ) {
         return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike, transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);
     }
 
-    FontConf withPaint(Paint paint ) {
+    FontConf withPaint( @Nullable Paint paint ) {
         return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);
     }
 
-    FontConf withBackgroundPaint(Paint backgroundPaint ) {
+    FontConf withBackgroundPaint( @Nullable Paint backgroundPaint ) {
         return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, backgroundPaint, _horizontalAlignment, _verticalAlignment);
     }
 
-    FontConf withHorizontalAlignment(UI.HorizontalAlignment horizontalAlignment ) {
+    FontConf withHorizontalAlignment( UI.HorizontalAlignment horizontalAlignment ) {
         return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, horizontalAlignment, _verticalAlignment);
     }
 
-    FontConf withVerticalAlignment(UI.VerticalAlignment verticalAlignment ) {
+    FontConf withVerticalAlignment( UI.VerticalAlignment verticalAlignment ) {
         return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, _horizontalAlignment, verticalAlignment);
     }
 
-    FontConf withPropertiesFromFont(Font font )
+    FontConf withPropertiesFromFont( Font font )
     {
         if ( font == UI.FONT_UNDEFINED )
             return this;
@@ -657,8 +658,8 @@ final class FontConf
         String transform       = ( _transform           == null ? "?" : _transform.toString()           );
         String paint           = ( _paint               == null ? "?" : _paint.toString()               );
         String backgroundPaint = ( _backgroundPaint     == null ? "?" : _backgroundPaint.toString()     );
-        String horizontalAlign = ( _horizontalAlignment == null ? "?" : _horizontalAlignment.toString() );
-        String verticalAlign   = ( _verticalAlignment   == null ? "?" : _verticalAlignment.toString()   );
+        String horizontalAlign = ( _horizontalAlignment == UI.HorizontalAlignment.UNDEFINED ? "?" : _horizontalAlignment.toString() );
+        String verticalAlign   = ( _verticalAlignment   == UI.VerticalAlignment.UNDEFINED ? "?" : _verticalAlignment.toString()   );
         return this.getClass().getSimpleName() + "[" +
                     "family="              + _familyName + ", " +
                     "size="                + _size                                   + ", " +

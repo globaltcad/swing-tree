@@ -1,5 +1,7 @@
 package swingtree.style;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
@@ -36,20 +38,20 @@ final class Outline
     }
 
 
-    private final Float top;
-    private final Float right;
-    private final Float bottom;
-    private final Float left;
+    private final @Nullable Float top;
+    private final @Nullable Float right;
+    private final @Nullable Float bottom;
+    private final @Nullable Float left;
 
 
-    static Outline ofNullable( Float top, Float right, Float bottom, Float left ) {
+    static Outline ofNullable( @Nullable Float top, @Nullable Float right, @Nullable Float bottom, @Nullable Float left ) {
         if ( top == null && right == null && bottom == null && left == null )
             return _NONE;
 
         return new Outline(top, right, bottom, left);
     }
     
-    private Outline( Float top, Float right, Float bottom, Float left ) {
+    private Outline( @Nullable Float top, @Nullable Float right, @Nullable Float bottom, @Nullable Float left ) {
         this.top    = top;
         this.right  = right;
         this.bottom = bottom;
@@ -143,7 +145,7 @@ final class Outline
                left   != null && left   > 0;
     }
 
-    private static Float _plus( Float a, Float b ) {
+    private static @Nullable Float _plus( @Nullable Float a, @Nullable Float b ) {
         if ( a == null && b == null )
             return null;
         return a == null ? b : b == null ? a : a + b;
@@ -204,7 +206,7 @@ final class Outline
                 "]";
     }
 
-    private static String _toString( Float value ) {
+    private static String _toString( @Nullable Float value ) {
         return value == null ? "?" : value.toString().replace(".0", "");
     }
 

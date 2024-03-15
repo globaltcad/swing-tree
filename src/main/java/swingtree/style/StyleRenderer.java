@@ -1,6 +1,7 @@
 package swingtree.style;
 
 import com.github.weisj.jsvg.geometry.size.FloatSize;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import swingtree.UI;
 import swingtree.api.Painter;
@@ -129,7 +130,7 @@ final class StyleRenderer
     }
 
 
-    private static void _paintClippedTo( Shape newClip, Graphics g, Runnable painter ) {
+    private static void _paintClippedTo( @Nullable Shape newClip, Graphics g, Runnable painter ) {
         Shape oldClip = g.getClip();
 
         if ( newClip != null && newClip != oldClip ) {
@@ -681,23 +682,25 @@ final class StyleRenderer
                 return;
             }
 
+            Area areaToFill = conf.areas().get(gradient.area());
+
             if ( gradient.type() == UI.GradientType.CONIC )
-                _renderConicGradient(g2d, corner1, corner2, gradient, conf.areas().get(gradient.area()));
+                _renderConicGradient(g2d, corner1, corner2, gradient, areaToFill);
             else if ( gradient.type() == UI.GradientType.RADIAL )
-                _renderRadialGradient(g2d, corner1, corner2, gradient, conf.areas().get(gradient.area()));
+                _renderRadialGradient(g2d, corner1, corner2, gradient, areaToFill);
             else if ( gradient.span().isDiagonal() )
-                _renderDiagonalGradient(g2d, corner1, corner2, gradient, conf.areas().get(gradient.area()));
+                _renderDiagonalGradient(g2d, corner1, corner2, gradient, areaToFill);
             else
-                _renderVerticalOrHorizontalGradient(g2d, corner1, corner2, gradient, conf.areas().get(gradient.area()));
+                _renderVerticalOrHorizontalGradient(g2d, corner1, corner2, gradient, areaToFill);
         }
     }
 
     private static void _renderConicGradient(
-        Graphics2D    g2d,
-        Point2D.Float corner1,
-        Point2D.Float corner2,
-        GradientConf  gradient,
-        Area          specificArea
+        Graphics2D     g2d,
+        Point2D.Float  corner1,
+        Point2D.Float  corner2,
+        GradientConf   gradient,
+        @Nullable Area specificArea
     ) {
         final Color[] colors    = gradient.colors();
         final float[] fractions = _fractionsFrom(gradient);
@@ -758,10 +761,10 @@ final class StyleRenderer
     }
 
     private static void _renderNoiseGradient(
-        final Graphics2D    g2d,
-        final Point2D.Float corner1,
-        final NoiseConf     noise,
-        final Area          specificArea
+        final Graphics2D     g2d,
+        final Point2D.Float  corner1,
+        final NoiseConf      noise,
+        final @Nullable Area specificArea
     ) {
         final Color[] colors    = noise.colors();
         final float[] fractions = _fractionsFrom(colors, noise.fractions());
@@ -793,11 +796,11 @@ final class StyleRenderer
      * @param gradient The shade to render.
      */
     private static void _renderDiagonalGradient(
-        final Graphics2D    g2d,
-        Point2D.Float       corner1,
-        Point2D.Float       corner2,
-        final GradientConf  gradient,
-        final Area          specificArea
+        final Graphics2D     g2d,
+        Point2D.Float        corner1,
+        Point2D.Float        corner2,
+        final GradientConf   gradient,
+        final @Nullable Area specificArea
     ) {
         {
             final float cx = ( corner1.x + corner2.x ) / 2;
@@ -862,11 +865,11 @@ final class StyleRenderer
     }
 
     private static void _renderVerticalOrHorizontalGradient(
-        Graphics2D    g2d,
-        Point2D.Float corner1,
-        Point2D.Float corner2,
-        GradientConf gradient,
-        Area          specificArea
+        Graphics2D     g2d,
+        Point2D.Float  corner1,
+        Point2D.Float  corner2,
+        GradientConf   gradient,
+        @Nullable Area specificArea
     ) {
         final UI.Cycle      cycle      = gradient.cycle();
         final Color[]       colors     = gradient.colors();
@@ -932,11 +935,11 @@ final class StyleRenderer
     }
 
     private static void _renderRadialGradient(
-        Graphics2D    g2d,
-        Point2D.Float corner1,
-        Point2D.Float corner2,
-        GradientConf  gradient,
-        Area          specificArea
+        Graphics2D     g2d,
+        Point2D.Float  corner1,
+        Point2D.Float  corner2,
+        GradientConf   gradient,
+        @Nullable Area specificArea
     ) {
         final UI.Cycle cycle  = gradient.cycle();
         final Color[]  colors = gradient.colors();

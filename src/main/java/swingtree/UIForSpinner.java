@@ -1,5 +1,6 @@
 package swingtree;
 
+import org.jspecify.annotations.Nullable;
 import sprouts.Action;
 import sprouts.From;
 import sprouts.Val;
@@ -56,9 +57,9 @@ public final class UIForSpinner<S extends JSpinner> extends UIForAnySwing<UIForS
                     super.setValue(value);
                     updateEditorFormatter();
                 }
-                @Override public Object getNextValue() { return incrValue(+1); }
-                @Override public Object getPreviousValue() { return incrValue(-1); }
-                private Number incrValue(int dir)
+                @Override public @Nullable Object getNextValue() { return incrValue(+1); }
+                @Override public @Nullable Object getPreviousValue() { return incrValue(-1); }
+                private @Nullable Number incrValue(int dir)
                 {
                     Number newValue;
                     Number value = this.getNumber();

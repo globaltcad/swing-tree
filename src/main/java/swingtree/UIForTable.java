@@ -1,5 +1,6 @@
 package swingtree;
 
+import org.jspecify.annotations.Nullable;
 import sprouts.Event;
 import swingtree.api.Buildable;
 import swingtree.api.model.BasicTableModel;
@@ -180,6 +181,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      * @return This builder object.
      */
     public final UIForTable<T> withModel( Buildable<BasicTableModel> dataModelBuilder ) {
+        Objects.requireNonNull(dataModelBuilder);
         return this.withModel(dataModelBuilder.build());
     }
 
@@ -223,7 +225,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
                             List<List<E>> data = getData();
                             return ( data.isEmpty() ? 0 : data.get(0).size() );
                         }
-                        @Override public Object getValueAt(int rowIndex, int columnIndex) {
+                        @Override public @Nullable Object getValueAt(int rowIndex, int columnIndex) {
                             List<List<E>> data = getData();
                             if (isNotWithinBounds(rowIndex, columnIndex)) return null;
                             return data.get(rowIndex).get(columnIndex);
@@ -245,7 +247,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
                             return (data.isEmpty() ? 0 : data.get(0).size());
                         }
                         @Override public int getColumnCount() { return getData().size(); }
-                        @Override public Object getValueAt( int rowIndex, int columnIndex ) {
+                        @Override public @Nullable Object getValueAt( int rowIndex, int columnIndex ) {
                             List<List<E>> data = getData();
                             if ( isNotWithinBounds(rowIndex, columnIndex) ) return null;
                             return data.get(columnIndex).get(rowIndex);
@@ -353,7 +355,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
         }
 
         @Override
-        public String getColumnName(int column) {
+        public @Nullable String getColumnName(int column) {
             List<String> columnNames = new ArrayList<>(getData().keySet());
             if ( column < 0 || column >= columnNames.size() ) return null;
             return columnNames.get(column);
@@ -391,7 +393,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
         public int getColumnCount() { return getData().size(); }
 
         @Override
-        public Object getValueAt( int rowIndex, int columnIndex ) {
+        public @Nullable Object getValueAt( int rowIndex, int columnIndex ) {
             if ( isNotWithinBounds(rowIndex, columnIndex) ) return null;
             List<E> column = getData().values().stream().skip(columnIndex).findFirst().orElse(null);
             if ( column == null ) return null;

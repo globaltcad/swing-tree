@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import org.jspecify.annotations.Nullable;
 import swingtree.UI;
 import swingtree.api.Painter;
 
@@ -22,7 +23,7 @@ final class StyleUtil
     private StyleUtil() {} // No instantiation, just a utility class
 
 
-    static Shape intersect( Shape clipA, Shape clipB )
+    static @Nullable Shape intersect( @Nullable Shape clipA, @Nullable Shape clipB )
     {
         if ( Objects.equals(clipA, clipB) )
             return clipA;
@@ -43,13 +44,13 @@ final class StyleUtil
         return finalClip;
     }
 
-    static String toString( Color color ) {
+    static String toString( @Nullable Color color ) {
         if ( color == UI.COLOR_UNDEFINED) return "DEFAULT";
         if ( color == null ) return "?";
         return "rgba(" + color.getRed() + "," + color.getGreen() + "," + color.getBlue() + "," + color.getAlpha() + ")";
     }
 
-    static String toString( Arc arc ) {
+    static String toString( @Nullable Arc arc ) {
         if ( arc == null ) return "?";
         return "Arc(" + arc.width() + "," + arc.height() + ")";
     }

@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import org.jspecify.annotations.Nullable;
 import swingtree.UI;
 
 import java.awt.Color;
@@ -28,14 +29,14 @@ final class BorderConf
     public static BorderConf none() { return _NONE; }
 
     static BorderConf of(
-        Arc     topLeftArc,
-        Arc     topRightArc,
-        Arc     bottomLeftArc,
-        Arc     bottomRightArc,
-        Outline borderWidths,
-        Outline margin,
-        Outline padding,
-        Color   borderColor
+        Arc             topLeftArc,
+        Arc             topRightArc,
+        Arc             bottomLeftArc,
+        Arc             bottomRightArc,
+        Outline         borderWidths,
+        Outline         margin,
+        Outline         padding,
+        @Nullable Color borderColor
     ) {
         if ( topLeftArc      == Arc.none() &&
              topRightArc     == Arc.none() &&
@@ -61,18 +62,18 @@ final class BorderConf
     private final Outline _margin;
     private final Outline _padding;
 
-    private final Color _borderColor;
+    private final @Nullable Color _borderColor;
 
 
     private BorderConf(
-        Arc     topLeftArc,
-        Arc     topRightArc,
-        Arc     bottomLeftArc,
-        Arc     bottomRightArc,
-        Outline borderWidths,
-        Outline margin,
-        Outline padding,
-        Color   borderColor
+        Arc             topLeftArc,
+        Arc             topRightArc,
+        Arc             bottomLeftArc,
+        Arc             bottomRightArc,
+        Outline         borderWidths,
+        Outline         margin,
+        Outline         padding,
+        @Nullable Color borderColor
     ) {
         _topLeftArc      = topLeftArc;
         _topRightArc     = topRightArc;

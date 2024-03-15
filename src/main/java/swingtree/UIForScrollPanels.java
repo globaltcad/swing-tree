@@ -1,5 +1,6 @@
 package swingtree;
 
+import org.jspecify.annotations.Nullable;
 import sprouts.Change;
 import sprouts.Vals;
 import sprouts.Var;
@@ -47,7 +48,7 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
 	}
 
 	@Override
-	protected void _addComponentTo(P thisComponent, JComponent addedComponent, Object constraints) {
+	protected void _addComponentTo(P thisComponent, JComponent addedComponent, @Nullable Object constraints) {
 		Objects.requireNonNull(addedComponent);
 
 		EntryViewModel entry = _entryModel();
@@ -68,9 +69,9 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
 
 	@Override
 	protected <M> void _addViewableProps(
-			Vals<M> models, String attr, ViewSupplier<M> viewSupplier, P thisComponent
+			Vals<M> models, @Nullable String attr, ViewSupplier<M> viewSupplier, P thisComponent
 	) {
-		BiFunction<Integer, Vals<M>, M> modelFetcher = (i, vals) -> {
+		BiFunction<Integer, Vals<M>, @Nullable M> modelFetcher = (i, vals) -> {
 			M v = vals.at(i).get();
 			if ( v instanceof EntryViewModel ) ((EntryViewModel) v).position().set(i);
 			return v;

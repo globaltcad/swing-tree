@@ -1,5 +1,7 @@
 package swingtree;
 
+import org.jspecify.annotations.Nullable;
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.Objects;
@@ -34,7 +36,7 @@ public final class UIForJFrame<F extends JFrame> extends UIForAnyWindow<UIForJFr
 	}
 
 	@Override
-	protected void _addComponentTo(F thisComponent, Component addedComponent, Object constraints) {
+	protected void _addComponentTo(F thisComponent, Component addedComponent, @Nullable Object constraints) {
 		thisComponent.add(constraints == null ? null : constraints.toString(), addedComponent);
 	}
 

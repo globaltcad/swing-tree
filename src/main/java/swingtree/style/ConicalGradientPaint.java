@@ -40,6 +40,8 @@ package swingtree.style;
  *  - Deletion of the error-prone method "recalculate" and introduction of a new rotation offset field variable.
  */
 
+import org.jspecify.annotations.Nullable;
+
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
@@ -93,7 +95,7 @@ final class ConicalGradientPaint implements Paint {
          * @param transform
          * @return the cached context, or null if the arguments don't match
          */
-        private ConicalGradientPaintContext get(Rectangle bounds, Point2D center, AffineTransform transform) {
+        private @Nullable ConicalGradientPaintContext get(Rectangle bounds, Point2D center, AffineTransform transform) {
             if (this.bounds.equals(bounds) && this.center.equals(center) && this.transform.equals(transform))
                 return cachedContext;
             else
@@ -111,7 +113,7 @@ final class ConicalGradientPaint implements Paint {
     private final float[] ALPHA_STEP_LOOKUP;
     private final Color[] COLORS;
     private static final float INT_TO_FLOAT_CONST = 1f / 255f;
-    private CachedContext cached;
+    private @Nullable CachedContext cached;
 
 
 
@@ -353,7 +355,7 @@ final class ConicalGradientPaint implements Paint {
         }
 
         @Override
-        public Raster getRaster(final int X, final int Y, final int TILE_WIDTH, final int TILE_HEIGHT) {
+        public @Nullable Raster getRaster(final int X, final int Y, final int TILE_WIDTH, final int TILE_HEIGHT) {
 
             try {
                 long index = ((long)X << 32) | (long)Y;

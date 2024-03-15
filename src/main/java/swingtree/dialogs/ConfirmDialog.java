@@ -1,5 +1,6 @@
 package swingtree.dialogs;
 
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import swingtree.UI;
 
@@ -43,27 +44,27 @@ public final class ConfirmDialog
                 );
     }
 
-    private final int           _type;
-    private final String        _title;
-    private final String        _message;
-    private final String        _yesOption;
-    private final String        _noOption;
-    private final String        _cancelOption;
-    private final ConfirmAnswer _defaultOption;
-    private final Icon          _icon;
-    private final Component     _parent;
+    private final int                  _type;
+    private final String               _title;
+    private final String               _message;
+    private final String               _yesOption;
+    private final String               _noOption;
+    private final String               _cancelOption;
+    private final ConfirmAnswer        _defaultOption;
+    private final @Nullable Icon       _icon;
+    private final @Nullable Component  _parent;
 
 
     private ConfirmDialog(
-        int type,
-        String        title,
-        String        message,
-        String        yesOption,
-        String        noOption,
-        String        cancelOption,
-        ConfirmAnswer defaultOption,
-        Icon          icon,
-        Component     parent
+        int                 type,
+        String              title,
+        String              message,
+        String              yesOption,
+        String              noOption,
+        String              cancelOption,
+        ConfirmAnswer       defaultOption,
+        @Nullable Icon      icon,
+        @Nullable Component parent
     ) {
         _type          = type;
         _title         = Objects.requireNonNull(title);

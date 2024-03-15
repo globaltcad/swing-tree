@@ -4,6 +4,7 @@ import com.github.weisj.jsvg.SVGDocument;
 import com.github.weisj.jsvg.parser.SVGLoader;
 import net.miginfocom.layout.LC;
 import net.miginfocom.swing.MigLayout;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sprouts.Event;
@@ -15,7 +16,6 @@ import swingtree.api.*;
 import swingtree.api.model.BasicTableModel;
 import swingtree.api.model.TableListDataSource;
 import swingtree.api.model.TableMapDataSource;
-import swingtree.style.StylableComponent;
 import swingtree.components.JBox;
 import swingtree.components.JIcon;
 import swingtree.components.JScrollPanels;
@@ -218,23 +218,15 @@ public final class UI extends UINamespaceUtilities
      *  Different positions along a vertically aligned UI component.
      */
     public enum VerticalAlignment implements UIEnum<VerticalAlignment>{
-        TOP, CENTER, BOTTOM;
+        UNDEFINED, TOP, CENTER, BOTTOM;
 
-        public int forSwing() {
+        public Optional<Integer> forSwing() {
             switch ( this ) {
-                case TOP:    return SwingConstants.TOP;
-                case CENTER: return SwingConstants.CENTER;
-                case BOTTOM: return SwingConstants.BOTTOM;
+                case TOP:    return Optional.of(SwingConstants.TOP);
+                case CENTER: return Optional.of(SwingConstants.CENTER);
+                case BOTTOM: return Optional.of(SwingConstants.BOTTOM);
             }
-            throw new RuntimeException();
-        }
-        public float forY() {
-            switch ( this ) {
-                case TOP:    return 0f;
-                case CENTER: return 0.5f;
-                case BOTTOM: return 1f;
-            }
-            throw new RuntimeException();
+            return Optional.empty();
         }
     }
 
@@ -243,39 +235,29 @@ public final class UI extends UINamespaceUtilities
      */
     public enum HorizontalAlignment implements UIEnum<HorizontalAlignment>
     {
+        UNDEFINED,
         LEFT, CENTER, RIGHT, LEADING, TRAILING;
 
-        public final int forSwing() {
+        public final Optional<Integer> forSwing() {
             switch ( this ) {
-                case LEFT:     return SwingConstants.LEFT;
-                case CENTER:   return SwingConstants.CENTER;
-                case RIGHT:    return SwingConstants.RIGHT;
-                case LEADING:  return SwingConstants.LEADING;
-                case TRAILING: return SwingConstants.TRAILING;
+                case LEFT:     return Optional.of(SwingConstants.LEFT);
+                case CENTER:   return Optional.of(SwingConstants.CENTER);
+                case RIGHT:    return Optional.of(SwingConstants.RIGHT);
+                case LEADING:  return Optional.of(SwingConstants.LEADING);
+                case TRAILING: return Optional.of(SwingConstants.TRAILING);
             }
-            throw new RuntimeException();
-        }
-        public final float forX() {
-            switch ( this ) {
-                case LEFT: case LEADING:
-                    return 0f;
-                case CENTER:
-                    return 0.5f;
-                case RIGHT: case TRAILING:
-                    return 1f;
-            }
-            throw new RuntimeException();
+            return Optional.empty();
         }
 
-        public final int forFlowLayout() {
+        public final Optional<Integer> forFlowLayout() {
             switch ( this ) {
-                case LEFT:     return FlowLayout.LEFT;
-                case CENTER:   return FlowLayout.CENTER;
-                case RIGHT:    return FlowLayout.RIGHT;
-                case LEADING:  return FlowLayout.LEADING;
-                case TRAILING: return FlowLayout.TRAILING;
+                case LEFT:     return Optional.of(FlowLayout.LEFT);
+                case CENTER:   return Optional.of(FlowLayout.CENTER);
+                case RIGHT:    return Optional.of(FlowLayout.RIGHT);
+                case LEADING:  return Optional.of(FlowLayout.LEADING);
+                case TRAILING: return Optional.of(FlowLayout.TRAILING);
             }
-            throw new RuntimeException();
+            return Optional.empty();
         }
     }
 
@@ -284,12 +266,14 @@ public final class UI extends UINamespaceUtilities
      */
     public enum Alignment implements UIEnum<Alignment>
     {
+        UNDEFINED,
         TOP_LEFT,    TOP_CENTER, TOP_RIGHT, TOP_LEADING, TOP_TRAILING,
         CENTER_LEFT, CENTER, CENTER_RIGHT, CENTER_LEADING, CENTER_TRAILING,
         BOTTOM_LEFT, BOTTOM_CENTER, BOTTOM_RIGHT, BOTTOM_LEADING, BOTTOM_TRAILING;
 
         public VerticalAlignment getVertical() {
             switch ( this ) {
+                case UNDEFINED : return VerticalAlignment.UNDEFINED;
                 case TOP_LEFT: case TOP_CENTER: case TOP_RIGHT: case TOP_LEADING: case TOP_TRAILING:
                     return VerticalAlignment.TOP;
                 case CENTER_LEFT: case CENTER: case CENTER_RIGHT: case CENTER_LEADING: case CENTER_TRAILING:
@@ -302,6 +286,7 @@ public final class UI extends UINamespaceUtilities
 
         public HorizontalAlignment getHorizontal() {
             switch ( this ) {
+                case UNDEFINED : return HorizontalAlignment.UNDEFINED;
                 case TOP_LEFT: case CENTER_LEFT: case BOTTOM_LEFT:
                     return HorizontalAlignment.LEFT;
                 case TOP_CENTER: case CENTER: case BOTTOM_CENTER:
@@ -1100,7 +1085,7 @@ public final class UI extends UINamespaceUtilities
      * @return The icon.
      * @throws NullPointerException if {@code path} is {@code null}.
      */
-    private static ImageIcon _tryLoadIcon( IconDeclaration declaration )
+    private static @Nullable ImageIcon _tryLoadIcon(IconDeclaration declaration )
     {
         ImageIcon icon = null;
         try {
@@ -1118,7 +1103,7 @@ public final class UI extends UINamespaceUtilities
      * @return The icon.
      * @throws NullPointerException if {@code path} is {@code null}.
      */
-    private static ImageIcon _loadIcon( IconDeclaration declaration )
+    private static @Nullable ImageIcon _loadIcon( IconDeclaration declaration )
     {
         Objects.requireNonNull(declaration, "declaration");
         String path = declaration.path();
@@ -3457,7 +3442,7 @@ public final class UI extends UINamespaceUtilities
 
     /**
      *  Use this to create a builder for a new {@link JSlider} instance
-     *  based on tbe provided alignment property which dynamically
+     *  based on the provided alignment property which dynamically
      *  determines if the property is aligned vertically or horizontally.
      *
      * @param align The alignment property determining if the {@link JSlider} aligns vertically or horizontally.
@@ -3524,7 +3509,13 @@ public final class UI extends UINamespaceUtilities
 
     /**
      * Creates a slider with the specified alignment and the
-     * specified minimum, maximum, and dynamic value.
+     * specified minimum, maximum, and dynamic value. <br>
+     * The slider will be updated whenever the provided property changes.
+     * But note that the property is of the read only {@link Val} type,
+     * which means that when the user moves the slider, the property will not be updated.
+     * <br>
+     * If you want bidirectional binding, use {@link #slider(Align, int, int, Var)}
+     * instead of this method.
      *
      * @param align The alignment determining if the {@link JSlider} aligns vertically or horizontally.
      * @param min The minimum possible value of the slider.
@@ -3551,7 +3542,10 @@ public final class UI extends UINamespaceUtilities
 
     /**
      * Creates a slider with the specified alignment and the
-     * specified minimum, maximum, and dynamic value.
+     * specified minimum, maximum, and dynamic value property.
+     * The property will be updated whenever the user
+     * moves the slider and the slider will be updated whenever
+     * the property changes in your code (see {@link Var#set(Object)}).
      *
      * @param align The alignment determining if the {@link JSlider} aligns vertically or horizontally.
      * @param min The minimum possible value of the slider.
@@ -3577,7 +3571,9 @@ public final class UI extends UINamespaceUtilities
     }
 
     /**
-     *  Use this to create a builder for the provided {@link JComboBox} instance.
+     *  Use this to create a builder for the provided {@link JComboBox} instance.<br>
+     *  This is useful when you want to write declarative UI with a custom {@link JComboBox} type.
+     *  Also see {@link #comboBox()} for a more convenient way to create a new {@link JComboBox} instance.
      *
      * @param component The {@link JComboBox} instance to create a builder for.
      * @param <E> The type of the elements in the {@link JComboBox}.
@@ -3590,8 +3586,8 @@ public final class UI extends UINamespaceUtilities
     }
 
     /**
-     *  Use this to declare a builder for a new {@link JComboBox} UI component.
-     *  This is in essence a convenience method for {@code UI.of(new JComboBox())}.
+     *  Use this to create a UI builder for a the {@link JComboBox} component type.
+     *  This is similar to {@code UI.of(new JComboBox())}.
      *
      * @param <E> The type of the elements in the {@link JComboBox}.
      * @return A builder instance for a new {@link JComboBox}, which enables fluent method chaining.
@@ -3688,11 +3684,14 @@ public final class UI extends UINamespaceUtilities
 
     /**
      *  Use this to create a builder for a new  {@link JComboBox} instance
-     *  with the provided list of elements as selectable items which
-     *  may not be modified by the user.
+     *  with the provided {@link List} of elements as selectable items which
+     *  may not be modified by the user. <br>
+     *  So even if the combo box is editable, the user will not be able to
+     *  modify the items in the list (the selected item inside the
+     *  text field can still be modified though).
      *
      * @param items The list of elements to be selectable in the {@link JComboBox}.
-     * @return A builder instance for the provided {@link JComboBox}, which enables fluent method chaining.
+     * @return A UI builder for the provided {@link JComboBox}, which enables fluent method chaining.
      * @param <E> The type of the elements in the list.
      */
     public static <E> UIForCombo<E,JComboBox<E>> comboBoxWithUnmodifiable( java.util.List<E> items ) {
@@ -4258,7 +4257,7 @@ public final class UI extends UINamespaceUtilities
      */
     public static UIForIcon<JIcon> icon( int width, int height, String iconPath ) {
         NullUtil.nullArgCheck(iconPath, "iconPath", String.class);
-        return icon(width, height, findIcon(iconPath).orElse(null));
+        return icon(width, height, findIcon(iconPath).orElse(new ImageIcon()));
     }
 
     /**
@@ -4824,11 +4823,15 @@ public final class UI extends UINamespaceUtilities
     }
 
     /**
-     *  A convenience method for creating a builder for a {@link JTextField} with a certain text alignment.
-     *  This is a shortcut version for the following code:
+     *  A convenience method for creating a builder for a {@link JTextField} with
+     *  the specified {@link HorizontalAlignment} constant as the text orientation.
+     *  You may also use {@link UIForTextField#withTextOrientation(HorizontalAlignment)}
+     *  to define the text orientation:
      *  <pre>{@code
-     *      UI.textField()
-     *          .withTextOrientation(UI.HorizontalDirection.RIGHT);
+     *    UI.textField("may text")
+     *    .withTextOrientation(
+     *        UI.HorizontalAlignment.RIGHT
+     *    );
      *  }</pre>
      *
      * @param direction The text orientation type which should be used.
@@ -4840,40 +4843,115 @@ public final class UI extends UINamespaceUtilities
     }
 
     /**
-     *  A convenience method for creating a builder for a {@link JTextField} with a certain text and text alignment.
-     *  This is a shortcut version for the following code:
+     *  A convenience method for creating a builder for a {@link JTextField}
+     *  with the specified text and text orientation.
+     *  You may also use {@link UIForTextField#withText(String)}
+     *  and {@link UIForTextField#withTextOrientation(HorizontalAlignment)}
+     *  to define the text and text orientation:
      *  <pre>{@code
-     *      UI.textField()
-     *          .withTextOrientation(UI.HorizontalDirection.LEFT)
-     *          .withText(text);
+     *    UI.textField()
+     *    .withTextOrientation(
+     *        UI.HorizontalAlignment.LEFT
+     *    )
+     *    .withText(text);
      *  }</pre>
      *
-     * @param direction The text orientation type which should be used.
+     * @param orientation Defines the orientation of the text inside the text field.<br>
+     *                    This may be one of the following constants:
+     *                    <ul>
+     *                      <li>{@link HorizontalAlignment#LEFT}</li>
+     *                      <li>{@link HorizontalAlignment#CENTER}</li>
+     *                      <li>{@link HorizontalAlignment#RIGHT}</li>
+     *                      <li>{@link HorizontalAlignment#LEADING}</li>
+     *                      <li>{@link HorizontalAlignment#TRAILING}</li>
+     *                      <li>{@link HorizontalAlignment#UNDEFINED} (No-Op)</li>
+     *                    </ul>
      * @param text The new text to be set for the wrapped text component type.
      * @return A builder instance for a new {@link JTextField}, which enables fluent method chaining.
      */
-    public static UIForTextField<JTextField> textField( HorizontalAlignment direction, String text ) {
-        NullUtil.nullArgCheck(direction, "direction", HorizontalAlignment.class);
-        return textField().withTextOrientation(direction).withText(text);
+    public static UIForTextField<JTextField> textField( HorizontalAlignment orientation, String text ) {
+        NullUtil.nullArgCheck(orientation, "orientation", HorizontalAlignment.class);
+        return textField().withTextOrientation(orientation).withText(text);
     }
 
-    public static UIForTextField<JTextField> textField( HorizontalAlignment direction, Val<String> text ) {
-        NullUtil.nullArgCheck(direction, "direction", HorizontalAlignment.class);
-        NullUtil.nullArgCheck(text, "text", Val.class);
-        NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
-        return textField()
-                .applyIf(!text.hasNoID(), it -> it.id(text.id()))
-                .withTextOrientation(direction)
-                .withText(text);
-    }
-
-    public static UIForTextField<JTextField> textField( HorizontalAlignment direction, Var<String> text ) {
-        NullUtil.nullArgCheck(direction, "direction", HorizontalAlignment.class);
+    /**
+     *  Creates a UI builder for a text field where the text is aligned according
+     *  to the provided {@link HorizontalAlignment} constant, and the text
+     *  of the text field is bound to a string property.
+     *  Whenever the user modifies the text inside the text field, the value of the
+     *  property will be updated accordingly. Conversely, when the state of the property
+     *  is modified inside your view model through the {@link Var#set(Object)} method,
+     *  the text field will be updated accordingly.
+     *  <p>
+     *  You may also use {@link UIForTextField#withTextOrientation(HorizontalAlignment)}
+     *  and {@link UIForTextField#withText(Var)} to define the text orientation and text property
+     *  of the text field:
+     *  <pre>{@code
+     *  UI.textField()
+     *  .withTextOrientation(
+     *    UI.HorizontalAlignment.RIGHT
+     *  )
+     *  .withText(textProperty);
+     *  }</pre>
+     *
+     * @param textOrientation The orientation of the text inside the text field.
+     * @param text A string property which is used to model the text of this text field.
+     * @return A text field UI builder for declarative UI
+     *        design based on method chaining and nesting of SwingTree builder types.
+     */
+    public static UIForTextField<JTextField> textField( HorizontalAlignment textOrientation, Var<String> text ) {
+        NullUtil.nullArgCheck(textOrientation, "textOrientation", HorizontalAlignment.class);
         NullUtil.nullArgCheck(text, "text", Var.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
         return textField()
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
-                .withTextOrientation(direction)
+                .withTextOrientation(textOrientation)
+                .withText(text);
+    }
+
+    /**
+     *  Creates a UI builder for a text field where the text is aligned according
+     *  to the provided {@link HorizontalAlignment} constant, and the text
+     *  of the text field is uni-directionally bound to a string property.
+     *  Whenever the state of the property is modified inside your view model through the
+     *  {@link Var#set(Object)} method, the text field will be updated accordingly. <br>
+     *  But note that <b>when the user modifies the text inside the text field, the value of the
+     *  property will not be updated</b>.
+     *  <p>
+     *  You may also use {@link UIForTextField#withTextOrientation(HorizontalAlignment)}
+     *  and {@link UIForTextField#withText(Val)} to define the text orientation and text property
+     *  of the text field:
+     *  <pre>{@code
+     *  UI.textField()
+     *  .withTextOrientation(
+     *    UI.HorizontalAlignment.RIGHT
+     *  )
+     *  .withText(readOnlyTextProperty);
+     *  }</pre>
+     *
+     *  @param orientation The orientation of the text inside the text field.
+     *                     This is the direction in which the text is aligned.<br>
+     *                     It may be one of the following constants:
+     *                     <ul>
+     *                       <li>{@link HorizontalAlignment#LEFT}</li>
+     *                       <li>{@link HorizontalAlignment#CENTER}</li>
+     *                       <li>{@link HorizontalAlignment#RIGHT}</li>
+     *                       <li>{@link HorizontalAlignment#LEADING}</li>
+     *                       <li>{@link HorizontalAlignment#TRAILING}</li>
+     *                       <li>{@link HorizontalAlignment#UNDEFINED} (No-Op)</li>
+     *                     </ul>
+     *  @param text A string property which is used to model the text of this text field
+     *              uni-directionally (read-only).
+     *  @return A text field UI builder for declarative UI design based on method chaining
+     *        and nesting of SwingTree builder types.
+     */
+    public static UIForTextField<JTextField> textField( HorizontalAlignment orientation, Val<String> text ) {
+        NullUtil.nullArgCheck(orientation, "orientation", HorizontalAlignment.class);
+        NullUtil.nullArgCheck(text, "text", Val.class);
+        NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
+        return textField()
+                .applyIf(!text.hasNoID(), it -> it.id(text.id()))
+                .withTextOrientation(orientation)
                 .withText(text);
     }
 
@@ -4923,7 +5001,6 @@ public final class UI extends UINamespaceUtilities
                 .applyIf( !number.hasNoID(), it -> it.id(number.id()) )
                 .withNumber(number, formatter);
     }
-
 
     /**
      *  Use this to create a builder for a new {@link JTextField} instance with
@@ -5062,14 +5139,14 @@ public final class UI extends UINamespaceUtilities
     /**
      *  Use this to create a builder for the provided {@link JPasswordField} instance.
      *
-     * @param component The {@link JPasswordField} instance which should be wrapped by the builder.
+     * @param passwordField The {@link JPasswordField} instance which should be wrapped by the builder.
      * @param <F> The type of the {@link JPasswordField} instance which should be wrapped by the builder.
      * @return A builder instance for the provided {@link JPasswordField}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
-    public static <F extends JPasswordField> UIForPasswordField<F> of( F component ) {
-        NullUtil.nullArgCheck(component, "component", JPasswordField.class);
-        return new UIForPasswordField<>(new BuilderState<>(component));
+    public static <F extends JPasswordField> UIForPasswordField<F> of( F passwordField ) {
+        NullUtil.nullArgCheck(passwordField, "passwordField", JPasswordField.class);
+        return new UIForPasswordField<>(new BuilderState<>(passwordField));
     }
 
     /**
@@ -5131,14 +5208,14 @@ public final class UI extends UINamespaceUtilities
     /**
      *  Use this to create a builder for the provided {@link JProgressBar} instance.
      *
-     * @param component The {@link JProgressBar} instance which should be wrapped by the builder.
+     * @param progressBar The {@link JProgressBar} instance which should be wrapped by the builder.
      * @param <P> The type of the {@link JProgressBar} instance which should be wrapped by the builder.
      * @return A builder instance for the provided {@link JProgressBar}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
-    public static <P extends JProgressBar> UIForProgressBar<P> of( P component ) {
-        NullUtil.nullArgCheck(component, "component", JProgressBar.class);
-        return new UIForProgressBar<>(new BuilderState<>(component));
+    public static <P extends JProgressBar> UIForProgressBar<P> of( P progressBar ) {
+        NullUtil.nullArgCheck(progressBar, "progressBar", JProgressBar.class);
+        return new UIForProgressBar<>(new BuilderState<>(progressBar));
     }
 
     /**
@@ -5574,6 +5651,7 @@ public final class UI extends UINamespaceUtilities
      * @return A builder instance for a new {@link JTable}.
      */
     public static UIForTable<JTable> table( Buildable<BasicTableModel> tableModelBuildable ) {
+        Objects.requireNonNull(tableModelBuildable);
         return table().withModel(tableModelBuildable);
     }
 
@@ -5607,6 +5685,7 @@ public final class UI extends UINamespaceUtilities
      * @return A functional API for building a {@link javax.swing.table.TableModel}.
      */
     public static <E> BasicTableModel.Builder<E> tableModel( Class<E> entryType ) {
+        Objects.requireNonNull(entryType);
         return new BasicTableModel.Builder<>(entryType);
     }
 
@@ -5637,7 +5716,7 @@ public final class UI extends UINamespaceUtilities
      * @return A builder instance for a new {@link JTable}.
      */
     public static Render.Builder<JTable, Object> renderTable() {
-        return Render.forTable(Object.class, null)
+        return Render.forTable(Object.class)
                      .when(Object.class)
                      .asText( cell -> cell.valueAsString().orElse("") );
     }
@@ -5663,7 +5742,7 @@ public final class UI extends UINamespaceUtilities
      *          configure how he passed item types should be rendered.
      */
     public static Render.Builder<JList<Object>, Object> renderList() {
-        return Render.forList(Object.class, null).when(Object.class).asText(cell->cell.valueAsString().orElse(""));
+        return Render.forList(Object.class).when(Object.class).asText(cell->cell.valueAsString().orElse(""));
     }
 
     /**
@@ -5687,7 +5766,8 @@ public final class UI extends UINamespaceUtilities
      * @param <T> The common super-type type of the items which should be rendered.
      */
     public static <T> Render.Builder<JList<T>, T> renderList( Class<T> commonType ) {
-        return Render.forList(commonType, null).when(commonType).asText(cell->cell.valueAsString().orElse(""));
+        Objects.requireNonNull(commonType);
+        return Render.forList(commonType).when(commonType).asText(cell->cell.valueAsString().orElse(""));
     }
 
     /**
@@ -5709,7 +5789,8 @@ public final class UI extends UINamespaceUtilities
      * @param <T> The type of the items which should be rendered.
      */
     public static <T> Render.As<JList<T>, T, T> renderListItem( Class<T> itemType ) {
-        return Render.forList(itemType, null).when(itemType);
+        Objects.requireNonNull(itemType);
+        return Render.forList(itemType).when(itemType);
     }
 
     /**
@@ -5732,7 +5813,7 @@ public final class UI extends UINamespaceUtilities
      * @return A render builder exposing an API that allows you to configure how he passed item types should be rendered.
      */
     public static Render.Builder<JComboBox<Object>, Object> renderCombo() {
-        return Render.forCombo(Object.class, null).when(Object.class).asText(cell->cell.valueAsString().orElse(""));
+        return Render.forCombo(Object.class).when(Object.class).asText(cell->cell.valueAsString().orElse(""));
     }
 
     /**
@@ -5755,7 +5836,8 @@ public final class UI extends UINamespaceUtilities
      * @param <T> The common super-type type of the items which should be rendered.
      */
     public static <T> Render.Builder<JComboBox<T>, T> renderCombo( Class<T> commonType ) {
-        return Render.forCombo(commonType, null).when(commonType).asText(cell->cell.valueAsString().orElse(""));
+        Objects.requireNonNull(commonType);
+        return Render.forCombo(commonType).when(commonType).asText(cell->cell.valueAsString().orElse(""));
     }
 
     /**
@@ -5777,80 +5859,8 @@ public final class UI extends UINamespaceUtilities
      * @param <T> The type of the items which should be rendered.
      */
     public static <T> Render.As<JComboBox<T>, T, T> renderComboItem( Class<T> itemType ) {
-        return Render.forCombo(itemType, null).when(itemType);
-    }
-
-    /**
-     * @param borderSupplier A lambda which provides a border for rendered cells.
-     * @return The builder API allowing method chaining.
-     */
-    public static Render.Builder<JTable, Object> renderTableWithBorder( Supplier<Border> borderSupplier ) {
-        return Render.forTable(Object.class, borderSupplier).when(Object.class).as(cell->{});
-    }
-
-    /**
-     * @param borderSupplier A lambda which provides a border for rendered cells.
-     * @return The builder API allowing method chaining.
-     */
-    public static Render.Builder<JList<Object>, Object> renderListWithBorder( Supplier<Border> borderSupplier ) {
-        return Render.forList(Object.class, borderSupplier).when(Object.class).as(cell->{});
-    }
-
-    /**
-     * @param borderSupplier A lambda which provides a border for rendered cells.
-     * @return The builder API allowing method chaining.
-     */
-    public static Render.Builder<JComboBox<Object>, Object> renderComboWithBorder( Supplier<Border> borderSupplier ) {
-        return Render.forCombo(Object.class, borderSupplier).when(Object.class).as(cell->{});
-    }
-
-    /**
-     * @param border A border for rendered cells.
-     * @return The builder API allowing method chaining.
-     */
-    public static Render.Builder<JTable, Object> renderTableWithBorder( Border border ) {
-        return renderTableWithBorder(()->border);
-    }
-
-    /**
-     * @param border A property holding a {@link Border} used for rendered cells.
-     * @return The builder API allowing method chaining.
-     */
-    public static Render.Builder<JTable, Object> renderTableWithBorder( Val<Border> border ) {
-        return renderTableWithBorder(border::orElseThrow);
-    }
-
-    /**
-     * @param border A border for rendered cells.
-     * @return The builder API allowing method chaining.
-     */
-    public static Render.Builder<JList<Object>, Object> renderListWithBorder( Border border ) {
-        return renderListWithBorder(()->border);
-    }
-
-    /**
-     * @param border A property holding a {@link Border} used for rendered cells.
-     * @return The builder API allowing method chaining.
-     */
-    public static Render.Builder<JList<Object>, Object> renderListWithBorder( Var<Border> border ) {
-        return renderListWithBorder(border::orElseThrow);
-    }
-
-    /**
-     * @param border A border for rendered cells.
-     * @return The builder API allowing method chaining.
-     */
-    public static Render.Builder<JComboBox<Object>, Object> renderComboWithBorder( Border border ) {
-        return renderComboWithBorder(()->border);
-    }
-
-    /**
-     * @param border A property holding a {@link Border} used for rendered cells.
-     * @return The builder API allowing method chaining.
-     */
-    public static Render.Builder<JComboBox<Object>, Object> renderComboWithBorder( Val<Border> border ) {
-        NullUtil.nullPropertyCheck(border, "border", "Null is not a valid border.");
-        return renderComboWithBorder(border::orElseThrow);
+        Objects.requireNonNull(itemType);
+        return Render.forCombo(itemType).when(itemType);
     }
 
     /**
@@ -5860,6 +5870,7 @@ public final class UI extends UINamespaceUtilities
      * @param <F> The concrete type of this new frame.
      */
     public static <F extends JFrame> UIForJFrame<F> of( F frame ) {
+        Objects.requireNonNull(frame);
         return new UIForJFrame<>(new BuilderState<>(frame));
     }
 
@@ -6638,7 +6649,7 @@ public final class UI extends UINamespaceUtilities
     private static class TestWindow
     {
         private final JFrame frame;
-        private final java.awt.Component component;
+        private final java.awt.@Nullable Component component;
 
         private TestWindow( String title, Function<JFrame, java.awt.Component> uiSupplier ) {
             Objects.requireNonNull( title );
@@ -6668,15 +6679,16 @@ public final class UI extends UINamespaceUtilities
         }
         private void _determineSize() {
             Dimension size = frame.getSize();
-            if ( size == null ) // The frame has no size! It is best to set the size to the preferred size of the component:
-                size = component.getPreferredSize();
+            if ( component != null ) {
+                if ( size == null ) // The frame has no size! It is best to set the size to the preferred size of the component:
+                    size = component.getPreferredSize();
 
-            if ( size == null ) // The component has no preferred size! It is best to set the size to the minimum size of the component:
-                size = component.getMinimumSize();
+                if ( size == null ) // The component has no preferred size! It is best to set the size to the minimum size of the component:
+                    size = component.getMinimumSize();
 
-            if ( size == null ) // The component has no minimum size! Let's just look up the size of the component:
-                size = component.getSize();
-
+                if ( size == null ) // The component has no minimum size! Let's just look up the size of the component:
+                    size = component.getSize();
+            }
             frame.setSize(size);
         }
     }
@@ -6767,7 +6779,7 @@ public final class UI extends UINamespaceUtilities
     }
     /** {inheritDoc} */
     public static class TableHeader extends JTableHeader implements StylableComponent {
-        private Function<Integer, String> _toolTipTextSupplier;
+        private @Nullable Function<Integer, String> _toolTipTextSupplier;
         public TableHeader() { super(); }
         public TableHeader(TableColumnModel model) { super(model); }
         /**
@@ -6793,8 +6805,11 @@ public final class UI extends UINamespaceUtilities
             int modelCol = Optional.ofNullable(getTable())
                                     .map( t -> t.convertColumnIndexToModel(col) )
                                     .orElse(col);
-            String retStr;
-            try { retStr = _toolTipTextSupplier.apply(modelCol); }
+            String retStr = "";
+            try {
+                if ( _toolTipTextSupplier != null )
+                    retStr = _toolTipTextSupplier.apply(modelCol);
+            }
             catch ( NullPointerException | ArrayIndexOutOfBoundsException ex ) {
                 retStr = "";
             }
@@ -6846,7 +6861,7 @@ public final class UI extends UINamespaceUtilities
     /** {inheritDoc} */
     public static class ScrollPane extends JScrollPane implements StylableComponent {
         public ScrollPane() { this(null); }
-        public ScrollPane(java.awt.Component view) {
+        public ScrollPane(java.awt.@Nullable Component view) {
             super(view);
             addMouseWheelListener(new NestedJScrollPanelScrollCorrection(this));
         }

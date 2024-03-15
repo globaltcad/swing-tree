@@ -23,6 +23,7 @@
 
 package swingtree.components;
 
+import org.jspecify.annotations.Nullable;
 import sprouts.Event;
 import sprouts.Var;
 import swingtree.UI;
@@ -73,12 +74,12 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
     private int arrowSize = 8;
     private boolean onSplit = false;
     private Rectangle splitRectangle = new Rectangle();
-    private JPopupMenu popupMenu;
+    private @Nullable JPopupMenu popupMenu;
     private boolean alwaysPopup;
     private Color arrowColor = Color.BLACK;
     private Color disabledArrowColor = Color.GRAY;
-    private Image image;
-    private Image disabledImage;
+    private @Nullable Image image;
+    private @Nullable Image disabledImage;
     private final swingtree.components.JSplitButton.Listener listener;
 
     /**
@@ -87,7 +88,7 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
      * @param text the text of the button
      * @param icon the Icon image to display on the button
      */
-    public JSplitButton(final String text, final Icon icon) {
+    public JSplitButton( final String text, final @Nullable Icon icon ) {
         super(text, icon);
         this.listener = new swingtree.components.JSplitButton.Listener();
         super.addMouseMotionListener(this.listener);
@@ -110,14 +111,14 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
      * @param icon the Icon image to display on the button
      */
     public JSplitButton(final Icon icon) {
-        this(null, icon);
+        this("", icon);
     }
 
     /**
      * Creates a button with no set text or icon.
      */
     public JSplitButton() {
-        this(null, null);
+        this("", null);
     }
 
     /** {@inheritDoc} */
@@ -138,7 +139,7 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
      *
      * @return JPopupMenu
      */
-    public JPopupMenu getPopupMenu() {
+    public @Nullable JPopupMenu getPopupMenu() {
         return popupMenu;
     }
 

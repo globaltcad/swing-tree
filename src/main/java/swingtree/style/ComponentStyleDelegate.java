@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import swingtree.UI;
 import swingtree.api.*;
@@ -1411,6 +1412,8 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with a background noise defined by the provided styler lambda.
      */
     public ComponentStyleDelegate<C> noise( String noiseName, Function<NoiseConf, NoiseConf> styler ) {
+        Objects.requireNonNull(noiseName);
+        Objects.requireNonNull(styler);
         return noise(NoiseConf.DEFAULT_LAYER, noiseName, styler);
     }
 
@@ -1464,6 +1467,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with a background noise defined by the provided styler lambda.
      */
     public ComponentStyleDelegate<C> noise( Function<NoiseConf, NoiseConf> styler ) {
+        Objects.requireNonNull(styler);
         return noise(NoiseConf.DEFAULT_LAYER, StyleUtil.DEFAULT_KEY, styler);
     }
 
@@ -1491,6 +1495,8 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with a named background image defined by the provided styler lambda.
      */
     public ComponentStyleDelegate<C> image( String imageName, Function<ImageConf, ImageConf> styler ) {
+        Objects.requireNonNull(imageName);
+        Objects.requireNonNull(styler);
         return image(ImageConf.DEFAULT_LAYER, imageName, styler);
     }
 
@@ -1553,6 +1559,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with a background image defined by the provided styler lambda.
      */
     public ComponentStyleDelegate<C> image( Function<ImageConf, ImageConf> styler ) {
+        Objects.requireNonNull(styler);
         return image(ImageConf.DEFAULT_LAYER, StyleUtil.DEFAULT_KEY, styler);
     }
 
@@ -1578,6 +1585,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with a background image defined by the provided styler lambda.
      */
     public ComponentStyleDelegate<C> image( UI.Layer layer, Function<ImageConf, ImageConf> styler ) {
+        Objects.requireNonNull(layer);
         Objects.requireNonNull(styler);
         return _withStyle(_styleConf.images(layer, StyleUtil.DEFAULT_KEY, styler));
     }
@@ -1599,6 +1607,8 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @throws NullPointerException If the value is {@code null}! (Use {@code ""} to remove a property)
      */
     public ComponentStyleDelegate<C> property( String key, String value ) {
+        Objects.requireNonNull(key);
+        Objects.requireNonNull(value);
         return _withStyle(_styleConf.property(key, value));
     }
 
@@ -1612,6 +1622,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided font name and size.
      */
     public ComponentStyleDelegate<C> font( String name, int size ) {
+        Objects.requireNonNull(name);
         return _withStyle(_styleConf._withFont(_styleConf.font().withFamily(name).withSize(size)));
     }
 
@@ -1624,6 +1635,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided font name.
      */
     public ComponentStyleDelegate<C> fontFamily( String name ) {
+        Objects.requireNonNull(name);
         return _withStyle(_styleConf._withFont(_styleConf.font().withFamily(name)));
     }
 
@@ -1634,8 +1646,11 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *
      * @param font The {@link Font}.
      * @return A new {@link ComponentStyleDelegate} with the provided {@link Font}.
+     * @throws NullPointerException If the font is {@code null}.
+     *         Use {@link UI#FONT_UNDEFINED} to remove the font style.
      */
     public ComponentStyleDelegate<C> font( Font font ) {
+        Objects.requireNonNull(font, "The font cannot be null! Use UI.FONT_UNDEFINED to remove the font style.");
         return _withStyle(_styleConf._withFont(_styleConf.font().withPropertiesFromFont(font)));
     }
 
@@ -1706,8 +1721,11 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *
      * @param color The {@link Color}.
      * @return A new {@link ComponentStyleDelegate} with the provided font color.
+     * @throws NullPointerException If the color is {@code null}.
+     *         Use {@link UI#COLOR_UNDEFINED} to remove the font color style.
      */
     public ComponentStyleDelegate<C> fontColor( Color color ) {
+        Objects.requireNonNull(color, "The color cannot be null! Use UI.COLOR_UNDEFINED to remove the font color style.");
         return _withStyle(_styleConf._withFont(_styleConf.font().withColor(color)));
     }
 
@@ -1720,10 +1738,13 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided font color.
      */
     public ComponentStyleDelegate<C> fontColor( String colorString ) {
-        Objects.requireNonNull(colorString);
+        Objects.requireNonNull(colorString, "The color string cannot be null! Use an empty string to remove the font color style.");
         Color newColor;
         try {
-            newColor = UI.color(colorString);
+            if ( colorString.isEmpty() )
+                newColor = UI.COLOR_UNDEFINED;
+            else
+                newColor = UI.color(colorString);
         } catch ( Exception e ) {
             log.error("Failed to parse color string: '"+colorString+"'", e);
             return this;
@@ -1738,8 +1759,11 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *
      * @param color The {@link Color}.
      * @return A new {@link ComponentStyleDelegate} with the provided font background color.
+     * @throws NullPointerException If the color is {@code null}.
+     *          Use {@link UI#COLOR_UNDEFINED} to remove the font background color style.
      */
     public ComponentStyleDelegate<C> fontBackgroundColor( Color color ) {
+        Objects.requireNonNull(color);
         return _withStyle(_styleConf._withFont(_styleConf.font().withBackgroundColor(color)));
     }
 
@@ -1755,7 +1779,10 @@ public final class ComponentStyleDelegate<C extends JComponent>
         Objects.requireNonNull(colorString);
         Color newColor;
         try {
-            newColor = UI.color(colorString);
+            if ( colorString.isEmpty() )
+                newColor = UI.COLOR_UNDEFINED;
+            else
+                newColor = UI.color(colorString);
         } catch ( Exception e ) {
             log.error("Failed to parse color string: '{}'", colorString, e);
             return this;
@@ -1770,8 +1797,11 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *
      * @param color The {@link Color}.
      * @return A new {@link ComponentStyleDelegate} with the provided font selection color.
+     * @throws NullPointerException If the color is {@code null}.
+     *         Use {@link UI#COLOR_UNDEFINED} to remove the font selection color style.
      */
     public ComponentStyleDelegate<C> fontSelectionColor( Color color ) {
+        Objects.requireNonNull(color);
         return _withStyle(_styleConf._withFont(_styleConf.font().withSelectionColor(color)));
     }
 
@@ -1787,7 +1817,10 @@ public final class ComponentStyleDelegate<C extends JComponent>
         Objects.requireNonNull(colorString);
         Color newColor;
         try {
-            newColor = UI.color(colorString);
+            if ( colorString.isEmpty() )
+                newColor = UI.COLOR_UNDEFINED;
+            else
+                newColor = UI.color(colorString);
         } catch ( Exception e ) {
             log.error("Failed to parse color string: '"+colorString+"'", e);
             return this;
@@ -1799,7 +1832,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param transform The {@link AffineTransform} to apply to the font.
      * @return A new {@link ComponentStyleDelegate} with the provided font transform.
      */
-    public ComponentStyleDelegate<C> fontTransform( AffineTransform transform ) {
+    public ComponentStyleDelegate<C> fontTransform( @Nullable AffineTransform transform ) {
         return _withStyle(_styleConf._withFont(_styleConf.font().withTransform(transform)));
     }
 
@@ -1808,7 +1841,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *              {@link java.awt.font.TextAttribute#FOREGROUND} attribute.
      * @return A new {@link ComponentStyleDelegate} with the provided font paint.
      */
-    public ComponentStyleDelegate<C> fontPaint( Paint paint ) {
+    public ComponentStyleDelegate<C> fontPaint( @Nullable Paint paint ) {
         return _withStyle(_styleConf._withFont(_styleConf.font().withPaint(paint)));
     }
 
@@ -1817,7 +1850,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *              {@link java.awt.font.TextAttribute#BACKGROUND} attribute.
      * @return A new {@link ComponentStyleDelegate} with the provided font background paint.
      */
-    public ComponentStyleDelegate<C> fontBackgroundPaint( Paint paint ) {
+    public ComponentStyleDelegate<C> fontBackgroundPaint( @Nullable Paint paint ) {
         return _withStyle(_styleConf._withFont(_styleConf.font().withBackgroundPaint(paint)));
     }
 
@@ -1854,6 +1887,8 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  @param alignment The horizontal alignment of the font.
      *                   See {@link UI.HorizontalAlignment} for more information.
      *  @return A new {@link ComponentStyleDelegate} with the provided font alignment.
+     * @throws NullPointerException If the alignment is {@code null}.
+     *         Use {@link UI.HorizontalAlignment#UNDEFINED} to remove the font alignment style.
      */
     public ComponentStyleDelegate<C> fontAlignment( UI.HorizontalAlignment alignment ) {
         Objects.requireNonNull(alignment);
@@ -1868,6 +1903,8 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  @param alignment The vertical alignment of the font.
      *                   See {@link UI.VerticalAlignment} for more information.
      *  @return A new {@link ComponentStyleDelegate} with the provided font alignment.
+     *  throws NullPointerException If the alignment is {@code null}.
+     *       Use {@link UI.VerticalAlignment#UNDEFINED} to remove the font alignment style.
      */
     public ComponentStyleDelegate<C> fontAlignment( UI.VerticalAlignment alignment ) {
         Objects.requireNonNull(alignment);
@@ -1882,6 +1919,8 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  @param alignment The horizontal and vertical alignment of the font.
      *                   See {@link UI.Alignment} for more information.
      *  @return A new {@link ComponentStyleDelegate} with the provided font alignment.
+     *  throws NullPointerException If the alignment is {@code null}.
+     *          Use {@link UI.Alignment#UNDEFINED} to remove the font alignment style.
      */
     public ComponentStyleDelegate<C> fontAlignment( UI.Alignment alignment ) {
         Objects.requireNonNull(alignment);

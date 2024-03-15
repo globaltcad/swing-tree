@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import org.jspecify.annotations.Nullable;
 import swingtree.UI;
 import swingtree.animation.AnimationState;
 import swingtree.api.Painter;
@@ -62,7 +63,7 @@ public final class ComponentExtension<C extends JComponent>
     private StyleEngine     _styleEngine = StyleEngine.create();
     private StyleSource<C>  _styleSource  = StyleSource.create();
 
-    private Shape _outerBaseClip = null;
+    private @Nullable Shape _outerBaseClip = null;
 
 
     private ComponentExtension( C owner ) { _owner = Objects.requireNonNull(owner); }
@@ -409,7 +410,7 @@ public final class ComponentExtension<C extends JComponent>
         _styleEngine = _styleEngine.withNewStyleAndComponent(styleConf, _owner);
     }
 
-    void paintBackground( Graphics g, Runnable lookAndFeelPainting )
+    void paintBackground( Graphics g, @Nullable Runnable lookAndFeelPainting )
     {
         gatherApplyAndInstallStyleConfig();
 
@@ -486,7 +487,7 @@ public final class ComponentExtension<C extends JComponent>
         return _styleInstaller.applyStyleToComponentState(_owner, newStyle, _styleSource);
     }
 
-    static void paintWithClip( Graphics2D g2d, Shape clip, Runnable paintTask ) {
+    static void paintWithClip( Graphics2D g2d, @Nullable Shape clip, Runnable paintTask ) {
         Shape formerClip = g2d.getClip();
         g2d.setClip(clip);
         try {

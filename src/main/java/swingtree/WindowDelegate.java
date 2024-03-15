@@ -1,5 +1,7 @@
 package swingtree;
 
+import org.jspecify.annotations.Nullable;
+
 import java.awt.*;
 
 /**
@@ -19,5 +21,5 @@ public interface WindowDelegate<W extends Window, E>
 	/**
 	 * @return The event which is wrapped by this delegate.
 	 */
-	E getEvent();
+	@Nullable E getEvent();
 }

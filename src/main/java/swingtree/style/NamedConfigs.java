@@ -1,5 +1,7 @@
 package swingtree.style;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -105,7 +107,7 @@ final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
         return -1;
     }
 
-    public S get( String name ) {
+    public @Nullable S get(String name ) {
         Objects.requireNonNull(name);
 
         int foundIndex = _findNamedStyle(name);

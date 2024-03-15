@@ -30,6 +30,7 @@ import javax.swing.event.EventListenerList;
 import javax.swing.plaf.ComponentUI;
 
 import net.miginfocom.swing.MigLayout;
+import org.jspecify.annotations.Nullable;
 import swingtree.style.ComponentExtension;
 import swingtree.style.StylableComponent;
 
@@ -48,7 +49,8 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
 
     private final EventListenerList listeners = new EventListenerList();
 
-    protected JRootPane rootPane;
+    protected @Nullable JRootPane rootPane;
+
 
     public JGlassPane() {
         setLayout(new MigLayout("fill, ins 0"));
@@ -101,7 +103,7 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
         this.setVisible(true);
     }
 
-    protected void detachFromRootPane( JRootPane rootPane ) {
+    protected void detachFromRootPane( @Nullable JRootPane rootPane ) {
         Objects.requireNonNull(rootPane);
         if ( rootPane.getGlassPane() == this ) {
             rootPane.setGlassPane(null);
@@ -109,7 +111,7 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
         }
     }
 
-    public void toRootPane(JRootPane pane) {
+    public void toRootPane(@Nullable JRootPane pane) {
         if( pane != null )
             attachToRootPane(pane);
         else
@@ -212,6 +214,8 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
      */
     @Override
     public boolean contains(int x, int y) {
+        if ( rootPane == null )
+            return false;
         Container container = rootPane.getContentPane();
         Point containerPoint = convertPoint(this, x, y, container);
         if ( containerPoint.y > 0 ) {

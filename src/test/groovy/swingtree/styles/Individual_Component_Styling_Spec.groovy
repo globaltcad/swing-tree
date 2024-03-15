@@ -1302,7 +1302,7 @@ class Individual_Component_Styling_Spec extends Specification
             var comp = ui.get(JComponent)
 
         expect : 'The component indeed has the specified horizontal text alignment!'
-            comp.horizontalAlignment == alignment.forSwing()
+            comp.horizontalAlignment == alignment.forSwing().get()
 
         where :
             component               | alignment

@@ -1,5 +1,6 @@
 package swingtree;
 
+import org.jspecify.annotations.Nullable;
 import sprouts.*;
 import swingtree.api.Peeker;
 import swingtree.style.ComponentExtension;
@@ -379,7 +380,7 @@ abstract class UIForAnything<I, C extends E, E extends Component>
             _addBuilderTo(thisComponent, UI.of((JComponent) other), null);
     }
 
-    protected final void _addBuilderTo( C thisComponent, UIForAnything<?, ?, ?> builder, Object conf )
+    protected final void _addBuilderTo( C thisComponent, UIForAnything<?, ?, ?> builder, @Nullable Object conf )
     {
         NullUtil.nullArgCheck(builder, "builder", UIForAnything.class);
 
@@ -425,7 +426,7 @@ abstract class UIForAnything<I, C extends E, E extends Component>
      * @param addedComponent A component instance which ought to be added to the wrapped component type.
      * @param constraints    The layout constraint which ought to be used to add the component to the wrapped component type.
      */
-    protected abstract void _addComponentTo( C thisComponent, E addedComponent, Object constraints );
+    protected abstract void _addComponentTo( C thisComponent, E addedComponent, @Nullable Object constraints );
 
     /**
      *  Returns the state of the builder, which is a container for the wrapped component

@@ -1,5 +1,6 @@
 package swingtree.dialogs;
 
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import sprouts.From;
 import sprouts.Var;
@@ -68,25 +69,25 @@ public final class OptionsDialog<E extends Enum<E>>
     }
 
 
-    private final int          _type;
-    private final String       _title;
-    private final String       _message;
-    private final E            _default;
-    private final E[]          _options;
-    private final Icon         _icon;
-    private final Component    _parent;
-    private final Var<E>       _property;
+    private final int                    _type;
+    private final String                 _title;
+    private final String                 _message;
+    private final @Nullable E            _default;
+    private final @Nullable E[]          _options;
+    private final @Nullable Icon         _icon;
+    private final @Nullable Component    _parent;
+    private final @Nullable Var<E>       _property;
 
 
     private OptionsDialog(
-        int       type,
-        String    title,
-        String    message,
-        E         defaultOption,
-        E[]       options,
-        Icon      icon,
-        Component parent,
-        Var<E>    property
+        int                 type,
+        String              title,
+        String              message,
+        @Nullable E         defaultOption,
+        @Nullable E[]       options,
+        @Nullable Icon      icon,
+        @Nullable Component parent,
+        @Nullable Var<E>    property
     ) {
         _type     = type;
         _title    = Objects.requireNonNull(title);
@@ -266,6 +267,8 @@ public final class OptionsDialog<E extends Enum<E>>
                 log.warn("No options were specified for dialog with title '{}' and message '{}'.", _title, _message);
             }
         }
+        if ( options == null )
+            options = (E[])new Enum<?>[0];
 
         String[] asStr = new String[options.length];
         for ( int i = 0; i < options.length; i++ )

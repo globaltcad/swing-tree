@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import org.jspecify.annotations.Nullable;
 import swingtree.UI;
 import swingtree.layout.Size;
 
@@ -108,7 +109,7 @@ final class ComponentAreas
     }
 
 
-    public Area get( UI.ComponentArea areaType ) {
+    public @Nullable Area get( UI.ComponentArea areaType ) {
         BoxModelConf boxModel = Optional.ofNullable(_key.get()).orElse(BoxModelConf.none());
         switch ( areaType ) {
             case ALL:

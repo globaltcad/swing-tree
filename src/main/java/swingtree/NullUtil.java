@@ -1,5 +1,6 @@
 package swingtree;
 
+import org.jspecify.annotations.Nullable;
 import sprouts.Val;
 import org.slf4j.helpers.MessageFormatter;
 
@@ -25,7 +26,7 @@ final class NullUtil
         return MessageFormatter.arrayFormat( withPlaceholders, toBePutAtPlaceholders ).getMessage();
     }
 
-    public static <T> void nullArgCheck( T var, String thing, Class<?> type, String... notes ) {
+    public static <T> void nullArgCheck( @Nullable T var, String thing, Class<?> type, String... notes ) {
         if ( var == null ) {
             String postfix = Arrays.stream(notes).collect(Collectors.joining(" "));
             postfix = ( postfix.trim().equals("") ? "" : " " ) + postfix;

@@ -1,5 +1,7 @@
 package swingtree;
 
+import org.jspecify.annotations.Nullable;
+
 import java.awt.*;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -49,7 +51,7 @@ public final class OptionalUI<C extends Component> {
     /**
      * If non-null, the value; if null, indicates no value is present
      */
-    private final C _component;
+    private final @Nullable C _component;
 
     /**
      * Returns an empty {@code OptionalUI} instance.  No value is present for this
@@ -77,7 +79,7 @@ public final class OptionalUI<C extends Component> {
      *        ensure the value is non-{@code null} unless creating the singleton
      *        instance returned by {@code empty()}.
      */
-    private OptionalUI( C value ) { this._component = value; }
+    private OptionalUI( @Nullable C value ) { this._component = value; }
 
     /**
      * Returns an {@code OptionalUI} describing the given value, if
@@ -263,7 +265,7 @@ public final class OptionalUI<C extends Component> {
     /**
      * @return The component wrapped in this OptionalUI, or null if no component is present.
      */
-    public C orNull() {
+    public @Nullable C orNull() {
         if ( !UI.thisIsUIThread() )
             throw new RuntimeException("The UI component may only be accessed by the UI thread!");
         return _component;

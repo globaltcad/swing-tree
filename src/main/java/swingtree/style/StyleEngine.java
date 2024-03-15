@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import swingtree.UI;
 import swingtree.animation.LifeSpan;
@@ -34,9 +35,9 @@ final class StyleEngine
 
 
     private StyleEngine(
-        BoxModelConf          boxModelConf,
-        ComponentConf         componentConf,
-        LayerCache[]          layerCaches // Null when the style engine is freshly created
+        BoxModelConf           boxModelConf,
+        ComponentConf          componentConf,
+        @Nullable LayerCache[] layerCaches // Null when the style engine is freshly created
     ) {
         _boxModelConf      = Objects.requireNonNull(boxModelConf);
         _componentConf     = Objects.requireNonNull(componentConf);

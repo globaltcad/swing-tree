@@ -6,6 +6,7 @@ import net.miginfocom.layout.CC;
 import net.miginfocom.layout.ConstraintParser;
 import net.miginfocom.layout.LC;
 import net.miginfocom.swing.MigLayout;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import sprouts.Action;
 import sprouts.*;
@@ -1536,7 +1537,9 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      */
     public final I withFlowLayout( UI.HorizontalAlignment alignment ) {
         NullUtil.nullArgCheck( alignment, "alignment", UI.HorizontalAlignment.class );
-        return this.withLayout(new FlowLayout(alignment.forFlowLayout()));
+        return this.withLayout(
+                    alignment.forFlowLayout().map( FlowLayout::new ).orElse(new FlowLayout())
+                );
     }
 
     /**
@@ -1555,7 +1558,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      */
     public final I withFlowLayout( UI.HorizontalAlignment alignment, int hgap, int vgap ) {
         NullUtil.nullArgCheck( alignment, "alignment", UI.HorizontalAlignment.class );
-        return this.withLayout(new FlowLayout(alignment.forFlowLayout(), hgap, vgap));
+        return this.withLayout(
+                    alignment.forFlowLayout()
+                                .map( a -> new FlowLayout(a, hgap, vgap) )
+                                .orElse(new FlowLayout(FlowLayout.CENTER, hgap, vgap))
+                );
     }
 
     /**
@@ -1898,7 +1905,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      * @param rowConstraints The row layout for the {@link MigLayout} instance.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I withLayout( LC attr, AC colConstrains, AC rowConstraints ) {
+    public final I withLayout( @Nullable LC attr, @Nullable AC colConstrains, @Nullable AC rowConstraints ) {
         // We make sure the default hidemode is 2 instead of 3 (which sucks because it takes up too much space)
         if ( attr == null )
             attr = new LC().hideMode(2);
@@ -2356,7 +2363,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 })
                 ._with( c -> {
                     Color newColor = condition.get() ? colorIfTrue : colorIfFalse;
-                    if ( newColor == UI.COLOR_UNDEFINED)
+                    if ( newColor == UI.COLOR_UNDEFINED )
                         newColor = null;
                     c.setForeground( newColor );
                 })
@@ -3465,7 +3472,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
     private void _onKeyTyped(C component, BiConsumer<KeyEvent, KeyAdapter> action ) {
         component.addKeyListener(new KeyAdapter() {
-            private KeyEvent lastEvent;
+            private @Nullable KeyEvent lastEvent;
 
             @Override
             public void keyPressed(KeyEvent e) {
@@ -3704,9 +3711,9 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
     @Override
     protected void _addComponentTo(
-        C          thisComponent,
-        JComponent addedComponent,
-        Object     constraints
+        C                thisComponent,
+        JComponent       addedComponent,
+        @Nullable Object constraints
     ) {
         NullUtil.nullArgCheck(addedComponent, "component", JComponent.class);
         if ( constraints == null )
@@ -4026,7 +4033,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         return this.add(attr.toString(), viewables, viewSupplier);
     }
 
-    protected <M> void _addViewableProps( Vals<M> models, String attr, ViewSupplier<M> viewSupplier, C thisComponent ) {
+    protected <M> void _addViewableProps( Vals<M> models, @Nullable String attr, ViewSupplier<M> viewSupplier, C thisComponent ) {
         _onShow( models, thisComponent, (c, delegate) -> {
             // we simply redo all the components.
             switch ( delegate.changeType() ) {
@@ -4065,7 +4072,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     private <M> void _addViewablePropTo(
-        C thisComponent, Val<M> viewable, String attr, ViewSupplier<M> viewSupplier
+        C thisComponent, Val<M> viewable, @Nullable String attr, ViewSupplier<M> viewSupplier
     ) {
         // First we remember the index of the component which will be provided by the viewable dynamically.
         final int index = thisComponent.getComponentCount();
@@ -4086,7 +4093,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     private <M> void _updateComponentAt(
-        int index, M v, ViewSupplier<M> viewSupplier, String attr, C c
+        int index, @Nullable M v, ViewSupplier<M> viewSupplier, @Nullable String attr, C c
     ) {
         JComponent newComponent = v == null ? new JPanel() : UI.use(_state().eventProcessor(), () -> viewSupplier.createViewFor(v).getComponent() );
         // We remove the old component.
@@ -4102,7 +4109,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     private <M> void _addComponentAt(
-        int index, M v, ViewSupplier<M> viewSupplier, String attr, C thisComponent
+        int index, M v, ViewSupplier<M> viewSupplier, @Nullable String attr, C thisComponent
     ) {
         // We add the new component.
         if ( attr == null )

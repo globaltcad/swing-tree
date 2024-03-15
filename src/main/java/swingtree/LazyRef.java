@@ -1,5 +1,7 @@
 package swingtree;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.function.Supplier;
 
 /**
@@ -13,12 +15,12 @@ final class LazyRef<V>
 {
 	public static <V> LazyRef<V> of(Supplier<V> source) { return new LazyRef<>(source); }
 
-	private Supplier<V> source;
-	private V variable = null;
+	private @Nullable Supplier<V> source;
+	private @Nullable V variable = null;
 
 	private LazyRef(Supplier<V> source) { this.source = source; }
 
-	public V get() {
+	public @Nullable V get() {
 		if ( this.source == null ) return this.variable;
 		else {
 			this.variable = this.source.get();

@@ -1,11 +1,13 @@
 package swingtree.style;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.Objects;
 
 final class LazyRef<T>
 {
     private final CacheProducerAndValidator<T> _producerAndValidator;
-    private T _value;
+    private @Nullable T _value;
 
 
     LazyRef(CacheProducerAndValidator<T> producerAndValidator) {

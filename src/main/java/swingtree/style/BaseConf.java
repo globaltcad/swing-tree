@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import org.jspecify.annotations.Nullable;
 import swingtree.UI;
 
 import javax.swing.ImageIcon;
@@ -33,22 +34,22 @@ final class BaseConf
     public static BaseConf none() { return _NONE; }
 
 
-    private final ImageIcon               _icon;
+    private final @Nullable ImageIcon     _icon;
     private final UI.FitComponent         _fit;
-    private final Color                   _foundationColor;
-    private final Color                   _backgroundColor;
-    private final Color                   _foregroundColor;
-    private final Cursor                  _cursor;
+    private final @Nullable Color         _foundationColor;
+    private final @Nullable Color         _backgroundColor;
+    private final @Nullable Color         _foregroundColor;
+    private final @Nullable Cursor        _cursor;
     private final UI.ComponentOrientation _orientation;
 
 
     private BaseConf(
-        ImageIcon               icon,
+        @Nullable ImageIcon     icon,
         UI.FitComponent         fit,
-        Color                   foundation,
-        Color                   background,
-        Color                   foregroundColor,
-        Cursor                  cursor,
+        @Nullable Color         foundation,
+        @Nullable Color         background,
+        @Nullable Color         foregroundColor,
+        @Nullable Cursor        cursor,
         UI.ComponentOrientation orientation
     ) {
         _icon            = icon;

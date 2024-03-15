@@ -43,6 +43,8 @@ abstract class AbstractComboModel<E> implements ComboBoxModel<E>
 			else
 				type = (Class<E>) Object.class;
 		}
+		if ( type == null )
+			type = (Class<E>) Object.class;
 		return type;
 	}
 

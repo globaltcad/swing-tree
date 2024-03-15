@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import swingtree.UI;
 import swingtree.components.JBox;
@@ -31,12 +32,16 @@ final class DynamicLaF
     static DynamicLaF none() { return _NONE; }
 
 
-    private final ComponentUI _styleLaF;  // Nullable
-    private final ComponentUI _formerLaF; // Nullable
-    private final boolean     _overrideWasNeeded;
+    private final @Nullable ComponentUI _styleLaF;  // Nullable
+    private final @Nullable ComponentUI _formerLaF; // Nullable
+    private final boolean               _overrideWasNeeded;
 
 
-    private DynamicLaF( ComponentUI styleLaF, ComponentUI formerLaF, boolean overrideWasNeeded ) {
+    private DynamicLaF(
+        @Nullable ComponentUI styleLaF,
+        @Nullable ComponentUI formerLaF,
+        boolean               overrideWasNeeded
+    ) {
         _styleLaF          = styleLaF;
         _formerLaF         = formerLaF;
         _overrideWasNeeded = overrideWasNeeded;
@@ -241,9 +246,11 @@ final class DynamicLaF
     }
 
     private static boolean _tryInstallingUISilently(
-        final JComponent  owner,
-        final ComponentUI laf
+        final           JComponent  owner,
+        final @Nullable ComponentUI laf
     ) {
+        if ( laf == null )
+            return false;
         /*
             We wish installing the UI by simply calling setUI(..) was so easy,
             but it is not due to the fact that this method has a lot of unwanted side effects.
@@ -318,9 +325,9 @@ final class DynamicLaF
 
     static class LabelStyler extends BasicLabelUI
     {
-        private final LabelUI _formerUI;
+        private final @Nullable LabelUI _formerUI;
 
-        LabelStyler(LabelUI formerUI) {
+        LabelStyler(@Nullable LabelUI formerUI) {
             _formerUI = (formerUI instanceof LabelStyler) ? ((LabelStyler)formerUI)._formerUI : formerUI;
         }
 

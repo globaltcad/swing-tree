@@ -50,7 +50,7 @@ public interface StylableComponent
      *  <pre>
      *      {@literal @}Override
      *      public void paint(Graphics g){
-     *          paintBackground(g, ()->super.paint(g));
+     *          paintBackground(g, ()-&gt;super.paint(g));
      *      }
      *  </pre>
      * @param g the graphics context to paint on,
@@ -63,7 +63,7 @@ public interface StylableComponent
      *  <pre>
      *      {@literal @}Override
      *      public void paintChildren(Graphics g){
-     *          paintForeground(g, ()->super.paintChildren(g));
+     *          paintForeground(g, ()-&gt;super.paintChildren(g));
      *      }
      *  </pre>
      * @param g the graphics context to paint on,
