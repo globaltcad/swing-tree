@@ -4809,11 +4809,15 @@ public final class UI extends UINamespaceUtilities
     }
 
     /**
-     *  A convenience method for creating a builder for a {@link JTextField} with a certain text alignment.
-     *  This is a shortcut version for the following code:
+     *  A convenience method for creating a builder for a {@link JTextField} with
+     *  the specified {@link HorizontalAlignment} constant as the text orientation.
+     *  You may also use {@link UIForTextField#withTextOrientation(HorizontalAlignment)}
+     *  to define the text orientation:
      *  <pre>{@code
-     *      UI.textField()
-     *          .withTextOrientation(UI.HorizontalDirection.RIGHT);
+     *    UI.textField("may text")
+     *    .withTextOrientation(
+     *        UI.HorizontalAlignment.RIGHT
+     *    );
      *  }</pre>
      *
      * @param direction The text orientation type which should be used.
@@ -4825,41 +4829,56 @@ public final class UI extends UINamespaceUtilities
     }
 
     /**
-     *  A convenience method for creating a builder for a {@link JTextField} with a certain text and text alignment.
-     *  This is a shortcut version for the following code:
+     *  A convenience method for creating a builder for a {@link JTextField}
+     *  with the specified text and text orientation.
+     *  You may also use {@link UIForTextField#withText(String)}
+     *  and {@link UIForTextField#withTextOrientation(HorizontalAlignment)}
+     *  to define the text and text orientation:
      *  <pre>{@code
-     *      UI.textField()
-     *          .withTextOrientation(UI.HorizontalDirection.LEFT)
-     *          .withText(text);
+     *    UI.textField()
+     *    .withTextOrientation(
+     *        UI.HorizontalAlignment.LEFT
+     *    )
+     *    .withText(text);
      *  }</pre>
      *
-     * @param direction The text orientation type which should be used.
+     * @param orientation Defines the orientation of the text inside the text field.<br>
+     *                    This may be one of the following constants:
+     *                    <ul>
+     *                      <li>{@link HorizontalAlignment#LEFT}</li>
+     *                      <li>{@link HorizontalAlignment#CENTER}</li>
+     *                      <li>{@link HorizontalAlignment#RIGHT}</li>
+     *                      <li>{@link HorizontalAlignment#LEADING}</li>
+     *                      <li>{@link HorizontalAlignment#TRAILING}</li>
+     *                      <li>{@link HorizontalAlignment#UNDEFINED} (No-Op)</li>
+     *                    </ul>
      * @param text The new text to be set for the wrapped text component type.
      * @return A builder instance for a new {@link JTextField}, which enables fluent method chaining.
      */
-    public static UIForTextField<JTextField> textField( HorizontalAlignment direction, String text ) {
-        NullUtil.nullArgCheck(direction, "direction", HorizontalAlignment.class);
-        return textField().withTextOrientation(direction).withText(text);
-    }
-
-    public static UIForTextField<JTextField> textField( HorizontalAlignment direction, Val<String> text ) {
-        NullUtil.nullArgCheck(direction, "direction", HorizontalAlignment.class);
-        NullUtil.nullArgCheck(text, "text", Val.class);
-        NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
-        return textField()
-                .applyIf(!text.hasNoID(), it -> it.id(text.id()))
-                .withTextOrientation(direction)
-                .withText(text);
+    public static UIForTextField<JTextField> textField( HorizontalAlignment orientation, String text ) {
+        NullUtil.nullArgCheck(orientation, "orientation", HorizontalAlignment.class);
+        return textField().withTextOrientation(orientation).withText(text);
     }
 
     /**
      *  Creates a UI builder for a text field where the text is aligned according
      *  to the provided {@link HorizontalAlignment} constant, and the text
-     *  is of the text field is bound to a string property.
+     *  of the text field is bound to a string property.
      *  Whenever the user modifies the text inside the text field, the value of the
      *  property will be updated accordingly. Conversely, when the state of the property
      *  is modified inside your view model through the {@link Var#set(Object)} method,
      *  the text field will be updated accordingly.
+     *  <p>
+     *  You may also use {@link UIForTextField#withTextOrientation(HorizontalAlignment)}
+     *  and {@link UIForTextField#withText(Var)} to define the text orientation and text property
+     *  of the text field:
+     *  <pre>{@code
+     *  UI.textField()
+     *  .withTextOrientation(
+     *    UI.HorizontalAlignment.RIGHT
+     *  )
+     *  .withText(textProperty);
+     *  }</pre>
      *
      * @param textOrientation The orientation of the text inside the text field.
      * @param text A string property which is used to model the text of this text field.
@@ -4873,6 +4892,52 @@ public final class UI extends UINamespaceUtilities
         return textField()
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
                 .withTextOrientation(textOrientation)
+                .withText(text);
+    }
+
+    /**
+     *  Creates a UI builder for a text field where the text is aligned according
+     *  to the provided {@link HorizontalAlignment} constant, and the text
+     *  of the text field is uni-directionally bound to a string property.
+     *  Whenever the state of the property is modified inside your view model through the
+     *  {@link Var#set(Object)} method, the text field will be updated accordingly. <br>
+     *  But note that <b>when the user modifies the text inside the text field, the value of the
+     *  property will not be updated</b>.
+     *  <p>
+     *  You may also use {@link UIForTextField#withTextOrientation(HorizontalAlignment)}
+     *  and {@link UIForTextField#withText(Val)} to define the text orientation and text property
+     *  of the text field:
+     *  <pre>{@code
+     *  UI.textField()
+     *  .withTextOrientation(
+     *    UI.HorizontalAlignment.RIGHT
+     *  )
+     *  .withText(readOnlyTextProperty);
+     *  }</pre>
+     *
+     *  @param orientation The orientation of the text inside the text field.
+     *                     This is the direction in which the text is aligned.<br>
+     *                     It may be one of the following constants:
+     *                     <ul>
+     *                       <li>{@link HorizontalAlignment#LEFT}</li>
+     *                       <li>{@link HorizontalAlignment#CENTER}</li>
+     *                       <li>{@link HorizontalAlignment#RIGHT}</li>
+     *                       <li>{@link HorizontalAlignment#LEADING}</li>
+     *                       <li>{@link HorizontalAlignment#TRAILING}</li>
+     *                       <li>{@link HorizontalAlignment#UNDEFINED} (No-Op)</li>
+     *                     </ul>
+     *  @param text A string property which is used to model the text of this text field
+     *              uni-directionally (read-only).
+     *  @return A text field UI builder for declarative UI design based on method chaining
+     *        and nesting of SwingTree builder types.
+     */
+    public static UIForTextField<JTextField> textField( HorizontalAlignment orientation, Val<String> text ) {
+        NullUtil.nullArgCheck(orientation, "orientation", HorizontalAlignment.class);
+        NullUtil.nullArgCheck(text, "text", Val.class);
+        NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
+        return textField()
+                .applyIf(!text.hasNoID(), it -> it.id(text.id()))
+                .withTextOrientation(orientation)
                 .withText(text);
     }
 
