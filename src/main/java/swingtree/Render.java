@@ -1,6 +1,5 @@
 package swingtree;
 
-import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
 import javax.swing.*;
@@ -24,25 +23,26 @@ public final class Render<C extends JComponent,E>
 	private static final Logger log = org.slf4j.LoggerFactory.getLogger(Render.class);
 
 	private final Class<C> _componentType;
-	private final @Nullable Supplier<Border> _borderSupplier;
+	private final Class<E> _elementType;
 
-	static <E> Render<JList<E>,E> forList(Class<E> elementType, @Nullable Supplier<Border> borderSupplier) {
-		Render r = new Render<>(JList.class, elementType, borderSupplier);
+
+    static <E> Render<JList<E>,E> forList(Class<E> elementType) {
+		Render r = new Render<>(JList.class, elementType);
 		return (Render<JList<E>,E>) r;
 	}
-	static <E> Render<JComboBox<E>,E> forCombo(Class<E> elementType, @Nullable Supplier<Border> borderSupplier) {
-		Render r = new Render<>(JComboBox.class, elementType, borderSupplier);
+	static <E> Render<JComboBox<E>,E> forCombo(Class<E> elementType) {
+		Render r = new Render<>(JComboBox.class, elementType);
 		return (Render<JComboBox<E>,E>) r;
 	}
-	static <E> Render<JTable,E> forTable(Class<E> elementType, @Nullable Supplier<Border> borderSupplier) {
-		Render r = new Render<>(JTable.class, elementType, borderSupplier);
+	static <E> Render<JTable,E> forTable(Class<E> elementType) {
+		Render r = new Render<>(JTable.class, elementType);
 		return (Render<JTable,E>) r;
 	}
 
-	private Render(Class<C> componentType, Class<E> elementType, @Nullable Supplier<Border> borderSupplier) {
+	private Render(Class<C> componentType, Class<E> elementType) {
 		_componentType = componentType;
-		_borderSupplier = borderSupplier;
-	}
+		_elementType   = elementType;
+    }
 
 	/**
 	 * 	Use this to specify which type of values should have custom rendering.
@@ -76,7 +76,7 @@ public final class Render<C extends JComponent,E>
 			@Override
 			public Builder<C,E> as(Cell.Interpreter<C,T> valueInterpreter) {
 				NullUtil.nullArgCheck(valueInterpreter, "valueInterpreter", Cell.Interpreter.class);
-				return new Builder(_componentType,valueType, valueValidator, valueInterpreter, _borderSupplier);
+				return new Builder(_componentType,valueType, valueValidator, valueInterpreter);
 			}
 		};
 	}
@@ -343,22 +343,19 @@ public final class Render<C extends JComponent,E>
 	public static class Builder<C extends JComponent, E> {
 
 		private final Class<C> _componentType;
-		private final @Nullable Supplier<Border> _border;
-		private final Map<Class<?>, java.util.List<Consumer<Cell<C,?>>>> _rendererLookup = new LinkedHashMap<>(16);
+        private final Map<Class<?>, java.util.List<Consumer<Cell<C,?>>>> _rendererLookup = new LinkedHashMap<>(16);
 
 		public Builder(
 				Class<C>                   componentType,
 				Class<E>                   valueType,
 				Predicate<Cell<C,E>>       valueValidator,
-				Cell.Interpreter<C, E>     valueInterpreter,
-				@Nullable Supplier<Border> border
+				Cell.Interpreter<C, E>     valueInterpreter
 		) {
 			NullUtil.nullArgCheck(valueType, "valueType", Class.class);
 			NullUtil.nullArgCheck(valueValidator, "valueValidator", Predicate.class);
 			NullUtil.nullArgCheck(valueInterpreter, "valueInterpreter", Cell.Interpreter.class);
 			_componentType = componentType;
-			_border = border;
-			when(valueType, valueValidator).as(valueInterpreter);
+            when(valueType, valueValidator).as(valueInterpreter);
 		}
 
 		/**
@@ -451,13 +448,6 @@ public final class Render<C extends JComponent,E>
 					return choice;
 				}
 			}
-
-			@Override
-			public Border getBorder() {
-				if ( _border != null ) return _border.get();
-				else
-					return super.getBorder();
-			}
 		}
 
 		private class SimpleListCellRenderer<O extends C> extends DefaultListCellRenderer
@@ -509,12 +499,6 @@ public final class Render<C extends JComponent,E>
 
 					return choice;
 				}
-			}
-			@Override
-			public Border getBorder() {
-				if ( _border != null ) return _border.get();
-				else
-					return super.getBorder();
 			}
 		}
 

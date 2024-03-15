@@ -5623,7 +5623,7 @@ public final class UI extends UINamespaceUtilities
      * @return A builder instance for a new {@link JTable}.
      */
     public static Render.Builder<JTable, Object> renderTable() {
-        return Render.forTable(Object.class, null)
+        return Render.forTable(Object.class)
                      .when(Object.class)
                      .asText( cell -> cell.valueAsString().orElse("") );
     }
@@ -5649,7 +5649,7 @@ public final class UI extends UINamespaceUtilities
      *          configure how he passed item types should be rendered.
      */
     public static Render.Builder<JList<Object>, Object> renderList() {
-        return Render.forList(Object.class, null).when(Object.class).asText(cell->cell.valueAsString().orElse(""));
+        return Render.forList(Object.class).when(Object.class).asText(cell->cell.valueAsString().orElse(""));
     }
 
     /**
@@ -5673,7 +5673,7 @@ public final class UI extends UINamespaceUtilities
      * @param <T> The common super-type type of the items which should be rendered.
      */
     public static <T> Render.Builder<JList<T>, T> renderList( Class<T> commonType ) {
-        return Render.forList(commonType, null).when(commonType).asText(cell->cell.valueAsString().orElse(""));
+        return Render.forList(commonType).when(commonType).asText(cell->cell.valueAsString().orElse(""));
     }
 
     /**
@@ -5695,7 +5695,7 @@ public final class UI extends UINamespaceUtilities
      * @param <T> The type of the items which should be rendered.
      */
     public static <T> Render.As<JList<T>, T, T> renderListItem( Class<T> itemType ) {
-        return Render.forList(itemType, null).when(itemType);
+        return Render.forList(itemType).when(itemType);
     }
 
     /**
@@ -5718,7 +5718,7 @@ public final class UI extends UINamespaceUtilities
      * @return A render builder exposing an API that allows you to configure how he passed item types should be rendered.
      */
     public static Render.Builder<JComboBox<Object>, Object> renderCombo() {
-        return Render.forCombo(Object.class, null).when(Object.class).asText(cell->cell.valueAsString().orElse(""));
+        return Render.forCombo(Object.class).when(Object.class).asText(cell->cell.valueAsString().orElse(""));
     }
 
     /**
@@ -5741,7 +5741,7 @@ public final class UI extends UINamespaceUtilities
      * @param <T> The common super-type type of the items which should be rendered.
      */
     public static <T> Render.Builder<JComboBox<T>, T> renderCombo( Class<T> commonType ) {
-        return Render.forCombo(commonType, null).when(commonType).asText(cell->cell.valueAsString().orElse(""));
+        return Render.forCombo(commonType).when(commonType).asText(cell->cell.valueAsString().orElse(""));
     }
 
     /**
@@ -5763,80 +5763,7 @@ public final class UI extends UINamespaceUtilities
      * @param <T> The type of the items which should be rendered.
      */
     public static <T> Render.As<JComboBox<T>, T, T> renderComboItem( Class<T> itemType ) {
-        return Render.forCombo(itemType, null).when(itemType);
-    }
-
-    /**
-     * @param borderSupplier A lambda which provides a border for rendered cells.
-     * @return The builder API allowing method chaining.
-     */
-    public static Render.Builder<JTable, Object> renderTableWithBorder( Supplier<Border> borderSupplier ) {
-        return Render.forTable(Object.class, borderSupplier).when(Object.class).as(cell->{});
-    }
-
-    /**
-     * @param borderSupplier A lambda which provides a border for rendered cells.
-     * @return The builder API allowing method chaining.
-     */
-    public static Render.Builder<JList<Object>, Object> renderListWithBorder( Supplier<Border> borderSupplier ) {
-        return Render.forList(Object.class, borderSupplier).when(Object.class).as(cell->{});
-    }
-
-    /**
-     * @param borderSupplier A lambda which provides a border for rendered cells.
-     * @return The builder API allowing method chaining.
-     */
-    public static Render.Builder<JComboBox<Object>, Object> renderComboWithBorder( Supplier<Border> borderSupplier ) {
-        return Render.forCombo(Object.class, borderSupplier).when(Object.class).as(cell->{});
-    }
-
-    /**
-     * @param border A border for rendered cells.
-     * @return The builder API allowing method chaining.
-     */
-    public static Render.Builder<JTable, Object> renderTableWithBorder( Border border ) {
-        return renderTableWithBorder(()->border);
-    }
-
-    /**
-     * @param border A property holding a {@link Border} used for rendered cells.
-     * @return The builder API allowing method chaining.
-     */
-    public static Render.Builder<JTable, Object> renderTableWithBorder( Val<Border> border ) {
-        return renderTableWithBorder(border::orElseThrow);
-    }
-
-    /**
-     * @param border A border for rendered cells.
-     * @return The builder API allowing method chaining.
-     */
-    public static Render.Builder<JList<Object>, Object> renderListWithBorder( Border border ) {
-        return renderListWithBorder(()->border);
-    }
-
-    /**
-     * @param border A property holding a {@link Border} used for rendered cells.
-     * @return The builder API allowing method chaining.
-     */
-    public static Render.Builder<JList<Object>, Object> renderListWithBorder( Var<Border> border ) {
-        return renderListWithBorder(border::orElseThrow);
-    }
-
-    /**
-     * @param border A border for rendered cells.
-     * @return The builder API allowing method chaining.
-     */
-    public static Render.Builder<JComboBox<Object>, Object> renderComboWithBorder( Border border ) {
-        return renderComboWithBorder(()->border);
-    }
-
-    /**
-     * @param border A property holding a {@link Border} used for rendered cells.
-     * @return The builder API allowing method chaining.
-     */
-    public static Render.Builder<JComboBox<Object>, Object> renderComboWithBorder( Val<Border> border ) {
-        NullUtil.nullPropertyCheck(border, "border", "Null is not a valid border.");
-        return renderComboWithBorder(border::orElseThrow);
+        return Render.forCombo(itemType).when(itemType);
     }
 
     /**
