@@ -5560,6 +5560,7 @@ public final class UI extends UINamespaceUtilities
      * @return A builder instance for a new {@link JTable}.
      */
     public static UIForTable<JTable> table( Buildable<BasicTableModel> tableModelBuildable ) {
+        Objects.requireNonNull(tableModelBuildable);
         return table().withModel(tableModelBuildable);
     }
 
@@ -5593,6 +5594,7 @@ public final class UI extends UINamespaceUtilities
      * @return A functional API for building a {@link javax.swing.table.TableModel}.
      */
     public static <E> BasicTableModel.Builder<E> tableModel( Class<E> entryType ) {
+        Objects.requireNonNull(entryType);
         return new BasicTableModel.Builder<>(entryType);
     }
 
@@ -5673,6 +5675,7 @@ public final class UI extends UINamespaceUtilities
      * @param <T> The common super-type type of the items which should be rendered.
      */
     public static <T> Render.Builder<JList<T>, T> renderList( Class<T> commonType ) {
+        Objects.requireNonNull(commonType);
         return Render.forList(commonType).when(commonType).asText(cell->cell.valueAsString().orElse(""));
     }
 
@@ -5695,6 +5698,7 @@ public final class UI extends UINamespaceUtilities
      * @param <T> The type of the items which should be rendered.
      */
     public static <T> Render.As<JList<T>, T, T> renderListItem( Class<T> itemType ) {
+        Objects.requireNonNull(itemType);
         return Render.forList(itemType).when(itemType);
     }
 
@@ -5741,6 +5745,7 @@ public final class UI extends UINamespaceUtilities
      * @param <T> The common super-type type of the items which should be rendered.
      */
     public static <T> Render.Builder<JComboBox<T>, T> renderCombo( Class<T> commonType ) {
+        Objects.requireNonNull(commonType);
         return Render.forCombo(commonType).when(commonType).asText(cell->cell.valueAsString().orElse(""));
     }
 
@@ -5763,6 +5768,7 @@ public final class UI extends UINamespaceUtilities
      * @param <T> The type of the items which should be rendered.
      */
     public static <T> Render.As<JComboBox<T>, T, T> renderComboItem( Class<T> itemType ) {
+        Objects.requireNonNull(itemType);
         return Render.forCombo(itemType).when(itemType);
     }
 
@@ -5773,6 +5779,7 @@ public final class UI extends UINamespaceUtilities
      * @param <F> The concrete type of this new frame.
      */
     public static <F extends JFrame> UIForJFrame<F> of( F frame ) {
+        Objects.requireNonNull(frame);
         return new UIForJFrame<>(new BuilderState<>(frame));
     }
 
