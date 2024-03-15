@@ -16,7 +16,6 @@ import swingtree.api.*;
 import swingtree.api.model.BasicTableModel;
 import swingtree.api.model.TableListDataSource;
 import swingtree.api.model.TableMapDataSource;
-import swingtree.style.StylableComponent;
 import swingtree.components.JBox;
 import swingtree.components.JIcon;
 import swingtree.components.JScrollPanels;
@@ -4853,13 +4852,27 @@ public final class UI extends UINamespaceUtilities
                 .withText(text);
     }
 
-    public static UIForTextField<JTextField> textField( HorizontalAlignment direction, Var<String> text ) {
-        NullUtil.nullArgCheck(direction, "direction", HorizontalAlignment.class);
+    /**
+     *  Creates a UI builder for a text field where the text is aligned according
+     *  to the provided {@link HorizontalAlignment} constant, and the text
+     *  is of the text field is bound to a string property.
+     *  Whenever the user modifies the text inside the text field, the value of the
+     *  property will be updated accordingly. Conversely, when the state of the property
+     *  is modified inside your view model through the {@link Var#set(Object)} method,
+     *  the text field will be updated accordingly.
+     *
+     * @param textOrientation The orientation of the text inside the text field.
+     * @param text A string property which is used to model the text of this text field.
+     * @return A text field UI builder for declarative UI
+     *        design based on method chaining and nesting of SwingTree builder types.
+     */
+    public static UIForTextField<JTextField> textField( HorizontalAlignment textOrientation, Var<String> text ) {
+        NullUtil.nullArgCheck(textOrientation, "direction", HorizontalAlignment.class);
         NullUtil.nullArgCheck(text, "text", Var.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
         return textField()
                 .applyIf(!text.hasNoID(), it -> it.id(text.id()))
-                .withTextOrientation(direction)
+                .withTextOrientation(textOrientation)
                 .withText(text);
     }
 
@@ -4909,7 +4922,6 @@ public final class UI extends UINamespaceUtilities
                 .applyIf( !number.hasNoID(), it -> it.id(number.id()) )
                 .withNumber(number, formatter);
     }
-
 
     /**
      *  Use this to create a builder for a new {@link JTextField} instance with
@@ -5048,14 +5060,14 @@ public final class UI extends UINamespaceUtilities
     /**
      *  Use this to create a builder for the provided {@link JPasswordField} instance.
      *
-     * @param component The {@link JPasswordField} instance which should be wrapped by the builder.
+     * @param passwordField The {@link JPasswordField} instance which should be wrapped by the builder.
      * @param <F> The type of the {@link JPasswordField} instance which should be wrapped by the builder.
      * @return A builder instance for the provided {@link JPasswordField}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
-    public static <F extends JPasswordField> UIForPasswordField<F> of( F component ) {
-        NullUtil.nullArgCheck(component, "component", JPasswordField.class);
-        return new UIForPasswordField<>(new BuilderState<>(component));
+    public static <F extends JPasswordField> UIForPasswordField<F> of( F passwordField ) {
+        NullUtil.nullArgCheck(passwordField, "passwordField", JPasswordField.class);
+        return new UIForPasswordField<>(new BuilderState<>(passwordField));
     }
 
     /**
@@ -5117,14 +5129,14 @@ public final class UI extends UINamespaceUtilities
     /**
      *  Use this to create a builder for the provided {@link JProgressBar} instance.
      *
-     * @param component The {@link JProgressBar} instance which should be wrapped by the builder.
+     * @param progressBar The {@link JProgressBar} instance which should be wrapped by the builder.
      * @param <P> The type of the {@link JProgressBar} instance which should be wrapped by the builder.
      * @return A builder instance for the provided {@link JProgressBar}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
-    public static <P extends JProgressBar> UIForProgressBar<P> of( P component ) {
-        NullUtil.nullArgCheck(component, "component", JProgressBar.class);
-        return new UIForProgressBar<>(new BuilderState<>(component));
+    public static <P extends JProgressBar> UIForProgressBar<P> of( P progressBar ) {
+        NullUtil.nullArgCheck(progressBar, "progressBar", JProgressBar.class);
+        return new UIForProgressBar<>(new BuilderState<>(progressBar));
     }
 
     /**
