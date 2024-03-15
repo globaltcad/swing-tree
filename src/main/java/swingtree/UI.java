@@ -4867,7 +4867,7 @@ public final class UI extends UINamespaceUtilities
      *        design based on method chaining and nesting of SwingTree builder types.
      */
     public static UIForTextField<JTextField> textField( HorizontalAlignment textOrientation, Var<String> text ) {
-        NullUtil.nullArgCheck(textOrientation, "direction", HorizontalAlignment.class);
+        NullUtil.nullArgCheck(textOrientation, "textOrientation", HorizontalAlignment.class);
         NullUtil.nullArgCheck(text, "text", Var.class);
         NullUtil.nullPropertyCheck(text, "text", "Please use an empty string instead of null!");
         return textField()
