@@ -3442,7 +3442,7 @@ public final class UI extends UINamespaceUtilities
 
     /**
      *  Use this to create a builder for a new {@link JSlider} instance
-     *  based on tbe provided alignment property which dynamically
+     *  based on the provided alignment property which dynamically
      *  determines if the property is aligned vertically or horizontally.
      *
      * @param align The alignment property determining if the {@link JSlider} aligns vertically or horizontally.
@@ -3509,7 +3509,13 @@ public final class UI extends UINamespaceUtilities
 
     /**
      * Creates a slider with the specified alignment and the
-     * specified minimum, maximum, and dynamic value.
+     * specified minimum, maximum, and dynamic value. <br>
+     * The slider will be updated whenever the provided property changes.
+     * But note that the property is of the read only {@link Val} type,
+     * which means that when the user moves the slider, the property will not be updated.
+     * <br>
+     * If you want bidirectional binding, use {@link #slider(Align, int, int, Var)}
+     * instead of this method.
      *
      * @param align The alignment determining if the {@link JSlider} aligns vertically or horizontally.
      * @param min The minimum possible value of the slider.
@@ -3536,7 +3542,10 @@ public final class UI extends UINamespaceUtilities
 
     /**
      * Creates a slider with the specified alignment and the
-     * specified minimum, maximum, and dynamic value.
+     * specified minimum, maximum, and dynamic value property.
+     * The property will be updated whenever the user
+     * moves the slider and the slider will be updated whenever
+     * the property changes in your code (see {@link Var#set(Object)}).
      *
      * @param align The alignment determining if the {@link JSlider} aligns vertically or horizontally.
      * @param min The minimum possible value of the slider.
@@ -3562,7 +3571,9 @@ public final class UI extends UINamespaceUtilities
     }
 
     /**
-     *  Use this to create a builder for the provided {@link JComboBox} instance.
+     *  Use this to create a builder for the provided {@link JComboBox} instance.<br>
+     *  This is useful when you want to write declarative UI with a custom {@link JComboBox} type.
+     *  Also see {@link #comboBox()} for a more convenient way to create a new {@link JComboBox} instance.
      *
      * @param component The {@link JComboBox} instance to create a builder for.
      * @param <E> The type of the elements in the {@link JComboBox}.
@@ -3575,8 +3586,8 @@ public final class UI extends UINamespaceUtilities
     }
 
     /**
-     *  Use this to declare a builder for a new {@link JComboBox} UI component.
-     *  This is in essence a convenience method for {@code UI.of(new JComboBox())}.
+     *  Use this to create a UI builder for a the {@link JComboBox} component type.
+     *  This is similar to {@code UI.of(new JComboBox())}.
      *
      * @param <E> The type of the elements in the {@link JComboBox}.
      * @return A builder instance for a new {@link JComboBox}, which enables fluent method chaining.
@@ -3673,11 +3684,14 @@ public final class UI extends UINamespaceUtilities
 
     /**
      *  Use this to create a builder for a new  {@link JComboBox} instance
-     *  with the provided list of elements as selectable items which
-     *  may not be modified by the user.
+     *  with the provided {@link List} of elements as selectable items which
+     *  may not be modified by the user. <br>
+     *  So even if the combo box is editable, the user will not be able to
+     *  modify the items in the list (the selected item inside the
+     *  text field can still be modified though).
      *
      * @param items The list of elements to be selectable in the {@link JComboBox}.
-     * @return A builder instance for the provided {@link JComboBox}, which enables fluent method chaining.
+     * @return A UI builder for the provided {@link JComboBox}, which enables fluent method chaining.
      * @param <E> The type of the elements in the list.
      */
     public static <E> UIForCombo<E,JComboBox<E>> comboBoxWithUnmodifiable( java.util.List<E> items ) {
