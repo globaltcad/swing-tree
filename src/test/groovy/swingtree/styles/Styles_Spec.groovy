@@ -216,7 +216,8 @@ class Styles_Spec extends Specification
                                                 "painters=PainterConf[NONE], " +
                                                 "gradients=GradientConf[NONE], " +
                                                 "noises=NoiseConf[NONE], " +
-                                                "images=ImageConf[NONE]" +
+                                                "images=ImageConf[NONE], " +
+                                                "texts=TextConf[NONE]" +
                                             "], " +
                                             "border=StyleConfLayer[EMPTY], " +
                                             "foreground=StyleConfLayer[EMPTY]" +
@@ -292,7 +293,8 @@ class Styles_Spec extends Specification
                                                         "offset=Offset[x=0, y=0], " +
                                                         "clipArea=BODY" +
                                                     "]" +
-                                                "]" +
+                                                "], " +
+                                                "texts=TextConf[NONE]" +
                                             "]" +
                                         "], " +
                                         "properties=[]" +
@@ -362,7 +364,8 @@ class Styles_Spec extends Specification
                                                     "]" +
                                                 "], " +
                                                 "noises=NoiseConf[NONE], " +
-                                                "images=ImageConf[NONE]" +
+                                                "images=ImageConf[NONE], " +
+                                                "texts=TextConf[NONE]" +
                                             "], " +
                                             "foreground=StyleConfLayer[EMPTY]" +
                                         "], " +

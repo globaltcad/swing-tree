@@ -1590,6 +1590,23 @@ public final class ComponentStyleDelegate<C extends JComponent>
         return _withStyle(_styleConf.images(layer, StyleUtil.DEFAULT_KEY, styler));
     }
 
+    public ComponentStyleDelegate<C> text( String textName, Function<TextConf, TextConf> styler ) {
+        Objects.requireNonNull(textName);
+        Objects.requireNonNull(styler);
+        return text(TextConf.DEFAULT_LAYER, textName, styler);
+    }
+
+    public ComponentStyleDelegate<C> text( UI.Layer layer, String textName, Function<TextConf, TextConf> styler ) {
+        Objects.requireNonNull(textName);
+        Objects.requireNonNull(styler);
+        return _withStyle(_styleConf.text(layer, textName, styler));
+    }
+
+    public ComponentStyleDelegate<C> text( Function<TextConf, TextConf> styler ) {
+        Objects.requireNonNull(styler);
+        return text(TextConf.DEFAULT_LAYER, StyleUtil.DEFAULT_KEY, styler);
+    }
+
     /**
      *  Allow for the specification of client properties on the styled component.
      *  This is useful when you want to store arbitrary configuration data on the component,
@@ -1612,6 +1629,14 @@ public final class ComponentStyleDelegate<C extends JComponent>
         return _withStyle(_styleConf.property(key, value));
     }
 
+    private ComponentStyleDelegate<C> _withFont( Function<FontConf, FontConf> fontStyler ) {
+        Objects.requireNonNull(fontStyler);
+        StyleConf updatedStyle = _styleConf._withFont(fontStyler.apply(_styleConf.font()));
+        // We also update the text style, if it exists:
+        updatedStyle = updatedStyle.text( text -> text.font(fontStyler) );
+        return _withStyle(updatedStyle);
+    }
+
     /**
      *  Returns a new {@link StyleConf} with the provided font name and size.
      *  Note that the font styles will only apply if the component that is being rendered
@@ -1623,7 +1648,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      */
     public ComponentStyleDelegate<C> font( String name, int size ) {
         Objects.requireNonNull(name);
-        return _withStyle(_styleConf._withFont(_styleConf.font().withFamily(name).withSize(size)));
+        return _withFont( f -> f.withFamily(name).withSize(size) );
     }
 
     /**
@@ -1636,7 +1661,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      */
     public ComponentStyleDelegate<C> fontFamily( String name ) {
         Objects.requireNonNull(name);
-        return _withStyle(_styleConf._withFont(_styleConf.font().withFamily(name)));
+        return _withFont( f -> f.withFamily(name) );
     }
 
     /**
@@ -1651,7 +1676,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      */
     public ComponentStyleDelegate<C> font( Font font ) {
         Objects.requireNonNull(font, "The font cannot be null! Use UI.FONT_UNDEFINED to remove the font style.");
-        return _withStyle(_styleConf._withFont(_styleConf.font().withPropertiesFromFont(font)));
+        return _withFont( f -> f.withPropertiesFromFont(font) );
     }
 
     /**
@@ -1663,7 +1688,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided font size.
      */
     public ComponentStyleDelegate<C> fontSize( int size ) {
-        return _withStyle(_styleConf._withFont(_styleConf.font().withSize(size)));
+        return _withFont( f -> f.withSize(size) );
     }
 
     /**
@@ -1675,7 +1700,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided font boldness.
      */
     public ComponentStyleDelegate<C> fontBold( boolean bold ) {
-        return _withStyle(_styleConf._withFont(_styleConf.font().withWeight( bold ? 2 : 1 )));
+        return _withFont( f -> f.withWeight( bold ? 2 : 1 ) );
     }
 
     /**
@@ -1687,7 +1712,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided font italicness.
      */
     public ComponentStyleDelegate<C> fontItalic( boolean italic ) {
-        return _withStyle(_styleConf._withFont(_styleConf.font().withPosture( italic ? 0.2f : 0f )));
+        return _withFont( f -> f.withPosture( italic ? 0.2f : 0f ) );
     }
 
     /**
@@ -1699,7 +1724,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided font underlinedness.
      */
     public ComponentStyleDelegate<C> fontUnderline( boolean underline ) {
-        return _withStyle(_styleConf._withFont(_styleConf.font().withIsUnderlined(underline)));
+        return _withFont( f -> f.withIsUnderlined(underline) );
     }
 
     /**
@@ -1711,7 +1736,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided font struck throughness.
      */
     public ComponentStyleDelegate<C> fontStrikeThrough( boolean strikeThrough ) {
-        return _withStyle(_styleConf._withFont(_styleConf.font().withIsStrikeThrough(strikeThrough)));
+        return _withFont( f -> f.withIsStrikeThrough(strikeThrough) );
     }
 
     /**
@@ -1726,7 +1751,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      */
     public ComponentStyleDelegate<C> fontColor( Color color ) {
         Objects.requireNonNull(color, "The color cannot be null! Use UI.COLOR_UNDEFINED to remove the font color style.");
-        return _withStyle(_styleConf._withFont(_styleConf.font().withColor(color)));
+        return _withFont( f -> f.withColor(color) );
     }
 
     /**
@@ -1749,7 +1774,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
             log.error("Failed to parse color string: '"+colorString+"'", e);
             return this;
         }
-        return _withStyle(_styleConf._withFont(_styleConf.font().withColor(newColor)));
+        return fontColor(newColor);
     }
 
     /**
@@ -1764,7 +1789,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      */
     public ComponentStyleDelegate<C> fontBackgroundColor( Color color ) {
         Objects.requireNonNull(color);
-        return _withStyle(_styleConf._withFont(_styleConf.font().withBackgroundColor(color)));
+        return _withFont( f -> f.withBackgroundColor(color) );
     }
 
     /**
@@ -1787,7 +1812,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
             log.error("Failed to parse color string: '{}'", colorString, e);
             return this;
         }
-        return _withStyle(_styleConf._withFont(_styleConf.font().withBackgroundColor(newColor)));
+        return fontBackgroundColor(newColor);
     }
 
     /**
@@ -1802,7 +1827,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      */
     public ComponentStyleDelegate<C> fontSelectionColor( Color color ) {
         Objects.requireNonNull(color);
-        return _withStyle(_styleConf._withFont(_styleConf.font().withSelectionColor(color)));
+        return _withFont( f -> f.withSelectionColor(color) );
     }
 
     /**
@@ -1825,7 +1850,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
             log.error("Failed to parse color string: '"+colorString+"'", e);
             return this;
         }
-        return _withStyle(_styleConf._withFont(_styleConf.font().withSelectionColor(newColor)));
+        return fontSelectionColor(newColor);
     }
 
     /**
@@ -1842,7 +1867,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided font paint.
      */
     public ComponentStyleDelegate<C> fontPaint( @Nullable Paint paint ) {
-        return _withStyle(_styleConf._withFont(_styleConf.font().withPaint(paint)));
+        return _withFont( f-> f.withPaint(paint) );
     }
 
     /**
@@ -1851,7 +1876,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided font background paint.
      */
     public ComponentStyleDelegate<C> fontBackgroundPaint( @Nullable Paint paint ) {
-        return _withStyle(_styleConf._withFont(_styleConf.font().withBackgroundPaint(paint)));
+        return _withFont( f -> f.withBackgroundPaint(paint) );
     }
 
 
@@ -1867,7 +1892,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided font weight.
      */
     public ComponentStyleDelegate<C> fontWeight( float weight ) {
-        return _withStyle(_styleConf._withFont(_styleConf.font().withWeight(weight)));
+        return _withFont( f -> f.withWeight(weight) );
     }
 
     /**
@@ -1876,7 +1901,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided font spacing.
      */
     public ComponentStyleDelegate<C> fontSpacing( float spacing ) {
-        return _withStyle(_styleConf._withFont(_styleConf.font().withSpacing(spacing)));
+        return _withFont( f -> f.withSpacing(spacing) );
     }
 
     /**
@@ -1892,7 +1917,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      */
     public ComponentStyleDelegate<C> fontAlignment( UI.HorizontalAlignment alignment ) {
         Objects.requireNonNull(alignment);
-        return _withStyle(_styleConf._withFont(_styleConf.font().withHorizontalAlignment(alignment)));
+        return _withFont( f -> f.withHorizontalAlignment(alignment) );
     }
 
     /**
@@ -1908,7 +1933,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      */
     public ComponentStyleDelegate<C> fontAlignment( UI.VerticalAlignment alignment ) {
         Objects.requireNonNull(alignment);
-        return _withStyle(_styleConf._withFont(_styleConf.font().withVerticalAlignment(alignment)));
+        return _withFont( f -> f.withVerticalAlignment(alignment) );
     }
 
     /**

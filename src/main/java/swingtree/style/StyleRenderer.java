@@ -12,6 +12,7 @@ import java.awt.*;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
 /**
@@ -75,7 +76,11 @@ final class StyleRenderer
         for ( ShadowConf shadow : conf.layer().shadows().sortedByNames() )
             _renderShadows(conf, shadow, g2d);
 
-        // 5. Painters, which are provided by the user and can be anything
+        // 5. Custom text, which can be rendered in any font and color:
+        for ( TextConf text : conf.layer().texts().sortedByNames() )
+            _renderText( text, conf, g2d );
+
+        // 6. Painters, which are provided by the user and can be anything
         List<PainterConf> painters = conf.layer().painters().sortedByNames();
 
         if ( !painters.isEmpty() )
@@ -581,6 +586,22 @@ final class StyleRenderer
                     .orElse(new Color(0.5f, 0.5f, 0.5f, 0f));
     }
 
+    private static Outline _insetsFrom(UI.ComponentBoundary boundary, LayerRenderConf conf) {
+        Outline insets = Outline.none();
+        switch ( boundary ) {
+            case OUTER_TO_EXTERIOR:
+                insets = Outline.none(); break;
+            case EXTERIOR_TO_BORDER:
+                insets = conf.boxModel().margin(); break;
+            case BORDER_TO_INTERIOR:
+                insets = conf.boxModel().margin().plus(conf.boxModel().widths()); break;
+            case INTERIOR_TO_CONTENT:
+            case CENTER_TO_CONTENT:
+                insets = conf.boxModel().margin().plus(conf.boxModel().widths()).plus(conf.boxModel().padding()); break;
+        }
+        return insets;
+    }
+
     private static void _renderGradient(
         final GradientConf    gradient,
         final LayerRenderConf conf,
@@ -591,54 +612,44 @@ final class StyleRenderer
             g2d.fill(conf.areas().get(gradient.area()));
         }
         else {
-            Outline insets = Outline.none();
-            switch ( gradient.boundary() ) {
-                case OUTER_TO_EXTERIOR:
-                    insets = Outline.none(); break;
-                case EXTERIOR_TO_BORDER:
-                    insets = conf.boxModel().margin(); break;
-                case BORDER_TO_INTERIOR:
-                    insets = conf.boxModel().margin().plus(conf.boxModel().widths()); break;
-                case INTERIOR_TO_CONTENT:
-                    insets = conf.boxModel().margin().plus(conf.boxModel().widths()).plus(conf.boxModel().padding()); break;
-                case CENTER_TO_CONTENT:
-                    Outline contentIns = conf.boxModel().margin().plus(conf.boxModel().widths()).plus(conf.boxModel().padding());
-                    float verticalInset = conf.boxModel().size().height().orElse(0f) / 2f;
-                    float horizontalInset = conf.boxModel().size().width().orElse(0f) / 2f;
-                    insets = Outline.of(verticalInset, horizontalInset);
-                    switch ( gradient.span() ) {
-                        case TOP_TO_BOTTOM:
-                            insets = insets.withBottom(contentIns.bottom().orElse(0f));
-                            break;
-                        case BOTTOM_TO_TOP:
-                            insets = insets.withTop(contentIns.top().orElse(0f));
-                            break;
-                        case LEFT_TO_RIGHT:
-                            insets = insets.withRight(contentIns.right().orElse(0f));
-                            break;
-                        case RIGHT_TO_LEFT:
-                            insets = insets.withLeft(contentIns.left().orElse(0f));
-                            break;
-                        case TOP_LEFT_TO_BOTTOM_RIGHT:
-                            insets = insets.withBottom(contentIns.bottom().orElse(0f))
-                                            .withRight(contentIns.right().orElse(0f));
-                            break;
-                        case BOTTOM_RIGHT_TO_TOP_LEFT:
-                            insets = insets.withTop(contentIns.top().orElse(0f))
-                                            .withLeft(contentIns.left().orElse(0f));
-                            break;
-                        case TOP_RIGHT_TO_BOTTOM_LEFT:
-                            insets = insets.withBottom(contentIns.bottom().orElse(0f))
-                                            .withLeft(contentIns.left().orElse(0f));
-                            break;
-                        case BOTTOM_LEFT_TO_TOP_RIGHT:
-                            insets = insets.withTop(contentIns.top().orElse(0f))
-                                            .withRight(contentIns.right().orElse(0f));
-                            break;
-                        default:
-                            break;
-                    }
-                    break;
+            Outline contentIns = _insetsFrom(gradient.boundary(), conf);
+            Outline insets = contentIns;
+            if ( gradient.boundary() == UI.ComponentBoundary.CENTER_TO_CONTENT ) {
+                float verticalInset = conf.boxModel().size().height().orElse(0f) / 2f;
+                float horizontalInset = conf.boxModel().size().width().orElse(0f) / 2f;
+                insets = Outline.of(verticalInset, horizontalInset);
+                switch ( gradient.span() ) {
+                    case TOP_TO_BOTTOM:
+                        insets = insets.withBottom(contentIns.bottom().orElse(0f));
+                        break;
+                    case BOTTOM_TO_TOP:
+                        insets = insets.withTop(contentIns.top().orElse(0f));
+                        break;
+                    case LEFT_TO_RIGHT:
+                        insets = insets.withRight(contentIns.right().orElse(0f));
+                        break;
+                    case RIGHT_TO_LEFT:
+                        insets = insets.withLeft(contentIns.left().orElse(0f));
+                        break;
+                    case TOP_LEFT_TO_BOTTOM_RIGHT:
+                        insets = insets.withBottom(contentIns.bottom().orElse(0f))
+                                        .withRight(contentIns.right().orElse(0f));
+                        break;
+                    case BOTTOM_RIGHT_TO_TOP_LEFT:
+                        insets = insets.withTop(contentIns.top().orElse(0f))
+                                        .withLeft(contentIns.left().orElse(0f));
+                        break;
+                    case TOP_RIGHT_TO_BOTTOM_LEFT:
+                        insets = insets.withBottom(contentIns.bottom().orElse(0f))
+                                        .withLeft(contentIns.left().orElse(0f));
+                        break;
+                    case BOTTOM_LEFT_TO_TOP_RIGHT:
+                        insets = insets.withTop(contentIns.top().orElse(0f))
+                                        .withRight(contentIns.right().orElse(0f));
+                        break;
+                    default:
+                        break;
+                }
             }
 
             final Size dimensions = conf.boxModel().size();
@@ -1264,4 +1275,78 @@ final class StyleRenderer
         });
     }
 
+    private static void _renderText(
+        final TextConf        text,
+        final LayerRenderConf conf,
+        final Graphics2D      g2d
+    ) {
+        if ( text.text().isEmpty() )
+            return;
+
+        final Font initialFont = g2d.getFont();
+        final Shape oldClip = g2d.getClip();
+        final String textToRender = text.text();
+        final UI.ComponentArea clipArea = text.clipArea();
+        final UI.ComponentBoundary placementBoundary = text.placementBoundary();
+        final UI.Placement placement = text.placement();
+        final Offset offset = text.offset();
+
+        Font font = Optional.ofNullable(initialFont).orElse(new Font(Font.DIALOG, Font.PLAIN, UI.scale(12)));
+        font = text.fontConf().createDerivedFrom(font).orElse(font);
+        g2d.setFont(font);
+        FontMetrics fm = g2d.getFontMetrics(font);
+        Rectangle2D rect = fm.getStringBounds(textToRender, g2d);
+
+        Outline insets = _insetsFrom(placementBoundary, conf);
+        float x = insets.left().orElse(0f) + offset.x();
+        float y = insets.top().orElse(0f) + offset.y();
+        if ( placementBoundary == UI.ComponentBoundary.CENTER_TO_CONTENT ) {
+            float centerX = conf.boxModel().size().height().orElse(0f) / 2f;
+            float centerY = conf.boxModel().size().width().orElse(0f) / 2f;
+            switch ( placement ) {
+                case BOTTOM_RIGHT:
+                    // It's already positioned at the bottom right
+                    break;
+                case BOTTOM_LEFT:
+                    x -= (float) rect.getWidth();
+                    break;
+                case TOP_RIGHT:
+                    y -= (float) rect.getHeight();
+                    break;
+                case TOP_LEFT:
+                    x -= (float) rect.getWidth();
+                    y -= (float) rect.getHeight();
+                    break;
+                case CENTER:
+                    x = centerX - (float) rect.getWidth() / 2f;
+                    y = centerY + (float) rect.getHeight() / 2f;
+                    break;
+                case RIGHT:
+                    y -= (float) rect.getHeight() / 2f;
+                case LEFT:
+                    x -= (float) rect.getWidth();
+                    y -= (float) rect.getHeight() / 2f;
+                    break;
+                case TOP:
+                    x = centerX - (float) rect.getWidth() / 2f;
+                    y -= (float) rect.getHeight();
+                    break;
+                case BOTTOM:
+                    x = centerX - (float) rect.getWidth() / 2f;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        try {
+            // Clip the text to the clip area:
+            g2d.setClip(conf.areas().get(clipArea));
+            // Render the text:
+            g2d.drawString(textToRender, x, y);
+        } finally {
+            g2d.setFont(initialFont);
+            g2d.setClip(oldClip);
+        }
+    }
 }
