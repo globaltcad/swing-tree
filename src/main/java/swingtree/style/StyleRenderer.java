@@ -588,16 +588,24 @@ final class StyleRenderer
 
     private static Outline _insetsFrom(UI.ComponentBoundary boundary, LayerRenderConf conf) {
         Outline insets = Outline.none();
+        BoxModelConf boxModel = conf.boxModel();
         switch ( boundary ) {
             case OUTER_TO_EXTERIOR:
                 insets = Outline.none(); break;
             case EXTERIOR_TO_BORDER:
-                insets = conf.boxModel().margin(); break;
+                insets = boxModel.margin(); break;
             case BORDER_TO_INTERIOR:
-                insets = conf.boxModel().margin().plus(conf.boxModel().widths()); break;
+                insets = boxModel.margin().plus(boxModel.widths()); break;
             case INTERIOR_TO_CONTENT:
+                insets = boxModel.margin().plus(boxModel.widths()).plus(boxModel.padding()); break;
             case CENTER_TO_CONTENT:
-                insets = conf.boxModel().margin().plus(conf.boxModel().widths()).plus(conf.boxModel().padding()); break;
+                insets = boxModel.margin().plus(boxModel.widths()).plus(boxModel.padding());
+                float deltaWidth = boxModel.size().width().orElse(0f) - boxModel.margin().left().orElse(0f) - boxModel.margin().right().orElse(0f);
+                float deltaHeight = boxModel.size().height().orElse(0f) - boxModel.margin().top().orElse(0f) - boxModel.margin().bottom().orElse(0f);
+                float halfWidth = deltaWidth / 2f;
+                float halfHeight = deltaHeight / 2f;
+                insets = insets.plus(Outline.of(halfHeight, halfWidth, halfHeight, halfWidth));
+            break;
         }
         return insets;
     }
@@ -612,9 +620,9 @@ final class StyleRenderer
             g2d.fill(conf.areas().get(gradient.area()));
         }
         else {
-            Outline contentIns = _insetsFrom(gradient.boundary(), conf);
-            Outline insets = contentIns;
+            Outline insets;
             if ( gradient.boundary() == UI.ComponentBoundary.CENTER_TO_CONTENT ) {
+                Outline contentIns = _insetsFrom(UI.ComponentBoundary.INTERIOR_TO_CONTENT, conf);
                 float verticalInset = conf.boxModel().size().height().orElse(0f) / 2f;
                 float horizontalInset = conf.boxModel().size().width().orElse(0f) / 2f;
                 insets = Outline.of(verticalInset, horizontalInset);
@@ -650,6 +658,8 @@ final class StyleRenderer
                     default:
                         break;
                 }
+            } else {
+                insets = _insetsFrom(gradient.boundary(), conf);
             }
 
             final Size dimensions = conf.boxModel().size();
@@ -1298,49 +1308,63 @@ final class StyleRenderer
         Rectangle2D rect = fm.getStringBounds(textToRender, g2d);
 
         Outline insets = _insetsFrom(placementBoundary, conf);
-        float x = insets.left().orElse(0f) + offset.x();
-        float y = insets.top().orElse(0f) + offset.y();
-        if ( placementBoundary == UI.ComponentBoundary.CENTER_TO_CONTENT ) {
-            float centerX = conf.boxModel().size().height().orElse(0f) / 2f;
-            float centerY = conf.boxModel().size().width().orElse(0f) / 2f;
-            switch ( placement ) {
-                case BOTTOM_RIGHT:
-                    // It's already positioned at the bottom right
-                    break;
-                case BOTTOM_LEFT:
-                    x -= (float) rect.getWidth();
-                    break;
-                case TOP_RIGHT:
-                    y -= (float) rect.getHeight();
-                    break;
-                case TOP_LEFT:
-                    x -= (float) rect.getWidth();
-                    y -= (float) rect.getHeight();
-                    break;
+        float x = insets.left().orElse(0f); // Top left is always the starting point
+        float y = insets.top().orElse(0f) ;
+        {
+            float leftX = insets.left().orElse(0f);
+            float topY = insets.top().orElse(0f);
+            float localWidth = conf.boxModel().size().width().orElse(0f) - (leftX + insets.right().orElse(0f));
+            float localHeight = conf.boxModel().size().height().orElse(0f) - (topY + insets.bottom().orElse(0f));
+            float rightX = leftX + localWidth;
+            float bottomY = topY + localHeight;
+
+            switch (placement) {
                 case CENTER:
+                    float centerX = leftX + localWidth / 2f;
+                    float centerY = topY + localHeight / 2f;
                     x = centerX - (float) rect.getWidth() / 2f;
-                    y = centerY + (float) rect.getHeight() / 2f;
-                    break;
-                case RIGHT:
-                    y -= (float) rect.getHeight() / 2f;
-                case LEFT:
-                    x -= (float) rect.getWidth();
-                    y -= (float) rect.getHeight() / 2f;
-                    break;
+                    y = centerY - (float) rect.getHeight() / 2f;
+                break;
                 case TOP:
-                    x = centerX - (float) rect.getWidth() / 2f;
-                    y -= (float) rect.getHeight();
-                    break;
+                    x = leftX + (localWidth - (float) rect.getWidth()) / 2f;
+                    y = topY;
+                break;
+                case LEFT:
+                    x = leftX;
+                    y = topY + (localHeight - (float) rect.getHeight()) / 2f;
+                break;
                 case BOTTOM:
-                    x = centerX - (float) rect.getWidth() / 2f;
-                    break;
-                default:
-                    break;
+                    x = leftX + (localWidth - (float) rect.getWidth()) / 2f;
+                    y = bottomY - (float) rect.getHeight();
+                break;
+                case RIGHT:
+                    x = rightX - (float) rect.getWidth();
+                    y = topY + (localHeight - (float) rect.getHeight()) / 2f;
+                break;
+                case TOP_LEFT:
+                    x = leftX;
+                    y = topY;
+                break;
+                case TOP_RIGHT:
+                    x = rightX - (float) rect.getWidth();
+                    y = topY;
+                break;
+                case BOTTOM_LEFT:
+                    x = leftX;
+                    y = bottomY - (float) rect.getHeight();
+                break;
+                case BOTTOM_RIGHT:
+                    x = rightX - (float) rect.getWidth();
+                    y = bottomY - (float) rect.getHeight();
+                break;
+                case UNDEFINED:
+                break;
             }
         }
 
         try {
-            // Clip the text to the clip area:
+            x += (offset.x() - (float) rect.getX());
+            y += (offset.y() - (float) rect.getY());
             g2d.setClip(conf.areas().get(clipArea));
             // Render the text:
             g2d.drawString(textToRender, x, y);

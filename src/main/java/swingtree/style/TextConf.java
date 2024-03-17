@@ -2,6 +2,7 @@ package swingtree.style;
 
 import swingtree.UI;
 
+import java.awt.Font;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -17,7 +18,7 @@ public final class TextConf implements Simplifiable<TextConf>
                                                 "",
                                                 FontConf.none(),
                                                 UI.ComponentArea.INTERIOR,
-                                                UI.ComponentBoundary.BORDER_TO_INTERIOR,
+                                                UI.ComponentBoundary.INTERIOR_TO_CONTENT,
                                                 UI.Placement.CENTER,
                                                 Offset.none()
                                             );
@@ -100,15 +101,19 @@ public final class TextConf implements Simplifiable<TextConf>
         return of(text, _fontConf, _clipArea, _placementBoundary, _placement, _offset);
     }
 
-    TextConf fontConf(FontConf fontConf) {
+    private TextConf _fontConf(FontConf fontConf) {
         return of(_text, fontConf, _clipArea, _placementBoundary, _placement, _offset);
     }
 
-    TextConf font( Function<FontConf, FontConf> fontConfFunction ) {
-        return fontConf(fontConfFunction.apply(_fontConf));
+    public TextConf font( Function<FontConf, FontConf> fontConfFunction ) {
+        return _fontConf(fontConfFunction.apply(_fontConf));
     }
 
-    public TextConf clipArea(UI.ComponentArea clipArea) {
+    public TextConf font( Font font ) {
+        return _fontConf(_fontConf.withPropertiesFromFont(font));
+    }
+
+    public TextConf clipTo( UI.ComponentArea clipArea ) {
         return of(_text, _fontConf, clipArea, _placementBoundary, _placement, _offset);
     }
 

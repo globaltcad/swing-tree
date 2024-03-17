@@ -196,6 +196,9 @@ final class StyleConfLayer implements Simplifiable<StyleConfLayer>
 
     @Override
     public StyleConfLayer simplified() {
+        if ( this == _EMPTY )
+            return this;
+
         NamedConfigs<ShadowConf>   simplifiedShadows   = _shadows.simplified();
         NamedConfigs<PainterConf>  simplifiedPainters  = _painters.simplified();
         NamedConfigs<GradientConf> simplifiedGradients = _gradients.simplified();

@@ -147,7 +147,7 @@ import java.util.*;
  *  easily create a modified copy of it by calling one of the wither-like methods.
  *  <p>
  */
-final class FontConf
+public final class FontConf
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(FontConf.class);
 
@@ -305,27 +305,27 @@ final class FontConf
 
     UI.VerticalAlignment verticalAlignment() { return _verticalAlignment; }
 
-    FontConf withFamily(String fontFamily ) {
+    public FontConf family( String fontFamily ) {
         return FontConf.of(fontFamily, _size, _posture, _weight, _spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);
     }
 
-    FontConf withSize(int fontSize ) {
+    public FontConf size( int fontSize ) {
         return FontConf.of(_familyName, fontSize, _posture, _weight, _spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);
     }
 
-    FontConf withPosture(float posture ) {
+    public FontConf posture( float posture ) {
         return FontConf.of(_familyName, _size, posture, _weight, _spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);
     }
 
-    FontConf withWeight(float fontWeight ) {
+    public FontConf weight( float fontWeight ) {
         return FontConf.of(_familyName, _size, _posture, fontWeight, _spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);
     }
 
-    FontConf withSpacing(float spacing ) {
+    public FontConf spacing( float spacing ) {
         return FontConf.of(_familyName, _size, _posture, _weight, spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);
     }
 
-    FontConf withColor(Color color ) {
+    public FontConf color( Color color ) {
         Objects.requireNonNull(color);
         if ( color == UI.COLOR_UNDEFINED)
             color = null;
@@ -335,7 +335,22 @@ final class FontConf
         return FontConf.of(_familyName, _size, _posture, _weight, _spacing, color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);
     }
 
-    FontConf withBackgroundColor(Color backgroundColor ) {
+    public FontConf color( String colorString ) {
+        Objects.requireNonNull(colorString);
+        Color newColor;
+        try {
+            if ( colorString.isEmpty() )
+                newColor = UI.COLOR_UNDEFINED;
+            else
+                newColor = UI.color(colorString);
+        } catch ( Exception e ) {
+            log.error("Failed to parse color string: '"+colorString+"'", e);
+            return this;
+        }
+        return color(newColor);
+    }
+
+    public FontConf backgroundColor( Color backgroundColor ) {
         Objects.requireNonNull(backgroundColor);
         if ( backgroundColor == UI.COLOR_UNDEFINED)
             backgroundColor = null;
@@ -344,7 +359,22 @@ final class FontConf
         return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _color, backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);
     }
 
-    FontConf withSelectionColor(Color selectionColor ) {
+    public FontConf backgroundColor( String colorString ) {
+        Objects.requireNonNull(colorString);
+        Color newColor;
+        try {
+            if ( colorString.isEmpty() )
+                newColor = UI.COLOR_UNDEFINED;
+            else
+                newColor = UI.color(colorString);
+        } catch ( Exception e ) {
+            log.error("Failed to parse color string: '{}'", colorString, e);
+            return this;
+        }
+        return backgroundColor(newColor);
+    }
+
+    public FontConf selectionColor(Color selectionColor ) {
         Objects.requireNonNull(selectionColor);
         if ( selectionColor == UI.COLOR_UNDEFINED)
             selectionColor = null;
@@ -353,31 +383,46 @@ final class FontConf
         return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _color, _backgroundColor, selectionColor, _isUnderlined, _isStrike, _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);
     }
 
-    FontConf withIsUnderlined(boolean underlined ) {
+    public FontConf selectionColor( String colorString ) {
+        Objects.requireNonNull(colorString);
+        Color newColor;
+        try {
+            if ( colorString.isEmpty() )
+                newColor = UI.COLOR_UNDEFINED;
+            else
+                newColor = UI.color(colorString);
+        } catch ( Exception e ) {
+            log.error("Failed to parse color string: '"+colorString+"'", e);
+            return this;
+        }
+        return selectionColor(newColor);
+    }
+
+    public FontConf underlined( boolean underlined ) {
         return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _color, _backgroundColor, _selectionColor, underlined, _isStrike, _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);
     }
 
-    FontConf withIsStrikeThrough(boolean strike ) {
+    public FontConf strikeThrough( boolean strike ) {
         return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, strike, _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);
     }
 
-    FontConf withTransform(@Nullable AffineTransform transform ) {
+    public FontConf transform( @Nullable AffineTransform transform ) {
         return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike, transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);
     }
 
-    FontConf withPaint( @Nullable Paint paint ) {
+    public FontConf paint( @Nullable Paint paint ) {
         return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);
     }
 
-    FontConf withBackgroundPaint( @Nullable Paint backgroundPaint ) {
+    public FontConf backgroundPaint( @Nullable Paint backgroundPaint ) {
         return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, backgroundPaint, _horizontalAlignment, _verticalAlignment);
     }
 
-    FontConf withHorizontalAlignment( UI.HorizontalAlignment horizontalAlignment ) {
+    public FontConf horizontalAlignment( UI.HorizontalAlignment horizontalAlignment ) {
         return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, horizontalAlignment, _verticalAlignment);
     }
 
-    FontConf withVerticalAlignment( UI.VerticalAlignment verticalAlignment ) {
+    public FontConf verticalAlignment( UI.VerticalAlignment verticalAlignment ) {
         return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, _horizontalAlignment, verticalAlignment);
     }
 
