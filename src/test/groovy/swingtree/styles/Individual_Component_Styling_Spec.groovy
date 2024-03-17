@@ -3018,9 +3018,23 @@ class Individual_Component_Styling_Spec extends Specification
     def 'Render custom text using the style API.'()
     {
         reportInfo """
+                The SwingTree style engine makes it possible to turn
+                any Swing component into a text component.
+                This is possible by configuring custom text sub style 
+                inside your `Styler` lambdas exposed by the style API.
+                <br>
+                In this example we style the `JBox` type to render custom text.
+                
+                ${Utility.linkSnapshot('components/custom-text-placement-collage.png')}
+
+                The rendered components are all stitched together into a collage so that you can see them
+                all at once and compare them with each other.
+
+                As you can see, there are a number of different placements for the text.
+                You may also style the font and the text color to your liking.
             """
 
-        given : 'We pass the following style rules to a number of labels:'
+        given : 'We pass the following style rules to a number of `JBox` UIs:'
             var ui1 =
                         UI.box().withStyle( it -> it
                             .margin(12)
@@ -3180,9 +3194,24 @@ class Individual_Component_Styling_Spec extends Specification
     def 'Render custom text with a custom placement and placement boundary.'( float scale )
     {
         reportInfo """
+                The SwingTree style engine makes it possible to turn
+                any Swing component into a text component.
+                This is possible by configuring custom text sub style 
+                inside your `Styler` lambdas exposed by the style API.
+                <br>
+                In this example we style the `JBox` type to render custom text
+                with a custom placement and placement boundary.
+                
+                ${Utility.linkSnapshot('components/custom-text-boundary-placement-collage.png')}
+
+                The rendered components are all stitched together into a collage so that you can see them
+                all at once and compare them with each other.
+
+                As you can see, there are a number of different placements for the text.
+                You may also style the font and the text color to your liking.
             """
 
-        given : 'We pass the following style rules to a number of labels:'
+        given : 'We pass the following style rules to a number of `JBox` UIs:'
             var ui1 =
                         UI.box().withStyle( it -> it
                             .margin(12)
