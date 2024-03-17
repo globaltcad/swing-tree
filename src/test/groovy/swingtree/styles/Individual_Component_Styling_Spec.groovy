@@ -3015,5 +3015,343 @@ class Individual_Component_Styling_Spec extends Specification
             scale << [1f, 1.25f, 1.75f, 2f]
     }
 
+    def 'Render custom text using the style API.'()
+    {
+        reportInfo """
+            """
+
+        given : 'We pass the following style rules to a number of labels:'
+            var ui1 =
+                        UI.box().withStyle( it -> it
+                            .margin(12)
+                            .padding(12)
+                            .border(12, new Color(50,100,220,100))
+                            .size(142, 110)
+                            .fontBold(true)
+                            .text( conf -> conf
+                                 .text("Center").placement(UI.Placement.CENTER)
+                                 .font( f -> f
+                                     .color("navy")
+                                     .family("Ubuntu")
+                                 )
+                            )
+                        )
+            var ui2 =
+                        UI.box().withStyle( it -> it
+                            .margin(12)
+                            .padding(12)
+                            .border(12, new Color(50,100,220,100))
+                            .size(142, 110)
+                            .fontBold(true)
+                            .text( conf -> conf
+                                 .text("Top").placement(UI.Placement.TOP)
+                                 .font( f -> f
+                                     .color("navy")
+                                     .family("Ubuntu")
+                                 )
+                            )
+                        )
+            var ui3 =
+                        UI.box().withStyle( it -> it
+                            .margin(12)
+                            .padding(12)
+                            .border(12, new Color(50,100,220,100))
+                            .size(142, 110)
+                            .fontBold(true)
+                            .text( conf -> conf
+                                 .text("Bottom").placement(UI.Placement.BOTTOM)
+                                 .font( f -> f
+                                     .color("navy")
+                                     .family("Ubuntu")
+                                 )
+                            )
+                        )
+            var ui4 =
+                        UI.box().withStyle( it -> it
+                            .margin(12)
+                            .padding(12)
+                            .border(12, new Color(50,100,220,100))
+                            .size(142, 110)
+                            .fontBold(true)
+                            .text( conf -> conf
+                                 .text("Left").placement(UI.Placement.LEFT)
+                                 .font( f -> f
+                                     .color("navy")
+                                     .family("Ubuntu")
+                                 )
+                            )
+                        )
+            var ui5 =
+                        UI.box().withStyle( it -> it
+                            .margin(12)
+                            .padding(12)
+                            .border(12, new Color(50,100,220,100))
+                            .size(142, 110)
+                            .fontBold(true)
+                            .text( conf -> conf
+                                 .text("Right").placement(UI.Placement.RIGHT)
+                                 .font( f -> f
+                                     .color("navy")
+                                     .family("Ubuntu")
+                                 )
+                            )
+                        )
+            var ui6 =
+                        UI.box().withStyle( it -> it
+                            .margin(12)
+                            .padding(12)
+                            .border(12, new Color(50,100,220,100))
+                            .size(142, 110)
+                            .fontBold(true)
+                            .text( conf -> conf
+                                 .text("Top Left").placement(UI.Placement.TOP_LEFT)
+                                 .font( f -> f
+                                     .color("navy")
+                                     .family("Ubuntu")
+                                 )
+                            )
+                        )
+            var ui7 =
+                        UI.box().withStyle( it -> it
+                            .margin(12)
+                            .padding(12)
+                            .border(12, new Color(50,100,220,100))
+                            .size(142, 110)
+                            .fontBold(true)
+                            .text( conf -> conf
+                                 .text("Top Right").placement(UI.Placement.TOP_RIGHT)
+                                 .font( f -> f
+                                     .color("navy")
+                                     .family("Ubuntu")
+                                 )
+                            )
+                        )
+            var ui8 =
+                        UI.box().withStyle( it -> it
+                            .margin(12)
+                            .padding(12)
+                            .border(12, new Color(50,100,220,100))
+                            .size(142, 110)
+                            .fontBold(true)
+                            .text( conf -> conf
+                                 .text("Bottom Left").placement(UI.Placement.BOTTOM_LEFT)
+                                 .font( f -> f
+                                     .color("navy")
+                                     .family("Ubuntu")
+                                 )
+                            )
+                        )
+            var ui9 =
+                        UI.box().withStyle( it -> it
+                            .margin(12)
+                            .padding(12)
+                            .border(12, new Color(50,100,220,100))
+                            .size(142, 110)
+                            .fontBold(true)
+                            .text( conf -> conf
+                                 .text("Bottom Right").placement(UI.Placement.BOTTOM_RIGHT)
+                                 .font( f -> f
+                                     .color("navy")
+                                     .family("Ubuntu")
+                                 )
+                            )
+                        )
+
+        when : 'We render the UIs into BufferedImage instances.'
+            var image1 = Utility.renderSingleComponent(ui1.get(JBox))
+            var image2 = Utility.renderSingleComponent(ui2.get(JBox))
+            var image3 = Utility.renderSingleComponent(ui3.get(JBox))
+            var image4 = Utility.renderSingleComponent(ui4.get(JBox))
+            var image5 = Utility.renderSingleComponent(ui5.get(JBox))
+            var image6 = Utility.renderSingleComponent(ui6.get(JBox))
+            var image7 = Utility.renderSingleComponent(ui7.get(JBox))
+            var image8 = Utility.renderSingleComponent(ui8.get(JBox))
+            var image9 = Utility.renderSingleComponent(ui9.get(JBox))
+            var images = new BufferedImage[] {image1, image2, image3, image4, image5, image6, image7, image8, image9}
+
+
+        then : 'The collage of images is as expected (compared with the snapshot above).'
+            Utility.similarityBetween(images, "components/custom-text-placement-collage.png", 99.9) > 99.9
+
+        where : 'We test this using the following scaling values:'
+            scale << [1f, 1.25f, 1.75f, 2f]
+    }
+
+    def 'Render custom text with a custom placement and placement boundary.'( float scale )
+    {
+        reportInfo """
+            """
+
+        given : 'We pass the following style rules to a number of labels:'
+            var ui1 =
+                        UI.box().withStyle( it -> it
+                            .margin(12)
+                            .padding(12)
+                            .border(6, new Color(100,50,220,100))
+                            .size(142, 110)
+                            .fontBold(true)
+                            .text( conf -> conf
+                                .text("Top Left")
+                                .placement(UI.Placement.TOP_LEFT)
+                                .placementBoundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)
+                                .font( f -> f
+                                    .color("red")
+                                    .family("Ubuntu")
+                                )
+                            )
+                        )
+            var ui2 =
+                        UI.box().withStyle( it -> it
+                            .margin(12)
+                            .padding(12)
+                            .border(6, new Color(100,50,220,100))
+                            .size(142, 110)
+                            .fontBold(true)
+                            .text( conf -> conf
+                                .text("Top")
+                                .placement(UI.Placement.TOP)
+                                .placementBoundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)
+                                .font( f -> f
+                                    .color("green")
+                                    .family("Ubuntu")
+                                )
+                            )
+                        )
+            var ui3 =
+                        UI.box().withStyle( it -> it
+                            .margin(12)
+                            .padding(12)
+                            .border(6, new Color(100,50,220,100))
+                            .size(142, 110)
+                            .fontBold(true)
+                            .text( conf -> conf
+                                .text("Top Right")
+                                .placement(UI.Placement.TOP_RIGHT)
+                                .placementBoundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)
+                                .font( f -> f
+                                    .color("blue")
+                                    .family("Ubuntu")
+                                )
+                            )
+                        )
+            var ui4 =
+                        UI.box().withStyle( it -> it
+                            .margin(12)
+                            .padding(12)
+                            .border(6, new Color(100,50,220,100))
+                            .size(142, 110)
+                            .fontBold(true)
+                            .text( conf -> conf
+                                .text("Left").placement(UI.Placement.LEFT)
+                                .placementBoundary(UI.ComponentBoundary.BORDER_TO_INTERIOR)
+                                .font( f -> f
+                                    .color("tan")
+                                    .family("Ubuntu")
+                                )
+                            )
+                        )
+            var ui5 =
+                        UI.box().withStyle( it -> it
+                            .margin(12)
+                            .padding(12)
+                            .border(6, new Color(100,50,220,100))
+                            .size(142, 110)
+                            .fontBold(true)
+                            .text( conf -> conf
+                                .text("Center").placement(UI.Placement.CENTER)
+                                .placementBoundary(UI.ComponentBoundary.BORDER_TO_INTERIOR)
+                                .font( f -> f
+                                    .color("magenta")
+                                    .family("Ubuntu")
+                                )
+                            )
+                        )
+            var ui6 =
+                        UI.box().withStyle( it -> it
+                            .margin(12)
+                            .padding(12)
+                            .border(6, new Color(100,50,220,100))
+                            .size(142, 110)
+                            .fontBold(true)
+                            .text( conf -> conf
+                                .text("Right").placement(UI.Placement.RIGHT)
+                                .placementBoundary(UI.ComponentBoundary.BORDER_TO_INTERIOR)
+                                .font( f -> f
+                                    .color("oak")
+                                    .family("Ubuntu")
+                                )
+                            )
+                        )
+            var ui7 =
+                        UI.box().withStyle( it -> it
+                            .margin(12)
+                            .padding(12)
+                            .border(6, new Color(100,50,220,100))
+                            .size(142, 110)
+                            .fontBold(true)
+                            .text( conf -> conf
+                                .text("Bottom Left").placement(UI.Placement.BOTTOM_LEFT)
+                                .placementBoundary(UI.ComponentBoundary.EXTERIOR_TO_BORDER)
+                                .font( f -> f
+                                    .color("navy")
+                                    .family("Ubuntu")
+                                )
+                            )
+                        )
+            var ui8 =
+                        UI.box().withStyle( it -> it
+                            .margin(12)
+                            .padding(12)
+                            .border(6, new Color(100,50,220,100))
+                            .size(142, 110)
+                            .fontBold(true)
+                            .text( conf -> conf
+                                .text("Bottom")
+                                .placement(UI.Placement.BOTTOM)
+                                .placementBoundary(UI.ComponentBoundary.EXTERIOR_TO_BORDER)
+                                .font( f -> f
+                                    .color("dark cyan")
+                                    .family("Ubuntu")
+                                )
+                            )
+                        )
+            var ui9 =
+                        UI.box().withStyle( it -> it
+                            .margin(12)
+                            .padding(12)
+                            .border(6, new Color(100,50,220,100))
+                            .size(142, 110)
+                            .fontBold(true)
+                            .text( conf -> conf
+                                .text("Bottom Right")
+                                .placement(UI.Placement.BOTTOM_RIGHT)
+                                .placementBoundary(UI.ComponentBoundary.EXTERIOR_TO_BORDER)
+                                .font( f -> f
+                                    .color("dark purple")
+                                    .family("Ubuntu")
+                                )
+                            )
+                        )
+
+        when : 'We render the UIs into BufferedImage instances.'
+            var image1 = Utility.renderSingleComponent(ui1.get(JBox))
+            var image2 = Utility.renderSingleComponent(ui2.get(JBox))
+            var image3 = Utility.renderSingleComponent(ui3.get(JBox))
+            var image4 = Utility.renderSingleComponent(ui4.get(JBox))
+            var image5 = Utility.renderSingleComponent(ui5.get(JBox))
+            var image6 = Utility.renderSingleComponent(ui6.get(JBox))
+            var image7 = Utility.renderSingleComponent(ui7.get(JBox))
+            var image8 = Utility.renderSingleComponent(ui8.get(JBox))
+            var image9 = Utility.renderSingleComponent(ui9.get(JBox))
+            var images = new BufferedImage[] {image1, image2, image3, image4, image5, image6, image7, image8, image9}
+
+
+        then : 'The collage of images is as expected (compared with the snapshot above).'
+            Utility.similarityBetween(images, "components/custom-text-boundary-placement-collage.png", 99.9) > 99.9
+
+        where : 'We test this using the following scaling values:'
+            scale << [1f, 1.25f, 1.75f, 2f]
+    }
+
 
 }
