@@ -586,9 +586,8 @@ final class StyleRenderer
                     .orElse(new Color(0.5f, 0.5f, 0.5f, 0f));
     }
 
-    private static Outline _insetsFrom(UI.ComponentBoundary boundary, LayerRenderConf conf) {
+    private static Outline _insetsFrom(UI.ComponentBoundary boundary, BoxModelConf boxModel) {
         Outline insets = Outline.none();
-        BoxModelConf boxModel = conf.boxModel();
         switch ( boundary ) {
             case OUTER_TO_EXTERIOR:
                 insets = Outline.none(); break;
@@ -620,10 +619,11 @@ final class StyleRenderer
             g2d.fill(conf.areas().get(gradient.area()));
         }
         else {
-            final Size dimensions = conf.boxModel().size();
+            final BoxModelConf boxModel = conf.boxModel();
+            final Size dimensions = boxModel.size();
             Outline insets;
             if ( gradient.boundary() == UI.ComponentBoundary.CENTER_TO_CONTENT ) {
-                Outline contentIns = _insetsFrom(UI.ComponentBoundary.INTERIOR_TO_CONTENT, conf);
+                Outline contentIns = _insetsFrom(UI.ComponentBoundary.INTERIOR_TO_CONTENT, boxModel);
                 float verticalInset = dimensions.height().orElse(0f) / 2f;
                 float horizontalInset = dimensions.width().orElse(0f) / 2f;
                 insets = Outline.of(verticalInset, horizontalInset);
@@ -660,7 +660,7 @@ final class StyleRenderer
                         break;
                 }
             } else {
-                insets = _insetsFrom(gradient.boundary(), conf);
+                insets = _insetsFrom(gradient.boundary(), boxModel);
             }
 
             Paint paint = _createGradientPaint(dimensions, insets, gradient);
@@ -762,19 +762,21 @@ final class StyleRenderer
             g2d.fill(conf.areas().get(noise.area()));
         }
         else {
+            BoxModelConf boxModel = conf.boxModel();
+            Size dimensions = boxModel.size();
             Outline insets = Outline.none();
             switch ( noise.boundary() ) {
                 case OUTER_TO_EXTERIOR:
                     insets = Outline.none(); break;
                 case EXTERIOR_TO_BORDER:
-                    insets = conf.boxModel().margin(); break;
+                    insets = boxModel.margin(); break;
                 case BORDER_TO_INTERIOR:
-                    insets = conf.boxModel().margin().plus(conf.boxModel().widths()); break;
+                    insets = boxModel.margin().plus(boxModel.widths()); break;
                 case INTERIOR_TO_CONTENT:
-                    insets = conf.boxModel().margin().plus(conf.boxModel().widths()).plus(conf.boxModel().padding()); break;
+                    insets = boxModel.margin().plus(boxModel.widths()).plus(boxModel.padding()); break;
                 case CENTER_TO_CONTENT:
-                    float verticalInset   = conf.boxModel().size().height().orElse(0f) / 2f;
-                    float horizontalInset = conf.boxModel().size().width().orElse(0f) / 2f;
+                    float verticalInset   = dimensions.height().orElse(0f) / 2f;
+                    float horizontalInset = dimensions.width().orElse(0f) / 2f;
                     insets = Outline.of(verticalInset, horizontalInset);
             }
 
@@ -1282,13 +1284,16 @@ final class StyleRenderer
         if ( text.content().isEmpty() )
             return;
 
+        final BoxModelConf boxModel = conf.boxModel();
+
         final Font initialFont = g2d.getFont();
         final Shape oldClip = g2d.getClip();
-        final String textToRender = text.content();
-        final UI.ComponentArea clipArea = text.clipArea();
+
+        final String               textToRender      = text.content();
+        final UI.ComponentArea     clipArea          = text.clipArea();
         final UI.ComponentBoundary placementBoundary = text.placementBoundary();
-        final UI.Placement placement = text.placement();
-        final Offset offset = text.offset();
+        final UI.Placement         placement         = text.placement();
+        final Offset               offset            = text.offset();
 
         Font font = Optional.ofNullable(initialFont).orElse(new Font(Font.DIALOG, Font.PLAIN, UI.scale(12)));
         font = text.fontConf().createDerivedFrom(font).orElse(font);
@@ -1296,14 +1301,14 @@ final class StyleRenderer
         FontMetrics fm = g2d.getFontMetrics(font);
         Rectangle2D rect = fm.getStringBounds(textToRender, g2d);
 
-        Outline insets = _insetsFrom(placementBoundary, conf);
+        Outline insets = _insetsFrom(placementBoundary, boxModel);
         float x = insets.left().orElse(0f); // Top left is always the starting point
         float y = insets.top().orElse(0f) ;
         {
             float leftX = insets.left().orElse(0f);
             float topY = insets.top().orElse(0f);
-            float localWidth = conf.boxModel().size().width().orElse(0f) - (leftX + insets.right().orElse(0f));
-            float localHeight = conf.boxModel().size().height().orElse(0f) - (topY + insets.bottom().orElse(0f));
+            float localWidth = boxModel.size().width().orElse(0f) - (leftX + insets.right().orElse(0f));
+            float localHeight = boxModel.size().height().orElse(0f) - (topY + insets.bottom().orElse(0f));
             float rightX = leftX + localWidth;
             float bottomY = topY + localHeight;
 
