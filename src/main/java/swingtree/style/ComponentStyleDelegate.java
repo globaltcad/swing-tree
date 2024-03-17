@@ -489,7 +489,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
     }
 
     /**
-     *  Returns a new {@link StyleConf} with the provided border color in the form of a string.
+     *  Returns an updated {@link StyleConf} with the provided border color in the form of a string.
      *  The string can be either a hex color string, a color name or a color constant from the system properties.
      *  The border will be rendered with an inset space based on the padding defined by the {@link StyleConf}.
      *
@@ -1590,18 +1590,77 @@ public final class ComponentStyleDelegate<C extends JComponent>
         return _withStyle(_styleConf.images(layer, StyleUtil.DEFAULT_KEY, styler));
     }
 
+    /**
+     *  Returns an updated {@link StyleConf} with a named text style
+     *  configurator for the default {@link TextConf} of the component. <br>
+     *  The sub-style exposed by this method adds <b>support for text rendering to
+     *  all components not just text components</b>. <br>
+     *  If you only want to style the {@link JComponent#getFont()} property of the component,
+     *  you can use {@link #componentFont(Function)} instead. <br>
+     *  <br>
+     *  The first parameter is the name of the text style, which allows
+     *  you to define any number of text styles for a single component
+     *  by using different names. <br>
+     *  Two sub-styles with the same name will override each other. <br>
+     *
+     * @param styler A configurator function that takes a {@link TextConf} and returns an updated {@link TextConf}.
+     *               The configurator function is called with the default text style of the component.
+     * @return A new {@link ComponentStyleDelegate} with the provided text style.
+     *         Each unique name creates an additional text style for the component.
+     * @see #text(UI.Layer, String, Function)
+     * @see #text(Function)
+     * @throws NullPointerException If the provided styler or textName is {@code null}.
+     */
     public ComponentStyleDelegate<C> text( String textName, Function<TextConf, TextConf> styler ) {
         Objects.requireNonNull(textName);
         Objects.requireNonNull(styler);
         return text(TextConf.DEFAULT_LAYER, textName, styler);
     }
 
+    /**
+     *  Returns an updated {@link StyleConf} with the provided named text style
+     *  configurator for the default {@link TextConf} of the component. <br>
+     *  The sub-style exposed by this method adds <b>support for text rendering to
+     *  all components not just text components</b>. <br>
+     *  If you only want to style the {@link JComponent#getFont()} property of the component,
+     *  you can use {@link #componentFont(Function)} instead. <br>
+     *  <br>
+     *  The first parameter is the name of the text style, which allows
+     *  you to define any number of text styles for a single component
+     *  by using different names. <br>
+     *  Two sub-styles with the same name will override each other. <br>
+     *
+     * @param layer The layer on which the text should be rendered.
+     * @param textName The name of the text style that you want to define.
+     *                 Each unique name creates an additional text style for the component.
+     * @param styler A configurator function that takes a {@link TextConf} and returns an updated {@link TextConf}.
+     *               The configurator function is called with the default text style of the component.
+     * @return A new {@link ComponentStyleDelegate} with the provided text style.
+     * @see #text(String, Function)
+     * @see #text(Function)
+     * @throws NullPointerException If the provided styler or textName is {@code null}.
+     */
     public ComponentStyleDelegate<C> text( UI.Layer layer, String textName, Function<TextConf, TextConf> styler ) {
         Objects.requireNonNull(textName);
         Objects.requireNonNull(styler);
         return _withStyle(_styleConf.text(layer, textName, styler));
     }
 
+    /**
+     *  Returns an updated {@link StyleConf} with the provided text style
+     *  configurator for the default {@link TextConf} of the component. <br>
+     *  The sub-style exposed by this method adds <b>support for text rendering to
+     *  all components not just text components</b>. <br>
+     *  If you only want to style the {@link JComponent#getFont()} property of the component,
+     *  you can use {@link #componentFont(Function)} instead. <br>
+     *
+     * @param styler A configurator function that takes a {@link TextConf} and returns an updated {@link TextConf}.
+     *               The configurator function is called with the default text style of the component.
+     * @return A new {@link ComponentStyleDelegate} with the provided text style.
+     * @see #text(UI.Layer, String, Function)
+     * @see #text(String, Function)
+     * @throws NullPointerException If the provided styler is {@code null}.
+     */
     public ComponentStyleDelegate<C> text( Function<TextConf, TextConf> styler ) {
         Objects.requireNonNull(styler);
         return text(TextConf.DEFAULT_LAYER, StyleUtil.DEFAULT_KEY, styler);

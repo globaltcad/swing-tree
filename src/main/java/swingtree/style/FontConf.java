@@ -9,6 +9,7 @@ import java.awt.*;
 import java.awt.font.TextAttribute;
 import java.awt.geom.AffineTransform;
 import java.util.*;
+import java.util.function.Function;
 
 /**
  *  An immutable, wither-like method based config API for font styles
@@ -20,13 +21,15 @@ import java.util.*;
  *      <li><h3>Name</h3>
  *          <p>
  *              The name of the font, which is essentially the font family.
- *              This will ultimately translate to {@link Font#getFamily()}.
+ *              This will ultimately translate to {@link Font#getFamily()}.<br>
+ *              You may specify the font family name through the {@link #family(String)} method.
  *          </p>
  *      </li>
  *      <li><h3>Size</h3>
  *          <p>
  *              The size of the font in points,
  *              which will ultimately translate to {@link Font#getSize()}.
+ *              Use the {@link #size(int)} method to specify the size of the font.
  *          </p>
  *      </li>
  *      <li><h3>Posture</h3>
@@ -35,12 +38,17 @@ import java.util.*;
  *              <br>
  *              A value of 0 means that the font is not italic,
  *              while a value of 1 means that the font is "fully" italic.
+ *              <br>
+ *              You can use the {@link #posture(float)} method to specify the posture of the font.
  *          </p>
  *      </li>
  *      <li><h3>Weight</h3>
  *          <p>
  *              The weight of the font (boldness, see {@link Font#BOLD}),
  *              which is a value between 0 and 2.
+ *          </p>
+ *          <p>
+ *              The weight of the font can be specified using the {@link #weight(float)} method.
  *          </p>
  *      </li>
  *      <li><h3>Spacing (Tracking)</h3>
@@ -60,11 +68,17 @@ import java.util.*;
  *              {@code 0.3}; values outside this range are generally not
  *              desirable.
  *          </p>
+ *          <p>
+ *              You can use the {@link #spacing(float)} method to specify the tracking of the font.
+ *          </p>
  *      </li>
  *      <li><h3>Color</h3>
  *          <p>
  *              The color of the font, which translates to the text property
  *              {@link TextAttribute#FOREGROUND}.
+ *          </p>
+ *          <p>
+ *              You can use the {@link #color(Color)} or {@link #color(String)} methods to specify the color of the font.
  *          </p>
  *      </li>
  *      <li><h3>Background Color</h3>
@@ -305,26 +319,77 @@ public final class FontConf
 
     UI.VerticalAlignment verticalAlignment() { return _verticalAlignment; }
 
+    /**
+     * Returns an updated font config with the specified font family name.
+     *
+     * @param fontFamily The font family name to use for the {@link Font#getFamily()} property.
+     * @return A new font style with the specified font family name.
+     */
     public FontConf family( String fontFamily ) {
         return FontConf.of(fontFamily, _size, _posture, _weight, _spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);
     }
 
+    /**
+     * Returns an updated font config with the specified font size,
+     * which will translate to a {@link Font} instance with the specified size 
+     * (see {@link Font#getSize()}).
+     *
+     * @param fontSize The font size to use for the {@link Font#getSize()} property.
+     * @return A new font style with the specified font size.
+     */
     public FontConf size( int fontSize ) {
         return FontConf.of(_familyName, fontSize, _posture, _weight, _spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);
     }
 
+    /**
+     * Returns an updated font config with the specified posture, defining the tilt of the font.
+     * A {@link Font} with a higher posture value will be more italic.
+     * (see {@link Font#isItalic()}).
+     *
+     * @param posture The posture to use for the {@link Font#isItalic()} property.
+     * @return A new font style with the specified posture.
+     */
     public FontConf posture( float posture ) {
         return FontConf.of(_familyName, _size, posture, _weight, _spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);
     }
 
+    /**
+     * Returns an updated font config with the specified weight, defining the boldness of the font.
+     * A {@link Font} with a higher weight value will be bolder.
+     * (see {@link Font#isBold()}).
+     *
+     * @param fontWeight The weight to use for the {@link Font#isBold()} property.
+     * @return A new font style with the specified weight.
+     */
     public FontConf weight( float fontWeight ) {
         return FontConf.of(_familyName, _size, _posture, fontWeight, _spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);
     }
 
+    /**
+     * Returns an updated font config with the specified spacing, defining the tracking of the font.
+     * The tracking value is multiplied by the font point size and
+     * passed through the font transform to determine an additional
+     * amount to add to the advance of each glyph cluster.  Positive
+     * tracking values will inhibit formation of optional ligatures.
+     * Tracking values are typically between {@code -0.1} and
+     * {@code 0.3}; values outside this range are generally not
+     * desirable.
+     *
+     * @param spacing The spacing to use for the {@link TextAttribute#TRACKING} property.
+     * @return A new font style with the specified spacing.
+     */
     public FontConf spacing( float spacing ) {
         return FontConf.of(_familyName, _size, _posture, _weight, spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);
     }
 
+    /**
+     * Returns an updated font config with the specified color,
+     * which will be used for the {@link TextAttribute#FOREGROUND} property
+     * of the resulting {@link Font} instance.
+     *
+     * @param color The color to use for the {@link TextAttribute#FOREGROUND} property.
+     * @return A new font style with the specified color.
+     */
     public FontConf color( Color color ) {
         Objects.requireNonNull(color);
         if ( color == UI.COLOR_UNDEFINED)
@@ -335,6 +400,14 @@ public final class FontConf
         return FontConf.of(_familyName, _size, _posture, _weight, _spacing, color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);
     }
 
+    /**
+     * Returns an updated font config with the specified color string used to define the font color.
+     * The color will be used for the {@link TextAttribute#FOREGROUND} property
+     * of the resulting {@link Font} instance.
+     *
+     * @param colorString The color string to use for the {@link TextAttribute#FOREGROUND} property.
+     * @return A new font style with the specified color.
+     */
     public FontConf color( String colorString ) {
         Objects.requireNonNull(colorString);
         Color newColor;
@@ -350,6 +423,14 @@ public final class FontConf
         return color(newColor);
     }
 
+    /**
+     * Returns an updated font config with the specified background color.
+     * The color value will be used for the {@link TextAttribute#BACKGROUND} property
+     * of the resulting {@link Font} instance.
+     *
+     * @param backgroundColor The background color to use for the {@link TextAttribute#BACKGROUND} property.
+     * @return A new font style with the specified background color.
+     */
     public FontConf backgroundColor( Color backgroundColor ) {
         Objects.requireNonNull(backgroundColor);
         if ( backgroundColor == UI.COLOR_UNDEFINED)
@@ -359,6 +440,14 @@ public final class FontConf
         return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _color, backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);
     }
 
+    /**
+     * Returns an updated font config with the specified background color string used to define the background color.
+     * The background color will be used for the {@link TextAttribute#BACKGROUND} property
+     * of the resulting {@link Font} instance.
+     *
+     * @param colorString The color string to use for the {@link TextAttribute#BACKGROUND} property.
+     * @return A new font style with the specified background color.
+     */
     public FontConf backgroundColor( String colorString ) {
         Objects.requireNonNull(colorString);
         Color newColor;
@@ -374,7 +463,16 @@ public final class FontConf
         return backgroundColor(newColor);
     }
 
-    public FontConf selectionColor(Color selectionColor ) {
+    /**
+     * Returns an updated font config with the specified selection color.
+     * The selection color will be used for the selection color of the font.
+     * Note that not all components support text selection, so this property may not
+     * have an effect on all components.
+     *
+     * @param selectionColor The selection color to use for the selection color of the font.
+     * @return A new font style with the specified selection color.
+     */
+    public FontConf selectionColor( Color selectionColor ) {
         Objects.requireNonNull(selectionColor);
         if ( selectionColor == UI.COLOR_UNDEFINED)
             selectionColor = null;
@@ -383,6 +481,15 @@ public final class FontConf
         return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _color, _backgroundColor, selectionColor, _isUnderlined, _isStrike, _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);
     }
 
+    /**
+     * Returns an updated font config with the specified selection color string used to define the selection color.
+     * The selection color will be used for the selection color of the font.
+     * Note that not all components support text selection, so this property may not
+     * have an effect on all components.
+     *
+     * @param colorString The color string to use for the selection color of the font.
+     * @return A new font style with the specified selection color.
+     */
     public FontConf selectionColor( String colorString ) {
         Objects.requireNonNull(colorString);
         Color newColor;
@@ -398,31 +505,116 @@ public final class FontConf
         return selectionColor(newColor);
     }
 
+    /**
+     * Returns an updated font config with the specified underlined property.
+     * This boolean will translate to the {@link TextAttribute#UNDERLINE} property
+     * of the resulting {@link Font} instance.
+     *
+     * @param underlined Whether the font should be underlined.
+     * @return A new font style with the specified underlined property.
+     */
     public FontConf underlined( boolean underlined ) {
         return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _color, _backgroundColor, _selectionColor, underlined, _isStrike, _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);
     }
 
+    /**
+     * Returns an updated font config with the specified strike through property.
+     * This boolean will translate to the {@link TextAttribute#STRIKETHROUGH} property
+     * of the resulting {@link Font} instance.
+     *
+     * @param strike Whether the font should be strike through.
+     * @return A new font style with the specified strike through property.
+     */
     public FontConf strikeThrough( boolean strike ) {
         return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, strike, _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);
     }
 
+    /**
+     * Returns an updated font config with the specified transform.
+     * This transform will be used for the {@link TextAttribute#TRANSFORM} property
+     * of the resulting {@link Font} instance.
+     *
+     * @param transform The transform to use for the {@link TextAttribute#TRANSFORM} property.
+     * @return A new font style with the specified transform.
+     */
     public FontConf transform( @Nullable AffineTransform transform ) {
         return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike, transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);
     }
 
+    /**
+     * Returns an updated font config with the specified paint.
+     * This paint will be used for the {@link TextAttribute#FOREGROUND} property
+     * of the resulting {@link Font} instance.
+     * Note that specifying a custom paint will override the effects of the color property
+     * as the color property is in essence merely a convenience property for a
+     * paint painting across the entire font area homogeneously using the specified color.
+     *
+     * @param paint The paint to use for the {@link TextAttribute#FOREGROUND} property.
+     * @return A new font style with the specified paint.
+     */
     public FontConf paint( @Nullable Paint paint ) {
         return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);
     }
 
+    /**
+     * Returns an updated font config with the specified background paint.
+     * This paint will be used for the {@link TextAttribute#BACKGROUND} property
+     * of the resulting {@link Font} instance.
+     *
+     * @param backgroundPaint The background paint to use for the {@link TextAttribute#BACKGROUND} property.
+     * @return A new font style with the specified background paint.
+     */
     public FontConf backgroundPaint( @Nullable Paint backgroundPaint ) {
         return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, backgroundPaint, _horizontalAlignment, _verticalAlignment);
     }
 
-    public FontConf horizontalAlignment( UI.HorizontalAlignment horizontalAlignment ) {
+    /**
+     * Returns an updated font config with the specified horizontal alignment.
+     * This property is not relevant for all components,
+     * It will usually only be relevant for {@link JLabel}, {@link AbstractButton} and {@link JTextField}
+     * types or maybe some custom components.
+     * Not all components support horizontal alignment.
+     * This will also not have an effect for font configs which
+     * are part of the {@link TextConf}.
+     * <b>
+     *     This method is deliberately package-private as it is not relevant for the
+     *     {@link ComponentStyleDelegate#componentFont(Function)} or
+     *     {@link TextConf#font(Function)} methods. <br>
+     *     <br>
+     *     It only makes sense to specify this property 
+     *     through the {@link ComponentStyleDelegate#fontAlignment(UI.HorizontalAlignment)}
+     *     method!!
+     * </b>
+     *
+     * @param horizontalAlignment The horizontal alignment to use for the font.
+     * @return A new font style with the specified horizontal alignment.
+     */
+    FontConf horizontalAlignment( UI.HorizontalAlignment horizontalAlignment ) {
         return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, horizontalAlignment, _verticalAlignment);
     }
 
-    public FontConf verticalAlignment( UI.VerticalAlignment verticalAlignment ) {
+    /**
+     * Returns an updated font config with the specified vertical alignment.
+     * This property is not relevant for all components,
+     * It will usually only be relevant for {@link JLabel}, {@link AbstractButton} and {@link JTextField}
+     * types or maybe some custom components.
+     * Not all components support vertical alignment.
+     * This will also not have an effect for font configs which
+     * are part of the {@link TextConf}.
+     * <b>
+     *     This method is deliberately package-private as it is not relevant for the
+     *     {@link ComponentStyleDelegate#componentFont(Function)} or
+     *     {@link TextConf#font(Function)} methods. <br>
+     *     <br>
+     *     It only makes sense to specify this property 
+     *     through the {@link ComponentStyleDelegate#fontAlignment(UI.VerticalAlignment)}
+     *     method!!
+     * </b>
+     *
+     * @param verticalAlignment The vertical alignment to use for the font.
+     * @return A new font style with the specified vertical alignment.
+     */
+    FontConf verticalAlignment( UI.VerticalAlignment verticalAlignment ) {
         return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, _horizontalAlignment, verticalAlignment);
     }
 
