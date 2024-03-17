@@ -46,6 +46,7 @@ import java.util.function.Function;
  *          <ul>
  *              <li>{@link UI.GradientType#LINEAR}</li>
  *              <li>{@link UI.GradientType#RADIAL}</li>
+ *              <li>{@link UI.GradientType#CONIC}</li>
  *          </ul>
  *      </li>
  *      <li><h3>Colors</h3>

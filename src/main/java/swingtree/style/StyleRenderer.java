@@ -1290,12 +1290,12 @@ final class StyleRenderer
         final LayerRenderConf conf,
         final Graphics2D      g2d
     ) {
-        if ( text.text().isEmpty() )
+        if ( text.content().isEmpty() )
             return;
 
         final Font initialFont = g2d.getFont();
         final Shape oldClip = g2d.getClip();
-        final String textToRender = text.text();
+        final String textToRender = text.content();
         final UI.ComponentArea clipArea = text.clipArea();
         final UI.ComponentBoundary placementBoundary = text.placementBoundary();
         final UI.Placement placement = text.placement();

@@ -3029,7 +3029,7 @@ class Individual_Component_Styling_Spec extends Specification
                             .size(142, 110)
                             .fontBold(true)
                             .text( conf -> conf
-                                 .text("Center").placement(UI.Placement.CENTER)
+                                 .content("Center").placement(UI.Placement.CENTER)
                                  .font( f -> f
                                      .color("navy")
                                      .family("Ubuntu")
@@ -3044,7 +3044,7 @@ class Individual_Component_Styling_Spec extends Specification
                             .size(142, 110)
                             .fontBold(true)
                             .text( conf -> conf
-                                 .text("Top").placement(UI.Placement.TOP)
+                                 .content("Top").placement(UI.Placement.TOP)
                                  .font( f -> f
                                      .color("navy")
                                      .family("Ubuntu")
@@ -3059,7 +3059,7 @@ class Individual_Component_Styling_Spec extends Specification
                             .size(142, 110)
                             .fontBold(true)
                             .text( conf -> conf
-                                 .text("Bottom").placement(UI.Placement.BOTTOM)
+                                 .content("Bottom").placement(UI.Placement.BOTTOM)
                                  .font( f -> f
                                      .color("navy")
                                      .family("Ubuntu")
@@ -3074,7 +3074,7 @@ class Individual_Component_Styling_Spec extends Specification
                             .size(142, 110)
                             .fontBold(true)
                             .text( conf -> conf
-                                 .text("Left").placement(UI.Placement.LEFT)
+                                 .content("Left").placement(UI.Placement.LEFT)
                                  .font( f -> f
                                      .color("navy")
                                      .family("Ubuntu")
@@ -3089,7 +3089,7 @@ class Individual_Component_Styling_Spec extends Specification
                             .size(142, 110)
                             .fontBold(true)
                             .text( conf -> conf
-                                 .text("Right").placement(UI.Placement.RIGHT)
+                                 .content("Right").placement(UI.Placement.RIGHT)
                                  .font( f -> f
                                      .color("navy")
                                      .family("Ubuntu")
@@ -3104,7 +3104,7 @@ class Individual_Component_Styling_Spec extends Specification
                             .size(142, 110)
                             .fontBold(true)
                             .text( conf -> conf
-                                 .text("Top Left").placement(UI.Placement.TOP_LEFT)
+                                 .content("Top Left").placement(UI.Placement.TOP_LEFT)
                                  .font( f -> f
                                      .color("navy")
                                      .family("Ubuntu")
@@ -3119,7 +3119,7 @@ class Individual_Component_Styling_Spec extends Specification
                             .size(142, 110)
                             .fontBold(true)
                             .text( conf -> conf
-                                 .text("Top Right").placement(UI.Placement.TOP_RIGHT)
+                                 .content("Top Right").placement(UI.Placement.TOP_RIGHT)
                                  .font( f -> f
                                      .color("navy")
                                      .family("Ubuntu")
@@ -3134,7 +3134,7 @@ class Individual_Component_Styling_Spec extends Specification
                             .size(142, 110)
                             .fontBold(true)
                             .text( conf -> conf
-                                 .text("Bottom Left").placement(UI.Placement.BOTTOM_LEFT)
+                                 .content("Bottom Left").placement(UI.Placement.BOTTOM_LEFT)
                                  .font( f -> f
                                      .color("navy")
                                      .family("Ubuntu")
@@ -3149,7 +3149,7 @@ class Individual_Component_Styling_Spec extends Specification
                             .size(142, 110)
                             .fontBold(true)
                             .text( conf -> conf
-                                 .text("Bottom Right").placement(UI.Placement.BOTTOM_RIGHT)
+                                 .content("Bottom Right").placement(UI.Placement.BOTTOM_RIGHT)
                                  .font( f -> f
                                      .color("navy")
                                      .family("Ubuntu")
@@ -3191,7 +3191,7 @@ class Individual_Component_Styling_Spec extends Specification
                             .size(142, 110)
                             .fontBold(true)
                             .text( conf -> conf
-                                .text("Top Left")
+                                .content("Top Left")
                                 .placement(UI.Placement.TOP_LEFT)
                                 .placementBoundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)
                                 .font( f -> f
@@ -3208,7 +3208,7 @@ class Individual_Component_Styling_Spec extends Specification
                             .size(142, 110)
                             .fontBold(true)
                             .text( conf -> conf
-                                .text("Top")
+                                .content("Top")
                                 .placement(UI.Placement.TOP)
                                 .placementBoundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)
                                 .font( f -> f
@@ -3225,7 +3225,7 @@ class Individual_Component_Styling_Spec extends Specification
                             .size(142, 110)
                             .fontBold(true)
                             .text( conf -> conf
-                                .text("Top Right")
+                                .content("Top Right")
                                 .placement(UI.Placement.TOP_RIGHT)
                                 .placementBoundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)
                                 .font( f -> f
@@ -3242,7 +3242,7 @@ class Individual_Component_Styling_Spec extends Specification
                             .size(142, 110)
                             .fontBold(true)
                             .text( conf -> conf
-                                .text("Left").placement(UI.Placement.LEFT)
+                                .content("Left").placement(UI.Placement.LEFT)
                                 .placementBoundary(UI.ComponentBoundary.BORDER_TO_INTERIOR)
                                 .font( f -> f
                                     .color("tan")
@@ -3258,7 +3258,7 @@ class Individual_Component_Styling_Spec extends Specification
                             .size(142, 110)
                             .fontBold(true)
                             .text( conf -> conf
-                                .text("Center").placement(UI.Placement.CENTER)
+                                .content("Center").placement(UI.Placement.CENTER)
                                 .placementBoundary(UI.ComponentBoundary.BORDER_TO_INTERIOR)
                                 .font( f -> f
                                     .color("magenta")
@@ -3274,7 +3274,7 @@ class Individual_Component_Styling_Spec extends Specification
                             .size(142, 110)
                             .fontBold(true)
                             .text( conf -> conf
-                                .text("Right").placement(UI.Placement.RIGHT)
+                                .content("Right").placement(UI.Placement.RIGHT)
                                 .placementBoundary(UI.ComponentBoundary.BORDER_TO_INTERIOR)
                                 .font( f -> f
                                     .color("oak")
@@ -3290,7 +3290,7 @@ class Individual_Component_Styling_Spec extends Specification
                             .size(142, 110)
                             .fontBold(true)
                             .text( conf -> conf
-                                .text("Bottom Left").placement(UI.Placement.BOTTOM_LEFT)
+                                .content("Bottom Left").placement(UI.Placement.BOTTOM_LEFT)
                                 .placementBoundary(UI.ComponentBoundary.EXTERIOR_TO_BORDER)
                                 .font( f -> f
                                     .color("navy")
@@ -3306,7 +3306,7 @@ class Individual_Component_Styling_Spec extends Specification
                             .size(142, 110)
                             .fontBold(true)
                             .text( conf -> conf
-                                .text("Bottom")
+                                .content("Bottom")
                                 .placement(UI.Placement.BOTTOM)
                                 .placementBoundary(UI.ComponentBoundary.EXTERIOR_TO_BORDER)
                                 .font( f -> f
@@ -3323,7 +3323,7 @@ class Individual_Component_Styling_Spec extends Specification
                             .size(142, 110)
                             .fontBold(true)
                             .text( conf -> conf
-                                .text("Bottom Right")
+                                .content("Bottom Right")
                                 .placement(UI.Placement.BOTTOM_RIGHT)
                                 .placementBoundary(UI.ComponentBoundary.EXTERIOR_TO_BORDER)
                                 .font( f -> f
