@@ -653,6 +653,7 @@ public final class StyleConf
                hasEqualGradientsAs(other)      &&
                hasEqualNoisesAs(other)         &&
                hasEqualImagesAs(other)         &&
+               hasEqualTextsAs(other)          &&
                hasEqualPropertiesAs(other);
     }
 
