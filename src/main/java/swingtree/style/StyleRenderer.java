@@ -773,7 +773,7 @@ final class StyleRenderer
                 case INTERIOR_TO_CONTENT:
                     insets = conf.boxModel().margin().plus(conf.boxModel().widths()).plus(conf.boxModel().padding()); break;
                 case CENTER_TO_CONTENT:
-                    float verticalInset = conf.boxModel().size().height().orElse(0f) / 2f;
+                    float verticalInset   = conf.boxModel().size().height().orElse(0f) / 2f;
                     float horizontalInset = conf.boxModel().size().width().orElse(0f) / 2f;
                     insets = Outline.of(verticalInset, horizontalInset);
             }
@@ -783,15 +783,16 @@ final class StyleRenderer
                                         insets.top().orElse(0f) + noise.offset().y()
                                     );
 
-            _renderNoiseGradient(g2d, corner1, noise, conf.areas().get(noise.area()));
+            Paint noisePaint = _createNoisePaint(corner1, noise);
+            Area areaToFill = conf.areas().get(noise.area());
+            g2d.setPaint(noisePaint);
+            g2d.fill(areaToFill);
         }
     }
 
-    private static void _renderNoiseGradient(
-        final Graphics2D     g2d,
-        final Point2D.Float  corner1,
-        final NoiseConf      noise,
-        final @Nullable Area specificArea
+    private static Paint _createNoisePaint(
+        final Point2D.Float  center,
+        final NoiseConf      noise
     ) {
         final Color[] colors    = noise.colors();
         final float[] fractions = _fractionsFrom(colors, noise.fractions());
@@ -800,17 +801,15 @@ final class StyleRenderer
         float scaleX = scale.x();
         float scaleY = scale.y();
 
-        g2d.setPaint(new NoiseGradientPaint(
-                        corner1,
+        return new NoiseGradientPaint(
+                        center,
                         scaleX,
                         scaleY,
                         rotation,
                         fractions,
                         colors,
                         noise.function()
-                    ));
-
-        g2d.fill(specificArea);
+                    );
     }
 
 
