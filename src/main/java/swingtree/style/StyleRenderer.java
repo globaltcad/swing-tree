@@ -620,11 +620,12 @@ final class StyleRenderer
             g2d.fill(conf.areas().get(gradient.area()));
         }
         else {
+            final Size dimensions = conf.boxModel().size();
             Outline insets;
             if ( gradient.boundary() == UI.ComponentBoundary.CENTER_TO_CONTENT ) {
                 Outline contentIns = _insetsFrom(UI.ComponentBoundary.INTERIOR_TO_CONTENT, conf);
-                float verticalInset = conf.boxModel().size().height().orElse(0f) / 2f;
-                float horizontalInset = conf.boxModel().size().width().orElse(0f) / 2f;
+                float verticalInset = dimensions.height().orElse(0f) / 2f;
+                float horizontalInset = dimensions.width().orElse(0f) / 2f;
                 insets = Outline.of(verticalInset, horizontalInset);
                 switch ( gradient.span() ) {
                     case TOP_TO_BOTTOM:
@@ -662,66 +663,74 @@ final class StyleRenderer
                 insets = _insetsFrom(gradient.boundary(), conf);
             }
 
-            final Size dimensions = conf.boxModel().size();
-
-            final float width  = dimensions.width().orElse(0f)  - ( insets.right().orElse(0f)  + insets.left().orElse(0f) );
-            final float height = dimensions.height().orElse(0f) - ( insets.bottom().orElse(0f) + insets.top().orElse(0f) );
-            final float realX  = insets.left().orElse(0f) + gradient.offset().x();
-            final float realY  = insets.top().orElse(0f)  + gradient.offset().y();
-
-            Point2D.Float corner1;
-            Point2D.Float corner2;
-
-            final UI.Span type = gradient.span();
-            if ( type.isOneOf(UI.Span.TOP_LEFT_TO_BOTTOM_RIGHT) ) {
-                corner1 = new Point2D.Float(realX, realY);
-                corner2 = new Point2D.Float(realX + width, realY + height);
-            } else if ( type.isOneOf(UI.Span.BOTTOM_LEFT_TO_TOP_RIGHT) ) {
-                corner1 = new Point2D.Float(realX, realY + height);
-                corner2 = new Point2D.Float(realX + width, realY);
-            } else if ( type.isOneOf(UI.Span.TOP_RIGHT_TO_BOTTOM_LEFT) ) {
-                corner1 = new Point2D.Float(realX + width, realY);
-                corner2 = new Point2D.Float(realX, realY + height);
-            } else if ( type.isOneOf(UI.Span.BOTTOM_RIGHT_TO_TOP_LEFT) ) {
-                corner1 = new Point2D.Float(realX + width, realY + height);
-                corner2 = new Point2D.Float(realX, realY);
-            } else if ( type == UI.Span.TOP_TO_BOTTOM ) {
-                corner1 = new Point2D.Float(realX, realY);
-                corner2 = new Point2D.Float(realX, realY + height);
-            } else if ( type == UI.Span.LEFT_TO_RIGHT ) {
-                corner1 = new Point2D.Float(realX, realY);
-                corner2 = new Point2D.Float(realX + width, realY);
-            } else if ( type == UI.Span.BOTTOM_TO_TOP ) {
-                corner1 = new Point2D.Float(realX, realY + height);
-                corner2 = new Point2D.Float(realX, realY);
-            } else if ( type == UI.Span.RIGHT_TO_LEFT ) {
-                corner1 = new Point2D.Float(realX + width, realY);
-                corner2 = new Point2D.Float(realX, realY);
+            Paint paint = _createGradientPaint(dimensions, insets, gradient);
+            if ( paint != null ) {
+                Area areaToFill = conf.areas().get(gradient.area());
+                g2d.setPaint(paint);
+                g2d.fill(areaToFill);
             }
-            else {
-                log.warn("Unknown gradient type: " + type, new Throwable());
-                return;
-            }
-
-            Area areaToFill = conf.areas().get(gradient.area());
-
-            if ( gradient.type() == UI.GradientType.CONIC )
-                _renderConicGradient(g2d, corner1, corner2, gradient, areaToFill);
-            else if ( gradient.type() == UI.GradientType.RADIAL )
-                _renderRadialGradient(g2d, corner1, corner2, gradient, areaToFill);
-            else if ( gradient.span().isDiagonal() )
-                _renderDiagonalGradient(g2d, corner1, corner2, gradient, areaToFill);
-            else
-                _renderVerticalOrHorizontalGradient(g2d, corner1, corner2, gradient, areaToFill);
         }
     }
 
-    private static void _renderConicGradient(
-        Graphics2D     g2d,
+    private static @Nullable Paint _createGradientPaint(
+        Size           dimensions,
+        Outline        insets,
+        GradientConf   gradient
+    ) {
+        final float width  = dimensions.width().orElse(0f)  - ( insets.right().orElse(0f)  + insets.left().orElse(0f) );
+        final float height = dimensions.height().orElse(0f) - ( insets.bottom().orElse(0f) + insets.top().orElse(0f) );
+        final float realX  = insets.left().orElse(0f) + gradient.offset().x();
+        final float realY  = insets.top().orElse(0f)  + gradient.offset().y();
+
+        Point2D.Float corner1;
+        Point2D.Float corner2;
+
+        final UI.Span type = gradient.span();
+        if ( type.isOneOf(UI.Span.TOP_LEFT_TO_BOTTOM_RIGHT) ) {
+            corner1 = new Point2D.Float(realX, realY);
+            corner2 = new Point2D.Float(realX + width, realY + height);
+        } else if ( type.isOneOf(UI.Span.BOTTOM_LEFT_TO_TOP_RIGHT) ) {
+            corner1 = new Point2D.Float(realX, realY + height);
+            corner2 = new Point2D.Float(realX + width, realY);
+        } else if ( type.isOneOf(UI.Span.TOP_RIGHT_TO_BOTTOM_LEFT) ) {
+            corner1 = new Point2D.Float(realX + width, realY);
+            corner2 = new Point2D.Float(realX, realY + height);
+        } else if ( type.isOneOf(UI.Span.BOTTOM_RIGHT_TO_TOP_LEFT) ) {
+            corner1 = new Point2D.Float(realX + width, realY + height);
+            corner2 = new Point2D.Float(realX, realY);
+        } else if ( type == UI.Span.TOP_TO_BOTTOM ) {
+            corner1 = new Point2D.Float(realX, realY);
+            corner2 = new Point2D.Float(realX, realY + height);
+        } else if ( type == UI.Span.LEFT_TO_RIGHT ) {
+            corner1 = new Point2D.Float(realX, realY);
+            corner2 = new Point2D.Float(realX + width, realY);
+        } else if ( type == UI.Span.BOTTOM_TO_TOP ) {
+            corner1 = new Point2D.Float(realX, realY + height);
+            corner2 = new Point2D.Float(realX, realY);
+        } else if ( type == UI.Span.RIGHT_TO_LEFT ) {
+            corner1 = new Point2D.Float(realX + width, realY);
+            corner2 = new Point2D.Float(realX, realY);
+        }
+        else {
+            log.warn("Unknown gradient type: " + type, new Throwable());
+            return null;
+        }
+
+        if ( gradient.type() == UI.GradientType.CONIC )
+            return _createConicGradientPaint(corner1, corner2, gradient);
+        else if ( gradient.type() == UI.GradientType.RADIAL )
+            return _createRadialGradientPaint(corner1, corner2, gradient);
+        else if ( gradient.span().isDiagonal() )
+            return _createDiagonalGradientPaint(corner1, corner2, gradient);
+        else
+            return _createVerticalOrHorizontalGradientPaint(corner1, corner2, gradient);
+
+    }
+
+    private static Paint _createConicGradientPaint(
         Point2D.Float  corner1,
         Point2D.Float  corner2,
-        GradientConf   gradient,
-        @Nullable Area specificArea
+        GradientConf   gradient
     ) {
         final Color[] colors    = gradient.colors();
         final float[] fractions = _fractionsFrom(gradient);
@@ -734,17 +743,14 @@ final class StyleRenderer
         for ( int i = 0; i < fractions.length; i++ )
             fractions[i] = (fractions[i] * 360f);// (((((fractions[i] * 360f)+180f) % 360f + 360f) % 360f)-180f);
 
-        g2d.setPaint(new ConicalGradientPaint(
+        return new ConicalGradientPaint(
                         true,
                         corner1,
                         rotation,
                         fractions,
                         colors
-                    ));
-
-        g2d.fill(specificArea);
+                    );
     }
-
 
     private static void _renderNoise(
         final NoiseConf       noise,
@@ -811,17 +817,14 @@ final class StyleRenderer
     /**
      *  Renders a shade from the top left corner to the bottom right corner.
      *
-     * @param g2d The graphics object to render to.
      * @param corner1 The first corner of the shade.
      * @param corner2 The second corner of the shade.
      * @param gradient The shade to render.
      */
-    private static void _renderDiagonalGradient(
-        final Graphics2D     g2d,
+    private static Paint _createDiagonalGradientPaint(
         Point2D.Float        corner1,
         Point2D.Float        corner2,
-        final GradientConf   gradient,
-        final @Nullable Area specificArea
+        final GradientConf   gradient
     ) {
         {
             final float cx = ( corner1.x + corner2.x ) / 2;
@@ -870,27 +873,23 @@ final class StyleRenderer
         }
 
         if ( colors.length == 2 && gradient.fractions().length == 0 && cycle == UI.Cycle.NONE )
-            g2d.setPaint(new GradientPaint(
+            return new GradientPaint(
                             corner1X, corner1Y, colors[0],
                             corner2X, corner2Y, colors[1]
-                        ));
+                        );
         else
-            g2d.setPaint(new LinearGradientPaint(
+            return new LinearGradientPaint(
                             corner1X, corner1Y,
                             corner2X, corner2Y,
                             fractions, colors,
                             _cycleMethodFrom(cycle)
-                        ));
-
-        g2d.fill(specificArea);
+                        );
     }
 
-    private static void _renderVerticalOrHorizontalGradient(
-        Graphics2D     g2d,
+    private static Paint _createVerticalOrHorizontalGradientPaint(
         Point2D.Float  corner1,
         Point2D.Float  corner2,
-        GradientConf   gradient,
-        @Nullable Area specificArea
+        GradientConf   gradient
     ) {
         final UI.Cycle      cycle      = gradient.cycle();
         final Color[]       colors     = gradient.colors();
@@ -919,12 +918,10 @@ final class StyleRenderer
             gradient.fractions().length == 0 &&
             cycle == UI.Cycle.NONE
         ) {
-            g2d.setPaint(
-                    new GradientPaint(
+            return new GradientPaint(
                         corner1X, corner1Y, colors[0],
                         corner2X, corner2Y, colors[1]
-                    )
-                );
+                    );
         } else {
             float[] fractions = _fractionsFrom(gradient);
 
@@ -936,17 +933,14 @@ final class StyleRenderer
                 corner2Y = p2.y;
             }
 
-            g2d.setPaint(
-                new LinearGradientPaint(
+            return new LinearGradientPaint(
                         corner1X, corner1Y,
                         corner2X, corner2Y,
                         fractions, colors,
                         _cycleMethodFrom(cycle)
-                    )
-            );
+                    );
 
         }
-        g2d.fill(specificArea);
     }
 
     private static Point2D.Float projectPointOntoLine(Point2D.Float A, Point2D.Float n, Point2D.Float C) {
@@ -955,12 +949,10 @@ final class StyleRenderer
         return new Point2D.Float(A.x + t * (B.x - A.x), A.y + t * (B.y - A.y));
     }
 
-    private static void _renderRadialGradient(
-        Graphics2D     g2d,
+    private static Paint _createRadialGradientPaint(
         Point2D.Float  corner1,
         Point2D.Float  corner2,
-        GradientConf   gradient,
-        @Nullable Area specificArea
+        GradientConf   gradient
     ) {
         final UI.Cycle cycle  = gradient.cycle();
         final Color[]  colors = gradient.colors();
@@ -987,21 +979,21 @@ final class StyleRenderer
 
         if ( gradient.focus().equals(Offset.none()) ) {
             if ( colors.length == 2 )
-                g2d.setPaint(new RadialGradientPaint(
+                return new RadialGradientPaint(
                         new Point2D.Float(corner1X, corner1Y),
                         radius,
                         fractions,
                         colors,
                         _cycleMethodFrom(cycle)
-                    ));
+                    );
             else
-                g2d.setPaint(new RadialGradientPaint(
+                return new RadialGradientPaint(
                         new Point2D.Float(corner1X, corner1Y),
                         radius,
                         fractions,
                         colors,
                         _cycleMethodFrom(cycle)
-                    ));
+                     );
         } else {
             float focusX = corner1X + gradient.focus().x();
             float focusY = corner1Y + gradient.focus().y();
@@ -1014,17 +1006,15 @@ final class StyleRenderer
                 focusY = p2.y;
             }
 
-            g2d.setPaint(new RadialGradientPaint(
+            return new RadialGradientPaint(
                     new Point2D.Float(corner1X, corner1Y),
                     radius,
                     new Point2D.Float(focusX, focusY),
                     fractions,
                     colors,
                     _cycleMethodFrom(cycle)
-                ));
+                );
         }
-
-        g2d.fill(specificArea);
     }
 
     private static MultipleGradientPaint.CycleMethod _cycleMethodFrom(UI.Cycle cycle) {
