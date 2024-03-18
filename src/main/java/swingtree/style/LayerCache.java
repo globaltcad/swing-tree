@@ -223,6 +223,12 @@ final class LayerCache
         for ( GradientConf gradient : state.layer().gradients().sortedByNames() )
             if ( !gradient.equals(GradientConf.none()) && gradient.colors().length > 0 )
                 heavyStyleCount++;
+        for ( NoiseConf noise : state.layer().noises().sortedByNames() )
+            if ( !noise.equals(NoiseConf.none()) && noise.colors().length > 0 )
+                heavyStyleCount++;
+        for ( TextConf text : state.layer().texts().sortedByNames() )
+            if ( !text.equals(TextConf.none()) && !text.content().isEmpty() )
+                heavyStyleCount++;
         for ( ShadowConf shadow : state.layer().shadows().sortedByNames() )
             if ( !shadow.equals(ShadowConf.none()) && shadow.color().isPresent() )
                 heavyStyleCount++;
