@@ -353,10 +353,6 @@ public final class StyleConf
         return _withLayers(_layers.map( layer -> layer.withShadows(layer.shadows().mapStyles(styler::apply)) ));
     }
 
-    StyleConf _withImages( UI.Layer layer, NamedConfigs<ImageConf> images ) {
-        return StyleConf.of(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withImages(images)), _properties);
-    }
-
     StyleConf _withGradients( UI.Layer layer, NamedConfigs<GradientConf> shades ) {
         Objects.requireNonNull(shades);
         return StyleConf.of(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withGradients(shades)), _properties);
@@ -365,6 +361,14 @@ public final class StyleConf
     StyleConf _withNoises( UI.Layer layer, NamedConfigs<NoiseConf> noises ) {
         Objects.requireNonNull(noises);
         return StyleConf.of(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withNoises(noises)), _properties);
+    }
+
+    StyleConf _withImages( UI.Layer layer, NamedConfigs<ImageConf> images ) {
+        return StyleConf.of(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withImages(images)), _properties);
+    }
+
+    StyleConf _withTexts( UI.Layer layer, NamedConfigs<TextConf> texts ) {
+        return StyleConf.of(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withTexts(texts)), _properties);
     }
 
     StyleConf _withLayers( StyleConfLayers layers ) {
@@ -429,6 +433,23 @@ public final class StyleConf
 
     List<ImageConf> images( UI.Layer layer ) {
         return _layers.get(layer).images().sortedByNames();
+    }
+
+    StyleConf text(UI.Layer layer, String textName, Function<TextConf, TextConf> styler ) {
+        Objects.requireNonNull(textName);
+        Objects.requireNonNull(styler);
+        TextConf text = _layers.get(layer).texts().find(textName).orElse(TextConf.none());
+        // We clone the text map:
+        NamedConfigs<TextConf> newTexts = _layers.get(layer).texts().withNamedStyle(textName, styler.apply(text));
+        return _withTexts( layer, newTexts );
+    }
+
+    StyleConf text( Function<TextConf, TextConf> styler ) {
+        return _withLayers(_layers.map( layer -> layer.withTexts(layer.texts().mapStyles(styler::apply)) ));
+    }
+
+    List<TextConf> texts( UI.Layer layer ) {
+        return _layers.get(layer).texts().sortedByNames();
     }
 
     StyleConf scale( double scale ) {
@@ -584,6 +605,27 @@ public final class StyleConf
         return thisLayer.hasEqualImagesAs(otherLayer);
     }
 
+    boolean hasEqualTextsAs( StyleConf otherStyle ) {
+        boolean allLayersAreEqual = true;
+        for ( UI.Layer layer : UI.Layer.values() ) {
+            if ( !hasEqualTextsAs(layer, otherStyle) ) {
+                allLayersAreEqual = false;
+                break;
+            }
+        }
+        return allLayersAreEqual;
+    }
+
+    boolean hasEqualTextsAs( UI.Layer layer, StyleConf otherStyle ) {
+        StyleConfLayer thisLayer = _layers.get(layer);
+        StyleConfLayer otherLayer = otherStyle._layers.get(layer);
+        if ( thisLayer == null && otherLayer == null )
+            return true;
+        if ( thisLayer == null || otherLayer == null )
+            return false;
+        return thisLayer.hasEqualTextsAs(otherLayer);
+    }
+
     boolean hasEqualPropertiesAs( StyleConf otherStyle ) {
         return Objects.equals(_properties, otherStyle._properties);
     }
@@ -611,6 +653,7 @@ public final class StyleConf
                hasEqualGradientsAs(other)      &&
                hasEqualNoisesAs(other)         &&
                hasEqualImagesAs(other)         &&
+               hasEqualTextsAs(other)          &&
                hasEqualPropertiesAs(other);
     }
 

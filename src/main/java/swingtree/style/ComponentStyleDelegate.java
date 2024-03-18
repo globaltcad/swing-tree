@@ -489,7 +489,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
     }
 
     /**
-     *  Returns a new {@link StyleConf} with the provided border color in the form of a string.
+     *  Returns an updated {@link StyleConf} with the provided border color in the form of a string.
      *  The string can be either a hex color string, a color name or a color constant from the system properties.
      *  The border will be rendered with an inset space based on the padding defined by the {@link StyleConf}.
      *
@@ -1591,6 +1591,82 @@ public final class ComponentStyleDelegate<C extends JComponent>
     }
 
     /**
+     *  Returns an updated {@link StyleConf} with a named text style
+     *  configurator for the default {@link TextConf} of the component. <br>
+     *  The sub-style exposed by this method adds <b>support for text rendering to
+     *  all components not just text components</b>. <br>
+     *  If you only want to style the {@link JComponent#getFont()} property of the component,
+     *  you can use {@link #componentFont(Function)} instead. <br>
+     *  <br>
+     *  The first parameter is the name of the text style, which allows
+     *  you to define any number of text styles for a single component
+     *  by using different names. <br>
+     *  Two sub-styles with the same name will override each other. <br>
+     *
+     * @param styler A configurator function that takes a {@link TextConf} and returns an updated {@link TextConf}.
+     *               The configurator function is called with the default text style of the component.
+     * @return A new {@link ComponentStyleDelegate} with the provided text style.
+     *         Each unique name creates an additional text style for the component.
+     * @see #text(UI.Layer, String, Function)
+     * @see #text(Function)
+     * @throws NullPointerException If the provided styler or textName is {@code null}.
+     */
+    public ComponentStyleDelegate<C> text( String textName, Function<TextConf, TextConf> styler ) {
+        Objects.requireNonNull(textName);
+        Objects.requireNonNull(styler);
+        return text(TextConf.DEFAULT_LAYER, textName, styler);
+    }
+
+    /**
+     *  Returns an updated {@link StyleConf} with the provided named text style
+     *  configurator for the default {@link TextConf} of the component. <br>
+     *  The sub-style exposed by this method adds <b>support for text rendering to
+     *  all components not just text components</b>. <br>
+     *  If you only want to style the {@link JComponent#getFont()} property of the component,
+     *  you can use {@link #componentFont(Function)} instead. <br>
+     *  <br>
+     *  The first parameter is the name of the text style, which allows
+     *  you to define any number of text styles for a single component
+     *  by using different names. <br>
+     *  Two sub-styles with the same name will override each other. <br>
+     *
+     * @param layer The layer on which the text should be rendered.
+     * @param textName The name of the text style that you want to define.
+     *                 Each unique name creates an additional text style for the component.
+     * @param styler A configurator function that takes a {@link TextConf} and returns an updated {@link TextConf}.
+     *               The configurator function is called with the default text style of the component.
+     * @return A new {@link ComponentStyleDelegate} with the provided text style.
+     * @see #text(String, Function)
+     * @see #text(Function)
+     * @throws NullPointerException If the provided styler or textName is {@code null}.
+     */
+    public ComponentStyleDelegate<C> text( UI.Layer layer, String textName, Function<TextConf, TextConf> styler ) {
+        Objects.requireNonNull(textName);
+        Objects.requireNonNull(styler);
+        return _withStyle(_styleConf.text(layer, textName, styler));
+    }
+
+    /**
+     *  Returns an updated {@link StyleConf} with the provided text style
+     *  configurator for the default {@link TextConf} of the component. <br>
+     *  The sub-style exposed by this method adds <b>support for text rendering to
+     *  all components not just text components</b>. <br>
+     *  If you only want to style the {@link JComponent#getFont()} property of the component,
+     *  you can use {@link #componentFont(Function)} instead. <br>
+     *
+     * @param styler A configurator function that takes a {@link TextConf} and returns an updated {@link TextConf}.
+     *               The configurator function is called with the default text style of the component.
+     * @return A new {@link ComponentStyleDelegate} with the provided text style.
+     * @see #text(UI.Layer, String, Function)
+     * @see #text(String, Function)
+     * @throws NullPointerException If the provided styler is {@code null}.
+     */
+    public ComponentStyleDelegate<C> text( Function<TextConf, TextConf> styler ) {
+        Objects.requireNonNull(styler);
+        return text(TextConf.DEFAULT_LAYER, StyleUtil.DEFAULT_KEY, styler);
+    }
+
+    /**
      *  Allow for the specification of client properties on the styled component.
      *  This is useful when you want to store arbitrary configuration data on the component,
      *  which is usually read and used by look and feel implementations to
@@ -1612,10 +1688,44 @@ public final class ComponentStyleDelegate<C extends JComponent>
         return _withStyle(_styleConf.property(key, value));
     }
 
+    private ComponentStyleDelegate<C> _withFont( Function<FontConf, FontConf> fontStyler ) {
+        Objects.requireNonNull(fontStyler);
+        StyleConf updatedStyle = _styleConf._withFont(fontStyler.apply(_styleConf.font()));
+        // We also update the text style, if it exists:
+        updatedStyle = updatedStyle.text( text -> text.font(fontStyler) );
+        return _withStyle(updatedStyle);
+    }
+
     /**
-     *  Returns a new {@link StyleConf} with the provided font name and size.
+     *  Returns a new {@link StyleConf} with the provided font style applied to the
+     *  font property of the component (see {@link JComponent#getFont()}). <br>
+     *  If you want to style the text of the entire component, which includes both
+     *  the component font property as well as the style engine based font render
+     *  (see {@link #text(String, Function)}), you can simply
+     *  call the regular font styling methods such as {@link #font(String, int)},
+     *  {@link #font(Font)}, {@link #fontFamily(String)}, {@link #fontSize(int)},
+     *  {@link #fontBold(boolean)}, {@link #fontItalic(boolean)}, {@link #fontUnderline(boolean)}...
+     *
+     * @param fontStyler A function that takes a {@link FontConf} and returns a new {@link FontConf}
+     *                   that is exclusively applied to the font property of the component.
+     * @return A new {@link ComponentStyleDelegate} with the provided font style
+     *          applied to the font property of the component.
+     */
+    public final ComponentStyleDelegate<C> componentFont( Function<FontConf, FontConf> fontStyler ) {
+        Objects.requireNonNull(fontStyler);
+        StyleConf updatedStyle = _styleConf._withFont(fontStyler.apply(_styleConf.font()));
+        return _withStyle(updatedStyle);
+    }
+
+    /**
+     *  Returns a new {@link StyleConf} with the provided font name and size.<br>
      *  Note that the font styles will only apply if the component that is being rendered
-     *  also supports displaying text.
+     *  also supports displaying text, or has a custom text style (see {@link TextConf).<br>
+     *  <p>
+     *  Note that this font style will be applied to both the component font property
+     *  and the style engine based text (see {@link #text(String, Function)}).
+     *  If you only want to style the component font property, you can use
+     *  {@link #componentFont(Function)}.
      *
      * @param name The font name.
      * @param size The font size.
@@ -1623,26 +1733,36 @@ public final class ComponentStyleDelegate<C extends JComponent>
      */
     public ComponentStyleDelegate<C> font( String name, int size ) {
         Objects.requireNonNull(name);
-        return _withStyle(_styleConf._withFont(_styleConf.font().withFamily(name).withSize(size)));
+        return _withFont( f -> f.family(name).size(size) );
     }
 
     /**
      *  Returns a new {@link StyleConf} with the provided font family name.
      *  Note that font styles will only apply if the component that is being rendered
-     *  also supports displaying text.
+     *  also supports displaying text, or has a custom text style (see {@link TextConf).<br>
+     *  <p>
+     *  Note that this font style will be applied to both the component font property
+     *  and the style engine based text (see {@link #text(String, Function)}).
+     *  If you only want to style the component font property, you can use
+     *  {@link #componentFont(Function)}.
      *
      * @param name The font name.
      * @return A new {@link ComponentStyleDelegate} with the provided font name.
      */
     public ComponentStyleDelegate<C> fontFamily( String name ) {
         Objects.requireNonNull(name);
-        return _withStyle(_styleConf._withFont(_styleConf.font().withFamily(name)));
+        return _withFont( f -> f.family(name) );
     }
 
     /**
      *  Returns a new {@link StyleConf} with the provided {@link Font}.
      *  Note that font styles will only apply if the component that is being rendered
-     *  also supports displaying text.
+     *  also supports displaying text, or has a custom text style (see {@link TextConf).<br>
+     *  <p>
+     *  Note that this font style will be applied to both the component font property
+     *  and the style engine based text (see {@link #text(String, Function)}).
+     *  If you only want to style the component font property, you can use
+     *  {@link #componentFont(Function)}.
      *
      * @param font The {@link Font}.
      * @return A new {@link ComponentStyleDelegate} with the provided {@link Font}.
@@ -1651,73 +1771,103 @@ public final class ComponentStyleDelegate<C extends JComponent>
      */
     public ComponentStyleDelegate<C> font( Font font ) {
         Objects.requireNonNull(font, "The font cannot be null! Use UI.FONT_UNDEFINED to remove the font style.");
-        return _withStyle(_styleConf._withFont(_styleConf.font().withPropertiesFromFont(font)));
+        return _withFont( f -> f.withPropertiesFromFont(font) );
     }
 
     /**
      *  Returns a new {@link StyleConf} with the provided font size.
      *  Note that font styles will only apply if the component that is being rendered
-     *  also supports displaying text.
+     *  also supports displaying text, or has a custom text style (see {@link TextConf).<br>
+     *  <p>
+     *  Note that this font style will be applied to both the component font property
+     *  and the style engine based text (see {@link #text(String, Function)}).
+     *  If you only want to style the component font property, you can use
+     *  {@link #componentFont(Function)}.
      *
      * @param size The font size.
      * @return A new {@link ComponentStyleDelegate} with the provided font size.
      */
     public ComponentStyleDelegate<C> fontSize( int size ) {
-        return _withStyle(_styleConf._withFont(_styleConf.font().withSize(size)));
+        return _withFont( f -> f.size(size) );
     }
 
     /**
      *  Makes the font bold or not bold depending on the value of the {@code isBold} parameter.
      *  Note that font styles will only apply if the component that is being rendered
-     *  also supports displaying text.
+     *  also supports displaying text, or has a custom text style (see {@link TextConf).<br>
+     *  <p>
+     *  Note that this font style will be applied to both the component font property
+     *  and the style engine based text (see {@link #text(String, Function)}).
+     *  If you only want to style the component font property, you can use
+     *  {@link #componentFont(Function)}.
      *
      * @param bold Whether the font should be bold or not.
      * @return A new {@link ComponentStyleDelegate} with the provided font boldness.
      */
     public ComponentStyleDelegate<C> fontBold( boolean bold ) {
-        return _withStyle(_styleConf._withFont(_styleConf.font().withWeight( bold ? 2 : 1 )));
+        return _withFont( f -> f.weight( bold ? 2 : 1 ) );
     }
 
     /**
      *  Makes the font italic or not italic depending on the value of the {@code italic} parameter.
      *  Note that font styles will only apply if the component that is being rendered
-     *  also supports displaying text.
+     *  also supports displaying text, or has a custom text style (see {@link TextConf).<br>
+     *  <p>
+     *  Note that this font style will be applied to both the component font property
+     *  and the style engine based text (see {@link #text(String, Function)}).
+     *  If you only want to style the component font property, you can use
+     *  {@link #componentFont(Function)}.
      *
      * @param italic Whether the font should be italic or not.
      * @return A new {@link ComponentStyleDelegate} with the provided font italicness.
      */
     public ComponentStyleDelegate<C> fontItalic( boolean italic ) {
-        return _withStyle(_styleConf._withFont(_styleConf.font().withPosture( italic ? 0.2f : 0f )));
+        return _withFont( f -> f.posture( italic ? 0.2f : 0f ) );
     }
 
     /**
      *  Makes the font underlined or not underlined depending on the value of the {@code underline} parameter.
      *  Note that font styles will only apply if the component that is being rendered
-     *  also supports displaying text.
+     *  also supports displaying text, or has a custom text style (see {@link TextConf).<br>
+     *  <p>
+     *  Note that this font style will be applied to both the component font property
+     *  and the style engine based text (see {@link #text(String, Function)}).
+     *  If you only want to style the component font property, you can use
+     *  {@link #componentFont(Function)}.
      *
      * @param underline Whether the font should be underlined or not.
      * @return A new {@link ComponentStyleDelegate} with the provided font underlinedness.
      */
     public ComponentStyleDelegate<C> fontUnderline( boolean underline ) {
-        return _withStyle(_styleConf._withFont(_styleConf.font().withIsUnderlined(underline)));
+        return _withFont( f -> f.underlined(underline) );
     }
 
     /**
      *  Makes the font struck through or not struck through depending on the value of the {@code strikeThrough} parameter.
      *  Note that font styles will only apply if the component that is being rendered
-     *  also supports displaying text.
+     *  also supports displaying text, or has a custom text style (see {@link TextConf).<br>
+     *  <p>
+     *  Note that this font style will be applied to both the component font property
+     *  and the style engine based text (see {@link #text(String, Function)}).
+     *  If you only want to style the component font property, you can use
+     *  {@link #componentFont(Function)}.
      *
      * @param strikeThrough Whether the font should be struck through or not.
      * @return A new {@link ComponentStyleDelegate} with the provided font struck throughness.
      */
     public ComponentStyleDelegate<C> fontStrikeThrough( boolean strikeThrough ) {
-        return _withStyle(_styleConf._withFont(_styleConf.font().withIsStrikeThrough(strikeThrough)));
+        return _withFont( f -> f.strikeThrough(strikeThrough) );
     }
 
     /**
      *  Creates a new {@link StyleConf} where the font color is set to the provided {@link Color}.
      *  Note that font styles will only apply if the component that is being rendered
-     *  also supports displaying text.
+     *  also supports displaying text, or has a custom text style (see {@link TextConf).<br>
+     *  <p>
+     *  Note that this font style will be applied to both the component font property
+     *  and the style engine based text (see {@link #text(String, Function)}).
+     *  If you only want to style the component font property, you can use
+     *  {@link #componentFont(Function)}.
      *
      * @param color The {@link Color}.
      * @return A new {@link ComponentStyleDelegate} with the provided font color.
@@ -1726,36 +1876,36 @@ public final class ComponentStyleDelegate<C extends JComponent>
      */
     public ComponentStyleDelegate<C> fontColor( Color color ) {
         Objects.requireNonNull(color, "The color cannot be null! Use UI.COLOR_UNDEFINED to remove the font color style.");
-        return _withStyle(_styleConf._withFont(_styleConf.font().withColor(color)));
+        return _withFont( f -> f.color(color) );
     }
 
     /**
      *  Creates a new {@link StyleConf} where the font color is set to a color parsed from the provided string.
      *  Note that font styles will only apply if the component that is being rendered
-     *  also supports displaying text.
+     *  also supports displaying text, or has a custom text style (see {@link TextConf).<br>
+     *  <p>
+     *  Note that this font style will be applied to both the component font property
+     *  and the style engine based text (see {@link #text(String, Function)}).
+     *  If you only want to style the component font property, you can use
+     *  {@link #componentFont(Function)}.
      *
      * @param colorString The {@link Color} as a string.
      * @return A new {@link ComponentStyleDelegate} with the provided font color.
      */
     public ComponentStyleDelegate<C> fontColor( String colorString ) {
         Objects.requireNonNull(colorString, "The color string cannot be null! Use an empty string to remove the font color style.");
-        Color newColor;
-        try {
-            if ( colorString.isEmpty() )
-                newColor = UI.COLOR_UNDEFINED;
-            else
-                newColor = UI.color(colorString);
-        } catch ( Exception e ) {
-            log.error("Failed to parse color string: '"+colorString+"'", e);
-            return this;
-        }
-        return _withStyle(_styleConf._withFont(_styleConf.font().withColor(newColor)));
+        return _withFont( f -> f.color(colorString) );
     }
 
     /**
      *  Creates a new {@link StyleConf} where the font background color is set to the provided {@link Color}.
      *  Note that font styles will only apply if the component that is being rendered
-     *  also supports displaying text.
+     *  also supports displaying text, or has a custom text style (see {@link TextConf).<br>
+     *  <p>
+     *  Note that this font style will be applied to both the component font property
+     *  and the style engine based text (see {@link #text(String, Function)}).
+     *  If you only want to style the component font property, you can use
+     *  {@link #componentFont(Function)}.
      *
      * @param color The {@link Color}.
      * @return A new {@link ComponentStyleDelegate} with the provided font background color.
@@ -1764,36 +1914,36 @@ public final class ComponentStyleDelegate<C extends JComponent>
      */
     public ComponentStyleDelegate<C> fontBackgroundColor( Color color ) {
         Objects.requireNonNull(color);
-        return _withStyle(_styleConf._withFont(_styleConf.font().withBackgroundColor(color)));
+        return _withFont( f -> f.backgroundColor(color) );
     }
 
     /**
      *  Creates a new {@link StyleConf} where the font color is set to a color parsed from the provided string.
      *  Note that font styles will only apply if the component that is being rendered
-     *  also supports displaying text.
+     *  also supports displaying text, or has a custom text style (see {@link TextConf).<br>
+     *  <p>
+     *  Note that this font style will be applied to both the component font property
+     *  and the style engine based text (see {@link #text(String, Function)}).
+     *  If you only want to style the component font property, you can use
+     *  {@link #componentFont(Function)}.
      *
      * @param colorString The {@link Color} as a string.
      * @return A new {@link ComponentStyleDelegate} with the provided font color.
      */
     public ComponentStyleDelegate<C> fontBackgroundColor( String colorString ) {
         Objects.requireNonNull(colorString);
-        Color newColor;
-        try {
-            if ( colorString.isEmpty() )
-                newColor = UI.COLOR_UNDEFINED;
-            else
-                newColor = UI.color(colorString);
-        } catch ( Exception e ) {
-            log.error("Failed to parse color string: '{}'", colorString, e);
-            return this;
-        }
-        return _withStyle(_styleConf._withFont(_styleConf.font().withBackgroundColor(newColor)));
+        return _withFont( f -> f.backgroundColor(colorString) );
     }
 
     /**
      *  Creates a new {@link StyleConf} where the font selection color is set to the provided {@link Color}.
      *  Note that font styles will only apply if the component that is being rendered
-     *  also supports displaying text.
+     *  also supports displaying text, or has a custom text style (see {@link TextConf).<br>
+     *  <p>
+     *  Note that this font style will be applied to both the component font property
+     *  and the style engine based text (see {@link #text(String, Function)}).
+     *  If you only want to style the component font property, you can use
+     *  {@link #componentFont(Function)}.
      *
      * @param color The {@link Color}.
      * @return A new {@link ComponentStyleDelegate} with the provided font selection color.
@@ -1802,30 +1952,24 @@ public final class ComponentStyleDelegate<C extends JComponent>
      */
     public ComponentStyleDelegate<C> fontSelectionColor( Color color ) {
         Objects.requireNonNull(color);
-        return _withStyle(_styleConf._withFont(_styleConf.font().withSelectionColor(color)));
+        return _withFont( f -> f.selectionColor(color) );
     }
 
     /**
      *  Creates a new {@link StyleConf} where the font selection color is set to a color parsed from the provided string.
      *  Note that font styles will only apply if the component that is being rendered
-     *  also supports displaying text.
+     *  also supports displaying text, or has a custom text style (see {@link TextConf).<br>
+     *  <p>
+     *  Note that this font style will be applied to both the component font property
+     *  and the style engine based text (see {@link #text(String, Function)}).
+     *  If you only want to style the component font property, you can use
+     *  {@link #componentFont(Function)}.
      *
      * @param colorString The {@link Color} as a string.
      * @return A new {@link ComponentStyleDelegate} with the provided font selection color.
      */
     public ComponentStyleDelegate<C> fontSelectionColor( String colorString ) {
-        Objects.requireNonNull(colorString);
-        Color newColor;
-        try {
-            if ( colorString.isEmpty() )
-                newColor = UI.COLOR_UNDEFINED;
-            else
-                newColor = UI.color(colorString);
-        } catch ( Exception e ) {
-            log.error("Failed to parse color string: '"+colorString+"'", e);
-            return this;
-        }
-        return _withStyle(_styleConf._withFont(_styleConf.font().withSelectionColor(newColor)));
+        return _withFont( f -> f.selectionColor(colorString) );
     }
 
     /**
@@ -1833,7 +1977,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided font transform.
      */
     public ComponentStyleDelegate<C> fontTransform( @Nullable AffineTransform transform ) {
-        return _withStyle(_styleConf._withFont(_styleConf.font().withTransform(transform)));
+        return _withStyle(_styleConf._withFont(_styleConf.font().transform(transform)));
     }
 
     /**
@@ -1842,7 +1986,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided font paint.
      */
     public ComponentStyleDelegate<C> fontPaint( @Nullable Paint paint ) {
-        return _withStyle(_styleConf._withFont(_styleConf.font().withPaint(paint)));
+        return _withFont( f-> f.paint(paint) );
     }
 
     /**
@@ -1851,7 +1995,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided font background paint.
      */
     public ComponentStyleDelegate<C> fontBackgroundPaint( @Nullable Paint paint ) {
-        return _withStyle(_styleConf._withFont(_styleConf.font().withBackgroundPaint(paint)));
+        return _withFont( f -> f.backgroundPaint(paint) );
     }
 
 
@@ -1862,12 +2006,17 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  of 2.0 (see {@link java.awt.font.TextAttribute#WEIGHT_BOLD}).
      *  <p>
      *  Note that font styles will only apply if the component that is being rendered
-     *  also supports displaying text.
+     *  also supports displaying text, or has a custom text style (see {@link TextConf).<br>
+     *  <p>
+     *  Note that this font style will be applied to both the component font property
+     *  and the style engine based text (see {@link #text(String, Function)}).
+     *  If you only want to style the component font property, you can use
+     *  {@link #componentFont(Function)}.
      * @param weight The weight of the font.
      * @return A new {@link ComponentStyleDelegate} with the provided font weight.
      */
     public ComponentStyleDelegate<C> fontWeight( float weight ) {
-        return _withStyle(_styleConf._withFont(_styleConf.font().withWeight(weight)));
+        return _withFont( f -> f.weight(weight) );
     }
 
     /**
@@ -1876,13 +2025,13 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided font spacing.
      */
     public ComponentStyleDelegate<C> fontSpacing( float spacing ) {
-        return _withStyle(_styleConf._withFont(_styleConf.font().withSpacing(spacing)));
+        return _withFont( f -> f.spacing(spacing) );
     }
 
     /**
      *  Use this to define the horizontal alignment of the default font of the component.
      *  Note that font styles will only apply if the component that is being rendered
-     *  also supports displaying text. <br>
+     *  also supports displaying text, or has a custom text style (see {@link TextConf). <br>
      *  Also note that not all text based components support text alignment.
      *  @param alignment The horizontal alignment of the font.
      *                   See {@link UI.HorizontalAlignment} for more information.
@@ -1892,13 +2041,13 @@ public final class ComponentStyleDelegate<C extends JComponent>
      */
     public ComponentStyleDelegate<C> fontAlignment( UI.HorizontalAlignment alignment ) {
         Objects.requireNonNull(alignment);
-        return _withStyle(_styleConf._withFont(_styleConf.font().withHorizontalAlignment(alignment)));
+        return _withFont( f -> f.horizontalAlignment(alignment) );
     }
 
     /**
      *  Use this to define the vertical alignment of the default font of the component.
      *  Note that font styles will only apply if the component that is being rendered
-     *  also supports displaying text. <br>
+     *  also supports displaying text, or has a custom text style (see {@link TextConf). <br>
      *  Also note that not all text based components support text alignment.
      *  @param alignment The vertical alignment of the font.
      *                   See {@link UI.VerticalAlignment} for more information.
@@ -1908,13 +2057,13 @@ public final class ComponentStyleDelegate<C extends JComponent>
      */
     public ComponentStyleDelegate<C> fontAlignment( UI.VerticalAlignment alignment ) {
         Objects.requireNonNull(alignment);
-        return _withStyle(_styleConf._withFont(_styleConf.font().withVerticalAlignment(alignment)));
+        return _withFont( f -> f.verticalAlignment(alignment) );
     }
 
     /**
      *  Use this to define the horizontal and vertical alignment of the default font of the component.
      *  Note that font styles will only apply if the component that is being rendered
-     *  also supports displaying text. <br>
+     *  also supports displaying text, or has a custom text style (see {@link TextConf). <br>
      *  Also note that not all text based components support text alignment.
      *  @param alignment The horizontal and vertical alignment of the font.
      *                   See {@link UI.Alignment} for more information.

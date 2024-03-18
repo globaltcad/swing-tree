@@ -13,13 +13,15 @@ final class StyleConfLayer implements Simplifiable<StyleConfLayer>
     static final NamedConfigs<GradientConf> _NO_GRADIENTS = NamedConfigs.of(NamedConf.of(StyleUtil.DEFAULT_KEY, GradientConf.none()));
     static final NamedConfigs<NoiseConf>    _NO_NOISES    = NamedConfigs.of(NamedConf.of(StyleUtil.DEFAULT_KEY, NoiseConf.none()));
     static final NamedConfigs<ImageConf>    _NO_IMAGES    = NamedConfigs.of(NamedConf.of(StyleUtil.DEFAULT_KEY, ImageConf.none()));
+    static final NamedConfigs<TextConf>     _NO_TEXTS     = NamedConfigs.of(NamedConf.of(StyleUtil.DEFAULT_KEY, TextConf.none()));
 
     private static final StyleConfLayer _EMPTY = new StyleConfLayer(
                                                     _NO_SHADOWS,
                                                     _NO_PAINTERS,
                                                     _NO_GRADIENTS,
                                                     _NO_NOISES,
-                                                    _NO_IMAGES
+                                                    _NO_IMAGES,
+                                                    _NO_TEXTS
                                                 );
 
     static final StyleConfLayer empty() {
@@ -31,6 +33,7 @@ final class StyleConfLayer implements Simplifiable<StyleConfLayer>
     private final NamedConfigs<GradientConf> _gradients;
     private final NamedConfigs<NoiseConf>    _noises;
     private final NamedConfigs<ImageConf>    _images;
+    private final NamedConfigs<TextConf>     _texts;
 
 
     static StyleConfLayer of(
@@ -38,7 +41,8 @@ final class StyleConfLayer implements Simplifiable<StyleConfLayer>
         NamedConfigs<PainterConf>  painters,
         NamedConfigs<GradientConf> gradients,
         NamedConfigs<NoiseConf>    noises,
-        NamedConfigs<ImageConf>    images
+        NamedConfigs<ImageConf>    images,
+        NamedConfigs<TextConf>     texts
     ) {
         StyleConfLayer empty = StyleConfLayer.empty();
         if (
@@ -46,11 +50,12 @@ final class StyleConfLayer implements Simplifiable<StyleConfLayer>
             painters .equals(_NO_PAINTERS ) &&
             gradients.equals(_NO_GRADIENTS) &&
             noises   .equals(_NO_NOISES   ) &&
-            images   .equals(_NO_IMAGES   )
+            images   .equals(_NO_IMAGES   ) &&
+            texts    .equals(_NO_TEXTS    )
         )
             return empty;
 
-        return new StyleConfLayer(shadows, painters, gradients, noises, images);
+        return new StyleConfLayer(shadows, painters, gradients, noises, images, texts);
     }
 
     StyleConfLayer(
@@ -58,13 +63,15 @@ final class StyleConfLayer implements Simplifiable<StyleConfLayer>
         NamedConfigs<PainterConf>  painters,
         NamedConfigs<GradientConf> gradients,
         NamedConfigs<NoiseConf>    noises,
-        NamedConfigs<ImageConf>    images
+        NamedConfigs<ImageConf>    images,
+        NamedConfigs<TextConf>     texts
     ) {
         _shadows   = shadows;
         _painters  = painters;
         _gradients = gradients;
         _noises    = noises;
         _images    = images;
+        _texts     = texts;
     }
 
 
@@ -83,21 +90,27 @@ final class StyleConfLayer implements Simplifiable<StyleConfLayer>
     NamedConfigs<ImageConf> images() {
         return _images;
     }
+    NamedConfigs<TextConf> texts() {
+        return _texts;
+    }
 
     StyleConfLayer withShadows(NamedConfigs<ShadowConf> shadows ) {
-        return of(shadows, _painters, _gradients, _noises, _images);
+        return of(shadows, _painters, _gradients, _noises, _images, _texts);
     }
     StyleConfLayer withPainters(NamedConfigs<PainterConf> painters ) {
-        return of(_shadows, painters, _gradients, _noises, _images);
+        return of(_shadows, painters, _gradients, _noises, _images, _texts);
     }
     StyleConfLayer withGradients(NamedConfigs<GradientConf> gradients ) {
-        return of(_shadows, _painters, gradients, _noises, _images);
+        return of(_shadows, _painters, gradients, _noises, _images, _texts);
     }
     StyleConfLayer withNoises(NamedConfigs<NoiseConf> noises ) {
-        return of(_shadows, _painters, _gradients, noises, _images);
+        return of(_shadows, _painters, _gradients, noises, _images, _texts);
     }
     StyleConfLayer withImages(NamedConfigs<ImageConf> images ) {
-        return of(_shadows, _painters, _gradients, _noises, images);
+        return of(_shadows, _painters, _gradients, _noises, images, _texts);
+    }
+    StyleConfLayer withTexts(NamedConfigs<TextConf> texts ) {
+        return of(_shadows, _painters, _gradients, _noises, _images, texts);
     }
 
     StyleConfLayer _scale( double scale ) {
@@ -106,7 +119,8 @@ final class StyleConfLayer implements Simplifiable<StyleConfLayer>
                     _painters, // This is the users problem...
                     _gradients.mapStyles( s -> s._scale(scale) ),
                     _noises.mapStyles( s -> s._scale(scale) ),
-                    _images.mapStyles( s -> s._scale(scale) )
+                    _images.mapStyles( s -> s._scale(scale) ),
+                    _texts.mapStyles( s -> s._scale(scale) )
                 );
     }
 
@@ -130,13 +144,17 @@ final class StyleConfLayer implements Simplifiable<StyleConfLayer>
         return Objects.equals(_images, otherStyle._images);
     }
 
+    boolean hasEqualTextsAs( StyleConfLayer otherStyle ) {
+        return Objects.equals(_texts, otherStyle._texts);
+    }
+
     public boolean hasPainters() {
         return !_painters.equals(_NO_PAINTERS);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(_shadows, _painters, _gradients, _noises, _images);
+        return Objects.hash(_shadows, _painters, _gradients, _noises, _images, _texts);
     }
 
     @Override
@@ -152,7 +170,8 @@ final class StyleConfLayer implements Simplifiable<StyleConfLayer>
             Objects.equals(this._painters,  otherLayer._painters)  &&
             Objects.equals(this._gradients, otherLayer._gradients) &&
             Objects.equals(this._noises,    otherLayer._noises)    &&
-            Objects.equals(this._images,    otherLayer._images);
+            Objects.equals(this._images,    otherLayer._images)    &&
+            Objects.equals(this._texts,     otherLayer._texts);
     }
 
     @Override
@@ -164,29 +183,36 @@ final class StyleConfLayer implements Simplifiable<StyleConfLayer>
         String gradientString   = _gradients.toString(StyleUtil.DEFAULT_KEY, "");
         String noiseString      = _noises.toString(StyleUtil.DEFAULT_KEY, "");
         String imagesString     = _images.toString(StyleUtil.DEFAULT_KEY, "");
+        String textString       = _texts.toString(StyleUtil.DEFAULT_KEY, "");
         return this.getClass().getSimpleName() + "[" +
                     "shadows="   + shadowString   + ", " +
                     "painters="  + painterString  + ", " +
                     "gradients=" + gradientString + ", " +
                     "noises="    + noiseString    + ", " +
-                    "images="    + imagesString   +
+                    "images="    + imagesString   + ", " +
+                    "texts="     + textString     +
                 "]";
     }
 
     @Override
     public StyleConfLayer simplified() {
+        if ( this == _EMPTY )
+            return this;
+
         NamedConfigs<ShadowConf>   simplifiedShadows   = _shadows.simplified();
         NamedConfigs<PainterConf>  simplifiedPainters  = _painters.simplified();
         NamedConfigs<GradientConf> simplifiedGradients = _gradients.simplified();
         NamedConfigs<NoiseConf>    simplifiedNoises    = _noises.simplified();
         NamedConfigs<ImageConf>    simplifiedImages    = _images.simplified();
+        NamedConfigs<TextConf>     simplifiedTexts     = _texts.simplified();
 
         if (
             simplifiedShadows   == _shadows   &&
             simplifiedPainters  == _painters  &&
             simplifiedGradients == _gradients &&
             simplifiedNoises    == _noises    &&
-            simplifiedImages    == _images
+            simplifiedImages    == _images    &&
+            simplifiedTexts     == _texts
         )
             return this;
 
@@ -195,13 +221,15 @@ final class StyleConfLayer implements Simplifiable<StyleConfLayer>
         simplifiedGradients = ( simplifiedGradients.equals(_NO_GRADIENTS) ? _NO_GRADIENTS : simplifiedGradients );
         simplifiedNoises    = ( simplifiedNoises.equals(_NO_NOISES)       ? _NO_NOISES    : simplifiedNoises    );
         simplifiedImages    = ( simplifiedImages.equals(_NO_IMAGES)       ? _NO_IMAGES    : simplifiedImages    );
+        simplifiedTexts     = ( simplifiedTexts.equals(_NO_TEXTS)         ? _NO_TEXTS     : simplifiedTexts     );
 
         if (
             simplifiedShadows   == _NO_SHADOWS   &&
             simplifiedPainters  == _NO_PAINTERS  &&
             simplifiedGradients == _NO_GRADIENTS &&
             simplifiedNoises    == _NO_NOISES    &&
-            simplifiedImages    == _NO_IMAGES
+            simplifiedImages    == _NO_IMAGES    &&
+            simplifiedTexts     == _NO_TEXTS
         )
             return _EMPTY;
 
@@ -210,7 +238,8 @@ final class StyleConfLayer implements Simplifiable<StyleConfLayer>
                     simplifiedPainters,
                     simplifiedGradients,
                     simplifiedNoises,
-                    simplifiedImages
+                    simplifiedImages,
+                    simplifiedTexts
                 );
     }
 }

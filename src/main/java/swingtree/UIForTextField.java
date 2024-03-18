@@ -7,11 +7,13 @@ import sprouts.Var;
 
 import javax.swing.JTextField;
 import javax.swing.text.JTextComponent;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.LayoutManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -216,6 +218,48 @@ public final class UIForTextField<F extends JTextField> extends UIForAnyTextComp
                     orientation.forSwing().ifPresent(thisComponent::setHorizontalAlignment);
                })
                ._this();
+    }
+
+    /**
+     *  Binds the placeholder text of this text field to a {@link Val} property.
+     *  When the item of the {@link Val} property changes, the placeholder text will be
+     *  updated accordingly.
+     *
+     * @param placeholder The placeholder property which will be listened to for changes.
+     * @return This UI builder node, to allow for method chaining.
+     */
+    public final UIForTextField<F> withPlaceholder( Val<String> placeholder ) {
+        NullUtil.nullArgCheck(placeholder, "placeholder", Val.class);
+        NullUtil.nullPropertyCheck(placeholder, "placeholder", "Null is not a valid value for a placeholder.");
+        return this.withRepaintOn(placeholder)
+                    .withStyle( conf -> conf
+                        .text("placeholder", textConf -> textConf
+                             .content(
+                                 Optional.ofNullable(conf.component().getText())
+                                     .map(s -> !s.isEmpty())
+                                     .map( hasContent -> hasContent ? "" : placeholder.get() )
+                                     .orElse(placeholder.get())
+                             )
+                             .placement( UI.Placement.LEFT )
+                             .font( f -> f.color(_nicePlaceholderColorFor(conf.component())) )
+                        )
+                    );
+    }
+
+    private static Color _nicePlaceholderColorFor( JTextField textField ) {
+        Color currentBackground = Optional.ofNullable(textField.getBackground()).orElse(Color.WHITE);
+        Color currentForeground = Optional.ofNullable(textField.getForeground()).orElse(Color.BLACK);
+        /*
+            We assume that "the color between" the background and the foreground is the color
+            that would be the most readable as a placeholder color.
+            So we interpolate the background and the foreground color to find the "in-between" color.
+         */
+        return new Color(
+            (currentBackground.getRed() + currentForeground.getRed()) / 2,
+            (currentBackground.getGreen() + currentForeground.getGreen()) / 2,
+            (currentBackground.getBlue() + currentForeground.getBlue()) / 2,
+            (currentBackground.getAlpha() + currentForeground.getAlpha()) / 2
+        );
     }
 
 }

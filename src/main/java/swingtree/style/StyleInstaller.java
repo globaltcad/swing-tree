@@ -82,6 +82,7 @@ final class StyleInstaller<C extends JComponent>
         final boolean noGradients             = StyleConf.none().hasEqualGradientsAs(newStyle);
         final boolean noNoises                = StyleConf.none().hasEqualNoisesAs(newStyle);
         final boolean noImages                = StyleConf.none().hasEqualImagesAs(newStyle);
+        final boolean noTexts                 = StyleConf.none().hasEqualTextsAs(newStyle);
         final boolean noProperties            = StyleConf.none().hasEqualPropertiesAs(newStyle);
 
         final boolean baseStyleIsBasic = newStyle.base().isBasic();
@@ -91,6 +92,7 @@ final class StyleInstaller<C extends JComponent>
         final boolean allNoisesAreBorderNoises       = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) || styleLayer.noises().everyNamedStyle(ns -> ns.style().colors().length == 0 ) );
         final boolean allPaintersAreBorderPainters   = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) || styleLayer.painters().everyNamedStyle(ns -> Painter.none().equals(ns.style().painter()) ) );
         final boolean allImagesAreBorderImages       = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) || styleLayer.images().everyNamedStyle(ns -> !ns.style().image().isPresent() && !ns.style().primer().isPresent() ) );
+        final boolean allTextsAreBorderTexts         = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) || styleLayer.texts().everyNamedStyle(ns -> TextConf.none().equals(ns.style()) ) );
 
         final boolean isNotStyled = noLayoutStyle           &&
                                     noPaddingAndMarginStyle &&
@@ -103,6 +105,7 @@ final class StyleInstaller<C extends JComponent>
                                     noGradients             &&
                                     noNoises                &&
                                     noImages                &&
+                                    noTexts                 &&
                                     noProperties;
 
         final boolean pluginsNeeded = !(// A plugin is either a Border or ComponentUI!
@@ -116,6 +119,7 @@ final class StyleInstaller<C extends JComponent>
                                    noGradients                                &&
                                    noNoises                                   &&
                                    noImages                                   &&
+                                   noTexts                                    &&
                                    noProperties );
 
         final boolean styleCanBeRenderedThroughBorder = (
@@ -124,7 +128,8 @@ final class StyleInstaller<C extends JComponent>
                                                        (noPainters    || allPaintersAreBorderPainters)   &&
                                                        (noGradients   || allGradientsAreBorderGradients) &&
                                                        (noNoises      || allNoisesAreBorderNoises)       &&
-                                                       (noImages      || allImagesAreBorderImages)
+                                                       (noImages      || allImagesAreBorderImages)       &&
+                                                       (noTexts       || allTextsAreBorderTexts)
                                                    );
 
         Runnable backgroundSetter = ()->{};
