@@ -148,8 +148,10 @@ final class StyleConfLayer implements Simplifiable<StyleConfLayer>
         return Objects.equals(_texts, otherStyle._texts);
     }
 
-    public boolean hasPainters() {
-        return !_painters.equals(_NO_PAINTERS);
+    public boolean hasPaintersWhichCannotBeCached() {
+        return _painters.stylesStream()
+                .map(PainterConf::painter)
+                .anyMatch( p -> !p.canBeCached() );
     }
 
     @Override

@@ -209,7 +209,7 @@ final class LayerCache
         if ( !size.hasPositiveWidth() || !size.hasPositiveHeight() )
             return false;
 
-        if ( state.layer().hasPainters() )
+        if ( state.layer().hasPaintersWhichCannotBeCached() )
             return false; // We don't know what the painters will do, so we don't cache their painting!
 
         int heavyStyleCount = 0;

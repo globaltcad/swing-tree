@@ -9,7 +9,7 @@ import java.util.Objects;
  *  to delegate to the data object in order to allow for caching of
  *  what is painted.
  */
-class CachablePainter implements Painter
+final class CachablePainter implements Painter
 {
     private final Object data;
     private final Painter painter;
@@ -23,6 +23,11 @@ class CachablePainter implements Painter
     @Override
     public void paint( Graphics2D g2d ) {
         painter.paint(g2d);
+    }
+
+    @Override
+    public boolean canBeCached() {
+        return true;
     }
 
     @Override

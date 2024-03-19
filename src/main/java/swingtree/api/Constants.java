@@ -14,6 +14,8 @@ class Constants
                                             public void paint(Graphics2D g2d) {
                                                 // None
                                             }
+                                            @Override
+                                            public boolean canBeCached() { return true; }
                                             @Override public String toString() { return "none"; }
                                         };
 

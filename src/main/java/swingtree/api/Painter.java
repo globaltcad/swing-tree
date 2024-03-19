@@ -90,37 +90,17 @@ public interface Painter
     void paint( Graphics2D g2d );
 
     /**
+     * @return true If the painting operation is cachable, false otherwise.
+     */
+    default boolean canBeCached() { return false; }
+
+    /**
      * Returns a new painter that paints this painter's style and then the given painter's style.
      * @param after the painter to paint after this painter.
      * @return a new painter that paints this painter's style and then the given painter's style.
      */
     default Painter andThen( Painter after ) {
-        return g2d -> {
-                    try {
-                        paint(g2d);
-                    } catch ( Exception e ) {
-                        e.printStackTrace();
-                        // Exceptions inside a painter should not be fatal.
-                    }
-                    try {
-                        after.paint(g2d);
-                    } catch ( Exception e ) {
-                        e.printStackTrace();
-                        // Exceptions inside a painter should not cripple the rest of the painting.
-                    }
-                    /*
-                         Note that if any exceptions happen in the above Painter implementations,
-                         then we don't want to mess up the execution of the rest of the component painting...
-                         Therefore, we catch any exceptions that happen in the above code.
-
-                         Ideally this would be logged in the logging framework of a user of the SwingTree
-                         library, but we don't know which logging framework that is, so we just print
-                         the stack trace to the console so that developers can see what went wrong.
-
-                         Hi there! If you are reading this, you are probably a developer using the SwingTree
-                         library, thank you for using it! Good luck finding out what went wrong! :)
-                    */
-                };
+        return new AndThenPainter(this, after);
     }
 
 }
