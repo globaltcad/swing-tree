@@ -1,10 +1,11 @@
 package swingtree;
 
+import org.jspecify.annotations.Nullable;
 import sprouts.Var;
 
 import java.util.Objects;
 
-final class ArrayBasedComboModel<E> extends AbstractComboModel<E>
+final class ArrayBasedComboModel<@Nullable E> extends AbstractComboModel<E>
 {
 	private final E[] _items;
 
@@ -13,7 +14,7 @@ final class ArrayBasedComboModel<E> extends AbstractComboModel<E>
 		this(Var.ofNullable(_findCommonType( items ), null), items);
 	}
 
-	ArrayBasedComboModel(Var<E> selection, E[] items) {
+	ArrayBasedComboModel(Var<E> selection, E @Nullable[] items) {
 		super(selection);
 		_items = Objects.requireNonNull(items);
 		_selectedIndex = _indexOf(_selectedItem.orElseNull());
@@ -25,8 +26,8 @@ final class ArrayBasedComboModel<E> extends AbstractComboModel<E>
 		return new ArrayBasedComboModel<>(newVar, _items);
 	}
 
-	@Override protected void setAt( int index, E element ) { _items[index] = element; }
+	@Override protected void setAt( int index, @Nullable E element ) { _items[index] = element; }
 	@Override public int getSize() { return _items.length; }
-	@Override public E getElementAt( int index ) { return _items[index]; }
+	@Override public @Nullable E getElementAt( int index ) { return _items[index]; }
 
 }

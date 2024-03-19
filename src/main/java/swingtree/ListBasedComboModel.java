@@ -1,11 +1,12 @@
 package swingtree;
 
+import org.jspecify.annotations.Nullable;
 import sprouts.Var;
 
 import java.util.List;
 import java.util.Objects;
 
-class ListBasedComboModel<E> extends AbstractComboModel<E>
+class ListBasedComboModel<@Nullable E> extends AbstractComboModel<E>
 {
 	private final List<E> _items;
 
@@ -29,7 +30,7 @@ class ListBasedComboModel<E> extends AbstractComboModel<E>
 		return new ListBasedComboModel<>(newVar, _items);
 	}
 
-	@Override protected void setAt(int index, E element) {
+	@Override protected void setAt(int index, @Nullable E element) {
 		/*
 			So the UI component tells us a combo option should be changed...
 			But does the user of this library want that?

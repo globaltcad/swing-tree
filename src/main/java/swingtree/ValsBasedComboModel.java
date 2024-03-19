@@ -1,11 +1,12 @@
 package swingtree;
 
+import org.jspecify.annotations.Nullable;
 import sprouts.Var;
 import sprouts.Vals;
 
 import java.util.Objects;
 
-class ValsBasedComboModel<E> extends AbstractComboModel<E>
+class ValsBasedComboModel<@Nullable E> extends AbstractComboModel<E>
 {
     private final Vals<E> _items;
 
@@ -23,14 +24,14 @@ class ValsBasedComboModel<E> extends AbstractComboModel<E>
 
     @Override public int getSize() { return _items.size(); }
 
-    @Override public E getElementAt( int index ) { return _items.at(index).orElseNull(); }
+    @Override public @Nullable E getElementAt(int index ) { return _items.at(index).orElseNull(); }
 
     @Override public AbstractComboModel<E> withVar( Var<E> newVar ) {
         return new ValsBasedComboModel<>(newVar, _items);
     }
 
     @Override
-    protected void setAt( int index, E element ) {
+    protected void setAt( int index, @Nullable E element ) {
         /*
             Vals are immutable, so we can't modify them.
             So we'll just ignore it.

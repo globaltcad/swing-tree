@@ -1,11 +1,12 @@
 package swingtree;
 
+import org.jspecify.annotations.Nullable;
 import sprouts.Var;
 import sprouts.Vars;
 
 import java.util.Objects;
 
-class VarsBasedComboModel<E> extends AbstractComboModel<E>
+class VarsBasedComboModel<@Nullable E> extends AbstractComboModel<E>
 {
     private final Vars<E> _items;
 
@@ -36,14 +37,14 @@ class VarsBasedComboModel<E> extends AbstractComboModel<E>
 
     @Override public int getSize() { return _items.size(); }
 
-    @Override public E getElementAt( int index ) { return _items.at(index).orElseNull(); }
+    @Override public @Nullable E getElementAt(int index ) { return _items.at(index).orElseNull(); }
 
     @Override public AbstractComboModel<E> withVar(Var<E> newVar) {
         return new VarsBasedComboModel<>(newVar, _items);
     }
 
     @Override
-    protected void setAt(int index, E element) {
+    protected void setAt(int index, @Nullable E element) {
         /*
             So the UI component tells us a combo option should be changed...
             But does the user of this library want that?
