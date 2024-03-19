@@ -150,6 +150,11 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     }
 
     /**
+     *  Sets the {@link Icon} property of the wrapped button type and scales it
+     *  according to the provided {@link UI.FitComponent} policy.
+     *  This icon is also used as the "pressed" and "disabled" icon if
+     *  there is no explicitly set pressed icon.
+     *
      * @param icon The {@link SvgIcon} which should be displayed on the button.
      * @param fitComponent The {@link UI.FitComponent} which determines how the icon should be scaled.
      * @return This very builder to allow for method chaining.
@@ -275,7 +280,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     public final I withFont( Font font ) {
         NullUtil.nullArgCheck(font, "font", Font.class);
         return _with( button -> {
-                        if ( font == UI.FONT_UNDEFINED )
+                        if ( _isUndefinedFont(font) )
                             button.setFont(null);
                         else
                             button.setFont(font);
@@ -297,14 +302,14 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
         NullUtil.nullArgCheck(font, "font", Val.class);
         NullUtil.nullPropertyCheck(font, "font", "Use the default font of this component instead of null!");
         return _withOnShow( font, (c,v) -> {
-                    if ( v == UI.FONT_UNDEFINED )
+                    if ( _isUndefinedFont(v) )
                         c.setFont(null);
                     else
                         c.setFont(v);
                 })
                ._with( thisComponent -> {
                    Font newFont = font.orElseThrow();
-                   if ( newFont == UI.FONT_UNDEFINED )
+                   if ( _isUndefinedFont(newFont) )
                        thisComponent.setFont( null );
                    else
                        thisComponent.setFont( newFont );
@@ -508,6 +513,12 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     }
 
     /**
+     *  Sets the {@link AbstractButton#setBorderPainted(boolean)} flag of the wrapped button type.
+     *  If the flag is set to true, the border of the button will be painted.
+     *  The default value for the borderPainted property is true.
+     *  Some look and feels might not support the borderPainted property,
+     *  in which case they ignore this.
+     *
      * @param borderPainted Whether the border of the button should be painted.
      * @return This very instance, which enables builder-style method chaining.
      */
@@ -516,6 +527,11 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     }
 
     /**
+     *  Binds the provided {@link Val} property to the {@link AbstractButton#setBorderPainted(boolean)} method.,
+     *  which means that whenever the value of the property changes, the border of the button will be painted or not.
+     *  The default value for the borderPainted property is true.
+     *  Some look and feels might not support the borderPainted property, in which case they ignore this.
+     *
      * @param val Whether the border of the button should be painted.
      * @return This very instance, which enables builder-style method chaining.
      */

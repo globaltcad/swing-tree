@@ -110,6 +110,9 @@ public class JScrollPanels extends UI.ScrollPane
 	}
 
 	/**
+	 *  Allows you to get the number of entries which are currently managed by this {@link JScrollPanels}.
+	 *  The number of entries is the number of view models which are currently managed by this {@link JScrollPanels}.
+	 *
 	 * @return The number of entries which are currently managed by this {@link JScrollPanels}.
 	 */
 	public int getNumberOfEntries() { return _internal.getComponents().length; }
@@ -279,6 +282,10 @@ public class JScrollPanels extends UI.ScrollPane
 	}
 
 	/**
+	 *  Use this to iterate over all panel list entries of a certain type
+	 *  by supplying a type class and a consumer action.
+	 *  Neither of the two parameters may be null!
+	 *
 	 * @param type The type of the entry which ought to be iterated over.
 	 * @param action The action which ought to be applied to all {@link JScrollPanels} entries of the given type.
 	 * @param <T> The entry value type parameter.

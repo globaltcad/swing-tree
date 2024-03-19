@@ -54,6 +54,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
     private final static String _TIMERS_KEY = "_swing-tree.timers";
 
+    @SuppressWarnings("ReferenceEquality")
+    protected final boolean _isUndefinedFont( Font font ) {
+        return font == UI.FONT_UNDEFINED;
+    }
+
     /**
      *  This method exposes a concise way to bind a {@link Observable} (usually a sprouts.Event to the
      *  {@link JComponent#repaint()} method of the component wrapped by this {@link UI}!
