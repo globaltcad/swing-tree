@@ -204,14 +204,16 @@ final class LayerCache
 
     public boolean _cachingMakesSenseFor( LayerRenderConf state )
     {
-        Size size = state.boxModel().size();
+        final Size size = state.boxModel().size();
+
         if ( !size.hasPositiveWidth() || !size.hasPositiveHeight() )
             return false;
 
-        if ( state.layer().hasPainters() )
+        if ( state.layer().hasPaintersWhichCannotBeCached() )
             return false; // We don't know what the painters will do, so we don't cache their painting!
 
         int heavyStyleCount = 0;
+
         for ( ImageConf imageConf : state.layer().images().sortedByNames() )
             if ( !imageConf.equals(ImageConf.none()) && imageConf.image().isPresent() ) {
                 ImageIcon icon = imageConf.image().get();
@@ -223,31 +225,40 @@ final class LayerCache
         for ( GradientConf gradient : state.layer().gradients().sortedByNames() )
             if ( !gradient.equals(GradientConf.none()) && gradient.colors().length > 0 )
                 heavyStyleCount++;
+        for ( NoiseConf noise : state.layer().noises().sortedByNames() )
+            if ( !noise.equals(NoiseConf.none()) && noise.colors().length > 0 )
+                heavyStyleCount++;
+        for ( TextConf text : state.layer().texts().sortedByNames() )
+            if ( !text.equals(TextConf.none()) && !text.content().isEmpty() )
+                heavyStyleCount++;
         for ( ShadowConf shadow : state.layer().shadows().sortedByNames() )
             if ( !shadow.equals(ShadowConf.none()) && shadow.color().isPresent() )
                 heavyStyleCount++;
 
-        BoxModelConf border = state.boxModel();
-        BaseColorConf colorConf = state.baseColors();
-        boolean rounded = border.hasAnyNonZeroArcs();
+        final BaseColorConf baseCoors = state.baseColors();
+        final BoxModelConf  boxModel  = state.boxModel();
+        final boolean       isRounded = boxModel.hasAnyNonZeroArcs();
 
         if ( _layer == UI.Layer.BORDER ) {
-            boolean hasWidth = !Outline.none().equals(border.widths());
-            if ( hasWidth && colorConf.borderColor().isPresent() )
+            boolean hasWidth = !Outline.none().equals(boxModel.widths());
+            if ( hasWidth && baseCoors.borderColor().isPresent() )
                 heavyStyleCount++;
         }
         if ( _layer == UI.Layer.BACKGROUND ) {
-            BaseColorConf base = state.baseColors();
-            boolean roundedOrHasMargin = rounded || !state.boxModel().margin().equals(Outline.none());
-            if ( base.backgroundColor().isPresent() && roundedOrHasMargin )
-                heavyStyleCount++;
+            boolean roundedOrHasMargin = isRounded || !boxModel.margin().equals(Outline.none());
+            if ( roundedOrHasMargin ) {
+                if ( baseCoors.backgroundColor().filter( c -> c.getAlpha() > 0 ).isPresent() )
+                    heavyStyleCount++;
+                if ( baseCoors.foundationColor().filter( c -> c.getAlpha() > 0 ).isPresent() )
+                    heavyStyleCount++;
+            }
         }
 
         if ( heavyStyleCount < 1 )
             return false;
 
-        int threshold = 256 * 256 * Math.min(heavyStyleCount, 5);
-        int pixelCount = (int) (size.width().orElse(0f) * size.height().orElse(0f));
+        final int threshold = 256 * 256 * Math.min(heavyStyleCount, 5);
+        final int pixelCount = (int) (size.width().orElse(0f) * size.height().orElse(0f));
 
         return pixelCount <= threshold;
     }
