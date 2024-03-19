@@ -377,6 +377,8 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
     }
 
     /**
+     *  Use this to add a {@link SplitItem} to the {@link JSplitButton} popup menu.
+     *
      * @param splitItem The {@link SplitItem} instance wrapping a {@link JMenuItem} as well as some associated {@link Action}s.
      * @param <I> The {@link JMenuItem} type which should be added to this {@link JSplitButton} builder.
      * @return This very instance, which enables builder-style method chaining.
