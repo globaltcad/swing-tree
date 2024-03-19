@@ -1,5 +1,6 @@
 package swingtree;
 
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import sprouts.From;
 import sprouts.Var;
@@ -18,7 +19,7 @@ import java.util.Objects;
  *
  * @param <E> The type of the elements which will be stored in this model.
  */
-abstract class AbstractComboModel<E> implements ComboBoxModel<E>
+abstract class AbstractComboModel<@Nullable E> implements ComboBoxModel<E>
 {
 	private static final Logger log = org.slf4j.LoggerFactory.getLogger(AbstractComboModel.class);
 
@@ -56,10 +57,10 @@ abstract class AbstractComboModel<E> implements ComboBoxModel<E>
 
 	abstract AbstractComboModel<E> withVar( Var<E> newVar );
 
-	@Override public void setSelectedItem( Object anItem ) {
+	@Override public void setSelectedItem( @Nullable Object anItem ) {
 		if ( anItem != null && !_selectedItem.type().isAssignableFrom(anItem.getClass()) )
 			anItem = _convert(anItem.toString());
-        E old = _selectedItem.orElseNull();
+        @Nullable E old = _selectedItem.orElseNull();
 		Object finalAnItem = anItem;
 		doQuietly(()-> {
 			_selectedItem.set(From.VIEW, (E) finalAnItem);
@@ -70,7 +71,7 @@ abstract class AbstractComboModel<E> implements ComboBoxModel<E>
 	}
 
 	/** {@inheritDoc} */
-	@Override public Object getSelectedItem() { return _selectedItem.orElseNull(); }
+	@Override public @Nullable Object getSelectedItem() { return _selectedItem.orElseNull(); }
 
 	/** {@inheritDoc} */
 	@Override public void addListDataListener( ListDataListener l ) { listeners.add(l); }
@@ -101,7 +102,7 @@ abstract class AbstractComboModel<E> implements ComboBoxModel<E>
 			_acceptsEditorChanges = true;
     }
 
-	abstract protected void setAt( int index, E element );
+	abstract protected void setAt( int index, @Nullable E element );
 
     void updateSelectedIndex() {
         if ( _selectedIndex >= 0 && !_selectedItem.is(getElementAt(_selectedIndex)) )
@@ -136,7 +137,7 @@ abstract class AbstractComboModel<E> implements ComboBoxModel<E>
 	 * @param o The string to convert
 	 * @return The converted object or simply the item of the combo box if no conversion was possible.
 	 */
-	private E _convert( String o ) {
+	private @Nullable E _convert( String o ) {
 		// We need to turn the above string into an object of the correct type!
 		// First of all, we know our target type:
 		Class<E> type = _selectedItem.type();
@@ -248,7 +249,7 @@ abstract class AbstractComboModel<E> implements ComboBoxModel<E>
 		return _selectedItem.orElseNull();
 	}
 
-	protected int _indexOf( Object anItem ) {
+	protected int _indexOf( @Nullable Object anItem ) {
 		for ( int i = 0; i < getSize(); i++ )
 			if ( Objects.equals(anItem, getElementAt(i)) )
 				return i;

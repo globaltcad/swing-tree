@@ -1,10 +1,11 @@
 package swingtree;
 
+import org.jspecify.annotations.Nullable;
 import sprouts.From;
 import sprouts.Val;
 import sprouts.Var;
 
-final class ArrayPropertyComboModel<E> extends AbstractComboModel<E>
+final class ArrayPropertyComboModel<@Nullable E> extends AbstractComboModel<E>
 {
 	private final Val<E[]> _items;
 	private final boolean _mutable;
@@ -28,7 +29,7 @@ final class ArrayPropertyComboModel<E> extends AbstractComboModel<E>
 		return new ArrayPropertyComboModel<>(newVar, _items);
 	}
 
-	@Override protected void setAt(int index, E element) {
+	@Override protected void setAt(int index, @Nullable E element) {
 		if ( _mutable )
 			_items.ifPresent(i -> {
 				i[index] = element;
@@ -36,7 +37,7 @@ final class ArrayPropertyComboModel<E> extends AbstractComboModel<E>
 			});
 	}
 	@Override public int getSize() { return _items.mapTo(Integer.class, i -> i.length ).orElse(0); }
-	@Override public E getElementAt( int index ) {
+	@Override public @Nullable E getElementAt( int index ) {
 		return (E) _items.mapTo(Object.class, i -> i[index] ).orElseNull();
 	}
 

@@ -1,5 +1,6 @@
 package swingtree;
 
+import org.jspecify.annotations.Nullable;
 import sprouts.*;
 import swingtree.api.ListEntryDelegate;
 import swingtree.api.ListEntryRenderer;
@@ -292,7 +293,7 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
         }
 
         @Override public int getSize() { return _entries.size(); }
-        @Override public E getElementAt( int i ) { return _entries.at( i ).orElseNull(); }
+        @Override public @Nullable E getElementAt(int i ) { return _entries.at( i ).orElseNull(); }
 
         public void fire( ValsDelegate<E> v ) {
             if ( v.index() < 0 ) {
