@@ -167,6 +167,7 @@ public class JBox extends JComponent implements Accessible, StylableComponent
      * @return an AccessibleJBox that serves as the
      *         AccessibleContext of this JBox
      */
+    @Override
     public AccessibleContext getAccessibleContext() {
         if ( accessibleContext == null )
             accessibleContext = new AccessibleJBox();

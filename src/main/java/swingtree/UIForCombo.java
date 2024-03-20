@@ -63,14 +63,17 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
             // Adds a PopupMenu listener which will listen to notification
             // messages from the popup portion of the combo box.
             thisComponent.addPopupMenuListener(new PopupMenuListener() {
+                @Override
                 public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
                     // This method is called before the popup menu becomes visible.
                     comboIsOpen[0] = true;
                 }
+                @Override
                 public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
                     // This method is called before the popup menu becomes invisible
                     comboIsOpen[0] = false;
                 }
+                @Override
                 public void popupMenuCanceled(PopupMenuEvent e) {
                     // This method is called when the popup menu is canceled
                     comboIsOpen[0] = false;
@@ -125,10 +128,13 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
 
     private void _onPopupClose( JComboBox<E> thisComponent, Consumer<PopupMenuEvent> consumer ) {
         thisComponent.addPopupMenuListener(new PopupMenuListener() {
+            @Override
             public void popupMenuWillBecomeVisible(PopupMenuEvent e) {/* Not relevant here */}
+            @Override
             public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
                 consumer.accept(e); // This method is called before the popup menu becomes invisible
             }
+            @Override
             public void popupMenuCanceled(PopupMenuEvent e) {/* Not relevant here */}
         });
     }

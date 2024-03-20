@@ -2463,7 +2463,7 @@ public final class UI extends UINamespaceUtilities
 
     /**
      *  Use this to create a builder for a new {@link JTabbedPane} UI component
-     *  with the provided {@code selectionIndex} property which should be determine the
+     *  with the provided {@code selectionIndex} property which should be determined the
      *  tab selection of the {@link JTabbedPane} dynamically.
      *  To add tabs to this builder use the tab object returned by {@link #tab(String)}
      *  like so:

@@ -183,14 +183,14 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
         NullUtil.nullArgCheck(font, "font", Val.class);
         NullUtil.nullPropertyCheck(font, "font", "Use the default font of this component instead of null!");
         return _withOnShow( font, (c,v) -> {
-                    if ( v == UI.FONT_UNDEFINED )
+                    if ( _isUndefinedFont(v) )
                         c.setFont(null);
                     else
                         c.setFont(v);
                 })
                 ._with( thisComponent -> {
                     Font newFont = font.orElseThrow();
-                    if ( newFont == UI.FONT_UNDEFINED )
+                    if ( _isUndefinedFont(newFont) )
                         thisComponent.setFont( null );
                     else
                         thisComponent.setFont( newFont );
@@ -272,6 +272,7 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
                 /**
                  * See documentation in {@link DocumentFilter}!
                  */
+                @Override
                 public void remove(FilterBypass fb, int offset, int length) throws BadLocationException {
                     state.removes.forEach(action -> action.accept( new TextRemoveDelegate(thisComponent, fb, offset, length) ) );
                     if ( state.removes.isEmpty() ) fb.remove(offset, length);
@@ -279,6 +280,7 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
                 /**
                  * See documentation in {@link DocumentFilter}!
                  */
+                @Override
                 public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
                     state.inserts.forEach(action -> action.accept( new TextInsertDelegate(thisComponent, fb, offset, string.length(), string, attr) ) );
                     if ( state.inserts.isEmpty() ) fb.insertString(offset, string, attr);
@@ -286,6 +288,7 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
                 /**
                  * See documentation in {@link DocumentFilter}!
                  */
+                @Override
                 public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
                     state.replaces.forEach(action -> action.accept(new TextReplaceDelegate(thisComponent, fb, offset, length, text, attrs)) );
                     if ( state.replaces.isEmpty() ) fb.replace(offset, length, text, attrs);

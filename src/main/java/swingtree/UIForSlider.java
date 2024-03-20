@@ -199,6 +199,11 @@ public final class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSli
     }
 
     /**
+     *  Use this to bind the supplied {@link Var} property to the value of the slider.
+     *  When the value of the slider changes, the value of the {@link Var} will be updated
+     *  and when the item of the {@link Var} is changed as part of the application logic,
+     *  the value of the slider will be updated accordingly.
+     *
      * @param var An integer property used to dynamically update the value of the slider.
      * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if {@code value} is {@code null}.
