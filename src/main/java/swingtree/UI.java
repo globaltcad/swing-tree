@@ -2636,6 +2636,10 @@ public final class UI extends UINamespaceUtilities
     }
 
     /**
+     *  This factory method creates a {@link JMenu} with the provided text property
+     *  bound to the menu item. So when the property state changes to a different text,
+     *  then so does the text displayed on the menu item. <br>
+     *
      * @param text The text property which should be displayed on the wrapped {@link JMenuItem} dynamically.
      * @return A builder instance for the provided {@link JMenuItem}, which enables fluent method chaining.
      */
@@ -6783,6 +6787,9 @@ public final class UI extends UINamespaceUtilities
         public TableHeader() { super(); }
         public TableHeader(TableColumnModel model) { super(model); }
         /**
+         *  Use this for defining the header cell tool tips.
+         *  This models the tool tip of all header cells using a function which receives the column index
+         *  and returns the tool tip text for that column.
          * @param toolTipTextSupplier A function which receives the column index and returns the
          *                            tool tip text for that column.
          */
@@ -6791,6 +6798,7 @@ public final class UI extends UINamespaceUtilities
             _toolTipTextSupplier = toolTipTextSupplier;
         }
         /**
+         *  Use this for defining a fixed set of tool tip texts for the columns.
          * @param toolTips The tool tip texts for the columns.
          */
         public void setToolTips( String... toolTips ) {
