@@ -1,6 +1,7 @@
 package swingtree.style;
 
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
 import swingtree.UI;
 import swingtree.animation.AnimationState;
 import swingtree.api.Painter;
@@ -20,6 +21,8 @@ import java.util.function.Supplier;
  */
 public final class ComponentExtension<C extends JComponent>
 {
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(ComponentExtension.class);
+
     private static long _anonymousPainterCounter = 0;
 
     /**
@@ -64,6 +67,8 @@ public final class ComponentExtension<C extends JComponent>
     private StyleSource<C>  _styleSource  = StyleSource.create();
 
     private @Nullable Shape _outerBaseClip = null;
+
+    private PaintStep _lastPaintStep = PaintStep.UNDEFINED;
 
 
     private ComponentExtension( C owner ) { _owner = Objects.requireNonNull(owner); }
@@ -281,80 +286,6 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     /**
-     *  This method is used to paint the background style of the component
-     *  using the provided {@link Graphics} object.
-     *  The method is designed for components for which SwingTree could not install a custom UI,
-     *  and it is intended to be used by custom {@link JComponent#paint(Graphics)}
-     *  overrides, before calling the super implementation.
-     *
-     * @param g The {@link Graphics} object to use for rendering.
-     * @param lookAndFeelPaint A {@link Runnable} which is used to paint the look and feel of the component.
-     */
-    void paintBackgroundStyle( Graphics g, Runnable lookAndFeelPaint )
-    {
-        if ( _styleInstaller.customLookAndFeelIsInstalled() ) {
-            if ( lookAndFeelPaint != null )
-                lookAndFeelPaint.run();
-            return; // We render ĥere through the custom installed UI!
-        }
-        paintBackground(g, lookAndFeelPaint);
-    }
-
-    /**
-     *  This method is used to paint the foreground style of the component
-     *  using the provided {@link Graphics2D} object.
-     *
-     * @param g2d The {@link Graphics2D} object to use for rendering.
-     * @param superPaint A {@link Runnable} which is used to paint the look and feel of the component.
-     */
-    void paintForeground( Graphics2D g2d, Runnable superPaint )
-    {
-        gatherApplyAndInstallStyleConfig();
-
-        Shape clip = _outerBaseClip != null ? _outerBaseClip : g2d.getClip();
-        if ( _owner instanceof JScrollPane ) {
-            /*
-                Scroll panes are not like other components, they have a viewport
-                which clips the children.
-                Now if we have a round border for the scroll pane, we want the
-                children to be clipped by the round border (and the viewport).
-                So we use the inner component area as the clip for the children.
-            */
-            clip = StyleUtil.intersect( _styleEngine.componentArea().orElse(clip), clip );
-        }
-        paintWithClip(g2d, clip, ()->{
-            superPaint.run();
-        });
-
-        // We remember if antialiasing was enabled before we render:
-        boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
-        // Reset antialiasing to its previous state:
-        if ( StyleEngine.IS_ANTIALIASING_ENABLED() )
-            g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
-
-        // We remember the clip:
-        Shape formerClip = g2d.getClip();
-
-        Font componentFont = _owner.getFont();
-        if ( componentFont != null && !componentFont.equals(g2d.getFont()) )
-            g2d.setFont( componentFont );
-
-        _styleEngine.paintForeground(g2d);
-
-        // We restore the clip:
-        if ( g2d.getClip() != formerClip )
-            g2d.setClip(formerClip);
-
-        // Reset antialiasing to its previous state:
-        g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
-    }
-
-    void paintWithContentAreaClip( Graphics g, Runnable painter ) {
-        gatherApplyAndInstallStyleConfig();
-        _styleEngine.paintClippedTo(UI.ComponentArea.BODY, g, painter);
-    }
-
-    /**
      *  Adds a {@link Styler} to the component.
      *  The styler will be used to calculate the style of the component.
      *
@@ -406,13 +337,68 @@ public final class ComponentExtension<C extends JComponent>
         _installStyle( _applyStyleToComponentState(gatherStyle(), false) );
     }
 
+    private StyleConf _applyStyleToComponentState(StyleConf newStyle, boolean force )
+    {
+        Objects.requireNonNull(newStyle);
+
+        if ( _owner.getBorder() instanceof StyleAndAnimationBorder<?> ) {
+            StyleAndAnimationBorder<C> border = (StyleAndAnimationBorder<C>) _owner.getBorder();
+            border.recalculateInsets(newStyle);
+        }
+
+        if ( !force ) {
+            // We check if it makes sense to apply the new style:
+            boolean componentBackgroundWasMutated = _styleInstaller.backgroundWasChangedSomewhereElse(_owner);
+
+            if ( !componentBackgroundWasMutated && _styleEngine.getComponentConf().style().equals(newStyle) )
+                return newStyle;
+        }
+
+        return _styleInstaller.applyStyleToComponentState(_owner, newStyle, _styleSource);
+    }
+
     private void _installStyle( StyleConf styleConf) {
         _styleEngine = _styleEngine.withNewStyleAndComponent(styleConf, _owner);
     }
 
+    private void _switchToPaintStep( PaintStep step ) {
+        int newStep  = step.ordinal();
+        int lastStep = _lastPaintStep.ordinal();
+        boolean isNewPaintCycle = newStep <= lastStep;
+        if ( isNewPaintCycle )
+            gatherApplyAndInstallStyleConfig();
+            /*
+                If the new step is less than or equal to the last step,
+                we consider it a new paint cycle and apply the style
+            */
+
+        _lastPaintStep = step;
+    }
+
+    /**
+     *  This method is used to paint the background style of the component
+     *  using the provided {@link Graphics} object.
+     *  The method is designed for components for which SwingTree could not install a custom UI,
+     *  and it is intended to be used by custom {@link JComponent#paint(Graphics)}
+     *  overrides, before calling the super implementation.
+     *
+     * @param g The {@link Graphics} object to use for rendering.
+     * @param lookAndFeelPaint A {@link Runnable} which is used to paint the look and feel of the component.
+     */
+    void paintBackgroundIfNeeded( Graphics g, Runnable lookAndFeelPaint )
+    {
+        if ( _styleInstaller.customLookAndFeelIsInstalled() ) {
+            if ( lookAndFeelPaint != null )
+                lookAndFeelPaint.run();
+            return; // We render ĥere through the custom installed UI!
+            // So the method call below will be called within lookAndFeelPaint.run();
+        }
+        paintBackground(g, lookAndFeelPaint);
+    }
+
     void paintBackground( Graphics g, @Nullable Runnable lookAndFeelPainting )
     {
-        gatherApplyAndInstallStyleConfig();
+        _switchToPaintStep(PaintStep.BACKGROUND);
 
         Shape baseClip = g.getClip();
         _outerBaseClip = baseClip;
@@ -441,7 +427,14 @@ public final class ComponentExtension<C extends JComponent>
                 try {
                     lookAndFeelPainting.run();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    String componentAsString = "?";
+                    try {
+                        // Anything can happen in client code...
+                        componentAsString = _owner.toString();
+                    } catch (Exception e2) {
+                        log.error("Error while converting component to string!", e2);
+                    }
+                    log.error("Error while painting look and feel of component '"+componentAsString+"'!", e);
                 }
             });
         }
@@ -451,7 +444,7 @@ public final class ComponentExtension<C extends JComponent>
 
     void paintBorder( Graphics2D g2d, Runnable formerBorderPainter )
     {
-        gatherApplyAndInstallStyleConfig();
+        _switchToPaintStep(PaintStep.BORDER);
 
         Shape former = g2d.getClip();
         try {
@@ -464,27 +457,58 @@ public final class ComponentExtension<C extends JComponent>
         }
     }
 
-
-    private StyleConf _applyStyleToComponentState(StyleConf newStyle, boolean force )
+    /**
+     *  This method is used to paint the foreground style of the component
+     *  using the provided {@link Graphics2D} object.
+     *
+     * @param g2d The {@link Graphics2D} object to use for rendering.
+     * @param superPaint A {@link Runnable} which is used to paint the look and feel of the component.
+     */
+    void paintForeground( Graphics2D g2d, Runnable superPaint )
     {
-        _styleSource = _styleSource.withoutExpiredAnimationStylers(); // Clean up expired animation stylers!
+        _switchToPaintStep(PaintStep.FOREGROUND);
 
-        Objects.requireNonNull(newStyle);
-
-        if ( _owner.getBorder() instanceof StyleAndAnimationBorder<?> ) {
-            StyleAndAnimationBorder<C> border = (StyleAndAnimationBorder<C>) _owner.getBorder();
-            border.recalculateInsets(newStyle);
+        Shape clip = _outerBaseClip != null ? _outerBaseClip : g2d.getClip();
+        if ( _owner instanceof JScrollPane ) {
+            /*
+                Scroll panes are not like other components, they have a viewport
+                which clips the children.
+                Now if we have a round border for the scroll pane, we want the
+                children to be clipped by the round border (and the viewport).
+                So we use the inner component area as the clip for the children.
+            */
+            clip = StyleUtil.intersect( _styleEngine.componentArea().orElse(clip), clip );
         }
+        paintWithClip(g2d, clip, ()->{
+            superPaint.run();
+        });
 
-        if ( !force ) {
-            // We check if it makes sense to apply the new style:
-            boolean componentBackgroundWasMutated = _styleInstaller.backgroundWasChangedSomewhereElse(_owner);
+        // We remember if antialiasing was enabled before we render:
+        boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
+        // Reset antialiasing to its previous state:
+        if ( StyleEngine.IS_ANTIALIASING_ENABLED() )
+            g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
-            if ( !componentBackgroundWasMutated && _styleEngine.getComponentConf().style().equals(newStyle) )
-                return newStyle;
-        }
+        // We remember the clip:
+        Shape formerClip = g2d.getClip();
 
-        return _styleInstaller.applyStyleToComponentState(_owner, newStyle, _styleSource);
+        Font componentFont = _owner.getFont();
+        if ( componentFont != null && !componentFont.equals(g2d.getFont()) )
+            g2d.setFont( componentFont );
+
+        _styleEngine.paintForeground(g2d);
+
+        // We restore the clip:
+        if ( g2d.getClip() != formerClip )
+            g2d.setClip(formerClip);
+
+        // Reset antialiasing to its previous state:
+        g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
+    }
+
+    void paintWithContentAreaClip( Graphics g, Runnable painter ) {
+        gatherApplyAndInstallStyleConfig();
+        _styleEngine.paintClippedTo(UI.ComponentArea.BODY, g, painter);
     }
 
     static void paintWithClip( Graphics2D g2d, @Nullable Shape clip, Runnable paintTask ) {
@@ -492,9 +516,15 @@ public final class ComponentExtension<C extends JComponent>
         g2d.setClip(clip);
         try {
             paintTask.run();
+        } catch (Exception e) {
+            log.error("Error during clipped painting task.", e);
         } finally {
             g2d.setClip(formerClip);
         }
     }
 
+    private enum PaintStep
+    {
+        BACKGROUND, BORDER, FOREGROUND, UNDEFINED
+    }
 }

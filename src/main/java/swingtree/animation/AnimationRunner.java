@@ -2,7 +2,7 @@ package swingtree.animation;
 
 import swingtree.style.ComponentExtension;
 
-import javax.swing.*;
+import javax.swing.JComponent;
 import javax.swing.Timer;
 import java.awt.event.ActionEvent;
 import java.util.*;
@@ -31,6 +31,7 @@ class AnimationRunner
 
 
     private final List<ComponentAnimator> _animators = new ArrayList<>();
+    private final List<JComponent> _toBeCleaned = new ArrayList<>();
 
 
     private AnimationRunner( int delay ) {
@@ -38,7 +39,13 @@ class AnimationRunner
     }
 
     private void _run( ActionEvent event ) {
-        if ( _animators.isEmpty() ) {
+
+        for ( JComponent component : new ArrayList<>(_toBeCleaned) ) {
+            ComponentExtension.from(component).clearAnimations();
+            _toBeCleaned.remove(component);
+        }
+
+        if ( _animators.isEmpty() && _toBeCleaned.isEmpty() ) {
             _timer.stop();
             // We can remove the instance from the map since it's not needed anymore
             _INSTANCES.remove(_timer.getDelay());
@@ -51,12 +58,12 @@ class AnimationRunner
             });
 
         long now = System.currentTimeMillis();
-        List<ComponentAnimator> toRemove = new ArrayList<>();
-        for ( ComponentAnimator animator : new ArrayList<>(_animators) )
-            if ( !animator.run(now, event) )
-                toRemove.add(animator);
 
-        _animators.removeAll(toRemove);
+        for ( ComponentAnimator animator : new ArrayList<>(_animators) )
+            if ( !animator.run(now, event) ) {
+                _animators.remove(animator);
+                animator.component().ifPresent( _toBeCleaned::add );
+            }
     }
 
     private void _add( ComponentAnimator animator ) {

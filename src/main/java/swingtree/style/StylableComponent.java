@@ -82,7 +82,7 @@ public interface StylableComponent
      */
     /*final*/ default void paintBackground( Graphics g, Runnable superPaint ) {
         if ( this instanceof JComponent ) {
-            ComponentExtension.from((JComponent) this).paintBackgroundStyle( g, superPaint );
+            ComponentExtension.from((JComponent) this).paintBackgroundIfNeeded( g, superPaint );
         }
         else
             throw new UnsupportedOperationException( "This interface is only intended for JComponent implementations" );

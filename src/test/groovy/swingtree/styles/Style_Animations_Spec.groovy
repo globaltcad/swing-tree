@@ -4,12 +4,11 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
 import swingtree.SwingTree
-import swingtree.threading.EventProcessor
 import swingtree.UI
+import swingtree.animation.LifeTime
+import swingtree.threading.EventProcessor
 
-import javax.swing.JButton
-import javax.swing.JLabel
-import javax.swing.UIManager
+import javax.swing.*
 import javax.swing.border.CompoundBorder
 import javax.swing.plaf.metal.MetalButtonUI
 import javax.swing.plaf.metal.MetalLabelUI
@@ -41,6 +40,51 @@ class Style_Animations_Spec extends Specification
         UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
         // This is to make sure that the tests are not influenced by
         // other look and feels that might be used in the example code...
+    }
+
+    def 'A transitory style animation always ends with a progress of 1.'()
+    {
+        reportInfo """
+            In this example we use a transitory style animation to record the progress of the animation.
+            The important note here is that the progress of the animation will always end with 1.
+            What this means for you in practice is that you can use this fact as 
+            a signal to perform some action once the animation has completed.
+            
+            So you can use the progress in a way where the animated style will be
+            reset to its original state once the animation has completed.
+        """
+        given : 'We create an event object for triggering the animation.'
+            var event = sprouts.Event.create()
+        and : 'Two lists in which we record the progress and cycle values of the animation.'
+            var proresses = []
+            var cycles = []
+        and : 'We create a simple `JTogglButton` UI component with a style animation.'
+            var ui = UI.toggleButton("Click me!")
+                            .withTransitoryStyle(event, LifeTime.of(0.05, TimeUnit.SECONDS), (state, conf) -> {
+                                proresses << state.progress()
+                                cycles << state.cycle()
+                                return conf;
+                            })
+        and : 'We actually build the component:'
+            var button = ui.get(JToggleButton)
+        expect : 'Initially the two lists are empty.'
+            proresses.isEmpty()
+            cycles.isEmpty()
+
+        when : 'We trigger the animation.'
+            event.fire()
+            Thread.sleep(100)
+            UI.sync()
+            button.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+
+        then : """
+            The progress of the animation will always end with 1.
+        """
+            proresses.last() == 1
+        and : """
+            The cycle of the animation will always end with 1.
+        """
+            cycles.last() == 0
     }
 
     def 'An `onMouseClick` event style animation is only temporary.'()
@@ -203,7 +247,6 @@ class Style_Animations_Spec extends Specification
             label.foreground == new Color(51, 51, 51)
             label.getUI() instanceof MetalLabelUI
     }
-
 
     def 'Advanced style animations will override the Look and Feel of a component temporarily'()
     {

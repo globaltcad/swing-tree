@@ -65,13 +65,6 @@ final class StyleSource<C extends JComponent>
         return new StyleSource<>(_localStyler, new Expirable[0], _styleSheet);
     }
 
-    StyleSource<C> withoutExpiredAnimationStylers() {
-        List<Expirable<Styler<C>>> animationStylers = new ArrayList<>(Arrays.asList(_animationStylers));
-        animationStylers.removeIf(Expirable::isExpired);
-        return new StyleSource<>(_localStyler, animationStylers.toArray(new Expirable[0]), _styleSheet);
-    }
-
-
     StyleConf gatherStyleFor(C owner )
     {
         StyleConf styleConf = Optional.ofNullable(owner.getParent())
@@ -107,23 +100,22 @@ final class StyleSource<C extends JComponent>
 
         // Animation styles are last: they override everything else:
         for ( Expirable<Styler<C>> expirableStyler : _animationStylers )
-            if ( !expirableStyler.isExpired() )
-                try {
-                    styleConf = expirableStyler.get().style(new ComponentStyleDelegate<>(owner, styleConf)).style();
-                } catch ( Exception e ) {
-                    log.warn("An exception occurred while applying an animation styler!", e);
-                    /*
-                         If any exceptions happen in a Styler implementation provided by a user,
-                         then we don't want to prevent the other Stylers from doing their job,
-                         which is why we catch any exceptions immediately!
+            try {
+                styleConf = expirableStyler.get().style(new ComponentStyleDelegate<>(owner, styleConf)).style();
+            } catch ( Exception e ) {
+                log.warn("An exception occurred while applying an animation styler!", e);
+                /*
+                     If any exceptions happen in a Styler implementation provided by a user,
+                     then we don't want to prevent the other Stylers from doing their job,
+                     which is why we catch any exceptions immediately!
 
-				         We log as warning because exceptions during
-				         styling are not a big deal!
+		             We log as warning because exceptions during
+		             styling are not a big deal!
 
-                         Hi there! If you are reading this, you are probably a developer using the SwingTree
-                         library, thank you for using it! Good luck finding out what went wrong! :)
-                    */
-                }
+                     Hi there! If you are reading this, you are probably a developer using the SwingTree
+                     library, thank you for using it! Good luck finding out what went wrong! :)
+                */
+            }
 
         styleConf = styleConf.simplified();
 
