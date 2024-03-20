@@ -65,6 +65,8 @@ public final class ComponentExtension<C extends JComponent>
 
     private @Nullable Shape _outerBaseClip = null;
 
+    private PaintStep _lastPaintStep = PaintStep.UNDEFINED;
+
 
     private ComponentExtension( C owner ) { _owner = Objects.requireNonNull(owner); }
 
@@ -356,6 +358,20 @@ public final class ComponentExtension<C extends JComponent>
         _styleEngine = _styleEngine.withNewStyleAndComponent(styleConf, _owner);
     }
 
+    private void _switchToPaintStep( PaintStep step ) {
+        int newStep  = step.ordinal();
+        int lastStep = _lastPaintStep.ordinal();
+        boolean isNewPaintCycle = newStep <= lastStep;
+        if ( isNewPaintCycle )
+            gatherApplyAndInstallStyleConfig();
+            /*
+                If the new step is less than or equal to the last step,
+                we consider it a new paint cycle and apply the style
+            */
+
+        _lastPaintStep = step;
+    }
+
     /**
      *  This method is used to paint the background style of the component
      *  using the provided {@link Graphics} object.
@@ -378,7 +394,7 @@ public final class ComponentExtension<C extends JComponent>
 
     void paintBackground( Graphics g, @Nullable Runnable lookAndFeelPainting )
     {
-        gatherApplyAndInstallStyleConfig();
+        _switchToPaintStep(PaintStep.BACKGROUND);
 
         Shape baseClip = g.getClip();
         _outerBaseClip = baseClip;
@@ -415,6 +431,21 @@ public final class ComponentExtension<C extends JComponent>
         g.setClip(baseClip);
     }
 
+    void paintBorder( Graphics2D g2d, Runnable formerBorderPainter )
+    {
+        _switchToPaintStep(PaintStep.BORDER);
+
+        Shape former = g2d.getClip();
+        try {
+            if ( _outerBaseClip != null )
+                g2d.setClip(_outerBaseClip);
+
+            _styleEngine.paintBorder(g2d, formerBorderPainter);
+        } finally {
+            g2d.setClip(former);
+        }
+    }
+
     /**
      *  This method is used to paint the foreground style of the component
      *  using the provided {@link Graphics2D} object.
@@ -424,7 +455,7 @@ public final class ComponentExtension<C extends JComponent>
      */
     void paintForeground( Graphics2D g2d, Runnable superPaint )
     {
-        gatherApplyAndInstallStyleConfig();
+        _switchToPaintStep(PaintStep.FOREGROUND);
 
         Shape clip = _outerBaseClip != null ? _outerBaseClip : g2d.getClip();
         if ( _owner instanceof JScrollPane ) {
@@ -464,21 +495,6 @@ public final class ComponentExtension<C extends JComponent>
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
     }
 
-    void paintBorder( Graphics2D g2d, Runnable formerBorderPainter )
-    {
-        gatherApplyAndInstallStyleConfig();
-
-        Shape former = g2d.getClip();
-        try {
-            if ( _outerBaseClip != null )
-                g2d.setClip(_outerBaseClip);
-
-            _styleEngine.paintBorder(g2d, formerBorderPainter);
-        } finally {
-            g2d.setClip(former);
-        }
-    }
-
     void paintWithContentAreaClip( Graphics g, Runnable painter ) {
         gatherApplyAndInstallStyleConfig();
         _styleEngine.paintClippedTo(UI.ComponentArea.BODY, g, painter);
@@ -494,4 +510,8 @@ public final class ComponentExtension<C extends JComponent>
         }
     }
 
+    private enum PaintStep
+    {
+        BACKGROUND, BORDER, FOREGROUND, UNDEFINED
+    }
 }
