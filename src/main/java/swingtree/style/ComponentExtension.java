@@ -1,6 +1,7 @@
 package swingtree.style;
 
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
 import swingtree.UI;
 import swingtree.animation.AnimationState;
 import swingtree.api.Painter;
@@ -20,6 +21,8 @@ import java.util.function.Supplier;
  */
 public final class ComponentExtension<C extends JComponent>
 {
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(ComponentExtension.class);
+
     private static long _anonymousPainterCounter = 0;
 
     /**
@@ -424,7 +427,14 @@ public final class ComponentExtension<C extends JComponent>
                 try {
                     lookAndFeelPainting.run();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    String componentAsString = "?";
+                    try {
+                        // Anything can happen in client code...
+                        componentAsString = _owner.toString();
+                    } catch (Exception e2) {
+                        log.error("Error while converting component to string!", e2);
+                    }
+                    log.error("Error while painting look and feel of component '"+componentAsString+"'!", e);
                 }
             });
         }
@@ -506,6 +516,8 @@ public final class ComponentExtension<C extends JComponent>
         g2d.setClip(clip);
         try {
             paintTask.run();
+        } catch (Exception e) {
+            log.error("Error during clipped painting task.", e);
         } finally {
             g2d.setClip(formerClip);
         }
