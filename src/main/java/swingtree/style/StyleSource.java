@@ -65,13 +65,6 @@ final class StyleSource<C extends JComponent>
         return new StyleSource<>(_localStyler, new Expirable[0], _styleSheet);
     }
 
-    StyleSource<C> withoutExpiredAnimationStylers() {
-        List<Expirable<Styler<C>>> animationStylers = new ArrayList<>(Arrays.asList(_animationStylers));
-        animationStylers.removeIf(Expirable::isExpired);
-        return new StyleSource<>(_localStyler, animationStylers.toArray(new Expirable[0]), _styleSheet);
-    }
-
-
     StyleConf gatherStyleFor(C owner )
     {
         StyleConf styleConf = Optional.ofNullable(owner.getParent())

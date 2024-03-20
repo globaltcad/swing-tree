@@ -334,8 +334,6 @@ public final class ComponentExtension<C extends JComponent>
 
     private StyleConf _applyStyleToComponentState(StyleConf newStyle, boolean force )
     {
-        _styleSource = _styleSource.withoutExpiredAnimationStylers(); // Clean up expired animation stylers!
-
         Objects.requireNonNull(newStyle);
 
         if ( _owner.getBorder() instanceof StyleAndAnimationBorder<?> ) {
