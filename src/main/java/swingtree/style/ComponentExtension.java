@@ -382,12 +382,13 @@ public final class ComponentExtension<C extends JComponent>
      * @param g The {@link Graphics} object to use for rendering.
      * @param lookAndFeelPaint A {@link Runnable} which is used to paint the look and feel of the component.
      */
-    void paintBackgroundStyle( Graphics g, Runnable lookAndFeelPaint )
+    void paintBackgroundIfNeeded( Graphics g, Runnable lookAndFeelPaint )
     {
         if ( _styleInstaller.customLookAndFeelIsInstalled() ) {
             if ( lookAndFeelPaint != null )
                 lookAndFeelPaint.run();
             return; // We render ĥere through the custom installed UI!
+            // So the method call below will be called within lookAndFeelPaint.run();
         }
         paintBackground(g, lookAndFeelPaint);
     }
