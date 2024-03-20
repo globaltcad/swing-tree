@@ -338,8 +338,8 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
     /**
      * Draws the default arrow image in the specified color.
      *
-     * @param color
-     * @return image
+     * @param color the color of the arrow
+     * @return image of the arrow
      */
     private Image getImage(final Color color) {
         final int size = _calculateArrowSize();

@@ -1,5 +1,6 @@
 package swingtree;
 
+import org.slf4j.Logger;
 import sprouts.Action;
 import sprouts.Event;
 import sprouts.From;
@@ -22,6 +23,8 @@ import java.util.stream.Collectors;
  */
 public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButton<UIForSplitButton<B>, B>
 {
+    private static Logger log = org.slf4j.LoggerFactory.getLogger(UIForSplitButton.class);
+
     private final BuilderState<B> _state;
 
     /**
@@ -418,7 +421,7 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
                     try {
                         action.accept(new SplitButtonDelegate<>( thisComponent,(SplitItemDelegate<JMenuItem>) delegate ));
                     } catch (Exception exception) {
-                        exception.printStackTrace();
+                        log.error("Error while executing selection action listener.", exception);
                     }
                 });
                 splitItem.getOnSelected().accept(delegate);

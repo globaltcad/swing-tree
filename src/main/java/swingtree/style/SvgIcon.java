@@ -345,6 +345,10 @@ public final class SvgIcon extends ImageIcon
     public UI.Placement getPreferredPlacement() { return _preferredPlacement; }
 
     /**
+     *  Allows you to get an updated {@link SvgIcon} with the given {@link UI.Placement} policy
+     *  which determines where the icon should be placed within a component
+     *  when rendered through the {@link #paintIcon(Component, java.awt.Graphics, int, int, int, int)} method.
+     *
      * @param placement The {@link UI.Placement} that determines where the icon should be placed within a component
      *                  (see {@link #paintIcon(Component, java.awt.Graphics, int, int, int, int)}).
      * @return A new {@link SvgIcon} with the given {@link UI.Placement} policy.
@@ -640,6 +644,8 @@ public final class SvgIcon extends ImageIcon
                 case RIGHT:
                     viewBox = new ViewBox( x + width - viewBox.width, y + (height - viewBox.height) / 2f, viewBox.width, viewBox.height );
                     break;
+                default:
+                    log.warn("Unknown preferred placement: " + preferredPlacement);
             }
         }
 
