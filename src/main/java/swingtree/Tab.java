@@ -75,6 +75,7 @@ public final class Tab
     }
 
     /**
+     *  Use this to make the tab selected by default.
      * @param isSelected The selected state of the tab.
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
@@ -86,6 +87,10 @@ public final class Tab
     }
 
     /**
+     *  Binds the boolean property passed to this method to the selected state of the tab,
+     *  which means that when the state of the property changes, the selected state of the tab will change accordingly.
+     *  Conversely, when the tab is selected, the property will be set to true, otherwise it will be set to false.
+     *
      * @param isSelected The selected state property of the tab.
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
@@ -98,6 +103,11 @@ public final class Tab
     }
 
     /**
+     *  Binds the boolean property passed to this method to the selected state of the tab,
+     *  which means that when the state of the property changes, the selected state of the tab will change accordingly.
+     *  Note that this is not a two-way binding, so when the user changes the selection state of the tab,
+     *  the property will not be updated.
+     *
      * @param isSelected The selected state property of the tab.
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
@@ -134,6 +144,8 @@ public final class Tab
     }
 
     /**
+     *  A tab may be enabled or disabled, which you can specify with this method.
+     *
      * @param isEnabled The enabled state of the tab.
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
@@ -145,6 +157,8 @@ public final class Tab
     }
 
     /**
+     *   Binds the boolean property passed to this method to the enabled state of the tab,
+     *   which means that when the state of the property changes, the enabled state of the tab will change accordingly.
      * @param isEnabled The enabled state property of the tab.
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
@@ -176,6 +190,8 @@ public final class Tab
     }
 
     /**
+     *  A tab header may have an icon displayed in it, which you can specify with this method.
+     *
      * @param icon The icon which should be displayed in the tab header.
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
@@ -232,6 +248,8 @@ public final class Tab
     }
 
     /**
+     *  Allows you to define the tooltip which should be displayed when hovering over the tab header.
+     *
      * @param tip The tooltip which should be displayed when hovering over the tab header.
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
@@ -243,6 +261,10 @@ public final class Tab
     }
 
     /**
+     *  Allows you to bind a string property to the tooltip of the tab.
+     *  When the item of the property changes, the tooltip will be updated accordingly.
+     *  You can see the tooltip when hovering over the tab header.
+     *
      * @param tip The tooltip property which should be displayed when hovering over the tab header.
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
@@ -297,6 +319,9 @@ public final class Tab
     }
 
     /**
+     *  Use this to register and catch generic {@link ChangeEvent} based selection events for this tab
+     *  and perform some action when the tab is selected.
+     *
      * @param onSelected The action to be executed when the tab is selected.
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */

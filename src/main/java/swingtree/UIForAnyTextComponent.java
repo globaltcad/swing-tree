@@ -160,7 +160,7 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
     public final I withFont( Font font ) {
         NullUtil.nullArgCheck(font, "font", Font.class);
         return _with( thisComponent -> {
-                    if ( font == UI.FONT_UNDEFINED )
+                    if ( _isUndefinedFont(font) )
                         thisComponent.setFont(null);
                     else
                         thisComponent.setFont(font);
