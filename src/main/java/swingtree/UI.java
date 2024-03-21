@@ -225,8 +225,9 @@ public final class UI extends UINamespaceUtilities
                 case TOP:    return Optional.of(SwingConstants.TOP);
                 case CENTER: return Optional.of(SwingConstants.CENTER);
                 case BOTTOM: return Optional.of(SwingConstants.BOTTOM);
+                default:
+                    return Optional.empty();
             }
-            return Optional.empty();
         }
     }
 
@@ -245,8 +246,9 @@ public final class UI extends UINamespaceUtilities
                 case RIGHT:    return Optional.of(SwingConstants.RIGHT);
                 case LEADING:  return Optional.of(SwingConstants.LEADING);
                 case TRAILING: return Optional.of(SwingConstants.TRAILING);
+                default:
+                    return Optional.empty();
             }
-            return Optional.empty();
         }
 
         public final Optional<Integer> forFlowLayout() {
@@ -256,8 +258,9 @@ public final class UI extends UINamespaceUtilities
                 case RIGHT:    return Optional.of(FlowLayout.RIGHT);
                 case LEADING:  return Optional.of(FlowLayout.LEADING);
                 case TRAILING: return Optional.of(FlowLayout.TRAILING);
+                default:
+                    return Optional.empty();
             }
-            return Optional.empty();
         }
     }
 
@@ -6666,7 +6669,7 @@ public final class UI extends UINamespaceUtilities
                 try {
                     c = UI.runAndGet(() -> uiSupplier.apply(frame));
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.error("Error trying to create a UI component for a new JFrame.", e);
                 }
             }
             else

@@ -183,6 +183,13 @@ public final class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSli
     }
 
     /**
+     *  Binds the supplied {@link Val} property to the value of the slider,
+     *  which causes the knob of the slider to move when the value of the property changes.
+     *  But note that the supplied property is a read only, so when the user updates
+     *  the value of the slider, the property will not be updated.
+     *  Use {@link #withValue(Var)} if you want to bind a property bidirectionally.
+     *  For more information about the underlying value in the component, see {@link JSlider#setValue(int)}.
+     *
      * @param val An integer property used to dynamically update the value of the slider.
      * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if {@code value} is {@code null}.
