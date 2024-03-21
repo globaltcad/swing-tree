@@ -54,6 +54,7 @@ public final class TabDelegate extends ComponentMouseEventDelegate<JTabbedPane>
     }
 
     /**
+     *  Use this to access the tab component of the delegated tab.
      * @return The component of the clicked tab.
      */
     public final JComponent tabComponent() {

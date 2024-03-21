@@ -68,6 +68,9 @@ public final class SplitItemDelegate<I extends JMenuItem> extends AbstractDelega
     }
 
     /**
+     *  This method provides a convenient way to access all the children of the parent component
+     *  of the split item this delegate is for.
+     *
      * @return A list of all the {@link JMenuItem} which constitute the options exposed by the {@link JSplitButton}.
      */
     public List<I> getSiblinghood() {
