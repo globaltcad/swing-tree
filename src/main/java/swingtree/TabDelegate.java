@@ -30,6 +30,7 @@ public final class TabDelegate extends ComponentMouseEventDelegate<JTabbedPane>
     }
 
     /**
+     *  Exposes the index of the currently selected tab.
      * @return The index of the clicked tab.
      */
     public final int selectedTabIndex() {
@@ -44,7 +45,9 @@ public final class TabDelegate extends ComponentMouseEventDelegate<JTabbedPane>
     }
 
     /**
-     * @return The component of the clicked tab.
+     *  Reports whether the clicked tab is the currently selected tab,
+     *  which is determined by comparing the index of the clicked tab with the index of the currently selected tab.
+     * @return True if the clicked tab is the currently selected tab.
      */
     public final boolean tabIsSelected() {
         return selectedTabIndex() == tabIndex();

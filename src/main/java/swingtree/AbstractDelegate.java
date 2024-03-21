@@ -51,6 +51,16 @@ abstract class AbstractDelegate<C extends JComponent>
         _component    = nullable ? component : Objects.requireNonNull(component);
     }
 
+    @SuppressWarnings("ReferenceEquality")
+    protected final boolean _isUndefinedFont( Font font ) {
+        return font == UI.FONT_UNDEFINED;
+    }
+
+    @SuppressWarnings("ReferenceEquality")
+    protected final boolean _isUndefinedColor( Color color ) {
+        return color == UI.COLOR_UNDEFINED;
+    }
+
     protected C _component() { return _component; }
 
     protected List<JComponent> _siblingsSource() {
@@ -135,7 +145,7 @@ abstract class AbstractDelegate<C extends JComponent>
      */
     public final AbstractDelegate<C> setBackground( Color color ) {
         Objects.requireNonNull(color, "Use UI.COLOR_UNDEFINED instead of null to represent the absence of a color.");
-        if ( color == UI.COLOR_UNDEFINED)
+        if ( _isUndefinedColor(color) )
             _component().setBackground(null);
         else
             _component().setBackground(color);
@@ -247,7 +257,7 @@ abstract class AbstractDelegate<C extends JComponent>
      */
     public final AbstractDelegate<C> setForeground( Color color ) {
         Objects.requireNonNull(color, "Use UI.COLOR_UNDEFINED instead of null to represent the absence of a color.");
-        if ( color == UI.COLOR_UNDEFINED)
+        if ( _isUndefinedColor(color) )
             _component().setForeground( null );
         else
             _component().setForeground( color );
@@ -358,7 +368,7 @@ abstract class AbstractDelegate<C extends JComponent>
      */
     public final AbstractDelegate<C> setFont( Font font ) {
         Objects.requireNonNull(font, "Use UI.FONT_UNDEFINED instead of null to represent the absence of a font.");
-        if ( font == UI.FONT_UNDEFINED )
+        if ( _isUndefinedFont(font) )
             _component().setFont(null);
         else
             _component().setFont(font);

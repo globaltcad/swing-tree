@@ -268,15 +268,10 @@ public final class ConfirmDialog
 
                 String defaultOption = "";
                 switch ( _defaultOption ) {
-                    case YES:
-                        defaultOption = yes;
-                        break;
-                    case NO:
-                        defaultOption = no;
-                        break;
-                    case CANCEL:
-                        defaultOption = cancel;
-                        break;
+                    case YES:    defaultOption = yes;    break;
+                    case NO:     defaultOption = no;     break;
+                    case CANCEL: defaultOption = cancel; break;
+                    default: break;
                 }
 
                 return ConfirmAnswer.from(Context.summoner.showOptionDialog(
