@@ -1,5 +1,10 @@
 package swingtree.style;
 
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import swingtree.UI;
+
 import java.awt.Color;
 import java.awt.color.ColorSpace;
 import java.util.Map;
@@ -89,6 +94,9 @@ import java.util.Map;
  */
 public final class Colour extends Color
 {
+    private static final Logger log = LoggerFactory.getLogger(Colour.class);
+
+    public static final Colour UNDEFINED = new Colour(0f, 0f, 0f, 0f);
     /**
      * A fully transparent color with an ARGB value of #00000000.
      */
@@ -867,7 +875,6 @@ public final class Colour extends Color
      * <div style="border:1px solid black;width:40px;height:20px;background-color:#C0C0C0;float:right;margin: 0 10px 0 0"></div>
      */
     public static final Colour SILVER = new Colour(0.7529412f, 0.7529412f, 0.7529412f);
-
     /**
      * The color sky blue with an RGB value of #87CEEB
      * <div style="border:1px solid black;width:40px;height:20px;background-color:#87CEEB;float:right;margin: 0 10px 0 0"></div>
@@ -1244,6 +1251,15 @@ public final class Colour extends Color
         return Colour.of(rgb[0], rgb[1], rgb[2], opacity);
     }
 
+    public static Colour of( String colorString ) {
+        try {
+            return _parseColor(colorString);
+        } catch ( Exception e ) {
+            log.error("Could not parse color '" + colorString + "'.", e);
+            return UI.COLOR_UNDEFINED;
+        }
+    }
+
     private static void _checkRGB( int red, int green, int blue ) {
         if (red < 0 || red > 255) {
             throw new IllegalArgumentException("Colour.rgb's red parameter (" + red + ") expects color values 0-255");
@@ -1603,13 +1619,14 @@ public final class Colour extends Color
     }
 
 
+
     /*
      * Named colors moved to nested class to initialize them only when they
      * are needed.
      */
     private static final class NamedColours {
 
-        private static Colour get(String name) {
+        private static @Nullable Colour get(String name) {
             return NAMED_COLOURS.get(name);
         }
 
@@ -1852,6 +1869,209 @@ public final class Colour extends Color
         hsbvals[1] = saturation;
         hsbvals[2] = brightness;
         return hsbvals;
+    }
+
+
+    private static Colour _parseColor( final String colorAsString )
+    {
+        // First some cleanup
+        final String colorString = colorAsString.trim();
+
+        if ( colorAsString.isEmpty() )
+            return UI.COLOR_UNDEFINED;
+
+        if ( colorString.startsWith("#") )
+            return Colour.of(Color.decode(colorString));
+
+        if ( colorString.startsWith("0x") )
+            return Colour.of(Color.decode(colorString));
+
+        if ( colorString.startsWith("rgb") ) {
+            // We have an rgb() or rgba() color
+            int start = colorString.indexOf('(');
+            int end = colorString.indexOf(')');
+            if ( start < 0 || end < 0 || end < start ) {
+                log.error("Invalid rgb() or rgba() color: " + colorString, new Throwable());
+                return UI.COLOR_UNDEFINED;
+            }
+
+            String[] parts = colorString.substring(start + 1, end).split(",");
+            if ( parts.length < 3 || parts.length > 4 ) {
+                log.error("Invalid rgb() or rgba() color: " + colorString, new Throwable());
+                return UI.COLOR_UNDEFINED;
+            }
+
+            for ( int i = 0; i < parts.length; i++ )
+                parts[i] = parts[i].trim();
+
+            int[] values = new int[parts.length];
+
+            for ( int i = 0; i < parts.length; i++ ) {
+                String part = parts[i];
+                if ( part.endsWith("%") ) {
+                    part = part.substring(0, part.length() - 1);
+                    values[i] = Integer.parseInt(part);
+                    if ( values[i] < 0 || values[i] > 100 ) {
+                        log.error("Invalid rgb() or rgba() color: " + colorString, new Throwable());
+                        return UI.COLOR_UNDEFINED;
+                    }
+                    values[i] = (int) Math.ceil(values[i] * 2.55);
+                }
+                else if ( part.matches("[0-9]+((\\.[0-9]+[fF]?)|[fF])") )
+                    values[i] = (int) (Float.parseFloat(part) * 255);
+                else
+                    values[i] = Integer.parseInt(part);
+            }
+            int r = values[0];
+            int g = values[1];
+            int b = values[2];
+            int a = values.length == 4 ? values[3] : 255;
+            return Colour.ofRgba(r, g, b, a);
+        }
+
+        if ( colorString.startsWith("hsb") ) {
+            // We have an hsb() or hsba() color
+            int start = colorString.indexOf('(');
+            int end = colorString.indexOf(')');
+            if ( start < 0 || end < 0 || end < start ) {
+                log.error("Invalid hsb() or hsba() color: " + colorString, new Throwable());
+                return UI.COLOR_UNDEFINED;
+            }
+
+            String[] parts = colorString.substring(start + 1, end).split(",");
+            if ( parts.length < 3 || parts.length > 4 ) {
+                log.error("Invalid hsb() or hsba() color: " + colorString, new Throwable());
+                return UI.COLOR_UNDEFINED;
+            }
+
+            for ( int i = 0; i < parts.length; i++ )
+                parts[i] = parts[i].trim();
+
+            float[] values = new float[parts.length];
+
+            for ( int i = 0; i < parts.length; i++ ) {
+                String part = parts[i];
+                if ( part.endsWith("%") ) {
+                    part = part.substring(0, part.length() - 1);
+                    values[i] = Float.parseFloat(part);
+                    if ( values[i] < 0 || values[i] > 100 ) {
+                        log.error(
+                                "Invalid hsb() or hsba() string '" + colorString + "', " +
+                                "value '" + part + "' out of range.",
+                                new Throwable()
+                            );
+                        return UI.COLOR_UNDEFINED;
+                    }
+                    values[i] = values[i] / 100.0f;
+                } else if ( part.endsWith("°") ) {
+                    if ( i > 0 ) {
+                        log.error(
+                            "Invalid hsb() or hsba() string '" + colorString + "', " +
+                            "unexpected degree symbol in '" + part + "' (only allowed for hue)",
+                            new Throwable()
+                        );
+                        return UI.COLOR_UNDEFINED;
+                    }
+
+                    part = part.substring(0, part.length() - 1);
+                    values[i] = Float.parseFloat(part);
+                    if ( values[i] < 0 || values[i] > 360 ) {
+                        log.error(
+                            "Invalid hsb() or hsba() string '" + colorString + "', " +
+                            "hue value '" + part + "' out of range.",
+                            new Throwable()
+                        );
+                        return UI.COLOR_UNDEFINED;
+                    }
+                    values[i] = values[i] / 360.0f;
+                } else if ( part.matches("[0-9]+((\\.[0-9]+[fF]?)|[fF])") )
+                    values[i] = Float.parseFloat(part);
+                else
+                    values[i] = Integer.parseInt(part);
+            }
+
+            float h = values[0];
+            float s = values[1];
+            float b = values[2];
+            float a = values.length == 4 ? values[3] : 1.0f;
+            Color c = Color.getHSBColor(h, s, b);
+            return Colour.ofRgba(c.getRed(), c.getGreen(), c.getBlue(), (int)(a * 255));
+        }
+
+        {
+            String maybeWord = colorString.toLowerCase();
+            boolean transparent = false;
+
+            if ( maybeWord.startsWith("transparent") ) {
+                transparent = true;
+                maybeWord = maybeWord.substring(11).trim();
+            }
+
+            // Let's try a few common color names
+            Colour color = _tryFromName(maybeWord);
+            if ( color == null && maybeWord.startsWith("darker") ) {
+                color = _tryFromName(maybeWord.substring(6).trim());
+                if ( color != null )
+                    color = color.darker();
+            }
+            if ( color == null && maybeWord.startsWith("dark") ) {
+                color = _tryFromName(maybeWord.substring(4).trim());
+                if ( color != null )
+                    color = color.darker();
+            }
+            if ( color == null && maybeWord.startsWith("lighter") ) {
+                color = _tryFromName(maybeWord.substring(7).trim());
+                if ( color != null )
+                    color = color.brighter();
+            }
+            if ( color == null && maybeWord.startsWith("light") ) {
+                color = _tryFromName(maybeWord.substring(5).trim());
+                if ( color != null )
+                    color = color.brighter();
+            }
+            if ( color == null && maybeWord.startsWith("brighter") ) {
+                color = _tryFromName(maybeWord.substring(8).trim());
+                if ( color != null )
+                    color = color.brighter();
+            }
+            if ( color == null && maybeWord.startsWith("bright") ) {
+                color = _tryFromName(maybeWord.substring(6).trim());
+                if ( color != null )
+                    color = color.brighter();
+            }
+
+            if ( color != null ) {
+                if ( transparent )
+                    return Colour.ofRgba(color.getRed(), color.getGreen(), color.getBlue(), 255/2);
+                else
+                    return color;
+            }
+            else if ( transparent )
+                return Colour.TRANSPARENT;
+        }
+
+        // Let's try to find it as a system property
+        Colour foundInSystemProperties = null;
+        try {
+            Color found = Color.getColor(colorString);
+            if ( found != null && !(found instanceof Colour) )
+                foundInSystemProperties = Colour.of(found);
+        } catch ( IllegalArgumentException e ) {
+            // Ignore
+        }
+        if ( foundInSystemProperties != null )
+            return foundInSystemProperties;
+
+        return UI.COLOR_UNDEFINED;
+    }
+
+    private static @Nullable Colour _tryFromName( String maybeColorName ) {
+        try {
+            String lowerCaseName = maybeColorName.toLowerCase();
+            return Colour.NamedColours.get(lowerCaseName);
+        } catch ( IllegalArgumentException e ) {
+            return null;
+        }
     }
 
 }

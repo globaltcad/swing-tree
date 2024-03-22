@@ -2912,7 +2912,7 @@ class Individual_Component_Styling_Spec extends Specification
                              .border(2, Color.DARK_GRAY)
                              .size(120, 120)
                              .noise( conf -> conf
-                                 .colors("dark sky", "sky", "white")
+                                 .colors("dark skyblue", "skyblue", "white")
                                  .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
                                  .function(UI.NoiseType.TILES)
                                  .offset(10, 15)
@@ -2924,7 +2924,7 @@ class Individual_Component_Styling_Spec extends Specification
                              .border(2, Color.DARK_GRAY)
                              .size(120, 120)
                              .noise( conf -> conf
-                                 .colors("dark purple", "dark sky", "bright sky")
+                                 .colors("dark purple", "dark skyblue", "bright skyblue")
                                  .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
                                  .function(UI.NoiseType.FIBERS)
                                  .offset(10, 15)

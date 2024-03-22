@@ -113,10 +113,10 @@ class Styles_Spec extends Specification
             "indigo"                       | new Color(75, 0, 130)
             "transparent purple"           | new Color(128, 0, 128, 127)
             "transparent red"              | new Color(255, 0, 0, 127)
-            "transparent green"            | new Color(0, 255, 0, 127)
+            "transparent green"            | new Color(0, 128, 0, 127)
             "transparent blue"             | new Color(0, 0, 255, 127)
-            "light indigo"                 | new Color(107, 0, 185)
-            "dark navy"                    | new Color(0, 0, 89)
+            "light indigo"                 | new Color(107, 0, 186)
+            "dark navy"                    | new Color(0, 0, 90)
             ""                             | UI.COLOR_UNDEFINED
             "I make no sense!"             | UI.COLOR_UNDEFINED
             "I make no sense! at all!"     | UI.COLOR_UNDEFINED
@@ -178,7 +178,7 @@ class Styles_Spec extends Specification
                                         "BaseConf[" +
                                             "icon=?, " +
                                             "fitComponent=NO, " +
-                                            "backgroundColor=rgba(0,255,0,255), " +
+                                            "backgroundColor=rgba(0,128,0,255), " +
                                             "foundationColor=rgba(255,0,0,255), " +
                                             "foregroundColor=?, " +
                                             "cursor=?, " +
