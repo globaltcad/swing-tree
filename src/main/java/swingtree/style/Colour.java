@@ -1481,7 +1481,7 @@ public final class Colour extends Color
      * @return A colour that is inversion of this colour.
      */
     public Colour invert() {
-        return Colour.of(1.0 - getRed(), 1.0 - getGreen(), 1.0 - getBlue(), opacity());
+        return Colour.of(1.0 - red(), 1.0 - green(), 1.0 - blue(), opacity());
     }
 
     /**
@@ -1496,7 +1496,7 @@ public final class Colour extends Color
      * @see #red()
      */
     public Colour withRed(double red) {
-        return Colour.of(red, getGreen(), getBlue(), getAlpha());
+        return Colour.of(red, green(), blue(), opacity());
     }
 
     /**
@@ -1511,7 +1511,7 @@ public final class Colour extends Color
      * @see #green()
      */
     public Colour withGreen(double green) {
-        return Colour.of(getRed(), green, getBlue(), getAlpha());
+        return Colour.of(red(), green, blue(), opacity());
     }
 
     /**
@@ -1526,7 +1526,7 @@ public final class Colour extends Color
      * @see #blue()
      */
     public Colour withBlue(double blue) {
-        return Colour.of(getRed(), getGreen(), blue, getAlpha());
+        return Colour.of(red(), green(), blue, opacity());
     }
 
     /**
@@ -1541,7 +1541,7 @@ public final class Colour extends Color
      * @see #opacity()
      */
     public Colour withOpacity(double opacity) {
-        return Colour.of(getRed(), getGreen(), getBlue(), opacity);
+        return Colour.of(red(), green(), blue(), opacity);
     }
 
     /**
