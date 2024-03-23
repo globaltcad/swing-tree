@@ -1470,6 +1470,8 @@ public final class Colour extends Color
     }
 
     public Colour saturateBy(double factor) {
+        if ( factor == 0.0 )
+            return this;
         return _deriveColour(0, 1.0 / factor, 1.0, 1.0);
     }
 
@@ -1482,6 +1484,8 @@ public final class Colour extends Color
     }
 
     public Colour desaturateBy(double factor) {
+        if ( factor == 0.0 )
+            return this;
         return _deriveColour(0, factor, 1.0, 1.0);
     }
 
