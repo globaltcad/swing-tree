@@ -1437,6 +1437,8 @@ public final class Colour extends Color
      * @param factor The factor by which to increase the brightness.
      */
     public Colour brighterBy(double factor) {
+        if ( factor == 0.0 )
+            return this;
         return _deriveColour(0, 1.0, 1.0 / factor, 1.0);
     }
 
@@ -1454,6 +1456,8 @@ public final class Colour extends Color
      * @param factor The factor by which to decrease the brightness.
      */
     public Colour darkerBy(double factor) {
+        if ( factor == 0.0 )
+            return this;
         return _deriveColour(0, 1.0, factor, 1.0);
     }
 
