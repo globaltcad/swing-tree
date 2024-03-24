@@ -51,6 +51,16 @@ abstract class AbstractDelegate<C extends JComponent>
         _component    = nullable ? component : Objects.requireNonNull(component);
     }
 
+    @SuppressWarnings("ReferenceEquality")
+    protected final boolean _isUndefinedFont( Font font ) {
+        return font == UI.FONT_UNDEFINED;
+    }
+
+    @SuppressWarnings("ReferenceEquality")
+    protected final boolean _isUndefinedColor( Color color ) {
+        return color == UI.Color.UNDEFINED;
+    }
+
     protected C _component() { return _component; }
 
     protected List<JComponent> _siblingsSource() {

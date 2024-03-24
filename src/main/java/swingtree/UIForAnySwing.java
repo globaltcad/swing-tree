@@ -61,7 +61,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
     @SuppressWarnings("ReferenceEquality")
     protected final boolean _isUndefinedColor( Color color ) {
-        return color == UI.COLOR_UNDEFINED;
+        return color == UI.Color.UNDEFINED;
     }
 
     /**

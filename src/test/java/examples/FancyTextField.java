@@ -53,7 +53,7 @@ public final class FancyTextField extends TextField
                             it.component().getHeight() / 2f / 1.5f,
                             it.component().getWidth() / 4f,
                             new float[] { 0f, 1f },
-                            new Color[] { new java.awt.Color(0xffff00), new java.awt.Color(0xffff00, true) }
+                            new java.awt.Color[] { new java.awt.Color(0xffff00), new java.awt.Color(0xffff00, true) }
                         ));
                         g2d.fillRect(0, 0, it.component().getWidth(), it.component().getHeight());
                     }
