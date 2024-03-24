@@ -4,14 +4,13 @@ import com.formdev.flatlaf.FlatLightLaf;
 import swingtree.UI;
 
 import javax.swing.*;
-import java.awt.*;
 
 import static swingtree.UI.Panel;
 import static swingtree.UI.*;
 
 public class NoteGuesserView extends Panel
 {
-    private final Color OLD_SHEET_MUSIC_COLOR = new Color(206, 198, 169,255);
+    private final Color OLD_SHEET_MUSIC_COLOR = new java.awt.Color(206, 198, 169,255);
 
     public NoteGuesserView(NoteGuesserViewModel vm) {
         FlatLightLaf.setup();
@@ -21,14 +20,14 @@ public class NoteGuesserView extends Panel
         .withPrefSize( 900, 700 )
         .withMinSize( 900, 700 )
         .add(ALIGN_X_CENTER,
-            label("Which note is this?").withFont(new Font("Arial", Font.BOLD, 24))
+            label("Which note is this?").withFont(new java.awt.Font("Arial", java.awt.Font.BOLD, 24))
         )
         .add(PUSH.and(GROW),
             panel(FILL).withRepaintOn(vm.getRepaintEvent())
             .withStyle( it ->
                 it
                  .backgroundColor(OLD_SHEET_MUSIC_COLOR.brighter())
-                 .foundationColor(new Color(255,255,255, 0))
+                 .foundationColor(new java.awt.Color(255,255,255, 0))
                  .font("Papyrus", 24)
                  .paddingTop(5)
                  .paddingLeft(25)
@@ -36,8 +35,8 @@ public class NoteGuesserView extends Panel
                  .paddingBottom(5)
                  .borderRadius(25, 25)
                  .borderWidth(3)
-                 .borderColor(new Color(0, 0, 0,255))
-                 .shadowColor(new Color(64,64,64,255))
+                 .borderColor(new java.awt.Color(0, 0, 0,255))
+                 .shadowColor(new java.awt.Color(64,64,64,255))
                  .shadowBlurRadius(6)
                  .shadowSpreadRadius(3)
                  .shadowIsInset(true)
@@ -106,7 +105,7 @@ public class NoteGuesserView extends Panel
 
     void noteLines(
         NoteGuesserViewModel vm,
-        Graphics2D g2d,
+        java.awt.Graphics2D g2d,
         int x, int y, int w, int h
     ) {
         int crop = Math.abs( w - h ) / 2;
@@ -125,8 +124,8 @@ public class NoteGuesserView extends Panel
 
             if ( !isActuallyALine ) {
                 float alpha = (float) ( 0.175f / Math.pow(2,vm.level().get()) );
-                g2d.setStroke(new BasicStroke(2));
-                g2d.setColor(shouldDrawFullLine ? Color.BLACK : new Color(0,0,0,alpha));
+                g2d.setStroke(new java.awt.BasicStroke(2));
+                g2d.setColor(shouldDrawFullLine ? Color.BLACK : Color.of(0,0,0,alpha));
                 g2d.drawLine(lineStartX, lineY, lineEndX, lineY);
 
                 // Now we draw support lines depending on the note index:
@@ -160,8 +159,8 @@ public class NoteGuesserView extends Panel
                     int noteLabelX = x - 30 + (isActuallyALine ? 15 : 0);
                     int noteLabelY = lineY + distanceBetween2Lines / 5;
                     int fontSize = distanceBetween2Lines / 2;
-                    Font derivedFont = g2d.getFont().deriveFont((float) fontSize);
-                    derivedFont = derivedFont.deriveFont(derivedFont.getStyle() | Font.BOLD);
+                    java.awt.Font derivedFont = g2d.getFont().deriveFont((float) fontSize);
+                    derivedFont = derivedFont.deriveFont(derivedFont.getStyle() | java.awt.Font.BOLD);
                     g2d.setFont(derivedFont);
                     g2d.setColor(Color.BLACK);
                     g2d.drawString(note, noteLabelX, noteLabelY);

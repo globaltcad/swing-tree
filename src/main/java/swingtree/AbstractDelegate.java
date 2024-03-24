@@ -134,8 +134,8 @@ abstract class AbstractDelegate<C extends JComponent>
      * @return The delegate itself.
      */
     public final AbstractDelegate<C> setBackground( Color color ) {
-        Objects.requireNonNull(color, "Use UI.Colour.UNDEFINED instead of null to represent the absence of a color.");
-        if ( color == UI.Colour.UNDEFINED)
+        Objects.requireNonNull(color, "Use UI.Color.UNDEFINED instead of null to represent the absence of a color.");
+        if ( color == UI.Color.UNDEFINED)
             _component().setBackground(null);
         else
             _component().setBackground(color);
@@ -220,14 +220,14 @@ abstract class AbstractDelegate<C extends JComponent>
      *  See {@link Component#getBackground()} for more information.
      *  </p>
      *
-     * @return The background color of the component, or {@link swingtree.UI.Colour#UNDEFINED} if the component
+     * @return The background color of the component, or {@link UI.Color#UNDEFINED} if the component
      *         does not have a background color (i.e. {@link Component#getBackground()} returns <code>null</code>).
      *         The return value will never be <code>null</code>.
      */
     public final Color getBackground() {
         Color backgroundColor = _component().getBackground();
         if ( backgroundColor == null )
-            return UI.Colour.UNDEFINED;
+            return UI.Color.UNDEFINED;
         else
             return backgroundColor;
     }
@@ -246,8 +246,8 @@ abstract class AbstractDelegate<C extends JComponent>
      * @return The delegate itself.
      */
     public final AbstractDelegate<C> setForeground( Color color ) {
-        Objects.requireNonNull(color, "Use UI.Colour.UNDEFINED instead of null to represent the absence of a color.");
-        if ( color == UI.Colour.UNDEFINED)
+        Objects.requireNonNull(color, "Use UI.Color.UNDEFINED instead of null to represent the absence of a color.");
+        if ( color == UI.Color.UNDEFINED)
             _component().setForeground( null );
         else
             _component().setForeground( color );
@@ -261,14 +261,14 @@ abstract class AbstractDelegate<C extends JComponent>
      *  See {@link Component#getForeground()} for more information.
      *  </p>
      *
-     * @return The foreground color of the component, or {@link UI.Colour#UNDEFINED} if the component
+     * @return The foreground color of the component, or {@link UI.Color#UNDEFINED} if the component
      *        does not have a foreground color (i.e. {@link Component#getForeground()} returns <code>null</code>).
      *        The return value will never be <code>null</code>.
      */
     public final Color getForeground() {
         Color foregroundColor = _component().getForeground();
         if ( foregroundColor == null )
-            return UI.Colour.UNDEFINED;
+            return UI.Color.UNDEFINED;
         else
             return foregroundColor;
     }

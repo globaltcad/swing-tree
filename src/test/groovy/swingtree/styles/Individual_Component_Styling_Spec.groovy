@@ -250,7 +250,7 @@ class Individual_Component_Styling_Spec extends Specification
                 component being a SwingTree component (it has the paint method overridden).
 
                 So what we do here is we set the background color of the component to
-                UI.Colour.UNDEFINED, which is a special color that is actually fully transparent.
+                UI.Color.UNDEFINED, which is a special color that is actually fully transparent.
 
                 This way, when the Swing look and feel tries to paint the background of the
                 component, it will actually paint nothing, and we can do the background
@@ -1234,7 +1234,7 @@ class Individual_Component_Styling_Spec extends Specification
             component being a SwingTree component (it has the paint method overridden).
 
             So what we do here is we set the background color of the component to
-            UI.Colour.UNDEFINED, which is a special color that is actually fully transparent.
+            UI.Color.UNDEFINED, which is a special color that is actually fully transparent.
 
             This way, when the Swing look and feel tries to paint the background of the
             component, it will actually paint nothing, and we can do the background

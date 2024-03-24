@@ -1210,7 +1210,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I withRoundedLineBorder() { return withRoundedLineBorder(Color.BLACK, 1); }
+    public final I withRoundedLineBorder() { return withRoundedLineBorder(java.awt.Color.BLACK, 1); }
 
     /**
      *  Use this to attach a titled rounded black line {@link Border} with
@@ -1221,7 +1221,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      */
     public final I withRoundedLineBorderTitled( String title ) {
         NullUtil.nullArgCheck( title, "title", String.class );
-        return withRoundedLineBorderTitled( title, Color.BLACK, 1 );
+        return withRoundedLineBorderTitled( title, java.awt.Color.BLACK, 1 );
     }
 
     /**
@@ -1236,7 +1236,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     public final I withRoundedLineBorderTitled( Val<String> title ) {
         NullUtil.nullArgCheck( title, "title", String.class );
         NullUtil.nullPropertyCheck(title, "title", "Null value for title is not allowed! Use an empty String instead!");
-        return withRoundedLineBorderTitled( title, Color.BLACK, 1 );
+        return withRoundedLineBorderTitled( title, java.awt.Color.BLACK, 1 );
     }
 
     /**
@@ -1979,7 +1979,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      */
     public final I withBackground( Color color ) {
         NullUtil.nullArgCheck(color, "color", Color.class);
-        return _with( c -> c.setBackground( color == UI.Colour.UNDEFINED ? null : color) )._this();
+        return _with( c -> c.setBackground( color == UI.Color.UNDEFINED ? null : color) )._this();
     }
 
     /**
@@ -2003,10 +2003,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(bg, "bg", Val.class);
         NullUtil.nullPropertyCheck(bg, "bg", "Please use the default color of this component instead of null!");
         return _withOnShow( bg, (c,v) -> {
-                    c.setBackground( v == UI.Colour.UNDEFINED ? null : v );
+                    c.setBackground( v == UI.Color.UNDEFINED ? null : v );
                 })
                 ._with( c -> {
-                    c.setBackground( bg.get() == UI.Colour.UNDEFINED ? null : bg.get() );
+                    c.setBackground( bg.get() == UI.Color.UNDEFINED ? null : bg.get() );
                 })
                 ._this();
     }
@@ -2031,7 +2031,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 })
                 ._with( c -> {
                     Color newColor =  condition.get() ? colorIfTrue : c.getBackground();
-                    c.setBackground( newColor == UI.Colour.UNDEFINED ? null : newColor );
+                    c.setBackground( newColor == UI.Color.UNDEFINED ? null : newColor );
                 })
                 ._this();
     }
@@ -2057,7 +2057,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 })
                 ._with( c -> {
                     Color newColor = condition.get() ? color.get() : c.getBackground();
-                    c.setBackground( newColor == UI.Colour.UNDEFINED ? null : newColor );
+                    c.setBackground( newColor == UI.Color.UNDEFINED ? null : newColor );
                 })
                 ._this();
     }
@@ -2102,7 +2102,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                })
                ._with( c -> {
                    Color newColor = condition.get() ? colorIfTrue.get() : colorIfFalse.get();
-                   c.setBackground( newColor == UI.Colour.UNDEFINED ? null : newColor );
+                   c.setBackground( newColor == UI.Color.UNDEFINED ? null : newColor );
                })
                ._this();
     }
@@ -2253,7 +2253,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      */
     public final I withForeground( Color color ) {
         NullUtil.nullArgCheck(color, "color", Color.class);
-        return _with( c -> c.setForeground( color == UI.Colour.UNDEFINED ? null : color ) )._this();
+        return _with( c -> c.setForeground( color == UI.Color.UNDEFINED ? null : color ) )._this();
     }
 
     /**
@@ -2277,11 +2277,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(fg, "fg", Val.class);
         NullUtil.nullPropertyCheck(fg, "fg", "Please use the default color of this component instead of null!");
         return _withOnShow( fg, (c,v) -> {
-                    c.setForeground( v == UI.Colour.UNDEFINED ? null : v );
+                    c.setForeground( v == UI.Color.UNDEFINED ? null : v );
                 })
                 ._with( c -> {
                     Color newColor = fg.get();
-                    if ( newColor == UI.Colour.UNDEFINED)
+                    if ( newColor == UI.Color.UNDEFINED)
                         newColor = null;
                     c.setForeground( newColor );
                 })
@@ -2308,7 +2308,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 })
                 ._with( c -> {
                     Color newColor = condition.get() ? fg : c.getForeground();
-                    if ( newColor == UI.Colour.UNDEFINED)
+                    if ( newColor == UI.Color.UNDEFINED)
                         newColor = null;
                     c.setForeground( newColor );
                 })
@@ -2336,7 +2336,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 })
                 ._with( c -> {
                     Color newColor = condition.get() ? color.get() : c.getForeground();
-                    if ( newColor == UI.Colour.UNDEFINED)
+                    if ( newColor == UI.Color.UNDEFINED)
                         newColor = null;
                     c.setForeground( newColor );
                 })
@@ -2363,7 +2363,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 })
                 ._with( c -> {
                     Color newColor = condition.get() ? colorIfTrue : colorIfFalse;
-                    if ( newColor == UI.Colour.UNDEFINED )
+                    if ( newColor == UI.Color.UNDEFINED )
                         newColor = null;
                     c.setForeground( newColor );
                 })
@@ -2398,7 +2398,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 })
                 ._with( c -> {
                     Color newColor = condition.get() ? colorIfTrue.get() : colorIfFalse.get();
-                    if ( newColor == UI.Colour.UNDEFINED)
+                    if ( newColor == UI.Color.UNDEFINED)
                         newColor = null;
                     c.setForeground( newColor );
                 })
@@ -2412,7 +2412,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         Val<Color>   baseColor
     ) {
         Color newColor = condition.is(true) ? color.get() : baseColor.get();
-        if ( newColor == UI.Colour.UNDEFINED)
+        if ( newColor == UI.Color.UNDEFINED)
             newColor = null;
 
         component.setForeground(newColor);
@@ -2425,7 +2425,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
             Val<Color> baseColor
     ) {
         Color newColor =  condition.is(true) ? color.get() : baseColor.get();
-        if ( newColor == UI.Colour.UNDEFINED)
+        if ( newColor == UI.Color.UNDEFINED)
             newColor = null;
 
         component.setBackground(newColor);

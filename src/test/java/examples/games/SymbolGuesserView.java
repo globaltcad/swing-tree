@@ -4,14 +4,13 @@ import com.formdev.flatlaf.FlatLightLaf;
 import swingtree.UI;
 
 import javax.swing.*;
-import java.awt.*;
 
 import static swingtree.UI.Panel;
 import static swingtree.UI.*;
 
 public class SymbolGuesserView extends Panel
 {
-    private final Color BACKGROUND = new Color(255, 255, 255,255);
+    private final Color BACKGROUND = new java.awt.Color(255, 255, 255,255);
 
     public SymbolGuesserView(SymbolGuesserViewModel vm) {
         FlatLightLaf.setup();
@@ -23,19 +22,19 @@ public class SymbolGuesserView extends Panel
             .add(ALIGN_X_CENTER.and(GROW_X),
                 panel(INS(12).and(WRAP(1)), "[grow]").withStyle( it -> it.borderRadius(24) )
                 .add(ALIGN_X_CENTER,
-                    label("Which symbol is this?").withFont(new Font("Arial", Font.BOLD, 24))
+                    label("Which symbol is this?").withFont(new java.awt.Font("Arial", java.awt.Font.BOLD, 24))
                 )
                 .add(ALIGN_X_CENTER,
                     panel(FILL.and(INS(48))).withRepaintOn(vm.getRepaintEvent())
                     .withStyle( it ->
                         it.backgroundColor(BACKGROUND.brighter())
-                          .foundationColor(new Color(255,255,255, 0))
+                          .foundationColor(new java.awt.Color(255,255,255, 0))
                           .margin(22)
                           .padding(22)
                           .borderRadius(37)
                           .borderWidth(1)
-                          .borderColor(new Color(0, 0, 0,255))
-                          .shadowColor(new Color(64,64,64,255))
+                          .borderColor(new java.awt.Color(0, 0, 0,255))
+                          .shadowColor(new java.awt.Color(64,64,64,255))
                           .shadowBlurRadius(7)
                           .shadowSpreadRadius(2)
                           .shadowIsInset(false)

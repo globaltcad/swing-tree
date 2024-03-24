@@ -100,10 +100,10 @@ public abstract class UINamespaceUtilities extends UILayoutConstants
      * @throws IllegalArgumentException If the string could not be parsed.
      * @throws NullPointerException If the string is null.
      */
-    public static Color color( final String colorAsString )
+    public static Color color(final String colorAsString )
     {
         Objects.requireNonNull(colorAsString);
-        return UI.Colour.of(colorAsString);
+        return UI.Color.of(colorAsString);
     }
 
     /**

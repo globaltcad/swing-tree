@@ -6943,42 +6943,17 @@ public final class UI extends UINamespaceUtilities
     public static class SplitButton extends JSplitButton {/* Already implemented */}
 
     /**
-     *  This constant is a {@link swingtree.UI.Colour} object with all of its rgba values set to 0.
-     *  Its identity is used to represent the absence of a color being specified,
-     *  and it is used as a safe replacement for null,
-     *  meaning that when the style engine of a component encounters it, it will pass it onto
-     *  the {@link java.awt.Component#setBackground(Color)} and
-     *  {@link java.awt.Component#setForeground(Color)} methods as null.
-     *  Passing null to these methods means that the look and feel determines the coloring.
-     */
-    public static final UI.Colour COLOR_UNDEFINED = UI.Colour.UNDEFINED;
-
-    /**
-     * The {@code Colour} class is a refined and more complete/modernized
-     * implementation of the {@link Color} class which models colors in the default
+     * This {@code Color} class is a refined and more complete/modernized
+     * implementation of the {@link java.awt.Color} class which models colors in the default
      * sRGB color space or colors in arbitrary color spaces identified by a
      * {@link ColorSpace}.
      * <br>
-     * The original {@link Color} class is an immutable and value based class
+     * The original {@link java.awt.Color} class is an immutable and value based class
      * (it overrides {@link Object#equals(Object) equals} and {@link Object#hashCode() hashCode})
      * but it is missing so called with-methods, which are a modern way to create
      * updated copies of an object without having to call the full constructor
      * with all the parameters.
      * <p>
-     * Another big shortcoming addressed by this class is that it corrects the spelling
-     * of {@link Color} as most english speaking countries agree on the word being spelled "colour"
-     * (Great Britain, Canada, Australia, New Zealand, South africa, India, Ireland, ...).
-     * Let's not kid ourselves, "Colour" has much more class than "Color".
-     * <p>
-     * But all jokes aside, <b>we are well aware that the convention in Java is to use
-     * the American spelling of the word, and because we value convention
-     * this is also the preferred spelling in the rest of the SwingTree library. <br>
-     * Nonetheless there is a need to cleanly bundle the set of color related features
-     * required for developing modern applications in Java in one API,
-     * as the alternative so far has been countless utility classes
-     * within the codebase of every project. <br>
-     * And since Java will probably never get extension methods,
-     * this is the most elegant solution to the problem.</b>
      * Here a list of the most useful features additionally provided by this class:
      * <p>
      *     <b>With-Methods</b>
@@ -7002,9 +6977,9 @@ public final class UI extends UINamespaceUtilities
      *          <li>{@link #AQUAMARINE}</li>
      *          <li>...</li>
      *      </ul>
-     *      Also note that this class overrides and fixes the {@link Color#darker()}
-     *      and {@link Color#brighter()} methods. Not only do they now return
-     *      a {@code Colour} type, but also use an implementation which updates the
+     *      Also note that this class overrides and fixes the {@link java.awt.Color#darker()}
+     *      and {@link java.awt.Color#brighter()} methods. Not only do they now return
+     *      a {@code Color} type, but also use an implementation which updates the
      *      brightness/darkness in terms of the HSB color space.<br>
      *      (The original implementation considers colors like
      *      {@code Color.BLUE}, {@code Color.RED} and {@code Color.GREEN}
@@ -7013,20 +6988,20 @@ public final class UI extends UINamespaceUtilities
      * </p>
      * <p>
      * Besides the RGB values every
-     * fully opaque {@code Colour} also has an implicit alpha value of 1.0.
-     * But you may also construct a {@code Colour} with an explicit alpha value
-     * by using the {@link #Colour(float, float, float, float)} constructor for example.
-     * The alpha value defines the transparency of a colour and can be represented by
+     * fully opaque {@code Color} also has an implicit alpha value of 1.0.
+     * But you may also construct a {@code Color} with an explicit alpha value
+     * by using the {@link #Color(float, float, float, float)} constructor for example.
+     * The alpha value defines the transparency of a color and can be represented by
      * a float value in the range 0.0&nbsp;-&nbsp;1.0 or 0&nbsp;-&nbsp;255.
-     * An alpha value of 1.0 or 255 means that the colour is completely
-     * opaque and an alpha value of 0 or 0.0 means that the colour is
+     * An alpha value of 1.0 or 255 means that the color is completely
+     * opaque and an alpha value of 0 or 0.0 means that the color is
      * completely transparent.
-     * When constructing a {@code Colour} with an explicit alpha or
-     * getting the colour/alpha components of a {@code Colour}, the colour
+     * When constructing a {@code Color} with an explicit alpha or
+     * getting the color/alpha components of a {@code Color}, the color
      * components are never premultiplied by the alpha component.
      * <p>
-     * The default colour space for the Java 2D(tm) API is sRGB, a proposed
-     * standard RGB colour space.  For further information on sRGB,
+     * The default color space for the Java 2D(tm) API is sRGB, a proposed
+     * standard RGB color space.  For further information on sRGB,
      * see <A href="http://www.w3.org/pub/WWW/Graphics/Color/sRGB.html">
      * http://www.w3.org/pub/WWW/Graphics/Color/sRGB.html
      * </A>.
@@ -7036,896 +7011,905 @@ public final class UI extends UINamespaceUtilities
      * @see         ColorSpace
      * @see         AlphaComposite
      */
-    public static final class Colour extends Color
+    public static final class Color extends java.awt.Color
     {
-        private static final Logger log = LoggerFactory.getLogger(Colour.class);
+        private static final Logger log = LoggerFactory.getLogger(Color.class);
 
-        public static final Colour UNDEFINED = new Colour(0f, 0f, 0f, 0f);
+        /**
+         *  This constant is a {@link Color} object with all of its rgba values set to 0.
+         *  Its identity is used to represent the absence of a color being specified,
+         *  and it is used as a safe replacement for null,
+         *  meaning that when the style engine of a component encounters it, it will pass it onto
+         *  the {@link java.awt.Component#setBackground(java.awt.Color)} and
+         *  {@link java.awt.Component#setForeground(java.awt.Color)} methods as null.
+         *  Passing null to these methods means that the look and feel determines the coloring.
+         */
+        public static final Color UNDEFINED = new Color(0f, 0f, 0f, 0f);
         /**
          * A fully transparent color with an ARGB value of #00000000.
          */
-        public static final Colour TRANSPARENT = new Colour(0f, 0f, 0f, 0f);
+        public static final Color TRANSPARENT = new Color(0f, 0f, 0f, 0f);
 
         /**
          * The color alice blue with an RGB value of #F0F8FF
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#F0F8FF;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour ALICEBLUE = new Colour(0.9411765f, 0.972549f, 1.0f);
+        public static final Color ALICEBLUE = new Color(0.9411765f, 0.972549f, 1.0f);
 
         /**
          * The color antique white with an RGB value of #FAEBD7
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#FAEBD7;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour ANTIQUEWHITE = new Colour(0.98039216f, 0.92156863f, 0.84313726f);
+        public static final Color ANTIQUEWHITE = new Color(0.98039216f, 0.92156863f, 0.84313726f);
 
         /**
          * The color aqua with an RGB value of #00FFFF
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#00FFFF;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour AQUA = new Colour(0.0f, 1.0f, 1.0f);
+        public static final Color AQUA = new Color(0.0f, 1.0f, 1.0f);
 
         /**
          * The color aquamarine with an RGB value of #7FFFD4
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#7FFFD4;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour AQUAMARINE = new Colour(0.49803922f, 1.0f, 0.83137256f);
+        public static final Color AQUAMARINE = new Color(0.49803922f, 1.0f, 0.83137256f);
 
         /**
          * The color azure with an RGB value of #F0FFFF
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#F0FFFF;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour AZURE = new Colour(0.9411765f, 1.0f, 1.0f);
+        public static final Color AZURE = new Color(0.9411765f, 1.0f, 1.0f);
 
         /**
          * The color beige with an RGB value of #F5F5DC
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#F5F5DC;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour BEIGE = new Colour(0.9607843f, 0.9607843f, 0.8627451f);
+        public static final Color BEIGE = new Color(0.9607843f, 0.9607843f, 0.8627451f);
 
         /**
          * The color bisque with an RGB value of #FFE4C4
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#FFE4C4;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour BISQUE = new Colour(1.0f, 0.89411765f, 0.76862746f);
+        public static final Color BISQUE = new Color(1.0f, 0.89411765f, 0.76862746f);
 
         /**
          * The color black with an RGB value of #000000
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#000000;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour BLACK = new Colour(0.0f, 0.0f, 0.0f);
+        public static final Color BLACK = new Color(0.0f, 0.0f, 0.0f);
 
         /**
          * The color blanched almond with an RGB value of #FFEBCD
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#FFEBCD;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour BLANCHEDALMOND = new Colour(1.0f, 0.92156863f, 0.8039216f);
+        public static final Color BLANCHEDALMOND = new Color(1.0f, 0.92156863f, 0.8039216f);
 
         /**
          * The color blue with an RGB value of #0000FF
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#0000FF;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour BLUE = new Colour(0.0f, 0.0f, 1.0f);
+        public static final Color BLUE = new Color(0.0f, 0.0f, 1.0f);
 
         /**
          * The color blue violet with an RGB value of #8A2BE2
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#8A2BE2;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour BLUEVIOLET = new Colour(0.5411765f, 0.16862746f, 0.8862745f);
+        public static final Color BLUEVIOLET = new Color(0.5411765f, 0.16862746f, 0.8862745f);
 
         /**
          * The color brown with an RGB value of #A52A2A
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#A52A2A;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour BROWN = new Colour(0.64705884f, 0.16470589f, 0.16470589f);
+        public static final Color BROWN = new Color(0.64705884f, 0.16470589f, 0.16470589f);
 
         /**
          * The color burly wood with an RGB value of #DEB887
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#DEB887;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour BURLYWOOD = new Colour(0.87058824f, 0.72156864f, 0.5294118f);
+        public static final Color BURLYWOOD = new Color(0.87058824f, 0.72156864f, 0.5294118f);
 
         /**
          * The color cadet blue with an RGB value of #5F9EA0
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#5F9EA0;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour CADETBLUE = new Colour(0.37254903f, 0.61960787f, 0.627451f);
+        public static final Color CADETBLUE = new Color(0.37254903f, 0.61960787f, 0.627451f);
 
         /**
          * The color chartreuse with an RGB value of #7FFF00
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#7FFF00;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour CHARTREUSE = new Colour(0.49803922f, 1.0f, 0.0f);
+        public static final Color CHARTREUSE = new Color(0.49803922f, 1.0f, 0.0f);
 
         /**
          * The color chocolate with an RGB value of #D2691E
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#D2691E;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour CHOCOLATE = new Colour(0.8235294f, 0.4117647f, 0.11764706f);
+        public static final Color CHOCOLATE = new Color(0.8235294f, 0.4117647f, 0.11764706f);
 
         /**
          * The color coral with an RGB value of #FF7F50
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#FF7F50;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour CORAL = new Colour(1.0f, 0.49803922f, 0.3137255f);
+        public static final Color CORAL = new Color(1.0f, 0.49803922f, 0.3137255f);
 
         /**
          * The color cornflower blue with an RGB value of #6495ED
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#6495ED;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour CORNFLOWERBLUE = new Colour(0.39215687f, 0.58431375f, 0.92941177f);
+        public static final Color CORNFLOWERBLUE = new Color(0.39215687f, 0.58431375f, 0.92941177f);
 
         /**
          * The color cornsilk with an RGB value of #FFF8DC
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#FFF8DC;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour CORNSILK = new Colour(1.0f, 0.972549f, 0.8627451f);
+        public static final Color CORNSILK = new Color(1.0f, 0.972549f, 0.8627451f);
 
         /**
          * The color crimson with an RGB value of #DC143C
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#DC143C;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour CRIMSON = new Colour(0.8627451f, 0.078431375f, 0.23529412f);
+        public static final Color CRIMSON = new Color(0.8627451f, 0.078431375f, 0.23529412f);
 
         /**
          * The color cyan with an RGB value of #00FFFF
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#00FFFF;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour CYAN = new Colour(0.0f, 1.0f, 1.0f);
+        public static final Color CYAN = new Color(0.0f, 1.0f, 1.0f);
 
         /**
          * The color dark blue with an RGB value of #00008B
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#00008B;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour DARKBLUE = new Colour(0.0f, 0.0f, 0.54509807f);
+        public static final Color DARKBLUE = new Color(0.0f, 0.0f, 0.54509807f);
 
         /**
          * The color dark cyan with an RGB value of #008B8B
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#008B8B;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour DARKCYAN = new Colour(0.0f, 0.54509807f, 0.54509807f);
+        public static final Color DARKCYAN = new Color(0.0f, 0.54509807f, 0.54509807f);
 
         /**
          * The color dark goldenrod with an RGB value of #B8860B
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#B8860B;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour DARKGOLDENROD = new Colour(0.72156864f, 0.5254902f, 0.043137256f);
+        public static final Color DARKGOLDENROD = new Color(0.72156864f, 0.5254902f, 0.043137256f);
 
         /**
          * The color dark gray with an RGB value of #A9A9A9
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#A9A9A9;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour DARKGRAY = new Colour(0.6627451f, 0.6627451f, 0.6627451f);
+        public static final Color DARKGRAY = new Color(0.6627451f, 0.6627451f, 0.6627451f);
 
         /**
          * The color dark green with an RGB value of #006400
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#006400;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour DARKGREEN = new Colour(0.0f, 0.39215687f, 0.0f);
+        public static final Color DARKGREEN = new Color(0.0f, 0.39215687f, 0.0f);
 
         /**
          * The color dark grey with an RGB value of #A9A9A9
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#A9A9A9;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour DARKGREY             = DARKGRAY;
+        public static final Color DARKGREY             = DARKGRAY;
 
         /**
          * The color dark khaki with an RGB value of #BDB76B
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#BDB76B;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour DARKKHAKI = new Colour(0.7411765f, 0.7176471f, 0.41960785f);
+        public static final Color DARKKHAKI = new Color(0.7411765f, 0.7176471f, 0.41960785f);
 
         /**
          * The color dark magenta with an RGB value of #8B008B
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#8B008B;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour DARKMAGENTA = new Colour(0.54509807f, 0.0f, 0.54509807f);
+        public static final Color DARKMAGENTA = new Color(0.54509807f, 0.0f, 0.54509807f);
 
         /**
          * The color dark olive green with an RGB value of #556B2F
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#556B2F;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour DARKOLIVEGREEN = new Colour(0.33333334f, 0.41960785f, 0.18431373f);
+        public static final Color DARKOLIVEGREEN = new Color(0.33333334f, 0.41960785f, 0.18431373f);
 
         /**
          * The color dark orange with an RGB value of #FF8C00
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#FF8C00;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour DARKORANGE = new Colour(1.0f, 0.54901963f, 0.0f);
+        public static final Color DARKORANGE = new Color(1.0f, 0.54901963f, 0.0f);
 
         /**
          * The color dark orchid with an RGB value of #9932CC
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#9932CC;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour DARKORCHID = new Colour(0.6f, 0.19607843f, 0.8f);
+        public static final Color DARKORCHID = new Color(0.6f, 0.19607843f, 0.8f);
 
         /**
          * The color dark red with an RGB value of #8B0000
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#8B0000;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour DARKRED = new Colour(0.54509807f, 0.0f, 0.0f);
+        public static final Color DARKRED = new Color(0.54509807f, 0.0f, 0.0f);
 
         /**
          * The color dark salmon with an RGB value of #E9967A
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#E9967A;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour DARKSALMON = new Colour(0.9137255f, 0.5882353f, 0.47843137f);
+        public static final Color DARKSALMON = new Color(0.9137255f, 0.5882353f, 0.47843137f);
 
         /**
          * The color dark sea green with an RGB value of #8FBC8F
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#8FBC8F;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour DARKSEAGREEN = new Colour(0.56078434f, 0.7372549f, 0.56078434f);
+        public static final Color DARKSEAGREEN = new Color(0.56078434f, 0.7372549f, 0.56078434f);
 
         /**
          * The color dark slate blue with an RGB value of #483D8B
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#483D8B;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour DARKSLATEBLUE = new Colour(0.28235295f, 0.23921569f, 0.54509807f);
+        public static final Color DARKSLATEBLUE = new Color(0.28235295f, 0.23921569f, 0.54509807f);
 
         /**
          * The color dark slate gray with an RGB value of #2F4F4F
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#2F4F4F;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour DARKSLATEGRAY = new Colour(0.18431373f, 0.30980393f, 0.30980393f);
+        public static final Color DARKSLATEGRAY = new Color(0.18431373f, 0.30980393f, 0.30980393f);
 
         /**
          * The color dark slate grey with an RGB value of #2F4F4F
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#2F4F4F;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour DARKSLATEGREY        = DARKSLATEGRAY;
+        public static final Color DARKSLATEGREY        = DARKSLATEGRAY;
 
         /**
          * The color dark turquoise with an RGB value of #00CED1
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#00CED1;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour DARKTURQUOISE = new Colour(0.0f, 0.80784315f, 0.81960785f);
+        public static final Color DARKTURQUOISE = new Color(0.0f, 0.80784315f, 0.81960785f);
 
         /**
          * The color dark violet with an RGB value of #9400D3
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#9400D3;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour DARKVIOLET = new Colour(0.5803922f, 0.0f, 0.827451f);
+        public static final Color DARKVIOLET = new Color(0.5803922f, 0.0f, 0.827451f);
 
         /**
          * The color deep pink with an RGB value of #FF1493
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#FF1493;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour DEEPPINK = new Colour(1.0f, 0.078431375f, 0.5764706f);
+        public static final Color DEEPPINK = new Color(1.0f, 0.078431375f, 0.5764706f);
 
         /**
          * The color deep sky blue with an RGB value of #00BFFF
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#00BFFF;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour DEEPSKYBLUE = new Colour(0.0f, 0.7490196f, 1.0f);
+        public static final Color DEEPSKYBLUE = new Color(0.0f, 0.7490196f, 1.0f);
 
         /**
          * The color dim gray with an RGB value of #696969
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#696969;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour DIMGRAY = new Colour(0.4117647f, 0.4117647f, 0.4117647f);
+        public static final Color DIMGRAY = new Color(0.4117647f, 0.4117647f, 0.4117647f);
 
         /**
          * The color dim grey with an RGB value of #696969
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#696969;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour DIMGREY              = DIMGRAY;
+        public static final Color DIMGREY              = DIMGRAY;
 
         /**
          * The color dodger blue with an RGB value of #1E90FF
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#1E90FF;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour DODGERBLUE = new Colour(0.11764706f, 0.5647059f, 1.0f);
+        public static final Color DODGERBLUE = new Color(0.11764706f, 0.5647059f, 1.0f);
 
         /**
          * The color firebrick with an RGB value of #B22222
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#B22222;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour FIREBRICK = new Colour(0.69803923f, 0.13333334f, 0.13333334f);
+        public static final Color FIREBRICK = new Color(0.69803923f, 0.13333334f, 0.13333334f);
 
         /**
          * The color floral white with an RGB value of #FFFAF0
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#FFFAF0;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour FLORALWHITE = new Colour(1.0f, 0.98039216f, 0.9411765f);
+        public static final Color FLORALWHITE = new Color(1.0f, 0.98039216f, 0.9411765f);
 
         /**
          * The color forest green with an RGB value of #228B22
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#228B22;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour FORESTGREEN = new Colour(0.13333334f, 0.54509807f, 0.13333334f);
+        public static final Color FORESTGREEN = new Color(0.13333334f, 0.54509807f, 0.13333334f);
 
         /**
          * The color fuchsia with an RGB value of #FF00FF
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#FF00FF;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour FUCHSIA = new Colour(1.0f, 0.0f, 1.0f);
+        public static final Color FUCHSIA = new Color(1.0f, 0.0f, 1.0f);
 
         /**
          * The color gainsboro with an RGB value of #DCDCDC
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#DCDCDC;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour GAINSBORO = new Colour(0.8627451f, 0.8627451f, 0.8627451f);
+        public static final Color GAINSBORO = new Color(0.8627451f, 0.8627451f, 0.8627451f);
 
         /**
          * The color ghost white with an RGB value of #F8F8FF
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#F8F8FF;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour GHOSTWHITE = new Colour(0.972549f, 0.972549f, 1.0f);
+        public static final Color GHOSTWHITE = new Color(0.972549f, 0.972549f, 1.0f);
 
         /**
          * The color gold with an RGB value of #FFD700
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#FFD700;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour GOLD = new Colour(1.0f, 0.84313726f, 0.0f);
+        public static final Color GOLD = new Color(1.0f, 0.84313726f, 0.0f);
 
         /**
          * The color goldenrod with an RGB value of #DAA520
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#DAA520;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour GOLDENROD = new Colour(0.85490197f, 0.64705884f, 0.1254902f);
+        public static final Color GOLDENROD = new Color(0.85490197f, 0.64705884f, 0.1254902f);
 
         /**
          * The color gray with an RGB value of #808080
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#808080;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour GRAY = new Colour(0.5019608f, 0.5019608f, 0.5019608f);
+        public static final Color GRAY = new Color(0.5019608f, 0.5019608f, 0.5019608f);
 
         /**
          * The color green with an RGB value of #008000
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#008000;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour GREEN = new Colour(0.0f, 0.5019608f, 0.0f);
+        public static final Color GREEN = new Color(0.0f, 0.5019608f, 0.0f);
 
         /**
          * The color green yellow with an RGB value of #ADFF2F
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#ADFF2F;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour GREENYELLOW = new Colour(0.6784314f, 1.0f, 0.18431373f);
+        public static final Color GREENYELLOW = new Color(0.6784314f, 1.0f, 0.18431373f);
 
         /**
          * The color grey with an RGB value of #808080
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#808080;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour GREY                 = GRAY;
+        public static final Color GREY                 = GRAY;
 
         /**
          * The color honeydew with an RGB value of #F0FFF0
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#F0FFF0;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour HONEYDEW = new Colour(0.9411765f, 1.0f, 0.9411765f);
+        public static final Color HONEYDEW = new Color(0.9411765f, 1.0f, 0.9411765f);
 
         /**
          * The color hot pink with an RGB value of #FF69B4
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#FF69B4;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour HOTPINK = new Colour(1.0f, 0.4117647f, 0.7058824f);
+        public static final Color HOTPINK = new Color(1.0f, 0.4117647f, 0.7058824f);
 
         /**
          * The color indian red with an RGB value of #CD5C5C
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#CD5C5C;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour INDIANRED = new Colour(0.8039216f, 0.36078432f, 0.36078432f);
+        public static final Color INDIANRED = new Color(0.8039216f, 0.36078432f, 0.36078432f);
 
         /**
          * The color indigo with an RGB value of #4B0082
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#4B0082;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour INDIGO = new Colour(0.29411766f, 0.0f, 0.50980395f);
+        public static final Color INDIGO = new Color(0.29411766f, 0.0f, 0.50980395f);
 
         /**
          * The color ivory with an RGB value of #FFFFF0
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#FFFFF0;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour IVORY = new Colour(1.0f, 1.0f, 0.9411765f);
+        public static final Color IVORY = new Color(1.0f, 1.0f, 0.9411765f);
 
         /**
          * The color khaki with an RGB value of #F0E68C
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#F0E68C;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour KHAKI = new Colour(0.9411765f, 0.9019608f, 0.54901963f);
+        public static final Color KHAKI = new Color(0.9411765f, 0.9019608f, 0.54901963f);
 
         /**
          * The color lavender with an RGB value of #E6E6FA
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#E6E6FA;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour LAVENDER = new Colour(0.9019608f, 0.9019608f, 0.98039216f);
+        public static final Color LAVENDER = new Color(0.9019608f, 0.9019608f, 0.98039216f);
 
         /**
          * The color lavender blush with an RGB value of #FFF0F5
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#FFF0F5;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour LAVENDERBLUSH = new Colour(1.0f, 0.9411765f, 0.9607843f);
+        public static final Color LAVENDERBLUSH = new Color(1.0f, 0.9411765f, 0.9607843f);
 
         /**
          * The color lawn green with an RGB value of #7CFC00
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#7CFC00;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour LAWNGREEN = new Colour(0.4862745f, 0.9882353f, 0.0f);
+        public static final Color LAWNGREEN = new Color(0.4862745f, 0.9882353f, 0.0f);
 
         /**
          * The color lemon chiffon with an RGB value of #FFFACD
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#FFFACD;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour LEMONCHIFFON = new Colour(1.0f, 0.98039216f, 0.8039216f);
+        public static final Color LEMONCHIFFON = new Color(1.0f, 0.98039216f, 0.8039216f);
 
         /**
          * The color light blue with an RGB value of #ADD8E6
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#ADD8E6;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour LIGHTBLUE = new Colour(0.6784314f, 0.84705883f, 0.9019608f);
+        public static final Color LIGHTBLUE = new Color(0.6784314f, 0.84705883f, 0.9019608f);
 
         /**
          * The color light coral with an RGB value of #F08080
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#F08080;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour LIGHTCORAL = new Colour(0.9411765f, 0.5019608f, 0.5019608f);
+        public static final Color LIGHTCORAL = new Color(0.9411765f, 0.5019608f, 0.5019608f);
 
         /**
          * The color light cyan with an RGB value of #E0FFFF
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#E0FFFF;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour LIGHTCYAN = new Colour(0.8784314f, 1.0f, 1.0f);
+        public static final Color LIGHTCYAN = new Color(0.8784314f, 1.0f, 1.0f);
 
         /**
          * The color light goldenrod yellow with an RGB value of #FAFAD2
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#FAFAD2;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour LIGHTGOLDENRODYELLOW = new Colour(0.98039216f, 0.98039216f, 0.8235294f);
+        public static final Color LIGHTGOLDENRODYELLOW = new Color(0.98039216f, 0.98039216f, 0.8235294f);
 
         /**
          * The color light gray with an RGB value of #D3D3D3
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#D3D3D3;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour LIGHTGRAY = new Colour(0.827451f, 0.827451f, 0.827451f);
+        public static final Color LIGHTGRAY = new Color(0.827451f, 0.827451f, 0.827451f);
 
         /**
          * The color light green with an RGB value of #90EE90
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#90EE90;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour LIGHTGREEN = new Colour(0.5647059f, 0.93333334f, 0.5647059f);
+        public static final Color LIGHTGREEN = new Color(0.5647059f, 0.93333334f, 0.5647059f);
 
         /**
          * The color light grey with an RGB value of #D3D3D3
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#D3D3D3;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour LIGHTGREY            = LIGHTGRAY;
+        public static final Color LIGHTGREY            = LIGHTGRAY;
 
         /**
          * The color light pink with an RGB value of #FFB6C1
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#FFB6C1;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour LIGHTPINK = new Colour(1.0f, 0.7137255f, 0.75686276f);
+        public static final Color LIGHTPINK = new Color(1.0f, 0.7137255f, 0.75686276f);
 
         /**
          * The color light salmon with an RGB value of #FFA07A
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#FFA07A;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour LIGHTSALMON = new Colour(1.0f, 0.627451f, 0.47843137f);
+        public static final Color LIGHTSALMON = new Color(1.0f, 0.627451f, 0.47843137f);
 
         /**
          * The color light sea green with an RGB value of #20B2AA
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#20B2AA;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour LIGHTSEAGREEN = new Colour(0.1254902f, 0.69803923f, 0.6666667f);
+        public static final Color LIGHTSEAGREEN = new Color(0.1254902f, 0.69803923f, 0.6666667f);
 
         /**
          * The color light sky blue with an RGB value of #87CEFA
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#87CEFA;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour LIGHTSKYBLUE = new Colour(0.5294118f, 0.80784315f, 0.98039216f);
+        public static final Color LIGHTSKYBLUE = new Color(0.5294118f, 0.80784315f, 0.98039216f);
 
         /**
          * The color light slate gray with an RGB value of #778899
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#778899;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour LIGHTSLATEGRAY = new Colour(0.46666667f, 0.53333336f, 0.6f);
+        public static final Color LIGHTSLATEGRAY = new Color(0.46666667f, 0.53333336f, 0.6f);
 
         /**
          * The color light slate grey with an RGB value of #778899
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#778899;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour LIGHTSLATEGREY       = LIGHTSLATEGRAY;
+        public static final Color LIGHTSLATEGREY       = LIGHTSLATEGRAY;
 
         /**
          * The color light steel blue with an RGB value of #B0C4DE
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#B0C4DE;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour LIGHTSTEELBLUE = new Colour(0.6901961f, 0.76862746f, 0.87058824f);
+        public static final Color LIGHTSTEELBLUE = new Color(0.6901961f, 0.76862746f, 0.87058824f);
 
         /**
          * The color light yellow with an RGB value of #FFFFE0
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#FFFFE0;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour LIGHTYELLOW = new Colour(1.0f, 1.0f, 0.8784314f);
+        public static final Color LIGHTYELLOW = new Color(1.0f, 1.0f, 0.8784314f);
 
         /**
          * The color lime with an RGB value of #00FF00
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#00FF00;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour LIME = new Colour(0.0f, 1.0f, 0.0f);
+        public static final Color LIME = new Color(0.0f, 1.0f, 0.0f);
 
         /**
          * The color lime green with an RGB value of #32CD32
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#32CD32;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour LIMEGREEN = new Colour(0.19607843f, 0.8039216f, 0.19607843f);
+        public static final Color LIMEGREEN = new Color(0.19607843f, 0.8039216f, 0.19607843f);
 
         /**
          * The color linen with an RGB value of #FAF0E6
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#FAF0E6;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour LINEN = new Colour(0.98039216f, 0.9411765f, 0.9019608f);
+        public static final Color LINEN = new Color(0.98039216f, 0.9411765f, 0.9019608f);
 
         /**
          * The color magenta with an RGB value of #FF00FF
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#FF00FF;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour MAGENTA = new Colour(1.0f, 0.0f, 1.0f);
+        public static final Color MAGENTA = new Color(1.0f, 0.0f, 1.0f);
 
         /**
          * The color maroon with an RGB value of #800000
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#800000;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour MAROON = new Colour(0.5019608f, 0.0f, 0.0f);
+        public static final Color MAROON = new Color(0.5019608f, 0.0f, 0.0f);
 
         /**
          * The color medium aquamarine with an RGB value of #66CDAA
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#66CDAA;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour MEDIUMAQUAMARINE = new Colour(0.4f, 0.8039216f, 0.6666667f);
+        public static final Color MEDIUMAQUAMARINE = new Color(0.4f, 0.8039216f, 0.6666667f);
 
         /**
          * The color medium blue with an RGB value of #0000CD
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#0000CD;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour MEDIUMBLUE = new Colour(0.0f, 0.0f, 0.8039216f);
+        public static final Color MEDIUMBLUE = new Color(0.0f, 0.0f, 0.8039216f);
 
         /**
          * The color medium orchid with an RGB value of #BA55D3
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#BA55D3;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour MEDIUMORCHID = new Colour(0.7294118f, 0.33333334f, 0.827451f);
+        public static final Color MEDIUMORCHID = new Color(0.7294118f, 0.33333334f, 0.827451f);
 
         /**
          * The color medium purple with an RGB value of #9370DB
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#9370DB;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour MEDIUMPURPLE = new Colour(0.5764706f, 0.4392157f, 0.85882354f);
+        public static final Color MEDIUMPURPLE = new Color(0.5764706f, 0.4392157f, 0.85882354f);
 
         /**
          * The color medium sea green with an RGB value of #3CB371
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#3CB371;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour MEDIUMSEAGREEN = new Colour(0.23529412f, 0.7019608f, 0.44313726f);
+        public static final Color MEDIUMSEAGREEN = new Color(0.23529412f, 0.7019608f, 0.44313726f);
 
         /**
          * The color medium slate blue with an RGB value of #7B68EE
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#7B68EE;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour MEDIUMSLATEBLUE = new Colour(0.48235294f, 0.40784314f, 0.93333334f);
+        public static final Color MEDIUMSLATEBLUE = new Color(0.48235294f, 0.40784314f, 0.93333334f);
 
         /**
          * The color medium spring green with an RGB value of #00FA9A
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#00FA9A;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour MEDIUMSPRINGGREEN = new Colour(0.0f, 0.98039216f, 0.6039216f);
+        public static final Color MEDIUMSPRINGGREEN = new Color(0.0f, 0.98039216f, 0.6039216f);
 
         /**
          * The color medium turquoise with an RGB value of #48D1CC
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#48D1CC;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour MEDIUMTURQUOISE = new Colour(0.28235295f, 0.81960785f, 0.8f);
+        public static final Color MEDIUMTURQUOISE = new Color(0.28235295f, 0.81960785f, 0.8f);
 
         /**
          * The color medium violet red with an RGB value of #C71585
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#C71585;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour MEDIUMVIOLETRED = new Colour(0.78039217f, 0.08235294f, 0.52156866f);
+        public static final Color MEDIUMVIOLETRED = new Color(0.78039217f, 0.08235294f, 0.52156866f);
 
         /**
          * The color midnight blue with an RGB value of #191970
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#191970;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour MIDNIGHTBLUE = new Colour(0.09803922f, 0.09803922f, 0.4392157f);
+        public static final Color MIDNIGHTBLUE = new Color(0.09803922f, 0.09803922f, 0.4392157f);
 
         /**
          * The color mint cream with an RGB value of #F5FFFA
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#F5FFFA;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour MINTCREAM = new Colour(0.9607843f, 1.0f, 0.98039216f);
+        public static final Color MINTCREAM = new Color(0.9607843f, 1.0f, 0.98039216f);
 
         /**
          * The color misty rose with an RGB value of #FFE4E1
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#FFE4E1;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour MISTYROSE = new Colour(1.0f, 0.89411765f, 0.88235295f);
+        public static final Color MISTYROSE = new Color(1.0f, 0.89411765f, 0.88235295f);
 
         /**
          * The color moccasin with an RGB value of #FFE4B5
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#FFE4B5;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour MOCCASIN = new Colour(1.0f, 0.89411765f, 0.70980394f);
+        public static final Color MOCCASIN = new Color(1.0f, 0.89411765f, 0.70980394f);
 
         /**
          * The color navajo white with an RGB value of #FFDEAD
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#FFDEAD;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour NAVAJOWHITE = new Colour(1.0f, 0.87058824f, 0.6784314f);
+        public static final Color NAVAJOWHITE = new Color(1.0f, 0.87058824f, 0.6784314f);
 
         /**
          * The color navy with an RGB value of #000080
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#000080;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour NAVY = new Colour(0.0f, 0.0f, 0.5019608f);
+        public static final Color NAVY = new Color(0.0f, 0.0f, 0.5019608f);
 
         /**
          * The color old lace with an RGB value of #FDF5E6
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#FDF5E6;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour OLDLACE = new Colour(0.99215686f, 0.9607843f, 0.9019608f);
+        public static final Color OLDLACE = new Color(0.99215686f, 0.9607843f, 0.9019608f);
 
         /**
          * The color olive with an RGB value of #808000
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#808000;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour OLIVE = new Colour(0.5019608f, 0.5019608f, 0.0f);
+        public static final Color OLIVE = new Color(0.5019608f, 0.5019608f, 0.0f);
 
         /**
          * The color olive drab with an RGB value of #6B8E23
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#6B8E23;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour OLIVEDRAB = new Colour(0.41960785f, 0.5568628f, 0.13725491f);
+        public static final Color OLIVEDRAB = new Color(0.41960785f, 0.5568628f, 0.13725491f);
 
         /**
          * The color orange with an RGB value of #FFA500
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#FFA500;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour ORANGE = new Colour(1.0f, 0.64705884f, 0.0f);
+        public static final Color ORANGE = new Color(1.0f, 0.64705884f, 0.0f);
 
         /**
          * The color orange red with an RGB value of #FF4500
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#FF4500;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour ORANGERED = new Colour(1.0f, 0.27058825f, 0.0f);
+        public static final Color ORANGERED = new Color(1.0f, 0.27058825f, 0.0f);
 
         /**
          * The color orchid with an RGB value of #DA70D6
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#DA70D6;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour ORCHID = new Colour(0.85490197f, 0.4392157f, 0.8392157f);
+        public static final Color ORCHID = new Color(0.85490197f, 0.4392157f, 0.8392157f);
 
         /**
          * The color pale goldenrod with an RGB value of #EEE8AA
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#EEE8AA;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour PALEGOLDENROD = new Colour(0.93333334f, 0.9098039f, 0.6666667f);
+        public static final Color PALEGOLDENROD = new Color(0.93333334f, 0.9098039f, 0.6666667f);
 
         /**
          * The color pale green with an RGB value of #98FB98
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#98FB98;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour PALEGREEN = new Colour(0.59607846f, 0.9843137f, 0.59607846f);
+        public static final Color PALEGREEN = new Color(0.59607846f, 0.9843137f, 0.59607846f);
 
         /**
          * The color pale turquoise with an RGB value of #AFEEEE
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#AFEEEE;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour PALETURQUOISE = new Colour(0.6862745f, 0.93333334f, 0.93333334f);
+        public static final Color PALETURQUOISE = new Color(0.6862745f, 0.93333334f, 0.93333334f);
 
         /**
          * The color pale violet red with an RGB value of #DB7093
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#DB7093;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour PALEVIOLETRED = new Colour(0.85882354f, 0.4392157f, 0.5764706f);
+        public static final Color PALEVIOLETRED = new Color(0.85882354f, 0.4392157f, 0.5764706f);
 
         /**
          * The color papaya whip with an RGB value of #FFEFD5
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#FFEFD5;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour PAPAYAWHIP = new Colour(1.0f, 0.9372549f, 0.8352941f);
+        public static final Color PAPAYAWHIP = new Color(1.0f, 0.9372549f, 0.8352941f);
 
         /**
          * The color peach puff with an RGB value of #FFDAB9
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#FFDAB9;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour PEACHPUFF = new Colour(1.0f, 0.85490197f, 0.7254902f);
+        public static final Color PEACHPUFF = new Color(1.0f, 0.85490197f, 0.7254902f);
 
         /**
          * The color peru with an RGB value of #CD853F
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#CD853F;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour PERU = new Colour(0.8039216f, 0.52156866f, 0.24705882f);
+        public static final Color PERU = new Color(0.8039216f, 0.52156866f, 0.24705882f);
 
         /**
          * The color pink with an RGB value of #FFC0CB
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#FFC0CB;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour PINK = new Colour(1.0f, 0.7529412f, 0.79607844f);
+        public static final Color PINK = new Color(1.0f, 0.7529412f, 0.79607844f);
 
         /**
          * The color plum with an RGB value of #DDA0DD
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#DDA0DD;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour PLUM = new Colour(0.8666667f, 0.627451f, 0.8666667f);
+        public static final Color PLUM = new Color(0.8666667f, 0.627451f, 0.8666667f);
 
         /**
          * The color powder blue with an RGB value of #B0E0E6
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#B0E0E6;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour POWDERBLUE = new Colour(0.6901961f, 0.8784314f, 0.9019608f);
+        public static final Color POWDERBLUE = new Color(0.6901961f, 0.8784314f, 0.9019608f);
 
         /**
          * The color purple with an RGB value of #800080
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#800080;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour PURPLE = new Colour(0.5019608f, 0.0f, 0.5019608f);
+        public static final Color PURPLE = new Color(0.5019608f, 0.0f, 0.5019608f);
 
         /**
          * The color red with an RGB value of #FF0000
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#FF0000;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour RED = new Colour(1.0f, 0.0f, 0.0f);
+        public static final Color RED = new Color(1.0f, 0.0f, 0.0f);
 
         /**
          * The color rosy brown with an RGB value of #BC8F8F
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#BC8F8F;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour ROSYBROWN = new Colour(0.7372549f, 0.56078434f, 0.56078434f);
+        public static final Color ROSYBROWN = new Color(0.7372549f, 0.56078434f, 0.56078434f);
 
         /**
          * The color royal blue with an RGB value of #4169E1
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#4169E1;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour ROYALBLUE = new Colour(0.25490198f, 0.4117647f, 0.88235295f);
+        public static final Color ROYALBLUE = new Color(0.25490198f, 0.4117647f, 0.88235295f);
 
         /**
          * The color saddle brown with an RGB value of #8B4513
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#8B4513;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour SADDLEBROWN = new Colour(0.54509807f, 0.27058825f, 0.07450981f);
+        public static final Color SADDLEBROWN = new Color(0.54509807f, 0.27058825f, 0.07450981f);
 
         /**
          * The color salmon with an RGB value of #FA8072
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#FA8072;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour SALMON = new Colour(0.98039216f, 0.5019608f, 0.44705883f);
+        public static final Color SALMON = new Color(0.98039216f, 0.5019608f, 0.44705883f);
 
         /**
          * The color sandy brown with an RGB value of #F4A460
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#F4A460;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour SANDYBROWN = new Colour(0.95686275f, 0.6431373f, 0.3764706f);
+        public static final Color SANDYBROWN = new Color(0.95686275f, 0.6431373f, 0.3764706f);
 
         /**
          * The color sea green with an RGB value of #2E8B57
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#2E8B57;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour SEAGREEN = new Colour(0.18039216f, 0.54509807f, 0.34117648f);
+        public static final Color SEAGREEN = new Color(0.18039216f, 0.54509807f, 0.34117648f);
 
         /**
          * The color sea shell with an RGB value of #FFF5EE
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#FFF5EE;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour SEASHELL = new Colour(1.0f, 0.9607843f, 0.93333334f);
+        public static final Color SEASHELL = new Color(1.0f, 0.9607843f, 0.93333334f);
 
         /**
          * The color sienna with an RGB value of #A0522D
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#A0522D;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour SIENNA = new Colour(0.627451f, 0.32156864f, 0.1764706f);
+        public static final Color SIENNA = new Color(0.627451f, 0.32156864f, 0.1764706f);
 
         /**
          * The color silver with an RGB value of #C0C0C0
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#C0C0C0;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour SILVER = new Colour(0.7529412f, 0.7529412f, 0.7529412f);
+        public static final Color SILVER = new Color(0.7529412f, 0.7529412f, 0.7529412f);
         /**
          * The color sky blue with an RGB value of #87CEEB
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#87CEEB;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour SKYBLUE = new Colour(0.5294118f, 0.80784315f, 0.92156863f);
+        public static final Color SKYBLUE = new Color(0.5294118f, 0.80784315f, 0.92156863f);
 
         /**
          * The color slate blue with an RGB value of #6A5ACD
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#6A5ACD;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour SLATEBLUE = new Colour(0.41568628f, 0.3529412f, 0.8039216f);
+        public static final Color SLATEBLUE = new Color(0.41568628f, 0.3529412f, 0.8039216f);
 
         /**
          * The color slate gray with an RGB value of #708090
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#708090;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour SLATEGRAY = new Colour(0.4392157f, 0.5019608f, 0.5647059f);
+        public static final Color SLATEGRAY = new Color(0.4392157f, 0.5019608f, 0.5647059f);
 
         /**
          * The color slate grey with an RGB value of #708090
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#708090;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour SLATEGREY            = SLATEGRAY;
+        public static final Color SLATEGREY            = SLATEGRAY;
 
         /**
          * The color snow with an RGB value of #FFFAFA
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#FFFAFA;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour SNOW = new Colour(1.0f, 0.98039216f, 0.98039216f);
+        public static final Color SNOW = new Color(1.0f, 0.98039216f, 0.98039216f);
 
         /**
          * The color spring green with an RGB value of #00FF7F
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#00FF7F;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour SPRINGGREEN = new Colour(0.0f, 1.0f, 0.49803922f);
+        public static final Color SPRINGGREEN = new Color(0.0f, 1.0f, 0.49803922f);
 
         /**
          * The color steel blue with an RGB value of #4682B4
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#4682B4;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour STEELBLUE = new Colour(0.27450982f, 0.50980395f, 0.7058824f);
+        public static final Color STEELBLUE = new Color(0.27450982f, 0.50980395f, 0.7058824f);
 
         /**
          * The color tan with an RGB value of #D2B48C
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#D2B48C;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour TAN = new Colour(0.8235294f, 0.7058824f, 0.54901963f);
+        public static final Color TAN = new Color(0.8235294f, 0.7058824f, 0.54901963f);
 
         /**
          * The color teal with an RGB value of #008080
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#008080;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour TEAL = new Colour(0.0f, 0.5019608f, 0.5019608f);
+        public static final Color TEAL = new Color(0.0f, 0.5019608f, 0.5019608f);
 
         /**
          * The color thistle with an RGB value of #D8BFD8
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#D8BFD8;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour THISTLE = new Colour(0.84705883f, 0.7490196f, 0.84705883f);
+        public static final Color THISTLE = new Color(0.84705883f, 0.7490196f, 0.84705883f);
 
         /**
          * The color tomato with an RGB value of #FF6347
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#FF6347;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour TOMATO = new Colour(1.0f, 0.3882353f, 0.2784314f);
+        public static final Color TOMATO = new Color(1.0f, 0.3882353f, 0.2784314f);
 
         /**
          * The color turquoise with an RGB value of #40E0D0
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#40E0D0;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour TURQUOISE = new Colour(0.2509804f, 0.8784314f, 0.8156863f);
+        public static final Color TURQUOISE = new Color(0.2509804f, 0.8784314f, 0.8156863f);
 
         /**
          * The color violet with an RGB value of #EE82EE
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#EE82EE;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour VIOLET = new Colour(0.93333334f, 0.50980395f, 0.93333334f);
+        public static final Color VIOLET = new Color(0.93333334f, 0.50980395f, 0.93333334f);
 
         /**
          * The color wheat with an RGB value of #F5DEB3
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#F5DEB3;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour WHEAT = new Colour(0.9607843f, 0.87058824f, 0.7019608f);
+        public static final Color WHEAT = new Color(0.9607843f, 0.87058824f, 0.7019608f);
 
         /**
          * The color white with an RGB value of #FFFFFF
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#FFFFFF;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour WHITE = new Colour(1.0f, 1.0f, 1.0f);
+        public static final Color WHITE = new Color(1.0f, 1.0f, 1.0f);
 
         /**
          * The color white smoke with an RGB value of #F5F5F5
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#F5F5F5;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour WHITESMOKE = new Colour(0.9607843f, 0.9607843f, 0.9607843f);
+        public static final Color WHITESMOKE = new Color(0.9607843f, 0.9607843f, 0.9607843f);
 
         /**
          * The color yellow with an RGB value of #FFFF00
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#FFFF00;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour YELLOW = new Colour(1.0f, 1.0f, 0.0f);
+        public static final Color YELLOW = new Color(1.0f, 1.0f, 0.0f);
 
         /**
          * The color yellow green with an RGB value of #9ACD32
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#9ACD32;float:right;margin: 0 10px 0 0"></div>
          */
-        public static final Colour YELLOWGREEN = new Colour(0.6039216f, 0.8039216f, 0.19607843f);
+        public static final Color YELLOWGREEN = new Color(0.6039216f, 0.8039216f, 0.19607843f);
 
         /**
          * Brightness change factor for darker() and brighter() methods.
@@ -7938,12 +7922,12 @@ public final class UI extends UINamespaceUtilities
         private static final double SATURATE_DESATURATE_FACTOR = 0.7;
 
         /**
-         *  Creates a {@link Colour} object from a {@link Color} object.
-         * @param color The color to convert to a colour.
-         * @return The colour object.
+         *  Creates a {@link Color} object from a {@link java.awt.Color} object.
+         * @param color The color to convert to a color.
+         * @return The color object.
          */
-        public static Colour of(Color color ) {
-            return new Colour(color);
+        public static Color of(java.awt.Color color ) {
+            return new Color(color);
         }
 
         /**
@@ -7952,12 +7936,12 @@ public final class UI extends UINamespaceUtilities
          * @param red the red component, in the range {@code 0-255}
          * @param green the green component, in the range {@code 0-255}
          * @param blue the blue component, in the range {@code 0-255}
-         * @return the {@code Colour}
+         * @return the {@code Color}
          * @throws IllegalArgumentException if any value is out of range
          */
-        public static Colour ofRgb(int red, int green, int blue ) {
+        public static Color ofRgb(int red, int green, int blue ) {
             _checkRGB(red, green, blue);
-            return new Colour(red, green, blue);
+            return new Color(red, green, blue);
         }
 
         /**
@@ -7977,8 +7961,8 @@ public final class UI extends UINamespaceUtilities
          * @see #getAlpha
          * @see #getRGB
          */
-        public static Colour ofRgba(int r, int g, int b, int a ) {
-            return new Colour(r, g, b, a);
+        public static Color ofRgba(int r, int g, int b, int a ) {
+            return new Color(r, g, b, a);
         }
 
         /**
@@ -7996,8 +7980,8 @@ public final class UI extends UINamespaceUtilities
          * @see #getBlue
          * @see #getRGB
          */
-        public static Colour ofRgb(int rgb ) {
-            return new Colour(rgb);
+        public static Color ofRgb(int rgb ) {
+            return new Color(rgb);
         }
 
         /**
@@ -8017,8 +8001,8 @@ public final class UI extends UINamespaceUtilities
          * @see #getAlpha
          * @see #getRGB
          */
-        public static Colour ofRgb(int rgba, boolean hasalpha ) {
-            return new Colour(rgba, hasalpha);
+        public static Color ofRgb(int rgba, boolean hasalpha ) {
+            return new Color(rgba, hasalpha);
         }
 
         /**
@@ -8028,14 +8012,14 @@ public final class UI extends UINamespaceUtilities
          * @param red the red component, in the range {@code 0.0-1.0}
          * @param green the green component, in the range {@code 0.0-1.0}
          * @param blue the blue component, in the range {@code 0.0-1.0}
-         * @return the {@code Colour}
+         * @return the {@code Color}
          * @throws IllegalArgumentException if any value is out of range
          * @see #red()
          * @see #green()
          * @see #blue()
          */
-        public static Colour of(double red, double green, double blue ) {
-            return Colour.of((float) red, (float) green, (float) blue);
+        public static Color of(double red, double green, double blue ) {
+            return Color.of((float) red, (float) green, (float) blue);
         }
 
         /**
@@ -8045,14 +8029,14 @@ public final class UI extends UINamespaceUtilities
          * @param red the red component, in the range {@code 0.0-1.0}
          * @param green the green component, in the range {@code 0.0-1.0}
          * @param blue the blue component, in the range {@code 0.0-1.0}
-         * @return the {@code Colour}
+         * @return the {@code Color}
          * @throws IllegalArgumentException if any value is out of range
          * @see #red()
          * @see #green()
          * @see #blue()
          */
-        public static Colour of(float red, float green, float blue ) {
-            return new Colour(red, green, blue);
+        public static Color of(float red, float green, float blue ) {
+            return new Color(red, green, blue);
         }
 
         /**
@@ -8063,15 +8047,15 @@ public final class UI extends UINamespaceUtilities
          * @param green the green component, in the range {@code 0-255}
          * @param blue the blue component, in the range {@code 0-255}
          * @param opacity the opacity component, in the range {@code 0.0-1.0}
-         * @return the {@code Colour}
+         * @return the {@code Color}
          * @throws IllegalArgumentException if any value is out of range
          * @see #red()
          * @see #green()
          * @see #blue()
          * @see #opacity()
          */
-        public static Colour of(double red, double green, double blue, double opacity ) {
-            return Colour.of((float) red, (float) green, (float) blue, (float) opacity);
+        public static Color of(double red, double green, double blue, double opacity ) {
+            return Color.of((float) red, (float) green, (float) blue, (float) opacity);
         }
 
         /**
@@ -8082,28 +8066,28 @@ public final class UI extends UINamespaceUtilities
          * @param green the green component, in the range {@code 0-255}
          * @param blue the blue component, in the range {@code 0-255}
          * @param opacity the opacity component, in the range {@code 0.0-1.0}
-         * @return the {@code Colour}
+         * @return the {@code Color}
          * @throws IllegalArgumentException if any value is out of range
          * @see #red()
          * @see #green()
          * @see #blue()
          * @see #opacity()
          */
-        public static Colour of(float red, float green, float blue, float opacity ) {
-            return new Colour(red, green, blue, opacity);
+        public static Color of(float red, float green, float blue, float opacity ) {
+            return new Color(red, green, blue, opacity);
         }
 
         /**
-         * Creates a color in the specified {@code ColourSpace}
+         * Creates a color in the specified {@code ColorSpace}
          * with the color components specified in the {@code float}
          * array and the specified alpha.  The number of components is
-         * determined by the type of the {@code ColourSpace}.  For
+         * determined by the type of the {@code ColorSpace}.  For
          * example, RGB requires 3 components, but CMYK requires 4
          * components.
-         * @param cspace the {@code ColourSpace} to be used to
+         * @param cspace the {@code ColorSpace} to be used to
          *                  interpret the components
          * @param components an arbitrary number of color components
-         *                      that is compatible with the {@code ColourSpace}
+         *                      that is compatible with the {@code ColorSpace}
          * @param alpha alpha value
          * @throws IllegalArgumentException if any of the values in the
          *         {@code components} array or {@code alpha} is
@@ -8111,8 +8095,8 @@ public final class UI extends UINamespaceUtilities
          * @see #getComponents
          * @see #getColorComponents
          */
-        public static Colour of(ColorSpace cspace, float[] components, float alpha ) {
-            return new Colour(cspace, components, alpha);
+        public static Color of(ColorSpace cspace, float[] components, float alpha ) {
+            return new Color(cspace, components, alpha);
         }
 
         /**
@@ -8123,12 +8107,12 @@ public final class UI extends UINamespaceUtilities
          * @param green the green component, in the range {@code 0-255}
          * @param blue the blue component, in the range {@code 0-255}
          * @param opacity the opacity component, in the range {@code 0.0-1.0}
-         * @return the {@code Colour}
+         * @return the {@code Color}
          * @throws IllegalArgumentException if any value is out of range
          */
-        public static Colour ofRgb(int red, int green, int blue, double opacity ) {
+        public static Color ofRgb(int red, int green, int blue, double opacity ) {
             _checkRGB(red, green, blue);
-            return Colour.of(
+            return Color.of(
                     red / 255.0,
                     green / 255.0,
                     blue / 255.0,
@@ -8138,9 +8122,9 @@ public final class UI extends UINamespaceUtilities
         /**
          * This is a shortcut for {@code rgb(gray, gray, gray)}.
          * @param gray the gray component, in the range {@code 0-255}
-         * @return the {@code Colour}
+         * @return the {@code Color}
          */
-        public static Colour ofGrayRgb(int gray ) {
+        public static Color ofGrayRgb(int gray ) {
             return ofRgb(gray, gray, gray);
         }
 
@@ -8148,9 +8132,9 @@ public final class UI extends UINamespaceUtilities
          * This is a shortcut for {@code rgb(gray, gray, gray, opacity)}.
          * @param gray the gray component, in the range {@code 0-255}
          * @param opacity the opacity component, in the range {@code 0.0-1.0}
-         * @return the {@code Colour}
+         * @return the {@code Color}
          */
-        public static Colour ofGrayRgb(int gray, double opacity ) {
+        public static Color ofGrayRgb(int gray, double opacity ) {
             return ofRgb(gray, gray, gray, opacity);
         }
 
@@ -8159,110 +8143,110 @@ public final class UI extends UINamespaceUtilities
          * @param gray color on gray scale in the range
          *             {@code 0.0} (black) - {@code 1.0} (white).
          * @param opacity the opacity component, in the range {@code 0.0-1.0}
-         * @return the {@code Colour}
+         * @return the {@code Color}
          * @throws IllegalArgumentException if any value is out of range
          */
-        public static Colour ofGray(double gray, double opacity ) {
-            return Colour.of(gray, gray, gray, opacity);
+        public static Color ofGray(double gray, double opacity ) {
+            return Color.of(gray, gray, gray, opacity);
         }
 
         /**
          * Creates an opaque grey color.
          * @param gray color on gray scale in the range
          *             {@code 0.0} (black) - {@code 1.0} (white).
-         * @return the {@code Colour}
+         * @return the {@code Color}
          * @throws IllegalArgumentException if any value is out of range
          */
-        public static Colour ofGray(double gray ) {
+        public static Color ofGray(double gray ) {
             return ofGray(gray, 1.0);
         }
 
         /**
-         * Creates a {@code Colour} based on the specified values in the HSB color model,
+         * Creates a {@code Color} based on the specified values in the HSB color model,
          * and a given opacity.
          *
          * @param hue the hue, in degrees
          * @param saturation the saturation, {@code 0.0 to 1.0}
          * @param brightness the brightness, {@code 0.0 to 1.0}
          * @param opacity the opacity, {@code 0.0 to 1.0}
-         * @return the {@code Colour}
+         * @return the {@code Color}
          * @throws IllegalArgumentException if {@code saturation}, {@code brightness} or
          *         {@code opacity} are out of range
          */
-        public static Colour ofHsb(double hue, double saturation, double brightness, double opacity) {
+        public static Color ofHsb(double hue, double saturation, double brightness, double opacity) {
             _checkSB(saturation, brightness);
             double[] rgb = HSBtoRGB(hue, saturation, brightness);
-            return Colour.of(rgb[0], rgb[1], rgb[2], opacity);
+            return Color.of(rgb[0], rgb[1], rgb[2], opacity);
         }
 
-        public static Colour of(String colorString ) {
+        public static Color of(String colorString ) {
             try {
                 return _parseColor(colorString);
             } catch ( Exception e ) {
                 log.error("Could not parse color '" + colorString + "'.", e);
-                return UI.Colour.UNDEFINED;
+                return Color.UNDEFINED;
             }
         }
 
         private static void _checkRGB( int red, int green, int blue ) {
             if (red < 0 || red > 255) {
-                throw new IllegalArgumentException("Colour.rgb's red parameter (" + red + ") expects color values 0-255");
+                throw new IllegalArgumentException("Color.rgb's red parameter (" + red + ") expects color values 0-255");
             }
             if (green < 0 || green > 255) {
-                throw new IllegalArgumentException("Colour.rgb's green parameter (" + green + ") expects color values 0-255");
+                throw new IllegalArgumentException("Color.rgb's green parameter (" + green + ") expects color values 0-255");
             }
             if (blue < 0 || blue > 255) {
-                throw new IllegalArgumentException("Colour.rgb's blue parameter (" + blue + ") expects color values 0-255");
+                throw new IllegalArgumentException("Color.rgb's blue parameter (" + blue + ") expects color values 0-255");
             }
         }
 
         private static void _checkSB( double saturation, double brightness ) {
             if (saturation < 0.0 || saturation > 1.0) {
-                throw new IllegalArgumentException("Colour.hsb's saturation parameter (" + saturation + ") expects values 0.0-1.0");
+                throw new IllegalArgumentException("Color.hsb's saturation parameter (" + saturation + ") expects values 0.0-1.0");
             }
             if (brightness < 0.0 || brightness > 1.0) {
-                throw new IllegalArgumentException("Colour.hsb's brightness parameter (" + brightness + ") expects values 0.0-1.0");
+                throw new IllegalArgumentException("Color.hsb's brightness parameter (" + brightness + ") expects values 0.0-1.0");
             }
         }
 
-        private Colour(Color color) {
+        private Color(java.awt.Color color) {
             super(color.getRGB());
         }
 
-        private Colour(int r, int g, int b) {
+        private Color(int r, int g, int b) {
             super(r, g, b);
         }
 
-        private Colour(int r, int g, int b, int a) {
+        private Color(int r, int g, int b, int a) {
             super(r, g, b, a);
         }
 
-        private Colour(int rgb) {
+        private Color(int rgb) {
             super(rgb);
         }
 
-        private Colour(int rgba, boolean hasalpha) {
+        private Color(int rgba, boolean hasalpha) {
             super(rgba, hasalpha);
         }
 
-        private Colour(float r, float g, float b) {
+        private Color(float r, float g, float b) {
             super(r, g, b);
         }
 
-        private Colour(float r, float g, float b, float a) {
+        private Color(float r, float g, float b, float a) {
             super(r, g, b, a);
         }
 
-        private Colour(ColorSpace cspace, float[] components, float alpha) {
+        private Color(ColorSpace cspace, float[] components, float alpha) {
             super(cspace, components, alpha);
         }
 
         /**
-         * The red component of the {@code Colour}, in the range {@code 0.0-1.0}.
+         * The red component of the {@code Color}, in the range {@code 0.0-1.0}.
          * If you want to get the red component in the range {@code 0-255}, use the
          * {@link #getRed()} method.
          *
-         * @return the red component of the {@code Colour}, in the range {@code 0.0-1.0}
+         * @return the red component of the {@code Color}, in the range {@code 0.0-1.0}
          * @see #getRed()
          */
         public double red() {
@@ -8270,11 +8254,11 @@ public final class UI extends UINamespaceUtilities
         }
 
         /**
-         * The green component of the {@code Colour}, in the range {@code 0.0-1.0}.
+         * The green component of the {@code Color}, in the range {@code 0.0-1.0}.
          * If you want to get the green component in the range {@code 0-255}, use the
          * {@link #getGreen()} method.
          *
-         * @return the green component of the {@code Colour}, in the range {@code 0.0-1.0}
+         * @return the green component of the {@code Color}, in the range {@code 0.0-1.0}
          * @see #getGreen()
          */
         public double green() {
@@ -8282,11 +8266,11 @@ public final class UI extends UINamespaceUtilities
         }
 
         /**
-         * The blue component of the {@code Colour}, in the range {@code 0.0-1.0}.
+         * The blue component of the {@code Color}, in the range {@code 0.0-1.0}.
          * If you want to get the blue component in the range {@code 0-255}, use the
          * {@link #getBlue()} method.
          *
-         * @return the blue component of the {@code Colour}, in the range {@code 0.0-1.0}
+         * @return the blue component of the {@code Color}, in the range {@code 0.0-1.0}
          * @see #getBlue()
          */
         public double blue() {
@@ -8294,11 +8278,11 @@ public final class UI extends UINamespaceUtilities
         }
 
         /**
-         * The opacity of the {@code Colour}, in the range {@code 0.0-1.0}.
+         * The opacity of the {@code Color}, in the range {@code 0.0-1.0}.
          * If you want to get the opacity in the form of the alpha component in the
          * range {@code 0-255}, use the {@link #getAlpha()} method.
          *
-         * @return the opacity of the {@code Colour}, in the range {@code 0.0-1.0}
+         * @return the opacity of the {@code Color}, in the range {@code 0.0-1.0}
          * @see #getAlpha()
          */
         public double opacity() {
@@ -8306,7 +8290,7 @@ public final class UI extends UINamespaceUtilities
         }
 
         /**
-         * Gets the hue component of this {@code Colour}.
+         * Gets the hue component of this {@code Color}.
          * @return Hue value in the range in the range {@code 0.0-360.0}.
          */
         public double hue() {
@@ -8314,7 +8298,7 @@ public final class UI extends UINamespaceUtilities
         }
 
         /**
-         * Gets the saturation component of this {@code Colour}.
+         * Gets the saturation component of this {@code Color}.
          * @return Saturation value in the range in the range {@code 0.0-1.0}.
          */
         public double saturation() {
@@ -8322,7 +8306,7 @@ public final class UI extends UINamespaceUtilities
         }
 
         /**
-         * Gets the brightness component of this {@code Colour}.
+         * Gets the brightness component of this {@code Color}.
          * @return Brightness value in the range in the range {@code 0.0-1.0}.
          */
         public double brightness() {
@@ -8330,7 +8314,7 @@ public final class UI extends UINamespaceUtilities
         }
 
         /**
-         * Creates a new {@code Colour} based on this {@code Colour} with hue,
+         * Creates a new {@code Color} based on this {@code Color} with hue,
          * saturation, brightness and opacity values altered. Hue is shifted
          * about the given value and normalized into its natural range, the
          * other components' values are multiplied by the given factors and
@@ -8342,10 +8326,10 @@ public final class UI extends UINamespaceUtilities
          * @param saturationFactor the saturation factor
          * @param brightnessFactor the brightness factor
          * @param opacityFactor the opacity factor
-         * @return a {@code Colour} based based on this {@code Colour} with hue,
+         * @return a {@code Color} based based on this {@code Color} with hue,
          * saturation, brightness and opacity values altered.
          */
-        private Colour _deriveColour(
+        private Color _deriveColor(
             double hueShift,
             double saturationFactor,
             double brightnessFactor,
@@ -8368,209 +8352,209 @@ public final class UI extends UINamespaceUtilities
         }
 
         /**
-         * Creates a new colour that is a brighter version of this colour.
-         * @return A colour that is a brighter version of this colour.
+         * Creates a new color that is a brighter version of this color.
+         * @return A color that is a brighter version of this color.
          */
         @Override
-        public Colour brighter() {
-            return _deriveColour(0, 1.0, 1.0 / DARKER_BRIGHTER_FACTOR, 1.0);
+        public Color brighter() {
+            return _deriveColor(0, 1.0, 1.0 / DARKER_BRIGHTER_FACTOR, 1.0);
         }
 
         /**
-         * Creates an updated colour whose brightness is increased by the specified factor.
+         * Creates an updated color whose brightness is increased by the specified factor.
          * @param factor The factor by which to increase the brightness.
          */
-        public Colour brighterBy(double factor) {
+        public Color brighterBy(double factor) {
             if ( factor == 0.0 )
                 return this;
-            return _deriveColour(0, 1.0, 1.0 / factor, 1.0);
+            return _deriveColor(0, 1.0, 1.0 / factor, 1.0);
         }
 
         /**
-         * Creates a new colour that is a darker version of this colour.
-         * @return a colour that is a darker version of this colour
+         * Creates a new color that is a darker version of this color.
+         * @return a color that is a darker version of this color
          */
         @Override
-        public Colour darker() {
-            return _deriveColour(0, 1.0, DARKER_BRIGHTER_FACTOR, 1.0);
+        public Color darker() {
+            return _deriveColor(0, 1.0, DARKER_BRIGHTER_FACTOR, 1.0);
         }
 
         /**
-         * Creates an updated colour whose brightness is decreased by the specified
+         * Creates an updated color whose brightness is decreased by the specified
          * percentage factor.
          * @param factor The factor by which to decrease the brightness.
          */
-        public Colour darkerBy(double factor) {
+        public Color darkerBy(double factor) {
             if ( factor == 0.0 )
                 return this;
             factor = 1.0 - factor;
-            return _deriveColour(0, 1.0, factor, 1.0);
+            return _deriveColor(0, 1.0, factor, 1.0);
         }
 
         /**
-         *  Provides an updated colour that is a more saturated version of this colour.
-         * @return A colour that is a more saturated version of this colour.
+         *  Provides an updated color that is a more saturated version of this color.
+         * @return A color that is a more saturated version of this color.
          */
-        public Colour saturate() {
-            return _deriveColour(0, 1.0 / SATURATE_DESATURATE_FACTOR, 1.0, 1.0);
+        public Color saturate() {
+            return _deriveColor(0, 1.0 / SATURATE_DESATURATE_FACTOR, 1.0, 1.0);
         }
 
-        public Colour saturateBy(double factor) {
+        public Color saturateBy(double factor) {
             if ( factor == 0.0 )
                 return this;
-            return _deriveColour(0, 1.0 / factor, 1.0, 1.0);
+            return _deriveColor(0, 1.0 / factor, 1.0, 1.0);
         }
 
         /**
-         * Creates a new colour that is a less saturated version of this colour.
-         * @return A colour that is a less saturated version of this colour.
+         * Creates a new color that is a less saturated version of this color.
+         * @return A color that is a less saturated version of this color.
          */
-        public Colour desaturate() {
-            return _deriveColour(0, SATURATE_DESATURATE_FACTOR, 1.0, 1.0);
+        public Color desaturate() {
+            return _deriveColor(0, SATURATE_DESATURATE_FACTOR, 1.0, 1.0);
         }
 
-        public Colour desaturateBy(double factor) {
+        public Color desaturateBy(double factor) {
             if ( factor == 0.0 )
                 return this;
             factor = 1.0 - factor;
-            return _deriveColour(0, factor, 1.0, 1.0);
+            return _deriveColor(0, factor, 1.0, 1.0);
         }
 
         /**
-         * Creates an updated colour that is grayscale equivalent of this colour.
+         * Creates an updated color that is grayscale equivalent of this color.
          * Opacity is preserved.
-         * @return A colour that is grayscale equivalent of this colour
+         * @return A color that is grayscale equivalent of this color
          */
-        public Colour grayscale() {
+        public Color grayscale() {
             double gray = 0.2126 * red() + 0.7152 * green() + 0.0722 * blue();
-            return Colour.of(gray, gray, gray, opacity());
+            return Color.of(gray, gray, gray, opacity());
         }
 
         /**
-         * Creates a new colour that is inversion of this colour.
+         * Creates a new color that is inversion of this color.
          * Opacity is preserved.
-         * @return A colour that is inversion of this colour.
+         * @return A color that is inversion of this color.
          */
-        public Colour invert() {
-            return Colour.of(1.0 - red(), 1.0 - green(), 1.0 - blue(), opacity());
+        public Color invert() {
+            return Color.of(1.0 - red(), 1.0 - green(), 1.0 - blue(), opacity());
         }
 
         /**
-         *  Returns an updated version of this colour with the red component changed
+         *  Returns an updated version of this color with the red component changed
          *  to the specified value in the range {@code 0.0-1.0}.
          *  The number {@code 0.0} represents no red, and {@code 1.0} represents
          *  full red.
          *
          *  @param red The red component, in the range {@code 0.0-1.0}.
-         *  @return A new {@code Colour} object with the red component changed.
+         *  @return A new {@code Color} object with the red component changed.
          * @throws IllegalArgumentException If the value is out of range (0.0-1.0)
          * @see #red()
          */
-        public Colour withRed(double red) {
-            return Colour.of(red, green(), blue(), opacity());
+        public Color withRed(double red) {
+            return Color.of(red, green(), blue(), opacity());
         }
 
         /**
-         *  Returns an updated version of this colour with the green component changed
+         *  Returns an updated version of this color with the green component changed
          *  to the specified value in the range {@code 0.0-1.0}.
          *  A number of {@code 0.0} represents no green, and {@code 1.0} represents
          *  green to the maximum extent.
          *
          *  @param green The green component, in the range {@code 0.0-1.0}
-         *  @return A new {@code Colour} object with the green component changed
+         *  @return A new {@code Color} object with the green component changed
          * @throws IllegalArgumentException If the value is out of range (0.0-1.0)
          * @see #green()
          */
-        public Colour withGreen(double green) {
-            return Colour.of(red(), green, blue(), opacity());
+        public Color withGreen(double green) {
+            return Color.of(red(), green, blue(), opacity());
         }
 
         /**
-         *  Returns an updated version of this colour with the blue component changed
+         *  Returns an updated version of this color with the blue component changed
          *  to the specified value in the range {@code 0.0-1.0}.
          *  A value closer to {@code 0.0} represents no blue, and closer to {@code 1.0}
          *  represents blue to the maximum extent possible.
          *
          *  @param blue The blue component, in the range {@code 0.0-1.0}
-         *  @return A new {@code Colour} object with the blue component changed
+         *  @return A new {@code Color} object with the blue component changed
          * @throws IllegalArgumentException If the value is out of range (0.0-1.0)
          * @see #blue()
          */
-        public Colour withBlue(double blue) {
-            return Colour.of(red(), green(), blue, opacity());
+        public Color withBlue(double blue) {
+            return Color.of(red(), green(), blue, opacity());
         }
 
         /**
-         *  Returns an updated version of this colour with the opacity changed
+         *  Returns an updated version of this color with the opacity changed
          *  to the specified value in the range {@code 0.0-1.0}.
-         *  A value closer to {@code 0.0} represents a fully transparent colour,
-         *  and closer to {@code 1.0} represents a fully opaque colour.
+         *  A value closer to {@code 0.0} represents a fully transparent color,
+         *  and closer to {@code 1.0} represents a fully opaque color.
          *
          *  @param opacity The opacity component, in the range {@code 0.0-1.0}
-         *  @return A new {@code Colour} object with the opacity changed
+         *  @return A new {@code Color} object with the opacity changed
          * @throws IllegalArgumentException If the value is out of range (0.0-1.0)
          * @see #opacity()
          */
-        public Colour withOpacity(double opacity) {
-            return Colour.of(red(), green(), blue(), opacity);
+        public Color withOpacity(double opacity) {
+            return Color.of(red(), green(), blue(), opacity);
         }
 
         /**
-         *  Creates and returns an updated version of this colour with the
+         *  Creates and returns an updated version of this color with the
          *  alpha component changed to the specified value in the range {@code 0-255}.
-         *  A value closer to {@code 0} represents a fully transparent colour,
-         *  and closer to {@code 255} represents a fully opaque colour.
+         *  A value closer to {@code 0} represents a fully transparent color,
+         *  and closer to {@code 255} represents a fully opaque color.
          *
          * @param alpha The alpha component, in the range {@code 0-255}.
-         * @return A new {@code Colour} object with the alpha component changed
+         * @return A new {@code Color} object with the alpha component changed
          */
-        public Colour withAlpha(int alpha ) {
-            return new Colour(getRed(), getGreen(), getBlue(), alpha);
+        public Color withAlpha(int alpha ) {
+            return new Color(getRed(), getGreen(), getBlue(), alpha);
         }
 
         /**
-         *  Returns an updated version of this colour with the hue changed
+         *  Returns an updated version of this color with the hue changed
          *  to the specified value in the range {@code 0.0-360.0}.
          *  A value closer to {@code 0.0} represents red, and closer to {@code 360.0}
          *  represents red again.
          *
          *  @param hue The hue component, in the range {@code 0.0-360.0}
-         *  @return A new {@code Colour} object with the hue changed
+         *  @return A new {@code Color} object with the hue changed
          * @throws IllegalArgumentException If the value is out of range (0.0-360.0)
          * @see #hue()
          */
-        public Colour withHue(double hue) {
-            return Colour.ofHsb(hue, saturation(), brightness(), opacity());
+        public Color withHue(double hue) {
+            return Color.ofHsb(hue, saturation(), brightness(), opacity());
         }
 
         /**
-         *  Returns an updated version of this colour with the saturation changed
+         *  Returns an updated version of this color with the saturation changed
          *  to the specified value in the range {@code 0.0-1.0}.
          *  A value closer to {@code 0.0} represents a shade of grey, and closer to
-         *  {@code 1.0} represents a fully saturated colour.
+         *  {@code 1.0} represents a fully saturated color.
          *
          *  @param saturation The saturation component, in the range {@code 0.0-1.0}
-         *  @return A new {@code Colour} object with the saturation changed
+         *  @return A new {@code Color} object with the saturation changed
          * @throws IllegalArgumentException If the value is out of range (0.0-1.0)
          * @see #saturation()
          */
-        public Colour withSaturation(double saturation) {
-            return Colour.ofHsb(hue(), saturation, brightness(), opacity());
+        public Color withSaturation(double saturation) {
+            return Color.ofHsb(hue(), saturation, brightness(), opacity());
         }
 
         /**
-         *  Returns an updated version of this colour with the brightness changed
+         *  Returns an updated version of this color with the brightness changed
          *  to the specified value in the range {@code 0.0-1.0}.
          *  A value closer to {@code 0.0} represents black, and closer to {@code 1.0}
          *  represents white.
          *
          *  @param brightness The brightness component, in the range {@code 0.0-1.0}
-         *  @return A new {@code Colour} object with the brightness changed
+         *  @return A new {@code Color} object with the brightness changed
          * @throws IllegalArgumentException If the value is out of range (0.0-1.0)
          * @see #brightness()
          */
-        public Colour withBrightness(double brightness ) {
-            return Colour.ofHsb(hue(), saturation(), brightness, opacity());
+        public Color withBrightness(double brightness ) {
+            return Color.ofHsb(hue(), saturation(), brightness, opacity());
         }
 
 
@@ -8665,19 +8649,19 @@ public final class UI extends UINamespaceUtilities
         }
 
 
-        private static Colour _parseColor(final String colorAsString )
+        private static Color _parseColor(final String colorAsString )
         {
             // First some cleanup
             final String colorString = colorAsString.trim();
 
             if ( colorAsString.isEmpty() )
-                return UI.Colour.UNDEFINED;
+                return Color.UNDEFINED;
 
             if ( colorString.startsWith("#") )
-                return Colour.of(Color.decode(colorString));
+                return Color.of(java.awt.Color.decode(colorString));
 
             if ( colorString.startsWith("0x") )
-                return Colour.of(Color.decode(colorString));
+                return Color.of(java.awt.Color.decode(colorString));
 
             if ( colorString.startsWith("rgb") ) {
                 // We have an rgb() or rgba() color
@@ -8685,13 +8669,13 @@ public final class UI extends UINamespaceUtilities
                 int end = colorString.indexOf(')');
                 if ( start < 0 || end < 0 || end < start ) {
                     log.error("Invalid rgb() or rgba() color: " + colorString, new Throwable());
-                    return UI.Colour.UNDEFINED;
+                    return Color.UNDEFINED;
                 }
 
                 String[] parts = colorString.substring(start + 1, end).split(",");
                 if ( parts.length < 3 || parts.length > 4 ) {
                     log.error("Invalid rgb() or rgba() color: " + colorString, new Throwable());
-                    return UI.Colour.UNDEFINED;
+                    return Color.UNDEFINED;
                 }
 
                 for ( int i = 0; i < parts.length; i++ )
@@ -8706,7 +8690,7 @@ public final class UI extends UINamespaceUtilities
                         values[i] = Integer.parseInt(part);
                         if ( values[i] < 0 || values[i] > 100 ) {
                             log.error("Invalid rgb() or rgba() color: " + colorString, new Throwable());
-                            return UI.Colour.UNDEFINED;
+                            return Color.UNDEFINED;
                         }
                         values[i] = (int) Math.ceil(values[i] * 2.55);
                     }
@@ -8719,7 +8703,7 @@ public final class UI extends UINamespaceUtilities
                 int g = values[1];
                 int b = values[2];
                 int a = values.length == 4 ? values[3] : 255;
-                return Colour.ofRgba(r, g, b, a);
+                return Color.ofRgba(r, g, b, a);
             }
 
             if ( colorString.startsWith("hsb") ) {
@@ -8728,13 +8712,13 @@ public final class UI extends UINamespaceUtilities
                 int end = colorString.indexOf(')');
                 if ( start < 0 || end < 0 || end < start ) {
                     log.error("Invalid hsb() or hsba() color: " + colorString, new Throwable());
-                    return UI.Colour.UNDEFINED;
+                    return Color.UNDEFINED;
                 }
 
                 String[] parts = colorString.substring(start + 1, end).split(",");
                 if ( parts.length < 3 || parts.length > 4 ) {
                     log.error("Invalid hsb() or hsba() color: " + colorString, new Throwable());
-                    return UI.Colour.UNDEFINED;
+                    return Color.UNDEFINED;
                 }
 
                 for ( int i = 0; i < parts.length; i++ )
@@ -8753,7 +8737,7 @@ public final class UI extends UINamespaceUtilities
                                     "value '" + part + "' out of range.",
                                     new Throwable()
                                 );
-                            return UI.Colour.UNDEFINED;
+                            return Color.UNDEFINED;
                         }
                         values[i] = values[i] / 100.0f;
                     } else if ( part.endsWith("°") ) {
@@ -8763,7 +8747,7 @@ public final class UI extends UINamespaceUtilities
                                 "unexpected degree symbol in '" + part + "' (only allowed for hue)",
                                 new Throwable()
                             );
-                            return UI.Colour.UNDEFINED;
+                            return Color.UNDEFINED;
                         }
 
                         part = part.substring(0, part.length() - 1);
@@ -8774,7 +8758,7 @@ public final class UI extends UINamespaceUtilities
                                 "hue value '" + part + "' out of range.",
                                 new Throwable()
                             );
-                            return UI.Colour.UNDEFINED;
+                            return Color.UNDEFINED;
                         }
                         values[i] = values[i] / 360.0f;
                     } else if ( part.matches("[0-9]+((\\.[0-9]+[fF]?)|[fF])") )
@@ -8787,8 +8771,8 @@ public final class UI extends UINamespaceUtilities
                 float s = values[1];
                 float b = values[2];
                 float a = values.length == 4 ? values[3] : 1.0f;
-                Color c = Color.getHSBColor(h, s, b);
-                return Colour.ofRgba(c.getRed(), c.getGreen(), c.getBlue(), (int)(a * 255));
+                java.awt.Color c = java.awt.Color.getHSBColor(h, s, b);
+                return Color.ofRgba(c.getRed(), c.getGreen(), c.getBlue(), (int)(a * 255));
             }
 
             {
@@ -8801,7 +8785,7 @@ public final class UI extends UINamespaceUtilities
                 }
 
                 // Let's try a few common color names
-                Colour color = _tryFromName(maybeWord);
+                Color color = _tryFromName(maybeWord);
                 if ( color == null && maybeWord.startsWith("darker") ) {
                     color = _tryFromName(maybeWord.substring(6).trim());
                     if ( color != null )
@@ -8835,30 +8819,30 @@ public final class UI extends UINamespaceUtilities
 
                 if ( color != null ) {
                     if ( transparent )
-                        return Colour.ofRgba(color.getRed(), color.getGreen(), color.getBlue(), 255/2);
+                        return Color.ofRgba(color.getRed(), color.getGreen(), color.getBlue(), 255/2);
                     else
                         return color;
                 }
                 else if ( transparent )
-                    return Colour.TRANSPARENT;
+                    return Color.TRANSPARENT;
             }
 
             // Let's try to find it as a system property
-            Colour foundInSystemProperties = null;
+            Color foundInSystemProperties = null;
             try {
-                Color found = Color.getColor(colorString);
-                if ( found != null && !(found instanceof Colour) )
-                    foundInSystemProperties = Colour.of(found);
+                java.awt.Color found = java.awt.Color.getColor(colorString);
+                if ( found != null && !(found instanceof Color) )
+                    foundInSystemProperties = Color.of(found);
             } catch ( IllegalArgumentException e ) {
                 // Ignore
             }
             if ( foundInSystemProperties != null )
                 return foundInSystemProperties;
 
-            return UI.Colour.UNDEFINED;
+            return Color.UNDEFINED;
         }
 
-        private static UI.@Nullable Colour _tryFromName(String maybeColorName ) {
+        private static @Nullable Color _tryFromName(String maybeColorName ) {
             try {
                 String lowerCaseName = maybeColorName.toLowerCase();
                 return ColorUtility.get(lowerCaseName);

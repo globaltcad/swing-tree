@@ -631,7 +631,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided background color.
      */
     public ComponentStyleDelegate<C> foundationColor( Color color ) {
-        Objects.requireNonNull(color, "Use 'UI.Colour.UNDEFINED' instead of 'null'.");
+        Objects.requireNonNull(color, "Use 'UI.Color.UNDEFINED' instead of 'null'.");
         return _withStyle(_styleConf._withBase(_styleConf.base().foundationColor(color)));
     }
 
@@ -707,7 +707,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided inner background color.
      */
     public ComponentStyleDelegate<C> backgroundColor( Color color ) {
-        Objects.requireNonNull(color, "Use 'UI.Colour.UNDEFINED' instead of 'null'.");
+        Objects.requireNonNull(color, "Use 'UI.Color.UNDEFINED' instead of 'null'.");
         return _withStyle(_styleConf._withBase(_styleConf.base().backgroundColor(color)));
     }
 
@@ -965,7 +965,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided foreground color.
      */
     public ComponentStyleDelegate<C> foregroundColor( Color color ) {
-        Objects.requireNonNull(color, "Use 'UI.Colour.UNDEFINED' instead of 'null'.");
+        Objects.requireNonNull(color, "Use 'UI.Color.UNDEFINED' instead of 'null'.");
         return _withStyle(_styleConf._withBase(_styleConf.base().foregroundColor(color)));
     }
 
@@ -1872,10 +1872,10 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param color The {@link Color}.
      * @return A new {@link ComponentStyleDelegate} with the provided font color.
      * @throws NullPointerException If the color is {@code null}.
-     *         Use {@link UI.Colour#UNDEFINED} to remove the font color style.
+     *         Use {@link UI.Color#UNDEFINED} to remove the font color style.
      */
     public ComponentStyleDelegate<C> fontColor( Color color ) {
-        Objects.requireNonNull(color, "The color cannot be null! Use UI.Colour.UNDEFINED to remove the font color style.");
+        Objects.requireNonNull(color, "The color cannot be null! Use UI.Color.UNDEFINED to remove the font color style.");
         return _withFont( f -> f.color(color) );
     }
 
@@ -1910,7 +1910,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param color The {@link Color}.
      * @return A new {@link ComponentStyleDelegate} with the provided font background color.
      * @throws NullPointerException If the color is {@code null}.
-     *          Use {@link UI.Colour#UNDEFINED} to remove the font background color style.
+     *          Use {@link UI.Color#UNDEFINED} to remove the font background color style.
      */
     public ComponentStyleDelegate<C> fontBackgroundColor( Color color ) {
         Objects.requireNonNull(color);
@@ -1948,7 +1948,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param color The {@link Color}.
      * @return A new {@link ComponentStyleDelegate} with the provided font selection color.
      * @throws NullPointerException If the color is {@code null}.
-     *         Use {@link UI.Colour#UNDEFINED} to remove the font selection color style.
+     *         Use {@link UI.Color#UNDEFINED} to remove the font selection color style.
      */
     public ComponentStyleDelegate<C> fontSelectionColor( Color color ) {
         Objects.requireNonNull(color);
