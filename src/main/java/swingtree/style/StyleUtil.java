@@ -45,7 +45,7 @@ final class StyleUtil
     }
 
     static String toString( @Nullable Color color ) {
-        if ( color == UI.COLOR_UNDEFINED) return "DEFAULT";
+        if ( color == UI.Colour.UNDEFINED) return "DEFAULT";
         if ( color == null ) return "?";
         return "rgba(" + color.getRed() + "," + color.getGreen() + "," + color.getBlue() + "," + color.getAlpha() + ")";
     }

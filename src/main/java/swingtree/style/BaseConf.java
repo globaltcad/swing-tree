@@ -113,7 +113,7 @@ final class BaseConf
     }
 
     BaseConf simplified() {
-        Color simplifiedFoundation = _foundationColor == UI.COLOR_UNDEFINED ? null : _foundationColor;
+        Color simplifiedFoundation = _foundationColor == UI.Colour.UNDEFINED ? null : _foundationColor;
 
         if ( simplifiedFoundation == _foundationColor )
             return this;
@@ -132,15 +132,15 @@ final class BaseConf
         BaseConf rhs = (BaseConf) obj;
 
         boolean sameBackground = Objects.equals(_backgroundColor, rhs._backgroundColor);
-        if ( _backgroundColor == UI.COLOR_UNDEFINED || rhs._backgroundColor == UI.COLOR_UNDEFINED )
+        if ( _backgroundColor == UI.Colour.UNDEFINED || rhs._backgroundColor == UI.Colour.UNDEFINED )
             sameBackground = _backgroundColor == rhs._backgroundColor;
 
         boolean sameFoundation = Objects.equals(_foundationColor, rhs._foundationColor);
-        if ( _foundationColor == UI.COLOR_UNDEFINED || rhs._foundationColor == UI.COLOR_UNDEFINED )
+        if ( _foundationColor == UI.Colour.UNDEFINED || rhs._foundationColor == UI.Colour.UNDEFINED )
             sameFoundation = _foundationColor == rhs._foundationColor;
 
         boolean sameForeground = Objects.equals(_foregroundColor, rhs._foregroundColor);
-        if ( _foregroundColor == UI.COLOR_UNDEFINED || rhs._foregroundColor == UI.COLOR_UNDEFINED )
+        if ( _foregroundColor == UI.Colour.UNDEFINED || rhs._foregroundColor == UI.Colour.UNDEFINED )
             sameForeground = _foregroundColor == rhs._foregroundColor;
 
         return Objects.equals(_icon,            rhs._icon           ) &&

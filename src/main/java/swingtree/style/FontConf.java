@@ -392,7 +392,7 @@ public final class FontConf
      */
     public FontConf color( Color color ) {
         Objects.requireNonNull(color);
-        if ( color == UI.COLOR_UNDEFINED)
+        if ( color == UI.Colour.UNDEFINED)
             color = null;
         if ( color == _color )
             return this;
@@ -413,7 +413,7 @@ public final class FontConf
         Color newColor;
         try {
             if ( colorString.isEmpty() )
-                newColor = UI.COLOR_UNDEFINED;
+                newColor = UI.Colour.UNDEFINED;
             else
                 newColor = UI.color(colorString);
         } catch ( Exception e ) {
@@ -433,7 +433,7 @@ public final class FontConf
      */
     public FontConf backgroundColor( Color backgroundColor ) {
         Objects.requireNonNull(backgroundColor);
-        if ( backgroundColor == UI.COLOR_UNDEFINED)
+        if ( backgroundColor == UI.Colour.UNDEFINED)
             backgroundColor = null;
         if ( backgroundColor == _backgroundColor )
             return this;
@@ -453,7 +453,7 @@ public final class FontConf
         Color newColor;
         try {
             if ( colorString.isEmpty() )
-                newColor = UI.COLOR_UNDEFINED;
+                newColor = UI.Colour.UNDEFINED;
             else
                 newColor = UI.color(colorString);
         } catch ( Exception e ) {
@@ -474,7 +474,7 @@ public final class FontConf
      */
     public FontConf selectionColor( Color selectionColor ) {
         Objects.requireNonNull(selectionColor);
-        if ( selectionColor == UI.COLOR_UNDEFINED)
+        if ( selectionColor == UI.Colour.UNDEFINED)
             selectionColor = null;
         if ( selectionColor == _selectionColor )
             return this;
@@ -495,7 +495,7 @@ public final class FontConf
         Color newColor;
         try {
             if ( colorString.isEmpty() )
-                newColor = UI.COLOR_UNDEFINED;
+                newColor = UI.Colour.UNDEFINED;
             else
                 newColor = UI.color(colorString);
         } catch ( Exception e ) {

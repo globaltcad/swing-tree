@@ -203,8 +203,8 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
      * @return A new {@link ShadowConf} with the specified color.
      */
     public ShadowConf color( Color shadowColor ) {
-        Objects.requireNonNull(shadowColor, "Use UI.COLOR_UNDEFINED to specify no color instead of null");
-        if ( shadowColor == UI.COLOR_UNDEFINED)
+        Objects.requireNonNull(shadowColor, "Use UI.Colour.UNDEFINED to specify no color instead of null");
+        if ( shadowColor == UI.Colour.UNDEFINED)
             shadowColor = null;
         if ( shadowColor == _color )
             return this;
@@ -340,7 +340,7 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
         if ( _color == null || _color.getAlpha() == 0 )
             return _NONE;
 
-        if ( _color == UI.COLOR_UNDEFINED)
+        if ( _color == UI.Colour.UNDEFINED)
             return _NONE;
 
         return this;

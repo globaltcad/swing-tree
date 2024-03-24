@@ -848,7 +848,7 @@ class Opaqueness_Styles_Spec extends Specification
                     .withTransitionalStyle(isOn, LifeTime.of(1, TimeUnit.MILLISECONDS), (state, it) -> it
                         .backgroundColor(
                             state.progress() == 0
-                                ? UI.COLOR_UNDEFINED
+                                ? UI.Colour.UNDEFINED
                                 : new Color(0,0,0,0)
                         )
                     )
@@ -862,7 +862,7 @@ class Opaqueness_Styles_Spec extends Specification
             causes the slider to have its default background color, which is opaque.
         """
             slider.isOpaque() == true
-        and : 'Due to the usage of `UI.COLOR_UNDEFINED`, the background color of the slider is undefined too:'
+        and : 'Due to the usage of `UI.Colour.UNDEFINED`, the background color of the slider is undefined too:'
             slider.getBackground() == null
 
         when : 'We set the `isOn` flag to true in order to start the transition:'
@@ -892,7 +892,7 @@ class Opaqueness_Styles_Spec extends Specification
             due to the background color being undefined (which causes the slider to have its default background color).
         """
             slider.isOpaque() == true
-        and : 'Due to the usage of `UI.COLOR_UNDEFINED`, the background color of the slider is undefined too:'
+        and : 'Due to the usage of `UI.Colour.UNDEFINED`, the background color of the slider is undefined too:'
             slider.getBackground() == null
     }
 
@@ -913,7 +913,7 @@ class Opaqueness_Styles_Spec extends Specification
                     .withTransitionalStyle(isOn, LifeTime.of(1, TimeUnit.MILLISECONDS), (state, it) -> it
                         .backgroundColor(
                             state.progress() == 0
-                                ? UI.COLOR_UNDEFINED
+                                ? UI.Colour.UNDEFINED
                                 : new Color(0,0,0,0)
                         )
                     )
@@ -927,8 +927,8 @@ class Opaqueness_Styles_Spec extends Specification
             causes the slider to have its default background color, which is opaque.
         """
             toggleButton.isOpaque() == true
-        and : 'Due to the usage of `UI.COLOR_UNDEFINED`, the background color of the button is now undefined:'
-            toggleButton.getBackground() == UI.COLOR_UNDEFINED
+        and : 'Due to the usage of `UI.Colour.UNDEFINED`, the background color of the button is now undefined:'
+            toggleButton.getBackground() == UI.Colour.UNDEFINED
 
         when : 'We set the `isOn` flag to true in order to start the transition:'
             isOn.set(true)
@@ -957,8 +957,8 @@ class Opaqueness_Styles_Spec extends Specification
             due to the background color being undefined (which causes the slider to have its default background color).
         """
             toggleButton.isOpaque() == true
-        and : 'Due to the usage of `UI.COLOR_UNDEFINED`, the background color of the slider is undefined again:'
-            toggleButton.getBackground() == UI.COLOR_UNDEFINED
+        and : 'Due to the usage of `UI.Colour.UNDEFINED`, the background color of the slider is undefined again:'
+            toggleButton.getBackground() == UI.Colour.UNDEFINED
     }
 
     def 'A check box (which typically opaque) may become non-opaque when transitioning to various styles.'(

@@ -277,8 +277,8 @@ public final class ImageConf implements Simplifiable<ImageConf>
      * @return A new {@link ImageConf} instance with the specified primer color.
      */
     public ImageConf primer( Color color ) {
-        Objects.requireNonNull(color, "Use UI.COLOR_UNDEFINED instead of null to represent the absence of a color.");
-        if ( color == UI.COLOR_UNDEFINED)
+        Objects.requireNonNull(color, "Use UI.Colour.UNDEFINED instead of null to represent the absence of a color.");
+        if ( color == UI.Colour.UNDEFINED)
             color = null;
         if ( color == _primer )
             return this;
@@ -621,7 +621,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
         ImageIcon simplifiedImage = _opacity == 0.0f ? null : _image;
         Color simplifiedPrimer = _primer == null || _primer.getAlpha() == 0 ? null : _primer;
 
-        if ( simplifiedPrimer == UI.COLOR_UNDEFINED)
+        if ( simplifiedPrimer == UI.Colour.UNDEFINED)
             simplifiedPrimer = null;
 
         if ( simplifiedImage == null && simplifiedPrimer == null )

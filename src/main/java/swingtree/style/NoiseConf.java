@@ -188,7 +188,7 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
     public NoiseConf colors( Color... colors ) {
         Objects.requireNonNull(colors);
         for ( Color color : colors )
-            Objects.requireNonNull(color, "Use UI.COLOR_UNDEFINED instead of null to represent the absence of a color.");
+            Objects.requireNonNull(color, "Use UI.Colour.UNDEFINED instead of null to represent the absence of a color.");
         return of(_function, colors, _offset, _scale, _area, _boundary, _rotation, _fractions);
     }
 
@@ -390,10 +390,10 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
         if ( _colors.length == 0 )
             return _NONE;
 
-        if ( Arrays.stream(_colors).allMatch( color -> color.getAlpha() == 0 || color == UI.COLOR_UNDEFINED) )
+        if ( Arrays.stream(_colors).allMatch( color -> color.getAlpha() == 0 || color == UI.Colour.UNDEFINED) )
             return _NONE;
 
-        int numberOfRealColors = Arrays.stream(_colors).mapToInt( color -> color == UI.COLOR_UNDEFINED ? 0 : 1 ).sum();
+        int numberOfRealColors = Arrays.stream(_colors).mapToInt( color -> color == UI.Colour.UNDEFINED ? 0 : 1 ).sum();
 
         if ( numberOfRealColors == 0 )
             return _NONE;
@@ -402,7 +402,7 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
             Color[] realColors = new Color[numberOfRealColors];
             int index = 0;
             for ( Color color : _colors )
-                if ( color != UI.COLOR_UNDEFINED)
+                if ( color != UI.Colour.UNDEFINED)
                     realColors[index++] = color;
 
             return of( _function, realColors, _offset, _scale, _area, _boundary, _rotation, _fractions );
