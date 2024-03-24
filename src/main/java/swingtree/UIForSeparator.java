@@ -73,6 +73,11 @@ public final class UIForSeparator<S extends JSeparator> extends UIForAnySwing<UI
     }
 
     /**
+     *  Sets the length of the separation line either horizontally or vertically
+     *  depending on the orientation of the separator.
+     *  This method is an alignment aware convenience method for
+     *  {@link JSeparator#setPreferredSize(Dimension)}.
+     *
      * @param separatorLength The length of the separation line.
      * @return This very builder to allow for method chaining.
      */
@@ -86,9 +91,9 @@ public final class UIForSeparator<S extends JSeparator> extends UIForAnySwing<UI
     private void _setLength( S thisComponent, int separatorLength ) {
         Dimension d = thisComponent.getPreferredSize();
         if ( thisComponent.getOrientation() == JSeparator.VERTICAL )
-            d.height = separatorLength;
+            d.height = UI.scale(separatorLength);
         else if ( thisComponent.getOrientation() == JSeparator.HORIZONTAL )
-            d.width = separatorLength;
+            d.width = UI.scale(separatorLength);
         thisComponent.setPreferredSize(d);
     }
 

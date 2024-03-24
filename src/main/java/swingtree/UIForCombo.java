@@ -63,14 +63,17 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
             // Adds a PopupMenu listener which will listen to notification
             // messages from the popup portion of the combo box.
             thisComponent.addPopupMenuListener(new PopupMenuListener() {
+                @Override
                 public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
                     // This method is called before the popup menu becomes visible.
                     comboIsOpen[0] = true;
                 }
+                @Override
                 public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
                     // This method is called before the popup menu becomes invisible
                     comboIsOpen[0] = false;
                 }
+                @Override
                 public void popupMenuCanceled(PopupMenuEvent e) {
                     // This method is called when the popup menu is canceled
                     comboIsOpen[0] = false;
@@ -97,11 +100,14 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
 
     private void _onPopupOpen( JComboBox<E> thisComponent, Consumer<PopupMenuEvent> consumer ) {
         thisComponent.addPopupMenuListener(new PopupMenuListener() {
+            @Override
             public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
                 // This method is called before the popup menu becomes visible.
                 consumer.accept(e);
             }
+            @Override
             public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {/* Not relevant here */}
+            @Override
             public void popupMenuCanceled(PopupMenuEvent e) {/* Not relevant here */}
         });
     }
@@ -125,10 +131,13 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
 
     private void _onPopupClose( JComboBox<E> thisComponent, Consumer<PopupMenuEvent> consumer ) {
         thisComponent.addPopupMenuListener(new PopupMenuListener() {
+            @Override
             public void popupMenuWillBecomeVisible(PopupMenuEvent e) {/* Not relevant here */}
+            @Override
             public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
                 consumer.accept(e); // This method is called before the popup menu becomes invisible
             }
+            @Override
             public void popupMenuCanceled(PopupMenuEvent e) {/* Not relevant here */}
         });
     }
@@ -153,8 +162,11 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
 
     private void _onPopupCancel( JComboBox<E> thisComponent, Consumer<PopupMenuEvent> consumer ) {
         thisComponent.addPopupMenuListener(new PopupMenuListener() {
+            @Override
             public void popupMenuWillBecomeVisible(PopupMenuEvent e) {/* Not relevant here */}
+            @Override
             public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {/* Not relevant here */}
+            @Override
             public void popupMenuCanceled(PopupMenuEvent e) {
                 consumer.accept(e); // This method is called when the popup menu is canceled
             }
@@ -277,7 +289,11 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
     }
 
     /**
-     * @param model The {@link ComboBoxModel} to be used for the combo box.
+     *  Use this convenience method to specify the model for the combo box,
+     *  which is used by the combo box component to determine the available options
+     *  and the currently selected item.
+     *
+     * @param model The {@link ComboBoxModel} to be used for modelling the content data of the combo box.
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForCombo<E,C> withModel( ComboBoxModel<E> model ) {
@@ -454,6 +470,8 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
     }
 
     /**
+     *  This method allows you to specify an initial selection for the combo box.
+     *
      * @param item The item which should be set as the currently selected combo box item.
      * @return This very instance, which enables builder-style method chaining.
      */

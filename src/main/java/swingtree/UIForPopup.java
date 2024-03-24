@@ -85,11 +85,14 @@ public final class UIForPopup<P extends JPopupMenu> extends UIForAnySwing<UIForP
 
     private void _onPopupOpen( P thisComponent, Consumer<PopupMenuEvent> consumer ) {
         thisComponent.addPopupMenuListener(new PopupMenuListener() {
+            @Override
             public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
                 // This method is called before the popup menu becomes visible.
                 consumer.accept(e);
             }
+            @Override
             public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {/* Not relevant here */}
+            @Override
             public void popupMenuCanceled(PopupMenuEvent e) {/* Not relevant here */}
         });
     }
@@ -113,10 +116,13 @@ public final class UIForPopup<P extends JPopupMenu> extends UIForAnySwing<UIForP
 
     private void _onPopupClose( P thisComponent, Consumer<PopupMenuEvent> consumer ) {
         thisComponent.addPopupMenuListener(new PopupMenuListener() {
+            @Override
             public void popupMenuWillBecomeVisible(PopupMenuEvent e) {/* Not relevant here */}
+            @Override
             public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
                 consumer.accept(e); // This method is called before the popup menu becomes invisible
             }
+            @Override
             public void popupMenuCanceled(PopupMenuEvent e) {/* Not relevant here */}
         });
     }
@@ -140,8 +146,11 @@ public final class UIForPopup<P extends JPopupMenu> extends UIForAnySwing<UIForP
 
     private void _onPopupCancel( P thisComponent, Consumer<PopupMenuEvent> consumer ) {
         thisComponent.addPopupMenuListener(new PopupMenuListener() {
+            @Override
             public void popupMenuWillBecomeVisible(PopupMenuEvent e) {/* Not relevant here */}
+            @Override
             public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {/* Not relevant here */}
+            @Override
             public void popupMenuCanceled(PopupMenuEvent e) {
                 consumer.accept(e); // This method is called when the popup menu is canceled
             }

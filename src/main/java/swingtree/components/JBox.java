@@ -118,6 +118,7 @@ public class JBox extends JComponent implements Accessible, StylableComponent
      * @return the PanelUI object that renders this component
      */
     /*@Override*/
+    @SuppressWarnings("MissingOverride")
     public PanelUI getUI() { return (PanelUI) ui; }
 
 
@@ -150,6 +151,7 @@ public class JBox extends JComponent implements Accessible, StylableComponent
      *
      * @return  a string representation of this JBox.
      */
+    @Override
     protected String paramString() { return super.paramString(); }
 
 /////////////////
@@ -165,6 +167,7 @@ public class JBox extends JComponent implements Accessible, StylableComponent
      * @return an AccessibleJBox that serves as the
      *         AccessibleContext of this JBox
      */
+    @Override
     public AccessibleContext getAccessibleContext() {
         if ( accessibleContext == null )
             accessibleContext = new AccessibleJBox();
@@ -194,6 +197,7 @@ public class JBox extends JComponent implements Accessible, StylableComponent
          * @return an instance of AccessibleRole describing the role of the
          * object
          */
+        @Override
         public AccessibleRole getAccessibleRole() { return AccessibleRole.PANEL; }
     }
 }

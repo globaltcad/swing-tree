@@ -60,6 +60,12 @@ public final class SplitItem<I extends JMenuItem>
     }
 
     /**
+     *  Use this to create a {@link SplitItem} for a {@link JSplitButton} from a {@link UIForMenuItem}
+     *  UI declaration.
+     *  This is useful when you want to create a {@link SplitItem} from a {@link JMenuItem} which is configured
+     *  using the declarative UI builder API exposed by {@link UIForMenuItem}.
+     *  See {@link UI#menuItem()} for more information.
+     *
      * @param item The {@link UIForMenuItem} which wraps a {@link  JMenuItem} for which a {@link SplitItem} should be created.
      * @param <M> The type parameter for the provided item type, a subtype of {@link JMenuItem}.
      * @return A {@link SplitItem} wrapping {@link JMenuItem} represented by the provided UI builder.
@@ -149,6 +155,11 @@ public final class SplitItem<I extends JMenuItem>
     }
 
     /**
+     *  Dynamically determines whether this {@link SplitItem} is enabled or not based on the value of the provided
+     *  observable boolean property. This means that whenever the value of the property changes, the enabled state
+     *  of this {@link SplitItem} will change accordingly. This is done by calling {@link JMenuItem#setEnabled(boolean)}
+     *  on the underlying {@link JMenuItem} with the value of the property.
+     *
      * @param isEnabled An observable boolean property which will dynamically determine whether this {@link SplitItem}
      *                  is enabled or not. So when the property changes, the enabled state of this {@link SplitItem}
      *                  will be updated accordingly.

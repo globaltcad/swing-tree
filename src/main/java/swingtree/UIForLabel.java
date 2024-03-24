@@ -1,5 +1,6 @@
 package swingtree;
 
+import org.slf4j.Logger;
 import sprouts.Val;
 import swingtree.api.IconDeclaration;
 
@@ -23,6 +24,8 @@ import java.util.Objects;
  */
 public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel<L>, L>
 {
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(UIForLabel.class);
+
     private final BuilderState<L> _state;
 
     UIForLabel( BuilderState<L> state ) {
@@ -97,7 +100,7 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
                                 if ( !ref.startsWith("http") ) ref = "https://" + ref;
                                 Desktop.getDesktop().browse(new URI(ref));
                             } catch (IOException | URISyntaxException e1) {
-                                e1.printStackTrace();
+                                log.error("Failed to open link: " + href.orElseThrow(), e1);
                             }
                         }
                         @Override  public void mouseExited(MouseEvent e) { thisComponent.setText(text.get()); }
@@ -567,7 +570,7 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
     public final UIForLabel<L> withFont( Font font ) {
         NullUtil.nullArgCheck(font, "font", Font.class, "Use 'UI.FONT_UNDEFINED' instead of null!");
         return _with( thisComponent -> {
-                    if ( font == UI.FONT_UNDEFINED )
+                    if ( _isUndefinedFont(font) )
                         thisComponent.setFont(null);
                     else
                         thisComponent.setFont(font);
@@ -590,7 +593,7 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
         NullUtil.nullArgCheck(font, "font", Val.class);
         NullUtil.nullPropertyCheck(font, "font", "Use the default font of this component instead of null!");
         return _withOnShow( font, (thisComponent,v) -> {
-                    if ( v == UI.FONT_UNDEFINED )
+                    if ( _isUndefinedFont(v) )
                         thisComponent.setFont(null);
                     else
                         thisComponent.setFont(v);

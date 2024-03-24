@@ -61,7 +61,9 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
 
                             private List<E> _reference = new ArrayList<>(entries);
 
+                            @Override
                             public int getSize() { _checkContentChange(); return entries.size(); }
+                            @Override
                             public E getElementAt( int i ) { _checkContentChange(); return entries.get( i ); }
 
                             private void _checkContentChange() {
