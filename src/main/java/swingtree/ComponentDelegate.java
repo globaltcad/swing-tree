@@ -155,6 +155,9 @@ public class ComponentDelegate<C extends JComponent, E> extends AbstractDelegate
     }
 
     /**
+     *  This method provides a convenient way to access all the children of the parent component
+     *  of the component this delegate is for.
+     *
      * @return A list of all siblings including the component from which this instance originated.
      */
     public final List<JComponent> getSiblinghood() {

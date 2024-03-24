@@ -28,13 +28,13 @@ import java.util.Objects;
 public interface BasicTableModel extends TableModel
 {
     /** {@inheritDoc} */
-    int getRowCount();
+    @Override int getRowCount();
     /** {@inheritDoc} */
-    int getColumnCount();
+    @Override int getColumnCount();
     /** {@inheritDoc} */
-    Object getValueAt(int rowIndex, int columnIndex);
+    @Override Object getValueAt(int rowIndex, int columnIndex);
     /** {@inheritDoc} */
-    void setValueAt(Object aValue, int rowIndex, int columnIndex);
+    @Override void setValueAt(Object aValue, int rowIndex, int columnIndex);
     /** {@inheritDoc} */
     @Override default Class<?> getColumnClass(int columnIndex) { return Object.class; }
     /** {@inheritDoc} */

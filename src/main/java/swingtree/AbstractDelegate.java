@@ -135,7 +135,7 @@ abstract class AbstractDelegate<C extends JComponent>
      */
     public final AbstractDelegate<C> setBackground( Color color ) {
         Objects.requireNonNull(color, "Use UI.Color.UNDEFINED instead of null to represent the absence of a color.");
-        if ( color == UI.Color.UNDEFINED)
+        if ( _isUndefinedColor(color) )
             _component().setBackground(null);
         else
             _component().setBackground(color);
@@ -247,7 +247,7 @@ abstract class AbstractDelegate<C extends JComponent>
      */
     public final AbstractDelegate<C> setForeground( Color color ) {
         Objects.requireNonNull(color, "Use UI.Color.UNDEFINED instead of null to represent the absence of a color.");
-        if ( color == UI.Color.UNDEFINED)
+        if ( _isUndefinedColor(color) )
             _component().setForeground( null );
         else
             _component().setForeground( color );
@@ -358,7 +358,7 @@ abstract class AbstractDelegate<C extends JComponent>
      */
     public final AbstractDelegate<C> setFont( Font font ) {
         Objects.requireNonNull(font, "Use UI.FONT_UNDEFINED instead of null to represent the absence of a font.");
-        if ( font == UI.FONT_UNDEFINED )
+        if ( _isUndefinedFont(font) )
             _component().setFont(null);
         else
             _component().setFont(font);

@@ -226,8 +226,9 @@ public final class UI extends UINamespaceUtilities
                 case TOP:    return Optional.of(SwingConstants.TOP);
                 case CENTER: return Optional.of(SwingConstants.CENTER);
                 case BOTTOM: return Optional.of(SwingConstants.BOTTOM);
+                default:
+                    return Optional.empty();
             }
-            return Optional.empty();
         }
     }
 
@@ -246,8 +247,9 @@ public final class UI extends UINamespaceUtilities
                 case RIGHT:    return Optional.of(SwingConstants.RIGHT);
                 case LEADING:  return Optional.of(SwingConstants.LEADING);
                 case TRAILING: return Optional.of(SwingConstants.TRAILING);
+                default:
+                    return Optional.empty();
             }
-            return Optional.empty();
         }
 
         public final Optional<Integer> forFlowLayout() {
@@ -257,8 +259,9 @@ public final class UI extends UINamespaceUtilities
                 case RIGHT:    return Optional.of(FlowLayout.RIGHT);
                 case LEADING:  return Optional.of(FlowLayout.LEADING);
                 case TRAILING: return Optional.of(FlowLayout.TRAILING);
+                default:
+                    return Optional.empty();
             }
-            return Optional.empty();
         }
     }
 
@@ -2464,7 +2467,7 @@ public final class UI extends UINamespaceUtilities
 
     /**
      *  Use this to create a builder for a new {@link JTabbedPane} UI component
-     *  with the provided {@code selectionIndex} property which should be determine the
+     *  with the provided {@code selectionIndex} property which should be determined the
      *  tab selection of the {@link JTabbedPane} dynamically.
      *  To add tabs to this builder use the tab object returned by {@link #tab(String)}
      *  like so:
@@ -2637,6 +2640,10 @@ public final class UI extends UINamespaceUtilities
     }
 
     /**
+     *  This factory method creates a {@link JMenu} with the provided text property
+     *  bound to the menu item. So when the property state changes to a different text,
+     *  then so does the text displayed on the menu item. <br>
+     *
      * @param text The text property which should be displayed on the wrapped {@link JMenuItem} dynamically.
      * @return A builder instance for the provided {@link JMenuItem}, which enables fluent method chaining.
      */
@@ -6663,7 +6670,7 @@ public final class UI extends UINamespaceUtilities
                 try {
                     c = UI.runAndGet(() -> uiSupplier.apply(frame));
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.error("Error trying to create a UI component for a new JFrame.", e);
                 }
             }
             else
@@ -6784,6 +6791,9 @@ public final class UI extends UINamespaceUtilities
         public TableHeader() { super(); }
         public TableHeader(TableColumnModel model) { super(model); }
         /**
+         *  Use this for defining the header cell tool tips.
+         *  This models the tool tip of all header cells using a function which receives the column index
+         *  and returns the tool tip text for that column.
          * @param toolTipTextSupplier A function which receives the column index and returns the
          *                            tool tip text for that column.
          */
@@ -6792,6 +6802,7 @@ public final class UI extends UINamespaceUtilities
             _toolTipTextSupplier = toolTipTextSupplier;
         }
         /**
+         *  Use this for defining a fixed set of tool tip texts for the columns.
          * @param toolTips The tool tip texts for the columns.
          */
         public void setToolTips( String... toolTips ) {

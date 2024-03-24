@@ -31,6 +31,10 @@ public final class UIForToolBar<T extends JToolBar> extends UIForAnySwing<UIForT
     }
 
     /**
+     *  Use this to set the orientation of the {@link JToolBar},
+     *  which is a layout mode that is either horizontal or vertical.
+     *  It translates to a call to {@link JToolBar#setOrientation(int)}.
+     *
      * @param alignment The {@link UI.Align} value mapping to the {@link JToolBar}'s orientation.
      *                  See {@link JToolBar#setOrientation(int)}.
      * @return This builder node.
@@ -44,6 +48,11 @@ public final class UIForToolBar<T extends JToolBar> extends UIForAnySwing<UIForT
     }
 
     /**
+     *  Dynamically determines the orientation of the {@link JToolBar} based on the value of the given {@link Val},
+     *  which means that whenever the value of the {@link Val} changes, the orientation of the {@link JToolBar} will change.
+     *  This translates to a call to {@link JToolBar#setOrientation(int)}.
+     *  The orientation must have either the value HORIZONTAL or VERTICAL.
+     *
      * @param alignment The {@link UI.Align} property mapping to the {@link JToolBar}'s orientation.
      *                  See {@link JToolBar#setOrientation(int)}.
      * @return This builder node.

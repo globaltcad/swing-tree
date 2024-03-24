@@ -252,6 +252,9 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
     }
 
     /**
+     *  Defines the tab placement side based on the given {@link swingtree.UI.Side} enum,
+     *  which maps directly to the {@link JTabbedPane#setTabPlacement(int)} method.
+     *
      * @param side The position to use for the tabs.
      * @return This builder node.
      */
@@ -264,6 +267,10 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
     }
 
     /**
+     *  Binds the supplied property to the tab placement of the tabbed pane.
+     *  This means that when the property changes, the tab placement will change accordingly.
+     *  The {@link swingtree.UI.Side} enum maps directly to the {@link JTabbedPane#setTabPlacement(int)} method.
+     *
      * @param side The position property to use for the tabs.
      * @return This builder node.
      */
@@ -279,6 +286,15 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
     }
 
     /**
+     *  Defines the overflow policy based on the given {@link swingtree.UI.OverflowPolicy} enum,
+     *  which maps directly to the {@link JTabbedPane#setTabLayoutPolicy(int)} method.
+     *  The overflow policy must either be {@link swingtree.UI.OverflowPolicy#SCROLL} or
+     *  {@link swingtree.UI.OverflowPolicy#WRAP}.
+     *  The {@link swingtree.UI.OverflowPolicy#SCROLL} policy will make the tabs scrollable
+     *  when there are too many tabs to fit in the tabbed pane.
+     *  The {@link swingtree.UI.OverflowPolicy#WRAP} policy will make the tabs wrap to the next line
+     *  when there are too many tabs to fit in the tabbed pane.
+     *
      * @param policy The overflow policy to use for the tabs.
      * @return This builder node.
      */
@@ -291,6 +307,11 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
     }
 
     /**
+     *  Binds the supplied enum property to the overflow policy of the tabbed pane.
+     *  When the item of the property changes, the overflow policy will change accordingly.
+     *  The {@link swingtree.UI.OverflowPolicy} enum maps directly to the
+     *  {@link JTabbedPane#setTabLayoutPolicy(int)} method.
+     *
      * @param policy The overflow policy property to use for the tabs.
      * @return This builder node.
      */

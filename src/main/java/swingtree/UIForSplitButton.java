@@ -1,5 +1,6 @@
 package swingtree;
 
+import org.slf4j.Logger;
 import sprouts.Action;
 import sprouts.Event;
 import sprouts.From;
@@ -22,6 +23,8 @@ import java.util.stream.Collectors;
  */
 public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButton<UIForSplitButton<B>, B>
 {
+    private static Logger log = org.slf4j.LoggerFactory.getLogger(UIForSplitButton.class);
+
     private final BuilderState<B> _state;
 
     /**
@@ -272,11 +275,14 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
         if ( popupMenu == null )
             return;
         popupMenu.addPopupMenuListener(new PopupMenuListener() {
+            @Override
             public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
                 // This method is called before the popup menu becomes visible.
                 consumer.accept(e);
             }
+            @Override
             public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {/* Not relevant here */}
+            @Override
             public void popupMenuCanceled(PopupMenuEvent e) {/* Not relevant here */}
         });
     }
@@ -304,11 +310,14 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
         if ( popupMenu == null )
             return;
         popupMenu.addPopupMenuListener(new PopupMenuListener() {
+            @Override
             public void popupMenuWillBecomeVisible(PopupMenuEvent e) {/* Not relevant here */}
+            @Override
             public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
                 // This method is called before the popup menu becomes invisible.
                 consumer.accept(e);
             }
+            @Override
             public void popupMenuCanceled(PopupMenuEvent e) {/* Not relevant here */}
         });
     }
@@ -335,8 +344,11 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
         if ( popupMenu == null )
             return;
         popupMenu.addPopupMenuListener(new PopupMenuListener() {
+            @Override
             public void popupMenuWillBecomeVisible(PopupMenuEvent e) {/* Not relevant here */}
+            @Override
             public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {/* Not relevant here */}
+            @Override
             public void popupMenuCanceled(PopupMenuEvent e) {
                 // This method is called when the popup menu is canceled.
                 consumer.accept(e);
@@ -358,6 +370,7 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
     }
 
     /**
+     *  Use this to add a {@link JMenuItem} to the {@link JSplitButton} popup menu.
      * @param item A {@link JMenuItem} which will be exposed by this {@link JSplitButton} once the split part was pressed.
      * @return This very instance, which enables builder-style method chaining.
      */
@@ -367,6 +380,8 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
     }
 
     /**
+     *  Use this to add a {@link SplitItem} to the {@link JSplitButton} popup menu.
+     *
      * @param splitItem The {@link SplitItem} instance wrapping a {@link JMenuItem} as well as some associated {@link Action}s.
      * @param <I> The {@link JMenuItem} type which should be added to this {@link JSplitButton} builder.
      * @return This very instance, which enables builder-style method chaining.
@@ -406,7 +421,7 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
                     try {
                         action.accept(new SplitButtonDelegate<>( thisComponent,(SplitItemDelegate<JMenuItem>) delegate ));
                     } catch (Exception exception) {
-                        exception.printStackTrace();
+                        log.error("Error while executing selection action listener.", exception);
                     }
                 });
                 splitItem.getOnSelected().accept(delegate);

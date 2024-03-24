@@ -177,6 +177,8 @@ final class BuilderState<C extends java.awt.Component>
     }
 
     /**
+     *  A builder may be disposed, which means that it is no longer usable for building
+     *  as it no longer has a reference to the component or built steps. <br>
      *  @return True if this builder node has already been disposed.
      */
     boolean isDisposed() {
