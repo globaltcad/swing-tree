@@ -1452,12 +1452,14 @@ public final class Colour extends Color
     }
 
     /**
-     * Creates an updated colour whose brightness is decreased by the specified factor.
+     * Creates an updated colour whose brightness is decreased by the specified
+     * percentage factor.
      * @param factor The factor by which to decrease the brightness.
      */
     public Colour darkerBy(double factor) {
         if ( factor == 0.0 )
             return this;
+        factor = 1.0 - factor;
         return _deriveColour(0, 1.0, factor, 1.0);
     }
 
@@ -1486,6 +1488,7 @@ public final class Colour extends Color
     public Colour desaturateBy(double factor) {
         if ( factor == 0.0 )
             return this;
+        factor = 1.0 - factor;
         return _deriveColour(0, factor, 1.0, 1.0);
     }
 
