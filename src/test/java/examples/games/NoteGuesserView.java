@@ -10,7 +10,7 @@ import static swingtree.UI.*;
 
 public class NoteGuesserView extends Panel
 {
-    private final Color OLD_SHEET_MUSIC_COLOR = new java.awt.Color(206, 198, 169,255);
+    private final java.awt.Color OLD_SHEET_MUSIC_COLOR = new java.awt.Color(206, 198, 169,255);
 
     public NoteGuesserView(NoteGuesserViewModel vm) {
         FlatLightLaf.setup();

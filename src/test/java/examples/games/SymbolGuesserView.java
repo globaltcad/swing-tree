@@ -10,7 +10,7 @@ import static swingtree.UI.*;
 
 public class SymbolGuesserView extends Panel
 {
-    private final Color BACKGROUND = new java.awt.Color(255, 255, 255,255);
+    private final java.awt.Color BACKGROUND = new java.awt.Color(255, 255, 255,255);
 
     public SymbolGuesserView(SymbolGuesserViewModel vm) {
         FlatLightLaf.setup();
