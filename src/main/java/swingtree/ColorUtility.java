@@ -2,6 +2,7 @@ package swingtree;
 
 import org.jspecify.annotations.Nullable;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /*
@@ -13,14 +14,14 @@ final class ColorUtility {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ColorUtility.class);
 
     static UI.Color deriveColor(
-        final double hueShift,
-        final double saturationFactor,
-        final double brightnessFactor,
-        final double opacityFactor,
-        final double red,
-        final double green,
-        final double blue,
-        final double opacity
+            final double hueShift,
+            final double saturationFactor,
+            final double brightnessFactor,
+            final double opacityFactor,
+            final double red,
+            final double green,
+            final double blue,
+            final double opacity
     ) {
         double[] hsb = ColorUtility.RGBtoHSB(red, green, blue);
 
@@ -41,7 +42,7 @@ final class ColorUtility {
     static double[] HSBtoRGB(double hue, double saturation, double brightness) {
         // normalize the hue
         double normalizedHue = ((hue % 360) + 360) % 360;
-        hue = normalizedHue/360;
+        hue = normalizedHue / 360;
 
         double r = 0, g = 0, b = 0;
         if (saturation == 0) {
@@ -129,52 +130,50 @@ final class ColorUtility {
     }
 
 
-    static UI.Color parseColor(final String colorAsString)
-    {
+    static UI.Color parseColor(final String colorAsString) {
         // First some cleanup
         final String colorString = colorAsString.trim();
 
-        if ( colorAsString.isEmpty() )
+        if (colorAsString.isEmpty())
             return UI.Color.UNDEFINED;
 
-        if ( colorString.startsWith("#") )
+        if (colorString.startsWith("#"))
             return UI.Color.of(java.awt.Color.decode(colorString));
 
-        if ( colorString.startsWith("0x") )
+        if (colorString.startsWith("0x"))
             return UI.Color.of(java.awt.Color.decode(colorString));
 
-        if ( colorString.startsWith("rgb") ) {
+        if (colorString.startsWith("rgb")) {
             // We have an rgb() or rgba() color
             int start = colorString.indexOf('(');
             int end = colorString.indexOf(')');
-            if ( start < 0 || end < 0 || end < start ) {
+            if (start < 0 || end < 0 || end < start) {
                 log.error("Invalid rgb() or rgba() color: " + colorString, new Throwable());
                 return UI.Color.UNDEFINED;
             }
 
             String[] parts = colorString.substring(start + 1, end).split(",");
-            if ( parts.length < 3 || parts.length > 4 ) {
+            if (parts.length < 3 || parts.length > 4) {
                 log.error("Invalid rgb() or rgba() color: " + colorString, new Throwable());
                 return UI.Color.UNDEFINED;
             }
 
-            for ( int i = 0; i < parts.length; i++ )
+            for (int i = 0; i < parts.length; i++)
                 parts[i] = parts[i].trim();
 
             int[] values = new int[parts.length];
 
-            for ( int i = 0; i < parts.length; i++ ) {
+            for (int i = 0; i < parts.length; i++) {
                 String part = parts[i];
-                if ( part.endsWith("%") ) {
+                if (part.endsWith("%")) {
                     part = part.substring(0, part.length() - 1);
                     values[i] = Integer.parseInt(part);
-                    if ( values[i] < 0 || values[i] > 100 ) {
+                    if (values[i] < 0 || values[i] > 100) {
                         log.error("Invalid rgb() or rgba() color: " + colorString, new Throwable());
                         return UI.Color.UNDEFINED;
                     }
                     values[i] = (int) Math.ceil(values[i] * 2.55);
-                }
-                else if ( part.matches("[0-9]+((\\.[0-9]+[fF]?)|[fF])") )
+                } else if (part.matches("[0-9]+((\\.[0-9]+[fF]?)|[fF])"))
                     values[i] = (int) (Float.parseFloat(part) * 255);
                 else
                     values[i] = Integer.parseInt(part);
@@ -186,62 +185,62 @@ final class ColorUtility {
             return UI.Color.ofRgba(r, g, b, a);
         }
 
-        if ( colorString.startsWith("hsb") ) {
+        if (colorString.startsWith("hsb")) {
             // We have an hsb() or hsba() color
             int start = colorString.indexOf('(');
             int end = colorString.indexOf(')');
-            if ( start < 0 || end < 0 || end < start ) {
+            if (start < 0 || end < 0 || end < start) {
                 log.error("Invalid hsb() or hsba() color: " + colorString, new Throwable());
                 return UI.Color.UNDEFINED;
             }
 
             String[] parts = colorString.substring(start + 1, end).split(",");
-            if ( parts.length < 3 || parts.length > 4 ) {
+            if (parts.length < 3 || parts.length > 4) {
                 log.error("Invalid hsb() or hsba() color: " + colorString, new Throwable());
                 return UI.Color.UNDEFINED;
             }
 
-            for ( int i = 0; i < parts.length; i++ )
+            for (int i = 0; i < parts.length; i++)
                 parts[i] = parts[i].trim();
 
             float[] values = new float[parts.length];
 
-            for ( int i = 0; i < parts.length; i++ ) {
+            for (int i = 0; i < parts.length; i++) {
                 String part = parts[i];
-                if ( part.endsWith("%") ) {
+                if (part.endsWith("%")) {
                     part = part.substring(0, part.length() - 1);
                     values[i] = Float.parseFloat(part);
-                    if ( values[i] < 0 || values[i] > 100 ) {
+                    if (values[i] < 0 || values[i] > 100) {
                         log.error(
                                 "Invalid hsb() or hsba() string '" + colorString + "', " +
-                                "value '" + part + "' out of range.",
+                                        "value '" + part + "' out of range.",
                                 new Throwable()
-                            );
+                        );
                         return UI.Color.UNDEFINED;
                     }
                     values[i] = values[i] / 100.0f;
-                } else if ( part.endsWith("°") ) {
-                    if ( i > 0 ) {
+                } else if (part.endsWith("°")) {
+                    if (i > 0) {
                         log.error(
-                            "Invalid hsb() or hsba() string '" + colorString + "', " +
-                            "unexpected degree symbol in '" + part + "' (only allowed for hue)",
-                            new Throwable()
+                                "Invalid hsb() or hsba() string '" + colorString + "', " +
+                                        "unexpected degree symbol in '" + part + "' (only allowed for hue)",
+                                new Throwable()
                         );
                         return UI.Color.UNDEFINED;
                     }
 
                     part = part.substring(0, part.length() - 1);
                     values[i] = Float.parseFloat(part);
-                    if ( values[i] < 0 || values[i] > 360 ) {
+                    if (values[i] < 0 || values[i] > 360) {
                         log.error(
-                            "Invalid hsb() or hsba() string '" + colorString + "', " +
-                            "hue value '" + part + "' out of range.",
-                            new Throwable()
+                                "Invalid hsb() or hsba() string '" + colorString + "', " +
+                                        "hue value '" + part + "' out of range.",
+                                new Throwable()
                         );
                         return UI.Color.UNDEFINED;
                     }
                     values[i] = values[i] / 360.0f;
-                } else if ( part.matches("[0-9]+((\\.[0-9]+[fF]?)|[fF])") )
+                } else if (part.matches("[0-9]+((\\.[0-9]+[fF]?)|[fF])"))
                     values[i] = Float.parseFloat(part);
                 else
                     values[i] = Integer.parseInt(part);
@@ -252,58 +251,57 @@ final class ColorUtility {
             float b = values[2];
             float a = values.length == 4 ? values[3] : 1.0f;
             java.awt.Color c = java.awt.Color.getHSBColor(h, s, b);
-            return UI.Color.ofRgba(c.getRed(), c.getGreen(), c.getBlue(), (int)(a * 255));
+            return UI.Color.ofRgba(c.getRed(), c.getGreen(), c.getBlue(), (int) (a * 255));
         }
 
         {
             String maybeWord = colorString.toLowerCase();
             boolean transparent = false;
 
-            if ( maybeWord.startsWith("transparent") ) {
+            if (maybeWord.startsWith("transparent")) {
                 transparent = true;
                 maybeWord = maybeWord.substring(11).trim();
             }
 
             // Let's try a few common color names
             UI.Color color = _tryFromName(maybeWord);
-            if ( color == null && maybeWord.startsWith("darker") ) {
+            if (color == null && maybeWord.startsWith("darker")) {
                 color = _tryFromName(maybeWord.substring(6).trim());
-                if ( color != null )
+                if (color != null)
                     color = color.darker();
             }
-            if ( color == null && maybeWord.startsWith("dark") ) {
+            if (color == null && maybeWord.startsWith("dark")) {
                 color = _tryFromName(maybeWord.substring(4).trim());
-                if ( color != null )
+                if (color != null)
                     color = color.darker();
             }
-            if ( color == null && maybeWord.startsWith("lighter") ) {
+            if (color == null && maybeWord.startsWith("lighter")) {
                 color = _tryFromName(maybeWord.substring(7).trim());
-                if ( color != null )
+                if (color != null)
                     color = color.brighter();
             }
-            if ( color == null && maybeWord.startsWith("light") ) {
+            if (color == null && maybeWord.startsWith("light")) {
                 color = _tryFromName(maybeWord.substring(5).trim());
-                if ( color != null )
+                if (color != null)
                     color = color.brighter();
             }
-            if ( color == null && maybeWord.startsWith("brighter") ) {
+            if (color == null && maybeWord.startsWith("brighter")) {
                 color = _tryFromName(maybeWord.substring(8).trim());
-                if ( color != null )
+                if (color != null)
                     color = color.brighter();
             }
-            if ( color == null && maybeWord.startsWith("bright") ) {
+            if (color == null && maybeWord.startsWith("bright")) {
                 color = _tryFromName(maybeWord.substring(6).trim());
-                if ( color != null )
+                if (color != null)
                     color = color.brighter();
             }
 
-            if ( color != null ) {
-                if ( transparent )
-                    return UI.Color.ofRgba(color.getRed(), color.getGreen(), color.getBlue(), 255/2);
+            if (color != null) {
+                if (transparent)
+                    return UI.Color.ofRgba(color.getRed(), color.getGreen(), color.getBlue(), 255 / 2);
                 else
                     return color;
-            }
-            else if ( transparent )
+            } else if (transparent)
                 return UI.Color.TRANSPARENT;
         }
 
@@ -311,22 +309,22 @@ final class ColorUtility {
         UI.Color foundInSystemProperties = null;
         try {
             java.awt.Color found = java.awt.Color.getColor(colorString);
-            if ( found != null && !(found instanceof UI.Color) )
+            if (found != null && !(found instanceof UI.Color))
                 foundInSystemProperties = UI.Color.of(found);
-        } catch ( IllegalArgumentException e ) {
+        } catch (IllegalArgumentException e) {
             // Ignore
         }
-        if ( foundInSystemProperties != null )
+        if (foundInSystemProperties != null)
             return foundInSystemProperties;
 
         return UI.Color.UNDEFINED;
     }
 
-    private static UI.@Nullable Color _tryFromName(String maybeColorName ) {
+    private static UI.@Nullable Color _tryFromName(String maybeColorName) {
         try {
             String lowerCaseName = maybeColorName.toLowerCase();
             return ColorUtility.get(lowerCaseName);
-        } catch ( IllegalArgumentException e ) {
+        } catch (IllegalArgumentException e) {
             return null;
         }
     }
@@ -336,153 +334,155 @@ final class ColorUtility {
         return NAMED_COLOURS.get(name);
     }
 
-    private static final Map<String, UI.Color> NAMED_COLOURS = Map.ofEntries(
-            Map.entry("aliceblue", UI.Color.ALICEBLUE),
-            Map.entry("antiquewhite", UI.Color.ANTIQUEWHITE),
-            Map.entry("aqua", UI.Color.AQUA),
-            Map.entry("aquamarine", UI.Color.AQUAMARINE),
-            Map.entry("azure", UI.Color.AZURE),
-            Map.entry("beige", UI.Color.BEIGE),
-            Map.entry("bisque", UI.Color.BISQUE),
-            Map.entry("black", UI.Color.BLACK),
-            Map.entry("blanchedalmond", UI.Color.BLANCHEDALMOND),
-            Map.entry("blue", UI.Color.BLUE),
-            Map.entry("blueviolet", UI.Color.BLUEVIOLET),
-            Map.entry("brown", UI.Color.BROWN),
-            Map.entry("burlywood", UI.Color.BURLYWOOD),
-            Map.entry("cadetblue", UI.Color.CADETBLUE),
-            Map.entry("chartreuse", UI.Color.CHARTREUSE),
-            Map.entry("chocolate", UI.Color.CHOCOLATE),
-            Map.entry("coral", UI.Color.CORAL),
-            Map.entry("cornflowerblue", UI.Color.CORNFLOWERBLUE),
-            Map.entry("cornsilk", UI.Color.CORNSILK),
-            Map.entry("crimson", UI.Color.CRIMSON),
-            Map.entry("cyan", UI.Color.CYAN),
-            Map.entry("darkblue", UI.Color.DARKBLUE),
-            Map.entry("darkcyan", UI.Color.DARKCYAN),
-            Map.entry("darkgoldenrod", UI.Color.DARKGOLDENROD),
-            Map.entry("darkgray", UI.Color.DARKGRAY),
-            Map.entry("darkgreen", UI.Color.DARKGREEN),
-            Map.entry("darkgrey", UI.Color.DARKGREY),
-            Map.entry("darkkhaki", UI.Color.DARKKHAKI),
-            Map.entry("darkmagenta", UI.Color.DARKMAGENTA),
-            Map.entry("darkolivegreen", UI.Color.DARKOLIVEGREEN),
-            Map.entry("darkorange", UI.Color.DARKORANGE),
-            Map.entry("darkorchid", UI.Color.DARKORCHID),
-            Map.entry("darkred", UI.Color.DARKRED),
-            Map.entry("darksalmon", UI.Color.DARKSALMON),
-            Map.entry("darkseagreen", UI.Color.DARKSEAGREEN),
-            Map.entry("darkslateblue", UI.Color.DARKSLATEBLUE),
-            Map.entry("darkslategray", UI.Color.DARKSLATEGRAY),
-            Map.entry("darkslategrey", UI.Color.DARKSLATEGREY),
-            Map.entry("darkturquoise", UI.Color.DARKTURQUOISE),
-            Map.entry("darkviolet", UI.Color.DARKVIOLET),
-            Map.entry("deeppink", UI.Color.DEEPPINK),
-            Map.entry("deepskyblue", UI.Color.DEEPSKYBLUE),
-            Map.entry("dimgray", UI.Color.DIMGRAY),
-            Map.entry("dimgrey", UI.Color.DIMGREY),
-            Map.entry("dodgerblue", UI.Color.DODGERBLUE),
-            Map.entry("firebrick", UI.Color.FIREBRICK),
-            Map.entry("floralwhite", UI.Color.FLORALWHITE),
-            Map.entry("forestgreen", UI.Color.FORESTGREEN),
-            Map.entry("fuchsia", UI.Color.FUCHSIA),
-            Map.entry("gainsboro", UI.Color.GAINSBORO),
-            Map.entry("ghostwhite", UI.Color.GHOSTWHITE),
-            Map.entry("gold", UI.Color.GOLD),
-            Map.entry("goldenrod", UI.Color.GOLDENROD),
-            Map.entry("gray", UI.Color.GRAY),
-            Map.entry("green", UI.Color.GREEN),
-            Map.entry("greenyellow", UI.Color.GREENYELLOW),
-            Map.entry("grey", UI.Color.GREY),
-            Map.entry("honeydew", UI.Color.HONEYDEW),
-            Map.entry("hotpink", UI.Color.HOTPINK),
-            Map.entry("indianred", UI.Color.INDIANRED),
-            Map.entry("indigo", UI.Color.INDIGO),
-            Map.entry("ivory", UI.Color.IVORY),
-            Map.entry("khaki", UI.Color.KHAKI),
-            Map.entry("lavender", UI.Color.LAVENDER),
-            Map.entry("lavenderblush", UI.Color.LAVENDERBLUSH),
-            Map.entry("lawngreen", UI.Color.LAWNGREEN),
-            Map.entry("lemonchiffon", UI.Color.LEMONCHIFFON),
-            Map.entry("lightblue", UI.Color.LIGHTBLUE),
-            Map.entry("lightcoral", UI.Color.LIGHTCORAL),
-            Map.entry("lightcyan", UI.Color.LIGHTCYAN),
-            Map.entry("lightgoldenrodyellow", UI.Color.LIGHTGOLDENRODYELLOW),
-            Map.entry("lightgray", UI.Color.LIGHTGRAY),
-            Map.entry("lightgreen", UI.Color.LIGHTGREEN),
-            Map.entry("lightgrey", UI.Color.LIGHTGREY),
-            Map.entry("lightpink", UI.Color.LIGHTPINK),
-            Map.entry("lightsalmon", UI.Color.LIGHTSALMON),
-            Map.entry("lightseagreen", UI.Color.LIGHTSEAGREEN),
-            Map.entry("lightskyblue", UI.Color.LIGHTSKYBLUE),
-            Map.entry("lightslategray", UI.Color.LIGHTSLATEGRAY),
-            Map.entry("lightslategrey", UI.Color.LIGHTSLATEGREY),
-            Map.entry("lightsteelblue", UI.Color.LIGHTSTEELBLUE),
-            Map.entry("lightyellow", UI.Color.LIGHTYELLOW),
-            Map.entry("lime", UI.Color.LIME),
-            Map.entry("limegreen", UI.Color.LIMEGREEN),
-            Map.entry("linen", UI.Color.LINEN),
-            Map.entry("magenta", UI.Color.MAGENTA),
-            Map.entry("maroon", UI.Color.MAROON),
-            Map.entry("mediumaquamarine", UI.Color.MEDIUMAQUAMARINE),
-            Map.entry("mediumblue", UI.Color.MEDIUMBLUE),
-            Map.entry("mediumorchid", UI.Color.MEDIUMORCHID),
-            Map.entry("mediumpurple", UI.Color.MEDIUMPURPLE),
-            Map.entry("mediumseagreen", UI.Color.MEDIUMSEAGREEN),
-            Map.entry("mediumslateblue", UI.Color.MEDIUMSLATEBLUE),
-            Map.entry("mediumspringgreen", UI.Color.MEDIUMSPRINGGREEN),
-            Map.entry("mediumturquoise", UI.Color.MEDIUMTURQUOISE),
-            Map.entry("mediumvioletred", UI.Color.MEDIUMVIOLETRED),
-            Map.entry("midnightblue", UI.Color.MIDNIGHTBLUE),
-            Map.entry("mintcream", UI.Color.MINTCREAM),
-            Map.entry("mistyrose", UI.Color.MISTYROSE),
-            Map.entry("moccasin", UI.Color.MOCCASIN),
-            Map.entry("navajowhite", UI.Color.NAVAJOWHITE),
-            Map.entry("navy", UI.Color.NAVY),
-            Map.entry("oldlace", UI.Color.OLDLACE),
-            Map.entry("olive", UI.Color.OLIVE),
-            Map.entry("olivedrab", UI.Color.OLIVEDRAB),
-            Map.entry("orange", UI.Color.ORANGE),
-            Map.entry("orangered", UI.Color.ORANGERED),
-            Map.entry("orchid", UI.Color.ORCHID),
-            Map.entry("palegoldenrod", UI.Color.PALEGOLDENROD),
-            Map.entry("palegreen", UI.Color.PALEGREEN),
-            Map.entry("paleturquoise", UI.Color.PALETURQUOISE),
-            Map.entry("palevioletred", UI.Color.PALEVIOLETRED),
-            Map.entry("papayawhip", UI.Color.PAPAYAWHIP),
-            Map.entry("peachpuff", UI.Color.PEACHPUFF),
-            Map.entry("peru", UI.Color.PERU),
-            Map.entry("pink", UI.Color.PINK),
-            Map.entry("plum", UI.Color.PLUM),
-            Map.entry("powderblue", UI.Color.POWDERBLUE),
-            Map.entry("purple", UI.Color.PURPLE),
-            Map.entry("red", UI.Color.RED),
-            Map.entry("rosybrown", UI.Color.ROSYBROWN),
-            Map.entry("royalblue", UI.Color.ROYALBLUE),
-            Map.entry("saddlebrown", UI.Color.SADDLEBROWN),
-            Map.entry("salmon", UI.Color.SALMON),
-            Map.entry("sandybrown", UI.Color.SANDYBROWN),
-            Map.entry("seagreen", UI.Color.SEAGREEN),
-            Map.entry("seashell", UI.Color.SEASHELL),
-            Map.entry("sienna", UI.Color.SIENNA),
-            Map.entry("silver", UI.Color.SILVER),
-            Map.entry("skyblue", UI.Color.SKYBLUE),
-            Map.entry("slateblue", UI.Color.SLATEBLUE),
-            Map.entry("slategray", UI.Color.SLATEGRAY),
-            Map.entry("slategrey", UI.Color.SLATEGREY),
-            Map.entry("snow", UI.Color.SNOW),
-            Map.entry("springgreen", UI.Color.SPRINGGREEN),
-            Map.entry("steelblue", UI.Color.STEELBLUE),
-            Map.entry("tan", UI.Color.TAN),
-            Map.entry("teal", UI.Color.TEAL),
-            Map.entry("thistle", UI.Color.THISTLE),
-            Map.entry("tomato", UI.Color.TOMATO),
-            Map.entry("transparent", UI.Color.TRANSPARENT),
-            Map.entry("turquoise", UI.Color.TURQUOISE),
-            Map.entry("violet", UI.Color.VIOLET),
-            Map.entry("wheat", UI.Color.WHEAT),
-            Map.entry("white", UI.Color.WHITE),
-            Map.entry("whitesmoke", UI.Color.WHITESMOKE),
-            Map.entry("yellow", UI.Color.YELLOW),
-            Map.entry("yellowgreen", UI.Color.YELLOWGREEN));
+    private static final Map<String, UI.Color> NAMED_COLOURS = new HashMap<>();
+    static {
+        NAMED_COLOURS.put("aliceblue", UI.Color.ALICEBLUE);
+        NAMED_COLOURS.put("antiquewhite", UI.Color.ANTIQUEWHITE);
+        NAMED_COLOURS.put("aqua", UI.Color.AQUA);
+        NAMED_COLOURS.put("aquamarine", UI.Color.AQUAMARINE);
+        NAMED_COLOURS.put("azure", UI.Color.AZURE);
+        NAMED_COLOURS.put("beige", UI.Color.BEIGE);
+        NAMED_COLOURS.put("bisque", UI.Color.BISQUE);
+        NAMED_COLOURS.put("black", UI.Color.BLACK);
+        NAMED_COLOURS.put("blanchedalmond", UI.Color.BLANCHEDALMOND);
+        NAMED_COLOURS.put("blue", UI.Color.BLUE);
+        NAMED_COLOURS.put("blueviolet", UI.Color.BLUEVIOLET);
+        NAMED_COLOURS.put("brown", UI.Color.BROWN);
+        NAMED_COLOURS.put("burlywood", UI.Color.BURLYWOOD);
+        NAMED_COLOURS.put("cadetblue", UI.Color.CADETBLUE);
+        NAMED_COLOURS.put("chartreuse", UI.Color.CHARTREUSE);
+        NAMED_COLOURS.put("chocolate", UI.Color.CHOCOLATE);
+        NAMED_COLOURS.put("coral", UI.Color.CORAL);
+        NAMED_COLOURS.put("cornflowerblue", UI.Color.CORNFLOWERBLUE);
+        NAMED_COLOURS.put("cornsilk", UI.Color.CORNSILK);
+        NAMED_COLOURS.put("crimson", UI.Color.CRIMSON);
+        NAMED_COLOURS.put("cyan", UI.Color.CYAN);
+        NAMED_COLOURS.put("darkblue", UI.Color.DARKBLUE);
+        NAMED_COLOURS.put("darkcyan", UI.Color.DARKCYAN);
+        NAMED_COLOURS.put("darkgoldenrod", UI.Color.DARKGOLDENROD);
+        NAMED_COLOURS.put("darkgray", UI.Color.DARKGRAY);
+        NAMED_COLOURS.put("darkgreen", UI.Color.DARKGREEN);
+        NAMED_COLOURS.put("darkgrey", UI.Color.DARKGREY);
+        NAMED_COLOURS.put("darkkhaki", UI.Color.DARKKHAKI);
+        NAMED_COLOURS.put("darkmagenta", UI.Color.DARKMAGENTA);
+        NAMED_COLOURS.put("darkolivegreen", UI.Color.DARKOLIVEGREEN);
+        NAMED_COLOURS.put("darkorange", UI.Color.DARKORANGE);
+        NAMED_COLOURS.put("darkorchid", UI.Color.DARKORCHID);
+        NAMED_COLOURS.put("darkred", UI.Color.DARKRED);
+        NAMED_COLOURS.put("darksalmon", UI.Color.DARKSALMON);
+        NAMED_COLOURS.put("darkseagreen", UI.Color.DARKSEAGREEN);
+        NAMED_COLOURS.put("darkslateblue", UI.Color.DARKSLATEBLUE);
+        NAMED_COLOURS.put("darkslategray", UI.Color.DARKSLATEGRAY);
+        NAMED_COLOURS.put("darkslategrey", UI.Color.DARKSLATEGREY);
+        NAMED_COLOURS.put("darkturquoise", UI.Color.DARKTURQUOISE);
+        NAMED_COLOURS.put("darkviolet", UI.Color.DARKVIOLET);
+        NAMED_COLOURS.put("deeppink", UI.Color.DEEPPINK);
+        NAMED_COLOURS.put("deepskyblue", UI.Color.DEEPSKYBLUE);
+        NAMED_COLOURS.put("dimgray", UI.Color.DIMGRAY);
+        NAMED_COLOURS.put("dimgrey", UI.Color.DIMGREY);
+        NAMED_COLOURS.put("dodgerblue", UI.Color.DODGERBLUE);
+        NAMED_COLOURS.put("firebrick", UI.Color.FIREBRICK);
+        NAMED_COLOURS.put("floralwhite", UI.Color.FLORALWHITE);
+        NAMED_COLOURS.put("forestgreen", UI.Color.FORESTGREEN);
+        NAMED_COLOURS.put("fuchsia", UI.Color.FUCHSIA);
+        NAMED_COLOURS.put("gainsboro", UI.Color.GAINSBORO);
+        NAMED_COLOURS.put("ghostwhite", UI.Color.GHOSTWHITE);
+        NAMED_COLOURS.put("gold", UI.Color.GOLD);
+        NAMED_COLOURS.put("goldenrod", UI.Color.GOLDENROD);
+        NAMED_COLOURS.put("gray", UI.Color.GRAY);
+        NAMED_COLOURS.put("green", UI.Color.GREEN);
+        NAMED_COLOURS.put("greenyellow", UI.Color.GREENYELLOW);
+        NAMED_COLOURS.put("grey", UI.Color.GREY);
+        NAMED_COLOURS.put("honeydew", UI.Color.HONEYDEW);
+        NAMED_COLOURS.put("hotpink", UI.Color.HOTPINK);
+        NAMED_COLOURS.put("indianred", UI.Color.INDIANRED);
+        NAMED_COLOURS.put("indigo", UI.Color.INDIGO);
+        NAMED_COLOURS.put("ivory", UI.Color.IVORY);
+        NAMED_COLOURS.put("khaki", UI.Color.KHAKI);
+        NAMED_COLOURS.put("lavender", UI.Color.LAVENDER);
+        NAMED_COLOURS.put("lavenderblush", UI.Color.LAVENDERBLUSH);
+        NAMED_COLOURS.put("lawngreen", UI.Color.LAWNGREEN);
+        NAMED_COLOURS.put("lemonchiffon", UI.Color.LEMONCHIFFON);
+        NAMED_COLOURS.put("lightblue", UI.Color.LIGHTBLUE);
+        NAMED_COLOURS.put("lightcoral", UI.Color.LIGHTCORAL);
+        NAMED_COLOURS.put("lightcyan", UI.Color.LIGHTCYAN);
+        NAMED_COLOURS.put("lightgoldenrodyellow", UI.Color.LIGHTGOLDENRODYELLOW);
+        NAMED_COLOURS.put("lightgray", UI.Color.LIGHTGRAY);
+        NAMED_COLOURS.put("lightgreen", UI.Color.LIGHTGREEN);
+        NAMED_COLOURS.put("lightgrey", UI.Color.LIGHTGREY);
+        NAMED_COLOURS.put("lightpink", UI.Color.LIGHTPINK);
+        NAMED_COLOURS.put("lightsalmon", UI.Color.LIGHTSALMON);
+        NAMED_COLOURS.put("lightseagreen", UI.Color.LIGHTSEAGREEN);
+        NAMED_COLOURS.put("lightskyblue", UI.Color.LIGHTSKYBLUE);
+        NAMED_COLOURS.put("lightslategray", UI.Color.LIGHTSLATEGRAY);
+        NAMED_COLOURS.put("lightslategrey", UI.Color.LIGHTSLATEGREY);
+        NAMED_COLOURS.put("lightsteelblue", UI.Color.LIGHTSTEELBLUE);
+        NAMED_COLOURS.put("lightyellow", UI.Color.LIGHTYELLOW);
+        NAMED_COLOURS.put("lime", UI.Color.LIME);
+        NAMED_COLOURS.put("limegreen", UI.Color.LIMEGREEN);
+        NAMED_COLOURS.put("linen", UI.Color.LINEN);
+        NAMED_COLOURS.put("magenta", UI.Color.MAGENTA);
+        NAMED_COLOURS.put("maroon", UI.Color.MAROON);
+        NAMED_COLOURS.put("mediumaquamarine", UI.Color.MEDIUMAQUAMARINE);
+        NAMED_COLOURS.put("mediumblue", UI.Color.MEDIUMBLUE);
+        NAMED_COLOURS.put("mediumorchid", UI.Color.MEDIUMORCHID);
+        NAMED_COLOURS.put("mediumpurple", UI.Color.MEDIUMPURPLE);
+        NAMED_COLOURS.put("mediumseagreen", UI.Color.MEDIUMSEAGREEN);
+        NAMED_COLOURS.put("mediumslateblue", UI.Color.MEDIUMSLATEBLUE);
+        NAMED_COLOURS.put("mediumspringgreen", UI.Color.MEDIUMSPRINGGREEN);
+        NAMED_COLOURS.put("mediumturquoise", UI.Color.MEDIUMTURQUOISE);
+        NAMED_COLOURS.put("mediumvioletred", UI.Color.MEDIUMVIOLETRED);
+        NAMED_COLOURS.put("midnightblue", UI.Color.MIDNIGHTBLUE);
+        NAMED_COLOURS.put("mintcream", UI.Color.MINTCREAM);
+        NAMED_COLOURS.put("mistyrose", UI.Color.MISTYROSE);
+        NAMED_COLOURS.put("moccasin", UI.Color.MOCCASIN);
+        NAMED_COLOURS.put("navajowhite", UI.Color.NAVAJOWHITE);
+        NAMED_COLOURS.put("navy", UI.Color.NAVY);
+        NAMED_COLOURS.put("oldlace", UI.Color.OLDLACE);
+        NAMED_COLOURS.put("olive", UI.Color.OLIVE);
+        NAMED_COLOURS.put("olivedrab", UI.Color.OLIVEDRAB);
+        NAMED_COLOURS.put("orange", UI.Color.ORANGE);
+        NAMED_COLOURS.put("orangered", UI.Color.ORANGERED);
+        NAMED_COLOURS.put("orchid", UI.Color.ORCHID);
+        NAMED_COLOURS.put("palegoldenrod", UI.Color.PALEGOLDENROD);
+        NAMED_COLOURS.put("palegreen", UI.Color.PALEGREEN);
+        NAMED_COLOURS.put("paleturquoise", UI.Color.PALETURQUOISE);
+        NAMED_COLOURS.put("palevioletred", UI.Color.PALEVIOLETRED);
+        NAMED_COLOURS.put("papayawhip", UI.Color.PAPAYAWHIP);
+        NAMED_COLOURS.put("peachpuff", UI.Color.PEACHPUFF);
+        NAMED_COLOURS.put("peru", UI.Color.PERU);
+        NAMED_COLOURS.put("pink", UI.Color.PINK);
+        NAMED_COLOURS.put("plum", UI.Color.PLUM);
+        NAMED_COLOURS.put("powderblue", UI.Color.POWDERBLUE);
+        NAMED_COLOURS.put("purple", UI.Color.PURPLE);
+        NAMED_COLOURS.put("red", UI.Color.RED);
+        NAMED_COLOURS.put("rosybrown", UI.Color.ROSYBROWN);
+        NAMED_COLOURS.put("royalblue", UI.Color.ROYALBLUE);
+        NAMED_COLOURS.put("saddlebrown", UI.Color.SADDLEBROWN);
+        NAMED_COLOURS.put("salmon", UI.Color.SALMON);
+        NAMED_COLOURS.put("sandybrown", UI.Color.SANDYBROWN);
+        NAMED_COLOURS.put("seagreen", UI.Color.SEAGREEN);
+        NAMED_COLOURS.put("seashell", UI.Color.SEASHELL);
+        NAMED_COLOURS.put("sienna", UI.Color.SIENNA);
+        NAMED_COLOURS.put("silver", UI.Color.SILVER);
+        NAMED_COLOURS.put("skyblue", UI.Color.SKYBLUE);
+        NAMED_COLOURS.put("slateblue", UI.Color.SLATEBLUE);
+        NAMED_COLOURS.put("slategray", UI.Color.SLATEGRAY);
+        NAMED_COLOURS.put("slategrey", UI.Color.SLATEGREY);
+        NAMED_COLOURS.put("snow", UI.Color.SNOW);
+        NAMED_COLOURS.put("springgreen", UI.Color.SPRINGGREEN);
+        NAMED_COLOURS.put("steelblue", UI.Color.STEELBLUE);
+        NAMED_COLOURS.put("tan", UI.Color.TAN);
+        NAMED_COLOURS.put("teal", UI.Color.TEAL);
+        NAMED_COLOURS.put("thistle", UI.Color.THISTLE);
+        NAMED_COLOURS.put("tomato", UI.Color.TOMATO);
+        NAMED_COLOURS.put("transparent", UI.Color.TRANSPARENT);
+        NAMED_COLOURS.put("turquoise", UI.Color.TURQUOISE);
+        NAMED_COLOURS.put("violet", UI.Color.VIOLET);
+        NAMED_COLOURS.put("wheat", UI.Color.WHEAT);
+        NAMED_COLOURS.put("white", UI.Color.WHITE);
+        NAMED_COLOURS.put("whitesmoke", UI.Color.WHITESMOKE);
+        NAMED_COLOURS.put("yellow", UI.Color.YELLOW);
+        NAMED_COLOURS.put("yellowgreen", UI.Color.YELLOWGREEN);
+    }
 }
