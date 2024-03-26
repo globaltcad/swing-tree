@@ -304,6 +304,9 @@ public final class SvgIcon extends ImageIcon
     }
 
     /**
+     *  The underlying SVG document contains a size object, which
+     *  is the width and height of the root SVG element inside the document.
+     *
      * @return The size of the SVG document in the form of a {@link FloatSize},
      *         a subclass of {@link java.awt.geom.Dimension2D}.
      */

@@ -60,6 +60,11 @@ public final class Size
     }
 
     /**
+     *  The width of this {@link Size} instance may not be specified,
+     *  in which case this method returns {@link Optional#empty()}
+     *  and the thing that this configuration is applied to should
+     *  resort to its default width.
+     *
      * @return The width of this {@link Size} instance or {@link Optional#empty()} if unknown.
      */
     public Optional<Float> width() {
@@ -67,6 +72,11 @@ public final class Size
     }
 
     /**
+     *  The height of this {@link Size} instance may not be specified,
+     *  in which case this method returns {@link Optional#empty()}
+     *  and the thing that this configuration is applied to should
+     *  resort to its default height.
+     *
      * @return The height of this {@link Size} instance or {@link Optional#empty()} if unknown.
      */
     public Optional<Float> height() {
