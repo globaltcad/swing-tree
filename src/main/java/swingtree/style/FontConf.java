@@ -3,7 +3,6 @@ package swingtree.style;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import swingtree.UI;
-import swingtree.UIConstants;
 
 import javax.swing.*;
 import java.awt.*;
