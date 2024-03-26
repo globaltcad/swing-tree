@@ -82,6 +82,8 @@ if ( WE_CAN_DO_STATIC_ANALYSIS ) {
             options.errorprone {
                 check("NullAway", net.ltgt.gradle.errorprone.CheckSeverity.ERROR)
                 option("NullAway:AnnotatedPackages", "")
+                // We disable the NonCanonicalType because non-canonical type declarations are used for convenience
+                check("NonCanonicalType", net.ltgt.gradle.errorprone.CheckSeverity.OFF)
             }
         } else {
             options.errorprone {
