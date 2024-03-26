@@ -1674,6 +1674,44 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
+     *  A convenient factory method for creating a declarative
+     *  builder object for a plain {@link JMenu} component.
+     *
+     * @return A SwingTree builder node for the {@link JMenu} type.
+     */
+    public static UIForMenu<JMenu> menu() {
+        return new UIForMenu<>(new BuilderState<>(JMenu.class, UI.Menu::new));
+    }
+
+    /**
+     *  A convenient factory method for creating a declarative
+     *  builder object for a {@link JMenu} component
+     *  initialized with the provided text.
+     *
+     * @param text The text displayed on the menu.
+     * @return A SwingTree builder node for the {@link JMenu} type.
+     */
+    public static UIForMenu<JMenu> menu( String text ) {
+        NullUtil.nullArgCheck(text, "text", String.class);
+        return menu().withText(text);
+    }
+
+    /**
+     *  A convenient factory method for creating a declarative
+     *  builder object for a {@link JMenu} component
+     *  bound to the supplied text property.
+     *  Note that whenever the text property changes, the text
+     *  displayed on the menu will be updated accordingly.
+     *
+     * @param text The text property dynamically changing the text displayed on the menu.
+     * @return A SwingTree builder node for the {@link JMenu} type.
+     */
+    public static UIForMenu<JMenu> menu( Val<String> text ) {
+        NullUtil.nullArgCheck(text, "text", Val.class);
+        return menu().withText(text);
+    }
+
+    /**
      *  Use this to create a builder for the provided {@link JMenuItem} instance.
      *
      * @param component The {@link JMenuItem} component which should be wrapped by the swing tree UI builder designed for menu items.
