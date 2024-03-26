@@ -49,7 +49,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  This is useful if you want to make the styling of a component based on its state,
      *  like for example determining the background color of a {@link JCheckBox} based on
      *  whether it is selected or not...
-     * <p>
+     * 
      * @return The {@link JComponent} this {@link ComponentStyleDelegate} is for.
      */
     public C component() { return _component; }
@@ -145,7 +145,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  It determines the amount of space between the component's outer bounds and the beginning
      *  of the inner border, background region and shadow frame
      *  (see {@link #borderWidth(double)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
-     * <p>
+     * 
      * @param top The top padding distance in pixels.
      * @param right The right padding distance in pixels.
      * @param bottom The bottom padding distance in pixels.
@@ -161,7 +161,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  The margin determines the amount of space between the component's outer bounds and the beginning
      *  of the inner border, background region and shadow frame
      *  (see {@link #borderWidth(double)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
-     * <p>
+     *
      * @param margin The margin distance in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
      */
@@ -174,7 +174,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  The margin determines the amount of space between the component's outer bounds and the beginning
      *  of the inner border, background region and shadow frame
      *  (see {@link #borderWidth(double)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
-     * <p>
+     * 
      * @param margin The margin distance in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
      */
@@ -187,7 +187,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  The margin determines the amount of space between the component's outer bounds and the beginning
      *  of the inner border, background region and shadow frame
      *  (see {@link #borderWidth(double)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
-     * <p>
+     *
      * @param margin The margin distance in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
      */
@@ -200,7 +200,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  The margin determines the amount of space between the component's outer bounds and the beginning
      *  of the inner border, background region and shadow frame
      *  (see {@link #borderWidth(double)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
-     * <p>
+     *
      * @param margin The margin distance in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
      */
@@ -213,7 +213,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  The margin determines the amount of space between the component's outer bounds and the beginning
      *  of the inner border, background region and shadow frame
      *  (see {@link #borderWidth(double)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
-     * <p>
+     *
      * @param margin The margin distance in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
      */
@@ -226,7 +226,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  The margin determines the amount of space between the component's outer bounds and the beginning
      *  of the inner border, background region and shadow frame
      *  (see {@link #borderWidth(double)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
-     * <p>
+     *
      * @param margin The margin distance in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
      */
@@ -239,7 +239,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  The margin determines the amount of space between the component's outer bounds and the beginning
      *  of the inner border, background region and shadow frame
      *  (see {@link #borderWidth(double)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
-     * <p>
+     *
      * @param margin The margin distance in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
      */
@@ -252,7 +252,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  It determines the amount of space between the inner bounds (the inner border, background region and shadow frame)
      *  and the component's content.
      *  (see {@link #borderWidth(double)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
-     * <p>
+     *
      * @param top The top padding distance in pixels.
      * @param right The right padding distance in pixels.
      * @param bottom The bottom padding distance in pixels.
@@ -268,7 +268,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  It determines the amount of space between the inner bounds (the inner border, background region and shadow frame)
      *  and the component's content.
      *  (see {@link #borderWidth(double)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
-     * <p>
+     *
      * @param padding The padding distance in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
      */
@@ -281,7 +281,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  The padding determines the amount of space between the inner bounds (the inner border, background region and shadow frame)
      *  and the component's content.
      *  (see {@link #borderWidth(double)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
-     * <p>
+     *
      * @param padding The padding distance in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
      */
@@ -295,7 +295,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  and the component's content.
      *  of the inner border, background region and shadow frame
      *  (see {@link #borderWidth(double)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
-     * <p>
+     *
      * @param padding The padding distance in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
      */
@@ -308,7 +308,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  The padding determines the amount of space between the inner bounds (the inner border, background region and shadow frame)
      *  and the component's content.
      *  (see {@link #borderWidth(double)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
-     * <p>
+     *
      * @param padding The padding distance in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
      */
@@ -321,7 +321,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  The padding determines the amount of space between the inner bounds (the inner border, background region and shadow frame)
      *  and the component's content.
      *  (see {@link #borderWidth(double)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
-     * <p>
+     *
      * @param padding The padding distance in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
      */
@@ -334,7 +334,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  The padding determines the amount of space between the inner bounds (the inner border, background region and shadow frame)
      *  and the component's content.
      *  (see {@link #borderWidth(double)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
-     * <p>
+     *
      * @param padding The padding distance in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
      */
@@ -347,7 +347,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  The padding determines the amount of space between the inner bounds (the inner border, background region and shadow frame)
      *  and the component's content.
      *  (see {@link #borderWidth(double)}, {@link #backgroundColor(Color)}, {@link #shadowColor(Color)}).
-     * <p>
+     * 
      * @param padding The padding distance in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
      */
@@ -1412,6 +1412,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * Note that this method translates to {@link #noise(UI.Layer, String, Function)} but with the
      * layer set to {@link UI.Layer#BACKGROUND}.
      *
+     * @param noiseName The name of the noise which is used to create, identify and possibly override a noise with the same name.
      * @param styler A function that takes a {@link NoiseConf} and returns a new {@link NoiseConf}.
      * @return A new {@link ComponentStyleDelegate} with a background noise defined by the provided styler lambda.
      */
@@ -1771,7 +1772,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param font The {@link Font}.
      * @return A new {@link ComponentStyleDelegate} with the provided {@link Font}.
      * @throws NullPointerException If the font is {@code null}.
-     *         Use {@link UI#FONT_UNDEFINED} to remove the font style.
+     *         Use {@link UI.Font#UNDEFINED} to remove the font style.
      */
     public ComponentStyleDelegate<C> font( Font font ) {
         Objects.requireNonNull(font, "The font cannot be null! Use UI.FONT_UNDEFINED to remove the font style.");
@@ -2009,6 +2010,10 @@ public final class ComponentStyleDelegate<C extends JComponent>
     }
 
     /**
+     *  Updates this style delegate with the supplied {@link Paint} object
+     *  used for the background of the font, which translates to the
+     *  {@link java.awt.font.TextAttribute#BACKGROUND} attribute.
+     *  
      * @param paint The {@link Paint} to use for the background of the font, which translates to the
      *              {@link java.awt.font.TextAttribute#BACKGROUND} attribute.
      * @return A new {@link ComponentStyleDelegate} with the provided font background paint.
@@ -2050,7 +2055,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
     /**
      *  Use this to define the horizontal alignment of the default font of the component.
      *  Note that font styles will only apply if the component that is being rendered
-     *  also supports displaying text, or has a custom text style (see {@link TextConf). <br>
+     *  also supports displaying text, or has a custom text style (see {@link TextConf}). <br>
      *  Also note that not all text based components support text alignment.
      *  @param alignment The horizontal alignment of the font.
      *                   See {@link UI.HorizontalAlignment} for more information.
@@ -2066,7 +2071,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
     /**
      *  Use this to define the vertical alignment of the default font of the component.
      *  Note that font styles will only apply if the component that is being rendered
-     *  also supports displaying text, or has a custom text style (see {@link TextConf). <br>
+     *  also supports displaying text, or has a custom text style (see {@link TextConf}). <br>
      *  Also note that not all text based components support text alignment.
      *  @param alignment The vertical alignment of the font.
      *                   See {@link UI.VerticalAlignment} for more information.
@@ -2082,7 +2087,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
     /**
      *  Use this to define the horizontal and vertical alignment of the default font of the component.
      *  Note that font styles will only apply if the component that is being rendered
-     *  also supports displaying text, or has a custom text style (see {@link TextConf). <br>
+     *  also supports displaying text, or has a custom text style (see {@link TextConf}). <br>
      *  Also note that not all text based components support text alignment.
      *  @param alignment The horizontal and vertical alignment of the font.
      *                   See {@link UI.Alignment} for more information.
@@ -2485,12 +2490,20 @@ public final class ComponentStyleDelegate<C extends JComponent>
     }
 
     /**
+     *  A convenient delegate method to {@link UI#scale()} which exposes the current UI scale factor
+     *  that is used to scale the UI for high resolution displays (high dots-per-inch, or DPI).
+     *  Use this scale factor when writing custom rendering code against the {@link Graphics2D} API.
+     *
      * @return The current UI scale factor, which is used to scale the UI
      *         for high resolution displays (high dots-per-inch, or DPI).
      */
     public float getScale() { return UI.scale(); }
 
     /**
+     *  A convenient delegate method to {@link UI#scale()} which exposes the current UI scale factor
+     *  that is used to scale the UI for high resolution displays (high dots-per-inch, or DPI).
+     *  Use this scale factor when writing custom rendering code against the {@link Graphics2D} API.
+     *
      * @return The current UI scale factor, which is used to scale the UI
      *         for high resolution displays (high dots-per-inch, or DPI).
      */
