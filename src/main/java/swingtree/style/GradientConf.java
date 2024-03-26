@@ -24,7 +24,7 @@ import java.util.function.Function;
  *  The following properties with their respective purpose are available:
  *  <br>
  *  <ul>
- *      <li><h3>Transition</h3>
+ *      <li><b>Transition</b>
  *          The transition defines the direction of the gradient.
  *          <br>
  *          The following transitions are available:
@@ -39,7 +39,7 @@ import java.util.function.Function;
  *              <li>{@link UI.Span#RIGHT_TO_LEFT}</li>
  *          </ul>
  *      </li>
- *      <li><h3>Type</h3>
+ *      <li><b>Type</b>
  *          The type defines the shape of the gradient
  *          which can be either linear or radial. <br>
  *          So the following types are available:
@@ -49,17 +49,17 @@ import java.util.function.Function;
  *              <li>{@link UI.GradientType#CONIC}</li>
  *          </ul>
  *      </li>
- *      <li><h3>Colors</h3>
+ *      <li><b>Colors</b>
  *          An array of colors that will be used
  *          as a basis for the gradient transition.
  *      </li>
- *      <li><h3>Offset</h3>
+ *      <li><b>Offset</b>
  *          The offset defines the start position of the gradient
  *          on the x and y axis.
  *          This property, together with the {@link #span(UI.Span)}
  *          property, defines the start position and direction of the gradient.
  *      </li>
- *      <li><h3>Size</h3>
+ *      <li><b>Size</b>
  *          The size defines the size of the gradient
  *          in terms of the distance from the start position of the gradient
  *          to the end position of the gradient.
@@ -67,29 +67,29 @@ import java.util.function.Function;
  *          If no size is specified, the size of the gradient will be
  *          based on the size of the component that the gradient is applied to.
  *      </li>
- *      <li><h3>Area</h3>
+ *      <li><b>Area</b>
  *          The component are to which the gradient is clipped to.
  *          Which means that the gradient will only be visible within the
  *          specified area of the component.
  *      </li>
- *      <li><h3>Boundary</h3>
+ *      <li><b>Boundary</b>
  *          The boundaries of a component define the outlines between the different
  *          {@link swingtree.UI.ComponentArea}s.
  *          Setting a particular boundary causes the gradient to start at that boundary.
  *      </li>
- *      <li><h3>Focus Offset</h3>
+ *      <li><b>Focus Offset</b>
  *          An offset property consisting of a {@code x} and {@code y} value
  *          which will be used together with the gradients position to calculate
  *          a focus point.
  *          This is only relevant for radial gradients!
  *      </li>
- *      <li><h3>Rotation</h3>
+ *      <li><b>Rotation</b>
  *          The rotation of the gradient in degrees.
  *          This is typically only relevant for a linear gradient.
  *          However it is also applicable to a radial gradient with a focus offset,
  *          where the rotation will be applied to the focus offset.
  *      </li>
- *      <li><h3>Fractions</h3>
+ *      <li><b>Fractions</b>
  *          An array of values between 0 and 1 that defines the relative position
  *          of each color in the gradient.
  *          <br>
@@ -99,7 +99,7 @@ import java.util.function.Function;
  *          If the number of fractions is greater than the number of colors, then the remaining
  *          fractions will be ignored.
  *      </li>
- *      <li><h3>Cycle</h3>
+ *      <li><b>Cycle</b>
  *          The cycle of the gradient which can be one of the following constants:
  *          <ul>
  *              <li>{@link UI.Cycle#NONE} -

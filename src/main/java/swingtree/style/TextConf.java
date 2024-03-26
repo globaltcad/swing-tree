@@ -38,25 +38,25 @@ import java.util.function.Function;
  *  Here a full list of all available properties with their respective
  *  meaning and default values:
  *  <ul>
- *      <li><h3>Content</h3>
+ *      <li><b>Content</b>
  *          You can set this property through {@link TextConf#content(String)}.
  *          This is the actual text content that should be rendered onto the component.
  *          It's default value is an empty string, in which case this
  *          configuration object will not have any effect.
  *      </li>
- *      <li><h3>Font</h3>
+ *      <li><b>Font</b>
  *          The {@link FontConf} object is its own rich configuration object
  *          which holds all font properties like size, style, color, etc.
  *          You can configure it through {@link TextConf#font(Function)}.<br>
  *          The default font configuration is {@link FontConf#none()}.
  *      </li>
- *      <li><h3>Clip Area</h3>
+ *      <li><b>Clip Area</b>
  *          The clip area is an enum the area of the component where the text should be
  *          rendered. So the text will only be visible within this area.<br>
  *          You can configure it through {@link TextConf#clipTo(UI.ComponentArea)}.<br>
  *          The default clip area is {@link UI.ComponentArea#INTERIOR}.
  *      </li>
- *      <li><h3>Placement Boundary</h3>
+ *      <li><b>Placement Boundary</b>
  *          The placement boundary is an enum which defines the boundary of the component
  *          onto which the text placement should be bound to.
  *          You can configure it through {@link TextConf#placementBoundary(UI.ComponentBoundary)}.<br>
@@ -65,13 +65,13 @@ import java.util.function.Function;
  *          If you want to ignore the padding and place the text directly after the border
  *          of the component, you can set it to {@link UI.ComponentBoundary#BORDER_TO_INTERIOR}.
  *      </li>
- *          <li><h3>Placement</h3>
+ *          <li><b>Placement</b>
  *          The placement is an enum which defines where the text should be placed
  *          according to the {@link TextConf#placementBoundary(UI.ComponentBoundary)}.
  *          You can configure it through {@link TextConf#placement(UI.Placement)}.<br>
  *          The default placement is {@link UI.Placement#CENTER}.
  *      </li>
- *      <li><h3>Offset</h3>
+ *      <li><b>Offset</b>
  *          The offset holds the x and y placement offset of the text.
  *          You can configure it through {@link TextConf#offset(Offset)} or {@link TextConf#offset(int, int)}.
  *          <br>

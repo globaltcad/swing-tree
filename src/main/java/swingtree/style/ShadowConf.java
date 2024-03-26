@@ -19,26 +19,26 @@ import java.util.Optional;
  *  The following properties with their respective purpose are available:
  *  <br>
  *  <ol>
- *      <li><h3>Horizontal Offset</h3>
+ *      <li><b>Horizontal Offset</b>
  *          <p>
  *              The horizontal shadow offset, if positive the shadow will move to the right,
  *              if negative the shadow will move to the left.
  *          </p>
  *      </li>
- *      <li><h3>Vertical Offset</h3>
+ *      <li><b>Vertical Offset</b>
  *          <p>
  *              The vertical shadow offset, if positive the shadow will move down,
  *              if negative the shadow will move up.
  *          </p>
  *      </li>
- *      <li><h3>Blur Radius</h3>
+ *      <li><b>Blur Radius</b>
  *          <p>
  *              The blur radius of the shadow, which defines the width of the blur effect.
  *              The higher the value, the bigger the blur, so the shadow transition will be
  *              stretched over a wider area.
  *          </p>
  *      </li>
- *      <li><h3>Spread Radius</h3>
+ *      <li><b>Spread Radius</b>
  *          <p>
  *              The spread radius of the shadow defines how far inwards or
  *              outwards ({@link #isInset()}) the shadow begins.
@@ -51,12 +51,12 @@ import java.util.Optional;
  *              so that the shadow either grows or shrinks in size.
  *          </p>
  *      </li>
- *      <li><h3>Color</h3>
+ *      <li><b>Color</b>
  *          <p>
  *              The color of the shadow.
  *          </p>
  *      </li>
- *      <li><h3>Inset</h3>
+ *      <li><b>Inset</b>
  *          <p>
  *              Whether the shadow is inset or outset.
  *              If true, the shadow is inset, otherwise it is outset.
