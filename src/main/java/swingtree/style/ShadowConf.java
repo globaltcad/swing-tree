@@ -70,6 +70,7 @@ import java.util.Optional;
  *  as the instance returned by that method is a shadow with no offset, no blur, no spread and no color,
  *  effectively making it a representation of the absence of a shadow.
  */
+@SuppressWarnings("ReferenceEquality")
 public final class ShadowConf implements Simplifiable<ShadowConf>
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(ShadowConf.class);

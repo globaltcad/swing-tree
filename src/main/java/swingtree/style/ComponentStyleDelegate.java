@@ -55,6 +55,10 @@ public final class ComponentStyleDelegate<C extends JComponent>
     public C component() { return _component; }
 
     /**
+     *  Exposes the parent {@link Container} of the {@link JComponent} delegated by this {@link ComponentStyleDelegate}
+     *  through an {@link Optional} in case the parent is null.
+     *  You may use this to make your styling dependent on the properties of the parent container.
+     *
      * @return An optional parent {@link Container} of the {@link JComponent} this {@link ComponentStyleDelegate} is for.
      */
     public Optional<Container> parent() { return Optional.ofNullable(_component.getParent()); }
@@ -1720,7 +1724,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
     /**
      *  Returns a new {@link StyleConf} with the provided font name and size.<br>
      *  Note that the font styles will only apply if the component that is being rendered
-     *  also supports displaying text, or has a custom text style (see {@link TextConf).<br>
+     *  also supports displaying text, or has a custom text style (see {@link TextConf}).<br>
      *  <p>
      *  Note that this font style will be applied to both the component font property
      *  and the style engine based text (see {@link #text(String, Function)}).
@@ -1739,7 +1743,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
     /**
      *  Returns a new {@link StyleConf} with the provided font family name.
      *  Note that font styles will only apply if the component that is being rendered
-     *  also supports displaying text, or has a custom text style (see {@link TextConf).<br>
+     *  also supports displaying text, or has a custom text style (see {@link TextConf}).<br>
      *  <p>
      *  Note that this font style will be applied to both the component font property
      *  and the style engine based text (see {@link #text(String, Function)}).
@@ -1757,7 +1761,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
     /**
      *  Returns a new {@link StyleConf} with the provided {@link Font}.
      *  Note that font styles will only apply if the component that is being rendered
-     *  also supports displaying text, or has a custom text style (see {@link TextConf).<br>
+     *  also supports displaying text, or has a custom text style (see {@link TextConf}).<br>
      *  <p>
      *  Note that this font style will be applied to both the component font property
      *  and the style engine based text (see {@link #text(String, Function)}).
@@ -1777,7 +1781,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
     /**
      *  Returns a new {@link StyleConf} with the provided font size.
      *  Note that font styles will only apply if the component that is being rendered
-     *  also supports displaying text, or has a custom text style (see {@link TextConf).<br>
+     *  also supports displaying text, or has a custom text style (see {@link TextConf}).<br>
      *  <p>
      *  Note that this font style will be applied to both the component font property
      *  and the style engine based text (see {@link #text(String, Function)}).
@@ -1794,7 +1798,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
     /**
      *  Makes the font bold or not bold depending on the value of the {@code isBold} parameter.
      *  Note that font styles will only apply if the component that is being rendered
-     *  also supports displaying text, or has a custom text style (see {@link TextConf).<br>
+     *  also supports displaying text, or has a custom text style (see {@link TextConf}).<br>
      *  <p>
      *  Note that this font style will be applied to both the component font property
      *  and the style engine based text (see {@link #text(String, Function)}).
@@ -1811,7 +1815,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
     /**
      *  Makes the font italic or not italic depending on the value of the {@code italic} parameter.
      *  Note that font styles will only apply if the component that is being rendered
-     *  also supports displaying text, or has a custom text style (see {@link TextConf).<br>
+     *  also supports displaying text, or has a custom text style (see {@link TextConf}).<br>
      *  <p>
      *  Note that this font style will be applied to both the component font property
      *  and the style engine based text (see {@link #text(String, Function)}).
@@ -1828,7 +1832,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
     /**
      *  Makes the font underlined or not underlined depending on the value of the {@code underline} parameter.
      *  Note that font styles will only apply if the component that is being rendered
-     *  also supports displaying text, or has a custom text style (see {@link TextConf).<br>
+     *  also supports displaying text, or has a custom text style (see {@link TextConf}).<br>
      *  <p>
      *  Note that this font style will be applied to both the component font property
      *  and the style engine based text (see {@link #text(String, Function)}).
@@ -1845,7 +1849,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
     /**
      *  Makes the font struck through or not struck through depending on the value of the {@code strikeThrough} parameter.
      *  Note that font styles will only apply if the component that is being rendered
-     *  also supports displaying text, or has a custom text style (see {@link TextConf).<br>
+     *  also supports displaying text, or has a custom text style (see {@link TextConf}).<br>
      *  <p>
      *  Note that this font style will be applied to both the component font property
      *  and the style engine based text (see {@link #text(String, Function)}).
@@ -1862,7 +1866,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
     /**
      *  Creates a new {@link StyleConf} where the font color is set to the provided {@link Color}.
      *  Note that font styles will only apply if the component that is being rendered
-     *  also supports displaying text, or has a custom text style (see {@link TextConf).<br>
+     *  also supports displaying text, or has a custom text style (see {@link TextConf}).<br>
      *  <p>
      *  Note that this font style will be applied to both the component font property
      *  and the style engine based text (see {@link #text(String, Function)}).
@@ -1882,7 +1886,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
     /**
      *  Creates a new {@link StyleConf} where the font color is set to a color parsed from the provided string.
      *  Note that font styles will only apply if the component that is being rendered
-     *  also supports displaying text, or has a custom text style (see {@link TextConf).<br>
+     *  also supports displaying text, or has a custom text style (see {@link TextConf}).<br>
      *  <p>
      *  Note that this font style will be applied to both the component font property
      *  and the style engine based text (see {@link #text(String, Function)}).
@@ -1900,7 +1904,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
     /**
      *  Creates a new {@link StyleConf} where the font background color is set to the provided {@link Color}.
      *  Note that font styles will only apply if the component that is being rendered
-     *  also supports displaying text, or has a custom text style (see {@link TextConf).<br>
+     *  also supports displaying text, or has a custom text style (see {@link TextConf}).<br>
      *  <p>
      *  Note that this font style will be applied to both the component font property
      *  and the style engine based text (see {@link #text(String, Function)}).
@@ -1920,7 +1924,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
     /**
      *  Creates a new {@link StyleConf} where the font color is set to a color parsed from the provided string.
      *  Note that font styles will only apply if the component that is being rendered
-     *  also supports displaying text, or has a custom text style (see {@link TextConf).<br>
+     *  also supports displaying text, or has a custom text style (see {@link TextConf}).<br>
      *  <p>
      *  Note that this font style will be applied to both the component font property
      *  and the style engine based text (see {@link #text(String, Function)}).
@@ -1938,7 +1942,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
     /**
      *  Creates a new {@link StyleConf} where the font selection color is set to the provided {@link Color}.
      *  Note that font styles will only apply if the component that is being rendered
-     *  also supports displaying text, or has a custom text style (see {@link TextConf).<br>
+     *  also supports displaying text, or has a custom text style (see {@link TextConf}).<br>
      *  <p>
      *  Note that this font style will be applied to both the component font property
      *  and the style engine based text (see {@link #text(String, Function)}).
@@ -1958,7 +1962,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
     /**
      *  Creates a new {@link StyleConf} where the font selection color is set to a color parsed from the provided string.
      *  Note that font styles will only apply if the component that is being rendered
-     *  also supports displaying text, or has a custom text style (see {@link TextConf).<br>
+     *  also supports displaying text, or has a custom text style (see {@link TextConf}).<br>
      *  <p>
      *  Note that this font style will be applied to both the component font property
      *  and the style engine based text (see {@link #text(String, Function)}).
@@ -2006,7 +2010,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  of 2.0 (see {@link java.awt.font.TextAttribute#WEIGHT_BOLD}).
      *  <p>
      *  Note that font styles will only apply if the component that is being rendered
-     *  also supports displaying text, or has a custom text style (see {@link TextConf).<br>
+     *  also supports displaying text, or has a custom text style (see {@link TextConf}).<br>
      *  <p>
      *  Note that this font style will be applied to both the component font property
      *  and the style engine based text (see {@link #text(String, Function)}).

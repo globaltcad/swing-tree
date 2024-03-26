@@ -701,11 +701,17 @@ public final class SvgIcon extends ImageIcon
     @Override
     public String toString() {
         String typeName           = getClass().getSimpleName();
-        String svgDocument        = _svgDocument == null ? "?" : _svgDocument.toString();
         String width              = _width  < 0 ? "?" : String.valueOf(_width);
         String height             = _height < 0 ? "?" : String.valueOf(_height);
         String fitComponent       = _fitComponent.toString();
         String preferredPlacement = _preferredPlacement.toString();
+        String svgDocument        = Optional.ofNullable(_svgDocument)
+                                            .map(it -> {
+                                                String docClass = it.getClass().getSimpleName();
+                                                FloatSize size = it.size();
+                                                return docClass + "[width=" + size.width + ", height=" + size.height + "]";
+                                            })
+                                            .orElse("?");
         return typeName + "[" +
                     "width=" + width + ", " +
                     "height=" + height + ", " +
