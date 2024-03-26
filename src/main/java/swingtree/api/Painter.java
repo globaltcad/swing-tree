@@ -74,6 +74,8 @@ import java.util.concurrent.TimeUnit;
 public interface Painter
 {
     /**
+     *  Exposes a constant painter that paints nothing.
+     *  This is useful as a no-op null object pattern.
      * @return A painter that paints nothing.
      */
     static Painter none() { return Constants.PAINTER_NONE; }

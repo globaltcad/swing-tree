@@ -7,10 +7,13 @@ import java.util.Objects;
 
 /**
  *  A SwingTree builder node designed for configuring {@link JMenu} instances.
+ *  This class is not meant to be instantiated directly, but rather through
+ *  the {@link UI#menu()} or {@link UI#menu(String)} methods among others.
  */
 public final class UIForMenu<M extends JMenu> extends UIForAnyMenuItem<UIForMenu<M>, M>
 {
     private final BuilderState<M> _state;
+
 
     UIForMenu( BuilderState<M> state ) {
         Objects.requireNonNull(state);
@@ -23,7 +26,7 @@ public final class UIForMenu<M extends JMenu> extends UIForAnyMenuItem<UIForMenu
     }
     
     @Override
-    protected UIForMenu<M> _newBuilderWithState(BuilderState<M> newState ) {
+    protected UIForMenu<M> _newBuilderWithState( BuilderState<M> newState ) {
         return new UIForMenu<>(newState);
     }
 

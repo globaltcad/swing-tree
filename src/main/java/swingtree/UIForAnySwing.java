@@ -68,7 +68,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  This method exposes a concise way to bind a {@link Observable} (usually a sprouts.Event to the
      *  {@link JComponent#repaint()} method of the component wrapped by this {@link UI}!
      *  This means that the component will be repainted whenever the event is fired.
-     *  <p>
+     *
      * @param event The event to which the repaint method of the component will be bound.
      * @return The JComponent type which will be managed by this builder.
      */
@@ -1809,6 +1809,9 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     /**
+     *  Takes the supplied layout constraints and column constraints
+     *  uses them to construct a new {@link MigLayout} for the component wrapped by this UI builder.
+     *
      * @param attr The constraints for the layout.
      * @param colConstrains The column layout for the {@link MigLayout} instance.
      * @return This very instance, which enables builder-style method chaining.
