@@ -52,7 +52,7 @@ import java.util.function.Supplier;
 /**
  *  A namespace for useful factory methods like
  *  {@link #color(String)} and {@link #font(String)},
- *  and layout constants (see {@link UILayoutConstants}).
+ *  and layout constants (see {@link UILayoutConstants} and {@link UIConstants}).
  *  <br>
  *  <b>
  *      This class is intended to be used
@@ -63,7 +63,7 @@ import java.util.function.Supplier;
  *      used outside of the {@link UI} namespace.
  *  </b>
  */
-public abstract class UIFactoryMethods extends UILayoutConstants
+public abstract class UIFactoryMethods extends UIConstants
 {
     private static final Logger log = LoggerFactory.getLogger(UIFactoryMethods.class);
 
