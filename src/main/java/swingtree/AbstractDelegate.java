@@ -53,7 +53,7 @@ abstract class AbstractDelegate<C extends JComponent>
 
     @SuppressWarnings("ReferenceEquality")
     protected final boolean _isUndefinedFont( Font font ) {
-        return font == UI.FONT_UNDEFINED;
+        return font == UI.Font.UNDEFINED;
     }
 
     @SuppressWarnings("ReferenceEquality")
@@ -362,12 +362,12 @@ abstract class AbstractDelegate<C extends JComponent>
      *  </p>
      *
      * @param font The font that should be used to paint the text of the component.
-     *             If this parameter is {@link UI#FONT_UNDEFINED} then this component will inherit
+     *             If this parameter is {@link UI.Font#UNDEFINED} then this component will inherit
      *             the font of its parent. Null is not allowed.
      * @return The delegate itself.
      */
     public final AbstractDelegate<C> setFont( Font font ) {
-        Objects.requireNonNull(font, "Use UI.FONT_UNDEFINED instead of null to represent the absence of a font.");
+        Objects.requireNonNull(font, "Use UI.Font.UNDEFINED instead of null to represent the absence of a font.");
         if ( _isUndefinedFont(font) )
             _component().setFont(null);
         else
@@ -387,7 +387,7 @@ abstract class AbstractDelegate<C extends JComponent>
     public final Font getFont() {
         Font font = _component().getFont();
         if ( font == null )
-            return UI.FONT_UNDEFINED;
+            return UI.Font.UNDEFINED;
         else
             return font;
     }

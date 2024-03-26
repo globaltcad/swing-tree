@@ -1830,6 +1830,21 @@ public final class ComponentStyleDelegate<C extends JComponent>
     }
 
     /**
+     *  Determines if the font should be plain, bold, italic or bold and italic
+     *  based on the provided {@link UI.FontStyle} parameter,
+     *  which may be {@link UI.FontStyle#PLAIN}, {@link UI.FontStyle#BOLD},
+     *  {@link UI.FontStyle#ITALIC} or {@link UI.FontStyle#BOLD_ITALIC}.<br>
+     *  <b>
+     *      Note that this will override any previous bold or italic settings.
+     *  </b>
+     * @param style The font style in form of a {@link UI.FontStyle}.
+     * @return An updated {@link ComponentStyleDelegate} with the provided font style.
+     */
+    public ComponentStyleDelegate<C> fontStyle( UI.FontStyle style ) {
+        return _withFont( f -> f.style(style) );
+    }
+
+    /**
      *  Makes the font underlined or not underlined depending on the value of the {@code underline} parameter.
      *  Note that font styles will only apply if the component that is being rendered
      *  also supports displaying text, or has a custom text style (see {@link TextConf}).<br>

@@ -22,6 +22,8 @@ import java.awt.color.ColorSpace;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.RoundRectangle2D;
+import java.text.AttributedCharacterIterator;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -1755,7 +1757,7 @@ public final class UI extends UIFactoryMethods
          * @param color The color to convert to a color.
          * @return The color object.
          */
-        public static Color of(java.awt.Color color ) {
+        public static Color of( java.awt.Color color ) {
             return new Color(color);
         }
 
@@ -1768,7 +1770,7 @@ public final class UI extends UIFactoryMethods
          * @return the {@code Color}
          * @throws IllegalArgumentException if any value is out of range
          */
-        public static Color ofRgb(int red, int green, int blue ) {
+        public static Color ofRgb( int red, int green, int blue ) {
             _checkRGB(red, green, blue);
             return new Color(red, green, blue);
         }
@@ -1790,7 +1792,7 @@ public final class UI extends UIFactoryMethods
          * @see #getAlpha
          * @see #getRGB
          */
-        public static Color ofRgba(int r, int g, int b, int a ) {
+        public static Color ofRgba( int r, int g, int b, int a ) {
             return new Color(r, g, b, a);
         }
 
@@ -1809,7 +1811,7 @@ public final class UI extends UIFactoryMethods
          * @see #getBlue
          * @see #getRGB
          */
-        public static Color ofRgb(int rgb ) {
+        public static Color ofRgb( int rgb ) {
             return new Color(rgb);
         }
 
@@ -1830,7 +1832,7 @@ public final class UI extends UIFactoryMethods
          * @see #getAlpha
          * @see #getRGB
          */
-        public static Color ofRgb(int rgba, boolean hasalpha ) {
+        public static Color ofRgb( int rgba, boolean hasalpha ) {
             return new Color(rgba, hasalpha);
         }
 
@@ -1847,7 +1849,7 @@ public final class UI extends UIFactoryMethods
          * @see #green()
          * @see #blue()
          */
-        public static Color of(double red, double green, double blue ) {
+        public static Color of( double red, double green, double blue ) {
             return Color.of((float) red, (float) green, (float) blue);
         }
 
@@ -1864,7 +1866,7 @@ public final class UI extends UIFactoryMethods
          * @see #green()
          * @see #blue()
          */
-        public static Color of(float red, float green, float blue ) {
+        public static Color of( float red, float green, float blue ) {
             return new Color(red, green, blue);
         }
 
@@ -1883,7 +1885,7 @@ public final class UI extends UIFactoryMethods
          * @see #blue()
          * @see #opacity()
          */
-        public static Color of(double red, double green, double blue, double opacity ) {
+        public static Color of( double red, double green, double blue, double opacity ) {
             return Color.of((float) red, (float) green, (float) blue, (float) opacity);
         }
 
@@ -1902,7 +1904,7 @@ public final class UI extends UIFactoryMethods
          * @see #blue()
          * @see #opacity()
          */
-        public static Color of(float red, float green, float blue, float opacity ) {
+        public static Color of( float red, float green, float blue, float opacity ) {
             return new Color(red, green, blue, opacity);
         }
 
@@ -1924,7 +1926,7 @@ public final class UI extends UIFactoryMethods
          * @see #getComponents
          * @see #getColorComponents
          */
-        public static Color of(ColorSpace cspace, float[] components, float alpha ) {
+        public static Color of( ColorSpace cspace, float[] components, float alpha ) {
             return new Color(cspace, components, alpha);
         }
 
@@ -1939,7 +1941,7 @@ public final class UI extends UIFactoryMethods
          * @return the {@code Color}
          * @throws IllegalArgumentException if any value is out of range
          */
-        public static Color ofRgb(int red, int green, int blue, double opacity ) {
+        public static Color ofRgb( int red, int green, int blue, double opacity ) {
             _checkRGB(red, green, blue);
             return Color.of(
                     red / 255.0,
@@ -1953,7 +1955,7 @@ public final class UI extends UIFactoryMethods
          * @param gray the gray component, in the range {@code 0-255}
          * @return the {@code Color}
          */
-        public static Color ofGrayRgb(int gray ) {
+        public static Color ofGrayRgb( int gray ) {
             return ofRgb(gray, gray, gray);
         }
 
@@ -1963,7 +1965,7 @@ public final class UI extends UIFactoryMethods
          * @param opacity the opacity component, in the range {@code 0.0-1.0}
          * @return the {@code Color}
          */
-        public static Color ofGrayRgb(int gray, double opacity ) {
+        public static Color ofGrayRgb( int gray, double opacity ) {
             return ofRgb(gray, gray, gray, opacity);
         }
 
@@ -1975,7 +1977,7 @@ public final class UI extends UIFactoryMethods
          * @return the {@code Color}
          * @throws IllegalArgumentException if any value is out of range
          */
-        public static Color ofGray(double gray, double opacity ) {
+        public static Color ofGray( double gray, double opacity ) {
             return Color.of(gray, gray, gray, opacity);
         }
 
@@ -1986,7 +1988,7 @@ public final class UI extends UIFactoryMethods
          * @return the {@code Color}
          * @throws IllegalArgumentException if any value is out of range
          */
-        public static Color ofGray(double gray ) {
+        public static Color ofGray( double gray ) {
             return ofGray(gray, 1.0);
         }
 
@@ -2008,7 +2010,7 @@ public final class UI extends UIFactoryMethods
             return Color.of(rgb[0], rgb[1], rgb[2], opacity);
         }
 
-        public static Color of(String colorString ) {
+        public static Color of( String colorString ) {
             try {
                 return ColorUtility.parseColor(colorString);
             } catch ( Exception e ) {
@@ -2373,6 +2375,46 @@ public final class UI extends UIFactoryMethods
          */
         public Color withBrightness(double brightness ) {
             return Color.ofHsb(hue(), saturation(), brightness, opacity());
+        }
+    }
+
+    public static class Font extends java.awt.Font
+    {
+
+        /**
+         *  This constant is a {@link java.awt.Font} object with a font name of "" (empty string),
+         *  a font style of -1 (undefined) and a font size of 0.
+         *  Its identity is used to represent the absence of a font being specified,
+         *  and it is used as a safe replacement for null,
+         *  meaning that when the style engine of a component encounters it, it will pass it onto
+         *  the {@link java.awt.Component#setFont(java.awt.Font)} method as null.
+         *  Passing null to this method means that the look and feel determines the font.
+         */
+        public static final java.awt.Font UNDEFINED = new Font("", -1, 0);
+
+
+        public static Font of( String name, FontStyle style, int size ) {
+            return new Font(name, style.toAWTFontStyle(), size);
+        }
+
+        public static Font of( Map<? extends AttributedCharacterIterator.Attribute, ?> attributes ) {
+            return new Font(attributes);
+        }
+
+        public static Font of( java.awt.Font font ) {
+            return new Font(font);
+        }
+
+        private Font(String name, int style, int size) {
+            super(name, style, size);
+        }
+
+        private Font(Map<? extends AttributedCharacterIterator.Attribute, ?> attributes) {
+            super(attributes);
+        }
+
+        private Font(java.awt.Font font) {
+            super(font);
         }
     }
 

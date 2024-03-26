@@ -68,17 +68,6 @@ public abstract class UIFactoryMethods extends UIConstants
     private static final Logger log = LoggerFactory.getLogger(UIFactoryMethods.class);
 
     /**
-     *  This constant is a {@link java.awt.Font} object with a font name of "" (empty string),
-     *  a font style of -1 (undefined) and a font size of 0.
-     *  Its identity is used to represent the absence of a font being specified,
-     *  and it is used as a safe replacement for null,
-     *  meaning that when the style engine of a component encounters it, it will pass it onto
-     *  the {@link java.awt.Component#setFont(Font)} method as null.
-     *  Passing null to this method means that the look and feel determines the font.
-     */
-    public static final Font FONT_UNDEFINED = new Font("", -1, 0);
-
-    /**
      *  Creates a new {@link Color} object from the specified
      *  red, green and blue values.
      *
@@ -217,21 +206,21 @@ public abstract class UIFactoryMethods extends UIConstants
      * @return the {@code Font} object that {@code fontString} describes.
      * @throws NullPointerException if {@code fontString} is {@code null}
      */
-    public static Font font( String fontString ) {
+    public static UI.Font font( String fontString ) {
         Objects.requireNonNull(fontString);
         Exception potentialProblem1 = null;
         Exception potentialProblem2 = null;
         String mayBeProperty = System.getProperty(fontString);
-        Font font = null;
+        UI.Font font = null;
         try {
             if ( mayBeProperty == null )
-                font = Font.decode(fontString);
+                font = UI.Font.of(Font.decode(fontString));
         } catch( Exception e ) {
             potentialProblem1 = e;
         }
         try {
             if ( mayBeProperty != null )
-                font = Font.decode(mayBeProperty);
+                font = UI.Font.of(Font.decode(mayBeProperty));
         } catch( Exception e ) {
             potentialProblem2 = e;
         }
@@ -244,10 +233,10 @@ public abstract class UIFactoryMethods extends UIConstants
             log.error("Could not parse font string '" + fontString + "' using 'Font.decode(String)' or 'System.getProperty(String)'.", new Throwable());
 
             try {
-                return new Font(fontString, Font.PLAIN, UI.scale(12));
+                return UI.Font.of(fontString, UI.FontStyle.PLAIN, UI.scale(12));
             } catch (Exception e) {
                 log.error("Could not create font with name '" + fontString + "' and size 12.", e);
-                return new Font(Font.DIALOG, Font.PLAIN, UI.scale(12));
+                return UI.Font.of(Font.DIALOG, UI.FontStyle.PLAIN, UI.scale(12));
             }
         }
         return font;

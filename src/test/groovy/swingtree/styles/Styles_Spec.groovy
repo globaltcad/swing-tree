@@ -786,10 +786,10 @@ class Styles_Spec extends Specification
                 "]"
     }
 
-    def 'The `UI.FONT_UNDEFINED` constant can be used as a safe shorthand for null for the font property of the style API'()
+    def 'The `UI.Font.UNDEFINED` constant can be used as a safe shorthand for null for the font property of the style API'()
     {
         reportInfo """
-            The `UI.FONT_UNDEFINED` constant is a java.awt.Font object with its family set to "" and its size set to -1.
+            The `UI.Font.UNDEFINED` constant is a java.awt.Font object with its family set to "" and its size set to -1.
             Its identity is used to represent the absence of a font family, and is used as a safe shorthand for null,
             meaning that when the style engine of a component encounters it, it will treat it as if no
             font family was specified for the property.
@@ -800,7 +800,7 @@ class Styles_Spec extends Specification
         """
             var aComboBox =
                         UI.of(new JComboBox<String>()).withStyle( conf -> conf
-                            .font(UI.FONT_UNDEFINED)
+                            .font(UI.Font.UNDEFINED)
                         )
                         .get(JComboBox)
         expect : """

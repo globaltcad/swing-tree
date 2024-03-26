@@ -621,6 +621,26 @@ public abstract class UIConstants extends UILayoutConstants
     }
 
     /**
+     *  Use this to specify the font style of a component.
+     *  <br>
+     *  See {@link UIForAnySwing#withStyle(Styler)} and {@link ComponentStyleDelegate#fontStyle(FontStyle)}.
+     */
+    public enum FontStyle implements UIEnum<FontStyle>
+    {
+        PLAIN, BOLD, ITALIC, BOLD_ITALIC;
+
+        public int toAWTFontStyle() {
+            switch ( this ) {
+                case PLAIN:        return java.awt.Font.PLAIN;
+                case BOLD:         return java.awt.Font.BOLD;
+                case ITALIC:       return java.awt.Font.ITALIC;
+                case BOLD_ITALIC:  return java.awt.Font.BOLD + java.awt.Font.ITALIC;
+            }
+            throw new RuntimeException();
+        }
+    }
+
+    /**
      *  Set of enum instances defining common types of Swing look and feels.
      *  Use {@link UI#currentLookAndFeel()} to check which look and feel is currently active.
      */

@@ -3,6 +3,7 @@ package swingtree.style;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import swingtree.UI;
+import swingtree.UIConstants;
 
 import javax.swing.*;
 import java.awt.*;
@@ -366,6 +367,32 @@ public final class FontConf
     }
 
     /**
+     *  Determines if the font should be plain, bold, italic or bold and italic
+     *  based on the provided {@link UI.FontStyle} parameter,
+     *  which may be {@link UI.FontStyle#PLAIN}, {@link UI.FontStyle#BOLD},
+     *  {@link UI.FontStyle#ITALIC} or {@link UI.FontStyle#BOLD_ITALIC}.<br>
+     *  <b>
+     *      Note that this will override any previous bold or italic settings.
+     *  </b>
+     * @param fontStyle The font style to use for the font in the {@link UI.FontStyle} enum.
+     * @return An updated font config with the specified font style.
+     */
+    public FontConf style( UI.FontStyle fontStyle ) {
+        switch (fontStyle) {
+            case PLAIN:
+                return weight(0).posture(0);
+            case BOLD:
+                return weight(2).posture(0);
+            case ITALIC:
+                return weight(0).posture(0.2f);
+            case BOLD_ITALIC:
+                return weight(2).posture(0.2f);
+            default:
+                return this;
+        }
+    }
+
+    /**
      * Returns an updated font config with the specified spacing, defining the tracking of the font.
      * The tracking value is multiplied by the font point size and
      * passed through the font transform to determine an additional
@@ -620,7 +647,7 @@ public final class FontConf
 
     FontConf withPropertiesFromFont( Font font )
     {
-        if ( font == UI.FONT_UNDEFINED )
+        if ( font == UI.Font.UNDEFINED )
             return this;
 
         Map<TextAttribute, ?> attributeMap = font.getAttributes();

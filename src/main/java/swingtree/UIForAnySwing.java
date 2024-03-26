@@ -56,7 +56,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
     @SuppressWarnings("ReferenceEquality")
     protected final boolean _isUndefinedFont( Font font ) {
-        return font == UI.FONT_UNDEFINED;
+        return font == UI.Font.UNDEFINED;
     }
 
     @SuppressWarnings("ReferenceEquality")
