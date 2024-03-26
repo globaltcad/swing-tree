@@ -18,21 +18,21 @@ import java.util.function.Function;
  *  The following properties with their respective purpose are available:
  *  <br>
  *  <ol>
- *      <li><h3>Name</h3>
+ *      <li><b>Name</b>
  *          <p>
  *              The name of the font, which is essentially the font family.
  *              This will ultimately translate to {@link Font#getFamily()}.<br>
  *              You may specify the font family name through the {@link #family(String)} method.
  *          </p>
  *      </li>
- *      <li><h3>Size</h3>
+ *      <li><b>Size</b>
  *          <p>
  *              The size of the font in points,
  *              which will ultimately translate to {@link Font#getSize()}.
  *              Use the {@link #size(int)} method to specify the size of the font.
  *          </p>
  *      </li>
- *      <li><h3>Posture</h3>
+ *      <li><b>Posture</b>
  *          <p>
  *              The posture of the font, which is a value between 0 and 1.
  *              <br>
@@ -42,7 +42,7 @@ import java.util.function.Function;
  *              You can use the {@link #posture(float)} method to specify the posture of the font.
  *          </p>
  *      </li>
- *      <li><h3>Weight</h3>
+ *      <li><b>Weight</b>
  *          <p>
  *              The weight of the font (boldness, see {@link Font#BOLD}),
  *              which is a value between 0 and 2.
@@ -51,7 +51,7 @@ import java.util.function.Function;
  *              The weight of the font can be specified using the {@link #weight(float)} method.
  *          </p>
  *      </li>
- *      <li><h3>Spacing (Tracking)</h3>
+ *      <li><b>Spacing (Tracking)</b>
  *          <p>
  *              This property controls the tracking which is a floating point number
  *              with the default value of
@@ -72,7 +72,7 @@ import java.util.function.Function;
  *              You can use the {@link #spacing(float)} method to specify the tracking of the font.
  *          </p>
  *      </li>
- *      <li><h3>Color</h3>
+ *      <li><b>Color</b>
  *          <p>
  *              The color of the font, which translates to the text property
  *              {@link TextAttribute#FOREGROUND}.
@@ -81,13 +81,13 @@ import java.util.function.Function;
  *              You can use the {@link #color(Color)} or {@link #color(String)} methods to specify the color of the font.
  *          </p>
  *      </li>
- *      <li><h3>Background Color</h3>
+ *      <li><b>Background Color</b>
  *          <p>
  *              The background color of the font
  *              which translates to the text property {@link TextAttribute#BACKGROUND}.
  *          </p>
  *      </li>
- *      <li><h3>Selection Color</h3>
+ *      <li><b>Selection Color</b>
  *          <p>
  *              The selection color of the font, which translates to
  *              {@link javax.swing.text.JTextComponent#setSelectionColor(Color)}.
@@ -96,24 +96,24 @@ import java.util.function.Function;
  *              most components do not support text selection.
  *          </p>
  *      </li>
- *      <li><h3>Underlined</h3>
+ *      <li><b>Underlined</b>
  *          <p>
  *              Whether or not the font is underlined.
  *              This will ultimately translate to {@link TextAttribute#UNDERLINE}.
  *          </p>
  *      </li>
- *      <li><h3>Strike</h3>
+ *      <li><b>Strike</b>
  *          <p>
  *              Whether or not the font is strike through.
  *              This will ultimately translate to {@link TextAttribute#STRIKETHROUGH}.
  *          </p>
  *      </li>
- *      <li><h3>Transform</h3>
+ *      <li><b>Transform</b>
  *          <p>
  *              The transform of the font, which is an {@link AffineTransform} instance.
  *          </p>
  *      </li>
- *      <li><h3>Paint</h3>
+ *      <li><b>Paint</b>
  *          <p>
  *              The paint of the font, which is a {@link Paint} instance.
  *              Note that specifying a custom paint will override the effects of the color property
@@ -121,13 +121,13 @@ import java.util.function.Function;
  *              paint painting across the entire font area homogeneously using the specified color.
  *          </p>
  *      </li>
- *      <li><h3>Background Paint</h3>
+ *      <li><b>Background Paint</b>
  *          <p>
  *              The background paint of the font, which is a {@link Paint} instance
  *              that is used to paint the background of the font.
  *          </p>
  *      </li>
- *      <li><h3>Horizontal Alignment</h3>
+ *      <li><b>Horizontal Alignment</b>
  *          <p>
  *              The horizontal alignment of the font.
  *              <br>
@@ -137,7 +137,7 @@ import java.util.function.Function;
  *              Not all components support horizontal alignment.
  *          </p>
  *      </li>
- *      <li><h3>Vertical Alignment</h3>
+ *      <li><b>Vertical Alignment</b>
  *          <p>
  *              The vertical alignment of the font.
  *              <br>
@@ -366,6 +366,32 @@ public final class FontConf
     }
 
     /**
+     *  Determines if the font should be plain, bold, italic or bold and italic
+     *  based on the provided {@link UI.FontStyle} parameter,
+     *  which may be {@link UI.FontStyle#PLAIN}, {@link UI.FontStyle#BOLD},
+     *  {@link UI.FontStyle#ITALIC} or {@link UI.FontStyle#BOLD_ITALIC}.<br>
+     *  <b>
+     *      Note that this will override any previous bold or italic settings.
+     *  </b>
+     * @param fontStyle The font style to use for the font in the {@link UI.FontStyle} enum.
+     * @return An updated font config with the specified font style.
+     */
+    public FontConf style( UI.FontStyle fontStyle ) {
+        switch (fontStyle) {
+            case PLAIN:
+                return weight(0).posture(0);
+            case BOLD:
+                return weight(2).posture(0);
+            case ITALIC:
+                return weight(0).posture(0.2f);
+            case BOLD_ITALIC:
+                return weight(2).posture(0.2f);
+            default:
+                return this;
+        }
+    }
+
+    /**
      * Returns an updated font config with the specified spacing, defining the tracking of the font.
      * The tracking value is multiplied by the font point size and
      * passed through the font transform to determine an additional
@@ -392,7 +418,7 @@ public final class FontConf
      */
     public FontConf color( Color color ) {
         Objects.requireNonNull(color);
-        if ( color == UI.COLOR_UNDEFINED)
+        if ( color == UI.Color.UNDEFINED)
             color = null;
         if ( color == _color )
             return this;
@@ -413,7 +439,7 @@ public final class FontConf
         Color newColor;
         try {
             if ( colorString.isEmpty() )
-                newColor = UI.COLOR_UNDEFINED;
+                newColor = UI.Color.UNDEFINED;
             else
                 newColor = UI.color(colorString);
         } catch ( Exception e ) {
@@ -433,7 +459,7 @@ public final class FontConf
      */
     public FontConf backgroundColor( Color backgroundColor ) {
         Objects.requireNonNull(backgroundColor);
-        if ( backgroundColor == UI.COLOR_UNDEFINED)
+        if ( backgroundColor == UI.Color.UNDEFINED)
             backgroundColor = null;
         if ( backgroundColor == _backgroundColor )
             return this;
@@ -453,7 +479,7 @@ public final class FontConf
         Color newColor;
         try {
             if ( colorString.isEmpty() )
-                newColor = UI.COLOR_UNDEFINED;
+                newColor = UI.Color.UNDEFINED;
             else
                 newColor = UI.color(colorString);
         } catch ( Exception e ) {
@@ -474,7 +500,7 @@ public final class FontConf
      */
     public FontConf selectionColor( Color selectionColor ) {
         Objects.requireNonNull(selectionColor);
-        if ( selectionColor == UI.COLOR_UNDEFINED)
+        if ( selectionColor == UI.Color.UNDEFINED)
             selectionColor = null;
         if ( selectionColor == _selectionColor )
             return this;
@@ -495,7 +521,7 @@ public final class FontConf
         Color newColor;
         try {
             if ( colorString.isEmpty() )
-                newColor = UI.COLOR_UNDEFINED;
+                newColor = UI.Color.UNDEFINED;
             else
                 newColor = UI.color(colorString);
         } catch ( Exception e ) {
@@ -620,7 +646,7 @@ public final class FontConf
 
     FontConf withPropertiesFromFont( Font font )
     {
-        if ( font == UI.FONT_UNDEFINED )
+        if ( font == UI.Font.UNDEFINED )
             return this;
 
         Map<TextAttribute, ?> attributeMap = font.getAttributes();

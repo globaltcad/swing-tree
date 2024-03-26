@@ -2,9 +2,6 @@ package examples.stylish;
 
 import swingtree.UI;
 
-import java.awt.*;
-
-import static swingtree.UI.Panel;
 import static swingtree.UI.*;
 
 public class WellRoundedView extends Panel
@@ -15,10 +12,10 @@ public class WellRoundedView extends Panel
         .withLayout(FILL.and(WRAP(2)))
         .withStyle( it ->
             it.margin(24).padding(24)
-              .backgroundColor(new Color(57, 221, 255,255))
+              .backgroundColor(new java.awt.Color(57, 221, 255,255))
               .borderRadius(32)
               .shadowBlurRadius(5)
-              .shadowColor(new Color(0,0,0, 128))
+              .shadowColor(new java.awt.Color(0,0,0, 128))
               .shadowIsInset(true)
         )
         .add(SPAN.and(ALIGN_X_CENTER),
@@ -27,7 +24,7 @@ public class WellRoundedView extends Panel
         .add(
             panel(INS(12), "[grow]")
             .withStyle( it ->
-                it.backgroundColor(new Color(255, 255, 255,255))
+                it.backgroundColor(new java.awt.Color(255, 255, 255,255))
                   .borderRadius(24)
             )
             .add(SPAN.and(WRAP), label("Isn't this a well rounded view?"))

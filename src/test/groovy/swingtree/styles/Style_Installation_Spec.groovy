@@ -6,7 +6,6 @@ import spock.lang.Subject
 import spock.lang.Title
 import swingtree.UI
 import swingtree.api.Styler
-import swingtree.style.ComponentStyleDelegate
 
 import javax.swing.JButton
 import javax.swing.plaf.metal.MetalButtonUI
@@ -76,8 +75,8 @@ class Style_Installation_Spec extends Specification
             false    | { it.shadow(UI.Layer.BORDER, "myShadow", conf->conf.color("red").spreadRadius(1).blurRadius(5)) }
             true     | { it.shadow(UI.Layer.BACKGROUND, "myShadow", conf->conf.color("black").offset(1,2).blurRadius(5)) }
             true     | { it.shadow(UI.Layer.BACKGROUND, "myShadow", conf->conf.color("red").spreadRadius(7).isOutset(true)) }
-            false    | { it.shadow(UI.Layer.BACKGROUND, "myShadow", conf->conf.color(UI.COLOR_UNDEFINED).offset(1,2).blurRadius(5)) }
-            false    | { it.shadow(UI.Layer.BACKGROUND, "myShadow", conf->conf.color(UI.COLOR_UNDEFINED).spreadRadius(7).isOutset(true)) }
+            false    | { it.shadow(UI.Layer.BACKGROUND, "myShadow", conf->conf.color(UI.Color.UNDEFINED).offset(1,2).blurRadius(5)) }
+            false    | { it.shadow(UI.Layer.BACKGROUND, "myShadow", conf->conf.color(UI.Color.UNDEFINED).spreadRadius(7).isOutset(true)) }
             false    | { it.shadow(UI.Layer.FOREGROUND, "myShadow", conf->conf.color("red").spreadRadius(1).blurRadius(5)) }
 
             true     | { it.gradient(UI.Layer.BACKGROUND, "myGradient", conf->conf.colors(Color.RED, Color.BLUE)) }

@@ -56,12 +56,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
     @SuppressWarnings("ReferenceEquality")
     protected final boolean _isUndefinedFont( Font font ) {
-        return font == UI.FONT_UNDEFINED;
+        return font == UI.Font.UNDEFINED;
     }
-    
+
     @SuppressWarnings("ReferenceEquality")
     protected final boolean _isUndefinedColor( Color color ) {
-        return color == UI.COLOR_UNDEFINED;
+        return color == UI.Color.UNDEFINED;
     }
 
     /**
@@ -1246,7 +1246,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     public final I withRoundedLineBorderTitled( Val<String> title ) {
         NullUtil.nullArgCheck( title, "title", String.class );
         NullUtil.nullPropertyCheck(title, "title", "Null value for title is not allowed! Use an empty String instead!");
-        return withRoundedLineBorderTitled( title, Color.BLACK, 1 );
+        return withRoundedLineBorderTitled( title, java.awt.Color.BLACK, 1 );
     }
 
     /**

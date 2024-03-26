@@ -45,6 +45,7 @@ import java.util.stream.Collectors;
  *  See {@link swingtree.style.StyleSheet} for more information about
  *  how this composition of styles is achieved in practice.
  */
+@SuppressWarnings("ReferenceEquality")
 public final class StyleConf
 {
     private static final StyleConf _NONE = new StyleConf(
@@ -345,12 +346,12 @@ public final class StyleConf
 
     StyleConf _withShadow( UI.Layer layer, Function<ShadowConf, ShadowConf> styler ) {
         // A new map is created where all the styler is applied to all the values:
-        NamedConfigs<ShadowConf> styledShadows = _layers.get(layer).shadows().mapStyles(styler::apply);
+        NamedConfigs<ShadowConf> styledShadows = _layers.get(layer).shadows().mapStyles(styler);
         return _withShadow(layer, styledShadows);
     }
 
     StyleConf _withShadow( Function<ShadowConf, ShadowConf> styler ) {
-        return _withLayers(_layers.map( layer -> layer.withShadows(layer.shadows().mapStyles(styler::apply)) ));
+        return _withLayers(_layers.map( layer -> layer.withShadows(layer.shadows().mapStyles(styler)) ));
     }
 
     StyleConf _withGradients( UI.Layer layer, NamedConfigs<GradientConf> shades ) {

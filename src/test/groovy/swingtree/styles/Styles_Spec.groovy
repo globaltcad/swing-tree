@@ -75,11 +75,11 @@ class Styles_Spec extends Specification
             backgroundColor.get() == expectedColor
             foregroundColor.get() == expectedColor
         and :
-            !foundationColor.isPresent() && expectedColor == UI.COLOR_UNDEFINED || foundationColor.get() == expectedColor
-            !borderColor.isPresent() && expectedColor == UI.COLOR_UNDEFINED || borderColor.get() == expectedColor
-            !shadowColor.isPresent() && expectedColor == UI.COLOR_UNDEFINED || shadowColor.get() == expectedColor
-            !fontSelectionColor.isPresent() && expectedColor == UI.COLOR_UNDEFINED || fontSelectionColor.get() == expectedColor
-            !fontColor.isPresent() && expectedColor == UI.COLOR_UNDEFINED || fontColor.get() == expectedColor
+            !foundationColor.isPresent() && expectedColor == UI.Color.UNDEFINED || foundationColor.get() == expectedColor
+            !borderColor.isPresent() && expectedColor == UI.Color.UNDEFINED || borderColor.get() == expectedColor
+            !shadowColor.isPresent() && expectedColor == UI.Color.UNDEFINED || shadowColor.get() == expectedColor
+            !fontSelectionColor.isPresent() && expectedColor == UI.Color.UNDEFINED || fontSelectionColor.get() == expectedColor
+            !fontColor.isPresent() && expectedColor == UI.Color.UNDEFINED || fontColor.get() == expectedColor
 
         where :
             colorString                    | expectedColor
@@ -113,14 +113,14 @@ class Styles_Spec extends Specification
             "indigo"                       | new Color(75, 0, 130)
             "transparent purple"           | new Color(128, 0, 128, 127)
             "transparent red"              | new Color(255, 0, 0, 127)
-            "transparent green"            | new Color(0, 255, 0, 127)
+            "transparent green"            | new Color(0, 128, 0, 127)
             "transparent blue"             | new Color(0, 0, 255, 127)
-            "light indigo"                 | new Color(107, 0, 185)
-            "dark navy"                    | new Color(0, 0, 89)
-            ""                             | UI.COLOR_UNDEFINED
-            "I make no sense!"             | UI.COLOR_UNDEFINED
-            "I make no sense! at all!"     | UI.COLOR_UNDEFINED
-            "Hold my b(0/&/§H%,1fu3s98s"   | UI.COLOR_UNDEFINED
+            "light indigo"                 | new Color(107, 0, 186)
+            "dark navy"                    | new Color(0, 0, 90)
+            ""                             | UI.Color.UNDEFINED
+            "I make no sense!"             | UI.Color.UNDEFINED
+            "I make no sense! at all!"     | UI.Color.UNDEFINED
+            "Hold my b(0/&/§H%,1fu3s98s"   | UI.Color.UNDEFINED
     }
 
     def 'The String representation of a style config will tell you everything about it!'( float uiScale )
@@ -178,7 +178,7 @@ class Styles_Spec extends Specification
                                         "BaseConf[" +
                                             "icon=?, " +
                                             "fitComponent=NO, " +
-                                            "backgroundColor=rgba(0,255,0,255), " +
+                                            "backgroundColor=rgba(0,128,0,255), " +
                                             "foundationColor=rgba(255,0,0,255), " +
                                             "foregroundColor=?, " +
                                             "cursor=?, " +
@@ -676,10 +676,10 @@ class Styles_Spec extends Specification
             uiScale << [ 1.0f, 1.5f, 2.0f, 2.25f, 3.0f ]
     }
 
-    def 'The `UI.COLOR_UNDEFINED` constant can be used as a safe shorthand for null for the background and foreground properties of the style API'()
+    def 'The `UI.Color.UNDEFINED` constant can be used as a safe shorthand for null for the background and foreground properties of the style API'()
     {
         reportInfo """
-            The `UI.COLOR_UNDEFINED` constant is a java.awt.Color object with all of its rgba values set to 0.
+            The `UI.Color.UNDEFINED` constant is a java.awt.Color object with all of its rgba values set to 0.
             Its identity is used to represent the absence of a color being specified, 
             and is used as a safe replacement for null, meaning that when the style engine of a 
             component encounters it, it will pass it onto
@@ -694,9 +694,9 @@ class Styles_Spec extends Specification
             We send the component through the SwingTree builder API and apply a style to it... 
         """
         aToggleButton = UI.of(aToggleButton).withStyle(conf -> conf
-                            .backgroundColor(UI.COLOR_UNDEFINED)
-                            .foregroundColor(UI.COLOR_UNDEFINED)
-                            .foundationColor(UI.COLOR_UNDEFINED)
+                            .backgroundColor(UI.Color.UNDEFINED)
+                            .foregroundColor(UI.Color.UNDEFINED)
+                            .foundationColor(UI.Color.UNDEFINED)
                         )
                         .get(JToggleButton)
         then : """
@@ -739,10 +739,10 @@ class Styles_Spec extends Specification
     }
 
 
-    def 'The `UI.COLOR_UNDEFINED` constant can be used as a safe shorthand for null for various properties in the style API'()
+    def 'The `UI.Color.UNDEFINED` constant can be used as a safe shorthand for null for various properties in the style API'()
     {
         reportInfo """
-            The `UI.COLOR_UNDEFINED` constant is a java.awt.Color object with all of its rgba values set to 0.
+            The `UI.Color.UNDEFINED` constant is a java.awt.Color object with all of its rgba values set to 0.
             Its identity is used to represent the absence of a color, and is used as a safe shorthand for null,
             meaning that when the style engine of a component encounters it, it will treat it as if no
             color was specified for the property.
@@ -754,16 +754,16 @@ class Styles_Spec extends Specification
         """
             var aComboBox =
                         UI.of(new JComboBox<String>()).withStyle( conf -> conf
-                            .shadowColor(UI.COLOR_UNDEFINED)
+                            .shadowColor(UI.Color.UNDEFINED)
                             .gradient(UI.Layer.BACKGROUND, g -> g
-                                .colors(UI.COLOR_UNDEFINED, UI.COLOR_UNDEFINED, UI.COLOR_UNDEFINED)
+                                .colors(UI.Color.UNDEFINED, UI.Color.UNDEFINED, UI.Color.UNDEFINED)
                             )
                             .image(UI.Layer.FOREGROUND, i -> i
-                                .primer(UI.COLOR_UNDEFINED)
+                                .primer(UI.Color.UNDEFINED)
                             )
-                            .fontColor(UI.COLOR_UNDEFINED)
-                            .fontSelectionColor(UI.COLOR_UNDEFINED)
-                            .fontBackgroundColor(UI.COLOR_UNDEFINED)
+                            .fontColor(UI.Color.UNDEFINED)
+                            .fontSelectionColor(UI.Color.UNDEFINED)
+                            .fontBackgroundColor(UI.Color.UNDEFINED)
                         )
                         .get(JComboBox)
         expect : """
@@ -786,10 +786,10 @@ class Styles_Spec extends Specification
                 "]"
     }
 
-    def 'The `UI.FONT_UNDEFINED` constant can be used as a safe shorthand for null for the font property of the style API'()
+    def 'The `UI.Font.UNDEFINED` constant can be used as a safe shorthand for null for the font property of the style API'()
     {
         reportInfo """
-            The `UI.FONT_UNDEFINED` constant is a java.awt.Font object with its family set to "" and its size set to -1.
+            The `UI.Font.UNDEFINED` constant is a java.awt.Font object with its family set to "" and its size set to -1.
             Its identity is used to represent the absence of a font family, and is used as a safe shorthand for null,
             meaning that when the style engine of a component encounters it, it will treat it as if no
             font family was specified for the property.
@@ -800,7 +800,7 @@ class Styles_Spec extends Specification
         """
             var aComboBox =
                         UI.of(new JComboBox<String>()).withStyle( conf -> conf
-                            .font(UI.FONT_UNDEFINED)
+                            .font(UI.Font.UNDEFINED)
                         )
                         .get(JComboBox)
         expect : """

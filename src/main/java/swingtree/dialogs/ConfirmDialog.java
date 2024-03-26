@@ -126,10 +126,13 @@ public final class ConfirmDialog
     }
 
     /**
+     *  Use this to display a custom icon in the dialog by
+     *  providing the path to the icon resource.
+     *
      * @param path The path to the icon of the dialog.
      * @return A new {@link ConfirmDialog} instance with the specified icon.
      */
-    public ConfirmDialog icon(String path ) {
+    public ConfirmDialog icon( String path ) {
         return new ConfirmDialog(_type, _title, _message, _yesOption, _noOption, _cancelOption, _defaultOption, UI.findIcon(path).orElse(null), _parent);
     }
 

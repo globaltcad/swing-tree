@@ -53,13 +53,14 @@ abstract class AbstractDelegate<C extends JComponent>
 
     @SuppressWarnings("ReferenceEquality")
     protected final boolean _isUndefinedFont( Font font ) {
-        return font == UI.FONT_UNDEFINED;
+        return font == UI.Font.UNDEFINED;
     }
 
     @SuppressWarnings("ReferenceEquality")
     protected final boolean _isUndefinedColor( Color color ) {
-        return color == UI.COLOR_UNDEFINED;
+        return color == UI.Color.UNDEFINED;
     }
+
 
     protected C _component() { return _component; }
 
@@ -144,7 +145,7 @@ abstract class AbstractDelegate<C extends JComponent>
      * @return The delegate itself.
      */
     public final AbstractDelegate<C> setBackground( Color color ) {
-        Objects.requireNonNull(color, "Use UI.COLOR_UNDEFINED instead of null to represent the absence of a color.");
+        Objects.requireNonNull(color, "Use UI.Color.UNDEFINED instead of null to represent the absence of a color.");
         if ( _isUndefinedColor(color) )
             _component().setBackground(null);
         else
@@ -230,14 +231,14 @@ abstract class AbstractDelegate<C extends JComponent>
      *  See {@link Component#getBackground()} for more information.
      *  </p>
      *
-     * @return The background color of the component, or {@link UI#COLOR_UNDEFINED} if the component
+     * @return The background color of the component, or {@link UI.Color#UNDEFINED} if the component
      *         does not have a background color (i.e. {@link Component#getBackground()} returns <code>null</code>).
      *         The return value will never be <code>null</code>.
      */
     public final Color getBackground() {
         Color backgroundColor = _component().getBackground();
         if ( backgroundColor == null )
-            return UI.COLOR_UNDEFINED;
+            return UI.Color.UNDEFINED;
         else
             return backgroundColor;
     }
@@ -256,7 +257,7 @@ abstract class AbstractDelegate<C extends JComponent>
      * @return The delegate itself.
      */
     public final AbstractDelegate<C> setForeground( Color color ) {
-        Objects.requireNonNull(color, "Use UI.COLOR_UNDEFINED instead of null to represent the absence of a color.");
+        Objects.requireNonNull(color, "Use UI.Color.UNDEFINED instead of null to represent the absence of a color.");
         if ( _isUndefinedColor(color) )
             _component().setForeground( null );
         else
@@ -271,14 +272,14 @@ abstract class AbstractDelegate<C extends JComponent>
      *  See {@link Component#getForeground()} for more information.
      *  </p>
      *
-     * @return The foreground color of the component, or {@link UI#COLOR_UNDEFINED} if the component
+     * @return The foreground color of the component, or {@link UI.Color#UNDEFINED} if the component
      *        does not have a foreground color (i.e. {@link Component#getForeground()} returns <code>null</code>).
      *        The return value will never be <code>null</code>.
      */
     public final Color getForeground() {
         Color foregroundColor = _component().getForeground();
         if ( foregroundColor == null )
-            return UI.COLOR_UNDEFINED;
+            return UI.Color.UNDEFINED;
         else
             return foregroundColor;
     }
@@ -362,12 +363,12 @@ abstract class AbstractDelegate<C extends JComponent>
      *  </p>
      *
      * @param font The font that should be used to paint the text of the component.
-     *             If this parameter is {@link UI#FONT_UNDEFINED} then this component will inherit
+     *             If this parameter is {@link UI.Font#UNDEFINED} then this component will inherit
      *             the font of its parent. Null is not allowed.
      * @return The delegate itself.
      */
     public final AbstractDelegate<C> setFont( Font font ) {
-        Objects.requireNonNull(font, "Use UI.FONT_UNDEFINED instead of null to represent the absence of a font.");
+        Objects.requireNonNull(font, "Use UI.Font.UNDEFINED instead of null to represent the absence of a font.");
         if ( _isUndefinedFont(font) )
             _component().setFont(null);
         else
@@ -387,7 +388,7 @@ abstract class AbstractDelegate<C extends JComponent>
     public final Font getFont() {
         Font font = _component().getFont();
         if ( font == null )
-            return UI.FONT_UNDEFINED;
+            return UI.Font.UNDEFINED;
         else
             return font;
     }

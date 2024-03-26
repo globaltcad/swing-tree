@@ -19,7 +19,7 @@ import java.util.Optional;
  *  The following properties with their respective purpose are available:
  *  <br>
  *  <ol>
- *      <li><h3>Layer:</h3>
+ *      <li><b>Layer:</b>
  *          The layer onto which the image will be drawn.
  *          Layers exist to determine the order in which something is drawn onto the component.
  *          Here a list of available layers:
@@ -30,17 +30,17 @@ import java.util.Optional;
  *              <li>{@link swingtree.UI.Layer#FOREGROUND}</li>
  *          </ul>
  *      </li>
- *      <li><h3>Primer:</h3>
+ *      <li><b>Primer:</b>
  *          The primer color of the image style which will
  *          be used as a filler color for the image background.
  *          The background is the inner component area of the component.
  *      </li>
- *      <li><h3>Image:</h3>
+ *      <li><b>Image:</b>
  *          The image which will be drawn onto the component,
  *          which may be specified as an instance of {@link Image}, {@link ImageIcon}
  *          or path to an image file (see {@link swingtree.UI#findIcon(String)}).
  *      </li>
- *      <li><h3>Placement:</h3>
+ *      <li><b>Placement:</b>
  *          The placement type determines where the image will be drawn onto the component.
  *          The following placement options are available:
  *          <ul>
@@ -55,13 +55,13 @@ import java.util.Optional;
  *              <li> {@link swingtree.UI.Placement#RIGHT} </li>
  *          </ul>
  *      </li>
- *      <li><h3>Repeat:</h3>
+ *      <li><b>Repeat:</b>
  *          If this flag is set to {@code true}, then the image may be painted
  *          multiple times so that it fills up the entire inner component area.
  *          There will not be a noticeable effect of this flag if the
  *          image already fills out the inner component area (see {@link #autoFit(boolean)}, {@link #size(int, int)}).
  *      </li>
- *      <li><h3>Fit-Mode:</h3>
+ *      <li><b>Fit-Mode:</b>
  *          If this enum determines how the image will be stretched or shrunk
  *          to fill the inner component area dependent on the specified width and height,
  *          meaning that if the width was not specified explicitly through {@link #width(Integer)}
@@ -71,31 +71,31 @@ import java.util.Optional;
  *          <b>Note that the inner component area is the area enclosed by the border, which
  *          is itself not part of said area!</b>
  *      </li>
- *      <li><h3>Width and Height:</h3>
+ *      <li><b>Width and Height:</b>
  *          These properties allow you to specify the width and height of the image.
  *          If the width or height is not specified, then the image will be drawn
  *          with its original width or height or it will be scaled to fit the inner component area
  *          if {@link #autoFit(boolean)} is set to {@code true}.
  *      </li>
- *      <li><h3>Opacity:</h3>
+ *      <li><b>Opacity:</b>
  *          This property allows you to specify the opacity of the image.
  *          The opacity must be between 0.0f and 1.0f, where 0.0f means that the image is completely transparent
  *          and 1.0f means that the image is completely opaque.
  *      </li>
- *      <li><h3>Padding:</h3>
+ *      <li><b>Padding:</b>
  *          This property allows you to specify the padding of the image.
  *          The padding is the space between the image and the inner component area.
  *          The padding can be specified for each side of the image individually
  *          or for all sides at once.
  *      </li>
- *      <li><h3>Offset:</h3>
+ *      <li><b>Offset:</b>
  *          The offset consists of two integers, one for the horizontal offset
  *          and one for the vertical offset. <br>
  *          It allows you to specify the offset of the image from the placement position.
  *          This means that after the image has been placed onto the component,
  *          it will be moved by the specified offset in the horizontal and vertical direction.
  *      </li>
- *      <li><h3>Clip Area:</h3>
+ *      <li><b>Clip Area:</b>
  *          The clip area determines onto which part of the component the image will be drawn.
  *          The following clip areas are available:
  *          <ul>
@@ -277,8 +277,8 @@ public final class ImageConf implements Simplifiable<ImageConf>
      * @return A new {@link ImageConf} instance with the specified primer color.
      */
     public ImageConf primer( Color color ) {
-        Objects.requireNonNull(color, "Use UI.COLOR_UNDEFINED instead of null to represent the absence of a color.");
-        if ( color == UI.COLOR_UNDEFINED)
+        Objects.requireNonNull(color, "Use UI.Color.UNDEFINED instead of null to represent the absence of a color.");
+        if ( color == UI.Color.UNDEFINED)
             color = null;
         if ( color == _primer )
             return this;
@@ -621,7 +621,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
         ImageIcon simplifiedImage = _opacity == 0.0f ? null : _image;
         Color simplifiedPrimer = _primer == null || _primer.getAlpha() == 0 ? null : _primer;
 
-        if ( simplifiedPrimer == UI.COLOR_UNDEFINED)
+        if ( simplifiedPrimer == UI.Color.UNDEFINED)
             simplifiedPrimer = null;
 
         if ( simplifiedImage == null && simplifiedPrimer == null )

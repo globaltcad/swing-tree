@@ -266,7 +266,7 @@ final class BorderConf
         Outline simplifiedPadding      = _padding; // Allowing the user to set an all 0 padding is needed for overriding the default insets (from former border!)
         Color simplifiedBorderColor    = _borderColor != null && _borderColor.getAlpha() > 0 ? _borderColor : null;
 
-        if ( simplifiedBorderColor == UI.COLOR_UNDEFINED)
+        if ( simplifiedBorderColor == UI.Color.UNDEFINED)
             simplifiedBorderColor = null;
 
         boolean hasNoBorderWidths = simplifiedBorderWidths.equals(Outline.none());

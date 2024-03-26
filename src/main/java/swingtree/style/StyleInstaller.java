@@ -177,7 +177,7 @@ final class StyleInstaller<C extends JComponent>
         final boolean hasBorderRadius                    = newStyle.border().hasAnyNonZeroArcs();
         final boolean hasBackground                      = newStyle.base().backgroundColor().isPresent();
         final boolean hasMargin                          = newStyle.margin().isPositive();
-        final boolean hasOpaqueBorder                    = !(255 > newStyle.border().color().map(Color::getAlpha).orElse(0));
+        final boolean hasOpaqueBorder                    = !(255 > newStyle.border().color().map(java.awt.Color::getAlpha).orElse(0));
         final boolean isSwingTreeComponent               = owner instanceof StylableComponent;
         final boolean backgroundIsActuallyBackground =
                                     !( owner instanceof JTabbedPane  ) && // The LaFs interpret ths tab buttons as background
@@ -197,11 +197,11 @@ final class StyleInstaller<C extends JComponent>
 
         if ( hasBackground ) {
             boolean backgroundIsAlreadySet = Objects.equals( owner.getBackground(), newStyle.base().backgroundColor().get() );
-            if ( !backgroundIsAlreadySet || newStyle.base().backgroundColor().get() == UI.COLOR_UNDEFINED )
+            if ( !backgroundIsAlreadySet || newStyle.base().backgroundColor().get() == UI.Color.UNDEFINED )
             {
                 _initialBackgroundColor = _initialBackgroundColor != null ? _initialBackgroundColor :  owner.getBackground();
                 Color newColor = newStyle.base().backgroundColor()
-                                                .filter( c -> c != UI.COLOR_UNDEFINED )
+                                                .filter( c -> c != UI.Color.UNDEFINED )
                                                 .orElse(null);
 
                 backgroundSetter = () -> {
@@ -228,8 +228,8 @@ final class StyleInstaller<C extends JComponent>
         boolean canBeOpaque = true;
 
         if ( !opaqueGradAreas.contains(UI.ComponentArea.ALL) ) {
-            boolean hasOpaqueFoundation = 255 == newStyle.base().foundationColor().map(Color::getAlpha).orElse(0);
-            boolean hasOpaqueBackground = 255 == newStyle.base().backgroundColor().map( c -> c != UI.COLOR_UNDEFINED ? c : _initialBackgroundColor ).map(Color::getAlpha).orElse(255);
+            boolean hasOpaqueFoundation = 255 == newStyle.base().foundationColor().map(java.awt.Color::getAlpha).orElse(0);
+            boolean hasOpaqueBackground = 255 == newStyle.base().backgroundColor().map( c -> c != UI.Color.UNDEFINED ? c : _initialBackgroundColor ).map(java.awt.Color::getAlpha).orElse(255);
             boolean hasBorder           = newStyle.border().widths().isPositive();
 
             if ( !hasOpaqueFoundation && !opaqueGradAreas.contains(UI.ComponentArea.EXTERIOR) ) {
@@ -316,8 +316,8 @@ final class StyleInstaller<C extends JComponent>
             if ( bypassLaFBackgroundPainting )
                 if ( backgroundIsActuallyBackground )
                     backgroundSetter = () -> {
-                        if ( !Objects.equals( owner.getBackground(), UI.COLOR_UNDEFINED ) )
-                            owner.setBackground(UI.COLOR_UNDEFINED);
+                        if ( !Objects.equals( owner.getBackground(), UI.Color.UNDEFINED ) )
+                            owner.setBackground(UI.Color.UNDEFINED);
                     };
             /*
                 The above line looks very strange, but it is very important!
@@ -346,7 +346,7 @@ final class StyleInstaller<C extends JComponent>
                 component being a SwingTree component (it has the paint method overridden).
 
                 So what we do here is we set the background color of the component to
-                UI.COLOR_UNDEFINED, which is a special color that is actually fully transparent.
+                UI.Color.UNDEFINED, which is a special color that is actually fully transparent.
 
                 This way, when the Swing look and feel tries to paint the background of the
                 component, it will actually paint nothing, and we can do the background
@@ -387,7 +387,7 @@ final class StyleInstaller<C extends JComponent>
     {
         if ( styleConf.base().foregroundColor().isPresent() && !Objects.equals( owner.getForeground(), styleConf.base().foregroundColor().get() ) ) {
             Color newColor = styleConf.base().foregroundColor().get();
-            if ( newColor == UI.COLOR_UNDEFINED)
+            if ( newColor == UI.Color.UNDEFINED)
                 newColor = null;
 
             if ( !Objects.equals( owner.getForeground(), newColor ) )

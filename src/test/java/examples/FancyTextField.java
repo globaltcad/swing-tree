@@ -2,13 +2,8 @@ package examples;
 
 import swingtree.UI;
 
-import javax.imageio.ImageIO;
 import javax.swing.JPanel;
-import java.awt.*;
-import java.io.IOException;
 
-import static swingtree.UI.Cursor;
-import static swingtree.UI.TextField;
 import static swingtree.UI.*;
 
 /**
@@ -53,12 +48,12 @@ public final class FancyTextField extends TextField
                         // of the button where the center is yellow and the outer part is transparent.
                         // We also scale the g2d so that the gradient is stretched vertically.
                         g2d.scale(1, 1.5);
-                        g2d.setPaint(new RadialGradientPaint(
+                        g2d.setPaint(new java.awt.RadialGradientPaint(
                             it.component().getWidth() / 2f,
                             it.component().getHeight() / 2f / 1.5f,
                             it.component().getWidth() / 4f,
                             new float[] { 0f, 1f },
-                            new Color[] { new Color(0xffff00), new Color(0xffff00, true) }
+                            new java.awt.Color[] { new java.awt.Color(0xffff00), new java.awt.Color(0xffff00, true) }
                         ));
                         g2d.fillRect(0, 0, it.component().getWidth(), it.component().getHeight());
                     }

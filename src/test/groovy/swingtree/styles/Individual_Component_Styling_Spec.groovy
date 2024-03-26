@@ -250,7 +250,7 @@ class Individual_Component_Styling_Spec extends Specification
                 component being a SwingTree component (it has the paint method overridden).
 
                 So what we do here is we set the background color of the component to
-                UI.COLOR_UNDEFINED, which is a special color that is actually fully transparent.
+                UI.Color.UNDEFINED, which is a special color that is actually fully transparent.
 
                 This way, when the Swing look and feel tries to paint the background of the
                 component, it will actually paint nothing, and we can do the background
@@ -1234,7 +1234,7 @@ class Individual_Component_Styling_Spec extends Specification
             component being a SwingTree component (it has the paint method overridden).
 
             So what we do here is we set the background color of the component to
-            UI.COLOR_UNDEFINED, which is a special color that is actually fully transparent.
+            UI.Color.UNDEFINED, which is a special color that is actually fully transparent.
 
             This way, when the Swing look and feel tries to paint the background of the
             component, it will actually paint nothing, and we can do the background
@@ -2912,7 +2912,7 @@ class Individual_Component_Styling_Spec extends Specification
                              .border(2, Color.DARK_GRAY)
                              .size(120, 120)
                              .noise( conf -> conf
-                                 .colors("dark sky", "sky", "white")
+                                 .colors("dark skyblue", "skyblue", "white")
                                  .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
                                  .function(UI.NoiseType.TILES)
                                  .offset(10, 15)
@@ -2924,7 +2924,7 @@ class Individual_Component_Styling_Spec extends Specification
                              .border(2, Color.DARK_GRAY)
                              .size(120, 120)
                              .noise( conf -> conf
-                                 .colors("dark purple", "dark sky", "bright sky")
+                                 .colors("dark purple", "dark skyblue", "bright skyblue")
                                  .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
                                  .function(UI.NoiseType.FIBERS)
                                  .offset(10, 15)

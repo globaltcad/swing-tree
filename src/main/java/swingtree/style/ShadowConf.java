@@ -19,26 +19,26 @@ import java.util.Optional;
  *  The following properties with their respective purpose are available:
  *  <br>
  *  <ol>
- *      <li><h3>Horizontal Offset</h3>
+ *      <li><b>Horizontal Offset</b>
  *          <p>
  *              The horizontal shadow offset, if positive the shadow will move to the right,
  *              if negative the shadow will move to the left.
  *          </p>
  *      </li>
- *      <li><h3>Vertical Offset</h3>
+ *      <li><b>Vertical Offset</b>
  *          <p>
  *              The vertical shadow offset, if positive the shadow will move down,
  *              if negative the shadow will move up.
  *          </p>
  *      </li>
- *      <li><h3>Blur Radius</h3>
+ *      <li><b>Blur Radius</b>
  *          <p>
  *              The blur radius of the shadow, which defines the width of the blur effect.
  *              The higher the value, the bigger the blur, so the shadow transition will be
  *              stretched over a wider area.
  *          </p>
  *      </li>
- *      <li><h3>Spread Radius</h3>
+ *      <li><b>Spread Radius</b>
  *          <p>
  *              The spread radius of the shadow defines how far inwards or
  *              outwards ({@link #isInset()}) the shadow begins.
@@ -51,12 +51,12 @@ import java.util.Optional;
  *              so that the shadow either grows or shrinks in size.
  *          </p>
  *      </li>
- *      <li><h3>Color</h3>
+ *      <li><b>Color</b>
  *          <p>
  *              The color of the shadow.
  *          </p>
  *      </li>
- *      <li><h3>Inset</h3>
+ *      <li><b>Inset</b>
  *          <p>
  *              Whether the shadow is inset or outset.
  *              If true, the shadow is inset, otherwise it is outset.
@@ -70,6 +70,7 @@ import java.util.Optional;
  *  as the instance returned by that method is a shadow with no offset, no blur, no spread and no color,
  *  effectively making it a representation of the absence of a shadow.
  */
+@SuppressWarnings("ReferenceEquality")
 public final class ShadowConf implements Simplifiable<ShadowConf>
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(ShadowConf.class);
@@ -203,8 +204,8 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
      * @return A new {@link ShadowConf} with the specified color.
      */
     public ShadowConf color( Color shadowColor ) {
-        Objects.requireNonNull(shadowColor, "Use UI.COLOR_UNDEFINED to specify no color instead of null");
-        if ( shadowColor == UI.COLOR_UNDEFINED)
+        Objects.requireNonNull(shadowColor, "Use UI.Color.UNDEFINED to specify no color instead of null");
+        if ( shadowColor == UI.Color.UNDEFINED)
             shadowColor = null;
         if ( shadowColor == _color )
             return this;
@@ -340,7 +341,7 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
         if ( _color == null || _color.getAlpha() == 0 )
             return _NONE;
 
-        if ( _color == UI.COLOR_UNDEFINED)
+        if ( _color == UI.Color.UNDEFINED)
             return _NONE;
 
         return this;
