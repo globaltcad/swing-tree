@@ -1,5 +1,10 @@
 package swingtree.style;
 
+/**
+ *  A collection of noise functions that can be used to generate procedural textures.
+ *  The functions in this class are also supposed to serve as an example
+ *  which demonstrates how to create procedural textures yourself.
+ */
 public final class NoiseFunctions
 {
     private static final long PRIME_1 = 12055296811267L;
@@ -213,7 +218,7 @@ public final class NoiseFunctions
         return  (float) ((Math.sin(sum * (12.0/kernelSize)) + 1)/2);
     }
 
-    private static double _coordinateToHazeValue(int kernelSize, float xIn, float yIn ) {
+    private static double _coordinateToHazeValue( int kernelSize, float xIn, float yIn ) {
         final int maxDistance  = kernelSize / 2;
         final int kernelPoints = kernelSize * kernelSize;
         final double sampleRate = 0.5;
@@ -302,12 +307,71 @@ public final class NoiseFunctions
         return (float) (1 - Math.log(iteration) / Math.log(MAX_ITERATIONS));
     }
 
+    public static float voronoiBasedCells(float xIn, float yIn ) {
+        float scale = 1f/32;
+        return _coordinateToWorleyDistanceValue(xIn*scale, yIn*scale);
+    }
+
+    private static float _coordinateToWorleyDistanceValue(float xIn, float yIn ) {
+        final int minX1 = (int) ( Math.floor(xIn) ) - 1 ;
+        final int minX2 = (int) ( Math.floor(xIn) )     ;
+        final int minX3 = (int) ( Math.floor(xIn) ) + 1 ;
+        final int minY1 = (int) ( Math.floor(yIn) ) - 1 ;
+        final int minY2 = (int) ( Math.floor(yIn) )     ;
+        final int minY3 = (int) ( Math.floor(yIn) ) + 1 ;
+        final double centerX = minX2 + _fastPseudoRandomDoubleFrom(minX2, minY2);
+        final double centerY = minY2 + _fastPseudoRandomDoubleFrom(minY2, minX2);
+        final double distanceCenter = _distanceBetween(centerX, centerY, xIn, yIn);
+        final double leftX = minX1 + _fastPseudoRandomDoubleFrom(minX1, minY2);
+        final double leftY = minY2 + _fastPseudoRandomDoubleFrom(minY2, minX1);
+        final double distanceLeft = _distanceBetween(leftX, leftY, xIn, yIn);
+        final double rightX = minX3 + _fastPseudoRandomDoubleFrom(minX3, minY2);
+        final double rightY = minY2 + _fastPseudoRandomDoubleFrom(minY2, minX3);
+        final double distanceRight = _distanceBetween(rightX, rightY, xIn, yIn);
+        final double topX = minX2 + _fastPseudoRandomDoubleFrom(minX2, minY1);
+        final double topY = minY1 + _fastPseudoRandomDoubleFrom(minY1, minX2);
+        final double distanceTop = _distanceBetween(topX, topY, xIn, yIn);
+        final double bottomX = minX2 + _fastPseudoRandomDoubleFrom(minX2, minY3);
+        final double bottomY = minY3 + _fastPseudoRandomDoubleFrom(minY3, minX2);
+        final double distanceBottom = _distanceBetween(bottomX, bottomY, xIn, yIn);
+        final double topLeftX = minX1 + _fastPseudoRandomDoubleFrom(minX1, minY1);
+        final double topLeftY = minY1 + _fastPseudoRandomDoubleFrom(minY1, minX1);
+        final double distanceTopLeft = _distanceBetween(topLeftX, topLeftY, xIn, yIn);
+        final double topRightX = minX3 + _fastPseudoRandomDoubleFrom(minX3, minY1);
+        final double topRightY = minY1 + _fastPseudoRandomDoubleFrom(minY1, minX3);
+        final double distanceTopRight = _distanceBetween(topRightX, topRightY, xIn, yIn);
+        final double bottomLeftX = minX1 + _fastPseudoRandomDoubleFrom(minX1, minY3);
+        final double bottomLeftY = minY3 + _fastPseudoRandomDoubleFrom(minY3, minX1);
+        final double distanceBottomLeft = _distanceBetween(bottomLeftX, bottomLeftY, xIn, yIn);
+        final double bottomRightX = minX3 + _fastPseudoRandomDoubleFrom(minX3, minY3);
+        final double bottomRightY = minY3 + _fastPseudoRandomDoubleFrom(minY3, minX3);
+        final double distanceBottomRight = _distanceBetween(bottomRightX, bottomRightY, xIn, yIn);
+        double min = 1;
+        min = Math.min(min, distanceCenter);
+        min = Math.min(min, distanceLeft);
+        min = Math.min(min, distanceRight);
+        min = Math.min(min, distanceTop);
+        min = Math.min(min, distanceBottom);
+        min = Math.min(min, distanceTopLeft);
+        min = Math.min(min, distanceTopRight);
+        min = Math.min(min, distanceBottomLeft);
+        min = Math.min(min, distanceBottomRight);
+        return (float) (1 - min);
+    }
+
+    private static double _distanceBetween( double x1, double y1, double x2, double y2 ) {
+        return Math.sqrt( (x1-x2)*(x1-x2) + (y1-y2)*(y1-y2) );
+    }
 
     private static double _sigmoid( double x ) {
         return 1 / (1 + Math.exp(-x));
     }
 
-
+    /**
+     * @param x The x coordinate
+     * @param y The y coordinate
+     * @return A pseudo random double in the range 0.0 to 1.0
+     */
     private static double _fastPseudoRandomDoubleFrom( float x, float y ) {
         final byte randomByte = _fastPseudoRandomByteSeedFrom(x, y);
         // The byte is in the range -128 to 127, so -128 is 0.0 and 127 is 1.0

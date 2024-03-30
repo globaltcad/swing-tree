@@ -419,19 +419,20 @@ public final class UI extends UIFactoryMethods
      */
     public enum NoiseType implements UIEnum<NoiseType>, NoiseFunction
     {
+        CELLS(NoiseFunctions::cells),
+        FIBERS(NoiseFunctions::fibery),
+        GRAINY(NoiseFunctions::grainy),
+        HARD_SPOTS(NoiseFunctions::hardSpots),
+        HARD_TOPOLOGY(NoiseFunctions::hardTopology),
+        HAZE(NoiseFunctions::haze),
+        MANDELBROT(NoiseFunctions::mandelbrot),
+        RETRO(NoiseFunctions::retro),
         STOCHASTIC(NoiseFunctions::stochastic),
         SMOOTH_TOPOLOGY(NoiseFunctions::smoothTopology),
-        HARD_TOPOLOGY(NoiseFunctions::hardTopology),
         SMOOTH_SPOTS(NoiseFunctions::smoothSpots),
-        HARD_SPOTS(NoiseFunctions::hardSpots),
-        GRAINY(NoiseFunctions::grainy),
-        TILES(NoiseFunctions::tiles),
-        FIBERS(NoiseFunctions::fibery),
-        RETRO(NoiseFunctions::retro),
-        CELLS(NoiseFunctions::cells),
-        HAZE(NoiseFunctions::haze),
         SPIRALS(NoiseFunctions::spirals),
-        MANDELBROT(NoiseFunctions::mandelbrot);
+        TILES(NoiseFunctions::tiles),
+        TISSUE(NoiseFunctions::voronoiBasedCells);
 
 
         private final NoiseFunction function;
