@@ -280,7 +280,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
         Objects.requireNonNull(color, "Use UI.Color.UNDEFINED instead of null to represent the absence of a color.");
         if ( color == UI.Color.UNDEFINED)
             color = null;
-        if ( color == _primer )
+        if ( Objects.equals(color, _primer) )
             return this;
         return ImageConf.of(color, _image, _placement, _repeat, _fitMode, _size, _opacity, _padding, _offset, _clipArea);
     }
@@ -425,10 +425,35 @@ public final class ImageConf implements Simplifiable<ImageConf>
     }
 
     /**
+     *  There are different kinds of strategies to fit the image onto the component.
+     *  These strategies are identified using the {@link UI.FitComponent} enum
+     *  which defines the following fit modes:
+     *  <ul>
+     *      <li>{@link UI.FitComponent#NO} -
+     *          The image will not be scaled to fit the inner component area.
+     *      </li>
+     *      <li>{@link UI.FitComponent#WIDTH} -
+     *          The image will be scaled to fit the inner component width.
+     *      </li>
+     *      <li>{@link UI.FitComponent#HEIGHT} -
+     *          The image will be scaled to fit the inner component height.
+     *      </li>
+     *      <li>{@link UI.FitComponent#WIDTH_AND_HEIGHT} -
+     *          The image will be scaled to fit both the component width and height.
+     *      </li>
+     *      <li>{@link UI.FitComponent#MAX_DIM} -
+     *          The image will be scaled to fit the smaller
+     *          of the two dimension of the inner component area.
+     *      </li>
+     *      <li>{@link UI.FitComponent#MIN_DIM} -
+     *          The image will be scaled to fit the larger
+     *          of the two dimension of the inner component area.
+     *      </li>
+     *  </ul>
      * @param fit The fit mode of the image.
      * @return A new {@link ImageConf} instance with the specified {@code fit} mode.
      */
-    public ImageConf fitMode(UI.FitComponent fit ) {
+    public ImageConf fitMode( UI.FitComponent fit ) {
         return ImageConf.of(_primer, _image, _placement, _repeat, fit, _size, _opacity, _padding, _offset, _clipArea);
     }
 
@@ -446,9 +471,9 @@ public final class ImageConf implements Simplifiable<ImageConf>
      *  Ensures that the image has the specified height.
      *
      * @param height The height of the image.
-     * @return A new {@link ImageConf} instance with the specified {@code heiht}.
+     * @return A new {@link ImageConf} instance with the specified {@code height}.
      */
-    public ImageConf height(Integer height ) {
+    public ImageConf height( Integer height ) {
         return ImageConf.of(_primer, _image, _placement, _repeat, _fitMode, _size.withHeight(height), _opacity, _padding, _offset, _clipArea);
     }
 
@@ -655,10 +680,10 @@ public final class ImageConf implements Simplifiable<ImageConf>
         return Objects.equals(_primer,    rhs._primer)    &&
                Objects.equals(_image,     rhs._image)     &&
                Objects.equals(_placement, rhs._placement) &&
-               Objects.equals(_repeat,    rhs._repeat)    &&
+               _repeat == rhs._repeat    &&
                Objects.equals(_fitMode,   rhs._fitMode)   &&
                Objects.equals(_size,      rhs._size)      &&
-               Objects.equals(_opacity,   rhs._opacity)   &&
+               _opacity == rhs._opacity   &&
                Objects.equals(_padding,   rhs._padding)   &&
                Objects.equals(_offset,    rhs._offset)    &&
                Objects.equals(_clipArea,  rhs._clipArea);

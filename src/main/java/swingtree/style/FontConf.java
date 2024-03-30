@@ -420,7 +420,7 @@ public final class FontConf
         Objects.requireNonNull(color);
         if ( color == UI.Color.UNDEFINED)
             color = null;
-        if ( color == _color )
+        if ( Objects.equals(color, _color) )
             return this;
 
         return FontConf.of(_familyName, _size, _posture, _weight, _spacing, color, _backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);
@@ -461,7 +461,7 @@ public final class FontConf
         Objects.requireNonNull(backgroundColor);
         if ( backgroundColor == UI.Color.UNDEFINED)
             backgroundColor = null;
-        if ( backgroundColor == _backgroundColor )
+        if ( Objects.equals(backgroundColor, _backgroundColor) )
             return this;
         return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _color, backgroundColor, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);
     }
@@ -502,7 +502,7 @@ public final class FontConf
         Objects.requireNonNull(selectionColor);
         if ( selectionColor == UI.Color.UNDEFINED)
             selectionColor = null;
-        if ( selectionColor == _selectionColor )
+        if ( Objects.equals(selectionColor, _selectionColor) )
             return this;
         return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _color, _backgroundColor, selectionColor, _isUnderlined, _isStrike, _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);
     }

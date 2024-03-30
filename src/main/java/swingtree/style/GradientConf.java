@@ -179,7 +179,7 @@ public final class GradientConf implements Simplifiable<GradientConf>
              type       == none._type       &&
              Arrays.equals(colors, none._colors) &&
              Objects.equals(offset, none._offset) &&
-             Objects.equals(size, none._size) &&
+             size       == none._size &&
              area       == none._area       &&
              boundary   == none._boundary   &&
              Objects.equals(focus, none._focus) &&

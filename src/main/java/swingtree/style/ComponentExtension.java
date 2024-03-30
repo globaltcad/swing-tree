@@ -193,6 +193,10 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     /**
+     *  A component can have multiple group tags, which are used by the SwingTree style engine
+     *  to apply styles with the same tags, which is conceptually similar to CSS classes.
+     *  This method returns the group tags associated with the component.
+     *
      * @return The group tags associated with the component
      *         in the form of an unmodifiable list of {@link String}s.
      */
@@ -213,6 +217,9 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     /**
+     *  Exposes the current {@link StyleConf} configuration of the component,
+     *  which holds all the SwingTree style information needed to render the component.
+     *
      * @return The current {@link StyleConf} configuration of the component
      *         which is calculated based on the {@link Styler} lambdas
      *         associated with the component.

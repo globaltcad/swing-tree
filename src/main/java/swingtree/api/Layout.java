@@ -39,14 +39,14 @@ public interface Layout
     /**
      * @return A hash code value for this layout.
      */
-    int hashCode();
+    @Override int hashCode();
 
     /**
      * @param o The object to compare this layout to.
      * @return {@code true} if the supplied object is a layout
      *         that is equal to this layout, {@code false} otherwise.
      */
-    boolean equals( Object o );
+    @Override boolean equals( Object o );
 
     /**
      * Installs this layout for the supplied component.
@@ -56,6 +56,11 @@ public interface Layout
     void installFor( JComponent component );
 
     /**
+     *  A factory method for creating a layout that does nothing
+     *  (i.e. it does not install any layout for a component).
+     *  This is a no-op layout that can be used to represent the lack of a specific layout
+     *  being set for a component without having to set the layout to {@code null}.
+     *
      * @return A layout that does nothing, i.e. it does not install any layout for a component.
      */
     static Layout unspecific() { return Constants.UNSPECIFIC_LAYOUT_CONSTANT; }
@@ -92,6 +97,11 @@ public interface Layout
     }
 
     /**
+     *  A factory method for creating a layout that installs the {@link MigLayout}
+     *  manager onto a component based on the supplied parameters.
+     *  This will effectively translate to a call to the {@link MigLayout#MigLayout(String)}
+     *  constructor with the supplied constraints.
+     *
      * @param constr The layout constraints for the layout.
      * @return A layout that uses the MigLayout.
      */

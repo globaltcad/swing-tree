@@ -66,6 +66,11 @@ final class StyleInstaller<C extends JComponent>
         return _dynamicLaF.customLookAndFeelIsInstalled();
     }
 
+    @SuppressWarnings("ReferenceEquality")
+    private boolean _isUndefinedColor( Color color ) {
+        return color == UI.Color.UNDEFINED;
+    }
+
     StyleConf applyStyleToComponentState(
         C              owner, // <- The component we want to style.
         StyleConf      newStyle,
@@ -197,11 +202,11 @@ final class StyleInstaller<C extends JComponent>
 
         if ( hasBackground ) {
             boolean backgroundIsAlreadySet = Objects.equals( owner.getBackground(), newStyle.base().backgroundColor().get() );
-            if ( !backgroundIsAlreadySet || newStyle.base().backgroundColor().get() == UI.Color.UNDEFINED )
+            if ( !backgroundIsAlreadySet || _isUndefinedColor(newStyle.base().backgroundColor().get()) )
             {
                 _initialBackgroundColor = _initialBackgroundColor != null ? _initialBackgroundColor :  owner.getBackground();
                 Color newColor = newStyle.base().backgroundColor()
-                                                .filter( c -> c != UI.Color.UNDEFINED )
+                                                .filter( c -> !_isUndefinedColor(c) )
                                                 .orElse(null);
 
                 backgroundSetter = () -> {
@@ -229,7 +234,7 @@ final class StyleInstaller<C extends JComponent>
 
         if ( !opaqueGradAreas.contains(UI.ComponentArea.ALL) ) {
             boolean hasOpaqueFoundation = 255 == newStyle.base().foundationColor().map(java.awt.Color::getAlpha).orElse(0);
-            boolean hasOpaqueBackground = 255 == newStyle.base().backgroundColor().map( c -> c != UI.Color.UNDEFINED ? c : _initialBackgroundColor ).map(java.awt.Color::getAlpha).orElse(255);
+            boolean hasOpaqueBackground = 255 == newStyle.base().backgroundColor().map( c -> !_isUndefinedColor(c) ? c : _initialBackgroundColor ).map(java.awt.Color::getAlpha).orElse(255);
             boolean hasBorder           = newStyle.border().widths().isPositive();
 
             if ( !hasOpaqueFoundation && !opaqueGradAreas.contains(UI.ComponentArea.EXTERIOR) ) {
@@ -373,6 +378,7 @@ final class StyleInstaller<C extends JComponent>
         return newStyle;
     }
 
+    @SuppressWarnings("ReferenceEquality")
     boolean backgroundWasChangedSomewhereElse( C owner ) {
         if ( _currentBackgroundColor != null ) {
             if ( _currentBackgroundColor != owner.getBackground() ) {
@@ -389,7 +395,7 @@ final class StyleInstaller<C extends JComponent>
 
         if ( base.foregroundColor().isPresent() && !Objects.equals( owner.getForeground(), base.foregroundColor().get() ) ) {
             Color newColor = base.foregroundColor().get();
-            if ( newColor == UI.Color.UNDEFINED)
+            if ( _isUndefinedColor(newColor) )
                 newColor = null;
 
             if ( !Objects.equals( owner.getForeground(), newColor ) )

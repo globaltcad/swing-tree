@@ -2361,6 +2361,12 @@ public final class ComponentStyleDelegate<C extends JComponent>
     }
 
     /**
+     *  Use this to define the layout manager for this {@link JComponent}
+     *  using a {@link Layout} object. <br>
+     *  Checkout the factory methods in {@link Layout} for creating
+     *  different types of layout managers like {@link Layout#flow()}, {@link Layout#mig(String)}
+     *  or {@link Layout#grid(int, int)}. <br>
+     *
      * @param installer The {@link Layout} to use for installing the layout.
      * @return A new {@link ComponentStyleDelegate} with the provided {@link Layout} set to be later
      */

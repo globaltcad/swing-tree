@@ -174,6 +174,8 @@ public final class SvgIcon extends ImageIcon
     }
 
     /**
+     *  Creates an updated {@link SvgIcon} with the given width returned by {@link #getIconWidth()}.
+     *
      * @param width The width of the icon, or -1 if the icon should be rendered according
      *              to the width of a given component or the width of the SVG document itself.
      * @return A new {@link SvgIcon} with the given width.
@@ -227,6 +229,11 @@ public final class SvgIcon extends ImageIcon
     }
 
     /**
+     *  Allows you to create an updated {@link SvgIcon} with the given size
+     *  in the form of a {@link Size} object containing the width and height.
+     *  If the width or height is -1, the icon will be rendered according to the
+     *  width or height of a given component.
+     *
      * @param size The size of the icon in the form of a {@link Size}.
      * @return A new {@link SvgIcon} with the given width and height.
      */
@@ -330,6 +337,31 @@ public final class SvgIcon extends ImageIcon
     public UI.FitComponent getFitComponent() { return _fitComponent; }
 
     /**
+     *  There are different kinds of strategies to fit an SVG icon onto the component.
+     *  These strategies are identified using the {@link UI.FitComponent} enum
+     *  which defines the following fit modes:
+     *  <ul>
+     *      <li>{@link UI.FitComponent#NO} -
+     *          The image will not be scaled to fit the inner component area.
+     *      </li>
+     *      <li>{@link UI.FitComponent#WIDTH} -
+     *          The image will be scaled to fit the inner component width.
+     *      </li>
+     *      <li>{@link UI.FitComponent#HEIGHT} -
+     *          The image will be scaled to fit the inner component height.
+     *      </li>
+     *      <li>{@link UI.FitComponent#WIDTH_AND_HEIGHT} -
+     *          The image will be scaled to fit both the component width and height.
+     *      </li>
+     *      <li>{@link UI.FitComponent#MAX_DIM} -
+     *          The image will be scaled to fit the smaller
+     *          of the two dimension of the inner component area.
+     *      </li>
+     *      <li>{@link UI.FitComponent#MIN_DIM} -
+     *          The image will be scaled to fit the larger
+     *          of the two dimension of the inner component area.
+     *      </li>
+     *  </ul>
      * @param fit The {@link UI.FitComponent} that determines if and how the icon should be fitted into a
      *            any given component (see {@link #paintIcon(Component, java.awt.Graphics, int, int, int, int)}).
      * @return A new {@link SvgIcon} with the given {@link UI.FitComponent} policy.
@@ -342,6 +374,10 @@ public final class SvgIcon extends ImageIcon
     }
 
     /**
+     *  The preferred placement policy determines where the icon
+     *  should be placed within a component when rendered through the
+     *  {@link #paintIcon(Component, java.awt.Graphics, int, int, int, int)} method.
+     *
      * @return The {@link UI.Placement} that determines where the icon should be placed within a component
      *         (see {@link #paintIcon(Component, java.awt.Graphics, int, int, int, int)}).
      */
@@ -673,7 +709,7 @@ public final class SvgIcon extends ImageIcon
             // account for the scale of the transform with respect to the view box!
             _svgDocument.render((JComponent) c, g2d, viewBox);
         } catch (Exception e) {
-            log.warn("Failed to render SVG document: " + _svgDocument, e);
+            log.warn("Failed to render SVG document.", e);
         }
 
         if ( needsScaling )
