@@ -1,5 +1,6 @@
 package swingtree.layout;
 
+import org.jspecify.annotations.Nullable;
 import swingtree.api.Styler;
 import swingtree.style.ComponentStyleDelegate;
 import swingtree.style.ImageConf;
@@ -30,6 +31,8 @@ public final class Size
     }
 
     /**
+     *  A factory method that creates a {@link Size} instance from a width and height.
+     *  If the width or height is negative, the returned size will have a width or height of -1.
      * @param width The width of the size.
      * @param height The height of the size.
      * @return A {@link Size} instance that represents the given width and height.
@@ -41,10 +44,11 @@ public final class Size
     }
 
     /**
+     *  A factory method that creates a {@link Size} instance from a {@link Dimension}.
      * @param dimension The dimension to convert to a {@link Size} instance.
      * @return A {@link Size} instance that represents the given dimension.
      */
-    public static Size of( Dimension dimension ) {
+    public static Size of( @Nullable Dimension dimension ) {
         if ( dimension == null )
             return UNKNOWN;
         return of(dimension.width, dimension.height);
@@ -55,8 +59,8 @@ public final class Size
 
 
     private Size( float width, float height ) {
-        _width  = Math.max(-1, width);
-        _height = Math.max(-1, height);
+        _width  = width  < 0 ? -1 : width;
+        _height = height < 0 ? -1 : height;
     }
 
     /**
@@ -92,6 +96,8 @@ public final class Size
     }
 
     /**
+     *  Creates an updated {@link Size} instance with the given width.
+     *  If the width is negative, the width of the returned size will be -1.
      * @param width The width of the size to create.
      * @return A new {@link Size} instance with the given width.
      */
@@ -100,10 +106,12 @@ public final class Size
     }
 
     /**
+     *  Creates an updated {@link Size} instance with the given height.
+     *  If the height is negative, the height of the returned size will be -1.
      * @param height The height of the size to create.
      * @return A new {@link Size} instance with the given height.
      */
-    public Size withHeight(int height ) {
+    public Size withHeight( int height ) {
         return new Size(_width, height);
     }
 
@@ -135,8 +143,8 @@ public final class Size
         if ( o == null ) return false;
         if ( o.getClass() != this.getClass() ) return false;
         Size that = (Size)o;
-        return Objects.equals(this._width,  that._width) &&
-               Objects.equals(this._height, that._height);
+        return _width  == that._width &&
+               _height == that._height;
     }
 
     @Override

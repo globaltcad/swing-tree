@@ -2001,6 +2001,9 @@ public final class ComponentStyleDelegate<C extends JComponent>
     }
 
     /**
+     *  Creates an updated style config with the provided font paint
+     *  applied to all font configurations of the component.
+     *
      * @param paint The {@link Paint} to use for the foreground of the font, which translates to the
      *              {@link java.awt.font.TextAttribute#FOREGROUND} attribute.
      * @return A new {@link ComponentStyleDelegate} with the provided font paint.

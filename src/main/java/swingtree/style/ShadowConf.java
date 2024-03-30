@@ -138,6 +138,10 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
     boolean isInset() { return !_isOutset; }
 
     /**
+     *  Use this to offset the shadow position along the X axis.
+     *  If the {@code horizontalShadowOffset} is positive, the shadow will move to the right,
+     *  if negative the shadow will move to the left.
+     *
      * @param horizontalShadowOffset The horizontal shadow offset, if positive the shadow will move to the right,
      *                               if negative the shadow will move to the left.
      * @return A new {@link ShadowConf} with the specified horizontal shadow offset.
@@ -147,6 +151,9 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
     }
 
     /**
+     *  Defines the shadow position along the Y axis in terms of the "vertical shadow offset".
+     *  It will move the shadow up if negative and down if positive.
+     *
      * @param verticalShadowOffset The vertical shadow offset, if positive the shadow will move down,
      *                             if negative the shadow will move up.
      * @return A new {@link ShadowConf} with the specified vertical shadow offset.
@@ -156,6 +163,11 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
     }
 
     /**
+     *  Use this to offset the shadow position along the X or Y axis
+     *  using the two supplied {@code horizontalShadowOffset} and {@code verticalShadowOffset} doubles.
+     *  The {@code horizontalShadowOffset} will shift the shadow along the X axis,
+     *  while the {@code verticalShadowOffset} will shift the shadow along the Y axis.
+     *
      * @param horizontalShadowOffset The horizontal shadow offset, if positive the shadow will move to the right,
      *                               if negative the shadow will move to the left.
      * @param verticalShadowOffset The vertical shadow offset, if positive the shadow will move down,
@@ -188,6 +200,10 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
     }
 
     /**
+     *  The spread radius of a shadow is a sort of scale for the shadow box.
+     *  So when the spread radius is large the shadow will both begin and  end further away from the shadow center.
+     *  When the spread radius is small the shadow will be more concentrated around the shadow center.
+     *
      * @param shadowSpreadRadius The spread radius of the shadow, which defines how far the shadow spreads
      *                           outwards or inwards ({@link #isInset()}) from the element.
      *                           This offsets the start of the shadow similarly to the vertical and horizontal
@@ -200,6 +216,7 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
     }
 
     /**
+     *  Use this to define the color of the visible shadow gradient.
      * @param shadowColor The color of the shadow.
      * @return A new {@link ShadowConf} with the specified color.
      */
