@@ -385,8 +385,10 @@ final class StyleInstaller<C extends JComponent>
 
     private void _applyGenericBaseStyleTo( final C owner, final StyleConf styleConf )
     {
-        if ( styleConf.base().foregroundColor().isPresent() && !Objects.equals( owner.getForeground(), styleConf.base().foregroundColor().get() ) ) {
-            Color newColor = styleConf.base().foregroundColor().get();
+        final BaseConf base = styleConf.base();
+
+        if ( base.foregroundColor().isPresent() && !Objects.equals( owner.getForeground(), base.foregroundColor().get() ) ) {
+            Color newColor = base.foregroundColor().get();
             if ( newColor == UI.Color.UNDEFINED)
                 newColor = null;
 
@@ -394,14 +396,14 @@ final class StyleInstaller<C extends JComponent>
                 owner.setForeground( newColor );
         }
 
-        styleConf.base().cursor().ifPresent( cursor -> {
+        base.cursor().ifPresent( cursor -> {
             if ( !Objects.equals( owner.getCursor(), cursor ) )
                 owner.setCursor( cursor );
         });
 
-        if ( styleConf.base().orientation() != UI.ComponentOrientation.UNKNOWN ) {
+        if ( base.orientation() != UI.ComponentOrientation.UNKNOWN ) {
             ComponentOrientation currentOrientation = owner.getComponentOrientation();
-            UI.ComponentOrientation newOrientation = styleConf.base().orientation();
+            UI.ComponentOrientation newOrientation = base.orientation();
             switch ( newOrientation ) {
                 case LEFT_TO_RIGHT:
                     if ( !Objects.equals( currentOrientation, ComponentOrientation.LEFT_TO_RIGHT ) )
@@ -421,8 +423,10 @@ final class StyleInstaller<C extends JComponent>
 
     private void _applyIconStyleTo( final C owner, StyleConf styleConf )
     {
-        UI.FitComponent fit = styleConf.base().fit();
-        styleConf.base().icon().ifPresent( icon -> {
+        final BaseConf base = styleConf.base();
+
+        UI.FitComponent fit = base.fit();
+        base.icon().ifPresent( icon -> {
             if ( icon instanceof SvgIcon) {
                 SvgIcon svgIcon = (SvgIcon) icon;
                 icon = svgIcon.withFitComponent(fit);
@@ -445,36 +449,35 @@ final class StyleInstaller<C extends JComponent>
         });
     }
 
-    private void _applyLayoutStyleTo( final C owner, final StyleConf styleConf )
+    private void _applyLayoutStyleTo( final C owner, final StyleConf style )
     {
-        final LayoutConf style = styleConf.layout();
-
+        final LayoutConf layoutConf = style.layout();
         // Generic Layout stuff:
 
-        styleConf.layout().alignmentX().ifPresent( alignmentX -> {
+        layoutConf.alignmentX().ifPresent( alignmentX -> {
             if ( !Objects.equals( owner.getAlignmentX(), alignmentX ) )
                 owner.setAlignmentX( alignmentX );
         });
 
-        styleConf.layout().alignmentY().ifPresent( alignmentY -> {
+        layoutConf.alignmentY().ifPresent( alignmentY -> {
             if ( !Objects.equals( owner.getAlignmentY(), alignmentY ) )
                 owner.setAlignmentY( alignmentY );
         });
 
         // Install Generic Layout:
-        styleConf.layout().layout().installFor(owner);
+        layoutConf.layout().installFor(owner);
 
         // Now on to MigLayout stuff:
 
-        Optional<Float> alignmentX = style.alignmentX();
-        Optional<Float> alignmentY = style.alignmentY();
+        Optional<Float> alignmentX = layoutConf.alignmentX();
+        Optional<Float> alignmentY = layoutConf.alignmentY();
 
         if ( !alignmentX.isPresent() && !alignmentY.isPresent() )
             return;
 
-        LayoutManager layout = ( owner.getParent() == null ? null : owner.getParent().getLayout() );
-        if ( layout instanceof MigLayout ) {
-            MigLayout migLayout = (MigLayout) layout;
+        LayoutManager layoutManager = ( owner.getParent() == null ? null : owner.getParent().getLayout() );
+        if ( layoutManager instanceof MigLayout ) {
+            MigLayout migLayout = (MigLayout) layoutManager;
             Object rawComponentConstraints = migLayout.getComponentConstraints(owner);
             if ( rawComponentConstraints instanceof String )
                 rawComponentConstraints = ConstraintParser.parseComponentConstraint(rawComponentConstraints.toString());
