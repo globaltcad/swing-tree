@@ -411,7 +411,7 @@ public final class SvgIcon extends ImageIcon
      * @param y the Y coordinate of the icon's top-left corner
      */
     @Override
-    public void paintIcon( java.awt.Component c, java.awt.Graphics g, int x, int y )
+    public synchronized void paintIcon( java.awt.Component c, java.awt.Graphics g, int x, int y )
     {
         if ( _svgDocument == null )
             return;
@@ -694,9 +694,9 @@ public final class SvgIcon extends ImageIcon
         if ( obj == this ) return true;
         if ( obj.getClass() != getClass() ) return false;
         SvgIcon rhs = (SvgIcon) obj;
-        return Objects.equals(_svgDocument,        rhs._svgDocument)  &&
-               Objects.equals(_width,              rhs._width)        &&
-               Objects.equals(_height,             rhs._height)       &&
+        return _width  == rhs._width  &&
+               _height == rhs._height &&
+               Objects.equals(_svgDocument,        rhs._svgDocument)  &&
                Objects.equals(_fitComponent,       rhs._fitComponent) &&
                Objects.equals(_preferredPlacement, rhs._preferredPlacement);
     }

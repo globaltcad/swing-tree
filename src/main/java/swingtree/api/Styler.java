@@ -62,8 +62,11 @@ public interface Styler<C extends JComponent>
             try {
                 result = style( delegate );
             } catch ( Exception e ) {
-                e.printStackTrace();
                 // Exceptions inside a styler should not be fatal.
+                Constants.LOG.error(
+                    "Error trying to run '"+delegate+"' through styler '"+this+"'.",
+                    e
+                );
             }
             return other.style( result );
         };

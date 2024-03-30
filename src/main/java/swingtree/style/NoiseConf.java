@@ -147,7 +147,7 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
         if ( scale == 1 )
             return this;
 
-        if ( this == _NONE )
+        if ( this.equals(_NONE) )
             return _NONE;
 
         return of(

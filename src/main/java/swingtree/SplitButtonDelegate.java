@@ -24,6 +24,7 @@ public final class SplitButtonDelegate<I extends JMenuItem> extends AbstractDele
         public ActionEvent getEvent() { return _itemsDelegate.getEvent(); }
 
         /**
+         *  Exposes the underlying {@link SplitItemDelegate} instance.
          * @return The {@link JSplitButton} to which this {@link SplitItem} (and its {@link JMenuItem}) belongs.
          */
         public JSplitButton getSplitButton() {
@@ -57,7 +58,7 @@ public final class SplitButtonDelegate<I extends JMenuItem> extends AbstractDele
             return _siblingsSource();
         }
 
-        /*
+        /**
          * @return A list of all the {@link JComponent} which constitute the neighbouring UI components of the split button.
          *          except the current {@link JSplitButton} itself.
          */

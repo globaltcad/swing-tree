@@ -59,6 +59,10 @@ public final class StyleConf
                                         );
 
     /**
+     *  Exposes the "null object" pattern for {@link StyleConf} instances.
+     *  So the constant returned by this method is the default instance
+     *  that represents the absence of a style.
+     *
      * @return The default style instance, representing the absence of a style.
      */
     public static StyleConf none() { return _NONE; }
@@ -158,6 +162,9 @@ public final class StyleConf
     }
 
     /**
+     *  Internally, a style configuration consists of a set of layers defined by the {@link UI.Layer} enum.
+     *  You can retrieve all shadow styles for a specific layer by calling this method.
+     *
      * @return An unmodifiable list of all shadow styles sorted by their names in ascending alphabetical order.
      */
     List<ShadowConf> shadows( UI.Layer layer ) {
@@ -186,6 +193,7 @@ public final class StyleConf
     public FontConf font() { return _font; }
 
     /**
+     *  Returns a new {@link StyleConf} instance with the given layout constraint.
      * @return An unmodifiable list of painters sorted by their names in ascending alphabetical order.
      */
     List<PainterConf> painters( UI.Layer layer ) {

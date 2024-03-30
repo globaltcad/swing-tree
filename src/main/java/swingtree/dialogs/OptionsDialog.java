@@ -100,6 +100,10 @@ public final class OptionsDialog<E extends Enum<E>>
     }
 
     /**
+     *  Creates an updated options dialog config with the specified title
+     *  which will used as the window title of the dialog
+     *  when it is shown to the user.
+     *
      * @param title The title of the dialog.
      * @return A new {@link OptionsDialog} instance with the specified title.
      */

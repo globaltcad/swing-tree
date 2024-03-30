@@ -1,9 +1,12 @@
 package swingtree.api;
 
+import org.slf4j.Logger;
+
 import java.awt.*;
 
 class Constants
 {
+    static final Logger LOG = org.slf4j.LoggerFactory.getLogger("swingtree");
     static final Styler<?> STYLER_NONE = delegate -> delegate;
     static final AnimatedStyler<?> ANIMATED_STYLER_NONE = (state, delegate) -> delegate;
     static final Layout UNSPECIFIC_LAYOUT_CONSTANT = new Layout.Unspecific();

@@ -1993,6 +1993,10 @@ public final class ComponentStyleDelegate<C extends JComponent>
     }
 
     /**
+     *  The {@link AffineTransform} property of a font defines how the font is
+     *  rotated, scaled, skewed or translated. This method allows you to apply
+     *  a custom {@link AffineTransform} to the fonts of the component.
+     *
      * @param transform The {@link AffineTransform} to apply to the font.
      * @return A new {@link ComponentStyleDelegate} with the provided font transform.
      */

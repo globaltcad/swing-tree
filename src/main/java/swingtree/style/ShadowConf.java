@@ -180,6 +180,8 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
 
     /**
      *  Use this to offset the shadow diagonally between the top left corner and the bottom right corner.
+     *  This is effectively a diagonal shadow offset as it is applied to both the X and Y axis.
+     *  (see {@link #offset(double, double)} for more information)
      *
      * @param shadowOffset The shadow offset, if positive the shadow will move to the right and down,
      *                     if negative the shadow will move to the left and up.
@@ -190,6 +192,10 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
     }
 
     /**
+     *  The blur radius of a shadow defines the gap size between the start and end of the shadow gradient.
+     *  The higher the value, the bigger the blur, so the shadow transition will extend further
+     *  inwards or outwards ({@link #isInset()}) from the shadow center.
+     *
      * @param shadowBlurRadius The blur radius of the shadow, which defines the width of the blur effect.
      *                         The higher the value, the bigger the blur, so the shadow transition will be
      *                         stretched over a wider area.
@@ -224,12 +230,16 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
         Objects.requireNonNull(shadowColor, "Use UI.Color.UNDEFINED to specify no color instead of null");
         if ( shadowColor == UI.Color.UNDEFINED)
             shadowColor = null;
-        if ( shadowColor == _color )
+        if ( Objects.equals(shadowColor, _color) )
             return this;
         return ShadowConf.of(_offset, _blurRadius, _spreadRadius, shadowColor, _isOutset);
     }
 
     /**
+     *  Updates the color of the shadow using a color string
+     *  which can be specified in various formats.
+     *  (see {@link UI#color(String)} for more information)
+     *
      * @param shadowColor The color of the shadow in the form of a String.
      *                    The color can be specified in the following formats:
      *                    <ul>
@@ -256,6 +266,12 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
     }
 
     /**
+     *  Use this to define the color of the visible shadow gradient
+     *  in terms of the red, green and blue components
+     *  consisting of three double values ranging from 0.0 to 1.0,
+     *  where 0.0 represents the absence of the color component
+     *  and 1.0 represents the color component at full strength.
+     *
      * @param red The red component of the shadow color.
      * @param green The green component of the shadow color.
      * @param blue The blue component of the shadow color.
@@ -266,6 +282,12 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
     }
 
     /**
+     *  Use this to define the color of the visible shadow gradient
+     *  in terms of the red, green, blue and alpha components
+     *  consisting of four double values ranging from 0.0 to 1.0,
+     *  where 0.0 represents the absence of the color component
+     *  and 1.0 represents the color component at full strength.
+     *
      * @param red The red component of the shadow color.
      * @param green The green component of the shadow color.
      * @param blue The blue component of the shadow color.

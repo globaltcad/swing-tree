@@ -1807,6 +1807,10 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
+     *  A factory method for creating a {@link JMenuItem} with an icon and the supplied text
+     *  property uni-directionally bound to the menu item. <br>
+     *  When the text property changes, the text displayed on the menu item will be updated accordingly.
+     *
      * @param text The text property which should be displayed on the wrapped {@link JMenuItem} dynamically.
      * @param icon The icon which should be displayed on the wrapped {@link JMenuItem}.
      * @return A builder instance for the provided {@link JMenuItem}, which enables fluent method chaining.
@@ -4784,6 +4788,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
+     *  Allows you to create a declarative builder for the {@link JTableHeader} UI component.
      * @return A builder instance for a new {@link JTableHeader}.
      */
     public static UIForTableHeader<UI.TableHeader> tableHeader() {
@@ -5274,7 +5279,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     public static ConfirmAnswer confirm(String message ) { return confirm("Confirm", message); }
 
     /**
-     * Shows a conformation dialog with the given message.
+     * Shows a conformation dialog with the given title and message.
      *
      * @param title   the title of the dialog
      * @param message the message to show

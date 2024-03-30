@@ -118,6 +118,9 @@ public final class ConfirmDialog
     }
 
     /**
+     *  Defines the icon for the dialog, whose appearance and position may vary depending on the
+     *  look and feel of the current system.
+     *
      * @param icon The icon of the dialog.
      * @return A new {@link ConfirmDialog} instance with the specified icon.
      */
@@ -140,7 +143,7 @@ public final class ConfirmDialog
      * @param parent The parent component of the dialog.
      * @return A new {@link ConfirmDialog} instance with the specified parent component.
      */
-    public ConfirmDialog parent(Component parent ) {
+    public ConfirmDialog parent( Component parent ) {
         return new ConfirmDialog(_type, _title, _message, _yesOption, _noOption, _cancelOption, _defaultOption, _icon, parent);
     }
 
