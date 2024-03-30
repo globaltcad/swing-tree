@@ -32,7 +32,7 @@ import java.util.Optional;
  *  and border of a raw Swing component should be as smooth as possible.
  *  If the user defines a border radius for a component, then this should
  *  not automatically lead to its look and feel being lost.
- *  Instead, only parts of the original look and feel should applied.
+ *  Instead, only parts of the original look and feel should be applied.
  *  This is also true for other component properties like the background color,
  *  the foreground color, the font and the opacity flag.<br>
  *  This last part is especially tricky, because the opacity flag is a very
