@@ -25,9 +25,11 @@ import javax.swing.table.TableColumnModel;
 import java.awt.*;
 import java.awt.color.ColorSpace;
 import java.awt.event.MouseEvent;
+import java.awt.font.TextAttribute;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.RoundRectangle2D;
 import java.text.AttributedCharacterIterator;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -667,7 +669,7 @@ public final class UI extends UIFactoryMethods
     {
         PLAIN, BOLD, ITALIC, BOLD_ITALIC;
 
-        public int toAWTFontStyle() {
+        int toAWTFontStyle() {
             switch ( this ) {
                 case PLAIN:        return java.awt.Font.PLAIN;
                 case BOLD:         return java.awt.Font.BOLD;
@@ -3042,9 +3044,13 @@ public final class UI extends UIFactoryMethods
         }
     }
 
+    /**
+     *  This class represents a SwingTree font and is used to specify the font of a component.
+     *  It is a subclass of {@link java.awt.Font} and provides additional functionality.
+     *  The appearance of a font is primarily based on the font family name which is used to find a font on the system.
+     */
     public static class Font extends java.awt.Font
     {
-
         /**
          *  This constant is a {@link java.awt.Font} object with a font name of "" (empty string),
          *  a font style of -1 (undefined) and a font size of 0.
@@ -3056,15 +3062,36 @@ public final class UI extends UIFactoryMethods
          */
         public static final java.awt.Font UNDEFINED = new Font("", -1, 0);
 
-
+        /**
+         *  A factory method that creates a new {@code Font} object with the specified font name
+         *  {@link FontStyle} and size.
+         *  This maps directly to the constructor of {@link java.awt.Font#Font(String, int, int)}.
+         * @param name The font name, which may be anything depending on what fonts are loaded on the system.
+         * @param style The style of the font, which is one of the constants {@link FontStyle#PLAIN},
+         * @param size The point size of the font.
+         * @return A new {@code Font} object with the specified font name, style and size.
+         */
         public static Font of( String name, FontStyle style, int size ) {
             return new Font(name, style.toAWTFontStyle(), size);
         }
 
+        /**
+         *  Creates a new {@code Font} object from a map of attributes
+         *  where the key is an attribute and the value is the value of the attribute.
+         *  See {@link java.awt.font.TextAttribute} for a list of common attributes.
+         *  These attributes define the style of the font.
+         * @param attributes A map of attributes that define the style of the font.
+         * @return A new {@code Font} object with the specified attributes.
+         */
         public static Font of( Map<? extends AttributedCharacterIterator.Attribute, ?> attributes ) {
             return new Font(attributes);
         }
 
+        /**
+         *  Creates a new {@link swingtree.UI.Font} object from a {@link java.awt.Font} object.
+         * @param font The font to convert to a font.
+         * @return The SwingTree native font object.
+         */
         public static Font of( java.awt.Font font ) {
             return new Font(font);
         }
@@ -3080,6 +3107,58 @@ public final class UI extends UIFactoryMethods
         private Font(java.awt.Font font) {
             super(font);
         }
+
+        /**
+         *  Returns an updated version of this font with the font (family) name changed to the specified value.
+         *  @param name The font name, which may be anything depending on what fonts are loaded on the system.
+         *  @return A new {@code Font} object with the font name changed.
+         *  @throws NullPointerException If the font name is null.
+         */
+        public Font withName( String name ) {
+            Objects.requireNonNull(name, "The font name cannot be null.");
+            Map<TextAttribute, Object> attributes = new HashMap<>(getAttributes());
+            attributes.put(TextAttribute.FAMILY, name);
+            return new Font(attributes);
+        }
+
+        /**
+         *  Returns an updated version of this font with the font style changed to the specified value.
+         *  @param style The style of the font, which is one of the constants {@link FontStyle#PLAIN},
+         *  {@link FontStyle#BOLD} or {@link FontStyle#ITALIC}.
+         *  @return A new {@code Font} object with the font style changed.
+         */
+        public Font withStyle( FontStyle style ) {
+            Map<TextAttribute, Object> attributes = new HashMap<>(getAttributes());
+            switch (style) {
+                case PLAIN:
+                    attributes.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_REGULAR);
+                    attributes.put(TextAttribute.POSTURE, TextAttribute.POSTURE_REGULAR);
+                    break;
+                case BOLD:
+                    attributes.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_BOLD);
+                    break;
+                case ITALIC:
+                    attributes.put(TextAttribute.POSTURE, TextAttribute.POSTURE_OBLIQUE);
+                    break;
+                case BOLD_ITALIC:
+                    attributes.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_BOLD);
+                    attributes.put(TextAttribute.POSTURE, TextAttribute.POSTURE_OBLIQUE);
+                    break;
+            }
+            return new Font(attributes);
+        }
+
+        /**
+         *  Returns an updated version of this font with the font size changed to the specified value.
+         *  @param size The point size of the font.
+         *  @return A new {@code Font} object with the font size changed.
+         */
+        public Font withSize( int size ) {
+            Map<TextAttribute, Object> attributes = new HashMap<>(getAttributes());
+            attributes.put(TextAttribute.SIZE, (float) size);
+            return new Font(attributes);
+        }
+
     }
 
 }
