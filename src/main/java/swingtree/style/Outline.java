@@ -59,54 +59,75 @@ final class Outline
     }
 
     /**
+     *  The top outline value in the form of an {@link Optional}, where {@link Optional#empty()}
+     *  means that the top outline was not specified.
+     *
      * @return An {@link Optional} containing the top outline value if it was specified,
      *        {@link Optional#empty()} otherwise.
      */
     Optional<Float> top() { return Optional.ofNullable(top); }
 
     /**
+     *  An optional value for the right outline.
+     *
      * @return An {@link Optional} containing the right outline value if it was specified,
      *        {@link Optional#empty()} otherwise.
      */
     Optional<Float> right() { return Optional.ofNullable(right); }
 
     /**
+     *  The bottom outline value in the form of an {@link Optional}, where {@link Optional#empty()}
+     *  means that the bottom outline was not specified.
+     *
      * @return An {@link Optional} containing the bottom outline value if it was specified,
      *        {@link Optional#empty()} otherwise.
      */
     Optional<Float> bottom() { return Optional.ofNullable(bottom); }
 
     /**
+     *  Returns an optional value for the left outline where {@link Optional#empty()}
+     *  means that the left outline was not specified.
+     *
      * @return An {@link Optional} containing the left outline value if it was specified,
      *        {@link Optional#empty()} otherwise.
      */
     Optional<Float> left() { return Optional.ofNullable(left); }
 
     /**
+     *  Creates an updated {@link Outline} with the specified {@code top} outline value.
+     *
      * @param top The top outline value.
      * @return A new {@link Outline} with the specified top outline value.
      */
     Outline withTop( float top ) { return Outline.ofNullable(top, right, bottom, left); }
 
     /**
+     *  Creates an updated {@link Outline} with the specified {@code right} outline value.
+     *
      * @param right The right outline value.
      * @return A new {@link Outline} with the specified right outline value.
      */
     Outline withRight( float right ) { return Outline.ofNullable(top, right, bottom, left); }
 
     /**
+     *  Creates an updated {@link Outline} with the specified {@code bottom} outline value.
+     *
      * @param bottom The bottom outline value.
      * @return A new {@link Outline} with the specified bottom outline value.
      */
     Outline withBottom( float bottom ) { return Outline.ofNullable(top, right, bottom, left); }
 
     /**
+     *  Creates an updated {@link Outline} with the specified {@code left} outline value.
      * @param left The left outline value.
      * @return A new {@link Outline} with the specified left outline value.
      */
     Outline withLeft( float left ) { return Outline.ofNullable(top, right, bottom, left); }
 
     /**
+     *  An {@link Outline} may be scaled by a factor to increase or decrease the thickness of the outline.
+     *  If any of the sides was not specified, it will remain unspecified.
+     *
      * @param scale The scale factor.
      * @return A new {@link Outline} with the outline values scaled by the specified factor.
      */
@@ -139,10 +160,10 @@ final class Outline
      *         {@code false} otherwise.
      */
     public boolean isPositive() {
-        return top    != null && top    > 0 ||
-               right  != null && right  > 0 ||
-               bottom != null && bottom > 0 ||
-               left   != null && left   > 0;
+        return ( top    != null && top    > 0 ) ||
+               ( right  != null && right  > 0 ) ||
+               ( bottom != null && bottom > 0 ) ||
+               ( left   != null && left   > 0 );
     }
 
     private static @Nullable Float _plus( @Nullable Float a, @Nullable Float b ) {
@@ -151,6 +172,12 @@ final class Outline
         return a == null ? b : b == null ? a : a + b;
     }
 
+    /**
+     *  Adds the outline values of this {@link Outline} with the specified {@code other} {@link Outline} values.
+     *
+     * @param other The other {@link Outline} to merge with.
+     * @return A new {@link Outline} with the merged outline values.
+     */
     public Outline plus( Outline other ) {
         if ( this == _NONE )
             return other;
@@ -165,6 +192,12 @@ final class Outline
                 );
     }
 
+    /**
+     *  Maps the outline values of this {@link Outline} using the specified {@code mapper} function.
+     *
+     * @param mapper The mapper function.
+     * @return A new {@link Outline} with the mapped outline values.
+     */
     public Outline map( Function<Float, Float> mapper ) {
         return Outline.ofNullable(
                     top    == null ? null : mapper.apply(top),

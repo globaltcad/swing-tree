@@ -117,6 +117,7 @@ final class StyleConfLayers
         return of(f.apply(_background), f.apply(_content), f.apply(_border), f.apply(_foreground), _any == null ? null : f.apply(_any));
     }
 
+    @SuppressWarnings("ReferenceEquality")
     StyleConfLayers simplified() {
         if ( this == _EMPTY )
             return this;
