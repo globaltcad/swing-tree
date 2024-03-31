@@ -38,13 +38,13 @@ final class BorderConf
         Outline         padding,
         @Nullable Color borderColor
     ) {
-        if ( topLeftArc      == Arc.none() &&
-             topRightArc     == Arc.none() &&
-             bottomLeftArc   == Arc.none() &&
-             bottomRightArc  == Arc.none() &&
-             borderWidths    == Outline.none() &&
-             margin          == Outline.none() &&
-             padding         == Outline.none() &&
+        if ( topLeftArc    .equals( Arc.none()     ) &&
+             topRightArc   .equals( Arc.none()     ) &&
+             bottomLeftArc .equals( Arc.none()     ) &&
+             bottomRightArc.equals( Arc.none()     ) &&
+             borderWidths  .equals( Outline.none() ) &&
+             margin        .equals( Outline.none() ) &&
+             padding       .equals( Outline.none() ) &&
              borderColor     == null
         )
             return _NONE;
@@ -94,19 +94,19 @@ final class BorderConf
     public Optional<Arc> bottomRightArc() { return _bottomRightArc == Arc.none() ? Optional.empty() : Optional.of(_bottomRightArc); }
 
     public boolean hasAnyNonZeroArcs() {
-        return _topLeftArc     != Arc.none() && _topLeftArc.width()     > 0 && _topLeftArc.height()     > 0 ||
-               _topRightArc    != Arc.none() && _topRightArc.width()    > 0 && _topRightArc.height()    > 0 ||
-               _bottomLeftArc  != Arc.none() && _bottomLeftArc.width()  > 0 && _bottomLeftArc.height()  > 0 ||
-               _bottomRightArc != Arc.none() && _bottomRightArc.width() > 0 && _bottomRightArc.height() > 0;
+        return !_topLeftArc    .equals( Arc.none() ) && _topLeftArc.width()     > 0 && _topLeftArc.height()     > 0 ||
+               !_topRightArc   .equals( Arc.none() ) && _topRightArc.width()    > 0 && _topRightArc.height()    > 0 ||
+               !_bottomLeftArc .equals( Arc.none() ) && _bottomLeftArc.width()  > 0 && _bottomLeftArc.height()  > 0 ||
+               !_bottomRightArc.equals( Arc.none() ) && _bottomRightArc.width() > 0 && _bottomRightArc.height() > 0;
     }
 
-    public float topLeftRadius() { return _topLeftArc != Arc.none() ? (_topLeftArc.width() + _topLeftArc.height()) / 2 : 0; }
+    public float topLeftRadius() { return !_topLeftArc.equals(Arc.none()) ? (_topLeftArc.width() + _topLeftArc.height()) / 2 : 0; }
 
-    public float topRightRadius() { return _topRightArc != Arc.none() ? (_topRightArc.width() + _topRightArc.height()) / 2 : 0; }
+    public float topRightRadius() { return !_topRightArc.equals(Arc.none()) ? (_topRightArc.width() + _topRightArc.height()) / 2 : 0; }
 
-    public float bottomLeftRadius() { return _bottomLeftArc != Arc.none() ? (_bottomLeftArc.width() + _bottomLeftArc.height()) / 2 : 0; }
+    public float bottomLeftRadius() { return !_bottomLeftArc.equals(Arc.none()) ? (_bottomLeftArc.width() + _bottomLeftArc.height()) / 2 : 0; }
 
-    public float bottomRightRadius() { return _bottomRightArc != Arc.none() ? (_bottomRightArc.width() + _bottomRightArc.height()) / 2 : 0; }
+    public float bottomRightRadius() { return !_bottomRightArc.equals(Arc.none()) ? (_bottomRightArc.width() + _bottomRightArc.height()) / 2 : 0; }
 
     public Outline widths() { return _borderWidths; }
 
@@ -123,13 +123,13 @@ final class BorderConf
     }
 
     BorderConf withMargin( Outline margin ) {
-        if ( margin == _margin )
+        if ( margin.equals(_margin) )
             return this;
         return BorderConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, margin, _padding, _borderColor);
     }
 
     BorderConf withPadding( Outline padding ) {
-        if ( padding == _padding )
+        if ( padding.equals(_padding) )
             return this;
         return BorderConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, padding, _borderColor);
     }
@@ -169,16 +169,16 @@ final class BorderConf
         float arcWidth;
         switch ( corner ) {
             case TOP_LEFT:
-                arcWidth = _topLeftArc != Arc.none() ? _topLeftArc.width() : 0;
+                arcWidth = !_topLeftArc.equals(Arc.none()) ? _topLeftArc.width() : 0;
                 return BorderConf.of(Arc.of(arcWidth, borderArcHeight), _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _borderColor);
             case TOP_RIGHT:
-                arcWidth = _topRightArc != Arc.none() ? _topRightArc.width() : 0;
+                arcWidth = !_topRightArc.equals(Arc.none()) ? _topRightArc.width() : 0;
                 return BorderConf.of(_topLeftArc, Arc.of(arcWidth, borderArcHeight), _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _borderColor);
             case BOTTOM_LEFT:
-                arcWidth = _bottomLeftArc != Arc.none() ? _bottomLeftArc.width() : 0;
+                arcWidth = !_bottomLeftArc.equals(Arc.none()) ? _bottomLeftArc.width() : 0;
                 return BorderConf.of(_topLeftArc, _topRightArc, Arc.of(arcWidth, borderArcHeight), _bottomRightArc, _borderWidths, _margin, _padding, _borderColor);
             case BOTTOM_RIGHT:
-                arcWidth = _bottomRightArc != Arc.none() ? _bottomRightArc.width() : 0;
+                arcWidth = !_bottomRightArc.equals(Arc.none()) ? _bottomRightArc.width() : 0;
                 return BorderConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, Arc.of(arcWidth, borderArcHeight), _borderWidths, _margin, _padding, _borderColor);
             default:
                 throw new IllegalArgumentException("Unknown corner: " + corner);
@@ -217,9 +217,9 @@ final class BorderConf
     }
 
     boolean allCornersShareTheSameArc() {
-        return Objects.equals(_topLeftArc, _topRightArc) &&
-               Objects.equals(_topLeftArc, _bottomLeftArc) &&
-               Objects.equals(_topLeftArc, _bottomRightArc);
+        return _topLeftArc.equals(_topRightArc) &&
+               _topLeftArc.equals(_bottomLeftArc) &&
+               _topLeftArc.equals(_bottomRightArc);
     }
 
     boolean allSidesShareTheSameWidth() {
