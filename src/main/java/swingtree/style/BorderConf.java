@@ -140,16 +140,16 @@ final class BorderConf
         float arcHeight;
         switch ( corner ) {
             case TOP_LEFT:
-                arcHeight = _topLeftArc != Arc.none() ? _topLeftArc.height() : 0;
+                arcHeight = !_topLeftArc.equals(Arc.none()) ? _topLeftArc.height() : 0;
                 return BorderConf.of(Arc.of(borderArcWidth, arcHeight), _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _borderColor);
             case TOP_RIGHT:
-                arcHeight = _topRightArc != Arc.none() ? _topRightArc.height() : 0;
+                arcHeight = !_topRightArc.equals(Arc.none()) ? _topRightArc.height() : 0;
                 return BorderConf.of(_topLeftArc, Arc.of(borderArcWidth, arcHeight), _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _borderColor);
             case BOTTOM_LEFT:
-                arcHeight = _bottomLeftArc != Arc.none() ? _bottomLeftArc.height() : 0;
+                arcHeight = !_bottomLeftArc.equals(Arc.none()) ? _bottomLeftArc.height() : 0;
                 return BorderConf.of(_topLeftArc, _topRightArc, Arc.of(borderArcWidth, arcHeight), _bottomRightArc, _borderWidths, _margin, _padding, _borderColor);
             case BOTTOM_RIGHT:
-                arcHeight = _bottomRightArc != Arc.none() ? _bottomRightArc.height() : 0;
+                arcHeight = !_bottomRightArc.equals(Arc.none()) ? _bottomRightArc.height() : 0;
                 return BorderConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, Arc.of(borderArcWidth, arcHeight), _borderWidths, _margin, _padding, _borderColor);
             default:
                 throw new IllegalArgumentException("Unknown corner: " + corner);
