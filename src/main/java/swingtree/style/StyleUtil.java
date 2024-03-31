@@ -65,4 +65,8 @@ final class StyleUtil
         return enumBasedId.getClass().getSimpleName() + "." + enumBasedId.name();
     }
 
+    @SuppressWarnings("ReferenceEquality")
+    static boolean isUndefinedColor( Color color ) {
+        return color == UI.Color.UNDEFINED;
+    }
 }

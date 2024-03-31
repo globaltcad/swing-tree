@@ -390,10 +390,10 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
         if ( _colors.length == 0 )
             return _NONE;
 
-        if ( Arrays.stream(_colors).allMatch( color -> color.getAlpha() == 0 || color == UI.Color.UNDEFINED) )
+        if ( Arrays.stream(_colors).allMatch( color -> color.getAlpha() == 0 || StyleUtil.isUndefinedColor(color) ) )
             return _NONE;
 
-        int numberOfRealColors = Arrays.stream(_colors).mapToInt( color -> color == UI.Color.UNDEFINED ? 0 : 1 ).sum();
+        int numberOfRealColors = Arrays.stream(_colors).mapToInt( color -> StyleUtil.isUndefinedColor(color) ? 0 : 1 ).sum();
 
         if ( numberOfRealColors == 0 )
             return _NONE;
@@ -402,7 +402,7 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
             Color[] realColors = new Color[numberOfRealColors];
             int index = 0;
             for ( Color color : _colors )
-                if ( color != UI.Color.UNDEFINED)
+                if ( !StyleUtil.isUndefinedColor(color) )
                     realColors[index++] = color;
 
             return of( _function, realColors, _offset, _scale, _area, _boundary, _rotation, _fractions );

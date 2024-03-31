@@ -5292,6 +5292,11 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
+     *  Exposes the {@link ConfirmDialog} API, an immutable builder config type
+     *  for creating a confirmation dialog designed to ask a question.
+     *  The supplied string will be used as the question to ask the user
+     *  when the dialog is shown using the {@link ConfirmDialog#showAsQuestion()} method.
+     *
      * @param toBeConfirmed The question to ask the user.
      * @return A builder for creating a confirmation dialog designed to ask a question.
      */
