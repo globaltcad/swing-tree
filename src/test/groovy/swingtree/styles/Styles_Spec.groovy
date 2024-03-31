@@ -70,7 +70,7 @@ class Styles_Spec extends Specification
             var borderColor = style.border().color()
             var shadowColor = style.shadow().color()
             var fontSelectionColor = style.font().selectionColor()
-            var fontColor = style.font().color()
+            var fontColor = style.font().paint()
         expect :
             backgroundColor.get() == expectedColor
             foregroundColor.get() == expectedColor
@@ -192,11 +192,9 @@ class Styles_Spec extends Specification
                                             "spacing=0.0, " +
                                             "underlined=true, " +
                                             "strikeThrough=true, " +
-                                            "color=rgba(255,0,255,255), " +
-                                            "backgroundColor=?, " +
                                             "selectionColor=rgba(0,255,255,255), " +
                                             "transform=?, " +
-                                            "paint=?, " +
+                                            "paint=rgba(255,0,255,255), " +
                                             "backgroundPaint=?, " +
                                             "horizontalAlignment=?, " +
                                             "verticalAlignment=?" +
@@ -232,11 +230,11 @@ class Styles_Spec extends Specification
             style = ComponentExtension.from(
                                 UI.of(new JSpinner()).withStyle(conf->conf
                                     .fontAlignment(UI.Alignment.CENTER)
+                                    .fontBackgroundColor("cyan")
+                                    .fontBackgroundColor(new Color(0, 42, 42, 42))
                                     .fontBackgroundPaint(paint1)
                                     .fontPaint(paint2)
                                     .fontTransform(transform)
-                                    .fontBackgroundColor("cyan")
-                                    .fontBackgroundColor(new Color(0, 42, 42, 42))
                                     .image(UI.Layer.FOREGROUND, "bubbles", imgConf -> imgConf
                                         .fitMode(UI.FitComponent.WIDTH)
                                         .repeat(true)
@@ -260,8 +258,6 @@ class Styles_Spec extends Specification
                                             "spacing=0.0, " +
                                             "underlined=?, " +
                                             "strikeThrough=?, " +
-                                            "color=?, " +
-                                            "backgroundColor=rgba(0,42,42,42), " +
                                             "selectionColor=?, " +
                                             "transform=$transform, " +
                                             "paint=$paint2, " +
