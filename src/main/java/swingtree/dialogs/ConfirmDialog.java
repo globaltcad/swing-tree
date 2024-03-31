@@ -242,6 +242,12 @@ public final class ConfirmDialog
     }
 
     /**
+     *  Use this to summon the dialog with the current settings and wait
+     *  for the user to select an option. <br>
+     *  The answer will be returned as a {@link ConfirmAnswer} enum.
+     *  Note that this method is blocking and will only return when the user has selected
+     *  an option in the dialog.
+     *
      * @return The {@link ConfirmAnswer} that the user selected in the dialog.
      */
     public ConfirmAnswer show() {

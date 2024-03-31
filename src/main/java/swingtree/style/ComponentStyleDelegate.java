@@ -2051,6 +2051,9 @@ public final class ComponentStyleDelegate<C extends JComponent>
     }
 
     /**
+     *  The font spacing, which is also known as tracking, is the space between characters in a font.
+     *  See {@link java.awt.font.TextAttribute#TRACKING} for more information.
+     *
      * @param spacing The spacing of the default font of the component, which translates to the
      *                {@link java.awt.font.TextAttribute#TRACKING} attribute.
      * @return A new {@link ComponentStyleDelegate} with the provided font spacing.

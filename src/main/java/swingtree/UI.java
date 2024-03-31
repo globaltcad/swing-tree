@@ -55,8 +55,6 @@ import java.util.function.Supplier;
  */
 public final class UI extends UIFactoryMethods
 {
-    private static final Logger log = LoggerFactory.getLogger(UI.class);
-
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     /**
