@@ -69,4 +69,9 @@ final class StyleUtil
     static boolean isUndefinedColor( @Nullable Color color ) {
         return color == UI.Color.UNDEFINED;
     }
+
+    @SuppressWarnings("ReferenceEquality")
+    static boolean isUndefinedFont( @Nullable Font font ) {
+        return font == UI.Font.UNDEFINED;
+    }
 }

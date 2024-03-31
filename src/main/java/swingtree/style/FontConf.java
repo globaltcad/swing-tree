@@ -418,7 +418,7 @@ public final class FontConf
      */
     public FontConf color( Color color ) {
         Objects.requireNonNull(color);
-        if ( color == UI.Color.UNDEFINED)
+        if ( StyleUtil.isUndefinedColor(color) )
             color = null;
         if ( Objects.equals(color, _color) )
             return this;
@@ -459,7 +459,7 @@ public final class FontConf
      */
     public FontConf backgroundColor( Color backgroundColor ) {
         Objects.requireNonNull(backgroundColor);
-        if ( backgroundColor == UI.Color.UNDEFINED)
+        if ( StyleUtil.isUndefinedColor(backgroundColor) )
             backgroundColor = null;
         if ( Objects.equals(backgroundColor, _backgroundColor) )
             return this;
@@ -500,7 +500,7 @@ public final class FontConf
      */
     public FontConf selectionColor( Color selectionColor ) {
         Objects.requireNonNull(selectionColor);
-        if ( selectionColor == UI.Color.UNDEFINED)
+        if ( StyleUtil.isUndefinedColor(selectionColor) )
             selectionColor = null;
         if ( Objects.equals(selectionColor, _selectionColor) )
             return this;
@@ -646,7 +646,7 @@ public final class FontConf
 
     FontConf withPropertiesFromFont( Font font )
     {
-        if ( font == UI.Font.UNDEFINED )
+        if ( StyleUtil.isUndefinedFont(font) )
             return this;
 
         Map<TextAttribute, ?> attributeMap = font.getAttributes();

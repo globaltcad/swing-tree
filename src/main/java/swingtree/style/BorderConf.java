@@ -94,10 +94,10 @@ final class BorderConf
     public Optional<Arc> bottomRightArc() { return _bottomRightArc.equals(Arc.none()) ? Optional.empty() : Optional.of(_bottomRightArc); }
 
     public boolean hasAnyNonZeroArcs() {
-        return !_topLeftArc    .equals( Arc.none() ) && _topLeftArc.width()     > 0 && _topLeftArc.height()     > 0 ||
-               !_topRightArc   .equals( Arc.none() ) && _topRightArc.width()    > 0 && _topRightArc.height()    > 0 ||
-               !_bottomLeftArc .equals( Arc.none() ) && _bottomLeftArc.width()  > 0 && _bottomLeftArc.height()  > 0 ||
-               !_bottomRightArc.equals( Arc.none() ) && _bottomRightArc.width() > 0 && _bottomRightArc.height() > 0;
+        return  ( !_topLeftArc    .equals( Arc.none() ) && _topLeftArc.width()     > 0 && _topLeftArc.height()     > 0 ) ||
+                ( !_topRightArc   .equals( Arc.none() ) && _topRightArc.width()    > 0 && _topRightArc.height()    > 0 ) ||
+                ( !_bottomLeftArc .equals( Arc.none() ) && _bottomLeftArc.width()  > 0 && _bottomLeftArc.height()  > 0 ) ||
+                ( !_bottomRightArc.equals( Arc.none() ) && _bottomRightArc.width() > 0 && _bottomRightArc.height() > 0 );
     }
 
     public float topLeftRadius() { return !_topLeftArc.equals(Arc.none()) ? (_topLeftArc.width() + _topLeftArc.height()) / 2 : 0; }
@@ -213,6 +213,8 @@ final class BorderConf
     }
 
     BorderConf withColor( Color borderColor ) {
+        if ( StyleUtil.isUndefinedColor(borderColor) )
+            return this;
         return BorderConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, borderColor);
     }
 
@@ -264,7 +266,7 @@ final class BorderConf
         Outline simplifiedBorderWidths = _borderWidths.simplified();
         Outline simplifiedMargin       = _margin.simplified();
         Outline simplifiedPadding      = _padding; // Allowing the user to set an all 0 padding is needed for overriding the default insets (from former border!)
-        Color simplifiedBorderColor    = _borderColor != null && _borderColor.getAlpha() > 0 ? _borderColor : null;
+        @Nullable Color simplifiedBorderColor    = _borderColor != null && _borderColor.getAlpha() > 0 ? _borderColor : null;
 
         if ( simplifiedBorderColor == UI.Color.UNDEFINED)
             simplifiedBorderColor = null;
@@ -276,14 +278,14 @@ final class BorderConf
         }
 
         if (
-            simplifiedTopLeftArc     == _topLeftArc &&
-            simplifiedTopRightArc    == _topRightArc &&
-            simplifiedBottomLeftArc  == _bottomLeftArc &&
-            simplifiedBottomRightArc == _bottomRightArc &&
-            simplifiedBorderWidths   == _borderWidths &&
-            simplifiedMargin         == _margin &&
-            simplifiedPadding        == _padding &&
-            simplifiedBorderColor    == _borderColor
+            simplifiedTopLeftArc    .equals(_topLeftArc    ) &&
+            simplifiedTopRightArc   .equals(_topRightArc   ) &&
+            simplifiedBottomLeftArc .equals(_bottomLeftArc ) &&
+            simplifiedBottomRightArc.equals(_bottomRightArc) &&
+            simplifiedBorderWidths  .equals(_borderWidths  ) &&
+            simplifiedMargin        .equals(_margin        ) &&
+            simplifiedPadding       .equals(_padding       ) &&
+            Objects.equals(simplifiedBorderColor, _borderColor)
         )
             return this;
         else
@@ -330,14 +332,14 @@ final class BorderConf
         if ( obj.getClass() != getClass() ) return false;
         BorderConf rhs = (BorderConf) obj;
         return
-            Objects.equals(_topLeftArc,     rhs._topLeftArc)     &&
-            Objects.equals(_topRightArc,    rhs._topRightArc)    &&
-            Objects.equals(_bottomLeftArc,  rhs._bottomLeftArc)  &&
-            Objects.equals(_bottomRightArc, rhs._bottomRightArc) &&
-            Objects.equals(_borderColor,    rhs._borderColor)    &&
-            Objects.equals(_borderWidths,   rhs._borderWidths)   &&
-            Objects.equals(_margin,         rhs._margin)         &&
-            Objects.equals(_padding,        rhs._padding);
+            _topLeftArc    .equals(rhs._topLeftArc)     &&
+            _topRightArc   .equals(rhs._topRightArc)    &&
+            _bottomLeftArc .equals(rhs._bottomLeftArc)  &&
+            _bottomRightArc.equals(rhs._bottomRightArc) &&
+            _borderWidths  .equals(rhs._borderWidths)   &&
+            _margin        .equals(rhs._margin)         &&
+            _padding       .equals(rhs._padding)        &&
+            Objects.equals(_borderColor,    rhs._borderColor);
     }
 
     @Override
@@ -348,10 +350,10 @@ final class BorderConf
 
         String arcsString;
         if ( allCornersShareTheSameArc() ) {
-            boolean arcWidthEqualsHeight = _topLeftArc == Arc.none() || _topLeftArc.width() == _topLeftArc.height();
+            boolean arcWidthEqualsHeight = _topLeftArc.equals(Arc.none()) || _topLeftArc.width() == _topLeftArc.height();
             arcsString = (
                         arcWidthEqualsHeight
-                            ? "radius="   + ( _topLeftArc == Arc.none() ? "?" : Arc._toString(_topLeftArc.width()) )
+                            ? "radius="   + ( _topLeftArc.equals(Arc.none()) ? "?" : Arc._toString(_topLeftArc.width()) )
                             : "arcWidth=" + Arc._toString(_topLeftArc.width()) + ", arcHeight=" + Arc._toString(_topLeftArc.height())
                     );
         } else {
