@@ -66,7 +66,7 @@ final class StyleUtil
     }
 
     @SuppressWarnings("ReferenceEquality")
-    static boolean isUndefinedColor( Color color ) {
+    static boolean isUndefinedColor( @Nullable Color color ) {
         return color == UI.Color.UNDEFINED;
     }
 }

@@ -2,6 +2,7 @@ package swingtree.dialogs;
 
 import org.jspecify.annotations.Nullable;
 import swingtree.UI;
+import swingtree.api.IconDeclaration;
 
 import javax.swing.Icon;
 import javax.swing.JOptionPane;
@@ -56,7 +57,7 @@ public final class MessageDialog
      *  @param type The type of the dialog.
      *  @return A new {@link MessageDialog} instance with the specified type.
      */
-    public MessageDialog type(int type ) {
+    private MessageDialog type( int type ) {
         return new MessageDialog(type, _title, _message, _icon, _parent);
     }
 
@@ -65,17 +66,50 @@ public final class MessageDialog
      *  @param title The title of the dialog.
      *  @return A new {@link MessageDialog} instance with the specified title.
      */
-    public MessageDialog titled(String title ) {
+    public MessageDialog titled( String title ) {
         return new MessageDialog(_type, title, _message, _icon, _parent);
     }
 
     /**
-     *  Set the icon of the dialog.
+     *  Defines the icon which should be displayed alongside the message
+     *  in terms of an {@link IconDeclaration}, which is a constant object holding
+     *  the path to the icon resource and the preferred size of the icon.
+     *  Consider using this over the {@link #icon(Icon)} method
+     *  to avoid resource loading issues as this approach ensures
+     *  that the icon is loaded and cached only once.<br>
+     *  A failure to load the icon will result in the default icon being displayed.
+     *
+     * @param icon The icon declaration to find the icon.
+     * @return A new {@link MessageDialog} instance with the specified icon.
+     */
+    public MessageDialog icon( IconDeclaration icon ) {
+        Objects.requireNonNull(icon);
+        return icon.find().map(this::icon).orElse(this);
+    }
+
+    /**
+     *  Set the icon of the dialog as an {@link Icon}.
+     *  Consider using the {@link #icon(IconDeclaration)} method
+     *  to avoid resource loading issues.
+     *
      *  @param icon The icon of the dialog.
      *  @return A new {@link MessageDialog} instance with the specified icon.
      */
-    public MessageDialog icon(Icon icon ) {
+    public MessageDialog icon( Icon icon ) {
         return new MessageDialog(_type, _title, _message, icon, _parent);
+    }
+
+    /**
+     *  Set the icon of the dialog as a path to the icon resource.
+     *  Consider using the {@link #icon(IconDeclaration)} method
+     *  to avoid resource loading issues.
+     *
+     *  @param path The path to the icon resource.
+     *  @return A new {@link MessageDialog} instance with the specified icon.
+     */
+    public MessageDialog icon( String path ) {
+        Objects.requireNonNull(path);
+        return icon(IconDeclaration.of(path));
     }
 
     /**
