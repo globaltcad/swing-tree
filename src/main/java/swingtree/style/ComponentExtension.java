@@ -324,7 +324,7 @@ public final class ComponentExtension<C extends JComponent>
      * @param force If set to <code>true</code>, the style will be applied even if it is the same as the current style.
      */
     public void gatherApplyAndInstallStyle( boolean force ) {
-        _installStyle( _applyStyleToComponentState(gatherStyle(), force) );
+        _applyStyleToComponentState(gatherStyle(), force);
     }
 
     /**
@@ -337,14 +337,14 @@ public final class ComponentExtension<C extends JComponent>
      * @param force If set to <code>true</code>, the style will be applied even if it is the same as the current style.
      */
     public void applyAndInstallStyle(StyleConf styleConf, boolean force ) {
-        _installStyle( _applyStyleToComponentState(styleConf, force) );
+        _applyStyleToComponentState(styleConf, force);
     }
 
     void gatherApplyAndInstallStyleConfig() {
-        _installStyle( _applyStyleToComponentState(gatherStyle(), false) );
+        _applyStyleToComponentState(gatherStyle(), false);
     }
 
-    private StyleConf _applyStyleToComponentState( StyleConf newStyle, boolean force )
+    private void _applyStyleToComponentState( StyleConf newStyle, boolean force )
     {
         Objects.requireNonNull(newStyle);
 
@@ -353,19 +353,24 @@ public final class ComponentExtension<C extends JComponent>
             border.recalculateInsets(newStyle);
         }
 
+        boolean callInstaller = true;
+
         if ( !force ) {
             // We check if it makes sense to apply the new style:
             boolean componentBackgroundWasMutated = _styleInstaller.backgroundWasChangedSomewhereElse(_owner);
 
             if ( !componentBackgroundWasMutated && _styleEngine.getComponentConf().style().equals(newStyle) )
-                return newStyle;
+                callInstaller = false;
         }
 
-        return _styleInstaller.applyStyleToComponentState(_owner, newStyle, _styleEngine.getBoxModelConf(), _styleSource);
-    }
+        if ( callInstaller )
+            newStyle = _styleInstaller.applyStyleToComponentState(
+                                        _owner, newStyle,
+                                        _styleEngine.getBoxModelConf(),
+                                        _styleSource
+                                    );
 
-    private void _installStyle( StyleConf styleConf) {
-        _styleEngine = _styleEngine.withNewStyleAndComponent(styleConf, _owner);
+        _styleEngine = _styleEngine.withNewStyleAndComponent(newStyle, _owner);
     }
 
     private void _switchToPaintStep( PaintStep step ) {
