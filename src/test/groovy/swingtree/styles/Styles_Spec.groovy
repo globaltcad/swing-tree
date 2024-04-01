@@ -16,11 +16,14 @@ import swingtree.style.ComponentStyleDelegate
 import javax.swing.JButton
 import javax.swing.JComboBox
 import javax.swing.JComponent
+import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JSpinner
 import javax.swing.JToggleButton
 import java.awt.*
+import java.awt.font.TextAttribute
 import java.awt.geom.AffineTransform
+import java.awt.geom.Point2D
 
 @Title("The Style Configuration")
 @Narrative('''
@@ -817,5 +820,60 @@ class Styles_Spec extends Specification
                     "], " +
                     "properties=[]" +
                 "]"
+    }
+
+    def 'The style API allows you to configure a custom paint for a component font.'()
+    {
+        given :'A UI declaration consisting of a `JBox` with 3 components:'
+            var ui =
+                        UI.label("I am a Gradient")
+                        .withStyle( it -> it
+                            .size(200, 50)
+                            .padding(3).borderRadius(12)
+                            .componentFont(f->f
+                                .size(18)
+                                .family("Ubuntu")
+                                .gradient(grad -> grad
+                                    .colors(Color.RED, Color.GREEN, Color.BLUE)
+                                    .boundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)
+                                    .span(UI.Span.TOP_TO_BOTTOM)
+                                    .type(UI.GradientType.LINEAR)
+                                )
+                                .backgroundGradient( grad -> grad
+                                    .colors(Color.CYAN, Color.MAGENTA)
+                                    .span(UI.Span.RIGHT_TO_LEFT)
+                                    .type(UI.GradientType.LINEAR)
+                                    .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
+                                    .offset(-6, -6)
+                                )
+                            )
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                        )
+        when : 'We create the declared `JLabel` component using the `get` method...'
+            var label = ui.get(JLabel)
+        then : 'The label will have a font with the expected size and family.'
+            label.getFont().getSize() == 18
+            label.getFont().getFamily() == "Ubuntu"
+        when : 'We extract the foreground and background paint of the font...'
+            var paint           = label.getFont().getAttributes().get(TextAttribute.FOREGROUND)
+            var backgroundPaint = label.getFont().getAttributes().get(TextAttribute.BACKGROUND)
+        then : """
+            We find tha both paint objects are gradient paints.
+            But one is a linear gradient and the other is a simple 2 color based gradient.
+        """
+            paint instanceof LinearGradientPaint
+            backgroundPaint instanceof GradientPaint
+        when : 'We cast them to their respective types...'
+            var grad1 = paint as LinearGradientPaint
+            var grad2 = backgroundPaint as GradientPaint
+        then : 'They have the expected start and end points:'
+            grad1.getStartPoint() == new Point2D.Float(3, 3)
+            grad1.getEndPoint() == new Point2D.Float(3, 47)
+            grad2.getPoint1() == new Point2D.Float(94.0, 19.0)
+            grad2.getPoint2() == new Point2D.Float(-3.0, 19.0)
+        and : 'They also both have the expected colors:'
+            grad1.getColors() == [ Color.RED, Color.GREEN, Color.BLUE ] as Color[]
+            grad2.getColor1() == Color.CYAN
+            grad2.getColor2() == Color.MAGENTA
     }
 }
