@@ -569,12 +569,58 @@ public final class FontConf
      * Note that specifying a custom paint will override the effects of the color property
      * as the color property is in essence merely a convenience property for a
      * paint painting across the entire font area homogeneously using the specified color.
+     * <br>
+     * Note that this will override the effects of the {@link #color(Color)}, {@link #color(String)},
+     * {@link #noise(Function)} or {@link #gradient(Function)} methods
+     * as a font can only have one paint.
      *
      * @param paint The paint to use for the {@link TextAttribute#FOREGROUND} property.
      * @return A new font style with the specified paint.
      */
     public FontConf paint( @Nullable Paint paint ) {
         FontPaintConf paintConf = FontPaintConf.of(null, paint, null, null);
+        return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _selectionColor, _isUnderlined, _isStrike,  _transform, paintConf, _backgroundPaint, _horizontalAlignment, _verticalAlignment);
+    }
+
+    /**
+     *  Configures a noise function based {@link Paint} for the font appearance,
+     *  using a configurator function that takes a {@link NoiseConf} instance
+     *  and returns an updated {@link NoiseConf} instance with the desired properties.
+     *  <br>
+     *  Keep in mind that this will override the effects of the {@link #color(Color)},
+     *  {@link #color(String)}, {@link #paint(Paint)} or {@link #gradient(Function)}
+     *  methods as a font can only have one paint.
+     *
+     * @param configurator The configurator function that takes a {@link NoiseConf} instance
+     *                     and returns an updated {@link NoiseConf} instance with the desired properties.
+     * @return A new font style with the specified noise paint.
+     */
+    public FontConf noise( Function<NoiseConf, NoiseConf> configurator ) {
+        Objects.requireNonNull(configurator);
+        FontPaintConf paintConf = _paint.noise(configurator);
+        return _withPaintConf(paintConf);
+    }
+
+    /**
+     *  Configures a gradient function based {@link Paint} for the font appearance,
+     *  using a configurator function that takes a {@link GradientConf} instance
+     *  and returns an updated {@link GradientConf} instance with the desired properties.
+     *  <br>
+     *  Keep in mind that this will override the effects of the {@link #color(Color)},
+     *  {@link #color(String)}, {@link #paint(Paint)} or {@link #noise(Function)}
+     *  methods as a font can only have one paint.
+     *
+     * @param configurator The configurator function that takes a {@link GradientConf} instance
+     *                     and returns an updated {@link GradientConf} instance with the desired properties.
+     * @return A new font style with the specified gradient paint.
+     */
+    public FontConf gradient( Function<GradientConf, GradientConf> configurator ) {
+        Objects.requireNonNull(configurator);
+        FontPaintConf paintConf = _paint.gradient(configurator);
+        return _withPaintConf(paintConf);
+    }
+
+    private FontConf _withPaintConf( FontPaintConf paintConf ) {
         return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _selectionColor, _isUnderlined, _isStrike,  _transform, paintConf, _backgroundPaint, _horizontalAlignment, _verticalAlignment);
     }
 
@@ -588,6 +634,48 @@ public final class FontConf
      */
     public FontConf backgroundPaint( @Nullable Paint backgroundPaint ) {
         FontPaintConf backgroundPaintConf = FontPaintConf.of(null, backgroundPaint, null, null);
+        return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, backgroundPaintConf, _horizontalAlignment, _verticalAlignment);
+    }
+
+    /**
+     *  Configures a noise function based {@link Paint} for the background of the font appearance,
+     *  using a configurator function that takes a {@link NoiseConf} instance
+     *  and returns an updated {@link NoiseConf} instance with the desired properties.
+     *  <br>
+     *  Note that the background can only have one paint, so specifying a noise based paint
+     *  will override the effects of the {@link #backgroundPaint(Paint)}, {@link #backgroundGradient(Function)},
+     *  and {@link #backgroundColor(String)} methods.
+     *
+     * @param configurator The configurator function that takes a {@link NoiseConf} instance
+     *                     and returns an updated {@link NoiseConf} instance with the desired properties.
+     * @return A new font style with the specified noise background paint.
+     */
+    public FontConf backgroundNoise( Function<NoiseConf, NoiseConf> configurator ) {
+        Objects.requireNonNull(configurator);
+        FontPaintConf backgroundPaintConf = _backgroundPaint.noise(configurator);
+        return _withBackgroundPaintConf(backgroundPaintConf);
+    }
+
+    /**
+     *  Configures a gradient function based {@link Paint} for the background of the font appearance,
+     *  using a configurator function that takes a {@link GradientConf} instance
+     *  and returns an updated {@link GradientConf} instance with the desired properties.
+     *  <br>
+     *  The background of a font can only have one paint, so specifying a gradient based paint
+     *  will override the effects of the {@link #backgroundPaint(Paint)}, {@link #backgroundNoise(Function)},
+     *  and {@link #backgroundColor(String)} methods.
+     *
+     * @param configurator The configurator function that takes a {@link GradientConf} instance
+     *                     and returns an updated {@link GradientConf} instance with the desired properties.
+     * @return A new font style with the specified gradient background paint.
+     */
+    public FontConf backgroundGradient( Function<GradientConf, GradientConf> configurator ) {
+        Objects.requireNonNull(configurator);
+        FontPaintConf backgroundPaintConf = _backgroundPaint.gradient(configurator);
+        return _withBackgroundPaintConf(backgroundPaintConf);
+    }
+
+    private FontConf _withBackgroundPaintConf( FontPaintConf backgroundPaintConf ) {
         return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, backgroundPaintConf, _horizontalAlignment, _verticalAlignment);
     }
 

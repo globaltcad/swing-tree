@@ -1,6 +1,7 @@
 package swingtree.style;
 
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
 
 import java.awt.Color;
 import java.awt.Paint;
@@ -19,6 +20,7 @@ import java.util.function.Function;
  */
 final class FontPaintConf
 {
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(FontPaintConf.class);
     private static final FontPaintConf _NONE = new FontPaintConf(null, null, null, null);
 
     public static FontPaintConf none() { return _NONE; }
@@ -84,16 +86,28 @@ final class FontPaintConf
         return of(null, paint, null, null);
     }
 
-    FontPaintConf noise( Function<NoiseConf, NoiseConf> f ) {
-        Objects.requireNonNull(f);
+    FontPaintConf noise( Function<NoiseConf, NoiseConf> noiseConfigurator ) {
+        Objects.requireNonNull(noiseConfigurator);
         NoiseConf noise = _noise == null ? NoiseConf.none() : _noise;
-        return of(null, null, f.apply(noise), null);
+        try {
+            noise = noiseConfigurator.apply(noise);
+            return of(null, null, noise, null);
+        } catch ( Exception e ) {
+            log.error("Failed to apply noise configuration.", e);
+        }
+        return this;
     }
 
-    FontPaintConf gradient( Function<GradientConf, GradientConf> f ) {
-        Objects.requireNonNull(f);
+    FontPaintConf gradient( Function<GradientConf, GradientConf> gradientConfigurator ) {
+        Objects.requireNonNull(gradientConfigurator);
         GradientConf gradient = _gradient == null ? GradientConf.none() : _gradient;
-        return of(null, null, null, f.apply(gradient));
+        try {
+            gradient = gradientConfigurator.apply(gradient);
+            return of(null, null, null, gradient);
+        } catch ( Exception e ) {
+            log.error("Failed to apply gradient configuration.", e);
+        }
+        return this;
     }
 
     @Nullable Paint get( BoxModelConf boxModelConf ) {
