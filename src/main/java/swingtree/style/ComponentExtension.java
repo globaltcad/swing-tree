@@ -366,7 +366,6 @@ public final class ComponentExtension<C extends JComponent>
         if ( callInstaller )
             newStyle = _styleInstaller.applyStyleToComponentState(
                                         _owner, newStyle,
-                                        _styleEngine.getBoxModelConf(),
                                         _styleSource
                                     );
 
@@ -377,6 +376,9 @@ public final class ComponentExtension<C extends JComponent>
         for ( LayerCache layerCache : layerCaches )
             layerCache.validate(currentConf, newConf);
         _styleEngine =  _styleEngine.with(newBoxModelConf, newConf);
+
+        if ( callInstaller )
+            _styleInstaller.installFontStyleTo(_owner, newStyle, _styleEngine.getBoxModelConf());
     }
 
     private void _switchToPaintStep( PaintStep step ) {

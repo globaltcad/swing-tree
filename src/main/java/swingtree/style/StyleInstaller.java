@@ -67,10 +67,9 @@ final class StyleInstaller<C extends JComponent>
     }
 
     StyleConf applyStyleToComponentState(
-        C              owner, // <- The component we want to style.
-        StyleConf      newStyle,
-        BoxModelConf   boxModel,
-        StyleSource<C> styleSource
+        final C              owner, // <- The component we want to style.
+        StyleConf            newStyle,
+        final StyleSource<C> styleSource
     ) {
         final boolean noLayoutStyle           = StyleConf.none().hasEqualLayoutAs(newStyle);
         final boolean noPaddingAndMarginStyle = StyleConf.none().hasEqualMarginAndPaddingAs(newStyle);
@@ -359,7 +358,6 @@ final class StyleInstaller<C extends JComponent>
         _applyIconStyleTo(owner, newStyle);
         _applyLayoutStyleTo(owner, newStyle);
         _applyDimensionalityStyleTo(owner, newStyle);
-        _applyFontStyleTo(owner, newStyle, boxModel);
         _applyPropertiesTo(owner, newStyle);
         _doComboBoxMarginAdjustment(owner, newStyle);
 
@@ -372,6 +370,10 @@ final class StyleInstaller<C extends JComponent>
             _currentBackgroundColor = owner.getBackground();
 
         return newStyle;
+    }
+
+    void installFontStyleTo( C owner, StyleConf styleConf, BoxModelConf boxModel ) {
+        _applyFontStyleTo(owner, styleConf, boxModel);
     }
 
     @SuppressWarnings("ReferenceEquality")
@@ -574,6 +576,8 @@ final class StyleInstaller<C extends JComponent>
     private void _applyFontStyleTo( final C owner, final StyleConf styleConf, final BoxModelConf boxModel )
     {
         final FontConf fontConf = styleConf.font();
+        if ( FontConf.none().equals(fontConf) )
+            return;
 
         if ( owner instanceof JTextComponent ) {
             JTextComponent tc = (JTextComponent) owner;
