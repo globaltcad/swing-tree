@@ -370,7 +370,13 @@ public final class ComponentExtension<C extends JComponent>
                                         _styleSource
                                     );
 
-        _styleEngine = _styleEngine.withNewStyleAndComponent(newStyle, _owner);
+        ComponentConf currentConf = _styleEngine.getComponentConf();
+        LayerCache[] layerCaches = _styleEngine.getLayerCaches();
+        ComponentConf newConf = currentConf.with(newStyle, _owner);
+        BoxModelConf newBoxModelConf = BoxModelConf.of(newConf.style().border(), newConf.baseOutline(), newConf.currentBounds().size());
+        for ( LayerCache layerCache : layerCaches )
+            layerCache.validate(currentConf, newConf);
+        _styleEngine =  _styleEngine.with(newBoxModelConf, newConf);
     }
 
     private void _switchToPaintStep( PaintStep step ) {
