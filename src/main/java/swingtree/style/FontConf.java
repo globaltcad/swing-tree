@@ -877,14 +877,22 @@ public final class FontConf
             attributes.put(TextAttribute.FAMILY, _familyName);
         }
         if ( !_paint.equals(FontPaintConf.none()) ) {
-            Paint paint = _paint.get(boxModel);
-            isChange = isChange || !Objects.equals(paint, currentAttributes.get(TextAttribute.FOREGROUND));
-            attributes.put(TextAttribute.FOREGROUND, paint);
+            try {
+                Paint paint = _paint.get(boxModel);
+                isChange = isChange || !Objects.equals(paint, currentAttributes.get(TextAttribute.FOREGROUND));
+                attributes.put(TextAttribute.FOREGROUND, paint);
+            } catch ( Exception e ) {
+                log.error("Failed to create paint from paint config: "+_paint, e);
+            }
         }
         if ( !_backgroundPaint.equals(FontPaintConf.none()) ) {
-            Paint backgroundPaint = _backgroundPaint.get(boxModel);
-            isChange = isChange || !Objects.equals(backgroundPaint, currentAttributes.get(TextAttribute.BACKGROUND));
-            attributes.put(TextAttribute.BACKGROUND, backgroundPaint);
+            try {
+                Paint backgroundPaint = _backgroundPaint.get(boxModel);
+                isChange = isChange || !Objects.equals(backgroundPaint, currentAttributes.get(TextAttribute.BACKGROUND));
+                attributes.put(TextAttribute.BACKGROUND, backgroundPaint);
+            } catch ( Exception e ) {
+                log.error("Failed to create paint from paint config: "+_backgroundPaint, e);
+            }
         }
         if ( isChange )
             return Optional.of(existingFont.deriveFont(attributes));
