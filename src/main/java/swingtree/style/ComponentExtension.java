@@ -344,7 +344,7 @@ public final class ComponentExtension<C extends JComponent>
         _installStyle( _applyStyleToComponentState(gatherStyle(), false) );
     }
 
-    private StyleConf _applyStyleToComponentState(StyleConf newStyle, boolean force )
+    private StyleConf _applyStyleToComponentState( StyleConf newStyle, boolean force )
     {
         Objects.requireNonNull(newStyle);
 
@@ -361,7 +361,7 @@ public final class ComponentExtension<C extends JComponent>
                 return newStyle;
         }
 
-        return _styleInstaller.applyStyleToComponentState(_owner, newStyle, _styleSource);
+        return _styleInstaller.applyStyleToComponentState(_owner, newStyle, _styleEngine.getBoxModelConf(), _styleSource);
     }
 
     private void _installStyle( StyleConf styleConf) {

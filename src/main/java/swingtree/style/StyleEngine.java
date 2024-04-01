@@ -51,6 +51,7 @@ final class StyleEngine
 
     ComponentConf getComponentConf() { return _componentConf; }
 
+    BoxModelConf getBoxModelConf() { return _boxModelConf; }
 
     void paintClippedTo( UI.ComponentArea area, Graphics g, Runnable painter ) {
         Shape oldClip = g.getClip();

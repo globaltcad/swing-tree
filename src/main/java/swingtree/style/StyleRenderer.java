@@ -628,7 +628,7 @@ final class StyleRenderer
         }
     }
 
-    private static @Nullable Paint _createGradientPaint(
+    static @Nullable Paint _createGradientPaint(
         BoxModelConf boxModel,
         GradientConf gradient
     ) {
@@ -761,7 +761,7 @@ final class StyleRenderer
         g2d.fill(areaToFill);
     }
 
-    private static Paint _createNoisePaint(
+    static Paint _createNoisePaint(
         final BoxModelConf   boxModel,
         final NoiseConf      noise
     ) {
@@ -1298,7 +1298,7 @@ final class StyleRenderer
         final Offset               offset            = text.offset();
 
         Font font = Optional.ofNullable(initialFont).orElse(new Font(Font.DIALOG, Font.PLAIN, UI.scale(12)));
-        font = text.fontConf().createDerivedFrom(font).orElse(font);
+        font = text.fontConf().createDerivedFrom(font, boxModel).orElse(font);
         g2d.setFont(font);
         FontMetrics fm = g2d.getFontMetrics(font);
         Rectangle2D rect = fm.getStringBounds(textToRender, g2d);

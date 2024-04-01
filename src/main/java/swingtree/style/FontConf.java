@@ -175,8 +175,8 @@ public final class FontConf
                                                         null,  // is underlined
                                                         null,  // is strike through
                                                         null,  // transform
-                                                        null,  // paint
-                                                        null,  // background paint
+                                                        FontPaintConf.none(),  // paint
+                                                        FontPaintConf.none(),  // background paint
                                                         UI.HorizontalAlignment.UNDEFINED,  // horizontal alignment
                                                         UI.VerticalAlignment.UNDEFINED   // vertical alignment
                                                     );
@@ -193,8 +193,8 @@ public final class FontConf
         @Nullable Boolean          isUnderline,
         @Nullable Boolean          isStrike,
         @Nullable AffineTransform  transform,
-        @Nullable Paint            paint,
-        @Nullable Paint            backgroundPaint,
+        FontPaintConf              paint,
+        FontPaintConf              backgroundPaint,
         UI.HorizontalAlignment     horizontalAlignment,
         UI.VerticalAlignment       verticalAlignment
     ) {
@@ -208,8 +208,8 @@ public final class FontConf
             isUnderline == null &&
             isStrike == null &&
             transform == null &&
-            paint == null &&
-            backgroundPaint == null &&
+            paint.equals(FontPaintConf.none()) &&
+            backgroundPaint.equals(FontPaintConf.none()) &&
             horizontalAlignment == _NONE._horizontalAlignment &&
             verticalAlignment == _NONE._verticalAlignment
         )
@@ -240,9 +240,9 @@ public final class FontConf
     private final @Nullable Color           _selectionColor; // Only relevant for text components with selection support.
     private final @Nullable Boolean         _isUnderlined;
     private final @Nullable Boolean         _isStrike;
-    private final @Nullable Paint           _paint;
-    private final @Nullable Paint           _backgroundPaint;
     private final @Nullable AffineTransform _transform;
+    private final FontPaintConf             _paint;
+    private final FontPaintConf             _backgroundPaint;
     private final UI.HorizontalAlignment    _horizontalAlignment;
     private final UI.VerticalAlignment      _verticalAlignment;
 
@@ -257,8 +257,8 @@ public final class FontConf
         @Nullable Boolean         isUnderline,
         @Nullable Boolean         isStrike,
         @Nullable AffineTransform transform,
-        @Nullable Paint           paint,
-        @Nullable Paint           backgroundPaint,
+        FontPaintConf             paint,
+        FontPaintConf             backgroundPaint,
         UI.HorizontalAlignment    horizontalAlignment,
         UI.VerticalAlignment      verticalAlignment
     ) {
@@ -293,9 +293,17 @@ public final class FontConf
 
     Optional<AffineTransform> transform() { return Optional.ofNullable(_transform); }
 
-    Optional<Paint> paint() { return Optional.ofNullable(_paint); }
+    Optional<Paint> paint() {
+        if ( FontPaintConf.none().equals(_paint) )
+            return Optional.empty();
+        return Optional.ofNullable(_paint.get(BoxModelConf.none()));
+    }
 
-    Optional<Paint> backgroundPaint() { return Optional.ofNullable(_backgroundPaint); }
+    Optional<Paint> backgroundPaint() {
+        if ( FontPaintConf.none().equals(_backgroundPaint) )
+            return Optional.empty();
+        return Optional.ofNullable(_backgroundPaint.get(BoxModelConf.none()));
+    }
 
     UI.HorizontalAlignment horizontalAlignment() { return _horizontalAlignment; }
 
@@ -405,7 +413,9 @@ public final class FontConf
         if ( Objects.equals(color, _paint) )
             return this;
 
-        return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _selectionColor, _isUnderlined, _isStrike,  _transform, color, _backgroundPaint, _horizontalAlignment, _verticalAlignment);
+        FontPaintConf paintConf = FontPaintConf.of(color, null, null, null);
+
+        return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _selectionColor, _isUnderlined, _isStrike,  _transform, paintConf, _backgroundPaint, _horizontalAlignment, _verticalAlignment);
     }
 
     /**
@@ -445,7 +455,10 @@ public final class FontConf
             backgroundColor = null;
         if ( Objects.equals(backgroundColor, _backgroundPaint) )
             return this;
-        return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, backgroundColor, _horizontalAlignment, _verticalAlignment);
+
+        FontPaintConf backgroundPaintConf = FontPaintConf.of(backgroundColor, null, null, null);
+
+        return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, backgroundPaintConf, _horizontalAlignment, _verticalAlignment);
     }
 
     /**
@@ -561,7 +574,8 @@ public final class FontConf
      * @return A new font style with the specified paint.
      */
     public FontConf paint( @Nullable Paint paint ) {
-        return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _selectionColor, _isUnderlined, _isStrike,  _transform, paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);
+        FontPaintConf paintConf = FontPaintConf.of(null, paint, null, null);
+        return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _selectionColor, _isUnderlined, _isStrike,  _transform, paintConf, _backgroundPaint, _horizontalAlignment, _verticalAlignment);
     }
 
     /**
@@ -573,7 +587,8 @@ public final class FontConf
      * @return A new font style with the specified background paint.
      */
     public FontConf backgroundPaint( @Nullable Paint backgroundPaint ) {
-        return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, backgroundPaint, _horizontalAlignment, _verticalAlignment);
+        FontPaintConf backgroundPaintConf = FontPaintConf.of(null, backgroundPaint, null, null);
+        return FontConf.of(_familyName, _size, _posture, _weight, _spacing, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, backgroundPaintConf, _horizontalAlignment, _verticalAlignment);
     }
 
     /**
@@ -688,18 +703,24 @@ public final class FontConf
             log.debug("Failed to fetch TextAttribute.TRANSFORM in font attributes '" + attributeMap + "' of font '" + font + "'", e);
         }
 
-        Paint paint = _paint;
+        FontPaintConf paint = _paint;
         try {
+            Paint found = null;
             if (attributeMap.containsKey(TextAttribute.FOREGROUND))
-                paint = (Paint) attributeMap.get(TextAttribute.FOREGROUND);
+                found = (Paint) attributeMap.get(TextAttribute.FOREGROUND);
+            if (found != null)
+                paint = FontPaintConf.of(null, found, null, null);
         } catch (Exception e) {
             log.warn("Failed to extract font attributes from font: " + font, e);
         }
 
-        Paint backgroundPaint = _backgroundPaint;
+        FontPaintConf backgroundPaint = _backgroundPaint;
         try {
+            Paint found = null;
             if (attributeMap.containsKey(TextAttribute.BACKGROUND))
-                backgroundPaint = (Paint) attributeMap.get(TextAttribute.BACKGROUND);
+                found = (Paint) attributeMap.get(TextAttribute.BACKGROUND);
+            if (found != null)
+                backgroundPaint = FontPaintConf.of(null, found, null, null);
         } catch (Exception e) {
             log.warn("Failed to extract font attributes from font: " + font, e);
         }
@@ -722,7 +743,7 @@ public final class FontConf
                 );
     }
 
-    Optional<Font> createDerivedFrom( Font existingFont )
+    Optional<Font> createDerivedFrom( Font existingFont, BoxModelConf boxModel )
     {
         if ( this.equals(_NONE) )
             return Optional.empty();
@@ -767,13 +788,15 @@ public final class FontConf
             isChange = isChange || !Objects.equals(_familyName, currentAttributes.get(TextAttribute.FAMILY));
             attributes.put(TextAttribute.FAMILY, _familyName);
         }
-        if ( _paint != null ) {
-            isChange = isChange || !Objects.equals(_paint, currentAttributes.get(TextAttribute.FOREGROUND));
-            attributes.put(TextAttribute.FOREGROUND, _paint);
+        if ( !_paint.equals(FontPaintConf.none()) ) {
+            Paint paint = _paint.get(boxModel);
+            isChange = isChange || !Objects.equals(paint, currentAttributes.get(TextAttribute.FOREGROUND));
+            attributes.put(TextAttribute.FOREGROUND, paint);
         }
-        if ( _backgroundPaint != null ) {
-            isChange = isChange || !Objects.equals(_backgroundPaint, currentAttributes.get(TextAttribute.BACKGROUND));
-            attributes.put(TextAttribute.BACKGROUND, _backgroundPaint);
+        if ( !_backgroundPaint.equals(FontPaintConf.none()) ) {
+            Paint backgroundPaint = _backgroundPaint.get(boxModel);
+            isChange = isChange || !Objects.equals(backgroundPaint, currentAttributes.get(TextAttribute.BACKGROUND));
+            attributes.put(TextAttribute.BACKGROUND, backgroundPaint);
         }
         if ( isChange )
             return Optional.of(existingFont.deriveFont(attributes));
@@ -879,8 +902,8 @@ public final class FontConf
                     "strikeThrough="       + strike                                  + ", " +
                     "selectionColor="      + StyleUtil.toString(_selectionColor)     + ", " +
                     "transform="           + transform                               + ", " +
-                    "paint="               + StyleUtil.toString(_paint)              + ", " +
-                    "backgroundPaint="     + StyleUtil.toString(_backgroundPaint)    + ", " +
+                    "paint="               + _paint                                  + ", " +
+                    "backgroundPaint="     + _backgroundPaint                        + ", " +
                     "horizontalAlignment=" + horizontalAlign                         + ", " +
                     "verticalAlignment="   + verticalAlign                           +
                 "]";

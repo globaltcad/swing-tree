@@ -69,6 +69,7 @@ final class StyleInstaller<C extends JComponent>
     StyleConf applyStyleToComponentState(
         C              owner, // <- The component we want to style.
         StyleConf      newStyle,
+        BoxModelConf   boxModel,
         StyleSource<C> styleSource
     ) {
         final boolean noLayoutStyle           = StyleConf.none().hasEqualLayoutAs(newStyle);
@@ -358,7 +359,7 @@ final class StyleInstaller<C extends JComponent>
         _applyIconStyleTo(owner, newStyle);
         _applyLayoutStyleTo(owner, newStyle);
         _applyDimensionalityStyleTo(owner, newStyle);
-        _applyFontStyleTo(owner, newStyle);
+        _applyFontStyleTo(owner, newStyle, boxModel);
         _applyPropertiesTo(owner, newStyle);
         _doComboBoxMarginAdjustment(owner, newStyle);
 
@@ -570,7 +571,7 @@ final class StyleInstaller<C extends JComponent>
         }
     }
 
-    private void _applyFontStyleTo( final C owner, final StyleConf styleConf )
+    private void _applyFontStyleTo( final C owner, final StyleConf styleConf, final BoxModelConf boxModel )
     {
         final FontConf fontConf = styleConf.font();
 
@@ -581,7 +582,7 @@ final class StyleInstaller<C extends JComponent>
         }
 
         fontConf
-             .createDerivedFrom(owner.getFont())
+             .createDerivedFrom(owner.getFont(), boxModel)
              .ifPresent( newFont -> {
                     if ( !newFont.equals(owner.getFont()) )
                         owner.setFont( newFont );

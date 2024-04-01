@@ -194,8 +194,8 @@ class Styles_Spec extends Specification
                                             "strikeThrough=true, " +
                                             "selectionColor=rgba(0,255,255,255), " +
                                             "transform=?, " +
-                                            "paint=rgba(255,0,255,255), " +
-                                            "backgroundPaint=?, " +
+                                            "paint=FontPaintConf[rgba(255,0,255,255)], " +
+                                            "backgroundPaint=FontPaintConf[NONE], " +
                                             "horizontalAlignment=?, " +
                                             "verticalAlignment=?" +
                                         "], " +
@@ -260,8 +260,8 @@ class Styles_Spec extends Specification
                                             "strikeThrough=?, " +
                                             "selectionColor=?, " +
                                             "transform=$transform, " +
-                                            "paint=$paint2, " +
-                                            "backgroundPaint=$paint1, " +
+                                            "paint=FontPaintConf[$paint2], " +
+                                            "backgroundPaint=FontPaintConf[$paint1], " +
                                             "horizontalAlignment=CENTER, " +
                                             "verticalAlignment=CENTER" +
                                         "], " +
