@@ -2361,7 +2361,93 @@ class Individual_Component_Styling_Spec extends Specification
 
         where :
             uiScale << [1]
+    }
 
+    def 'Configure a custom paint for the font of your components.'(
+        float uiScale
+    ) {
+        reportInfo """
+            The style API allows you to configure custom paint styles for the font of your components.
+            Usually the paint of a font is used to fill out the bounds of the characters.
+            It may be a gradient, noise function or a custom `java.awt.Paint` implementation.
+            This example demonstrates different font paint confgurations.
+
+            ${Utility.linkSnapshot('components/font-style-with-custom-paint.png')}
+
+            As you can see, you can easily have a font style with horizontal
+            and vertical gradient paint effect as well as noise based paint.
+        """
+        given : """
+            Before we create the UI declaration we first need to 
+            set a scaling factor to simulate a platform with higher DPI.
+            So when your screen has a higher pixel density then this factor
+            is used by SwingTree to ensure that the UI is upscaled accordingly! 
+            Please note that the line below only exists for testing purposes, 
+            SwingTree will determine a suitable 
+            scaling factor for the current system automatically for you,
+            so you do not have to specify this factor manually. 
+        """
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'A UI declaration consisting of a `JBox` with 3 components:'
+            var ui =
+                    UI.box("fill, ins 3, wrap 2, gap 3", "[grow][grow]")
+                    .add("span, center",
+                        UI.label("I am a Gradient")
+                        .withStyle( it -> it
+                            .padding(3).borderRadius(12)
+                            .componentFont(f->f
+                                .size(18)
+                                .family("Alloy Ink")
+                                .gradient(grad -> grad
+                                    .colors(Color.BLACK, Color.GREEN, Color.BLUE, Color.MAGENTA)
+                                    .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
+                                    .span(UI.Span.BOTTOM_TO_TOP)
+                                    .type(UI.GradientType.LINEAR)
+                                )
+                            )
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                        )
+                    )
+                    .add(
+                        UI.toggleButton("I am a Rainbow")
+                        .withStyle( it -> it
+                            .padding(3).borderRadius(12)
+                            .componentFont(f->f
+                                .size(18).weight(3f)
+                                .family("Ubuntu")
+                                .gradient(grad -> grad
+                                    .colors(Color.BLACK, Color.RED, Color.ORANGE, Color.YELLOW, Color.GREEN, Color.BLUE, Color.MAGENTA)
+                                    .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
+                                    .span(UI.Span.LEFT_TO_RIGHT)
+                                    .type(UI.GradientType.LINEAR)
+                                )
+                            )
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                        )
+                    )
+                    .add(
+                        UI.button("I am Noisy")
+                        .withStyle( it -> it
+                            .padding(3).borderRadius(12)
+                            .componentFont(f->f
+                                .size(18).weight(3f)
+                                .family("Ubuntu")
+                                .noise(n->n
+                                    .colors("black", "blue", "dark green", "yellow")
+                                    .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
+                                    .function(UI.NoiseType.HAZE)
+                                    .scale(0.5)
+                                )
+                            )
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                        )
+                    )
+
+        expect : 'The image is as expected.'
+            Utility.similarityBetween(ui.get(JBox), "components/font-style-with-custom-paint.png", 99.5) > 99.5
+
+        where :
+            uiScale << [2]
     }
 
     def 'Use the style API to design custom tabbed panes from scratch.'(
