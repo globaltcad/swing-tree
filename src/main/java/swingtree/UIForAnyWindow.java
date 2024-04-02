@@ -20,6 +20,8 @@ import java.util.function.Consumer;
  */
 public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Window> extends UIForAnything<I,W,Component>
 {
+	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UIForAnyWindow.class);
+
 	/**
 	 *  Adds a title to the window. <br>
 	 *  Note that the way this is displayed depends on the window type and the
@@ -52,6 +54,32 @@ public abstract class UIForAnyWindow<I extends UIForAnyWindow<I,W>, W extends Wi
 			   ._with( thisWindow -> {
 			       _setTitleOf( thisWindow, title.orElseThrow() );
 			   })
+			   ._this();
+	}
+
+	/**
+	 *  Sets the {@link UI.OnWindowClose} operation for the window. <br>
+	 *  This translates to {@link JFrame#setDefaultCloseOperation(int)} or
+	 *  {@link JDialog#setDefaultCloseOperation(int)} depending on the window type.
+	 *  The following operations are supported:
+	 *  <ul>
+	 *      <li>{@link UI.OnWindowClose#DO_NOTHING} - Do nothing when the window is closed.</li>
+	 *      <li>{@link UI.OnWindowClose#HIDE} - Hide the window when it is closed.</li>
+	 *      <li>{@link UI.OnWindowClose#DISPOSE} - Dispose the window when it is closed.</li>
+	 *  </ul>
+	 * @param onClose The operation to be executed when the window is closed.
+	 * @return This declarative builder instance to enable method chaining.
+	 */
+	public final I withOnCloseOperation(UI.OnWindowClose onClose ) {
+		NullUtil.nullArgCheck(onClose, "onClose", UI.OnWindowClose.class);
+		return _with( thisWindow -> {
+					if ( thisWindow instanceof JFrame )
+						((JFrame)thisWindow).setDefaultCloseOperation(onClose.forSwing());
+					else if ( thisWindow instanceof JDialog )
+						((JDialog)thisWindow).setDefaultCloseOperation(onClose.forSwing());
+					else
+						log.warn("Cannot set close operation on window of type: {}", thisWindow.getClass().getName());
+		       })
 			   ._this();
 	}
 

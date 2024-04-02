@@ -617,6 +617,38 @@ public final class UI extends UIFactoryMethods
     }
 
     /**
+     *  Defines a set of close operations for a {@link JDialog} or {@link JFrame} windows.
+     *  The following list describes what each enum instance represents:
+     *  <ul>
+     *      <li>{@link OnWindowClose#DISPOSE} -
+     *      The window is disposed when it is closed.
+     *      </li>
+     *      <li>{@link OnWindowClose#HIDE} -
+     *      The window is hidden when it is closed.
+     *      It will not be disposed and can be shown again.
+     *      </li>
+     *      <li>{@link OnWindowClose#DO_NOTHING} -
+     *      The window does nothing when it is closed.
+     *      </li>
+     *  </ul>
+     *  See {@link UIForAnyWindow#withOnCloseOperation(OnWindowClose)} for more
+     *  information about the usage of this enum.
+     */
+    public enum OnWindowClose implements UIEnum<OnWindowClose>
+    {
+        DISPOSE, HIDE, DO_NOTHING;
+
+        public int forSwing() {
+            switch ( this ) {
+                case DISPOSE:     return WindowConstants.DISPOSE_ON_CLOSE;
+                case HIDE:        return WindowConstants.HIDE_ON_CLOSE;
+                case DO_NOTHING:  return WindowConstants.DO_NOTHING_ON_CLOSE;
+            }
+            throw new RuntimeException();
+        }
+    }
+
+    /**
      *  Used to define how a layout manager (typically the {@link BoxLayout})
      *  will lay out components along the given axis. <br>
      *  Create a simple box layout for your components
