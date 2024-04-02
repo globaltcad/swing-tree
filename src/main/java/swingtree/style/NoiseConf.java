@@ -167,6 +167,8 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
      *  Accepts the {@link NoiseFunction}, which takes a coordinate and returns a value
      *  between 0 and 1. <br>
      *  The noise function is used to define the noise gradient.
+     *  <p>
+     *  <b>Take a look at {@link UI.NoiseType} for a rich set of predefined noise functions.</b>
      *
      * @param function The noise function mapping the translated, scaled and rotated virtual space
      *                 to a gradient value of a pixel in the color space / view space of the screen.
