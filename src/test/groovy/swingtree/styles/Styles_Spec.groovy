@@ -824,7 +824,18 @@ class Styles_Spec extends Specification
 
     def 'The style API allows you to configure a custom paint for a component font.'()
     {
-        given :'A UI declaration consisting of a `JBox` with 3 components:'
+        reportInfo """
+            Usually the font of a component is a solid color which simply fills
+            out the characters of the text. But the `java.awt.Font` class also
+            allows for a custom paint to be used to fill out the characters.
+            
+            SwingTree allows you to configure this font paint
+            through the style API.
+            
+            In this example we will configure a linear gradient as
+            the paint for the font of a `JLabel` component.
+        """
+        given :'A UI declaration consisting of a `JLabel` with a custom gradient paint for the font:'
             var ui =
                         UI.label("I am a Gradient")
                         .withStyle( it -> it
@@ -875,5 +886,67 @@ class Styles_Spec extends Specification
             grad1.getColors() == [ Color.RED, Color.GREEN, Color.BLUE ] as Color[]
             grad2.getColor1() == Color.CYAN
             grad2.getColor2() == Color.MAGENTA
+    }
+
+    def 'The style API allows you to configure a custom noise paint for a component font.'()
+    {
+        reportInfo """
+            Usually the font of a component is a solid color which simply fills
+            out the characters of the text. But the `java.awt.Font` class also
+            allows for a custom paint to be used to fill out the characters.
+            
+            SwingTree allows you to configure this font paint
+            through the style API.
+            
+            In this example we will configure a noise gradient as
+            the paint for the font of a `JLabel` component.
+            The noise gradient is a custom paint that uses a noise function
+            to generate values used for interpolation between colors.
+        """
+        given :'A UI declaration consisting of a `JLabel` with a custom noise paint for the font:'
+            var ui =
+                        UI.label("I am a Gradient")
+                        .withStyle( it -> it
+                            .size(200, 50)
+                            .padding(3).borderRadius(12)
+                            .componentFont(f->f
+                                .size(18)
+                                .family("Arial")
+                                .noise(grad -> grad
+                                    .colors(Color.RED, Color.GREEN, Color.BLUE)
+                                    .boundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)
+                                    .function(UI.NoiseType.RETRO)
+                                )
+                                .backgroundNoise( grad -> grad
+                                    .colors(Color.CYAN, Color.MAGENTA)
+                                    .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
+                                    .offset(-6, -6)
+                                    .function(UI.NoiseType.MANDELBROT)
+                                    .scale(3, 4)
+                                )
+                            )
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                        )
+        when : 'We create the declared `JLabel` component using the `get` method...'
+            var label = ui.get(JLabel)
+        then : 'The label will have a font with the expected size and family.'
+            label.getFont().getSize() == 18
+            label.getFont().getFamily() == "Arial"
+        when : 'We extract the foreground and background paint of the font...'
+            var paint           = label.getFont().getAttributes().get(TextAttribute.FOREGROUND)
+            var backgroundPaint = label.getFont().getAttributes().get(TextAttribute.BACKGROUND)
+        then : """
+            We find tha both paint objects are noise paints.
+        """
+            paint instanceof swingtree.style.NoiseGradientPaint
+            backgroundPaint instanceof swingtree.style.NoiseGradientPaint
+        and : 'They have the expected colors and noise functions:'
+            paint.getColors() == [ Color.RED, Color.GREEN, Color.BLUE ]
+            paint.getNoiseFunction() == UI.NoiseType.RETRO
+            backgroundPaint.getColors() == [ Color.CYAN, Color.MAGENTA ]
+            backgroundPaint.getNoiseFunction() == UI.NoiseType.MANDELBROT
+        and : 'They also both have the expected scale:'
+            paint.getScale() == new Point2D.Float(1, 1)
+            backgroundPaint.getScale() == new Point2D.Float(3, 4)
     }
 }

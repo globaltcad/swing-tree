@@ -12,8 +12,11 @@ import java.awt.image.ColorModel;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 
 final class NoiseGradientPaint implements Paint
@@ -142,6 +145,26 @@ final class NoiseGradientPaint implements Paint
             this.blueStepLookup[i]  = ((this.colors[i + 1].getBlue()  - this.colors[i].getBlue()) * INT_TO_FLOAT_CONST)  / (localFractions[i + 1] - localFractions[i]);
             this.alphaStepLookup[i] = ((this.colors[i + 1].getAlpha() - this.colors[i].getAlpha()) * INT_TO_FLOAT_CONST) / (localFractions[i + 1] - localFractions[i]);
         }
+    }
+
+    public Point2D getCenter() {
+        return center;
+    }
+
+    public Point2D getScale() {
+        return new Point2D.Float(scaleX, scaleY);
+    }
+
+    public float getRotation() {
+        return rotation;
+    }
+
+    public NoiseFunction getNoiseFunction() {
+        return noiseFunction;
+    }
+
+    public List<Color> getColors() {
+        return Stream.of(colors).collect(Collectors.toList());
     }
 
     private static Color getColorFromFraction(
