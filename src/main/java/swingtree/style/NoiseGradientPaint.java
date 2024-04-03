@@ -11,6 +11,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.ColorModel;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
@@ -231,6 +232,45 @@ final class NoiseGradientPaint implements Paint
     @Override
     public int getTransparency() {
         return Transparency.TRANSLUCENT;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 97 * hash + Objects.hashCode(this.center);
+        hash = 97 * hash + Float.floatToIntBits(this.scaleX);
+        hash = 97 * hash + Float.floatToIntBits(this.scaleY);
+        hash = 97 * hash + Float.floatToIntBits(this.rotation);
+        hash = 97 * hash + Objects.hashCode(this.noiseFunction);
+        hash = 97 * hash + Arrays.hashCode(this.localFractions);
+        hash = 97 * hash + Arrays.deepHashCode(this.colors);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        final NoiseGradientPaint other = (NoiseGradientPaint) obj;
+        if (Float.floatToIntBits(this.scaleX) != Float.floatToIntBits(other.scaleX))
+            return false;
+        if (Float.floatToIntBits(this.scaleY) != Float.floatToIntBits(other.scaleY))
+            return false;
+        if (Float.floatToIntBits(this.rotation) != Float.floatToIntBits(other.rotation))
+            return false;
+        if (!Objects.equals(this.center, other.center))
+            return false;
+        if (!Objects.equals(this.noiseFunction, other.noiseFunction))
+            return false;
+        if (!Objects.deepEquals(this.localFractions, other.localFractions))
+            return false;
+        if (!Objects.deepEquals(this.colors, other.colors))
+            return false;
+        return true;
     }
 
     private final class ConicalGradientPaintContext implements PaintContext
