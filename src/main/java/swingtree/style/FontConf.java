@@ -48,7 +48,7 @@ import java.util.function.Function;
  *              which is a value between 0 and 2.
  *          </p>
  *          <p>
- *              The weight of the font can be specified using the {@link #weight(float)} method.
+ *              The weight of the font can be specified using the {@link #weight(double)} method.
  *          </p>
  *      </li>
  *      <li><b>Spacing (Tracking)</b>
@@ -351,8 +351,8 @@ public final class FontConf
      * @param fontWeight The weight to use for the {@link Font#isBold()} property.
      * @return A new font style with the specified weight.
      */
-    public FontConf weight( float fontWeight ) {
-        return FontConf.of(_familyName, _size, _posture, fontWeight, _spacing, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);
+    public FontConf weight( double fontWeight ) {
+        return FontConf.of(_familyName, _size, _posture, (float) fontWeight, _spacing, _selectionColor, _isUnderlined, _isStrike,  _transform, _paint, _backgroundPaint, _horizontalAlignment, _verticalAlignment);
     }
 
     /**
