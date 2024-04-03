@@ -31,17 +31,17 @@ final class NoiseGradientPaint implements Paint
         private final Point2D center;
         private final AffineTransform transform;
 
-        private final ConicalGradientPaintContext cachedContext;
+        private final NoiseGradientPaintContext cachedContext;
 
 
-        private CachedContext(Rectangle bounds, Point2D center, AffineTransform transform, ConicalGradientPaintContext context) {
+        private CachedContext(Rectangle bounds, Point2D center, AffineTransform transform, NoiseGradientPaintContext context) {
             this.bounds = bounds;
             this.center = center;
             this.transform = transform;
             cachedContext = context;
         }
 
-        private @Nullable ConicalGradientPaintContext get(Rectangle bounds, Point2D center, AffineTransform transform) {
+        private @Nullable NoiseGradientPaint.NoiseGradientPaintContext get(Rectangle bounds, Point2D center, AffineTransform transform) {
             if (this.bounds.equals(bounds) && this.center.equals(center) && this.transform.equals(transform))
                 return cachedContext;
             else
@@ -218,12 +218,12 @@ final class NoiseGradientPaint implements Paint
     ) {
 
         if (cached != null) {
-            ConicalGradientPaintContext c = cached.get(DEVICE_BOUNDS, center, TRANSFORM);
+            NoiseGradientPaintContext c = cached.get(DEVICE_BOUNDS, center, TRANSFORM);
             if (c != null)
                 return c;
         }
 
-        ConicalGradientPaintContext context = new ConicalGradientPaintContext(center, TRANSFORM);
+        NoiseGradientPaintContext context = new NoiseGradientPaintContext(center, TRANSFORM);
         cached = new CachedContext(DEVICE_BOUNDS, center, TRANSFORM, context);
 
         return context;
@@ -273,12 +273,12 @@ final class NoiseGradientPaint implements Paint
         return true;
     }
 
-    private final class ConicalGradientPaintContext implements PaintContext
+    private final class NoiseGradientPaintContext implements PaintContext
     {
         final private Point2D center;
         private final HashMap<Long, WritableRaster> cachedRasters;
 
-        public ConicalGradientPaintContext(final Point2D center, AffineTransform transform) {
+        public NoiseGradientPaintContext(final Point2D center, AffineTransform transform) {
             this.cachedRasters = new HashMap<>();
             try {
                 this.center = transform.transform(center, null);  //user to device
