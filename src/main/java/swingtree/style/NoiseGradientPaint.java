@@ -41,7 +41,7 @@ final class NoiseGradientPaint implements Paint
             cachedContext = context;
         }
 
-        private @Nullable NoiseGradientPaint.NoiseGradientPaintContext get(Rectangle bounds, Point2D center, AffineTransform transform) {
+        private NoiseGradientPaint.@Nullable NoiseGradientPaintContext get(Rectangle bounds, Point2D center, AffineTransform transform) {
             if (this.bounds.equals(bounds) && this.center.equals(center) && this.transform.equals(transform))
                 return cachedContext;
             else
