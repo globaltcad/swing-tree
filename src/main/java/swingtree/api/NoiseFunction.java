@@ -11,8 +11,9 @@ import swingtree.style.NoiseConf;
  * Conceptually speaking, this maps the translated, scaled and rotated virtual space
  * to a gradient value of a pixel in the color space / view space of the screen.
  * <p>
- * See {@link swingtree.UI.NoiseType} for the different types of
- * default noise function implementations.
+ * <b>Please take a look at {@link swingtree.UI.NoiseType} for a rich set of
+ * predefined noise function implementations.<br>
+ * There you will most likely find a noise function that fits your needs.</b>
  */
 public interface NoiseFunction
 {

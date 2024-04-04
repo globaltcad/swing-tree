@@ -175,14 +175,14 @@ public final class GradientConf implements Simplifiable<GradientConf>
         rotation = ( (((rotation+180f) % 360f + 360f) % 360f) - 180f );
 
         GradientConf none = none();
-        if ( span == none._span &&
+        if ( span       == none._span &&
              type       == none._type       &&
-             colors     == none._colors     &&
-             offset     == none._offset     &&
-             size       == none._size       &&
+             Arrays.equals(colors, none._colors) &&
+             Objects.equals(offset, none._offset) &&
+             size       == none._size &&
              area       == none._area       &&
              boundary   == none._boundary   &&
-             focus      == none._focus      &&
+             Objects.equals(focus, none._focus) &&
              rotation   == none._rotation   &&
              Arrays.equals(fractions, none._fractions) &&
              cycle      == none._cycle
@@ -556,14 +556,14 @@ public final class GradientConf implements Simplifiable<GradientConf>
         if ( this == o ) return true;
         if ( !(o instanceof GradientConf) ) return false;
         GradientConf that = (GradientConf) o;
-        return _span == that._span &&
+        return _span       == that._span &&
                _type       == that._type             &&
                Arrays.equals(_colors, that._colors)  &&
                Objects.equals(_offset, that._offset) &&
                _size       == that._size             &&
                _area       == that._area             &&
                _boundary   == that._boundary         &&
-               _focus      == that._focus            &&
+               Objects.equals(_focus, that._focus)   &&
                _rotation   == that._rotation         &&
                Arrays.equals(_fractions, that._fractions) &&
                _cycle      == that._cycle;
@@ -587,6 +587,7 @@ public final class GradientConf implements Simplifiable<GradientConf>
     }
 
     @Override
+    @SuppressWarnings("ReferenceEquality")
     public GradientConf simplified() {
         if ( this == _NONE )
             return _NONE;
@@ -615,13 +616,13 @@ public final class GradientConf implements Simplifiable<GradientConf>
             Color[] realColors = new Color[numberOfRealColors];
             int index = 0;
             for ( Color color : _colors )
-                if ( color != UI.Color.UNDEFINED)
+                if ( color != UI.Color.UNDEFINED )
                     realColors[index++] = color;
 
             return of(_span, _type, realColors, _offset, _size, _area, _boundary, focus, rotation, _fractions, _cycle);
         }
 
-        if ( focus != _focus )
+        if ( !focus.equals(_focus) )
             return of(_span, _type, _colors, _offset, _size, _area, _boundary, focus, rotation, _fractions, _cycle);
 
         return this;

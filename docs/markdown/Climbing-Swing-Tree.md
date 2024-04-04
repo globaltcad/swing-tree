@@ -409,10 +409,10 @@ Which will look like this:
 Here you can see that we can use the `withStyle` method
 to **supply a `Styler` lambda giving us access to the
 style API of a Swing component**.
-The style API consists of a `StyleDelegate` which 
+The style API consists of a `ComponentStyleDelegate` which 
 in the above example is the `it` parameter.
-The `StyleDelegate` exposes both the Swing component
-and the current `Style` configuration object.
+The `ComponentStyleDelegate` exposes both the Swing component
+and the current `StyleConf` configuration object.
 
 You can configure all kinds of style properties like
 **background** and **foreground colors, border colors, border thickness,
@@ -422,9 +422,9 @@ All of these styles will of course be rendered
 with DPI awareness and HiDPI support out of the box!
 
 This API is functional and immutable,
-meaning that the methods on the `StyleDelegate` object
-will return a new `StyleDelegate` object with the corresponding
-`Style` properties changed.
+meaning that the methods on the `ComponentStyleDelegate` object
+will return a new `ComponentStyleDelegate` object with the corresponding
+`StyleConf` properties changed.
 This makes it easy to compose `Styler` lambdas
 to combine different styles for different components.
 
@@ -432,9 +432,15 @@ Also note that all `Styler` lambdas are executed eagerly
 every time a Swing component is painted.
 So feel free to use any kind of logic in your `Styler` lambdas
 to dynamically change the style of a component based on its state.
-The `StyleDelegate` also exposes the current component through the `component()` method,
+The `ComponentStyleDelegate` also exposes the current component through the `component()` method,
 so you can use it to query the component's state and properties
 (like for example checking if a toggle button is selected or not and then styling according to that information).
+
+The SwingTree style API has much more to offer than what could be covered in this tutorial.
+If you want to dive deeper into the SwingTree style API,
+you may also want to check out the following pieces of documentation:
+
+- [Font Styling](./Font-Styling.md)
 
 ## Harvesting Fruit ##
 

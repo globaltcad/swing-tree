@@ -577,7 +577,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  This is the inverse of {@link #makeNonOpaque()}.
      *
      *  @return This very instance, which enables builder-style method chaining.
+     *  @deprecated SwingTree considers the opaqueness a property which emerges from the
+     *              style configuration of the component. Therefore, it is not recommended
+     *              to set the opaqueness directly. Instead, use the {@link #withBackground(Color)}
+     *              method to set the style of the component so that it becomes opaque.
      */
+    @Deprecated
     public final I makeOpaque() {
         return _with( c -> c.setOpaque( true ) )._this();
     }
@@ -587,7 +592,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  This is the inverse of {@link #makeOpaque()}.
      *
      *  @return This very instance, which enables builder-style method chaining.
+     *  @deprecated Use {@link #withBackground(Color)} instead, by passing
+     *             it the {@link UI.Color#TRANSPARENT} constant.<br>
+     *             Alternatively, you may use the {@link #peek(Peeker)}
+     *             method to peek into the builder's component
+     *             and set the flag directly.
      */
+    @Deprecated
     public final I makeNonOpaque() {
         return _with( c -> c.setOpaque( false ) )._this();
     }
@@ -1992,7 +2003,19 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      */
     public final I withBackground( Color color ) {
         NullUtil.nullArgCheck(color, "color", Color.class);
-        return _with( c -> c.setBackground( _isUndefinedColor(color) ? null : color) )._this();
+        return _with( c -> _setBackground(c, color) )
+                ._this();
+    }
+
+    @SuppressWarnings("ReferenceEquality")
+    private void _setBackground( JComponent thisComponent, Color color ) {
+        color = _isUndefinedColor(color) ? null : color;
+        thisComponent.setBackground( color );
+        color = thisComponent.getBackground();
+        // ^ If the provided color is null the component may inherit the color from its parent!
+        if ( color == UI.Color.TRANSPARENT ) {
+            thisComponent.setOpaque(false);
+        }
     }
 
     /**

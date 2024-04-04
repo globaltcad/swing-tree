@@ -1993,6 +1993,10 @@ public final class ComponentStyleDelegate<C extends JComponent>
     }
 
     /**
+     *  The {@link AffineTransform} property of a font defines how the font is
+     *  rotated, scaled, skewed or translated. This method allows you to apply
+     *  a custom {@link AffineTransform} to the fonts of the component.
+     *
      * @param transform The {@link AffineTransform} to apply to the font.
      * @return A new {@link ComponentStyleDelegate} with the provided font transform.
      */
@@ -2001,6 +2005,9 @@ public final class ComponentStyleDelegate<C extends JComponent>
     }
 
     /**
+     *  Creates an updated style config with the provided font paint
+     *  applied to all font configurations of the component.
+     *
      * @param paint The {@link Paint} to use for the foreground of the font, which translates to the
      *              {@link java.awt.font.TextAttribute#FOREGROUND} attribute.
      * @return A new {@link ComponentStyleDelegate} with the provided font paint.
@@ -2044,6 +2051,9 @@ public final class ComponentStyleDelegate<C extends JComponent>
     }
 
     /**
+     *  The font spacing, which is also known as tracking, is the space between characters in a font.
+     *  See {@link java.awt.font.TextAttribute#TRACKING} for more information.
+     *
      * @param spacing The spacing of the default font of the component, which translates to the
      *                {@link java.awt.font.TextAttribute#TRACKING} attribute.
      * @return A new {@link ComponentStyleDelegate} with the provided font spacing.
@@ -2354,6 +2364,12 @@ public final class ComponentStyleDelegate<C extends JComponent>
     }
 
     /**
+     *  Use this to define the layout manager for this {@link JComponent}
+     *  using a {@link Layout} object. <br>
+     *  Checkout the factory methods in {@link Layout} for creating
+     *  different types of layout managers like {@link Layout#flow()}, {@link Layout#mig(String)}
+     *  or {@link Layout#grid(int, int)}. <br>
+     *
      * @param installer The {@link Layout} to use for installing the layout.
      * @return A new {@link ComponentStyleDelegate} with the provided {@link Layout} set to be later
      */

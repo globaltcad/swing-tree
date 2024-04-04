@@ -629,6 +629,10 @@ abstract class UIForAnything<I, C extends E, E extends Component>
     }
 
     /**
+     *  Exposes the this-pointer of the builder instance cast to the {@code I} type
+     *  parameter of the builder class. <br>
+     *  This is done to reduce the amount of type casting
+     *  and warnings in the codebase. <br>
      * @return The builder instance itself based on the type parameter {@code <I>}.
      */
     protected final I _this() { return (I) this; }

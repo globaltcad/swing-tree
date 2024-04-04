@@ -31,6 +31,9 @@ import java.util.Optional;
 public final class SplitItem<I extends JMenuItem>
 {
     /**
+     *  A factory method to create a {@link SplitItem} for a {@link JSplitButton} from a simple text string
+     *  which will be displayed on the {@link SplitItem} when it is part of a clicked {@link JSplitButton}.
+     *
      * @param text The text which should be displayed on the {@link SplitItem} (and its underlying {@link JMenuItem}).
      * @return A {@link SplitItem} wrapping a simple {@link JMenuItem} displaying the provided text.
      */

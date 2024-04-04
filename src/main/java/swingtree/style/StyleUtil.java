@@ -50,6 +50,12 @@ final class StyleUtil
         return "rgba(" + color.getRed() + "," + color.getGreen() + "," + color.getBlue() + "," + color.getAlpha() + ")";
     }
 
+    static String toString( @Nullable Paint paint ) {
+        if ( paint == null ) return "?";
+        if ( paint instanceof Color ) return toString((Color) paint);
+        return Objects.toString(paint);
+    }
+
     static String toString( @Nullable Arc arc ) {
         if ( arc == null ) return "?";
         return "Arc(" + arc.width() + "," + arc.height() + ")";
@@ -65,4 +71,13 @@ final class StyleUtil
         return enumBasedId.getClass().getSimpleName() + "." + enumBasedId.name();
     }
 
+    @SuppressWarnings("ReferenceEquality")
+    static boolean isUndefinedColor( @Nullable Color color ) {
+        return color == UI.Color.UNDEFINED;
+    }
+
+    @SuppressWarnings("ReferenceEquality")
+    static boolean isUndefinedFont( @Nullable Font font ) {
+        return font == UI.Font.UNDEFINED;
+    }
 }

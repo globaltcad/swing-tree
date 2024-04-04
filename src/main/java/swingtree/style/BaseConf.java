@@ -4,7 +4,8 @@ import org.jspecify.annotations.Nullable;
 import swingtree.UI;
 
 import javax.swing.ImageIcon;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Cursor;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -113,18 +114,19 @@ final class BaseConf
     }
 
     BaseConf simplified() {
-        Color simplifiedFoundation = _foundationColor == UI.Color.UNDEFINED ? null : _foundationColor;
+        Color simplifiedFoundation = StyleUtil.isUndefinedColor(_foundationColor) ? null : _foundationColor;
 
-        if ( simplifiedFoundation == _foundationColor )
+        if ( Objects.equals(simplifiedFoundation, _foundationColor) )
             return this;
-
-        return new BaseConf(_icon, _fit, simplifiedFoundation, _backgroundColor, _foregroundColor, _cursor, _orientation);
+        else
+            return new BaseConf(_icon, _fit, null, _backgroundColor, _foregroundColor, _cursor, _orientation);
     }
 
     @Override
     public int hashCode() { return Objects.hash(_icon, _fit, _backgroundColor, _foundationColor, _foregroundColor, _cursor, _orientation); }
 
     @Override
+    @SuppressWarnings("ReferenceEquality")
     public boolean equals( Object obj ) {
         if ( obj == null ) return false;
         if ( obj == this ) return true;
@@ -132,15 +134,15 @@ final class BaseConf
         BaseConf rhs = (BaseConf) obj;
 
         boolean sameBackground = Objects.equals(_backgroundColor, rhs._backgroundColor);
-        if ( _backgroundColor == UI.Color.UNDEFINED || rhs._backgroundColor == UI.Color.UNDEFINED )
+        if ( StyleUtil.isUndefinedColor(_backgroundColor) || StyleUtil.isUndefinedColor(rhs._backgroundColor) )
             sameBackground = _backgroundColor == rhs._backgroundColor;
 
         boolean sameFoundation = Objects.equals(_foundationColor, rhs._foundationColor);
-        if ( _foundationColor == UI.Color.UNDEFINED || rhs._foundationColor == UI.Color.UNDEFINED )
+        if ( StyleUtil.isUndefinedColor(_foundationColor) || StyleUtil.isUndefinedColor(rhs._foundationColor) )
             sameFoundation = _foundationColor == rhs._foundationColor;
 
         boolean sameForeground = Objects.equals(_foregroundColor, rhs._foregroundColor);
-        if ( _foregroundColor == UI.Color.UNDEFINED || rhs._foregroundColor == UI.Color.UNDEFINED )
+        if ( StyleUtil.isUndefinedColor(_foregroundColor) || StyleUtil.isUndefinedColor(rhs._foregroundColor) )
             sameForeground = _foregroundColor == rhs._foregroundColor;
 
         return Objects.equals(_icon,            rhs._icon           ) &&

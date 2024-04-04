@@ -66,6 +66,10 @@ import java.util.Optional;
 public interface IconDeclaration
 {
     /**
+     *  The most important part of the identity of an
+     *  icon declaration is the path to the icon resource.
+     *  This path may be relative to the classpath or may be an absolute path.
+     *
      * @return The path to the icon resource, which is relative
      *         to the classpath or may be an absolute path.
      */

@@ -8,14 +8,18 @@ import swingtree.SwingTree
 import swingtree.UI
 import swingtree.api.Styler
 import swingtree.components.JBox
+import swingtree.style.FontConf
 import utility.Utility
 
+import javax.swing.JLabel
 import java.awt.Color
+import java.util.function.Function
 
 @Title('Invariant Styles')
 @Narrative("""
     This test demonstrates how various pairs of different styles 
-    produce identical images when rendered into a BufferedImage.
+    produce identical component states as well as identical
+    images when rendered into a BufferedImage.
 """)
 @Subject([UI, Styler])
 class Invariant_Styles_Spec extends Specification
@@ -318,6 +322,66 @@ class Invariant_Styles_Spec extends Specification
 
         where : 'We test this using the following scaling values:'
             uiScale << [1f, 1.25f, 1.75f, 2f]
+    }
+
+    def 'Two labels with the same font style configuration will have equal font objects.'(
+        Function<FontConf, FontConf> styler
+    ) {
+        given: 'Two labels with the same font style configuration'
+            var ui1 = UI.label("A").withStyle(it->it.componentFont(styler))
+            var ui2 = UI.label("B").withStyle(it->it.componentFont(styler))
+        and : 'We build the two labels and also create a plain reference label:'
+            var label1 = ui1.get(JLabel)
+            var label2 = ui2.get(JLabel)
+            var label3 = new JLabel("C")
+        when: 'We unpack the font objects from the labels.'
+            var font1 = label1.getFont()
+            var font2 = label2.getFont()
+            var font3 = label3.getFont()
+        then: 'The first two labels have the same font object.'
+            font1 == font2
+        and : 'The third label on the other hand has a different font object.'
+            font3 != font1
+            font3 != font2
+        where : 'We test the following font configurations:'
+            styler << [
+                {f -> f.size(1).family("Arial").style(UI.FontStyle.BOLD)},
+                {f -> f.size(2).family("Ubuntu").style(UI.FontStyle.BOLD_ITALIC)},
+                {f -> f.size(3).family("SansSerif").style(UI.FontStyle.ITALIC)},
+                {f -> f.gradient(g->g.colors(Color.RED, Color.BLUE).span(UI.Span.TOP_TO_BOTTOM))},
+                {f -> f.size(82)
+                       .family("Dialog")
+                       .weight(2.75)
+                       .color(Color.WHITE)
+                       .noise(noise -> noise
+                               .colors(Color.DARK_GRAY, Color.CYAN)
+                               .function(UI.NoiseType.CELLS)
+                               .scale(1.25)
+                       )
+                       .backgroundNoise(noise -> noise
+                               .colors(Color.BLACK, Color.BLUE)
+                               .function(UI.NoiseType.CELLS)
+                               .scale(1.25)
+                       )
+                },
+                {f -> f.size(82)
+                       .family("Noto Sans")
+                       .weight(1.25)
+                       .color(Color.BLUE)
+                       .noise(noise -> noise
+                           .colors(Color.DARK_GRAY, Color.CYAN)
+                           .function(UI.NoiseType.SMOOTH_SPOTS)
+                           .scale(1.15)
+                       )
+                       .backgroundGradient(grad -> grad
+                           .colors(Color.GREEN, Color.MAGENTA, Color.ORANGE)
+                           .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
+                           .span(UI.Span.BOTTOM_TO_TOP)
+                           .type(UI.GradientType.CONIC)
+                           .focus(26,16)
+                       )
+                }
+            ]
     }
 
 }

@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import sprouts.From;
 import sprouts.Var;
 import swingtree.UI;
+import swingtree.api.IconDeclaration;
 
 import javax.swing.Icon;
 import javax.swing.JOptionPane;
@@ -100,6 +101,10 @@ public final class OptionsDialog<E extends Enum<E>>
     }
 
     /**
+     *  Creates an updated options dialog config with the specified title
+     *  which will used as the window title of the dialog
+     *  when it is shown to the user.
+     *
      * @param title The title of the dialog.
      * @return A new {@link OptionsDialog} instance with the specified title.
      */
@@ -138,6 +143,24 @@ public final class OptionsDialog<E extends Enum<E>>
     }
 
     /**
+     *  Allows you to specify an icon declaration for an icon that will be displayed in the dialog window.
+     *  An icon declaration is a constant that simply holds the location of the icon resource.
+     *  This is the preferred way to specify an icon for the dialog.
+     *
+     * @param icon The icon declaration for an icon that will be displayed in the dialog window.
+     * @return A new {@link OptionsDialog} instance with the specified icon.
+     */
+    public OptionsDialog<E> icon( IconDeclaration icon ) {
+        Objects.requireNonNull(icon);
+        return icon.find().map(this::icon).orElse(this);
+    }
+
+    /**
+     *  Creates an updated options dialog config with the specified icon,
+     *  which will be displayed in the dialog window.
+     *  Consider using the {@link #icon(IconDeclaration)} method instead,
+     *  as it is the preferred way to specify an icon for the dialog.
+     *
      * @param icon The icon of the dialog.
      * @return A new {@link OptionsDialog} instance with the specified icon.
      */
@@ -146,6 +169,12 @@ public final class OptionsDialog<E extends Enum<E>>
     }
 
     /**
+     *  Creates an updated options dialog config with the specified icon path
+     *  leading to the icon that will be displayed in the dialog window.
+     *  The icon will be loaded using the {@link UI#findIcon(String)} method.
+     *  But consider using the {@link #icon(IconDeclaration)} method instead of this,
+     *  as it is the preferred way to specify an icon for the dialog.
+     *
      * @param path The path to the icon of the dialog.
      * @return A new {@link OptionsDialog} instance with the specified icon.
      */
@@ -155,6 +184,11 @@ public final class OptionsDialog<E extends Enum<E>>
     }
 
     /**
+     *  You may specify a reference to a parent component for the dialog,
+     *  which will be used to center the dialog on the parent component.
+     *  See {@link JOptionPane#showOptionDialog(Component, Object, String, int, int, Icon, Object[], Object)}
+     *  for more information.
+     *
      * @param parent The parent component of the dialog.
      * @return A new {@link OptionsDialog} instance with the specified parent component.
      */

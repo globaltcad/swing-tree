@@ -16,11 +16,14 @@ import swingtree.style.ComponentStyleDelegate
 import javax.swing.JButton
 import javax.swing.JComboBox
 import javax.swing.JComponent
+import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JSpinner
 import javax.swing.JToggleButton
 import java.awt.*
+import java.awt.font.TextAttribute
 import java.awt.geom.AffineTransform
+import java.awt.geom.Point2D
 
 @Title("The Style Configuration")
 @Narrative('''
@@ -70,7 +73,7 @@ class Styles_Spec extends Specification
             var borderColor = style.border().color()
             var shadowColor = style.shadow().color()
             var fontSelectionColor = style.font().selectionColor()
-            var fontColor = style.font().color()
+            var fontColor = style.font().paint()
         expect :
             backgroundColor.get() == expectedColor
             foregroundColor.get() == expectedColor
@@ -192,12 +195,10 @@ class Styles_Spec extends Specification
                                             "spacing=0.0, " +
                                             "underlined=true, " +
                                             "strikeThrough=true, " +
-                                            "color=rgba(255,0,255,255), " +
-                                            "backgroundColor=?, " +
                                             "selectionColor=rgba(0,255,255,255), " +
                                             "transform=?, " +
-                                            "paint=?, " +
-                                            "backgroundPaint=?, " +
+                                            "paint=FontPaintConf[rgba(255,0,255,255)], " +
+                                            "backgroundPaint=FontPaintConf[NONE], " +
                                             "horizontalAlignment=?, " +
                                             "verticalAlignment=?" +
                                         "], " +
@@ -232,11 +233,11 @@ class Styles_Spec extends Specification
             style = ComponentExtension.from(
                                 UI.of(new JSpinner()).withStyle(conf->conf
                                     .fontAlignment(UI.Alignment.CENTER)
+                                    .fontBackgroundColor("cyan")
+                                    .fontBackgroundColor(new Color(0, 42, 42, 42))
                                     .fontBackgroundPaint(paint1)
                                     .fontPaint(paint2)
                                     .fontTransform(transform)
-                                    .fontBackgroundColor("cyan")
-                                    .fontBackgroundColor(new Color(0, 42, 42, 42))
                                     .image(UI.Layer.FOREGROUND, "bubbles", imgConf -> imgConf
                                         .fitMode(UI.FitComponent.WIDTH)
                                         .repeat(true)
@@ -260,12 +261,10 @@ class Styles_Spec extends Specification
                                             "spacing=0.0, " +
                                             "underlined=?, " +
                                             "strikeThrough=?, " +
-                                            "color=?, " +
-                                            "backgroundColor=rgba(0,42,42,42), " +
                                             "selectionColor=?, " +
                                             "transform=$transform, " +
-                                            "paint=$paint2, " +
-                                            "backgroundPaint=$paint1, " +
+                                            "paint=FontPaintConf[$paint2], " +
+                                            "backgroundPaint=FontPaintConf[$paint1], " +
                                             "horizontalAlignment=CENTER, " +
                                             "verticalAlignment=CENTER" +
                                         "], " +
@@ -821,5 +820,149 @@ class Styles_Spec extends Specification
                     "], " +
                     "properties=[]" +
                 "]"
+    }
+
+    def 'The style API allows you to configure a custom paint for a component font.'()
+    {
+        reportInfo """
+            Usually the font of a component is a solid color which simply fills
+            out the characters of the text. But the `java.awt.Font` class also
+            allows for a custom paint to be used to fill out the characters.
+            
+            SwingTree allows you to configure this font paint
+            through the style API.
+            
+            In this example we will configure a linear gradient as
+            the paint for the font of a `JLabel` component.
+        """
+        given :'A UI declaration consisting of a `JLabel` with a custom gradient paint for the font:'
+            var ui =
+                        UI.label("I am a Gradient")
+                        .withStyle( it -> it
+                            .size(200, 50)
+                            .padding(3).borderRadius(12)
+                            .componentFont(f->f
+                                .size(18)
+                                .family("Ubuntu")
+                                .gradient(grad -> grad
+                                    .colors(Color.RED, Color.GREEN, Color.BLUE)
+                                    .boundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)
+                                    .span(UI.Span.TOP_TO_BOTTOM)
+                                    .type(UI.GradientType.LINEAR)
+                                )
+                                .backgroundGradient( grad -> grad
+                                    .colors(Color.CYAN, Color.MAGENTA)
+                                    .span(UI.Span.RIGHT_TO_LEFT)
+                                    .type(UI.GradientType.LINEAR)
+                                    .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
+                                    .offset(-6, -6)
+                                )
+                            )
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                        )
+        when : 'We create the declared `JLabel` component using the `get` method...'
+            var label = ui.get(JLabel)
+        then : 'The label will have a font with the expected size and family.'
+            label.getFont().getSize() == 18
+            label.getFont().getFamily() == "Ubuntu"
+        when : 'We extract the foreground and background paint of the font...'
+            var paint           = label.getFont().getAttributes().get(TextAttribute.FOREGROUND)
+            var backgroundPaint = label.getFont().getAttributes().get(TextAttribute.BACKGROUND)
+        then : """
+            We find that both paint objects are font paints.
+        """
+            paint instanceof swingtree.style.FontPaint
+            backgroundPaint instanceof swingtree.style.FontPaint
+        when : 'We unpack their delegated paint...'
+            paint           = paint.getDelegatedPaint()
+            backgroundPaint = backgroundPaint.getDelegatedPaint()
+        then : """
+            We find tha both paint objects are gradient paints.
+            But one is a linear gradient and the other is a simple 2 color based gradient.
+        """
+            paint instanceof LinearGradientPaint
+            backgroundPaint instanceof GradientPaint
+        when : 'We cast them to their respective types...'
+            var grad1 = paint as LinearGradientPaint
+            var grad2 = backgroundPaint as GradientPaint
+        then : 'They have the expected start and end points:'
+            grad1.getStartPoint() == new Point2D.Float(3, 3)
+            grad1.getEndPoint() == new Point2D.Float(3, 47)
+            grad2.getPoint1() == new Point2D.Float(94.0, 19.0)
+            grad2.getPoint2() == new Point2D.Float(-3.0, 19.0)
+        and : 'They also both have the expected colors:'
+            grad1.getColors() == [ Color.RED, Color.GREEN, Color.BLUE ] as Color[]
+            grad2.getColor1() == Color.CYAN
+            grad2.getColor2() == Color.MAGENTA
+    }
+
+    def 'The style API allows you to configure a custom noise paint for a component font.'()
+    {
+        reportInfo """
+            Usually the font of a component is a solid color which simply fills
+            out the characters of the text. But the `java.awt.Font` class also
+            allows for a custom paint to be used to fill out the characters.
+            
+            SwingTree allows you to configure this font paint
+            through the style API.
+            
+            In this example we will configure a noise gradient as
+            the paint for the font of a `JLabel` component.
+            The noise gradient is a custom paint that uses a noise function
+            to generate values used for interpolation between colors.
+        """
+        given :'A UI declaration consisting of a `JLabel` with a custom noise paint for the font:'
+            var ui =
+                        UI.label("I am a Gradient")
+                        .withStyle( it -> it
+                            .size(200, 50)
+                            .padding(3).borderRadius(12)
+                            .componentFont(f->f
+                                .size(18)
+                                .family("Arial")
+                                .noise(grad -> grad
+                                    .colors(Color.RED, Color.GREEN, Color.BLUE)
+                                    .boundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)
+                                    .function(UI.NoiseType.RETRO)
+                                )
+                                .backgroundNoise( grad -> grad
+                                    .colors(Color.CYAN, Color.MAGENTA)
+                                    .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
+                                    .offset(-6, -6)
+                                    .function(UI.NoiseType.MANDELBROT)
+                                    .scale(3, 4)
+                                )
+                            )
+                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                        )
+        when : 'We create the declared `JLabel` component using the `get` method...'
+            var label = ui.get(JLabel)
+        then : 'The label will have a font with the expected size and family.'
+            label.getFont().getSize() == 18
+            label.getFont().getFamily() == "Arial"
+        when : 'We extract the foreground and background paint of the font...'
+            var paint           = label.getFont().getAttributes().get(TextAttribute.FOREGROUND)
+            var backgroundPaint = label.getFont().getAttributes().get(TextAttribute.BACKGROUND)
+        then : """
+            We find that both paint objects are font paints.
+        """
+            paint instanceof swingtree.style.FontPaint
+            backgroundPaint instanceof swingtree.style.FontPaint
+        when : 'We unpack their delegated paint...'
+            paint           = paint.getDelegatedPaint()
+            backgroundPaint = backgroundPaint.getDelegatedPaint()
+        then : """
+            We find that both paint objects are noise paints.
+        """
+            paint instanceof swingtree.style.NoiseGradientPaint
+            backgroundPaint instanceof swingtree.style.NoiseGradientPaint
+        and : 'They have the expected colors and noise functions:'
+            paint.getColors() == [ Color.RED, Color.GREEN, Color.BLUE ]
+            paint.getNoiseFunction() == UI.NoiseType.RETRO
+            backgroundPaint.getColors() == [ Color.CYAN, Color.MAGENTA ]
+            backgroundPaint.getNoiseFunction() == UI.NoiseType.MANDELBROT
+        and : 'They also both have the expected scale:'
+            paint.getScale() == new Point2D.Float(1, 1)
+            backgroundPaint.getScale() == new Point2D.Float(3, 4)
     }
 }

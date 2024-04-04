@@ -11,9 +11,13 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.ColorModel;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 
 final class NoiseGradientPaint implements Paint
@@ -27,17 +31,17 @@ final class NoiseGradientPaint implements Paint
         private final Point2D center;
         private final AffineTransform transform;
 
-        private final ConicalGradientPaintContext cachedContext;
+        private final NoiseGradientPaintContext cachedContext;
 
 
-        private CachedContext(Rectangle bounds, Point2D center, AffineTransform transform, ConicalGradientPaintContext context) {
+        private CachedContext(Rectangle bounds, Point2D center, AffineTransform transform, NoiseGradientPaintContext context) {
             this.bounds = bounds;
             this.center = center;
             this.transform = transform;
             cachedContext = context;
         }
 
-        private @Nullable ConicalGradientPaintContext get(Rectangle bounds, Point2D center, AffineTransform transform) {
+        private NoiseGradientPaint.@Nullable NoiseGradientPaintContext get(Rectangle bounds, Point2D center, AffineTransform transform) {
             if (this.bounds.equals(bounds) && this.center.equals(center) && this.transform.equals(transform))
                 return cachedContext;
             else
@@ -144,6 +148,26 @@ final class NoiseGradientPaint implements Paint
         }
     }
 
+    public Point2D getCenter() {
+        return center;
+    }
+
+    public Point2D getScale() {
+        return new Point2D.Float(scaleX, scaleY);
+    }
+
+    public float getRotation() {
+        return rotation;
+    }
+
+    public NoiseFunction getNoiseFunction() {
+        return noiseFunction;
+    }
+
+    public List<Color> getColors() {
+        return Stream.of(colors).collect(Collectors.toList());
+    }
+
     private static Color getColorFromFraction(
         final Color START_COLOR,
         final Color DESTINATION_COLOR,
@@ -194,12 +218,12 @@ final class NoiseGradientPaint implements Paint
     ) {
 
         if (cached != null) {
-            ConicalGradientPaintContext c = cached.get(DEVICE_BOUNDS, center, TRANSFORM);
+            NoiseGradientPaintContext c = cached.get(DEVICE_BOUNDS, center, TRANSFORM);
             if (c != null)
                 return c;
         }
 
-        ConicalGradientPaintContext context = new ConicalGradientPaintContext(center, TRANSFORM);
+        NoiseGradientPaintContext context = new NoiseGradientPaintContext(center, TRANSFORM);
         cached = new CachedContext(DEVICE_BOUNDS, center, TRANSFORM, context);
 
         return context;
@@ -210,12 +234,51 @@ final class NoiseGradientPaint implements Paint
         return Transparency.TRANSLUCENT;
     }
 
-    private final class ConicalGradientPaintContext implements PaintContext
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 97 * hash + Objects.hashCode(this.center);
+        hash = 97 * hash + Float.floatToIntBits(this.scaleX);
+        hash = 97 * hash + Float.floatToIntBits(this.scaleY);
+        hash = 97 * hash + Float.floatToIntBits(this.rotation);
+        hash = 97 * hash + Objects.hashCode(this.noiseFunction);
+        hash = 97 * hash + Arrays.hashCode(this.localFractions);
+        hash = 97 * hash + Arrays.deepHashCode(this.colors);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        final NoiseGradientPaint other = (NoiseGradientPaint) obj;
+        if (Float.floatToIntBits(this.scaleX) != Float.floatToIntBits(other.scaleX))
+            return false;
+        if (Float.floatToIntBits(this.scaleY) != Float.floatToIntBits(other.scaleY))
+            return false;
+        if (Float.floatToIntBits(this.rotation) != Float.floatToIntBits(other.rotation))
+            return false;
+        if (!Objects.equals(this.center, other.center))
+            return false;
+        if (!Objects.equals(this.noiseFunction, other.noiseFunction))
+            return false;
+        if (!Objects.deepEquals(this.localFractions, other.localFractions))
+            return false;
+        if (!Objects.deepEquals(this.colors, other.colors))
+            return false;
+        return true;
+    }
+
+    private final class NoiseGradientPaintContext implements PaintContext
     {
         final private Point2D center;
         private final HashMap<Long, WritableRaster> cachedRasters;
 
-        public ConicalGradientPaintContext(final Point2D center, AffineTransform transform) {
+        public NoiseGradientPaintContext(final Point2D center, AffineTransform transform) {
             this.cachedRasters = new HashMap<>();
             try {
                 this.center = transform.transform(center, null);  //user to device

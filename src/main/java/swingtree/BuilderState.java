@@ -165,7 +165,7 @@ final class BuilderState<C extends java.awt.Component>
             if ( !currentThread.getName().startsWith("Test worker") )
                 log.warn(
                     "The builder state for component type '" + _componentType.getSimpleName() + "' " +
-                    "is being disposed from thread '" + currentThread.getName() + "', which is problematic!" +
+                    "is being disposed from thread '" + currentThread.getName() + "', which is problematic! \n" +
                     "Builder states should only be disposed by the UI thread (AWT's EDT thread) because " +
                     "they lack thread safety. Furthermore, it is important to note that GUI components " +
                     "should only be assembled in the frontend layer of the application, and not in the backend layer " +

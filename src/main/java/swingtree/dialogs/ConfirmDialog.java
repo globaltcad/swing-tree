@@ -3,6 +3,7 @@ package swingtree.dialogs;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import swingtree.UI;
+import swingtree.api.IconDeclaration;
 
 import javax.swing.Icon;
 import javax.swing.JOptionPane;
@@ -118,6 +119,24 @@ public final class ConfirmDialog
     }
 
     /**
+     *  Use this to specify the icon for the confirm dialog through an {@link IconDeclaration},
+     *  which is a constant that represents the icon resource with a preferred size.
+     *  The icon will be loaded and cached automatically for you when using the declaration based approach.
+     *
+     * @param icon The icon declaration of the dialog, which may contain the path to the icon resource.
+     * @return A new {@link ConfirmDialog} instance with the specified icon declaration.
+     */
+    public ConfirmDialog icon( IconDeclaration icon ) {
+        Objects.requireNonNull(icon);
+        return icon.find().map(this::icon).orElse(this);
+    }
+
+    /**
+     *  Defines the icon for the dialog, whose appearance and position may vary depending on the
+     *  look and feel of the current system.
+     *  Consider using the {@link #icon(IconDeclaration)} method over this one
+     *  as it reduces the risk of icon loading issues.
+     *
      * @param icon The icon of the dialog.
      * @return A new {@link ConfirmDialog} instance with the specified icon.
      */
@@ -128,11 +147,14 @@ public final class ConfirmDialog
     /**
      *  Use this to display a custom icon in the dialog by
      *  providing the path to the icon resource.
+     *  Consider using the {@link #icon(IconDeclaration)} method over this one
+     *  as you may also specify the preferred size of the icon through the declaration.
      *
      * @param path The path to the icon of the dialog.
      * @return A new {@link ConfirmDialog} instance with the specified icon.
      */
     public ConfirmDialog icon( String path ) {
+        Objects.requireNonNull(path);
         return new ConfirmDialog(_type, _title, _message, _yesOption, _noOption, _cancelOption, _defaultOption, UI.findIcon(path).orElse(null), _parent);
     }
 
@@ -140,7 +162,7 @@ public final class ConfirmDialog
      * @param parent The parent component of the dialog.
      * @return A new {@link ConfirmDialog} instance with the specified parent component.
      */
-    public ConfirmDialog parent(Component parent ) {
+    public ConfirmDialog parent( Component parent ) {
         return new ConfirmDialog(_type, _title, _message, _yesOption, _noOption, _cancelOption, _defaultOption, _icon, parent);
     }
 
@@ -220,6 +242,12 @@ public final class ConfirmDialog
     }
 
     /**
+     *  Use this to summon the dialog with the current settings and wait
+     *  for the user to select an option. <br>
+     *  The answer will be returned as a {@link ConfirmAnswer} enum.
+     *  Note that this method is blocking and will only return when the user has selected
+     *  an option in the dialog.
+     *
      * @return The {@link ConfirmAnswer} that the user selected in the dialog.
      */
     public ConfirmAnswer show() {

@@ -51,6 +51,9 @@ final class StyleEngine
 
     ComponentConf getComponentConf() { return _componentConf; }
 
+    LayerCache[] getLayerCaches() { return _layerCaches; }
+
+    BoxModelConf getBoxModelConf() { return _boxModelConf; }
 
     void paintClippedTo( UI.ComponentArea area, Graphics g, Runnable painter ) {
         Shape oldClip = g.getClip();
@@ -75,12 +78,8 @@ final class StyleEngine
         return Optional.ofNullable(contentClip);
     }
 
-    StyleEngine withNewStyleAndComponent(StyleConf newStyle, JComponent component ) {
-        ComponentConf newConf = _componentConf.with(newStyle, component);
-        BoxModelConf newBoxModelConf = BoxModelConf.of(newConf.style().border(), newConf.baseOutline(), newConf.currentBounds().size());
-        for ( LayerCache layerCache : _layerCaches )
-            layerCache.validate(_componentConf, newConf);
-        return new StyleEngine(newBoxModelConf, newConf, _layerCaches);
+    StyleEngine with( BoxModelConf boxModelConf, ComponentConf componentConf ) {
+        return new StyleEngine(boxModelConf, componentConf, _layerCaches);
     }
 
     StyleEngine withoutAnimationPainters() {

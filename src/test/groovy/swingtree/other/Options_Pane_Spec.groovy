@@ -191,7 +191,7 @@ class Options_Pane_Spec extends Specification
         when : 'We invoke the `choice` method on the `UI` API.'
             UI.choice("Is the answer to life, the universe and everything really 42?", enumProperty)
                 .titled("A Question for You!")
-                .icon(null)
+                .icon((Icon)null)
                 .defaultOption(ConfirmAnswer.CLOSE)
                 .show()
 
@@ -241,7 +241,7 @@ class Options_Pane_Spec extends Specification
             var answer =
                         UI.confirmation("Have you read the terms and conditions?")
                         .titled("Confirm or Deny")
-                        .icon(null)
+                        .icon((Icon)null)
                         .yesOption("Sure, who hasn't?")
                         .noOption("No, Sorry!")
                         .defaultOption(ConfirmAnswer.YES)

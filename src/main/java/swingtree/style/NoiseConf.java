@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import swingtree.UI;
 import swingtree.api.NoiseFunction;
@@ -147,7 +148,7 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
         if ( scale == 1 )
             return this;
 
-        if ( this == _NONE )
+        if ( this.equals(_NONE) )
             return _NONE;
 
         return of(
@@ -166,6 +167,8 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
      *  Accepts the {@link NoiseFunction}, which takes a coordinate and returns a value
      *  between 0 and 1. <br>
      *  The noise function is used to define the noise gradient.
+     *  <p>
+     *  <b>Take a look at {@link UI.NoiseType} for a rich set of predefined noise functions.</b>
      *
      * @param function The noise function mapping the translated, scaled and rotated virtual space
      *                 to a gradient value of a pixel in the color space / view space of the screen.
@@ -354,7 +357,7 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
     }
 
     @Override
-    public boolean equals( Object o ) {
+    public boolean equals( @Nullable Object o ) {
         if ( this == o ) return true;
         if ( !(o instanceof NoiseConf) ) return false;
         NoiseConf that = (NoiseConf) o;
@@ -390,10 +393,10 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
         if ( _colors.length == 0 )
             return _NONE;
 
-        if ( Arrays.stream(_colors).allMatch( color -> color.getAlpha() == 0 || color == UI.Color.UNDEFINED) )
+        if ( Arrays.stream(_colors).allMatch( color -> color.getAlpha() == 0 || StyleUtil.isUndefinedColor(color) ) )
             return _NONE;
 
-        int numberOfRealColors = Arrays.stream(_colors).mapToInt( color -> color == UI.Color.UNDEFINED ? 0 : 1 ).sum();
+        int numberOfRealColors = Arrays.stream(_colors).mapToInt( color -> StyleUtil.isUndefinedColor(color) ? 0 : 1 ).sum();
 
         if ( numberOfRealColors == 0 )
             return _NONE;
@@ -402,7 +405,7 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
             Color[] realColors = new Color[numberOfRealColors];
             int index = 0;
             for ( Color color : _colors )
-                if ( color != UI.Color.UNDEFINED)
+                if ( !StyleUtil.isUndefinedColor(color) )
                     realColors[index++] = color;
 
             return of( _function, realColors, _offset, _scale, _area, _boundary, _rotation, _fractions );

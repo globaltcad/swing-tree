@@ -329,6 +329,59 @@ final class ConicalGradientPaint implements Paint {
         return Transparency.TRANSLUCENT;
     }
 
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 97 * hash + this.CENTER.hashCode();
+        hash = 97 * hash + Float.floatToIntBits(this.ANGLE_OFFSET);
+        hash = 97 * hash + java.util.Arrays.hashCode(this.FRACTION_ANGLES);
+        hash = 97 * hash + java.util.Arrays.hashCode(this.RED_STEP_LOOKUP);
+        hash = 97 * hash + java.util.Arrays.hashCode(this.GREEN_STEP_LOOKUP);
+        hash = 97 * hash + java.util.Arrays.hashCode(this.BLUE_STEP_LOOKUP);
+        hash = 97 * hash + java.util.Arrays.hashCode(this.ALPHA_STEP_LOOKUP);
+        hash = 97 * hash + java.util.Arrays.hashCode(this.COLORS);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(final Object OBJ) {
+        if (this == OBJ) {
+            return true;
+        }
+        if (OBJ == null) {
+            return false;
+        }
+        if (getClass() != OBJ.getClass()) {
+            return false;
+        }
+        final ConicalGradientPaint OTHER = (ConicalGradientPaint) OBJ;
+        if (!this.CENTER.equals(OTHER.CENTER)) {
+            return false;
+        }
+        if (Float.floatToIntBits(this.ANGLE_OFFSET) != Float.floatToIntBits(OTHER.ANGLE_OFFSET)) {
+            return false;
+        }
+        if (!java.util.Arrays.equals(this.FRACTION_ANGLES, OTHER.FRACTION_ANGLES)) {
+            return false;
+        }
+        if (!java.util.Arrays.equals(this.RED_STEP_LOOKUP, OTHER.RED_STEP_LOOKUP)) {
+            return false;
+        }
+        if (!java.util.Arrays.equals(this.GREEN_STEP_LOOKUP, OTHER.GREEN_STEP_LOOKUP)) {
+            return false;
+        }
+        if (!java.util.Arrays.equals(this.BLUE_STEP_LOOKUP, OTHER.BLUE_STEP_LOOKUP)) {
+            return false;
+        }
+        if (!java.util.Arrays.equals(this.ALPHA_STEP_LOOKUP, OTHER.ALPHA_STEP_LOOKUP)) {
+            return false;
+        }
+        if (!java.util.Arrays.equals(this.COLORS, OTHER.COLORS)) {
+            return false;
+        }
+        return true;
+    }
+
     private final class ConicalGradientPaintContext implements PaintContext
     {
         final private Point2D CENTER;

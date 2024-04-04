@@ -4,7 +4,7 @@ import java.awt.Point;
 
 /**
  *  An immutable value class that represents a location in a two-dimensional
- *  coordinate system specified in integer precision and specifically designed
+ *  coordinate system specified in float precision and specifically designed
  *  for Swing components.
  *  It can be used as an alternative to the AWT {@link Point} class,
  *  but in situations where immutability is desired.

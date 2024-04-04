@@ -446,6 +446,10 @@ abstract class AbstractDelegate<C extends JComponent>
     }
 
     /**
+     *  Delegates to the {@link JComponent#setBounds(int, int, int, int)} method
+     *  of the underlying component. The bounds consist of a location and a size
+     *  which are relative to the component's parent.
+     *
      * @param bounds The new bounds of the component.
      *                This is relative to the component's parent.
      * @return The delegate itself, so you can chain calls to this method.

@@ -32,7 +32,7 @@ import java.util.Optional;
  *  and border of a raw Swing component should be as smooth as possible.
  *  If the user defines a border radius for a component, then this should
  *  not automatically lead to its look and feel being lost.
- *  Instead, only parts of the original look and feel should applied.
+ *  Instead, only parts of the original look and feel should be applied.
  *  This is also true for other component properties like the background color,
  *  the foreground color, the font and the opacity flag.<br>
  *  This last part is especially tricky, because the opacity flag is a very
@@ -66,11 +66,41 @@ final class StyleInstaller<C extends JComponent>
         return _dynamicLaF.customLookAndFeelIsInstalled();
     }
 
-    StyleConf applyStyleToComponentState(
-        C              owner, // <- The component we want to style.
-        StyleConf      newStyle,
-        StyleSource<C> styleSource
+    StyleEngine _updateEngine(
+        final C              owner,
+        final StyleEngine    engine,
+        StyleConf            newStyle
     ) {
+        ComponentConf currentConf = engine.getComponentConf();
+        LayerCache[] layerCaches = engine.getLayerCaches();
+        ComponentConf newConf = currentConf.with(newStyle, owner);
+        BoxModelConf newBoxModelConf = BoxModelConf.of(newConf.style().border(), newConf.baseOutline(), newConf.currentBounds().size());
+        for ( LayerCache layerCache : layerCaches )
+            layerCache.validate(currentConf, newConf);
+
+        return engine.with(newBoxModelConf, newConf);
+    }
+
+    StyleEngine applyStyleToComponentState(
+        final C              owner, // <- The component we want to style.
+        final StyleEngine    engine,
+        final StyleSource<C> styleSource,
+        StyleConf            newStyle,
+        final boolean        force
+    ) {
+        boolean doInstallation = true;
+
+        if ( !force ) {
+            // We check if it makes sense to apply the new style:
+            boolean componentBackgroundWasMutated = this.backgroundWasChangedSomewhereElse(owner);
+
+            if ( !componentBackgroundWasMutated && engine.getComponentConf().style().equals(newStyle) )
+                doInstallation = false;
+        }
+
+        if ( !doInstallation )
+            return _updateEngine(owner, engine, newStyle);
+
         final boolean noLayoutStyle           = StyleConf.none().hasEqualLayoutAs(newStyle);
         final boolean noPaddingAndMarginStyle = StyleConf.none().hasEqualMarginAndPaddingAs(newStyle);
         final boolean noBorderStyle           = StyleConf.none().hasEqualBorderAs(newStyle);
@@ -157,7 +187,7 @@ final class StyleInstaller<C extends JComponent>
                 _initialIsOpaque = null;
             }
             if ( isNotStyled )
-                return newStyle;
+                return _updateEngine(owner, engine, newStyle);
         }
 
         // The component is styled, so we can now apply the style to the component:
@@ -197,11 +227,11 @@ final class StyleInstaller<C extends JComponent>
 
         if ( hasBackground ) {
             boolean backgroundIsAlreadySet = Objects.equals( owner.getBackground(), newStyle.base().backgroundColor().get() );
-            if ( !backgroundIsAlreadySet || newStyle.base().backgroundColor().get() == UI.Color.UNDEFINED )
+            if ( !backgroundIsAlreadySet || StyleUtil.isUndefinedColor(newStyle.base().backgroundColor().get()) )
             {
                 _initialBackgroundColor = _initialBackgroundColor != null ? _initialBackgroundColor :  owner.getBackground();
                 Color newColor = newStyle.base().backgroundColor()
-                                                .filter( c -> c != UI.Color.UNDEFINED )
+                                                .filter( c -> !StyleUtil.isUndefinedColor(c) )
                                                 .orElse(null);
 
                 backgroundSetter = () -> {
@@ -229,7 +259,7 @@ final class StyleInstaller<C extends JComponent>
 
         if ( !opaqueGradAreas.contains(UI.ComponentArea.ALL) ) {
             boolean hasOpaqueFoundation = 255 == newStyle.base().foundationColor().map(java.awt.Color::getAlpha).orElse(0);
-            boolean hasOpaqueBackground = 255 == newStyle.base().backgroundColor().map( c -> c != UI.Color.UNDEFINED ? c : _initialBackgroundColor ).map(java.awt.Color::getAlpha).orElse(255);
+            boolean hasOpaqueBackground = 255 == newStyle.base().backgroundColor().map( c -> !StyleUtil.isUndefinedColor(c) ? c : _initialBackgroundColor ).map(java.awt.Color::getAlpha).orElse(255);
             boolean hasBorder           = newStyle.border().widths().isPositive();
 
             if ( !hasOpaqueFoundation && !opaqueGradAreas.contains(UI.ComponentArea.EXTERIOR) ) {
@@ -358,7 +388,6 @@ final class StyleInstaller<C extends JComponent>
         _applyIconStyleTo(owner, newStyle);
         _applyLayoutStyleTo(owner, newStyle);
         _applyDimensionalityStyleTo(owner, newStyle);
-        _applyFontStyleTo(owner, newStyle);
         _applyPropertiesTo(owner, newStyle);
         _doComboBoxMarginAdjustment(owner, newStyle);
 
@@ -370,9 +399,15 @@ final class StyleInstaller<C extends JComponent>
         if ( !backgroundWasSetSomewhereElse )
             _currentBackgroundColor = owner.getBackground();
 
-        return newStyle;
+        StyleEngine newEngine = _updateEngine(owner, engine, newStyle);
+
+        _applyFontStyleTo(owner, newStyle);
+
+        return newEngine;
     }
 
+
+    @SuppressWarnings("ReferenceEquality")
     boolean backgroundWasChangedSomewhereElse( C owner ) {
         if ( _currentBackgroundColor != null ) {
             if ( _currentBackgroundColor != owner.getBackground() ) {
@@ -385,23 +420,25 @@ final class StyleInstaller<C extends JComponent>
 
     private void _applyGenericBaseStyleTo( final C owner, final StyleConf styleConf )
     {
-        if ( styleConf.base().foregroundColor().isPresent() && !Objects.equals( owner.getForeground(), styleConf.base().foregroundColor().get() ) ) {
-            Color newColor = styleConf.base().foregroundColor().get();
-            if ( newColor == UI.Color.UNDEFINED)
+        final BaseConf base = styleConf.base();
+
+        if ( base.foregroundColor().isPresent() && !Objects.equals( owner.getForeground(), base.foregroundColor().get() ) ) {
+            Color newColor = base.foregroundColor().get();
+            if ( StyleUtil.isUndefinedColor(newColor) )
                 newColor = null;
 
             if ( !Objects.equals( owner.getForeground(), newColor ) )
                 owner.setForeground( newColor );
         }
 
-        styleConf.base().cursor().ifPresent( cursor -> {
+        base.cursor().ifPresent( cursor -> {
             if ( !Objects.equals( owner.getCursor(), cursor ) )
                 owner.setCursor( cursor );
         });
 
-        if ( styleConf.base().orientation() != UI.ComponentOrientation.UNKNOWN ) {
+        if ( base.orientation() != UI.ComponentOrientation.UNKNOWN ) {
             ComponentOrientation currentOrientation = owner.getComponentOrientation();
-            UI.ComponentOrientation newOrientation = styleConf.base().orientation();
+            UI.ComponentOrientation newOrientation = base.orientation();
             switch ( newOrientation ) {
                 case LEFT_TO_RIGHT:
                     if ( !Objects.equals( currentOrientation, ComponentOrientation.LEFT_TO_RIGHT ) )
@@ -421,8 +458,10 @@ final class StyleInstaller<C extends JComponent>
 
     private void _applyIconStyleTo( final C owner, StyleConf styleConf )
     {
-        UI.FitComponent fit = styleConf.base().fit();
-        styleConf.base().icon().ifPresent( icon -> {
+        final BaseConf base = styleConf.base();
+
+        UI.FitComponent fit = base.fit();
+        base.icon().ifPresent( icon -> {
             if ( icon instanceof SvgIcon) {
                 SvgIcon svgIcon = (SvgIcon) icon;
                 icon = svgIcon.withFitComponent(fit);
@@ -445,36 +484,35 @@ final class StyleInstaller<C extends JComponent>
         });
     }
 
-    private void _applyLayoutStyleTo( final C owner, final StyleConf styleConf )
+    private void _applyLayoutStyleTo( final C owner, final StyleConf style )
     {
-        final LayoutConf style = styleConf.layout();
-
+        final LayoutConf layoutConf = style.layout();
         // Generic Layout stuff:
 
-        styleConf.layout().alignmentX().ifPresent( alignmentX -> {
+        layoutConf.alignmentX().ifPresent( alignmentX -> {
             if ( !Objects.equals( owner.getAlignmentX(), alignmentX ) )
                 owner.setAlignmentX( alignmentX );
         });
 
-        styleConf.layout().alignmentY().ifPresent( alignmentY -> {
+        layoutConf.alignmentY().ifPresent( alignmentY -> {
             if ( !Objects.equals( owner.getAlignmentY(), alignmentY ) )
                 owner.setAlignmentY( alignmentY );
         });
 
         // Install Generic Layout:
-        styleConf.layout().layout().installFor(owner);
+        layoutConf.layout().installFor(owner);
 
         // Now on to MigLayout stuff:
 
-        Optional<Float> alignmentX = style.alignmentX();
-        Optional<Float> alignmentY = style.alignmentY();
+        Optional<Float> alignmentX = layoutConf.alignmentX();
+        Optional<Float> alignmentY = layoutConf.alignmentY();
 
         if ( !alignmentX.isPresent() && !alignmentY.isPresent() )
             return;
 
-        LayoutManager layout = ( owner.getParent() == null ? null : owner.getParent().getLayout() );
-        if ( layout instanceof MigLayout ) {
-            MigLayout migLayout = (MigLayout) layout;
+        LayoutManager layoutManager = ( owner.getParent() == null ? null : owner.getParent().getLayout() );
+        if ( layoutManager instanceof MigLayout ) {
+            MigLayout migLayout = (MigLayout) layoutManager;
             Object rawComponentConstraints = migLayout.getComponentConstraints(owner);
             if ( rawComponentConstraints instanceof String )
                 rawComponentConstraints = ConstraintParser.parseComponentConstraint(rawComponentConstraints.toString());
@@ -569,6 +607,8 @@ final class StyleInstaller<C extends JComponent>
     private void _applyFontStyleTo( final C owner, final StyleConf styleConf )
     {
         final FontConf fontConf = styleConf.font();
+        if ( FontConf.none().equals(fontConf) )
+            return;
 
         if ( owner instanceof JTextComponent ) {
             JTextComponent tc = (JTextComponent) owner;
@@ -577,7 +617,7 @@ final class StyleInstaller<C extends JComponent>
         }
 
         fontConf
-             .createDerivedFrom(owner.getFont())
+             .createDerivedFrom(owner.getFont(), owner)
              .ifPresent( newFont -> {
                     if ( !newFont.equals(owner.getFont()) )
                         owner.setFont( newFont );
