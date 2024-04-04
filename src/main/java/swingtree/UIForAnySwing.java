@@ -577,6 +577,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  This is the inverse of {@link #makeNonOpaque()}.
      *
      *  @return This very instance, which enables builder-style method chaining.
+     *  @deprecated SwingTree considers the opaqueness a property which emerges from the
+     *              style configuration of the component. Therefore, it is not recommended
+     *              to set the opaqueness directly. Instead, use the {@link #withBackground(Color)}
+     *              method to set the style of the component so that it becomes opaque.
      */
     @Deprecated
     public final I makeOpaque() {
@@ -588,6 +592,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  This is the inverse of {@link #makeOpaque()}.
      *
      *  @return This very instance, which enables builder-style method chaining.
+     *  @deprecated Use {@link #withBackground(Color)} instead, by passing
+     *             it the {@link UI.Color#TRANSPARENT} constant.<br>
+     *             Alternatively, you may use the {@link #peek(Peeker)}
+     *             method to peek into the builder's component
+     *             and set the flag directly.
      */
     @Deprecated
     public final I makeNonOpaque() {
