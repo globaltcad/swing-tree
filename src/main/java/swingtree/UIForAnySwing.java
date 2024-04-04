@@ -4103,7 +4103,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     );
         });
         models.forEach( v -> {
-            _addBuildersTo( thisComponent, new UIForAnything[]{viewSupplier.createViewFor(v)} );
+            if ( attr == null )
+                _addBuildersTo( thisComponent, viewSupplier.createViewFor(v) );
+            else
+                _addBuildersTo( thisComponent, attr, viewSupplier.createViewFor(v) );
         });
     }
 
