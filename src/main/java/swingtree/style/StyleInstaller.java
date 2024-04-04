@@ -399,12 +399,13 @@ final class StyleInstaller<C extends JComponent>
         if ( !backgroundWasSetSomewhereElse )
             _currentBackgroundColor = owner.getBackground();
 
-        return _updateEngine(owner, engine, newStyle);
+        StyleEngine newEngine = _updateEngine(owner, engine, newStyle);
+
+        _applyFontStyleTo(owner, newStyle);
+
+        return newEngine;
     }
 
-    void installFontStyleTo( C owner, StyleConf styleConf, BoxModelConf boxModel ) {
-        _applyFontStyleTo(owner, styleConf, boxModel);
-    }
 
     @SuppressWarnings("ReferenceEquality")
     boolean backgroundWasChangedSomewhereElse( C owner ) {
@@ -603,7 +604,7 @@ final class StyleInstaller<C extends JComponent>
         }
     }
 
-    private void _applyFontStyleTo( final C owner, final StyleConf styleConf, final BoxModelConf boxModel )
+    private void _applyFontStyleTo( final C owner, final StyleConf styleConf )
     {
         final FontConf fontConf = styleConf.font();
         if ( FontConf.none().equals(fontConf) )
@@ -616,7 +617,7 @@ final class StyleInstaller<C extends JComponent>
         }
 
         fontConf
-             .createDerivedFrom(owner.getFont(), boxModel)
+             .createDerivedFrom(owner.getFont(), owner)
              .ifPresent( newFont -> {
                     if ( !newFont.equals(owner.getFont()) )
                         owner.setFont( newFont );

@@ -869,6 +869,14 @@ class Styles_Spec extends Specification
             var paint           = label.getFont().getAttributes().get(TextAttribute.FOREGROUND)
             var backgroundPaint = label.getFont().getAttributes().get(TextAttribute.BACKGROUND)
         then : """
+            We find that both paint objects are font paints.
+        """
+            paint instanceof swingtree.style.FontPaint
+            backgroundPaint instanceof swingtree.style.FontPaint
+        when : 'We unpack their delegated paint...'
+            paint           = paint.getDelegatedPaint()
+            backgroundPaint = backgroundPaint.getDelegatedPaint()
+        then : """
             We find tha both paint objects are gradient paints.
             But one is a linear gradient and the other is a simple 2 color based gradient.
         """
@@ -936,7 +944,15 @@ class Styles_Spec extends Specification
             var paint           = label.getFont().getAttributes().get(TextAttribute.FOREGROUND)
             var backgroundPaint = label.getFont().getAttributes().get(TextAttribute.BACKGROUND)
         then : """
-            We find tha both paint objects are noise paints.
+            We find that both paint objects are font paints.
+        """
+            paint instanceof swingtree.style.FontPaint
+            backgroundPaint instanceof swingtree.style.FontPaint
+        when : 'We unpack their delegated paint...'
+            paint           = paint.getDelegatedPaint()
+            backgroundPaint = backgroundPaint.getDelegatedPaint()
+        then : """
+            We find that both paint objects are noise paints.
         """
             paint instanceof swingtree.style.NoiseGradientPaint
             backgroundPaint instanceof swingtree.style.NoiseGradientPaint

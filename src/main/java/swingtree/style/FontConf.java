@@ -296,13 +296,13 @@ public final class FontConf
     Optional<Paint> paint() {
         if ( FontPaintConf.none().equals(_paint) )
             return Optional.empty();
-        return Optional.ofNullable(_paint.get(BoxModelConf.none()));
+        return Optional.ofNullable(_paint.getFor(BoxModelConf.none()));
     }
 
     Optional<Paint> backgroundPaint() {
         if ( FontPaintConf.none().equals(_backgroundPaint) )
             return Optional.empty();
-        return Optional.ofNullable(_backgroundPaint.get(BoxModelConf.none()));
+        return Optional.ofNullable(_backgroundPaint.getFor(BoxModelConf.none()));
     }
 
     UI.HorizontalAlignment horizontalAlignment() { return _horizontalAlignment; }
@@ -831,7 +831,15 @@ public final class FontConf
                 );
     }
 
-    Optional<Font> createDerivedFrom( Font existingFont, BoxModelConf boxModel )
+    Optional<Font> createDerivedFrom( Font existingFont, JComponent component ) {
+        return _createDerivedFrom(existingFont, component);
+    }
+
+    Optional<Font> createDerivedFrom( Font existingFont, BoxModelConf boxModel ) {
+        return _createDerivedFrom(existingFont, boxModel);
+    }
+
+    private Optional<Font> _createDerivedFrom( Font existingFont, Object boxModelOrComponent )
     {
         if ( this.equals(_NONE) )
             return Optional.empty();
@@ -878,7 +886,12 @@ public final class FontConf
         }
         if ( !_paint.equals(FontPaintConf.none()) ) {
             try {
-                Paint paint = _paint.get(boxModel);
+                Paint paint = null;
+                if ( boxModelOrComponent instanceof BoxModelConf )
+                    paint = _paint.getFor((BoxModelConf) boxModelOrComponent);
+                else if ( boxModelOrComponent instanceof JComponent )
+                    paint = _paint.getFor((JComponent) boxModelOrComponent);
+
                 isChange = isChange || !Objects.equals(paint, currentAttributes.get(TextAttribute.FOREGROUND));
                 attributes.put(TextAttribute.FOREGROUND, paint);
             } catch ( Exception e ) {
@@ -887,7 +900,12 @@ public final class FontConf
         }
         if ( !_backgroundPaint.equals(FontPaintConf.none()) ) {
             try {
-                Paint backgroundPaint = _backgroundPaint.get(boxModel);
+                Paint backgroundPaint = null;
+                if ( boxModelOrComponent instanceof BoxModelConf )
+                    backgroundPaint = _backgroundPaint.getFor((BoxModelConf) boxModelOrComponent);
+                else if ( boxModelOrComponent instanceof JComponent )
+                    backgroundPaint = _backgroundPaint.getFor((JComponent) boxModelOrComponent);
+
                 isChange = isChange || !Objects.equals(backgroundPaint, currentAttributes.get(TextAttribute.BACKGROUND));
                 attributes.put(TextAttribute.BACKGROUND, backgroundPaint);
             } catch ( Exception e ) {

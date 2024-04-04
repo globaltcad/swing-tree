@@ -3,8 +3,9 @@ package swingtree.style;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
-import java.awt.Color;
-import java.awt.Paint;
+import javax.swing.JComponent;
+import java.awt.*;
+import java.lang.ref.WeakReference;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -110,7 +111,7 @@ final class FontPaintConf
         return this;
     }
 
-    @Nullable Paint get( BoxModelConf boxModelConf ) {
+    @Nullable Paint getFor( BoxModelConf boxModelConf ) {
         if (_color != null)
             return _color;
         if (_paint != null)
@@ -120,6 +121,10 @@ final class FontPaintConf
         if (_gradient != null)
             return StyleRenderer._createGradientPaint(boxModelConf, _gradient);
         return null;
+    }
+
+    @Nullable Paint getFor(JComponent component) {
+        return new FontPaint(this, new WeakReference<>(component));
     }
 
     @Override

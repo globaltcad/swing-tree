@@ -76,6 +76,8 @@ public final class ComponentExtension<C extends JComponent>
 
     C getOwner() { return _owner; }
 
+    BoxModelConf getBoxModelConf() { return _styleEngine.getBoxModelConf(); }
+
     /**
      *  Allows for extra state to be attached to the component extension.
      *  (Conceptually similar to how Swing components can have client properties.)<br>
@@ -360,8 +362,6 @@ public final class ComponentExtension<C extends JComponent>
                                     newStyle,
                                     force
                                 );
-
-        _styleInstaller.installFontStyleTo(_owner, newStyle, _styleEngine.getBoxModelConf());
     }
 
     private void _switchToPaintStep( PaintStep step ) {
