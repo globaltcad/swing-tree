@@ -1,6 +1,7 @@
 package swingtree.mvvm
 
 import examples.mvvm.LoginViewModel
+import net.miginfocom.swing.MigLayout
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
@@ -399,7 +400,7 @@ class MVVM_Example_Spec extends Specification
     }
 
 
-    def 'View Models can be represented by properties lists.'() {
+    def 'View Models can be represented by property lists.'() {
         reportInfo """
             In larger GUIs usually consist views which themselves consist of multiple
             sub views. This is also true for their view models which are usually
@@ -498,6 +499,116 @@ class MVVM_Example_Spec extends Specification
             !new Utility.Query(panel).find(JPanel, "sub-3").isPresent()
             !new Utility.Query(panel).find(JPanel, "sub-4").isPresent()
             new Utility.Query(panel).find(JPanel, "super").isPresent()
+    }
+
+    def 'A dynamic property list based UI declaration can have layout constraints.'()
+    {
+        reportInfo """
+            In larger GUIs usually consist views which themselves consist of multiple
+            sub views. This is also true for their view models which are usually
+            structured in the same tree like fashion. 
+            Often times however, your views are highly dynamic and you want to
+            be able to swap out sub views at runtime. In this case it is useful
+            to represent your view models as property lists, especially if 
+            one view consists of multiple sub views.
+            Simply implement the 'Viewable' interface in your view model and
+            you can bind it to a view using the "Vars" class wrapping your viewables.
+            When the property list changes, the view will be updated automatically.
+        """
+        given : 'We create 4 view models with 4 locally created views:'
+            var vm1 = "Dummy View Model 1"
+            var vm2 = "Dummy View Model 2"
+            var vm3 = "Dummy View Model 3"
+            var vm4 = "Dummy View Model 4"
+            ViewSupplier<String> viewer = viewModel -> {
+                switch ( viewModel ) {
+                    case "Dummy View Model 1":
+                            return UI.panel().id("sub-1")
+                    case "Dummy View Model 2":
+                            return UI.panel().id("sub-2")
+                    case "Dummy View Model 3":
+                            return UI.panel().id("sub-3")
+                    case "Dummy View Model 4":
+                                return UI.panel().id("sub-4")
+                }
+            }
+        and : 'A property list storing the view models.'
+            var vms = Vars.of(vm1, vm2, vm3, vm4)
+        and : 'Finally a view which binds to the view model property list.'
+            var ui = UI.panel()
+                        .add(UI.label("Dynamic Super View:"))
+                        .add(
+                            UI.panel("wrap 1").id("super")
+                            .add("growx", vms, viewer)
+                        )
+        and : 'We build the component and get its layout.'
+            var panel = ui.get(JPanel)
+        expect : 'We query the UI for the views and verify that the "super" and "sub-1" views are present.'
+            new Utility.Query(panel).find(JPanel, "super").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-1").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-2").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-3").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-4").isPresent()
+        when : 'We unpack the layout manager for the "super" view.'
+            var layout = (MigLayout) new Utility.Query(panel).find(JPanel, "super").get().getLayout()
+        then : 'Each sub view has the layout constraints "growx".'
+            layout.getComponentConstraints(new Utility.Query(panel).find(JPanel, "sub-1").get()) == "growx"
+            layout.getComponentConstraints(new Utility.Query(panel).find(JPanel, "sub-2").get()) == "growx"
+            layout.getComponentConstraints(new Utility.Query(panel).find(JPanel, "sub-3").get()) == "growx"
+            layout.getComponentConstraints(new Utility.Query(panel).find(JPanel, "sub-4").get()) == "growx"
+        when : 'We remove something from the view model property list.'
+            vms.remove(vm1)
+            UI.sync()
+        then : 'We expect all views to be present except for the "sub-2" view.'
+            new Utility.Query(panel).find(JPanel, "super").isPresent()
+            !new Utility.Query(panel).find(JPanel, "sub-1").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-2").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-3").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-4").isPresent()
+        and : 'The layout manager was updated accordingly:'
+            layout.constraintMap.size() == 3
+            layout.getComponentConstraints(new Utility.Query(panel).find(JPanel, "sub-2").get()) == "growx"
+            layout.getComponentConstraints(new Utility.Query(panel).find(JPanel, "sub-3").get()) == "growx"
+            layout.getComponentConstraints(new Utility.Query(panel).find(JPanel, "sub-4").get()) == "growx"
+        when : 'We remove something else from the view model property list but this time, for a change, use the index.'
+            vms.removeAt(1) // vm3
+            UI.sync()
+        then : 'We expect all views to be present except for the "sub-1" and "sub-3" views.'
+            new Utility.Query(panel).find(JPanel, "super").isPresent()
+            !new Utility.Query(panel).find(JPanel, "sub-1").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-2").isPresent()
+            !new Utility.Query(panel).find(JPanel, "sub-3").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-4").isPresent()
+        and : 'Again, as expected, the layout manager was updated accordingly:'
+            layout.constraintMap.size() == 2
+            layout.getComponentConstraints(new Utility.Query(panel).find(JPanel, "sub-2").get()) == "growx"
+            layout.getComponentConstraints(new Utility.Query(panel).find(JPanel, "sub-4").get()) == "growx"
+        when : 'We reintroduce "vm1"...'
+            vms.add(vm1)
+            UI.sync()
+        then : 'We expect all views to be present except for the "sub-3" view.'
+            new Utility.Query(panel).find(JPanel, "super").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-1").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-2").isPresent()
+            !new Utility.Query(panel).find(JPanel, "sub-3").isPresent()
+            new Utility.Query(panel).find(JPanel, "sub-4").isPresent()
+        and : 'The layout manager also knows about the new constraint:'
+            layout.constraintMap.size() == 3
+            layout.getComponentConstraints(new Utility.Query(panel).find(JPanel, "sub-1").get()) == "growx"
+            layout.getComponentConstraints(new Utility.Query(panel).find(JPanel, "sub-2").get()) == "growx"
+            layout.getComponentConstraints(new Utility.Query(panel).find(JPanel, "sub-4").get()) == "growx"
+
+        when : 'We clear the view model property list.'
+            vms.clear()
+            UI.sync()
+        then : 'We expect all views to be removed. (except for the "super" view)'
+            !new Utility.Query(panel).find(JPanel, "sub-1").isPresent()
+            !new Utility.Query(panel).find(JPanel, "sub-2").isPresent()
+            !new Utility.Query(panel).find(JPanel, "sub-3").isPresent()
+            !new Utility.Query(panel).find(JPanel, "sub-4").isPresent()
+            new Utility.Query(panel).find(JPanel, "super").isPresent()
+        and : 'The layout manager reports no constraints.'
+            layout.constraintMap.size() == 0
     }
 
     def 'A view model property may or may not exist, meaning its view may or may not be provided.'() {
