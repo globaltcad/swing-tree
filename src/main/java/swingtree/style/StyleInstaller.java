@@ -68,9 +68,24 @@ final class StyleInstaller<C extends JComponent>
 
     StyleConf applyStyleToComponentState(
         final C              owner, // <- The component we want to style.
+        final StyleEngine    engine,
         StyleConf            newStyle,
-        final StyleSource<C> styleSource
+        final StyleSource<C> styleSource,
+        final boolean        force
     ) {
+        boolean doInstallation = true;
+
+        if ( !force ) {
+            // We check if it makes sense to apply the new style:
+            boolean componentBackgroundWasMutated = this.backgroundWasChangedSomewhereElse(owner);
+
+            if ( !componentBackgroundWasMutated && engine.getComponentConf().style().equals(newStyle) )
+                doInstallation = false;
+        }
+
+        if ( !doInstallation )
+            return newStyle;
+
         final boolean noLayoutStyle           = StyleConf.none().hasEqualLayoutAs(newStyle);
         final boolean noPaddingAndMarginStyle = StyleConf.none().hasEqualMarginAndPaddingAs(newStyle);
         final boolean noBorderStyle           = StyleConf.none().hasEqualBorderAs(newStyle);
