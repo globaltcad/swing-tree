@@ -66,11 +66,26 @@ final class StyleInstaller<C extends JComponent>
         return _dynamicLaF.customLookAndFeelIsInstalled();
     }
 
-    StyleConf applyStyleToComponentState(
+    StyleEngine _updateEngine(
+        final C              owner,
+        final StyleEngine    engine,
+        StyleConf            newStyle
+    ) {
+        ComponentConf currentConf = engine.getComponentConf();
+        LayerCache[] layerCaches = engine.getLayerCaches();
+        ComponentConf newConf = currentConf.with(newStyle, owner);
+        BoxModelConf newBoxModelConf = BoxModelConf.of(newConf.style().border(), newConf.baseOutline(), newConf.currentBounds().size());
+        for ( LayerCache layerCache : layerCaches )
+            layerCache.validate(currentConf, newConf);
+
+        return engine.with(newBoxModelConf, newConf);
+    }
+
+    StyleEngine applyStyleToComponentState(
         final C              owner, // <- The component we want to style.
         final StyleEngine    engine,
-        StyleConf            newStyle,
         final StyleSource<C> styleSource,
+        StyleConf            newStyle,
         final boolean        force
     ) {
         boolean doInstallation = true;
@@ -84,7 +99,7 @@ final class StyleInstaller<C extends JComponent>
         }
 
         if ( !doInstallation )
-            return newStyle;
+            return _updateEngine(owner, engine, newStyle);
 
         final boolean noLayoutStyle           = StyleConf.none().hasEqualLayoutAs(newStyle);
         final boolean noPaddingAndMarginStyle = StyleConf.none().hasEqualMarginAndPaddingAs(newStyle);
@@ -172,7 +187,7 @@ final class StyleInstaller<C extends JComponent>
                 _initialIsOpaque = null;
             }
             if ( isNotStyled )
-                return newStyle;
+                return _updateEngine(owner, engine, newStyle);
         }
 
         // The component is styled, so we can now apply the style to the component:
@@ -384,7 +399,7 @@ final class StyleInstaller<C extends JComponent>
         if ( !backgroundWasSetSomewhereElse )
             _currentBackgroundColor = owner.getBackground();
 
-        return newStyle;
+        return _updateEngine(owner, engine, newStyle);
     }
 
     void installFontStyleTo( C owner, StyleConf styleConf, BoxModelConf boxModel ) {

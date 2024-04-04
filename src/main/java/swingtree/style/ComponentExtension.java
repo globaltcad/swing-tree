@@ -353,21 +353,13 @@ public final class ComponentExtension<C extends JComponent>
             border.recalculateInsets(newStyle);
         }
 
-        newStyle = _styleInstaller.applyStyleToComponentState(
+        _styleEngine = _styleInstaller.applyStyleToComponentState(
                                     _owner,
                                     _styleEngine,
-                                    newStyle,
                                     _styleSource,
+                                    newStyle,
                                     force
                                 );
-
-        ComponentConf currentConf = _styleEngine.getComponentConf();
-        LayerCache[] layerCaches = _styleEngine.getLayerCaches();
-        ComponentConf newConf = currentConf.with(newStyle, _owner);
-        BoxModelConf newBoxModelConf = BoxModelConf.of(newConf.style().border(), newConf.baseOutline(), newConf.currentBounds().size());
-        for ( LayerCache layerCache : layerCaches )
-            layerCache.validate(currentConf, newConf);
-        _styleEngine =  _styleEngine.with(newBoxModelConf, newConf);
 
         _styleInstaller.installFontStyleTo(_owner, newStyle, _styleEngine.getBoxModelConf());
     }
