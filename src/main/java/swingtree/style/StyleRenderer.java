@@ -11,6 +11,8 @@ import swingtree.layout.Size;
 import java.awt.*;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
+import java.awt.image.ConvolveOp;
+import java.awt.image.Kernel;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -28,9 +30,12 @@ final class StyleRenderer
     private StyleRenderer() {} // Un-instantiable!
 
 
-    public static void renderStyleOn( UI.Layer layer, LayerRenderConf conf, Graphics2D g2d )
-    {
-        // First up, we render things unique to certain layers:
+    public static void renderStyleOn(
+        UI.Layer layer,
+        LayerRenderConf conf,
+        Graphics2D g2d
+    ) {
+        // First we render things unique to certain layers:
 
         // Background stuff:
         conf.baseColors().foundationColor().ifPresent(outerColor -> {
@@ -1368,5 +1373,36 @@ final class StyleRenderer
             g2d.setFont(initialFont);
             g2d.setClip(oldClip);
         }
+    }
+
+    static void renderParentFilter(
+        FilterConf    filterConf,
+        BufferedImage parentRendering,
+        Graphics2D    g2d,
+        int offsetX,
+        int offsetY,
+        BoxModelConf boxModelConf
+    ) {
+        Offset offset = filterConf.offset();
+        Offset center = filterConf.center();
+        Offset scale = filterConf.scale();
+        KernelConf kernel = filterConf.kernel();
+        Kernel awtKernel = kernel.toAwtKernel();
+        ConvolveOp convolve = new ConvolveOp(awtKernel, ConvolveOp.EDGE_NO_OP, null);
+        BufferedImage filtered = convolve.filter(parentRendering, null);
+        offsetX += (int) offset.x();
+        offsetY += (int) offset.y();
+        Shape oldClip = g2d.getClip();
+        ComponentAreas areas = boxModelConf.areas();
+        Shape newClip = areas.get(filterConf.area());
+        if ( newClip == null ) {
+            Size size = boxModelConf.size();
+            int width = size.width().orElse(0f).intValue();
+            int height = size.height().orElse(0f).intValue();
+            newClip = new Rectangle(0, 0, width, height);
+        }
+        g2d.setClip(newClip);
+        g2d.drawImage(filtered, -offsetX, -offsetY, null);
+        g2d.setClip(oldClip);
     }
 }

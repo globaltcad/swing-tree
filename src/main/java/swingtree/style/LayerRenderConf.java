@@ -87,7 +87,7 @@ final class LayerRenderConf
 
     StyleConfLayer layer() { return _layer; }
 
-    ComponentAreas areas() { return ComponentAreas.of(_boxModelConf); }
+    ComponentAreas areas() { return _boxModelConf.areas(); }
 
 
     @Override

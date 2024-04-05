@@ -1,6 +1,7 @@
 package swingtree.style;
 
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
 import swingtree.UI;
 
 import java.util.Objects;
@@ -9,7 +10,10 @@ import java.util.function.Function;
 
 final class StyleConfLayers
 {
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(StyleConfLayers.class);
+
     private static final StyleConfLayers _EMPTY = new StyleConfLayers(
+                                                    FilterConf.none(),
                                                     StyleConfLayer.empty(),
                                                     StyleConfLayer.empty(),
                                                     StyleConfLayer.empty(),
@@ -21,7 +25,7 @@ final class StyleConfLayers
         return _EMPTY;
     }
 
-
+    private final FilterConf               _filter;
     private final StyleConfLayer           _background;
     private final StyleConfLayer           _content;
     private final StyleConfLayer           _border;
@@ -31,6 +35,7 @@ final class StyleConfLayers
 
 
     static StyleConfLayers of(
+        FilterConf               filter,
         StyleConfLayer           background,
         StyleConfLayer           content,
         StyleConfLayer           border,
@@ -39,6 +44,7 @@ final class StyleConfLayers
     ) {
         StyleConfLayer empty = StyleConfLayer.empty();
         if (
+            filter     == FilterConf.none() &&
             background == empty &&
             content    == empty &&
             border     == empty &&
@@ -47,16 +53,18 @@ final class StyleConfLayers
         )
             return _EMPTY;
 
-        return new StyleConfLayers( background, content, border, foreground, any );
+        return new StyleConfLayers( filter, background, content, border, foreground, any );
     }
 
     StyleConfLayers(
+        FilterConf               filter,
         StyleConfLayer           background,
         StyleConfLayer           content,
         StyleConfLayer           border,
         StyleConfLayer           foreground,
         @Nullable StyleConfLayer any
     ) {
+        _filter     = Objects.requireNonNull(filter);
         _background = Objects.requireNonNull(background);
         _content    = Objects.requireNonNull(content);
         _border     = Objects.requireNonNull(border);
@@ -64,7 +72,9 @@ final class StyleConfLayers
         _any        = any;
     }
 
-    StyleConfLayer get(UI.Layer layer ) {
+    FilterConf filter() { return _filter; }
+
+    StyleConfLayer get( UI.Layer layer ) {
         if ( _any != null )
             return _any;
 
@@ -78,12 +88,22 @@ final class StyleConfLayers
         }
     }
 
+    StyleConfLayers filter( Function<FilterConf, FilterConf> f ) {
+        FilterConf filter = _filter;
+        try {
+            filter = f.apply(_filter);
+        } catch (Exception e) {
+            log.error("Error configuring filter settings for component background.", e);
+        }
+        return of(filter, _background, _content, _border, _foreground, _any);
+    }
+
     StyleConfLayers with(UI.Layer layer, StyleConfLayer style) {
         switch (layer) {
-            case BACKGROUND: return of(style,       _content, _border,  _foreground, _any);
-            case CONTENT:    return of(_background,  style,    _border, _foreground, _any);
-            case BORDER:     return of(_background, _content,  style,   _foreground, _any);
-            case FOREGROUND: return of(_background, _content, _border,   style,      _any);
+            case BACKGROUND: return of(_filter, style,       _content, _border,  _foreground, _any);
+            case CONTENT:    return of(_filter, _background,  style,    _border, _foreground, _any);
+            case BORDER:     return of(_filter, _background, _content,  style,   _foreground, _any);
+            case FOREGROUND: return of(_filter, _background, _content, _border,   style,      _any);
             default:
                 throw new IllegalArgumentException("Unknown layer: " + layer);
         }
@@ -103,7 +123,7 @@ final class StyleConfLayers
     }
 
     StyleConfLayers map(Function<StyleConfLayer, StyleConfLayer> f ) {
-        return of(f.apply(_background), f.apply(_content), f.apply(_border), f.apply(_foreground), _any == null ? null : f.apply(_any));
+        return of(_filter, f.apply(_background), f.apply(_content), f.apply(_border), f.apply(_foreground), _any == null ? null : f.apply(_any));
     }
 
     @SuppressWarnings("ReferenceEquality")
@@ -111,6 +131,7 @@ final class StyleConfLayers
         if ( this == _EMPTY )
             return this;
 
+        FilterConf     filter     = _filter.simplified();
         StyleConfLayer background = _background.simplified();
         StyleConfLayer content    = _content.simplified();
         StyleConfLayer border     = _border.simplified();
@@ -118,6 +139,7 @@ final class StyleConfLayers
         StyleConfLayer any        = ( _any == null ? null : _any.simplified() );
 
         if (
+             filter     == _filter     &&
              background == _background &&
              content    == _content    &&
              border     == _border     &&
@@ -126,7 +148,7 @@ final class StyleConfLayers
         )
             return this;
 
-        return of(background, content, border, foreground, any);
+        return of(filter, background, content, border, foreground, any);
     }
 
     @Override
@@ -137,23 +159,24 @@ final class StyleConfLayers
                 _any
             );
         return String.format(
-            this.getClass().getSimpleName() + "[background=%s, content=%s, border=%s, foreground=%s]",
-            _background, _content, _border, _foreground
+            this.getClass().getSimpleName() + "[filter=%s, background=%s, content=%s, border=%s, foreground=%s]",
+            _filter, _background, _content, _border, _foreground
         );
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(_background, _content, _border, _foreground, _any);
+        return Objects.hash(_filter, _background, _content, _border, _foreground, _any);
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == this) return true;
-        if (!(obj instanceof StyleConfLayers)) return false;
+    public boolean equals( Object obj ) {
+        if ( obj == this ) return true;
+        if ( !(obj instanceof StyleConfLayers) ) return false;
 
         StyleConfLayers other = (StyleConfLayers) obj;
-        return Objects.equals(_background, other._background)
+        return Objects.equals(_filter,     other._filter)
+            && Objects.equals(_background, other._background)
             && Objects.equals(_content,    other._content)
             && Objects.equals(_border,     other._border)
             && Objects.equals(_foreground, other._foreground)

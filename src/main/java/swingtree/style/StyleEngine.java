@@ -11,6 +11,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Shape;
+import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -87,7 +88,7 @@ final class StyleEngine
         return new StyleEngine(_boxModelConf, _componentConf, _layerCaches);
     }
 
-    void renderBackgroundStyle( Graphics2D g2d )
+    void renderBackgroundStyle( Graphics2D g2d, @Nullable BufferedImage parentRendering, int x, int y )
     {
         // We remember if antialiasing was enabled before we render:
         boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
@@ -96,6 +97,14 @@ final class StyleEngine
         if ( IS_ANTIALIASING_ENABLED() )
             g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
+        // A component may have a filter on the parent:
+        if ( parentRendering != null ) {
+            FilterConf filter = _componentConf.style().layers().filter();
+            if ( !filter.equals(FilterConf.none()) ) {
+                // Location relative to the parent:
+                StyleRenderer.renderParentFilter(filter, parentRendering, g2d, x, y, _boxModelConf);
+            }
+        }
         _render(UI.Layer.BACKGROUND, g2d);
 
         // Reset antialiasing to its previous state:

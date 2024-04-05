@@ -204,6 +204,7 @@ class Styles_Spec extends Specification
                                         "], " +
                                         "DimensionalityConf[NONE], " +
                                         "StyleConfLayers[" +
+                                            "filter=FilterConf[NONE], " +
                                             "background=StyleConfLayer[EMPTY], " +
                                             "content=StyleConfLayer[" +
                                                 "shadows=ShadowConf[" +
@@ -270,6 +271,7 @@ class Styles_Spec extends Specification
                                         "], " +
                                         "DimensionalityConf[NONE], " +
                                         "StyleConfLayers[" +
+                                            "filter=FilterConf[NONE], " +
                                             "background=StyleConfLayer[EMPTY], " +
                                             "content=StyleConfLayer[EMPTY], " +
                                             "border=StyleConfLayer[EMPTY], " +
@@ -339,6 +341,7 @@ class Styles_Spec extends Specification
                                             "height=" + roundScaledToString(200) +
                                         "], " +
                                         "StyleConfLayers[" +
+                                            "filter=FilterConf[NONE], " +
                                             "background=StyleConfLayer[EMPTY], " +
                                             "content=StyleConfLayer[EMPTY], " +
                                             "border=StyleConfLayer[" +
@@ -505,6 +508,7 @@ class Styles_Spec extends Specification
                     "FontConf[NONE], " +
                     "DimensionalityConf[NONE], " +
                     "StyleConfLayers[" +
+                        "filter=FilterConf[NONE], " +
                         "background=StyleConfLayer[EMPTY], " +
                         "content=StyleConfLayer[EMPTY], " +
                         "border=StyleConfLayer[EMPTY], " +
@@ -552,6 +556,7 @@ class Styles_Spec extends Specification
                         "height=" + roundScaledToString(80) +
                     "], " +
                     "StyleConfLayers[" +
+                        "filter=FilterConf[NONE], " +
                         "background=StyleConfLayer[EMPTY], " +
                         "content=StyleConfLayer[EMPTY], " +
                         "border=StyleConfLayer[EMPTY], " +
@@ -604,6 +609,7 @@ class Styles_Spec extends Specification
                     "FontConf[NONE], " +
                     "DimensionalityConf[NONE], " +
                     "StyleConfLayers[" +
+                        "filter=FilterConf[NONE], " +
                         "background=StyleConfLayer[EMPTY], " +
                         "content=StyleConfLayer[EMPTY], " +
                         "border=StyleConfLayer[EMPTY], " +
@@ -664,6 +670,7 @@ class Styles_Spec extends Specification
                     "FontConf[NONE], " +
                     "DimensionalityConf[NONE], " +
                     "StyleConfLayers[" +
+                        "filter=FilterConf[NONE], " +
                         "background=StyleConfLayer[EMPTY], " +
                         "content=StyleConfLayer[EMPTY], " +
                         "border=StyleConfLayer[EMPTY], " +
@@ -728,6 +735,7 @@ class Styles_Spec extends Specification
                     "FontConf[NONE], " +
                     "DimensionalityConf[NONE], " +
                     "StyleConfLayers[" +
+                        "filter=FilterConf[NONE], " +
                         "background=StyleConfLayer[EMPTY], " +
                         "content=StyleConfLayer[EMPTY], " +
                         "border=StyleConfLayer[EMPTY], " +
@@ -776,6 +784,7 @@ class Styles_Spec extends Specification
                     "FontConf[NONE], " +
                     "DimensionalityConf[NONE], " +
                     "StyleConfLayers[" +
+                        "filter=FilterConf[NONE], " +
                         "background=StyleConfLayer[EMPTY], " +
                         "content=StyleConfLayer[EMPTY], " +
                         "border=StyleConfLayer[EMPTY], " +
@@ -813,6 +822,7 @@ class Styles_Spec extends Specification
                     "FontConf[NONE], " +
                     "DimensionalityConf[NONE], " +
                     "StyleConfLayers[" +
+                        "filter=FilterConf[NONE], " +
                         "background=StyleConfLayer[EMPTY], " +
                         "content=StyleConfLayer[EMPTY], " +
                         "border=StyleConfLayer[EMPTY], " +

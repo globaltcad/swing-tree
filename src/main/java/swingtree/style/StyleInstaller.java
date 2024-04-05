@@ -101,6 +101,8 @@ final class StyleInstaller<C extends JComponent>
         if ( !doInstallation )
             return _updateEngine(owner, engine, newStyle);
 
+        final boolean isSwingTreeComponent = owner instanceof StylableComponent;
+
         final boolean noLayoutStyle           = StyleConf.none().hasEqualLayoutAs(newStyle);
         final boolean noPaddingAndMarginStyle = StyleConf.none().hasEqualMarginAndPaddingAs(newStyle);
         final boolean noBorderStyle           = StyleConf.none().hasEqualBorderAs(newStyle);
@@ -116,6 +118,8 @@ final class StyleInstaller<C extends JComponent>
         final boolean noProperties            = StyleConf.none().hasEqualPropertiesAs(newStyle);
 
         final boolean baseStyleIsBasic = newStyle.base().isBasic();
+
+        final boolean noParentFilter = FilterConf.none().equals(newStyle.layers().filter());
 
         final boolean allShadowsAreBorderShadows     = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) || styleLayer.shadows().everyNamedStyle(ns -> !ns.style().color().isPresent() ) );
         final boolean allGradientsAreBorderGradients = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) || styleLayer.gradients().everyNamedStyle(ns -> ns.style().colors().length == 0 ) );
@@ -136,7 +140,8 @@ final class StyleInstaller<C extends JComponent>
                                     noNoises                &&
                                     noImages                &&
                                     noTexts                 &&
-                                    noProperties;
+                                    noProperties            &&
+                                    noParentFilter;
 
         final boolean pluginsNeeded = !(// A plugin is either a Border or ComponentUI!
                                    noLayoutStyle                              &&
@@ -150,7 +155,9 @@ final class StyleInstaller<C extends JComponent>
                                    noNoises                                   &&
                                    noImages                                   &&
                                    noTexts                                    &&
-                                   noProperties );
+                                   noProperties                               &&
+                                   noParentFilter
+                                );
 
         final boolean styleCanBeRenderedThroughBorder = (
                                                        (noBaseStyle   || !newStyle.base().hasAnyColors())&&
@@ -159,7 +166,8 @@ final class StyleInstaller<C extends JComponent>
                                                        (noGradients   || allGradientsAreBorderGradients) &&
                                                        (noNoises      || allNoisesAreBorderNoises)       &&
                                                        (noImages      || allImagesAreBorderImages)       &&
-                                                       (noTexts       || allTextsAreBorderTexts)
+                                                       (noTexts       || allTextsAreBorderTexts)         &&
+                                                       (noParentFilter|| isSwingTreeComponent)
                                                    );
 
         Runnable backgroundSetter = ()->{};
@@ -208,7 +216,6 @@ final class StyleInstaller<C extends JComponent>
         final boolean hasBackground                      = newStyle.base().backgroundColor().isPresent();
         final boolean hasMargin                          = newStyle.margin().isPositive();
         final boolean hasOpaqueBorder                    = !(255 > newStyle.border().color().map(java.awt.Color::getAlpha).orElse(0));
-        final boolean isSwingTreeComponent               = owner instanceof StylableComponent;
         final boolean backgroundIsActuallyBackground =
                                     !( owner instanceof JTabbedPane  ) && // The LaFs interpret ths tab buttons as background
                                     !( owner instanceof JSlider      ) && // The track color is usually considered the background

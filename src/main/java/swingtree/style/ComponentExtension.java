@@ -11,6 +11,7 @@ import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.*;
 import java.util.function.Consumer;
@@ -70,6 +71,7 @@ public final class ComponentExtension<C extends JComponent>
     private @Nullable Shape _outerBaseClip = null;
 
     private PaintStep _lastPaintStep = PaintStep.UNDEFINED;
+    private @Nullable BufferedImage _bufferedImage = null;
 
 
     private ComponentExtension( C owner ) { _owner = Objects.requireNonNull(owner); }
@@ -381,11 +383,49 @@ public final class ComponentExtension<C extends JComponent>
             */
 
         _lastPaintStep = step;
-        try {
-            superPaint.accept((Graphics2D) graphics);
-        } catch ( Exception e ) {
-            log.error("Error while painting step '"+step+"'!", e);
+
+        if ( isNewPaintCycle && step == PaintStep.BACKGROUND && _hasChildWithParentFilter() ) {
+            int w = _owner.getWidth();
+            int h = _owner.getHeight();
+            BufferedImage backgroundImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D g2d = backgroundImage.createGraphics();
+            StyleUtil.transferConfigurations((Graphics2D) graphics, g2d);
+            g2d.setClip(graphics.getClip());
+            try {
+                superPaint.accept(g2d);
+            } catch ( Exception e ) {
+                log.error("Error while painting step '"+step+"'!", e);
+            }
+            graphics.drawImage(backgroundImage, 0, 0, null);
+            _bufferedImage = backgroundImage;
+        } else {
+            try {
+                superPaint.accept((Graphics2D) graphics);
+            } catch ( Exception e ) {
+                log.error("Error while painting step '"+step+"'!", e);
+            }
         }
+    }
+
+    private boolean _hasChildWithParentFilter() {
+        for ( Component child : _owner.getComponents() ) {
+            if ( !child.isOpaque() && child instanceof JComponent ) {
+                if ( _hasParentFilter((JComponent) child) )
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean _hasParentFilter( JComponent aComponent ) {
+        ComponentExtension<?> extension = from(aComponent);
+        ComponentConf conf = extension.getConf();
+        if ( conf.equals(ComponentConf.none()) )
+            return false;
+        StyleConf style = conf.style();
+        if ( style.equals(StyleConf.none()) )
+            return false;
+        return !style.layers().filter().equals(FilterConf.none());
     }
 
     /**
@@ -428,7 +468,15 @@ public final class ComponentExtension<C extends JComponent>
             if ( componentFont != null && !componentFont.equals(internalGraphics.getFont()) )
                 internalGraphics.setFont( componentFont );
 
-            _styleEngine.renderBackgroundStyle(internalGraphics);
+            // Sometimes needed to render filtered backgrounds:
+            BufferedImage parentRendering = Optional.ofNullable(_owner.getParent())
+                                            .map( c -> c instanceof JComponent ? (JComponent) c : null )
+                                            .map(ComponentExtension::from)
+                                            .map(e -> e._bufferedImage)
+                                            .orElse(null);
+
+            // Location relative to the parent:
+            _styleEngine.renderBackgroundStyle(internalGraphics, parentRendering, _owner.getX(), _owner.getY());
 
             if ( lookAndFeelPainting != null ) {
                 Shape contentClip = _styleEngine.componentArea().orElse(null);
