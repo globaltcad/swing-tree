@@ -102,17 +102,6 @@ final class StyleConfLayers
             && predicate.test(UI.Layer.FOREGROUND, _foreground);
     }
 
-    public StyleConfLayers onlyRetainingAsUnnamedLayer(UI.Layer layer ){
-        switch (layer) {
-            case BACKGROUND: return of(StyleConfLayer.empty(), StyleConfLayer.empty(), StyleConfLayer.empty(), StyleConfLayer.empty(), _background);
-            case CONTENT:    return of(StyleConfLayer.empty(), StyleConfLayer.empty(), StyleConfLayer.empty(), StyleConfLayer.empty(), _content);
-            case BORDER:     return of(StyleConfLayer.empty(), StyleConfLayer.empty(), StyleConfLayer.empty(), StyleConfLayer.empty(), _border);
-            case FOREGROUND: return of(StyleConfLayer.empty(), StyleConfLayer.empty(), StyleConfLayer.empty(), StyleConfLayer.empty(), _foreground);
-            default:
-                throw new IllegalArgumentException("Unknown layer: " + layer);
-        }
-    }
-
     StyleConfLayers map(Function<StyleConfLayer, StyleConfLayer> f ) {
         return of(f.apply(_background), f.apply(_content), f.apply(_border), f.apply(_foreground), _any == null ? null : f.apply(_any));
     }
