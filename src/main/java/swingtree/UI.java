@@ -1240,7 +1240,6 @@ public final class UI extends UIFactoryMethods
     public static class Panel extends JPanel implements StylableComponent {
         @Override public void paint(Graphics g){ paintBackground(g, super::paint); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
-
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /** {inheritDoc} */
