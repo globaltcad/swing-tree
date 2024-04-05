@@ -12,6 +12,7 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  *  Orchestrates the rendering of a component's style and animations. <br>
@@ -101,7 +102,7 @@ final class StyleEngine
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
     }
 
-    void paintBorder( Graphics2D g2d, Runnable formerBorderPainter )
+    void paintBorder( Graphics2D g2d, Consumer<Graphics> formerBorderPainter )
     {
         // We remember if antialiasing was enabled before we render:
         boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
@@ -117,7 +118,7 @@ final class StyleEngine
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
 
         try {
-            formerBorderPainter.run();
+            formerBorderPainter.accept(g2d);
         } catch ( Exception ex ) {
             /*
                 Note that if any exceptions happen during the border style painting,

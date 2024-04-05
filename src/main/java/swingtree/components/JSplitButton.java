@@ -27,13 +27,15 @@ import org.jspecify.annotations.Nullable;
 import sprouts.Event;
 import sprouts.Var;
 import swingtree.UI;
-import swingtree.style.StylableComponent;
 import swingtree.components.action.ButtonClickedActionListener;
 import swingtree.components.action.SplitButtonActionListener;
 import swingtree.components.action.SplitButtonClickedActionListener;
-import swingtree.style.ComponentExtension;
+import swingtree.style.StylableComponent;
 
-import javax.swing.*;
+import javax.swing.Icon;
+import javax.swing.JButton;
+import javax.swing.JPopupMenu;
+import javax.swing.UIManager;
 import javax.swing.plaf.ComponentUI;
 import java.awt.*;
 import java.awt.event.*;
@@ -123,12 +125,12 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
 
     /** {@inheritDoc} */
     @Override public void paint(Graphics g){
-        paintBackground(g, ()->super.paint(g));
+        paintBackground(g, super::paint);
     }
 
     /** {@inheritDoc} */
     @Override public void paintChildren(Graphics g) {
-        paintForeground(g, ()->super.paintChildren(g));
+        paintForeground(g, super::paintChildren);
     }
 
     /** {@inheritDoc} */

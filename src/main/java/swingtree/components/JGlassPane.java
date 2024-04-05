@@ -1,38 +1,24 @@
 package swingtree.components;
 
 
-import static java.awt.AWTEvent.MOUSE_EVENT_MASK;
-import static java.awt.AWTEvent.MOUSE_MOTION_EVENT_MASK;
-import static java.awt.AWTEvent.MOUSE_WHEEL_EVENT_MASK;
-import static java.awt.event.MouseEvent.MOUSE_CLICKED;
-import static java.awt.event.MouseEvent.MOUSE_DRAGGED;
-import static java.awt.event.MouseEvent.MOUSE_ENTERED;
-import static java.awt.event.MouseEvent.MOUSE_EXITED;
-import static java.awt.event.MouseEvent.MOUSE_MOVED;
-import static java.awt.event.MouseEvent.MOUSE_PRESSED;
-import static java.awt.event.MouseEvent.MOUSE_RELEASED;
-import static java.awt.event.MouseEvent.MOUSE_WHEEL;
-import static javax.swing.SwingUtilities.convertMouseEvent;
-import static javax.swing.SwingUtilities.convertPoint;
-import static javax.swing.SwingUtilities.getDeepestComponentAt;
-
-import java.awt.*;
-import java.awt.event.AWTEventListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
-import java.util.Objects;
-
-import javax.swing.*;
-import javax.swing.event.EventListenerList;
-import javax.swing.plaf.ComponentUI;
-
 import net.miginfocom.swing.MigLayout;
 import org.jspecify.annotations.Nullable;
 import swingtree.style.ComponentExtension;
 import swingtree.style.StylableComponent;
+
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+import javax.swing.JRootPane;
+import javax.swing.SwingUtilities;
+import javax.swing.event.EventListenerList;
+import javax.swing.plaf.ComponentUI;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.Objects;
+
+import static java.awt.AWTEvent.*;
+import static java.awt.event.MouseEvent.*;
+import static javax.swing.SwingUtilities.*;
 
 /**
  *  A more advanced glass pane implementation than the default Swing
@@ -69,12 +55,12 @@ public class JGlassPane extends JPanel implements AWTEventListener, StylableComp
 
     /** {@inheritDoc} */
     @Override public void paint(Graphics g){
-        paintBackground(g, ()->super.paint(g));
+        paintBackground(g, super::paint);
     }
 
     /** {@inheritDoc} */
     @Override public void paintChildren(Graphics g) {
-        paintForeground(g, ()->super.paintChildren(g));
+        paintForeground(g, super::paintChildren);
     }
 
     @Override public void setUISilently( ComponentUI ui ) {

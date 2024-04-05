@@ -64,12 +64,12 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
     Insets getFullPaddingInsets() { return _fullPaddingInsets; }
 
     @Override
-    public void paintBorder( Component c, Graphics g, int x, int y, int width, int height )
+    public void paintBorder( Component c, Graphics graphics, int x, int y, int width, int height )
     {
         try {
-            _compExt.paintBorder((Graphics2D) g, ()->{
+            _compExt.paintBorder((Graphics2D) graphics, localGraphics->{
                 if ( _canPaintFormerBorder() )
-                    _paintFormerBorder(c, g, x, y, width, height);
+                    _paintFormerBorder(c, localGraphics, x, y, width, height);
             });
         } catch ( Exception ex ) {
             /*

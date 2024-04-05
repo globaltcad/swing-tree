@@ -13,6 +13,7 @@ import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.util.List;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -388,18 +389,18 @@ public final class ComponentExtension<C extends JComponent>
      * @param g The {@link Graphics} object to use for rendering.
      * @param lookAndFeelPaint A {@link Runnable} which is used to paint the look and feel of the component.
      */
-    void paintBackgroundIfNeeded( Graphics g, Runnable lookAndFeelPaint )
+    void paintBackgroundIfNeeded( Graphics g, Consumer<Graphics> lookAndFeelPaint )
     {
         if ( _styleInstaller.customLookAndFeelIsInstalled() ) {
             if ( lookAndFeelPaint != null )
-                lookAndFeelPaint.run();
+                lookAndFeelPaint.accept(g);
             return; // We render ĥere through the custom installed UI!
             // So the method call below will be called within lookAndFeelPaint.run();
         }
         paintBackground(g, lookAndFeelPaint);
     }
 
-    void paintBackground( Graphics g, @Nullable Runnable lookAndFeelPainting )
+    void paintBackground( Graphics g, @Nullable Consumer<Graphics> lookAndFeelPainting )
     {
         _switchToPaintStep(PaintStep.BACKGROUND);
 
@@ -428,7 +429,7 @@ public final class ComponentExtension<C extends JComponent>
 
             paintWithClip((Graphics2D) g, contentClip, () -> {
                 try {
-                    lookAndFeelPainting.run();
+                    lookAndFeelPainting.accept(g);
                 } catch (Exception e) {
                     String componentAsString = "?";
                     try {
@@ -445,7 +446,7 @@ public final class ComponentExtension<C extends JComponent>
         g.setClip(baseClip);
     }
 
-    void paintBorder( Graphics2D g2d, Runnable formerBorderPainter )
+    void paintBorder( Graphics2D g2d, Consumer<Graphics> formerBorderPainter )
     {
         _switchToPaintStep(PaintStep.BORDER);
 
@@ -467,7 +468,7 @@ public final class ComponentExtension<C extends JComponent>
      * @param g2d The {@link Graphics2D} object to use for rendering.
      * @param superPaint A {@link Runnable} which is used to paint the look and feel of the component.
      */
-    void paintForeground( Graphics2D g2d, Runnable superPaint )
+    void paintForeground( Graphics2D g2d, Consumer<Graphics> superPaint )
     {
         _switchToPaintStep(PaintStep.FOREGROUND);
 
@@ -483,7 +484,7 @@ public final class ComponentExtension<C extends JComponent>
             clip = StyleUtil.intersect( _styleEngine.componentArea().orElse(clip), clip );
         }
         paintWithClip(g2d, clip, ()->{
-            superPaint.run();
+            superPaint.accept(g2d);
         });
 
         // We remember if antialiasing was enabled before we render:
