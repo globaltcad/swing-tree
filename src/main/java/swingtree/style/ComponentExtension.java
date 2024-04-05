@@ -414,6 +414,7 @@ public final class ComponentExtension<C extends JComponent>
                     return true;
             }
         }
+        _bufferedImage = null;
         return false;
     }
 
