@@ -336,7 +336,7 @@ final class DynamicLaF
                 if ( _formerUI != null )
                     _paintComponentThroughFormerUI(_formerUI, localGraphics, c);
                 else
-                    super.paint(g, c);
+                    super.paint(localGraphics, c);
             });
         }
         @Override public void update( Graphics g, JComponent c ) { paint(g, c); }
