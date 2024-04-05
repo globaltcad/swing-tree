@@ -366,13 +366,13 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     private void _doPaintStep(
-        PaintStep            step,
-        Graphics             graphics,
-        Consumer<Graphics2D> superPaint
+        final PaintStep            step,
+        final Graphics             graphics,
+        final Consumer<Graphics2D> superPaint
     ) {
-        int newStep  = step.ordinal();
-        int lastStep = _lastPaintStep.ordinal();
-        boolean isNewPaintCycle = newStep <= lastStep;
+        final int newStep  = step.ordinal();
+        final int lastStep = _lastPaintStep.ordinal();
+        final boolean isNewPaintCycle = newStep <= lastStep;
         if ( isNewPaintCycle )
             gatherApplyAndInstallStyleConfig();
             /*
