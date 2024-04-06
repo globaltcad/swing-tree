@@ -136,12 +136,12 @@ final class StyleInstaller<C extends JComponent>
 
         final boolean hasPaddingAndMargin = !noPaddingAndMarginStyle;
         final boolean hasBorderStyle      = !noBorderStyle;
-        final boolean hasBorderShadows    = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> !layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) || !styleLayer.shadows().everyNamedStyle(ns -> !ns.style().color().isPresent() ) );
-        final boolean hasBorderGradients  = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> !layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) || !styleLayer.gradients().everyNamedStyle(ns -> ns.style().colors().length == 0 ) );
-        final boolean hasBorderNoises     = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> !layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) || !styleLayer.noises().everyNamedStyle(ns -> ns.style().colors().length == 0 ) );
-        final boolean hasBorderPainters   = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> !layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) || !styleLayer.painters().everyNamedStyle(ns -> Painter.none().equals(ns.style().painter()) ) );
-        final boolean hasBorderImages     = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> !layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) || !styleLayer.images().everyNamedStyle(ns -> !ns.style().image().isPresent() && !ns.style().primer().isPresent() ) );
-        final boolean hasBorderTexts      = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> !layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) || !styleLayer.texts().everyNamedStyle(ns -> TextConf.none().equals(ns.style()) ) );
+        final boolean hasBorderShadows    = newStyle.layers().atLeastOneNamedStyle( (layer, styleLayer) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) && styleLayer.shadows().atLeastOneNamedStyle(ns -> ns.style().color().isPresent() ) );
+        final boolean hasBorderGradients  = newStyle.layers().atLeastOneNamedStyle( (layer, styleLayer) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) && styleLayer.gradients().atLeastOneNamedStyle(ns -> ns.style().colors().length > 0 ) );
+        final boolean hasBorderNoises     = newStyle.layers().atLeastOneNamedStyle( (layer, styleLayer) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) && styleLayer.noises().atLeastOneNamedStyle(ns -> ns.style().colors().length > 0 ) );
+        final boolean hasBorderPainters   = newStyle.layers().atLeastOneNamedStyle( (layer, styleLayer) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) && styleLayer.painters().atLeastOneNamedStyle(ns -> !Painter.none().equals(ns.style().painter()) ) );
+        final boolean hasBorderImages     = newStyle.layers().atLeastOneNamedStyle( (layer, styleLayer) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) && styleLayer.images().atLeastOneNamedStyle(ns -> ns.style().image().isPresent() || ns.style().primer().isPresent() ) );
+        final boolean hasBorderTexts      = newStyle.layers().atLeastOneNamedStyle( (layer, styleLayer) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) && styleLayer.texts().atLeastOneNamedStyle(ns -> !TextConf.none().equals(ns.style()) ) );
 
         final boolean weNeedACustomBorder = (
                                    hasPaddingAndMargin ||

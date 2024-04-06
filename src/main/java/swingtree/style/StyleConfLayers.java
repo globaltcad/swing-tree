@@ -122,6 +122,19 @@ final class StyleConfLayers
             && predicate.test(UI.Layer.FOREGROUND, _foreground);
     }
 
+    boolean atLeastOneNamedStyle( BiPredicate<UI.Layer, StyleConfLayer> predicate ) {
+        if ( _any != null )
+            return  predicate.test(UI.Layer.BACKGROUND,    _any)
+                    || predicate.test(UI.Layer.CONTENT,    _any)
+                    || predicate.test(UI.Layer.BORDER,     _any)
+                    || predicate.test(UI.Layer.FOREGROUND, _any);
+
+        return predicate.test(UI.Layer.BACKGROUND, _background)
+            || predicate.test(UI.Layer.CONTENT,    _content)
+            || predicate.test(UI.Layer.BORDER,     _border)
+            || predicate.test(UI.Layer.FOREGROUND, _foreground);
+    }
+
     StyleConfLayers map(Function<StyleConfLayer, StyleConfLayer> f ) {
         return of(_filter, f.apply(_background), f.apply(_content), f.apply(_border), f.apply(_foreground), _any == null ? null : f.apply(_any));
     }

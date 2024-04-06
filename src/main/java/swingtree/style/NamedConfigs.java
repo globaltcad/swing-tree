@@ -137,6 +137,10 @@ final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
         return Arrays.stream(_styles).allMatch(namedStyleTester);
     }
 
+    public boolean atLeastOneNamedStyle( Predicate<NamedConf<S>> namedStyleTester ) {
+        return Arrays.stream(_styles).anyMatch(namedStyleTester);
+    }
+
     public String toString( String defaultName, String styleType ) {
         if ( styleType.isEmpty() )
             styleType = this.getClass().getSimpleName();
