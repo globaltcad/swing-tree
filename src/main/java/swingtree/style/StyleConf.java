@@ -514,6 +514,10 @@ public final class StyleConf
         return Objects.equals(_dimensionality, otherStyle._dimensionality);
     }
 
+    boolean hasEqualFilterAs( StyleConf otherStyle ) {
+        return _layers.filter().equals(otherStyle._layers.filter());
+    }
+
     boolean hasEqualShadowsAs( StyleConf otherStyle ) {
         boolean allLayersAreEqual = true;
         for ( UI.Layer layer : UI.Layer.values() ) {
@@ -662,6 +666,7 @@ public final class StyleConf
                hasEqualBaseAs(other)           &&
                hasEqualFontAs(other)           &&
                hasEqualDimensionalityAs(other) &&
+               hasEqualFilterAs(other)         &&
                hasEqualShadowsAs(other)        &&
                hasEqualPaintersAs(other)       &&
                hasEqualGradientsAs(other)      &&
