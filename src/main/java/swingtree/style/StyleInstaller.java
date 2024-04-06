@@ -117,8 +117,6 @@ final class StyleInstaller<C extends JComponent>
         final boolean noTexts                 = StyleConf.none().hasEqualTextsAs(newStyle);
         final boolean noProperties            = StyleConf.none().hasEqualPropertiesAs(newStyle);
 
-        final boolean baseStyleIsBasic = newStyle.base().isBasic();
-
         final boolean noParentFilter = FilterConf.none().equals(newStyle.layers().filter());
 
         final boolean isNotStyled = noLayoutStyle           &&
@@ -138,7 +136,6 @@ final class StyleInstaller<C extends JComponent>
 
         final boolean hasPaddingAndMargin = !noPaddingAndMarginStyle;
         final boolean hasBorderStyle      = !noBorderStyle;
-        final boolean hasBaseStyle        = !baseStyleIsBasic;
         final boolean hasBorderShadows    = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> !layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) || !styleLayer.shadows().everyNamedStyle(ns -> !ns.style().color().isPresent() ) );
         final boolean hasBorderGradients  = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> !layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) || !styleLayer.gradients().everyNamedStyle(ns -> ns.style().colors().length == 0 ) );
         final boolean hasBorderNoises     = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> !layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) || !styleLayer.noises().everyNamedStyle(ns -> ns.style().colors().length == 0 ) );
@@ -149,7 +146,6 @@ final class StyleInstaller<C extends JComponent>
         final boolean weNeedACustomBorder = (
                                    hasPaddingAndMargin ||
                                    hasBorderStyle      ||
-                                   hasBaseStyle        ||
                                    hasBorderShadows    ||
                                    hasBorderGradients  ||
                                    hasBorderNoises     ||
@@ -168,8 +164,8 @@ final class StyleInstaller<C extends JComponent>
         final boolean hasBackTexts     = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer != UI.Layer.BACKGROUND || !styleLayer.texts().everyNamedStyle(ns -> TextConf.none().equals(ns.style()) ) );
 
         final boolean weNeedCustomUI = (
-                                            (hasBackFilter && !isSwingTreeComponent)    ||
-                                            hasBaseColors    ||
+                                            (hasBackFilter && !isSwingTreeComponent)              ||
+                                            (hasBaseColors && newStyle.base().requiresCustomUI()) ||
                                             hasBackShadows   ||
                                             hasBackGradients ||
                                             hasBackNoises    ||
