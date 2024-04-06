@@ -147,7 +147,7 @@ final class StyleInstaller<C extends JComponent>
         final boolean weNeedACustomBorder = (
                                    hasPaddingAndMargin ||
                                    hasBorderStyle      ||
-                                   hasBaseStyle        ||//<-TODO: REMOVE
+                                   //hasBaseStyle        ||//<-TODO: REMOVE
                                    hasBorderShadows    ||
                                    hasBorderGradients  ||
                                    hasBorderNoises     ||
@@ -185,6 +185,12 @@ final class StyleInstaller<C extends JComponent>
 
         if ( weNeedCustomUI ) {
             _dynamicLaF = _dynamicLaF.establishLookAndFeelFor(newStyle, owner);
+        } else {
+            if ( _initialBackgroundColor != null ) {
+                if ( !Objects.equals( owner.getBackground(), _initialBackgroundColor ) )
+                    owner.setBackground(_initialBackgroundColor);
+                _initialBackgroundColor = null;
+            }
         }
 
         if ( isNotStyled || !weNeedCustomUI ) {
@@ -707,12 +713,6 @@ final class StyleInstaller<C extends JComponent>
         if ( currentBorder instanceof StyleAndAnimationBorder) {
             StyleAndAnimationBorder<?> border = (StyleAndAnimationBorder<?>) currentBorder;
             owner.setBorder(border.getFormerBorder());
-        }
-
-        if ( _initialBackgroundColor != null ) {
-            if ( !Objects.equals( owner.getBackground(), _initialBackgroundColor ) )
-                owner.setBackground(_initialBackgroundColor);
-            _initialBackgroundColor = null;
         }
     }
 
