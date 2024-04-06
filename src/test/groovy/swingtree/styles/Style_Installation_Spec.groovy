@@ -16,18 +16,23 @@ import java.awt.Color
 @Narrative('''
 
     **This specification covers the behaviour of the style installation process!**
-    Which means that the contents of this may not be relevant to.
+    Which means that the contents of this may not be relevant to you.
     Keep reading however if you are interested in some of the obscure details
     of the SwingTree library internals.
 
     SwingTree offers advanced styling options as part of **the style API**,
-    which is most commonly used using the `withStyle(Styler)` method
-    on any builder node.
+    which is most commonly used through the `withStyle(Styler)` method
+    on any declarative builder node.
    
-   The installation of styles is a complex process that involves the
-   the overwriting of the component's UI delegate, the application of
+   The installation of styles is a complex process that involves
+   the partial override of the component's UI delegate, the application of
    the style's properties to the component and the installation of
-   a custom border, all depending on the style's configuration.
+   a custom border, all depending on the style configuration.
+   
+   This is a very finicky process that requires a lot of 
+   testing to ensure that the styles are applied correctly.
+   Here you will find most of the tests that ensure that after the
+   installation of a style, the component has the expected plugin installed.
    
 ''')
 @Subject([UI, Styler])
