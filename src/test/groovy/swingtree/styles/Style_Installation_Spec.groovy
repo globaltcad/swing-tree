@@ -135,7 +135,7 @@ class Style_Installation_Spec extends Specification
             var ui = UI.button().withStyle(styler)
         when: 'We build the button'
             var button = ui.get(JButton)
-        then: 'The custom UI may or may not be installed:'
+        then: 'The custom `Border` may or may not be installed:'
             (button.getBorder() instanceof swingtree.style.StyleAndAnimationBorder) == isCustom
 
         where :
