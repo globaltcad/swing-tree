@@ -384,27 +384,32 @@ public final class ComponentExtension<C extends JComponent>
 
         _lastPaintStep = step;
 
-        if ( isNewPaintCycle && step == PaintStep.BACKGROUND && _hasChildWithParentFilter() ) {
-            int w = _owner.getWidth();
-            int h = _owner.getHeight();
-            BufferedImage backgroundImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-            Graphics2D g2d = backgroundImage.createGraphics();
-            StyleUtil.transferConfigurations((Graphics2D) graphics, g2d);
-            g2d.setClip(graphics.getClip());
-            try {
-                superPaint.accept(g2d);
-            } catch ( Exception e ) {
-                log.error("Error while painting step '"+step+"'!", e);
-            }
-            graphics.drawImage(backgroundImage, 0, 0, null);
-            _bufferedImage = backgroundImage;
-        } else {
-            try {
+        try {
+            if ( isNewPaintCycle && step == PaintStep.BACKGROUND && _hasChildWithParentFilter() ) {
+                int w = _owner.getWidth();
+                int h = _owner.getHeight();
+                _bufferedImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+                _renderInto(_bufferedImage, step, graphics, superPaint);
+            } else if ( _bufferedImage != null && step == PaintStep.BORDER ) {
+                _renderInto(_bufferedImage, step, graphics, superPaint);
+            } else {
                 superPaint.accept((Graphics2D) graphics);
-            } catch ( Exception e ) {
-                log.error("Error while painting step '"+step+"'!", e);
             }
+        } catch ( Exception e ) {
+            log.error("Error while painting step '"+step+"'!", e);
         }
+    }
+
+    private void _renderInto(BufferedImage buffer, PaintStep step, Graphics graphics, Consumer<Graphics2D> superPaint ) {
+        Graphics2D bufferGraphics = buffer.createGraphics();
+        StyleUtil.transferConfigurations((Graphics2D) graphics, bufferGraphics);
+        bufferGraphics.setClip(graphics.getClip());
+        try {
+            superPaint.accept(bufferGraphics);
+        } catch ( Exception e ) {
+            log.error("Error while painting step '"+step+"' into component buffer!", e);
+        }
+        graphics.drawImage(buffer, 0, 0, null);
     }
 
     private boolean _hasChildWithParentFilter() {
