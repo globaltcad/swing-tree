@@ -184,7 +184,7 @@ final class StyleInstaller<C extends JComponent>
             _dynamicLaF = _dynamicLaF.establishLookAndFeelFor(newStyle, owner);
         }
 
-        if ( isNotStyled || !pluginsNeeded ) {
+        if ( isNotStyled || !weNeedCustomUI ) {
             _dynamicLaF = _dynamicLaF._uninstallCustomLaF(owner);
             if ( _initialBackgroundColor != null ) {
                 if ( !Objects.equals( owner.getBackground(), _initialBackgroundColor ) )
