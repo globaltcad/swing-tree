@@ -1384,6 +1384,9 @@ final class StyleRenderer
         int offsetY,
         BoxModelConf boxModelConf
     ) {
+        Size size = boxModelConf.size();
+        int width = size.width().orElse(0f).intValue();
+        int height = size.height().orElse(0f).intValue();
         Offset offset = filterConf.offset();
         Offset center = filterConf.center();
         Offset scale = filterConf.scale();
@@ -1394,8 +1397,8 @@ final class StyleRenderer
 
         if ( !center.equals(Offset.none()) || !scale.equals(Offset.none()) ) {
             AffineTransform at = new AffineTransform();
-            float vx = center.x() + offsetX;
-            float vy = center.y() + offsetY;
+            float vx = center.x() + offsetX + width / 2f;
+            float vy = center.y() + offsetY + height / 2f;
             at.translate(vx, vy);
             at.scale(scale.x(), scale.y());
             at.translate(-vx, -vy);
@@ -1424,9 +1427,6 @@ final class StyleRenderer
         ComponentAreas areas = boxModelConf.areas();
         Shape newClip = areas.get(filterConf.area());
         if ( newClip == null ) {
-            Size size = boxModelConf.size();
-            int width = size.width().orElse(0f).intValue();
-            int height = size.height().orElse(0f).intValue();
             newClip = new Rectangle(0, 0, width, height);
         }
         g2d.setClip(newClip);
