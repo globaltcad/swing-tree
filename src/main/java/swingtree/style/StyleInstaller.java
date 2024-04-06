@@ -136,6 +136,7 @@ final class StyleInstaller<C extends JComponent>
 
         final boolean hasPaddingAndMargin = !noPaddingAndMarginStyle;
         final boolean hasBorderStyle      = !noBorderStyle;
+        final boolean hasBaseStyle        = !newStyle.base().isBasic();
         final boolean hasBorderShadows    = newStyle.layers().atLeastOneNamedStyle( (layer, styleLayer) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) && styleLayer.shadows().atLeastOneNamedStyle(ns -> ns.style().color().isPresent() ) );
         final boolean hasBorderGradients  = newStyle.layers().atLeastOneNamedStyle( (layer, styleLayer) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) && styleLayer.gradients().atLeastOneNamedStyle(ns -> ns.style().colors().length > 0 ) );
         final boolean hasBorderNoises     = newStyle.layers().atLeastOneNamedStyle( (layer, styleLayer) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) && styleLayer.noises().atLeastOneNamedStyle(ns -> ns.style().colors().length > 0 ) );
@@ -146,6 +147,7 @@ final class StyleInstaller<C extends JComponent>
         final boolean weNeedACustomBorder = (
                                    hasPaddingAndMargin ||
                                    hasBorderStyle      ||
+                                   hasBaseStyle        ||//<-TODO: REMOVE
                                    hasBorderShadows    ||
                                    hasBorderGradients  ||
                                    hasBorderNoises     ||
