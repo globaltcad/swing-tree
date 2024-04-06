@@ -136,22 +136,27 @@ final class StyleInstaller<C extends JComponent>
                                     noProperties            &&
                                     noParentFilter;
 
-        final boolean pluginsNeeded = !(// A plugin is either a Border or ComponentUI!
-                                   noLayoutStyle                              &&
-                                   noPaddingAndMarginStyle                    &&
-                                   noBorderStyle                              &&
-                                   (noBaseStyle || baseStyleIsBasic)          &&
-                                   noFontStyle                                &&
-                                   noShadowStyle                              &&
-                                   noPainters                                 &&
-                                   noGradients                                &&
-                                   noNoises                                   &&
-                                   noImages                                   &&
-                                   noTexts                                    &&
-                                   noProperties                               &&
-                                   noParentFilter
-                                );
+        final boolean hasPaddingAndMargin = !noPaddingAndMarginStyle;
+        final boolean hasBorderStyle      = !noBorderStyle;
+        final boolean hasBaseStyle        = !baseStyleIsBasic;
+        final boolean hasBorderShadows    = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> !layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) || !styleLayer.shadows().everyNamedStyle(ns -> !ns.style().color().isPresent() ) );
+        final boolean hasBorderGradients  = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> !layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) || !styleLayer.gradients().everyNamedStyle(ns -> ns.style().colors().length == 0 ) );
+        final boolean hasBorderNoises     = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> !layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) || !styleLayer.noises().everyNamedStyle(ns -> ns.style().colors().length == 0 ) );
+        final boolean hasBorderPainters   = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> !layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) || !styleLayer.painters().everyNamedStyle(ns -> Painter.none().equals(ns.style().painter()) ) );
+        final boolean hasBorderImages     = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> !layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) || !styleLayer.images().everyNamedStyle(ns -> !ns.style().image().isPresent() && !ns.style().primer().isPresent() ) );
+        final boolean hasBorderTexts      = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> !layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) || !styleLayer.texts().everyNamedStyle(ns -> TextConf.none().equals(ns.style()) ) );
 
+        final boolean weNeedACustomBorder = (
+                                   hasPaddingAndMargin ||
+                                   hasBorderStyle      ||
+                                   hasBaseStyle        ||
+                                   hasBorderShadows    ||
+                                   hasBorderGradients  ||
+                                   hasBorderNoises     ||
+                                   hasBorderPainters   ||
+                                   hasBorderImages     ||
+                                   hasBorderTexts
+                                );
 
         final boolean hasBaseColors    = (!noBaseStyle   && newStyle.base().hasAnyColors());
         final boolean hasBackFilter    = !noParentFilter;
@@ -175,7 +180,7 @@ final class StyleInstaller<C extends JComponent>
 
         Runnable backgroundSetter = ()->{};
 
-        if ( pluginsNeeded )
+        if ( weNeedACustomBorder )
             installCustomBorderBasedStyleAndAnimationRenderer(owner, newStyle);
         else if ( styleSource.hasNoAnimationStylers() )
             _uninstallCustomBorderBasedStyleAndAnimationRenderer(owner);
