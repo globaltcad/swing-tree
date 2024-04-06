@@ -12,7 +12,8 @@ public final class FilterConf
                                                 UI.ComponentArea.BODY,
                                                 Offset.none(),
                                                 Offset.none(),
-                                                Offset.none()
+                                                Offset.none(),
+                                                0f
                                             );
 
     public static FilterConf none() {
@@ -24,18 +25,20 @@ public final class FilterConf
         UI.ComponentArea area,
         Offset           offset,
         Offset           center,
-        Offset           scale
+        Offset           scale,
+        float            blur
     ) {
         if (
             _NONE._kernel.equals(kernel) &&
-            _NONE._area.equals(area) &&
+            _NONE._area.equals(area)     &&
             _NONE._offset.equals(offset) &&
             _NONE._center.equals(center) &&
-            _NONE._scale.equals(scale)
+            _NONE._scale.equals(scale)   &&
+            _NONE._blur == blur
         ) {
             return _NONE;
         }
-        return new FilterConf(kernel, area, offset, center, scale);
+        return new FilterConf(kernel, area, offset, center, scale, blur);
     }
 
     private final KernelConf       _kernel;
@@ -43,19 +46,22 @@ public final class FilterConf
     private final Offset           _offset;
     private final Offset           _center;
     private final Offset           _scale;
+    private final float            _blur;
 
     FilterConf(
         KernelConf       kernel,
         UI.ComponentArea area,
         Offset           offset,
         Offset           center,
-        Offset           scale
+        Offset           scale,
+        float            blur
     ) {
         _kernel = Objects.requireNonNull(kernel);
         _area   = Objects.requireNonNull(area);
         _offset = Objects.requireNonNull(offset);
         _center = Objects.requireNonNull(center);
         _scale  = Objects.requireNonNull(scale);
+        _blur   = blur;
     }
 
     KernelConf kernel() {
@@ -78,32 +84,46 @@ public final class FilterConf
         return _scale;
     }
 
+    float blur() {
+        return _blur;
+    }
+
     public FilterConf kernel(Size size, double... matrix) {
-        return of(KernelConf.of(size, matrix), _area, _offset, _center, _scale);
+        return of(KernelConf.of(size, matrix), _area, _offset, _center, _scale, _blur);
     }
 
     public FilterConf area(UI.ComponentArea area) {
-        return of(_kernel, area, _offset, _center, _scale);
+        return of(_kernel, area, _offset, _center, _scale, _blur);
     }
 
     public FilterConf offset(double x, double y) {
-        return of(_kernel, _area, Offset.of(x, y), _center, _scale);
+        return of(_kernel, _area, Offset.of(x, y), _center, _scale, _blur);
     }
 
     public FilterConf center(double x, double y) {
-        return of(_kernel, _area, _offset, Offset.of(x, y), _scale);
+        return of(_kernel, _area, _offset, Offset.of(x, y), _scale, _blur);
     }
 
     public FilterConf scale(double x, double y) {
-        return of(_kernel, _area, _offset, _center, Offset.of(x, y));
+        return of(_kernel, _area, _offset, _center, Offset.of(x, y), _blur);
+    }
+
+    public FilterConf blur( double radius ) {
+        return of(_kernel, _area, _offset, _center, _scale, (float)radius);
     }
 
     FilterConf simplified() {
         KernelConf kernel = _kernel.simplified();
-        if ( KernelConf.none().equals(kernel) ) {
+        if (
+            KernelConf.none().equals(kernel) &&
+            _offset.equals(Offset.none()) &&
+            _scale.equals(Offset.none()) &&
+            _center.equals(Offset.none()) &&
+            _blur == 0
+        ) {
             return _NONE;
         }
-        return of(kernel, _area, _offset, _center, _scale);
+        return of(kernel, _area, _offset, _center, _scale, _blur);
     }
 
     @Override
@@ -117,15 +137,16 @@ public final class FilterConf
         FilterConf other = (FilterConf) obj;
         return
             _kernel.equals(other._kernel) &&
-            _area.equals(other._area) &&
+            _area.equals(other._area)     &&
             _offset.equals(other._offset) &&
             _center.equals(other._center) &&
-            _scale.equals(other._scale);
+            _scale.equals(other._scale)   &&
+            _blur == other._blur;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(_kernel, _area, _offset, _center, _scale);
+        return Objects.hash(_kernel, _area, _offset, _center, _scale, _blur);
     }
 
     @Override
@@ -137,7 +158,8 @@ public final class FilterConf
                     + "area="   + _area   + ", "
                     + "offset=" + _offset + ", "
                     + "center=" + _center + ", "
-                    + "scale="  + _scale
+                    + "scale="  + _scale  + ", "
+                    + "blur="   + _blur
                 + "]";
     }
 }

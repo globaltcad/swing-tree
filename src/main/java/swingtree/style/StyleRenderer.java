@@ -10,6 +10,7 @@ import swingtree.layout.Size;
 
 import java.awt.*;
 import java.awt.geom.*;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.awt.image.ConvolveOp;
 import java.awt.image.Kernel;
@@ -1387,9 +1388,36 @@ final class StyleRenderer
         Offset center = filterConf.center();
         Offset scale = filterConf.scale();
         KernelConf kernel = filterConf.kernel();
-        Kernel awtKernel = kernel.toAwtKernel();
-        ConvolveOp convolve = new ConvolveOp(awtKernel, ConvolveOp.EDGE_NO_OP, null);
-        BufferedImage filtered = convolve.filter(parentRendering, null);
+        float blur = filterConf.blur();
+
+        BufferedImage filtered = parentRendering;
+
+        if ( !center.equals(Offset.none()) || !scale.equals(Offset.none()) ) {
+            AffineTransform at = new AffineTransform();
+            float vx = center.x() + offsetX;
+            float vy = center.y() + offsetY;
+            at.translate(vx, vy);
+            at.scale(scale.x(), scale.y());
+            at.translate(-vx, -vy);
+            AffineTransformOp scaleOp = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
+            filtered = scaleOp.filter(filtered, null);
+        }
+
+        if ( !kernel.equals(KernelConf.none()) ) {
+            Kernel awtKernel = kernel.toAwtKernel();
+            ConvolveOp convolve = new ConvolveOp(awtKernel, ConvolveOp.EDGE_NO_OP, null);
+            filtered = convolve.filter(filtered, null);
+        }
+
+        if ( blur > 0 ) {
+            Kernel blurKernelHorizontal = makeKernel(blur, false);
+            ConvolveOp blurOp = new ConvolveOp(blurKernelHorizontal, ConvolveOp.EDGE_NO_OP, null);
+            BufferedImage blurred = blurOp.filter(filtered, null);
+            Kernel blurKernelVertical = makeKernel(blur, true);
+            blurOp = new ConvolveOp(blurKernelVertical, ConvolveOp.EDGE_NO_OP, null);
+            filtered = blurOp.filter(blurred, filtered);
+        }
+
         offsetX += (int) offset.x();
         offsetY += (int) offset.y();
         Shape oldClip = g2d.getClip();
@@ -1405,4 +1433,31 @@ final class StyleRenderer
         g2d.drawImage(filtered, -offsetX, -offsetY, null);
         g2d.setClip(oldClip);
     }
+
+    public static Kernel makeKernel(float radius, boolean transpose) {
+        int r = (int)Math.ceil(radius);
+        int rows = r*2+1;
+        float[] matrix = new float[rows];
+        float sigma = radius/3;
+        float sigma22 = 2*sigma*sigma;
+        float sigmaPi2 = (float) (2*Math.PI*sigma);
+        float sqrtSigmaPi2 = (float)Math.sqrt(sigmaPi2);
+        float radius2 = radius*radius;
+        float total = 0;
+        int index = 0;
+        for (int row = -r; row <= r; row++) {
+            float distance = row*row;
+            if (distance > radius2)
+                matrix[index] = 0;
+            else
+                matrix[index] = (float)Math.exp(-(distance)/sigma22) / sqrtSigmaPi2;
+            total += matrix[index];
+            index++;
+        }
+        for (int i = 0; i < rows; i++)
+            matrix[i] /= total;
+
+        return new Kernel(transpose ? 1 : rows, transpose ? rows : 1, matrix);
+    }
+
 }

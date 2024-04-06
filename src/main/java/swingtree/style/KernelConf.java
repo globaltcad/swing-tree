@@ -15,7 +15,7 @@ final class KernelConf
         return _NONE;
     }
 
-    private static KernelConf of( int width, int height, float[] data ) {
+    static KernelConf of( int width, int height, float[] data ) {
         if (
             _NONE._width == width &&
             _NONE._height == height &&
