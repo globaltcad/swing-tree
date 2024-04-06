@@ -162,17 +162,16 @@ final class StyleInstaller<C extends JComponent>
         final boolean hasBackImages    = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer != UI.Layer.BACKGROUND || !styleLayer.images().everyNamedStyle(ns -> !ns.style().image().isPresent() && !ns.style().primer().isPresent() ) );
         final boolean hasBackTexts     = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer != UI.Layer.BACKGROUND || !styleLayer.texts().everyNamedStyle(ns -> TextConf.none().equals(ns.style()) ) );
 
-        final boolean weNeedCustomUI =
-                (
-                    hasBaseColors    ||
-                    hasBackFilter    ||
-                    hasBackShadows   ||
-                    hasBackGradients ||
-                    hasBackNoises    ||
-                    hasBackPainters  ||
-                    hasBackImages    ||
-                    hasBackTexts
-                );
+        final boolean weNeedCustomUI = (
+                                            (hasBackFilter && !isSwingTreeComponent)    ||
+                                            hasBaseColors    ||
+                                            hasBackShadows   ||
+                                            hasBackGradients ||
+                                            hasBackNoises    ||
+                                            hasBackPainters  ||
+                                            hasBackImages    ||
+                                            hasBackTexts
+                                        );
 
         Runnable backgroundSetter = ()->{};
 
