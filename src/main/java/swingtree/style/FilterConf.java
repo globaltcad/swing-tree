@@ -59,7 +59,7 @@ public final class FilterConf
                                                 KernelConf.none(),
                                                 UI.ComponentArea.BODY,
                                                 Offset.none(),
-                                                Offset.of(1,1),
+                                                Scale.none(),
                                                 0f
                                             );
 
@@ -71,7 +71,7 @@ public final class FilterConf
         KernelConf       kernel,
         UI.ComponentArea area,
         Offset           offset,
-        Offset           scale,
+        Scale            scale,
         float            blur
     ) {
         blur = Math.max(0, blur);
@@ -90,14 +90,14 @@ public final class FilterConf
     private final KernelConf       _kernel;
     private final UI.ComponentArea _area;
     private final Offset           _offset;
-    private final Offset           _scale;
+    private final Scale            _scale;
     private final float            _blur;
 
     FilterConf(
         KernelConf       kernel,
         UI.ComponentArea area,
         Offset           offset,
-        Offset           scale,
+        Scale            scale,
         float            blur
     ) {
         _kernel = Objects.requireNonNull(kernel);
@@ -119,7 +119,7 @@ public final class FilterConf
         return _offset;
     }
 
-    Offset scale() {
+    Scale scale() {
         return _scale;
     }
 
@@ -183,7 +183,7 @@ public final class FilterConf
      * @return An updated filter configuration having the desired scaling.
      */
     public FilterConf scale( double x, double y ) {
-        return of(_kernel, _area, _offset, Offset.of(x, y), _blur);
+        return of(_kernel, _area, _offset, Scale.of(x, y), _blur);
     }
 
     /**
@@ -214,7 +214,7 @@ public final class FilterConf
         KernelConf kernel = _kernel.simplified();
         if (
             KernelConf.none().equals(kernel) &&
-            _scale.equals(Offset.none()) &&
+            _scale.equals(Scale.none()) &&
             _offset.equals(Offset.none()) &&
             _blur <= 0
         ) {

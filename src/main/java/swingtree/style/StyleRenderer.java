@@ -1388,14 +1388,14 @@ final class StyleRenderer
         final float      width  = size.width().orElse(0f);
         final float      height = size.height().orElse(0f);
         final Offset     center = filterConf.offset();
-        final Offset     scale  = filterConf.scale();
+        final Scale      scale  = filterConf.scale();
         final KernelConf kernel = filterConf.kernel();
         final float      blur   = filterConf.blur();
 
         BufferedImage filtered = parentRendering;
 
-        if ( !center.equals(Offset.none()) || !scale.equals(Offset.of(1,1)) ) {
-            if ( scale.equals(Offset.of(1,1)) ) {
+        if ( !center.equals(Offset.none()) || !scale.equals(Scale.none()) ) {
+            if ( scale.equals(Scale.none()) ) {
                 offsetX += (int) center.x();
                 offsetY += (int) center.y();
             } else {
