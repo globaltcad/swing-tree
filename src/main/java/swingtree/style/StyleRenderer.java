@@ -1384,26 +1384,30 @@ final class StyleRenderer
         int offsetY,
         BoxModelConf boxModelConf
     ) {
-        Size size = boxModelConf.size();
-        int width = size.width().orElse(0f).intValue();
-        int height = size.height().orElse(0f).intValue();
-        Offset offset = filterConf.offset();
-        Offset center = filterConf.center();
-        Offset scale = filterConf.scale();
-        KernelConf kernel = filterConf.kernel();
-        float blur = filterConf.blur();
+        final Size       size   = boxModelConf.size();
+        final float      width  = size.width().orElse(0f);
+        final float      height = size.height().orElse(0f);
+        final Offset     center = filterConf.center();
+        final Offset     scale  = filterConf.scale();
+        final KernelConf kernel = filterConf.kernel();
+        final float      blur   = filterConf.blur();
 
         BufferedImage filtered = parentRendering;
 
         if ( !center.equals(Offset.none()) || !scale.equals(Offset.none()) ) {
-            AffineTransform at = new AffineTransform();
-            float vx = center.x() + offsetX + width / 2f;
-            float vy = center.y() + offsetY + height / 2f;
-            at.translate(vx, vy);
-            at.scale(scale.x(), scale.y());
-            at.translate(-vx, -vy);
-            AffineTransformOp scaleOp = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
-            filtered = scaleOp.filter(filtered, null);
+            if ( scale.equals(Offset.none()) ) {
+                offsetX += (int) center.x();
+                offsetY += (int) center.y();
+            } else {
+                AffineTransform at = new AffineTransform();
+                float vx = center.x() + offsetX + width / 2f;
+                float vy = center.y() + offsetY + height / 2f;
+                at.translate(vx, vy);
+                at.scale(scale.x(), scale.y());
+                at.translate(-vx, -vy);
+                AffineTransformOp scaleOp = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
+                filtered = scaleOp.filter(filtered, null);
+            }
         }
 
         if ( !kernel.equals(KernelConf.none()) ) {
@@ -1413,39 +1417,44 @@ final class StyleRenderer
         }
 
         if ( blur > 0 ) {
-            Kernel blurKernelHorizontal = makeKernel(blur, false);
+            Kernel blurKernelHorizontal = _makeKernel(blur, false);
             ConvolveOp blurOp = new ConvolveOp(blurKernelHorizontal, ConvolveOp.EDGE_NO_OP, null);
             BufferedImage blurred = blurOp.filter(filtered, null);
-            Kernel blurKernelVertical = makeKernel(blur, true);
+            Kernel blurKernelVertical = _makeKernel(blur, true);
             blurOp = new ConvolveOp(blurKernelVertical, ConvolveOp.EDGE_NO_OP, null);
             filtered = blurOp.filter(blurred, filtered);
         }
 
-        offsetX += (int) offset.x();
-        offsetY += (int) offset.y();
         Shape oldClip = g2d.getClip();
-        ComponentAreas areas = boxModelConf.areas();
-        Shape newClip = areas.get(filterConf.area());
-        if ( newClip == null ) {
-            newClip = new Rectangle(0, 0, width, height);
+        try {
+            ComponentAreas areas = boxModelConf.areas();
+            Shape newClip = areas.get(filterConf.area());
+            if (newClip == null) {
+                newClip = new Rectangle(0, 0, (int) width, (int) height);
+            }
+            g2d.setClip(newClip);
+            g2d.drawImage(filtered, -offsetX, -offsetY, null);
+        } catch (Exception e) {
+            log.error("Failed to successfully render filtered parent buffer!", e);
+        } finally {
+            g2d.setClip(oldClip);
         }
-        g2d.setClip(newClip);
-        g2d.drawImage(filtered, -offsetX, -offsetY, null);
-        g2d.setClip(oldClip);
     }
 
-    public static Kernel makeKernel(float radius, boolean transpose) {
-        int r = (int)Math.ceil(radius);
-        int rows = r*2+1;
-        float[] matrix = new float[rows];
-        float sigma = radius/3;
-        float sigma22 = 2*sigma*sigma;
-        float sigmaPi2 = (float) (2*Math.PI*sigma);
-        float sqrtSigmaPi2 = (float)Math.sqrt(sigmaPi2);
-        float radius2 = radius*radius;
+    private static Kernel _makeKernel( float radius, boolean transpose ) {
+        final int maxRadius = (int)Math.ceil(radius);
+        final int rows = maxRadius * 2 + 1;
+        final float[] matrix = new float[rows];
+        final float sigma = radius / 3;
+        final float sigma22 = 2*sigma*sigma;
+        final float sigmaPi2 = (float) ( 2 * Math.PI * sigma );
+        final float sqrtSigmaPi2 = (float)Math.sqrt(sigmaPi2);
+        final float radius2 = radius*radius;
+
         float total = 0;
-        int index = 0;
-        for (int row = -r; row <= r; row++) {
+        int   index = 0;
+
+        for (int row = -maxRadius; row <= maxRadius; row++) {
             float distance = row*row;
             if (distance > radius2)
                 matrix[index] = 0;
@@ -1454,10 +1463,9 @@ final class StyleRenderer
             total += matrix[index];
             index++;
         }
-        for (int i = 0; i < rows; i++)
+        for ( int i = 0; i < rows; i++ )
             matrix[i] /= total;
 
-        return new Kernel(transpose ? 1 : rows, transpose ? rows : 1, matrix);
+        return new Kernel( transpose ? 1 : rows, transpose ? rows : 1, matrix );
     }
-
 }

@@ -102,7 +102,11 @@ final class StyleEngine
             FilterConf filter = _componentConf.style().layers().filter();
             if ( !filter.equals(FilterConf.none()) ) {
                 // Location relative to the parent:
-                StyleRenderer.renderParentFilter(filter, parentRendering, g2d, x, y, _boxModelConf);
+                try {
+                    StyleRenderer.renderParentFilter(filter, parentRendering, g2d, x, y, _boxModelConf);
+                } catch ( Exception ex ) {
+                    log.error("Exception while trying to apply and render parent filter!", ex);
+                }
             }
         }
         _render(UI.Layer.BACKGROUND, g2d);
