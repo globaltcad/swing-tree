@@ -79,7 +79,13 @@ public final class ComponentExtension<C extends JComponent>
 
     C getOwner() { return _owner; }
 
-    BoxModelConf getBoxModelConf() { return _styleEngine.getBoxModelConf(); }
+    BoxModelConf getBoxModelConf() {
+        return _styleEngine.getBoxModelConf();
+    }
+
+    Optional<BufferedImage> getBufferedImage() {
+        return Optional.ofNullable(_bufferedImage);
+    }
 
     /**
      *  Allows for extra state to be attached to the component extension.
