@@ -473,7 +473,7 @@ public final class StyleConf
                     _base, // Just colors and the cursor
                     _font._scale(scale),
                     _dimensionality._scale(scale),
-                    _layers.map( layer -> layer._scale(scale) ),
+                    _layers._scale(scale),
                     _properties
                 );
     }

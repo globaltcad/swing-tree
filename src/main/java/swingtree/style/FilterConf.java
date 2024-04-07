@@ -98,6 +98,16 @@ public final class FilterConf
         return of(_kernel, _area, _center, _scale, (float)radius);
     }
 
+    FilterConf _scale( double factor ) {
+        if ( factor == 1 ) {
+            return this;
+        }
+        if ( this.equals(FilterConf.none()) ) {
+            return this;
+        }
+        return of(_kernel, _area, _center.scale(factor), _scale, (float) (_blur * factor));
+    }
+
     FilterConf simplified() {
         KernelConf kernel = _kernel.simplified();
         if (

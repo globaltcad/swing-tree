@@ -135,8 +135,25 @@ final class StyleConfLayers
             || predicate.test(UI.Layer.FOREGROUND, _foreground);
     }
 
-    StyleConfLayers map(Function<StyleConfLayer, StyleConfLayer> f ) {
+    StyleConfLayers map( Function<StyleConfLayer, StyleConfLayer> f ) {
         return of(_filter, f.apply(_background), f.apply(_content), f.apply(_border), f.apply(_foreground), _any == null ? null : f.apply(_any));
+    }
+
+    StyleConfLayers _scale( double factor ) {
+        if ( factor == 1 ) {
+            return this;
+        }
+        if ( this == _EMPTY ) {
+            return this;
+        }
+        return of(
+            _filter    ._scale(factor),
+            _background._scale(factor),
+            _content   ._scale(factor),
+            _border    ._scale(factor),
+            _foreground._scale(factor),
+            _any == null ? null : _any._scale(factor)
+        );
     }
 
     @SuppressWarnings("ReferenceEquality")
