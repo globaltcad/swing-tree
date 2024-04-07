@@ -31,7 +31,7 @@ import java.awt.geom.Point2D
     This specification demonstrates what kind of style configuration is
     created by various usage patterns of the style API.
     The style configuration defines how Swing components ought to be
-    configured and rendered.
+    placed and rendered.
 
 ''')
 @Subject([StyleConf])
@@ -832,7 +832,7 @@ class Styles_Spec extends Specification
                 "]"
     }
 
-    def 'The style API allows you to configure a custom paint for a component font.'()
+    def 'The style API allows you to configure a custom paint for a component font.'( float uiScale )
     {
         reportInfo """
             Usually the font of a component is a solid color which simply fills
@@ -845,7 +845,18 @@ class Styles_Spec extends Specification
             In this example we will configure a linear gradient as
             the paint for the font of a `JLabel` component.
         """
-        given :'A UI declaration consisting of a `JLabel` with a custom gradient paint for the font:'
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+            So when your screen has a higher pixel density then this factor
+            is used by SwingTree to ensure that the UI is upscaled accordingly! 
+            Please note that the line below only exists for testing purposes, 
+            SwingTree will determine a suitable 
+            scaling factor for the current system automatically for you,
+            so you do not have to specify this factor manually. 
+        """
+            SwingTree.get().setUiScaleFactor(uiScale)
+
+        and : 'A UI declaration consisting of a `JLabel` with a custom gradient paint for the font:'
             var ui =
                         UI.label("I am a Gradient")
                         .withStyle( it -> it
@@ -873,7 +884,7 @@ class Styles_Spec extends Specification
         when : 'We create the declared `JLabel` component using the `get` method...'
             var label = ui.get(JLabel)
         then : 'The label will have a font with the expected size and family.'
-            label.getFont().getSize() == 18
+            label.getFont().getSize() == (int)(18 * uiScale)
             label.getFont().getFamily() == "Ubuntu"
         when : 'We extract the foreground and background paint of the font...'
             var paint           = label.getFont().getAttributes().get(TextAttribute.FOREGROUND)
@@ -896,17 +907,20 @@ class Styles_Spec extends Specification
             var grad1 = paint as LinearGradientPaint
             var grad2 = backgroundPaint as GradientPaint
         then : 'They have the expected start and end points:'
-            grad1.getStartPoint() == new Point2D.Float(3, 3)
-            grad1.getEndPoint() == new Point2D.Float(3, 47)
-            grad2.getPoint1() == new Point2D.Float(94.0, 19.0)
-            grad2.getPoint2() == new Point2D.Float(-3.0, 19.0)
+            grad1.getStartPoint() == new Point2D.Float((float)(3*uiScale), (float)(3*uiScale))
+            grad1.getEndPoint() == new Point2D.Float((float)(3*uiScale), (float)(47*uiScale))
+            grad2.getPoint1() == new Point2D.Float((float)(100*uiScale+94.0-100), (float)(25*uiScale-6))
+            grad2.getPoint2() == new Point2D.Float((float)(3*uiScale-6), (float)(25*uiScale-6))
         and : 'They also both have the expected colors:'
             grad1.getColors() == [ Color.RED, Color.GREEN, Color.BLUE ] as Color[]
             grad2.getColor1() == Color.CYAN
             grad2.getColor2() == Color.MAGENTA
+
+        where :
+            uiScale << [ 1.0f, 2.0f, 3.0f ]
     }
 
-    def 'The style API allows you to configure a custom noise paint for a component font.'()
+    def 'The style API allows you to configure a custom noise paint for a component font.'( float uiScale )
     {
         reportInfo """
             Usually the font of a component is a solid color which simply fills
@@ -921,7 +935,18 @@ class Styles_Spec extends Specification
             The noise gradient is a custom paint that uses a noise function
             to generate values used for interpolation between colors.
         """
-        given :'A UI declaration consisting of a `JLabel` with a custom noise paint for the font:'
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+            So when your screen has a higher pixel density then this factor
+            is used by SwingTree to ensure that the UI is upscaled accordingly! 
+            Please note that the line below only exists for testing purposes, 
+            SwingTree will determine a suitable 
+            scaling factor for the current system automatically for you,
+            so you do not have to specify this factor manually. 
+        """
+            SwingTree.get().setUiScaleFactor(uiScale)
+
+        and :'A UI declaration consisting of a `JLabel` with a custom noise paint for the font:'
             var ui =
                         UI.label("I am a Gradient")
                         .withStyle( it -> it
@@ -948,7 +973,7 @@ class Styles_Spec extends Specification
         when : 'We create the declared `JLabel` component using the `get` method...'
             var label = ui.get(JLabel)
         then : 'The label will have a font with the expected size and family.'
-            label.getFont().getSize() == 18
+            label.getFont().getSize() == 18 * uiScale
             label.getFont().getFamily() == "Arial"
         when : 'We extract the foreground and background paint of the font...'
             var paint           = label.getFont().getAttributes().get(TextAttribute.FOREGROUND)
@@ -974,5 +999,8 @@ class Styles_Spec extends Specification
         and : 'They also both have the expected scale:'
             paint.getScale() == new Point2D.Float(1, 1)
             backgroundPaint.getScale() == new Point2D.Float(3, 4)
+
+        where :
+            uiScale << [ 1.0f, 2.0f, 3.0f ]
     }
 }
