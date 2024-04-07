@@ -84,11 +84,31 @@ class MVVM_Example_Spec extends Specification
         then : 'The view was successfully created.'
             button != null
         when : 'We press the button.'
-            button.doClick()
+            UI.runNow({
+                button.model.setPressed(true)
+            })
         then : """
-                The property was updated 2 times, because the pressed state switches 
-                from false to true and then false again.
+                The property was updated a single time.
             """
+            pressedStates == [true]
+        when : 'We release the button.'
+            UI.runNow({
+                button.model.setPressed(false)
+            })
+        then : """
+                The property was updated a single time.
+            """
+            pressedStates == [true, false]
+        when : """
+            We release a second time...
+        """
+            UI.runNow({
+                button.model.setPressed(false)
+            })
+        then : """
+            The property was not updated a second time,
+            because the model already knows that the button is not pressed.
+        """
             pressedStates == [true, false]
     }
 
