@@ -807,7 +807,7 @@ final class StyleRenderer
         final Color[] colors    = noise.colors();
         final float[] fractions = _fractionsFrom(colors, noise.fractions());
         float rotation = noise.rotation();
-        Offset scale = noise.scale();
+        Scale scale = noise.scale();
         float scaleX = scale.x();
         float scaleY = scale.y();
 
