@@ -29,7 +29,7 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
                                                         UI.NoiseType.STOCHASTIC,
                                                         new Color[0],
                                                         Offset.none(),
-                                                        Offset.of(1f, 1f),
+                                                        Scale.none(),
                                                         UI.ComponentArea.BODY,
                                                         UI.ComponentBoundary.EXTERIOR_TO_BORDER,
                                                         0f,
@@ -48,7 +48,7 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
         NoiseFunction        function,
         Color[]              colors,
         Offset               offset,
-        Offset               scale,
+        Scale                scale,
         UI.ComponentArea     area,
         UI.ComponentBoundary boundary,
         float                rotation,
@@ -86,7 +86,7 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
     private final NoiseFunction        _function;
     private final Color[]              _colors;
     private final Offset               _offset;
-    private final Offset               _scale;
+    private final Scale                _scale;
     private final UI.ComponentArea     _area;
     private final UI.ComponentBoundary _boundary;
     private final float                _rotation;
@@ -97,7 +97,7 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
         NoiseFunction        function,
         Color[]              colors,
         Offset               offset,
-        Offset               scale,
+        Scale                scale,
         UI.ComponentArea     area,
         UI.ComponentBoundary boundary,
         float                rotation,
@@ -119,7 +119,7 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
 
     Offset offset() { return _offset; }
 
-    Offset scale() { return _scale; }
+    Scale scale() { return _scale; }
 
     UI.ComponentArea area() { return _area; }
 
@@ -240,7 +240,7 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
      * @return A new noise gradient style with the specified size.
      */
     public NoiseConf scale( double scale ) {
-        return of(_function, _colors, _offset, Offset.of(scale, scale), _area, _boundary, _rotation, _fractions);
+        return of(_function, _colors, _offset, Scale.of(scale, scale), _area, _boundary, _rotation, _fractions);
     }
 
     /**
@@ -252,7 +252,7 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
      * @return A new noise gradient style with the specified size.
      */
     public NoiseConf scale( double x, double y ) {
-        return of(_function, _colors, _offset, Offset.of(x,y), _area, _boundary, _rotation, _fractions);
+        return of(_function, _colors, _offset, Scale.of(x,y), _area, _boundary, _rotation, _fractions);
     }
     
     /**

@@ -11,8 +11,10 @@ import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -69,6 +71,7 @@ public final class ComponentExtension<C extends JComponent>
     private @Nullable Shape _outerBaseClip = null;
 
     private PaintStep _lastPaintStep = PaintStep.UNDEFINED;
+    private @Nullable BufferedImage _bufferedImage = null;
 
 
     private ComponentExtension( C owner ) { _owner = Objects.requireNonNull(owner); }
@@ -76,7 +79,13 @@ public final class ComponentExtension<C extends JComponent>
 
     C getOwner() { return _owner; }
 
-    BoxModelConf getBoxModelConf() { return _styleEngine.getBoxModelConf(); }
+    BoxModelConf getBoxModelConf() {
+        return _styleEngine.getBoxModelConf();
+    }
+
+    Optional<BufferedImage> getBufferedImage() {
+        return Optional.ofNullable(_bufferedImage);
+    }
 
     /**
      *  Allows for extra state to be attached to the component extension.
@@ -364,10 +373,14 @@ public final class ComponentExtension<C extends JComponent>
                                 );
     }
 
-    private void _switchToPaintStep( PaintStep step ) {
-        int newStep  = step.ordinal();
-        int lastStep = _lastPaintStep.ordinal();
-        boolean isNewPaintCycle = newStep <= lastStep;
+    private void _doPaintStep(
+        final PaintStep            step,
+        final Graphics             graphics,
+        final Consumer<Graphics2D> superPaint
+    ) {
+        final int newStep  = step.ordinal();
+        final int lastStep = _lastPaintStep.ordinal();
+        final boolean isNewPaintCycle = newStep <= lastStep;
         if ( isNewPaintCycle )
             gatherApplyAndInstallStyleConfig();
             /*
@@ -376,6 +389,55 @@ public final class ComponentExtension<C extends JComponent>
             */
 
         _lastPaintStep = step;
+
+        try {
+            if ( isNewPaintCycle && step == PaintStep.BACKGROUND && _hasChildWithParentFilter() ) {
+                int w = _owner.getWidth();
+                int h = _owner.getHeight();
+                _bufferedImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+                _renderInto(_bufferedImage, step, graphics, superPaint);
+            } else if ( _bufferedImage != null && step == PaintStep.BORDER ) {
+                _renderInto(_bufferedImage, step, graphics, superPaint);
+            } else {
+                superPaint.accept((Graphics2D) graphics);
+            }
+        } catch ( Exception e ) {
+            log.error("Error while painting step '"+step+"'!", e);
+        }
+    }
+
+    private void _renderInto(BufferedImage buffer, PaintStep step, Graphics graphics, Consumer<Graphics2D> superPaint ) {
+        Graphics2D bufferGraphics = buffer.createGraphics();
+        StyleUtil.transferConfigurations((Graphics2D) graphics, bufferGraphics);
+        bufferGraphics.setClip(graphics.getClip());
+        try {
+            superPaint.accept(bufferGraphics);
+        } catch ( Exception e ) {
+            log.error("Error while painting step '"+step+"' into component buffer!", e);
+        }
+        graphics.drawImage(buffer, 0, 0, null);
+    }
+
+    private boolean _hasChildWithParentFilter() {
+        for ( Component child : _owner.getComponents() ) {
+            if ( !child.isOpaque() && child instanceof JComponent ) {
+                if ( _hasParentFilter((JComponent) child) )
+                    return true;
+            }
+        }
+        _bufferedImage = null;
+        return false;
+    }
+
+    private boolean _hasParentFilter( JComponent aComponent ) {
+        ComponentExtension<?> extension = from(aComponent);
+        ComponentConf conf = extension.getConf();
+        if ( conf.equals(ComponentConf.none()) )
+            return false;
+        StyleConf style = conf.style();
+        if ( style.equals(StyleConf.none()) )
+            return false;
+        return !style.layers().filter().equals(FilterConf.none());
     }
 
     /**
@@ -388,125 +450,136 @@ public final class ComponentExtension<C extends JComponent>
      * @param g The {@link Graphics} object to use for rendering.
      * @param lookAndFeelPaint A {@link Runnable} which is used to paint the look and feel of the component.
      */
-    void paintBackgroundIfNeeded( Graphics g, Runnable lookAndFeelPaint )
+    void paintBackgroundIfNeeded( Graphics g, Consumer<Graphics> lookAndFeelPaint )
     {
         if ( _styleInstaller.customLookAndFeelIsInstalled() ) {
             if ( lookAndFeelPaint != null )
-                lookAndFeelPaint.run();
+                lookAndFeelPaint.accept(g);
             return; // We render ĥere through the custom installed UI!
             // So the method call below will be called within lookAndFeelPaint.run();
         }
         paintBackground(g, lookAndFeelPaint);
     }
 
-    void paintBackground( Graphics g, @Nullable Runnable lookAndFeelPainting )
+    void paintBackground( Graphics graphics, @Nullable Consumer<Graphics> lookAndFeelPainting )
     {
-        _switchToPaintStep(PaintStep.BACKGROUND);
+        _doPaintStep(PaintStep.BACKGROUND, graphics, internalGraphics -> {
+            Shape baseClip = internalGraphics.getClip();
+            _outerBaseClip = baseClip;
 
-        Shape baseClip = g.getClip();
-        _outerBaseClip = baseClip;
+            if ( _outerBaseClip == null && _owner.getParent() == null ) {
+                // Happens when rendering individual components (usually unit tests)!
+                int x = (int) internalGraphics.getTransform().getTranslateX();
+                int y = (int) internalGraphics.getTransform().getTranslateY();
+                int w = _owner.getWidth();
+                int h = _owner.getHeight();
+                _outerBaseClip = new Rectangle(x,y,w,h);
+            }
 
-        if ( _outerBaseClip == null && _owner.getParent() == null ) {
-            // Happens when rendering individual components (usually unit tests)!
-            int x = (int) ((Graphics2D) g).getTransform().getTranslateX();
-            int y = (int) ((Graphics2D) g).getTransform().getTranslateY();
-            int w = _owner.getWidth();
-            int h = _owner.getHeight();
-            _outerBaseClip = new Rectangle(x,y,w,h);
-        }
+            Font componentFont = _owner.getFont();
+            if ( componentFont != null && !componentFont.equals(internalGraphics.getFont()) )
+                internalGraphics.setFont( componentFont );
 
-        Font componentFont = _owner.getFont();
-        if ( componentFont != null && !componentFont.equals(g.getFont()) )
-            g.setFont( componentFont );
+            // Sometimes needed to render filtered backgrounds:
+            BufferedImage parentRendering = Optional.ofNullable(_owner.getParent())
+                                            .map( c -> c instanceof JComponent ? (JComponent) c : null )
+                                            .map(ComponentExtension::from)
+                                            .map(e -> e._bufferedImage)
+                                            .orElse(null);
 
-        _styleEngine.renderBackgroundStyle( (Graphics2D) g);
+            // Location relative to the parent:
+            _styleEngine.renderBackgroundStyle(internalGraphics, parentRendering, _owner.getX(), _owner.getY());
 
-        if ( lookAndFeelPainting != null ) {
-            Shape contentClip = _styleEngine.componentArea().orElse(null);
+            if ( lookAndFeelPainting != null ) {
+                Shape contentClip = _styleEngine.componentArea().orElse(null);
 
-            contentClip = StyleUtil.intersect( contentClip, _outerBaseClip );
+                contentClip = StyleUtil.intersect( contentClip, _outerBaseClip );
 
-            paintWithClip((Graphics2D) g, contentClip, () -> {
-                try {
-                    lookAndFeelPainting.run();
-                } catch (Exception e) {
-                    String componentAsString = "?";
+                paintWithClip(internalGraphics, contentClip, () -> {
                     try {
-                        // Anything can happen in client code...
-                        componentAsString = _owner.toString();
-                    } catch (Exception e2) {
-                        log.error("Error while converting component to string!", e2);
+                        lookAndFeelPainting.accept(internalGraphics);
+                    } catch (Exception e) {
+                        String componentAsString = "?";
+                        try {
+                            // Anything can happen in client code...
+                            componentAsString = _owner.toString();
+                        } catch (Exception e2) {
+                            log.error("Error while converting component to string!", e2);
+                        }
+                        log.error("Error while painting look and feel of component '"+componentAsString+"'!", e);
                     }
-                    log.error("Error while painting look and feel of component '"+componentAsString+"'!", e);
-                }
-            });
-        }
+                });
+            }
 
-        g.setClip(baseClip);
+            internalGraphics.setClip(baseClip);
+        });
     }
 
-    void paintBorder( Graphics2D g2d, Runnable formerBorderPainter )
+    void paintBorder( Graphics2D graphics, Consumer<Graphics> formerBorderPainter )
     {
-        _switchToPaintStep(PaintStep.BORDER);
+        _doPaintStep(PaintStep.BORDER, graphics, internalGraphics -> {
+            Shape former = internalGraphics.getClip();
+                try {
+                    if ( _outerBaseClip != null )
+                        internalGraphics.setClip(_outerBaseClip);
 
-        Shape former = g2d.getClip();
-        try {
-            if ( _outerBaseClip != null )
-                g2d.setClip(_outerBaseClip);
-
-            _styleEngine.paintBorder(g2d, formerBorderPainter);
-        } finally {
-            g2d.setClip(former);
-        }
+                    _styleEngine.paintBorder(internalGraphics, formerBorderPainter);
+                } catch (Exception e) {
+                    log.error("Error while painting border!", e);
+                }
+                finally {
+                    internalGraphics.setClip(former);
+                }
+        });
     }
 
     /**
      *  This method is used to paint the foreground style of the component
      *  using the provided {@link Graphics2D} object.
      *
-     * @param g2d The {@link Graphics2D} object to use for rendering.
+     * @param graphics The {@link Graphics2D} object to use for rendering.
      * @param superPaint A {@link Runnable} which is used to paint the look and feel of the component.
      */
-    void paintForeground( Graphics2D g2d, Runnable superPaint )
+    void paintForeground( Graphics2D graphics, Consumer<Graphics> superPaint )
     {
-        _switchToPaintStep(PaintStep.FOREGROUND);
+        _doPaintStep(PaintStep.FOREGROUND, graphics, internalGraphics -> {
+            Shape clip = _outerBaseClip != null ? _outerBaseClip : internalGraphics.getClip();
+            if ( _owner instanceof JScrollPane ) {
+                /*
+                    Scroll panes are not like other components, they have a viewport
+                    which clips the children.
+                    Now if we have a round border for the scroll pane, we want the
+                    children to be clipped by the round border (and the viewport).
+                    So we use the inner component area as the clip for the children.
+                */
+                clip = StyleUtil.intersect( _styleEngine.componentArea().orElse(clip), clip );
+            }
+            paintWithClip(internalGraphics, clip, ()->{
+                superPaint.accept(internalGraphics);
+            });
 
-        Shape clip = _outerBaseClip != null ? _outerBaseClip : g2d.getClip();
-        if ( _owner instanceof JScrollPane ) {
-            /*
-                Scroll panes are not like other components, they have a viewport
-                which clips the children.
-                Now if we have a round border for the scroll pane, we want the
-                children to be clipped by the round border (and the viewport).
-                So we use the inner component area as the clip for the children.
-            */
-            clip = StyleUtil.intersect( _styleEngine.componentArea().orElse(clip), clip );
-        }
-        paintWithClip(g2d, clip, ()->{
-            superPaint.run();
+            // We remember if antialiasing was enabled before we render:
+            boolean antialiasingWasEnabled = internalGraphics.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
+            // Reset antialiasing to its previous state:
+            if ( StyleEngine.IS_ANTIALIASING_ENABLED() )
+                internalGraphics.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
+
+            // We remember the clip:
+            Shape formerClip = internalGraphics.getClip();
+
+            Font componentFont = _owner.getFont();
+            if ( componentFont != null && !componentFont.equals(internalGraphics.getFont()) )
+                internalGraphics.setFont( componentFont );
+
+            _styleEngine.paintForeground(internalGraphics);
+
+            // We restore the clip:
+            if ( internalGraphics.getClip() != formerClip )
+                internalGraphics.setClip(formerClip);
+
+            // Reset antialiasing to its previous state:
+            internalGraphics.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
         });
-
-        // We remember if antialiasing was enabled before we render:
-        boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
-        // Reset antialiasing to its previous state:
-        if ( StyleEngine.IS_ANTIALIASING_ENABLED() )
-            g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
-
-        // We remember the clip:
-        Shape formerClip = g2d.getClip();
-
-        Font componentFont = _owner.getFont();
-        if ( componentFont != null && !componentFont.equals(g2d.getFont()) )
-            g2d.setFont( componentFont );
-
-        _styleEngine.paintForeground(g2d);
-
-        // We restore the clip:
-        if ( g2d.getClip() != formerClip )
-            g2d.setClip(formerClip);
-
-        // Reset antialiasing to its previous state:
-        g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
     }
 
     void paintWithContentAreaClip( Graphics g, Runnable painter ) {

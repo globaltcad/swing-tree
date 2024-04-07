@@ -4,6 +4,7 @@ import javax.swing.JComponent;
 import javax.swing.plaf.ComponentUI;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.util.function.Consumer;
 
 /**
  *  Implementations of this interface are SwingTree native components
@@ -80,7 +81,7 @@ public interface StylableComponent
      * @param g The graphics context to paint on.
      * @param superPaint The super.paint() method to call.
      */
-    /*final*/ default void paintBackground( Graphics g, Runnable superPaint ) {
+    /*final*/ default void paintBackground( Graphics g, Consumer<Graphics> superPaint ) {
         if ( this instanceof JComponent ) {
             ComponentExtension.from((JComponent) this).paintBackgroundIfNeeded( g, superPaint );
         }
@@ -97,7 +98,7 @@ public interface StylableComponent
      * @param g The graphics context to paint on.
      * @param superPaint The super.paintChildren() method to call.
      */
-    /*final*/ default void paintForeground( Graphics g, Runnable superPaint ) {
+    /*final*/ default void paintForeground( Graphics g, Consumer<Graphics> superPaint ) {
         if ( this instanceof JComponent ) {
             ComponentExtension.from((JComponent) this).paintForeground( (Graphics2D) g, superPaint );
         }

@@ -314,8 +314,8 @@ final class DynamicLaF
         }
 
         @Override public void paint( Graphics g, JComponent c ) {
-            ComponentExtension.from(c).paintBackground(g, ()->{
-                _paintComponentThroughFormerUI(_formerUI, g, c);
+            ComponentExtension.from(c).paintBackground(g, localGraphics->{
+                _paintComponentThroughFormerUI(_formerUI, localGraphics, c);
             });
         }
         @Override public void update( Graphics g, JComponent c ) { paint(g, c); }
@@ -332,11 +332,11 @@ final class DynamicLaF
         }
 
         @Override public void paint( Graphics g, JComponent c ) {
-            ComponentExtension.from(c).paintBackground(g, ()->{
+            ComponentExtension.from(c).paintBackground(g, localGraphics->{
                 if ( _formerUI != null )
-                    _paintComponentThroughFormerUI(_formerUI, g, c);
+                    _paintComponentThroughFormerUI(_formerUI, localGraphics, c);
                 else
-                    super.paint(g, c);
+                    super.paint(localGraphics, c);
             });
         }
         @Override public void update( Graphics g, JComponent c ) { paint(g, c); }
@@ -377,9 +377,9 @@ final class DynamicLaF
             });
 
             boolean shouldPaintFormerUI = ( insetLeft == 0 && insetRight == 0 && insetTop == 0 && insetBottom == 0 );
-            ComponentExtension.from(c).paintBackground(g, ()->{
+            ComponentExtension.from(c).paintBackground(g, localGraphics->{
                 if ( shouldPaintFormerUI )
-                    _paintComponentThroughFormerUI(_formerUI, g, c);
+                    _paintComponentThroughFormerUI(_formerUI, localGraphics, c);
             });
         }
 

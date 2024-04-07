@@ -62,9 +62,14 @@ final class BaseConf
         _orientation     = orientation;
     }
 
+    boolean requiresCustomUI() {
+        return !Objects.equals(_foundationColor, _NONE._foundationColor) ||
+               !Objects.equals(_backgroundColor, _NONE._backgroundColor);
+    }
+
     boolean isBasic() {
         return Objects.equals(_foundationColor, _NONE._foundationColor) &&
-               Objects.equals(_backgroundColor, _NONE._backgroundColor);
+                Objects.equals(_backgroundColor, _NONE._backgroundColor);
     }
 
     public Optional<ImageIcon> icon() { return Optional.ofNullable(_icon); }

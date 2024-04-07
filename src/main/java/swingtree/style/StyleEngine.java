@@ -11,7 +11,9 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Shape;
+import java.awt.image.BufferedImage;
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  *  Orchestrates the rendering of a component's style and animations. <br>
@@ -86,7 +88,7 @@ final class StyleEngine
         return new StyleEngine(_boxModelConf, _componentConf, _layerCaches);
     }
 
-    void renderBackgroundStyle( Graphics2D g2d )
+    void renderBackgroundStyle( Graphics2D g2d, @Nullable BufferedImage parentRendering, int x, int y )
     {
         // We remember if antialiasing was enabled before we render:
         boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
@@ -95,13 +97,25 @@ final class StyleEngine
         if ( IS_ANTIALIASING_ENABLED() )
             g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 
+        // A component may have a filter on the parent:
+        if ( parentRendering != null ) {
+            FilterConf filter = _componentConf.style().layers().filter();
+            if ( !filter.equals(FilterConf.none()) ) {
+                // Location relative to the parent:
+                try {
+                    StyleRenderer.renderParentFilter(filter, parentRendering, g2d, x, y, _boxModelConf);
+                } catch ( Exception ex ) {
+                    log.error("Exception while trying to apply and render parent filter!", ex);
+                }
+            }
+        }
         _render(UI.Layer.BACKGROUND, g2d);
 
         // Reset antialiasing to its previous state:
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
     }
 
-    void paintBorder( Graphics2D g2d, Runnable formerBorderPainter )
+    void paintBorder( Graphics2D g2d, Consumer<Graphics> formerBorderPainter )
     {
         // We remember if antialiasing was enabled before we render:
         boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;
@@ -117,7 +131,7 @@ final class StyleEngine
         g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );
 
         try {
-            formerBorderPainter.run();
+            formerBorderPainter.accept(g2d);
         } catch ( Exception ex ) {
             /*
                 Note that if any exceptions happen during the border style painting,

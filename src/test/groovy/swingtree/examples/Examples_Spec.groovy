@@ -18,6 +18,7 @@ import examples.simple.NamedFieldsView
 import examples.simple.TodoApp
 import examples.stylish.BoxShadowPickerView
 import examples.stylish.BoxShadowPickerViewModel
+import examples.stylish.GlassUIView
 import examples.stylish.SoftUIView
 import examples.stylish.WellRoundedView
 import spock.lang.Narrative
@@ -27,6 +28,7 @@ import swingtree.SwingTree
 import swingtree.UI
 import swingtree.components.JSplitButton
 import swingtree.examples.advanced.AdvancedUI
+import swingtree.style.ComponentExtension
 import swingtree.threading.EventProcessor
 import utility.SwingTreeTestConfigurator
 import utility.Utility
@@ -155,6 +157,34 @@ class Examples_Spec extends Specification
             SwingTree style API to override the default look and feel of Swing components.
         """
         expect : new BoxShadowPickerView(new BoxShadowPickerViewModel())
+    }
+
+    def 'The glass view example UI defined in the examples can be created.'()
+    {
+        reportInfo """
+            The ${Utility.link('glass view example', BoxShadowPickerView)} is
+            an advanced styling example which demonstrates how
+            you can apply a glass effect to components
+            using a custom filter configuration.
+            
+            ${Utility.linkSnapshot('views/glass-style-example-view.png')}
+
+            As you can see, the component centered in the middle of
+            the view has a glass effect, which consists of a blur
+            as well as a scling on the background provided by the parent.
+
+            Under the hood, this works by rendering the parent into 
+            a buffered image and then when a child component is rendered,
+            it uses the parent's buffered image for the filter effect.
+        """
+        given : 'We instantiate the UI.'
+            var view = new GlassUIView()
+        expect : 'It is rendered as shown in the image.'
+            Utility.similarityBetween(view, "views/glass-style-example-view.png", 98) > 98
+        and :
+            ComponentExtension.from(view).getBufferedImage().isPresent()
+            !ComponentExtension.from(view.getComponent(0)).getBufferedImage().isPresent()
+
     }
 
     def 'The note guesser example UI defined in the examples can be created.'()

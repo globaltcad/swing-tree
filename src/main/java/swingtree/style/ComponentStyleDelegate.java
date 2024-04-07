@@ -1693,6 +1693,11 @@ public final class ComponentStyleDelegate<C extends JComponent>
         return _withStyle(_styleConf.property(key, value));
     }
 
+    public ComponentStyleDelegate<C> parentFilter( Function<FilterConf, FilterConf> filterStyler ) {
+        Objects.requireNonNull(filterStyler);
+        return _withStyle(_styleConf._withLayers(_styleConf.layers().filter(filterStyler)));
+    }
+
     private ComponentStyleDelegate<C> _withFont( Function<FontConf, FontConf> fontStyler ) {
         Objects.requireNonNull(fontStyler);
         StyleConf updatedStyle = _styleConf._withFont(fontStyler.apply(_styleConf.font()));

@@ -1,16 +1,19 @@
 package swingtree.components;
 
 import net.miginfocom.swing.MigLayout;
-import swingtree.style.StylableComponent;
 import swingtree.style.ComponentExtension;
+import swingtree.style.StylableComponent;
 
 import javax.accessibility.Accessible;
 import javax.accessibility.AccessibleContext;
 import javax.accessibility.AccessibleRole;
-import javax.swing.*;
+import javax.swing.BoxLayout;
+import javax.swing.JComponent;
+import javax.swing.UIDefaults;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.PanelUI;
-import java.awt.*;
+import java.awt.Graphics;
+import java.awt.LayoutManager;
 
 /**
  * <code>JBox</code> is a generic lightweight container similar to
@@ -86,12 +89,12 @@ public class JBox extends JComponent implements Accessible, StylableComponent
 
     /** {@inheritDoc} */
     @Override public void paint(Graphics g){
-        paintBackground(g, ()->super.paint(g));
+        paintBackground(g, super::paint);
     }
 
     /** {@inheritDoc} */
     @Override public void paintChildren(Graphics g) {
-        paintForeground(g, ()->super.paintChildren(g));
+        paintForeground(g, super::paintChildren);
     }
 
     @Override public void setUISilently( ComponentUI ui ) {

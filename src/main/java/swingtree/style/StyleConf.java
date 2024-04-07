@@ -473,7 +473,7 @@ public final class StyleConf
                     _base, // Just colors and the cursor
                     _font._scale(scale),
                     _dimensionality._scale(scale),
-                    _layers.map( layer -> layer._scale(scale) ),
+                    _layers._scale(scale),
                     _properties
                 );
     }
@@ -512,6 +512,10 @@ public final class StyleConf
 
     boolean hasEqualDimensionalityAs( StyleConf otherStyle ) {
         return Objects.equals(_dimensionality, otherStyle._dimensionality);
+    }
+
+    boolean hasEqualFilterAs( StyleConf otherStyle ) {
+        return _layers.filter().equals(otherStyle._layers.filter());
     }
 
     boolean hasEqualShadowsAs( StyleConf otherStyle ) {
@@ -662,6 +666,7 @@ public final class StyleConf
                hasEqualBaseAs(other)           &&
                hasEqualFontAs(other)           &&
                hasEqualDimensionalityAs(other) &&
+               hasEqualFilterAs(other)         &&
                hasEqualShadowsAs(other)        &&
                hasEqualPaintersAs(other)       &&
                hasEqualGradientsAs(other)      &&

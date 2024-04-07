@@ -22,6 +22,20 @@ final class StyleUtil
 
     private StyleUtil() {} // No instantiation, just a utility class
 
+    static void transferConfigurations(
+            Graphics2D from,
+            Graphics2D to
+    ) {
+        to.setFont(from.getFont());
+        to.setColor(from.getColor());
+        to.setBackground(from.getBackground());
+        to.setComposite(from.getComposite());
+        to.setClip(null); // We want to capture the full style and clip it later (see g.drawImage(_cache, 0, 0, null); below.
+        to.setComposite(from.getComposite());
+        to.setPaint(from.getPaint());
+        to.setRenderingHints(from.getRenderingHints());
+        to.setStroke(from.getStroke());
+    }
 
     static @Nullable Shape intersect( @Nullable Shape clipA, @Nullable Shape clipB )
     {

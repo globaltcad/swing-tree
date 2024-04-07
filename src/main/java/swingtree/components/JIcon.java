@@ -7,10 +7,11 @@ import swingtree.api.IconDeclaration;
 import swingtree.style.ComponentExtension;
 import swingtree.style.StylableComponent;
 
-import javax.swing.*;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
 import javax.swing.plaf.ComponentUI;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.util.Map;
 
 /**
@@ -57,12 +58,12 @@ public class JIcon extends JLabel implements StylableComponent
 
     /** {@inheritDoc} */
     @Override public void paint(Graphics g){
-        paintBackground(g, ()->super.paint(g));
+        paintBackground(g, super::paint);
     }
 
     /** {@inheritDoc} */
     @Override public void paintChildren(Graphics g) {
-        paintForeground(g, ()->super.paintChildren(g));
+        paintForeground(g, super::paintChildren);
     }
 
     @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }

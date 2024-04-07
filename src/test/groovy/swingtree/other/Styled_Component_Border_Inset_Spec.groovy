@@ -157,7 +157,7 @@ class Styled_Component_Border_Inset_Spec extends Specification
         """
             var ui =
                     UI.menuItem("ブランコツリー")
-                    .withStyle( styler);
+                    .withStyle(styler);
 
         and : 'We unpack the component and its border:'
             var component = ui.get(JMenuItem)
@@ -168,23 +168,27 @@ class Styled_Component_Border_Inset_Spec extends Specification
             borderType.isAssignableFrom(border.getClass())
 
         where :
-            uiScale | styler                                     || borderType
+            uiScale | styler                                             || borderType
 
-            1       | { it -> it }                               || javax.swing.plaf.synth.SynthBorder
-            2       | { it -> it }                               || javax.swing.plaf.synth.SynthBorder
-            3       | { it -> it }                               || javax.swing.plaf.synth.SynthBorder
+            1       | { it -> it }                                       || javax.swing.plaf.synth.SynthBorder
+            2       | { it -> it }                                       || javax.swing.plaf.synth.SynthBorder
+            3       | { it -> it }                                       || javax.swing.plaf.synth.SynthBorder
 
-            1       | { it -> it.foregroundColor(Color.BLUE) }   || javax.swing.plaf.synth.SynthBorder
-            2       | { it -> it.foregroundColor(Color.BLUE) }   || javax.swing.plaf.synth.SynthBorder
-            3       | { it -> it.foregroundColor(Color.BLUE) }   || javax.swing.plaf.synth.SynthBorder
+            1       | { it -> it.foregroundColor(Color.BLUE) }           || javax.swing.plaf.synth.SynthBorder
+            2       | { it -> it.foregroundColor(Color.BLUE) }           || javax.swing.plaf.synth.SynthBorder
+            3       | { it -> it.foregroundColor(Color.BLUE) }           || javax.swing.plaf.synth.SynthBorder
 
-            1       | { it -> it.cursor(UI.Cursor.HAND) }        || javax.swing.plaf.synth.SynthBorder
-            2       | { it -> it.cursor(UI.Cursor.HAND) }        || javax.swing.plaf.synth.SynthBorder
-            3       | { it -> it.cursor(UI.Cursor.HAND) }        || javax.swing.plaf.synth.SynthBorder
+            1       | { it -> it.cursor(UI.Cursor.HAND) }                || javax.swing.plaf.synth.SynthBorder
+            2       | { it -> it.cursor(UI.Cursor.HAND) }                || javax.swing.plaf.synth.SynthBorder
+            3       | { it -> it.cursor(UI.Cursor.HAND) }                || javax.swing.plaf.synth.SynthBorder
 
-            1       | { it -> it.foundationColor(Color.BLUE) }   || swingtree.style.StyleAndAnimationBorder
-            2       | { it -> it.foundationColor(Color.BLUE) }   || swingtree.style.StyleAndAnimationBorder
-            3       | { it -> it.foundationColor(Color.BLUE) }   || swingtree.style.StyleAndAnimationBorder
+            1       | { it -> it.foundationColor(Color.BLUE) }           || javax.swing.plaf.synth.SynthBorder
+            2       | { it -> it.foundationColor(Color.BLUE) }           || javax.swing.plaf.synth.SynthBorder
+            3       | { it -> it.foundationColor(Color.BLUE) }           || javax.swing.plaf.synth.SynthBorder
+
+            1       | { it -> it.painter(UI.Layer.BORDER,     g2d->{}) } || swingtree.style.StyleAndAnimationBorder
+            2       | { it -> it.painter(UI.Layer.CONTENT,    g2d->{}) } || swingtree.style.StyleAndAnimationBorder
+            //3       | { it -> it.painter(UI.Layer.BACKGROUND, g2d->{}) } || javax.swing.plaf.synth.SynthBorder
     }
 
 }
