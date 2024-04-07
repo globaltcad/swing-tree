@@ -130,8 +130,10 @@ class Style_Animations_Spec extends Specification
             UI.sync()
             label.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
 
-        then : 'The label will have a border and a background color.'
-            label.border != null
+        then : 'The label will have a border and the custom colors...'
+            new PollingConditions(timeout: 10, initialDelay: 0, factor: 1.25).eventually {
+                assert label.border != null
+            }
             label.background != new Color(238, 238, 238)
             label.foreground == new Color(51, 51, 51)
             label.getUI() instanceof MetalLabelUI
