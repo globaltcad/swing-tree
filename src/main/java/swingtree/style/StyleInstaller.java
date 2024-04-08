@@ -67,21 +67,24 @@ final class StyleInstaller<C extends JComponent>
         return _dynamicLaF.customLookAndFeelIsInstalled();
     }
 
+    Outline _formerBorderPadding( C owner, StyleConf newStyle ) {
+        Border border = owner.getBorder();
+        if ( border instanceof StyleAndAnimationBorder ) {
+            return ((StyleAndAnimationBorder<?>) border).getDelegatedInsets(newStyle, true);
+        }
+        return Outline.none();
+    }
+
     StyleEngine _updateEngine(
         final C           owner,
         final StyleEngine engine,
         final StyleConf   newStyle
     ) {
         final ComponentConf currentConf = engine.getComponentConf();
-
-        Outline outline = Outline.none();
-        Border border = owner.getBorder();
-        if ( border instanceof StyleAndAnimationBorder ) {
-            outline = ((StyleAndAnimationBorder<?>) border).getDelegatedInsets(newStyle, true);
-        }
+        final Outline correction = _formerBorderPadding(owner, newStyle);
         final boolean sameStyle   = currentConf.style().equals(newStyle);
         final boolean sameBounds  = currentConf.currentBounds().equals(owner.getX(), owner.getY(), owner.getWidth(), owner.getHeight());
-        final boolean sameOutline = currentConf.baseOutline().equals(outline);
+        final boolean sameOutline = currentConf.baseOutline().equals(correction);
 
         ComponentConf newConf;
         if ( sameStyle && sameBounds && sameOutline )
@@ -90,7 +93,7 @@ final class StyleInstaller<C extends JComponent>
             newConf = new ComponentConf(
                             newStyle,
                             Bounds.of(owner.getX(), owner.getY(), owner.getWidth(), owner.getHeight()),
-                            outline
+                            correction
                         );
 
         LayerCache[] layerCaches = engine.getLayerCaches();
