@@ -603,6 +603,9 @@ public final class UI extends UIFactoryMethods
          * like for example the contents of a {@link JPanel} or {@link JScrollPane}.
          */
         INTERIOR_TO_CONTENT, // After the padding, before the content.
+        /**
+         * The center point of the component.
+         */
         CENTER_TO_CONTENT, // The center of the component.
     }
 

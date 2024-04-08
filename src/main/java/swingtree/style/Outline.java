@@ -192,6 +192,20 @@ final class Outline
                 );
     }
 
+    public Outline or( Outline other ) {
+        if ( this == _NONE )
+            return other;
+        if ( other == _NONE )
+            return this;
+
+        return Outline.ofNullable(
+                    top    == null ? other.top    : top,
+                    right  == null ? other.right  : right,
+                    bottom == null ? other.bottom : bottom,
+                    left   == null ? other.left   : left
+                );
+    }
+
     /**
      *  Maps the outline values of this {@link Outline} using the specified {@code mapper} function.
      *

@@ -30,10 +30,10 @@ final class ComponentConf
     private int     _hashCode         = 0; // cached hash code
 
 
-    private ComponentConf(
-        StyleConf      styleConf,
-        Bounds         currentBounds,
-        Outline        baseOutline
+    ComponentConf(
+            StyleConf styleConf,
+            Bounds currentBounds,
+            Outline baseOutline
     ) {
         _styleConf     = Objects.requireNonNull(styleConf);
         _currentBounds = Objects.requireNonNull(currentBounds);
@@ -45,27 +45,6 @@ final class ComponentConf
     Bounds currentBounds() { return _currentBounds; }
 
     Outline baseOutline() { return _baseOutline; }
-
-    ComponentConf with( StyleConf styleConf, JComponent component )
-    {
-        Outline outline = Outline.none();
-        Border border = component.getBorder();
-        if ( border instanceof StyleAndAnimationBorder ) {
-            outline = ((StyleAndAnimationBorder<?>) border).getDelegatedInsets(styleConf, true);
-        }
-
-        boolean sameStyle   = _styleConf.equals(styleConf);
-        boolean sameBounds  = _currentBounds.equals(component.getX(), component.getY(), component.getWidth(), component.getHeight());
-        boolean sameOutline = _baseOutline.equals(outline);
-        if ( sameStyle && sameBounds && sameOutline )
-            return this;
-
-        return new ComponentConf(
-                   styleConf,
-                   Bounds.of(component.getX(), component.getY(), component.getWidth(), component.getHeight()),
-                   outline
-               );
-    }
 
     ComponentConf withSize( int width, int height ) {
         return new ComponentConf(

@@ -9,6 +9,7 @@ import org.jspecify.annotations.Nullable;
 import swingtree.UI;
 import swingtree.api.Painter;
 import swingtree.components.JIcon;
+import swingtree.layout.Bounds;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -67,17 +68,36 @@ final class StyleInstaller<C extends JComponent>
     }
 
     StyleEngine _updateEngine(
-        final C              owner,
-        final StyleEngine    engine,
-        StyleConf            newStyle
+        final C           owner,
+        final StyleEngine engine,
+        final StyleConf   newStyle
     ) {
-        ComponentConf currentConf = engine.getComponentConf();
+        final ComponentConf currentConf = engine.getComponentConf();
+
+        Outline outline = Outline.none();
+        Border border = owner.getBorder();
+        if ( border instanceof StyleAndAnimationBorder ) {
+            outline = ((StyleAndAnimationBorder<?>) border).getDelegatedInsets(newStyle, true);
+        }
+        final boolean sameStyle   = currentConf.style().equals(newStyle);
+        final boolean sameBounds  = currentConf.currentBounds().equals(owner.getX(), owner.getY(), owner.getWidth(), owner.getHeight());
+        final boolean sameOutline = currentConf.baseOutline().equals(outline);
+
+        ComponentConf newConf;
+        if ( sameStyle && sameBounds && sameOutline )
+            newConf = currentConf;
+        else
+            newConf = new ComponentConf(
+                            newStyle,
+                            Bounds.of(owner.getX(), owner.getY(), owner.getWidth(), owner.getHeight()),
+                            outline
+                        );
+
         LayerCache[] layerCaches = engine.getLayerCaches();
-        ComponentConf newConf = currentConf.with(newStyle, owner);
-        BoxModelConf newBoxModelConf = BoxModelConf.of(newConf.style().border(), newConf.baseOutline(), newConf.currentBounds().size());
         for ( LayerCache layerCache : layerCaches )
             layerCache.validate(currentConf, newConf);
 
+        BoxModelConf newBoxModelConf = BoxModelConf.of(newConf.style().border(), newConf.baseOutline(), newConf.currentBounds().size());
         return engine.with(newBoxModelConf, newConf);
     }
 
