@@ -59,6 +59,18 @@ final class StyleInstaller<C extends JComponent>
             owner.setBorder(new StyleAndAnimationBorder<>(ComponentExtension.from(owner), currentBorder, styleConf));
     }
 
+    StyleConf recalculateInsets( C owner, StyleConf styleConf) {
+        if ( owner.getBorder() instanceof StyleAndAnimationBorder ) {
+            final Outline marginCorrection  = _formerBorderMarginCorrection(owner);
+            final Outline paddingCorrection = _formerBorderPaddingCorrection(owner, styleConf, marginCorrection);
+            final Outline adjustedPadding   = styleConf.border().padding().or(paddingCorrection);
+            styleConf = styleConf._withBorder(styleConf.border().withPadding(adjustedPadding));
+            StyleAndAnimationBorder<?> border = (StyleAndAnimationBorder<?>) owner.getBorder();
+            border.recalculateInsets(styleConf);
+        }
+        return styleConf;
+    }
+
     void installCustomUIFor( C owner ) {
         _dynamicLaF.installCustomUIFor(owner);
     }
@@ -67,7 +79,7 @@ final class StyleInstaller<C extends JComponent>
         return _dynamicLaF.customLookAndFeelIsInstalled();
     }
 
-    Outline _formerBorderMarginCorrection(C owner ) {
+    Outline _formerBorderMarginCorrection( C owner ) {
         Border border = owner.getBorder();
         if ( border instanceof StyleAndAnimationBorder ) {
             return ((StyleAndAnimationBorder<?>) border).getDelegatedInsetsComponentAreaCorrection();
@@ -75,13 +87,22 @@ final class StyleInstaller<C extends JComponent>
         return Outline.none();
     }
 
+    Outline _formerBorderPaddingCorrection( C owner, StyleConf conf, Outline marginCorrection ) {
+        Border border = owner.getBorder();
+        Outline result = Outline.none();
+        if ( border instanceof StyleAndAnimationBorder ) {
+            result = ((StyleAndAnimationBorder<?>) border).getDelegatedInsets(conf);
+        }
+        return result.minus(marginCorrection).map( v -> v <= 0 ? null : v );
+    }
+
     StyleEngine _updateEngine(
         final C           owner,
         final StyleEngine engine,
-        final StyleConf   newStyle
+        final StyleConf   newStyle,
+        final Outline     correction
     ) {
         final ComponentConf currentConf = engine.getComponentConf();
-        final Outline correction = _formerBorderMarginCorrection(owner);
         final boolean sameStyle   = currentConf.style().equals(newStyle);
         final boolean sameBounds  = currentConf.currentBounds().equals(owner.getX(), owner.getY(), owner.getWidth(), owner.getHeight());
         final boolean sameOutline = currentConf.baseOutline().equals(correction);
@@ -121,8 +142,19 @@ final class StyleInstaller<C extends JComponent>
                 doInstallation = false;
         }
 
-        if ( !doInstallation )
-            return _updateEngine(owner, engine, newStyle);
+        final Outline marginCorrection = _formerBorderMarginCorrection(owner);
+        if ( !doInstallation ) {
+            final Outline paddingCorrection = _formerBorderPaddingCorrection(owner, newStyle, marginCorrection);
+            final Outline adjustedPadding   = newStyle.border().padding().or(paddingCorrection);
+            newStyle = newStyle._withBorder(newStyle.border().withPadding(adjustedPadding));
+
+            if ( owner.getBorder() instanceof StyleAndAnimationBorder<?> ) {
+                StyleAndAnimationBorder<C> border = (StyleAndAnimationBorder<C>) owner.getBorder();
+                border.recalculateInsets(newStyle);
+            }
+
+            return _updateEngine(owner, engine, newStyle, marginCorrection);
+        }
 
         final boolean isSwingTreeComponent = owner instanceof StylableComponent;
 
@@ -199,9 +231,10 @@ final class StyleInstaller<C extends JComponent>
 
         Runnable backgroundSetter = ()->{};
 
-        if ( weNeedACustomBorder )
+        if ( weNeedACustomBorder ) {
             installCustomBorderBasedStyleAndAnimationRenderer(owner, newStyle);
-        else if ( styleSource.hasNoAnimationStylers() )
+            newStyle = recalculateInsets(owner, newStyle);
+        } else if ( styleSource.hasNoAnimationStylers() )
             _uninstallCustomBorderBasedStyleAndAnimationRenderer(owner);
 
         if ( weNeedCustomUI ) {
@@ -227,7 +260,7 @@ final class StyleInstaller<C extends JComponent>
                 _initialIsOpaque = null;
             }
             if ( isNotStyled )
-                return _updateEngine(owner, engine, newStyle);
+                return _updateEngine(owner, engine, newStyle, marginCorrection);
         }
 
         // The component is styled, so we can now apply the style to the component:
@@ -438,7 +471,7 @@ final class StyleInstaller<C extends JComponent>
         if ( !backgroundWasSetSomewhereElse )
             _currentBackgroundColor = owner.getBackground();
 
-        StyleEngine newEngine = _updateEngine(owner, engine, newStyle);
+        StyleEngine newEngine = _updateEngine(owner, engine, newStyle, marginCorrection);
 
         _applyFontStyleTo(owner, newStyle);
 

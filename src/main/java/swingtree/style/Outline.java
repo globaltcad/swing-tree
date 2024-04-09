@@ -129,6 +129,15 @@ final class Outline
      */
     Outline withLeft( float left ) { return Outline.ofNullable(top, right, bottom, left); }
 
+    Outline minus( Outline other ) {
+        return Outline.ofNullable(
+                    top    == null ? null : top    - (other.top    == null ? 0 : other.top),
+                    right  == null ? null : right  - (other.right  == null ? 0 : other.right),
+                    bottom == null ? null : bottom - (other.bottom == null ? 0 : other.bottom),
+                    left   == null ? null : left   - (other.left   == null ? 0 : other.left)
+                );
+    }
+
     /**
      *  An {@link Outline} may be scaled by a factor to increase or decrease the thickness of the outline.
      *  If any of the sides was not specified, it will remain unspecified.

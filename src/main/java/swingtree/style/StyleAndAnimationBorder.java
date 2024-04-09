@@ -51,8 +51,6 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
         }
         else
             _borderWasNotPainted = false;
-
-        recalculateInsets(styleConf);
     }
 
     Border getFormerBorder() { return _formerBorder; }
@@ -196,7 +194,7 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
 
     private void _calculateBorderInsets( StyleConf styleConf )
     {
-        Outline correction = getDelegatedInsets(styleConf);
+        Outline correction = Outline.none();//getDelegatedInsets(styleConf);
 
         float left   = correction.left().orElse(0f);
         float top    = correction.top().orElse(0f);
