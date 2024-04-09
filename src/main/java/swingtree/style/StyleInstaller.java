@@ -70,7 +70,7 @@ final class StyleInstaller<C extends JComponent>
     Outline _formerBorderPadding( C owner, StyleConf newStyle ) {
         Border border = owner.getBorder();
         if ( border instanceof StyleAndAnimationBorder ) {
-            return ((StyleAndAnimationBorder<?>) border).getDelegatedInsets(newStyle, true);
+            return ((StyleAndAnimationBorder<?>) border).getDelegatedInsetsComponentAreaCorrection(newStyle);
         }
         return Outline.none();
     }

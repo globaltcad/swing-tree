@@ -2,6 +2,7 @@ package swingtree.style;
 
 import org.jspecify.annotations.Nullable;
 
+import java.awt.Insets;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
@@ -35,6 +36,10 @@ final class Outline
 
     static Outline of( float allSides ) {
         return new Outline(allSides, allSides, allSides, allSides);
+    }
+
+    static Outline of( Insets insets ) {
+        return of(insets.top, insets.right, insets.bottom, insets.left);
     }
 
 
