@@ -100,28 +100,28 @@ final class StyleInstaller<C extends JComponent>
         final C           owner,
         final StyleEngine engine,
         final StyleConf   newStyle,
-        final Outline     correction
+        final Outline     marginCorrection
     ) {
         final ComponentConf currentConf = engine.getComponentConf();
-        final boolean sameStyle   = currentConf.style().equals(newStyle);
-        final boolean sameBounds  = currentConf.currentBounds().equals(owner.getX(), owner.getY(), owner.getWidth(), owner.getHeight());
-        final boolean sameOutline = currentConf.baseOutline().equals(correction);
+        final boolean sameStyle      = currentConf.style().equals(newStyle);
+        final boolean sameBounds     = currentConf.currentBounds().equals(owner.getX(), owner.getY(), owner.getWidth(), owner.getHeight());
+        final boolean sameCorrection = currentConf.areaMarginCorrection().equals(marginCorrection);
 
         ComponentConf newConf;
-        if ( sameStyle && sameBounds && sameOutline )
+        if ( sameStyle && sameBounds && sameCorrection )
             newConf = currentConf;
         else
             newConf = new ComponentConf(
                             newStyle,
                             Bounds.of(owner.getX(), owner.getY(), owner.getWidth(), owner.getHeight()),
-                            correction
+                            marginCorrection
                         );
 
         LayerCache[] layerCaches = engine.getLayerCaches();
         for ( LayerCache layerCache : layerCaches )
             layerCache.validate(currentConf, newConf);
 
-        BoxModelConf newBoxModelConf = BoxModelConf.of(newConf.style().border(), newConf.baseOutline(), newConf.currentBounds().size());
+        BoxModelConf newBoxModelConf = BoxModelConf.of(newConf.style().border(), newConf.areaMarginCorrection(), newConf.currentBounds().size());
         return engine.with(newBoxModelConf, newConf);
     }
 
