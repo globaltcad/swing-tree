@@ -172,7 +172,7 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
         }
     }
 
-    public Outline getDelegatedInsetsComponentAreaCorrection(StyleConf conf )
+    public Outline getDelegatedInsetsComponentAreaCorrection()
     {
         if ( _doesNotDelegateAdditionalInsets() )
             return Outline.of(0, 0, 0, 0);

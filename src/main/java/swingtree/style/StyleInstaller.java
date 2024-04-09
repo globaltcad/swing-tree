@@ -67,10 +67,10 @@ final class StyleInstaller<C extends JComponent>
         return _dynamicLaF.customLookAndFeelIsInstalled();
     }
 
-    Outline _formerBorderPadding( C owner, StyleConf newStyle ) {
+    Outline _formerBorderMarginCorrection(C owner ) {
         Border border = owner.getBorder();
         if ( border instanceof StyleAndAnimationBorder ) {
-            return ((StyleAndAnimationBorder<?>) border).getDelegatedInsetsComponentAreaCorrection(newStyle);
+            return ((StyleAndAnimationBorder<?>) border).getDelegatedInsetsComponentAreaCorrection();
         }
         return Outline.none();
     }
@@ -81,7 +81,7 @@ final class StyleInstaller<C extends JComponent>
         final StyleConf   newStyle
     ) {
         final ComponentConf currentConf = engine.getComponentConf();
-        final Outline correction = _formerBorderPadding(owner, newStyle);
+        final Outline correction = _formerBorderMarginCorrection(owner);
         final boolean sameStyle   = currentConf.style().equals(newStyle);
         final boolean sameBounds  = currentConf.currentBounds().equals(owner.getX(), owner.getY(), owner.getWidth(), owner.getHeight());
         final boolean sameOutline = currentConf.baseOutline().equals(correction);
