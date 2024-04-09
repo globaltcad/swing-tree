@@ -62,7 +62,7 @@ final class StyleInstaller<C extends JComponent>
     StyleConf recalculateInsets( C owner, StyleConf styleConf) {
         if ( owner.getBorder() instanceof StyleAndAnimationBorder ) {
             final Outline marginCorrection  = _formerBorderMarginCorrection(owner);
-            final Outline paddingCorrection = _formerBorderPaddingCorrection(owner, styleConf, marginCorrection);
+            final Outline paddingCorrection = _formerBorderPaddingCorrection(owner, styleConf);
             final Outline adjustedPadding   = styleConf.border().padding().or(paddingCorrection);
             styleConf = styleConf._withBorder(styleConf.border().withPadding(adjustedPadding));
             StyleAndAnimationBorder<?> border = (StyleAndAnimationBorder<?>) owner.getBorder();
@@ -87,13 +87,13 @@ final class StyleInstaller<C extends JComponent>
         return Outline.none();
     }
 
-    Outline _formerBorderPaddingCorrection( C owner, StyleConf conf, Outline marginCorrection ) {
+    Outline _formerBorderPaddingCorrection( C owner, StyleConf conf ) {
         Border border = owner.getBorder();
         Outline result = Outline.none();
         if ( border instanceof StyleAndAnimationBorder ) {
             result = ((StyleAndAnimationBorder<?>) border).getDelegatedInsets(conf);
         }
-        return result.minus(marginCorrection).map( v -> v <= 0 ? null : v );
+        return result.map( v -> v <= 0 ? null : v );
     }
 
     StyleEngine _updateEngine(
@@ -144,7 +144,7 @@ final class StyleInstaller<C extends JComponent>
 
         final Outline marginCorrection = _formerBorderMarginCorrection(owner);
         if ( !doInstallation ) {
-            final Outline paddingCorrection = _formerBorderPaddingCorrection(owner, newStyle, marginCorrection);
+            final Outline paddingCorrection = _formerBorderPaddingCorrection(owner, newStyle);
             final Outline adjustedPadding   = newStyle.border().padding().or(paddingCorrection);
             newStyle = newStyle._withBorder(newStyle.border().withPadding(adjustedPadding));
 
