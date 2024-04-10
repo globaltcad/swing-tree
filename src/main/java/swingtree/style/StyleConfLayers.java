@@ -109,7 +109,11 @@ final class StyleConfLayers
         }
     }
 
-    boolean atLeastOneNamedStyle( BiPredicate<UI.Layer, StyleConfLayer> predicate ) {
+    /**
+     * @param predicate A predicate that takes a layer and a style configuration and returns true or false.
+     * @return True if the predicate returns true for any of the layers.
+     */
+    boolean any( BiPredicate<UI.Layer, StyleConfLayer> predicate ) {
         if ( _any != null )
             return  predicate.test(UI.Layer.BACKGROUND,    _any)
                     || predicate.test(UI.Layer.CONTENT,    _any)
