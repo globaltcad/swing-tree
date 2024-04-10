@@ -4,8 +4,6 @@ import swingtree.UI;
 import swingtree.layout.Bounds;
 import swingtree.layout.Size;
 
-import javax.swing.JComponent;
-import javax.swing.border.Border;
 import java.util.Objects;
 
 /**
@@ -23,55 +21,34 @@ final class ComponentConf
     }
 
     private final StyleConf _styleConf;
-    private final Bounds  _currentBounds;
-    private final Outline _baseOutline;
+    private final Bounds    _currentBounds;
+    private final Outline   _marginCorrection;
 
     private boolean _wasAlreadyHashed = false;
     private int     _hashCode         = 0; // cached hash code
 
 
-    private ComponentConf(
-        StyleConf      styleConf,
-        Bounds         currentBounds,
-        Outline        baseOutline
+    ComponentConf(
+            StyleConf styleConf,
+            Bounds currentBounds,
+            Outline marginCorrection
     ) {
-        _styleConf     = Objects.requireNonNull(styleConf);
-        _currentBounds = Objects.requireNonNull(currentBounds);
-        _baseOutline   = Objects.requireNonNull(baseOutline);
+        _styleConf        = Objects.requireNonNull(styleConf);
+        _currentBounds    = Objects.requireNonNull(currentBounds);
+        _marginCorrection = Objects.requireNonNull(marginCorrection);
     }
 
     StyleConf style() { return _styleConf; }
 
     Bounds currentBounds() { return _currentBounds; }
 
-    Outline baseOutline() { return _baseOutline; }
-
-    ComponentConf with( StyleConf styleConf, JComponent component )
-    {
-        Outline outline = Outline.none();
-        Border border = component.getBorder();
-        if ( border instanceof StyleAndAnimationBorder ) {
-            outline = ((StyleAndAnimationBorder<?>) border).getDelegatedInsets(styleConf, true);
-        }
-
-        boolean sameStyle   = _styleConf.equals(styleConf);
-        boolean sameBounds  = _currentBounds.equals(component.getX(), component.getY(), component.getWidth(), component.getHeight());
-        boolean sameOutline = _baseOutline.equals(outline);
-        if ( sameStyle && sameBounds && sameOutline )
-            return this;
-
-        return new ComponentConf(
-                   styleConf,
-                   Bounds.of(component.getX(), component.getY(), component.getWidth(), component.getHeight()),
-                   outline
-               );
-    }
+    Outline areaMarginCorrection() { return _marginCorrection; }
 
     ComponentConf withSize( int width, int height ) {
         return new ComponentConf(
                    _styleConf,
                    Bounds.of(_currentBounds.location(), Size.of(width, height)),
-                   _baseOutline
+                _marginCorrection
                );
     }
 
@@ -88,9 +65,9 @@ final class ComponentConf
     @Override
     public String toString() {
         return this.getClass().getSimpleName()+"[" +
-                    "style="         + _styleConf + ", "+
-                    "bounds="        + _currentBounds + ", "+
-                    "baseOutline="   + _baseOutline   + ", "+
+                    "style="                + _styleConf + ", "+
+                    "bounds="               + _currentBounds + ", "+
+                    "areaMarginCorrection=" + _marginCorrection + ", "+
                 "]";
     }
 
@@ -102,7 +79,7 @@ final class ComponentConf
         ComponentConf other = (ComponentConf) o;
         return Objects.equals(_styleConf, other._styleConf)
             && Objects.equals(_currentBounds, other._currentBounds)
-            && Objects.equals(_baseOutline, other._baseOutline);
+            && Objects.equals(_marginCorrection, other._marginCorrection);
     }
 
     @Override
@@ -110,7 +87,7 @@ final class ComponentConf
         if ( _wasAlreadyHashed )
             return _hashCode;
 
-        _hashCode = Objects.hash(_styleConf, _currentBounds, _baseOutline);
+        _hashCode = Objects.hash(_styleConf, _currentBounds, _marginCorrection);
         _wasAlreadyHashed = true;
         return _hashCode;
     }

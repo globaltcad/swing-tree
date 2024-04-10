@@ -79,8 +79,8 @@ class Styled_Component_Border_Inset_Spec extends Specification
         expect : 'The insets are as expected.'
             border.getBorderInsets(component) == new Insets(2, (int)(26*uiScale), 2, (int)(25*uiScale - 20*uiScale))
             border.getMarginInsets() == new Insets(0,0,0,(int)(25*uiScale))
-            border.getPaddingInsets() == new Insets(0, (int)(26*uiScale), 0, (int)(-20*uiScale))
-            border.getFullPaddingInsets() == new Insets(0, (int)(26*uiScale), 0, (int)(25*uiScale - 20*uiScale))
+            border.getPaddingInsets() == new Insets(2, (int)(26*uiScale), 2, (int)(-20*uiScale))
+            border.getFullPaddingInsets() == new Insets(2, (int)(26*uiScale), 2, (int)(25*uiScale - 20*uiScale))
 
         where :
             uiScale << [1, 2, 3]

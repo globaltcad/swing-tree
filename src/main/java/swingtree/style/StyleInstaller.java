@@ -9,6 +9,7 @@ import org.jspecify.annotations.Nullable;
 import swingtree.UI;
 import swingtree.api.Painter;
 import swingtree.components.JIcon;
+import swingtree.layout.Bounds;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -58,6 +59,18 @@ final class StyleInstaller<C extends JComponent>
             owner.setBorder(new StyleAndAnimationBorder<>(ComponentExtension.from(owner), currentBorder, styleConf));
     }
 
+    StyleConf recalculateInsets( C owner, StyleConf styleConf) {
+        if ( owner.getBorder() instanceof StyleAndAnimationBorder ) {
+            final Outline marginCorrection  = _formerBorderMarginCorrection(owner);
+            final Outline paddingCorrection = _formerBorderPaddingCorrection(owner, styleConf);
+            final Outline adjustedPadding   = styleConf.border().padding().or(paddingCorrection);
+            styleConf = styleConf._withBorder(styleConf.border().withPadding(adjustedPadding));
+            StyleAndAnimationBorder<?> border = (StyleAndAnimationBorder<?>) owner.getBorder();
+            border.recalculateInsets(styleConf);
+        }
+        return styleConf;
+    }
+
     void installCustomUIFor( C owner ) {
         _dynamicLaF.installCustomUIFor(owner);
     }
@@ -66,18 +79,49 @@ final class StyleInstaller<C extends JComponent>
         return _dynamicLaF.customLookAndFeelIsInstalled();
     }
 
+    Outline _formerBorderMarginCorrection( C owner ) {
+        Border border = owner.getBorder();
+        if ( border instanceof StyleAndAnimationBorder ) {
+            return ((StyleAndAnimationBorder<?>) border).getDelegatedInsetsComponentAreaCorrection();
+        }
+        return Outline.none();
+    }
+
+    Outline _formerBorderPaddingCorrection( C owner, StyleConf conf ) {
+        Border border = owner.getBorder();
+        Outline result = Outline.none();
+        if ( border instanceof StyleAndAnimationBorder ) {
+            result = ((StyleAndAnimationBorder<?>) border).getDelegatedInsets(conf);
+        }
+        return result.map( v -> v <= 0 ? null : v );
+    }
+
     StyleEngine _updateEngine(
-        final C              owner,
-        final StyleEngine    engine,
-        StyleConf            newStyle
+        final C           owner,
+        final StyleEngine engine,
+        final StyleConf   newStyle,
+        final Outline     marginCorrection
     ) {
-        ComponentConf currentConf = engine.getComponentConf();
+        final ComponentConf currentConf = engine.getComponentConf();
+        final boolean sameStyle      = currentConf.style().equals(newStyle);
+        final boolean sameBounds     = currentConf.currentBounds().equals(owner.getX(), owner.getY(), owner.getWidth(), owner.getHeight());
+        final boolean sameCorrection = currentConf.areaMarginCorrection().equals(marginCorrection);
+
+        ComponentConf newConf;
+        if ( sameStyle && sameBounds && sameCorrection )
+            newConf = currentConf;
+        else
+            newConf = new ComponentConf(
+                            newStyle,
+                            Bounds.of(owner.getX(), owner.getY(), owner.getWidth(), owner.getHeight()),
+                            marginCorrection
+                        );
+
         LayerCache[] layerCaches = engine.getLayerCaches();
-        ComponentConf newConf = currentConf.with(newStyle, owner);
-        BoxModelConf newBoxModelConf = BoxModelConf.of(newConf.style().border(), newConf.baseOutline(), newConf.currentBounds().size());
         for ( LayerCache layerCache : layerCaches )
             layerCache.validate(currentConf, newConf);
 
+        BoxModelConf newBoxModelConf = BoxModelConf.of(newConf.style().border(), newConf.areaMarginCorrection(), newConf.currentBounds().size());
         return engine.with(newBoxModelConf, newConf);
     }
 
@@ -98,8 +142,19 @@ final class StyleInstaller<C extends JComponent>
                 doInstallation = false;
         }
 
-        if ( !doInstallation )
-            return _updateEngine(owner, engine, newStyle);
+        final Outline marginCorrection = _formerBorderMarginCorrection(owner);
+        if ( !doInstallation ) {
+            final Outline paddingCorrection = _formerBorderPaddingCorrection(owner, newStyle);
+            final Outline adjustedPadding   = newStyle.border().padding().or(paddingCorrection);
+            newStyle = newStyle._withBorder(newStyle.border().withPadding(adjustedPadding));
+
+            if ( owner.getBorder() instanceof StyleAndAnimationBorder<?> ) {
+                StyleAndAnimationBorder<C> border = (StyleAndAnimationBorder<C>) owner.getBorder();
+                border.recalculateInsets(newStyle);
+            }
+
+            return _updateEngine(owner, engine, newStyle, marginCorrection);
+        }
 
         final boolean isSwingTreeComponent = owner instanceof StylableComponent;
 
@@ -136,49 +191,37 @@ final class StyleInstaller<C extends JComponent>
 
         final boolean hasPaddingAndMargin = !noPaddingAndMarginStyle;
         final boolean hasBorderStyle      = !noBorderStyle;
-        final boolean hasBorderShadows    = newStyle.layers().atLeastOneNamedStyle( (layer, styleLayer) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) && styleLayer.shadows().atLeastOneNamedStyle(ns -> ns.style().color().isPresent() ) );
-        final boolean hasBorderGradients  = newStyle.layers().atLeastOneNamedStyle( (layer, styleLayer) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) && styleLayer.gradients().atLeastOneNamedStyle(ns -> ns.style().colors().length > 0 ) );
-        final boolean hasBorderNoises     = newStyle.layers().atLeastOneNamedStyle( (layer, styleLayer) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) && styleLayer.noises().atLeastOneNamedStyle(ns -> ns.style().colors().length > 0 ) );
-        final boolean hasBorderPainters   = newStyle.layers().atLeastOneNamedStyle( (layer, styleLayer) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) && styleLayer.painters().atLeastOneNamedStyle(ns -> !Painter.none().equals(ns.style().painter()) ) );
-        final boolean hasBorderImages     = newStyle.layers().atLeastOneNamedStyle( (layer, styleLayer) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) && styleLayer.images().atLeastOneNamedStyle(ns -> ns.style().image().isPresent() || ns.style().primer().isPresent() ) );
-        final boolean hasBorderTexts      = newStyle.layers().atLeastOneNamedStyle( (layer, styleLayer) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) && styleLayer.texts().atLeastOneNamedStyle(ns -> !TextConf.none().equals(ns.style()) ) );
 
         final boolean weNeedACustomBorder = (
-                                   hasPaddingAndMargin ||
-                                   hasBorderStyle      ||
-                                   hasBorderShadows    ||
-                                   hasBorderGradients  ||
-                                   hasBorderNoises     ||
-                                   hasBorderPainters   ||
-                                   hasBorderImages     ||
-                                   hasBorderTexts
-                                );
+               hasPaddingAndMargin || hasBorderStyle
+               || newStyle.layers().any( (layer, it) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) && it.shadows().any(named -> named.style().color().isPresent() ) )
+               || newStyle.layers().any( (layer, it) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) && it.gradients().any(named -> named.style().colors().length > 0 ) )
+               || newStyle.layers().any( (layer, it) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) && it.images().any(named -> named.style().image().isPresent() || named.style().primer().isPresent() ) )
+               || newStyle.layers().any( (layer, it) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) && it.texts().any(named -> !TextConf.none().equals(named.style()) ) )
+               || newStyle.layers().any( (layer, it) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) && it.painters().any(named -> !Painter.none().equals(named.style().painter()) ) )
+               || newStyle.layers().any( (layer, it) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) && it.noises().any(named -> named.style().colors().length > 0 ) )
+            );
 
         final boolean hasBaseColors    = (!noBaseStyle   && newStyle.base().hasAnyColors());
         final boolean hasBackFilter    = !noParentFilter;
-        final boolean hasBackShadows   = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer != UI.Layer.BACKGROUND || !styleLayer.shadows().everyNamedStyle(ns -> !ns.style().color().isPresent() ) );
-        final boolean hasBackGradients = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer != UI.Layer.BACKGROUND || !styleLayer.gradients().everyNamedStyle(ns -> ns.style().colors().length == 0 ) );
-        final boolean hasBackNoises    = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer != UI.Layer.BACKGROUND || !styleLayer.noises().everyNamedStyle(ns -> ns.style().colors().length == 0 ) );
-        final boolean hasBackPainters  = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer != UI.Layer.BACKGROUND || !styleLayer.painters().everyNamedStyle(ns -> Painter.none().equals(ns.style().painter()) ) );
-        final boolean hasBackImages    = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer != UI.Layer.BACKGROUND || !styleLayer.images().everyNamedStyle(ns -> !ns.style().image().isPresent() && !ns.style().primer().isPresent() ) );
-        final boolean hasBackTexts     = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer != UI.Layer.BACKGROUND || !styleLayer.texts().everyNamedStyle(ns -> TextConf.none().equals(ns.style()) ) );
 
         final boolean weNeedCustomUI = (
-                                            (hasBackFilter && !isSwingTreeComponent)              ||
-                                            (hasBaseColors && newStyle.base().requiresCustomUI()) ||
-                                            hasBackShadows   ||
-                                            hasBackGradients ||
-                                            hasBackNoises    ||
-                                            hasBackPainters  ||
-                                            hasBackImages    ||
-                                            hasBackTexts
-                                        );
+               (hasBackFilter && !isSwingTreeComponent) ||
+               (hasBaseColors && newStyle.base().requiresCustomUI())
+               || newStyle.layers().any( (layer, it) -> layer == UI.Layer.BACKGROUND && it.shadows().any(named -> named.style().color().isPresent() ) )
+               || newStyle.layers().any( (layer, it) -> layer == UI.Layer.BACKGROUND && it.gradients().any(named -> named.style().colors().length > 0 ) )
+               || newStyle.layers().any( (layer, it) -> layer == UI.Layer.BACKGROUND && it.images().any(named -> named.style().image().isPresent() || named.style().primer().isPresent() ) )
+               || newStyle.layers().any( (layer, it) -> layer == UI.Layer.BACKGROUND && it.painters().any(named -> !Painter.none().equals(named.style().painter()) ) )
+               || newStyle.layers().any( (layer, it) -> layer == UI.Layer.BACKGROUND && it.texts().any(named -> !TextConf.none().equals(named.style()) ) )
+               || newStyle.layers().any( (layer, it) -> layer == UI.Layer.BACKGROUND && it.noises().any(named -> named.style().colors().length > 0 ) )
+            );
 
         Runnable backgroundSetter = ()->{};
 
-        if ( weNeedACustomBorder )
+        if ( weNeedACustomBorder ) {
             installCustomBorderBasedStyleAndAnimationRenderer(owner, newStyle);
-        else if ( styleSource.hasNoAnimationStylers() )
+            newStyle = recalculateInsets(owner, newStyle);
+        } else if ( styleSource.hasNoAnimationStylers() )
             _uninstallCustomBorderBasedStyleAndAnimationRenderer(owner);
 
         if ( weNeedCustomUI ) {
@@ -204,7 +247,7 @@ final class StyleInstaller<C extends JComponent>
                 _initialIsOpaque = null;
             }
             if ( isNotStyled )
-                return _updateEngine(owner, engine, newStyle);
+                return _updateEngine(owner, engine, newStyle, marginCorrection);
         }
 
         // The component is styled, so we can now apply the style to the component:
@@ -215,16 +258,16 @@ final class StyleInstaller<C extends JComponent>
         if ( owner instanceof AbstractButton && _initialContentAreaFilled == null )
             _initialContentAreaFilled = ((AbstractButton) owner).isContentAreaFilled();
 
-        final List<UI.ComponentArea> opaqueGradAreas     = newStyle.noiseAndGradientCoveredAreas();
-        final boolean hasBackgroundGradients             = newStyle.hasVisibleGradientsOnLayer(UI.Layer.BACKGROUND);
-        final boolean hasBackgroundNoise                 = newStyle.hasVisibleNoisesOnLayer(UI.Layer.BACKGROUND);
-        final boolean hasBackgroundPainters              = newStyle.hasPaintersOnLayer(UI.Layer.BACKGROUND);
-        final boolean hasBackgroundImages                = newStyle.hasImagesOnLayer(UI.Layer.BACKGROUND);
-        final boolean hasBackgroundShadows               = newStyle.hasVisibleShadows(UI.Layer.BACKGROUND);
-        final boolean hasBorderRadius                    = newStyle.border().hasAnyNonZeroArcs();
-        final boolean hasBackground                      = newStyle.base().backgroundColor().isPresent();
-        final boolean hasMargin                          = newStyle.margin().isPositive();
-        final boolean hasOpaqueBorder                    = !(255 > newStyle.border().color().map(java.awt.Color::getAlpha).orElse(0));
+        final List<UI.ComponentArea> opaqueGradAreas = newStyle.noiseAndGradientCoveredAreas();
+        final boolean hasBackgroundGradients         = newStyle.hasVisibleGradientsOnLayer(UI.Layer.BACKGROUND);
+        final boolean hasBackgroundNoise             = newStyle.hasVisibleNoisesOnLayer(UI.Layer.BACKGROUND);
+        final boolean hasBackgroundPainters          = newStyle.hasPaintersOnLayer(UI.Layer.BACKGROUND);
+        final boolean hasBackgroundImages            = newStyle.hasImagesOnLayer(UI.Layer.BACKGROUND);
+        final boolean hasBackgroundShadows           = newStyle.hasVisibleShadows(UI.Layer.BACKGROUND);
+        final boolean hasBorderRadius                = newStyle.border().hasAnyNonZeroArcs();
+        final boolean hasBackground                  = newStyle.base().backgroundColor().isPresent();
+        final boolean hasMargin                      = newStyle.margin().isPositive();
+        final boolean hasOpaqueBorder                = !(255 > newStyle.border().color().map(java.awt.Color::getAlpha).orElse(0));
         final boolean backgroundIsActuallyBackground =
                                     !( owner instanceof JTabbedPane  ) && // The LaFs interpret ths tab buttons as background
                                     !( owner instanceof JSlider      ) && // The track color is usually considered the background
@@ -415,7 +458,7 @@ final class StyleInstaller<C extends JComponent>
         if ( !backgroundWasSetSomewhereElse )
             _currentBackgroundColor = owner.getBackground();
 
-        StyleEngine newEngine = _updateEngine(owner, engine, newStyle);
+        StyleEngine newEngine = _updateEngine(owner, engine, newStyle, marginCorrection);
 
         _applyFontStyleTo(owner, newStyle);
 

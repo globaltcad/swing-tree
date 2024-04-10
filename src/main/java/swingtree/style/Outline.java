@@ -2,6 +2,7 @@ package swingtree.style;
 
 import org.jspecify.annotations.Nullable;
 
+import java.awt.Insets;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
@@ -35,6 +36,10 @@ final class Outline
 
     static Outline of( float allSides ) {
         return new Outline(allSides, allSides, allSides, allSides);
+    }
+
+    static Outline of( Insets insets ) {
+        return of(insets.top, insets.right, insets.bottom, insets.left);
     }
 
 
@@ -124,6 +129,15 @@ final class Outline
      */
     Outline withLeft( float left ) { return Outline.ofNullable(top, right, bottom, left); }
 
+    Outline minus( Outline other ) {
+        return Outline.ofNullable(
+                    top    == null ? null : top    - (other.top    == null ? 0 : other.top),
+                    right  == null ? null : right  - (other.right  == null ? 0 : other.right),
+                    bottom == null ? null : bottom - (other.bottom == null ? 0 : other.bottom),
+                    left   == null ? null : left   - (other.left   == null ? 0 : other.left)
+                );
+    }
+
     /**
      *  An {@link Outline} may be scaled by a factor to increase or decrease the thickness of the outline.
      *  If any of the sides was not specified, it will remain unspecified.
@@ -189,6 +203,20 @@ final class Outline
                     _plus(right,  other.right ),
                     _plus(bottom, other.bottom),
                     _plus(left,   other.left  )
+                );
+    }
+
+    public Outline or( Outline other ) {
+        if ( this == _NONE )
+            return other;
+        if ( other == _NONE )
+            return this;
+
+        return Outline.ofNullable(
+                    top    == null ? other.top    : top,
+                    right  == null ? other.right  : right,
+                    bottom == null ? other.bottom : bottom,
+                    left   == null ? other.left   : left
                 );
     }
 

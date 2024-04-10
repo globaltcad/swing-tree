@@ -51,8 +51,6 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
         }
         else
             _borderWasNotPainted = false;
-
-        recalculateInsets(styleConf);
     }
 
     Border getFormerBorder() { return _formerBorder; }
@@ -146,79 +144,73 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
     @Override
     public boolean isBorderOpaque() { return false; }
 
-    public Outline getDelegatedInsets( StyleConf conf, boolean adjust )
-    {
+    private boolean _doesNotDelegateAdditionalInsets() {
         if ( !_canUseFormerBorderInsets() )
-            return Outline.of(0, 0, 0, 0);
+            return true;
 
         if ( _formerBorder == null )
-            return Outline.of(0, 0, 0, 0);
+            return true;
 
         boolean usesSwingTreeBorder = _compExt.getStyle().border().isVisible();
 
         if ( usesSwingTreeBorder )
+            return true;
+
+        return false;
+    }
+
+    public Outline getDelegatedInsets( StyleConf conf )
+    {
+        if ( _doesNotDelegateAdditionalInsets() )
             return Outline.of(0, 0, 0, 0);
         else
         {
             Insets formerInsets = _formerBorder.getBorderInsets(_compExt.getOwner());
-            int left   = 0;
-            int top    = 0;
-            int right  = 0;
-            int bottom = 0;
-            if ( !adjust ) {
-                left   += formerInsets.left;
-                top    += formerInsets.top;
-                right  += formerInsets.right;
-                bottom += formerInsets.bottom;
-            } else if (
+            return conf.padding().map(v->0f).or(Outline.of(formerInsets));
+        }
+    }
+
+    public Outline getDelegatedInsetsComponentAreaCorrection()
+    {
+        if ( _doesNotDelegateAdditionalInsets() )
+            return Outline.of(0, 0, 0, 0);
+        else
+        {
+            if (
                 UI.currentLookAndFeel().isOneOf(UI.LookAndFeel.NIMBUS) &&
                 _compExt.getOwner() instanceof JTextComponent
             ) {
-                left   += formerInsets.left;
-                top    += formerInsets.top;
-                right  += formerInsets.right;
-                bottom += formerInsets.bottom;
-                left   = left   / 2;
-                top    = top    / 2;
-                right  = right  / 2;
-                bottom = bottom / 2;
-
+                Insets formerInsets = _formerBorder.getBorderInsets(_compExt.getOwner());
+                int left   = formerInsets.left   / 2;
+                int top    = formerInsets.top    / 2;
+                int right  = formerInsets.right  / 2;
+                int bottom = formerInsets.bottom / 2;
                 return Outline.of(top, right, bottom, left);
             }
 
-            float finalLeft   = conf.padding().left().isPresent()   ? 0f : left  ;
-            float finalTop    = conf.padding().top().isPresent()    ? 0f : top   ;
-            float finalRight  = conf.padding().right().isPresent()  ? 0f : right ;
-            float finalBottom = conf.padding().bottom().isPresent() ? 0f : bottom;
-            return Outline.of(finalTop, finalRight, finalBottom, finalLeft);
+            return Outline.of(0, 0, 0, 0);
         }
     }
 
     private void _calculateBorderInsets( StyleConf styleConf )
     {
-        Outline correction = getDelegatedInsets(styleConf, false);
+        // Margin:
+        float left   = styleConf.margin().left()  .orElse(0f);
+        float top    = styleConf.margin().top()   .orElse(0f);
+        float right  = styleConf.margin().right() .orElse(0f);
+        float bottom = styleConf.margin().bottom().orElse(0f);
 
-        float left   = correction.left().orElse(0f);
-        float top    = correction.top().orElse(0f);
-        float right  = correction.right().orElse(0f);
-        float bottom = correction.bottom().orElse(0f);
-
-        left   += styleConf.margin().left()  .orElse(0f);
-        top    += styleConf.margin().top()   .orElse(0f);
-        right  += styleConf.margin().right() .orElse(0f);
-        bottom += styleConf.margin().bottom().orElse(0f);
-
-        // Add padding:
-        left   += styleConf.padding().left().orElse(0f);
-        top    += styleConf.padding().top().orElse(0f);
-        right  += styleConf.padding().right().orElse(0f);
-        bottom += styleConf.padding().bottom().orElse(0f);
         // Add border widths:
         left   += Math.max(styleConf.border().widths().left().orElse(0f),   0);
         top    += Math.max(styleConf.border().widths().top().orElse(0f),    0);
         right  += Math.max(styleConf.border().widths().right().orElse(0f),  0);
         bottom += Math.max(styleConf.border().widths().bottom().orElse(0f), 0);
 
+        // Add padding:
+        left   += styleConf.padding().left().orElse(0f);
+        top    += styleConf.padding().top().orElse(0f);
+        right  += styleConf.padding().right().orElse(0f);
+        bottom += styleConf.padding().bottom().orElse(0f);
         if (
             _insets == null         ||
             _insets.left   != left  ||

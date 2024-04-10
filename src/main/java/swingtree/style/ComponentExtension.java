@@ -269,6 +269,7 @@ public final class ComponentExtension<C extends JComponent>
         String painterName = "anonymous-painter-"+_anonymousPainterCounter;
         _styleSource = _styleSource.withAnimationStyler(state.lifeSpan(), it -> it.painter(layer, clipArea, painterName, painter));
         _styleInstaller.installCustomBorderBasedStyleAndAnimationRenderer(_owner, _styleEngine.getComponentConf().style());
+        _styleInstaller.recalculateInsets(_owner, _styleEngine.getComponentConf().style());
         /*
             We need to install the custom SwingTree border which is used to render the animations!
         */
@@ -358,12 +359,6 @@ public final class ComponentExtension<C extends JComponent>
     private void _applyStyleToComponentState( StyleConf newStyle, boolean force )
     {
         Objects.requireNonNull(newStyle);
-
-        if ( _owner.getBorder() instanceof StyleAndAnimationBorder<?> ) {
-            StyleAndAnimationBorder<C> border = (StyleAndAnimationBorder<C>) _owner.getBorder();
-            border.recalculateInsets(newStyle);
-        }
-
         _styleEngine = _styleInstaller.applyStyleToComponentState(
                                     _owner,
                                     _styleEngine,

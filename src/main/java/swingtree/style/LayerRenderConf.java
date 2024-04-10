@@ -2,9 +2,7 @@ package swingtree.style;
 
 import swingtree.UI;
 
-import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Shape;
 import java.util.Objects;
 
 /**
@@ -62,7 +60,7 @@ final class LayerRenderConf
     static LayerRenderConf of( UI.Layer layer, ComponentConf fullConf ) {
         BoxModelConf boxModelConf = BoxModelConf.of(
                                         fullConf.style().border(),
-                                        fullConf.baseOutline(),
+                                        fullConf.areaMarginCorrection(),
                                         fullConf.currentBounds().size()
                                     );
         BaseColorConf colorConf = BaseColorConf.of(

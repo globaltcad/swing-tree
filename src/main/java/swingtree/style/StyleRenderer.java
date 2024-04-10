@@ -241,7 +241,7 @@ final class StyleRenderer
 
         if ( shadow.isOutset() ) {
             int artifactAdjustment = 1;
-            baseArea = ComponentAreas.calculateBaseArea(conf.boxModel(), artifactAdjustment, artifactAdjustment, artifactAdjustment, artifactAdjustment);
+            baseArea = ComponentAreas.calculateComponentBodyArea(conf.boxModel(), artifactAdjustment, artifactAdjustment, artifactAdjustment, artifactAdjustment);
         }
         else
             baseArea = new Area(conf.areas().get(UI.ComponentArea.BODY));
