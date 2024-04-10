@@ -59,7 +59,7 @@ final class StyleInstaller<C extends JComponent>
             owner.setBorder(new StyleAndAnimationBorder<>(ComponentExtension.from(owner), currentBorder, styleConf));
     }
 
-    StyleConf recalculateInsets( C owner, StyleConf styleConf) {
+    StyleConf recalculateInsets( C owner, StyleConf styleConf ) {
         if ( owner.getBorder() instanceof StyleAndAnimationBorder ) {
             final Outline paddingCorrection = _formerBorderPaddingCorrection(owner, styleConf);
             final Outline adjustedPadding   = styleConf.border().padding().or(paddingCorrection);
@@ -101,6 +101,8 @@ final class StyleInstaller<C extends JComponent>
         final StyleConf   newStyle,
         final Outline     marginCorrection
     ) {
+        _currentBackgroundColor = owner.getBackground();
+
         final ComponentConf currentConf = engine.getComponentConf();
         final boolean sameStyle      = currentConf.style().equals(newStyle);
         final boolean sameBounds     = currentConf.currentBounds().equals(owner.getX(), owner.getY(), owner.getWidth(), owner.getHeight());
@@ -132,12 +134,13 @@ final class StyleInstaller<C extends JComponent>
         final boolean        force
     ) {
         boolean doInstallation = true;
+        boolean backgroundWasSetSomewhereElse = this.backgroundWasChangedSomewhereElse(owner);
+        if ( backgroundWasSetSomewhereElse )
+            _initialBackgroundColor = owner.getBackground();
 
         if ( !force ) {
             // We check if it makes sense to apply the new style:
-            boolean componentBackgroundWasMutated = this.backgroundWasChangedSomewhereElse(owner);
-
-            if ( !componentBackgroundWasMutated && engine.getComponentConf().style().equals(newStyle) )
+            if ( !backgroundWasSetSomewhereElse && engine.getComponentConf().style().equals(newStyle) )
                 doInstallation = false;
         }
 
@@ -280,8 +283,6 @@ final class StyleInstaller<C extends JComponent>
                 newStyle = newStyle.backgroundColor(_initialBackgroundColor);
             }
         }
-
-        boolean backgroundWasSetSomewhereElse = backgroundWasChangedSomewhereElse( owner );
 
         if ( hasBackground ) {
             boolean backgroundIsAlreadySet = Objects.equals( owner.getBackground(), newStyle.base().backgroundColor().get() );
@@ -454,9 +455,6 @@ final class StyleInstaller<C extends JComponent>
 
         backgroundSetter.run();
 
-        if ( !backgroundWasSetSomewhereElse )
-            _currentBackgroundColor = owner.getBackground();
-
         StyleEngine newEngine = _updateEngine(owner, engine, newStyle, marginCorrection);
 
         _applyFontStyleTo(owner, newStyle);
@@ -469,7 +467,6 @@ final class StyleInstaller<C extends JComponent>
     boolean backgroundWasChangedSomewhereElse( C owner ) {
         if ( _currentBackgroundColor != null ) {
             if ( _currentBackgroundColor != owner.getBackground() ) {
-                _initialBackgroundColor = _currentBackgroundColor;
                 return true;
             }
         }
