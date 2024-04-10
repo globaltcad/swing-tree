@@ -61,7 +61,6 @@ final class StyleInstaller<C extends JComponent>
 
     StyleConf recalculateInsets( C owner, StyleConf styleConf) {
         if ( owner.getBorder() instanceof StyleAndAnimationBorder ) {
-            final Outline marginCorrection  = _formerBorderMarginCorrection(owner);
             final Outline paddingCorrection = _formerBorderPaddingCorrection(owner, styleConf);
             final Outline adjustedPadding   = styleConf.border().padding().or(paddingCorrection);
             styleConf = styleConf._withBorder(styleConf.border().withPadding(adjustedPadding));
