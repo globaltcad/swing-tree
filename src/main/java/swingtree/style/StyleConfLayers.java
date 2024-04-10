@@ -109,19 +109,6 @@ final class StyleConfLayers
         }
     }
 
-    boolean everyNamedStyle( BiPredicate<UI.Layer, StyleConfLayer> predicate ) {
-        if ( _any != null )
-            return  predicate.test(UI.Layer.BACKGROUND,    _any)
-                    && predicate.test(UI.Layer.CONTENT,    _any)
-                    && predicate.test(UI.Layer.BORDER,     _any)
-                    && predicate.test(UI.Layer.FOREGROUND, _any);
-
-        return predicate.test(UI.Layer.BACKGROUND, _background)
-            && predicate.test(UI.Layer.CONTENT,    _content)
-            && predicate.test(UI.Layer.BORDER,     _border)
-            && predicate.test(UI.Layer.FOREGROUND, _foreground);
-    }
-
     boolean atLeastOneNamedStyle( BiPredicate<UI.Layer, StyleConfLayer> predicate ) {
         if ( _any != null )
             return  predicate.test(UI.Layer.BACKGROUND,    _any)

@@ -133,10 +133,6 @@ final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
                 );
     }
 
-    public boolean everyNamedStyle( Predicate<NamedConf<S>> namedStyleTester ) {
-        return Arrays.stream(_styles).allMatch(namedStyleTester);
-    }
-
     public boolean atLeastOneNamedStyle( Predicate<NamedConf<S>> namedStyleTester ) {
         return Arrays.stream(_styles).anyMatch(namedStyleTester);
     }

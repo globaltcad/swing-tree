@@ -211,12 +211,12 @@ final class StyleInstaller<C extends JComponent>
 
         final boolean hasBaseColors    = (!noBaseStyle   && newStyle.base().hasAnyColors());
         final boolean hasBackFilter    = !noParentFilter;
-        final boolean hasBackShadows   = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer != UI.Layer.BACKGROUND || !styleLayer.shadows().everyNamedStyle(ns -> !ns.style().color().isPresent() ) );
-        final boolean hasBackGradients = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer != UI.Layer.BACKGROUND || !styleLayer.gradients().everyNamedStyle(ns -> ns.style().colors().length == 0 ) );
-        final boolean hasBackNoises    = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer != UI.Layer.BACKGROUND || !styleLayer.noises().everyNamedStyle(ns -> ns.style().colors().length == 0 ) );
-        final boolean hasBackPainters  = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer != UI.Layer.BACKGROUND || !styleLayer.painters().everyNamedStyle(ns -> Painter.none().equals(ns.style().painter()) ) );
-        final boolean hasBackImages    = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer != UI.Layer.BACKGROUND || !styleLayer.images().everyNamedStyle(ns -> !ns.style().image().isPresent() && !ns.style().primer().isPresent() ) );
-        final boolean hasBackTexts     = newStyle.layers().everyNamedStyle( (layer, styleLayer) -> layer != UI.Layer.BACKGROUND || !styleLayer.texts().everyNamedStyle(ns -> TextConf.none().equals(ns.style()) ) );
+        final boolean hasBackShadows   = newStyle.layers().atLeastOneNamedStyle( (layer, styleLayer) -> layer == UI.Layer.BACKGROUND && styleLayer.shadows().atLeastOneNamedStyle(ns -> ns.style().color().isPresent() ) );
+        final boolean hasBackGradients = newStyle.layers().atLeastOneNamedStyle( (layer, styleLayer) -> layer == UI.Layer.BACKGROUND && styleLayer.gradients().atLeastOneNamedStyle(ns -> ns.style().colors().length > 0 ) );
+        final boolean hasBackNoises    = newStyle.layers().atLeastOneNamedStyle( (layer, styleLayer) -> layer == UI.Layer.BACKGROUND && styleLayer.noises().atLeastOneNamedStyle(ns -> ns.style().colors().length > 0 ) );
+        final boolean hasBackPainters  = newStyle.layers().atLeastOneNamedStyle( (layer, styleLayer) -> layer == UI.Layer.BACKGROUND && styleLayer.painters().atLeastOneNamedStyle(ns -> !Painter.none().equals(ns.style().painter()) ) );
+        final boolean hasBackImages    = newStyle.layers().atLeastOneNamedStyle( (layer, styleLayer) -> layer == UI.Layer.BACKGROUND && styleLayer.images().atLeastOneNamedStyle(ns -> ns.style().image().isPresent() || ns.style().primer().isPresent() ) );
+        final boolean hasBackTexts     = newStyle.layers().atLeastOneNamedStyle( (layer, styleLayer) -> layer == UI.Layer.BACKGROUND && styleLayer.texts().atLeastOneNamedStyle(ns -> !TextConf.none().equals(ns.style()) ) );
 
         final boolean weNeedCustomUI = (
                                             (hasBackFilter && !isSwingTreeComponent)              ||
