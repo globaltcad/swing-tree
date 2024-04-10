@@ -47,10 +47,10 @@ import java.util.Optional;
 final class StyleInstaller<C extends JComponent>
 {
     private DynamicLaF        _dynamicLaF = DynamicLaF.none(); // Not null, but can be DynamicLaF.none().
-    private @Nullable Color   _initialBackgroundColor   = null;
-    private @Nullable Color   _currentBackgroundColor   = null;
-    private @Nullable Boolean _initialIsOpaque          = null;
-    private @Nullable Boolean _initialContentAreaFilled = null;
+    private @Nullable Color   _outSideBackgroundColor    = null;
+    private @Nullable Color   _lastInsideBackgroundColor = null;
+    private @Nullable Boolean _initialIsOpaque           = null;
+    private @Nullable Boolean _initialContentAreaFilled  = null;
 
 
     void installCustomBorderBasedStyleAndAnimationRenderer( C owner, StyleConf styleConf) {
@@ -59,9 +59,8 @@ final class StyleInstaller<C extends JComponent>
             owner.setBorder(new StyleAndAnimationBorder<>(ComponentExtension.from(owner), currentBorder, styleConf));
     }
 
-    StyleConf recalculateInsets( C owner, StyleConf styleConf) {
+    StyleConf recalculateInsets( C owner, StyleConf styleConf ) {
         if ( owner.getBorder() instanceof StyleAndAnimationBorder ) {
-            final Outline marginCorrection  = _formerBorderMarginCorrection(owner);
             final Outline paddingCorrection = _formerBorderPaddingCorrection(owner, styleConf);
             final Outline adjustedPadding   = styleConf.border().padding().or(paddingCorrection);
             styleConf = styleConf._withBorder(styleConf.border().withPadding(adjustedPadding));
@@ -102,6 +101,8 @@ final class StyleInstaller<C extends JComponent>
         final StyleConf   newStyle,
         final Outline     marginCorrection
     ) {
+        _lastInsideBackgroundColor = owner.getBackground();
+
         final ComponentConf currentConf = engine.getComponentConf();
         final boolean sameStyle      = currentConf.style().equals(newStyle);
         final boolean sameBounds     = currentConf.currentBounds().equals(owner.getX(), owner.getY(), owner.getWidth(), owner.getHeight());
@@ -132,13 +133,22 @@ final class StyleInstaller<C extends JComponent>
         StyleConf            newStyle,
         final boolean        force
     ) {
+        Runnable backgroundSetter = ()->{};
+
         boolean doInstallation = true;
+        boolean backgroundWasSetSomewhereElse = this.backgroundWasChangedSomewhereElse(owner);
+        if ( backgroundWasSetSomewhereElse ) {
+            _outSideBackgroundColor = owner.getBackground();
+            Color outSideBackgroundColor = _outSideBackgroundColor;
+            backgroundSetter = () -> {
+                if ( !Objects.equals( owner.getBackground(), outSideBackgroundColor ) )
+                    owner.setBackground(outSideBackgroundColor);
+            };
+        }
 
         if ( !force ) {
             // We check if it makes sense to apply the new style:
-            boolean componentBackgroundWasMutated = this.backgroundWasChangedSomewhereElse(owner);
-
-            if ( !componentBackgroundWasMutated && engine.getComponentConf().style().equals(newStyle) )
+            if ( !backgroundWasSetSomewhereElse && engine.getComponentConf().style().equals(newStyle) )
                 doInstallation = false;
         }
 
@@ -192,7 +202,7 @@ final class StyleInstaller<C extends JComponent>
         final boolean hasPaddingAndMargin = !noPaddingAndMarginStyle;
         final boolean hasBorderStyle      = !noBorderStyle;
 
-        final boolean weNeedACustomBorder = (
+        final boolean weNeedACustomBorder = !isNotStyled && (
                hasPaddingAndMargin || hasBorderStyle
                || newStyle.layers().any( (layer, it) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) && it.shadows().any(named -> named.style().color().isPresent() ) )
                || newStyle.layers().any( (layer, it) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) && it.gradients().any(named -> named.style().colors().length > 0 ) )
@@ -205,7 +215,7 @@ final class StyleInstaller<C extends JComponent>
         final boolean hasBaseColors    = (!noBaseStyle   && newStyle.base().hasAnyColors());
         final boolean hasBackFilter    = !noParentFilter;
 
-        final boolean weNeedCustomUI = (
+        final boolean weNeedCustomUI = !isNotStyled && (
                (hasBackFilter && !isSwingTreeComponent) ||
                (hasBaseColors && newStyle.base().requiresCustomUI())
                || newStyle.layers().any( (layer, it) -> layer == UI.Layer.BACKGROUND && it.shadows().any(named -> named.style().color().isPresent() ) )
@@ -216,8 +226,6 @@ final class StyleInstaller<C extends JComponent>
                || newStyle.layers().any( (layer, it) -> layer == UI.Layer.BACKGROUND && it.noises().any(named -> named.style().colors().length > 0 ) )
             );
 
-        Runnable backgroundSetter = ()->{};
-
         if ( weNeedACustomBorder ) {
             installCustomBorderBasedStyleAndAnimationRenderer(owner, newStyle);
             newStyle = recalculateInsets(owner, newStyle);
@@ -227,20 +235,15 @@ final class StyleInstaller<C extends JComponent>
         if ( weNeedCustomUI ) {
             _dynamicLaF = _dynamicLaF.establishLookAndFeelFor(newStyle, owner);
         } else {
-            if ( _initialBackgroundColor != null ) {
-                if ( !Objects.equals( owner.getBackground(), _initialBackgroundColor ) )
-                    owner.setBackground(_initialBackgroundColor);
-                _initialBackgroundColor = null;
+            if ( _outSideBackgroundColor != null ) {
+                if ( !Objects.equals( owner.getBackground(), _outSideBackgroundColor) )
+                    owner.setBackground(_outSideBackgroundColor);
+                _outSideBackgroundColor = null;
             }
         }
 
         if ( isNotStyled || !weNeedCustomUI ) {
             _dynamicLaF = _dynamicLaF._uninstallCustomLaF(owner);
-            if ( _initialBackgroundColor != null ) {
-                if ( !Objects.equals( owner.getBackground(), _initialBackgroundColor ) )
-                    backgroundSetter = () -> owner.setBackground(_initialBackgroundColor);
-                _initialBackgroundColor = null;
-            }
             if ( _initialIsOpaque != null ) {
                 if ( owner.isOpaque() != _initialIsOpaque )
                     owner.setOpaque(_initialIsOpaque);
@@ -277,18 +280,16 @@ final class StyleInstaller<C extends JComponent>
         if ( !hasBackground && _initialIsOpaque ) {
             // If the style has a border radius set we need to make sure that we have a background color:
             if ( hasBorderRadius || newStyle.border().margin().isPositive() ) {
-                _initialBackgroundColor = _initialBackgroundColor != null ? _initialBackgroundColor : owner.getBackground();
-                newStyle = newStyle.backgroundColor(_initialBackgroundColor);
+                _outSideBackgroundColor = _outSideBackgroundColor != null ? _outSideBackgroundColor : owner.getBackground();
+                newStyle = newStyle.backgroundColor(_outSideBackgroundColor);
             }
         }
-
-        boolean backgroundWasSetSomewhereElse = backgroundWasChangedSomewhereElse( owner );
 
         if ( hasBackground ) {
             boolean backgroundIsAlreadySet = Objects.equals( owner.getBackground(), newStyle.base().backgroundColor().get() );
             if ( !backgroundIsAlreadySet || StyleUtil.isUndefinedColor(newStyle.base().backgroundColor().get()) )
             {
-                _initialBackgroundColor = _initialBackgroundColor != null ? _initialBackgroundColor :  owner.getBackground();
+                _outSideBackgroundColor = _outSideBackgroundColor != null ? _outSideBackgroundColor :  owner.getBackground();
                 Color newColor = newStyle.base().backgroundColor()
                                                 .filter( c -> !StyleUtil.isUndefinedColor(c) )
                                                 .orElse(null);
@@ -318,7 +319,7 @@ final class StyleInstaller<C extends JComponent>
 
         if ( !opaqueGradAreas.contains(UI.ComponentArea.ALL) ) {
             boolean hasOpaqueFoundation = 255 == newStyle.base().foundationColor().map(java.awt.Color::getAlpha).orElse(0);
-            boolean hasOpaqueBackground = 255 == newStyle.base().backgroundColor().map( c -> !StyleUtil.isUndefinedColor(c) ? c : _initialBackgroundColor ).map(java.awt.Color::getAlpha).orElse(255);
+            boolean hasOpaqueBackground = 255 == newStyle.base().backgroundColor().map( c -> !StyleUtil.isUndefinedColor(c) ? c : _outSideBackgroundColor).map(java.awt.Color::getAlpha).orElse(255);
             boolean hasBorder           = newStyle.border().widths().isPositive();
 
             if ( !hasOpaqueFoundation && !opaqueGradAreas.contains(UI.ComponentArea.EXTERIOR) ) {
@@ -455,9 +456,6 @@ final class StyleInstaller<C extends JComponent>
 
         backgroundSetter.run();
 
-        if ( !backgroundWasSetSomewhereElse )
-            _currentBackgroundColor = owner.getBackground();
-
         StyleEngine newEngine = _updateEngine(owner, engine, newStyle, marginCorrection);
 
         _applyFontStyleTo(owner, newStyle);
@@ -468,9 +466,8 @@ final class StyleInstaller<C extends JComponent>
 
     @SuppressWarnings("ReferenceEquality")
     boolean backgroundWasChangedSomewhereElse( C owner ) {
-        if ( _currentBackgroundColor != null ) {
-            if ( _currentBackgroundColor != owner.getBackground() ) {
-                _initialBackgroundColor = _currentBackgroundColor;
+        if ( _lastInsideBackgroundColor != null ) {
+            if ( _lastInsideBackgroundColor != owner.getBackground() ) {
                 return true;
             }
         }
