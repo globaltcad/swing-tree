@@ -202,7 +202,7 @@ final class StyleInstaller<C extends JComponent>
         final boolean hasPaddingAndMargin = !noPaddingAndMarginStyle;
         final boolean hasBorderStyle      = !noBorderStyle;
 
-        final boolean weNeedACustomBorder = (
+        final boolean weNeedACustomBorder = !isNotStyled && (
                hasPaddingAndMargin || hasBorderStyle
                || newStyle.layers().any( (layer, it) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) && it.shadows().any(named -> named.style().color().isPresent() ) )
                || newStyle.layers().any( (layer, it) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) && it.gradients().any(named -> named.style().colors().length > 0 ) )
@@ -215,7 +215,7 @@ final class StyleInstaller<C extends JComponent>
         final boolean hasBaseColors    = (!noBaseStyle   && newStyle.base().hasAnyColors());
         final boolean hasBackFilter    = !noParentFilter;
 
-        final boolean weNeedCustomUI = (
+        final boolean weNeedCustomUI = !isNotStyled && (
                (hasBackFilter && !isSwingTreeComponent) ||
                (hasBaseColors && newStyle.base().requiresCustomUI())
                || newStyle.layers().any( (layer, it) -> layer == UI.Layer.BACKGROUND && it.shadows().any(named -> named.style().color().isPresent() ) )
