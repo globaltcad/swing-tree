@@ -47,10 +47,10 @@ import java.util.Optional;
 final class StyleInstaller<C extends JComponent>
 {
     private DynamicLaF        _dynamicLaF = DynamicLaF.none(); // Not null, but can be DynamicLaF.none().
-    private @Nullable Color   _initialBackgroundColor   = null;
-    private @Nullable Color   _currentBackgroundColor   = null;
-    private @Nullable Boolean _initialIsOpaque          = null;
-    private @Nullable Boolean _initialContentAreaFilled = null;
+    private @Nullable Color   _outSideBackgroundColor    = null;
+    private @Nullable Color   _lastInsideBackgroundColor = null;
+    private @Nullable Boolean _initialIsOpaque           = null;
+    private @Nullable Boolean _initialContentAreaFilled  = null;
 
 
     void installCustomBorderBasedStyleAndAnimationRenderer( C owner, StyleConf styleConf) {
@@ -101,7 +101,7 @@ final class StyleInstaller<C extends JComponent>
         final StyleConf   newStyle,
         final Outline     marginCorrection
     ) {
-        _currentBackgroundColor = owner.getBackground();
+        _lastInsideBackgroundColor = owner.getBackground();
 
         final ComponentConf currentConf = engine.getComponentConf();
         final boolean sameStyle      = currentConf.style().equals(newStyle);
@@ -136,7 +136,7 @@ final class StyleInstaller<C extends JComponent>
         boolean doInstallation = true;
         boolean backgroundWasSetSomewhereElse = this.backgroundWasChangedSomewhereElse(owner);
         if ( backgroundWasSetSomewhereElse )
-            _initialBackgroundColor = owner.getBackground();
+            _outSideBackgroundColor = owner.getBackground();
 
         if ( !force ) {
             // We check if it makes sense to apply the new style:
@@ -229,19 +229,19 @@ final class StyleInstaller<C extends JComponent>
         if ( weNeedCustomUI ) {
             _dynamicLaF = _dynamicLaF.establishLookAndFeelFor(newStyle, owner);
         } else {
-            if ( _initialBackgroundColor != null ) {
-                if ( !Objects.equals( owner.getBackground(), _initialBackgroundColor ) )
-                    owner.setBackground(_initialBackgroundColor);
-                _initialBackgroundColor = null;
+            if ( _outSideBackgroundColor != null ) {
+                if ( !Objects.equals( owner.getBackground(), _outSideBackgroundColor) )
+                    owner.setBackground(_outSideBackgroundColor);
+                _outSideBackgroundColor = null;
             }
         }
 
         if ( isNotStyled || !weNeedCustomUI ) {
             _dynamicLaF = _dynamicLaF._uninstallCustomLaF(owner);
-            if ( _initialBackgroundColor != null ) {
-                if ( !Objects.equals( owner.getBackground(), _initialBackgroundColor ) )
-                    backgroundSetter = () -> owner.setBackground(_initialBackgroundColor);
-                _initialBackgroundColor = null;
+            if ( _outSideBackgroundColor != null ) {
+                if ( !Objects.equals( owner.getBackground(), _outSideBackgroundColor) )
+                    backgroundSetter = () -> owner.setBackground(_outSideBackgroundColor);
+                _outSideBackgroundColor = null;
             }
             if ( _initialIsOpaque != null ) {
                 if ( owner.isOpaque() != _initialIsOpaque )
@@ -279,8 +279,8 @@ final class StyleInstaller<C extends JComponent>
         if ( !hasBackground && _initialIsOpaque ) {
             // If the style has a border radius set we need to make sure that we have a background color:
             if ( hasBorderRadius || newStyle.border().margin().isPositive() ) {
-                _initialBackgroundColor = _initialBackgroundColor != null ? _initialBackgroundColor : owner.getBackground();
-                newStyle = newStyle.backgroundColor(_initialBackgroundColor);
+                _outSideBackgroundColor = _outSideBackgroundColor != null ? _outSideBackgroundColor : owner.getBackground();
+                newStyle = newStyle.backgroundColor(_outSideBackgroundColor);
             }
         }
 
@@ -288,7 +288,7 @@ final class StyleInstaller<C extends JComponent>
             boolean backgroundIsAlreadySet = Objects.equals( owner.getBackground(), newStyle.base().backgroundColor().get() );
             if ( !backgroundIsAlreadySet || StyleUtil.isUndefinedColor(newStyle.base().backgroundColor().get()) )
             {
-                _initialBackgroundColor = _initialBackgroundColor != null ? _initialBackgroundColor :  owner.getBackground();
+                _outSideBackgroundColor = _outSideBackgroundColor != null ? _outSideBackgroundColor :  owner.getBackground();
                 Color newColor = newStyle.base().backgroundColor()
                                                 .filter( c -> !StyleUtil.isUndefinedColor(c) )
                                                 .orElse(null);
@@ -318,7 +318,7 @@ final class StyleInstaller<C extends JComponent>
 
         if ( !opaqueGradAreas.contains(UI.ComponentArea.ALL) ) {
             boolean hasOpaqueFoundation = 255 == newStyle.base().foundationColor().map(java.awt.Color::getAlpha).orElse(0);
-            boolean hasOpaqueBackground = 255 == newStyle.base().backgroundColor().map( c -> !StyleUtil.isUndefinedColor(c) ? c : _initialBackgroundColor ).map(java.awt.Color::getAlpha).orElse(255);
+            boolean hasOpaqueBackground = 255 == newStyle.base().backgroundColor().map( c -> !StyleUtil.isUndefinedColor(c) ? c : _outSideBackgroundColor).map(java.awt.Color::getAlpha).orElse(255);
             boolean hasBorder           = newStyle.border().widths().isPositive();
 
             if ( !hasOpaqueFoundation && !opaqueGradAreas.contains(UI.ComponentArea.EXTERIOR) ) {
@@ -465,8 +465,8 @@ final class StyleInstaller<C extends JComponent>
 
     @SuppressWarnings("ReferenceEquality")
     boolean backgroundWasChangedSomewhereElse( C owner ) {
-        if ( _currentBackgroundColor != null ) {
-            if ( _currentBackgroundColor != owner.getBackground() ) {
+        if ( _lastInsideBackgroundColor != null ) {
+            if ( _lastInsideBackgroundColor != owner.getBackground() ) {
                 return true;
             }
         }
