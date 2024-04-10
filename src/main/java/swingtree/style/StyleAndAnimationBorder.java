@@ -194,29 +194,23 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
 
     private void _calculateBorderInsets( StyleConf styleConf )
     {
-        Outline correction = Outline.none();//getDelegatedInsets(styleConf);
+        // Margin:
+        float left   = styleConf.margin().left()  .orElse(0f);
+        float top    = styleConf.margin().top()   .orElse(0f);
+        float right  = styleConf.margin().right() .orElse(0f);
+        float bottom = styleConf.margin().bottom().orElse(0f);
 
-        float left   = correction.left().orElse(0f);
-        float top    = correction.top().orElse(0f);
-        float right  = correction.right().orElse(0f);
-        float bottom = correction.bottom().orElse(0f);
-
-        left   += styleConf.margin().left()  .orElse(0f);
-        top    += styleConf.margin().top()   .orElse(0f);
-        right  += styleConf.margin().right() .orElse(0f);
-        bottom += styleConf.margin().bottom().orElse(0f);
-
-        // Add padding:
-        left   += styleConf.padding().left().orElse(0f);
-        top    += styleConf.padding().top().orElse(0f);
-        right  += styleConf.padding().right().orElse(0f);
-        bottom += styleConf.padding().bottom().orElse(0f);
         // Add border widths:
         left   += Math.max(styleConf.border().widths().left().orElse(0f),   0);
         top    += Math.max(styleConf.border().widths().top().orElse(0f),    0);
         right  += Math.max(styleConf.border().widths().right().orElse(0f),  0);
         bottom += Math.max(styleConf.border().widths().bottom().orElse(0f), 0);
 
+        // Add padding:
+        left   += styleConf.padding().left().orElse(0f);
+        top    += styleConf.padding().top().orElse(0f);
+        right  += styleConf.padding().right().orElse(0f);
+        bottom += styleConf.padding().bottom().orElse(0f);
         if (
             _insets == null         ||
             _insets.left   != left  ||
