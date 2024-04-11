@@ -210,7 +210,18 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
         for (ActionListener listener : listeners)
             thisComponent.removeActionListener(listener);
 
-        thisComponent.addActionListener(consumer::accept);
+        thisComponent.addActionListener(e -> {
+            boolean acceptEvent = false;
+            if ( e.getSource() instanceof JComboBox ) {
+                ComboBoxModel<?> model = ((JComboBox<?>) e.getSource()).getModel();
+                if ( model instanceof AbstractComboModel ) {
+                    AbstractComboModel<?> swingTreeModel = (AbstractComboModel<?>) model;
+                    acceptEvent = swingTreeModel.acceptsEditorChanges();
+                }
+            }
+            if ( acceptEvent )
+                consumer.accept(e);
+        });
 
         for ( int i = listeners.length - 1; i >= 0; i-- ) // reverse order because swing does not give us the listeners in the order they were added!
             thisComponent.addActionListener(listeners[i]);
