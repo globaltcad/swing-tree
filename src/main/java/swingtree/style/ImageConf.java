@@ -184,16 +184,16 @@ public final class ImageConf implements Simplifiable<ImageConf>
         UI.ComponentArea    clipArea
     ) {
         if (
-            primer    == _NONE._primer    &&
-            image     == _NONE._image     &&
-            placement == _NONE._placement &&
-            repeat    == _NONE._repeat    &&
-            fitMode   == _NONE._fitMode   &&
-            size      == _NONE._size      &&
-            opacity   == _NONE._opacity   &&
-            padding   == _NONE._padding   &&
-            offset    == _NONE._offset    &&
-            clipArea  == _NONE._clipArea
+            Objects.equals( primer, _NONE._primer )   &&
+            Objects.equals( image , _NONE._image  )   &&
+            placement.equals( _NONE._placement ) &&
+            repeat   == _NONE._repeat            &&
+            fitMode  .equals( _NONE._fitMode   ) &&
+            size     .equals( _NONE._size      ) &&
+            opacity  == _NONE._opacity           &&
+            padding  .equals( _NONE._padding   ) &&
+            offset   .equals( _NONE._offset    ) &&
+            clipArea .equals( _NONE._clipArea  )
         )
             return _NONE;
         else

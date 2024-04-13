@@ -39,15 +39,15 @@ final class BoxModelConf
         Outline baseOutline,
         Size    size
     ) {
-        if ( topLeftArc      == Arc.none() &&
-             topRightArc     == Arc.none() &&
-             bottomLeftArc   == Arc.none() &&
-             bottomRightArc  == Arc.none() &&
-             borderWidths    == Outline.none() &&
-             margin          == Outline.none() &&
-             padding         == Outline.none() &&
-             baseOutline     == Outline.none() &&
-             size            == Size.unknown()
+        if ( topLeftArc      .equals( Arc.none() ) &&
+             topRightArc     .equals( Arc.none() ) &&
+             bottomLeftArc   .equals( Arc.none() ) &&
+             bottomRightArc  .equals( Arc.none() ) &&
+             borderWidths    .equals( Outline.none() ) &&
+             margin          .equals( Outline.none() ) &&
+             padding         .equals( Outline.none() ) &&
+             baseOutline     .equals( Outline.none() ) &&
+             size            .equals( Size.unknown() )
         )
             return _NONE;
         else {
@@ -154,16 +154,16 @@ final class BoxModelConf
         float arcHeight;
         switch ( corner ) {
             case TOP_LEFT:
-                arcHeight = _topLeftArc != Arc.none() ? _topLeftArc.height() : 0;
+                arcHeight = !_topLeftArc.equals(Arc.none()) ? _topLeftArc.height() : 0;
                 return BoxModelConf.of(Arc.of(borderArcWidth, arcHeight), _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _baseOutline, _size);
             case TOP_RIGHT:
-                arcHeight = _topRightArc != Arc.none() ? _topRightArc.height() : 0;
+                arcHeight = !_topRightArc.equals(Arc.none()) ? _topRightArc.height() : 0;
                 return BoxModelConf.of(_topLeftArc, Arc.of(borderArcWidth, arcHeight), _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _baseOutline, _size);
             case BOTTOM_LEFT:
-                arcHeight = _bottomLeftArc != Arc.none() ? _bottomLeftArc.height() : 0;
+                arcHeight = !_bottomLeftArc.equals(Arc.none()) ? _bottomLeftArc.height() : 0;
                 return BoxModelConf.of(_topLeftArc, _topRightArc, Arc.of(borderArcWidth, arcHeight), _bottomRightArc, _borderWidths, _margin, _padding, _baseOutline, _size);
             case BOTTOM_RIGHT:
-                arcHeight = _bottomRightArc != Arc.none() ? _bottomRightArc.height() : 0;
+                arcHeight = !_bottomRightArc.equals(Arc.none()) ? _bottomRightArc.height() : 0;
                 return BoxModelConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, Arc.of(borderArcWidth, arcHeight), _borderWidths, _margin, _padding, _baseOutline, _size);
             default:
                 throw new IllegalArgumentException("Unknown corner: " + corner);
