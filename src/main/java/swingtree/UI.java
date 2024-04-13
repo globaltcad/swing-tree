@@ -56,6 +56,7 @@ import java.util.function.Supplier;
  */
 public final class UI extends UIFactoryMethods
 {
+    private static final Logger log = LoggerFactory.getLogger(UI.class);
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     /**
@@ -744,7 +745,9 @@ public final class UI extends UIFactoryMethods
             if ( laf.contains("Nimbus")  ) return LookAndFeel.NIMBUS;
             if ( laf.contains("Metal")   ) return LookAndFeel.METAL;
         }
-        catch (Exception ignored) {}
+        catch (Exception e) {
+            log.warn("Failed to determine current look and feel.", e);
+        }
 
         return LookAndFeel.OTHER;
     }

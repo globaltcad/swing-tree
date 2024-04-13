@@ -256,7 +256,7 @@ final class BorderConf
     }
 
     BorderConf simplified() {
-        if ( this == _NONE )
+        if ( this.equals(_NONE) )
             return _NONE;
 
         Arc simplifiedTopLeftArc       = _topLeftArc.simplified();

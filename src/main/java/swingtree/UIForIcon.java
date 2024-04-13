@@ -15,7 +15,7 @@ public final class UIForIcon<I extends JIcon> extends UIForAnySwing<UIForIcon<I>
      * Extensions of the {@link  UIForAnySwing} always wrap
      * a single component for which they are responsible.
      *
-     * @param component The JComponent type which will be managed by this builder.
+     * @param state The state of the builder used for creating an icon based component.
      */
     UIForIcon( BuilderState<I> state ) {
         Objects.requireNonNull(state);
@@ -28,7 +28,7 @@ public final class UIForIcon<I extends JIcon> extends UIForAnySwing<UIForIcon<I>
     }
     
     @Override
-    protected UIForIcon<I> _newBuilderWithState(BuilderState<I> newState ) {
+    protected UIForIcon<I> _newBuilderWithState( BuilderState<I> newState ) {
         return new UIForIcon<>(newState);
     }
 }

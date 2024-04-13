@@ -999,7 +999,7 @@ public final class FontConf
     @Override
     public String toString()
     {
-        if ( this == _NONE )
+        if ( this.equals(_NONE) )
             return this.getClass().getSimpleName() + "[NONE]";
         String underline       = ( _isUnderlined        == null ? "?" : String.valueOf(_isUnderlined)   );
         String strike          = ( _isStrike            == null ? "?" : String.valueOf(_isStrike)       );
