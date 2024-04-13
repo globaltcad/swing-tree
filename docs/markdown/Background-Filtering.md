@@ -63,19 +63,21 @@ more clearly.
 The second `withStyle` is applied to a label component that is added to the panel.
 Here we set the background color to `Color.TRANSPARENT` to ensure that the component
 is non-opaque and then apply a blur filter to the passed through parent rendering
-using the `parentFilter` sub-style.
+using the `parentFilter` sub-style. We set the radius of the blur filter kernel to 16
+and clip the result to the body area of the component.
 
 
 ![A glassy background](../img/tutorial/glassy-tissue-background.png)
 
-As you can see, the label component now has a blurred appearance.
+As you can see, the label component now has a blurred background.
 Although that does look nice, it is still not quite what we want.
-Glass in the real world may not just be blurring what passes through it, 
-it very often also magnifies the content behind it through refraction.
+Not only does glass in the real world sometimes blur the light passing through it, 
+it very often also magnifies it. This is due to the fact that the light is refracted
+when passing through the glass.
 
-Additionally, to the blurring, SwingTree also allows you to apply a scaling 
+So additionally to the blurring, SwingTree also allows you to apply a scaling 
 factor to the filter configuration. It causes the background to be scaled
-up or down before it is blurred.
+up or down before it is blurred and displayed on the component.
 
 Here is an example that demonstrates this:
 
@@ -118,13 +120,13 @@ public class ScaledGlassyBackground extends Panel
 
 This is again very similar to the previous example, but this time
 instead of just applying a blur filter, we also set the scale factor
-to 1.25. This causes the background to be scaled up by 25% before it is blurred.
-Also, not that we reduced the blur factor to 6. This is because the scaling
-operation already causes the background to look more blurred.
-So the blur factor needs to be reduced to compensate for that.
+to `1.25`. This causes the background to be scaled up by `25%` before it is blurred.
+Also, note that we reduced the blur factor to `6`. This is because the scaling
+operation already causes the background to look a little bit blurry.
+So the additional blur needs to be reduced to compensate for that.
 
 ![A scaled glassy background](../img/tutorial/scaled-glassy-tissue-background.png)
 
 Now the effect looks really convincing. It gets even better when
 resizing the window and seeing how the background scales dynamically.
-That really make the component fell like glass.
+That really make the component feel like glass.
