@@ -102,6 +102,10 @@ public interface IconDeclaration
     }
 
     /**
+     *  Creates and returns an updated {@link IconDeclaration} instance
+     *  with the same path but the given size as preferred size
+     *  for the icon.
+     *
      * @param size The preferred size of the icon in the form of a {@link Size} instance.
      * @return A new {@link IconDeclaration} instance with the same path
      *        but with the given size.

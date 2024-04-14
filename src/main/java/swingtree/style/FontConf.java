@@ -921,7 +921,7 @@ public final class FontConf
     FontConf _scale(double scale ) {
         if ( scale == 1.0 )
             return this;
-        else if ( this == _NONE )
+        else if ( this.equals(_NONE) )
             return this;
         else
             return FontConf.of(

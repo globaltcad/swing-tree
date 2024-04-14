@@ -534,7 +534,7 @@ public final class GradientConf implements Simplifiable<GradientConf>
 
     @Override
     public String toString() {
-        if ( this == _NONE )
+        if ( this.equals(_NONE) )
             return getClass().getSimpleName() + "[NONE]";
         return getClass().getSimpleName() + "[" +
                     "transition=" + _span + ", " +
@@ -589,7 +589,7 @@ public final class GradientConf implements Simplifiable<GradientConf>
     @Override
     @SuppressWarnings("ReferenceEquality")
     public GradientConf simplified() {
-        if ( this == _NONE )
+        if ( this.equals(_NONE) )
             return _NONE;
 
         if ( _colors.length == 0 )

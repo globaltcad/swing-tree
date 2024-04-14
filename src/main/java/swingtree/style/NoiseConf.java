@@ -342,7 +342,7 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
 
     @Override
     public String toString() {
-        if ( this == _NONE )
+        if ( this.equals(_NONE) )
             return getClass().getSimpleName() + "[NONE]";
         return getClass().getSimpleName() + "[" +
                     "function="    + _function + ", " +
@@ -387,7 +387,7 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
 
     @Override
     public NoiseConf simplified() {
-        if ( this == _NONE )
+        if ( this.equals(_NONE) )
             return _NONE;
 
         if ( _colors.length == 0 )

@@ -132,7 +132,7 @@ final class DimensionalityConf
     }
 
     DimensionalityConf simplified() {
-        if ( this == _NONE )
+        if ( this.equals(_NONE) )
             return _NONE;
 
         Size simplifiedMinSize       = _minSize.width().orElse(0f) == 0f && _minSize.height().orElse(0f) == 0f ? _NONE._minSize : _minSize;
@@ -150,7 +150,7 @@ final class DimensionalityConf
 
     @Override
     public String toString() {
-        if ( this == _NONE )
+        if ( this.equals(_NONE) )
             return this.getClass().getSimpleName() + "[NONE]";
 
         return

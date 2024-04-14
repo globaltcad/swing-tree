@@ -655,6 +655,7 @@ abstract class UIForAnything<I, C extends E, E extends Component>
     }
 
     @Override
+    @SuppressWarnings("EqualsGetClass")
     public final boolean equals( Object obj ) {
         if ( obj == null ) return false;
         if ( obj == this ) return true;

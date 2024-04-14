@@ -640,7 +640,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
 
     @Override
     public ImageConf simplified() {
-        if ( this == _NONE )
+        if ( this.equals(_NONE) )
             return _NONE;
 
         ImageIcon simplifiedImage = _opacity == 0.0f ? null : _image;
@@ -691,7 +691,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
 
     @Override
     public String toString() {
-        if ( this == _NONE ) return this.getClass().getSimpleName()+"[NONE]";
+        if ( this.equals(_NONE) ) return this.getClass().getSimpleName()+"[NONE]";
         return this.getClass().getSimpleName() + "[" +
                     "primer="        + StyleUtil.toString(_primer)                          + ", " +
                     "image="         + ( _image == null ? "?" : _image.toString() )            + ", " +

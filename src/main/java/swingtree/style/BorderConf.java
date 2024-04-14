@@ -240,7 +240,7 @@ final class BorderConf
     BorderConf _scale( double scale ) {
         if ( scale == 1.0 )
             return this;
-        else if ( this == _NONE )
+        else if ( this.equals(_NONE) )
             return _NONE;
         else
             return BorderConf.of(
@@ -345,7 +345,7 @@ final class BorderConf
     @Override
     public String toString()
     {
-        if ( this == _NONE )
+        if ( this.equals(_NONE) )
             return this.getClass().getSimpleName() + "[NONE]";
 
         String arcsString;
