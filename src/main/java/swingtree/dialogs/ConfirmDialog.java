@@ -82,7 +82,7 @@ public final class ConfirmDialog
      * @param title The title of the dialog.
      * @return A new {@link ConfirmDialog} instance with the specified title.
      */
-    public ConfirmDialog titled(String title ) {
+    public ConfirmDialog titled( String title ) {
         return new ConfirmDialog(_type, title, _message, _yesOption, _noOption, _cancelOption, _defaultOption, _icon, _parent);
     }
 
@@ -90,7 +90,7 @@ public final class ConfirmDialog
      * @param yesOption The text of the "yes" option.
      * @return A new {@link ConfirmDialog} instance with the specified "yes" option text.
      */
-    public ConfirmDialog yesOption(String yesOption ) {
+    public ConfirmDialog yesOption( String yesOption ) {
         return new ConfirmDialog(_type, _title, _message, yesOption, _noOption, _cancelOption, _defaultOption, _icon, _parent);
     }
 
@@ -98,7 +98,7 @@ public final class ConfirmDialog
      * @param noOption The text of the "no" option.
      * @return A new {@link ConfirmDialog} instance with the specified "no" option text.
      */
-    public ConfirmDialog noOption(String noOption ) {
+    public ConfirmDialog noOption( String noOption ) {
         return new ConfirmDialog(_type, _title, _message, _yesOption, noOption, _cancelOption, _defaultOption, _icon, _parent);
     }
 

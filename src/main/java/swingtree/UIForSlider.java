@@ -149,6 +149,10 @@ public final class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSli
     }
 
     /**
+     *  Binds the supplied {@link Val} property to the max value of the slider.
+     *  When the value of the property changes, the max value of the slider will be updated accordingly.
+     *  For more information about the underlying value in the component, see {@link JSlider#setMaximum(int)}.
+     *
      * @param max An integer property used to dynamically update the max value of the slider.
      * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if {@code max} is {@code null}.

@@ -755,6 +755,18 @@ public final class UI extends UIFactoryMethods
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     /**
+     *  There are two types of strategies for achieving high DPI scaling in Swing.
+     *  The first one is available since Java 9, and it uses the system property {@code sun.java2d.uiScale}
+     *  to scale the {@link java.awt.geom.AffineTransform} of the {@link Graphics2D} graphics context.
+     *  The second one is look and feel / client code dependent scaling, which is what this library uses.
+     *  <p>
+     *  The factor returned by this method is determined by SwingTree
+     *  automatically to ensure that the UI is DPI aware.
+     *  All the SwingTree styles are scaled using this factor.
+     *  Use this factor to scale your {@link Graphics2D} based painting operations.
+     *  For configuring the scaling factor, see {@link SwingTree#setUiScaleFactor(float)}
+     *  or {@link SwingTree#initialiseUsing(SwingTreeConfigurator)}.
+     *
      * @return The current UI scale factor, which is used for DPI aware painting and layouts.
      */
     public static float scale() { return SwingTree.get().getUiScaleFactor(); }
