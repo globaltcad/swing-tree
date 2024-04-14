@@ -82,6 +82,7 @@ final class StyleUtil
         return "Painter@" + Integer.toHexString(Objects.hashCode(painter));
     }
 
+    @SuppressWarnings("GetClassOnEnum")
     static String toString( Enum<?> enumBasedId ) {
         return enumBasedId.getClass().getSimpleName() + "." + enumBasedId.name();
     }

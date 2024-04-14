@@ -226,12 +226,12 @@ final class StyleConfLayer implements Simplifiable<StyleConfLayer>
         simplifiedTexts     = ( simplifiedTexts.equals(_NO_TEXTS)         ? _NO_TEXTS     : simplifiedTexts     );
 
         if (
-            simplifiedShadows   == _NO_SHADOWS   &&
-            simplifiedPainters  == _NO_PAINTERS  &&
-            simplifiedGradients == _NO_GRADIENTS &&
-            simplifiedNoises    == _NO_NOISES    &&
-            simplifiedImages    == _NO_IMAGES    &&
-            simplifiedTexts     == _NO_TEXTS
+            simplifiedShadows   .equals( _NO_SHADOWS   ) &&
+            simplifiedPainters  .equals( _NO_PAINTERS  ) &&
+            simplifiedGradients .equals( _NO_GRADIENTS ) &&
+            simplifiedNoises    .equals( _NO_NOISES    ) &&
+            simplifiedImages    .equals( _NO_IMAGES    ) &&
+            simplifiedTexts     .equals( _NO_TEXTS     )
         )
             return _EMPTY;
 

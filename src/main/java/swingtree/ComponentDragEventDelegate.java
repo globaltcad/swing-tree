@@ -32,6 +32,9 @@ public final class ComponentDragEventDelegate<C extends JComponent> extends Comp
     }
 
     /**
+     *  Provides a list of all {@link MouseEvent}s of a continuous mouse drag performed on the component.
+     *  When a drag ends, the list is cleared.
+     *
      * @return A list of all {@link MouseEvent}s of a continuous mouse drag performed on the component.
      */
     public List<MouseEvent> dragEvents() {
@@ -39,6 +42,10 @@ public final class ComponentDragEventDelegate<C extends JComponent> extends Comp
     }
 
     /**
+     *  SwingTree keeps track of the most recent mouse drag events of a continuous drag.
+     *  This method returns a list of all mouse position {@link Point}s of a continuous mouse drag
+     *  performed on the component.
+     *
      * @return A list of all mouse position {@link Point}s of a continuous mouse drag performed on the component.
      *         The points of this list represent the mouse movement track since the start of a continuous drag.
      */

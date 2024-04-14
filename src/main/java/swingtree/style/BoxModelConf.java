@@ -124,10 +124,10 @@ final class BoxModelConf
     public Optional<Arc> bottomRightArc() { return _bottomRightArc.equals(Arc.none()) ? Optional.empty() : Optional.of(_bottomRightArc); }
 
     public boolean hasAnyNonZeroArcs() {
-        return !_topLeftArc     .equals(Arc.none()) && _topLeftArc.width()     > 0 && _topLeftArc.height()     > 0 ||
-               !_topRightArc    .equals(Arc.none()) && _topRightArc.width()    > 0 && _topRightArc.height()    > 0 ||
-               !_bottomLeftArc  .equals(Arc.none()) && _bottomLeftArc.width()  > 0 && _bottomLeftArc.height()  > 0 ||
-               !_bottomRightArc .equals(Arc.none()) && _bottomRightArc.width() > 0 && _bottomRightArc.height() > 0;
+        return ( !_topLeftArc     .equals(Arc.none()) && _topLeftArc.width()     > 0 && _topLeftArc.height()     > 0 ) ||
+               ( !_topRightArc    .equals(Arc.none()) && _topRightArc.width()    > 0 && _topRightArc.height()    > 0 ) ||
+               ( !_bottomLeftArc  .equals(Arc.none()) && _bottomLeftArc.width()  > 0 && _bottomLeftArc.height()  > 0 ) ||
+               ( !_bottomRightArc .equals(Arc.none()) && _bottomRightArc.width() > 0 && _bottomRightArc.height() > 0 );
     }
 
     public float topLeftRadius() { return !_topLeftArc.equals(Arc.none()) ? (_topLeftArc.width() + _topLeftArc.height()) / 2 : 0; }

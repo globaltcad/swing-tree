@@ -1459,7 +1459,7 @@ final class StyleRenderer
             if (distance > radius2)
                 matrix[index] = 0;
             else
-                matrix[index] = (float)Math.exp(-(distance)/sigma22) / sqrtSigmaPi2;
+                matrix[index] = (float)Math.exp(-distance/sigma22) / sqrtSigmaPi2;
             total += matrix[index];
             index++;
         }
