@@ -44,15 +44,19 @@ public final class SplitItemDelegate<I extends JMenuItem> extends AbstractDelega
     }
 
     /**
+     *  Returns the underlying {@link JSplitButton} instance or throws an exception if
+     *  the current thread is not the Swing thread.
+     *
      * @return The {@link JSplitButton} to which this {@link SplitItem} (and its {@link JMenuItem}) belongs.
      */
     public JSplitButton getSplitButton() {
         // We make sure that only the Swing thread can access the component:
-        if (UI.thisIsUIThread()) return splitButton;
+        if ( UI.thisIsUIThread() )
+            return splitButton;
         else
             throw new IllegalStateException(
                     "Split button can only be accessed by the Swing thread."
-            );
+                );
     }
 
     /**
@@ -60,11 +64,12 @@ public final class SplitItemDelegate<I extends JMenuItem> extends AbstractDelega
      */
     public final I getCurrentItem() {
         // We make sure that only the Swing thread can access the component:
-        if (UI.thisIsUIThread()) return _component();
+        if ( UI.thisIsUIThread() )
+            return _component();
         else
             throw new IllegalStateException(
                     "The current button item can only be accessed by the Swing thread."
-            );
+                );
     }
 
     /**
@@ -75,11 +80,12 @@ public final class SplitItemDelegate<I extends JMenuItem> extends AbstractDelega
      */
     public List<I> getSiblinghood() {
         // We make sure that only the Swing thread can access the sibling components:
-        if (!UI.thisIsUIThread())
+        if ( UI.thisIsUIThread() )
+            return this.siblingsSource.get();
+        else
             throw new IllegalStateException(
                     "Sibling components can only be accessed by the Swing thread."
-            );
-        return this.siblingsSource.get();
+                );
     }
 
     /**
@@ -238,7 +244,7 @@ public final class SplitItemDelegate<I extends JMenuItem> extends AbstractDelega
      * @param prefix The text which should be prepended to the text displayed on the {@link JSplitButton}.
      * @return This {@link SplitItemDelegate} instance to allow for method chaining.
      */
-    public SplitItemDelegate<I> prependToButtonText(String prefix) {
+    public SplitItemDelegate<I> prependToButtonText( String prefix ) {
         NullUtil.nullArgCheck(prefix, "postfix", String.class);
         // We make sure that only the Swing thread can modify components:
         if (!UI.thisIsUIThread()) {

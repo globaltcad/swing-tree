@@ -84,6 +84,7 @@ abstract class AbstractDelegate<C extends JComponent>
      *  {@code UI.run(() -> delegate.component())}.
      *
      * @return The underlying component.
+     * @throws IllegalStateException If the accessing thread is not the event dispatch thread.
      */
     public final C get() {
         if ( !UI.thisIsUIThread() )
@@ -128,8 +129,17 @@ abstract class AbstractDelegate<C extends JComponent>
      *  In essence, this is a delegate to {@link Component#getParent()}. <br>
      *
      * @return The parent {@link Container} of the underlying component.
+     * @throws IllegalStateException If the accessing thread is not the event dispatch thread.
      */
-    public final Container getParent() { return _component().getParent(); }
+    public final Container getParent() {
+        if ( UI.thisIsUIThread() )
+            return _component().getParent();
+        else
+            throw new IllegalStateException(
+                    "You can only access the parent component from the GUI thread. " +
+                    "Use 'UI.run(() -> delegate.getParent())' to access the parent component from the application thread."
+                );
+    }
 
     /**
      *  As a delegate to the underlying component, you can use this method to

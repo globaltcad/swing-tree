@@ -58,8 +58,9 @@ final class StyleUtil
         return finalClip;
     }
 
+    @SuppressWarnings("ReferenceEquality")
     static String toString( @Nullable Color color ) {
-        if ( color == UI.Color.UNDEFINED) return "DEFAULT";
+        if ( color == UI.Color.UNDEFINED ) return "DEFAULT";
         if ( color == null ) return "?";
         return "rgba(" + color.getRed() + "," + color.getGreen() + "," + color.getBlue() + "," + color.getAlpha() + ")";
     }
