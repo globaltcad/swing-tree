@@ -53,6 +53,10 @@ abstract class AbstractComboModel<@Nullable E> implements ComboBoxModel<E>
 		_selectedItem = Objects.requireNonNull(selectedItem);
 	}
 
+	final boolean acceptsEditorChanges() {
+		return _acceptsEditorChanges;
+	}
+
 	final Var<E> _getSelectedItemVar() { return _selectedItem; }
 
 	abstract AbstractComboModel<E> withVar( Var<E> newVar );

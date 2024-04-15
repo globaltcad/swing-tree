@@ -210,7 +210,40 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
         for (ActionListener listener : listeners)
             thisComponent.removeActionListener(listener);
 
-        thisComponent.addActionListener(consumer::accept);
+        thisComponent.addActionListener(e -> {
+            /*
+                Unfortunately, this event is fired in all kinds of
+                annoying situations, so we need to filter things that
+                are only relevant to us...
+
+                We know that when the action command is "comboBoxEdited", then
+                the user wrote into the text field.
+                This is also fired when the user presses enter!
+                So we filter the event:
+            */
+            if ( "comboBoxEdited".equals(e.getActionCommand()) )
+                return;
+
+            /*
+                Now another big problem is that when a user types
+                something, the editor will inform our combo box model
+                of the change and then the model will trigger item change listeners.
+                Unfortunately, this will then cause a domino effect, because
+                the combo box will consequently trigger an
+                action event with the action command "comboBoxChanged".
+                We can filter the event by checking if it comes from
+                our model:
+            */
+            if ( e.getSource() instanceof JComboBox ) {
+                ComboBoxModel<?> model = ((JComboBox<?>) e.getSource()).getModel();
+                if ( model instanceof AbstractComboModel ) {
+                    AbstractComboModel<?> swingTreeModel = (AbstractComboModel<?>) model;
+                    if ( !swingTreeModel.acceptsEditorChanges() )
+                        return;
+                }
+            }
+            consumer.accept(e);
+        });
 
         for ( int i = listeners.length - 1; i >= 0; i-- ) // reverse order because swing does not give us the listeners in the order they were added!
             thisComponent.addActionListener(listeners[i]);

@@ -12,6 +12,7 @@ import swingtree.api.Layout
 import swingtree.threading.EventProcessor
 import swingtree.style.StyleConf
 import swingtree.style.ComponentStyleDelegate
+import utility.SwingTreeTestConfigurator
 
 import javax.swing.JButton
 import javax.swing.JComboBox
@@ -20,6 +21,7 @@ import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JSpinner
 import javax.swing.JToggleButton
+import javax.swing.UIManager
 import java.awt.*
 import java.awt.font.TextAttribute
 import java.awt.geom.AffineTransform
@@ -38,13 +40,25 @@ import java.awt.geom.Point2D
 class Styles_Spec extends Specification
 {
     def setupSpec() {
+        SwingTree.initialiseUsing(SwingTreeTestConfigurator.get())
         SwingTree.get().setEventProcessor(EventProcessor.COUPLED_STRICT)
         // In this specification we are using the strict event processor
         // which will throw exceptions if we try to perform UI operations in the test thread.
     }
 
     def cleanupSpec() {
-        SwingTree.initialize()
+        SwingTree.clear()
+    }
+
+    def setup() {
+        // We reset to the default look and feel:
+        UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
+        // This is to make sure that the tests are not influenced by
+        // other look and feels that might be used in the example code...
+    }
+
+    def cleanup() {
+        UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
     }
 
     def 'Various kinds of String expressions can be parsed as colors by various style properties.'(
@@ -954,7 +968,7 @@ class Styles_Spec extends Specification
                             .padding(3).borderRadius(12)
                             .componentFont(f->f
                                 .size(18)
-                                .family("Arial")
+                                .family("Ubuntu")
                                 .noise(grad -> grad
                                     .colors(Color.RED, Color.GREEN, Color.BLUE)
                                     .boundary(UI.ComponentBoundary.INTERIOR_TO_CONTENT)
@@ -974,7 +988,7 @@ class Styles_Spec extends Specification
             var label = ui.get(JLabel)
         then : 'The label will have a font with the expected size and family.'
             label.getFont().getSize() == 18 * uiScale
-            label.getFont().getFamily() == "Arial"
+            label.getFont().getFamily() == "Ubuntu"
         when : 'We extract the foreground and background paint of the font...'
             var paint           = label.getFont().getAttributes().get(TextAttribute.FOREGROUND)
             var backgroundPaint = label.getFont().getAttributes().get(TextAttribute.BACKGROUND)

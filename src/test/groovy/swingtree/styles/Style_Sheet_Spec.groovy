@@ -15,6 +15,7 @@ import swingtree.style.Outline
 
 import swingtree.style.StyleConf
 import swingtree.style.StyleSheet
+import utility.SwingTreeTestConfigurator
 
 import javax.swing.*
 import javax.swing.text.JTextComponent
@@ -64,9 +65,25 @@ import java.awt.*
 class Style_Sheet_Spec extends Specification
 {
     def setupSpec() {
+        SwingTree.initialiseUsing(SwingTreeTestConfigurator.get())
         SwingTree.get().setEventProcessor(EventProcessor.COUPLED_STRICT)
         // In this specification we are using the strict event processor
         // which will throw exceptions if we try to perform UI operations in the test thread.
+    }
+
+    def cleanupSpec() {
+        SwingTree.clear()
+    }
+
+    def setup() {
+        // We reset to the default look and feel:
+        UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
+        // This is to make sure that the tests are not influenced by
+        // other look and feels that might be used in the example code...
+    }
+
+    def cleanup() {
+        UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
     }
 
     def 'Write custom style sheet classes by extending the StyleSheet class.'()
@@ -698,7 +715,7 @@ class Style_Sheet_Spec extends Specification
                             .spreadRadius(42)
                             .isInset(false)
                         )
-                        .font(new Font("Arial", Font.BOLD, 12))
+                        .font(new Font("Ubuntu", Font.BOLD, 12))
                     );
                 }
             }
@@ -721,7 +738,7 @@ class Style_Sheet_Spec extends Specification
             s.shadow(UI.Layer.CONTENT, "named shadow").isInset() == false
             s.shadow(UI.Layer.BORDER, "named shadow") == ShadowConf.none()
             s.shadow(UI.Layer.FOREGROUND, "named shadow") == ShadowConf.none()
-            s.font().family() == "Arial"
+            s.font().family() == "Ubuntu"
             s.font().size() == 12
             s.font().posture() == 0
     }
