@@ -46,6 +46,9 @@ public final class SplitButtonDelegate<I extends JMenuItem> extends AbstractDele
         }
 
         /**
+         * The "siblinghood" of a component refers to all children of its parent component, including itself.
+         * This is contrary to the {@link #getSiblings()} method which returns all children of the parent component
+         * except the current component.
          *
          * @return A list of all the {@link JComponent} siblings of the split button, including the split button itself.
          */
@@ -59,6 +62,10 @@ public final class SplitButtonDelegate<I extends JMenuItem> extends AbstractDele
         }
 
         /**
+         *  The "siblings" of a component refer to all children of its parent component, except itself.
+         *  This is contrary to the {@link #getSiblinghood()} method which returns all children of the parent component
+         *  including the current component.
+         *
          * @return A list of all the {@link JComponent} which constitute the neighbouring UI components of the split button.
          *          except the current {@link JSplitButton} itself.
          */
@@ -167,6 +174,8 @@ public final class SplitButtonDelegate<I extends JMenuItem> extends AbstractDele
         }
 
         /**
+         *  A convenience method to prepend text to the text displayed on the {@link JSplitButton}.
+         *
          * @param prefix The text which should be prepended to the text displayed on the {@link JSplitButton}.
          * @return This delegate instance to allow for method chaining.
          */

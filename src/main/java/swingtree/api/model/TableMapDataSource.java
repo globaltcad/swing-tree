@@ -14,6 +14,11 @@ import java.util.Map;
 public interface TableMapDataSource<E> {
 
     /**
+     *  Supplies a map of columns forming a matrix which will be used to render a table.
+     *  It is called continuously by the table model to populate the table,
+     *  so the implementation should avoid doing heavy computations, I/O operations
+     *  or large allocations.
+     *
      * @return A map of columns forming a matrix which will be used to populate the table.
      */
     Map<String, List<E>> get();

@@ -53,6 +53,8 @@ public final class SplitItem<I extends JMenuItem>
     }
 
     /**
+     *  A factory method to create a {@link SplitItem} for a {@link JSplitButton} from a {@link JMenuItem} subtype.
+     *
      * @param item The {@link JMenuItem} subtype for which a {@link SplitItem} (for {@link JSplitButton}) should be created.
      * @return A {@link SplitItem} wrapping the provided {@link JMenuItem} type.
      * @param <I> The type parameter for the provided item type.

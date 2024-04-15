@@ -76,7 +76,7 @@ public final class Render<C extends JComponent,E>
 			@Override
 			public Builder<C,E> as(Cell.Interpreter<C,T> valueInterpreter) {
 				NullUtil.nullArgCheck(valueInterpreter, "valueInterpreter", Cell.Interpreter.class);
-				return new Builder(_componentType,valueType, valueValidator, valueInterpreter);
+				return new Builder(_componentType, valueType, valueValidator, valueInterpreter);
 			}
 		};
 	}

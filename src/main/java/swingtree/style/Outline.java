@@ -193,7 +193,7 @@ final class Outline
      * @return A new {@link Outline} with the merged outline values.
      */
     public Outline plus( Outline other ) {
-        if ( this == _NONE )
+        if ( this.equals(_NONE) )
             return other;
         if ( other == _NONE )
             return this;
@@ -207,7 +207,7 @@ final class Outline
     }
 
     public Outline or( Outline other ) {
-        if ( this == _NONE )
+        if ( this.equals(_NONE) )
             return other;
         if ( other == _NONE )
             return this;

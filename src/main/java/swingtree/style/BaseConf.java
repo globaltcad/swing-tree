@@ -161,7 +161,7 @@ final class BaseConf
 
     @Override
     public String toString() {
-        if ( this == _NONE )
+        if ( this.equals(_NONE) )
             return this.getClass().getSimpleName() + "[NONE]";
         return this.getClass().getSimpleName() + "[" +
                     "icon="            + ( _icon       == null ? "?" : _icon.toString()  ) + ", " +

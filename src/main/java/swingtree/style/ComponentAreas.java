@@ -157,7 +157,7 @@ final class ComponentAreas
         final Size    size    = border.size();
         final Outline outline = border.baseOutline();
 
-        if ( BorderConf.none().equals(border) ) {
+        if ( BoxModelConf.none().equals(border) ) {
             Outline insets = outline.plus(margin).plus(Outline.of(insTop, insLeft, insBottom, insRight));
             // If there is no style, we just return the component's bounds:
             return new Area(new Rectangle2D.Float(

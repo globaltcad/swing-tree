@@ -48,9 +48,9 @@ final class LayerRenderConf
         StyleConfLayer layers
     ) {
         if (
-            boxModelConf == BoxModelConf.none() &&
-            base         == BaseColorConf.none() &&
-            layers       == _NONE._layer
+            boxModelConf .equals( BoxModelConf.none()  ) &&
+            base         .equals( BaseColorConf.none() ) &&
+            layers       .equals( _NONE._layer )
         )
             return _NONE;
         else

@@ -66,7 +66,7 @@ final class Arc
      * @return A new scaled {@link Arc}.
      */
     Arc scale( double scale ) {
-        if ( this == _NONE )
+        if ( this.equals(_NONE) )
             return _NONE;
 
         return Arc.of(
@@ -76,7 +76,7 @@ final class Arc
     }
 
     Arc simplified() {
-        if ( this == _NONE )
+        if ( this.equals(_NONE) )
             return _NONE;
 
         if ( _arcWidth <= 0 || _arcHeight <= 0 )
@@ -87,7 +87,7 @@ final class Arc
 
     @Override
     public String toString() {
-        if ( this == _NONE )
+        if ( this.equals(_NONE) )
             return "Arc[NONE]";
         return this.getClass().getSimpleName()+"[" +
                     "arcWidth="  + _toString(_arcWidth ) + ", "+

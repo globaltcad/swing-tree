@@ -356,7 +356,7 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
 
     @Override
     public String toString() {
-        if ( this == _NONE )
+        if ( this.equals(_NONE) )
             return this.getClass().getSimpleName()+"[NONE]";
         return this.getClass().getSimpleName()+"[" +
                     "horizontalOffset=" + _toString(_offset.x()  ) + ", " +
@@ -374,7 +374,7 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
 
     @Override
     public ShadowConf simplified() {
-        if ( this == _NONE )
+        if ( this.equals(_NONE) )
             return _NONE;
 
         if ( _color == null || _color.getAlpha() == 0 )

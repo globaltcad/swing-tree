@@ -2557,4 +2557,15 @@ public final class ComponentStyleDelegate<C extends JComponent>
      */
     public double scale( double value ) { return UI.scale(value); }
 
+    @Override
+    public String toString() {
+        try {
+            return this.getClass().getSimpleName() + "[" +
+                        "styleConf=" + _styleConf + ", " +
+                        "component=" + _component + ", " +
+                    "]";
+        } catch ( Exception e ) {
+            return this.getClass().getSimpleName() + "[toString() failed: " + e + "]";
+        }
+    }
 }

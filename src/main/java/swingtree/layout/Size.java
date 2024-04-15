@@ -24,6 +24,10 @@ public final class Size
     private static final Size UNKNOWN = new Size(-1, -1);
 
     /**
+     *  Exposes the {@link #UNKNOWN} size instance, which is a null object
+     *  that represents an unknown size. It uses -1 for both width and height
+     *  and will return {@link Optional#empty()} for both width and height.
+     *
      * @return A {@link Size} instance that represents an unknown size.
      */
     public static Size unknown() {
@@ -32,7 +36,9 @@ public final class Size
 
     /**
      *  A factory method that creates a {@link Size} instance from a width and height.
-     *  If the width or height is negative, the returned size will have a width or height of -1.
+     *  If the width or height is negative, the returned size will have be the {@link #UNKNOWN} size with
+     *  a width or height of -1.
+     *
      * @param width The width of the size.
      * @param height The height of the size.
      * @return A {@link Size} instance that represents the given width and height.

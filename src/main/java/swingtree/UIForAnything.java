@@ -318,6 +318,10 @@ abstract class UIForAnything<I, C extends E, E extends Component>
     }
 
     /**
+     *  Uses the supplied builder to build its component and then add it to the component
+     *  that is being built by this builder instance. This directly allows you to nest your
+     *  builder based UI declarations in an HTML-like fashion.
+     *
      * @param builder A builder for another {@link JComponent} instance which ought to be added to the wrapped component type.
      * @param <T> The type of the {@link JComponent} which is wrapped by the provided builder.
      * @return This very instance, which enables builder-style method chaining.
@@ -471,8 +475,13 @@ abstract class UIForAnything<I, C extends E, E extends Component>
     }
 
     /**
+     *  A convenient delegate to the {@link EventProcessor#registerAppEvent(Runnable)} method,
+     *  which allows you to execute an action on the current application thread.
+     *  To configure the current {@link EventProcessor} see {@link UI#use(EventProcessor, Supplier)}
+     *  or the underlying {@link SwingTree#setEventProcessor(EventProcessor)} method.
+     *
      * @param action An action which should be executed by the application thread,
-     *               which is determined by implementations of the {@link EventProcessor},
+     *               which is determined by implementations of the current {@link EventProcessor},
      *               also see {@link UI#use(EventProcessor, Supplier)}.
      */
     protected final void _runInApp( Runnable action ) {
@@ -655,6 +664,7 @@ abstract class UIForAnything<I, C extends E, E extends Component>
     }
 
     @Override
+    @SuppressWarnings("EqualsGetClass")
     public final boolean equals( Object obj ) {
         if ( obj == null ) return false;
         if ( obj == this ) return true;

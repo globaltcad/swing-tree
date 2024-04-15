@@ -56,6 +56,9 @@ public final class UIForSeparator<S extends JSeparator> extends UIForAnySwing<UI
     }
 
     /**
+     *  Binds the supplied alignment property to the orientation of the separator,
+     *  so that whenever the property changes, the orientation of the separator will be updated accordingly.
+     *
      * @param align The alignment property used to dynamically update the alignment of the separator.
      * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if {@code align} is {@code null}.

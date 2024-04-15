@@ -88,6 +88,12 @@ public interface IconDeclaration
     }
 
     /**
+     *  This method is used to find the icon resource
+     *  and load it as an {@link ImageIcon} instance
+     *  wrapped in an {@link Optional},
+     *  or return an empty {@link Optional} if the icon resource
+     *  could not be found.
+     *
      * @return An {@link Optional} that contains the {@link ImageIcon}
      *         if the icon resource was found, otherwise an empty {@link Optional}.
      */
@@ -96,6 +102,10 @@ public interface IconDeclaration
     }
 
     /**
+     *  Creates and returns an updated {@link IconDeclaration} instance
+     *  with the same path but the given size as preferred size
+     *  for the icon.
+     *
      * @param size The preferred size of the icon in the form of a {@link Size} instance.
      * @return A new {@link IconDeclaration} instance with the same path
      *        but with the given size.

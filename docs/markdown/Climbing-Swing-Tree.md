@@ -441,6 +441,7 @@ If you want to dive deeper into the SwingTree style API,
 you may also want to check out the following pieces of documentation:
 
 - [Font Styling](./Font-Styling.md)
+- [Background Filtering](./Background-Filtering.md)
 
 ## Harvesting Fruit ##
 

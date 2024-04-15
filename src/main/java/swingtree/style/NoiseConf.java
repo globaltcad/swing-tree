@@ -59,12 +59,12 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
         rotation = ( (((rotation+180f) % 360f + 360f) % 360f) - 180f );
 
         NoiseConf none = none();
-        if ( function   == none._function   &&
-             colors     == none._colors     &&
-             offset     == none._offset     &&
-             scale      == none._scale      &&
-             area       == none._area       &&
-             boundary   == none._boundary   &&
+        if ( function   .equals( none._function ) &&
+             Arrays.equals(colors, none._colors) &&
+             offset     .equals( none._offset   ) &&
+             scale      .equals( none._scale    ) &&
+             area       .equals( none._area     ) &&
+             boundary   .equals( none._boundary ) &&
              rotation   == none._rotation   &&
              Arrays.equals(fractions, none._fractions)
         )
@@ -308,7 +308,7 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
      * @param boundary The boundary at which the noise gradient should start in terms of its offset.
      * @return A new noise gradient style with the specified boundary.
      */
-    public NoiseConf boundary(UI.ComponentBoundary boundary ) {
+    public NoiseConf boundary( UI.ComponentBoundary boundary ) {
         return of(_function, _colors, _offset, _scale, _area, boundary, _rotation, _fractions);
     }
 
@@ -342,7 +342,7 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
 
     @Override
     public String toString() {
-        if ( this == _NONE )
+        if ( this.equals(_NONE) )
             return getClass().getSimpleName() + "[NONE]";
         return getClass().getSimpleName() + "[" +
                     "function="    + _function + ", " +
@@ -387,7 +387,7 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
 
     @Override
     public NoiseConf simplified() {
-        if ( this == _NONE )
+        if ( this.equals(_NONE) )
             return _NONE;
 
         if ( _colors.length == 0 )

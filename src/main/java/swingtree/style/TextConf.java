@@ -350,7 +350,7 @@ public final class TextConf implements Simplifiable<TextConf>
 
     @Override
     public String toString() {
-        if ( this == _NONE )
+        if ( this.equals(_NONE) )
             return this.getClass().getSimpleName() + "[NONE]";
         return this.getClass().getSimpleName() + "[" +
             "content=" + _content + ", " +
