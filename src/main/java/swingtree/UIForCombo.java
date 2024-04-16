@@ -31,6 +31,15 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
         _state = state;
     }
 
+    /**
+     *  Builds and returns the configured {@link JComboBox} instance.
+     *
+     * @return The configured {@link JComboBox} instance.
+     */
+    public JComboBox<E> getComboBox() {
+        return this.get(getType());
+    }
+
     @Override
     protected BuilderState<JComboBox<E>> _state() {
         return _state;
