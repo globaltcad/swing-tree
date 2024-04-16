@@ -287,16 +287,15 @@ abstract class UIForAnything<I, C extends E, E extends Component>
      *  which type of {@link javax.swing.JComponent} is currently being built and returned.
      *
      * @param type The type class of the component which this builder wraps.
-     * @param <T> The type parameter of the component which this builder wraps.
      * @return The result of the building process, namely: a type of JComponent.
      */
-    public final <T extends C> T get( Class<T> type ) {
+    public final C get( Class<C> type ) {
         if ( type != _state().componentType() && !type.isAssignableFrom(_state().componentType()) )
             throw new IllegalArgumentException(
                     "The type of the component wrapped by this builder is '" + _state().componentType() + "', " +
                     "but the provided type is '" + type + "' which is not assignable from '" + _state().componentType() + "'."
                 );
-        return (T) getComponent();
+        return getComponent();
     }
 
     /**
