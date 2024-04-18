@@ -66,6 +66,10 @@ public interface Layout
     static Layout unspecific() { return Constants.UNSPECIFIC_LAYOUT_CONSTANT; }
 
     /**
+     *  If you don't want to assign any layout to a component style, but you also
+     *  don't want to pass null to the {@link ComponentStyleDelegate#layout(Layout)}
+     *  method, you can use the no-op instance returned by this method.
+     *
      * @return A layout that removes any existing layout from a component.
      */
     static Layout none() { return Constants.NONE_LAYOUT_CONSTANT; }
