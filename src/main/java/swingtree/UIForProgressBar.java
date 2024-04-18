@@ -124,6 +124,10 @@ public final class UIForProgressBar<P extends JProgressBar> extends UIForAnySwin
     }
 
     /**
+     *  Sets the value of the progress bar
+     *  through the {@link JProgressBar#setValue(int)} method
+     *  of the underlying {@link JProgressBar} type.
+     *
      * @param value The value to set for this {@link JProgressBar}.
      * @return This very instance, which enables builder-style method chaining.
      */

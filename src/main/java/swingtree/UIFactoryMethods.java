@@ -4778,11 +4778,14 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
+     *  Allows you to wrap a custom {@link JTableHeader} type in a
+     *  declarative SwingTree UI builder.
+     *
      * @param header The table header which should be wrapped by the builder.
      * @return A builder instance for a new {@link JTableHeader}.
      * @param <H> The type of the {@link JTableHeader} for which the builder should be created.
      */
-    public static <H extends UI.TableHeader> UIForTableHeader<H> of(H header ) {
+    public static <H extends UI.TableHeader> UIForTableHeader<H> of( H header ) {
         NullUtil.nullArgCheck(header, "header", UI.TableHeader.class);
         return new UIForTableHeader<>(new BuilderState<>(header));
     }
@@ -5266,20 +5269,30 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
+     *  Exposes the {@link MessageDialog} API, an immutable builder config
+     *  for creating a message dialog with a given message text.
+     *  Call methods like {@link MessageDialog#showAsInfo()}, {@link MessageDialog#showAsWarning()}
+     *  or {@link MessageDialog#showAsError()} to show the dialog in the desired style.
+     *
      * @param text The text to show in the dialog.
      * @return A builder for creating an error dialog.
      */
-    public static MessageDialog message(String text ) { return MessageDialog.saying(text); }
+    public static MessageDialog message( String text ) { return MessageDialog.saying(text); }
 
     /**
-     *  Shows a conformation dialog with the given message.
+     *  Shows a conformation dialog with the given message and
+     *  returns the user's answer in the form of a {@link ConfirmAnswer}
+     *  enum constant.
+     *
      * @param message the message to show
      * @return {@code Answer.YES} if the user clicked "Yes", {@code Answer.NO} if the user clicked "No", {@code Answer.CANCEL} otherwise.
      */
-    public static ConfirmAnswer confirm(String message ) { return confirm("Confirm", message); }
+    public static ConfirmAnswer confirm( String message ) { return confirm("Confirm", message); }
 
     /**
-     * Shows a conformation dialog with the given title and message.
+     * Shows a conformation dialog with the given title and message and
+     * returns the user's answer in the form of a {@link ConfirmAnswer}
+     * enum constant.
      *
      * @param title   the title of the dialog
      * @param message the message to show

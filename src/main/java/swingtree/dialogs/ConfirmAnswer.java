@@ -38,7 +38,10 @@ public enum ConfirmAnswer
     public boolean isClose() { return this == CLOSE; }
 
     /**
-     * @return {@code true} if the user selected the "cancel" option, ot they closed the dialog, {@code false} otherwise.
+     *  A convenience method to check if the user
+     *  selected the "cancel" option, or closed the dialog.
+     *
+     * @return {@code true} if the user selected the "cancel" option, or they closed the dialog, {@code false} otherwise.
      */
     public boolean isCancelOrClose() { return isCancel() || isClose(); }
 
