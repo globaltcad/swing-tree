@@ -1186,8 +1186,7 @@ public final class SwingTree
                     if( dpi < 50 )
                         dpi = 50;
                 } catch( NumberFormatException ex ) {
-                    ex.printStackTrace();
-                    //LoggingFacade.INSTANCE.logConfig( "SwingTree: Failed to parse 'forceFontDPI=" + forceFontDPI + "'.", ex );
+                    log.error("Failed to parse DPI scale from font size String '"+forceFontDPI+"'", ex);
                 }
             }
 

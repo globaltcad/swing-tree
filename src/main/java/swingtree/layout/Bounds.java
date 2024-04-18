@@ -7,10 +7,13 @@ import java.util.Objects;
  *  An immutable value object that represents the position and size of a component
  *  in the form of an x and y coordinate modeled by a {@link Location} object
  *  and a width and height modeled by a {@link Size} object.
+ *  Note the rectangular bounds object is positioned in a coordinate system
+ *  where the y-axis is growing positively downwards and the x-axis is growing
+ *  positively to the right.
  *  <p>
- *  Note that the {@link #equals(Object)} and {@link #hashCode()} methods
+ *  Also note that the {@link #equals(Object)} and {@link #hashCode()} methods
  *  are implemented to compare the {@link Location} and {@link Size} objects
- *  for value based equality.
+ *  for value based equality instead of reference based equality.
  */
 public final class Bounds
 {
@@ -84,6 +87,12 @@ public final class Bounds
     }
 
     /**
+     *  If you think of the bounds object as a rectangle, then the
+     *  {@link Location} defines the top left corner and the {@link Size}
+     *  defines the width and height of the rectangle.
+     *  Note that the y-axis is growing positively downwards and the x-axis
+     *  is growing positively to the right.
+     *
      * @return The {@link Location} of this bounds object,
      *         which contains the x and y coordinates.
      */
@@ -106,6 +115,12 @@ public final class Bounds
     }
 
     /**
+     *  The {@link Size} of define the width and height of the bounds
+     *  starting from the x and y coordinates of the {@link Location}.
+     *  Note that the {@link Location} is always the top left corner
+     *  of the bounds object where the y-axis is growing positively downwards
+     *  and the x-axis is growing positively to the right.
+     *
      * @return The {@link Size} of this bounds object,
      *        which contains the width and height.
      */

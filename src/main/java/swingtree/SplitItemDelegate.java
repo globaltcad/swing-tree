@@ -5,6 +5,7 @@ import swingtree.components.JSplitButton;
 
 import javax.swing.JMenuItem;
 import java.awt.event.ActionEvent;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -25,15 +26,18 @@ public final class SplitItemDelegate<I extends JMenuItem> extends AbstractDelega
     private final Supplier<List<I>> siblingsSource;
 
     SplitItemDelegate(
-            ActionEvent event,
-            JSplitButton splitButton,
-            Supplier<List<I>> siblingsSource,
-            I currentItem
+        ActionEvent       event,
+        JSplitButton      splitButton,
+        Supplier<List<I>> siblingsSource,
+        I                 currentItem
     ) {
         super(true, currentItem, splitButton);
-        this.event = Objects.requireNonNull(event);
-        this.splitButton = Objects.requireNonNull(splitButton);
-        this.siblingsSource = Objects.requireNonNull(siblingsSource);
+        Objects.requireNonNull(event);
+        Objects.requireNonNull(splitButton);
+        Objects.requireNonNull(siblingsSource);
+        this.event          = event;
+        this.splitButton    = splitButton;
+        this.siblingsSource = () -> Collections.unmodifiableList(siblingsSource.get());
     }
 
     /**
