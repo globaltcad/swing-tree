@@ -109,5 +109,14 @@ final class LayerRenderConf
                Objects.equals(_layer, other._layer);
     }
 
+    @Override
+    public String toString() {
+        return getClass().getSimpleName()+"[" +
+                    "boxModel=" + _boxModelConf + ", " +
+                    "baseColor=" + _baseColor + ", " +
+                    "layer=" + _layer +
+                ']';
+    }
+
 
 }

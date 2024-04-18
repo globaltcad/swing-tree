@@ -71,6 +71,10 @@ public interface Layout
     static Layout none() { return Constants.NONE_LAYOUT_CONSTANT; }
 
     /**
+     *  This leads to the installation of the {@link MigLayout} layout manager,
+     *  which is a powerful general purpose layout manager for Swing.
+     *  Click <a href="http://www.miglayout.com/">here</a> for more information.
+     *
      * @param constr The layout constraints for the layout.
      * @param rowConstr The row constraints for the layout.
      * @param colConstr The column constraints for the layout.
@@ -85,6 +89,11 @@ public interface Layout
     }
 
     /**
+     *  A factory method for creating a layout that installs the {@link MigLayout}
+     *  manager onto a component based on the supplied parameters.
+     *  The MigLayout layout manager is a powerful general purpose layout manager for Swing.
+     *  Click <a href="http://www.miglayout.com/">here</a> for more information.
+     *
      * @param constr The layout constraints for the layout.
      * @param rowConstr The row constraints for the layout.
      * @return A layout that uses the MigLayout.
@@ -101,6 +110,8 @@ public interface Layout
      *  manager onto a component based on the supplied parameters.
      *  This will effectively translate to a call to the {@link MigLayout#MigLayout(String)}
      *  constructor with the supplied constraints.
+     *  In case you are not familiar with the MigLayout constraints, you can find more information
+     *  about them <a href="http://www.miglayout.com/whitepaper.html">here</a>.
      *
      * @param constr The layout constraints for the layout.
      * @return A layout that uses the MigLayout.

@@ -134,7 +134,7 @@ final class StyleConfLayers
         if ( factor == 1 ) {
             return this;
         }
-        if ( this == _EMPTY ) {
+        if ( this.equals(_EMPTY) ) {
             return this;
         }
         return of(

@@ -214,12 +214,20 @@ public final class ComponentExtension<C extends JComponent>
     public List<String> getStyleGroups() { return Collections.unmodifiableList(_styleGroups); }
 
     /**
+     *  A style group is a tag which is used by the SwingTree style engine
+     *  to apply styles to things with the same tags making it conceptually similar to CSS classes.
+     *  This method lets you check if the component belongs to a given String based group.
+     *
      * @param group The group to check.
      * @return {@code true} if the component belongs to the given group.
      */
     public boolean belongsToGroup( String group ) { return _styleGroups.contains(group); }
 
     /**
+     *  A style group is a tag which is used by the SwingTree style engine
+     *  to apply styles to things with the same tags making it conceptually similar to CSS classes.
+     *  This method lets you check if the component belongs to a given enum based group.
+     *
      * @param group The group to check.
      * @return {@code true} if the component belongs to the given group.
      */

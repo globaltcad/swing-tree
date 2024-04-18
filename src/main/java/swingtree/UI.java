@@ -464,6 +464,7 @@ public final class UI extends UIFactoryMethods
         BOTTOM_TO_TOP, RIGHT_TO_LEFT;
 
         /**
+         *  Use this to check if the alignment is diagonal and not horizontal or vertical.
          * @return {@code true} if this alignment is diagonal, {@code false} otherwise.
          */
         public boolean isDiagonal() {
@@ -728,6 +729,11 @@ public final class UI extends UIFactoryMethods
     }
 
     /**
+     *  SwingTree tries to be compatible with different look and feels, which is
+     *  why it maintains a set of constants for the most common look and feels through
+     *  the {@link LookAndFeel} enum.
+     *  This method returns the current look and feel of the application
+     *  or {@link LookAndFeel#OTHER} if the look and feel is not recognized.
      * @return One of
      *            <ul>
      *                <li>{@link LookAndFeel#FLAT_LAF}</li>
@@ -736,7 +742,6 @@ public final class UI extends UIFactoryMethods
      *            </ul>
      *            or {@link LookAndFeel#OTHER} if none of the above
      *            was recognized.
-     *
      */
     public static LookAndFeel currentLookAndFeel() {
         try {

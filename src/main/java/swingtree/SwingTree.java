@@ -277,6 +277,11 @@ public final class SwingTree
     }
 
 	/**
+     *  The {@link EventProcessor} is a simple interface whose implementations
+     *  delegate tasks to threads that are capable of processing GUI or application events.
+     *  As part of this singleton, the SwingTree library maintains a global
+     *  {@link EventProcessor} that is used consistently by all declarative builders.
+     *
 	 * @return The currently configured {@link EventProcessor} that is used to process
 	 *         GUI and application events.
 	 */
@@ -866,7 +871,8 @@ public final class SwingTree
         public static final boolean isWindows_10_orLater;
         /** <strong>Note</strong>: This requires Java 8u321, 11.0.14, 17.0.2 or 18 (or later).
          * (see https://bugs.openjdk.java.net/browse/JDK-8274840)
-         **/ public static final boolean isWindows_11_orLater;
+         **/
+        public static final boolean isWindows_11_orLater;
         public static final boolean isMacOS_10_11_ElCapitan_orLater;
         public static final boolean isMacOS_10_14_Mojave_orLater;
         public static final boolean isMacOS_10_15_Catalina_orLater;
@@ -993,7 +999,7 @@ public final class SwingTree
                 if( word.endsWith( "," ) )
                     word = word.substring( 0, word.length() - 1 ).trim();
 
-                String lword = word.toLowerCase();
+                String lword = word.toLowerCase(Locale.ENGLISH);
                 if( lword.equals( "italic" ) || lword.equals( "oblique" ) )
                     style |= Font.ITALIC;
                 else if( lword.equals( "bold" ) )
@@ -1029,7 +1035,7 @@ public final class SwingTree
                 size = 1;
 
             // handle logical font names
-            String logicalFamily = mapFcName( family.toLowerCase() );
+            String logicalFamily = mapFcName( family.toLowerCase(Locale.ENGLISH) );
             if( logicalFamily != null )
                 family = logicalFamily;
 
@@ -1078,7 +1084,7 @@ public final class SwingTree
                     return createFont( Font.DIALOG, style, size, dsize );
 
                 // check whether last work contains some font weight (e.g. Ultra-Bold or Heavy)
-                String lastWord = family.substring( index + 1 ).toLowerCase();
+                String lastWord = family.substring( index + 1 ).toLowerCase(Locale.ENGLISH);
                 if( lastWord.contains( "bold" ) || lastWord.contains( "heavy" ) || lastWord.contains( "black" ) )
                     style |= Font.BOLD;
 

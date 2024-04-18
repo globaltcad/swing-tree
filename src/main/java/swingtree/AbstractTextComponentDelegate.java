@@ -46,16 +46,28 @@ public abstract class AbstractTextComponentDelegate
     }
 
     /**
+     *  The filter bypass type is used as a way to circumvent calling back into the Document to change it.
+     *  Document implementations that wish to support a DocumentFilter must provide an implementation that
+     *  will not call back into the DocumentFilter when the following methods are invoked from the DocumentFilter.
+     *
      * @return The {@link DocumentFilter.FilterBypass} object that can be used to modify the document.
      */
     public DocumentFilter.FilterBypass getFilterBypass() {
         return filterBypass;
     }
 
+    /**
+     *  The offset at which the text change occurred.
+     *  @return The offset at which the text change occurred.
+     */
     public int getOffset() {
         return offset;
     }
 
+    /**
+     *  The length of the text change.
+     *  @return The length of the text change.
+     */
     public int getLength() {
         return length;
     }
