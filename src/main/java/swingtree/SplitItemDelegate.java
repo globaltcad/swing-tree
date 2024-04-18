@@ -212,12 +212,15 @@ public final class SplitItemDelegate<I extends JMenuItem> extends AbstractDelega
     }
 
     /**
+     *  Takes the supplied {@link String} and passes it to the
+     *  {@link JSplitButton#setText(String)} while running on the UI thread.
+     *
      * @param text The text which should be displayed on the {@link JSplitButton}.
      * @return This {@link SplitItemDelegate} instance to allow for method chaining.
      */
-    public SplitItemDelegate<I> setButtonText(String text) {
+    public SplitItemDelegate<I> setButtonText( String text ) {
         // We make sure that only the Swing thread can modify components:
-        if (!UI.thisIsUIThread()) {
+        if ( !UI.thisIsUIThread() ) {
             UI.run(() -> setButtonText(text));
             return this;
         }

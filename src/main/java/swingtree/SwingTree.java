@@ -1162,7 +1162,7 @@ public final class SwingTree
             int style = Font.PLAIN;
             int size = 10;
 
-            if( generalFont != null ) {
+            if ( generalFont != null ) {
                 List<String> strs = StringUtils.split( generalFont, ',' );
                 try {
                     family = strs.get( 0 );
@@ -1171,9 +1171,8 @@ public final class SwingTree
                         style |= Font.BOLD;
                     if( "1".equals( strs.get( 5 ) ) )
                         style |= Font.ITALIC;
-                } catch( RuntimeException ex ) {
-                    ex.printStackTrace();
-                    //LoggingFacade.INSTANCE.logConfig( "SwingTree: Failed to parse 'font=" + generalFont + "'.", ex );
+                } catch ( RuntimeException ex ) {
+                    log.error("Failed to parse KDE system font from String '"+generalFont+"'.", ex);
                 }
             }
 
@@ -1227,8 +1226,7 @@ public final class SwingTree
                 while( (line = reader.readLine()) != null )
                     lines.add( line );
             } catch( IOException ex ) {
-                ex.printStackTrace();
-                //LoggingFacade.INSTANCE.logConfig( "SwingTree: Failed to read '" + filename + "'.", ex );
+                log.error("Failed to read KDE font config files for determining DPI scale factor.", ex);
             }
             return lines;
         }

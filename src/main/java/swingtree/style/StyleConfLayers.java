@@ -44,12 +44,12 @@ final class StyleConfLayers
     ) {
         StyleConfLayer empty = StyleConfLayer.empty();
         if (
-            filter     == FilterConf.none() &&
-            background == empty &&
-            content    == empty &&
-            border     == empty &&
-            foreground == empty &&
-            any        == null
+            filter     .equals( FilterConf.none() ) &&
+            background .equals( empty ) &&
+            content    .equals( empty ) &&
+            border     .equals( empty ) &&
+            foreground .equals( empty ) &&
+            any == null
         )
             return _EMPTY;
 

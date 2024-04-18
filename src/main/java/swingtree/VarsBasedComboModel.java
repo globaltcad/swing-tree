@@ -6,7 +6,7 @@ import sprouts.Vars;
 
 import java.util.Objects;
 
-class VarsBasedComboModel<@Nullable E> extends AbstractComboModel<E>
+class VarsBasedComboModel<E extends @Nullable Object> extends AbstractComboModel<E>
 {
     private final Vars<E> _items;
 
