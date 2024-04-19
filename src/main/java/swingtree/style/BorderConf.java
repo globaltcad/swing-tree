@@ -117,7 +117,7 @@ final class BorderConf
     public Optional<Color> color() { return Optional.ofNullable(_borderColor); }
 
     BorderConf withWidths( Outline borderWidths ) {
-        if ( borderWidths == _borderWidths )
+        if ( borderWidths.equals(_borderWidths) )
             return this;
         return BorderConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, borderWidths, _margin, _padding, _borderColor);
     }

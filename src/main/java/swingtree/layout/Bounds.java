@@ -186,6 +186,9 @@ public final class Bounds
     }
 
     /**
+     *  The bounds object has a location and size which form a rectangular area
+     *  exposed by this method as a float value defined by the width multiplied by the height.
+     *
      * @return The area of this bounds object, which is the width multiplied by the height.
      */
     public float area() {
@@ -193,6 +196,9 @@ public final class Bounds
     }
 
     /**
+     *  The bounds object has a location and size which form a rectangular area
+     *  which can easily be converted to a {@link Rectangle} object using this method.
+     *
      * @return A {@link Rectangle} object with the same location and size as this bounds object.
      */
     public Rectangle toRectangle() {
