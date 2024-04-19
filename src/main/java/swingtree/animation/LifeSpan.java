@@ -89,4 +89,12 @@ public final class LifeSpan
     public int hashCode() {
         return Objects.hash(_lifeTime, _startTime);
     }
+
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName() + "[" +
+                    "startTime=" + _startTime + ", " +
+                    "lifeTime="  + _lifeTime  +
+                "]";
+    }
 }

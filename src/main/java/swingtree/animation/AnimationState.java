@@ -317,6 +317,10 @@ public final class AnimationState
     }
 
     /**
+     *  A single iteration of an animation consists of its progress going from 0 to 1
+     *  in case of it being progressive, or from 1 to 0 in case of it being regressive (see {@link Stride}).
+     *  This method returns the number of times the animation has been repeated.
+     *
      * @return The number of times the animation has been repeated.
      *         This number is guaranteed to be 0 at the beginning of the animation,
      *         and for most animations it will be 0 at the end of the animation as well.
@@ -325,11 +329,19 @@ public final class AnimationState
     public long repeats() { return howManyLoops; }
 
     /**
+     *  Exposes the {@link LifeSpan} of the animation, which defines
+     *  when the animation starts, for how long it should run, how is should progress and
+     *  the refresh rate of the animation.
+     *
      * @return The {@link LifeSpan} of the animation, i.e. the time when the animation started and how long it should run.
      */
     public LifeSpan lifeSpan() { return lifeSpan; }
 
     /**
+     *  Exposes the timer event that triggered the animation.
+     *  Note that under the hood, all animations with the same refresh rate will be
+     *  updated by the same timer and thus share the same event.
+     *
      * @return The timer event that triggered the animation.
      */
     public ActionEvent event() { return event; }
@@ -360,10 +372,8 @@ public final class AnimationState
     @Override
     public int hashCode() {
         int result;
-        long temp;
-        temp = Double.doubleToLongBits(progress);
-        result = (int) (temp ^ (temp >>> 32));
-        result = 31 * result + (int) (howManyLoops ^ (howManyLoops >>> 32));
+        result = Double.hashCode(progress);
+        result = 31 * result + Long.hashCode(howManyLoops);
         result = 31 * result + lifeSpan.hashCode();
         result = 31 * result + event.hashCode();
         return result;

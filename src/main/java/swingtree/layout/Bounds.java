@@ -47,7 +47,7 @@ public final class Bounds
     public static Bounds of( Location location, Size size ) {
         Objects.requireNonNull(location);
         Objects.requireNonNull(size);
-        if ( location == Location.origin() && size == Size.unknown() )
+        if ( location.equals(Location.origin()) && size.equals(Size.unknown()) )
             return EMPTY;
 
         return new Bounds(location, size);
