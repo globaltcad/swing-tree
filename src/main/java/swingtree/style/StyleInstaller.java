@@ -168,14 +168,12 @@ final class StyleInstaller<C extends JComponent>
 
         final boolean isSwingTreeComponent = owner instanceof StylableComponent;
 
-        final boolean isStyled = !newStyle.equals(StyleConf.none());
-
-        final boolean noPaddingAndMarginStyle = StyleConf.none().hasEqualMarginAndPaddingAs(newStyle);
-        final boolean noBorderStyle           = StyleConf.none().hasEqualBorderAs(newStyle);
-        final boolean noBaseStyle             = StyleConf.none().hasEqualBaseAs(newStyle);
-
-        final boolean hasPaddingAndMargin = !noPaddingAndMarginStyle;
-        final boolean hasBorderStyle      = !noBorderStyle;
+        final boolean isStyled            = !newStyle.equals(StyleConf.none());
+        final boolean hasPaddingAndMargin = isStyled && !StyleConf.none().hasEqualMarginAndPaddingAs(newStyle);
+        final boolean hasBorderStyle      = isStyled && !StyleConf.none().hasEqualBorderAs(newStyle);
+        final boolean hasBaseStyle        = isStyled && !StyleConf.none().hasEqualBaseAs(newStyle);
+        final boolean hasBaseColors       = isStyled && (hasBaseStyle && newStyle.base().hasAnyColors());
+        final boolean hasBackFilter       = isStyled && !FilterConf.none().equals(newStyle.layers().filter());
 
         final boolean weNeedACustomBorder = isStyled && (
                hasPaddingAndMargin || hasBorderStyle
@@ -186,9 +184,6 @@ final class StyleInstaller<C extends JComponent>
                || newStyle.layers().any( (layer, it) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) && it.painters().any(named -> !Painter.none().equals(named.style().painter()) ) )
                || newStyle.layers().any( (layer, it) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) && it.noises().any(named -> named.style().colors().length > 0 ) )
             );
-
-        final boolean hasBaseColors    = (!noBaseStyle   && newStyle.base().hasAnyColors());
-        final boolean hasBackFilter    = !FilterConf.none().equals(newStyle.layers().filter());
 
         final boolean weNeedCustomUI = isStyled && (
                (hasBackFilter && !isSwingTreeComponent) ||
