@@ -439,6 +439,7 @@ final class ColorUtility {
         NAMED_COLOURS.put("moccasin", UI.Color.MOCCASIN);
         NAMED_COLOURS.put("navajowhite", UI.Color.NAVAJOWHITE);
         NAMED_COLOURS.put("navy", UI.Color.NAVY);
+        NAMED_COLOURS.put("oak", UI.Color.OAK);
         NAMED_COLOURS.put("oldlace", UI.Color.OLDLACE);
         NAMED_COLOURS.put("olive", UI.Color.OLIVE);
         NAMED_COLOURS.put("olivedrab", UI.Color.OLIVEDRAB);

@@ -2194,6 +2194,11 @@ public final class UI extends UIFactoryMethods
         public static final Color NAVY = new Color(0.0f, 0.0f, 0.5019608f);
 
         /**
+         * The color "oak".
+         */
+        public static final Color OAK = new Color(216/255f, 181/255f, 137/255f);
+
+        /**
          * The color old lace with an RGB value of #FDF5E6
          * <div style="border:1px solid black;width:40px;height:20px;background-color:#FDF5E6;float:right;margin: 0 10px 0 0"></div>
          */
