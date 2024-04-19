@@ -331,6 +331,34 @@ public final class SvgIcon extends ImageIcon
     }
 
     /**
+     *  Allows you to access the {@link UI.FitComponent} policy, which
+     *  determines if and how the icon should be fitted
+     *  onto a component when rendered through the
+     *  {@link #paintIcon(Component, java.awt.Graphics, int, int, int, int)} method.<br>
+     *  The following fit modes are available:
+     *  <ul>
+     *      <li>{@link UI.FitComponent#NO} -
+     *      The image will not be scaled to fit the inner component area.
+     *      </li>
+     *      <li>{@link UI.FitComponent#WIDTH} -
+     *      The image will be scaled to fit the inner component width.
+     *      </li>
+     *      <li>{@link UI.FitComponent#HEIGHT} -
+     *      The image will be scaled to fit the inner component height.
+     *      </li>
+     *      <li>{@link UI.FitComponent#WIDTH_AND_HEIGHT} -
+     *      The image will be scaled to fit both the component width and height.
+     *      </li>
+     *      <li>{@link UI.FitComponent#MAX_DIM} -
+     *      The image will be scaled to fit the larger of the two dimensions of the inner component area.
+     *      </li>
+     *      <li>{@link UI.FitComponent#MIN_DIM} -
+     *      The image will be scaled to fit the smaller of the two dimensions of the inner component area.
+     *      </li>
+     *  </ul>
+     *  See {@link #withFitComponent(UI.FitComponent)} if you want to create a new {@link SvgIcon}
+     *  with an updated fit policy.
+     *
      * @return The {@link UI.FitComponent} that determines if and how the icon should be fitted into a
      *         any given component (see {@link #paintIcon(Component, java.awt.Graphics, int, int, int, int)}).
      */
@@ -354,11 +382,11 @@ public final class SvgIcon extends ImageIcon
      *          The image will be scaled to fit both the component width and height.
      *      </li>
      *      <li>{@link UI.FitComponent#MAX_DIM} -
-     *          The image will be scaled to fit the smaller
+     *          The image will be scaled to fit the larger
      *          of the two dimension of the inner component area.
      *      </li>
      *      <li>{@link UI.FitComponent#MIN_DIM} -
-     *          The image will be scaled to fit the larger
+     *          The image will be scaled to fit the smaller
      *          of the two dimension of the inner component area.
      *      </li>
      *  </ul>
