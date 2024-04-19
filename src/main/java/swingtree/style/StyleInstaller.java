@@ -168,36 +168,11 @@ final class StyleInstaller<C extends JComponent>
 
         final boolean isSwingTreeComponent = owner instanceof StylableComponent;
 
-        final boolean noLayoutStyle           = StyleConf.none().hasEqualLayoutAs(newStyle);
+        final boolean isNotStyled = newStyle.equals(StyleConf.none());
+
         final boolean noPaddingAndMarginStyle = StyleConf.none().hasEqualMarginAndPaddingAs(newStyle);
         final boolean noBorderStyle           = StyleConf.none().hasEqualBorderAs(newStyle);
         final boolean noBaseStyle             = StyleConf.none().hasEqualBaseAs(newStyle);
-        final boolean noFontStyle             = StyleConf.none().hasEqualFontAs(newStyle);
-        final boolean noDimensionalityStyle   = StyleConf.none().hasEqualDimensionalityAs(newStyle);
-        final boolean noShadowStyle           = StyleConf.none().hasEqualShadowsAs(newStyle);
-        final boolean noPainters              = StyleConf.none().hasEqualPaintersAs(newStyle);
-        final boolean noGradients             = StyleConf.none().hasEqualGradientsAs(newStyle);
-        final boolean noNoises                = StyleConf.none().hasEqualNoisesAs(newStyle);
-        final boolean noImages                = StyleConf.none().hasEqualImagesAs(newStyle);
-        final boolean noTexts                 = StyleConf.none().hasEqualTextsAs(newStyle);
-        final boolean noProperties            = StyleConf.none().hasEqualPropertiesAs(newStyle);
-
-        final boolean noParentFilter = FilterConf.none().equals(newStyle.layers().filter());
-
-        final boolean isNotStyled = noLayoutStyle           &&
-                                    noPaddingAndMarginStyle &&
-                                    noBorderStyle           &&
-                                    noBaseStyle             &&
-                                    noFontStyle             &&
-                                    noDimensionalityStyle   &&
-                                    noShadowStyle           &&
-                                    noPainters              &&
-                                    noGradients             &&
-                                    noNoises                &&
-                                    noImages                &&
-                                    noTexts                 &&
-                                    noProperties            &&
-                                    noParentFilter;
 
         final boolean hasPaddingAndMargin = !noPaddingAndMarginStyle;
         final boolean hasBorderStyle      = !noBorderStyle;
@@ -213,7 +188,7 @@ final class StyleInstaller<C extends JComponent>
             );
 
         final boolean hasBaseColors    = (!noBaseStyle   && newStyle.base().hasAnyColors());
-        final boolean hasBackFilter    = !noParentFilter;
+        final boolean hasBackFilter    = !FilterConf.none().equals(newStyle.layers().filter());
 
         final boolean weNeedCustomUI = !isNotStyled && (
                (hasBackFilter && !isSwingTreeComponent) ||
