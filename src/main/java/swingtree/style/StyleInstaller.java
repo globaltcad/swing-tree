@@ -168,7 +168,7 @@ final class StyleInstaller<C extends JComponent>
 
         final boolean isSwingTreeComponent = owner instanceof StylableComponent;
 
-        final boolean isNotStyled = newStyle.equals(StyleConf.none());
+        final boolean isStyled = !newStyle.equals(StyleConf.none());
 
         final boolean noPaddingAndMarginStyle = StyleConf.none().hasEqualMarginAndPaddingAs(newStyle);
         final boolean noBorderStyle           = StyleConf.none().hasEqualBorderAs(newStyle);
@@ -177,7 +177,7 @@ final class StyleInstaller<C extends JComponent>
         final boolean hasPaddingAndMargin = !noPaddingAndMarginStyle;
         final boolean hasBorderStyle      = !noBorderStyle;
 
-        final boolean weNeedACustomBorder = !isNotStyled && (
+        final boolean weNeedACustomBorder = isStyled && (
                hasPaddingAndMargin || hasBorderStyle
                || newStyle.layers().any( (layer, it) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) && it.shadows().any(named -> named.style().color().isPresent() ) )
                || newStyle.layers().any( (layer, it) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) && it.gradients().any(named -> named.style().colors().length > 0 ) )
@@ -190,7 +190,7 @@ final class StyleInstaller<C extends JComponent>
         final boolean hasBaseColors    = (!noBaseStyle   && newStyle.base().hasAnyColors());
         final boolean hasBackFilter    = !FilterConf.none().equals(newStyle.layers().filter());
 
-        final boolean weNeedCustomUI = !isNotStyled && (
+        final boolean weNeedCustomUI = isStyled && (
                (hasBackFilter && !isSwingTreeComponent) ||
                (hasBaseColors && newStyle.base().requiresCustomUI())
                || newStyle.layers().any( (layer, it) -> layer == UI.Layer.BACKGROUND && it.shadows().any(named -> named.style().color().isPresent() ) )
@@ -217,14 +217,14 @@ final class StyleInstaller<C extends JComponent>
             }
         }
 
-        if ( isNotStyled || !weNeedCustomUI ) {
+        if ( !isStyled || !weNeedCustomUI ) {
             _dynamicLaF = _dynamicLaF._uninstallCustomLaF(owner);
             if ( _initialIsOpaque != null ) {
                 if ( owner.isOpaque() != _initialIsOpaque )
                     owner.setOpaque(_initialIsOpaque);
                 _initialIsOpaque = null;
             }
-            if ( isNotStyled )
+            if ( !isStyled )
                 return _updateEngine(owner, engine, newStyle, marginCorrection);
         }
 
