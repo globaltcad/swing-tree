@@ -96,6 +96,9 @@ if ( WE_CAN_DO_STATIC_ANALYSIS ) {
 
 test {
     useJUnitPlatform()
+    testLogging {
+        exceptionFormat = 'full'
+    }
 }
 
 // CONFIGURING TEST REPORTING :
