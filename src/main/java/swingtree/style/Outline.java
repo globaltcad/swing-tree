@@ -226,7 +226,7 @@ final class Outline
      * @param mapper The mapper function.
      * @return A new {@link Outline} with the mapped outline values.
      */
-    public Outline map( Function<Float, Float> mapper ) {
+    public Outline map( Function<Float, @Nullable Float> mapper ) {
         return Outline.ofNullable(
                     top    == null ? null : mapper.apply(top),
                     right  == null ? null : mapper.apply(right),

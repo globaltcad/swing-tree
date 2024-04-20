@@ -453,7 +453,7 @@ public final class FontConf
         Objects.requireNonNull(backgroundColor);
         if ( StyleUtil.isUndefinedColor(backgroundColor) )
             backgroundColor = null;
-        if ( Objects.equals(backgroundColor, _backgroundPaint) )
+        if ( _backgroundPaint.representsColor(backgroundColor) )
             return this;
 
         FontPaintConf backgroundPaintConf = FontPaintConf.of(backgroundColor, null, null, null);

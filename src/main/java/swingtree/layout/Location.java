@@ -53,6 +53,10 @@ public final class Location
     }
 
     /**
+     *  Exposes the x coordinate of this location in the form of a float,
+     *  which describes the horizontal position in a two-dimensional coordinate system.
+     *  So the larger the x value of the location, the further to the right it is.
+     *
      * @return The x-coordinate of this location.
      */
     public float x() {
@@ -60,6 +64,10 @@ public final class Location
     }
 
     /**
+     *  Exposes the y coordinate of this location in the form of a float,
+     *  which describes the vertical position in a two-dimensional coordinate system.
+     *  So the larger the y value of the location, the further down it is.
+     *
      * @return The y-coordinate of this location.
      */
     public float y() {
