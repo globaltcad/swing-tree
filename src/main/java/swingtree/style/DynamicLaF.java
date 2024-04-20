@@ -197,7 +197,7 @@ final class DynamicLaF
             }
         }
 
-        return new DynamicLaF(formerLaF, styleLaF, true);
+        return new DynamicLaF(styleLaF, formerLaF, true);
     }
 
     DynamicLaF _uninstallCustomLaF( JComponent _owner )
