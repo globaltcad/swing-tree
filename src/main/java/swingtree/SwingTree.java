@@ -1233,7 +1233,7 @@ public final class SwingTree
             } catch( IOException ex ) {
                 log.error("Failed to read KDE font config files for determining DPI scale factor.", ex);
             }
-            return lines;
+            return Collections.unmodifiableList(lines);
         }
 
         private static @Nullable String getConfigEntry( List<String> config, String group, String key ) {
