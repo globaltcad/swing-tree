@@ -32,6 +32,10 @@ public final class TextRemoveDelegate extends AbstractTextComponentDelegate
     }
 
     /**
+     *  This method exposes the actual text that is being removed from the document
+     *  as part of the current text removal event.
+     *  If nothing is removed from the document, an empty {@link String} is returned.
+     *
      * @return The text to be removed or an empty {@link String} if no text is to be removed.
      *         Null is never returned.
      *

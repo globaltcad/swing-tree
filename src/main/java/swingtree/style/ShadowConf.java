@@ -310,6 +310,13 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
     }
 
     /**
+     *  Use this to define whether the shadow is outset or inset,
+     *  which will determine the direction of the shadow gradient.
+     *  If the {@code isOutset} parameter is true, the shadow gradient
+     *  will transition with its color going outward from the shadow center.
+     *  If the {@code isOutset} parameter is false on the other hand,
+     *  the shadow gradient goes inward starting from the outer edge of the shadow box.
+     *
      * @param shadowOutset Whether the shadow is outset or inset.
      *                     If true, the shadow is outset, otherwise it is inset.
      *                     Outset shadows go outward, starting from the outer edge of the box's border,

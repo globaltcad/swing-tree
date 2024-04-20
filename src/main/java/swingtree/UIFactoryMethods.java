@@ -1725,6 +1725,19 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
+     *  A convenient factory method for creating a declarative
+     *  builder object for a the {@link JMenuItem} component type.<br>
+     *  Menu items are usually passed to {@link JMenu}s or {@link JPopupMenu}s
+     *  like so: <br>
+     *  <pre>{@code
+     *  UI.menu()
+     *  .add(UI.menuItem("Delete").onClick( it->{..} ))
+     *  .add(UI.menuItem("Save").onClick( it->{..} ))
+     *  .add(UI.menuItem("Exit").onClick( it->{..} ))
+     *  }</pre>
+     *  See also {@link #menu()} and {@link #menu(String)}
+     *  or {@link #popupMenu()} for related factory methods.
+     *
      * @return A SwingTree builder node for the {@link JMenuItem} type.
      */
     public static UIForMenuItem<JMenuItem> menuItem() {
@@ -1750,9 +1763,17 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
-     *  This factory method creates a {@link JMenu} with the provided text property
+     *  This factory method creates a {@link JMenuItem} with the provided text property
      *  bound to the menu item. So when the property state changes to a different text,
      *  then so does the text displayed on the menu item. <br>
+     *  A {@link JMenuItem} is typically used as part of {@link JMenu}s or {@link JPopupMenu}s.
+     *  Here an example demonstrating the usage of this method: <br>
+     *  <pre>{@code
+     *  UI.popupMenu()
+     *  .add(UI.menuItem(viewModel.actionName1()).onClick( it -> {..} ))
+     *  .add(UI.menuItem(viewModel.actionName2()).onClick( it -> {..} ))
+     *  }</pre>
+     *
      *
      * @param text The text property which should be displayed on the wrapped {@link JMenuItem} dynamically.
      * @return A builder instance for the provided {@link JMenuItem}, which enables fluent method chaining.
@@ -1793,6 +1814,8 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *    .withTip("I give info!")
      *    .onClick( it -> {...} )
      *  }</pre>
+     *  Note that a {@link JMenuItem} is typically used as part of {@link JMenu}s or {@link JPopupMenu}s.
+     *  See also {@link #menu()}, {@link #menu(String)} or {@link #popupMenu()} for related factory methods.
      *
      * @param text The text which should be displayed on the wrapped {@link JMenuItem}.
      * @param icon The icon which should be displayed on the wrapped {@link JMenuItem}.
@@ -1850,11 +1873,12 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  are heavy objects whose loading may or may not succeed, and so they are
      *  not suitable for direct use in a property as part of your view model.
      *  Instead, you should use the {@link IconDeclaration} interface, which is a
-     *  lightweight value object that merely models the resource location of the icon
-     *  even if it is not yet loaded or even does not exist at all.
+     *  lightweight and error tolerant value based object that merely
+     *  models the resource location of the icon. It can exist even if the target
+     *  icon is not yet loaded or does not exist at all.
      *  <p>
-     *  This is especially useful in case of unit tests for you view model,
-     *  where the icon may not be available at all, but you still want to test
+     *  This is especially useful when writing unit tests for your view models,
+     *  where the icon resources may not be available, but you still want to test
      *  the behaviour of your view model.
      *
      * @param text The text which should be displayed on the wrapped {@link JMenuItem}.
@@ -1882,11 +1906,12 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  are heavy objects whose loading may or may not succeed, and so they are
      *  not suitable for direct use in a property as part of your view model.
      *  Instead, you should use the {@link IconDeclaration} interface, which is a
-     *  lightweight value object that merely models the resource location of the icon
-     *  even if it is not yet loaded or even does not exist at all.
+     *  lightweight and error tolerant value based object that merely
+     *  models the resource location of the icon. It can exist even if the target
+     *  icon is not yet loaded or does not exist at all.
      *  <p>
-     *  This is especially useful in case of unit tests for you view model,
-     *  where the icon may not be available at all, but you still want to test
+     *  This is especially useful when writing unit tests for your view models,
+     *  where the icon resources may not be available, but you still want to test
      *  the behaviour of your view model.
      *
      * @param text The text property which should be displayed on the wrapped {@link JMenuItem} dynamically.

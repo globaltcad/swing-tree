@@ -464,6 +464,10 @@ abstract class UIForAnything<I, C extends E, E extends Component>
     }
 
     /**
+     *  A convenient shortcut to the {@link EventProcessor#registerUIEvent(Runnable)} method
+     *  to the current {@link EventProcessor} attached to the current {@link BuilderState}.
+     *  In practice, this method will ultimately just delegate tasks to the AWT Event Dispatch Thread (EDT).
+     *
      * @param action An action which should be executed by the UI thread,
      *               which is determined by implementations of the {@link EventProcessor},
      *               also see {@link UI#use(EventProcessor, Supplier)}. <br>
@@ -488,6 +492,11 @@ abstract class UIForAnything<I, C extends E, E extends Component>
     }
 
     /**
+     *  A convenient delegate to the {@link EventProcessor#registerAppEvent(Runnable)} method,
+     *  which allows you to execute an action on the current application thread.
+     *  Which thread executes these tasks is determined by the current {@link EventProcessor}.
+     *  Usually this is the {@link EventProcessor#COUPLED} or {@link EventProcessor#COUPLED_STRICT} event processor.
+     *
      * @param value A value which should be captured and then passed to the provided action
      *              on the current application thread (see {@link EventProcessor} and {@link UI#use(EventProcessor, Supplier)}).
      * @param action A consumer lambda which is executed by the application thread
