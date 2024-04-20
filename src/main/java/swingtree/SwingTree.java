@@ -306,6 +306,12 @@ public final class SwingTree
 	}
 
 	/**
+     *  The {@link StyleSheet} is an abstract class whose extensions are used to declare
+     *  component styles through a CSS like DSL API.
+     *  As part of this singleton, the SwingTree library maintains a global
+     *  {@link StyleSheet} that is used consistently by all declarative builders.
+     *  Use this method to access this global style sheet.
+     *
 	 * @return The currently configured {@link StyleSheet} that is used to style components.
 	 */
 	public StyleSheet getStyleSheet() {
