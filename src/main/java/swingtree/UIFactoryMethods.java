@@ -1847,6 +1847,11 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
+     *  A factory method for creating a {@link JMenuItem} with an icon and the supplied text
+     *  property uni-directionally bound to the menu item. <br>
+     *  When the text property changes in the view model,
+     *  the text displayed on the menu item will be updated accordingly.
+     *
      * @param text The text property which should be displayed on the wrapped {@link JMenuItem} dynamically.
      * @param icon The icon which should be displayed on the wrapped {@link JMenuItem}.
      * @return A builder instance for the provided {@link JMenuItem}, which enables fluent method chaining.
@@ -4578,6 +4583,10 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
+     *  Use this to create a builder for a concrete {@link JList} component
+     *  type instance. This method allows you to easily integrate custom
+     *  {@link JList} implementations into the SwingTree framework.
+     *
      * @param list The {@link JList} which should be wrapped by the builder.
      * @param <E> The type of the elements in the list.
      * @return A builder instance for the provided {@link JList}.

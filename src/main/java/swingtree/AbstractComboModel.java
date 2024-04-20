@@ -180,7 +180,7 @@ abstract class AbstractComboModel<E extends @Nullable Object> implements ComboBo
 		}
 		// What now? Hmmm, let's try Boolean!
 		if ( type == Boolean.class ) {
-			o = o.trim().toLowerCase();
+			o = o.trim().toLowerCase(Locale.ENGLISH);
 			if ( o.equals("true") || o.equals("yes") || o.equals("1") )
 				return type.cast(Boolean.TRUE);
 
