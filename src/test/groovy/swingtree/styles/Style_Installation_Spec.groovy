@@ -11,6 +11,7 @@ import swingtree.layout.Size
 import javax.swing.JButton
 import javax.swing.plaf.metal.MetalButtonUI
 import java.awt.Color
+import java.awt.image.BufferedImage
 
 @Title("Style Installation")
 @Narrative('''
@@ -53,11 +54,27 @@ class Style_Installation_Spec extends Specification
             and should give you a good idea of what it took to build the SwingTree library.
         """
         given: 'We create a button UI with the given styler'
-            var ui = UI.button().withStyle(styler)
+            var applyStyle = true
+            var ui =
+                    UI.button()
+                    .withSize(80,50)
+                    .withStyle( it -> applyStyle ? styler(it) : it )
         when: 'We build the button'
             var button = ui.get(JButton)
         then: 'The custom UI may or may not be installed:'
             !(button.getUI() instanceof MetalButtonUI) == isCustom
+
+        when : """
+            The style is deactivated and updated, then we expect the
+            former UI to be reinstalled.
+            We test this by deactivating the style
+            and then simulating a repaint of the button.
+        """
+            applyStyle = false
+            BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
+            button.paint(image.createGraphics())
+        then : 'The original UI should be installed because the component is no longer styled'
+            button.getUI() instanceof MetalButtonUI
 
         where :
             isCustom | styler
