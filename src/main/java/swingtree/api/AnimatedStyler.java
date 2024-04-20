@@ -71,7 +71,7 @@ public interface AnimatedStyler<C extends JComponent>
             try {
                 result = style( state, delegate );
             } catch ( Exception e ) {
-                e.printStackTrace();
+                Constants.LOG.error("Failed to evaluate composed style", e);
             }
             return other.style( state, result );
         };

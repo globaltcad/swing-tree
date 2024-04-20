@@ -1,13 +1,14 @@
 package swingtree.layout;
 
 import java.awt.Point;
+import java.util.Objects;
 
 /**
- *  An immutable value class that represents a location in a two-dimensional
+ *  An immutable value based class that represents a location in a two-dimensional
  *  coordinate system specified in float precision and specifically designed
  *  for Swing components.
  *  It can be used as an alternative to the AWT {@link Point} class,
- *  but in situations where immutability is desired.
+ *  but in situations where immutability is desired (which should be most cases).
  *  <p>
  *  Use the {@link #of(float, float)} factory method to create a new instance
  *  or {@link #withX(int)} and {@link #withY(int)} to create a new instance
@@ -18,6 +19,9 @@ public final class Location
     private final static Location ORIGIN = new Location( 0, 0 );
 
     /**
+     *  A factory method that creates a new location with the specified x- and y-coordinates
+     *  or returns the {@link #origin()} constant if both coordinates are zero.
+     *
      * @param x The x-coordinate of the location to create.
      * @param y The y-coordinate of the location to create.
      * @return A new location with the specified x- and y-coordinates.
@@ -31,11 +35,15 @@ public final class Location
     }
 
     /**
+     *  A factory method that creates a new location from the supplied AWT {@link Point}.
+     *  If the point is null, a {@link NullPointerException} is thrown.
+     *
      * @param p The point to create a location from.
      * @return A new location with the x- and y-coordinates of the specified point.
      *         If both coordinates are zero, the {@link #origin()} is returned.
      */
     public static Location of( Point p ) {
+        Objects.requireNonNull(p);
         return of( p.x, p.y );
     }
 
@@ -93,11 +101,16 @@ public final class Location
     }
 
     /**
+     *  A {@link Location} consists of two x and y coordinates in 2D space, which is
+     *  why this convenience method allows you to transform this
+     *  {@link Location} object to an AWT {@link Point}.
+     *
      * @return A new AWT {@link Point} with the same x- and y-coordinates as this location.
      */
     public Point toPoint() {
         return new Point( (int) _x, (int) _y);
     }
+
 
     @Override
     public String toString() {
