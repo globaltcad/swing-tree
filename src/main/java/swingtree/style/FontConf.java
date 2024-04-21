@@ -159,7 +159,8 @@ import java.util.function.Function;
  *  <br>
  *  This means that you can not modify a font style instance directly, but you can
  *  easily create a modified copy of it by calling one of the wither-like methods.
- *  <p>
+ *
+ * @author Daniel Nepp
  */
 public final class FontConf
 {

@@ -635,7 +635,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  <b>Please note that the {@link JBox} type is in no way related to the {@link BoxLayout}!
      *  The term <i>box</i> is referring to the purpose of this component, which
      *  is to tightly store and wrap other sub-components seamlessly...</b>
-     *  <p>
+     *
      * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
      * @param colConstraints The layout which will be passed to the {@link MigLayout} constructor as second argument.
      * @return A builder instance for a transparent {@link JBox}, which enables fluent method chaining.
@@ -765,7 +765,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  <b>Please note that the {@link JBox} type is in no way related to the {@link BoxLayout}!
      *  The term <i>box</i> is referring to the purpose of this component, which
      *  is to tightly store and wrap other sub-components seamlessly...</b>
-     *  <p>
+     *
      * @param attr The layout attributes in the form of a {@link LayoutConstraint} constants.
      * @param colConstraints The column constraints.
      * @param rowConstraints The row constraints.
@@ -787,7 +787,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  <b>Please note that the {@link JBox} type is in no way related to the {@link BoxLayout}!
      *  The term <i>box</i> is referring to the purpose of this component, which
      *  is to tightly store and wrap other sub-components seamlessly...</b>
-     *  <p>
+     *
      * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
      * @return A builder instance for a transparent {@link JBox}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code attr} is {@code null}.
@@ -813,7 +813,6 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  <b>Please note that the {@link JBox} type is in no way related to the {@link BoxLayout}!
      *  The term <i>box</i> is referring to the purpose of this component, which
      *  is to tightly store and wrap other sub-components seamlessly...</b>
-     *  <p>
      *
      * @param attr The layout attributes in the form of a {@link LayoutConstraint} constants.
      * @param colConstraints The column constraints.
@@ -847,7 +846,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  <b>Please note that the {@link JBox} type is in no way related to the {@link BoxLayout}!
      *  The term <i>box</i> is referring to the purpose of this component, which
      *  is to tightly store and wrap other sub-components seamlessly...</b>
-     *  <p>
+     *
      * @param attr The layout attributes in the form of a {@link LayoutConstraint} constants.
      * @param colConstraints The column constraints.
      * @param rowConstraints The row constraints.

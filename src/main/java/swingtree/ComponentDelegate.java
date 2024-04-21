@@ -86,6 +86,10 @@ public class ComponentDelegate<C extends JComponent, E> extends AbstractDelegate
     public final E getEvent() { return event; }
 
     /**
+     *  Exposes the "siblings", which consist of all
+     *  the child components of the parent of the delegated component
+     *  except the for the delegated component itself.
+     *
      * @return A list of all siblings excluding the component from which this instance originated.
      */
     public final List<JComponent> getSiblings() {

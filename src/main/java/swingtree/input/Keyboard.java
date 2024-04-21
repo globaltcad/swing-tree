@@ -18,6 +18,8 @@ public class Keyboard
     private final static Keyboard INSTANCE = new Keyboard();
 
     /**
+     *  Exposes the singleton instance of the {@link Keyboard} class.
+     *
      * @return The singleton instance of the {@link Keyboard} class.
      */
     public static Keyboard get() { return INSTANCE; }

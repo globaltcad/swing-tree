@@ -28,7 +28,6 @@ import java.awt.LayoutManager;
  *  <b>Please note that the {@link JBox} type is in no way related to the {@link BoxLayout}!
  *  The term <i>box</i> is referring to the purpose of this component, which
  *  is to tightly store and wrap other sub-components seamlessly...</b>
- *  <p>
  *
  * @author Daniel Nepp
  */

@@ -480,14 +480,15 @@ public final class GradientConf implements Simplifiable<GradientConf>
     }
 
     /**
-     *  Define the fractions of the gradient which is an array of values between 0 and 1
-     *  that defines the relative position of each color in the gradient.
+     *  Define the fractions of the gradient in the dorm of an array of values between 0 and 1
+     *  that each the relative position of each color in the gradient transition.
      *  <p>
      *  Note that the number of fractions must match the number of colors in the gradient.
      *  If the number of fractions is less than the number of colors, then the remaining
      *  colors will be evenly distributed between the last two fractions.
      *
      *  @param fractions The fractions of the gradient.
+     * @return An updated gradient configuration with the specified fractions.
      */
     public GradientConf fractions( double... fractions ) {
         float[] actualFractions = new float[fractions.length];

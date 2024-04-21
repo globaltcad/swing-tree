@@ -18,9 +18,9 @@ import java.util.function.Consumer;
  *  A builder node for {@link JScrollPanels}, a custom SwingTree component,
  *  which is similar to a {@link JList} but with the ability to interact with
  *  the individual components in the list.
- *  <p>
  *
  * @param <P> The type of the component which this builder node wraps.
+ * @author Daniel Nepp
  */
 public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPane<UIForScrollPanels<P>, P>
 {
