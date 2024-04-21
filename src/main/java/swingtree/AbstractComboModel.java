@@ -195,15 +195,35 @@ abstract class AbstractComboModel<E extends @Nullable Object> implements ComboBo
 		if ( type.isEnum() ) {
 			Class<? extends Enum> enumType = type.asSubclass(Enum.class);
 			String name = o.trim();
-			try { return type.cast(Enum.valueOf(enumType, name)); } catch ( IllegalArgumentException ignored) {}
+			try {
+				return type.cast(Enum.valueOf(enumType, name));
+			} catch ( IllegalArgumentException ignored) {
+				log.debug("Failed to parse enum string '"+name+"' as "+type+".", ignored);
+			}
 			name = o.toUpperCase(Locale.ENGLISH);
-			try { return type.cast(Enum.valueOf(enumType, name)); } catch ( IllegalArgumentException ignored) {}
+			try {
+				return type.cast(Enum.valueOf(enumType, name));
+			} catch ( IllegalArgumentException ignored) {
+				log.debug("Failed to parse enum string '"+name+"' as "+type+".", ignored);
+			}
 			name = o.toLowerCase(Locale.ENGLISH);
-			try { return type.cast(Enum.valueOf(enumType, name)); } catch ( IllegalArgumentException ignored) {}
+			try {
+				return type.cast(Enum.valueOf(enumType, name));
+			} catch ( IllegalArgumentException ignored) {
+				log.debug("Failed to parse enum string '"+name+"' as "+type+".", ignored);
+			}
 			name = name.toUpperCase(Locale.ENGLISH).replace(' ', '_').replace('-', '_');
-			try { return type.cast(Enum.valueOf(enumType, name)); } catch ( IllegalArgumentException ignored) {}
+			try {
+				return type.cast(Enum.valueOf(enumType, name));
+			} catch ( IllegalArgumentException ignored) {
+				log.debug("Failed to parse enum string '"+name+"' as "+type+".", ignored);
+			}
 			name = name.toLowerCase(Locale.ENGLISH).replace(' ', '_').replace('-', '_');
-			try { return type.cast(Enum.valueOf(enumType, name)); } catch ( IllegalArgumentException ignored) {}
+			try {
+				return type.cast(Enum.valueOf(enumType, name));
+			} catch ( IllegalArgumentException ignored) {
+				log.debug("Failed to parse enum string '"+name+"' as "+type+".", ignored);
+			}
 			// We failed to parse the enum... the input is invalid!
 			// So we cannot update the model, and simply return the old value:
 			return _selectedItem.orElseNull();
