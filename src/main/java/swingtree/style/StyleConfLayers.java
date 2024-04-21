@@ -110,6 +110,9 @@ final class StyleConfLayers
     }
 
     /**
+     *  Tests if the predicate returns true for any of the {@link UI.Layer}s and their
+     *  corresponding {@link StyleConfLayer}s in this {@link StyleConfLayers} object.
+     *
      * @param predicate A predicate that takes a layer and a style configuration and returns true or false.
      * @return True if the predicate returns true for any of the layers.
      */

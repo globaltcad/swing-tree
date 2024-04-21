@@ -170,6 +170,10 @@ final class Outline
     }
 
     /**
+     *  Determines if any of the outline values are not null and positive,
+     *  which means that the outline is visible as part of the component's
+     *  appearance or layout.
+     *
      * @return {@code true} if any of the outline values are not null and positive,
      *         {@code false} otherwise.
      */

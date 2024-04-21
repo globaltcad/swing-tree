@@ -125,6 +125,14 @@ public class ComponentDelegate<C extends JComponent, E> extends AbstractDelegate
     }
 
     /**
+     *  Allows you to query the sibling components of the delegated component
+     *  of the specified type. So a list of all siblings which are of the specified type
+     *  will be returned, <b>excluding</b> the currently delegated component itself. <br>
+     *  Note that this method may only be called by the Swing thread.
+     *  If another thread calls this method, an exception will be thrown.
+     *  Use {@link #forSiblingsOfType(Class, Consumer)} to access the sibling components
+     *  of the specified type in a thread-safe way.
+     *
      * @param type The type class of the sibling components to return.
      * @param <T> The type of the sibling components to return.
      * @return A list of all siblings of the specified type, excluding the component from which this instance originated.
@@ -167,6 +175,9 @@ public class ComponentDelegate<C extends JComponent, E> extends AbstractDelegate
     /**
      *  This method provides a convenient way to access all the children of the parent component
      *  of the component this delegate is for.
+     *  Note that this method may only be called by the Swing thread.
+     *  If another thread calls this method, an exception will be thrown.
+     *  Use {@link #forSiblinghood(Consumer)} to access the sibling components
      *
      * @return A list of all siblings including the component from which this instance originated.
      */
@@ -197,6 +208,14 @@ public class ComponentDelegate<C extends JComponent, E> extends AbstractDelegate
     }
 
     /**
+     *  Allows you to query the sibling components of the delegated component
+     *  of the specified type. So a list of all siblings which are of the specified type
+     *  will be returned, possibly including the delegated component itself. <br>
+     *  Note that this method may only be called by the Swing thread.
+     *  If another thread calls this method, an exception will be thrown.
+     *  Use {@link #forSiblinghoodOfType(Class, Consumer)} to access the sibling components
+     *  of the specified type in a thread-safe way.
+     *
      * @param type The type of the sibling components to return.
      * @param <T> The {@link JComponent} type of the sibling components to return.
      * @return A list of all siblings of the specified type, including the component from which this instance originated.

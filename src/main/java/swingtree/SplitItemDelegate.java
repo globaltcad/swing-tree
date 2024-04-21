@@ -21,9 +21,11 @@ import java.util.stream.Collectors;
  * @param <I> The {@link JMenuItem} subtype for which this context was created.
  */
 public final class SplitItemDelegate<I extends JMenuItem> extends AbstractDelegate<I> {
-    private final ActionEvent event;
-    private final JSplitButton splitButton;
-    private final Supplier<List<I>> siblingsSource;
+    
+    private final ActionEvent       _event;
+    private final JSplitButton      _splitButton;
+    private final Supplier<List<I>> _siblingsSource;
+
 
     SplitItemDelegate(
         ActionEvent       event,
@@ -35,9 +37,9 @@ public final class SplitItemDelegate<I extends JMenuItem> extends AbstractDelega
         Objects.requireNonNull(event);
         Objects.requireNonNull(splitButton);
         Objects.requireNonNull(siblingsSource);
-        this.event          = event;
-        this.splitButton    = splitButton;
-        this.siblingsSource = () -> Collections.unmodifiableList(siblingsSource.get());
+        _event          = event;
+        _splitButton    = splitButton;
+        _siblingsSource = () -> Collections.unmodifiableList(siblingsSource.get());
     }
 
     /**
@@ -52,7 +54,7 @@ public final class SplitItemDelegate<I extends JMenuItem> extends AbstractDelega
      * @return The {@link ActionEvent} which caused this action to be executed.
      */
     public ActionEvent getEvent() {
-        return event;
+        return _event;
     }
 
     /**
@@ -64,7 +66,7 @@ public final class SplitItemDelegate<I extends JMenuItem> extends AbstractDelega
     public JSplitButton getSplitButton() {
         // We make sure that only the Swing thread can access the component:
         if ( UI.thisIsUIThread() )
-            return splitButton;
+            return _splitButton;
         else
             throw new IllegalStateException(
                     "Split button can only be accessed by the Swing thread."
@@ -97,7 +99,7 @@ public final class SplitItemDelegate<I extends JMenuItem> extends AbstractDelega
     public List<I> getSiblinghood() {
         // We make sure that only the Swing thread can access the sibling components:
         if ( UI.thisIsUIThread() )
-            return this.siblingsSource.get();
+            return _siblingsSource.get();
         else
             throw new IllegalStateException(
                     "Sibling components can only be accessed by the Swing thread."
@@ -114,7 +116,7 @@ public final class SplitItemDelegate<I extends JMenuItem> extends AbstractDelega
             throw new IllegalStateException(
                     "Sibling components can only be accessed by the Swing thread."
             );
-        return this.siblingsSource.get()
+        return _siblingsSource.get()
                 .stream()
                 .filter(s -> s != getCurrentItem())
                 .collect(Collectors.toList());
@@ -233,7 +235,7 @@ public final class SplitItemDelegate<I extends JMenuItem> extends AbstractDelega
             return this;
         }
         NullUtil.nullArgCheck(text, "text", String.class);
-        this.splitButton.setText(text);
+        _splitButton.setText(text);
         return this;
     }
 
@@ -241,21 +243,22 @@ public final class SplitItemDelegate<I extends JMenuItem> extends AbstractDelega
      * @return The text displayed on the {@link JSplitButton}.
      */
     public String getButtonText() {
-        return this.splitButton.getText();
+        return _splitButton.getText();
     }
 
     /**
+     *  Appends the supplied {@link String} to the text displayed on the {@link JSplitButton}.
      * @param postfix The text which should be appended to the text displayed on the {@link JSplitButton}.
      * @return This {@link SplitItemDelegate} instance to allow for method chaining.
      */
-    public SplitItemDelegate<I> appendToButtonText(String postfix) {
+    public SplitItemDelegate<I> appendToButtonText( String postfix ) {
         NullUtil.nullArgCheck(postfix, "postfix", String.class);
         // We make sure that only the Swing thread can modify components:
-        if (!UI.thisIsUIThread()) {
+        if ( !UI.thisIsUIThread() ) {
             UI.run(() -> appendToButtonText(postfix));
             return this;
         }
-        this.splitButton.setText(this.getButtonText() + postfix);
+        _splitButton.setText(this.getButtonText() + postfix);
         return this;
     }
 
@@ -270,7 +273,7 @@ public final class SplitItemDelegate<I extends JMenuItem> extends AbstractDelega
             UI.run(() -> prependToButtonText(prefix));
             return this;
         }
-        this.splitButton.setText(prefix + this.getButtonText());
+        _splitButton.setText(prefix + this.getButtonText());
         return this;
     }
 
