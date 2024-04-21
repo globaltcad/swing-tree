@@ -161,6 +161,9 @@ public final class SplitButtonDelegate<I extends JMenuItem> extends AbstractDele
         }
 
         /**
+         *  Allows you to set the text displayed on the {@link JSplitButton}
+         *  inside of your user {@link Action} implementation.
+         *
          * @param text The text which should be displayed on the {@link JSplitButton}.
          * @return This delegate instance to allow for method chaining.
          */

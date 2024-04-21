@@ -15,6 +15,10 @@ final class NullUtil
     private NullUtil() {} // This is a utility class!
 
     /**
+     *  Formats a {@link String} with placeholders "{}" and replaces them with the
+     *  {@link String} representations of the given {@link Object}s.
+     *  This is essentially just a delegate to {@link MessageFormatter#arrayFormat(String, Object[])}.
+     *
      * @param withPlaceholders The {@link String} which may or may not contain placeholder in the for of "{}".
      * @param toBePutAtPlaceholders Arbitrary {@link Object}s which will be turned into
      *                              {@link String}s instead of the placeholder brackets.
@@ -22,7 +26,7 @@ final class NullUtil
      * @return A {@link String} containing the actual {@link String} representations of th {@link Object}s
      *         instead of the placeholder brackets within the first argument.
      */
-    public static String format( String withPlaceholders, Object... toBePutAtPlaceholders ) {
+    static String format( String withPlaceholders, Object... toBePutAtPlaceholders ) {
         return MessageFormatter.arrayFormat( withPlaceholders, toBePutAtPlaceholders ).getMessage();
     }
 

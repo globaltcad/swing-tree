@@ -83,6 +83,10 @@ public final class Location
     }
 
     /**
+     *  Allows you to create an updated version of this location with the
+     *  specified y-coordinate and the same x-coordinate
+     *  as this location instance.
+     *
      * @param y The y-coordinate of the location to create.
      * @return A new location with the same x-coordinate as this location
      *         and the specified y-coordinate.
@@ -92,6 +96,10 @@ public final class Location
     }
 
     /**
+     *  Allows you to create an updated version of this location with the
+     *  specified x-coordinate and the same y-coordinate
+     *  as this location instance.
+     *
      * @param x The x-coordinate of the location to create.
      * @return A new location with the same y-coordinate as this location
      *         and the specified x-coordinate.

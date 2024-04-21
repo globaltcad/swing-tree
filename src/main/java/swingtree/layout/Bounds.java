@@ -129,6 +129,10 @@ public final class Bounds
     }
 
     /**
+     *  Allows you to create an updated version of this bounds object with the
+     *  specified x-coordinate and the same y-coordinate and size as this bounds instance.
+     *  See also {@link #withY(int)}, {@link #withWidth(int)}, and {@link #withHeight(int)}.
+     *
      * @param x A new x coordinate for the location of this bounds object.
      * @return A new bounds object with a new location that has the specified x coordinate.
      */
@@ -137,6 +141,10 @@ public final class Bounds
     }
 
     /**
+     *  Allows you to create an updated version of this bounds object with the
+     *  specified y-coordinate and the same x-coordinate and size as this bounds instance.
+     *  See also {@link #withX(int)}, {@link #withWidth(int)}, and {@link #withHeight(int)}.
+     *
      * @param y A new y coordinate for the location of this bounds object.
      * @return A new bounds object with a new location that has the specified y coordinate.
      */
@@ -145,6 +153,10 @@ public final class Bounds
     }
 
     /**
+     *  Allows you to create an updated version of this bounds object with the
+     *  specified width and the same x and y coordinates as well as height as this bounds instance.
+     *  See also {@link #withX(int)}, {@link #withY(int)}, and {@link #withHeight(int)}.
+     *
      * @param width A new width for the size of this bounds object.
      * @return A new bounds object with a new size that has the specified width.
      */
@@ -153,6 +165,10 @@ public final class Bounds
     }
 
     /**
+     *  Allows you to create an updated version of this bounds object with the
+     *  specified height and the same x and y coordinates as well as width as this bounds instance.
+     *  See also {@link #withX(int)}, {@link #withY(int)}, and {@link #withWidth(int)}.
+     *
      * @param height A new height for the size of this bounds object.
      * @return A new bounds object with a new size that has the specified height.
      */
@@ -161,6 +177,11 @@ public final class Bounds
     }
 
     /**
+     *  Allows you to check weather the bounds object has the specified
+     *  width and height, which is true if the width and height are equal
+     *  to the width and height of the {@link Size} of this bounds object
+     *  (see {@link #size()}).
+     *
      * @param width A new width for the size of this bounds object.
      * @param height A new height for the size of this bounds object.
      * @return A new bounds object with a new size that has the specified width and height.
@@ -170,6 +191,10 @@ public final class Bounds
     }
 
     /**
+     *  Allows you to check weather the bounds object has the specified
+     *  width, which is true if the width is equal to the width of the
+     *  {@link Size} of this bounds object (see {@link #size()}).
+     *
      * @param width An integer value to compare to the width of this bounds object.
      * @return The truth value of whether the specified width is equal to the width of this bounds object.
      */
@@ -178,6 +203,10 @@ public final class Bounds
     }
 
     /**
+     *  Allows you to check weather the bounds object has the specified
+     *  height, which is true if the height is equal to the height of the
+     *  {@link Size} of this bounds object (see {@link #size()}).
+     *
      * @param height An integer value to compare to the height of this bounds object.
      * @return The truth value of whether the specified height is equal to the height of this bounds object.
      */
@@ -214,6 +243,12 @@ public final class Bounds
     }
 
     /**
+     *  A convent method to check if the specified x and y coordinates and width and height
+     *  are equal to the location and size of this bounds object.
+     *  This is equivalent to calling {@link #equals(Object)} with
+     *  a new bounds object created with the specified x and y coordinates and width and height
+     *  like so: {@code equals(Bounds.of(x, y, width, height))}.
+     *
      * @param x An integer value to compare to the x coordinate of the location of this bounds object.
      * @param y An integer value to compare to the y coordinate of the location of this bounds object.
      * @param width An integer value to compare to the width of this bounds object.
