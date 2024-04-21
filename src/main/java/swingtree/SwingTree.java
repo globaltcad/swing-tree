@@ -374,6 +374,17 @@ public final class SwingTree
     }
 
     /**
+     *  Exposes a set of system properties in the form of a nicely formatted string.
+     *  These are used by the SwingTree library to determine the system configuration
+     *  and to adjust the UI accordingly.
+     *
+     * @return A string containing system information.
+     */
+    public String getSystemInfo() {
+        return SystemInfo.getAsPrettyString();
+    }
+
+    /**
      * This class handles scaling in SwingTree UIs.
      * It computes user scaling factor based on font size and
      * provides methods to scale integer, float, {@link Dimension} and {@link Insets}.
@@ -972,6 +983,35 @@ public final class SwingTree
 
         public static long toVersion( int major, int minor, int micro, int patch ) {
             return ((long) major << 48) + ((long) minor << 32) + ((long) micro << 16) + patch;
+        }
+
+        static String getAsPrettyString() {
+            return SystemInfo.class.getSimpleName() + "[\n" +
+                    "    isWindows=" + isWindows + ",\n" +
+                    "    isMacOS=" + isMacOS + ",\n" +
+                    "    isLinux=" + isLinux + ",\n" +
+                    "    osVersion=" + osVersion + ",\n" +
+                    "    isWindows_10_orLater=" + isWindows_10_orLater + ",\n" +
+                    "    isWindows_11_orLater=" + isWindows_11_orLater + ",\n" +
+                    "    isMacOS_10_11_ElCapitan_orLater=" + isMacOS_10_11_ElCapitan_orLater + ",\n" +
+                    "    isMacOS_10_14_Mojave_orLater=" + isMacOS_10_14_Mojave_orLater + ",\n" +
+                    "    isMacOS_10_15_Catalina_orLater=" + isMacOS_10_15_Catalina_orLater + ",\n" +
+                    "    isX86=" + isX86 + ",\n" +
+                    "    isX86_64=" + isX86_64 + ",\n" +
+                    "    isAARCH64=" + isAARCH64 + ",\n" +
+                    "    javaVersion=" + javaVersion + ",\n" +
+                    "    isJava_9_orLater=" + isJava_9_orLater + ",\n" +
+                    "    isJava_11_orLater=" + isJava_11_orLater + ",\n" +
+                    "    isJava_15_orLater=" + isJava_15_orLater + ",\n" +
+                    "    isJava_17_orLater=" + isJava_17_orLater + ",\n" +
+                    "    isJava_18_orLater=" + isJava_18_orLater + ",\n" +
+                    "    isJetBrainsJVM=" + isJetBrainsJVM + ",\n" +
+                    "    isJetBrainsJVM_11_orLater=" + isJetBrainsJVM_11_orLater + ",\n" +
+                    "    isKDE=" + isKDE + ",\n" +
+                    "    isProjector=" + isProjector + ",\n" +
+                    "    isWebswing=" + isWebswing + ",\n" +
+                    "    isWinPE=" + isWinPE + "\n" +
+                    "]\n";
         }
     }
 

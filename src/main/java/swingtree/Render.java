@@ -72,6 +72,9 @@ public final class Render<C extends JComponent,E>
 	) {
 		NullUtil.nullArgCheck(valueType, "valueType", Class.class);
 		NullUtil.nullArgCheck(valueValidator, "valueValidator", Predicate.class);
+		// We check if T is a subclass of E, if not we throw an exception:
+		if ( !valueType.isAssignableFrom(_elementType) )
+			throw new IllegalArgumentException("The value type "+valueType+" is not a subclass of "+_elementType);
 		return new As<C,E,T>() {
 			@Override
 			public Builder<C,E> as(Cell.Interpreter<C,T> valueInterpreter) {

@@ -178,7 +178,7 @@ final class StyleConfLayer implements Simplifiable<StyleConfLayer>
 
     @Override
     public String toString() {
-        if ( this == _EMPTY )
+        if ( this.equals(_EMPTY) )
             return this.getClass().getSimpleName() + "[EMPTY]";
         String shadowString     = _shadows.toString(StyleUtil.DEFAULT_KEY, "");
         String painterString    = _painters.toString(StyleUtil.DEFAULT_KEY, "");
@@ -198,7 +198,7 @@ final class StyleConfLayer implements Simplifiable<StyleConfLayer>
 
     @Override
     public StyleConfLayer simplified() {
-        if ( this == _EMPTY )
+        if ( this.equals(_EMPTY) )
             return this;
 
         NamedConfigs<ShadowConf>   simplifiedShadows   = _shadows.simplified();

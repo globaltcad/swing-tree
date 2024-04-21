@@ -195,7 +195,7 @@ final class Outline
     public Outline plus( Outline other ) {
         if ( this.equals(_NONE) )
             return other;
-        if ( other == _NONE )
+        if ( other.equals(_NONE) )
             return this;
 
         return Outline.ofNullable(
@@ -209,7 +209,7 @@ final class Outline
     public Outline or( Outline other ) {
         if ( this.equals(_NONE) )
             return other;
-        if ( other == _NONE )
+        if ( other.equals(_NONE) )
             return this;
 
         return Outline.ofNullable(

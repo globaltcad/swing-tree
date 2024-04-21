@@ -90,9 +90,9 @@ final class ConicalGradientPaint implements Paint {
 
         /**
          * KK: Get the cached context - if it matches the supplied arguments.  If the arguments aren't equal to the cached version, return null
-         * @param bounds
-         * @param center
-         * @param transform
+         * @param bounds A {@link Rectangle} representing the bounds of the context to be created (device space).
+         * @param center The center of the gradient (device space).
+         * @param transform The transform to be applied to the context (user space to device space).
          * @return the cached context, or null if the arguments don't match
          */
         private @Nullable ConicalGradientPaintContext get(Rectangle bounds, Point2D center, AffineTransform transform) {
@@ -119,10 +119,10 @@ final class ConicalGradientPaint implements Paint {
 
     /**
      * Standard constructor which takes the FRACTIONS in values from 0.0f to 1.0f
-     * @param CENTER
-     * @param GIVEN_FRACTIONS
-     * @param GIVEN_COLORS
-     * @throws IllegalArgumentException
+     * @param CENTER The center of the gradient circle.
+     * @param GIVEN_FRACTIONS The fractions of the gradient in values from 0.0f to 1.0f, these should match the COLORS array.
+     * @param GIVEN_COLORS The colors of the gradient, these should match the FRACTIONS array.
+     * @throws IllegalArgumentException if fractions and colors are not of the same size.
      */
     public ConicalGradientPaint(final Point2D CENTER, final float[] GIVEN_FRACTIONS, final Color[] GIVEN_COLORS) throws IllegalArgumentException {
         this(false, CENTER, 0.0f, GIVEN_FRACTIONS, GIVEN_COLORS);
@@ -131,12 +131,12 @@ final class ConicalGradientPaint implements Paint {
     /**
      * Enhanced constructor which takes the FRACTIONS in degress from 0.0f to 360.0f and
      * also an GIVEN_OFFSET in degrees around the rotation CENTER
-     * @param USE_DEGREES
-     * @param CENTER
-     * @param GIVEN_OFFSET
-     * @param GIVEN_FRACTIONS
-     * @param GIVEN_COLORS
-     * @throws IllegalArgumentException
+     * @param USE_DEGREES true if fractions are in degrees, false if fractions are in 0.0 to 1.0
+     * @param CENTER the center of the gradient
+     * @param GIVEN_OFFSET the offset of the gradient in degrees
+     * @param GIVEN_FRACTIONS the fractions of the gradient in degrees or 0.0 to 1.0
+     * @param GIVEN_COLORS the colors of the gradient
+     * @throws IllegalArgumentException if fractions and colors are not of the same size
      */
     public ConicalGradientPaint(
         final boolean USE_DEGREES,
@@ -257,10 +257,10 @@ final class ConicalGradientPaint implements Paint {
      * with a given RANGE of 100 and a given VALUE of 50 will return the color that is exactly in the middle of the
      * gradient between black and white which is gray(R:128, G:128, B:128, A:255)
      * So this method is really useful to calculate colors in gradients between two given colors.
-     * @param START_COLOR
-     * @param DESTINATION_COLOR
-     * @param RANGE
-     * @param VALUE
+     * @param START_COLOR The color at the beginning of the gradient.
+     * @param DESTINATION_COLOR The color at the end of the gradient.
+     * @param RANGE The range of the gradient.
+     * @param VALUE The value in the range of the gradient.
      * @return Color calculated from a range of values by given value
      */
     private static Color getColorFromFraction(
