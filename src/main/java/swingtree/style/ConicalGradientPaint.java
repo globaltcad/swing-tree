@@ -81,7 +81,12 @@ final class ConicalGradientPaint implements Paint {
 
         private final ConicalGradientPaintContext cachedContext;
 
-        private CachedContext(Rectangle bounds, Point2D center, AffineTransform transform, ConicalGradientPaintContext context) {
+        private CachedContext(
+            Rectangle bounds,
+            Point2D center,
+            AffineTransform transform,
+            ConicalGradientPaintContext context
+        ) {
             this.bounds = bounds;
             this.center = center;
             this.transform = transform;

@@ -2,13 +2,12 @@ package swingtree;
 
 import sprouts.Action;
 
-import javax.swing.*;
-import java.awt.Container;
-import java.util.*;
+import javax.swing.JComponent;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  *  Instances of this are delegates for a specific components and events that
@@ -46,14 +45,14 @@ import java.util.stream.Stream;
  */
 public class ComponentDelegate<C extends JComponent, E> extends AbstractDelegate<C>
 {
-    private final E event;
+    private final E _event;
 
 
     public ComponentDelegate(
             C component, E event
     ) {
         super(false, component, component);
-        this.event = Objects.requireNonNull(event);
+        _event = Objects.requireNonNull(event);
     }
 
     /**
@@ -90,7 +89,7 @@ public class ComponentDelegate<C extends JComponent, E> extends AbstractDelegate
             UI.run( () -> action.accept(_component()) );
     }
 
-    public final E getEvent() { return event; }
+    public final E getEvent() { return _event; }
 
     /**
      *  Exposes the "siblings", which consist of all
