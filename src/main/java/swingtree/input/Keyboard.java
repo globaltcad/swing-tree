@@ -26,7 +26,7 @@ public class Keyboard
 
     /**
      *  This enum represents all the keys on the keyboard which can be queried for their current state.
-     *  This is a mapping of the {@link KeyEvent} constants to a more readable enum.
+     *  This is a mapping of the {@link KeyEvent} constants to a more readable and type safe enum.
      */
     public enum Key
     {
