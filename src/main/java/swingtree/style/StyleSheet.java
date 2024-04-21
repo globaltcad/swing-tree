@@ -425,7 +425,7 @@ public abstract class StyleSheet
             for ( StyleTrait<?> trait1 : _traitStylers.keySet() ) {
                 List<StyleTrait<?>> traits = _traitGraph.computeIfAbsent(trait1, k -> new java.util.ArrayList<>());
                 for ( StyleTrait<?> trait2 : _traitStylers.keySet() )
-                    if ( trait2 != trait1 && trait2.thisInherits(trait1) )
+                    if ( !trait2.equals(trait1) && trait2.thisInherits(trait1) )
                         traits.add(trait2);
             }
 
