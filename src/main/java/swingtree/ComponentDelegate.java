@@ -57,11 +57,18 @@ public class ComponentDelegate<C extends JComponent, E> extends AbstractDelegate
     }
 
     /**
+     *  Exposes the underlying component from which this delegate
+     *  and user event actions originate.
+     *  This method may only be called by the Swing thread.
+     *  If another thread calls this method, an exception will be thrown.
+     *
      * @return The component for which the current {@link Action} originated.
+     * @throws IllegalStateException If this method is called from a non-Swing thread.
      */
     public final C getComponent() {
         // We make sure that only the Swing thread can access the component:
-        if ( UI.thisIsUIThread() ) return _component();
+        if ( UI.thisIsUIThread() )
+            return _component();
         else
             throw new IllegalStateException(
                     "Component can only be accessed by the Swing thread."

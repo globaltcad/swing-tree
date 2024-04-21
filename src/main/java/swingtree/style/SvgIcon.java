@@ -212,6 +212,12 @@ public final class SvgIcon extends ImageIcon
     }
 
     /**
+     *  Creates an updated {@link SvgIcon} with the given width and height.
+     *  Dimensions smaller than 0 are considered "undefined".
+     *  When the icon is being rendered then these will be determined according to the
+     *  aspect ratio of the SVG document, the {@link swingtree.UI.FitComponent} / {@link swingtree.UI.Placement}
+     *  policies or the size of the component the SVG is rendered into.
+     *
      * @param width The width of the icon, or -1 if the icon should be rendered according
      *              to the width of a given component or the width of the SVG document itself.
      * @param height The height of the icon, or -1 if the icon should be rendered according
@@ -232,7 +238,8 @@ public final class SvgIcon extends ImageIcon
      *  Allows you to create an updated {@link SvgIcon} with the given size
      *  in the form of a {@link Size} object containing the width and height.
      *  If the width or height is -1, the icon will be rendered according to the
-     *  width or height of a given component.
+     *  width or height of a given component, the width or height of the SVG document
+     *  and the {@link swingtree.UI.FitComponent} / {@link swingtree.UI.Placement} policies.
      *
      * @param size The size of the icon in the form of a {@link Size}.
      * @return A new {@link SvgIcon} with the given width and height.
