@@ -36,6 +36,10 @@ public final class TextInsertDelegate extends AbstractTextComponentDelegate
     }
 
     /**
+     *  Exposes the text that is being inserted.
+     *  See {@link DocumentFilter#insertString(DocumentFilter.FilterBypass, int, String, AttributeSet)}
+     *  for more information.
+     *
      * @return The text to be inserted or an empty {@link String} if no text is to be inserted.
      *         Null is never returned.
      */

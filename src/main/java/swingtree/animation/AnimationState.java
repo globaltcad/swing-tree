@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * The state of an animation at a given point in time describing how far the animation has progressed
  * using a number between 0 and 1 (see {@link #progress()}).
- * Use the numbers exposed by the methods of this interface to define how
+ * Use the numbers exposed by the methods of this value based class to define how
  * your animation should progress over time.
  */
 public final class AnimationState
@@ -73,6 +73,12 @@ public final class AnimationState
     }
 
     /**
+     *  Exposes the progress of the animation state, which is a number between 0 and 1
+     *  that represents how far the animation has progressed between its start and end.
+     *  Note that an animation may also regress, in which case the states will
+     *  transition from 1 to 0 instead of from 0 to 1.
+     *  See {@link Stride} for more information.
+     *
      * @return The animation progress in terms of a number between 0 and 1,
      *         where 0.5 means the animation is halfway through, and 1 means the animation completed.
      */

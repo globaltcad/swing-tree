@@ -47,12 +47,17 @@ public final class TextReplaceDelegate extends AbstractTextComponentDelegate
         return text;
     }
 
-    /**mr
+    /**
+     *  Exposes the text to be replaced or
+     *  an empty {@link String} indicating that no text is to be replaced.
+     *  Null is never returned.
+     *
      * @return The text to be removed.
      */
     public String getReplacementText() {
         try {
-            return getComponent().getDocument().getText(getOffset(), getLength());
+            String replacement = getComponent().getDocument().getText(getOffset(), getLength());
+            return ( replacement == null ? "" : replacement );
         } catch (BadLocationException e) {
             log.error(
                     "Failed to read the replacement text from the document " +
@@ -64,6 +69,17 @@ public final class TextReplaceDelegate extends AbstractTextComponentDelegate
     }
 
     /**
+     *  Exposes the attribute set of the text to be replaced.
+     *  It is a collection of unique attributes in the form of a read-only,
+     *  immutable interface. A single attribute is basically a key and
+     *  a value assigned to the key.  The collection may represent
+     *  something like a style run, a logical style, etc.  These
+     *  are generally used to describe features that will contribute
+     *  to some graphical representation such as a font. <br>
+     *  <p>
+     *  See {@link DocumentFilter#replace(DocumentFilter.FilterBypass, int, int, String, AttributeSet)}
+     *  for more information about the origin of this attribute.
+     *
      * @return The attribute set of the text to be inserted.
      */
     public AttributeSet getAttributeSet() {

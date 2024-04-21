@@ -72,6 +72,10 @@ public final class SplitItemDelegate<I extends JMenuItem> extends AbstractDelega
     }
 
     /**
+     *  Exposes the {@link JMenuItem} which is currently selected by the user
+     *  and displayed as the button item of the {@link JSplitButton}.
+     *  This is the item which caused the {@link ActionEvent} to be fired.
+     *
      * @return The {@link JMenuItem} which caused this action to be executed.
      */
     public final I getCurrentItem() {
