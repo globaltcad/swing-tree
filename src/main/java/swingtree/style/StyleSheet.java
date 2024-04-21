@@ -520,7 +520,7 @@ public abstract class StyleSheet
                 }
 
                 for ( StyleTrait<?> extension : traits )
-                    if ( extension != current )
+                    if ( !extension.equals(current) )
                         _traverse(extension, paths, stack);
             }
 
