@@ -1045,8 +1045,30 @@ class Opaqueness_Styles_Spec extends Specification
 
             false   | 0      | 0      | 0      |   "rgba(0,0,0,0)"  |   "rgba(0,0,0,0)"  |   "rgba(0,0,0, 0)" | ["red", "rgba(0,0,0,0)"]
             false   | 0      | 0      | 0      |   "rgba(0,0,0,0)"  |   "rgba(0,0,0,0)"  |   "rgba(0,0,0, 0)" | ["rgba(0,0,0,0)", "green"]
+    }
 
+    def 'A plain button will be opaque, even if it has a custom painter.'()
+    {
+        reportInfo """
+ 
+            A plain button is a component that is opaque by default,
+            but when you call the `makePlain()` method on the button, it will become non-opaque.
 
+        """
+        given : 'We declare a plain button with a custom painter:'
+            var button =
+                    UI.button("Hello World")
+                    .makePlain()
+                    .withStyle( it -> it
+                        .painter(UI.Layer.BORDER, g2d -> {})
+                    )
+                    .get(JButton)
+        expect : """
+            The component has to be opaque because the button is not plain.
+        """
+            !button.isOpaque()
+        and : 'It has a transparent background color!'
+            button.getBackground() === UI.Color.TRANSPARENT
     }
 }
 

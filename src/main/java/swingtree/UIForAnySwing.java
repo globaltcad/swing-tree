@@ -2008,7 +2008,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     @SuppressWarnings("ReferenceEquality")
-    private void _setBackground( JComponent thisComponent, Color color ) {
+    protected void _setBackground( JComponent thisComponent, Color color ) {
         color = _isUndefinedColor(color) ? null : color;
         thisComponent.setBackground( color );
         color = thisComponent.getBackground();

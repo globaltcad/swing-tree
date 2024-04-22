@@ -365,10 +365,12 @@ final class StyleInstaller<C extends JComponent>
         }
         else
         {
-            if ( !owner.isOpaque() )
-                owner.setOpaque(true);
-
             boolean bypassLaFBackgroundPainting = requiresBackgroundPainting || (hasBackground && isSwingTreeComponent);
+
+            boolean shouldBeOpaque = bypassLaFBackgroundPainting || owner.getBackground() != UI.Color.TRANSPARENT;
+
+            if ( owner.isOpaque() != shouldBeOpaque )
+                owner.setOpaque(shouldBeOpaque);
 
             if ( bypassLaFBackgroundPainting )
                 if ( backgroundIsActuallyBackground )
