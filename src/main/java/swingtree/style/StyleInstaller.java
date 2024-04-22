@@ -285,6 +285,9 @@ final class StyleInstaller<C extends JComponent>
 
         boolean canBeOpaque = true;
 
+        if ( _isTransparentConstant(owner.getBackground()) )
+            canBeOpaque = false;
+
         if ( !opaqueGradAreas.contains(UI.ComponentArea.ALL) ) {
             boolean hasOpaqueFoundation = 255 == newStyle.base().foundationColor().map(java.awt.Color::getAlpha).orElse(0);
             boolean hasOpaqueBackground = 255 == newStyle.base().backgroundColor().map( c -> !StyleUtil.isUndefinedColor(c) ? c : _outSideBackgroundColor).map(java.awt.Color::getAlpha).orElse(255);
@@ -344,7 +347,7 @@ final class StyleInstaller<C extends JComponent>
             if ( owner.isOpaque() )
                 owner.setOpaque(false);
         }
-        else if ( !isSwingTreeComponent && !backgroundIsFullyTransparent )
+        else if ( !isSwingTreeComponent && !backgroundIsFullyTransparent && _initialIsOpaque != null )
         {
             if ( owner.isOpaque() != _initialIsOpaque )
                 owner.setOpaque(_initialIsOpaque);
@@ -365,8 +368,10 @@ final class StyleInstaller<C extends JComponent>
         }
         else
         {
-            if ( !owner.isOpaque() )
-                owner.setOpaque(true);
+            boolean shouldBeOpaque = !_isTransparentConstant(owner.getBackground());
+
+            if ( owner.isOpaque() != shouldBeOpaque )
+                owner.setOpaque(shouldBeOpaque);
 
             boolean bypassLaFBackgroundPainting = requiresBackgroundPainting || (hasBackground && isSwingTreeComponent);
 
@@ -430,6 +435,10 @@ final class StyleInstaller<C extends JComponent>
         return newEngine;
     }
 
+    @SuppressWarnings("ReferenceEquality")
+    private final boolean _isTransparentConstant( final Color color ) {
+        return color == UI.Color.TRANSPARENT;
+    }
 
     @SuppressWarnings("ReferenceEquality")
     boolean backgroundWasChangedSomewhereElse( C owner ) {

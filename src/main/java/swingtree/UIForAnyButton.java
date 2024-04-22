@@ -590,6 +590,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
                     it.setOpaque(false);
                     it.setFocusPainted(false);
                     it.setMargin(new Insets(0,0,0,0));
+                    _setBackground(it, UI.Color.TRANSPARENT);
                 });
     }
 
