@@ -11,9 +11,14 @@ import java.lang.ref.WeakReference;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
-public class FlipFlopStyler<C extends JComponent>
+/**
+ *  Models an animation which can switch between two states.
+ *
+ * @param <C> The type of the component which this flip-flop animation is applied to.
+ * @author Daniel Nepp
+ */
+class FlipFlopStyler<C extends JComponent>
 {
-
     private final LifeTime          _lifetime;
     private final AnimatedStyler<C> _styler;
     private final WeakReference<C>  _owner;

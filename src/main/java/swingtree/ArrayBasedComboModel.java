@@ -5,7 +5,7 @@ import sprouts.Var;
 
 import java.util.Objects;
 
-final class ArrayBasedComboModel<@Nullable E> extends AbstractComboModel<E>
+final class ArrayBasedComboModel<E extends @Nullable Object> extends AbstractComboModel<E>
 {
 	private final E[] _items;
 

@@ -18,6 +18,11 @@ import java.awt.event.ComponentEvent;
 public interface UIVerifier<C extends JComponent>
 {
     /**
+     *  This method is invoked by a UI component to
+     *  check if its view model is in a valid state
+     *  and then update the component accordingly.
+     *  <b>This method should not have any side effects!</b>
+     *
      * @param delegate The delegate to the component to be verified.
      * @return true if the component is valid, false otherwise.
      */

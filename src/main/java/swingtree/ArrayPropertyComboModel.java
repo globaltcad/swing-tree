@@ -5,7 +5,7 @@ import sprouts.From;
 import sprouts.Val;
 import sprouts.Var;
 
-final class ArrayPropertyComboModel<@Nullable E> extends AbstractComboModel<E>
+final class ArrayPropertyComboModel<E extends @Nullable Object> extends AbstractComboModel<E>
 {
 	private final Val<E[]> _items;
 	private final boolean _mutable;

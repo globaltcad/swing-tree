@@ -168,41 +168,14 @@ final class StyleInstaller<C extends JComponent>
 
         final boolean isSwingTreeComponent = owner instanceof StylableComponent;
 
-        final boolean noLayoutStyle           = StyleConf.none().hasEqualLayoutAs(newStyle);
-        final boolean noPaddingAndMarginStyle = StyleConf.none().hasEqualMarginAndPaddingAs(newStyle);
-        final boolean noBorderStyle           = StyleConf.none().hasEqualBorderAs(newStyle);
-        final boolean noBaseStyle             = StyleConf.none().hasEqualBaseAs(newStyle);
-        final boolean noFontStyle             = StyleConf.none().hasEqualFontAs(newStyle);
-        final boolean noDimensionalityStyle   = StyleConf.none().hasEqualDimensionalityAs(newStyle);
-        final boolean noShadowStyle           = StyleConf.none().hasEqualShadowsAs(newStyle);
-        final boolean noPainters              = StyleConf.none().hasEqualPaintersAs(newStyle);
-        final boolean noGradients             = StyleConf.none().hasEqualGradientsAs(newStyle);
-        final boolean noNoises                = StyleConf.none().hasEqualNoisesAs(newStyle);
-        final boolean noImages                = StyleConf.none().hasEqualImagesAs(newStyle);
-        final boolean noTexts                 = StyleConf.none().hasEqualTextsAs(newStyle);
-        final boolean noProperties            = StyleConf.none().hasEqualPropertiesAs(newStyle);
+        final boolean isStyled            = !newStyle.equals(StyleConf.none());
+        final boolean hasPaddingAndMargin = isStyled && !StyleConf.none().hasEqualMarginAndPaddingAs(newStyle);
+        final boolean hasBorderStyle      = isStyled && !StyleConf.none().hasEqualBorderAs(newStyle);
+        final boolean hasBaseStyle        = isStyled && !StyleConf.none().hasEqualBaseAs(newStyle);
+        final boolean hasBaseColors       = isStyled && (hasBaseStyle && newStyle.base().hasAnyColors());
+        final boolean hasBackFilter       = isStyled && !FilterConf.none().equals(newStyle.layers().filter());
 
-        final boolean noParentFilter = FilterConf.none().equals(newStyle.layers().filter());
-
-        final boolean isNotStyled = noLayoutStyle           &&
-                                    noPaddingAndMarginStyle &&
-                                    noBorderStyle           &&
-                                    noBaseStyle             &&
-                                    noFontStyle             &&
-                                    noDimensionalityStyle   &&
-                                    noShadowStyle           &&
-                                    noPainters              &&
-                                    noGradients             &&
-                                    noNoises                &&
-                                    noImages                &&
-                                    noTexts                 &&
-                                    noProperties            &&
-                                    noParentFilter;
-
-        final boolean hasPaddingAndMargin = !noPaddingAndMarginStyle;
-        final boolean hasBorderStyle      = !noBorderStyle;
-
-        final boolean weNeedACustomBorder = !isNotStyled && (
+        final boolean weNeedToInstallTheCustomBorder = isStyled && (
                hasPaddingAndMargin || hasBorderStyle
                || newStyle.layers().any( (layer, it) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) && it.shadows().any(named -> named.style().color().isPresent() ) )
                || newStyle.layers().any( (layer, it) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) && it.gradients().any(named -> named.style().colors().length > 0 ) )
@@ -212,10 +185,7 @@ final class StyleInstaller<C extends JComponent>
                || newStyle.layers().any( (layer, it) -> layer.isOneOf(UI.Layer.BORDER, UI.Layer.CONTENT) && it.noises().any(named -> named.style().colors().length > 0 ) )
             );
 
-        final boolean hasBaseColors    = (!noBaseStyle   && newStyle.base().hasAnyColors());
-        final boolean hasBackFilter    = !noParentFilter;
-
-        final boolean weNeedCustomUI = !isNotStyled && (
+        final boolean weNeedToInstallTheCustomUI = isStyled && (
                (hasBackFilter && !isSwingTreeComponent) ||
                (hasBaseColors && newStyle.base().requiresCustomUI())
                || newStyle.layers().any( (layer, it) -> layer == UI.Layer.BACKGROUND && it.shadows().any(named -> named.style().color().isPresent() ) )
@@ -226,13 +196,13 @@ final class StyleInstaller<C extends JComponent>
                || newStyle.layers().any( (layer, it) -> layer == UI.Layer.BACKGROUND && it.noises().any(named -> named.style().colors().length > 0 ) )
             );
 
-        if ( weNeedACustomBorder ) {
+        if ( weNeedToInstallTheCustomBorder ) {
             installCustomBorderBasedStyleAndAnimationRenderer(owner, newStyle);
             newStyle = recalculateInsets(owner, newStyle);
         } else if ( styleSource.hasNoAnimationStylers() )
             _uninstallCustomBorderBasedStyleAndAnimationRenderer(owner);
 
-        if ( weNeedCustomUI ) {
+        if ( weNeedToInstallTheCustomUI ) {
             _dynamicLaF = _dynamicLaF.establishLookAndFeelFor(newStyle, owner);
         } else {
             if ( _outSideBackgroundColor != null ) {
@@ -242,18 +212,16 @@ final class StyleInstaller<C extends JComponent>
             }
         }
 
-        if ( isNotStyled || !weNeedCustomUI ) {
+        if ( !isStyled || !weNeedToInstallTheCustomUI ) {
             _dynamicLaF = _dynamicLaF._uninstallCustomLaF(owner);
             if ( _initialIsOpaque != null ) {
                 if ( owner.isOpaque() != _initialIsOpaque )
                     owner.setOpaque(_initialIsOpaque);
                 _initialIsOpaque = null;
             }
-            if ( isNotStyled )
+            if ( !isStyled )
                 return _updateEngine(owner, engine, newStyle, marginCorrection);
         }
-
-        // The component is styled, so we can now apply the style to the component:
 
         if ( _initialIsOpaque == null )
             _initialIsOpaque = owner.isOpaque();
@@ -272,9 +240,9 @@ final class StyleInstaller<C extends JComponent>
         final boolean hasMargin                      = newStyle.margin().isPositive();
         final boolean hasOpaqueBorder                = !(255 > newStyle.border().color().map(java.awt.Color::getAlpha).orElse(0));
         final boolean backgroundIsActuallyBackground =
-                                    !( owner instanceof JTabbedPane  ) && // The LaFs interpret ths tab buttons as background
+                                    !( owner instanceof JTabbedPane  ) && // The LaFs interpret the tab buttons as background
                                     !( owner instanceof JSlider      ) && // The track color is usually considered the background
-                                    !( owner instanceof JProgressBar );   // also the track color is usually considered the background
+                                    !( owner instanceof JProgressBar );   // also the progress track color is usually considered the background
                                     // TODO: Find and add more cases!
 
         if ( !hasBackground && _initialIsOpaque ) {
@@ -339,7 +307,6 @@ final class StyleInstaller<C extends JComponent>
             )
                 canBeOpaque = false;
         }
-
 
         final Color   backgroundColor = owner.getBackground();
         final boolean backgroundIsFullyTransparent = backgroundColor == null || backgroundColor.getAlpha() == 0;
@@ -558,7 +525,7 @@ final class StyleInstaller<C extends JComponent>
         // Install Generic Layout:
         layoutConf.layout().installFor(owner);
 
-        // Now on to MigLayout stuff:
+        // Now on to MigLayout installation details:
 
         Optional<Float> alignmentX = layoutConf.alignmentX();
         Optional<Float> alignmentY = layoutConf.alignmentY();
@@ -631,7 +598,7 @@ final class StyleInstaller<C extends JComponent>
 
             Dimension newMaxSize = new Dimension(maxWidth, maxHeight);
 
-            if ( ! newMaxSize.equals(maxSize) )
+            if ( !newMaxSize.equals(maxSize) )
                 owner.setMaximumSize(newMaxSize);
         }
 
@@ -655,7 +622,7 @@ final class StyleInstaller<C extends JComponent>
 
             Dimension newSize = new Dimension(width, height);
 
-            if ( ! newSize.equals(size) )
+            if ( !newSize.equals(size) )
                 owner.setSize(newSize);
         }
     }

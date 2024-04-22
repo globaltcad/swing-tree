@@ -298,6 +298,11 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
     }
 
     /**
+     *  Allows you to register a user action listener which will be called
+     *  whenever parts (or all) of the text in the underlying text component gets removed.
+     *  This event is based on the {@link DocumentFilter#remove(DocumentFilter.FilterBypass, int, int)}
+     *  method of the underlying {@link AbstractDocument}.
+     *
      * @param action A {@link Action} lambda which will be called when parts (or all) of the text in
      *               the underlying text component gets removed.
      *
@@ -327,6 +332,14 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
     }
 
     /**
+     *  This method allows you to register a user action which will be called
+     *  whenever the text in the underlying text component gets replaced.
+     *  This event is based on the
+     *  {@link DocumentFilter#replace(DocumentFilter.FilterBypass, int, int, String, AttributeSet)}
+     *  method of the underlying {@link AbstractDocument}.
+     *  Use the {@link TextReplaceDelegate} that is supplied to your action to
+     *  get access to the underlying text component and the text replacement details.
+     *
      * @param action A {@link Action} lambda which will be called when the text in
      *               the underlying text component gets replaced.
      *

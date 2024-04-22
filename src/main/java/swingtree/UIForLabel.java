@@ -140,6 +140,10 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
     }
 
     /**
+     *  Makes the wrapped {@link JLabel} font bold if the provided flag is true,
+     *  and plain if the flag is false.
+     *  See {@link #makeBold()} and {@link #makePlain()} for more information.
+     *
      * @param isBold The flag determining if the font of this label should be bold or plain.
      * @return This very builder to allow for method chaining.
      */

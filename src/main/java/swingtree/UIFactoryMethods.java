@@ -635,7 +635,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  <b>Please note that the {@link JBox} type is in no way related to the {@link BoxLayout}!
      *  The term <i>box</i> is referring to the purpose of this component, which
      *  is to tightly store and wrap other sub-components seamlessly...</b>
-     *  <p>
+     *
      * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
      * @param colConstraints The layout which will be passed to the {@link MigLayout} constructor as second argument.
      * @return A builder instance for a transparent {@link JBox}, which enables fluent method chaining.
@@ -765,7 +765,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  <b>Please note that the {@link JBox} type is in no way related to the {@link BoxLayout}!
      *  The term <i>box</i> is referring to the purpose of this component, which
      *  is to tightly store and wrap other sub-components seamlessly...</b>
-     *  <p>
+     *
      * @param attr The layout attributes in the form of a {@link LayoutConstraint} constants.
      * @param colConstraints The column constraints.
      * @param rowConstraints The row constraints.
@@ -787,7 +787,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  <b>Please note that the {@link JBox} type is in no way related to the {@link BoxLayout}!
      *  The term <i>box</i> is referring to the purpose of this component, which
      *  is to tightly store and wrap other sub-components seamlessly...</b>
-     *  <p>
+     *
      * @param attr The layout attributes which will be passed to the {@link MigLayout} constructor as first argument.
      * @return A builder instance for a transparent {@link JBox}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code attr} is {@code null}.
@@ -813,7 +813,6 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  <b>Please note that the {@link JBox} type is in no way related to the {@link BoxLayout}!
      *  The term <i>box</i> is referring to the purpose of this component, which
      *  is to tightly store and wrap other sub-components seamlessly...</b>
-     *  <p>
      *
      * @param attr The layout attributes in the form of a {@link LayoutConstraint} constants.
      * @param colConstraints The column constraints.
@@ -847,7 +846,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  <b>Please note that the {@link JBox} type is in no way related to the {@link BoxLayout}!
      *  The term <i>box</i> is referring to the purpose of this component, which
      *  is to tightly store and wrap other sub-components seamlessly...</b>
-     *  <p>
+     *
      * @param attr The layout attributes in the form of a {@link LayoutConstraint} constants.
      * @param colConstraints The column constraints.
      * @param rowConstraints The row constraints.
@@ -1725,6 +1724,19 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
+     *  A convenient factory method for creating a declarative
+     *  builder object for a the {@link JMenuItem} component type.<br>
+     *  Menu items are usually passed to {@link JMenu}s or {@link JPopupMenu}s
+     *  like so: <br>
+     *  <pre>{@code
+     *  UI.menu()
+     *  .add(UI.menuItem("Delete").onClick( it->{..} ))
+     *  .add(UI.menuItem("Save").onClick( it->{..} ))
+     *  .add(UI.menuItem("Exit").onClick( it->{..} ))
+     *  }</pre>
+     *  See also {@link #menu()} and {@link #menu(String)}
+     *  or {@link #popupMenu()} for related factory methods.
+     *
      * @return A SwingTree builder node for the {@link JMenuItem} type.
      */
     public static UIForMenuItem<JMenuItem> menuItem() {
@@ -1750,9 +1762,17 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
-     *  This factory method creates a {@link JMenu} with the provided text property
+     *  This factory method creates a {@link JMenuItem} with the provided text property
      *  bound to the menu item. So when the property state changes to a different text,
      *  then so does the text displayed on the menu item. <br>
+     *  A {@link JMenuItem} is typically used as part of {@link JMenu}s or {@link JPopupMenu}s.
+     *  Here an example demonstrating the usage of this method: <br>
+     *  <pre>{@code
+     *  UI.popupMenu()
+     *  .add(UI.menuItem(viewModel.actionName1()).onClick( it -> {..} ))
+     *  .add(UI.menuItem(viewModel.actionName2()).onClick( it -> {..} ))
+     *  }</pre>
+     *
      *
      * @param text The text property which should be displayed on the wrapped {@link JMenuItem} dynamically.
      * @return A builder instance for the provided {@link JMenuItem}, which enables fluent method chaining.
@@ -1793,6 +1813,8 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *    .withTip("I give info!")
      *    .onClick( it -> {...} )
      *  }</pre>
+     *  Note that a {@link JMenuItem} is typically used as part of {@link JMenu}s or {@link JPopupMenu}s.
+     *  See also {@link #menu()}, {@link #menu(String)} or {@link #popupMenu()} for related factory methods.
      *
      * @param text The text which should be displayed on the wrapped {@link JMenuItem}.
      * @param icon The icon which should be displayed on the wrapped {@link JMenuItem}.
@@ -1824,6 +1846,11 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
+     *  A factory method for creating a {@link JMenuItem} with an icon and the supplied text
+     *  property uni-directionally bound to the menu item. <br>
+     *  When the text property changes in the view model,
+     *  the text displayed on the menu item will be updated accordingly.
+     *
      * @param text The text property which should be displayed on the wrapped {@link JMenuItem} dynamically.
      * @param icon The icon which should be displayed on the wrapped {@link JMenuItem}.
      * @return A builder instance for the provided {@link JMenuItem}, which enables fluent method chaining.
@@ -1850,11 +1877,12 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  are heavy objects whose loading may or may not succeed, and so they are
      *  not suitable for direct use in a property as part of your view model.
      *  Instead, you should use the {@link IconDeclaration} interface, which is a
-     *  lightweight value object that merely models the resource location of the icon
-     *  even if it is not yet loaded or even does not exist at all.
+     *  lightweight and error tolerant value based object that merely
+     *  models the resource location of the icon. It can exist even if the target
+     *  icon is not yet loaded or does not exist at all.
      *  <p>
-     *  This is especially useful in case of unit tests for you view model,
-     *  where the icon may not be available at all, but you still want to test
+     *  This is especially useful when writing unit tests for your view models,
+     *  where the icon resources may not be available, but you still want to test
      *  the behaviour of your view model.
      *
      * @param text The text which should be displayed on the wrapped {@link JMenuItem}.
@@ -1882,11 +1910,12 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  are heavy objects whose loading may or may not succeed, and so they are
      *  not suitable for direct use in a property as part of your view model.
      *  Instead, you should use the {@link IconDeclaration} interface, which is a
-     *  lightweight value object that merely models the resource location of the icon
-     *  even if it is not yet loaded or even does not exist at all.
+     *  lightweight and error tolerant value based object that merely
+     *  models the resource location of the icon. It can exist even if the target
+     *  icon is not yet loaded or does not exist at all.
      *  <p>
-     *  This is especially useful in case of unit tests for you view model,
-     *  where the icon may not be available at all, but you still want to test
+     *  This is especially useful when writing unit tests for your view models,
+     *  where the icon resources may not be available, but you still want to test
      *  the behaviour of your view model.
      *
      * @param text The text property which should be displayed on the wrapped {@link JMenuItem} dynamically.
@@ -4553,6 +4582,10 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
+     *  Use this to create a builder for a concrete {@link JList} component
+     *  type instance. This method allows you to easily integrate custom
+     *  {@link JList} implementations into the SwingTree framework.
+     *
      * @param list The {@link JList} which should be wrapped by the builder.
      * @param <E> The type of the elements in the list.
      * @return A builder instance for the provided {@link JList}.
@@ -4778,11 +4811,14 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
+     *  Allows you to wrap a custom {@link JTableHeader} type in a
+     *  declarative SwingTree UI builder.
+     *
      * @param header The table header which should be wrapped by the builder.
      * @return A builder instance for a new {@link JTableHeader}.
      * @param <H> The type of the {@link JTableHeader} for which the builder should be created.
      */
-    public static <H extends UI.TableHeader> UIForTableHeader<H> of(H header ) {
+    public static <H extends UI.TableHeader> UIForTableHeader<H> of( H header ) {
         NullUtil.nullArgCheck(header, "header", UI.TableHeader.class);
         return new UIForTableHeader<>(new BuilderState<>(header));
     }
@@ -5266,20 +5302,30 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
+     *  Exposes the {@link MessageDialog} API, an immutable builder config
+     *  for creating a message dialog with a given message text.
+     *  Call methods like {@link MessageDialog#showAsInfo()}, {@link MessageDialog#showAsWarning()}
+     *  or {@link MessageDialog#showAsError()} to show the dialog in the desired style.
+     *
      * @param text The text to show in the dialog.
      * @return A builder for creating an error dialog.
      */
-    public static MessageDialog message(String text ) { return MessageDialog.saying(text); }
+    public static MessageDialog message( String text ) { return MessageDialog.saying(text); }
 
     /**
-     *  Shows a conformation dialog with the given message.
+     *  Shows a conformation dialog with the given message and
+     *  returns the user's answer in the form of a {@link ConfirmAnswer}
+     *  enum constant.
+     *
      * @param message the message to show
      * @return {@code Answer.YES} if the user clicked "Yes", {@code Answer.NO} if the user clicked "No", {@code Answer.CANCEL} otherwise.
      */
-    public static ConfirmAnswer confirm(String message ) { return confirm("Confirm", message); }
+    public static ConfirmAnswer confirm( String message ) { return confirm("Confirm", message); }
 
     /**
-     * Shows a conformation dialog with the given title and message.
+     * Shows a conformation dialog with the given title and message and
+     * returns the user's answer in the form of a {@link ConfirmAnswer}
+     * enum constant.
      *
      * @param title   the title of the dialog
      * @param message the message to show

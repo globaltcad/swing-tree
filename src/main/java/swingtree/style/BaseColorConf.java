@@ -61,4 +61,13 @@ final class BaseColorConf
                Objects.equals(_backgroundColor, rhs._backgroundColor) &&
                Objects.equals(_borderColor,     rhs._borderColor);
     }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "[" +
+                "foundationColor=" + _foundationColor + ", " +
+                "backgroundColor=" + _backgroundColor + ", " +
+                "borderColor=" + _borderColor +
+            "]";
+    }
 }

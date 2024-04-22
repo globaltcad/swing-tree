@@ -1,5 +1,6 @@
 package swingtree;
 
+import sprouts.Action;
 import swingtree.components.JSplitButton;
 
 import javax.swing.*;
@@ -9,12 +10,18 @@ import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+/**
+ *  This class is a delegate for events of the {@link JSplitButton} component.
+ *  See {@link UIForSplitButton#onSplitClick(Action)} or {@link UIForSplitButton#onSelection(Action)}
+ *  for more information about where this delegate is used.
+ * @param <I> The common type of the {@link JMenuItem} which is part of the {@link JSplitButton}.
+ */
 public final class SplitButtonDelegate<I extends JMenuItem> extends AbstractDelegate<JSplitButton>
 {
         private final SplitItemDelegate<I> _itemsDelegate;
 
         SplitButtonDelegate(
-            JSplitButton button,
+            JSplitButton          button,
             SplitItemDelegate<I> itemsDelegate
         ) {
             super(false, button, button);
@@ -32,6 +39,9 @@ public final class SplitButtonDelegate<I extends JMenuItem> extends AbstractDele
         }
 
         /**
+         *  This method exposes all of the {@link JMenuItem}s which are
+         *  part of the {@link JSplitButton} in an immutable list.
+         *
          * @return A list of all split button items.
          */
         List<I> getItems() {
@@ -39,6 +49,8 @@ public final class SplitButtonDelegate<I extends JMenuItem> extends AbstractDele
         }
 
         /**
+         *  Exposes the {@link JMenuItem} which is currently selected.
+         *
          * @return The {@link JMenuItem} which caused this action to be executed.
          */
         public final I getCurrentItem() {
@@ -149,6 +161,9 @@ public final class SplitButtonDelegate<I extends JMenuItem> extends AbstractDele
         }
 
         /**
+         *  Allows you to set the text displayed on the {@link JSplitButton}
+         *  inside of your user {@link Action} implementation.
+         *
          * @param text The text which should be displayed on the {@link JSplitButton}.
          * @return This delegate instance to allow for method chaining.
          */
@@ -158,6 +173,9 @@ public final class SplitButtonDelegate<I extends JMenuItem> extends AbstractDele
         }
 
         /**
+         *  A convenient getter method for accessing the text displayed on the {@link JSplitButton}.
+         *  See also {@link #setButtonText(String)} for setting the text displayed on the {@link JSplitButton}.
+         *
          * @return The text displayed on the {@link JSplitButton}.
          */
         public String getButtonText() {

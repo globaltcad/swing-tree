@@ -159,7 +159,8 @@ import java.util.function.Function;
  *  <br>
  *  This means that you can not modify a font style instance directly, but you can
  *  easily create a modified copy of it by calling one of the wither-like methods.
- *  <p>
+ *
+ * @author Daniel Nepp
  */
 public final class FontConf
 {
@@ -410,7 +411,7 @@ public final class FontConf
         Objects.requireNonNull(color);
         if ( StyleUtil.isUndefinedColor(color) )
             color = null;
-        if ( Objects.equals(color, _paint) )
+        if ( _paint.representsColor(color) )
             return this;
 
         FontPaintConf paintConf = FontPaintConf.of(color, null, null, null);
@@ -453,7 +454,7 @@ public final class FontConf
         Objects.requireNonNull(backgroundColor);
         if ( StyleUtil.isUndefinedColor(backgroundColor) )
             backgroundColor = null;
-        if ( Objects.equals(backgroundColor, _backgroundPaint) )
+        if ( _backgroundPaint.representsColor(backgroundColor) )
             return this;
 
         FontPaintConf backgroundPaintConf = FontPaintConf.of(backgroundColor, null, null, null);

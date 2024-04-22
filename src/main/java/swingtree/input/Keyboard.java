@@ -18,13 +18,15 @@ public class Keyboard
     private final static Keyboard INSTANCE = new Keyboard();
 
     /**
+     *  Exposes the singleton instance of the {@link Keyboard} class.
+     *
      * @return The singleton instance of the {@link Keyboard} class.
      */
     public static Keyboard get() { return INSTANCE; }
 
     /**
      *  This enum represents all the keys on the keyboard which can be queried for their current state.
-     *  This is a mapping of the {@link KeyEvent} constants to a more readable enum.
+     *  This is a mapping of the {@link KeyEvent} constants to a more readable and type safe enum.
      */
     public enum Key
     {

@@ -36,6 +36,10 @@ public final class TextInsertDelegate extends AbstractTextComponentDelegate
     }
 
     /**
+     *  Exposes the text that is being inserted.
+     *  See {@link DocumentFilter#insertString(DocumentFilter.FilterBypass, int, String, AttributeSet)}
+     *  for more information.
+     *
      * @return The text to be inserted or an empty {@link String} if no text is to be inserted.
      *         Null is never returned.
      */
@@ -44,9 +48,14 @@ public final class TextInsertDelegate extends AbstractTextComponentDelegate
     }
 
     /**
+     *  Exposes the attribute set of the text to be inserted.
+     *  An attribute is a key-value pair that can be used to store
+     *  arbitrary data about the text to be inserted.
+     *  See {@link DocumentFilter#insertString(DocumentFilter.FilterBypass, int, String, AttributeSet)}
+     *  for more information about the underlying source of this attribute set.
      * @return The attribute set of the text to be inserted.
      */
-    public AttributeSet attributeSet() {
+    public final AttributeSet attributeSet() {
         return attributeSet;
     }
 }

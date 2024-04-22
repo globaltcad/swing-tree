@@ -9,6 +9,7 @@ import javax.swing.ComboBoxModel;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -19,7 +20,7 @@ import java.util.Objects;
  *
  * @param <E> The type of the elements which will be stored in this model.
  */
-abstract class AbstractComboModel<@Nullable E> implements ComboBoxModel<E>
+abstract class AbstractComboModel<E extends @Nullable Object> implements ComboBoxModel<E>
 {
 	private static final Logger log = org.slf4j.LoggerFactory.getLogger(AbstractComboModel.class);
 
@@ -179,12 +180,12 @@ abstract class AbstractComboModel<@Nullable E> implements ComboBoxModel<E>
 		}
 		// What now? Hmmm, let's try Boolean!
 		if ( type == Boolean.class ) {
-			o = o.trim().toLowerCase();
+			o = o.trim().toLowerCase(Locale.ENGLISH);
 			if ( o.equals("true") || o.equals("yes") || o.equals("1") )
-				return (E) Boolean.TRUE;
+				return type.cast(Boolean.TRUE);
 
 			if ( o.equals("false") || o.equals("no") || o.equals("0") )
-				return (E) Boolean.FALSE;
+				return type.cast(Boolean.FALSE);
 
 			// We failed to parse the boolean... the input is invalid!
 			// So we cannot update the model, and simply return the old value:
@@ -192,17 +193,37 @@ abstract class AbstractComboModel<@Nullable E> implements ComboBoxModel<E>
 		}
 		// Ok maybe it's an enum?
 		if ( type.isEnum() ) {
-			Class<Enum> enumType = (Class<Enum>) type;
+			Class<? extends Enum> enumType = type.asSubclass(Enum.class);
 			String name = o.trim();
-			try { return (E) Enum.valueOf(enumType, name); } catch ( IllegalArgumentException ignored) {}
-			name = o.toUpperCase();
-			try { return (E) Enum.valueOf(enumType, name); } catch ( IllegalArgumentException ignored) {}
-			name = o.toLowerCase();
-			try { return (E) Enum.valueOf(enumType, name); } catch ( IllegalArgumentException ignored) {}
-			name = name.toUpperCase().replace(' ', '_').replace('-', '_');
-			try { return (E) Enum.valueOf(enumType, name); } catch ( IllegalArgumentException ignored) {}
-			name = name.toLowerCase().replace(' ', '_').replace('-', '_');
-			try { return (E) Enum.valueOf(enumType, name); } catch ( IllegalArgumentException ignored) {}
+			try {
+				return type.cast(Enum.valueOf(enumType, name));
+			} catch ( IllegalArgumentException ignored) {
+				log.debug("Failed to parse enum string '"+name+"' as "+type+".", ignored);
+			}
+			name = o.toUpperCase(Locale.ENGLISH);
+			try {
+				return type.cast(Enum.valueOf(enumType, name));
+			} catch ( IllegalArgumentException ignored) {
+				log.debug("Failed to parse enum string '"+name+"' as "+type+".", ignored);
+			}
+			name = o.toLowerCase(Locale.ENGLISH);
+			try {
+				return type.cast(Enum.valueOf(enumType, name));
+			} catch ( IllegalArgumentException ignored) {
+				log.debug("Failed to parse enum string '"+name+"' as "+type+".", ignored);
+			}
+			name = name.toUpperCase(Locale.ENGLISH).replace(' ', '_').replace('-', '_');
+			try {
+				return type.cast(Enum.valueOf(enumType, name));
+			} catch ( IllegalArgumentException ignored) {
+				log.debug("Failed to parse enum string '"+name+"' as "+type+".", ignored);
+			}
+			name = name.toLowerCase(Locale.ENGLISH).replace(' ', '_').replace('-', '_');
+			try {
+				return type.cast(Enum.valueOf(enumType, name));
+			} catch ( IllegalArgumentException ignored) {
+				log.debug("Failed to parse enum string '"+name+"' as "+type+".", ignored);
+			}
 			// We failed to parse the enum... the input is invalid!
 			// So we cannot update the model, and simply return the old value:
 			return _selectedItem.orElseNull();
@@ -210,14 +231,14 @@ abstract class AbstractComboModel<@Nullable E> implements ComboBoxModel<E>
 		// Or a character?
 		if ( type == Character.class ) {
 			if ( o.trim().length() == 1 )
-				return (E) Character.valueOf(o.charAt(0));
+				return type.cast(o.charAt(0));
 			// Maybe it's all repeated?
 			if ( o.trim().length() > 1 ) {
 				char c = o.charAt(0);
 				for ( int i = 1; i < o.length(); i++ )
 					if ( o.charAt(i) != c )
 						return _selectedItem.orElseNull();
-				return (E) Character.valueOf(c);
+				return type.cast(c);
 			}
 			// We failed to parse the character... the input is invalid!
 			// So we cannot update the model, and simply return the old value:
@@ -240,7 +261,7 @@ abstract class AbstractComboModel<@Nullable E> implements ComboBoxModel<E>
 				array[i] = _convert(parts[i]);
 
 			// And finally we can return the array:
-			return (E) array;
+			return type.cast(array);
 		}
 		// Uff! Still nothing?!? Ok let's be creative, maybe we can try to use the constructor:
 		try {

@@ -29,10 +29,10 @@ final class DimensionalityConf
         Size size
     ) {
         if (
-            minSize       == _NONE._minSize &&
-            maxSize       == _NONE._maxSize &&
-            preferredSize == _NONE._preferredSize &&
-            size          == _NONE._size
+            minSize       .equals( _NONE._minSize       ) &&
+            maxSize       .equals( _NONE._maxSize       ) &&
+            preferredSize .equals( _NONE._preferredSize ) &&
+            size          .equals( _NONE._size          )
         )
             return _NONE;
         else

@@ -127,6 +127,13 @@ final class FontPaintConf
         return new FontPaint(this, new WeakReference<>(component));
     }
 
+    public boolean representsColor( @Nullable Color color ) {
+        return Objects.equals(color, _color) &&
+                _paint    == null &&
+                _gradient == null &&
+                _noise    == null;
+    }
+
     @Override
     public boolean equals( Object o ) {
         if ( this == o ) return true;

@@ -277,6 +277,11 @@ public final class SwingTree
     }
 
 	/**
+     *  The {@link EventProcessor} is a simple interface whose implementations
+     *  delegate tasks to threads that are capable of processing GUI or application events.
+     *  As part of this singleton, the SwingTree library maintains a global
+     *  {@link EventProcessor} that is used consistently by all declarative builders.
+     *
 	 * @return The currently configured {@link EventProcessor} that is used to process
 	 *         GUI and application events.
 	 */
@@ -301,6 +306,12 @@ public final class SwingTree
 	}
 
 	/**
+     *  The {@link StyleSheet} is an abstract class whose extensions are used to declare
+     *  component styles through a CSS like DSL API.
+     *  As part of this singleton, the SwingTree library maintains a global
+     *  {@link StyleSheet} that is used consistently by all declarative builders.
+     *  Use this method to access this global style sheet.
+     *
 	 * @return The currently configured {@link StyleSheet} that is used to style components.
 	 */
 	public StyleSheet getStyleSheet() {
@@ -360,6 +371,17 @@ public final class SwingTree
      */
     public void setDefaultAnimationInterval( long defaultAnimationInterval ) {
         _config = _config.defaultAnimationInterval(defaultAnimationInterval);
+    }
+
+    /**
+     *  Exposes a set of system properties in the form of a nicely formatted string.
+     *  These are used by the SwingTree library to determine the system configuration
+     *  and to adjust the UI accordingly.
+     *
+     * @return A string containing system information.
+     */
+    public String getSystemInfo() {
+        return SystemInfo.getAsPrettyString();
     }
 
     /**
@@ -866,7 +888,8 @@ public final class SwingTree
         public static final boolean isWindows_10_orLater;
         /** <strong>Note</strong>: This requires Java 8u321, 11.0.14, 17.0.2 or 18 (or later).
          * (see https://bugs.openjdk.java.net/browse/JDK-8274840)
-         **/ public static final boolean isWindows_11_orLater;
+         **/
+        public static final boolean isWindows_11_orLater;
         public static final boolean isMacOS_10_11_ElCapitan_orLater;
         public static final boolean isMacOS_10_14_Mojave_orLater;
         public static final boolean isMacOS_10_15_Catalina_orLater;
@@ -961,6 +984,35 @@ public final class SwingTree
         public static long toVersion( int major, int minor, int micro, int patch ) {
             return ((long) major << 48) + ((long) minor << 32) + ((long) micro << 16) + patch;
         }
+
+        static String getAsPrettyString() {
+            return SystemInfo.class.getSimpleName() + "[\n" +
+                    "    isWindows=" + isWindows + ",\n" +
+                    "    isMacOS=" + isMacOS + ",\n" +
+                    "    isLinux=" + isLinux + ",\n" +
+                    "    osVersion=" + osVersion + ",\n" +
+                    "    isWindows_10_orLater=" + isWindows_10_orLater + ",\n" +
+                    "    isWindows_11_orLater=" + isWindows_11_orLater + ",\n" +
+                    "    isMacOS_10_11_ElCapitan_orLater=" + isMacOS_10_11_ElCapitan_orLater + ",\n" +
+                    "    isMacOS_10_14_Mojave_orLater=" + isMacOS_10_14_Mojave_orLater + ",\n" +
+                    "    isMacOS_10_15_Catalina_orLater=" + isMacOS_10_15_Catalina_orLater + ",\n" +
+                    "    isX86=" + isX86 + ",\n" +
+                    "    isX86_64=" + isX86_64 + ",\n" +
+                    "    isAARCH64=" + isAARCH64 + ",\n" +
+                    "    javaVersion=" + javaVersion + ",\n" +
+                    "    isJava_9_orLater=" + isJava_9_orLater + ",\n" +
+                    "    isJava_11_orLater=" + isJava_11_orLater + ",\n" +
+                    "    isJava_15_orLater=" + isJava_15_orLater + ",\n" +
+                    "    isJava_17_orLater=" + isJava_17_orLater + ",\n" +
+                    "    isJava_18_orLater=" + isJava_18_orLater + ",\n" +
+                    "    isJetBrainsJVM=" + isJetBrainsJVM + ",\n" +
+                    "    isJetBrainsJVM_11_orLater=" + isJetBrainsJVM_11_orLater + ",\n" +
+                    "    isKDE=" + isKDE + ",\n" +
+                    "    isProjector=" + isProjector + ",\n" +
+                    "    isWebswing=" + isWebswing + ",\n" +
+                    "    isWinPE=" + isWinPE + "\n" +
+                    "]\n";
+        }
     }
 
     private static class LinuxFontPolicy
@@ -993,7 +1045,7 @@ public final class SwingTree
                 if( word.endsWith( "," ) )
                     word = word.substring( 0, word.length() - 1 ).trim();
 
-                String lword = word.toLowerCase();
+                String lword = word.toLowerCase(Locale.ENGLISH);
                 if( lword.equals( "italic" ) || lword.equals( "oblique" ) )
                     style |= Font.ITALIC;
                 else if( lword.equals( "bold" ) )
@@ -1029,7 +1081,7 @@ public final class SwingTree
                 size = 1;
 
             // handle logical font names
-            String logicalFamily = mapFcName( family.toLowerCase() );
+            String logicalFamily = mapFcName( family.toLowerCase(Locale.ENGLISH) );
             if( logicalFamily != null )
                 family = logicalFamily;
 
@@ -1078,7 +1130,7 @@ public final class SwingTree
                     return createFont( Font.DIALOG, style, size, dsize );
 
                 // check whether last work contains some font weight (e.g. Ultra-Bold or Heavy)
-                String lastWord = family.substring( index + 1 ).toLowerCase();
+                String lastWord = family.substring( index + 1 ).toLowerCase(Locale.ENGLISH);
                 if( lastWord.contains( "bold" ) || lastWord.contains( "heavy" ) || lastWord.contains( "black" ) )
                     style |= Font.BOLD;
 
@@ -1156,7 +1208,7 @@ public final class SwingTree
             int style = Font.PLAIN;
             int size = 10;
 
-            if( generalFont != null ) {
+            if ( generalFont != null ) {
                 List<String> strs = StringUtils.split( generalFont, ',' );
                 try {
                     family = strs.get( 0 );
@@ -1165,9 +1217,8 @@ public final class SwingTree
                         style |= Font.BOLD;
                     if( "1".equals( strs.get( 5 ) ) )
                         style |= Font.ITALIC;
-                } catch( RuntimeException ex ) {
-                    ex.printStackTrace();
-                    //LoggingFacade.INSTANCE.logConfig( "SwingTree: Failed to parse 'font=" + generalFont + "'.", ex );
+                } catch ( RuntimeException ex ) {
+                    log.error("Failed to parse KDE system font from String '"+generalFont+"'.", ex);
                 }
             }
 
@@ -1181,8 +1232,7 @@ public final class SwingTree
                     if( dpi < 50 )
                         dpi = 50;
                 } catch( NumberFormatException ex ) {
-                    ex.printStackTrace();
-                    //LoggingFacade.INSTANCE.logConfig( "SwingTree: Failed to parse 'forceFontDPI=" + forceFontDPI + "'.", ex );
+                    log.error("Failed to parse DPI scale from font size String '"+forceFontDPI+"'", ex);
                 }
             }
 
@@ -1221,10 +1271,9 @@ public final class SwingTree
                 while( (line = reader.readLine()) != null )
                     lines.add( line );
             } catch( IOException ex ) {
-                ex.printStackTrace();
-                //LoggingFacade.INSTANCE.logConfig( "SwingTree: Failed to read '" + filename + "'.", ex );
+                log.error("Failed to read KDE font config files for determining DPI scale factor.", ex);
             }
-            return lines;
+            return Collections.unmodifiableList(lines);
         }
 
         private static @Nullable String getConfigEntry( List<String> config, String group, String key ) {

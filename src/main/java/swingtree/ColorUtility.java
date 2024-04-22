@@ -3,6 +3,7 @@ package swingtree;
 import org.jspecify.annotations.Nullable;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 /*
@@ -152,7 +153,7 @@ final class ColorUtility {
                 return UI.Color.UNDEFINED;
             }
 
-            String[] parts = colorString.substring(start + 1, end).split(",");
+            String[] parts = colorString.substring(start + 1, end).split(",", -1);
             if (parts.length < 3 || parts.length > 4) {
                 log.error("Invalid rgb() or rgba() color: " + colorString, new Throwable());
                 return UI.Color.UNDEFINED;
@@ -194,7 +195,7 @@ final class ColorUtility {
                 return UI.Color.UNDEFINED;
             }
 
-            String[] parts = colorString.substring(start + 1, end).split(",");
+            String[] parts = colorString.substring(start + 1, end).split(",", -1);
             if (parts.length < 3 || parts.length > 4) {
                 log.error("Invalid hsb() or hsba() color: " + colorString, new Throwable());
                 return UI.Color.UNDEFINED;
@@ -255,7 +256,7 @@ final class ColorUtility {
         }
 
         {
-            String maybeWord = colorString.toLowerCase();
+            String maybeWord = colorString.toLowerCase(Locale.ENGLISH);
             boolean transparent = false;
 
             if (maybeWord.startsWith("transparent")) {
@@ -322,7 +323,7 @@ final class ColorUtility {
 
     private static UI.@Nullable Color _tryFromName(String maybeColorName) {
         try {
-            String lowerCaseName = maybeColorName.toLowerCase();
+            String lowerCaseName = maybeColorName.toLowerCase(Locale.ENGLISH);
             return ColorUtility.get(lowerCaseName);
         } catch (IllegalArgumentException e) {
             return null;
@@ -438,6 +439,7 @@ final class ColorUtility {
         NAMED_COLOURS.put("moccasin", UI.Color.MOCCASIN);
         NAMED_COLOURS.put("navajowhite", UI.Color.NAVAJOWHITE);
         NAMED_COLOURS.put("navy", UI.Color.NAVY);
+        NAMED_COLOURS.put("oak", UI.Color.OAK);
         NAMED_COLOURS.put("oldlace", UI.Color.OLDLACE);
         NAMED_COLOURS.put("olive", UI.Color.OLIVE);
         NAMED_COLOURS.put("olivedrab", UI.Color.OLIVEDRAB);

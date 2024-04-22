@@ -38,6 +38,11 @@ public final class TabDelegate extends ComponentMouseEventDelegate<JTabbedPane>
     }
 
     /**
+     *  Exposes the index of the currently delegated tab,
+     *  in the form of an integer starting at 0.
+     *  It represents the position of the tab in the array
+     *  of all existing tabs within the underlying {@link JTabbedPane}.
+     *
      * @return The index of the clicked tab.
      */
     public final int tabIndex() {

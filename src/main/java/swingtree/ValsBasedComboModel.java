@@ -6,7 +6,7 @@ import sprouts.Vals;
 
 import java.util.Objects;
 
-class ValsBasedComboModel<@Nullable E> extends AbstractComboModel<E>
+class ValsBasedComboModel<E extends @Nullable Object> extends AbstractComboModel<E>
 {
     private final Vals<E> _items;
 

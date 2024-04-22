@@ -2,13 +2,12 @@ package swingtree;
 
 import sprouts.Action;
 
-import javax.swing.*;
-import java.awt.Container;
-import java.util.*;
+import javax.swing.JComponent;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  *  Instances of this are delegates for a specific components and events that
@@ -46,22 +45,29 @@ import java.util.stream.Stream;
  */
 public class ComponentDelegate<C extends JComponent, E> extends AbstractDelegate<C>
 {
-    private final E event;
+    private final E _event;
 
 
     public ComponentDelegate(
             C component, E event
     ) {
         super(false, component, component);
-        this.event = Objects.requireNonNull(event);
+        _event = Objects.requireNonNull(event);
     }
 
     /**
+     *  Exposes the underlying component from which this delegate
+     *  and user event actions originate.
+     *  This method may only be called by the Swing thread.
+     *  If another thread calls this method, an exception will be thrown.
+     *
      * @return The component for which the current {@link Action} originated.
+     * @throws IllegalStateException If this method is called from a non-Swing thread.
      */
     public final C getComponent() {
         // We make sure that only the Swing thread can access the component:
-        if ( UI.thisIsUIThread() ) return _component();
+        if ( UI.thisIsUIThread() )
+            return _component();
         else
             throw new IllegalStateException(
                     "Component can only be accessed by the Swing thread."
@@ -83,9 +89,13 @@ public class ComponentDelegate<C extends JComponent, E> extends AbstractDelegate
             UI.run( () -> action.accept(_component()) );
     }
 
-    public final E getEvent() { return event; }
+    public final E getEvent() { return _event; }
 
     /**
+     *  Exposes the "siblings", which consist of all
+     *  the child components of the parent of the delegated component
+     *  except the for the delegated component itself.
+     *
      * @return A list of all siblings excluding the component from which this instance originated.
      */
     public final List<JComponent> getSiblings() {
@@ -115,6 +125,14 @@ public class ComponentDelegate<C extends JComponent, E> extends AbstractDelegate
     }
 
     /**
+     *  Allows you to query the sibling components of the delegated component
+     *  of the specified type. So a list of all siblings which are of the specified type
+     *  will be returned, <b>excluding</b> the currently delegated component itself. <br>
+     *  Note that this method may only be called by the Swing thread.
+     *  If another thread calls this method, an exception will be thrown.
+     *  Use {@link #forSiblingsOfType(Class, Consumer)} to access the sibling components
+     *  of the specified type in a thread-safe way.
+     *
      * @param type The type class of the sibling components to return.
      * @param <T> The type of the sibling components to return.
      * @return A list of all siblings of the specified type, excluding the component from which this instance originated.
@@ -157,6 +175,9 @@ public class ComponentDelegate<C extends JComponent, E> extends AbstractDelegate
     /**
      *  This method provides a convenient way to access all the children of the parent component
      *  of the component this delegate is for.
+     *  Note that this method may only be called by the Swing thread.
+     *  If another thread calls this method, an exception will be thrown.
+     *  Use {@link #forSiblinghood(Consumer)} to access the sibling components
      *
      * @return A list of all siblings including the component from which this instance originated.
      */
@@ -187,6 +208,14 @@ public class ComponentDelegate<C extends JComponent, E> extends AbstractDelegate
     }
 
     /**
+     *  Allows you to query the sibling components of the delegated component
+     *  of the specified type. So a list of all siblings which are of the specified type
+     *  will be returned, possibly including the delegated component itself. <br>
+     *  Note that this method may only be called by the Swing thread.
+     *  If another thread calls this method, an exception will be thrown.
+     *  Use {@link #forSiblinghoodOfType(Class, Consumer)} to access the sibling components
+     *  of the specified type in a thread-safe way.
+     *
      * @param type The type of the sibling components to return.
      * @param <T> The {@link JComponent} type of the sibling components to return.
      * @return A list of all siblings of the specified type, including the component from which this instance originated.

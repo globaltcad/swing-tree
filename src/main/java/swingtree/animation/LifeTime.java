@@ -210,4 +210,12 @@ public final class LifeTime
         return Objects.hash(_delay, _duration, _interval);
     }
 
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName()+"[" +
+                    "delay="    + _delay    + ", "+
+                    "duration=" + _duration + ", "+
+                    "interval=" + _interval +
+                "]";
+    }
 }

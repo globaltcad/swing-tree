@@ -4,6 +4,8 @@ package examples.comparisons.comparison1;
 import swingtree.UI;
 import utility.Utility;
 
+import javax.swing.JPanel;
+
 import static swingtree.UI.*;
 
 public class MadeWithSwingTree extends Panel
@@ -80,7 +82,7 @@ public class MadeWithSwingTree extends Panel
                 .add("gapy "+S+" 0, span, wrap", label("Different distance (small / medium) between the buttons."))
                 .add("gapy "+S+" 0, span, wrap", label("Buttons have same size despite different text length"))
             )
-            .get(Panel.class)
+            .get(JPanel.class)
         );
     }
 

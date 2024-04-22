@@ -1,6 +1,8 @@
 package swingtree.style;
 
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import swingtree.UI;
 import swingtree.layout.Size;
 
@@ -23,6 +25,7 @@ import java.util.function.BiConsumer;
 final class LayerCache
 {
     private static final Map<LayerRenderConf, CachedImage> _CACHE = new WeakHashMap<>();
+    private static final Logger log = LoggerFactory.getLogger(LayerCache.class);
 
 
     private static final class CachedImage extends BufferedImage
@@ -184,7 +187,9 @@ final class LayerCache
             try {
                 StyleUtil.transferConfigurations(g, g2);
             }
-            catch (Exception ignored) {}
+            catch ( Exception ignored ) {
+                log.debug("Error while transferring configurations to the cached image graphics context.");
+            }
             finally {
                 renderer.accept(_layerRenderData, g2);
                 g2.dispose();

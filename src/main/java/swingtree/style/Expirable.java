@@ -20,17 +20,23 @@ final class Expirable<T>
     }
 
     /**
+     *  Determines if the lifetime of this instance is expired,
+     *  which is based on the current time and the start and end
+     *  of the lifespan.
      *  @return True if the lifetime of this instance is expired,
      *          false otherwise.
      **/
     boolean isExpired() { return _lifeSpan.isExpired(); }
 
     /**
+     *  Exposes the thing that can expire.
      *  @return The payload of this instance.
      **/
     T get() { return _value; }
 
     /**
+     *  Exposes the lifespan of this instance,
+     *  which is used to determine if the payload is expired.
      *  @return The time span of this instance.
      **/
     LifeSpan getLifeSpan() { return _lifeSpan; }

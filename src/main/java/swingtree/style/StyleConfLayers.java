@@ -44,12 +44,12 @@ final class StyleConfLayers
     ) {
         StyleConfLayer empty = StyleConfLayer.empty();
         if (
-            filter     == FilterConf.none() &&
-            background == empty &&
-            content    == empty &&
-            border     == empty &&
-            foreground == empty &&
-            any        == null
+            filter     .equals( FilterConf.none() ) &&
+            background .equals( empty ) &&
+            content    .equals( empty ) &&
+            border     .equals( empty ) &&
+            foreground .equals( empty ) &&
+            any == null
         )
             return _EMPTY;
 
@@ -110,6 +110,9 @@ final class StyleConfLayers
     }
 
     /**
+     *  Tests if the predicate returns true for any of the {@link UI.Layer}s and their
+     *  corresponding {@link StyleConfLayer}s in this {@link StyleConfLayers} object.
+     *
      * @param predicate A predicate that takes a layer and a style configuration and returns true or false.
      * @return True if the predicate returns true for any of the layers.
      */
@@ -134,7 +137,7 @@ final class StyleConfLayers
         if ( factor == 1 ) {
             return this;
         }
-        if ( this == _EMPTY ) {
+        if ( this.equals(_EMPTY) ) {
             return this;
         }
         return of(

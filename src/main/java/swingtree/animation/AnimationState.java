@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * The state of an animation at a given point in time describing how far the animation has progressed
  * using a number between 0 and 1 (see {@link #progress()}).
- * Use the numbers exposed by the methods of this interface to define how
+ * Use the numbers exposed by the methods of this value based class to define how
  * your animation should progress over time.
  */
 public final class AnimationState
@@ -73,6 +73,12 @@ public final class AnimationState
     }
 
     /**
+     *  Exposes the progress of the animation state, which is a number between 0 and 1
+     *  that represents how far the animation has progressed between its start and end.
+     *  Note that an animation may also regress, in which case the states will
+     *  transition from 1 to 0 instead of from 0 to 1.
+     *  See {@link Stride} for more information.
+     *
      * @return The animation progress in terms of a number between 0 and 1,
      *         where 0.5 means the animation is halfway through, and 1 means the animation completed.
      */
@@ -317,6 +323,10 @@ public final class AnimationState
     }
 
     /**
+     *  A single iteration of an animation consists of its progress going from 0 to 1
+     *  in case of it being progressive, or from 1 to 0 in case of it being regressive (see {@link Stride}).
+     *  This method returns the number of times the animation has been repeated.
+     *
      * @return The number of times the animation has been repeated.
      *         This number is guaranteed to be 0 at the beginning of the animation,
      *         and for most animations it will be 0 at the end of the animation as well.
@@ -325,11 +335,19 @@ public final class AnimationState
     public long repeats() { return howManyLoops; }
 
     /**
+     *  Exposes the {@link LifeSpan} of the animation, which defines
+     *  when the animation starts, for how long it should run, how is should progress and
+     *  the refresh rate of the animation.
+     *
      * @return The {@link LifeSpan} of the animation, i.e. the time when the animation started and how long it should run.
      */
     public LifeSpan lifeSpan() { return lifeSpan; }
 
     /**
+     *  Exposes the timer event that triggered the animation.
+     *  Note that under the hood, all animations with the same refresh rate will be
+     *  updated by the same timer and thus share the same event.
+     *
      * @return The timer event that triggered the animation.
      */
     public ActionEvent event() { return event; }
@@ -360,10 +378,8 @@ public final class AnimationState
     @Override
     public int hashCode() {
         int result;
-        long temp;
-        temp = Double.doubleToLongBits(progress);
-        result = (int) (temp ^ (temp >>> 32));
-        result = 31 * result + (int) (howManyLoops ^ (howManyLoops >>> 32));
+        result = Double.hashCode(progress);
+        result = 31 * result + Long.hashCode(howManyLoops);
         result = 31 * result + lifeSpan.hashCode();
         result = 31 * result + event.hashCode();
         return result;

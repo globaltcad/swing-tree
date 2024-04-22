@@ -114,9 +114,9 @@ public class NoteGuesserView extends Panel
         // Let's start the loop that drwas the lines:
         for ( int ni = 0; ni < (vm.numNotes()); ni++ ) {
             int lineStartX = x;
-            int lineY = y + (h - h * ni / (vm.numNotes()));
+            int lineY = y + (h - h * ni / vm.numNotes());
             int lineEndX = x + w;
-            int distanceBetween2Lines = 2 * (h / (vm.numNotes()));
+            int distanceBetween2Lines = 2 * (h / vm.numNotes());
 
             boolean shouldDrawFullLine = vm.isVisibleLine(ni);
 

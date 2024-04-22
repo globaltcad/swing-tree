@@ -70,6 +70,10 @@ public final class LifeSpan
     }
 
     /**
+     *  Allows you to check whether the animation is expired or not.
+     *  An animation is considered expired if the current time is greater than
+     *  the start time plus the duration of the animation.
+     *
      * @return {@code true} if the animation is expired, {@code false} otherwise.
      */
     public boolean isExpired() {
@@ -88,5 +92,13 @@ public final class LifeSpan
     @Override
     public int hashCode() {
         return Objects.hash(_lifeTime, _startTime);
+    }
+
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName() + "[" +
+                    "startTime=" + _startTime + ", " +
+                    "lifeTime="  + _lifeTime  +
+                "]";
     }
 }

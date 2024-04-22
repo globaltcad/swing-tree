@@ -51,7 +51,6 @@ import java.awt.image.ColorModel;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 
 
 /**
@@ -75,96 +74,104 @@ final class ConicalGradientPaint implements Paint {
      * Cache for the context - when the bounds, center, and transform are unchanged, then the context is the same
      */
     private static class CachedContext {
-        private final Rectangle bounds;
-        private final Point2D center;
-        private final AffineTransform transform;
+        private final Rectangle _bounds;
+        private final Point2D _center;
+        private final AffineTransform _transform;
 
-        private final ConicalGradientPaintContext cachedContext;
+        private final ConicalGradientPaintContext _cachedContext;
 
-        private CachedContext(Rectangle bounds, Point2D center, AffineTransform transform, ConicalGradientPaintContext context) {
-            this.bounds = bounds;
-            this.center = center;
-            this.transform = transform;
-            cachedContext = context;
+        private CachedContext(
+            Rectangle bounds,
+            Point2D center,
+            AffineTransform transform,
+            ConicalGradientPaintContext context
+        ) {
+            _bounds        = bounds;
+            _center        = center;
+            _transform     = transform;
+            _cachedContext = context;
         }
 
         /**
          * KK: Get the cached context - if it matches the supplied arguments.  If the arguments aren't equal to the cached version, return null
-         * @param bounds
-         * @param center
-         * @param transform
+         * @param bounds A {@link Rectangle} representing the bounds of the context to be created (device space).
+         * @param center The center of the gradient (device space).
+         * @param transform The transform to be applied to the context (user space to device space).
          * @return the cached context, or null if the arguments don't match
          */
-        private @Nullable ConicalGradientPaintContext get(Rectangle bounds, Point2D center, AffineTransform transform) {
-            if (this.bounds.equals(bounds) && this.center.equals(center) && this.transform.equals(transform))
-                return cachedContext;
+        private @Nullable ConicalGradientPaintContext get(
+                Rectangle       bounds, 
+                Point2D         center, 
+                AffineTransform transform
+        ) {
+            if (_bounds.equals(bounds) && _center.equals(center) && _transform.equals(transform))
+                return _cachedContext;
             else
                 return null;
         }
     }
 
 
-    private final Point2D CENTER;
-    private final float ANGLE_OFFSET;
-    private final float[] FRACTION_ANGLES;
-    private final float[] RED_STEP_LOOKUP;
-    private final float[] GREEN_STEP_LOOKUP;
-    private final float[] BLUE_STEP_LOOKUP;
-    private final float[] ALPHA_STEP_LOOKUP;
-    private final Color[] COLORS;
+    private final Point2D _center;
+    private final float   _angleOffset;
+    private final float[] _fractionOffsets;
+    private final float[] _redStepLookup;
+    private final float[] _greenStepLookup;
+    private final float[] _blueStepLookup;
+    private final float[] _alphaStepLookup;
+    private final Color[] _colors;
     private static final float INT_TO_FLOAT_CONST = 1f / 255f;
-    private @Nullable CachedContext cached;
+    private @Nullable CachedContext _cached;
 
-
-
+    
     /**
      * Standard constructor which takes the FRACTIONS in values from 0.0f to 1.0f
-     * @param CENTER
-     * @param GIVEN_FRACTIONS
-     * @param GIVEN_COLORS
-     * @throws IllegalArgumentException
+     * @param center The center of the gradient circle.
+     * @param GIVEN_FRACTIONS The fractions of the gradient in values from 0.0f to 1.0f, these should match the COLORS array.
+     * @param GIVEN_COLORS The colors of the gradient, these should match the FRACTIONS array.
+     * @throws IllegalArgumentException if fractions and colors are not of the same size.
      */
-    public ConicalGradientPaint(final Point2D CENTER, final float[] GIVEN_FRACTIONS, final Color[] GIVEN_COLORS) throws IllegalArgumentException {
-        this(false, CENTER, 0.0f, GIVEN_FRACTIONS, GIVEN_COLORS);
+    public ConicalGradientPaint(final Point2D center, final float[] GIVEN_FRACTIONS, final Color[] GIVEN_COLORS) throws IllegalArgumentException {
+        this(false, center, 0.0f, GIVEN_FRACTIONS, GIVEN_COLORS);
     }
 
     /**
      * Enhanced constructor which takes the FRACTIONS in degress from 0.0f to 360.0f and
      * also an GIVEN_OFFSET in degrees around the rotation CENTER
-     * @param USE_DEGREES
-     * @param CENTER
-     * @param GIVEN_OFFSET
-     * @param GIVEN_FRACTIONS
-     * @param GIVEN_COLORS
-     * @throws IllegalArgumentException
+     * @param usesDegrees true if fractions are in degrees, false if fractions are in 0.0 to 1.0
+     * @param center the center of the gradient
+     * @param offset the offset of the gradient in degrees
+     * @param fractions the fractions of the gradient in degrees or 0.0 to 1.0
+     * @param colors the colors of the gradient
+     * @throws IllegalArgumentException if fractions and colors are not of the same size
      */
     public ConicalGradientPaint(
-        final boolean USE_DEGREES,
-        final Point2D CENTER,
-        final float   GIVEN_OFFSET,
-        final float[] GIVEN_FRACTIONS,
-        final Color[] GIVEN_COLORS
+        final boolean usesDegrees,
+        final Point2D center,
+        final float   offset,
+        final float[] fractions,
+        final Color[] colors
     )
     throws IllegalArgumentException
     {
         // Check that fractions and colors are of the same size
-        if (GIVEN_FRACTIONS.length != GIVEN_COLORS.length) {
+        if (fractions.length != colors.length) {
             throw new IllegalArgumentException("Fractions and colors must be equal in size");
         }
 
-        final java.util.List<Float> fractionList = new java.util.ArrayList<Float>(GIVEN_FRACTIONS.length);
-        final float OFFSET;
-        if (USE_DEGREES) {
-            final float DEG_FRACTION = 1f / 360f;
-            if (Float.compare((GIVEN_OFFSET * DEG_FRACTION), -0.5f) == 0) {
-                OFFSET = -0.5f;
-            } else if (Float.compare((GIVEN_OFFSET * DEG_FRACTION), 0.5f) == 0) {
-                OFFSET = 0.5f;
+        final java.util.List<Float> fractionList = new java.util.ArrayList<Float>(fractions.length);
+        final float finalOffset;
+        if (usesDegrees) {
+            final float degFraction = 1f / 360f;
+            if (Float.compare((offset * degFraction), -0.5f) == 0) {
+                finalOffset = -0.5f;
+            } else if (Float.compare((offset * degFraction), 0.5f) == 0) {
+                finalOffset = 0.5f;
             } else {
-                OFFSET = (GIVEN_OFFSET * DEG_FRACTION);
+                finalOffset = (offset * degFraction);
             }
-            for (final float fraction : GIVEN_FRACTIONS) {
-                fractionList.add((fraction * DEG_FRACTION));
+            for (final float fraction : fractions) {
+                fractionList.add((fraction * degFraction));
             }
         } else {
             // Now it seems to work with rotation of 0.5f, below is the old code to correct the problem
@@ -182,23 +189,23 @@ final class ConicalGradientPaint implements Paint {
 //            }
 //            else
             {
-                OFFSET = GIVEN_OFFSET;
+                finalOffset = offset;
             }
-            for (final float fraction : GIVEN_FRACTIONS) {
+            for (final float fraction : fractions) {
                 fractionList.add(fraction);
             }
         }
 
         // Check for valid offset
-        if (OFFSET > 0.5f || OFFSET < -0.5f) {
+        if (finalOffset > 0.5f || finalOffset < -0.5f) {
             throw new IllegalArgumentException("Offset has to be in the range of -0.5 to 0.5");
         }
 
-        this.ANGLE_OFFSET = GIVEN_OFFSET;
+        _angleOffset = offset;
 
         // Adjust fractions and colors array in the case where startvalue != 0.0f and/or endvalue != 1.0f
-        final java.util.List<Color> colorList = new java.util.ArrayList<Color>(GIVEN_COLORS.length);
-        colorList.addAll(java.util.Arrays.asList(GIVEN_COLORS));
+        final java.util.List<Color> colorList = new java.util.ArrayList<Color>(colors.length);
+        colorList.addAll(java.util.Arrays.asList(colors));
 
         //KK: Calculate the Color at the top dead center (mix between first and last)
         final Color start = colorList.get(0);
@@ -226,27 +233,27 @@ final class ConicalGradientPaint implements Paint {
         }
 
         // Set the values
-        this.CENTER = CENTER;
-        COLORS = colorList.toArray(new Color[colorList.size()]);
+        _center = center;
+        _colors = colorList.toArray(new Color[colorList.size()]);
 
         // Prepare lookup table for the angles of each fraction
         final int MAX_FRACTIONS = fractionList.size();
-        this.FRACTION_ANGLES = new float[MAX_FRACTIONS];
+        _fractionOffsets = new float[MAX_FRACTIONS];
         for (int i = 0; i < MAX_FRACTIONS; i++) {
-            FRACTION_ANGLES[i] = fractionList.get(i) * 360f;
+            _fractionOffsets[i] = fractionList.get(i) * 360f;
         }
 
         // Prepare lookup tables for the color stepsize of each color
-        RED_STEP_LOOKUP = new float[COLORS.length];
-        GREEN_STEP_LOOKUP = new float[COLORS.length];
-        BLUE_STEP_LOOKUP = new float[COLORS.length];
-        ALPHA_STEP_LOOKUP = new float[COLORS.length];
+        _redStepLookup = new float[_colors.length];
+        _greenStepLookup = new float[_colors.length];
+        _blueStepLookup = new float[_colors.length];
+        _alphaStepLookup = new float[_colors.length];
 
-        for (int i = 0; i < (COLORS.length - 1); i++) {
-            RED_STEP_LOOKUP[i] = ((COLORS[i + 1].getRed() - COLORS[i].getRed()) * INT_TO_FLOAT_CONST) / (FRACTION_ANGLES[i + 1] - FRACTION_ANGLES[i]);
-            GREEN_STEP_LOOKUP[i] = ((COLORS[i + 1].getGreen() - COLORS[i].getGreen()) * INT_TO_FLOAT_CONST) / (FRACTION_ANGLES[i + 1] - FRACTION_ANGLES[i]);
-            BLUE_STEP_LOOKUP[i] = ((COLORS[i + 1].getBlue() - COLORS[i].getBlue()) * INT_TO_FLOAT_CONST) / (FRACTION_ANGLES[i + 1] - FRACTION_ANGLES[i]);
-            ALPHA_STEP_LOOKUP[i] = ((COLORS[i + 1].getAlpha() - COLORS[i].getAlpha()) * INT_TO_FLOAT_CONST) / (FRACTION_ANGLES[i + 1] - FRACTION_ANGLES[i]);
+        for (int i = 0; i < (_colors.length - 1); i++) {
+            _redStepLookup[i] = ((_colors[i + 1].getRed() - _colors[i].getRed()) * INT_TO_FLOAT_CONST) / (_fractionOffsets[i + 1] - _fractionOffsets[i]);
+            _greenStepLookup[i] = ((_colors[i + 1].getGreen() - _colors[i].getGreen()) * INT_TO_FLOAT_CONST) / (_fractionOffsets[i + 1] - _fractionOffsets[i]);
+            _blueStepLookup[i] = ((_colors[i + 1].getBlue() - _colors[i].getBlue()) * INT_TO_FLOAT_CONST) / (_fractionOffsets[i + 1] - _fractionOffsets[i]);
+            _alphaStepLookup[i] = ((_colors[i + 1].getAlpha() - _colors[i].getAlpha()) * INT_TO_FLOAT_CONST) / (_fractionOffsets[i + 1] - _fractionOffsets[i]);
         }
     }
 
@@ -257,10 +264,10 @@ final class ConicalGradientPaint implements Paint {
      * with a given RANGE of 100 and a given VALUE of 50 will return the color that is exactly in the middle of the
      * gradient between black and white which is gray(R:128, G:128, B:128, A:255)
      * So this method is really useful to calculate colors in gradients between two given colors.
-     * @param START_COLOR
-     * @param DESTINATION_COLOR
-     * @param RANGE
-     * @param VALUE
+     * @param START_COLOR The color at the beginning of the gradient.
+     * @param DESTINATION_COLOR The color at the end of the gradient.
+     * @param RANGE The range of the gradient.
+     * @param VALUE The value in the range of the gradient.
      * @return Color calculated from a range of values by given value
      */
     private static Color getColorFromFraction(
@@ -312,14 +319,14 @@ final class ConicalGradientPaint implements Paint {
 
 
         //KK - speed up repaints by caching the context
-        if (cached != null) {
-            ConicalGradientPaintContext c = cached.get(DEVICE_BOUNDS, CENTER, TRANSFORM);
+        if (_cached != null) {
+            ConicalGradientPaintContext c = _cached.get(DEVICE_BOUNDS, _center, TRANSFORM);
             if (c != null)
                 return c;
         }
 
-        ConicalGradientPaintContext context = new ConicalGradientPaintContext(CENTER, TRANSFORM);
-        cached = new CachedContext(DEVICE_BOUNDS, CENTER, TRANSFORM, context);
+        ConicalGradientPaintContext context = new ConicalGradientPaintContext(_center, TRANSFORM);
+        _cached = new CachedContext(DEVICE_BOUNDS, _center, TRANSFORM, context);
 
         return context;
     }
@@ -332,14 +339,14 @@ final class ConicalGradientPaint implements Paint {
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 97 * hash + this.CENTER.hashCode();
-        hash = 97 * hash + Float.floatToIntBits(this.ANGLE_OFFSET);
-        hash = 97 * hash + java.util.Arrays.hashCode(this.FRACTION_ANGLES);
-        hash = 97 * hash + java.util.Arrays.hashCode(this.RED_STEP_LOOKUP);
-        hash = 97 * hash + java.util.Arrays.hashCode(this.GREEN_STEP_LOOKUP);
-        hash = 97 * hash + java.util.Arrays.hashCode(this.BLUE_STEP_LOOKUP);
-        hash = 97 * hash + java.util.Arrays.hashCode(this.ALPHA_STEP_LOOKUP);
-        hash = 97 * hash + java.util.Arrays.hashCode(this.COLORS);
+        hash = 97 * hash + _center.hashCode();
+        hash = 97 * hash + Float.floatToIntBits(_angleOffset);
+        hash = 97 * hash + java.util.Arrays.hashCode(_fractionOffsets);
+        hash = 97 * hash + java.util.Arrays.hashCode(_redStepLookup);
+        hash = 97 * hash + java.util.Arrays.hashCode(_greenStepLookup);
+        hash = 97 * hash + java.util.Arrays.hashCode(_blueStepLookup);
+        hash = 97 * hash + java.util.Arrays.hashCode(_alphaStepLookup);
+        hash = 97 * hash + java.util.Arrays.hashCode(_colors);
         return hash;
     }
 
@@ -355,28 +362,28 @@ final class ConicalGradientPaint implements Paint {
             return false;
         }
         final ConicalGradientPaint OTHER = (ConicalGradientPaint) OBJ;
-        if (!this.CENTER.equals(OTHER.CENTER)) {
+        if (!_center.equals(OTHER._center)) {
             return false;
         }
-        if (Float.floatToIntBits(this.ANGLE_OFFSET) != Float.floatToIntBits(OTHER.ANGLE_OFFSET)) {
+        if (Float.floatToIntBits(_angleOffset) != Float.floatToIntBits(OTHER._angleOffset)) {
             return false;
         }
-        if (!java.util.Arrays.equals(this.FRACTION_ANGLES, OTHER.FRACTION_ANGLES)) {
+        if (!java.util.Arrays.equals(_fractionOffsets, OTHER._fractionOffsets)) {
             return false;
         }
-        if (!java.util.Arrays.equals(this.RED_STEP_LOOKUP, OTHER.RED_STEP_LOOKUP)) {
+        if (!java.util.Arrays.equals(_redStepLookup, OTHER._redStepLookup)) {
             return false;
         }
-        if (!java.util.Arrays.equals(this.GREEN_STEP_LOOKUP, OTHER.GREEN_STEP_LOOKUP)) {
+        if (!java.util.Arrays.equals(_greenStepLookup, OTHER._greenStepLookup)) {
             return false;
         }
-        if (!java.util.Arrays.equals(this.BLUE_STEP_LOOKUP, OTHER.BLUE_STEP_LOOKUP)) {
+        if (!java.util.Arrays.equals(_blueStepLookup, OTHER._blueStepLookup)) {
             return false;
         }
-        if (!java.util.Arrays.equals(this.ALPHA_STEP_LOOKUP, OTHER.ALPHA_STEP_LOOKUP)) {
+        if (!java.util.Arrays.equals(_alphaStepLookup, OTHER._alphaStepLookup)) {
             return false;
         }
-        if (!java.util.Arrays.equals(this.COLORS, OTHER.COLORS)) {
+        if (!java.util.Arrays.equals(_colors, OTHER._colors)) {
             return false;
         }
         return true;
@@ -384,15 +391,15 @@ final class ConicalGradientPaint implements Paint {
 
     private final class ConicalGradientPaintContext implements PaintContext
     {
-        final private Point2D CENTER;
-        private final HashMap<Long, WritableRaster> cachedRasters;
-        private final AffineTransform transform;
+        final private Point2D _center;
+        private final HashMap<Long, WritableRaster> _cachedRasters;
+        private final AffineTransform _transform;
 
         public ConicalGradientPaintContext(final Point2D CENTER, AffineTransform transform) {
-            this.cachedRasters = new HashMap<>();
-            this.transform = transform;
+            _cachedRasters = new HashMap<>();
+            _transform = transform;
             try {
-                this.CENTER = transform.transform(CENTER, null);  //user to device
+                _center = transform.transform(CENTER, null);  //user to device
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
@@ -412,7 +419,7 @@ final class ConicalGradientPaint implements Paint {
 
             try {
                 long index = ((long)X << 32) | (long)Y;
-                WritableRaster raster = cachedRasters.get(index);
+                WritableRaster raster = _cachedRasters.get(index);
 
                 if (raster == null)
                     raster = getColorModel().createCompatibleWritableRaster(TILE_WIDTH, TILE_HEIGHT);  // Create raster for given colormodel
@@ -420,14 +427,14 @@ final class ConicalGradientPaint implements Paint {
                     return raster;
 
                 //get the rotation center in device space
-                final double ROTATION_CENTER_X = -X + CENTER.getX();
-                final double ROTATION_CENTER_Y = -Y + CENTER.getY();
+                final double ROTATION_CENTER_X = -X + _center.getX();
+                final double ROTATION_CENTER_Y = -Y + _center.getY();
 
                 //Convert to user space
-                Point2D rotationCenter = transform.inverseTransform(new Point2D.Double(ROTATION_CENTER_X, ROTATION_CENTER_Y), null); //device to user
+                Point2D rotationCenter = _transform.inverseTransform(new Point2D.Double(ROTATION_CENTER_X, ROTATION_CENTER_Y), null); //device to user
 
 
-                final int MAX = FRACTION_ANGLES.length - 1;
+                final int MAX = _fractionOffsets.length - 1;
 
                 // KK: use memory allocated by raster directly
                 // Create data array with place for red, green, blue and alpha values
@@ -445,7 +452,7 @@ final class ConicalGradientPaint implements Paint {
                 for (int tileY = 0; tileY < TILE_HEIGHT; tileY++) {
                     for (int tileX = 0; tileX < TILE_WIDTH; tileX++) {
 
-                        Point2D d = transform.inverseTransform(new Point2D.Double(tileX, tileY), null); //device to user
+                        Point2D d = _transform.inverseTransform(new Point2D.Double(tileX, tileY), null); //device to user
 
 
                         // Calculate the distance between the current position and the rotation angle
@@ -474,7 +481,7 @@ final class ConicalGradientPaint implements Paint {
                             angle = 450.0 - angle;
                         }
 
-                        angle += ANGLE_OFFSET;
+                        angle += _angleOffset;
 
                         if (angle > 360.0) {
                             angle -= 360.0;
@@ -484,11 +491,11 @@ final class ConicalGradientPaint implements Paint {
 
                         // Check for each angle in fractionAngles array
                         for (int i = 0; i < MAX; i++) {
-                            if ((angle >= FRACTION_ANGLES[i])) {
-                                currentRed   = COLORS[i].getRed() * INT_TO_FLOAT_CONST + (angle - FRACTION_ANGLES[i]) * RED_STEP_LOOKUP[i];
-                                currentGreen = COLORS[i].getGreen() * INT_TO_FLOAT_CONST + (angle - FRACTION_ANGLES[i]) * GREEN_STEP_LOOKUP[i];
-                                currentBlue  = COLORS[i].getBlue() * INT_TO_FLOAT_CONST + (angle - FRACTION_ANGLES[i]) * BLUE_STEP_LOOKUP[i];
-                                currentAlpha = COLORS[i].getAlpha() * INT_TO_FLOAT_CONST + (angle - FRACTION_ANGLES[i]) * ALPHA_STEP_LOOKUP[i];
+                            if ((angle >= _fractionOffsets[i])) {
+                                currentRed   = _colors[i].getRed() * INT_TO_FLOAT_CONST + (angle - _fractionOffsets[i]) * _redStepLookup[i];
+                                currentGreen = _colors[i].getGreen() * INT_TO_FLOAT_CONST + (angle - _fractionOffsets[i]) * _greenStepLookup[i];
+                                currentBlue  = _colors[i].getBlue() * INT_TO_FLOAT_CONST + (angle - _fractionOffsets[i]) * _blueStepLookup[i];
+                                currentAlpha = _colors[i].getAlpha() * INT_TO_FLOAT_CONST + (angle - _fractionOffsets[i]) * _alphaStepLookup[i];
                             }
                         }
 
@@ -506,7 +513,7 @@ final class ConicalGradientPaint implements Paint {
                 // Fill the raster with the data
                 raster.setPixels(0, 0, TILE_WIDTH, TILE_HEIGHT, data);
 
-                cachedRasters.put(index, raster);
+                _cachedRasters.put(index, raster);
                 return raster;
             }
             catch (NoninvertibleTransformException ex) {

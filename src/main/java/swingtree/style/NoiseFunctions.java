@@ -313,12 +313,12 @@ public final class NoiseFunctions
     }
 
     private static float _coordinateToWorleyDistanceValue(float xIn, float yIn ) {
-        final int minX1 = (int) ( Math.floor(xIn) ) - 1 ;
-        final int minX2 = (int) ( Math.floor(xIn) )     ;
-        final int minX3 = (int) ( Math.floor(xIn) ) + 1 ;
-        final int minY1 = (int) ( Math.floor(yIn) ) - 1 ;
-        final int minY2 = (int) ( Math.floor(yIn) )     ;
-        final int minY3 = (int) ( Math.floor(yIn) ) + 1 ;
+        final int minX1 = (int) Math.floor(xIn) - 1 ;
+        final int minX2 = (int) Math.floor(xIn)     ;
+        final int minX3 = (int) Math.floor(xIn) + 1 ;
+        final int minY1 = (int) Math.floor(yIn) - 1 ;
+        final int minY2 = (int) Math.floor(yIn)     ;
+        final int minY3 = (int) Math.floor(yIn) + 1 ;
         final double centerX = minX2 + _fastPseudoRandomDoubleFrom(minX2, minY2);
         final double centerY = minY2 + _fastPseudoRandomDoubleFrom(minY2, minX2);
         final double distanceCenter = _distanceBetween(centerX, centerY, xIn, yIn);

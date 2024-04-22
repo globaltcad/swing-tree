@@ -170,6 +170,10 @@ final class Outline
     }
 
     /**
+     *  Determines if any of the outline values are not null and positive,
+     *  which means that the outline is visible as part of the component's
+     *  appearance or layout.
+     *
      * @return {@code true} if any of the outline values are not null and positive,
      *         {@code false} otherwise.
      */
@@ -195,7 +199,7 @@ final class Outline
     public Outline plus( Outline other ) {
         if ( this.equals(_NONE) )
             return other;
-        if ( other == _NONE )
+        if ( other.equals(_NONE) )
             return this;
 
         return Outline.ofNullable(
@@ -209,7 +213,7 @@ final class Outline
     public Outline or( Outline other ) {
         if ( this.equals(_NONE) )
             return other;
-        if ( other == _NONE )
+        if ( other.equals(_NONE) )
             return this;
 
         return Outline.ofNullable(
@@ -226,7 +230,7 @@ final class Outline
      * @param mapper The mapper function.
      * @return A new {@link Outline} with the mapped outline values.
      */
-    public Outline map( Function<Float, Float> mapper ) {
+    public Outline map( Function<Float, @Nullable Float> mapper ) {
         return Outline.ofNullable(
                     top    == null ? null : mapper.apply(top),
                     right  == null ? null : mapper.apply(right),
