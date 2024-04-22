@@ -96,6 +96,7 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
         super.addMouseMotionListener(this.listener);
         super.addMouseListener(this.listener);
         super.addActionListener(this.listener);
+        UI.of(this).withStyle(delegate -> delegate.paddingRight(delegate.component().getSplitWidth()));
     }
 
     /**
