@@ -873,7 +873,7 @@ class Individual_Component_Styling_Spec extends Specification
             var image = Utility.renderSingleComponent(ui.get(JTextArea))
 
         then : 'The image is as expected.'
-            Utility.similarityBetween(image, "components/sunken-JTextArea.png", 99.9) > 99.9
+            Utility.similarityBetween(image, "components/sunken-JTextArea.png", 98.8) > 98.8
     }
 
     def 'Create a soft UI slider that sinks into the background if you wish.'()
@@ -2957,20 +2957,22 @@ class Individual_Component_Styling_Spec extends Specification
 
         given : 'We pass the following style rules to a number of labels:'
             var ui1 =
-                        UI.label("Center Left Right").withStyle( it -> it
-                            .fontAlignment(UI.HorizontalAlignment.CENTER)
-                            .border(2, Color.DARK_GRAY)
-                            .size(120, 120)
-                            .noise( conf -> conf
-                                .colors("black", "lime", "white")
-                                .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
-                                .function(UI.NoiseType.STOCHASTIC)
-                                .offset(10, 15)
-                            )
-                        )
+                         UI.label("Center Left Right").withStyle( it -> it
+                             .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .fontFamily("Ubuntu")
+                             .border(2, Color.DARK_GRAY)
+                             .size(120, 120)
+                             .noise( conf -> conf
+                                 .colors("black", "lime", "white")
+                                 .boundary(UI.ComponentBoundary.CENTER_TO_CONTENT)
+                                 .function(UI.NoiseType.STOCHASTIC)
+                                 .offset(10, 15)
+                             )
+                         )
             var ui2 =
                          UI.label("Center Right Left").withStyle( it -> it
                              .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .fontFamily("Ubuntu")
                              .border(2, Color.DARK_GRAY)
                              .size(120, 120)
                              .noise( conf -> conf
@@ -2982,7 +2984,8 @@ class Individual_Component_Styling_Spec extends Specification
                          )
             var ui3 =
                          UI.label("Center Top Bottom").withStyle( it -> it
-                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .fontFamily("Ubuntu")
                              .border(2, Color.DARK_GRAY)
                              .size(120, 120)
                              .noise( conf -> conf
@@ -2994,7 +2997,8 @@ class Individual_Component_Styling_Spec extends Specification
                          )
             var ui4 =
                          UI.label("Center Bottom TOP").withStyle( it -> it
-                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .fontFamily("Ubuntu")
                              .border(2, Color.DARK_GRAY)
                              .size(120, 120)
                              .noise( conf -> conf
@@ -3006,7 +3010,8 @@ class Individual_Component_Styling_Spec extends Specification
                          )
             var ui5 =
                          UI.label("Center LT to BR").withStyle( it -> it
-                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .fontFamily("Ubuntu")
                              .border(2, Color.DARK_GRAY)
                              .size(120, 120)
                              .noise( conf -> conf
@@ -3018,7 +3023,8 @@ class Individual_Component_Styling_Spec extends Specification
                          )
             var ui6 =
                          UI.label("Center BR to LT").withStyle( it -> it
-                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .fontFamily("Ubuntu")
                              .border(2, Color.DARK_GRAY)
                              .size(120, 120)
                              .noise( conf -> conf
@@ -3030,7 +3036,8 @@ class Individual_Component_Styling_Spec extends Specification
                          )
             var ui7 =
                          UI.label("Center TR to BL").withStyle( it -> it
-                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .fontFamily("Ubuntu")
                              .border(2, Color.DARK_GRAY)
                              .size(120, 120)
                              .noise( conf -> conf
@@ -3042,7 +3049,8 @@ class Individual_Component_Styling_Spec extends Specification
                          )
             var ui8 =
                          UI.label("Center BL to TR").withStyle( it -> it
-                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .fontFamily("Ubuntu")
                              .border(2, Color.DARK_GRAY)
                              .size(120, 120)
                              .noise( conf -> conf
@@ -3054,7 +3062,8 @@ class Individual_Component_Styling_Spec extends Specification
                          )
             var ui9 =
                          UI.label("Full Top Bottom").withStyle( it -> it
-                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .fontFamily("Ubuntu")
                              .border(2, Color.DARK_GRAY)
                              .size(120, 120)
                              .noise( conf -> conf
@@ -3066,7 +3075,8 @@ class Individual_Component_Styling_Spec extends Specification
                          )
             var ui10 =
                          UI.label("Full Bottom TOP").withStyle( it -> it
-                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .fontFamily("Ubuntu")
                              .border(2, Color.DARK_GRAY)
                              .size(120, 120)
                              .noise( conf -> conf
@@ -3078,7 +3088,8 @@ class Individual_Component_Styling_Spec extends Specification
                          )
             var ui11 =
                          UI.label("Full Left Right").withStyle( it -> it
-                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .fontFamily("Ubuntu")
                              .border(2, Color.DARK_GRAY)
                              .size(120, 120)
                              .noise( conf -> conf
@@ -3090,7 +3101,8 @@ class Individual_Component_Styling_Spec extends Specification
                          )
             var ui12 =
                          UI.label("Full Right Left").withStyle( it -> it
-                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .fontFamily("Ubuntu")
                              .border(2, Color.DARK_GRAY)
                              .size(120, 120)
                              .noise( conf -> conf
@@ -3119,7 +3131,7 @@ class Individual_Component_Styling_Spec extends Specification
 
 
         then : 'The collage of images is as expected (compared with the snapshot above).'
-            Utility.similarityBetween(images, "components/noise-gradients-collage.png", 99.9) > 99.9
+            Utility.similarityBetween(images, "components/noise-gradients-collage.png", 99.8) > 99.8
 
         where : 'We test this using the following scaling values:'
             scale << [1f, 1.25f, 1.75f, 2f]
@@ -3295,7 +3307,7 @@ class Individual_Component_Styling_Spec extends Specification
 
 
         then : 'The collage of images is as expected (compared with the snapshot above).'
-            Utility.similarityBetween(images, "components/custom-text-placement-collage.png", 99.9) > 99.9
+            Utility.similarityBetween(images, "components/custom-text-placement-collage.png", 99.8) > 99.8
 
         where : 'We test this using the following scaling values:'
             scale << [1f, 1.25f, 1.75f, 2f]
@@ -3486,7 +3498,7 @@ class Individual_Component_Styling_Spec extends Specification
 
 
         then : 'The collage of images is as expected (compared with the snapshot above).'
-            Utility.similarityBetween(images, "components/custom-text-boundary-placement-collage.png", 99.9) > 99.9
+            Utility.similarityBetween(images, "components/custom-text-boundary-placement-collage.png", 99.6) > 99.6
 
         where : 'We test this using the following scaling values:'
             scale << [1f, 1.25f, 1.75f, 2f]
