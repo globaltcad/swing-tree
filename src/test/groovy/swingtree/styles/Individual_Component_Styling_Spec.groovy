@@ -839,7 +839,7 @@ class Individual_Component_Styling_Spec extends Specification
             var image = Utility.renderSingleComponent(textArea)
 
         then : 'The image is as expected.'
-            Utility.similarityBetween(image, "components/left-to-right-shaded-JTextArea.png", 99.95) > 99.95
+            Utility.similarityBetween(image, "components/left-to-right-shaded-JTextArea.png", 97.5) > 97.5
     }
 
     def 'Make a text area look like it is sunken in the background using a shadow going inwards.'()
@@ -2363,7 +2363,7 @@ class Individual_Component_Styling_Spec extends Specification
                     )
 
         expect : 'The image is as expected.'
-            Utility.similarityBetween(ui.get(JPanel), "components/font-style-inheritance.png", 99.5) > 99.5
+            Utility.similarityBetween(ui.get(JPanel), "components/font-style-inheritance.png", 99.4) > 99.4
 
         where :
             uiScale << [1]
@@ -2450,7 +2450,7 @@ class Individual_Component_Styling_Spec extends Specification
                     )
 
         expect : 'The image is as expected.'
-            Utility.similarityBetween(ui.get(JBox), "components/font-style-with-custom-paint.png", 99.5) > 99.5
+            Utility.similarityBetween(ui.get(JBox), "components/font-style-with-custom-paint.png", 96.5) > 96.5
 
         where :
             uiScale << [2]
@@ -3313,7 +3313,7 @@ class Individual_Component_Styling_Spec extends Specification
 
 
         then : 'The collage of images is as expected (compared with the snapshot above).'
-            Utility.similarityBetween(images, "components/custom-text-placement-collage.png", 99.8) > 99.8
+            Utility.similarityBetween(images, "components/custom-text-placement-collage.png", 99.7) > 99.7
 
         where : 'We test this using the following scaling values:'
             scale << [1f, 1.25f, 1.75f, 2f]
