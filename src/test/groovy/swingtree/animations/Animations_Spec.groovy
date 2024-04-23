@@ -54,6 +54,7 @@ class Animations_Spec extends Specification
                 })
         and : 'We wait for the animation to finish'
             TimeUnit.MILLISECONDS.sleep(500)
+            UI.sync()
         then : 'The animation has been executed at least once'
             progressValues.values().flatten().size() > 0
         and : 'The progress values are always between 0 and 1'
