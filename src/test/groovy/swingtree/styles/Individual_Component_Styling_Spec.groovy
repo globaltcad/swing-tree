@@ -2748,6 +2748,7 @@ class Individual_Component_Styling_Spec extends Specification
         given : 'We pass the following style rules to a number of labels:'
             var ui1 =
                         UI.label("Center Left Right").withStyle( it -> it
+                            .fontFamily("Ubuntu")
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
                             .border(2, Color.DARK_GRAY)
                             .size(120, 120)
@@ -2761,6 +2762,7 @@ class Individual_Component_Styling_Spec extends Specification
                         )
             var ui2 =
                          UI.label("Center Right Left").withStyle( it -> it
+                             .fontFamily("Ubuntu")
                              .fontAlignment(UI.HorizontalAlignment.CENTER)
                              .border(2, Color.DARK_GRAY)
                              .size(120, 120)
@@ -2774,7 +2776,8 @@ class Individual_Component_Styling_Spec extends Specification
                          )
             var ui3 =
                          UI.label("Center Top Bottom").withStyle( it -> it
-                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .fontFamily("Ubuntu")
+                             .fontAlignment(UI.HorizontalAlignment.CENTER)
                              .border(2, Color.DARK_GRAY)
                              .size(120, 120)
                              .gradient( gradConf -> gradConf
@@ -2787,7 +2790,8 @@ class Individual_Component_Styling_Spec extends Specification
                          )
             var ui4 =
                          UI.label("Center Bottom TOP").withStyle( it -> it
-                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .fontFamily("Ubuntu")
+                             .fontAlignment(UI.HorizontalAlignment.CENTER)
                              .border(2, Color.DARK_GRAY)
                              .size(120, 120)
                              .gradient( gradConf -> gradConf
@@ -2800,7 +2804,8 @@ class Individual_Component_Styling_Spec extends Specification
                          )
             var ui5 =
                          UI.label("Center LT to BR").withStyle( it -> it
-                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .fontFamily("Ubuntu")
+                             .fontAlignment(UI.HorizontalAlignment.CENTER)
                              .border(2, Color.DARK_GRAY)
                              .size(120, 120)
                              .gradient( gradConf -> gradConf
@@ -2813,7 +2818,8 @@ class Individual_Component_Styling_Spec extends Specification
                          )
             var ui6 =
                          UI.label("Center BR to LT").withStyle( it -> it
-                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .fontFamily("Ubuntu")
+                             .fontAlignment(UI.HorizontalAlignment.CENTER)
                              .border(2, Color.DARK_GRAY)
                              .size(120, 120)
                              .gradient( gradConf -> gradConf
@@ -2826,7 +2832,8 @@ class Individual_Component_Styling_Spec extends Specification
                          )
             var ui7 =
                          UI.label("Center TR to BL").withStyle( it -> it
-                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .fontFamily("Ubuntu")
+                             .fontAlignment(UI.HorizontalAlignment.CENTER)
                              .border(2, Color.DARK_GRAY)
                              .size(120, 120)
                              .gradient( gradConf -> gradConf
@@ -2839,7 +2846,8 @@ class Individual_Component_Styling_Spec extends Specification
                          )
             var ui8 =
                          UI.label("Center BL to TR").withStyle( it -> it
-                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .fontFamily("Ubuntu")
+                             .fontAlignment(UI.HorizontalAlignment.CENTER)
                              .border(2, Color.DARK_GRAY)
                              .size(120, 120)
                              .gradient( gradConf -> gradConf
@@ -2852,7 +2860,8 @@ class Individual_Component_Styling_Spec extends Specification
                          )
             var ui9 =
                          UI.label("Full Top Bottom").withStyle( it -> it
-                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .fontFamily("Ubuntu")
+                             .fontAlignment(UI.HorizontalAlignment.CENTER)
                              .border(2, Color.DARK_GRAY)
                              .size(120, 120)
                              .gradient( gradConf -> gradConf
@@ -2865,7 +2874,8 @@ class Individual_Component_Styling_Spec extends Specification
                          )
             var ui10 =
                          UI.label("Full Bottom TOP").withStyle( it -> it
-                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .fontFamily("Ubuntu")
+                             .fontAlignment(UI.HorizontalAlignment.CENTER)
                              .border(2, Color.DARK_GRAY)
                              .size(120, 120)
                              .gradient( gradConf -> gradConf
@@ -2878,7 +2888,8 @@ class Individual_Component_Styling_Spec extends Specification
                          )
             var ui11 =
                          UI.label("Full Left Right").withStyle( it -> it
-                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .fontFamily("Ubuntu")
+                             .fontAlignment(UI.HorizontalAlignment.CENTER)
                              .border(2, Color.DARK_GRAY)
                              .size(120, 120)
                              .gradient( gradConf -> gradConf
@@ -2891,7 +2902,8 @@ class Individual_Component_Styling_Spec extends Specification
                          )
             var ui12 =
                          UI.label("Full Right Left").withStyle( it -> it
-                            .fontAlignment(UI.HorizontalAlignment.CENTER)
+                             .fontFamily("Ubuntu")
+                             .fontAlignment(UI.HorizontalAlignment.CENTER)
                              .border(2, Color.DARK_GRAY)
                              .size(120, 120)
                              .gradient( gradConf -> gradConf
