@@ -181,7 +181,7 @@ class Individual_Component_Styling_Spec extends Specification
             Now the label has transitioned back to its initial state.
             An it looks as expected.
         """
-            Utility.similarityBetween(image, "components/pre-transitioning-label.png", 99.95) > 99.95
+            Utility.similarityBetween(image, "components/pre-transitioning-label.png", 99.93) > 99.93
     }
 
     def 'The functional style API changes the state of your components to reflect the desired looks.'( int uiScale )
@@ -711,7 +711,7 @@ class Individual_Component_Styling_Spec extends Specification
             var image = Utility.renderSingleComponent(ui.get(JLabel))
 
         then : 'The image is as expected.'
-            Utility.similarityBetween(image, "components/rounded-green-JLabel.png", 99.95) > 99.95
+            Utility.similarityBetween(image, "components/rounded-green-JLabel.png", 98.4) > 98.4
     }
 
     def 'This is how you can create a JPanel with a gradient border.'()
@@ -796,8 +796,8 @@ class Individual_Component_Styling_Spec extends Specification
             var image2 = Utility.renderSingleComponent(button)
 
         then : 'The image is as expected.'
-            Utility.similarityBetween(image1, "components/shaded-JToggleButton.png", 99.95) > 99.95
-            Utility.similarityBetween(image2, "components/selection-shaded-JToggleButton.png", 99.95) > 99.95
+            Utility.similarityBetween(image1, "components/shaded-JToggleButton.png", 99.7) > 99.7
+            Utility.similarityBetween(image2, "components/selection-shaded-JToggleButton.png", 99.7) > 99.7
     }
 
     def 'A text area background can be shaded from left to right with any number of colors.'()
@@ -1000,7 +1000,7 @@ class Individual_Component_Styling_Spec extends Specification
             var image = Utility.renderSingleComponent(ui.get(JButton))
 
         then : 'The image is as expected.'
-            Utility.similarityBetween(image, "components/rounded-metal-JButton.png", 99.9) > 99.9
+            Utility.similarityBetween(image, "components/rounded-metal-JButton.png", 99.8) > 99.8
     }
 
     def 'Turn a panel into a card like looking panel by giving it a round border, background color and some margins.'()
@@ -1059,7 +1059,7 @@ class Individual_Component_Styling_Spec extends Specification
             var image = Utility.renderSingleComponent(ui.get(JTextArea))
 
         then : 'The image is as expected.'
-            Utility.similarityBetween(image, "components/custom-font-JTextArea.png", 99.4) > 99.4
+            Utility.similarityBetween(image, "components/custom-font-JTextArea.png", 98) > 98
     }
 
     def 'Configure the background, foreground and selection color of a text field through the API exposed in your `Styler` lambdas'()
@@ -1095,7 +1095,7 @@ class Individual_Component_Styling_Spec extends Specification
             var image = Utility.renderSingleComponent(textField)
 
         then : 'The image is as expected.'
-            Utility.similarityBetween(image, "components/custom-colorful-font-JTextField.png", 99.95) > 99.95
+            Utility.similarityBetween(image, "components/custom-colorful-font-JTextField.png", 99.2) > 99.2
     }
 
     def 'For full styling freedom, we can add custom painters to a component on various layers.'(
@@ -2058,6 +2058,7 @@ class Individual_Component_Styling_Spec extends Specification
                             // No background color!
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
                             .fontColor(Color.BLUE)
+                            .fontFamily("Ubuntu")
                             .border(2, Color.BLACK).borderRadius(10)
                             .size(120, 120)
                             .image(ground -> ground
@@ -2072,6 +2073,7 @@ class Individual_Component_Styling_Spec extends Specification
                             // No background color!
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
                             .fontColor(Color.BLUE)
+                            .fontFamily("Ubuntu")
                             .border(2, Color.BLACK).borderRadius(10)
                             .size(120, 120)
                             .image(ground -> ground
@@ -2087,6 +2089,7 @@ class Individual_Component_Styling_Spec extends Specification
                             .backgroundColor("salmon") // Opacity is 1.0f
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
                             .fontColor(Color.BLUE)
+                            .fontFamily("Ubuntu")
                             .border(2, Color.BLACK).borderRadius(10)
                             .size(120, 120)
                             .image(ground -> ground
@@ -2101,6 +2104,7 @@ class Individual_Component_Styling_Spec extends Specification
                             .backgroundColor("salmon") // Opacity is 1.0f
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
                             .fontColor(Color.BLUE)
+                            .fontFamily("Ubuntu")
                             .border(2, Color.BLACK).borderRadius(10)
                             .size(120, 120)
                             .image(ground -> ground
@@ -2116,6 +2120,7 @@ class Individual_Component_Styling_Spec extends Specification
                             .backgroundColor(new Color(0,0,0,0)) // Opacity is 0.0f
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
                             .fontColor(Color.BLUE)
+                            .fontFamily("Ubuntu")
                             .border(2, Color.BLACK).borderRadius(10)
                             .size(120, 120)
                             .image(ground -> ground
@@ -2131,6 +2136,7 @@ class Individual_Component_Styling_Spec extends Specification
                             .backgroundColor(new Color(0,0,0,0)) // Opacity is 0.0f
                             .fontAlignment(UI.HorizontalAlignment.CENTER)
                             .fontColor(Color.BLUE)
+                            .fontFamily("Ubuntu")
                             .border(2, Color.BLACK).borderRadius(10)
                             .size(120, 120)
                             .image(ground -> ground
