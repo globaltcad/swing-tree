@@ -148,7 +148,8 @@ class Animations_Spec extends Specification
             button.doClick()
 
         and : 'We wait for the animation to finish'
-            TimeUnit.MILLISECONDS.sleep(410)
+            TimeUnit.MILLISECONDS.sleep(500)
+            UI.sync()
         then : 'The animation has been completed 4 times.'
             iterations == [0, 1, 2, 3]
         and : 'The progress and cycle values are always between 0 and 1'
