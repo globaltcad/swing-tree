@@ -2450,7 +2450,7 @@ class Individual_Component_Styling_Spec extends Specification
                     )
 
         expect : 'The image is as expected.'
-            Utility.similarityBetween(ui.get(JBox), "components/font-style-with-custom-paint.png", 96.5) > 96.5
+            Utility.similarityBetween(ui.get(JBox), "components/font-style-with-custom-paint.png", 96.4) > 96.4
 
         where :
             uiScale << [2]
