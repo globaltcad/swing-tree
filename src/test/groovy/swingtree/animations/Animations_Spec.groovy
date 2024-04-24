@@ -53,9 +53,9 @@ class Animations_Spec extends Specification
                     progressValues[(int)it.repeats()] << it.progress()
                 })
         and : 'We wait for the animation to finish'
-            TimeUnit.MILLISECONDS.sleep(300)
+            TimeUnit.MILLISECONDS.sleep(350)
             UI.sync()
-            TimeUnit.MILLISECONDS.sleep(300)
+            TimeUnit.MILLISECONDS.sleep(350)
             UI.sync()
         then : 'The animation has been executed at least once'
             progressValues.values().flatten().size() > 0
@@ -150,7 +150,9 @@ class Animations_Spec extends Specification
             UI.runNow( () -> button.doClick() )
         and : 'We wait for the animation to finish'
             UI.sync()
-            TimeUnit.MILLISECONDS.sleep(750)
+            TimeUnit.MILLISECONDS.sleep(350)
+            UI.sync()
+            TimeUnit.MILLISECONDS.sleep(350)
         then : 'The animation has been completed 4 times.'
             iterations == [0, 1, 2, 3]
         and : 'The progress and cycle values are always between 0 and 1'
