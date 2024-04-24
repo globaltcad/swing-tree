@@ -141,16 +141,14 @@ class Animations_Spec extends Specification
                             })
                     })
                     .get(JButton)
-        and :
-            TimeUnit.MILLISECONDS.sleep(410)
         then : 'Initially the animation has not been executed yet.'
             iterations == []
-        when : 'We simulate a click on the button'
-            button.doClick()
 
+        when : 'We simulate a click on the button'
+            UI.runNow( () -> button.doClick() )
         and : 'We wait for the animation to finish'
-            TimeUnit.MILLISECONDS.sleep(500)
             UI.sync()
+            TimeUnit.MILLISECONDS.sleep(750)
         then : 'The animation has been completed 4 times.'
             iterations == [0, 1, 2, 3]
         and : 'The progress and cycle values are always between 0 and 1'
