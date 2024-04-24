@@ -7,9 +7,8 @@ The following example shows how to create a simple message dialog with a title, 
 and three `Yes`, `No`, and `Cancel` buttons.
 
 ```java
-var answer = UI.confirm()
-             .title("Please confirm!")
-             .message("Do you want to continue reading?")
+var answer = UI.confirmation("Do you want to continue reading?")
+             .titled("Please confirm!")
              .show();
 ```
 
@@ -25,9 +24,8 @@ If you want to configure which buttons are shown and what their text is,
 you can achieve this by explicitly setting the texts like this:
 
 ```java
-var answer = UI.confirm()
-             .title("Confirm OK!")
-             .message("Only one button!")
+var answer = UI.confirmation("Only one button!")
+             .titled("Confirm OK!")
              .yesOption("I am ok with this")
              .noOption("")
              .cancelOption("")
@@ -44,9 +42,9 @@ dialogs, however there are other factory methods for showing
 information, warning, and error dialogs.
 
 ```java
-UI.confirmInfo().message("Bananas are yellow.").show();
-UI.confirmWarning().message("You forgot to turn off the stove!").show();
-UI.confirmError().message("The world is ending!").show();
+UI.confirmation("Bananas are yellow.").show();
+UI.confirmation("You forgot to turn off the stove!").showAsWarning();
+UI.confirmation("The world is ending!").showAsError();
 ```
 
 They differ from one another in the look and feel of the dialog.
@@ -54,9 +52,8 @@ The look however is mostly determined by the icon that is shown in the dialog,
 which you can also configure yourself.
 
 ```java
-  UI.confirm()
-  .title("Confirm with custom icon"!)
-  .message("Do you like my icon?")
+  UI.confirmation("Do you like my icon?")
+  .titled("Confirm with custom icon"!)
   .icon(UI.findIcon("my-icon.png").orElse(null))
   .show();
 ```
@@ -78,9 +75,9 @@ Just like there are different factory methods for confirm dialogs,
 there are also different factory methods for message dialogs.
 
 ```java
-UI.info().message("Bananas are still yellow!").show();
-UI.warning().message("You will burn the house down!").show();
-UI.error().message("The world is still ending!").show();
+UI.message("Bananas are still yellow!").showAsInfo();
+UI.message("You will burn the house down!").showWarning();
+UI.message("The world is still ending!").showAsError();
 ```
 
 ---
