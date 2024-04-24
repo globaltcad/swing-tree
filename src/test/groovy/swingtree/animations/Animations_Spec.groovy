@@ -53,7 +53,9 @@ class Animations_Spec extends Specification
                     progressValues[(int)it.repeats()] << it.progress()
                 })
         and : 'We wait for the animation to finish'
-            TimeUnit.MILLISECONDS.sleep(500)
+            TimeUnit.MILLISECONDS.sleep(300)
+            UI.sync()
+            TimeUnit.MILLISECONDS.sleep(300)
             UI.sync()
         then : 'The animation has been executed at least once'
             progressValues.values().flatten().size() > 0
