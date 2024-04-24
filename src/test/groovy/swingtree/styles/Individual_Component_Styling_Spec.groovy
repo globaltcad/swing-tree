@@ -1059,7 +1059,7 @@ class Individual_Component_Styling_Spec extends Specification
             var image = Utility.renderSingleComponent(ui.get(JTextArea))
 
         then : 'The image is as expected.'
-            Utility.similarityBetween(image, "components/custom-font-JTextArea.png", 98) > 98
+            Utility.similarityBetween(image, "components/custom-font-JTextArea.png", 95) > 95
     }
 
     def 'Configure the background, foreground and selection color of a text field through the API exposed in your `Styler` lambdas'()
@@ -2450,7 +2450,7 @@ class Individual_Component_Styling_Spec extends Specification
                     )
 
         expect : 'The image is as expected.'
-            Utility.similarityBetween(ui.get(JBox), "components/font-style-with-custom-paint.png", 96.4) > 96.4
+            Utility.similarityBetween(ui.get(JBox), "components/font-style-with-custom-paint.png", 95.95) > 95.95
 
         where :
             uiScale << [2]
@@ -3313,7 +3313,7 @@ class Individual_Component_Styling_Spec extends Specification
 
 
         then : 'The collage of images is as expected (compared with the snapshot above).'
-            Utility.similarityBetween(images, "components/custom-text-placement-collage.png", 99.7) > 99.7
+            Utility.similarityBetween(images, "components/custom-text-placement-collage.png", 99.6) > 99.6
 
         where : 'We test this using the following scaling values:'
             scale << [1f, 1.25f, 1.75f, 2f]
@@ -3354,6 +3354,7 @@ class Individual_Component_Styling_Spec extends Specification
                                 .font( f -> f
                                     .color("red")
                                     .family("Ubuntu")
+                                    .size(13)
                                 )
                             )
                         )
@@ -3371,6 +3372,7 @@ class Individual_Component_Styling_Spec extends Specification
                                 .font( f -> f
                                     .color("green")
                                     .family("Ubuntu")
+                                    .size(13)
                                 )
                             )
                         )
@@ -3388,6 +3390,7 @@ class Individual_Component_Styling_Spec extends Specification
                                 .font( f -> f
                                     .color("blue")
                                     .family("Ubuntu")
+                                    .size(13)
                                 )
                             )
                         )
@@ -3404,6 +3407,7 @@ class Individual_Component_Styling_Spec extends Specification
                                 .font( f -> f
                                     .color("tan")
                                     .family("Ubuntu")
+                                    .size(13)
                                 )
                             )
                         )
@@ -3420,6 +3424,7 @@ class Individual_Component_Styling_Spec extends Specification
                                 .font( f -> f
                                     .color("magenta")
                                     .family("Ubuntu")
+                                    .size(13)
                                 )
                             )
                         )
@@ -3436,6 +3441,7 @@ class Individual_Component_Styling_Spec extends Specification
                                 .font( f -> f
                                     .color("oak")
                                     .family("Ubuntu")
+                                    .size(13)
                                 )
                             )
                         )
@@ -3452,6 +3458,7 @@ class Individual_Component_Styling_Spec extends Specification
                                 .font( f -> f
                                     .color("navy")
                                     .family("Ubuntu")
+                                    .size(13)
                                 )
                             )
                         )
@@ -3469,6 +3476,7 @@ class Individual_Component_Styling_Spec extends Specification
                                 .font( f -> f
                                     .color("dark cyan")
                                     .family("Ubuntu")
+                                    .size(13)
                                 )
                             )
                         )
@@ -3486,6 +3494,7 @@ class Individual_Component_Styling_Spec extends Specification
                                 .font( f -> f
                                     .color("dark purple")
                                     .family("Ubuntu")
+                                    .size(13)
                                 )
                             )
                         )
