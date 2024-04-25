@@ -14,7 +14,7 @@ class Color_Spec extends Specification
         reportInfo """
             The colors in SwingTree are modelled using a custom `Color` type which for 
             compatibility reasons is a subclass of java.awt.Color.
-            Amon many other useful methods, the custom color type has a method called
+            Among many other useful methods, the custom color type has a method called
             `brighterBy(double)` which will brighten the color according to the HSB color space
             (Hue, Saturation, Brightness).
         """
@@ -45,7 +45,7 @@ class Color_Spec extends Specification
         reportInfo """
             The colors in SwingTree are modelled using a custom `Color` type which for 
             compatibility reasons is a subclass of java.awt.Color.
-            Amon many other useful methods, the custom color type has a method called
+            Among many other useful methods, the custom color type has a method called
             `darkerBy(double)` which will darken the color according to the brightness in the 
             HSB color space (Hue, Saturation, Brightness).
         """
@@ -76,7 +76,7 @@ class Color_Spec extends Specification
         reportInfo """
             The colors in SwingTree are modelled using a custom `Color` type which for 
             compatibility reasons is a subclass of java.awt.Color.
-            Amon many other useful methods, the custom color type has a method called
+            Among many other useful methods, the custom color type has a method called
             `saturateBy(double)` which will increase the saturation of the color according to the HSB color space
             (Hue, Saturation, Brightness).
         """
@@ -101,4 +101,34 @@ class Color_Spec extends Specification
             UI.Color.BLACK         |   0.0    || UI.Color.BLACK
     }
 
+    def 'Use "desaturateBy(double)" on a SwingTree color to decrease the saturation of the color according to the HSB color space.'(
+            UI.Color colorIn, double factor, Color saturated
+    ) {
+        reportInfo """
+            The colors in SwingTree are modelled using a custom `Color` type which for 
+            compatibility reasons is a subclass of java.awt.Color.
+            Among many other useful methods, the custom color type has a method called
+            `desaturateBy(double)` which will decrease the saturation of the color according to the HSB color space
+            (Hue, Saturation, Brightness).
+        """
+        expect :
+            colorIn.desaturateBy(factor) == saturated
+        where :
+            colorIn                |  factor  ||  saturated
+            UI.Color.DEEPSKYBLUE   |   0.3    || new Color(77,210,255)
+            UI.Color.CORAL         |   0.4    || new Color(255,178,150)
+            UI.Color.LAVENDERBLUSH |   0.6    || new Color(255,249,251)
+            UI.Color.TAN           |   0.7    || new Color(210,201,189)
+            UI.Color.LINEN         |   0.2    || new Color(250,242,234)
+            UI.Color.WHITE         |   0.7    || new Color(255,255,255)
+            UI.Color.BLACK         |   0.9    || new Color(0,0,0)
+
+            UI.Color.DEEPSKYBLUE   |   0.0    || UI.Color.DEEPSKYBLUE
+            UI.Color.CORAL         |   0.0    || UI.Color.CORAL
+            UI.Color.LAVENDERBLUSH |   0.0    || UI.Color.LAVENDERBLUSH
+            UI.Color.TAN           |   0.0    || UI.Color.TAN
+            UI.Color.LINEN         |   0.0    || UI.Color.LINEN
+            UI.Color.WHITE         |   0.0    || UI.Color.WHITE
+            UI.Color.BLACK         |   0.0    || UI.Color.BLACK
+    }
 }
