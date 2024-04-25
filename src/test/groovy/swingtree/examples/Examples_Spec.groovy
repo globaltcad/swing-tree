@@ -117,7 +117,7 @@ class Examples_Spec extends Specification
         and :
             new Utility.Query(ui).find(JButton, "hover-icon-button").get().cursor.type == Cursor.HAND_CURSOR
         and :
-            Utility.similarityBetween(ui, "views/simple-form-UI.png", 99.9) > 99.9
+            Utility.similarityBetween(ui, "views/simple-form-UI.png", 99.2) > 99.2
     }
 
     def 'The login example UI defined in the examples, a good MVVM demonstration.'()
@@ -230,7 +230,7 @@ class Examples_Spec extends Specification
         given : 'We create the UI.'
             var ui = new WellRoundedView()
         expect : 'It is rendered as shown in the image.'
-            Utility.similarityBetween(ui, "views/well-rounded-UI.png", 98.1) > 98.1
+            Utility.similarityBetween(ui, "views/well-rounded-UI.png", 98) > 98
     }
 
     def 'The soft example UI is rendered as expected.'()

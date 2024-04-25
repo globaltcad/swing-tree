@@ -28,6 +28,7 @@ public class SwingTreeTestConfigurator implements SwingTreeConfigurator
                 "/fonts/Buggie-L3y03.ttf",
                 "/fonts/DancingScript-3j68.ttf",
                 "/fonts/AlloyInk-nRLyO.ttf",
+                "/fonts/roboto-black.ttf"
         };
 
         // We simply load the fonts here, so that they are available
