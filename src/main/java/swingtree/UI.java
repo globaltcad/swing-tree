@@ -2907,11 +2907,13 @@ public final class UI extends UIFactoryMethods
 
         /**
          * Creates an updated color whose brightness is increased by the specified factor.
-         * @param factor The factor by which to increase the brightness.
+         * @param percentage The factor by which to increase the brightness.
          */
-        public Color brighterBy(double factor) {
-            if ( factor == 0.0 )
+        public Color brighterBy(double percentage) {
+            if ( percentage == 0.0 )
                 return this;
+
+            double factor = 1 - percentage;
             return _deriveColor(0, 1.0, 1.0 / factor, 1.0);
         }
 
@@ -2927,12 +2929,13 @@ public final class UI extends UIFactoryMethods
         /**
          * Creates an updated color whose brightness is decreased by the specified
          * percentage factor.
-         * @param factor The factor by which to decrease the brightness.
+         * @param percentage The factor by which to decrease the brightness.
          */
-        public Color darkerBy(double factor) {
-            if ( factor == 0.0 )
+        public Color darkerBy(double percentage) {
+            if ( percentage == 0.0 )
                 return this;
-            factor = 1.0 - factor;
+
+            double factor = 1 - percentage;
             return _deriveColor(0, 1.0, factor, 1.0);
         }
 
@@ -2944,9 +2947,11 @@ public final class UI extends UIFactoryMethods
             return _deriveColor(0, 1.0 / SATURATE_DESATURATE_FACTOR, 1.0, 1.0);
         }
 
-        public Color saturateBy(double factor) {
-            if ( factor == 0.0 )
+        public Color saturateBy(double percentage) {
+            if ( percentage == 0.0 )
                 return this;
+
+            double factor = 1 - percentage;
             return _deriveColor(0, 1.0 / factor, 1.0, 1.0);
         }
 
@@ -2958,10 +2963,11 @@ public final class UI extends UIFactoryMethods
             return _deriveColor(0, SATURATE_DESATURATE_FACTOR, 1.0, 1.0);
         }
 
-        public Color desaturateBy(double factor) {
-            if ( factor == 0.0 )
+        public Color desaturateBy(double percentage) {
+            if ( percentage == 0.0 )
                 return this;
-            factor = 1.0 - factor;
+
+            double factor = 1 - percentage;
             return _deriveColor(0, factor, 1.0, 1.0);
         }
 
