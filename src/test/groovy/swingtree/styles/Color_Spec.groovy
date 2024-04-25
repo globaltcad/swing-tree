@@ -1,10 +1,34 @@
 package swingtree.styles
 
+import spock.lang.Narrative
 import spock.lang.Specification
+import spock.lang.Subject
+import spock.lang.Title
 import swingtree.UI
 
 import java.awt.*
 
+@Title("Yet Another Color")
+@Narrative('''
+
+    The age-old `java.awt.Color` class is a bit limited in what it can do.
+    Not only are the color constants it has to offer rather limited,
+    many of them are also inconsistent with the 
+    naming and RGB values of modern color palettes.
+    The `java.awt.Color.GREEN` constant for example has an RGB value of 
+    `(0, 255, 0)` which is considered "lime" in modern color palettes.
+    
+    Furthermore, there is a lack of useful wither methods on the `Color` class
+    that are expected from a modern value based type, like in this case for example
+    `withRed(double)`, `withGreen(double)`, `withBlue(double)`, `withAlpha(double)`
+    or `withBrightness(double)`, `withSaturation(double)`, `withHue(double)`.
+    
+    SwingTree addresses these shortcomings by providing a custom `Color` type
+    in the `UI` namespace which is a subclass of `java.awt.Color` and has a number
+    of useful methods to manipulate colors in both the RGB and HSB color spaces.  
+
+''')
+@Subject([UI.Color])
 class Color_Spec extends Specification
 {
 
