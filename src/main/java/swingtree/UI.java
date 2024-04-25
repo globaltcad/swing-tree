@@ -2907,11 +2907,13 @@ public final class UI extends UIFactoryMethods
 
         /**
          * Creates an updated color whose brightness is increased by the specified factor.
-         * @param factor The factor by which to increase the brightness.
+         * @param percentage The factor by which to increase the brightness.
          */
-        public Color brighterBy(double factor) {
-            if ( factor == 0.0 )
+        public Color brighterBy(double percentage) {
+            if ( percentage == 0.0 )
                 return this;
+
+            double factor = 1 - percentage;
             return _deriveColor(0, 1.0, 1.0 / factor, 1.0);
         }
 
@@ -2927,41 +2929,63 @@ public final class UI extends UIFactoryMethods
         /**
          * Creates an updated color whose brightness is decreased by the specified
          * percentage factor.
-         * @param factor The factor by which to decrease the brightness.
+         * @param percentage The factor by which to decrease the brightness.
          */
-        public Color darkerBy(double factor) {
-            if ( factor == 0.0 )
+        public Color darkerBy(double percentage) {
+            if ( percentage == 0.0 )
                 return this;
-            factor = 1.0 - factor;
+
+            double factor = 1 - percentage;
             return _deriveColor(0, 1.0, factor, 1.0);
         }
 
         /**
          *  Provides an updated color that is a more saturated version of this color.
+         *  The color will be 30% more saturated than the original color.
+         *
          * @return A color that is a more saturated version of this color.
          */
         public Color saturate() {
             return _deriveColor(0, 1.0 / SATURATE_DESATURATE_FACTOR, 1.0, 1.0);
         }
 
-        public Color saturateBy(double factor) {
-            if ( factor == 0.0 )
+        /**
+         *  Creates a color which is saturated by the specified percentage factor.
+         *  So the value {@code 0.0} will return the same color and the value
+         *  and the value {@code 1.0} will return a fully saturated color.
+         *
+         * @param percentage The percentage factor by which to increase the saturation.
+         */
+        public Color saturateBy(double percentage) {
+            if ( percentage == 0.0 )
                 return this;
+
+            double factor = 1 - percentage;
             return _deriveColor(0, 1.0 / factor, 1.0, 1.0);
         }
 
         /**
          * Creates a new color that is a less saturated version of this color.
+         * The color will be 30% less saturated than the original color.
+         *
          * @return A color that is a less saturated version of this color.
          */
         public Color desaturate() {
             return _deriveColor(0, SATURATE_DESATURATE_FACTOR, 1.0, 1.0);
         }
 
-        public Color desaturateBy(double factor) {
-            if ( factor == 0.0 )
+        /**
+         *  Creates a color which is desaturated by the specified percentage factor.
+         *  So the value {@code 0.0} will return the same color and the value
+         *  and the value {@code 1.0} will return a fully desaturated color.
+         *
+         * @param percentage The percentage factor by which to decrease the saturation.
+         */
+        public Color desaturateBy(double percentage) {
+            if ( percentage == 0.0 )
                 return this;
-            factor = 1.0 - factor;
+
+            double factor = 1 - percentage;
             return _deriveColor(0, factor, 1.0, 1.0);
         }
 
