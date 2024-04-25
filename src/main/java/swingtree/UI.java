@@ -2941,12 +2941,21 @@ public final class UI extends UIFactoryMethods
 
         /**
          *  Provides an updated color that is a more saturated version of this color.
+         *  The color will be 30% more saturated than the original color.
+         *
          * @return A color that is a more saturated version of this color.
          */
         public Color saturate() {
             return _deriveColor(0, 1.0 / SATURATE_DESATURATE_FACTOR, 1.0, 1.0);
         }
 
+        /**
+         *  Creates a color which is saturated by the specified percentage factor.
+         *  So the value {@code 0.0} will return the same color and the value
+         *  and the value {@code 1.0} will return a fully saturated color.
+         *
+         * @param percentage The percentage factor by which to increase the saturation.
+         */
         public Color saturateBy(double percentage) {
             if ( percentage == 0.0 )
                 return this;
@@ -2957,12 +2966,21 @@ public final class UI extends UIFactoryMethods
 
         /**
          * Creates a new color that is a less saturated version of this color.
+         * The color will be 30% less saturated than the original color.
+         *
          * @return A color that is a less saturated version of this color.
          */
         public Color desaturate() {
             return _deriveColor(0, SATURATE_DESATURATE_FACTOR, 1.0, 1.0);
         }
 
+        /**
+         *  Creates a color which is desaturated by the specified percentage factor.
+         *  So the value {@code 0.0} will return the same color and the value
+         *  and the value {@code 1.0} will return a fully desaturated color.
+         *
+         * @param percentage The percentage factor by which to decrease the saturation.
+         */
         public Color desaturateBy(double percentage) {
             if ( percentage == 0.0 )
                 return this;
