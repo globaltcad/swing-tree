@@ -29,6 +29,7 @@ public final class AnimationState implements Progress
 
     private static AnimationState _of( LifeSpan lifeSpan, Stride stride, ActionEvent event, long now, boolean isEnd ) {
         long duration = lifeSpan.lifeTime().getDurationIn(TimeUnit.MILLISECONDS);
+        long interval = lifeSpan.lifeTime().getIntervalIn(TimeUnit.MILLISECONDS);
         long howLongIsRunning = Math.max(0, now - lifeSpan.getStartTimeIn(TimeUnit.MILLISECONDS));
         long howLongCurrentLoop = duration <= 0 ? 0 : howLongIsRunning % duration;
         if ( isEnd && howLongCurrentLoop == 0 )
@@ -55,6 +56,13 @@ public final class AnimationState implements Progress
                 progress = howLongCurrentLoop / (double) duration;
                 log.warn("Unknown stride: {}", stride);
         }
+        long steps = duration / interval;
+        if ( steps > 0 )
+            progress = Math.round( progress * steps ) / (double) steps;
+        /*
+            In the above line, we round the progress to the nearest step.
+            This makes animations more deterministic and cache friendly.
+        */
         return new AnimationState(progress, howManyLoops, lifeSpan, event);
     }
 

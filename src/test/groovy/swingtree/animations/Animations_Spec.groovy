@@ -73,6 +73,16 @@ class Animations_Spec extends Specification
             This is to ensure that the animation is always finished predictably.
         """
             progressValues[2].last() == 1
+        and : """
+            Finally, we verify the exact progress values of the animation.
+            We can expect them to be always the same because they
+            are always rounded to a multiple of the animation interval.
+        """
+        progressValues == [
+                            0:[0.5, 0.6666666666666666, 0.8333333333333334],
+                            1:[0.0, 0.16666666666666666, 0.3333333333333333, 0.5, 0.6666666666666666, 0.8333333333333334, 1.0],
+                            2:[0.16666666666666666, 0.3333333333333333, 0.5, 0.6666666666666666, 0.8333333333333334, 1.0, 1.0]
+                        ]
     }
 
     def 'Use the API exposed by `UI.animateFor(..)` to schedule regressive animations (whose progress goes from 1 to 0)'()
