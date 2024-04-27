@@ -3776,6 +3776,10 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
+     *  Creates a declarative toggle button builder for a {@link JToggleButton}
+     *  displaying the provided icon
+     *  scaled to fit the desired size and {@link UI.FitComponent} policy.
+     *
      * @param width The width the icon should be scaled to.
      * @param height The height the icon should be scaled to.
      * @param icon The {@link IconDeclaration} whose icon ought to be displayed on top of the button.
@@ -4735,6 +4739,8 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
+     *  Creates a declarative UI builder for the {@link JTable} component type.
+     *
      * @return A fluent builder instance for a new {@link JTable}.
      */
     public static UIForTable<JTable> table() {
