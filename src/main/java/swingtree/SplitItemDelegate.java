@@ -107,6 +107,11 @@ public final class SplitItemDelegate<I extends JMenuItem> extends AbstractDelega
     }
 
     /**
+     *  Exposes the "siblings" of the delegated component, which refers
+     *  to all children of its parent component, except for itself.
+     *  This is contrary to the {@link #getSiblinghood()} method which returns all children of the parent component
+     *  including the current component.
+     *
      * @return A list of all the {@link JMenuItem} which constitute the options exposed by the {@link JSplitButton}
      * except the current {@link JMenuItem} exposed by {@link #getCurrentItem()}.
      */

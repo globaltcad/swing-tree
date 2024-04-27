@@ -263,6 +263,8 @@ public final class OptionalUI<C extends Component> {
     }
 
     /**
+     *  If a component is present, returns the component, otherwise returns {@code null}.
+     *
      * @return The component wrapped in this OptionalUI, or null if no component is present.
      */
     public @Nullable C orNull() {

@@ -101,12 +101,18 @@ public final class Bounds
     }
 
     /**
+     *  Allows you to check weather the bounds object has a width
+     *  that is greater than zero.
+     *
      * @return The truth value of whether this bounds object has a width,
      *       which is true if the width is greater than zero.
      */
     public boolean hasWidth() { return _size._width > 0; }
 
     /**
+     *  Allows you to check weather the bounds object has a height
+     *  that is greater than zero.
+     *
      * @return The truth value of whether this bounds object has a height,
      *       which is true if the height is greater than zero.
      */
