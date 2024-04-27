@@ -32,8 +32,9 @@ public final class UIForProgressBar<P extends JProgressBar> extends UIForAnySwin
     }
 
     /**
-     *  Sets the orientation of the slider.
-     *  @param align The orientation of the slider.
+     *  Sets a fixed orientation for the slider using the {@link UI.Align} enum.
+     *
+     *  @param align The orientation constant of the slider.
      *  @return This builder node.
      */
     public final UIForProgressBar<P> withOrientation( UI.Align align ) {
@@ -45,7 +46,10 @@ public final class UIForProgressBar<P extends JProgressBar> extends UIForAnySwin
     }
 
     /**
-     *  Dynamically sets the orientation of the slider.
+     *  Models the orientation of the slider using a {@link Val} property
+     *  which allows for dynamic updates to the orientation of the slider.
+     *  So when the value of the property changes, the orientation of the slider will be updated accordingly.
+     *
      *  @param align The orientation of the slider.
      *  @return This builder node.
      */
@@ -76,6 +80,10 @@ public final class UIForProgressBar<P extends JProgressBar> extends UIForAnySwin
     }
 
     /**
+     *  Models the minimum value of the slider using a {@link Val} property
+     *  which allows for dynamic updates to the min value of the slider.
+     *  So when the value of the property changes, the min value of the slider will be updated accordingly.
+     *
      * @param min The min property used to dynamically update the min value of the slider.
      * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if {@code min} is {@code null}.
@@ -178,6 +186,11 @@ public final class UIForProgressBar<P extends JProgressBar> extends UIForAnySwin
     }
 
     /**
+     *  Allows you to model the progress of the progress bar in terms of a double value between 0 and 1
+     *  using a {@link Val} property.
+     *  When the value of the property changes, the progress bar will be updated accordingly. <br>
+     *  The progress value will be converted to an integer value between the min and max values.
+     *
      * @param progress A double property used to dynamically update the value of the progress bar.
      * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if {@code value} is {@code null}.

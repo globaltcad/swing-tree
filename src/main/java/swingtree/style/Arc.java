@@ -45,11 +45,17 @@ final class Arc
     }
 
     /**
+     *  Exposes the width of the arc, which can be thought of as the width
+     *  of the bounding rectangle of an arc.
+     *
      * @return The width of the arc.
      */
     public float width() { return _arcWidth; }
 
     /**
+     *  Exposes the height of the arc, which can be thought of as the height
+     *  of the bounding rectangle of an arc.
+     *
      * @return The height of the arc.
      */
     public float height() { return _arcHeight; }
