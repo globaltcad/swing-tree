@@ -121,6 +121,10 @@ public final class OptionsDialog<E extends Enum<E>>
     }
 
     /**
+     *  Creates an updated options dialog config with the specified default option,
+     *  which will be the option with the initial focus when the dialog is shown.
+     *  If the user presses the enter key, this option will be selected automatically.
+     *
      * @param defaultOption The default option of the dialog.
      *                      This option will be selected by default.
      * @return A new {@link OptionsDialog} instance with the specified default option.

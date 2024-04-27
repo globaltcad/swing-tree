@@ -183,6 +183,8 @@ public final class SplitButtonDelegate<I extends JMenuItem> extends AbstractDele
         }
 
         /**
+         *  A convenience method to append text to the text displayed on the {@link JSplitButton}.
+         *
          * @param postfix The text which should be appended to the text displayed on the {@link JSplitButton}.
          * @return This delegate instance to allow for method chaining.
          */

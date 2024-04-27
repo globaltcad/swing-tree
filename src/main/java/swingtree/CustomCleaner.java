@@ -37,10 +37,12 @@ final class CustomCleaner
     private final ReferenceQueue<Object> _referenceQueue = new ReferenceQueue<>();
 
     private final List<ReferenceWithCleanup<Object>> _toBeCleaned = new ArrayList<>();
-    private @Nullable Thread _thread = null;
+    private final Thread _thread;
 
 
-    private CustomCleaner() {}
+    private CustomCleaner() {
+        _thread = new Thread(this::run, "SwingTree-Cleaner");
+    }
 
 
     static class ReferenceWithCleanup<T> extends PhantomReference<T>
@@ -77,8 +79,7 @@ final class CustomCleaner
         synchronized ( _referenceQueue ) {
             _toBeCleaned.add(new ReferenceWithCleanup<>(o, action, _referenceQueue));
             if ( _toBeCleaned.size() == 1 ) {
-                if ( _thread == null ) {
-                    _thread = new Thread(this::run, "SwingTree-Cleaner");
+                if ( !_thread.isAlive() ) {
                     _thread.start();
                 }
                 else {
@@ -92,9 +93,8 @@ final class CustomCleaner
     }
 
     private void run() {
-        if ( _thread == null ) {
-            log.error("Cleaner thread is null! This should not happen!");
-            return;
+        if ( !_thread.isAlive() ) {
+            _thread.start();
         }
         while ( _thread.isAlive() ) {
             while ( !_toBeCleaned.isEmpty() ) {

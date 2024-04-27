@@ -79,6 +79,11 @@ public final class ConfirmDialog
     }
 
     /**
+     *  This method allows you to specify the title of the dialog,
+     *  which is the text that will be displayed in the title bar of the dialog window.
+     *  If you don't specify a title, a default title may be used based on the dialog type,
+     *  so a title does not need to be specified here for the dialog to be shown.
+     *
      * @param title The title of the dialog.
      * @return A new {@link ConfirmDialog} instance with the specified title.
      */
@@ -87,6 +92,10 @@ public final class ConfirmDialog
     }
 
     /**
+     *  This method allows you to specify some text that will be used to represent the {@link ConfirmAnswer#YES}
+     *  option in the dialog. <br>
+     *  So when the user clicks on that option, the dialog will return {@link ConfirmAnswer#YES}.
+     *
      * @param yesOption The text of the "yes" option.
      * @return A new {@link ConfirmDialog} instance with the specified "yes" option text.
      */
@@ -95,6 +104,10 @@ public final class ConfirmDialog
     }
 
     /**
+     *  This method allows you to specify some text that will be used to represent the {@link ConfirmAnswer#NO}
+     *  option in the dialog. <br>
+     *  So when the user clicks on that option, the dialog will return {@link ConfirmAnswer#NO}.
+     *
      * @param noOption The text of the "no" option.
      * @return A new {@link ConfirmDialog} instance with the specified "no" option text.
      */
@@ -103,6 +116,10 @@ public final class ConfirmDialog
     }
 
     /**
+     *  This method allows you to specify some text that will be used to represent the {@link ConfirmAnswer#CANCEL}
+     *  option in the dialog. <br>
+     *  So when the user clicks on that option, the dialog will return {@link ConfirmAnswer#CANCEL}.
+     *
      * @param cancelOption The text of the "cancel" option.
      * @return A new {@link ConfirmDialog} instance with the specified "cancel" option text.
      */
@@ -111,6 +128,11 @@ public final class ConfirmDialog
     }
 
     /**
+     *  Use this to specify the default option for the dialog, which is the option
+     *  which will have the initial focus when the dialog is shown. <br>
+     *  So when the user presses the "Enter" key, the dialog will return the option
+     *  that was set as the default option.
+     *
      * @param defaultOption The text of the default option.
      * @return A new {@link ConfirmDialog} instance with the specified default option text.
      */
@@ -159,6 +181,11 @@ public final class ConfirmDialog
     }
 
     /**
+     *  Allows you to specify the parent component of the dialog, which is the component
+     *  that the dialog will be centered on top of. <br>
+     *  This is useful when you want to make the dialog modal to a specific component,
+     *  but a parent component is not required to show the dialog.
+     *
      * @param parent The parent component of the dialog.
      * @return A new {@link ConfirmDialog} instance with the specified parent component.
      */

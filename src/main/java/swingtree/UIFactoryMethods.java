@@ -3776,6 +3776,10 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
+     *  Creates a declarative toggle button builder for a {@link JToggleButton}
+     *  displaying the provided icon
+     *  scaled to fit the desired size and {@link UI.FitComponent} policy.
+     *
      * @param width The width the icon should be scaled to.
      * @param height The height the icon should be scaled to.
      * @param icon The {@link IconDeclaration} whose icon ought to be displayed on top of the button.
@@ -4735,6 +4739,8 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
+     *  Creates a declarative UI builder for the {@link JTable} component type.
+     *
      * @return A fluent builder instance for a new {@link JTable}.
      */
     public static UIForTable<JTable> table() {
@@ -4832,13 +4838,50 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
-     * @return A functional API for building a {@link javax.swing.table.TableModel}.
+     *  This method is the entry point to a fluent builder API for creating a generic table model
+     *  for a {@link javax.swing.JTable} or more specifically the {@link UIForTable#withModel(Buildable)}
+     *  method. <br>
+     *  Here an example demonstrating how this API
+     *  is typically used as part of a UI declaration:
+     *  <pre>{@code
+     *  UI.table().withModel(
+     *      UI.tableModel()
+     *      .colName( col -> new String[]{"X", "Y", "Z"}[col] )
+     *      .colCount( () -> 3 )
+     *      .rowCount( () -> data.size() )
+     *      .getsEntryAt( (r, c) -> data[r][c] )
+     *      .updateOn(update)
+     *  )
+     *  }</pre>
+     *  Note that this method is equivalent to
+     *  calling {@link #tableModel(Class)} with the {@link Object} class as the type parameter.
+     *
+     * @return A functional and fluent API for building a {@link javax.swing.table.TableModel}.
      */
     public static BasicTableModel.Builder<Object> tableModel() {
         return new BasicTableModel.Builder<>(Object.class);
     }
 
     /**
+     *  This method is the entry point to a fluent builder API for creating an entry type specific table model
+     *  for a {@link javax.swing.JTable} or more specifically the {@link UIForTable#withModel(Buildable)}
+     *  method. <br>
+     *  Here an example demonstrating how this API
+     *  is typically used as part of a UI declaration:
+     *  <pre>{@code
+     *  UI.table().withModel(
+     *      UI.tableModel(String.class)
+     *      .colName( col -> new String[]{"X", "Y", "Z"}[col] )
+     *      .colCount( () -> 3 )
+     *      .rowCount( () -> data.size() )
+     *      .getsEntryAt( (r, c) -> data[r][c] )
+     *      .updateOn(update)
+     *  )
+     *  }</pre>
+     *  Note that this method is different from {@link #tableModel()} in that it allows you to specify
+     *  the type of the table entries. This is useful when you want to have more
+     *  compile-time type safety when working with the table model.
+     *
      * @param entryType The type of the table entries.
      * @param <E> The type of the table entries.
      * @return A functional API for building a {@link javax.swing.table.TableModel}.

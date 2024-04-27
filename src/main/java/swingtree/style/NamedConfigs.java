@@ -1,6 +1,8 @@
 package swingtree.style;
 
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.function.Function;
@@ -24,6 +26,7 @@ import java.util.stream.Stream;
 final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
 {
     private static final NamedConfigs<?> EMPTY = new NamedConfigs<>();
+    private static final Logger log = LoggerFactory.getLogger(NamedConfigs.class);
 
     static <S> NamedConfigs<S> of(NamedConf<S> defaultStyle ) {
         return new NamedConfigs<>( defaultStyle );
@@ -75,17 +78,26 @@ final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
         return new NamedConfigs<>(styles);
     }
 
-    public NamedConfigs<S> mapStyles(Function<S,S> f ) {
+    public NamedConfigs<S> mapStyles( Function<S,S> f ) {
         Objects.requireNonNull(f);
         return mapNamedStyles( ns -> NamedConf.of(ns.name(), f.apply(ns.style())) );
     }
 
-    public NamedConfigs<S> mapNamedStyles(Function<NamedConf<S>, NamedConf<S>> f ) {
+    public NamedConfigs<S> mapNamedStyles( Function<NamedConf<S>, NamedConf<S>> f ) {
         Objects.requireNonNull(f);
 
         NamedConf<S>[] newStyles = null;
         for ( int i = 0; i < _styles.length; i++ ) {
-            NamedConf<S> mapped = f.apply(_styles[i]);
+            NamedConf<S> mapped = _styles[i];
+            try {
+                mapped = f.apply(_styles[i]);
+            } catch ( Exception e ) {
+                log.error(
+                        "Failed to map named style '" + _styles[i] + "' using " +
+                        "the provided function '" + f + "'.",
+                        e
+                    );
+            }
             if ( newStyles == null && mapped != _styles[i] ) {
                 newStyles = Arrays.copyOf(_styles, _styles.length);
                 // We avoid heap allocation if possible!

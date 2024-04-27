@@ -103,8 +103,7 @@ public interface IconDeclaration
 
     /**
      *  Creates and returns an updated {@link IconDeclaration} instance
-     *  with the same path but the given size as preferred size
-     *  for the icon.
+     *  with a new preferred size for the icon.
      *
      * @param size The preferred size of the icon in the form of a {@link Size} instance.
      * @return A new {@link IconDeclaration} instance with the same path
@@ -115,6 +114,9 @@ public interface IconDeclaration
     }
 
     /**
+     *  Creates and returns an updated {@link IconDeclaration} instance
+     *  with a new preferred width and height for the icon.
+     *
      * @param width The preferred width of the icon.
      * @param height The preferred height of the icon.
      * @return A new {@link IconDeclaration} instance with the same path
@@ -125,6 +127,9 @@ public interface IconDeclaration
     }
 
     /**
+     *  Creates and returns an updated {@link IconDeclaration} instance
+     *  with a new preferred width for the icon.
+     *
      * @param width The preferred width of the icon.
      * @return A new {@link IconDeclaration} instance with the same path
      *        but with the specified width as preferred width.
@@ -134,6 +139,9 @@ public interface IconDeclaration
     }
 
     /**
+     *  Allows you to create an updated {@link IconDeclaration} instance
+     *  with a new preferred height for the icon.
+     *
      * @param height The preferred height of the icon.
      * @return A new {@link IconDeclaration} instance with the same path
      *        but with the specified height as preferred height.
@@ -152,6 +160,9 @@ public interface IconDeclaration
     }
 
     /**
+     *  A factory method for creating an {@link IconDeclaration} instance
+     *  from the provided path to the icon resource.
+     *
      * @param path The path to the icon resource, which may be relative
      *             to the classpath or may be an absolute path.
      * @return A new {@link IconDeclaration} instance
@@ -162,6 +173,9 @@ public interface IconDeclaration
     }
 
     /**
+     *  A factory method for creating an {@link IconDeclaration} instance
+     *  from the provided path to the icon resource and the preferred size.
+     *
      * @param size The preferred size of the icon.
      * @param path The path to the icon resource, which may be relative
      *             to the classpath or may be an absolute path.
