@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import com.google.errorprone.annotations.Immutable;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import swingtree.UI;
@@ -70,6 +71,7 @@ import java.util.Optional;
  *  as the instance returned by that method is a shadow with no offset, no blur, no spread and no color,
  *  effectively making it a representation of the absence of a shadow.
  */
+@Immutable
 @SuppressWarnings("ReferenceEquality")
 public final class ShadowConf implements Simplifiable<ShadowConf>
 {

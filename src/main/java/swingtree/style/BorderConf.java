@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import com.google.errorprone.annotations.Immutable;
 import org.jspecify.annotations.Nullable;
 import swingtree.UI;
 
@@ -13,6 +14,7 @@ import java.util.Optional;
  *  The state of this object is updated through with-methods that return
  *  a new instance of this class with the updated state.
  */
+@Immutable
 final class BorderConf
 {
     private static final BorderConf _NONE = new BorderConf(

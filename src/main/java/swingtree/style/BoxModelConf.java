@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import com.google.errorprone.annotations.Immutable;
 import swingtree.UI;
 import swingtree.layout.Size;
 
@@ -12,6 +13,7 @@ import java.util.Optional;
  *  The state of this object is updated through with-methods that return
  *  a new instance of this class with the updated state.
  */
+@Immutable
 final class BoxModelConf
 {
     private static final BoxModelConf _NONE = new BoxModelConf(

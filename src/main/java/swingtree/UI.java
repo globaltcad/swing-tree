@@ -1,5 +1,6 @@
 package swingtree;
 
+import com.google.errorprone.annotations.Immutable;
 import net.miginfocom.swing.MigLayout;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
@@ -1562,6 +1563,7 @@ public final class UI extends UIFactoryMethods
      * @see         ColorSpace
      * @see         AlphaComposite
      */
+    @Immutable
     public static final class Color extends java.awt.Color
     {
         private static final Logger log = LoggerFactory.getLogger(Color.class);
@@ -3132,7 +3134,7 @@ public final class UI extends UIFactoryMethods
      *  It is a subclass of {@link java.awt.Font} and provides additional functionality.
      *  The appearance of a font is primarily based on the font family name which is used to find a font on the system.
      */
-    public static class Font extends java.awt.Font
+    public static final class Font extends java.awt.Font
     {
         /**
          *  This constant is a {@link java.awt.Font} object with a font name of "" (empty string),

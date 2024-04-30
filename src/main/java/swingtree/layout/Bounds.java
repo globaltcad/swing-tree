@@ -1,5 +1,7 @@
 package swingtree.layout;
 
+import com.google.errorprone.annotations.Immutable;
+
 import java.awt.Rectangle;
 import java.util.Objects;
 
@@ -15,6 +17,7 @@ import java.util.Objects;
  *  are implemented to compare the {@link Location} and {@link Size} objects
  *  for value based equality instead of reference based equality.
  */
+@Immutable
 public final class Bounds
 {
     private final static Bounds EMPTY = new Bounds(Location.origin(), Size.unknown());
