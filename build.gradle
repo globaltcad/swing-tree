@@ -39,13 +39,14 @@ repositories {
 dependencies {
 
     if ( WE_CAN_DO_STATIC_ANALYSIS ) {
-        errorprone "com.uber.nullaway:nullaway:0.10.22"
+        errorprone "com.uber.nullaway:nullaway:0.10.25"
         compileOnly "com.google.code.findbugs:jsr305:3.0.2"
-        errorprone "com.google.errorprone:error_prone_core:2.24.1"
+        errorprone "com.google.errorprone:error_prone_core:2.27.0"
     }
     else
         errorprone "com.google.errorprone:error_prone_core:2.9.+"
 
+    implementation group: 'com.google.errorprone', name: 'error_prone_annotations', version: '2.27.0'
     implementation group: 'org.jspecify', name: 'jspecify', version: '0.3.0'
 
     // Main dependencies:
