@@ -153,6 +153,10 @@ public interface IconDeclaration
     }
 
     /**
+     *  This method is used to find an {@link ImageIcon} of a specific type
+     *  and load and return it wrapped in an {@link Optional},
+     *  or return an empty {@link Optional} if the icon resource could not be found.
+     *
      * @param type The type of icon to find.
      * @return An {@link Optional} that contains the {@link ImageIcon} of the given type.
      * @param <T> The type of icon to find.

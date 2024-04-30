@@ -186,6 +186,11 @@ final class BuilderState<C extends java.awt.Component>
     }
 
     /**
+     *  A mutator is a functional consumer containing an action
+     *  that mutates the component passed to it. <br>
+     *  A mutator is either executed immediately or composed into a factory pipeline
+     *  and executed when the component is built and fetched at the end of the builder chain. <br>
+     *
      * @param componentMutator A consumer which mutates the component managed by this builder.
      * @return In procedural mode, this very builder node is returned.
      *         In declarative mode, a new builder node is returned which is a copy of this builder node,
