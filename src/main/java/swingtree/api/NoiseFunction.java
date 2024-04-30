@@ -1,6 +1,7 @@
 package swingtree.api;
 
 
+import com.google.errorprone.annotations.Immutable;
 import swingtree.style.NoiseConf;
 
 /**
@@ -15,6 +16,8 @@ import swingtree.style.NoiseConf;
  * predefined noise function implementations.<br>
  * There you will most likely find a noise function that fits your needs.</b>
  */
+@Immutable
+@FunctionalInterface
 public interface NoiseFunction
 {
     /**

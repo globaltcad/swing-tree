@@ -1,10 +1,14 @@
 package swingtree.api;
 
+import com.google.errorprone.annotations.Immutable;
+
 /**
  *  Used by {@link NoiseFunction#andThen(FloatFunction)}
  *  to apply a scalar function to the result of a noise function
  *  or to the input of a noise function using {@link NoiseFunction#compose(FloatFunction)}.
  */
+@Immutable
+@FunctionalInterface
 public interface FloatFunction
 {
     /**
