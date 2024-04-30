@@ -1,11 +1,14 @@
 package swingtree.style;
 
+import com.google.errorprone.annotations.Immutable;
+
 import java.util.Objects;
 
 /**
  *  An immutable value object that represents an offset from a position
  *  in the form of an x and y offset or lack thereof (0, 0).
  */
+@Immutable
 final class Offset
 {
     private static final Offset _NONE = new Offset(0, 0);

@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import com.google.errorprone.annotations.Immutable;
 import org.jspecify.annotations.Nullable;
 
 import java.awt.Insets;
@@ -16,6 +17,7 @@ import java.util.function.Function;
  *  was specified through the styling API or not so that the default properties of a component
  *  can be preserved (the insets of a layout manager, for example).
  */
+@Immutable
 final class Outline
 {
     private static final Outline _NONE = new Outline(null, null, null, null);

@@ -1,11 +1,14 @@
 package swingtree.style;
 
+import com.google.errorprone.annotations.Immutable;
+
 import java.util.Objects;
 
 /**
  *  An immutable value object that represents a 2D scale
  *  in the form of x and y scale values or lack thereof (1, 1).
  */
+@Immutable
 final class Scale
 {
     private static final Scale _NONE = new Scale(1, 1);

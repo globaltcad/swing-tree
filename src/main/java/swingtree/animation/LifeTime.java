@@ -1,5 +1,6 @@
 package swingtree.animation;
 
+import com.google.errorprone.annotations.Immutable;
 import sprouts.Event;
 import sprouts.Val;
 import swingtree.SwingTree;
@@ -41,6 +42,7 @@ import java.util.concurrent.TimeUnit;
  *  }))
  *  }</pre>
  */
+@Immutable
 public final class LifeTime
 {
     private final long _delay; // in milliseconds
