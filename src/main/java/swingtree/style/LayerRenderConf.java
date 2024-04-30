@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import com.google.errorprone.annotations.Immutable;
 import swingtree.UI;
 
 import java.awt.Graphics2D;
@@ -14,6 +15,8 @@ import java.util.Objects;
  *  render cache is being invalidated and the component is rendered again
  *  (potentially with a new cached image buffer).
  */
+@Immutable
+@SuppressWarnings("Immutable")
 final class LayerRenderConf
 {
     private static final LayerRenderConf _NONE = new LayerRenderConf(

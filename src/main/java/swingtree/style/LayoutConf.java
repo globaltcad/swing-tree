@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import com.google.errorprone.annotations.Immutable;
 import org.jspecify.annotations.Nullable;
 import swingtree.api.Layout;
 
@@ -11,6 +12,8 @@ import java.util.Optional;
  *  The layout manager of a component will use this information
  *  to determine the actual layout of the component in the layout.
  **/
+@Immutable
+@SuppressWarnings("Immutable")
 final class LayoutConf
 {
     private static final LayoutConf _NONE = new LayoutConf(Layout.unspecific(), null, null, null);

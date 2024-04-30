@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import com.google.errorprone.annotations.Immutable;
 import swingtree.UI;
 import swingtree.layout.Size;
 
@@ -53,6 +54,8 @@ import java.util.Objects;
  *      </li>
  *  </ul>
  */
+@Immutable
+@SuppressWarnings("Immutable")
 public final class FilterConf
 {
     private static final FilterConf _NONE = new FilterConf(

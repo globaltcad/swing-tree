@@ -1,5 +1,6 @@
 package swingtree;
 
+import com.google.errorprone.annotations.Immutable;
 import org.slf4j.Logger;
 
 import javax.swing.*;
@@ -18,6 +19,7 @@ import java.util.function.*;
  * 	<b>Please take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
  * 	where you can browse a collection of examples demonstrating how to use the API of this class.</b>
  */
+@Immutable
 public final class Render<C extends JComponent,E>
 {
 	private static final Logger log = org.slf4j.LoggerFactory.getLogger(Render.class);

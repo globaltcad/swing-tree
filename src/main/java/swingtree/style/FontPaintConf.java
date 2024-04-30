@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import com.google.errorprone.annotations.Immutable;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -19,6 +20,8 @@ import java.util.function.Function;
  *  so this means that only one of these objects can be non-null
  *  at a time the other three must be null.
  */
+@Immutable
+@SuppressWarnings("Immutable")
 final class FontPaintConf
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(FontPaintConf.class);

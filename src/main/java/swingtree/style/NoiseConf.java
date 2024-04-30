@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import com.google.errorprone.annotations.Immutable;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import swingtree.UI;
@@ -20,6 +21,8 @@ import java.util.Objects;
  *  The noise gradient can also be offset, scaled, rotated and clipped to a specific area of the component,
  *  and positioned at a specific boundary of the component.
  */
+@Immutable
+@SuppressWarnings("Immutable")
 public final class NoiseConf implements Simplifiable<NoiseConf>
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(NoiseConf.class);

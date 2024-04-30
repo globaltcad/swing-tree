@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import com.google.errorprone.annotations.Immutable;
 import swingtree.UI;
 import swingtree.layout.Bounds;
 import swingtree.layout.Size;
@@ -10,6 +11,8 @@ import java.util.Objects;
  *  An immutable snapshot of all the essential component state needed for rendering
  *  and configuring the component state.
  */
+@Immutable
+@SuppressWarnings("Immutable")
 final class ComponentConf
 {
     public static ComponentConf none() {
