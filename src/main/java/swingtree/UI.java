@@ -65,6 +65,7 @@ public final class UI extends UIFactoryMethods
      *  map to the cursor type id.
      *  This exists simply because swing was created before enums were added to Java.
      */
+    @Immutable
     public enum Cursor implements UIEnum<Cursor>
     {
         DEFAULT(java.awt.Cursor.DEFAULT_CURSOR),
@@ -107,6 +108,7 @@ public final class UI extends UIFactoryMethods
      *  in various API methods like for example {@link UIForTabbedPane#withTabPlacementAt(Side)}
      *  or the tapped pane factory method {@link UI#tabbedPane(Side)}.
      */
+    @Immutable
     public enum Side implements UIEnum<Side>
     {
         TOP, LEFT, BOTTOM, RIGHT;
@@ -145,6 +147,7 @@ public final class UI extends UIFactoryMethods
     /**
      *  Overflow policy of UI components.
      */
+    @Immutable
     public enum OverflowPolicy implements UIEnum<OverflowPolicy>
     {
         WRAP, SCROLL;
