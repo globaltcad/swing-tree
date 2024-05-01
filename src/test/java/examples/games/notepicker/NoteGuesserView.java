@@ -57,14 +57,17 @@ public class NoteGuesserView extends Panel
     }
 
     public NoteGuesserView(NoteGuesserViewModel vm) {
+        MidiChannel[] mifiChannels;
         try {
             // * Open a synthesizer
             Synthesizer synth = MidiSystem.getSynthesizer();
             synth.open();
-            channels = synth.getChannels();
+            mifiChannels = synth.getChannels();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            mifiChannels = null;
+            e.printStackTrace();
         }
+        channels = mifiChannels;
         FlatLightLaf.setup();
         UIManager.put( "Button.arc", 25 );
         of(this).withBackground(OLD_SHEET_MUSIC_COLOR)
