@@ -1,6 +1,4 @@
-package examples.games;
-
-import examples.games.Symbol;
+package examples.games.kanapicker;
 
 import java.util.ArrayList;
 import java.util.Collections;

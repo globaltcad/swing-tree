@@ -1,4 +1,4 @@
-package examples.games;
+package examples.games.kanapicker;
 
 import com.formdev.flatlaf.FlatLightLaf;
 import swingtree.UI;
@@ -106,7 +106,6 @@ public class SymbolGuesserView extends Panel
 
     public static void main( String... args ) {
         SymbolGuesserViewModel vm = new SymbolGuesserViewModel();
-        SymbolGuesserView view = new SymbolGuesserView(vm);
-        UI.show(view);
+        UI.show( f -> new SymbolGuesserView(vm) );
     }
 }

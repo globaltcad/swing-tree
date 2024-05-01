@@ -1,4 +1,4 @@
-package examples.games;
+package examples.games.kanapicker;
 
 import sprouts.Var;
 

@@ -1,4 +1,4 @@
-package examples.games;
+package examples.games.kanapicker;
 
 import sprouts.Event;
 import sprouts.From;
@@ -149,22 +149,6 @@ public class SymbolGuesserViewModel
             new Symbol('ヰ', "wi", "wi"),
             new Symbol('ヲ', "wo", "wo"),
             new Symbol('ン', "n", "n")
-        ));
-        // In the real world you kanji is not an alphabet, but for the sake of this example it is.
-        // It is not an alphabet because it is not phonetic and often has multiple readings
-        // and represents full words, not just sounds.
-        alphabets.add(new Alphabet("Kanji",
-            new Symbol('一', "ichi", "one"),
-            new Symbol('二', "ni", "two"),
-            new Symbol('三', "san", "three"),
-            new Symbol('四', "shi", "four"),
-            new Symbol('五', "go", "five"),
-            new Symbol('六', "roku", "six"),
-            new Symbol('七', "shichi", "seven"),
-            new Symbol('八', "hachi", "eight"),
-            new Symbol('九', "kyu", "nine"),
-            new Symbol('十', "ju", "ten"),
-            new Symbol('百', "hyaku", "hundred")
         ));
         enableSymbols();
         newRandomSymbol();

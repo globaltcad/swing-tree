@@ -6,10 +6,10 @@ import examples.animated.AnimatedView
 import examples.animated.TransitionalAnimation
 import examples.comparisons.comparison1.MadeWithNetBeansEditor
 import examples.comparisons.comparison1.MadeWithSwingTree
-import examples.games.NoteGuesserView
-import examples.games.NoteGuesserViewModel
-import examples.games.SymbolGuesserView
-import examples.games.SymbolGuesserViewModel
+import examples.games.notepicker.NoteGuesserView
+import examples.games.notepicker.NoteGuesserViewModel
+import examples.games.kanapicker.SymbolGuesserView
+import examples.games.kanapicker.SymbolGuesserViewModel
 import examples.lists.ListTestExample
 import examples.mvvm.*
 import examples.simple.Form
