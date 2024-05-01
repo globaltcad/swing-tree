@@ -8,8 +8,8 @@ import examples.comparisons.comparison1.MadeWithNetBeansEditor
 import examples.comparisons.comparison1.MadeWithSwingTree
 import examples.games.notepicker.NoteGuesserView
 import examples.games.notepicker.NoteGuesserViewModel
-import examples.games.kanapicker.SymbolGuesserView
-import examples.games.kanapicker.SymbolGuesserViewModel
+import examples.games.kanapicker.KanaPickerView
+import examples.games.kanapicker.KanaPickerViewModel
 import examples.lists.ListTestExample
 import examples.mvvm.*
 import examples.simple.Form
@@ -206,9 +206,27 @@ class Examples_Spec extends Specification
             Utility.similarityBetween(ui, "views/note-guesser-UI.png", 93) > 93
     }
 
-    def 'The symbol guesser example UI defined in the examples can be created.'()
+    def 'The Kana-Picker is an example game which teaches you the Japanese Kana symbols.'()
     {
-        expect : new SymbolGuesserView(new SymbolGuesserViewModel())
+        reportInfo """
+            The Kana Picker is a very simple SwingTree based example game
+            that teaches you the Japanese Kana symbols. 
+            A random Hiragana or Katakana symbol is shown on the left
+            and you have to pick the correct Romaji pronunciation from a list of options.
+            
+            ${Utility.linkSnapshot('views/kana-picker-UI.png')}
+
+            It also demonstrates nicely how to use the MVVM design pattern
+            in a SwingTree based application.
+            Just ${Utility.link('navigate to the class', KanaPickerView)} and run
+            it yourself and play around with it.
+            The ${Utility.link('view model', KanaPickerViewModel)} is also a nice example of how to
+            do MVVM with SwingTree.
+        """
+        given : 'We create the UI:'
+            var ui = new KanaPickerView(new KanaPickerViewModel())
+        expect : 'The UI instance is rendered as shown in the image.'
+            Utility.similarityBetween(ui, "views/kana-picker-UI.png", 95) > 95
     }
 
     def 'The "Well rounded" style example UI defined in the examples can be created.'()

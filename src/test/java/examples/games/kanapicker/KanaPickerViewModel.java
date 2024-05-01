@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-public class SymbolGuesserViewModel
+public class KanaPickerViewModel
 {
     private final Event repaint = Event.create();
     private final Var<String> feedback = Var.of("Choose:");
@@ -45,7 +45,7 @@ public class SymbolGuesserViewModel
 
     public Val<Integer> level() { return level; }
 
-    public SymbolGuesserViewModel() {
+    public KanaPickerViewModel() {
         alphabets.add(new Alphabet("Hiragana",
             new Symbol('あ', "a", "a"),
             new Symbol('え', "e", "e"),
