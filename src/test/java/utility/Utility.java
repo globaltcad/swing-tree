@@ -18,8 +18,17 @@ import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ *  This class provides utility methods for testing purposes, which includes
+ *  taking snapshots of UIs, comparing them, and rendering them to images.
+ *  It also provides a method to set the Look and Feel of the application
+ *  and querying the UI for components.
+ */
 public class Utility
 {
+    private static final String GITHUB_URL = "https://github.com/globaltcad/swing-tree/blob/";
+    private static final String GITHUB_URL_RAW = "https://raw.githubusercontent.com/globaltcad/swing-tree/";
+
     private static final String SNAPSHOTS_DIR_NAME = "snapshots";
     private static final String FAILURE_POSTFIX = "-FAILURE";
 
@@ -380,7 +389,7 @@ public class Utility
     }
 
     public static String link(String linkText, Class<?> exampleTypeClass) {
-        String pathBase = "https://github.com/globaltcad/swing-tree/blob/main/src/test/java/";
+        String pathBase = GITHUB_URL + "main/src/test/java/";
         String filename = exampleTypeClass.getName().replace(".", "/") + ".java";
         String base = "<a href=\"" + pathBase + filename + "\" target=\"_blank\">";
         return  base + linkText + "</a>";
@@ -389,7 +398,7 @@ public class Utility
     public static String linkSnapshot(String filename) {
         filename = "/"+SNAPSHOTS_DIR_NAME+"/" + filename;
         filename = _findActual(filename);
-        String pathBase = "https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources";
+        String pathBase = GITHUB_URL_RAW + "main/src/test/resources";
         return "<img src=\"" + pathBase + filename + "\" alt=\"" + filename + "\" style=\"max-width: 50%;\" />";
     }
 
