@@ -14,11 +14,18 @@ import java.awt.*;
 public interface WindowDelegate<W extends Window, E>
 {
 	/**
+	 *  This method allows you to access the underlying window instance
+	 *  of this delegate.
+	 *  See {@link #getEvent()} for the event instance.
+	 *
 	 * @return The window which is wrapped by this delegate.
 	 */
 	W get();
 
 	/**
+	 * 	Allows you to access the delegated event instance.
+	 * 	See {@link #get()} for the window instance.
+	 *
 	 * @return The event which is wrapped by this delegate.
 	 */
 	@Nullable E getEvent();

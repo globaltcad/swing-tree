@@ -115,6 +115,10 @@ public final class UIForProgressBar<P extends JProgressBar> extends UIForAnySwin
     }
 
     /**
+     *  Models the maximum value of the progress bar using a {@link Val} property
+     *  so that when the value of the property changes, the max value of the progress bar will be updated accordingly.
+     *  For more information see {@link JProgressBar#setMaximum(int)}.
+     *
      * @param max An integer property used to dynamically update the max value of the progress bar.
      * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if {@code max} is {@code null}.

@@ -17,6 +17,10 @@ import java.util.Map;
 
 import static swingtree.UI.*;
 
+/**
+ *  The view for the Note Guesser game in which you are presented with a note and you have to guess which note it is
+ *  by pressing the correct key on a virtual piano keyboard.
+ */
 public class NoteGuesserView extends Panel
 {
     private static final int INSTRUMENT = 0; // 0 is a piano, 9 is percussion, other channels are for other instruments

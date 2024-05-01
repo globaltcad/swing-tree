@@ -158,9 +158,19 @@ final class StyleEngine
     }
 
     private void _render( UI.Layer layer, Graphics2D g2d ) {
-        _layerCaches[layer.ordinal()].paint(g2d, (conf, graphics) -> {
-            StyleRenderer.renderStyleOn(layer, conf, graphics);
-        });
+        LayerCache cache = null;
+        switch ( layer ) {
+            case BACKGROUND: cache = _layerCaches[0]; break;
+            case CONTENT:    cache = _layerCaches[1]; break;
+            case BORDER:     cache = _layerCaches[2]; break;
+            case FOREGROUND: cache = _layerCaches[3]; break;
+        }
+        if ( cache != null )
+            cache.paint(g2d, (conf, graphics) -> {
+                StyleRenderer.renderStyleOn(layer, conf, graphics);
+            });
+        else
+            log.error("Layer cache is null for layer: " + layer, new Throwable());
     }
 
 }

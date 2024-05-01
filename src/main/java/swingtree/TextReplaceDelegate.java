@@ -1,5 +1,6 @@
 package swingtree;
 
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import sprouts.Action;
 
@@ -31,7 +32,7 @@ public final class TextReplaceDelegate extends AbstractTextComponentDelegate
         DocumentFilter.FilterBypass filterBypass,
         int                         offset,
         int                         length,
-        String                      text,
+        @Nullable String            text,
         AttributeSet                attributeSet
     ) {
         super(textComponent, filterBypass, offset, length);
@@ -40,6 +41,9 @@ public final class TextReplaceDelegate extends AbstractTextComponentDelegate
     }
 
     /**
+     *  Exposes the text to insert where an empty string indicates no text
+     *  is to be inserted.
+     *
      * @return The text to be inserted or an empty {@link String} indicating that no text is to be inserted.
      *         Null is never returned.
      */

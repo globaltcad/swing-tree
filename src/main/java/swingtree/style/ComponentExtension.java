@@ -381,8 +381,8 @@ public final class ComponentExtension<C extends JComponent>
         final Graphics             graphics,
         final Consumer<Graphics2D> superPaint
     ) {
-        final int newStep  = step.ordinal();
-        final int lastStep = _lastPaintStep.ordinal();
+        final int newStep  = step.getStepOrder();
+        final int lastStep = _lastPaintStep.getStepOrder();
         final boolean isNewPaintCycle = newStep <= lastStep;
         if ( isNewPaintCycle )
             gatherApplyAndInstallStyleConfig();
@@ -604,6 +604,18 @@ public final class ComponentExtension<C extends JComponent>
 
     private enum PaintStep
     {
-        BACKGROUND, BORDER, FOREGROUND, UNDEFINED
+        BACKGROUND, BORDER, FOREGROUND, UNDEFINED;
+
+
+        private int getStepOrder() {
+            switch ( this ) {
+                case BACKGROUND: return 0;
+                case BORDER:     return 1;
+                case FOREGROUND: return 2;
+                case UNDEFINED:  return 3;
+                default: return -1;
+            }
+        }
+
     }
 }
