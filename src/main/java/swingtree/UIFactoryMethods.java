@@ -4600,6 +4600,8 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
+     *  Allows for the creation of a declarative UI for the {@link JList} component type.
+     *
      * @param <E> The type of the elements in the list.
      * @return A builder instance for a new {@link JList}.
      */
@@ -4608,6 +4610,9 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
+     *  Allows for the creation of a declarative UI for a new {@link JList} instance
+     *  with a custom list model.
+     *
      * @param model The model which should be used for the new {@link JList}.
      * @param <E> The type of the elements in the list.
      * @return A builder instance for a new {@link JList}.
@@ -4729,6 +4734,10 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     public static <E> UIForList<E, JList<E>> listOf( java.util.List<E> entries ) { return list( entries ); }
 
     /**
+     *  Allows you to wrap the provided {@link JTable} type in a declarative UI builder.
+     *  This is useful when you want to use a custom {@link JTable} implementation
+     *  in the SwingTree framework.
+     *
      * @param table The table which should be wrapped by the builder.
      * @param <T> The {@link JTable} type.
      * @return A builder instance for a new {@link JTable}.

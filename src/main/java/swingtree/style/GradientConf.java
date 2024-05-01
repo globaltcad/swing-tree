@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import com.google.errorprone.annotations.Immutable;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import swingtree.UI;
@@ -130,6 +131,8 @@ import java.util.function.Function;
  *  as the instance returned by that method is a gradient without any colors, effectively
  *  making it a representation of the absence of a gradient style.
  */
+@Immutable
+@SuppressWarnings("Immutable")
 public final class GradientConf implements Simplifiable<GradientConf>
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(GradientConf.class);

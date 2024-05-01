@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import com.google.errorprone.annotations.Immutable;
 import org.jspecify.annotations.Nullable;
 import swingtree.UI;
 
@@ -15,6 +16,8 @@ import java.util.Optional;
  *  Instances of this are part of the full {@link StyleConf} configuration that is used to
  *  style a component in all kinds of ways.
  */
+@Immutable
+@SuppressWarnings("Immutable")
 final class BaseConf
 {
     private static final BaseConf _NONE = new BaseConf(

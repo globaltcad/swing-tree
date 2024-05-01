@@ -189,6 +189,10 @@ public final class SvgIcon extends ImageIcon
     }
 
     /**
+     *  Exposes the height of the icon, or -1 if the icon should be rendered according
+     *  to the height of a given component or the height of the SVG document itself.
+     *  (...or other policies such as {@link swingtree.UI.FitComponent} and {@link swingtree.UI.Placement}).
+     *
      * @return A new {@link SvgIcon} with the given width and height.
      *        If the width or height is -1, the icon will be rendered according to the width or height of a given component
      *        or the width or height of the SVG document itself.
@@ -199,6 +203,12 @@ public final class SvgIcon extends ImageIcon
     }
 
     /**
+     *  Creates an updated {@link SvgIcon} with the supplied integer used
+     *  as the icon height, which you can retrieve using {@link #getIconHeight()}.
+     *  If the height is -1, the icon will be rendered according to the height of a given component
+     *  or the height of the SVG document itself.
+     *  (...or other policies such as {@link swingtree.UI.FitComponent} and {@link swingtree.UI.Placement}).
+     *
      * @param height The height of the icon, or -1 if the icon should be rendered according
      *               to the height of a given component or the height of the SVG document itself.
      * @return A new {@link SvgIcon} with the given height.
@@ -331,6 +341,8 @@ public final class SvgIcon extends ImageIcon
     }
 
     /**
+     *  Allows you to access the underlying {@link SVGDocument} that is used to render the icon.
+     *
      * @return The underlying {@link SVGDocument} that is used to render the icon.
      */
     public @Nullable SVGDocument getSvgDocument() {

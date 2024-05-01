@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import com.google.errorprone.annotations.Immutable;
 import swingtree.UI;
 import swingtree.api.Painter;
 
@@ -45,6 +46,7 @@ import java.util.stream.Collectors;
  *  See {@link swingtree.style.StyleSheet} for more information about
  *  how this composition of styles is achieved in practice.
  */
+@Immutable
 @SuppressWarnings("ReferenceEquality")
 public final class StyleConf
 {

@@ -1,5 +1,6 @@
 package swingtree.api;
 
+import com.google.errorprone.annotations.Immutable;
 import swingtree.UI;
 import swingtree.layout.Size;
 
@@ -63,6 +64,7 @@ import java.util.Optional;
  *  where the icon may not be available at all, yet you can still test the
  *  behavior of your view model.
  */
+@Immutable
 public interface IconDeclaration
 {
     /**
@@ -151,6 +153,10 @@ public interface IconDeclaration
     }
 
     /**
+     *  This method is used to find an {@link ImageIcon} of a specific type
+     *  and load and return it wrapped in an {@link Optional},
+     *  or return an empty {@link Optional} if the icon resource could not be found.
+     *
      * @param type The type of icon to find.
      * @return An {@link Optional} that contains the {@link ImageIcon} of the given type.
      * @param <T> The type of icon to find.
@@ -185,33 +191,6 @@ public interface IconDeclaration
     static IconDeclaration of( Size size, String path ) {
         Objects.requireNonNull(size);
         Objects.requireNonNull(path);
-        return new IconDeclaration() {
-            @Override
-            public Size size() {
-                return size;
-            }
-            @Override
-            public String path() {
-                return path;
-            }
-            @Override
-            public String toString() {
-                return this.getClass().getSimpleName()+"["+
-                            "size=" + ( size().equals(Size.unknown()) ? "?" : size() ) + ", " +
-                            "path='" + path() + "'" +
-                        "]";
-            }
-            @Override public int hashCode() {
-                return Objects.hash(path(), size());
-            }
-            @Override public boolean equals( Object other ) {
-                if ( other == this ) return true;
-                if ( other == null ) return false;
-                if ( other.getClass() != this.getClass() ) return false;
-                IconDeclaration that = (IconDeclaration) other;
-                return Objects.equals(this.path(), that.path())
-                    && Objects.equals(this.size(), that.size());
-            }
-        };
+        return new BasicIconDeclaration(size, path);
     }
 }

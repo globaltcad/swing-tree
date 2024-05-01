@@ -1,5 +1,6 @@
 package swingtree.api;
 
+import com.google.errorprone.annotations.Immutable;
 import net.miginfocom.swing.MigLayout;
 import swingtree.UI;
 import swingtree.style.ComponentExtension;
@@ -34,6 +35,7 @@ import java.util.Objects;
  *    This interface also contains various implementations
  *    for supporting the most common types of {@link LayoutManager}s.
  */
+@Immutable
 public interface Layout
 {
     /**
@@ -264,6 +266,7 @@ public interface Layout
      *  which represents the absence of a {@link LayoutManager}
      *  for a component (i.e. it removes any existing layout from the component and sets it to {@code null}).
      */
+    @Immutable
     final class Unspecific implements Layout
     {
         Unspecific() {}
@@ -296,6 +299,7 @@ public interface Layout
      *  which does not represent the absence of a {@link LayoutManager}
      *  for a component, but rather the absence of it being specified.
      */
+    @Immutable
     final class None implements Layout
     {
         None(){}
@@ -327,6 +331,7 @@ public interface Layout
      *  based on the new configuration,
      *  which are the constraints, column constraints and row constraints.
      */
+    @Immutable
     final class ForMigLayout implements Layout
     {
         private final String _constr;
@@ -428,6 +433,7 @@ public interface Layout
      *  based on the new configuration,
      *  which are the alignment, horizontal gap and vertical gap.
      */
+    @Immutable
     final class ForFlowLayout implements Layout
     {
         private final int _align;
@@ -494,6 +500,7 @@ public interface Layout
      *  it will create and re-install a new {@link BorderLayout} onto the component
      *  based on the new configuration.
      */
+    @Immutable
     final class BorderLayoutInstaller implements Layout
     {
         private final int _hgap;
@@ -554,6 +561,7 @@ public interface Layout
      *  it will create and re-install a new {@link GridLayout} onto the component
      *  based on the new configuration.
      */
+    @Immutable
     final class GridLayoutInstaller implements Layout
     {
         private final int _rows;
@@ -628,6 +636,7 @@ public interface Layout
      *  it will create and re-install a new {@link BoxLayout} onto the component
      *  based on the new configuration.
      */
+    @Immutable
     final class ForBoxLayout implements Layout
     {
         private final int _axis;

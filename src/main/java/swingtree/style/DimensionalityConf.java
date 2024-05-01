@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import com.google.errorprone.annotations.Immutable;
 import swingtree.layout.Size;
 
 import java.util.Objects;
@@ -11,6 +12,7 @@ import java.util.Optional;
  *  The layout manager of a component will use this information
  *  to determine the actual size of the component in the layout.
  **/
+@Immutable
 final class DimensionalityConf
 {
     private static final DimensionalityConf _NONE = new DimensionalityConf(

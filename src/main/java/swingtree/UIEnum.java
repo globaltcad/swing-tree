@@ -1,9 +1,12 @@
 package swingtree;
 
+import com.google.errorprone.annotations.Immutable;
+
 /**
  *  A set of extension methods for various SwingTree enums.
  * @param <E> The enum type.
  */
+@Immutable
 public /*seiled*/ interface UIEnum<E extends Enum<E>> /*permits UI...*/
 {
     /**

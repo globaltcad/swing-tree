@@ -1,5 +1,6 @@
 package swingtree;
 
+import com.google.errorprone.annotations.Immutable;
 import net.miginfocom.swing.MigLayout;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
@@ -64,6 +65,7 @@ public final class UI extends UIFactoryMethods
      *  map to the cursor type id.
      *  This exists simply because swing was created before enums were added to Java.
      */
+    @Immutable
     public enum Cursor implements UIEnum<Cursor>
     {
         DEFAULT(java.awt.Cursor.DEFAULT_CURSOR),
@@ -94,6 +96,7 @@ public final class UI extends UIFactoryMethods
      *  A general purpose enum describing if something is never, always or sometimes active.
      *  This is mostly used to configure the scroll bar policy for UI components with scroll behaviour.
      */
+    @Immutable
     public enum Active implements UIEnum<Active>{
         NEVER, AS_NEEDED, ALWAYS
     }
@@ -105,6 +108,7 @@ public final class UI extends UIFactoryMethods
      *  in various API methods like for example {@link UIForTabbedPane#withTabPlacementAt(Side)}
      *  or the tapped pane factory method {@link UI#tabbedPane(Side)}.
      */
+    @Immutable
     public enum Side implements UIEnum<Side>
     {
         TOP, LEFT, BOTTOM, RIGHT;
@@ -143,6 +147,7 @@ public final class UI extends UIFactoryMethods
     /**
      *  Overflow policy of UI components.
      */
+    @Immutable
     public enum OverflowPolicy implements UIEnum<OverflowPolicy>
     {
         WRAP, SCROLL;
@@ -159,6 +164,7 @@ public final class UI extends UIFactoryMethods
     /**
      *  Vertical or horizontal alignment.
      */
+    @Immutable
     public enum Align implements UIEnum<Align>
     {
         HORIZONTAL, VERTICAL;
@@ -203,6 +209,7 @@ public final class UI extends UIFactoryMethods
     /**
      *  Different positions along a vertically aligned UI component.
      */
+    @Immutable
     public enum VerticalAlignment implements UIEnum<VerticalAlignment>{
         UNDEFINED, TOP, CENTER, BOTTOM;
 
@@ -220,6 +227,7 @@ public final class UI extends UIFactoryMethods
     /**
      *  Different positions along a horizontally aligned UI component.
      */
+    @Immutable
     public enum HorizontalAlignment implements UIEnum<HorizontalAlignment>
     {
         UNDEFINED,
@@ -253,6 +261,7 @@ public final class UI extends UIFactoryMethods
     /**
      *  The logical combination of a vertical and horizontal alignment.
      */
+    @Immutable
     public enum Alignment implements UIEnum<Alignment>
     {
         UNDEFINED,
@@ -297,6 +306,7 @@ public final class UI extends UIFactoryMethods
      *  See {@link UI#table(ListData, TableListDataSource)}  or {@link UIForTable#withModel(ListData, TableListDataSource)}
      *  for more information about the usage of this enum.
      */
+    @Immutable
     public enum ListData implements UIEnum<ListData>
     {
         COLUMN_MAJOR,
@@ -334,6 +344,7 @@ public final class UI extends UIFactoryMethods
      *  See {@link UI#table(MapData, TableMapDataSource)} or {@link UIForTable#withModel(MapData, TableMapDataSource)}
      *  for more information about the usage of this enum.
      */
+    @Immutable
     public enum MapData implements UIEnum<MapData>
     {
         EDITABLE, READ_ONLY;
@@ -352,6 +363,7 @@ public final class UI extends UIFactoryMethods
      *  <br>
      *  See {@link ComponentStyleDelegate#borderWidthAt(Edge, double)}
      */
+    @Immutable
     public enum Edge implements UIEnum<Edge>
     {
         EVERY,
@@ -363,6 +375,7 @@ public final class UI extends UIFactoryMethods
      *  Instances of this enum are used to configure onto which
      *  layer a particular style configuration should be applied.
      */
+    @Immutable
     public enum Layer implements UIEnum<Layer>
     {
         /**
@@ -395,6 +408,7 @@ public final class UI extends UIFactoryMethods
      *  {@link GradientConf#type(GradientType)} method exposed by methods like
      *  {@link ComponentStyleDelegate#gradient(String, Function)} or {@link ComponentStyleDelegate#gradient(Layer, String, Function)}.
      */
+    @Immutable
     public enum GradientType implements UIEnum<GradientType>
     {
         /**
@@ -417,6 +431,7 @@ public final class UI extends UIFactoryMethods
      *  Pass instances of this to {@link NoiseConf#function(NoiseFunction)} to configure the noise behaviour
      *  as part of the style API (see {@link UIForAnySwing#withStyle(Styler)}).
      */
+    @Immutable
     public enum NoiseType implements UIEnum<NoiseType>, NoiseFunction
     {
         CELLS(NoiseFunctions::cells),
@@ -455,6 +470,7 @@ public final class UI extends UIFactoryMethods
      *  {@link GradientConf#span(Span)} method exposed by methods like
      *  {@link ComponentStyleDelegate#gradient(String, Function)} or {@link ComponentStyleDelegate#gradient(Layer, String, Function)}.
      */
+    @Immutable
     public enum Span implements UIEnum<Span>
     {
         TOP_LEFT_TO_BOTTOM_RIGHT, BOTTOM_LEFT_TO_TOP_RIGHT,
@@ -497,6 +513,7 @@ public final class UI extends UIFactoryMethods
      *      </li>
      *  </ul>
      */
+    @Immutable
     public enum Cycle implements UIEnum<Cycle>
     {
         NONE,
@@ -511,6 +528,7 @@ public final class UI extends UIFactoryMethods
      *  <br>
      *  See {@link ComponentStyleDelegate#borderRadiusAt(Corner, double, double)}.
      */
+    @Immutable
     public enum Corner implements UIEnum<Corner>
     {
         EVERY,
@@ -522,6 +540,7 @@ public final class UI extends UIFactoryMethods
      *  Use this to specify the placement of an image as part of the {@link ImageConf} through
      *  the {@link ImageConf#placement(Placement)} method exposed by the style API (see {@link UIForAnySwing#withStyle(Styler)}).
      */
+    @Immutable
     public enum Placement implements UIEnum<Placement>
     {
         UNDEFINED,
@@ -559,6 +578,7 @@ public final class UI extends UIFactoryMethods
      *      </li>
      *  </ul>
      */
+    @Immutable
     public enum ComponentArea implements UIEnum<ComponentArea>
     {
         ALL, EXTERIOR, BORDER, INTERIOR, BODY
@@ -586,7 +606,8 @@ public final class UI extends UIFactoryMethods
      *     </li>
      * </ul>
      */
-    public enum ComponentBoundary {
+    @Immutable
+    public enum ComponentBoundary implements UIEnum<ComponentBoundary> {
         /**
          * The outermost boundary of the component, including any margin that might be applied.
          */
@@ -617,6 +638,7 @@ public final class UI extends UIFactoryMethods
      *  <br>
      *  See {@link UIForAnySwing#withStyle(Styler)} and {@link ComponentStyleDelegate#orientation(ComponentOrientation)}.
      */
+    @Immutable
     public enum ComponentOrientation implements UIEnum<ComponentOrientation>
     {
         UNKNOWN, LEFT_TO_RIGHT, RIGHT_TO_LEFT
@@ -640,6 +662,7 @@ public final class UI extends UIFactoryMethods
      *  See {@link UIForAnyWindow#withOnCloseOperation(OnWindowClose)} for more
      *  information about the usage of this enum.
      */
+    @Immutable
     public enum OnWindowClose implements UIEnum<OnWindowClose>
     {
         DISPOSE, HIDE, DO_NOTHING;
@@ -663,6 +686,7 @@ public final class UI extends UIFactoryMethods
      *  object which can be passed to the style API (see {@link UIForAnySwing#withStyle(Styler)}
      *  and {@link ComponentStyleDelegate#layout(Layout)}).
      */
+    @Immutable
     public enum Axis implements UIEnum<Axis>
     {
         /**
@@ -702,6 +726,7 @@ public final class UI extends UIFactoryMethods
      *  <br>
      *  See {@link UIForAnySwing#withStyle(Styler)} and {@link ComponentStyleDelegate#fontStyle(FontStyle)}.
      */
+    @Immutable
     public enum FontStyle implements UIEnum<FontStyle>
     {
         PLAIN, BOLD, ITALIC, BOLD_ITALIC;
@@ -721,6 +746,7 @@ public final class UI extends UIFactoryMethods
      *  Set of enum instances defining common types of Swing look and feels.
      *  Use {@link UI#currentLookAndFeel()} to check which look and feel is currently active.
      */
+    @Immutable
     public enum LookAndFeel implements UIEnum<LookAndFeel> {
         OTHER,
         METAL,
@@ -1562,6 +1588,7 @@ public final class UI extends UIFactoryMethods
      * @see         ColorSpace
      * @see         AlphaComposite
      */
+    @Immutable
     public static final class Color extends java.awt.Color
     {
         private static final Logger log = LoggerFactory.getLogger(Color.class);
@@ -3132,7 +3159,7 @@ public final class UI extends UIFactoryMethods
      *  It is a subclass of {@link java.awt.Font} and provides additional functionality.
      *  The appearance of a font is primarily based on the font family name which is used to find a font on the system.
      */
-    public static class Font extends java.awt.Font
+    public static final class Font extends java.awt.Font
     {
         /**
          *  This constant is a {@link java.awt.Font} object with a font name of "" (empty string),

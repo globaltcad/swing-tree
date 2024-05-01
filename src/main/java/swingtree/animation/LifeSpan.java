@@ -1,5 +1,7 @@
 package swingtree.animation;
 
+import com.google.errorprone.annotations.Immutable;
+
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -11,6 +13,7 @@ import java.util.concurrent.TimeUnit;
  *  This object is intended to be accessed as part of an {@link AnimationState} within
  *  an {@link Animation} and is typically used to decide how an animation should behave.
  */
+@Immutable
 public final class LifeSpan
 {
     public static LifeSpan startingNowWith( LifeTime lifeTime ) {

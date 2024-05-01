@@ -1,4 +1,4 @@
-package examples.games;
+package examples.games.kanapicker;
 
 import com.formdev.flatlaf.FlatLightLaf;
 import swingtree.UI;
@@ -8,11 +8,11 @@ import javax.swing.*;
 import static swingtree.UI.Panel;
 import static swingtree.UI.*;
 
-public class SymbolGuesserView extends Panel
+public class KanaPickerView extends Panel
 {
     private final java.awt.Color BACKGROUND = new java.awt.Color(255, 255, 255,255);
 
-    public SymbolGuesserView(SymbolGuesserViewModel vm) {
+    public KanaPickerView(KanaPickerViewModel vm) {
         FlatLightLaf.setup();
         UIManager.put( "Button.arc", 25 );
         of(this).withBackground(BACKGROUND)
@@ -105,8 +105,7 @@ public class SymbolGuesserView extends Panel
     }
 
     public static void main( String... args ) {
-        SymbolGuesserViewModel vm = new SymbolGuesserViewModel();
-        SymbolGuesserView view = new SymbolGuesserView(vm);
-        UI.show(view);
+        KanaPickerViewModel vm = new KanaPickerViewModel();
+        UI.show( f -> new KanaPickerView(vm) );
     }
 }

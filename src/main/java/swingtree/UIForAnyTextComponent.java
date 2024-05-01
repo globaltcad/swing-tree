@@ -1,6 +1,7 @@
 package swingtree;
 
 
+import org.jspecify.annotations.Nullable;
 import sprouts.Action;
 import sprouts.From;
 import sprouts.Val;
@@ -289,7 +290,7 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
                  * See documentation in {@link DocumentFilter}!
                  */
                 @Override
-                public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
+                public void replace(FilterBypass fb, int offset, int length, @Nullable String text, AttributeSet attrs) throws BadLocationException {
                     state.replaces.forEach(action -> action.accept(new TextReplaceDelegate(thisComponent, fb, offset, length, text, attrs)) );
                     if ( state.replaces.isEmpty() ) fb.replace(offset, length, text, attrs);
                 }
@@ -318,6 +319,14 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
     }
 
     /**
+     *  Allows you to register a user action listener which will be called
+     *  whenever new text gets inserted into the underlying text component.
+     *  This event is based on the
+     *  {@link DocumentFilter#insertString(DocumentFilter.FilterBypass, int, String, AttributeSet)}
+     *  method of the underlying {@link AbstractDocument}.
+     *  Use the {@link TextInsertDelegate} that is supplied to your action to
+     *  get access to the underlying text component and the text insertion details.
+     *
      * @param action A {@link Action} lambda which will be called when new text gets inserted
      *               into the underlying text component.
      *

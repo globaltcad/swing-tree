@@ -1,11 +1,13 @@
 package swingtree.style;
 
+import com.google.errorprone.annotations.Immutable;
 import org.jspecify.annotations.Nullable;
 
 import java.awt.Color;
 import java.util.Objects;
 import java.util.Optional;
 
+@Immutable
 final class BaseColorConf
 {
     private static final BaseColorConf _NONE = new BaseColorConf(null, null, null);

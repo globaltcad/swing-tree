@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import com.google.errorprone.annotations.Immutable;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +24,8 @@ import java.util.stream.Stream;
  *
  * @param <S> The type of the style.
  */
+@Immutable(containerOf = "S")
+@SuppressWarnings("Immutable")
 final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
 {
     private static final NamedConfigs<?> EMPTY = new NamedConfigs<>();

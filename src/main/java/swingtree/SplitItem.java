@@ -43,6 +43,9 @@ public final class SplitItem<I extends JMenuItem>
     }
 
     /**
+     *  A factory method to create a {@link SplitItem} for a {@link JSplitButton} from a {@link Val} property
+     *  which will be used to dynamically determine the text displayed on the {@link SplitItem}.
+     *
      * @param text The text property whose text should be displayed on the {@link SplitItem} (and its underlying {@link JMenuItem}).
      *             When the text of the property changes, then the text of the {@link JMenuItem} will be updated accordingly.
      * @return A {@link SplitItem} wrapping a simple {@link JMenuItem} displaying the provided text.

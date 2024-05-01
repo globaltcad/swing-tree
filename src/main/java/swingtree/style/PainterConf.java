@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import com.google.errorprone.annotations.Immutable;
 import swingtree.UI;
 import swingtree.api.Painter;
 
@@ -32,6 +33,8 @@ import java.util.Objects;
  *  effectively making it a representation of the absence of a painter.
  *  <p>
  */
+@Immutable
+@SuppressWarnings("Immutable")
 final class PainterConf
 {
     private static final PainterConf _NONE = new PainterConf(Painter.none(), UI.ComponentArea.BODY);

@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import com.google.errorprone.annotations.Immutable;
 import swingtree.layout.Size;
 
 import java.awt.image.Kernel;
@@ -7,6 +8,8 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 
+@Immutable
+@SuppressWarnings("Immutable")
 final class KernelConf
 {
     private static final KernelConf _NONE = new KernelConf(0, 0, new float[0]);

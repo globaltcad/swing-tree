@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import com.google.errorprone.annotations.Immutable;
 import swingtree.UI;
 import swingtree.api.Styler;
 
@@ -86,6 +87,7 @@ import java.util.function.Function;
  *  It is a convenient way to represent a <i>no-op</i> configuration object which will not have any effect
  *  when applied to a component.
  */
+@Immutable
 public final class TextConf implements Simplifiable<TextConf>
 {
     public static UI.Layer DEFAULT_LAYER = UI.Layer.CONTENT;

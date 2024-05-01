@@ -115,6 +115,10 @@ public final class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSli
     }
 
     /**
+     *  Binds the supplied {@link Val} property to the min value of the slider
+     *  so that when the value of the property changes, the min value of the slider will be updated accordingly.
+     *  For more information about the underlying value in the component, see {@link JSlider#setMinimum(int)}.
+     *
      * @param min The min property used to dynamically update the min value of the slider.
      * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if {@code min} is {@code null}.

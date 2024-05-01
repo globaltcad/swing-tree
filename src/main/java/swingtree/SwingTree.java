@@ -147,6 +147,14 @@ public final class SwingTree
     }
 
     /**
+     *  The icon cash is a hash map that uses an {@link IconDeclaration} as a key
+     *  and an {@link ImageIcon} as a value. This is used to cache icons that are loaded
+     *  from the file system using convenience methods like
+     *  {@link swingtree.UI#findIcon(String)} and {@link swingtree.UI#findIcon(IconDeclaration)} or
+     *  {@link swingtree.UI#findSvgIcon(String)}, {@link swingtree.UI#findSvgIcon(IconDeclaration)}.<br>
+     *  Note that the map returned by this method is mutable and can be used to add or remove icons
+     *  from the cache. <b>You may also want to consider this as a possible source of memory leaks.</b>
+     *
      * @return The icon cache of this context, which is used to cache icons
      *         that are loaded from the file system.
      */

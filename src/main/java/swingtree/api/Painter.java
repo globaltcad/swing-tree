@@ -80,10 +80,25 @@ public interface Painter
      */
     static Painter none() { return Constants.PAINTER_NONE; }
 
+    /**
+     *  Allows you to create a cacheable painter that uses the given data object as a cache key.
+     *  The provided data object should be immutable and have exhaustive {@link Object#hashCode()}
+     *  and {@link Object#equals(Object)} implementations. <br>
+     *  The data object is expected to be the sole source of information for the painter's painting operations.
+     *  Otherwise, the usage of this method is discouraged as cache based
+     *  rendering may not reflect the actual state of the component. <br>
+     *
+     * @param data The data object to use as a cache key, must be immutable and have
+     *             exhaustive {@link Object#hashCode()} and {@link Object#equals(Object)} implementations.
+     * @param painter The painter to use for painting, must be stateless and immutable as well.
+     *                It is expected to use the given data object as the sole source of information
+     *                for its painting operations.
+     * @return A cache friendly painter that uses the given data object as a cache key.
+     * @param <D> The type of the data object to use as a cache key.
+     */
     static <D> Painter of( D data, Painter painter ) {
         return new CachablePainter(data, painter);
     }
-
 
     /**
      * Paints a custom style on a component using the given graphics context.
@@ -92,6 +107,13 @@ public interface Painter
     void paint( Graphics2D g2d );
 
     /**
+     *  If a painter implementation reports that it can be cached, SwingTree will
+     *  use the painter as a cache key and the result of its painting operations
+     *  will be cached and reused for equal cache keys. <br>
+     *  So a painter that can be cached should be stateless and immutable as well as
+     *  have exhaustive {@link Object#hashCode()} and
+     *  {@link Object#equals(Object)} implementations. <br>
+     *
      * @return true If the painting operation is cachable, false otherwise.
      */
     default boolean canBeCached() { return false; }

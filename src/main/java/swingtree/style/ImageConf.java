@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import com.google.errorprone.annotations.Immutable;
 import org.jspecify.annotations.Nullable;
 import swingtree.UI;
 import swingtree.api.IconDeclaration;
@@ -153,6 +154,8 @@ import java.util.Optional;
  *      are transparent.
  *  </p>
  **/
+@Immutable
+@SuppressWarnings("Immutable")
 public final class ImageConf implements Simplifiable<ImageConf>
 {
     static final UI.Layer DEFAULT_LAYER = UI.Layer.BACKGROUND;

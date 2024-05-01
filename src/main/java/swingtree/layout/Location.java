@@ -1,5 +1,7 @@
 package swingtree.layout;
 
+import com.google.errorprone.annotations.Immutable;
+
 import java.awt.Point;
 import java.util.Objects;
 
@@ -14,6 +16,7 @@ import java.util.Objects;
  *  or {@link #withX(int)} and {@link #withY(int)} to create a new instance
  *  with a modified value.
  */
+@Immutable
 public final class Location
 {
     private final static Location ORIGIN = new Location( 0, 0 );

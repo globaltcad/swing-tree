@@ -1,11 +1,14 @@
 package swingtree.style;
 
+import com.google.errorprone.annotations.Immutable;
+
 import java.util.Objects;
 
 /**
  *  Defines a various named style configuration types that all belong to the same
  *  component {@link swingtree.UI.Layer}. <br>
  */
+@Immutable
 final class StyleConfLayer implements Simplifiable<StyleConfLayer>
 {
     static final NamedConfigs<ShadowConf>   _NO_SHADOWS   = NamedConfigs.of(NamedConf.of(StyleUtil.DEFAULT_KEY, ShadowConf.none()));

@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import com.google.errorprone.annotations.Immutable;
 import swingtree.UI;
 
 import java.awt.*;
@@ -8,6 +9,7 @@ import java.awt.*;
  *  A value object that represents the arc width and height of a rounded rectangle corner
  *  as part of a component {@link StyleConf}.
  */
+@Immutable
 final class Arc
 {
     private static final Arc _NONE = new Arc(-1, -1);

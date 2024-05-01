@@ -245,6 +245,8 @@ public final class SplitItemDelegate<I extends JMenuItem> extends AbstractDelega
     }
 
     /**
+     *  Allows you to retrieve the text currently displayed on the {@link JSplitButton}.
+     *
      * @return The text displayed on the {@link JSplitButton}.
      */
     public String getButtonText() {

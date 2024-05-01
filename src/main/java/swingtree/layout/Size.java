@@ -1,5 +1,6 @@
 package swingtree.layout;
 
+import com.google.errorprone.annotations.Immutable;
 import org.jspecify.annotations.Nullable;
 import swingtree.api.Styler;
 import swingtree.style.ComponentStyleDelegate;
@@ -19,6 +20,7 @@ import java.util.function.Function;
  *  {@link ComponentStyleDelegate#image(Function)} and
  *  {@link ImageConf#size(int, int)}.
  */
+@Immutable
 public final class Size
 {
     private static final Size UNKNOWN = new Size(-1, -1);

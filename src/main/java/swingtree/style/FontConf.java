@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import com.google.errorprone.annotations.Immutable;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import swingtree.UI;
@@ -162,6 +163,8 @@ import java.util.function.Function;
  *
  * @author Daniel Nepp
  */
+@Immutable
+@SuppressWarnings("Immutable")
 public final class FontConf
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(FontConf.class);
