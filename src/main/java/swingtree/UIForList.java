@@ -135,6 +135,7 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
      * @param selection The {@link Var} of entries to set as selection model.
      * @return This instance of the builder node to allow for fluent method chaining.
      */
+    @SuppressWarnings("NullAway")
     public final UIForList<E, L> withSelection( Var<E> selection ) {
         return _with( thisComponent -> {
                      thisComponent.addListSelectionListener( e -> {
@@ -342,18 +343,23 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
             _entries = Objects.requireNonNull(entries, "entries");
         }
 
-        @Override public int getSize() { return _entries.size(); }
-        @Override public @Nullable E getElementAt(int i ) { return _entries.at( i ).orElseNull(); }
+        @Override public int getSize() {
+            return _entries.size();
+        }
+        @Override public @Nullable E getElementAt(int i ) {
+            return _entries.at( i ).orElseNull();
+        }
 
         public void fire( ValsDelegate<E> v ) {
-            if ( v.index() < 0 ) {
+            int index = v.index();
+            if ( index < 0 ) {
                 fireContentsChanged( this, 0, _entries.size() );
                 return;
             }
             switch ( v.changeType() ) {
-                case ADD:    fireIntervalAdded( this, v.index(), v.index() ); break;
-                case REMOVE: fireIntervalRemoved( this, v.index(), v.index() ); break;
-                case SET:    fireContentsChanged( this, v.index(), v.index() ); break;
+                case ADD:    fireIntervalAdded(   this, index, index + v.newValues().size() ); break;
+                case REMOVE: fireIntervalRemoved( this, index, index + v.oldValues().size() ); break;
+                case SET:    fireContentsChanged( this, index, index + v.newValues().size() ); break;
                 default:
                     fireContentsChanged( this, 0, _entries.size() );
             }

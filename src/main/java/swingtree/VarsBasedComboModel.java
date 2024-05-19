@@ -43,6 +43,7 @@ class VarsBasedComboModel<E extends @Nullable Object> extends AbstractComboModel
         return new VarsBasedComboModel<>(newVar, _items);
     }
 
+    @SuppressWarnings("NullAway")
     @Override
     protected void setAt(int index, @Nullable E element) {
         /*
