@@ -1980,10 +1980,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(tip, "tip", Val.class);
         NullUtil.nullPropertyCheck(tip, "tip", "Please use an empty string instead of null!");
         return _withOnShow( tip, (c,v) -> {
-                    c.setToolTipText(v.isEmpty() ? null : v);
+                    c.setToolTipText( v.isEmpty() ? null : v );
                 })
                 ._with( c -> {
-                    c.setToolTipText( tip.orElseNull() );
+                    String tipString = tip.orElse("");
+                    c.setToolTipText( tipString.isEmpty() ? null : tipString );
                 })
                 ._this();
     }
