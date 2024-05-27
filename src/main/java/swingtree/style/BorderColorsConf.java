@@ -74,6 +74,10 @@ final class BorderColorsConf
         return c == UI.Color.UNDEFINED;
     }
 
+    boolean isHomogeneous() {
+        return _top.equals(_right) && _top.equals(_bottom) && _top.equals(_left);
+    }
+
     Optional<Color> top() {
         return Optional.ofNullable(_isUndefined(_top) ? null : _top);
     }
@@ -105,5 +109,22 @@ final class BorderColorsConf
                _right.equals(rhs._right) &&
                _bottom.equals(rhs._bottom) &&
                _left.equals(rhs._left);
+    }
+
+    @Override
+    public String toString() {
+        if ( this.equals(_NONE) )
+            return getClass().getSimpleName() + "[NONE]";
+        else if ( isHomogeneous() )
+            return getClass().getSimpleName() + "[" +
+                    "all=" + _top +
+                "]";
+        else
+            return getClass().getSimpleName() + "[" +
+                    "top="    + _top + ", " +
+                    "right="  + _right + ", " +
+                    "bottom=" + _bottom + ", " +
+                    "left="   + _left +
+                "]";
     }
 }
