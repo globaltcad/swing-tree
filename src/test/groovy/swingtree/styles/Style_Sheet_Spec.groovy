@@ -131,7 +131,7 @@ class Style_Sheet_Spec extends Specification
             s2.border().widths().bottom().get() == 7
             s2.border().widths().left().get() == 7
             s2.border().widths().right().get() == 7
-            s3.border().color().get() == Color.GREEN
+            s3.border().colors().everyColor( c -> c == Color.GREEN )
     }
 
     def 'The `type` style trait factory method determines for which components a particular style should be applied.'()
@@ -419,7 +419,7 @@ class Style_Sheet_Spec extends Specification
             s1.border().widths().left().get() == 11
             s1.border().widths().bottom().get() == 11
             s1.border().widths().right().get() == 11
-            s1.border().color().get() == Color.GREEN
+            s1.border().colors().everyColor( c -> c == Color.GREEN )
             s1.border().topLeftArc().get() == Arc.of(19, 19)
             s1.border().topRightArc().get() == Arc.of(19, 19)
             s1.border().bottomLeftArc().get() == Arc.of(19, 19)
@@ -433,7 +433,7 @@ class Style_Sheet_Spec extends Specification
             s2.border().widths().left().get() == 11
             s2.border().widths().bottom().get() == 11
             s2.border().widths().right().get() == 11
-            s2.border().color().get() == Color.GREEN
+            s2.border().colors().everyColor( c -> c == Color.GREEN )
             s2.border().topLeftArc().get() == Arc.of(19, 19)
             s2.border().topRightArc().get() == Arc.of(19, 19)
             s2.border().bottomLeftArc().get() == Arc.of(19, 19)
@@ -643,7 +643,7 @@ class Style_Sheet_Spec extends Specification
             s.border().widths().left().get() == 10
             s.border().widths().bottom().get() == 10
             s.border().widths().right().get() == 10
-            s.border().color().get() == Color.GREEN
+            s.border().colors().everyColor( c -> c == Color.GREEN )
         and : 'Note that only the default border shade will be overridden, not the named one.'
             s.gradient(UI.Layer.BORDER, "default").span() == UI.Span.BOTTOM_TO_TOP
             s.gradient(UI.Layer.BORDER, "default").colors() as java.util.List == [Color.RED, Color.BLUE]
@@ -728,7 +728,7 @@ class Style_Sheet_Spec extends Specification
             s.border().widths().left().get() == 5
             s.border().widths().bottom().get() == 5
             s.border().widths().right().get() == 5
-            s.border().color().get() == Color.MAGENTA
+            s.border().colors().everyColor( c -> c == Color.MAGENTA )
             s.base().backgroundColor().get() == Color.RED
             s.gradient(Layer.BORDER, "default").span() == UI.Span.BOTTOM_TO_TOP
             s.gradient(Layer.BORDER, "default").colors() as java.util.List == [Color.RED, Color.BLUE]

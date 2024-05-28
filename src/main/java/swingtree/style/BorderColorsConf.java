@@ -5,6 +5,7 @@ import swingtree.UI;
 
 import java.awt.Color;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 /**
  *  Contains the 4 possible colors of the 4 different parts
@@ -76,6 +77,26 @@ final class BorderColorsConf
 
     boolean isHomogeneous() {
         return _top.equals(_right) && _top.equals(_bottom) && _top.equals(_left);
+    }
+
+    boolean isAnyVisible() {
+        return
+                _top.getAlpha() > 0    ||
+                _right.getAlpha() > 0  ||
+                _bottom.getAlpha() > 0 ||
+                _left.getAlpha() > 0;
+    }
+
+    boolean isFullyOpaue() {
+        return
+                _top.getAlpha()    == 255 &&
+                _right.getAlpha()  == 255 &&
+                _bottom.getAlpha() == 255 &&
+                _left.getAlpha()   == 255;
+    }
+
+    public boolean everyColor(Predicate<Color> consumer ) {
+        return consumer.test(_top) && consumer.test(_right) && consumer.test(_bottom) && consumer.test(_left);
     }
 
     Optional<Color> top() {

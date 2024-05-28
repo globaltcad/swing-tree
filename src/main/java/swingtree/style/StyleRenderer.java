@@ -15,6 +15,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ConvolveOp;
 import java.awt.image.Kernel;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -53,9 +54,7 @@ final class StyleRenderer
         });
 
         // Border stuff:
-        conf.baseColors().borderColor().ifPresent(color -> {
-            _drawBorder( conf, color, g2d);
-        });
+        _drawBorder( conf, conf.baseColors().borderColor(), g2d);
 
         // Now onto things every layer has in common:
 
@@ -154,13 +153,50 @@ final class StyleRenderer
         g.setClip(oldClip);
     }
 
-    private static void _drawBorder( LayerRenderConf conf, Color color, Graphics2D g2d )
+    private static void _drawBorder( LayerRenderConf conf, BorderColorsConf colors, Graphics2D g2d )
     {
+        if ( colors.equals(BorderColorsConf.none()) )
+            return;
+
         if ( !Outline.none().equals(conf.boxModel().widths()) ) {
             try {
                 Area borderArea = conf.areas().get(UI.ComponentArea.BORDER);
-                g2d.setColor(color);
-                g2d.fill(borderArea);
+                Objects.requireNonNull(borderArea);
+                if ( colors.isHomogeneous() ) {
+                    g2d.setColor(colors.bottom().orElse(UI.Color.BLACK));
+                    g2d.fill(borderArea);
+                } else {
+                    // We split the component into 4 triangles:
+                    Rectangle areaBounds = borderArea.getBounds();
+                    int topLeftX    = borderArea.getBounds().x;
+                    int topLeftY    = borderArea.getBounds().y;
+                    int topRightX   = topLeftX + areaBounds.width;
+                    int bottomLeftY = topLeftY + areaBounds.height;
+                    int centerX     = topLeftX + areaBounds.width / 2;
+                    int centerY     = topLeftY + areaBounds.height / 2;
+                    Area topTriangle    = new Area(new Polygon(new int[] {topLeftX, topRightX, centerX}, new int[] {topLeftY, topLeftY, centerY}, 3));
+                    Area rightTriangle  = new Area(new Polygon(new int[] {topRightX, topRightX, centerX}, new int[] {topLeftY, bottomLeftY, centerY}, 3));
+                    Area bottomTriangle = new Area(new Polygon(new int[] {topLeftX, topRightX, centerX}, new int[] {bottomLeftY, bottomLeftY, centerY}, 3));
+                    Area leftTriangle   = new Area(new Polygon(new int[] {topLeftX, topLeftX, centerX}, new int[] {topLeftY, bottomLeftY, centerY}, 3));
+                    // Now we created clipped border areas:
+                    Area topBorderArea = new Area(borderArea);
+                    topBorderArea.intersect(topTriangle);
+                    Area rightBorderArea = new Area(borderArea);
+                    rightBorderArea.intersect(rightTriangle);
+                    Area bottomBorderArea = new Area(borderArea);
+                    bottomBorderArea.intersect(bottomTriangle);
+                    Area leftBorderArea = new Area(borderArea);
+                    leftBorderArea.intersect(leftTriangle);
+                    // Now we can draw the borders:
+                    g2d.setColor(colors.top().orElse(UI.Color.BLACK));
+                    g2d.fill(topBorderArea);
+                    g2d.setColor(colors.right().orElse(UI.Color.BLACK));
+                    g2d.fill(rightBorderArea);
+                    g2d.setColor(colors.bottom().orElse(UI.Color.BLACK));
+                    g2d.fill(bottomBorderArea);
+                    g2d.setColor(colors.left().orElse(UI.Color.BLACK));
+                    g2d.fill(leftBorderArea);
+                }
             } catch ( Exception e ) {
                 log.warn(
                     "An exception occurred while drawing the border of border style '" + conf.boxModel() + "' ",
