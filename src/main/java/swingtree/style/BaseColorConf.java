@@ -10,48 +10,54 @@ import java.util.Optional;
 @Immutable
 final class BaseColorConf
 {
-    private static final BaseColorConf _NONE = new BaseColorConf(null, null, null);
+    private static final BaseColorConf _NONE = new BaseColorConf(null, null, BorderColorsConf.none());
 
     static BaseColorConf none() { return _NONE; }
 
-    private final @Nullable Color _foundationColor;
-    private final @Nullable Color _backgroundColor;
-    private final @Nullable Color _borderColor;
+    private final @Nullable Color  _foundationColor;
+    private final @Nullable Color  _backgroundColor;
+    private final BorderColorsConf _borderColors;
 
     static BaseColorConf of(
-        @Nullable Color foundationColor,
-        @Nullable Color backgroundColor,
-        @Nullable Color borderColor
+        @Nullable Color  foundationColor,
+        @Nullable Color  backgroundColor,
+        BorderColorsConf borderColors
     ) {
         if (
             foundationColor == null &&
             backgroundColor == null &&
-            borderColor     == null
+            borderColors.equals(BorderColorsConf.none())
         )
             return _NONE;
         else
-            return new BaseColorConf(foundationColor, backgroundColor, borderColor);
+            return new BaseColorConf(foundationColor, backgroundColor, borderColors);
     }
 
     BaseColorConf(
-        @Nullable Color foundationColor,
-        @Nullable Color backgroundColor,
-        @Nullable Color borderColor
+        @Nullable Color  foundationColor,
+        @Nullable Color  backgroundColor,
+        BorderColorsConf borderColors
     ) {
         _foundationColor = foundationColor;
         _backgroundColor = backgroundColor;
-        _borderColor     = borderColor;
+        _borderColors    = Objects.requireNonNull(borderColors);
     }
 
-    Optional<Color> foundationColor() { return Optional.ofNullable(_foundationColor); }
+    Optional<Color> foundationColor() {
+        return Optional.ofNullable(_foundationColor);
+    }
 
-    Optional<Color> backgroundColor() { return Optional.ofNullable(_backgroundColor); }
+    Optional<Color> backgroundColor() {
+        return Optional.ofNullable(_backgroundColor);
+    }
 
-    Optional<Color> borderColor() { return Optional.ofNullable(_borderColor); }
+    BorderColorsConf borderColor() {
+        return _borderColors;
+    }
 
 
     @Override
-    public int hashCode() { return Objects.hash(_foundationColor, _backgroundColor, _borderColor); }
+    public int hashCode() { return Objects.hash(_foundationColor, _backgroundColor, _borderColors); }
 
     @Override
     public boolean equals( Object obj ) {
@@ -61,7 +67,7 @@ final class BaseColorConf
         BaseColorConf rhs = (BaseColorConf) obj;
         return Objects.equals(_foundationColor, rhs._foundationColor) &&
                Objects.equals(_backgroundColor, rhs._backgroundColor) &&
-               Objects.equals(_borderColor,     rhs._borderColor);
+               Objects.equals(_borderColors,    rhs._borderColors);
     }
 
     @Override
@@ -69,7 +75,7 @@ final class BaseColorConf
         return getClass().getSimpleName() + "[" +
                 "foundationColor=" + _foundationColor + ", " +
                 "backgroundColor=" + _backgroundColor + ", " +
-                "borderColor=" + _borderColor +
+                "borderColor="     + _borderColors    +
             "]";
     }
 }

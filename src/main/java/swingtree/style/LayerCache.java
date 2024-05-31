@@ -238,7 +238,8 @@ final class LayerCache
 
         if ( _layer == UI.Layer.BORDER ) {
             boolean hasWidth = !Outline.none().equals(boxModel.widths());
-            if ( hasWidth && baseCoors.borderColor().isPresent() )
+            boolean hasColoring = !baseCoors.borderColor().equals(BorderColorsConf.none());
+            if ( hasWidth && hasColoring )
                 heavyStyleCount++;
         }
         if ( _layer == UI.Layer.BACKGROUND ) {

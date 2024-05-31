@@ -69,11 +69,7 @@ final class LayerRenderConf
         BaseColorConf colorConf = BaseColorConf.of(
                                     fullConf.style().base().foundationColor().filter( c -> layer == UI.Layer.BACKGROUND ).orElse(null),
                                     fullConf.style().base().backgroundColor().filter( c -> layer == UI.Layer.BACKGROUND ).orElse(null),
-                                    fullConf.style()
-                                            .border()
-                                            .color()
-                                            .filter(c -> layer == UI.Layer.BORDER )
-                                            .orElse(null)
+                                    layer == UI.Layer.BORDER ? fullConf.style().border().colors() : BorderColorsConf.none()
                                 );
         return of(
                     boxModelConf,

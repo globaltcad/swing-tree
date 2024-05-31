@@ -238,7 +238,7 @@ final class StyleInstaller<C extends JComponent>
         final boolean hasBorderRadius                = newStyle.border().hasAnyNonZeroArcs();
         final boolean hasBackground                  = newStyle.base().backgroundColor().isPresent();
         final boolean hasMargin                      = newStyle.margin().isPositive();
-        final boolean hasOpaqueBorder                = !(255 > newStyle.border().color().map(java.awt.Color::getAlpha).orElse(0));
+        final boolean hasOpaqueBorder                = newStyle.border().colors().isFullyOpaue();
         final boolean backgroundIsActuallyBackground =
                                     !( owner instanceof JTabbedPane  ) && // The LaFs interpret the tab buttons as background
                                     !( owner instanceof JSlider      ) && // The track color is usually considered the background

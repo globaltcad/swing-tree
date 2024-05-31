@@ -131,7 +131,7 @@ class Style_Sheet_Spec extends Specification
             s2.border().widths().bottom().get() == 7
             s2.border().widths().left().get() == 7
             s2.border().widths().right().get() == 7
-            s3.border().color().get() == Color.GREEN
+            s3.border().colors().everyColor( c -> c == Color.GREEN )
     }
 
     def 'The `type` style trait factory method determines for which components a particular style should be applied.'()
@@ -413,13 +413,21 @@ class Style_Sheet_Spec extends Specification
             var s3 = ss.applyTo(slider3)
             var s4 = ss.applyTo(label1)
             var s5 = ss.applyTo(label2)
-        then : '...and we check the results'
+        then : 'We first verify that they are not equal to another:'
+            s1 != s2 && s2 != s3 && s3 != s4 && s4 != s5
+        and : 'They are equal to recalculated instances of themselves:'
+            s1 == ss.applyTo(slider1)
+            s2 == ss.applyTo(slider2)
+            s3 == ss.applyTo(slider3)
+            s4 == ss.applyTo(label1)
+            s5 == ss.applyTo(label2)
+        and : 'Then we check the results:'
             s1.base().foundationColor().get() == Color.BLUE
             s1.border().widths().top().get() == 11
             s1.border().widths().left().get() == 11
             s1.border().widths().bottom().get() == 11
             s1.border().widths().right().get() == 11
-            s1.border().color().get() == Color.GREEN
+            s1.border().colors().everyColor( c -> c == Color.GREEN )
             s1.border().topLeftArc().get() == Arc.of(19, 19)
             s1.border().topRightArc().get() == Arc.of(19, 19)
             s1.border().bottomLeftArc().get() == Arc.of(19, 19)
@@ -433,7 +441,7 @@ class Style_Sheet_Spec extends Specification
             s2.border().widths().left().get() == 11
             s2.border().widths().bottom().get() == 11
             s2.border().widths().right().get() == 11
-            s2.border().color().get() == Color.GREEN
+            s2.border().colors().everyColor( c -> c == Color.GREEN )
             s2.border().topLeftArc().get() == Arc.of(19, 19)
             s2.border().topRightArc().get() == Arc.of(19, 19)
             s2.border().bottomLeftArc().get() == Arc.of(19, 19)
@@ -447,7 +455,7 @@ class Style_Sheet_Spec extends Specification
             s3.border().widths().left().get() == 11
             s3.border().widths().bottom().get() == 11
             s3.border().widths().right().get() == 11
-            s3.border().color().get() == Color.GREEN
+            s3.border().colors().everyColor( c -> c == Color.GREEN )
             s3.border().topLeftArc().get() == Arc.of(3, 3)
             s3.border().topRightArc().get() == Arc.of(3, 3)
             s3.border().bottomLeftArc().get() == Arc.of(3, 3)
@@ -461,7 +469,7 @@ class Style_Sheet_Spec extends Specification
             s4.border().widths().left().get() == 11
             s4.border().widths().bottom().get() == 11
             s4.border().widths().right().get() == 11
-            s4.border().color().get() == Color.GREEN
+            s4.border().colors().everyColor( c -> c == Color.GREEN )
             s4.border().topLeftArc().get() == Arc.of(19, 19)
             s4.border().topRightArc().get() == Arc.of(19, 19)
             s4.border().bottomLeftArc().get() == Arc.of(19, 19)
@@ -475,7 +483,7 @@ class Style_Sheet_Spec extends Specification
             s5.border().widths().left().get() == 11
             s5.border().widths().bottom().get() == 11
             s5.border().widths().right().get() == 11
-            s5.border().color().get() == Color.GREEN
+            s5.border().colors().everyColor( c -> c == Color.GREEN )
             s5.border().topLeftArc().get() == Arc.of(3, 3)
             s5.border().topRightArc().get() == Arc.of(3, 3)
             s5.border().bottomLeftArc().get() == Arc.of(3, 3)
@@ -643,7 +651,7 @@ class Style_Sheet_Spec extends Specification
             s.border().widths().left().get() == 10
             s.border().widths().bottom().get() == 10
             s.border().widths().right().get() == 10
-            s.border().color().get() == Color.GREEN
+            s.border().colors().everyColor( c -> c == Color.GREEN )
         and : 'Note that only the default border shade will be overridden, not the named one.'
             s.gradient(UI.Layer.BORDER, "default").span() == UI.Span.BOTTOM_TO_TOP
             s.gradient(UI.Layer.BORDER, "default").colors() as java.util.List == [Color.RED, Color.BLUE]
@@ -728,7 +736,7 @@ class Style_Sheet_Spec extends Specification
             s.border().widths().left().get() == 5
             s.border().widths().bottom().get() == 5
             s.border().widths().right().get() == 5
-            s.border().color().get() == Color.MAGENTA
+            s.border().colors().everyColor( c -> c == Color.MAGENTA )
             s.base().backgroundColor().get() == Color.RED
             s.gradient(Layer.BORDER, "default").span() == UI.Span.BOTTOM_TO_TOP
             s.gradient(Layer.BORDER, "default").colors() as java.util.List == [Color.RED, Color.BLUE]
@@ -742,4 +750,120 @@ class Style_Sheet_Spec extends Specification
             s.font().size() == 12
             s.font().posture() == 0
     }
+    
+    
+    def 'The style API of a StyleSheet has a rich set of methods for styling the border of components.'()
+    {
+        reportInfo """
+            In this example we demonstrate how the style API of a `StyleSheet` can be used
+            to style the border of components and also how these different border styles
+            can be combined and inherited.
+            
+            A border can have different widths, colors and radii for each of it's edges.
+        """
+        given :
+            var ss = new StyleSheet() {
+                        @Override
+                        protected void configure() {
+                            add(type(JComponent.class), it -> it
+                                   .borderWidthAt(UI.Edge.TOP, 11)
+                                   .borderWidthAt(UI.Edge.LEFT, 6)
+                                   .borderWidthAt(UI.Edge.BOTTOM, 42)
+                                   .borderWidthAt(UI.Edge.RIGHT, 7)
+                                   .borderColors("green", "red", "blue", "hsb(0.5, 0.5, 0.5)")
+                                   .borderRadius(9)
+                                   .padding(24, 72, 42, 12)
+                            );
+                             add(group("A"), it -> it
+                                 .borderAt(UI.Edge.TOP, 19, UI.Color.WHITE)
+                                 .borderRadiusAt(UI.Corner.TOP_LEFT, 19)
+                             );
+                            add(group("B").type(JButton.class), it -> it
+                                 .borderAt(UI.Edge.LEFT, 3, "rgb(0, 0, 42)")
+                                 .borderRadiusAt(UI.Corner.BOTTOM_RIGHT, 3, 5)
+                            );
+                            add(group("B").type(JLabel.class), it -> it
+                                .borderWidthAt(UI.Edge.RIGHT, 4)
+                                .borderColors(UI.Color.LIME, UI.Color.MAGENTA, UI.Color.CYAN, UI.Color.YELLOW)
+                            );
+                         }
+                     }
+        when : 'We create a few UI components:'
+            var button1 = UI.button("X").group("A", "B").get(JButton)
+            var button2 = UI.button("Y").group("A").get(JButton)
+            var button3 = UI.button("Z").group("B").get(JButton)
+            var label1 = UI.label(":)").group("A").get(JLabel)
+            var label2 = UI.label(":D").group("B").get(JLabel)
+        and : 'We run them through the style sheet...'
+            var s1 = ss.applyTo(button1)
+            var s2 = ss.applyTo(button2)
+            var s3 = ss.applyTo(button3)
+            var s4 = ss.applyTo(label1)
+            var s5 = ss.applyTo(label2)
+        then : 'We first verify that they are not equal to another:'
+            s1 != s2 && s2 != s3 && s3 != s4 && s4 != s5
+        and : 'They are equal to recalculated instances of themselves:'
+            s1 == ss.applyTo(button1)
+            s2 == ss.applyTo(button2)
+            s3 == ss.applyTo(button3)
+            s4 == ss.applyTo(label1)
+            s5 == ss.applyTo(label2)
+        and : 'We also check that they have the expected commonalities:'
+            [s1, s2, s3, s4, s5].every { it.padding() == Outline.of(24, 72, 42, 12) }
+            [s1, s2, s3, s4, s5].every { it.border().widths().bottom().get() == 42 }
+            [s1, s2, s3, s4, s5].every { it.border().topRightArc().get() == Arc.of(9, 9) }
+            [s1, s2, s3, s4, s5].every { it.border().bottomLeftArc().get() == Arc.of(9, 9) }
+
+        and : 'Finally we can also verify that the components have the expected styles:'
+            s1.border().widths().top().get() == 19
+            s1.border().widths().left().get() == 3
+            s1.border().widths().right().get() == 7
+            s1.border().colors().top().get() == UI.Color.WHITE
+            s1.border().colors().right().get() == UI.Color.RED
+            s1.border().colors().bottom().get() == UI.Color.BLUE
+            s1.border().colors().left().get() == UI.Color.ofRgb(0, 0, 42)
+            s1.border().topLeftArc().get() == Arc.of(19, 19)
+            s1.border().bottomRightArc().get() == Arc.of(3, 5)
+
+            s2.border().widths().top().get() == 19
+            s2.border().widths().left().get() == 6
+            s2.border().widths().right().get() == 7
+            s2.border().colors().top().get() == UI.Color.WHITE
+            s2.border().colors().right().get() == UI.Color.RED
+            s2.border().colors().bottom().get() == UI.Color.BLUE
+            s2.border().colors().left().get() == UI.Color.ofRgb(64, 128, 128)
+            s2.border().topLeftArc().get() == Arc.of(19, 19)
+            s2.border().bottomRightArc().get() == Arc.of(9, 9)
+
+            s3.border().widths().top().get() == 11
+            s3.border().widths().left().get() == 3
+            s3.border().widths().right().get() == 7
+            s3.border().colors().top().get() == UI.Color.GREEN
+            s3.border().colors().right().get() == UI.Color.RED
+            s3.border().colors().bottom().get() == UI.Color.BLUE
+            s3.border().colors().left().get() == UI.Color.ofRgb(0, 0, 42)
+            s3.border().topLeftArc().get() == Arc.of(9, 9)
+            s3.border().bottomRightArc().get() == Arc.of(3, 5)
+
+            s4.border().widths().top().get() == 19
+            s4.border().widths().left().get() == 6
+            s4.border().widths().right().get() == 7
+            s4.border().colors().top().get() == UI.Color.WHITE
+            s4.border().colors().right().get() == UI.Color.RED
+            s4.border().colors().bottom().get() == UI.Color.BLUE
+            s4.border().colors().left().get() == UI.Color.ofRgb(64, 128, 128)
+            s4.border().topLeftArc().get() == Arc.of(19, 19)
+            s4.border().bottomRightArc().get() == Arc.of(9, 9)
+
+            s5.border().widths().top().get() == 11
+            s5.border().widths().left().get() == 6
+            s5.border().widths().right().get() == 4
+            s5.border().colors().top().get() == UI.Color.LIME
+            s5.border().colors().right().get() == UI.Color.MAGENTA
+            s5.border().colors().bottom().get() == UI.Color.CYAN
+            s5.border().colors().left().get() == UI.Color.YELLOW
+            s5.border().topLeftArc().get() == Arc.of(9, 9)
+            s5.border().bottomRightArc().get() == Arc.of(9, 9)
+    }
+
 }

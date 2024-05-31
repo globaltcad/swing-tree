@@ -4,6 +4,7 @@ import org.jspecify.annotations.Nullable;
 import swingtree.UI;
 import swingtree.layout.Size;
 
+import java.awt.Polygon;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
@@ -16,16 +17,18 @@ import java.util.WeakHashMap;
 
 /**
  *  A wrapper object for transient reference based caching of the various areas of a component.
- *  This is used to avoid recalculating the areas of a component over and over again.
+ *  This is used to avoid recalculating the areas of a component over and over again
+ *  if they don't change. (This is also shared between multiple components)
  */
 final class ComponentAreas
 {
     private static final Map<BoxModelConf, ComponentAreas> _CACHE = new WeakHashMap<>();
 
-    private final LazyRef<Area> _borderArea;
-    private final LazyRef<Area> _interiorArea;
-    private final LazyRef<Area> _exteriorArea;
-    private final LazyRef<Area> _bodyArea;
+    private final LazyRef<Area>   _borderArea;
+    private final LazyRef<Area>   _interiorArea;
+    private final LazyRef<Area>   _exteriorArea;
+    private final LazyRef<Area>   _bodyArea;
+    private final LazyRef<Area[]> _borderEdgeAreas;
     private final WeakReference<BoxModelConf> _key;
 
 
@@ -101,11 +104,12 @@ final class ComponentAreas
         LazyRef<Area> exteriorComponentArea,
         LazyRef<Area> componentBodyArea
     ) {
-        _key = new WeakReference<>(conf);
-        _borderArea   = Objects.requireNonNull(borderArea);
-        _interiorArea = Objects.requireNonNull(interiorComponentArea);
-        _exteriorArea = Objects.requireNonNull(exteriorComponentArea);
-        _bodyArea     = Objects.requireNonNull(componentBodyArea);
+        _key             = new WeakReference<>(conf);
+        _borderArea      = Objects.requireNonNull(borderArea);
+        _interiorArea    = Objects.requireNonNull(interiorComponentArea);
+        _exteriorArea    = Objects.requireNonNull(exteriorComponentArea);
+        _bodyArea        = Objects.requireNonNull(componentBodyArea);
+        _borderEdgeAreas = new LazyRef<>((currentState, currentAreas) -> calculateEdgeBorderAreas(currentState));
     }
 
 
@@ -115,25 +119,26 @@ final class ComponentAreas
             case ALL:
                 return null; // No clipping
             case BODY:
-                return bodyArea().getFor(boxModel, this); // all - exterior == interior + border
+                return _bodyArea.getFor(boxModel, this); // all - exterior == interior + border
             case INTERIOR:
-                return interiorArea().getFor(boxModel, this); // all - exterior - border == content - border
+                return _interiorArea.getFor(boxModel, this); // all - exterior - border == content - border
             case BORDER:
-                return borderArea().getFor(boxModel, this); // all - exterior - interior
+                return _borderArea.getFor(boxModel, this); // all - exterior - interior
             case EXTERIOR:
-                return exteriorArea().getFor(boxModel, this); // all - border - interior
+                return _exteriorArea.getFor(boxModel, this); // all - border - interior
             default:
                 return null;
         }
     }
 
-    public LazyRef<Area> borderArea() { return _borderArea; }
+    public Area[] getEdgeAreas() {
+        BoxModelConf boxModel = Optional.ofNullable(_key.get()).orElse(BoxModelConf.none());
+        return _borderEdgeAreas.getFor(boxModel, this);
+    }
 
-    public LazyRef<Area> exteriorArea() { return _exteriorArea; }
-
-    public LazyRef<Area> interiorArea() { return _interiorArea; }
-
-    public LazyRef<Area> bodyArea() { return _bodyArea; }
+    public boolean bodyAreaExists() {
+        return _bodyArea.exists();
+    }
 
     static Area calculateComponentBodyArea(BoxModelConf state, float insTop, float insLeft, float insBottom, float insRight )
     {
@@ -329,4 +334,78 @@ final class ComponentAreas
             return area;
         }
     }
+
+
+    /**
+     *  Calculates the border-edge areas of the components box model in the form of
+     *  an array of 4 {@link Area} objects, each representing the area of a single edge.
+     *  So the top, right, bottom and left edge areas are returned in that order.
+     *  <p>
+     *  Each area is essentially just a polygon which consists of 5 points,
+     *  two of which are the margin based border corners and the other three
+     *  are the inner border width based corners as well as a center point.
+     *
+     * @param boxModel The box model of the component
+     * @return An array of 4 {@link Area} objects representing the border-edge areas
+     */
+    private static Area[] calculateEdgeBorderAreas( BoxModelConf boxModel) {
+        final Size    size   = boxModel.size();
+        final Outline margin = boxModel.margin();
+        final Outline widths = boxModel.widths();
+        final float   width  = size.width().orElse(0f);
+        final float   height = size.height().orElse(0f);
+
+        final float topLeftX     = margin.left().orElse(0f);
+        final float topLeftY     = margin.top().orElse(0f);
+        final float topRightX    = width - margin.right().orElse(0f);
+        final float topRightY    = topLeftY;
+        final float bottomLeftX  = topLeftX;
+        final float bottomLeftY  = height - margin.bottom().orElse(0f);
+        final float bottomRightX = topRightX;
+        final float bottomRightY = bottomLeftY;
+
+        final float innerTopLeftX     = topLeftX + widths.left().orElse(0f);
+        final float innerTopLeftY     = topLeftY + widths.top().orElse(0f);
+        final float innerTopRightX    = topRightX - widths.right().orElse(0f);
+        final float innerTopRightY    = innerTopLeftY;
+        final float innerBottomLeftX  = bottomLeftX + widths.left().orElse(0f);
+        final float innerBottomLeftY  = bottomLeftY - widths.bottom().orElse(0f);
+        final float innerBottomRightX = bottomRightX - widths.right().orElse(0f);
+        final float innerBottomRightY = innerBottomLeftY;
+
+        final float innerCenterX = (innerTopLeftX + innerTopRightX) / 2f;
+        final float innerCenterY = (innerTopLeftY + innerBottomLeftY) / 2f;
+
+        Area[] edgeAreas = new Area[4];
+        { // TOP:
+            edgeAreas[0] = new Area(new Polygon(
+                new int[] {(int)innerCenterX, (int)innerTopLeftX, (int)topLeftX, (int)topRightX, (int)innerTopRightX},
+                new int[] {(int)innerCenterY, (int)innerTopLeftY, (int)topLeftY, (int)topRightY, (int)innerTopRightY},
+                5
+            ));
+        }
+        { // RIGHT:
+            edgeAreas[1] = new Area(new Polygon(
+                new int[] {(int)innerCenterX, (int)innerTopRightX, (int)topRightX, (int)bottomRightX, (int)innerBottomRightX},
+                new int[] {(int)innerCenterY, (int)innerTopRightY, (int)topRightY, (int)bottomRightY, (int)innerBottomRightY},
+                5
+            ));
+        }
+        { // BOTTOM:
+            edgeAreas[2] = new Area(new Polygon(
+                new int[] {(int)innerCenterX, (int)innerBottomRightX, (int)bottomRightX, (int)bottomLeftX, (int)innerBottomLeftX},
+                new int[] {(int)innerCenterY, (int)innerBottomRightY, (int)bottomRightY, (int)bottomLeftY, (int)innerBottomLeftY},
+                5
+            ));
+        }
+        { // LEFT:
+            edgeAreas[3] = new Area(new Polygon(
+                new int[] {(int)innerCenterX, (int)innerBottomLeftX, (int)bottomLeftX, (int)topLeftX, (int)innerTopLeftX},
+                new int[] {(int)innerCenterY, (int)innerBottomLeftY, (int)bottomLeftY, (int)topLeftY, (int)innerTopLeftY},
+                5
+            ));
+        }
+        return edgeAreas;
+    }
+
 }
