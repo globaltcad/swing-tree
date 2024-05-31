@@ -5083,6 +5083,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *          configure how he passed item type should be rendered.
      * @param <T> The type of the items which should be rendered.
      */
+    @Deprecated
     public static <T> Render.As<JComboBox<T>, T, T> renderComboItem( Class<T> itemType ) {
         Objects.requireNonNull(itemType);
         return Render.forCombo(itemType).when(itemType);

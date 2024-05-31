@@ -36,8 +36,8 @@ public class UserRegistrationView extends Panel
                 .add(GROW_X,
                     comboBox(vm.gender()).isEnabledIfNot(vm.allInputsDisabled())
                     .withRenderer(
-                        renderComboItem(UserRegistrationViewModel.Gender.class)
-                        .asText( it ->
+                        UserRegistrationViewModel.Gender.class,
+                        conf -> conf.asText( it ->
                             it.value()
                               .map(Objects::toString)
                               .map( s -> s.replace("_", " ") )

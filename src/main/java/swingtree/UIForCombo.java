@@ -15,6 +15,7 @@ import java.awt.event.ActionListener;
 import java.lang.ref.WeakReference;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  *  A SwingTree builder node designed for configuring {@link JComboBox} instances.
@@ -328,6 +329,35 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
                     thisComponent.setRenderer((ListCellRenderer<E>) renderBuilder.buildForCombo((C)thisComponent));
                 })
                 ._this();
+    }
+
+    /**
+     *  Use this to build a combo box cell renderer for a specific item type.
+     *  What you would typically want to do is customize the text that should be displayed
+     *  for a specific item type. <br>
+     *  This is done like so:
+     *  <pre>{@code
+     *  UI.comboBox(Size.LARGE, Size.MEDIUM, Size.SMALL)
+     *  .withRenderer(
+     *      Size.class,
+     *      conf -> conf.asText(cell -> cell.getValue().name().toLowerCase())
+     *  );
+     *  }</pre>
+     *
+     * @param itemType The type of the items which should be rendered using a custom renderer.* @return A render builder exposing an API that allows you to
+     *          configure how he passed item type should be rendered.
+     * @param renderBuilder A lambda function that takes a {@link Render.As} builder as argument and returns another
+     *                      {@link Render.Builder} that configures how the passed item type should be rendered.
+     * @return This builder instance for further configuration.
+     * @param <T> The type of the items which should be rendered using a custom renderer.
+     * @param <V> The type of the items which should be rendered using a custom renderer.
+     */
+    public final <T, V extends E> UIForCombo<E,C> withRenderer(
+        Class<T> itemType,
+        Function<Render.As<JComboBox<T>, T, T>,Render.Builder<C,V>> renderBuilder
+    ) {
+        Render.Builder<C,V> render = renderBuilder.apply(Render.forCombo(itemType).when(itemType));
+        return withRenderer(render);
     }
 
     /**
