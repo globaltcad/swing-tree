@@ -159,7 +159,6 @@ final class StyleRenderer
             return;
 
         if ( !Outline.none().equals(conf.boxModel().widths()) ) {
-            BoxModelConf boxModel = conf.boxModel();
             try {
                 Area borderArea = conf.areas().get(UI.ComponentArea.BORDER);
                 Objects.requireNonNull(borderArea);
@@ -167,16 +166,16 @@ final class StyleRenderer
                     g2d.setColor(colors.bottom().orElse(UI.Color.BLACK));
                     g2d.fill(borderArea);
                 } else {
-                    Area[] edgeTriangles = calculateEdgeBorderAreas(boxModel, g2d);
+                    Area[] borderEdgeRegions = conf.areas().getEdgeAreas();
                     // We created clipped border areas:
                     Area topBorderArea = new Area(borderArea);
-                    topBorderArea.intersect(edgeTriangles[0]);
+                    topBorderArea.intersect(borderEdgeRegions[0]);
                     Area rightBorderArea = new Area(borderArea);
-                    rightBorderArea.intersect(edgeTriangles[1]);
+                    rightBorderArea.intersect(borderEdgeRegions[1]);
                     Area bottomBorderArea = new Area(borderArea);
-                    bottomBorderArea.intersect(edgeTriangles[2]);
+                    bottomBorderArea.intersect(borderEdgeRegions[2]);
                     Area leftBorderArea = new Area(borderArea);
-                    leftBorderArea.intersect(edgeTriangles[3]);
+                    leftBorderArea.intersect(borderEdgeRegions[3]);
                     // Now we can draw the borders:
                     g2d.setColor(colors.top().orElse(UI.Color.BLACK));
                     g2d.fill(topBorderArea);
@@ -199,79 +198,6 @@ final class StyleRenderer
             }
         }
     }
-
-    /**
-     *  Calculates the border-edge areas of the components box model in the form of
-     *  an array of 4 {@link Area} objects, each representing the area of a single edge.
-     *  So the top, right, bottom and left edge areas are returned in that order.
-     *  <p>
-     *  Each area is essentially just a polygon which consists of 5 points,
-     *  two of which are the margin based border corners and the other three
-     *  are the inner border width based corners as well as a center point.
-     *
-     * @param boxModel The box model of the component
-     * @return An array of 4 {@link Area} objects representing the border-edge areas
-     */
-    private static Area[] calculateEdgeBorderAreas( BoxModelConf boxModel, Graphics2D debug ) {
-        final Size    size   = boxModel.size();
-        final Outline margin = boxModel.margin();
-        final Outline widths = boxModel.widths();
-        final float   width  = size.width().orElse(0f);
-        final float   height = size.height().orElse(0f);
-
-        final float topLeftX     = margin.left().orElse(0f);
-        final float topLeftY     = margin.top().orElse(0f);
-        final float topRightX    = width - margin.right().orElse(0f);
-        final float topRightY    = topLeftY;
-        final float bottomLeftX  = topLeftX;
-        final float bottomLeftY  = height - margin.bottom().orElse(0f);
-        final float bottomRightX = topRightX;
-        final float bottomRightY = bottomLeftY;
-
-        final float innerTopLeftX     = topLeftX + widths.left().orElse(0f);
-        final float innerTopLeftY     = topLeftY + widths.top().orElse(0f);
-        final float innerTopRightX    = topRightX - widths.right().orElse(0f);
-        final float innerTopRightY    = innerTopLeftY;
-        final float innerBottomLeftX  = bottomLeftX + widths.left().orElse(0f);
-        final float innerBottomLeftY  = bottomLeftY - widths.bottom().orElse(0f);
-        final float innerBottomRightX = bottomRightX - widths.right().orElse(0f);
-        final float innerBottomRightY = innerBottomLeftY;
-
-        final float innerCenterX = (innerTopLeftX + innerTopRightX) / 2f;
-        final float innerCenterY = (innerTopLeftY + innerBottomLeftY) / 2f;
-
-        Area[] edgeAreas = new Area[4];
-        { // TOP:
-            edgeAreas[0] = new Area(new Polygon(
-                new int[] {(int)innerCenterX, (int)innerTopLeftX, (int)topLeftX, (int)topRightX, (int)innerTopRightX},
-                new int[] {(int)innerCenterY, (int)innerTopLeftY, (int)topLeftY, (int)topRightY, (int)innerTopRightY},
-                5
-            ));
-        }
-        { // RIGHT:
-            edgeAreas[1] = new Area(new Polygon(
-                new int[] {(int)innerCenterX, (int)innerTopRightX, (int)topRightX, (int)bottomRightX, (int)innerBottomRightX},
-                new int[] {(int)innerCenterY, (int)innerTopRightY, (int)topRightY, (int)bottomRightY, (int)innerBottomRightY},
-                5
-            ));
-        }
-        { // BOTTOM:
-            edgeAreas[2] = new Area(new Polygon(
-                new int[] {(int)innerCenterX, (int)innerBottomRightX, (int)bottomRightX, (int)bottomLeftX, (int)innerBottomLeftX},
-                new int[] {(int)innerCenterY, (int)innerBottomRightY, (int)bottomRightY, (int)bottomLeftY, (int)innerBottomLeftY},
-                5
-            ));
-        }
-        { // LEFT:
-            edgeAreas[3] = new Area(new Polygon(
-                new int[] {(int)innerCenterX, (int)innerBottomLeftX, (int)bottomLeftX, (int)topLeftX, (int)innerTopLeftX},
-                new int[] {(int)innerCenterY, (int)innerBottomLeftY, (int)bottomLeftY, (int)topLeftY, (int)innerTopLeftY},
-                5
-            ));
-        }
-        return edgeAreas;
-    }
-
 
     private static void _renderShadows(
         LayerRenderConf conf,
