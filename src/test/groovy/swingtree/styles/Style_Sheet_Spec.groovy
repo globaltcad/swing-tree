@@ -413,7 +413,15 @@ class Style_Sheet_Spec extends Specification
             var s3 = ss.applyTo(slider3)
             var s4 = ss.applyTo(label1)
             var s5 = ss.applyTo(label2)
-        then : '...and we check the results'
+        then : 'We first verify that they are not equal to another:'
+            s1 != s2 && s2 != s3 && s3 != s4 && s4 != s5
+        and : 'They are equal to recalculated instances of themselves:'
+            s1 == ss.applyTo(slider1)
+            s2 == ss.applyTo(slider2)
+            s3 == ss.applyTo(slider3)
+            s4 == ss.applyTo(label1)
+            s5 == ss.applyTo(label2)
+        and : 'Then we check the results:'
             s1.base().foundationColor().get() == Color.BLUE
             s1.border().widths().top().get() == 11
             s1.border().widths().left().get() == 11
@@ -792,13 +800,21 @@ class Style_Sheet_Spec extends Specification
             var s3 = ss.applyTo(button3)
             var s4 = ss.applyTo(label1)
             var s5 = ss.applyTo(label2)
-        then : 'We first check that they have the expected commonalities:'
+        then : 'We first verify that they are not equal to another:'
+            s1 != s2 && s2 != s3 && s3 != s4 && s4 != s5
+        and : 'They are equal to recalculated instances of themselves:'
+            s1 == ss.applyTo(button1)
+            s2 == ss.applyTo(button2)
+            s3 == ss.applyTo(button3)
+            s4 == ss.applyTo(label1)
+            s5 == ss.applyTo(label2)
+        and : 'We also check that they have the expected commonalities:'
             [s1, s2, s3, s4, s5].every { it.padding() == Outline.of(24, 72, 42, 12) }
             [s1, s2, s3, s4, s5].every { it.border().widths().bottom().get() == 42 }
             [s1, s2, s3, s4, s5].every { it.border().topRightArc().get() == Arc.of(9, 9) }
             [s1, s2, s3, s4, s5].every { it.border().bottomLeftArc().get() == Arc.of(9, 9) }
 
-        and : '...and we can also verify that the components have the expected styles:'
+        and : 'Finally we can also verify that the components have the expected styles:'
             s1.border().widths().top().get() == 19
             s1.border().widths().left().get() == 3
             s1.border().widths().right().get() == 7
