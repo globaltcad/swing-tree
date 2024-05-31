@@ -225,6 +225,27 @@ final class BorderConf
             );
     }
 
+    BorderConf withColors( Color top, Color right, Color bottom, Color left ) {
+        return BorderConf.of(
+                _topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc,
+                _borderWidths, _margin, _padding,
+                BorderColorsConf.of(top, right, bottom, left)
+            );
+    }
+
+    BorderConf withColorAt( UI.Edge edge, Color borderColor ) {
+        if ( edge == UI.Edge.EVERY )
+            return this.withColor(borderColor);
+        switch (edge) {
+            case TOP:    return BorderConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _borderColors.withTop(borderColor));
+            case RIGHT:  return BorderConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _borderColors.withRight(borderColor));
+            case BOTTOM: return BorderConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _borderColors.withBottom(borderColor));
+            case LEFT:   return BorderConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _borderColors.withLeft(borderColor));
+            default:
+                throw new IllegalArgumentException("Unknown side: " + edge);
+        }
+    }
+
     boolean allCornersShareTheSameArc() {
         return _topLeftArc.equals(_topRightArc) &&
                _topLeftArc.equals(_bottomLeftArc) &&

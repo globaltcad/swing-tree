@@ -115,6 +115,22 @@ final class BorderColorsConf
         return Optional.ofNullable(_isUndefined(_left) ? null : _left);
     }
 
+    BorderColorsConf withTop( Color top ) {
+        return new BorderColorsConf(top, _right, _bottom, _left);
+    }
+
+    BorderColorsConf withRight( Color right ) {
+        return new BorderColorsConf(_top, right, _bottom, _left);
+    }
+
+    BorderColorsConf withBottom( Color bottom ) {
+        return new BorderColorsConf(_top, _right, bottom, _left);
+    }
+
+    BorderColorsConf withLeft( Color left ) {
+        return new BorderColorsConf(_top, _right, _bottom, left);
+    }
+
     @Override
     public int hashCode() {
         return _top.hashCode() + _right.hashCode() + _bottom.hashCode() + _left.hashCode();

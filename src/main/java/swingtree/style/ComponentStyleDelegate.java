@@ -368,6 +368,21 @@ public final class ComponentStyleDelegate<C extends JComponent>
     }
 
     /**
+     *   Returns a new {@link StyleConf} with the provided border width and border colors.
+     *   The border will be rendered with an inset space based on the margin defined by the {@link StyleConf}.
+     *   You may configure the border colors for each side of the component individually.
+     * @param width The border width in pixels.
+     * @param top The color for the top part of the border.
+     * @param right The color for the right part of the border.
+     * @param bottom The color for the bottom part of the border.
+     * @param left The color for the left part of the border.
+     * @return A new {@link ComponentStyleDelegate} with the provided border width and border colors.
+     */
+    public ComponentStyleDelegate<C> border( double width, Color top, Color right, Color bottom, Color left ) {
+        return _withStyle(_styleConf._withBorder(_styleConf.border().withWidth(width).withColors(top, right, bottom, left)));
+    }
+
+    /**
      *  Returns a new {@link StyleConf} with the provided border widths and border color.
      *  The border will be rendered with an inset space based on the margin defined by the {@link StyleConf}.
      *
@@ -384,7 +399,8 @@ public final class ComponentStyleDelegate<C extends JComponent>
 
     /**
      *  Returns a new {@link StyleConf} with the provided border width and border color in the form of a string.
-     *  The string can be either a hex color string, a color name or a color constant from the system properties.
+     *  The string can be either a hex color string, a color name or a color constant from the system properties
+     *  (See {@link swingtree.UI#color(String)} for more information on the supported color formats).
      *  The border will be rendered with an inset space based on the padding defined by the {@link StyleConf}.
      *
      * @param width The border width in pixels.
@@ -404,17 +420,78 @@ public final class ComponentStyleDelegate<C extends JComponent>
     }
 
     /**
+     *  Returns a new {@link StyleConf} with the provided border width and border colors in the form of strings.
+     *  The strings can be either hex color strings, color names or color constants from the system properties.
+     *  The border will be rendered with an inset space based on the padding defined by the {@link StyleConf}.
+     *
+     * @param width The border width in pixels.
+     * @param top The color for the top part of the border.
+     * @param right The color for the right part of the border.
+     * @param bottom The color for the bottom part of the border.
+     * @param left The color for the left part of the border.
+     * @return A new {@link ComponentStyleDelegate} with the provided border width and border colors.
+     */
+    public ComponentStyleDelegate<C> border( double width, String top, String right, String bottom, String left ) {
+        Color topColor = UI.color(top);
+        Color rightColor = UI.color(right);
+        Color bottomColor = UI.color(bottom);
+        Color leftColor = UI.color(left);
+        return _withStyle(_styleConf._withBorder(_styleConf.border().withWidth(width).withColors(topColor, rightColor, bottomColor, leftColor)));
+    }
+
+    /**
      *  Returns a new {@link StyleConf} with the provided border width.
      *  <p>
      *  Note that in order for the border to be visible you also
      *  have to specify it's color, which you can do through
      *  {@link #borderColor(Color)} or {@link #borderColor(String)}.
+     *  You may also specify different colors for each side of the border
+     *  through {@link #borderColors(Color, Color, Color, Color)} or {@link #borderColors(String, String, String, String)}.
      *
      * @param width The border width in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided border width.
      */
     public ComponentStyleDelegate<C> borderWidth( double width ) {
         return _withStyle(_styleConf._withBorder(_styleConf.border().withWidth(width)));
+    }
+
+    /**
+     *  Returns a new {@link StyleConf} with the provided border colors,
+     *  which are stored in the order of top, right, bottom, left.
+     *  Note that a component border will be rendered with an inset
+     *  space based on the padding defined by the {@link StyleConf}.
+     *  <p>
+     *  Instead of null, the {@link swingtree.UI.Color#UNDEFINED}
+     *  constant is used to indicate that a border color is not set.
+     *
+     * @param top The color for the top part of the border.
+     * @param right The color for the right part of the border.
+     * @param bottom The color for the bottom part of the border.
+     * @param left The color for the left part of the border.
+     * @return A new {@link ComponentStyleDelegate} with the provided border colors.
+     */
+    public ComponentStyleDelegate<C> borderColors( Color top, Color right, Color bottom, Color left ) {
+        return _withStyle(_styleConf._withBorder(_styleConf.border().withColors(top, right, bottom, left)));
+    }
+
+    /**
+     *  Returns a new {@link StyleConf} with the provided border colors in the form of strings.
+     *  The strings can be either hex color strings, color names or color constants from the system properties
+     *  (See {@link swingtree.UI#color(String)} for more information on the supported color formats).
+     *  The border will be rendered with an inset space based on the padding defined by the {@link StyleConf}.
+     *
+     * @param top The color for the top part of the border.
+     * @param right The color for the right part of the border.
+     * @param bottom The color for the bottom part of the border.
+     * @param left The color for the left part of the border.
+     * @return A new {@link ComponentStyleDelegate} with the provided border colors.
+     */
+    public ComponentStyleDelegate<C> borderColors( String top, String right, String bottom, String left ) {
+        Color topColor = UI.color(top);
+        Color rightColor = UI.color(right);
+        Color bottomColor = UI.color(bottom);
+        Color leftColor = UI.color(left);
+        return _withStyle(_styleConf._withBorder(_styleConf.border().withColors(topColor, rightColor, bottomColor, leftColor)));
     }
 
     /**
@@ -431,6 +508,48 @@ public final class ComponentStyleDelegate<C extends JComponent>
     public ComponentStyleDelegate<C> borderWidthAt( UI.Edge edge, double width ) {
         Objects.requireNonNull(edge);
         return _withStyle(_styleConf._withBorder(_styleConf.border().withWidthAt(edge, (float) width)));
+    }
+
+    /**
+     *  Returns a new {@link StyleConf} with the provided width and color used to define
+     *  the border for the specified edge of the component.
+     *  The border will be rendered with an inset space based on the padding defined by the {@link StyleConf}.
+     *
+     * @param edge The edge to set the border width and color for, you may use {@link UI.Edge#EVERY}
+     *             to set the same width and color for all edges.
+     * @param width The border width in pixels.
+     * @param color The border color.
+     * @return A new {@link ComponentStyleDelegate} with the provided border width and color for the specified edge.
+     */
+    public ComponentStyleDelegate<C> borderAt( UI.Edge edge, double width, Color color ) {
+        Objects.requireNonNull(edge);
+        return _withStyle(_styleConf._withBorder(_styleConf.border().withWidthAt(edge, (float) width).withColorAt(edge, color)));
+    }
+
+    /**
+     *  Returns a new {@link StyleConf} with the provided width and color string used to define
+     *  the border for the specified edge of the component.
+     *  The border will be rendered with an inset space based on the padding defined by the {@link StyleConf}.
+     *  <p>
+     *  The color is specified as a string, which can be either a hex color string, a color name or a color constant
+     *  from the system properties (See {@link swingtree.UI#color(String)} for more information on the supported color formats).
+     *
+     * @param edge The edge to set the border width and color for, you may use {@link UI.Edge#EVERY}
+     *             to set the same width and color for all edges.
+     * @param width The border width in pixels.
+     * @param colorString The border color.
+     * @return A new {@link ComponentStyleDelegate} with the provided border width and color for the specified edge.
+     */
+    public ComponentStyleDelegate<C> borderAt( UI.Edge edge, double width, String colorString ) {
+        Objects.requireNonNull(edge);
+        Color newColor;
+        try {
+            newColor = UI.color(colorString);
+        } catch ( Exception e ) {
+            log.error("Failed to parse color string: '"+colorString+"'", e);
+            return this;
+        }
+        return _withStyle(_styleConf._withBorder(_styleConf.border().withWidthAt(edge, (float) width).withColorAt(edge, newColor)));
     }
 
     /**
