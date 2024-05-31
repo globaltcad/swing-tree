@@ -84,7 +84,7 @@ class Styles_Spec extends Specification
             var foundationColor = style.base().foundationColor()
             var backgroundColor = style.base().backgroundColor()
             var foregroundColor = style.base().foregroundColor()
-            var borderColor = style.border().color()
+            var borderColor = style.border().colors()
             var shadowColor = style.shadow().color()
             var fontSelectionColor = style.font().selectionColor()
             var fontColor = style.font().paint()
@@ -93,7 +93,7 @@ class Styles_Spec extends Specification
             foregroundColor.get() == expectedColor
         and :
             !foundationColor.isPresent() && expectedColor == UI.Color.UNDEFINED || foundationColor.get() == expectedColor
-            !borderColor.isPresent() && expectedColor == UI.Color.UNDEFINED || borderColor.get() == expectedColor
+            !borderColor.every( c -> c == UI.Color.UNDEFINED ) && expectedColor == UI.Color.UNDEFINED || borderColor.everyColor( c -> c == expectedColor )
             !shadowColor.isPresent() && expectedColor == UI.Color.UNDEFINED || shadowColor.get() == expectedColor
             !fontSelectionColor.isPresent() && expectedColor == UI.Color.UNDEFINED || fontSelectionColor.get() == expectedColor
             !fontColor.isPresent() && expectedColor == UI.Color.UNDEFINED || fontColor.get() == expectedColor

@@ -3,10 +3,7 @@ package swingtree.style;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import swingtree.UI;
-import swingtree.animation.LifeSpan;
-import swingtree.api.Painter;
 
-import javax.swing.JComponent;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -74,7 +71,7 @@ final class StyleEngine
     Optional<Shape> componentArea() {
         Shape contentClip = null;
         ComponentAreas _areas = ComponentAreas.of(_boxModelConf);
-        if ( _areas.bodyArea().exists() || _componentConf.style().margin().isPositive() )
+        if ( _areas.bodyAreaExists() || _componentConf.style().margin().isPositive() )
             contentClip = _areas.get(UI.ComponentArea.BODY);
 
         return Optional.ofNullable(contentClip);

@@ -3519,5 +3519,56 @@ class Individual_Component_Styling_Spec extends Specification
             scale << [1f, 1.25f, 1.75f, 2f]
     }
 
+    def 'A border can have different colors on each side.'( float scale )
+    {
+        reportInfo """
+                The border of a SwingTree style consists of four parts:
+                the top, right, bottom, and left sides, which are divided cleanily
+                by the diagonal lines of the rectengular bounds of a component.
+                Each of these sides can have a different color  
+                and thickness.
+                <br>
+                In this example we style a `JBox` type to with a border that 
+                has thick border and different colors on each side.
+                
+                ${Utility.linkSnapshot('components/thick-border-with-different-colors.png')}
+
+                As you can see, the border of the `JBox` type has a different color
+                on each side and a thickness of 6-12 pixels.
+                Note that they are almost triangular in shape, 
+                which is due to the diagonal shreshold lines of the 
+                rectangular bounds of the component.
+            """
+        given : """
+            We first set a scaling factor to simulate a platform with higher DPI.
+            So when your screen has a higher pixel density then this factor
+            is used by SwingTree to ensure that the UI is upscaled accordingly! 
+            Please note that the line below only exists for testing purposes, 
+            SwingTree will determine a suitable 
+            scaling factor for the current system automatically for you,
+            so you do not have to specify this factor manually. 
+        """
+            SwingTree.get().setUiScaleFactor(scale)
+        and : 'We pass the following style rules to a `JBox` UI:'
+            var ui =
+                        UI.box().withStyle( it -> it
+                            .margin(4)
+                            .padding(2)
+                            .size(12+20+20, 12+18)
+                            .borderAt(UI.Edge.TOP, 3, UI.Color.RED.withOpacity(0.5))
+                            .borderAt(UI.Edge.RIGHT, 6, "green")
+                            .borderAt(UI.Edge.BOTTOM, 15, UI.Color.LIGHTBLUE)
+                            .borderAt(UI.Edge.LEFT, 14, "light magenta")
+                        )
+
+        when : 'We render the UI into a BufferedImage instance.'
+            var image = Utility.renderSingleComponent(ui.get(JBox))
+
+        then : 'The image is as expected (compared with the snapshot above).'
+            Utility.similarityBetween(image, "components/thick-border-with-different-colors.png", 99.6) > 99.6
+
+        where : 'We test this using the following scaling values:'
+            scale << [5.5f]
+    }
 
 }

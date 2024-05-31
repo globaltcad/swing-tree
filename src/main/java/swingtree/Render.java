@@ -312,7 +312,7 @@ public final class Render<C extends JComponent,E>
 		 *  and then renders the cell.
 		 *  <pre>{@code
 		 *  	.when( MyEnum.class )
-		 *  	.asGraphics( (cell, g) -> {
+		 *  	.render( (cell, g) -> {
 		 *  		// draw something
 		 *  		g.drawString( "Hello World", 0, 0 );
 		 *  	})

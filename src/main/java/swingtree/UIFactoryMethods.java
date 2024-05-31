@@ -4658,6 +4658,20 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
+     *  A functionally identical alias method for {@link #list(Vals)}, which allows for
+     *  the creation of a new {@link JList} instance with the provided
+     *  observable property list (a {@link Vals} object) as data model.
+     *  When the property list changes, the {@link JList} will be updated accordingly.
+     *
+     * @param elements The elements which should be used as model data for the new {@link JList}.
+     * @return A builder instance for a new {@link JList} with the provided {@link Vals} as data model.
+     * @param <E> The type of the elements in the list.
+     */
+    public static <E> UIForList<E, JList<E>> listOf( Vals<E> elements ) {
+        return list( elements );
+    }
+
+    /**
      *  Allows for the creation of a new {@link JList} instance with 2 observable
      *  collections as data model, a {@link Var} property for the selection and a {@link Vals}
      *  property list for the elements.

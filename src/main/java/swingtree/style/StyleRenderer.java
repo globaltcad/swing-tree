@@ -15,6 +15,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ConvolveOp;
 import java.awt.image.Kernel;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -53,9 +54,7 @@ final class StyleRenderer
         });
 
         // Border stuff:
-        conf.baseColors().borderColor().ifPresent(color -> {
-            _drawBorder( conf, color, g2d);
-        });
+        _drawBorder( conf, conf.baseColors().borderColor(), g2d);
 
         // Now onto things every layer has in common:
 
@@ -154,13 +153,39 @@ final class StyleRenderer
         g.setClip(oldClip);
     }
 
-    private static void _drawBorder( LayerRenderConf conf, Color color, Graphics2D g2d )
+    private static void _drawBorder( LayerRenderConf conf, BorderColorsConf colors, Graphics2D g2d )
     {
+        if ( colors.equals(BorderColorsConf.none()) )
+            return;
+
         if ( !Outline.none().equals(conf.boxModel().widths()) ) {
             try {
                 Area borderArea = conf.areas().get(UI.ComponentArea.BORDER);
-                g2d.setColor(color);
-                g2d.fill(borderArea);
+                Objects.requireNonNull(borderArea);
+                if ( colors.isHomogeneous() ) {
+                    g2d.setColor(colors.bottom().orElse(UI.Color.BLACK));
+                    g2d.fill(borderArea);
+                } else {
+                    Area[] borderEdgeRegions = conf.areas().getEdgeAreas();
+                    // We created clipped border areas:
+                    Area topBorderArea = new Area(borderArea);
+                    topBorderArea.intersect(borderEdgeRegions[0]);
+                    Area rightBorderArea = new Area(borderArea);
+                    rightBorderArea.intersect(borderEdgeRegions[1]);
+                    Area bottomBorderArea = new Area(borderArea);
+                    bottomBorderArea.intersect(borderEdgeRegions[2]);
+                    Area leftBorderArea = new Area(borderArea);
+                    leftBorderArea.intersect(borderEdgeRegions[3]);
+                    // Now we can draw the borders:
+                    g2d.setColor(colors.top().orElse(UI.Color.BLACK));
+                    g2d.fill(topBorderArea);
+                    g2d.setColor(colors.right().orElse(UI.Color.BLACK));
+                    g2d.fill(rightBorderArea);
+                    g2d.setColor(colors.bottom().orElse(UI.Color.BLACK));
+                    g2d.fill(bottomBorderArea);
+                    g2d.setColor(colors.left().orElse(UI.Color.BLACK));
+                    g2d.fill(leftBorderArea);
+                }
             } catch ( Exception e ) {
                 log.warn(
                     "An exception occurred while drawing the border of border style '" + conf.boxModel() + "' ",
