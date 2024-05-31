@@ -447,7 +447,7 @@ class Style_Sheet_Spec extends Specification
             s3.border().widths().left().get() == 11
             s3.border().widths().bottom().get() == 11
             s3.border().widths().right().get() == 11
-            s3.border().color().get() == Color.GREEN
+            s3.border().colors().everyColor( c -> c == Color.GREEN )
             s3.border().topLeftArc().get() == Arc.of(3, 3)
             s3.border().topRightArc().get() == Arc.of(3, 3)
             s3.border().bottomLeftArc().get() == Arc.of(3, 3)
@@ -461,7 +461,7 @@ class Style_Sheet_Spec extends Specification
             s4.border().widths().left().get() == 11
             s4.border().widths().bottom().get() == 11
             s4.border().widths().right().get() == 11
-            s4.border().color().get() == Color.GREEN
+            s4.border().colors().everyColor( c -> c == Color.GREEN )
             s4.border().topLeftArc().get() == Arc.of(19, 19)
             s4.border().topRightArc().get() == Arc.of(19, 19)
             s4.border().bottomLeftArc().get() == Arc.of(19, 19)
@@ -475,7 +475,7 @@ class Style_Sheet_Spec extends Specification
             s5.border().widths().left().get() == 11
             s5.border().widths().bottom().get() == 11
             s5.border().widths().right().get() == 11
-            s5.border().color().get() == Color.GREEN
+            s5.border().colors().everyColor( c -> c == Color.GREEN )
             s5.border().topLeftArc().get() == Arc.of(3, 3)
             s5.border().topRightArc().get() == Arc.of(3, 3)
             s5.border().bottomLeftArc().get() == Arc.of(3, 3)
