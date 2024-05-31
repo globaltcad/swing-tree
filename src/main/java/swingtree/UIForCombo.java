@@ -332,13 +332,43 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
     }
 
     /**
+     *  Use this to create a generic combo box renderer for various item types without
+     *  a meaningful common super-type (see {@link UIForCombo#withRenderer(Class, Function)}).
+     *  You would typically want to use this method to render generic types where the only
+     *  common type is {@link Object}, yet you want to render the item
+     *  in a specific way depending on their actual type.
+     *  This is done like so:
+     *  <pre>{@code
+     *  UI.comboBox(new Object[]{":-)", 42L, '§'})
+     *  .withRenderer( conf -> conf
+     *      .when(String.class).asText( cell -> "String: "+cell.getValue() )
+     *      .when(Character.class).asText( cell -> "Char: "+cell.getValue() )
+     *      .when(Number.class).asText( cell -> "Number: "+cell.getValue() )
+     *  );
+     *  }</pre>
+     *
+     * @param renderBuilder A lambda function that configures the renderer for this combo box.
+     * @return This combo box instance for further configuration.
+     * @param <V> The type of the value that is being rendered in this combo box.
+     */
+    public final <V extends E> UIForCombo<E,C> withRenderer(
+        Function<Render.Builder<C,V>,Render.Builder<C,V>> renderBuilder
+    ) {
+        Class<Object> commonType = Object.class;
+        Objects.requireNonNull(commonType);
+        Render.Builder render = Render.forCombo(commonType).when(commonType).asText(cell->cell.valueAsString().orElse(""));
+        render = renderBuilder.apply(render);
+        return withRenderer(render);
+    }
+
+    /**
      *  Use this to build a combo box cell renderer for a specific item type.
      *  What you would typically want to do is customize the text that should be displayed
      *  for a specific item type. <br>
      *  This is done like so:
      *  <pre>{@code
      *  UI.comboBox(Size.LARGE, Size.MEDIUM, Size.SMALL)
-     *  .withRenderer(
+     *  .withRendererFor(
      *      Size.class,
      *      conf -> conf.asText(cell -> cell.getValue().name().toLowerCase())
      *  );
@@ -352,11 +382,40 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
      * @param <T> The type of the items which should be rendered using a custom renderer.
      * @param <V> The type of the items which should be rendered using a custom renderer.
      */
-    public final <T, V extends E> UIForCombo<E,C> withRenderer(
+    public final <T, V extends E> UIForCombo<E,C> withRendererFor(
         Class<T> itemType,
         Function<Render.As<JComboBox<T>, T, T>,Render.Builder<C,V>> renderBuilder
     ) {
         Render.Builder<C,V> render = renderBuilder.apply(Render.forCombo(itemType).when(itemType));
+        return withRenderer(render);
+    }
+
+    /**
+     *  Use this to create a combo box renderer for a specific item type and its subtype.
+     *  You would typically want to use this method to render generic types like {@link Object}
+     *  where you want to render the item in a specific way depending on its actual type.
+     *  This is done like so:
+     *  <pre>{@code
+     *  UI.comboBox(new Number[]{1f, 42L, 4.20d})
+     *  .withBasicRenderer(
+     *      Number.class, conf -> conf
+     *      .when(Integer.class).asText( cell -> "Integer: "+cell.getValue() )
+     *      .when(Long.class).asText( cell -> "Long: "+cell.getValue() )
+     *      .when(Float.class).asText( cell -> "Float: "+cell.getValue() )
+     *  );
+     *  }</pre>
+     *
+     * @param commonType The common type of the items which should be rendered using a custom renderer.
+     * @return A render builder exposing an API that allows you to configure how he passed item types should be rendered.
+     * @param <T> The common super-type type of the items which should be rendered using a custom renderer.
+     */
+    public final <T extends E> UIForCombo<E,C> withRenderer(
+        Class<T> commonType,
+        Function<Render.Builder<C, T>,Render.Builder<C, T>> renderBuilder
+    ) {
+        Objects.requireNonNull(commonType);
+        Render.Builder render = Render.forCombo(commonType).when(commonType).asText(cell->cell.valueAsString().orElse(""));
+        render = renderBuilder.apply(render);
         return withRenderer(render);
     }
 

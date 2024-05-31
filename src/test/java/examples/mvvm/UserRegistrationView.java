@@ -35,7 +35,7 @@ public class UserRegistrationView extends Panel
                 .add(label("Gender"))
                 .add(GROW_X,
                     comboBox(vm.gender()).isEnabledIfNot(vm.allInputsDisabled())
-                    .withRenderer(
+                    .withRendererFor(
                         UserRegistrationViewModel.Gender.class,
                         conf -> conf.asText( it ->
                             it.value()

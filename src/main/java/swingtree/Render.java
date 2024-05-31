@@ -32,9 +32,9 @@ public final class Render<C extends JComponent,E>
 		Render r = new Render<>(JList.class, elementType);
 		return (Render<JList<E>,E>) r;
 	}
-	static <E> Render<JComboBox<E>,E> forCombo(Class<E> elementType) {
+	static <C extends JComboBox<E>, E> Render<C,E> forCombo(Class<E> elementType) {
 		Render r = new Render<>(JComboBox.class, elementType);
-		return (Render<JComboBox<E>,E>) r;
+		return (Render<C,E>) r;
 	}
 	static <E> Render<JTable,E> forTable(Class<E> elementType) {
 		Render r = new Render<>(JTable.class, elementType);

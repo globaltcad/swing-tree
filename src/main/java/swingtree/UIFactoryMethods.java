@@ -5037,6 +5037,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *
      * @return A render builder exposing an API that allows you to configure how he passed item types should be rendered.
      */
+    @Deprecated
     public static Render.Builder<JComboBox<Object>, Object> renderCombo() {
         return Render.forCombo(Object.class).when(Object.class).asText(cell->cell.valueAsString().orElse(""));
     }
@@ -5059,7 +5060,9 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @param commonType The common type of the items which should be rendered using a custom renderer.
      * @return A render builder exposing an API that allows you to configure how he passed item types should be rendered.
      * @param <T> The common super-type type of the items which should be rendered.
+     * @deprecated Use {@link UIForCombo#withRenderer(Class, Function)} instead.
      */
+    @Deprecated
     public static <T> Render.Builder<JComboBox<T>, T> renderCombo( Class<T> commonType ) {
         Objects.requireNonNull(commonType);
         return Render.forCombo(commonType).when(commonType).asText(cell->cell.valueAsString().orElse(""));
@@ -5082,6 +5085,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A render builder exposing an API that allows you to
      *          configure how he passed item type should be rendered.
      * @param <T> The type of the items which should be rendered.
+     * @deprecated Use {@link UIForCombo#withRendererFor(Class, Function)} instead.
      */
     @Deprecated
     public static <T> Render.As<JComboBox<T>, T, T> renderComboItem( Class<T> itemType ) {
