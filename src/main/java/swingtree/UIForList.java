@@ -205,7 +205,7 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
      *                 responsible for rendering each entry of the {@link JList} instance.
      * @return This instance of the builder node to allow for fluent method chaining.
      */
-    public final UIForList<E, L> withRenderer( ListEntryRenderer<E, L> renderer ) {
+    public final UIForList<E, L> withRenderComponent( ListEntryRenderer<E, L> renderer ) {
         return _with( thisComponent -> {
                     thisComponent.setCellRenderer((list, value, index, isSelected, cellHasFocus) -> renderer.render(new ListEntryDelegate<E, L>() {
                         @Override public L list() { return (L) list; }
@@ -299,7 +299,7 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
      *  This is done like so:
      *  <pre>{@code
      *  UI.list(new Object[]{":-)", 42L, '§'})
-     *  .withRenderer( conf -> conf
+     *  .withRenderer( it -> it
      *      .when(String.class).asText( cell -> "String: "+cell.getValue() )
      *      .when(Character.class).asText( cell -> "Char: "+cell.getValue() )
      *      .when(Number.class).asText( cell -> "Number: "+cell.getValue() )
@@ -327,7 +327,7 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
      *  This is done like so:
      *  <pre>{@code
      *  UI.list("A", "B", "C")
-     *  .withRendererFor(String.class, conf -> conf
+     *  .withRendererFor(String.class, it -> it
      *      .asText(cell -> cell.getValue().toLowerCase())
      *  );
      *  }</pre>
@@ -355,7 +355,7 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
      *  This is done like so:
      *  <pre>{@code
      *  UI.list(new Number[]{1f, 42L, 4.20d})
-     *  .withRenderer(Number.class, conf -> conf
+     *  .withRenderer(Number.class, it -> it
      *      .when(Integer.class).asText( cell -> "Integer: "+cell.getValue() )
      *      .when(Long.class).asText( cell -> "Long: "+cell.getValue() )
      *      .when(Float.class).asText( cell -> "Float: "+cell.getValue() )

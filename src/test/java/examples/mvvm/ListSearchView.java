@@ -22,17 +22,17 @@ public class ListSearchView extends Panel
                 .add(SHRINK.and(WRAP), label("Last search:"))
                 .add(PUSH.and(GROW),
                     UI.list(vm.lastSearchTimes())
-                    .withRenderer(renderListItem(LocalDateTime.class).asText(cell -> cell.value().get().toString() ))
+                    .withRendererFor(LocalDateTime.class, it -> it.asText(cell -> cell.value().get().toString() ))
                     .withBorder(vm.listBorder())
                 )
                 .add(PUSH.and(GROW).and(WRAP),
                     UI.list(vm.searchTerms())
-                    .withRenderer(renderListItem(String.class).asText(cell -> cell.value().get() ))
+                    .withRendererFor(String.class, it -> it.asText(cell -> cell.value().get() ))
                 )
                 .add(SHRINK.and(WRAP), label("Search for:"))
                 .add(PUSH.and(GROW).and(SPAN).and(WRAP),
                     listOf(vm.getRandomColors())
-                    .withRenderer( it -> new Component() {
+                    .withRenderComponent( it -> new Component() {
                         @Override
                         public void paint(Graphics g) {
                             g.setColor(it.entry().orElse(Color.BLACK));

@@ -5042,6 +5042,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  }</pre>
      *
      * @return A render builder exposing an API that allows you to configure how he passed item types should be rendered.
+     * @deprecated Use {@link UIForCombo#withRenderer(Function)} instead.
      */
     @Deprecated
     public static Render.Builder<JComboBox<Object>, Object> renderCombo() {

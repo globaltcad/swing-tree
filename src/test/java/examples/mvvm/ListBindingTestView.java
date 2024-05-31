@@ -31,8 +31,7 @@ public class ListBindingTestView extends Panel
             panel(FILL)
             .add(PUSH.and(GROW),
                 listOf(vm.colorNames())
-                .withRenderer(
-                    renderListItem(String.class)
+                .withRendererFor(String.class, it -> it
                     .asText( cell -> cell.value().get() )
                     //.render( (cell, g2d) -> {
                     //    cell.setRenderer(new JLabel(""));

@@ -346,7 +346,7 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
      *  This is done like so:
      *  <pre>{@code
      *  UI.comboBox(new Object[]{":-)", 42L, '§'})
-     *  .withRenderer( conf -> conf
+     *  .withRenderer( it -> it
      *      .when(String.class).asText( cell -> "String: "+cell.getValue() )
      *      .when(Character.class).asText( cell -> "Char: "+cell.getValue() )
      *      .when(Number.class).asText( cell -> "Number: "+cell.getValue() )
@@ -376,7 +376,7 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
      *  UI.comboBox(Size.LARGE, Size.MEDIUM, Size.SMALL)
      *  .withRendererFor(
      *      Size.class,
-     *      conf -> conf.asText(cell -> cell.getValue().name().toLowerCase())
+     *      it -> it.asText(cell -> cell.getValue().name().toLowerCase())
      *  );
      *  }</pre>
      *
@@ -403,8 +403,8 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
      *  This is done like so:
      *  <pre>{@code
      *  UI.comboBox(new Number[]{1f, 42L, 4.20d})
-     *  .withBasicRenderer(
-     *      Number.class, conf -> conf
+     *  .withRenderer(
+     *      Number.class, it -> it
      *      .when(Integer.class).asText( cell -> "Integer: "+cell.getValue() )
      *      .when(Long.class).asText( cell -> "Long: "+cell.getValue() )
      *      .when(Float.class).asText( cell -> "Float: "+cell.getValue() )
