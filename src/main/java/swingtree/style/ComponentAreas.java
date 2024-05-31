@@ -119,13 +119,13 @@ final class ComponentAreas
             case ALL:
                 return null; // No clipping
             case BODY:
-                return bodyArea().getFor(boxModel, this); // all - exterior == interior + border
+                return _bodyArea.getFor(boxModel, this); // all - exterior == interior + border
             case INTERIOR:
-                return interiorArea().getFor(boxModel, this); // all - exterior - border == content - border
+                return _interiorArea.getFor(boxModel, this); // all - exterior - border == content - border
             case BORDER:
-                return borderArea().getFor(boxModel, this); // all - exterior - interior
+                return _borderArea.getFor(boxModel, this); // all - exterior - interior
             case EXTERIOR:
-                return exteriorArea().getFor(boxModel, this); // all - border - interior
+                return _exteriorArea.getFor(boxModel, this); // all - border - interior
             default:
                 return null;
         }
@@ -136,13 +136,9 @@ final class ComponentAreas
         return _borderEdgeAreas.getFor(boxModel, this);
     }
 
-    public LazyRef<Area> borderArea() { return _borderArea; }
-
-    public LazyRef<Area> exteriorArea() { return _exteriorArea; }
-
-    public LazyRef<Area> interiorArea() { return _interiorArea; }
-
-    public LazyRef<Area> bodyArea() { return _bodyArea; }
+    public boolean bodyAreaExists() {
+        return _bodyArea.exists();
+    }
 
     static Area calculateComponentBodyArea(BoxModelConf state, float insTop, float insLeft, float insBottom, float insRight )
     {
