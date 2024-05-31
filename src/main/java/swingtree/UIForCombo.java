@@ -323,7 +323,13 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
      * @return This very instance, which enables builder-style method chaining.
      * @param <V> The type of the value to be rendered.
      */
-    public final <V extends E> UIForCombo<E,C> withRenderer( Render.Builder<C,V> renderBuilder ) {
+    @Deprecated
+    public final <V extends E> UIForCombo<E,C> withRenderer(Render.Builder<C,V> renderBuilder ) {
+        NullUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
+        return _withRenderer(renderBuilder);
+    }
+
+    public final <V extends E> UIForCombo<E,C> _withRenderer(Render.Builder<C,V> renderBuilder ) {
         NullUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
         return _with( thisComponent -> {
                     thisComponent.setRenderer((ListCellRenderer<E>) renderBuilder.buildForCombo((C)thisComponent));
@@ -358,7 +364,7 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
         Objects.requireNonNull(commonType);
         Render.Builder render = Render.forCombo(commonType).when(commonType).asText(cell->cell.valueAsString().orElse(""));
         render = renderBuilder.apply(render);
-        return withRenderer(render);
+        return _withRenderer(render);
     }
 
     /**
@@ -387,7 +393,7 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
         Function<Render.As<JComboBox<T>, T, T>,Render.Builder<C,V>> renderBuilder
     ) {
         Render.Builder<C,V> render = renderBuilder.apply(Render.forCombo(itemType).when(itemType));
-        return withRenderer(render);
+        return _withRenderer(render);
     }
 
     /**
@@ -416,7 +422,7 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
         Objects.requireNonNull(commonType);
         Render.Builder render = Render.forCombo(commonType).when(commonType).asText(cell->cell.valueAsString().orElse(""));
         render = renderBuilder.apply(render);
-        return withRenderer(render);
+        return _withRenderer(render);
     }
 
     /**
