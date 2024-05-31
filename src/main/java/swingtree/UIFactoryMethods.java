@@ -4965,7 +4965,9 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *
      * @return A render builder exposing an API that allows you to
      *          configure how he passed item types should be rendered.
+     * @deprecated Use {@link UIForList#withRenderer(Function)} instead.
      */
+    @Deprecated
     public static Render.Builder<JList<Object>, Object> renderList() {
         return Render.forList(Object.class).when(Object.class).asText(cell->cell.valueAsString().orElse(""));
     }
@@ -4989,7 +4991,9 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A render builder exposing an API that allows you to
      *          configure how he passed item types should be rendered.
      * @param <T> The common super-type type of the items which should be rendered.
+     * @deprecated Use {@link UIForList#withRenderer(Class, Function)} instead.
      */
+    @Deprecated
     public static <T> Render.Builder<JList<T>, T> renderList( Class<T> commonType ) {
         Objects.requireNonNull(commonType);
         return Render.forList(commonType).when(commonType).asText(cell->cell.valueAsString().orElse(""));
@@ -5012,7 +5016,9 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A render builder exposing an API that allows you to
      *          configure how he passed item type should be rendered.
      * @param <T> The type of the items which should be rendered.
+     * @deprecated Use {@link UIForList#withRendererFor(Class, Function)} instead.
      */
+    @Deprecated
     public static <T> Render.As<JList<T>, T, T> renderListItem( Class<T> itemType ) {
         Objects.requireNonNull(itemType);
         return Render.forList(itemType).when(itemType);
