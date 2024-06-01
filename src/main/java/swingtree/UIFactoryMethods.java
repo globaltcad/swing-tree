@@ -4939,7 +4939,10 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * bedore calling the {@link Render.As#asText(Function)} method.
      *
      * @return A builder instance for a new {@link JTable}.
+     * @deprecated Use {@link UIForTable#withRendererForColumn(int, Function)}
+     *             or {@link UIForTable#withRendererForColumn(String, Function)} instead.
      */
+    @Deprecated
     public static Render.Builder<JTable, Object> renderTable() {
         return Render.forTable(Object.class)
                 .when(Object.class)
