@@ -4880,7 +4880,9 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  calling {@link #tableModel(Class)} with the {@link Object} class as the type parameter.
      *
      * @return A functional and fluent API for building a {@link javax.swing.table.TableModel}.
+     * @deprecated Use {@link UIForTable#withModel(Function)} instead.
      */
+    @Deprecated
     public static BasicTableModel.Builder<Object> tableModel() {
         return new BasicTableModel.Builder<>(Object.class);
     }
@@ -4908,7 +4910,9 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @param entryType The type of the table entries.
      * @param <E> The type of the table entries.
      * @return A functional API for building a {@link javax.swing.table.TableModel}.
+     * @deprecated Use {@link UIForTable#withModel(Class, Function)} instead.
      */
+    @Deprecated
     public static <E> BasicTableModel.Builder<E> tableModel( Class<E> entryType ) {
         Objects.requireNonNull(entryType);
         return new BasicTableModel.Builder<>(entryType);

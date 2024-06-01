@@ -35,8 +35,7 @@ class Table_Renderer_Spec extends Specification
     {
         given : 'We create a table with a lambda based table model.'
             var ui =
-                    UI.table().withModel(
-                        UI.tableModel()
+                    UI.table().withModel( m -> m
                         .colNames("A", "B")
                         .colCount({2})
                         .rowCount({3})

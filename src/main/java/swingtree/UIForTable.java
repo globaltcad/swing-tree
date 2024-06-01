@@ -312,6 +312,66 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
     }
 
     /**
+     *  Exposes a fluent builder API for a table model. <br>
+     *  Here an example demonstrating how this API
+     *  is typically used as part of a UI declaration:
+     *  <pre>{@code
+     *  UI.table().withModel( m -> m
+     *      .colName( col -> new String[]{"X", "Y", "Z"}[col] )
+     *      .colCount( () -> 3 )
+     *      .rowCount( () -> data.size() )
+     *      .getsEntryAt( (r, c) -> data[r][c] )
+     *      .updateOn(update)
+     *  )
+     *  }</pre>
+     *  The builder API is exposed to the lambda function passed to this method.
+     *  The actually {@link TableModel} is built internally and then set on the table.
+     *
+     * @param dataModelBuilder A lambda function which receives a builder API for a table model
+     * @return This builder instance, to allow for further method chaining.
+     */
+    public final UIForTable<T> withModel(
+        Function<BasicTableModel.Builder<Object>, BasicTableModel.Builder<Object>> dataModelBuilder
+    ) {
+        Objects.requireNonNull(dataModelBuilder);
+        BasicTableModel.Builder<Object> builder = UI.tableModel();
+        builder = dataModelBuilder.apply(builder);
+        return this.withModel(builder.build());
+    }
+
+    /**
+     *  Exposes a fluent builder API for a table model holding a specific type of entry {@link Object}s. <br>
+     *  Here an example demonstrating how this API
+     *  is typically used as part of a UI declaration:
+     *  <pre>{@code
+     *  UI.table().withModel(Double.class, m -> m
+     *      .colName( col -> new String[]{"X", "Y", "Z"}[col] )
+     *      .colCount( () -> 3 )
+     *      .rowCount( () -> data.size() )
+     *      .getsEntryAt( (r, c) -> data[r][c] )
+     *      .updateOn(update)
+     *  )
+     *  }</pre>
+     *  In this example, the table model is built for a table holding {@link Double} entries.
+     *  So the data array is expected to be a two-dimensional array of {@link Double}s. <br>
+     *  <br>
+     *  Note that the builder API is exposed to the lambda function passed to this method.
+     *  The actually {@link TableModel} is built internally and then set on the table.
+     *
+     * @param itemType The type of the table entry {@link Object}s.
+     * @param dataModelBuilder A lambda function which receives a builder API for a table model
+     * @return This builder instance, to allow for further method chaining.
+     */
+    public final <E> UIForTable<T> withModel(
+        Class<E> itemType,
+        Function<BasicTableModel.Builder<E>, BasicTableModel.Builder<E>> dataModelBuilder
+    ) {
+        Objects.requireNonNull(dataModelBuilder);
+        BasicTableModel.Builder<E> builder = UI.tableModel(itemType);
+        builder = dataModelBuilder.apply(builder);
+        return this.withModel(builder.build());
+    }
+    /**
      * Use this to set a basic table model for this table.
      * @param model The model for the table model.
      * @return This builder object.
