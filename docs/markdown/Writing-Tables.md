@@ -4,9 +4,10 @@
 Tables are a common way to display data.
 In SwingTree, tables are created using the `UI.table()` factory method.
 But in order to display data, a table needs a model.
-The model is created using the `UI.tableModel()` factory method,
-which exposes a fluent API for configuring the model.
-
+The model builder is created internally and then exposed to the
+user in the configuration lambda expression passed to the
+`withModel` method. The model builder has a fluent API
+for defining the structure of the table and source of its data.
 Take a look at the following example:
 
 ```java
@@ -16,8 +17,7 @@ var dataChanged = Event.create();
 
 // ...
 
-UI.table().withModel(
-    UI.tableModel()
+UI.table().withModel( m -> m
     .colName( i -> header[i] )
     .colCount( () -> header.length )
     .rowCount( () -> data.length )
