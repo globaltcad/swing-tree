@@ -319,19 +319,6 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
                 ._this();
     }
 
-    /**
-     *  Pass a {@link Render.Builder} to this method to customize the rendering of the combo box.
-     *
-     * @param renderBuilder The {@link Render.Builder} to be used for customizing the rendering of the combo box.
-     * @return This very instance, which enables builder-style method chaining.
-     * @param <V> The type of the value to be rendered.
-     */
-    @Deprecated
-    public final <V extends E> UIForCombo<E,C> withRenderer( Render.Builder<C,V> renderBuilder ) {
-        NullUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
-        return _withRenderer(renderBuilder);
-    }
-
     public final <V extends E> UIForCombo<E,C> _withRenderer( Render.Builder<C,V> renderBuilder ) {
         NullUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
         return _with( thisComponent -> {
@@ -371,45 +358,6 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
         Render.Builder render = Render.forCombo(commonType).when(commonType).asText(cell->cell.valueAsString().orElse(""));
         try {
             render = renderBuilder.apply(render);
-        } catch (Exception e) {
-            log.error("Error while building renderer.", e);
-            return this;
-        }
-        Objects.requireNonNull(render);
-        return _withRenderer(render);
-    }
-
-    /**
-     *  Use this to build a combo box cell renderer for a specific item type.
-     *  What you would typically want to do is customize the text that should be displayed
-     *  for a specific item type. <br>
-     *  This is done like so:
-     *  <pre>{@code
-     *  UI.comboBox(Size.LARGE, Size.MEDIUM, Size.SMALL)
-     *  .withRendererFor(
-     *      Size.class,
-     *      it -> it.asText(cell -> cell.getValue().name().toLowerCase())
-     *  );
-     *  }</pre>
-     *
-     * @param itemType The type of the items which should be rendered using a custom renderer.* @return A render builder exposing an API that allows you to
-     *          configure how he passed item type should be rendered.
-     * @param renderBuilder A lambda function that takes a {@link Render.As} builder as argument and returns another
-     *                      {@link Render.Builder} that configures how the passed item type should be rendered.
-     * @return This builder instance for further configuration.
-     * @param <T> The type of the items which should be rendered using a custom renderer.
-     * @param <V> The type of the items which should be rendered using a custom renderer.
-     * @deprecated Use {@link UIForCombo#withRenderer(Class, Function)} instead.
-     */
-    @Deprecated
-    public final <T, V extends E> UIForCombo<E,C> withRendererFor(
-        Class<T> itemType,
-        Function<Render.As<JComboBox<T>, T, T>,Render.Builder<C,V>> renderBuilder
-    ) {
-        Render.As<JComboBox<T>, T, T> as = Render.forCombo(itemType).when(itemType);
-        Render.Builder<C,V> render;
-        try {
-            render = renderBuilder.apply(as);
         } catch (Exception e) {
             log.error("Error while building renderer.", e);
             return this;

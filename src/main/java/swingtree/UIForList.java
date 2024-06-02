@@ -240,36 +240,6 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
                 ._this();
     }
 
-    /**
-     * Receives a {@link Render.Builder} instance providing
-     * a fluent builder API for configuring how the values of this {@link JList} instance
-     * should be rendered. The {@link Render.Builder} instance may be
-     * created through the {@link UI#renderListItem(Class)} method.
-     * <p>
-     * Take a look at the following example:
-     * <pre>{@code
-     *  UI.list(vm.wordList())
-     *  .withRenderer(
-     *    renderListItem(String.class)
-     *    .asText(
-     *      cell->"("+cell.value().get()+")"
-     *    )
-     *  )
-     *  }</pre>
-     *  In this example, a new {@link JList} is created with a list of words
-     *  in the form of {@link String}s, which is provided by the <code>vm.wordList()</code> method.
-     *  The entries of said list are individually prepared for rendering
-     *  through the {@link Render.As#asText(Function)} method.
-     *
-     * @param renderBuilder The {@link Render.Builder} containing the fluently configured renderer.
-     * @return This very instance, which enables builder-style method chaining.
-     * @param <V> The type of the values that will be rendered.
-     */
-    public final <V extends E> UIForList<E, L> withRenderer( Render.Builder<L,V> renderBuilder ) {
-        NullUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
-        return _withRenderer(renderBuilder);
-    }
-
     private final <V extends E> UIForList<E, L> _withRenderer( Render.Builder<L,V> renderBuilder ) {
         NullUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
         return _with( thisComponent -> {
@@ -326,42 +296,6 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
             return this;
         }
         Objects.requireNonNull(render);
-        return _withRenderer(render);
-    }
-
-    /**
-     *  Use this to build a list cell renderer for a specific item type.
-     *  What you would typically want to do is customize the text that should be displayed
-     *  for a specific item type. <br>
-     *  This is done like so:
-     *  <pre>{@code
-     *  UI.list("A", "B", "C")
-     *  .withRendererFor(String.class, it -> it
-     *      .asText(cell -> cell.getValue().toLowerCase())
-     *  );
-     *  }</pre>
-     *
-     * @param itemType The type of the items which should be rendered using a custom renderer.* @return A render builder exposing an API that allows you to
-     *          configure how he passed item type should be rendered.
-     * @param renderBuilder A lambda function that takes a {@link Render.As} builder as argument and returns another
-     *                      {@link Render.Builder} that configures how the passed item type should be rendered.
-     * @return This builder instance for further configuration.
-     * @param <T> The type of the items which should be rendered using a custom renderer.
-     * @param <V> The type of the items which should be rendered using a custom renderer.
-     * @deprecated Use {@link #withRenderer(Class, Function)} instead.
-     */
-    @Deprecated
-    public final <T, V extends E> UIForList<E, L> withRendererFor(
-        Class<T> itemType,
-        Function<Render.As<JList<T>, T, T>,Render.Builder<L,V>> renderBuilder
-    ) {
-        Render.Builder<L,V> render;
-        try {
-            render = renderBuilder.apply(Render.forList(itemType).when(itemType));
-        } catch (Exception e) {
-            log.error("Error while building renderer.", e);
-            return this;
-        }
         return _withRenderer(render);
     }
 
