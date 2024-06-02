@@ -4784,7 +4784,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return This builder node.
      * @param <E> The type of the table entry {@link Object}s.
      */
-    public static <E> UIForTable<JTable> table(UI.ListData dataFormat, TableListDataSource<E> dataSource ) {
+    public static <E> UIForTable<JTable> table( UI.ListData dataFormat, TableListDataSource<E> dataSource ) {
         NullUtil.nullArgCheck(dataFormat, "dataFormat", UI.ListData.class);
         NullUtil.nullArgCheck(dataSource, "dataSource", TableListDataSource.class);
         return table().withModel(dataFormat, dataSource);
@@ -4804,7 +4804,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return This builder node.
      * @param <E> The type of the table entry {@link Object}s.
      */
-    public static <E> UIForTable<JTable> table(UI.MapData dataFormat, TableMapDataSource<E> dataSource ) {
+    public static <E> UIForTable<JTable> table( UI.MapData dataFormat, TableMapDataSource<E> dataSource ) {
         NullUtil.nullArgCheck(dataFormat, "dataFormat", UI.ListData.class);
         NullUtil.nullArgCheck(dataSource, "dataSource", TableMapDataSource.class);
         return table().withModel(dataFormat, dataSource);
@@ -4833,10 +4833,85 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *
      * @param tableModelBuildable The table model builder which can be created using the {@link #tableModel()} factory method.
      * @return A builder instance for a new {@link JTable}.
+     * @deprecated Use {@link #table(Function)} instead.
      */
+    @Deprecated
     public static UIForTable<JTable> table( Buildable<BasicTableModel> tableModelBuildable ) {
         Objects.requireNonNull(tableModelBuildable);
         return table().withModel(tableModelBuildable);
+    }
+
+    /**
+     *  Creates a new {@link JTable} instance builder with the provided table model
+     *  configuration as a basis for creating the table model in a declarative fashion. <br>
+     *  It is expected to be used like so:
+     *  <pre>{@code
+     *  UI.table( m -> m
+     *    .colCount( () -> data[0].size() )
+     *    .rowCount( () -> data.size() )
+     *    .getsEntryAt((col, row) -> data[col][row] )
+     * )
+     * }</pre>
+     * The purpose of this pattern is to remove the necessity of implementing the {@link javax.swing.table.TableModel}
+     * interface manually, which is a rather tedious task.
+     * Instead, you can use ths fluent API provided by the {@link BasicTableModel.Builder} to create
+     * a general purpose table model for your table.
+     *
+     * @param tableModelBuildable A lambda function which takes in model builder
+     *                            and then returns a fully configured model builder
+     *                            used as a basis for the table model.
+     * @return This builder instance, to allow for further method chaining.
+     */
+    public static UIForTable<JTable> table(
+        Function<BasicTableModel.Builder<Object>, BasicTableModel.Builder<Object>> tableModelBuildable
+    ) {
+        Objects.requireNonNull(tableModelBuildable);
+        BasicTableModel.Builder<Object> builder = new BasicTableModel.Builder<>(Object.class);
+        BasicTableModel.Builder<Object> modifiedBuilder;
+        try {
+            modifiedBuilder = tableModelBuildable.apply(builder);
+        } catch (Exception e) {
+            log.error("Failed to configure table model!", e);
+            return table();
+        }
+        return table().withModel(modifiedBuilder);
+    }
+
+    /**
+     *  Creates a new {@link JTable} instance builder with the provided table model
+     *  configuration as a basis for creating the table model in a declarative fashion. <br>
+     *  It is expected to be used like so:
+     *  <pre>{@code
+     *  UI.table(Double.class, m -> m
+     *    .colCount( () -> data[0].size() )
+     *    .rowCount( () -> data.size() )
+     *    .getsEntryAt((col, row) -> data[col][row] )
+     * )
+     * }</pre>
+     * The purpose of this pattern is to remove the necessity of implementing the {@link javax.swing.table.TableModel}
+     * interface manually, which is a rather tedious task.
+     * Instead, you can use ths fluent API provided by the {@link BasicTableModel.Builder} to create
+     * a general purpose table model for your table.
+     *
+     * @param tableModelBuildable A lambda function which takes in model builder
+     *                            and then returns a fully configured model builder
+     *                            used as a basis for the table model.
+     * @return This builder instance, to allow for further method chaining.
+     */
+    public static <T> UIForTable<JTable> table(
+        Class<T> itemType,
+        Function<BasicTableModel.Builder<T>, BasicTableModel.Builder<T>> tableModelBuildable
+    ) {
+        Objects.requireNonNull(tableModelBuildable);
+        BasicTableModel.Builder<T> builder = new BasicTableModel.Builder<>(itemType);
+        BasicTableModel.Builder<T> modifiedBuilder;
+        try {
+            modifiedBuilder = tableModelBuildable.apply(builder);
+        } catch (Exception e) {
+            log.error("Failed to configure table model!", e);
+            return table();
+        }
+        return table().withModel(modifiedBuilder.build());
     }
 
     /**
@@ -4880,7 +4955,9 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  calling {@link #tableModel(Class)} with the {@link Object} class as the type parameter.
      *
      * @return A functional and fluent API for building a {@link javax.swing.table.TableModel}.
+     * @deprecated Use {@link UIForTable#withModel(Function)} instead.
      */
+    @Deprecated
     public static BasicTableModel.Builder<Object> tableModel() {
         return new BasicTableModel.Builder<>(Object.class);
     }
@@ -4908,7 +4985,9 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @param entryType The type of the table entries.
      * @param <E> The type of the table entries.
      * @return A functional API for building a {@link javax.swing.table.TableModel}.
+     * @deprecated Use {@link UIForTable#withModel(Class, Function)} instead.
      */
+    @Deprecated
     public static <E> BasicTableModel.Builder<E> tableModel( Class<E> entryType ) {
         Objects.requireNonNull(entryType);
         return new BasicTableModel.Builder<>(entryType);
@@ -4936,10 +5015,13 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * and the second column as a float or double value surrounded by parentheses.
      * Note that the API allows you to specify how specific types of table entry values
      * should be rendered. This is done by calling the {@link Render.Builder#when(Class)} method
-     * bedore calling the {@link Render.As#asText(Function)} method.
+     * before calling the {@link Render.As#asText(Function)} method.
      *
      * @return A builder instance for a new {@link JTable}.
+     * @deprecated Use {@link UIForTable#withRendererForColumn(int, Function)}
+     *             or {@link UIForTable#withRendererForColumn(String, Function)} instead.
      */
+    @Deprecated
     public static Render.Builder<JTable, Object> renderTable() {
         return Render.forTable(Object.class)
                 .when(Object.class)
@@ -4965,7 +5047,9 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *
      * @return A render builder exposing an API that allows you to
      *          configure how he passed item types should be rendered.
+     * @deprecated Use {@link UIForList#withRenderer(Function)} instead.
      */
+    @Deprecated
     public static Render.Builder<JList<Object>, Object> renderList() {
         return Render.forList(Object.class).when(Object.class).asText(cell->cell.valueAsString().orElse(""));
     }
@@ -4989,7 +5073,9 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A render builder exposing an API that allows you to
      *          configure how he passed item types should be rendered.
      * @param <T> The common super-type type of the items which should be rendered.
+     * @deprecated Use {@link UIForList#withRenderer(Class, Function)} instead.
      */
+    @Deprecated
     public static <T> Render.Builder<JList<T>, T> renderList( Class<T> commonType ) {
         Objects.requireNonNull(commonType);
         return Render.forList(commonType).when(commonType).asText(cell->cell.valueAsString().orElse(""));
@@ -5012,7 +5098,9 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A render builder exposing an API that allows you to
      *          configure how he passed item type should be rendered.
      * @param <T> The type of the items which should be rendered.
+     * @deprecated Use {@link UIForList#withRenderer(Class, Function)} instead.
      */
+    @Deprecated
     public static <T> Render.As<JList<T>, T, T> renderListItem( Class<T> itemType ) {
         Objects.requireNonNull(itemType);
         return Render.forList(itemType).when(itemType);
@@ -5036,7 +5124,9 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  }</pre>
      *
      * @return A render builder exposing an API that allows you to configure how he passed item types should be rendered.
+     * @deprecated Use {@link UIForCombo#withRenderer(Function)} instead.
      */
+    @Deprecated
     public static Render.Builder<JComboBox<Object>, Object> renderCombo() {
         return Render.forCombo(Object.class).when(Object.class).asText(cell->cell.valueAsString().orElse(""));
     }
@@ -5059,7 +5149,9 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @param commonType The common type of the items which should be rendered using a custom renderer.
      * @return A render builder exposing an API that allows you to configure how he passed item types should be rendered.
      * @param <T> The common super-type type of the items which should be rendered.
+     * @deprecated Use {@link UIForCombo#withRenderer(Class, Function)} instead.
      */
+    @Deprecated
     public static <T> Render.Builder<JComboBox<T>, T> renderCombo( Class<T> commonType ) {
         Objects.requireNonNull(commonType);
         return Render.forCombo(commonType).when(commonType).asText(cell->cell.valueAsString().orElse(""));
@@ -5082,7 +5174,9 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A render builder exposing an API that allows you to
      *          configure how he passed item type should be rendered.
      * @param <T> The type of the items which should be rendered.
+     * @deprecated Use {@link UIForCombo#withRenderer(Class, Function)} instead.
      */
+    @Deprecated
     public static <T> Render.As<JComboBox<T>, T, T> renderComboItem( Class<T> itemType ) {
         Objects.requireNonNull(itemType);
         return Render.forCombo(itemType).when(itemType);

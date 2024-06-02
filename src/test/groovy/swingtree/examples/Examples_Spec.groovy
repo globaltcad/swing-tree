@@ -448,8 +448,7 @@ class Examples_Spec extends Specification
                     UI.panel("fill")
                     .add("grow, span", UI.label("Row Major 2"))
                     .add("grow, span",
-                        UI.table(
-                           UI.tableModel()
+                        UI.table( m -> m
                            .colCount( () -> data[0].size() ).rowCount( () -> data.size() )
                            .getsEntryAt((col, row) -> data[col][row] )
                         )
@@ -458,8 +457,7 @@ class Examples_Spec extends Specification
                     .add("grow, span", UI.separator())
                     .add("grow, span", UI.label("Column Major 2"))
                     .add("grow, span",
-                        UI.table(
-                           UI.tableModel()
+                        UI.table( m -> m
                            .colCount( () -> data.size() )
                            .rowCount( () -> data[0].size() )
                            .getsEntryAt((col, row) -> data[row][col] )

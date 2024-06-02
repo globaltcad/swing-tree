@@ -37,8 +37,8 @@ public class SomeComponentsView extends Panel
 			)
 			.add(GROW,
 				comboBox(vm.getBaseSize())
-				.withRenderer(
-					renderComboItem(SomeComponentsViewModel.BaseSize.class)
+				.withRenderer( it -> it
+				    .when(SomeComponentsViewModel.BaseSize.class)
 					.asText( cell -> cell.value().map(SomeComponentsViewModel.BaseSize::title).orElse("") )
 				)
 			)

@@ -5,7 +5,7 @@ import java.awt.*;
 
 /**
  *  A functional interface allowing you to define how a {@link JList} entry should
- *  be rendered in a declarative manner through method {@link swingtree.UIForList#withRenderer(ListEntryRenderer)}.
+ *  be rendered in a declarative manner through method {@link swingtree.UIForList#withRenderComponent(ListEntryRenderer)}.
  *
  * @param <E> The type of the list entry.
  * @param <L> The type of the list.
