@@ -32,9 +32,9 @@ public final class Render<C extends JComponent,E>
 		Render r = new Render<>(JList.class, elementType);
 		return (Render<JList<E>,E>) r;
 	}
-	static <E> Render<JComboBox<E>,E> forCombo(Class<E> elementType) {
+	static <C extends JComboBox<E>, E> Render<C,E> forCombo(Class<E> elementType) {
 		Render r = new Render<>(JComboBox.class, elementType);
-		return (Render<JComboBox<E>,E>) r;
+		return (Render<C,E>) r;
 	}
 	static <E> Render<JTable,E> forTable(Class<E> elementType) {
 		Render r = new Render<>(JTable.class, elementType);
@@ -531,7 +531,7 @@ public final class Render<C extends JComponent,E>
 		 *  Like many things in the SwingTree library, this class is
 		 *  essentially a convenient builder for a {@link ListCellRenderer}.
 		 *  This internal method actually builds the {@link ListCellRenderer} instance,
-		 *  see {@link UIForList#withRenderer(Builder)} for more details
+		 *  see {@link UIForList#withRenderer(Function)} for more details
 		 *  about how to use this class as pat of the main API.
 		 *
 		 * @param list The list for which the renderer is to be built.
@@ -550,7 +550,7 @@ public final class Render<C extends JComponent,E>
 		 *  Like many things in the SwingTree library, this class is
 		 *  essentially a convenient builder for a {@link ListCellRenderer}.
 		 *  This internal method actually builds the {@link ListCellRenderer} instance,
-		 *  see {@link UIForList#withRenderer(Builder)} for more details
+		 *  see {@link UIForList#withRenderer(Function)} for more details
 		 *  about how to use this class as pat of the main API.
 		 *
 		 * @param comboBox The combo box for which the renderer is to be built.

@@ -35,8 +35,7 @@ class Table_Renderer_Spec extends Specification
     {
         given : 'We create a table with a lambda based table model.'
             var ui =
-                    UI.table().withModel(
-                        UI.tableModel()
+                    UI.table().withModel( m -> m
                         .colNames("A", "B")
                         .colCount({2})
                         .rowCount({3})
@@ -49,7 +48,7 @@ class Table_Renderer_Spec extends Specification
             var render = Mock(Render.Cell.Interpreter)
 
         when : 'We attach the interpreter to a table renderer which we then attach to the table.'
-            ui = ui.withRendererForColumn("A", UI.renderTable().when(String).as(render) )
+            ui = ui.withRendererForColumn("A", it->it.when(String).as(render) )
         and : 'We we access the resulting TableCellRenderer instance from the UI.'
             var found = ui.get(JTable).getColumn("A").cellRenderer
         and : 'Finally we access the component from the renderer (which is responsible for the actual rendering).'
@@ -84,7 +83,7 @@ class Table_Renderer_Spec extends Specification
             table.getValueAt(0, 1) == "b"
 
         when : 'We build a table renderer for strings and pass our mocked renderer to it.'
-            ui = ui.withRendererForColumn(1, UI.renderTable().when(String).as(render) )
+            ui = ui.withRendererForColumn(1, it->it.when(String).as(render) )
             table = ui.get(JTable)
         and : 'We we access the resulting TableCellRenderer instance from the UI.'
             var found = table
@@ -124,7 +123,7 @@ class Table_Renderer_Spec extends Specification
             table.getValueAt(0, 1) == "1"
 
         when : 'We build a table renderer for strings and pass our mocked renderer to it.'
-            ui = ui.withRendererForColumn(1, UI.renderTable().when(String).as(render) )
+            ui = ui.withRendererForColumn(1, it->it.when(String).as(render) )
             table = ui.get(JTable)
         and :
             var found = table
@@ -165,7 +164,7 @@ class Table_Renderer_Spec extends Specification
             table.getValueAt(0, 1) == "1"
 
         when : 'We build a table renderer for strings and pass our mocked renderer to it.'
-            ui = ui.withRendererForColumn(1, UI.renderTable().when(String).as(render) )
+            ui = ui.withRendererForColumn(1, it->it.when(String).as(render) )
             table = ui.get(JTable)
         and : 'We we access the resulting TableCellRenderer instance from the UI.'
             var found = table
@@ -196,8 +195,7 @@ class Table_Renderer_Spec extends Specification
             var ui =
                         UI.table(UI.ListData.ROW_MAJOR_EDITABLE, { [[1, 2, 3], [7, 8, 9]] })
                         .withRenderer(
-                            UI.renderTable()
-                            .when(Integer).asText( cell -> cell.valueAsString().orElse("")+"!" )
+                            it -> it.when(Integer).asText( cell -> cell.valueAsString().orElse("")+"!" )
                         )
         when : 'We access the resulting TableCellRenderer instance from the UI.'
             var found = ui.get(JTable)

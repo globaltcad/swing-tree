@@ -28,8 +28,9 @@ public class ListRendering extends Panel
             .add(GROW,
                 of(new List<Test>()).id("my-test-list")
                 .withEntries(Stream.of(Test.A, Test.B, Test.C).collect(Collectors.toList()))
-                .withRenderer(
-                    renderListItem(Test.class).asText( cell -> cell.valueAsString().orElse("") )
+                .withRenderer( it -> it
+                    .when(Test.class)
+                    .asText( cell -> cell.valueAsString().orElse("") )
                 )
             )
         )
@@ -37,8 +38,7 @@ public class ListRendering extends Panel
             panel().withBorderTitled("Number Rendering").withMinWidth(200)
             .add(GROW,
                 listOf(new Number[]{1f, 2L, 3.0, 4})
-                .withRenderer(
-                    renderList(Number.class)
+                .withRenderer(Number.class, it -> it
                     .when(Integer.class).asText( cell -> "Integer: "+cell.value().get() )
                     .when(Long.class).asText( cell -> "Long: "+cell.value().get() )
                     .when(Float.class).asText( cell -> "Float: "+cell.value().get() )

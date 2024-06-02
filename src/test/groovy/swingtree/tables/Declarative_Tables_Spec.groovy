@@ -89,8 +89,7 @@ class Declarative_Tables_Spec extends Specification
             var update = Event.create()
         and : 'We create a table with a lambda based table model.'
             var ui =
-                    UI.table().withModel(
-                        UI.tableModel()
+                    UI.table().withModel( m -> m
                         .colName( col -> ["X", "Y", "Z"].get(col) )
                         .colCount( () -> 3 )
                         .rowCount( () -> data.size() )

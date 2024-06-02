@@ -461,7 +461,7 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
      * instead.
      */
     @Deprecated
-    public void removeSplitButtonActionListener(final SplitButtonActionListener l) {
+    public void removeSplitButtonActionListener( final SplitButtonActionListener l ) {
         if ((l != null) && (getAction() == l)) {
             setAction(null);
         } else {
