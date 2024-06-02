@@ -228,8 +228,9 @@ class Basic_UI_Builder_Examples_Spec extends Specification
         and : 'We creat a combo box with a cell renderer that renders the enum value as a lower case string.'
             var ui =
                     UI.comboBox(sel)
-                    .withRendererFor(Keyboard.Key,
-                        conf->conf.asText( cell -> cell.value().map( k -> k.name().toLowerCase() ).orElse("") )
+                    .withRenderer( it -> it
+                        .when(Keyboard.Key)
+                        .asText( cell -> cell.value().map( k -> k.name().toLowerCase() ).orElse("") )
                     )
         and : 'We actually build the component:'
             var comboBox = ui.get(JComboBox)

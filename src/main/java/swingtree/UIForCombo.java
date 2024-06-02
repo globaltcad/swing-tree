@@ -1,5 +1,7 @@
 package swingtree;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sprouts.Action;
 import sprouts.*;
 
@@ -25,6 +27,7 @@ import java.util.function.Function;
  */
 public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UIForCombo<E,C>, JComboBox<E>>
 {
+    private static final Logger log = LoggerFactory.getLogger(UIForCombo.class);
     private final BuilderState<JComboBox<E>> _state;
 
     UIForCombo( BuilderState<JComboBox<E>> state ) {
@@ -324,12 +327,12 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
      * @param <V> The type of the value to be rendered.
      */
     @Deprecated
-    public final <V extends E> UIForCombo<E,C> withRenderer(Render.Builder<C,V> renderBuilder ) {
+    public final <V extends E> UIForCombo<E,C> withRenderer( Render.Builder<C,V> renderBuilder ) {
         NullUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
         return _withRenderer(renderBuilder);
     }
 
-    public final <V extends E> UIForCombo<E,C> _withRenderer(Render.Builder<C,V> renderBuilder ) {
+    public final <V extends E> UIForCombo<E,C> _withRenderer( Render.Builder<C,V> renderBuilder ) {
         NullUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
         return _with( thisComponent -> {
                     thisComponent.setRenderer((ListCellRenderer<E>) renderBuilder.buildForCombo((C)thisComponent));
@@ -338,11 +341,11 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
     }
 
     /**
-     *  Use this to create a generic combo box renderer for various item types without
+     *  Use this to define a generic combo box renderer for various item types without
      *  a meaningful common super-type (see {@link UIForCombo#withRenderer(Class, Function)}).
      *  You would typically want to use this method to render generic types where the only
-     *  common type is {@link Object}, yet you want to render the item
-     *  in a specific way depending on their actual type.
+     *  common type is {@link Object}, yet you still want to render the items
+     *  in a specific way depending on their actual type. <br>
      *  This is done like so:
      *  <pre>{@code
      *  UI.comboBox(new Object[]{":-)", 42L, '§'})
@@ -352,6 +355,9 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
      *      .when(Number.class).asText( cell -> "Number: "+cell.getValue() )
      *  );
      *  }</pre>
+     *  Note that inside the lambda function, you can use the {@link Render.Builder} to define
+     *  for what type of item you want to render the item in a specific way and the {@link Render.As}
+     *  to define how the item should be rendered.
      *
      * @param renderBuilder A lambda function that configures the renderer for this combo box.
      * @return This combo box instance for further configuration.
@@ -363,7 +369,13 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
         Class<Object> commonType = Object.class;
         Objects.requireNonNull(commonType);
         Render.Builder render = Render.forCombo(commonType).when(commonType).asText(cell->cell.valueAsString().orElse(""));
-        render = renderBuilder.apply(render);
+        try {
+            render = renderBuilder.apply(render);
+        } catch (Exception e) {
+            log.error("Error while building renderer.", e);
+            return this;
+        }
+        Objects.requireNonNull(render);
         return _withRenderer(render);
     }
 
@@ -387,12 +399,22 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
      * @return This builder instance for further configuration.
      * @param <T> The type of the items which should be rendered using a custom renderer.
      * @param <V> The type of the items which should be rendered using a custom renderer.
+     * @deprecated Use {@link UIForCombo#withRenderer(Class, Function)} instead.
      */
+    @Deprecated
     public final <T, V extends E> UIForCombo<E,C> withRendererFor(
         Class<T> itemType,
         Function<Render.As<JComboBox<T>, T, T>,Render.Builder<C,V>> renderBuilder
     ) {
-        Render.Builder<C,V> render = renderBuilder.apply(Render.forCombo(itemType).when(itemType));
+        Render.As<JComboBox<T>, T, T> as = Render.forCombo(itemType).when(itemType);
+        Render.Builder<C,V> render;
+        try {
+            render = renderBuilder.apply(as);
+        } catch (Exception e) {
+            log.error("Error while building renderer.", e);
+            return this;
+        }
+        Objects.requireNonNull(render);
         return _withRenderer(render);
     }
 
@@ -421,8 +443,29 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
     ) {
         Objects.requireNonNull(commonType);
         Render.Builder render = Render.forCombo(commonType).when(commonType).asText(cell->cell.valueAsString().orElse(""));
-        render = renderBuilder.apply(render);
+        try {
+            render = renderBuilder.apply(render);
+        } catch (Exception e) {
+            log.error("Error while building renderer.", e);
+            return this;
+        }
+        Objects.requireNonNull(render);
         return _withRenderer(render);
+    }
+
+    /**
+     * Sets the {@link ListCellRenderer} for the {@link JComboBox}, which renders the combo box items
+     * by supplying a custom component for each item through the
+     * {@link ListCellRenderer#getListCellRendererComponent(JList, Object, int, boolean, boolean)} method.
+     * <p>
+     * @param renderer The {@link ListCellRenderer} that will be used to paint each cell in the combo box.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final UIForCombo<E,C> withListCellRenderer( ListCellRenderer<E> renderer ) {
+        return _with( thisComponent -> {
+                    thisComponent.setRenderer(renderer);
+                })
+                ._this();
     }
 
     /**
@@ -589,21 +632,6 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
      */
     public final UIForCombo<E,C> withItems( Var<E> selection, Val<E[]> options ) {
         return this.withModel(new ArrayPropertyComboModel<>(selection, options));
-    }
-
-    /**
-     * Sets the {@link ListCellRenderer} for the {@link JComboBox}, which renders the combo box items
-     * by supplying a custom component for each item through the
-     * {@link ListCellRenderer#getListCellRendererComponent(JList, Object, int, boolean, boolean)} method.
-     * <p>
-     * @param renderer The {@link ListCellRenderer} that will be used to paint each cell in the combo box.
-     * @return This very instance, which enables builder-style method chaining.
-     */
-    public final UIForCombo<E,C> withRenderer( ListCellRenderer<E> renderer ) {
-        return _with( thisComponent -> {
-                    thisComponent.setRenderer(renderer);
-                })
-                ._this();
     }
 
     /**

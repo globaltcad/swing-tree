@@ -531,7 +531,7 @@ public final class Render<C extends JComponent,E>
 		 *  Like many things in the SwingTree library, this class is
 		 *  essentially a convenient builder for a {@link ListCellRenderer}.
 		 *  This internal method actually builds the {@link ListCellRenderer} instance,
-		 *  see {@link UIForList#withRenderer(Builder)} for more details
+		 *  see {@link UIForList#withRenderer(Function)} for more details
 		 *  about how to use this class as pat of the main API.
 		 *
 		 * @param list The list for which the renderer is to be built.
@@ -550,7 +550,7 @@ public final class Render<C extends JComponent,E>
 		 *  Like many things in the SwingTree library, this class is
 		 *  essentially a convenient builder for a {@link ListCellRenderer}.
 		 *  This internal method actually builds the {@link ListCellRenderer} instance,
-		 *  see {@link UIForList#withRenderer(Builder)} for more details
+		 *  see {@link UIForList#withRenderer(Function)} for more details
 		 *  about how to use this class as pat of the main API.
 		 *
 		 * @param comboBox The combo box for which the renderer is to be built.

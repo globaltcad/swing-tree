@@ -28,8 +28,9 @@ public class ListRendering extends Panel
             .add(GROW,
                 of(new List<Test>()).id("my-test-list")
                 .withEntries(Stream.of(Test.A, Test.B, Test.C).collect(Collectors.toList()))
-                .withRendererFor(Test.class,
-                    it -> it.asText( cell -> cell.valueAsString().orElse("") )
+                .withRenderer( it -> it
+                    .when(Test.class)
+                    .asText( cell -> cell.valueAsString().orElse("") )
                 )
             )
         )

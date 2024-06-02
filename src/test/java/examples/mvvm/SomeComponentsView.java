@@ -37,9 +37,9 @@ public class SomeComponentsView extends Panel
 			)
 			.add(GROW,
 				comboBox(vm.getBaseSize())
-				.withRendererFor(
-					SomeComponentsViewModel.BaseSize.class,
-					conf -> conf.asText( cell -> cell.value().map(SomeComponentsViewModel.BaseSize::title).orElse("") )
+				.withRenderer( it -> it
+				    .when(SomeComponentsViewModel.BaseSize.class)
+					.asText( cell -> cell.value().map(SomeComponentsViewModel.BaseSize::title).orElse("") )
 				)
 			)
 		)

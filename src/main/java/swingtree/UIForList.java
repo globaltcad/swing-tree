@@ -1,6 +1,8 @@
 package swingtree;
 
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sprouts.*;
 import swingtree.api.ListEntryDelegate;
 import swingtree.api.ListEntryRenderer;
@@ -25,6 +27,7 @@ import java.util.function.Function;
  */
 public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForList<E, L>, L>
 {
+    private static final Logger log = LoggerFactory.getLogger(UIForList.class);
     private final BuilderState<L> _state;
 
     /**
@@ -316,8 +319,14 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
         Class<Object> commonType = Object.class;
         Objects.requireNonNull(commonType);
         Render.Builder render = Render.forCombo(commonType).when(commonType).asText(cell->cell.valueAsString().orElse(""));
-        render = renderBuilder.apply(render);
-        return withRenderer(render);
+        try {
+            render = renderBuilder.apply(render);
+        } catch (Exception e) {
+            log.error("Error while building renderer.", e);
+            return this;
+        }
+        Objects.requireNonNull(render);
+        return _withRenderer(render);
     }
 
     /**
@@ -339,13 +348,21 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
      * @return This builder instance for further configuration.
      * @param <T> The type of the items which should be rendered using a custom renderer.
      * @param <V> The type of the items which should be rendered using a custom renderer.
+     * @deprecated Use {@link #withRenderer(Class, Function)} instead.
      */
+    @Deprecated
     public final <T, V extends E> UIForList<E, L> withRendererFor(
         Class<T> itemType,
         Function<Render.As<JList<T>, T, T>,Render.Builder<L,V>> renderBuilder
     ) {
-        Render.Builder<L,V> render = renderBuilder.apply(Render.forList(itemType).when(itemType));
-        return withRenderer(render);
+        Render.Builder<L,V> render;
+        try {
+            render = renderBuilder.apply(Render.forList(itemType).when(itemType));
+        } catch (Exception e) {
+            log.error("Error while building renderer.", e);
+            return this;
+        }
+        return _withRenderer(render);
     }
 
     /**
@@ -372,8 +389,14 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
     ) {
         Objects.requireNonNull(commonType);
         Render.Builder render = Render.forCombo(commonType).when(commonType).asText(cell->cell.valueAsString().orElse(""));
-        render = renderBuilder.apply(render);
-        return withRenderer(render);
+        try {
+            render = renderBuilder.apply(render);
+        } catch (Exception e) {
+            log.error("Error while building renderer.", e);
+            return this;
+        }
+        Objects.requireNonNull(render);
+        return _withRenderer(render);
     }
 
 
