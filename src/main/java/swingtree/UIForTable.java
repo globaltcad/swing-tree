@@ -70,21 +70,6 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
                 ._this();
     }
 
-    /**
-     *  Use this to build a table cell renderer for a particular column.
-     *  The second argument accepts the builder API for a cell renderer.
-     *
-     * @param columnName The name of the column for which the cell renderer will be built.
-     * @param renderBuilder The builder API for a cell renderer.
-     * @return This builder node.
-     * @deprecated Use {@link #withRendererForColumn(String, Function)} instead.
-     */
-    @Deprecated
-    public final UIForTable<T> withRendererForColumn( String columnName, Render.Builder<JTable, ?> renderBuilder ) {
-        NullUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
-        return withCellRendererForColumn(columnName, renderBuilder.getForTable());
-    }
-
     private static <T extends JTable> Render.Builder<T, Object> _renderTable() {
         return (Render.Builder)
                 Render.forTable(Object.class)
@@ -125,10 +110,16 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      */
     public final UIForTable<T> withRendererForColumn(
         String columnName,
-        Function<Render.Builder<JTable, ?>, Render.Builder<JTable, ?>> renderBuilder
+        Function<Render.Builder<T, Object>, Render.Builder<T, Object>> renderBuilder
     ) {
         NullUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
-        Render.Builder<JTable, ?> builder = renderBuilder.apply(_renderTable());
+        Render.Builder<T, Object> builder = _renderTable();
+        try {
+            builder = renderBuilder.apply(builder);
+        } catch (Exception e) {
+            log.error("Error while building table renderer.", e);
+            return this;
+        }
         return withCellRendererForColumn(columnName, builder.getForTable());
     }
 
@@ -266,12 +257,12 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      * @return This builder node.
      */
     public final UIForTable<T> withRenderer(
-        Function<Render.Builder<JTable, ?>, Render.Builder<JTable, ?>> renderBuilder
+        Function<Render.Builder<T, Object>, Render.Builder<T, Object>> renderBuilder
     ) {
         NullUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
-        Render.Builder<JTable, ?> builder;
+        Render.Builder<T, Object> builder = _renderTable();
         try {
-            builder = renderBuilder.apply(_renderTable());
+            builder = renderBuilder.apply(builder);
         } catch (Exception e) {
             log.error("Error while building table renderer.", e);
             return this;
