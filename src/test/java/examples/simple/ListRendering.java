@@ -51,7 +51,7 @@ public class ListRendering extends Panel
     // Here you can test the UI:
 
     public static void main(String[] args) {
-        UI.show(new ListRendering());
+        UI.show( f -> new ListRendering() );
     }
 
 }

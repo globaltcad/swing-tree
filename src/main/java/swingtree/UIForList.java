@@ -287,7 +287,7 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
     ) {
         Class<Object> commonType = Object.class;
         Objects.requireNonNull(commonType);
-        Render.Builder render = Render.forCombo(commonType).when(commonType).asText(cell->cell.valueAsString().orElse(""));
+        Render.Builder render = Render.forList(commonType).when(commonType).asText(cell->cell.valueAsString().orElse(""));
         try {
             render = renderBuilder.apply(render);
         } catch (Exception e) {
