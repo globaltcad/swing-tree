@@ -71,10 +71,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
     }
 
     private static <T extends JTable> Render.Builder<T, Object> _renderTable() {
-        return (Render.Builder)
-                Render.forTable(Object.class)
-                .when(Object.class)
-                .asText( cell -> cell.valueAsString().orElse("") );
+        return (Render.Builder) Render.forTable(Object.class);
     }
 
     /**
