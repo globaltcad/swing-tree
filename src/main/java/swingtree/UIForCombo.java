@@ -354,7 +354,7 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
     ) {
         Class<Object> commonType = Object.class;
         Objects.requireNonNull(commonType);
-        Render.Builder render = Render.forCombo(commonType).when(commonType).asText(cell->cell.valueAsString().orElse(""));
+        Render.Builder render = Render.forCombo(commonType);
         try {
             render = renderBuilder.apply(render);
         } catch (Exception e) {
