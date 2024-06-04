@@ -256,7 +256,7 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
      * @param renderer The {@link ListCellRenderer} that will be used to paint each cell in the list.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final UIForList<E, L> withRenderer( ListCellRenderer<E> renderer ) {
+    public final UIForList<E, L> withCellRenderer( ListCellRenderer<E> renderer ) {
         return _with( thisComponent -> {
                     thisComponent.setCellRenderer(renderer);
                 })
@@ -264,8 +264,7 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
     }
 
     /**
-     *  Use this to build a list cell renderer for various item types without
-     *  a meaningful common super-type (see {@link #withRenderer(Class, Function)}).
+     *  Use this to build a list cell renderer for various item types.
      *  You would typically want to use this method to render generic types where the only
      *  common type is {@link Object}, yet you want to render the item
      *  in a specific way depending on their actual type.
@@ -287,40 +286,6 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
         Function<Render.Builder<L,V>,Render.Builder<L,V>> renderBuilder
     ) {
         Class<Object> commonType = Object.class;
-        Objects.requireNonNull(commonType);
-        Render.Builder render = Render.forCombo(commonType).when(commonType).asText(cell->cell.valueAsString().orElse(""));
-        try {
-            render = renderBuilder.apply(render);
-        } catch (Exception e) {
-            log.error("Error while building renderer.", e);
-            return this;
-        }
-        Objects.requireNonNull(render);
-        return _withRenderer(render);
-    }
-
-    /**
-     *  Use this to build a list cell renderer for a specific item type and its subtype.
-     *  You would typically want to use this method to render generic types like {@link Object}
-     *  where you want to render the item in a specific way depending on its actual type.
-     *  This is done like so:
-     *  <pre>{@code
-     *  UI.list(new Number[]{1f, 42L, 4.20d})
-     *  .withRenderer(Number.class, it -> it
-     *      .when(Integer.class).asText( cell -> "Integer: "+cell.getValue() )
-     *      .when(Long.class).asText( cell -> "Long: "+cell.getValue() )
-     *      .when(Float.class).asText( cell -> "Float: "+cell.getValue() )
-     *  );
-     *  }</pre>
-     *
-     * @param commonType The common type of the items which should be rendered using a custom renderer.
-     * @return A render builder exposing an API that allows you to configure how he passed item types should be rendered.
-     * @param <T> The common super-type type of the items which should be rendered using a custom renderer.
-     */
-    public final <T extends E> UIForList<E,L> withRenderer(
-        Class<T> commonType,
-        Function<Render.Builder<L, T>,Render.Builder<L, T>> renderBuilder
-    ) {
         Objects.requireNonNull(commonType);
         Render.Builder render = Render.forCombo(commonType).when(commonType).asText(cell->cell.valueAsString().orElse(""));
         try {

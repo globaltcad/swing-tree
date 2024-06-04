@@ -4985,7 +4985,6 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
 
-
     /**
      *  Exposes an API for scheduling periodic animation updates.
      *  This is a convenience method for {@link Animator#animateFor(LifeTime)}. <br>
@@ -5005,7 +5004,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  @param unit The time unit of the duration.
      *  @return An {@link Animator} instance which allows you to configure the animation.
      */
-    public static Animator animateFor(long duration, TimeUnit unit ) {
+    public static Animator animateFor( long duration, TimeUnit unit ) {
         Objects.requireNonNull(unit, "unit");
         return Animator.animateFor( LifeTime.of(duration, unit) );
     }
