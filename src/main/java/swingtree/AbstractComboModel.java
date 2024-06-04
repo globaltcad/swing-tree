@@ -69,7 +69,7 @@ abstract class AbstractComboModel<E extends @Nullable Object> implements ComboBo
         E old = _selectedItem.orElseNull();
 		Object finalAnItem = anItem;
 		doQuietly(()-> {
-			_selectedItem.set(From.VIEW, (E) finalAnItem);
+			_selectedItem.set(From.VIEW, (E) NullUtil.fakeNonNull(finalAnItem));
 			_selectedIndex = _indexOf(finalAnItem);
 			if ( !Objects.equals(old, finalAnItem) )
 				fireListeners();
@@ -115,7 +115,6 @@ abstract class AbstractComboModel<E extends @Nullable Object> implements ComboBo
             _selectedIndex = _indexOf(_selectedItem.orElseNull());
     }
 
-	@SuppressWarnings("NullAway")
 	void setFromEditor( String o ) {
 		if ( !_acceptsEditorChanges )
 			return; // The editor of a combo box can have very strange behaviour when it is updated by listeners
@@ -126,7 +125,7 @@ abstract class AbstractComboModel<E extends @Nullable Object> implements ComboBo
 				E e = _convert(o);
 				this.setAt( _selectedIndex, e );
 				boolean stateChanged = _selectedItem.orElseNull() != e;
-				_selectedItem.set(From.VIEW, e);
+				_selectedItem.set(From.VIEW, NullUtil.fakeNonNull(e));
 				if ( stateChanged )
 					doQuietly(this::fireListeners);
 

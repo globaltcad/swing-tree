@@ -135,14 +135,13 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
      * @param selection The {@link Var} of entries to set as selection model.
      * @return This instance of the builder node to allow for fluent method chaining.
      */
-    @SuppressWarnings("NullAway")
     public final UIForList<E, L> withSelection( Var<E> selection ) {
         return _with( thisComponent -> {
                      thisComponent.addListSelectionListener( e -> {
                          if ( !e.getValueIsAdjusting() )
                              // Necessary because Java 8 does not check if index is out of bounds.
                              if (thisComponent.getMinSelectionIndex() >= thisComponent.getModel().getSize())
-                                 selection.set( From.VIEW, null );
+                                 selection.set( From.VIEW, NullUtil.fakeNonNull(null) );
                              else
                                  selection.set( From.VIEW,  thisComponent.getSelectedValue() );
                      });
