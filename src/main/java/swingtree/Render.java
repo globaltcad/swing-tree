@@ -540,9 +540,13 @@ public final class Render<C extends JComponent,E>
 		ListCellRenderer<E> buildForList( C list ) {
 			if ( JList.class.isAssignableFrom(_componentType) )
 				return (ListCellRenderer<E>) new SimpleListCellRenderer<>(list);
-			else
+			else if ( JComboBox.class.isAssignableFrom(_componentType) )
 				throw new IllegalArgumentException(
 						"Renderer was set up to be used for a JList! (not "+ _componentType.getSimpleName()+")"
+					);
+			else
+				throw new IllegalArgumentException(
+						"Renderer was set up to be used for an unknown component type! (cannot handle '"+ _componentType.getSimpleName()+"')"
 					);
 		}
 
