@@ -3,6 +3,7 @@ package swingtree.style;
 import com.google.errorprone.annotations.Immutable;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
+import swingtree.api.Configurator;
 
 import javax.swing.JComponent;
 import java.awt.*;
@@ -90,7 +91,7 @@ final class FontPaintConf
         return of(null, paint, null, null);
     }
 
-    FontPaintConf noise( Function<NoiseConf, NoiseConf> noiseConfigurator ) {
+    FontPaintConf noise( Configurator<NoiseConf> noiseConfigurator ) {
         Objects.requireNonNull(noiseConfigurator);
         NoiseConf noise = _noise == null ? NoiseConf.none() : _noise;
         try {
@@ -102,7 +103,7 @@ final class FontPaintConf
         return this;
     }
 
-    FontPaintConf gradient( Function<GradientConf, GradientConf> gradientConfigurator ) {
+    FontPaintConf gradient( Configurator<GradientConf> gradientConfigurator ) {
         Objects.requireNonNull(gradientConfigurator);
         GradientConf gradient = _gradient == null ? GradientConf.none() : _gradient;
         try {

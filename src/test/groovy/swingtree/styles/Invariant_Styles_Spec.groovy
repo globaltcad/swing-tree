@@ -6,6 +6,7 @@ import spock.lang.Subject
 import spock.lang.Title
 import swingtree.SwingTree
 import swingtree.UI
+import swingtree.api.Configurator
 import swingtree.api.Styler
 import swingtree.components.JBox
 import swingtree.style.FontConf
@@ -325,7 +326,7 @@ class Invariant_Styles_Spec extends Specification
     }
 
     def 'Two labels with the same font style configuration will have equal font objects.'(
-        Function<FontConf, FontConf> styler
+        Configurator<FontConf> styler
     ) {
         given: 'Two labels with the same font style configuration'
             var ui1 = UI.label("A").withStyle(it->it.componentFont(styler))

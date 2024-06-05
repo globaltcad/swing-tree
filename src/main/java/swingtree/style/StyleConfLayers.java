@@ -4,6 +4,7 @@ import com.google.errorprone.annotations.Immutable;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import swingtree.UI;
+import swingtree.api.Configurator;
 
 import java.util.Objects;
 import java.util.function.BiPredicate;
@@ -90,7 +91,7 @@ final class StyleConfLayers
         }
     }
 
-    StyleConfLayers filter( Function<FilterConf, FilterConf> f ) {
+    StyleConfLayers filter( Configurator<FilterConf> f ) {
         FilterConf filter = _filter;
         try {
             filter = f.apply(_filter);
@@ -131,7 +132,7 @@ final class StyleConfLayers
             || predicate.test(UI.Layer.FOREGROUND, _foreground);
     }
 
-    StyleConfLayers map( Function<StyleConfLayer, StyleConfLayer> f ) {
+    StyleConfLayers map( Configurator<StyleConfLayer> f ) {
         return of(_filter, f.apply(_background), f.apply(_content), f.apply(_border), f.apply(_foreground), _any == null ? null : f.apply(_any));
     }
 

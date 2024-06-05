@@ -4,6 +4,7 @@ import com.google.errorprone.annotations.Immutable;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import swingtree.api.Configurator;
 
 import java.util.*;
 import java.util.function.Function;
@@ -81,12 +82,12 @@ final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
         return new NamedConfigs<>(styles);
     }
 
-    public NamedConfigs<S> mapStyles( Function<S,S> f ) {
+    public NamedConfigs<S> mapStyles( Configurator<S> f ) {
         Objects.requireNonNull(f);
         return mapNamedStyles( ns -> NamedConf.of(ns.name(), f.apply(ns.style())) );
     }
 
-    public NamedConfigs<S> mapNamedStyles( Function<NamedConf<S>, NamedConf<S>> f ) {
+    public NamedConfigs<S> mapNamedStyles( Configurator<NamedConf<S>> f ) {
         Objects.requireNonNull(f);
 
         NamedConf<S>[] newStyles = null;

@@ -5,6 +5,7 @@ import net.miginfocom.swing.MigLayout;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import swingtree.api.Configurator;
 import swingtree.api.Layout;
 import swingtree.api.NoiseFunction;
 import swingtree.api.Styler;
@@ -402,11 +403,11 @@ public final class UI extends UIFactoryMethods
 
     /**
      *  Use these enum instances to specify the gradient type for various sub styles,
-     *  like for example the gradient style API exposed by {@link ComponentStyleDelegate#gradient(Layer, String, Function)}
+     *  like for example the gradient style API exposed by {@link ComponentStyleDelegate#gradient(Layer, String, Configurator)}
      *  or {@link ComponentStyleDelegate#gradient(Function)} methods (see {@link UIForAnySwing#withStyle(Styler)}).
      *  <p>
      *  {@link GradientConf#type(GradientType)} method exposed by methods like
-     *  {@link ComponentStyleDelegate#gradient(String, Function)} or {@link ComponentStyleDelegate#gradient(Layer, String, Function)}.
+     *  {@link ComponentStyleDelegate#gradient(String, Configurator)} or {@link ComponentStyleDelegate#gradient(Layer, String, Configurator)}.
      */
     @Immutable
     public enum GradientType implements UIEnum<GradientType>
