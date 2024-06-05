@@ -234,6 +234,10 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      *    )
      *    // ...
      *  }</pre>
+     *  You may want to know that a similar API is also available for the {@link javax.swing.JList}
+     *  and {@link javax.swing.JComboBox} components, see {@link UIForList#withRenderer(Function)},
+     *  {@link UIForCombo#withRenderer(Function)} for more information.
+     *
      *
      * @param renderBuilder A lambda function which exposes the builder API for a cell renderer
      *                      and returns the builder API for a cell renderer.
@@ -329,7 +333,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
     }
 
     /**
-     *  Exposes a fluent builder API for a table model holding a specific type of entry {@link Object}s. <br>
+     *  Exposes a fluent builder API for a table model holding a specific type of entry. <br>
      *  Here an example demonstrating how this API
      *  is typically used as part of a UI declaration:
      *  <pre>{@code
@@ -341,11 +345,14 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      *      .updateOn(update)
      *  )
      *  }</pre>
-     *  In this example, the table model is built for a table holding {@link Double} entries.
-     *  So the data array is expected to be a two-dimensional array of {@link Double}s. <br>
+     *  In this example, the table model is built for a {@link Double} based data source.
+     *  So here the data array is a two-dimensional array of {@link Double}s. <br>
      *  <br>
      *  Note that the builder API is exposed to the lambda function passed to this method.
-     *  The actually {@link TableModel} is built internally and then set on the table.
+     *  The actual {@link TableModel} is built internally and then installed on the table component.
+     *  <p>
+     *  You can also use the {@link UI#table(Function)} factory method to directly create a table
+     *  with a custom table model. <br>
      *
      * @param itemType The type of the table entry {@link Object}s.
      * @param dataModelBuilder A lambda function which receives a builder API for a table model

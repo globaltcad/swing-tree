@@ -277,6 +277,10 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
      *      .when(Number.class).asText( cell -> "Number: "+cell.getValue() )
      *  );
      *  }</pre>
+     *  Note that a similar API is also available for the {@link javax.swing.JComboBox}
+     *  and {@link javax.swing.JTable} components, see {@link UIForCombo#withRenderer(Function)},
+     *  {@link UIForTable#withRenderer(Function)} and {@link UI#table(Function)}
+     *  for more information.
      *
      * @param renderBuilder A lambda function that configures the renderer for this combo box.
      * @return This combo box instance for further configuration.
