@@ -141,7 +141,7 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
                          if ( !e.getValueIsAdjusting() )
                              // Necessary because Java 8 does not check if index is out of bounds.
                              if (thisComponent.getMinSelectionIndex() >= thisComponent.getModel().getSize())
-                                 selection.set( From.VIEW, null );
+                                 selection.set( From.VIEW, NullUtil.fakeNonNull(null) );
                              else
                                  selection.set( From.VIEW,  thisComponent.getSelectedValue() );
                      });
@@ -256,7 +256,7 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
      * @param renderer The {@link ListCellRenderer} that will be used to paint each cell in the list.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final UIForList<E, L> withRenderer( ListCellRenderer<E> renderer ) {
+    public final UIForList<E, L> withCellRenderer( ListCellRenderer<E> renderer ) {
         return _with( thisComponent -> {
                     thisComponent.setCellRenderer(renderer);
                 })
@@ -264,8 +264,7 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
     }
 
     /**
-     *  Use this to build a list cell renderer for various item types without
-     *  a meaningful common super-type (see {@link #withRenderer(Class, Function)}).
+     *  Use this to build a list cell renderer for various item types.
      *  You would typically want to use this method to render generic types where the only
      *  common type is {@link Object}, yet you want to render the item
      *  in a specific way depending on their actual type.
@@ -278,6 +277,10 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
      *      .when(Number.class).asText( cell -> "Number: "+cell.getValue() )
      *  );
      *  }</pre>
+     *  Note that a similar API is also available for the {@link javax.swing.JComboBox}
+     *  and {@link javax.swing.JTable} components, see {@link UIForCombo#withRenderer(Function)},
+     *  {@link UIForTable#withRenderer(Function)} and {@link UI#table(Function)}
+     *  for more information.
      *
      * @param renderBuilder A lambda function that configures the renderer for this combo box.
      * @return This combo box instance for further configuration.
@@ -288,41 +291,7 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
     ) {
         Class<Object> commonType = Object.class;
         Objects.requireNonNull(commonType);
-        Render.Builder render = Render.forCombo(commonType).when(commonType).asText(cell->cell.valueAsString().orElse(""));
-        try {
-            render = renderBuilder.apply(render);
-        } catch (Exception e) {
-            log.error("Error while building renderer.", e);
-            return this;
-        }
-        Objects.requireNonNull(render);
-        return _withRenderer(render);
-    }
-
-    /**
-     *  Use this to build a list cell renderer for a specific item type and its subtype.
-     *  You would typically want to use this method to render generic types like {@link Object}
-     *  where you want to render the item in a specific way depending on its actual type.
-     *  This is done like so:
-     *  <pre>{@code
-     *  UI.list(new Number[]{1f, 42L, 4.20d})
-     *  .withRenderer(Number.class, it -> it
-     *      .when(Integer.class).asText( cell -> "Integer: "+cell.getValue() )
-     *      .when(Long.class).asText( cell -> "Long: "+cell.getValue() )
-     *      .when(Float.class).asText( cell -> "Float: "+cell.getValue() )
-     *  );
-     *  }</pre>
-     *
-     * @param commonType The common type of the items which should be rendered using a custom renderer.
-     * @return A render builder exposing an API that allows you to configure how he passed item types should be rendered.
-     * @param <T> The common super-type type of the items which should be rendered using a custom renderer.
-     */
-    public final <T extends E> UIForList<E,L> withRenderer(
-        Class<T> commonType,
-        Function<Render.Builder<L, T>,Render.Builder<L, T>> renderBuilder
-    ) {
-        Objects.requireNonNull(commonType);
-        Render.Builder render = Render.forCombo(commonType).when(commonType).asText(cell->cell.valueAsString().orElse(""));
+        Render.Builder render = Render.forList(commonType);
         try {
             render = renderBuilder.apply(render);
         } catch (Exception e) {
@@ -342,18 +311,23 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
             _entries = Objects.requireNonNull(entries, "entries");
         }
 
-        @Override public int getSize() { return _entries.size(); }
-        @Override public @Nullable E getElementAt(int i ) { return _entries.at( i ).orElseNull(); }
+        @Override public int getSize() {
+            return _entries.size();
+        }
+        @Override public @Nullable E getElementAt(int i ) {
+            return _entries.at( i ).orElseNull();
+        }
 
         public void fire( ValsDelegate<E> v ) {
-            if ( v.index() < 0 ) {
+            int index = v.index();
+            if ( index < 0 ) {
                 fireContentsChanged( this, 0, _entries.size() );
                 return;
             }
             switch ( v.changeType() ) {
-                case ADD:    fireIntervalAdded( this, v.index(), v.index() ); break;
-                case REMOVE: fireIntervalRemoved( this, v.index(), v.index() ); break;
-                case SET:    fireContentsChanged( this, v.index(), v.index() ); break;
+                case ADD:    fireIntervalAdded(   this, index, index + v.newValues().size() ); break;
+                case REMOVE: fireIntervalRemoved( this, index, index + v.oldValues().size() ); break;
+                case SET:    fireContentsChanged( this, index, index + v.newValues().size() ); break;
                 default:
                     fireContentsChanged( this, 0, _entries.size() );
             }

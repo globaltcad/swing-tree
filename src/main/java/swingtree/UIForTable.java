@@ -70,25 +70,8 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
                 ._this();
     }
 
-    /**
-     *  Use this to build a table cell renderer for a particular column.
-     *  The second argument accepts the builder API for a cell renderer.
-     *
-     * @param columnName The name of the column for which the cell renderer will be built.
-     * @param renderBuilder The builder API for a cell renderer.
-     * @return This builder node.
-     * @deprecated Use {@link #withRendererForColumn(String, Function)} instead.
-     */
-    @Deprecated
-    public final UIForTable<T> withRendererForColumn( String columnName, Render.Builder<JTable, ?> renderBuilder ) {
-        NullUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
-        return withRenderComponentForColumn(columnName, renderBuilder.getForTable());
-    }
-
-    private static Render.Builder<JTable, Object> _renderTable() {
-        return Render.forTable(Object.class)
-                .when(Object.class)
-                .asText( cell -> cell.valueAsString().orElse("") );
+    private static <T extends JTable> Render.Builder<T, Object> _renderTable() {
+        return (Render.Builder) Render.forTable(Object.class);
     }
 
     /**
@@ -97,13 +80,11 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      *  Here is an example of how to use this method:
      * <pre>{@code
      *     UI.table(myModel)
-     *     .withRendererForColumn("column1",
-     *         UI.renderTable()
+     *     .withRendererForColumn("column1", it -> it
      *         .when(String.class)
      *         .asText( cell -> "[" + cell.valueAsString().orElse("") + "]" ) )
      *     )
-     *     .withRendererForColumn("column2",
-     *         UI.renderTable()
+     *     .withRendererForColumn("column2", it -> it
      *         .when(Float.class)
      *         .asText( cell -> "(" + cell.valueAsString().orElse("") + "f)" ) )
      *         .when(Double.class)
@@ -124,26 +105,17 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      */
     public final UIForTable<T> withRendererForColumn(
         String columnName,
-        Function<Render.Builder<JTable, ?>, Render.Builder<JTable, ?>> renderBuilder
+        Function<Render.Builder<T, Object>, Render.Builder<T, Object>> renderBuilder
     ) {
         NullUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
-        Render.Builder<JTable, ?> builder = renderBuilder.apply(_renderTable());
-        return withRenderComponentForColumn(columnName, builder.getForTable());
-    }
-
-    /**
-     *  Use this to build a table cell renderer for a particular column.
-     *  The second argument accepts the builder API for a cell renderer.
-     *
-     * @param columnIndex The index of the column for which the cell renderer will be built.
-     * @param renderBuilder The builder API for a cell renderer.
-     * @return This builder node.
-     * @deprecated Use {@link #withRendererForColumn(int, Function)} instead.
-     */
-    @Deprecated
-    public final UIForTable<T> withRendererForColumn( int columnIndex, Render.Builder<JTable, ?> renderBuilder ) {
-        NullUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
-        return withRenderComponentForColumn(columnIndex, renderBuilder.getForTable());
+        Render.Builder<T, Object> builder = _renderTable();
+        try {
+            builder = renderBuilder.apply(builder);
+        } catch (Exception e) {
+            log.error("Error while building table renderer.", e);
+            return this;
+        }
+        return withCellRendererForColumn(columnName, builder.getForTable());
     }
 
     /**
@@ -152,13 +124,11 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      *  Here an example of how this method may be used:
      * <pre>{@code
      *     UI.table(myModel)
-     *     .withRendererForColumn(0,
-     *         UI.renderTable()
+     *     .withRendererForColumn(0, it -> it
      *         .when(String.class)
      *         .asText( cell -> "[" + cell.valueAsString().orElse("") + "]" ) )
      *     )
-     *     .withRendererForColumn(1,
-     *         UI.renderTable()
+     *     .withRendererForColumn(1, it -> it
      *         .when(Float.class)
      *         .asText( cell -> "(" + cell.valueAsString().orElse("") + "f)" ) )
      *         .when(Double.class)
@@ -179,11 +149,17 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      */
     public final UIForTable<T> withRendererForColumn(
         int columnIndex,
-        Function<Render.Builder<JTable, ?>, Render.Builder<JTable, ?>> renderBuilder
+        Function<Render.Builder<T, Object>, Render.Builder<T, Object>> renderBuilder
     ) {
         NullUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
-        Render.Builder<JTable, ?> builder = renderBuilder.apply(_renderTable());
-        return withRenderComponentForColumn(columnIndex, builder.getForTable());
+        Render.Builder<T, Object> builder = _renderTable();
+        try {
+            builder = renderBuilder.apply(builder);
+        } catch (Exception e) {
+            log.error("Error while building table renderer.", e);
+            return this;
+        }
+        return withCellRendererForColumn(columnIndex, builder.getForTable());
     }
 
     /**
@@ -198,7 +174,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      * @param renderer The cell renderer to be registered.
      * @return This builder node, to allow for builder-style method chaining.
      */
-    public final UIForTable<T> withRenderComponentForColumn( String columnName, TableCellRenderer renderer ) {
+    public final UIForTable<T> withCellRendererForColumn( String columnName, TableCellRenderer renderer ) {
         NullUtil.nullArgCheck(columnName, "columnName", String.class);
         NullUtil.nullArgCheck(renderer, "renderer", TableCellRenderer.class);
         return _with( thisComponent -> {
@@ -219,7 +195,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      * @param renderer The cell renderer to be registered.
      * @return This builder node.
      */
-    public final UIForTable<T> withRenderComponentForColumn( int columnIndex, TableCellRenderer renderer ) {
+    public final UIForTable<T> withCellRendererForColumn( int columnIndex, TableCellRenderer renderer ) {
         NullUtil.nullArgCheck(renderer, "renderer", TableCellRenderer.class);
         return _with( thisComponent -> {
                     thisComponent.getColumnModel().getColumn(columnIndex).setCellRenderer(renderer);
@@ -238,7 +214,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      * @param renderer A provider of {@link java.awt.Component} instances which are used to render the cells of a table.
      * @return This builder instance, to allow for method chaining.
      */
-    public final UIForTable<T> withTableCellRenderer( TableCellRenderer renderer ) {
+    public final UIForTable<T> withCellRenderer( TableCellRenderer renderer ) {
         NullUtil.nullArgCheck(renderer, "renderer", TableCellRenderer.class);
         return _with( thisComponent -> {
                     thisComponent.setDefaultRenderer(Object.class, renderer);
@@ -247,26 +223,21 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
     }
 
     /**
-     * Use this to register a table cell renderer for all columns of this table.
-     * @param renderBuilder The builder API for a cell renderer.
-     * @return  This builder node.
-     * @deprecated Use {@link #withRenderer(Function)} instead.
-     */
-    @Deprecated
-    public final UIForTable<T> withRenderer( Render.Builder<JTable, ?> renderBuilder ) {
-        NullUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
-        return withTableCellRenderer(renderBuilder.getForTable());
-    }
-
-    /**
      *  Use this to define a table cell renderer for all columns of this table
      *  using the fluent builder API exposed to the provided lambda function.<br>
      *  Here is an example of how this method is used:
      *  <pre>{@code
      *    UI.table()
-     *    .withRenderer(it -> it.asText(cell -> cell.value().get().toString() ))
+     *    .withRenderer( it -> it
+     *        .when(SomeDataType.class)
+     *        .asText( cell -> cell.value().get().toString() )
+     *    )
      *    // ...
      *  }</pre>
+     *  You may want to know that a similar API is also available for the {@link javax.swing.JList}
+     *  and {@link javax.swing.JComboBox} components, see {@link UIForList#withRenderer(Function)},
+     *  {@link UIForCombo#withRenderer(Function)} for more information.
+     *
      *
      * @param renderBuilder A lambda function which exposes the builder API for a cell renderer
      *                      and returns the builder API for a cell renderer.
@@ -274,18 +245,18 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      * @return This builder node.
      */
     public final UIForTable<T> withRenderer(
-        Function<Render.Builder<JTable, ?>, Render.Builder<JTable, ?>> renderBuilder
+        Function<Render.Builder<T, Object>, Render.Builder<T, Object>> renderBuilder
     ) {
         NullUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
-        Render.Builder<JTable, ?> builder;
+        Render.Builder<T, Object> builder = _renderTable();
         try {
-            builder = renderBuilder.apply(_renderTable());
+            builder = renderBuilder.apply(builder);
         } catch (Exception e) {
             log.error("Error while building table renderer.", e);
             return this;
         }
         Objects.requireNonNull(builder);
-        return withTableCellRenderer(builder.getForTable());
+        return withCellRenderer(builder.getForTable());
     }
 
     /**
@@ -362,7 +333,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
     }
 
     /**
-     *  Exposes a fluent builder API for a table model holding a specific type of entry {@link Object}s. <br>
+     *  Exposes a fluent builder API for a table model holding a specific type of entry. <br>
      *  Here an example demonstrating how this API
      *  is typically used as part of a UI declaration:
      *  <pre>{@code
@@ -374,11 +345,14 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      *      .updateOn(update)
      *  )
      *  }</pre>
-     *  In this example, the table model is built for a table holding {@link Double} entries.
-     *  So the data array is expected to be a two-dimensional array of {@link Double}s. <br>
+     *  In this example, the table model is built for a {@link Double} based data source.
+     *  So here the data array is a two-dimensional array of {@link Double}s. <br>
      *  <br>
      *  Note that the builder API is exposed to the lambda function passed to this method.
-     *  The actually {@link TableModel} is built internally and then set on the table.
+     *  The actual {@link TableModel} is built internally and then installed on the table component.
+     *  <p>
+     *  You can also use the {@link UI#table(Function)} factory method to directly create a table
+     *  with a custom table model. <br>
      *
      * @param itemType The type of the table entry {@link Object}s.
      * @param dataModelBuilder A lambda function which receives a builder API for a table model

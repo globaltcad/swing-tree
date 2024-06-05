@@ -62,13 +62,14 @@ abstract class AbstractComboModel<E extends @Nullable Object> implements ComboBo
 
 	abstract AbstractComboModel<E> withVar( Var<E> newVar );
 
+	@SuppressWarnings("NullAway")
 	@Override public void setSelectedItem( @Nullable Object anItem ) {
 		if ( anItem != null && !_selectedItem.type().isAssignableFrom(anItem.getClass()) )
 			anItem = _convert(anItem.toString());
-        @Nullable E old = _selectedItem.orElseNull();
+        E old = _selectedItem.orElseNull();
 		Object finalAnItem = anItem;
 		doQuietly(()-> {
-			_selectedItem.set(From.VIEW, (E) finalAnItem);
+			_selectedItem.set(From.VIEW, (E) NullUtil.fakeNonNull(finalAnItem));
 			_selectedIndex = _indexOf(finalAnItem);
 			if ( !Objects.equals(old, finalAnItem) )
 				fireListeners();
@@ -124,7 +125,7 @@ abstract class AbstractComboModel<E extends @Nullable Object> implements ComboBo
 				E e = _convert(o);
 				this.setAt( _selectedIndex, e );
 				boolean stateChanged = _selectedItem.orElseNull() != e;
-				_selectedItem.set(From.VIEW, e);
+				_selectedItem.set(From.VIEW, NullUtil.fakeNonNull(e));
 				if ( stateChanged )
 					doQuietly(this::fireListeners);
 

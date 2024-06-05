@@ -28,17 +28,17 @@ public final class Render<C extends JComponent,E>
 	private final Class<E> _elementType;
 
 
-    static <E> Render<JList<E>,E> forList(Class<E> elementType) {
+    static <E> Render.Builder<JList<E>,E> forList(Class<E> elementType) {
 		Render r = new Render<>(JList.class, elementType);
-		return (Render<JList<E>,E>) r;
+		return (Render.Builder<JList<E>,E>) r.builder();
 	}
-	static <C extends JComboBox<E>, E> Render<C,E> forCombo(Class<E> elementType) {
+	static <C extends JComboBox<E>, E> Render.Builder<C,E> forCombo(Class<E> elementType) {
 		Render r = new Render<>(JComboBox.class, elementType);
-		return (Render<C,E>) r;
+		return (Render.Builder<C,E>) r.builder();
 	}
-	static <E> Render<JTable,E> forTable(Class<E> elementType) {
+	static <E> Render.Builder<JTable,E> forTable(Class<E> elementType) {
 		Render r = new Render<>(JTable.class, elementType);
-		return (Render<JTable,E>) r;
+		return (Render.Builder<JTable,E>) r.builder();
 	}
 
 	private Render(Class<C> componentType, Class<E> elementType) {
@@ -46,44 +46,8 @@ public final class Render<C extends JComponent,E>
 		_elementType   = elementType;
     }
 
-	/**
-	 * 	Use this to specify which type of values should have custom rendering.
-	 * 	The object returned by this method allows you to specify how to render the values.
-	 *
-	 * @param valueType The type of cell value, for which you want custom rendering.
-	 * @param <T> The type parameter of the cell value, for which you want custom rendering.
-	 * @return The {@link As} builder API step which expects you to provide a lambda for customizing how a cell is rendered.
-	 */
-	public <T extends E> As<C,E,T> when( Class<T> valueType ) {
-		NullUtil.nullArgCheck(valueType, "valueType", Class.class);
-		return when( valueType, cell -> true );
-	}
-
-	/**
-	 * 	Use this to specify which type of values should have custom rendering.
-	 * 	The object returned by this method allows you to specify how to render the values.
-	 *
-	 * @param valueType The type of cell value, for which you want custom rendering.
-	 * @param valueValidator A condition which ought to be met for the custom rendering to be applied to the value.
-	 * @param <T> The type parameter of the cell value, for which you want custom rendering.
-	 * @return The {@link As} builder API step which expects you to provide a lambda for customizing how a cell is rendered.
-	 */
-	public <T extends E> As<C,E,T> when(
-			Class<T> valueType,
-			Predicate<Cell<C,T>> valueValidator
-	) {
-		NullUtil.nullArgCheck(valueType, "valueType", Class.class);
-		NullUtil.nullArgCheck(valueValidator, "valueValidator", Predicate.class);
-		// We check if T is a subclass of E, if not we throw an exception:
-		if ( !valueType.isAssignableFrom(_elementType) )
-			throw new IllegalArgumentException("The value type "+valueType+" is not a subclass of "+_elementType);
-		return new As<C,E,T>() {
-			@Override
-			public Builder<C,E> as(Cell.Interpreter<C,T> valueInterpreter) {
-				NullUtil.nullArgCheck(valueInterpreter, "valueInterpreter", Cell.Interpreter.class);
-				return new Builder(_componentType, valueType, valueValidator, valueInterpreter);
-			}
-		};
+	Builder<C,E> builder() {
+		return new Builder<>(_componentType);
 	}
 
 	/**
@@ -137,7 +101,6 @@ public final class Render<C extends JComponent,E>
 			 * @param cell The cell which is to be rendered.
 			 */
 			void interpret( Cell<C, V> cell );
-
 		}
 	}
 
@@ -162,7 +125,6 @@ public final class Render<C extends JComponent,E>
 		 * 	This is the most generic way to customize the rendering of a cell,
 		 * 	as you can choose between vastly different ways of rendering:
 		 * 	<pre>{@code
-		 * 	    UI.renderTable()
 		 * 		.when( MyEnum.class )
 		 * 		.as( cell -> {
 		 * 			// do component based rendering:
@@ -206,7 +168,43 @@ public final class Render<C extends JComponent,E>
 		 * @return The builder API allowing method chaining.
 		 */
 		default Builder<C, E> asText( Function<Cell<C,T>, String> renderer ) {
-			return this.as( cell -> {
+			return this.as(_createDefaultTextRenderer(renderer));
+		}
+
+		/**
+		 *  Specify a lambda which receives a {@link Cell} instance as well as a {@link Graphics} instance
+		 *  and then renders the cell.
+		 *  <pre>{@code
+		 *  	.when( MyEnum.class )
+		 *  	.render( (cell, g) -> {
+		 *  		// draw something
+		 *  		g.drawString( "Hello World", 0, 0 );
+		 *  	})
+		 * }</pre>
+		 * @param renderer A function which receives a {@link Cell} instance as well as a {@link Graphics} instance and then renders the cell.
+		 * @return The builder API allowing method chaining.
+		 */
+		default Builder<C, E> render( BiConsumer<Cell<C,T>, Graphics2D> renderer ) {
+			return this.as( cell -> cell.setRenderer(new JComponent(){
+				@Override public void paintComponent(Graphics g) {
+					try {
+						renderer.accept(cell, (Graphics2D) g);
+					} catch (Exception e) {
+						log.warn("An exception occurred while rendering a cell!", e);
+					    /*
+					        We log as warning because exceptions during rendering are not considered
+					        as harmful as elsewhere!
+					    */
+					}
+				}
+			}) );
+		}
+	}
+
+	private static <C extends JComponent, V> Render.Cell.Interpreter<C,V> _createDefaultTextRenderer(
+	    Function<Cell<C, V>, String> renderer
+	) {
+		return cell -> {
 				JLabel l = new JLabel(renderer.apply(cell));
 				l.setOpaque(true);
 
@@ -304,40 +302,9 @@ public final class Render<C extends JComponent,E>
 				if ( border != null ) l.setBorder(border);
 
 				cell.setRenderer(l);
-			});
-		}
-
-		/**
-		 *  Specify a lambda which receives a {@link Cell} instance as well as a {@link Graphics} instance
-		 *  and then renders the cell.
-		 *  <pre>{@code
-		 *  	.when( MyEnum.class )
-		 *  	.render( (cell, g) -> {
-		 *  		// draw something
-		 *  		g.drawString( "Hello World", 0, 0 );
-		 *  	})
-		 * }</pre>
-		 * @param renderer A function which receives a {@link Cell} instance as well as a {@link Graphics} instance and then renders the cell.
-		 * @return The builder API allowing method chaining.
-		 */
-		default Builder<C, E> render( BiConsumer<Cell<C,T>, Graphics2D> renderer ) {
-			return this.as( cell -> cell.setRenderer(new JComponent(){
-				@Override public void paintComponent(Graphics g) {
-					try {
-						renderer.accept(cell, (Graphics2D) g);
-					} catch (Exception e) {
-						log.warn("An exception occurred while rendering a cell!", e);
-					    /*
-					        We log as warning because exceptions during rendering are not considered
-					        as harmful as elsewhere!
-					    */
-					}
-				}
-			}) );
-		}
-
-
+			};
 	}
+
 
 	/**
 	 * 	A builder for building simple customized {@link javax.swing.table.TableCellRenderer}!
@@ -350,17 +317,8 @@ public final class Render<C extends JComponent,E>
 		private final Class<C> _componentType;
         private final Map<Class<?>, java.util.List<Consumer<Cell<C,?>>>> _rendererLookup = new LinkedHashMap<>(16);
 
-		public Builder(
-				Class<C>                   componentType,
-				Class<E>                   valueType,
-				Predicate<Cell<C,E>>       valueValidator,
-				Cell.Interpreter<C, E>     valueInterpreter
-		) {
-			NullUtil.nullArgCheck(valueType, "valueType", Class.class);
-			NullUtil.nullArgCheck(valueValidator, "valueValidator", Predicate.class);
-			NullUtil.nullArgCheck(valueInterpreter, "valueInterpreter", Cell.Interpreter.class);
+		public Builder( Class<C> componentType ) {
 			_componentType = componentType;
-            when(valueType, valueValidator).as(valueInterpreter);
 		}
 
 		/**
@@ -517,10 +475,13 @@ public final class Render<C extends JComponent,E>
 				if ( e.getKey().isAssignableFrom(type) )
 					cellRenderer.addAll(e.getValue());
 			}
+			// We reverse the cell renderers, so that the most specific one is first
+			Collections.reverse(cellRenderer);
 			return cellRenderer;
 		}
 
 		DefaultTableCellRenderer getForTable() {
+			_addDefaultRendering();
 			if ( JTable.class.isAssignableFrom(_componentType) )
 				return new SimpleTableCellRenderer();
 			else
@@ -538,11 +499,16 @@ public final class Render<C extends JComponent,E>
 		 * @return The new {@link ListCellRenderer} instance specific to the given list.
 		 */
 		ListCellRenderer<E> buildForList( C list ) {
+			_addDefaultRendering();
 			if ( JList.class.isAssignableFrom(_componentType) )
 				return (ListCellRenderer<E>) new SimpleListCellRenderer<>(list);
-			else
+			else if ( JComboBox.class.isAssignableFrom(_componentType) )
 				throw new IllegalArgumentException(
 						"Renderer was set up to be used for a JList! (not "+ _componentType.getSimpleName()+")"
+					);
+			else
+				throw new IllegalArgumentException(
+						"Renderer was set up to be used for an unknown component type! (cannot handle '"+ _componentType.getSimpleName()+"')"
 					);
 		}
 
@@ -557,12 +523,18 @@ public final class Render<C extends JComponent,E>
 		 * @return The new {@link ListCellRenderer} instance specific to the given combo box.
 		 */
 		ListCellRenderer<E> buildForCombo( C comboBox ) {
+			_addDefaultRendering();
 			if ( JComboBox.class.isAssignableFrom(_componentType) )
 				return (ListCellRenderer<E>) new SimpleListCellRenderer<>(comboBox);
 			else
 				throw new IllegalArgumentException(
 						"Renderer was set up to be used for a JComboBox! (not "+ _componentType.getSimpleName()+")"
 					);
+		}
+
+		private void _addDefaultRendering() {
+			// We use the default text renderer for objects
+			_store(Object.class, cell -> true, _createDefaultTextRenderer( cell -> cell.valueAsString().orElse("")) );
 		}
 	}
 

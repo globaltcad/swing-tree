@@ -57,7 +57,7 @@ class VarsBasedComboModel<E extends @Nullable Object> extends AbstractComboModel
             So we'll just try to modify it, and if it fails, we'll just ignore it.
          */
         try {
-            _items.at(index).set(element);
+            _items.at(index).set(NullUtil.fakeNonNull(element));
         } catch ( UnsupportedOperationException ignored ) {
             // ignore, the user of this library doesn't want us to modify the list
         }
