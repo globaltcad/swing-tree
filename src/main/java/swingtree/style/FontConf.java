@@ -10,8 +10,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.font.TextAttribute;
 import java.awt.geom.AffineTransform;
-import java.util.*;
-import java.util.function.Function;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  *  An immutable, wither-like method based config API for font styles

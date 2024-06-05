@@ -4,6 +4,10 @@ package swingtree.api;
  *  A configurator is a functional interface that takes a configuration object and
  *  returns a transformed configuration object.
  *  Typically, this configuration object is an immutable builder object.
+ *  <p>
+ *  This interface is primarily used to configure the style configuration objects
+ *  of components through the {@link swingtree.UIForAnySwing#withStyle(Styler)}
+ *  method or when writing a custom {@link swingtree.style.StyleSheet}.
  *
  * @param <T> the type of the configuration object
  */

@@ -3,19 +3,18 @@ package swingtree;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sprouts.Action;
 import sprouts.*;
+import swingtree.api.Configurator;
 import swingtree.api.ListEntryDelegate;
 import swingtree.api.ListEntryRenderer;
 
-import javax.swing.AbstractListModel;
-import javax.swing.JList;
-import javax.swing.ListCellRenderer;
+import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
 
 /**
  *  A SwingTree builder node designed for configuring {@link JList} instances.
@@ -278,8 +277,8 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
      *  );
      *  }</pre>
      *  Note that a similar API is also available for the {@link javax.swing.JComboBox}
-     *  and {@link javax.swing.JTable} components, see {@link UIForCombo#withRenderer(Function)},
-     *  {@link UIForTable#withRenderer(Function)} and {@link UI#table(Function)}
+     *  and {@link javax.swing.JTable} components, see {@link UIForCombo#withRenderer(Configurator)},
+     *  {@link UIForTable#withRenderer(Configurator)} and {@link UI#table(Configurator)}
      *  for more information.
      *
      * @param renderBuilder A lambda function that configures the renderer for this combo box.
@@ -287,7 +286,7 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
      * @param <V> The type of the value that is being rendered in this combo box.
      */
     public final <V extends E> UIForList<E, L> withRenderer(
-        Function<Render.Builder<L,V>,Render.Builder<L,V>> renderBuilder
+        Configurator<Render.Builder<L,V>> renderBuilder
     ) {
         Class<Object> commonType = Object.class;
         Objects.requireNonNull(commonType);

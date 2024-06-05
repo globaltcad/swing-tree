@@ -12,7 +12,7 @@ import sprouts.*;
 import swingtree.animation.Animator;
 import swingtree.animation.LifeTime;
 import swingtree.animation.Stride;
-import swingtree.api.Buildable;
+import swingtree.api.Configurator;
 import swingtree.api.IconDeclaration;
 import swingtree.api.MenuBuilder;
 import swingtree.api.SwingBuilder;
@@ -4832,7 +4832,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return This builder instance, to allow for further method chaining.
      */
     public static UIForTable<JTable> table(
-        Function<BasicTableModel.Builder<Object>, BasicTableModel.Builder<Object>> tableModelBuildable
+        Configurator<BasicTableModel.Builder<Object>> tableModelBuildable
     ) {
         Objects.requireNonNull(tableModelBuildable);
         BasicTableModel.Builder<Object> builder = new BasicTableModel.Builder<>(Object.class);

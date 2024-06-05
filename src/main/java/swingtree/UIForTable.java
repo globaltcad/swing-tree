@@ -236,8 +236,8 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      *    // ...
      *  }</pre>
      *  You may want to know that a similar API is also available for the {@link javax.swing.JList}
-     *  and {@link javax.swing.JComboBox} components, see {@link UIForList#withRenderer(Function)},
-     *  {@link UIForCombo#withRenderer(Function)} for more information.
+     *  and {@link javax.swing.JComboBox} components, see {@link UIForList#withRenderer(Configurator)},
+     *  {@link UIForCombo#withRenderer(Configurator)} for more information.
      *
      *
      * @param renderBuilder A lambda function which exposes the builder API for a cell renderer
@@ -246,7 +246,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      * @return This builder node.
      */
     public final UIForTable<T> withRenderer(
-        Function<Render.Builder<T, Object>, Render.Builder<T, Object>> renderBuilder
+            Configurator<Render.Builder<T, Object>> renderBuilder
     ) {
         NullUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
         Render.Builder<T, Object> builder = _renderTable();
