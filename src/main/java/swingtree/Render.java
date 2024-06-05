@@ -475,7 +475,9 @@ public final class Render<C extends JComponent,E>
 				if ( e.getKey().isAssignableFrom(type) )
 					cellRenderer.addAll(e.getValue());
 			}
-			return cellRenderer.reversed();
+			// We reverse the cell renderers, so that the most specific one is first
+			Collections.reverse(cellRenderer);
+			return cellRenderer;
 		}
 
 		DefaultTableCellRenderer getForTable() {
