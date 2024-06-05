@@ -361,7 +361,7 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
         Objects.requireNonNull(commonType);
         Render.Builder render = Render.forCombo(commonType);
         try {
-            render = renderBuilder.apply(render);
+            render = renderBuilder.configure(render);
         } catch (Exception e) {
             log.error("Error while building renderer.", e);
             return this;
@@ -516,7 +516,7 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
      * @throws NullPointerException if either one of {@code selection} or {@code options} is {@code null}.
      */
     @SafeVarargs
-    public final UIForCombo<E,C> withItems(Var<E> selection, E... options ) {
+    public final UIForCombo<E,C> withItems( Var<E> selection, E... options ) {
         return this.withModel(new ArrayBasedComboModel<>(selection, options));
     }
 

@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import swingtree.api.Configurator;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -84,7 +83,7 @@ final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
 
     public NamedConfigs<S> mapStyles( Configurator<S> f ) {
         Objects.requireNonNull(f);
-        return mapNamedStyles( ns -> NamedConf.of(ns.name(), f.apply(ns.style())) );
+        return mapNamedStyles( ns -> NamedConf.of(ns.name(), f.configure(ns.style())) );
     }
 
     public NamedConfigs<S> mapNamedStyles( Configurator<NamedConf<S>> f ) {
@@ -94,7 +93,7 @@ final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
         for ( int i = 0; i < _styles.length; i++ ) {
             NamedConf<S> mapped = _styles[i];
             try {
-                mapped = f.apply(_styles[i]);
+                mapped = f.configure(_styles[i]);
             } catch ( Exception e ) {
                 log.error(
                         "Failed to map named style '" + _styles[i] + "' using " +

@@ -20,5 +20,5 @@ public interface Configurator<T>
      * @param config the configuration object
      * @return the transformed configuration object
      */
-    T apply(T config);
+    T configure( T config );
 }

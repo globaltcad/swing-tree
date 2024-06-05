@@ -198,7 +198,7 @@ public final class TextConf implements Simplifiable<TextConf>
      * @return A new {@link TextConf} object with the given font configuration.
      */
     public TextConf font( Configurator<FontConf> fontConfFunction ) {
-        return _fontConf(fontConfFunction.apply(_fontConf));
+        return _fontConf(fontConfFunction.configure(_fontConf));
     }
 
     /**

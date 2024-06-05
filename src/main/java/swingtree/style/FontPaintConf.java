@@ -9,7 +9,6 @@ import javax.swing.JComponent;
 import java.awt.*;
 import java.lang.ref.WeakReference;
 import java.util.Objects;
-import java.util.function.Function;
 
 /**
  *  An internal class that holds immutable configuration data
@@ -95,7 +94,7 @@ final class FontPaintConf
         Objects.requireNonNull(noiseConfigurator);
         NoiseConf noise = _noise == null ? NoiseConf.none() : _noise;
         try {
-            noise = noiseConfigurator.apply(noise);
+            noise = noiseConfigurator.configure(noise);
             return of(null, null, noise, null);
         } catch ( Exception e ) {
             log.error("Failed to apply noise configuration.", e);
@@ -107,7 +106,7 @@ final class FontPaintConf
         Objects.requireNonNull(gradientConfigurator);
         GradientConf gradient = _gradient == null ? GradientConf.none() : _gradient;
         try {
-            gradient = gradientConfigurator.apply(gradient);
+            gradient = gradientConfigurator.configure(gradient);
             return of(null, null, null, gradient);
         } catch ( Exception e ) {
             log.error("Failed to apply gradient configuration.", e);

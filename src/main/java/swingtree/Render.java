@@ -85,8 +85,8 @@ public final class Render<C extends JComponent,E>
 		/**
 		 * 	An interface for interpreting the value of a {@link Cell} and
 		 * 	setting a {@link Component} or custom renderer which is then used to render the cell.
-		 * 	Use {@link Cell#setRenderer(Component)} or {@link Cell#setRenderer(Consumer)}
-		 * 	to define how the cell should be rendered exactly.
+		 * 	Inside your interpreter, use {@link Cell#setRenderer(Component)} or {@link Cell#setRenderer(Consumer)}
+		 * 	to define how the cell should be rendered.
 		 *
 		 * @param <C> The type of the component which is used to render the cell.
 		 * @param <V> The type of the value of the cell.

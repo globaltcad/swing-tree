@@ -111,7 +111,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
         NullUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
         Render.Builder<T, Object> builder = _renderTable();
         try {
-            builder = renderBuilder.apply(builder);
+            builder = renderBuilder.configure(builder);
         } catch (Exception e) {
             log.error("Error while building table renderer.", e);
             return this;
@@ -155,7 +155,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
         NullUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
         Render.Builder<T, Object> builder = _renderTable();
         try {
-            builder = renderBuilder.apply(builder);
+            builder = renderBuilder.configure(builder);
         } catch (Exception e) {
             log.error("Error while building table renderer.", e);
             return this;
@@ -246,12 +246,12 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      * @return This builder node.
      */
     public final UIForTable<T> withRenderer(
-            Configurator<Render.Builder<T, Object>> renderBuilder
+        Configurator<Render.Builder<T, Object>> renderBuilder
     ) {
         NullUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
         Render.Builder<T, Object> builder = _renderTable();
         try {
-            builder = renderBuilder.apply(builder);
+            builder = renderBuilder.configure(builder);
         } catch (Exception e) {
             log.error("Error while building table renderer.", e);
             return this;
@@ -326,7 +326,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
         Objects.requireNonNull(dataModelBuilder);
         BasicTableModel.Builder<Object> builder = new BasicTableModel.Builder<>(Object.class);
         try {
-            builder = dataModelBuilder.apply(builder);
+            builder = dataModelBuilder.configure(builder);
         } catch (Exception e) {
             log.error("Error while building table model.", e);
         }
@@ -366,7 +366,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
         Objects.requireNonNull(dataModelBuilder);
         BasicTableModel.Builder<E> builder = new BasicTableModel.Builder<>(itemType);
         try {
-            builder = dataModelBuilder.apply(builder);
+            builder = dataModelBuilder.configure(builder);
         } catch (Exception e) {
             log.error("Error while building table model.", e);
         }

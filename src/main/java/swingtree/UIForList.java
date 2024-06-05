@@ -292,7 +292,7 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
         Objects.requireNonNull(commonType);
         Render.Builder render = Render.forList(commonType);
         try {
-            render = renderBuilder.apply(render);
+            render = renderBuilder.configure(render);
         } catch (Exception e) {
             log.error("Error while building renderer.", e);
             return this;

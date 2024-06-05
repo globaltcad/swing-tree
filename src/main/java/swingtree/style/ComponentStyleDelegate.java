@@ -14,7 +14,6 @@ import java.awt.geom.AffineTransform;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  *  A {@link ComponentStyleDelegate} is a delegate for a {@link JComponent} and its {@link StyleConf} configuration
@@ -1394,7 +1393,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
         Objects.requireNonNull(styler);
         ShadowConf shadow = Optional.ofNullable(_styleConf.shadow(layer, shadowName)).orElse(ShadowConf.none());
         // We clone the shadow map:
-        NamedConfigs<ShadowConf> newShadows = _styleConf.shadowsMap(layer).withNamedStyle(shadowName, styler.apply(shadow));
+        NamedConfigs<ShadowConf> newShadows = _styleConf.shadowsMap(layer).withNamedStyle(shadowName, styler.configure(shadow));
         return _withStyle(_styleConf._withShadow(layer, newShadows));
     }
 
@@ -1819,7 +1818,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
 
     private ComponentStyleDelegate<C> _withFont( Configurator<FontConf> fontStyler ) {
         Objects.requireNonNull(fontStyler);
-        StyleConf updatedStyle = _styleConf._withFont(fontStyler.apply(_styleConf.font()));
+        StyleConf updatedStyle = _styleConf._withFont(fontStyler.configure(_styleConf.font()));
         // We also update the text style, if it exists:
         updatedStyle = updatedStyle.text( text -> text.font(fontStyler) );
         return _withStyle(updatedStyle);
@@ -1842,7 +1841,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      */
     public final ComponentStyleDelegate<C> componentFont( Configurator<FontConf> fontStyler ) {
         Objects.requireNonNull(fontStyler);
-        StyleConf updatedStyle = _styleConf._withFont(fontStyler.apply(_styleConf.font()));
+        StyleConf updatedStyle = _styleConf._withFont(fontStyler.configure(_styleConf.font()));
         return _withStyle(updatedStyle);
     }
 
