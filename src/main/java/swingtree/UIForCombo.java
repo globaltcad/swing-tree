@@ -344,6 +344,11 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
      *  Note that inside the lambda function, you can use the {@link Render.Builder} to define
      *  for what type of item you want to render the item in a specific way and the {@link Render.As}
      *  to define how the item should be rendered.
+     *  <p>
+     *  You may want to know that a similar API is also available for the {@link javax.swing.JList}
+     *  and {@link javax.swing.JTable} components, see {@link UIForList#withRenderer(Function)},
+     *  {@link UIForTable#withRenderer(Function)} and {@link UI#table(Function)}
+     *  for more information.
      *
      * @param renderBuilder A lambda function that configures the renderer for this combo box.
      * @return This combo box instance for further configuration.
