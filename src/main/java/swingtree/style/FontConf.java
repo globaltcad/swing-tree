@@ -4,13 +4,16 @@ import com.google.errorprone.annotations.Immutable;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import swingtree.UI;
+import swingtree.api.Configurator;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.font.TextAttribute;
 import java.awt.geom.AffineTransform;
-import java.util.*;
-import java.util.function.Function;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  *  An immutable, wither-like method based config API for font styles
@@ -575,7 +578,7 @@ public final class FontConf
      * paint painting across the entire font area homogeneously using the specified color.
      * <br>
      * Note that this will override the effects of the {@link #color(Color)}, {@link #color(String)},
-     * {@link #noise(Function)} or {@link #gradient(Function)} methods
+     * {@link #noise(Configurator)} or {@link #gradient(Configurator)} methods
      * as a font can only have one paint.
      *
      * @param paint The paint to use for the {@link TextAttribute#FOREGROUND} property.
@@ -592,14 +595,14 @@ public final class FontConf
      *  and returns an updated {@link NoiseConf} instance with the desired properties.
      *  <br>
      *  Keep in mind that this will override the effects of the {@link #color(Color)},
-     *  {@link #color(String)}, {@link #paint(Paint)} or {@link #gradient(Function)}
+     *  {@link #color(String)}, {@link #paint(Paint)} or {@link #gradient(Configurator)}
      *  methods as a font can only have one paint.
      *
      * @param configurator The configurator function that takes a {@link NoiseConf} instance
      *                     and returns an updated {@link NoiseConf} instance with the desired properties.
      * @return A new font style with the specified noise paint.
      */
-    public FontConf noise( Function<NoiseConf, NoiseConf> configurator ) {
+    public FontConf noise( Configurator<NoiseConf> configurator ) {
         Objects.requireNonNull(configurator);
         FontPaintConf paintConf = _paint.noise(configurator);
         return _withPaintConf(paintConf);
@@ -611,14 +614,14 @@ public final class FontConf
      *  and returns an updated {@link GradientConf} instance with the desired properties.
      *  <br>
      *  Keep in mind that this will override the effects of the {@link #color(Color)},
-     *  {@link #color(String)}, {@link #paint(Paint)} or {@link #noise(Function)}
+     *  {@link #color(String)}, {@link #paint(Paint)} or {@link #noise(Configurator)}
      *  methods as a font can only have one paint.
      *
      * @param configurator The configurator function that takes a {@link GradientConf} instance
      *                     and returns an updated {@link GradientConf} instance with the desired properties.
      * @return A new font style with the specified gradient paint.
      */
-    public FontConf gradient( Function<GradientConf, GradientConf> configurator ) {
+    public FontConf gradient( Configurator<GradientConf> configurator ) {
         Objects.requireNonNull(configurator);
         FontPaintConf paintConf = _paint.gradient(configurator);
         return _withPaintConf(paintConf);
@@ -647,14 +650,14 @@ public final class FontConf
      *  and returns an updated {@link NoiseConf} instance with the desired properties.
      *  <br>
      *  Note that the background can only have one paint, so specifying a noise based paint
-     *  will override the effects of the {@link #backgroundPaint(Paint)}, {@link #backgroundGradient(Function)},
+     *  will override the effects of the {@link #backgroundPaint(Paint)}, {@link #backgroundGradient(Configurator)},
      *  and {@link #backgroundColor(String)} methods.
      *
      * @param configurator The configurator function that takes a {@link NoiseConf} instance
      *                     and returns an updated {@link NoiseConf} instance with the desired properties.
      * @return A new font style with the specified noise background paint.
      */
-    public FontConf backgroundNoise( Function<NoiseConf, NoiseConf> configurator ) {
+    public FontConf backgroundNoise( Configurator<NoiseConf> configurator ) {
         Objects.requireNonNull(configurator);
         FontPaintConf backgroundPaintConf = _backgroundPaint.noise(configurator);
         return _withBackgroundPaintConf(backgroundPaintConf);
@@ -666,14 +669,14 @@ public final class FontConf
      *  and returns an updated {@link GradientConf} instance with the desired properties.
      *  <br>
      *  The background of a font can only have one paint, so specifying a gradient based paint
-     *  will override the effects of the {@link #backgroundPaint(Paint)}, {@link #backgroundNoise(Function)},
+     *  will override the effects of the {@link #backgroundPaint(Paint)}, {@link #backgroundNoise(Configurator)},
      *  and {@link #backgroundColor(String)} methods.
      *
      * @param configurator The configurator function that takes a {@link GradientConf} instance
      *                     and returns an updated {@link GradientConf} instance with the desired properties.
      * @return A new font style with the specified gradient background paint.
      */
-    public FontConf backgroundGradient( Function<GradientConf, GradientConf> configurator ) {
+    public FontConf backgroundGradient( Configurator<GradientConf> configurator ) {
         Objects.requireNonNull(configurator);
         FontPaintConf backgroundPaintConf = _backgroundPaint.gradient(configurator);
         return _withBackgroundPaintConf(backgroundPaintConf);
@@ -693,8 +696,8 @@ public final class FontConf
      * are part of the {@link TextConf}.
      * <b>
      *     This method is deliberately package-private as it is not relevant for the
-     *     {@link ComponentStyleDelegate#componentFont(Function)} or
-     *     {@link TextConf#font(Function)} methods. <br>
+     *     {@link ComponentStyleDelegate#componentFont(Configurator)} or
+     *     {@link TextConf#font(Configurator)} methods. <br>
      *     <br>
      *     It only makes sense to specify this property 
      *     through the {@link ComponentStyleDelegate#fontAlignment(UI.HorizontalAlignment)}
@@ -718,8 +721,8 @@ public final class FontConf
      * are part of the {@link TextConf}.
      * <b>
      *     This method is deliberately package-private as it is not relevant for the
-     *     {@link ComponentStyleDelegate#componentFont(Function)} or
-     *     {@link TextConf#font(Function)} methods. <br>
+     *     {@link ComponentStyleDelegate#componentFont(Configurator)} or
+     *     {@link TextConf#font(Configurator)} methods. <br>
      *     <br>
      *     It only makes sense to specify this property 
      *     through the {@link ComponentStyleDelegate#fontAlignment(UI.VerticalAlignment)}

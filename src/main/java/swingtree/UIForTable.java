@@ -4,6 +4,7 @@ import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import sprouts.Event;
 import swingtree.api.Buildable;
+import swingtree.api.Configurator;
 import swingtree.api.model.BasicTableModel;
 import swingtree.api.model.TableListDataSource;
 import swingtree.api.model.TableMapDataSource;
@@ -105,12 +106,12 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      */
     public final UIForTable<T> withRendererForColumn(
         String columnName,
-        Function<Render.Builder<T, Object>, Render.Builder<T, Object>> renderBuilder
+        Configurator<Render.Builder<T, Object>> renderBuilder
     ) {
         NullUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
         Render.Builder<T, Object> builder = _renderTable();
         try {
-            builder = renderBuilder.apply(builder);
+            builder = renderBuilder.configure(builder);
         } catch (Exception e) {
             log.error("Error while building table renderer.", e);
             return this;
@@ -149,12 +150,12 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      */
     public final UIForTable<T> withRendererForColumn(
         int columnIndex,
-        Function<Render.Builder<T, Object>, Render.Builder<T, Object>> renderBuilder
+        Configurator<Render.Builder<T, Object>> renderBuilder
     ) {
         NullUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
         Render.Builder<T, Object> builder = _renderTable();
         try {
-            builder = renderBuilder.apply(builder);
+            builder = renderBuilder.configure(builder);
         } catch (Exception e) {
             log.error("Error while building table renderer.", e);
             return this;
@@ -167,7 +168,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      * A {@link TableCellRenderer} is a supplier of {@link java.awt.Component} instances which are used to render
      * the cells of a table.
      * <b>Note that in SwingTree, the preferred way of defining a cell renderer for a particular column is through the
-     * {@link #withRendererForColumn(String, Function)} method, which allows for a more fluent and declarative
+     * {@link #withRendererForColumn(String, Configurator)} method, which allows for a more fluent and declarative
      * way of defining cell renderers.</b>
      *
      * @param columnName The name of the column for which the cell renderer will be registered.
@@ -235,8 +236,8 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      *    // ...
      *  }</pre>
      *  You may want to know that a similar API is also available for the {@link javax.swing.JList}
-     *  and {@link javax.swing.JComboBox} components, see {@link UIForList#withRenderer(Function)},
-     *  {@link UIForCombo#withRenderer(Function)} for more information.
+     *  and {@link javax.swing.JComboBox} components, see {@link UIForList#withRenderer(Configurator)},
+     *  {@link UIForCombo#withRenderer(Configurator)} for more information.
      *
      *
      * @param renderBuilder A lambda function which exposes the builder API for a cell renderer
@@ -245,12 +246,12 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      * @return This builder node.
      */
     public final UIForTable<T> withRenderer(
-        Function<Render.Builder<T, Object>, Render.Builder<T, Object>> renderBuilder
+        Configurator<Render.Builder<T, Object>> renderBuilder
     ) {
         NullUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
         Render.Builder<T, Object> builder = _renderTable();
         try {
-            builder = renderBuilder.apply(builder);
+            builder = renderBuilder.configure(builder);
         } catch (Exception e) {
             log.error("Error while building table renderer.", e);
             return this;
@@ -320,12 +321,12 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      * @return This builder instance, to allow for further method chaining.
      */
     public final UIForTable<T> withModel(
-        Function<BasicTableModel.Builder<Object>, BasicTableModel.Builder<Object>> dataModelBuilder
+        Configurator<BasicTableModel.Builder<Object>> dataModelBuilder
     ) {
         Objects.requireNonNull(dataModelBuilder);
         BasicTableModel.Builder<Object> builder = new BasicTableModel.Builder<>(Object.class);
         try {
-            builder = dataModelBuilder.apply(builder);
+            builder = dataModelBuilder.configure(builder);
         } catch (Exception e) {
             log.error("Error while building table model.", e);
         }
@@ -360,12 +361,12 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      */
     public final <E> UIForTable<T> withModel(
         Class<E> itemType,
-        Function<BasicTableModel.Builder<E>, BasicTableModel.Builder<E>> dataModelBuilder
+        Configurator<BasicTableModel.Builder<E>> dataModelBuilder
     ) {
         Objects.requireNonNull(dataModelBuilder);
         BasicTableModel.Builder<E> builder = new BasicTableModel.Builder<>(itemType);
         try {
-            builder = dataModelBuilder.apply(builder);
+            builder = dataModelBuilder.configure(builder);
         } catch (Exception e) {
             log.error("Error while building table model.", e);
         }

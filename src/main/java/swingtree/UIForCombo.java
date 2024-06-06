@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sprouts.Action;
 import sprouts.*;
+import swingtree.api.Configurator;
 
 import javax.swing.*;
 import javax.swing.event.DocumentListener;
@@ -11,13 +12,12 @@ import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.Document;
-import java.awt.Component;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.lang.ref.WeakReference;
 import java.util.Objects;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  *  A SwingTree builder node designed for configuring {@link JComboBox} instances.
@@ -346,8 +346,8 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
      *  to define how the item should be rendered.
      *  <p>
      *  You may want to know that a similar API is also available for the {@link javax.swing.JList}
-     *  and {@link javax.swing.JTable} components, see {@link UIForList#withRenderer(Function)},
-     *  {@link UIForTable#withRenderer(Function)} and {@link UI#table(Function)}
+     *  and {@link javax.swing.JTable} components, see {@link UIForList#withRenderer(Configurator)},
+     *  {@link UIForTable#withRenderer(Configurator)} and {@link UI#table(Configurator)}
      *  for more information.
      *
      * @param renderBuilder A lambda function that configures the renderer for this combo box.
@@ -355,13 +355,13 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
      * @param <V> The type of the value that is being rendered in this combo box.
      */
     public final <V extends E> UIForCombo<E,C> withRenderer(
-        Function<Render.Builder<C,V>,Render.Builder<C,V>> renderBuilder
+        Configurator<Render.Builder<C,V>> renderBuilder
     ) {
         Class<Object> commonType = Object.class;
         Objects.requireNonNull(commonType);
         Render.Builder render = Render.forCombo(commonType);
         try {
-            render = renderBuilder.apply(render);
+            render = renderBuilder.configure(render);
         } catch (Exception e) {
             log.error("Error while building renderer.", e);
             return this;
@@ -516,7 +516,7 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
      * @throws NullPointerException if either one of {@code selection} or {@code options} is {@code null}.
      */
     @SafeVarargs
-    public final UIForCombo<E,C> withItems(Var<E> selection, E... options ) {
+    public final UIForCombo<E,C> withItems( Var<E> selection, E... options ) {
         return this.withModel(new ArrayBasedComboModel<>(selection, options));
     }
 

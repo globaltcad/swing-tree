@@ -4,9 +4,9 @@ import com.google.errorprone.annotations.Immutable;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import swingtree.api.Configurator;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -81,19 +81,19 @@ final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
         return new NamedConfigs<>(styles);
     }
 
-    public NamedConfigs<S> mapStyles( Function<S,S> f ) {
+    public NamedConfigs<S> mapStyles( Configurator<S> f ) {
         Objects.requireNonNull(f);
-        return mapNamedStyles( ns -> NamedConf.of(ns.name(), f.apply(ns.style())) );
+        return mapNamedStyles( ns -> NamedConf.of(ns.name(), f.configure(ns.style())) );
     }
 
-    public NamedConfigs<S> mapNamedStyles( Function<NamedConf<S>, NamedConf<S>> f ) {
+    public NamedConfigs<S> mapNamedStyles( Configurator<NamedConf<S>> f ) {
         Objects.requireNonNull(f);
 
         NamedConf<S>[] newStyles = null;
         for ( int i = 0; i < _styles.length; i++ ) {
             NamedConf<S> mapped = _styles[i];
             try {
-                mapped = f.apply(_styles[i]);
+                mapped = f.configure(_styles[i]);
             } catch ( Exception e ) {
                 log.error(
                         "Failed to map named style '" + _styles[i] + "' using " +

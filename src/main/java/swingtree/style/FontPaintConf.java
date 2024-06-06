@@ -3,12 +3,12 @@ package swingtree.style;
 import com.google.errorprone.annotations.Immutable;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
+import swingtree.api.Configurator;
 
 import javax.swing.JComponent;
 import java.awt.*;
 import java.lang.ref.WeakReference;
 import java.util.Objects;
-import java.util.function.Function;
 
 /**
  *  An internal class that holds immutable configuration data
@@ -90,11 +90,11 @@ final class FontPaintConf
         return of(null, paint, null, null);
     }
 
-    FontPaintConf noise( Function<NoiseConf, NoiseConf> noiseConfigurator ) {
+    FontPaintConf noise( Configurator<NoiseConf> noiseConfigurator ) {
         Objects.requireNonNull(noiseConfigurator);
         NoiseConf noise = _noise == null ? NoiseConf.none() : _noise;
         try {
-            noise = noiseConfigurator.apply(noise);
+            noise = noiseConfigurator.configure(noise);
             return of(null, null, noise, null);
         } catch ( Exception e ) {
             log.error("Failed to apply noise configuration.", e);
@@ -102,11 +102,11 @@ final class FontPaintConf
         return this;
     }
 
-    FontPaintConf gradient( Function<GradientConf, GradientConf> gradientConfigurator ) {
+    FontPaintConf gradient( Configurator<GradientConf> gradientConfigurator ) {
         Objects.requireNonNull(gradientConfigurator);
         GradientConf gradient = _gradient == null ? GradientConf.none() : _gradient;
         try {
-            gradient = gradientConfigurator.apply(gradient);
+            gradient = gradientConfigurator.configure(gradient);
             return of(null, null, null, gradient);
         } catch ( Exception e ) {
             log.error("Failed to apply gradient configuration.", e);

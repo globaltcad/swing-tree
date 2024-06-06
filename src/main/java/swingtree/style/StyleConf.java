@@ -2,12 +2,12 @@ package swingtree.style;
 
 import com.google.errorprone.annotations.Immutable;
 import swingtree.UI;
+import swingtree.api.Configurator;
 import swingtree.api.Painter;
 
 import java.awt.*;
 import java.util.List;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -359,13 +359,13 @@ public final class StyleConf
         return StyleConf.of(_layout, _border, _base, _font, _dimensionality, _layers, properties);
     }
 
-    StyleConf _withShadow( UI.Layer layer, Function<ShadowConf, ShadowConf> styler ) {
+    StyleConf _withShadow( UI.Layer layer, Configurator<ShadowConf> styler ) {
         // A new map is created where all the styler is applied to all the values:
         NamedConfigs<ShadowConf> styledShadows = _layers.get(layer).shadows().mapStyles(styler);
         return _withShadow(layer, styledShadows);
     }
 
-    StyleConf _withShadow( Function<ShadowConf, ShadowConf> styler ) {
+    StyleConf _withShadow( Configurator<ShadowConf> styler ) {
         return _withLayers(_layers.map( layer -> layer.withShadows(layer.shadows().mapStyles(styler)) ));
     }
 
@@ -412,12 +412,12 @@ public final class StyleConf
                             .collect(Collectors.toList());
     }
 
-    StyleConf gradient( UI.Layer layer, String shadeName, Function<GradientConf, GradientConf> styler ) {
+    StyleConf gradient( UI.Layer layer, String shadeName, Configurator<GradientConf> styler ) {
         Objects.requireNonNull(shadeName);
         Objects.requireNonNull(styler);
         GradientConf gradConf = _layers.get(layer).gradients().find(shadeName).orElse(GradientConf.none());
         // We clone the shadow map:
-        NamedConfigs<GradientConf> newShadows = _layers.get(layer).gradients().withNamedStyle(shadeName, styler.apply(gradConf));
+        NamedConfigs<GradientConf> newShadows = _layers.get(layer).gradients().withNamedStyle(shadeName, styler.configure(gradConf));
         return _withGradients(layer, newShadows);
     }
 
@@ -429,21 +429,21 @@ public final class StyleConf
         return found != null ? found : GradientConf.none();
     }
 
-    StyleConf noise( UI.Layer layer, String noiseName, Function<NoiseConf, NoiseConf> styler ) {
+    StyleConf noise( UI.Layer layer, String noiseName, Configurator<NoiseConf> styler ) {
         Objects.requireNonNull(noiseName);
         Objects.requireNonNull(styler);
         NoiseConf noise = _layers.get(layer).noises().find(noiseName).orElse(NoiseConf.none());
         // We clone the noise map:
-        NamedConfigs<NoiseConf> newNoises = _layers.get(layer).noises().withNamedStyle(noiseName, styler.apply(noise));
+        NamedConfigs<NoiseConf> newNoises = _layers.get(layer).noises().withNamedStyle(noiseName, styler.configure(noise));
         return _withNoises(layer, newNoises);
     }
 
-    StyleConf images(UI.Layer layer, String imageName, Function<ImageConf, ImageConf> styler ) {
+    StyleConf images(UI.Layer layer, String imageName, Configurator<ImageConf> styler ) {
         Objects.requireNonNull(imageName);
         Objects.requireNonNull(styler);
         ImageConf ground = _layers.get(layer).images().find(imageName).orElse(ImageConf.none());
         // We clone the ground map:
-        NamedConfigs<ImageConf> newImages = _layers.get(layer).images().withNamedStyle(imageName, styler.apply(ground));
+        NamedConfigs<ImageConf> newImages = _layers.get(layer).images().withNamedStyle(imageName, styler.configure(ground));
         return _withImages( layer, newImages );
     }
 
@@ -451,16 +451,16 @@ public final class StyleConf
         return _layers.get(layer).images().sortedByNames();
     }
 
-    StyleConf text(UI.Layer layer, String textName, Function<TextConf, TextConf> styler ) {
+    StyleConf text(UI.Layer layer, String textName, Configurator<TextConf> styler ) {
         Objects.requireNonNull(textName);
         Objects.requireNonNull(styler);
         TextConf text = _layers.get(layer).texts().find(textName).orElse(TextConf.none());
         // We clone the text map:
-        NamedConfigs<TextConf> newTexts = _layers.get(layer).texts().withNamedStyle(textName, styler.apply(text));
+        NamedConfigs<TextConf> newTexts = _layers.get(layer).texts().withNamedStyle(textName, styler.configure(text));
         return _withTexts( layer, newTexts );
     }
 
-    StyleConf text( Function<TextConf, TextConf> styler ) {
+    StyleConf text( Configurator<TextConf> styler ) {
         return _withLayers(_layers.map( layer -> layer.withTexts(layer.texts().mapStyles(styler)) ));
     }
 

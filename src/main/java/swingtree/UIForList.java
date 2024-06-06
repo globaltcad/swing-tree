@@ -3,19 +3,18 @@ package swingtree;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sprouts.Action;
 import sprouts.*;
+import swingtree.api.Configurator;
 import swingtree.api.ListEntryDelegate;
 import swingtree.api.ListEntryRenderer;
 
-import javax.swing.AbstractListModel;
-import javax.swing.JList;
-import javax.swing.ListCellRenderer;
+import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
 
 /**
  *  A SwingTree builder node designed for configuring {@link JList} instances.
@@ -188,7 +187,7 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
      *  A typical usage of this method would look like this:
      *  <pre>{@code
      *   listOf(vm.colors())
-     *   .withRenderer( it -> new Component() {
+     *   .withRenderComponent( it -> new Component() {
      *     {@literal @}Override
      *     public void paint(Graphics g) {
      *       g.setColor(it.entry().orElse(Color.PINK));
@@ -264,11 +263,11 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
     }
 
     /**
-     *  Use this to build a list cell renderer for various item types.
-     *  You would typically want to use this method to render generic types where the only
-     *  common type is {@link Object}, yet you want to render the item
-     *  in a specific way depending on their actual type.
-     *  This is done like so:
+     *  Use this to build a list cell renderer for various item types
+     *  by defining a renderer for each type or using {@link Object} as a common type
+     *  using the fluent builder API exposed to the {@link Configurator}
+     *  lambda function passed to this method. <br>
+     *  A typical usage may look something like this:
      *  <pre>{@code
      *  UI.list(new Object[]{":-)", 42L, '§'})
      *  .withRenderer( it -> it
@@ -278,8 +277,8 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
      *  );
      *  }</pre>
      *  Note that a similar API is also available for the {@link javax.swing.JComboBox}
-     *  and {@link javax.swing.JTable} components, see {@link UIForCombo#withRenderer(Function)},
-     *  {@link UIForTable#withRenderer(Function)} and {@link UI#table(Function)}
+     *  and {@link javax.swing.JTable} components, see {@link UIForCombo#withRenderer(Configurator)},
+     *  {@link UIForTable#withRenderer(Configurator)} and {@link UIForTable#withRendererForColumn(int, Configurator)}
      *  for more information.
      *
      * @param renderBuilder A lambda function that configures the renderer for this combo box.
@@ -287,13 +286,13 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
      * @param <V> The type of the value that is being rendered in this combo box.
      */
     public final <V extends E> UIForList<E, L> withRenderer(
-        Function<Render.Builder<L,V>,Render.Builder<L,V>> renderBuilder
+        Configurator<Render.Builder<L,V>> renderBuilder
     ) {
         Class<Object> commonType = Object.class;
         Objects.requireNonNull(commonType);
         Render.Builder render = Render.forList(commonType);
         try {
-            render = renderBuilder.apply(render);
+            render = renderBuilder.configure(render);
         } catch (Exception e) {
             log.error("Error while building renderer.", e);
             return this;

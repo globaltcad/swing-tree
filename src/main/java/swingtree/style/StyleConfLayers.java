@@ -4,10 +4,10 @@ import com.google.errorprone.annotations.Immutable;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import swingtree.UI;
+import swingtree.api.Configurator;
 
 import java.util.Objects;
 import java.util.function.BiPredicate;
-import java.util.function.Function;
 
 @Immutable
 final class StyleConfLayers
@@ -90,10 +90,10 @@ final class StyleConfLayers
         }
     }
 
-    StyleConfLayers filter( Function<FilterConf, FilterConf> f ) {
+    StyleConfLayers filter( Configurator<FilterConf> f ) {
         FilterConf filter = _filter;
         try {
-            filter = f.apply(_filter);
+            filter = f.configure(_filter);
         } catch (Exception e) {
             log.error("Error configuring filter settings for component background.", e);
         }
@@ -131,8 +131,8 @@ final class StyleConfLayers
             || predicate.test(UI.Layer.FOREGROUND, _foreground);
     }
 
-    StyleConfLayers map( Function<StyleConfLayer, StyleConfLayer> f ) {
-        return of(_filter, f.apply(_background), f.apply(_content), f.apply(_border), f.apply(_foreground), _any == null ? null : f.apply(_any));
+    StyleConfLayers map( Configurator<StyleConfLayer> f ) {
+        return of(_filter, f.configure(_background), f.configure(_content), f.configure(_border), f.configure(_foreground), _any == null ? null : f.configure(_any));
     }
 
     StyleConfLayers _scale( double factor ) {

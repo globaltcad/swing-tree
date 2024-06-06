@@ -2,6 +2,7 @@ package swingtree.style;
 
 import com.google.errorprone.annotations.Immutable;
 import swingtree.UI;
+import swingtree.api.Configurator;
 import swingtree.api.Styler;
 
 import java.awt.Font;
@@ -196,8 +197,8 @@ public final class TextConf implements Simplifiable<TextConf>
      *                         and returns a new font configuration with the desired properties.
      * @return A new {@link TextConf} object with the given font configuration.
      */
-    public TextConf font( Function<FontConf, FontConf> fontConfFunction ) {
-        return _fontConf(fontConfFunction.apply(_fontConf));
+    public TextConf font( Configurator<FontConf> fontConfFunction ) {
+        return _fontConf(fontConfFunction.configure(_fontConf));
     }
 
     /**
@@ -287,7 +288,7 @@ public final class TextConf implements Simplifiable<TextConf>
      * {@link TextConf#placement(UI.Placement)} and {@link TextConf#placementBoundary(UI.ComponentBoundary)}
      * properties as a first choice.
      * @param offset The offset of the text, defined by an {@link Offset} object.
-     *               You may create an {@link Offset} object with {@link Offset#of(int, int)}.
+     *               You may create an {@link Offset} object with {@link Offset#of(float, float)}.
      * @return An updated {@link TextConf} object with the given offset.
      */
     TextConf offset(Offset offset) {

@@ -12,7 +12,7 @@ import sprouts.*;
 import swingtree.animation.Animator;
 import swingtree.animation.LifeTime;
 import swingtree.animation.Stride;
-import swingtree.api.Buildable;
+import swingtree.api.Configurator;
 import swingtree.api.IconDeclaration;
 import swingtree.api.MenuBuilder;
 import swingtree.api.SwingBuilder;
@@ -4832,13 +4832,13 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return This builder instance, to allow for further method chaining.
      */
     public static UIForTable<JTable> table(
-        Function<BasicTableModel.Builder<Object>, BasicTableModel.Builder<Object>> tableModelBuildable
+        Configurator<BasicTableModel.Builder<Object>> tableModelBuildable
     ) {
         Objects.requireNonNull(tableModelBuildable);
         BasicTableModel.Builder<Object> builder = new BasicTableModel.Builder<>(Object.class);
         BasicTableModel.Builder<Object> modifiedBuilder;
         try {
-            modifiedBuilder = tableModelBuildable.apply(builder);
+            modifiedBuilder = tableModelBuildable.configure(builder);
         } catch (Exception e) {
             log.error("Failed to configure table model!", e);
             return table();
@@ -4857,10 +4857,10 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *    .getsEntryAt((col, row) -> data[col][row] )
      * )
      * }</pre>
-     * The purpose of this pattern is to remove the necessity of implementing the {@link javax.swing.table.TableModel}
+     * This API removes the necessity to implement the {@link javax.swing.table.TableModel}
      * interface manually, which is a rather tedious task.
-     * Instead, you can use ths fluent API provided by the {@link BasicTableModel.Builder} to create
-     * a general purpose table model for your table.
+     * Instead, you can configure a model step by step through a {@link Configurator} function
+     * receiving the fluent builder API provided by the {@link BasicTableModel.Builder}.
      *
      * @param tableModelBuildable A lambda function which takes in model builder
      *                            and then returns a fully configured model builder
@@ -4869,13 +4869,13 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      */
     public static <T> UIForTable<JTable> table(
         Class<T> itemType,
-        Function<BasicTableModel.Builder<T>, BasicTableModel.Builder<T>> tableModelBuildable
+        Configurator<BasicTableModel.Builder<T>> tableModelBuildable
     ) {
         Objects.requireNonNull(tableModelBuildable);
         BasicTableModel.Builder<T> builder = new BasicTableModel.Builder<>(itemType);
         BasicTableModel.Builder<T> modifiedBuilder;
         try {
-            modifiedBuilder = tableModelBuildable.apply(builder);
+            modifiedBuilder = tableModelBuildable.configure(builder);
         } catch (Exception e) {
             log.error("Failed to configure table model!", e);
             return table();
@@ -5322,7 +5322,10 @@ public abstract class UIFactoryMethods extends UILayoutConstants
 
     /**
      *  Use this to quickly launch a UI component in a {@link JFrame} window
-     *  at the center of the screen.
+     *  at the center of the screen.<br>
+     *  <b>Warning: This method should only be invoked from the Event Dispatch Thread (EDT).
+     *  You may encounter unexpected behavior if you call this method from another thread.<br>
+     *  Use {@link #show(Function)} instead to ensure that the UI is created on the EDT.</b>
      *
      * @param component The component to show in the window.
      */
@@ -5333,7 +5336,10 @@ public abstract class UIFactoryMethods extends UILayoutConstants
 
     /**
      *  Use this to quickly launch a UI component in a titled {@link JFrame} window
-     *  at the center of the screen.
+     *  at the center of the screen.<br>
+     *  <b>Warning: This method should only be invoked from the Event Dispatch Thread (EDT).
+     *  You may encounter unexpected behavior if you call this method from another thread.<br>
+     *  Use {@link #show(String, Function)} instead to ensure that the UI is created on the EDT.</b>
      *
      * @param title The title of the window.
      * @param component The component to show in the window.
@@ -5345,7 +5351,10 @@ public abstract class UIFactoryMethods extends UILayoutConstants
 
     /**
      *  Use this to quickly launch a UI component in a {@link JFrame} window
-     *  at the center of the screen.
+     *  at the center of the screen. <br>
+     *  <b>Warning: This method should only be invoked from the Event Dispatch Thread (EDT).
+     *  You may encounter unexpected behavior if you call this method from another thread.<br>
+     *  Use {@link #show(Function)} instead to ensure that the UI is created on the EDT.</b>
      *
      * @param ui The SwingTree UI to show in the window.
      * @param <C> The type of the component to show in the window.
@@ -5356,8 +5365,11 @@ public abstract class UIFactoryMethods extends UILayoutConstants
 
     /**
      *  Use this to quickly launch a UI component in a titled {@link JFrame} window
-     *  at the center of the screen.
-     *
+     *  at the center of the screen. <br>
+     *  <b>Warning: This method should only be invoked from the Event Dispatch Thread (EDT).
+     *  You may encounter unexpected behavior if you call this method from another thread.<br>
+     *  Use {@link #show(String, Function)} instead to ensure that the UI is created on the EDT.</b>
+     *  
      * @param title The title of the window.
      * @param ui The SwingTree UI to show in the window.
      * @param <C> The type of the component to show in the window.

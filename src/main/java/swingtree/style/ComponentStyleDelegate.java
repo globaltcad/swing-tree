@@ -14,7 +14,6 @@ import java.awt.geom.AffineTransform;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  *  A {@link ComponentStyleDelegate} is a delegate for a {@link JComponent} and its {@link StyleConf} configuration
@@ -1117,7 +1116,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  Note that in order to see the shadow, you may also need to call {@link #shadowSpreadRadius(double)},
      *  {@link #shadowBlurRadius(double)} and {@link #shadowColor(Color)}. <br>
      *  Note that this property will not only be applied to the default shadow, but also any
-     *  other named shadow that you may have defined using {@link #shadow(String, Function)}.
+     *  other named shadow that you may have defined using {@link #shadow(String, Configurator)}.
      *
      * @param offset The shadow offset in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided horizontal shadow offset.
@@ -1132,7 +1131,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  Note that in order to see the shadow, you may also need to call {@link #shadowSpreadRadius(double)},
      *  {@link #shadowBlurRadius(double)} and {@link #shadowColor(Color)}. <br>
      *  Note that this property will not only be applied to the default shadow, but also any
-     *  other named shadow that you may have defined using {@link #shadow(String, Function)}.
+     *  other named shadow that you may have defined using {@link #shadow(String, Configurator)}.
      *
      * @param offset The shadow offset in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided vertical shadow offset.
@@ -1147,7 +1146,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  Note that in order to see the shadow, you may also need to call {@link #shadowSpreadRadius(double)},
      *  {@link #shadowBlurRadius(double)} and {@link #shadowColor(Color)}. <br>
      *  Note that this property will not only be applied to the default shadow, but also any
-     *  other named shadow that you may have defined using {@link #shadow(String, Function)}.
+     *  other named shadow that you may have defined using {@link #shadow(String, Configurator)}.
      *
      * @param horizontalOffset The horizontal shadow offset in pixels.
      * @param verticalOffset The vertical shadow offset in pixels.
@@ -1163,7 +1162,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  Note that in order to see the shadow, you may also need to call {@link #shadowSpreadRadius(double)},
      *  {@link #shadowBlurRadius(double)} and {@link #shadowColor(Color)}. <br>
      *  Note that this property will not only be applied to the default shadow, but also any
-     *  other named shadow that you may have defined using {@link #shadow(String, Function)}.
+     *  other named shadow that you may have defined using {@link #shadow(String, Configurator)}.
      *
      * @param horizontalAndVerticalOffset The horizontal and vertical shadow offset in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided shadow offset.
@@ -1178,7 +1177,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  Note that in order to see the shadow, you may also need to call
      *  {@link #shadowSpreadRadius(double)} and {@link #shadowColor(Color)}. <br>
      *  Note that this property will not only be applied to the default shadow, but also any
-     *  other named shadow that you may have defined using {@link #shadow(String, Function)}.
+     *  other named shadow that you may have defined using {@link #shadow(String, Configurator)}.
      *
      * @param radius The shadow blur radius in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided shadow blur radius.
@@ -1193,7 +1192,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  Note that in order to see the shadow, you may also need to call
      *  {@link #shadowBlurRadius(double)} and {@link #shadowColor(Color)}. <br>
      *  Note that this property will not only be applied to the default shadow, but also any
-     *  other named shadow that you may have defined using {@link #shadow(String, Function)}.
+     *  other named shadow that you may have defined using {@link #shadow(String, Configurator)}.
      *
      * @param radius The shadow spread radius in pixels.
      * @return A new {@link ComponentStyleDelegate} with the provided shadow spread radius.
@@ -1208,10 +1207,10 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  {@link #shadowBlurRadius(double)} and {@link #shadowSpreadRadius(double)}. <br>
      *  The shadow will be rendered on the {@link UI.Layer#CONTENT} layer,
      *  if you want it to be rendered on a different layer, you
-     *  may want to take a look at {@link #shadow(UI.Layer, String, Function)}. <br>
+     *  may want to take a look at {@link #shadow(UI.Layer, String, Configurator)}. <br>
      *  <br>
      *  Note that this property will not only be applied to the default shadow, but also any
-     *  other named shadow that you may have defined using {@link #shadow(String, Function)}
+     *  other named shadow that you may have defined using {@link #shadow(String, Configurator)}
      *  (and which are also rendered on the {@link UI.Layer#CONTENT} layer).
      *
      * @param color The shadow color.
@@ -1228,10 +1227,10 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  {@link #shadowBlurRadius(double)} and {@link #shadowSpreadRadius(double)}. <br>
      *  The shadow will be rendered on the {@link UI.Layer#CONTENT} layer,
      *  if you want it to be rendered on a different layer, you
-     *  may want to take a look at {@link #shadow(UI.Layer, String, Function)}. <br>
+     *  may want to take a look at {@link #shadow(UI.Layer, String, Configurator)}. <br>
      *  <br>
      *  Note that this property will not only be applied to the default shadow, but also any
-     *  other named shadow that you may have defined using {@link #shadow(String, Function)}
+     *  other named shadow that you may have defined using {@link #shadow(String, Configurator)}
      *  (and which are also rendered on the {@link UI.Layer#CONTENT} layer).
      *
      * @param colorString The shadow color.
@@ -1257,10 +1256,10 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  {@link #shadowBlurRadius(double)} and {@link #shadowSpreadRadius(double)}. <br>
      *  The shadow will be rendered on the {@link UI.Layer#CONTENT} layer,
      *  if you want it to be rendered on a different layer, you
-     *  may want to take a look at {@link #shadow(UI.Layer, String, Function)}. <br>
+     *  may want to take a look at {@link #shadow(UI.Layer, String, Configurator)}. <br>
      *  <br>
      *  Note that this property will not only be applied to the default shadow, but also any
-     *  other named shadow that you may have defined using {@link #shadow(String, Function)}
+     *  other named shadow that you may have defined using {@link #shadow(String, Configurator)}
      *  (and which are also rendered on the {@link UI.Layer#CONTENT} layer).
      *
      * @param r The red component of the shadow color in the range of 0.0 to 1.0.
@@ -1280,10 +1279,10 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  {@link #shadowBlurRadius(double)} and {@link #shadowSpreadRadius(double)}. <br>
      *  The shadow will be rendered on the {@link UI.Layer#CONTENT} layer,
      *  if you want it to be rendered on a different layer, you
-     *  may want to take a look at {@link #shadow(UI.Layer, String, Function)}. <br>
+     *  may want to take a look at {@link #shadow(UI.Layer, String, Configurator)}. <br>
      *  <br>
      *  Note that this property will not only be applied to the default shadow, but also any
-     *  other named shadow that you may have defined using {@link #shadow(String, Function)}
+     *  other named shadow that you may have defined using {@link #shadow(String, Configurator)}
      *  (and which are also rendered on the {@link UI.Layer#CONTENT} layer).
      *
      * @param r The red component of the shadow color in the range of 0.0 to 1.0.
@@ -1299,7 +1298,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
     /**
      *  Use this to control whether your shadows should be rendered inwards or outwards. <br>
      *  Note that this property will be applied to all shadow effects of all layers, including
-     *  the default shadow and named shadows defined using {@link #shadow(String, Function)}. <br>
+     *  the default shadow and named shadows defined using {@link #shadow(String, Configurator)}. <br>
      *  The default value is {@code false}.
      *
      * @param inwards Whether the shadow should be rendered inwards or outwards.
@@ -1339,7 +1338,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param styler A function that takes a {@link ShadowConf} and returns a new {@link ShadowConf}.
      * @return A new {@link ComponentStyleDelegate} with a named shadow defined by the provided styler lambda.
      */
-    public ComponentStyleDelegate<C> shadow( String shadowName, Function<ShadowConf, ShadowConf> styler ) {
+    public ComponentStyleDelegate<C> shadow( String shadowName, Configurator<ShadowConf> styler ) {
         return shadow(ShadowConf.DEFAULT_LAYER, shadowName, styler);
     }
 
@@ -1388,13 +1387,13 @@ public final class ComponentStyleDelegate<C extends JComponent>
     public ComponentStyleDelegate<C> shadow(
         UI.Layer layer,
         String shadowName,
-        Function<ShadowConf, ShadowConf> styler
+        Configurator<ShadowConf> styler
     ) {
         Objects.requireNonNull(shadowName);
         Objects.requireNonNull(styler);
         ShadowConf shadow = Optional.ofNullable(_styleConf.shadow(layer, shadowName)).orElse(ShadowConf.none());
         // We clone the shadow map:
-        NamedConfigs<ShadowConf> newShadows = _styleConf.shadowsMap(layer).withNamedStyle(shadowName, styler.apply(shadow));
+        NamedConfigs<ShadowConf> newShadows = _styleConf.shadowsMap(layer).withNamedStyle(shadowName, styler.configure(shadow));
         return _withStyle(_styleConf._withShadow(layer, newShadows));
     }
 
@@ -1417,14 +1416,14 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *    )
      * }</pre>
      * Note that the background shades will be rendered in alphabetical order based on the name of the shade.<br>
-     * This method translates to {@link #gradient(UI.Layer, String, Function)} but with the
+     * This method translates to {@link #gradient(UI.Layer, String, Configurator)} but with the
      * layer set to {@link UI.Layer#BACKGROUND}.
      *
      * @param shadeName The name of the background shade.
      * @param styler A function that takes a {@link GradientConf} and returns a new {@link GradientConf}.
      * @return A new {@link ComponentStyleDelegate} with a named background shade defined by the provided styler lambda.
      */
-    public ComponentStyleDelegate<C> gradient( String shadeName, Function<GradientConf, GradientConf> styler ) {
+    public ComponentStyleDelegate<C> gradient( String shadeName, Configurator<GradientConf> styler ) {
         return gradient(GradientConf.DEFAULT_LAYER, shadeName, styler);
     }
 
@@ -1457,7 +1456,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
     public ComponentStyleDelegate<C> gradient(
         UI.Layer layer,
         String shadeName,
-        Function<GradientConf, GradientConf> styler
+        Configurator<GradientConf> styler
     ) {
         Objects.requireNonNull(shadeName);
         Objects.requireNonNull(styler);
@@ -1477,13 +1476,13 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *        )
      *    )
      * }</pre>
-     * This method translates to {@link #gradient(UI.Layer, String, Function)} but with the
+     * This method translates to {@link #gradient(UI.Layer, String, Configurator)} but with the
      * layer set to {@link UI.Layer#BACKGROUND} and the name being the "default" style name
      *
      * @param styler A function that takes a {@link GradientConf} and returns a new {@link GradientConf}.
      * @return A new {@link ComponentStyleDelegate} with a background shade defined by the provided styler lambda.
      */
-    public ComponentStyleDelegate<C> gradient( Function<GradientConf, GradientConf> styler ) {
+    public ComponentStyleDelegate<C> gradient( Configurator<GradientConf> styler ) {
         return gradient(GradientConf.DEFAULT_LAYER, StyleUtil.DEFAULT_KEY, styler);
     }
 
@@ -1500,14 +1499,14 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *        )
      *    )
      * }</pre>
-     * Note that this method translates to {@link #gradient(UI.Layer, String, Function)} but with the
+     * Note that this method translates to {@link #gradient(UI.Layer, String, Configurator)} but with the
      * name being the "default" style name.
      *
      * @param layer The layer on which the gradient should be rendered.
      * @param styler A function that takes a {@link GradientConf} and returns a new {@link GradientConf}.
      * @return A new {@link ComponentStyleDelegate} with a background shade defined by the provided styler lambda.
      */
-    public ComponentStyleDelegate<C> gradient( UI.Layer layer, Function<GradientConf, GradientConf> styler ) {
+    public ComponentStyleDelegate<C> gradient( UI.Layer layer, Configurator<GradientConf> styler ) {
         Objects.requireNonNull(styler);
         return _withStyle(_styleConf.gradient(layer, StyleUtil.DEFAULT_KEY, styler));
     }
@@ -1528,14 +1527,14 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *        )
      *    )
      * }</pre>
-     * Note that this method translates to {@link #noise(UI.Layer, String, Function)} but with the
+     * Note that this method translates to {@link #noise(UI.Layer, String, Configurator)} but with the
      * layer set to {@link UI.Layer#BACKGROUND}.
      *
      * @param noiseName The name of the noise which is used to create, identify and possibly override a noise with the same name.
      * @param styler A function that takes a {@link NoiseConf} and returns a new {@link NoiseConf}.
      * @return A new {@link ComponentStyleDelegate} with a background noise defined by the provided styler lambda.
      */
-    public ComponentStyleDelegate<C> noise( String noiseName, Function<NoiseConf, NoiseConf> styler ) {
+    public ComponentStyleDelegate<C> noise( String noiseName, Configurator<NoiseConf> styler ) {
         Objects.requireNonNull(noiseName);
         Objects.requireNonNull(styler);
         return noise(NoiseConf.DEFAULT_LAYER, noiseName, styler);
@@ -1562,7 +1561,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param styler A function that takes a {@link NoiseConf} and returns a new {@link NoiseConf}.
      * @return A new {@link ComponentStyleDelegate} with a background noise defined by the provided styler lambda.
      */
-    public ComponentStyleDelegate<C> noise( UI.Layer layer, String noiseName, Function<NoiseConf, NoiseConf> styler ) {
+    public ComponentStyleDelegate<C> noise( UI.Layer layer, String noiseName, Configurator<NoiseConf> styler ) {
         Objects.requireNonNull(noiseName);
         Objects.requireNonNull(styler);
         return _withStyle(_styleConf.noise(layer, noiseName, styler));
@@ -1584,13 +1583,13 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *        )
      *    )
      * }</pre>
-     * Note that this method translates to {@link #noise(UI.Layer, String, Function)} but with the
+     * Note that this method translates to {@link #noise(UI.Layer, String, Configurator)} but with the
      * layer set to {@link UI.Layer#BACKGROUND} and the name being the "default" style name.
      *
      * @param styler A function that takes a {@link NoiseConf} and returns a new {@link NoiseConf}.
      * @return A new {@link ComponentStyleDelegate} with a background noise defined by the provided styler lambda.
      */
-    public ComponentStyleDelegate<C> noise( Function<NoiseConf, NoiseConf> styler ) {
+    public ComponentStyleDelegate<C> noise( Configurator<NoiseConf> styler ) {
         Objects.requireNonNull(styler);
         return noise(NoiseConf.DEFAULT_LAYER, StyleUtil.DEFAULT_KEY, styler);
     }
@@ -1618,7 +1617,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param styler A function that takes a {@link ImageConf} and returns a new {@link ImageConf}.
      * @return A new {@link ComponentStyleDelegate} with a named background image defined by the provided styler lambda.
      */
-    public ComponentStyleDelegate<C> image( String imageName, Function<ImageConf, ImageConf> styler ) {
+    public ComponentStyleDelegate<C> image( String imageName, Configurator<ImageConf> styler ) {
         Objects.requireNonNull(imageName);
         Objects.requireNonNull(styler);
         return image(ImageConf.DEFAULT_LAYER, imageName, styler);
@@ -1656,7 +1655,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param styler A function that takes a {@link ImageConf} and returns a new {@link ImageConf}.
      * @return A new {@link ComponentStyleDelegate} with a named background image defined by the provided styler lambda.
      */
-    public ComponentStyleDelegate<C> image( UI.Layer layer, String imageName, Function<ImageConf, ImageConf> styler ) {
+    public ComponentStyleDelegate<C> image( UI.Layer layer, String imageName, Configurator<ImageConf> styler ) {
         Objects.requireNonNull(imageName);
         Objects.requireNonNull(styler);
         return _withStyle(_styleConf.images(layer, imageName, styler));
@@ -1676,13 +1675,13 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *        )
      *    )
      * }</pre>
-     * Note that this method translates to {@link #image(UI.Layer, String, Function)} but with the
+     * Note that this method translates to {@link #image(UI.Layer, String, Configurator)} but with the
      * layer set to {@link UI.Layer#BACKGROUND} and the name being the "default" style name.
      *
      * @param styler A function that takes a {@link ImageConf} and returns a new {@link ImageConf}.
      * @return A new {@link ComponentStyleDelegate} with a background image defined by the provided styler lambda.
      */
-    public ComponentStyleDelegate<C> image( Function<ImageConf, ImageConf> styler ) {
+    public ComponentStyleDelegate<C> image( Configurator<ImageConf> styler ) {
         Objects.requireNonNull(styler);
         return image(ImageConf.DEFAULT_LAYER, StyleUtil.DEFAULT_KEY, styler);
     }
@@ -1701,14 +1700,14 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *        )
      *    )
      * }</pre>
-     * Note that this method translates to {@link #image(UI.Layer, String, Function)} but with the
+     * Note that this method translates to {@link #image(UI.Layer, String, Configurator)} but with the
      * name being the "default" style name.
      *
      * @param layer The layer on which the image should be rendered.
      * @param styler A function that takes a {@link ImageConf} and returns a new {@link ImageConf}.
      * @return A new {@link ComponentStyleDelegate} with a background image defined by the provided styler lambda.
      */
-    public ComponentStyleDelegate<C> image( UI.Layer layer, Function<ImageConf, ImageConf> styler ) {
+    public ComponentStyleDelegate<C> image( UI.Layer layer, Configurator<ImageConf> styler ) {
         Objects.requireNonNull(layer);
         Objects.requireNonNull(styler);
         return _withStyle(_styleConf.images(layer, StyleUtil.DEFAULT_KEY, styler));
@@ -1720,7 +1719,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  The sub-style exposed by this method adds <b>support for text rendering to
      *  all components not just text components</b>. <br>
      *  If you only want to style the {@link JComponent#getFont()} property of the component,
-     *  you can use {@link #componentFont(Function)} instead. <br>
+     *  you can use {@link #componentFont(Configurator)} instead. <br>
      *  <br>
      *  The first parameter is the name of the text style, which allows
      *  you to define any number of text styles for a single component
@@ -1731,11 +1730,11 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *               The configurator function is called with the default text style of the component.
      * @return A new {@link ComponentStyleDelegate} with the provided text style.
      *         Each unique name creates an additional text style for the component.
-     * @see #text(UI.Layer, String, Function)
-     * @see #text(Function)
+     * @see #text(UI.Layer, String, Configurator)
+     * @see #text(Configurator)
      * @throws NullPointerException If the provided styler or textName is {@code null}.
      */
-    public ComponentStyleDelegate<C> text( String textName, Function<TextConf, TextConf> styler ) {
+    public ComponentStyleDelegate<C> text( String textName, Configurator<TextConf> styler ) {
         Objects.requireNonNull(textName);
         Objects.requireNonNull(styler);
         return text(TextConf.DEFAULT_LAYER, textName, styler);
@@ -1747,7 +1746,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  The sub-style exposed by this method adds <b>support for text rendering to
      *  all components not just text components</b>. <br>
      *  If you only want to style the {@link JComponent#getFont()} property of the component,
-     *  you can use {@link #componentFont(Function)} instead. <br>
+     *  you can use {@link #componentFont(Configurator)} instead. <br>
      *  <br>
      *  The first parameter is the name of the text style, which allows
      *  you to define any number of text styles for a single component
@@ -1760,11 +1759,11 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @param styler A configurator function that takes a {@link TextConf} and returns an updated {@link TextConf}.
      *               The configurator function is called with the default text style of the component.
      * @return A new {@link ComponentStyleDelegate} with the provided text style.
-     * @see #text(String, Function)
-     * @see #text(Function)
+     * @see #text(String, Configurator)
+     * @see #text(Configurator)
      * @throws NullPointerException If the provided styler or textName is {@code null}.
      */
-    public ComponentStyleDelegate<C> text( UI.Layer layer, String textName, Function<TextConf, TextConf> styler ) {
+    public ComponentStyleDelegate<C> text( UI.Layer layer, String textName, Configurator<TextConf> styler ) {
         Objects.requireNonNull(textName);
         Objects.requireNonNull(styler);
         return _withStyle(_styleConf.text(layer, textName, styler));
@@ -1776,16 +1775,16 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  The sub-style exposed by this method adds <b>support for text rendering to
      *  all components not just text components</b>. <br>
      *  If you only want to style the {@link JComponent#getFont()} property of the component,
-     *  you can use {@link #componentFont(Function)} instead. <br>
+     *  you can use {@link #componentFont(Configurator)} instead. <br>
      *
      * @param styler A configurator function that takes a {@link TextConf} and returns an updated {@link TextConf}.
      *               The configurator function is called with the default text style of the component.
      * @return A new {@link ComponentStyleDelegate} with the provided text style.
-     * @see #text(UI.Layer, String, Function)
-     * @see #text(String, Function)
+     * @see #text(UI.Layer, String, Configurator)
+     * @see #text(String, Configurator)
      * @throws NullPointerException If the provided styler is {@code null}.
      */
-    public ComponentStyleDelegate<C> text( Function<TextConf, TextConf> styler ) {
+    public ComponentStyleDelegate<C> text( Configurator<TextConf> styler ) {
         Objects.requireNonNull(styler);
         return text(TextConf.DEFAULT_LAYER, StyleUtil.DEFAULT_KEY, styler);
     }
@@ -1812,14 +1811,14 @@ public final class ComponentStyleDelegate<C extends JComponent>
         return _withStyle(_styleConf.property(key, value));
     }
 
-    public ComponentStyleDelegate<C> parentFilter( Function<FilterConf, FilterConf> filterStyler ) {
+    public ComponentStyleDelegate<C> parentFilter( Configurator<FilterConf> filterStyler ) {
         Objects.requireNonNull(filterStyler);
         return _withStyle(_styleConf._withLayers(_styleConf.layers().filter(filterStyler)));
     }
 
-    private ComponentStyleDelegate<C> _withFont( Function<FontConf, FontConf> fontStyler ) {
+    private ComponentStyleDelegate<C> _withFont( Configurator<FontConf> fontStyler ) {
         Objects.requireNonNull(fontStyler);
-        StyleConf updatedStyle = _styleConf._withFont(fontStyler.apply(_styleConf.font()));
+        StyleConf updatedStyle = _styleConf._withFont(fontStyler.configure(_styleConf.font()));
         // We also update the text style, if it exists:
         updatedStyle = updatedStyle.text( text -> text.font(fontStyler) );
         return _withStyle(updatedStyle);
@@ -1830,7 +1829,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  font property of the component (see {@link JComponent#getFont()}). <br>
      *  If you want to style the text of the entire component, which includes both
      *  the component font property as well as the style engine based font render
-     *  (see {@link #text(String, Function)}), you can simply
+     *  (see {@link #text(String, Configurator)}), you can simply
      *  call the regular font styling methods such as {@link #font(String, int)},
      *  {@link #font(Font)}, {@link #fontFamily(String)}, {@link #fontSize(int)},
      *  {@link #fontBold(boolean)}, {@link #fontItalic(boolean)}, {@link #fontUnderline(boolean)}...
@@ -1840,9 +1839,9 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided font style
      *          applied to the font property of the component.
      */
-    public final ComponentStyleDelegate<C> componentFont( Function<FontConf, FontConf> fontStyler ) {
+    public final ComponentStyleDelegate<C> componentFont( Configurator<FontConf> fontStyler ) {
         Objects.requireNonNull(fontStyler);
-        StyleConf updatedStyle = _styleConf._withFont(fontStyler.apply(_styleConf.font()));
+        StyleConf updatedStyle = _styleConf._withFont(fontStyler.configure(_styleConf.font()));
         return _withStyle(updatedStyle);
     }
 
@@ -1852,9 +1851,9 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  also supports displaying text, or has a custom text style (see {@link TextConf}).<br>
      *  <p>
      *  Note that this font style will be applied to both the component font property
-     *  and the style engine based text (see {@link #text(String, Function)}).
+     *  and the style engine based text (see {@link #text(String, Configurator)}).
      *  If you only want to style the component font property, you can use
-     *  {@link #componentFont(Function)}.
+     *  {@link #componentFont(Configurator)}.
      *
      * @param name The font name.
      * @param size The font size.
@@ -1871,9 +1870,9 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  also supports displaying text, or has a custom text style (see {@link TextConf}).<br>
      *  <p>
      *  Note that this font style will be applied to both the component font property
-     *  and the style engine based text (see {@link #text(String, Function)}).
+     *  and the style engine based text (see {@link #text(String, Configurator)}).
      *  If you only want to style the component font property, you can use
-     *  {@link #componentFont(Function)}.
+     *  {@link #componentFont(Configurator)}.
      *
      * @param name The font name.
      * @return A new {@link ComponentStyleDelegate} with the provided font name.
@@ -1889,9 +1888,9 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  also supports displaying text, or has a custom text style (see {@link TextConf}).<br>
      *  <p>
      *  Note that this font style will be applied to both the component font property
-     *  and the style engine based text (see {@link #text(String, Function)}).
+     *  and the style engine based text (see {@link #text(String, Configurator)}).
      *  If you only want to style the component font property, you can use
-     *  {@link #componentFont(Function)}.
+     *  {@link #componentFont(Configurator)}.
      *
      * @param font The {@link Font}.
      * @return A new {@link ComponentStyleDelegate} with the provided {@link Font}.
@@ -1909,9 +1908,9 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  also supports displaying text, or has a custom text style (see {@link TextConf}).<br>
      *  <p>
      *  Note that this font style will be applied to both the component font property
-     *  and the style engine based text (see {@link #text(String, Function)}).
+     *  and the style engine based text (see {@link #text(String, Configurator)}).
      *  If you only want to style the component font property, you can use
-     *  {@link #componentFont(Function)}.
+     *  {@link #componentFont(Configurator)}.
      *
      * @param size The font size.
      * @return A new {@link ComponentStyleDelegate} with the provided font size.
@@ -1926,9 +1925,9 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  also supports displaying text, or has a custom text style (see {@link TextConf}).<br>
      *  <p>
      *  Note that this font style will be applied to both the component font property
-     *  and the style engine based text (see {@link #text(String, Function)}).
+     *  and the style engine based text (see {@link #text(String, Configurator)}).
      *  If you only want to style the component font property, you can use
-     *  {@link #componentFont(Function)}.
+     *  {@link #componentFont(Configurator)}.
      *
      * @param bold Whether the font should be bold or not.
      * @return A new {@link ComponentStyleDelegate} with the provided font boldness.
@@ -1943,9 +1942,9 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  also supports displaying text, or has a custom text style (see {@link TextConf}).<br>
      *  <p>
      *  Note that this font style will be applied to both the component font property
-     *  and the style engine based text (see {@link #text(String, Function)}).
+     *  and the style engine based text (see {@link #text(String, Configurator)}).
      *  If you only want to style the component font property, you can use
-     *  {@link #componentFont(Function)}.
+     *  {@link #componentFont(Configurator)}.
      *
      * @param italic Whether the font should be italic or not.
      * @return A new {@link ComponentStyleDelegate} with the provided font italicness.
@@ -1975,9 +1974,9 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  also supports displaying text, or has a custom text style (see {@link TextConf}).<br>
      *  <p>
      *  Note that this font style will be applied to both the component font property
-     *  and the style engine based text (see {@link #text(String, Function)}).
+     *  and the style engine based text (see {@link #text(String, Configurator)}).
      *  If you only want to style the component font property, you can use
-     *  {@link #componentFont(Function)}.
+     *  {@link #componentFont(Configurator)}.
      *
      * @param underline Whether the font should be underlined or not.
      * @return A new {@link ComponentStyleDelegate} with the provided font underlinedness.
@@ -1992,9 +1991,9 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  also supports displaying text, or has a custom text style (see {@link TextConf}).<br>
      *  <p>
      *  Note that this font style will be applied to both the component font property
-     *  and the style engine based text (see {@link #text(String, Function)}).
+     *  and the style engine based text (see {@link #text(String, Configurator)}).
      *  If you only want to style the component font property, you can use
-     *  {@link #componentFont(Function)}.
+     *  {@link #componentFont(Configurator)}.
      *
      * @param strikeThrough Whether the font should be struck through or not.
      * @return A new {@link ComponentStyleDelegate} with the provided font struck throughness.
@@ -2009,9 +2008,9 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  also supports displaying text, or has a custom text style (see {@link TextConf}).<br>
      *  <p>
      *  Note that this font style will be applied to both the component font property
-     *  and the style engine based text (see {@link #text(String, Function)}).
+     *  and the style engine based text (see {@link #text(String, Configurator)}).
      *  If you only want to style the component font property, you can use
-     *  {@link #componentFont(Function)}.
+     *  {@link #componentFont(Configurator)}.
      *
      * @param color The {@link Color}.
      * @return A new {@link ComponentStyleDelegate} with the provided font color.
@@ -2029,9 +2028,9 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  also supports displaying text, or has a custom text style (see {@link TextConf}).<br>
      *  <p>
      *  Note that this font style will be applied to both the component font property
-     *  and the style engine based text (see {@link #text(String, Function)}).
+     *  and the style engine based text (see {@link #text(String, Configurator)}).
      *  If you only want to style the component font property, you can use
-     *  {@link #componentFont(Function)}.
+     *  {@link #componentFont(Configurator)}.
      *
      * @param colorString The {@link Color} as a string.
      * @return A new {@link ComponentStyleDelegate} with the provided font color.
@@ -2047,9 +2046,9 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  also supports displaying text, or has a custom text style (see {@link TextConf}).<br>
      *  <p>
      *  Note that this font style will be applied to both the component font property
-     *  and the style engine based text (see {@link #text(String, Function)}).
+     *  and the style engine based text (see {@link #text(String, Configurator)}).
      *  If you only want to style the component font property, you can use
-     *  {@link #componentFont(Function)}.
+     *  {@link #componentFont(Configurator)}.
      *
      * @param color The {@link Color}.
      * @return A new {@link ComponentStyleDelegate} with the provided font background color.
@@ -2067,9 +2066,9 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  also supports displaying text, or has a custom text style (see {@link TextConf}).<br>
      *  <p>
      *  Note that this font style will be applied to both the component font property
-     *  and the style engine based text (see {@link #text(String, Function)}).
+     *  and the style engine based text (see {@link #text(String, Configurator)}).
      *  If you only want to style the component font property, you can use
-     *  {@link #componentFont(Function)}.
+     *  {@link #componentFont(Configurator)}.
      *
      * @param colorString The {@link Color} as a string.
      * @return A new {@link ComponentStyleDelegate} with the provided font color.
@@ -2085,9 +2084,9 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  also supports displaying text, or has a custom text style (see {@link TextConf}).<br>
      *  <p>
      *  Note that this font style will be applied to both the component font property
-     *  and the style engine based text (see {@link #text(String, Function)}).
+     *  and the style engine based text (see {@link #text(String, Configurator)}).
      *  If you only want to style the component font property, you can use
-     *  {@link #componentFont(Function)}.
+     *  {@link #componentFont(Configurator)}.
      *
      * @param color The {@link Color}.
      * @return A new {@link ComponentStyleDelegate} with the provided font selection color.
@@ -2105,9 +2104,9 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  also supports displaying text, or has a custom text style (see {@link TextConf}).<br>
      *  <p>
      *  Note that this font style will be applied to both the component font property
-     *  and the style engine based text (see {@link #text(String, Function)}).
+     *  and the style engine based text (see {@link #text(String, Configurator)}).
      *  If you only want to style the component font property, you can use
-     *  {@link #componentFont(Function)}.
+     *  {@link #componentFont(Configurator)}.
      *
      * @param colorString The {@link Color} as a string.
      * @return A new {@link ComponentStyleDelegate} with the provided font selection color.
@@ -2164,9 +2163,9 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  also supports displaying text, or has a custom text style (see {@link TextConf}).<br>
      *  <p>
      *  Note that this font style will be applied to both the component font property
-     *  and the style engine based text (see {@link #text(String, Function)}).
+     *  and the style engine based text (see {@link #text(String, Configurator)}).
      *  If you only want to style the component font property, you can use
-     *  {@link #componentFont(Function)}.
+     *  {@link #componentFont(Configurator)}.
      * @param weight The weight of the font.
      * @return A new {@link ComponentStyleDelegate} with the provided font weight.
      */
