@@ -5322,7 +5322,10 @@ public abstract class UIFactoryMethods extends UILayoutConstants
 
     /**
      *  Use this to quickly launch a UI component in a {@link JFrame} window
-     *  at the center of the screen.
+     *  at the center of the screen.<br>
+     *  <b>Warning: This method should only be invoked from the Event Dispatch Thread (EDT).
+     *  You may encounter unexpected behavior if you call this method from another thread.<br>
+     *  Use {@link #show(Function)} instead to ensure that the UI is created on the EDT.</b>
      *
      * @param component The component to show in the window.
      */
@@ -5333,7 +5336,10 @@ public abstract class UIFactoryMethods extends UILayoutConstants
 
     /**
      *  Use this to quickly launch a UI component in a titled {@link JFrame} window
-     *  at the center of the screen.
+     *  at the center of the screen.<br>
+     *  <b>Warning: This method should only be invoked from the Event Dispatch Thread (EDT).
+     *  You may encounter unexpected behavior if you call this method from another thread.<br>
+     *  Use {@link #show(String, Function)} instead to ensure that the UI is created on the EDT.</b>
      *
      * @param title The title of the window.
      * @param component The component to show in the window.
@@ -5345,7 +5351,10 @@ public abstract class UIFactoryMethods extends UILayoutConstants
 
     /**
      *  Use this to quickly launch a UI component in a {@link JFrame} window
-     *  at the center of the screen.
+     *  at the center of the screen. <br>
+     *  <b>Warning: This method should only be invoked from the Event Dispatch Thread (EDT).
+     *  You may encounter unexpected behavior if you call this method from another thread.<br>
+     *  Use {@link #show(Function)} instead to ensure that the UI is created on the EDT.</b>
      *
      * @param ui The SwingTree UI to show in the window.
      * @param <C> The type of the component to show in the window.
@@ -5356,8 +5365,11 @@ public abstract class UIFactoryMethods extends UILayoutConstants
 
     /**
      *  Use this to quickly launch a UI component in a titled {@link JFrame} window
-     *  at the center of the screen.
-     *
+     *  at the center of the screen. <br>
+     *  <b>Warning: This method should only be invoked from the Event Dispatch Thread (EDT).
+     *  You may encounter unexpected behavior if you call this method from another thread.<br>
+     *  Use {@link #show(String, Function)} instead to ensure that the UI is created on the EDT.</b>
+     *  
      * @param title The title of the window.
      * @param ui The SwingTree UI to show in the window.
      * @param <C> The type of the component to show in the window.
