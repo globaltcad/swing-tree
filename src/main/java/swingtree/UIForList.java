@@ -187,7 +187,7 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
      *  A typical usage of this method would look like this:
      *  <pre>{@code
      *   listOf(vm.colors())
-     *   .withRenderer( it -> new Component() {
+     *   .withRenderComponent( it -> new Component() {
      *     {@literal @}Override
      *     public void paint(Graphics g) {
      *       g.setColor(it.entry().orElse(Color.PINK));
@@ -263,11 +263,11 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
     }
 
     /**
-     *  Use this to build a list cell renderer for various item types.
-     *  You would typically want to use this method to render generic types where the only
-     *  common type is {@link Object}, yet you want to render the item
-     *  in a specific way depending on their actual type.
-     *  This is done like so:
+     *  Use this to build a list cell renderer for various item types
+     *  by defining a renderer for each type or using {@link Object} as a common type
+     *  using the fluent builder API exposed to the {@link Configurator}
+     *  lambda function passed to this method. <br>
+     *  A typical usage may look something like this:
      *  <pre>{@code
      *  UI.list(new Object[]{":-)", 42L, '§'})
      *  .withRenderer( it -> it
@@ -278,7 +278,7 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
      *  }</pre>
      *  Note that a similar API is also available for the {@link javax.swing.JComboBox}
      *  and {@link javax.swing.JTable} components, see {@link UIForCombo#withRenderer(Configurator)},
-     *  {@link UIForTable#withRenderer(Configurator)} and {@link UI#table(Configurator)}
+     *  {@link UIForTable#withRenderer(Configurator)} and {@link UIForTable#withRendererForColumn(int, Configurator)}
      *  for more information.
      *
      * @param renderBuilder A lambda function that configures the renderer for this combo box.

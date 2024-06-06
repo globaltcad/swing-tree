@@ -3,9 +3,18 @@ package swingtree.api;
 /**
  *  A configurator is a functional interface that takes a configuration object and
  *  returns a transformed configuration object.
- *  Typically, this configuration object is an immutable builder object.
+ *  Typically, this configuration object is an immutable builder type.
+ *  It is commonly used to configure table models or cell renderer,
+ *  check out the following methods for these additional usage sites:
+ *  <ul>
+ *      <li>{@link swingtree.UIForTable#withModel(Configurator)}</li>
+ *      <li>{@link swingtree.UIForTable#withModel(Class, Configurator)} </li>
+ *      <li>{@link swingtree.UIForTable#withRenderer(Configurator)} </li>
+ *      <li>{@link swingtree.UIForList#withRenderer(Configurator)} </li>
+ *      <li>{@link swingtree.UIForCombo#withRenderer(Configurator)} </li>
+ *  </ul>
  *  <p>
- *  This interface is primarily used to configure the style configuration objects
+ *  Configurators are also heavily used for defining the <i>style</i>
  *  of components through the {@link swingtree.UIForAnySwing#withStyle(Styler)}
  *  method or when writing a custom {@link swingtree.style.StyleSheet}.
  *
@@ -17,8 +26,10 @@ public interface Configurator<T>
     /**
      *  Configures the given configuration object and returns the transformed configuration object.
      *
-     * @param config the configuration object
-     * @return the transformed configuration object
+     * @param config The configuration object, typically an immutable builder type
+     *               which uses method chaining to for defining its properties.
+     *
+     * @return The fully transformed/updated configuration object.
      */
     T configure( T config );
 }
