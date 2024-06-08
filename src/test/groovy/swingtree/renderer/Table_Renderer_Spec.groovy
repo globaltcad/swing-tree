@@ -1,9 +1,9 @@
 package swingtree.renderer
 
 
+import swingtree.CellInterpreter
 import swingtree.SwingTree
 import swingtree.threading.EventProcessor
-import swingtree.Render
 import swingtree.UI
 import spock.lang.Narrative
 import spock.lang.Specification
@@ -45,7 +45,7 @@ class Table_Renderer_Spec extends Specification
                 A mocked cell interpreter which interprets the state of the table cell
                 and then defines how it should be rendered (by setting a UI component).
             """
-            var render = Mock(Render.Cell.Interpreter)
+            var render = Mock(CellInterpreter)
 
         when : 'We attach the interpreter to a table renderer which we then attach to the table.'
             ui = ui.withRendererForColumn("A", it->it.when(String).as(render) )
@@ -73,7 +73,7 @@ class Table_Renderer_Spec extends Specification
                 A mocked cell interpreter which interprets the state of the table cell
                 and then defines how it should be rendered (by setting a UI component).
             """
-            var render = Mock(Render.Cell.Interpreter)
+            var render = Mock(CellInterpreter)
 
         expect : 'The table UI has the following state:'
             table.getColumnName(0) == "A" // default column names
@@ -112,7 +112,7 @@ class Table_Renderer_Spec extends Specification
                 A mocked cell interpreter which interprets the state of the table cell
                 and then defines how it should be rendered (by setting a UI component).
             """
-            var render = Mock(Render.Cell.Interpreter)
+            var render = Mock(CellInterpreter)
 
         expect : 'The table UI has the following state:'
             table.getColumnName(0) == "A" // default column names
@@ -153,7 +153,7 @@ class Table_Renderer_Spec extends Specification
                 A mocked cell interpreter which interprets the state of the table cell
                 and then defines how it should be rendered (by setting a UI component).
             """
-            var render = Mock(Render.Cell.Interpreter)
+            var render = Mock(CellInterpreter)
 
         expect : 'The table UI has the following state:'
             table.getColumnName(0) == "X"
