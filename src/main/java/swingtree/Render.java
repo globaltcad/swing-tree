@@ -330,7 +330,7 @@ public final class Render<C extends JComponent,E>
 					Component[] componentRef = new Component[1];
 					Object[] defaultValueRef = new Object[1];
 					List<String> toolTips = new ArrayList<>();
-					CellDelegate<JTable,Object> cell = new BasicCellDelegate(
+					CellDelegate<JTable,Object> cell = new CellDelegate(
 																table, value, isSelected, hasFocus, row, column,
 																componentRef, toolTips, defaultValueRef,
 																c-> SimpleTableCellRenderer.super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column)
@@ -377,7 +377,7 @@ public final class Render<C extends JComponent,E>
 					Component[] componentRef = new Component[1];
 					Object[] defaultValueRef = new Object[1];
 					List<String> toolTips = new ArrayList<>();
-					CellDelegate<O,Object> cell = new BasicCellDelegate<>(
+					CellDelegate<O,Object> cell = new CellDelegate<>(
 															_component, value, isSelected, hasFocus, row,
 														0, componentRef, toolTips, defaultValueRef,
 															c -> super.getListCellRendererComponent(list, value, row, isSelected, hasFocus)
