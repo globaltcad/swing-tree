@@ -1,4 +1,6 @@
-package swingtree;
+package swingtree.api;
+
+import swingtree.CellDelegate;
 
 import javax.swing.JComponent;
 import java.awt.Component;

@@ -1,7 +1,7 @@
 package swingtree.renderer
 
 
-import swingtree.CellInterpreter
+import swingtree.api.CellInterpreter
 import swingtree.SwingTree
 import swingtree.threading.EventProcessor
 import swingtree.UI

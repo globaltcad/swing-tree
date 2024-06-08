@@ -2,6 +2,7 @@ package swingtree;
 
 import com.google.errorprone.annotations.Immutable;
 import org.slf4j.Logger;
+import swingtree.api.CellInterpreter;
 
 import javax.swing.*;
 import javax.swing.border.Border;
