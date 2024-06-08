@@ -432,9 +432,12 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     }
 
     /**
-     *  Use this to make the wrapped UI component dynamically selected or deselected,
-     *  based on the equality between the supplied enum value and enum property. <br>
-     *  So to illustrate: <br>
+     *  Use this to dynamically bind the selection flag of the button to a {@link Val}
+     *  property which will determine the selection state of the button based on the
+     *  equality of the property value and the provided reference value.
+     *  So if the first {@code state} argument is equal to the value of the {@code selection} property,
+     *  the button will be selected, otherwise it will be deselected.<br>
+     *  A typical use case is to bind a button to an enum property, like so: <br>
      *  <pre>{@code
      *      // In your view model:
      *      enum Step { ONE, TWO, THREE }
@@ -448,38 +451,53 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *  <br>
      * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
-     * @param enumValue The enum value which, if equal to the supplied enum property, makes the UI component selected.
-     * @param enumProperty The enum property which, if equal to the supplied enum value, makes the UI component selected.
-     * @param <E> The type of the enum.
-     * @return This very instance, which enables builder-style method chaining.
+     * @param state The reference value which the button type should represent when selected.
+     * @param selection The {@link sprouts.Val} instance which will be used
+     *                  to dynamically model the selection state of the wrapped button type
+     *                  based on the equality of the {@code state} argument and the value of the property.
+     * @param <T> The type of the property value.
+     * @return The current builder type, to allow for further method chaining.
+     * @throws IllegalArgumentException if {@code selected} is {@code null}.
      */
-    public final <E extends Enum<E>> I isSelectedIf( E enumValue, Val<E> enumProperty ) {
-        NullUtil.nullArgCheck(enumValue, "enumValue", Enum.class);
-        NullUtil.nullArgCheck(enumProperty, "enumProperty", Val.class);
-        return _withOnShow( enumProperty, (c,v) -> _setSelectedSilently(c, enumValue.equals(v)) )
+    public final <T> I isSelectedIf( T state, Val<T> selection ) {
+        NullUtil.nullArgCheck(state, "state", Object.class);
+        NullUtil.nullArgCheck(selection, "selection", Val.class);
+        return _withOnShow( selection, (c,v) -> _setSelectedSilently(c, state.equals(v)) )
                 ._with( button ->
-                     _setSelectedSilently(button, enumValue.equals(enumProperty.orElseThrow()))
+                     _setSelectedSilently(button, state.equals(selection.orElseThrow()))
                 )
                 ._this();
     }
 
     /**
-     *  This is the inverse of {@link #isSelectedIf(Enum, Val)}.
+     *  This is the inverse of {@link #isSelectedIf(Object, Val)}.
      *  Use this to make the wrapped UI component dynamically deselected or selected,
-     *  based on the equality between the supplied enum value and enum property. <br>
-     * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     *  based on the equality between the supplied value and the property value. <br>
+     *  <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i><br>
+     *  A typical use case is to bind to an enum property, like so: <br>
+     *  <pre>{@code
+     *      // In your view model:
+     *      enum Step { ONE, TWO, THREE }
+     *      Var<Step> step = Var.of(Step.ONE);
      *
-     * @param enumValue The enum value which, if equal to the supplied enum property, makes the UI component deselected.
-     * @param enumProperty The enum property which, if equal to the supplied enum value, makes the UI component deselected.
-     * @param <E> The type of the enum.
+     *      // In your view:
+     *      UI.radioButton("Not Two")
+     *      .isSelectedIfNot(Step.TWO, vm.getStep());
+     *  }</pre>
+     *  As you can see, the radio button will be selected if the enum property is equal to the supplied enum value
+     *  and deselected otherwise. <br>
+     *
+     * @param state The value which, if equal to the supplied property value, makes the UI component deselected.
+     * @param selection The enum property which, if equal to the supplied value, makes the UI component deselected.
+     * @param <T> The type of the value.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final <E extends Enum<E>> I isSelectedIfNot( E enumValue, Val<E> enumProperty ) {
-        NullUtil.nullArgCheck(enumValue, "enumValue", Enum.class);
-        NullUtil.nullArgCheck(enumProperty, "enumProperty", Val.class);
-        return _withOnShow( enumProperty, (c, v) -> _setSelectedSilently(c, !enumValue.equals(v)) )
+    public final <T> I isSelectedIfNot( T state, Val<T> selection ) {
+        NullUtil.nullArgCheck(state, "state", Object.class);
+        NullUtil.nullArgCheck(selection, "selection", Val.class);
+        return _withOnShow( selection, (c, v) -> _setSelectedSilently(c, !state.equals(v)) )
                 ._with( button ->
-                     _setSelectedSilently(button, !enumValue.equals(enumProperty.orElseThrow()))
+                     _setSelectedSilently(button, !state.equals(selection.orElseThrow()))
                 )
                 ._this();
     }

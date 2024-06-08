@@ -15,19 +15,34 @@ import javax.swing.JToggleButton;
 public abstract class UIForAnyToggleButton<I, B extends JToggleButton> extends UIForAnyButton<I, B>
 {
     /**
-     *  Use this to dynamically bind to an enum based {@link sprouts.Var}
-     *  instance which will be used to dynamically model the selection state of the
-     *  wrapped {@link JToggleButton} type by checking
-     *  weather the property matches the provided enum or not.
+     *  Use this to dynamically bind the selection flag of the button to a {@link Var}
+     *  property which will determine the selection state of the button based on the
+     *  equality of the property value and the provided reference value.
+     *  So if the first {@code state} argument is equal to the value of the {@code selection} property,
+     *  the button will be selected, otherwise it will be deselected.<br>
+     *  A typical use case is to bind a button to an enum property, like so: <br>
+     *  <pre>{@code
+     *      // In your view model:
+     *      enum Step { ONE, TWO, THREE }
+     *      Var<Step> step = Var.of(Step.ONE);
      *
-     * @param state The reference {@link Enum} which this {@link JToggleButton} should represent.
+     *      // In your view:
+     *      UI.radioButton("Two").isSelectedIf(Step.TWO, vm.getStep());
+     *  }</pre>
+     *  As you can see, the radio button will be selected if the enum property is equal to the supplied enum value
+     *  and deselected otherwise. <br>
+     *  <br>
+     * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
+     *
+     * @param state The reference value which this {@link JToggleButton} should represent.
      * @param selection The {@link sprouts.Var} instance which will be used
-     *                  to dynamically model the selection state of the wrapped {@link JToggleButton} type.
-     * @param <E> The type of the enum.
-     * @return This builder node.
+     *                  to dynamically model the selection state of the wrapped {@link JToggleButton} type
+     *                  based on the equality of the {@code state} argument and the value of the property.
+     * @param <E> The type of the property value.
+     * @return The current builder type, to allow for further method chaining.
      * @throws IllegalArgumentException if {@code selected} is {@code null}.
      */
-    public final <E extends Enum<E>> I isSelectedIf( E state, Var<E> selection ) {
+    public final <E> I isSelectedIf( E state, Var<E> selection ) {
         NullUtil.nullArgCheck(state, "state", Enum.class);
         NullUtil.nullArgCheck(selection, "selection", Var.class);
         NullUtil.nullPropertyCheck(selection, "selection", "Null is not a valid selection state.");
@@ -36,10 +51,6 @@ public abstract class UIForAnyToggleButton<I, B extends JToggleButton> extends U
                })
                ._with( button -> {
                    _setSelectedSilently(button, state.equals(selection.get()));
-                   String currentText = button.getText();
-                   if ( currentText == null || currentText.isEmpty() )
-                       button.setText( state.toString() );
-
                    // When the user clicks the button, we update the selection property!
                    // But only if the button is selected, otherwise we'll ignore the click.
                    // And we also trigger "set" events for the button, so that other buttons
@@ -51,4 +62,5 @@ public abstract class UIForAnyToggleButton<I, B extends JToggleButton> extends U
                })
                ._this();
     }
+
 }

@@ -3625,8 +3625,46 @@ public abstract class UIFactoryMethods extends UILayoutConstants
         NullUtil.nullPropertyCheck(selection, "selection", "The selection state of a radio button may not be modelled using null!");
         return new UIForRadioButton<>(new BuilderState<JRadioButton>(UI.RadioButton.class, UI.RadioButton::new))
                 .applyIf(!selection.hasNoID(), it -> it.id(selection.id()))
+                .withText( state.toString() )
                 .isSelectedIf( state, selection );
     }
+
+    /**
+     *  Creates a declarative UI builder for the {@link JRadioButton} component type which
+     *  is dynamically bound to the equality of the provided state and the provided selection property.
+     *  This means that the radio button will be selected if the provided state is
+     *  equal to the value of the provided selection property and deselected otherwise.
+     *  <br>
+     *  A typical use case for this is to use an enum based property to model the selection state of the radio button
+     *  like so:
+     *  <pre>{@code
+     *    // In your view model:
+     *    enum Size { SMALL, MEDIUM, LARGE }
+     *    private Var<Size> selection = Var.of(Size.SMALL);
+     *    public Var<Size> selection() { return selection; }
+     *    // In your view:
+     *    UI.panel()
+     *    .add(UI.radioButton("Small", Size.SMALL, vm.selection())
+     *    .add(UI.radioButton("Medium", Size.MEDIUM, vm.selection())
+     *    .add(UI.radioButton("Large", Size.LARGE, vm.selection())
+     *  }</pre>
+     *
+     * @param label The text which should be displayed on the radio button.
+     * @param state The reference object which this radio button should represent.
+     * @param selection The property which will be used to model the selection state of the radio button.
+     * @return A builder instance for the radio button, which enables fluent method chaining.
+     * @param <T> The type of the state object which this radio button should represent.
+     */
+    public static <T> UIForRadioButton<JRadioButton> radioButton( String label, T state, Var<T> selection ) {
+        NullUtil.nullArgCheck(state, "state", Object.class);
+        NullUtil.nullArgCheck(selection, "selection", Var.class);
+        NullUtil.nullPropertyCheck(selection, "selection", "The selection state of a radio button may not be modelled using null!");
+        return new UIForRadioButton<>(new BuilderState<JRadioButton>(UI.RadioButton.class, UI.RadioButton::new))
+                .applyIf(!selection.hasNoID(), it -> it.id(selection.id()))
+                .withText( label )
+                .isSelectedIf( state, selection );
+    }
+
 
     /**
      *  Use this to create a builder for the provided {@link JRadioButton} instance.
