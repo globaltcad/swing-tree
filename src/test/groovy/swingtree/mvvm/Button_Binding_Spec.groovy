@@ -284,10 +284,12 @@ class Button_Binding_Spec extends Specification
 
         when : 'We then change the property to the target value.'
             food.set(target)
+            UI.sync()
         then : 'The radio button is selected as the property value is equal to the target value.'
             radioButton.isSelected()
         when : 'We then change the property to a different value.'
             food.set("カレー")
+            UI.sync()
         then : 'The radio button is deselected again.'
             !radioButton.isSelected()
     }
@@ -329,10 +331,12 @@ class Button_Binding_Spec extends Specification
 
         when : 'We then change the property to the target value.'
             size.set(target)
+            UI.sync()
         then : 'The radio button is selected as the property value is equal to the target value.'
             radioButton.isSelected()
         when : 'We then change the property to a different value.'
             size.set(Size.MEDIUM)
+            UI.sync()
         then : 'The radio button is deselected again.'
             !radioButton.isSelected()
     }
