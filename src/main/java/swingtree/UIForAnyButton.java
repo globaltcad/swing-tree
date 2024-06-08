@@ -451,9 +451,9 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
      *  <br>
      * <i>Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.</i>
      *
-     * @param state The reference value which this {@link JToggleButton} should represent.
+     * @param state The reference value which the button type should represent when selected.
      * @param selection The {@link sprouts.Val} instance which will be used
-     *                  to dynamically model the selection state of the wrapped {@link JToggleButton} type
+     *                  to dynamically model the selection state of the wrapped button type
      *                  based on the equality of the {@code state} argument and the value of the property.
      * @param <T> The type of the property value.
      * @return The current builder type, to allow for further method chaining.
