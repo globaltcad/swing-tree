@@ -1,6 +1,10 @@
 package swingtree.mvvm
 
+import spock.lang.Subject
 import swingtree.SwingTree
+import swingtree.UIForAnyButton
+import swingtree.UIForRadioButton
+import swingtree.UIForToggleButton
 import swingtree.threading.EventProcessor
 import swingtree.UI
 import sprouts.Val
@@ -24,10 +28,18 @@ import javax.swing.JRadioButton
     an application, but also make it easy to create UIs which
     are dynamic and reactive.
     
+    A typical use case for button types is to bind
+    their selection state to a property in the view model.
+    This property may be boolean based, or something entirely
+    different.
+
 ''')
+@Subject([UIForAnyButton, UIForToggleButton, UIForRadioButton])
 class Button_Binding_Spec extends Specification
 {
     enum SelectionState { SELECTED, NOT_SELECTED }
+
+    enum Size { SMALL, MEDIUM, LARGE }
 
     def setupSpec() {
         SwingTree.get().setEventProcessor(EventProcessor.COUPLED)
@@ -188,11 +200,13 @@ class Button_Binding_Spec extends Specification
             Val<SelectionState> selectionState = Var.of(SelectionState.NOT_SELECTED)
 
         when : 'We create and bind to a button UI node...'
-            var ui = UI.button("").isSelectedIf(SelectionState.SELECTED, selectionState)
+            var ui = UI.button("test").isSelectedIf(SelectionState.SELECTED, selectionState)
         and : 'Build the component:'
             var button = ui.get(JButton)
         then : 'The button should be updated when the property is changed and shown.'
             button.selected == false
+        and : 'The button has the expected text.'
+            button.text == "test"
 
         when : 'We change the property value...'
             selectionState.set(SelectionState.SELECTED)
@@ -217,17 +231,109 @@ class Button_Binding_Spec extends Specification
             Val<SelectionState> selectionState = Var.of(SelectionState.NOT_SELECTED)
 
         when : 'We create and bind to a button UI node...'
-            var ui = UI.button("").isSelectedIfNot(SelectionState.SELECTED, selectionState)
+            var ui = UI.button("test").isSelectedIfNot(SelectionState.SELECTED, selectionState)
         and : 'Build the component:'
             var button = ui.get(JButton)
 
         then : 'The button should be updated when the property is changed and shown.'
             button.selected == true
+        and : 'The button has the expected text.'
+            button.text == "test"
 
         when : 'We change the property value...'
             selectionState.set(SelectionState.SELECTED)
             UI.sync()
         then : 'The button should be updated.'
             button.selected == false
+    }
+
+
+    def 'Directly bind any property to the selection state of a radio button.'()
+    {
+        reportInfo """
+            A typical use-case is for a radio button
+            to be selected in case of a property to
+            be equal to a certain value and deselected
+            otherwise.
+            
+            In this example, the property is String based.
+            and the radio button is selected in case the
+            property is equal to a specific target value.
+        """
+        given : """
+            We first create the variables which are typically 
+            used in the view model.
+            A property and a target value.
+        """
+            var food = Var.of("おにぎり")
+            var target = "ビーガン"
+        and : """
+            We then create a radio button and bind the selection
+            state of the radio button to the property.
+        """
+            var radioButton =
+                    UI.radioButton("Is Vegan", target, food)
+                    .get(JRadioButton.class)
+        expect : """
+            The radio button is deselected initially
+            because the property value is not equal to the target value.
+        """
+            !radioButton.isSelected()
+        and : 'The radio button has the expected text.'
+            radioButton.text == "Is Vegan"
+
+        when : 'We then change the property to the target value.'
+            food.set(target)
+        then : 'The radio button is selected as the property value is equal to the target value.'
+            radioButton.isSelected()
+        when : 'We then change the property to a different value.'
+            food.set("カレー")
+        then : 'The radio button is deselected again.'
+            !radioButton.isSelected()
+    }
+
+    def 'Directly bind an enum based property to the selection state of a radio button.'()
+    {
+        reportInfo """
+            A typical use-case is for a radio button
+            to be selected in case of an enum property to
+            be equal to a certain value and deselected
+            otherwise.
+            
+            In this example, the property is based on the following enum:
+            ```
+            enum Size { SMALL, MEDIUM, LARGE }
+            ```
+        """
+        given : """
+            We first create the variables which are typically 
+            used in the view model.
+            A property and a target value.
+        """
+            var size = Var.of(Size.SMALL)
+            var target = Size.LARGE
+        and : """
+            We then create a radio button and bind the selection
+            state of the radio button to the property.
+        """
+            var radioButton =
+                    UI.radioButton( target, size )
+                    .get(JRadioButton.class)
+        expect : """
+            The radio button is deselected initially
+            because the property value is not equal to the target value.
+        """
+            !radioButton.isSelected()
+        and : 'The radio button has the expected text.'
+            radioButton.text == "LARGE"
+
+        when : 'We then change the property to the target value.'
+            size.set(target)
+        then : 'The radio button is selected as the property value is equal to the target value.'
+            radioButton.isSelected()
+        when : 'We then change the property to a different value.'
+            size.set(Size.MEDIUM)
+        then : 'The radio button is deselected again.'
+            !radioButton.isSelected()
     }
 }
