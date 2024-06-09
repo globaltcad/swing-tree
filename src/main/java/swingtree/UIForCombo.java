@@ -18,6 +18,7 @@ import java.awt.event.ActionListener;
 import java.lang.ref.WeakReference;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  *  A SwingTree builder node designed for configuring {@link JComboBox} instances.
@@ -383,6 +384,19 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
                     thisComponent.setRenderer(renderer);
                 })
                 ._this();
+    }
+
+    /**
+     *  Use this to specify a custom text based cell renderer for each item in the combo box.
+     *  The renderer is a function that takes a {@link CellDelegate} as input
+     *  and returns a {@link String} which will be used as the text for the combo box item.
+     *
+     * @param renderer The function that will be used to render the combo box items.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final UIForCombo<E,C> withTextRenderer( Function<CellDelegate<C,E>, String> renderer ) {
+        Objects.requireNonNull(renderer, "renderer");
+        return withRenderer( it -> it.when((Class<E>) Object.class).asText( renderer ) );
     }
 
     /**
