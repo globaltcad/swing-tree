@@ -48,27 +48,40 @@ public class RenderBuilder<C extends JComponent, E> {
      *
      * @param valueType The type of cell value, for which you want custom rendering.
      * @param <T>       The type parameter of the cell value, for which you want custom rendering.
-     * @return The {@link Render.As} builder API step which expects you to provide a lambda for customizing how a cell is rendered.
+     * @return The {@link RenderAs} builder API step which expects you to provide a lambda for customizing how a cell is rendered.
      */
-    public <T extends E> Render.As<C, E, T> when(Class<T> valueType) {
+    public <T extends E> RenderAs<C, E, T> when(Class<T> valueType ) {
         NullUtil.nullArgCheck(valueType, "valueType", Class.class);
         return when(valueType, cell -> true);
     }
 
-    public <T extends E> Render.As<C, E, T> when(
+    public <T extends E> RenderAs<C, E, T> when(
             Class<T> valueType,
             Predicate<CellDelegate<C, T>> valueValidator
     ) {
         NullUtil.nullArgCheck(valueType, "valueType", Class.class);
         NullUtil.nullArgCheck(valueValidator, "valueValidator", Predicate.class);
-        return new Render.As<C, E, T>() {
-            @Override
-            public RenderBuilder<C, E> as(CellInterpreter<C, T> valueInterpreter) {
-                NullUtil.nullArgCheck(valueInterpreter, "valueInterpreter", CellInterpreter.class);
-                _store(valueType, valueValidator, valueInterpreter);
-                return RenderBuilder.this;
-            }
-        };
+        return new BasicAs<>(this, valueType, valueValidator);
+    }
+
+    private static class BasicAs<C extends JComponent, E, T extends E> implements RenderAs<C, E, T>
+    {
+        private final RenderBuilder<C, E> _builder;
+        private final Class<T> _valueType;
+        private final Predicate<CellDelegate<C, T>> _valueValidator;
+
+        private BasicAs(RenderBuilder<C, E> builder, Class<T> valueType, Predicate<CellDelegate<C, T>> valueValidator) {
+            _builder = builder;
+            _valueType = valueType;
+            _valueValidator = valueValidator;
+        }
+
+        @Override
+        public RenderBuilder<C, E> as( CellInterpreter<C, T> valueInterpreter ) {
+            NullUtil.nullArgCheck(valueInterpreter, "valueInterpreter", CellInterpreter.class);
+            _builder._store(_valueType, _valueValidator, valueInterpreter);
+            return _builder;
+        }
     }
 
     private void _store(

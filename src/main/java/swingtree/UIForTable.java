@@ -96,7 +96,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      * and the second column as a float or double value surrounded by parentheses.
      * Note that the API allows you to specify how specific types of table entry values
      * should be rendered. This is done by calling the {@link RenderBuilder#when(Class)} method
-     * before calling the {@link Render.As#asText(Function)} method.
+     * before calling the {@link RenderAs#asText(Function)} method.
      *
      * @param columnName The name of the column for which the cell renderer will be built.
      * @param renderBuilder A lambda function which exposes a fluent builder API for a cell renderer
@@ -140,7 +140,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      * and the second column as a float or double value surrounded by parentheses.
      * Note that the API allows you to specify how specific types of table entry values
      * should be rendered. This is done by calling the {@link RenderBuilder#when(Class)} method
-     * before calling the {@link Render.As#asText(Function)} method.
+     * before calling the {@link RenderAs#asText(Function)} method.
      *
      * @param columnIndex The index of the column for which the cell renderer will be built.
      * @param renderBuilder A lambda function which exposes a fluent builder API for a cell renderer
