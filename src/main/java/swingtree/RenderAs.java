@@ -12,7 +12,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
- * This interface models the API of the {@link Render} builder which allows you to
+ * This class models the API of the {@link RenderBuilder} which allows you to
  * specify how a cell should be rendered.
  * Most likely you will want to call {@link #asText(Function)}
  * on this as most cells are rendered as simple texts.
