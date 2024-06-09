@@ -113,7 +113,7 @@ public final class UIForTableHeader<H extends UI.TableHeader> extends UIForAnySw
      * @param renderBuilder The builder for the renderer to set.
      * @return This builder node.
      */
-    UIForTableHeader<H> withDefaultRenderer( Render.Builder<JTable, ?> renderBuilder ) {
+    UIForTableHeader<H> withDefaultRenderer( RenderBuilder<JTable, ?> renderBuilder ) {
         Objects.requireNonNull(renderBuilder);
         return _with( thisComponent -> {
                     thisComponent.setDefaultRenderer(renderBuilder.getForTable());

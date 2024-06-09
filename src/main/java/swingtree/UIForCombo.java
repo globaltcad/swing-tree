@@ -320,8 +320,8 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
                 ._this();
     }
 
-    public final <V extends E> UIForCombo<E,C> _withRenderer( Render.Builder<C,V> renderBuilder ) {
-        NullUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
+    public final <V extends E> UIForCombo<E,C> _withRenderer( RenderBuilder<C,V> renderBuilder ) {
+        NullUtil.nullArgCheck(renderBuilder, "renderBuilder", RenderBuilder.class);
         return _with( thisComponent -> {
                     thisComponent.setRenderer((ListCellRenderer<E>) renderBuilder.buildForCombo((C)thisComponent));
                 })
@@ -342,7 +342,7 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
      *      .when(Number.class).asText( cell -> "Number: "+cell.getValue() )
      *  );
      *  }</pre>
-     *  Note that inside the lambda function, you can use the {@link Render.Builder} to define
+     *  Note that inside the lambda function, you can use the {@link RenderBuilder} to define
      *  for what type of item you want to render the item in a specific way and the {@link Render.As}
      *  to define how the item should be rendered.
      *  <p>
@@ -356,11 +356,11 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
      * @param <V> The type of the value that is being rendered in this combo box.
      */
     public final <V extends E> UIForCombo<E,C> withRenderer(
-        Configurator<Render.Builder<C,V>> renderBuilder
+        Configurator<RenderBuilder<C,V>> renderBuilder
     ) {
         Class<Object> commonType = Object.class;
         Objects.requireNonNull(commonType);
-        Render.Builder render = Render.forCombo(commonType);
+        RenderBuilder render = RenderBuilder.forCombo(commonType);
         try {
             render = renderBuilder.configure(render);
         } catch (Exception e) {
