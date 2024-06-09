@@ -21,7 +21,7 @@ import java.util.function.Predicate;
  * @param <C> The type of the component which is used to render the cell.
  * @param <E> The type of the value of the cell.
  */
-public class RenderBuilder<C extends JComponent, E> {
+public final class RenderBuilder<C extends JComponent, E> {
 
     private final Class<C> _componentType;
     private final Map<Class<?>, List<Consumer<CellDelegate<C, ?>>>> _rendererLookup = new LinkedHashMap<>(16);
@@ -61,33 +61,13 @@ public class RenderBuilder<C extends JComponent, E> {
     ) {
         NullUtil.nullArgCheck(valueType, "valueType", Class.class);
         NullUtil.nullArgCheck(valueValidator, "valueValidator", Predicate.class);
-        return new BasicAs<>(this, valueType, valueValidator);
+        return new RenderAs<>(this, valueType, valueValidator);
     }
 
-    private static class BasicAs<C extends JComponent, E, T extends E> implements RenderAs<C, E, T>
-    {
-        private final RenderBuilder<C, E> _builder;
-        private final Class<T> _valueType;
-        private final Predicate<CellDelegate<C, T>> _valueValidator;
-
-        private BasicAs(RenderBuilder<C, E> builder, Class<T> valueType, Predicate<CellDelegate<C, T>> valueValidator) {
-            _builder = builder;
-            _valueType = valueType;
-            _valueValidator = valueValidator;
-        }
-
-        @Override
-        public RenderBuilder<C, E> as( CellInterpreter<C, T> valueInterpreter ) {
-            NullUtil.nullArgCheck(valueInterpreter, "valueInterpreter", CellInterpreter.class);
-            _builder._store(_valueType, _valueValidator, valueInterpreter);
-            return _builder;
-        }
-    }
-
-    private void _store(
-            Class valueType,
-            Predicate predicate,
-            CellInterpreter valueInterpreter
+    void _store(
+        Class valueType,
+        Predicate predicate,
+        CellInterpreter valueInterpreter
     ) {
         NullUtil.nullArgCheck(valueType, "valueType", Class.class);
         NullUtil.nullArgCheck(predicate, "predicate", Predicate.class);
