@@ -1,6 +1,7 @@
 package swingtree;
 
 import swingtree.api.CellInterpreter;
+import swingtree.api.Configurator;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -13,7 +14,27 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
- *  A builder for building simple customized {@link javax.swing.table.TableCellRenderer}!
+ *  A builder type for creating cell renderer for a list, combo box or table
+ *  using a fluent API, typically through methods like {@link UIForList#withRenderer(Configurator)},
+ *  {@link UIForCombo#withRenderer(Configurator)} or {@link UIForTable#withRenderer(Configurator)},
+ *  where the builder is exposed to the configurator lambda. <p>
+ *  A typical usage of this API may look something like this:
+ *  <pre>{@code
+ *      .withRenderer( it -> it
+ *          .when( Number.class )
+ *          .asText( cell -> cell.valueAsString().orElse("")+" km/h" )
+ *          .when( String.class )
+ *          .as( cell -> {
+ *              // do component based rendering:
+ *              cell.setRenderer( new JLabel( cell.valueAsString().orElse("") ) );
+ *              // or do 2D graphics rendering directly:
+ *              cell.setRenderer( g -> {
+ *              	// draw something
+ *                  g.setColor( UI.color( cell.valueAsString().orElse("") ) );
+ *                  g.fillRect( 0, 0, cell.getComponent().getWidth(), cell.getComponent().getHeight() );
+ *              });
+ *          })
+ *      )
  * 	<p>
  * 	<b>Please take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
  * 	where you can browse a collection of examples demonstrating how to use the API of this class.</b>
@@ -45,21 +66,32 @@ public final class RenderBuilder<C extends JComponent, E> {
     }
 
     /**
-     * Use this to specify which type of values should have custom rendering.
+     * Use this to specify for which type of cell value you want custom rendering next.
      * The object returned by this method allows you to specify how to render the values.
      *
      * @param valueType The type of cell value, for which you want custom rendering.
      * @param <T>       The type parameter of the cell value, for which you want custom rendering.
      * @return The {@link RenderAs} builder API step which expects you to provide a lambda for customizing how a cell is rendered.
      */
-    public <T extends E> RenderAs<C, E, T> when(Class<T> valueType ) {
+    public <T extends E> RenderAs<C, E, T> when( Class<T> valueType ) {
         NullUtil.nullArgCheck(valueType, "valueType", Class.class);
         return when(valueType, cell -> true);
     }
 
+    /**
+     * Use this to specify a specific type for which you want custom rendering
+     * as well as a predicate which tests if a cell value should be rendered.
+     * The object returned by this method allows you to specify how to render the values
+     * using methods like {@link RenderAs#as(CellInterpreter)} or {@link RenderAs#asText(Function)}.
+     *
+     * @param valueType      The type of cell value, for which you want custom rendering.
+     * @param valueValidator A predicate which should return true if the cell value should be rendered.
+     * @param <T>            The type parameter of the cell value, for which you want custom rendering.
+     * @return The {@link RenderAs} builder API step which expects you to provide a lambda for customizing how a cell is rendered.
+     */
     public <T extends E> RenderAs<C, E, T> when(
-            Class<T> valueType,
-            Predicate<CellDelegate<C, T>> valueValidator
+        Class<T> valueType,
+        Predicate<CellDelegate<C, T>> valueValidator
     ) {
         NullUtil.nullArgCheck(valueType, "valueType", Class.class);
         NullUtil.nullArgCheck(valueValidator, "valueValidator", Predicate.class);
@@ -131,11 +163,11 @@ public final class RenderBuilder<C extends JComponent, E> {
 
         @Override
         public Component getListCellRendererComponent(
-                JList list,
-                Object value,
-                final int row,
-                boolean isSelected,
-                boolean hasFocus
+            final JList   list,
+            final Object  value,
+            final int     row,
+            final boolean isSelected,
+            final boolean hasFocus
         ) {
             List<Consumer<CellDelegate<C, ?>>> interpreter = _find(value, _rendererLookup);
             if (interpreter.isEmpty())
@@ -168,8 +200,8 @@ public final class RenderBuilder<C extends JComponent, E> {
     }
 
     private static <C extends JComponent> List<Consumer<CellDelegate<C, ?>>> _find(
-            Object value,
-            Map<Class<?>, List<Consumer<CellDelegate<C, ?>>>> rendererLookup
+        Object value,
+        Map<Class<?>, List<Consumer<CellDelegate<C, ?>>>> rendererLookup
     ) {
         Class<?> type = (value == null ? Object.class : value.getClass());
         List<Consumer<CellDelegate<C, ?>>> cellRenderer = new ArrayList<>();
@@ -200,7 +232,7 @@ public final class RenderBuilder<C extends JComponent, E> {
      * @param list The list for which the renderer is to be built.
      * @return The new {@link ListCellRenderer} instance specific to the given list.
      */
-    ListCellRenderer<E> buildForList(C list) {
+    ListCellRenderer<E> buildForList( C list ) {
         _addDefaultRendering();
         if (JList.class.isAssignableFrom(_componentType))
             return (ListCellRenderer<E>) new SimpleListCellRenderer<>(list);

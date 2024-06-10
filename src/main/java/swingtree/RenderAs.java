@@ -53,7 +53,8 @@ public final class RenderAs<C extends JComponent, E, T extends E>
      * 			cell.setRenderer( g -> {
      * 				// draw something
      * 				g.drawString( "Hello World", 0, 0 );
-     * 			            });        * 		})
+     * 			});
+     * 		})
      *    }</pre>
      *
      * @param valueInterpreter A lambda which customizes the provided cell.
