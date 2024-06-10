@@ -26,13 +26,16 @@ import java.util.function.Predicate;
  */
 public final class RenderAs<C extends JComponent, E, T extends E>
 {
-    private final RenderBuilder<C, E> _builder;
-    private final Class<T> _valueType;
+    private static final org.slf4j.Logger log = LoggerFactory.getLogger(RenderAs.class);
+
+    private final RenderBuilder<C, E>           _builder;
+    private final Class<T>                      _valueType;
     private final Predicate<CellDelegate<C, T>> _valueValidator;
 
+
     RenderAs(RenderBuilder<C, E> builder, Class<T> valueType, Predicate<CellDelegate<C, T>> valueValidator) {
-        _builder = builder;
-        _valueType = valueType;
+        _builder        = builder;
+        _valueType      = valueType;
         _valueValidator = valueValidator;
     }
 
@@ -112,7 +115,7 @@ public final class RenderAs<C extends JComponent, E, T extends E>
                 try {
                     renderer.accept(cell, (Graphics2D) g);
                 } catch (Exception e) {
-                    LoggerFactory.getLogger(RenderAs.class).warn("An exception occurred while rendering a cell!", e);
+                    log.warn("An exception occurred while rendering a cell!", e);
                     /*
                         We log as warning because exceptions during rendering are not considered
                         as harmful as elsewhere!

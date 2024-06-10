@@ -13,7 +13,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
- * A builder for building simple customized {@link javax.swing.table.TableCellRenderer}!
+ *  A builder for building simple customized {@link javax.swing.table.TableCellRenderer}!
  * 	<p>
  * 	<b>Please take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
  * 	where you can browse a collection of examples demonstrating how to use the API of this class.</b>
@@ -24,22 +24,24 @@ import java.util.function.Predicate;
 public final class RenderBuilder<C extends JComponent, E> {
 
     private final Class<C> _componentType;
+    private final Class<E> _elementType;
     private final Map<Class<?>, List<Consumer<CellDelegate<C, ?>>>> _rendererLookup = new LinkedHashMap<>(16);
 
 
     static <E> RenderBuilder<JList<E>,E> forList(Class<E> elementType) {
-        return (RenderBuilder) new RenderBuilder<>(JList.class);
+        return (RenderBuilder) new RenderBuilder<>(JList.class, elementType);
     }
     static <C extends JComboBox<E>, E> RenderBuilder<C,E> forCombo(Class<E> elementType) {
-        return (RenderBuilder) new RenderBuilder<>(JComboBox.class);
+        return (RenderBuilder) new RenderBuilder<>(JComboBox.class, elementType);
     }
     static <E> RenderBuilder<JTable,E> forTable(Class<E> elementType) {
-        return (RenderBuilder) new RenderBuilder<>(JTable.class);
+        return (RenderBuilder) new RenderBuilder<>(JTable.class, elementType);
     }
 
 
-    private RenderBuilder(Class<C> componentType) {
+    private RenderBuilder(Class<C> componentType, Class<E> elementType) {
         _componentType = componentType;
+        _elementType = elementType;
     }
 
     /**
