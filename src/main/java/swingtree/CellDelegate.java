@@ -6,6 +6,7 @@ import javax.swing.JComponent;
 import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -22,26 +23,27 @@ import java.util.function.Consumer;
  */
 public class CellDelegate<C extends JComponent, V>
 {
-    private final C owner;
-    private final @Nullable V value;
-    private final boolean isSelected;
-    private final boolean hasFocus;
-    private final int row;
-    private final int column;
-    private @Nullable Component componentRef;
-    private final List<String> toolTips;
-    private @Nullable V defaultValueRef;
+    private final C                   owner;
+    private final @Nullable V         value;
+    private final boolean             isSelected;
+    private final boolean             hasFocus;
+    private final int                 row;
+    private final int                 column;
+    private final @Nullable Component componentRef;
+    private final List<String>        toolTips;
+    private final @Nullable V         defaultValueRef;
+
 
     public CellDelegate(
-        C owner,
-        @Nullable V value,
-        boolean isSelected,
-        boolean hasFocus,
-        int row,
-        int column,
+        C                   owner,
+        @Nullable V         value,
+        boolean             isSelected,
+        boolean             hasFocus,
+        int                 row,
+        int                 column,
         @Nullable Component renderer,
-        List<String> toolTips,
-        @Nullable V defaultValue
+        List<String>        toolTips,
+        @Nullable V         defaultValue
     ) {
         this.owner           = Objects.requireNonNull(owner);
         this.value           = value;
@@ -82,17 +84,26 @@ public class CellDelegate<C extends JComponent, V>
         return column;
     }
 
-    public Optional<Component> getRenderer() {
+    public Optional<Component> renderer() {
         return Optional.ofNullable(componentRef);
     }
 
-    public CellDelegate<C, V> setRenderer(Component component) {
-        componentRef = component;
-        return this;
+    public CellDelegate<C, V> withRenderer(Component component) {
+        return new CellDelegate<>(
+            owner,
+            value,
+            isSelected,
+            hasFocus,
+            row,
+            column,
+            component,
+            toolTips,
+            defaultValueRef
+        );
     }
 
-    public CellDelegate<C, V> setRenderer( Consumer<Graphics2D> painter ) {
-        return setRenderer(new Component() {
+    public CellDelegate<C, V> withRenderer( Consumer<Graphics2D> painter ) {
+        return withRenderer(new Component() {
             @Override
             public void paint(Graphics g) {
                 super.paint(g);
@@ -101,17 +112,37 @@ public class CellDelegate<C extends JComponent, V>
         });
     }
 
-    public CellDelegate<C, V> setToolTip(String toolTip) {
-        toolTips.add(toolTip);
-        return this;
+    public CellDelegate<C, V> withToolTip( String toolTip ) {
+        ArrayList<String> newToolTips = new ArrayList<>(toolTips);
+        newToolTips.add(toolTip);
+        return new CellDelegate<>(
+            owner,
+            value,
+            isSelected,
+            hasFocus,
+            row,
+            column,
+            componentRef,
+            newToolTips,
+            defaultValueRef
+        );
     }
 
     public Optional<V> defaultValue() {
         return Optional.ofNullable(defaultValueRef);
     }
 
-    public CellDelegate<C, V> setDefaultRenderValue(V newValue) {
-        defaultValueRef = newValue;
-        return this;
+    public CellDelegate<C, V> withDefaultRenderValue( V newValue ) {
+        return new CellDelegate<>(
+            owner,
+            value,
+            isSelected,
+            hasFocus,
+            row,
+            column,
+            componentRef,
+            toolTips,
+            newValue
+        );
     }
 }

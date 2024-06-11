@@ -143,8 +143,8 @@ public final class RenderBuilder<C extends JComponent, E> {
                         cell = newCell;
                 }
                 Component choice;
-                if (cell.getRenderer().isPresent())
-                    choice = cell.getRenderer().get();
+                if (cell.renderer().isPresent())
+                    choice = cell.renderer().get();
                 else if (cell.defaultValue().isPresent())
                     choice = super.getTableCellRendererComponent(table, cell.defaultValue().get(), isSelected, hasFocus, row, column);
                 else
@@ -190,8 +190,8 @@ public final class RenderBuilder<C extends JComponent, E> {
                         cell = newCell;
                 }
                 Component choice;
-                if (cell.getRenderer().isPresent())
-                    choice = cell.getRenderer().get();
+                if (cell.renderer().isPresent())
+                    choice = cell.renderer().get();
                 else if (cell.defaultValue().isPresent())
                     choice = super.getListCellRendererComponent(list, cell.defaultValue().get(), row, isSelected, hasFocus);
                 else
@@ -378,7 +378,7 @@ public final class RenderBuilder<C extends JComponent, E> {
 
             if ( border != null ) l.setBorder(border);
 
-            return cell.setRenderer(l);
+            return cell.withRenderer(l);
         };
     }
 

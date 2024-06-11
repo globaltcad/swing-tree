@@ -9,7 +9,7 @@ import java.util.function.Consumer;
 /**
  * An interface for interpreting the value of a {@link CellDelegate} and
  * setting a {@link Component} or custom renderer which is then used to render the cell.
- * Inside your interpreter, use {@link CellDelegate#setRenderer(Component)} or {@link CellDelegate#setRenderer(Consumer)}
+ * Inside your interpreter, use {@link CellDelegate#withRenderer(Component)} or {@link CellDelegate#withRenderer(Consumer)}
  * to define how the cell should be rendered.
  *
  * @param <C> The type of the component which is used to render the cell.
