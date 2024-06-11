@@ -15,6 +15,10 @@ final class Arc
     private static final Arc _NONE = new Arc(-1, -1);
 
     /**
+     *  Exposes the "null" object for the {@link Arc} class, which is an arc
+     *  with width and height of -1. It is used to represent the absence of an arc,
+     *  and instead of using null references.
+     *
      * @return An {@link Arc} with width and height of -1.
      */
     static Arc none() { return _NONE; }

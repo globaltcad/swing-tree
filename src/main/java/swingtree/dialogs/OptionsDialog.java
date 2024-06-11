@@ -12,6 +12,7 @@ import javax.swing.JOptionPane;
 import java.awt.Component;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 
 /**
  *  An immutable builder class for creating simple enum based option dialogs
@@ -19,6 +20,25 @@ import java.util.Optional;
  *  <p>
  *  This class is intended to be used as part of the {@link UI} API
  *  by calling the {@link UI#choice(String, Enum[])} or {@link UI#choice(String, Var)} factory methods.
+ *  <p>
+ *  Here a simple usage example:
+ *  <pre>{@code
+ *      // In your view model:
+ *      public enum MyOptions { YES, NO, CANCEL }
+ *      private final Var<MyOptions> selectedOption = Var.of(MyOptions.YES);
+ *      // In your view:
+ *      UI.choice("Select an option:", vm.selectedOption())
+ *      .parent(this)
+ *      .showAsQuestion( o -> switch(o) {
+ *          case YES    -> "Yes, please!";
+ *          case NO     -> "No, thank you!";
+ *          case CANCEL -> "Cancel";
+ *      });
+ *  }</pre>
+ *  In this example, the user will be presented with a dialog
+ *  containing the message "Select an option:" and the enum options "YES", "NO" and "CANCEL"
+ *  presented as "Yes, please!", "No, thank you!" and "Cancel" respectively.
+ *  The dialog will know the available options from the {@link Var} instance "selectedOption".
  *  <p>
  *  Note that this API translates to the
  *  {@link JOptionPane#showOptionDialog(Component, Object, String, int, int, Icon, Object[], Object)} method.
@@ -241,7 +261,23 @@ public final class OptionsDialog<E extends Enum<E>>
      * @return The {@link Enum} instance that the user selected in the dialog.
      */
     public Optional<E> showAsQuestion() {
-        return _type(JOptionPane.QUESTION_MESSAGE).show();
+        return showAsQuestion(Object::toString);
+    }
+
+    /**
+     *  Shows the options dialog as a question dialog (see {@link JOptionPane#QUESTION_MESSAGE}) and returns the
+     *  {@link Enum} answer that the user selected from the existing options.
+     *  The presenter function is used to convert the enum options to strings that
+     *  will be displayed in the dialog for the user to select from. <br>
+     *  This is useful when your enum constant naming adheres to a specific naming convention,
+     *  like capitalized snake case, and you want to present the options in a more user-centric format.
+     *  Note that this method is blocking and will only return when the user has selected
+     *  an option in the dialog.
+     *
+     * @return The {@link Enum} instance that the user selected in the dialog.
+     */
+    public Optional<E> showAsQuestion( Function<E, String> presenter ) {
+        return _type(JOptionPane.QUESTION_MESSAGE).show(presenter);
     }
 
     /**
@@ -253,7 +289,23 @@ public final class OptionsDialog<E extends Enum<E>>
      * @return The {@link Enum} instance that the user selected in the dialog.
      */
     public Optional<E> showAsError() {
-        return _type(JOptionPane.ERROR_MESSAGE).show();
+        return showAsError(Object::toString);
+    }
+
+    /**
+     *  Shows the options dialog as an error dialog (see {@link JOptionPane#ERROR_MESSAGE}) and returns the
+     *  {@link Enum} answer that the user selected from the existing options.
+     *  The presenter function is used to convert the enum options to strings that
+     *  will be displayed in the dialog for the user to select from. <br>
+     *  This is useful when your enum constant naming adheres to a specific naming convention,
+     *  like capitalized snake case, and you want to present the options in a more user-centric format.
+     *  Note that this method is blocking and will only return when the user has selected
+     *  an option in the dialog.
+     *
+     * @return The {@link Enum} instance that the user selected in the dialog.
+     */
+    public Optional<E> showAsError( Function<E, String> presenter ) {
+        return _type(JOptionPane.ERROR_MESSAGE).show(presenter);
     }
 
     /**
@@ -265,7 +317,23 @@ public final class OptionsDialog<E extends Enum<E>>
      * @return The {@link Enum} instance that the user selected in the dialog.
      */
     public Optional<E> showAsWarning() {
-        return _type(JOptionPane.WARNING_MESSAGE).show();
+        return showAsWarning(Object::toString);
+    }
+
+    /**
+     *  Shows the options dialog as a warning dialog (see {@link JOptionPane#WARNING_MESSAGE}) and returns the
+     *  {@link Enum} answer that the user selected from the existing options.
+     *  The presenter function is used to convert the enum options to strings that
+     *  will be displayed in the dialog for the user to select from. <br>
+     *  This is useful when your enum constant naming adheres to a specific naming convention,
+     *  like capitalized snake case, and you want to present the options in a more user-centric format.
+     *  Note that this method is blocking and will only return when the user has selected
+     *  an option in the dialog.
+     *
+     * @return The {@link Enum} instance that the user selected in the dialog.
+     */
+    public Optional<E> showAsWarning( Function<E, String> presenter ) {
+        return _type(JOptionPane.WARNING_MESSAGE).show(presenter);
     }
 
     /**
@@ -277,7 +345,23 @@ public final class OptionsDialog<E extends Enum<E>>
      * @return The {@link Enum} instance that the user selected in the dialog.
      */
     public Optional<E> showAsInfo() {
-        return _type(JOptionPane.INFORMATION_MESSAGE).show();
+        return showAsInfo(Object::toString);
+    }
+
+    /**
+     *  Shows the options dialog as an information dialog (see {@link JOptionPane#INFORMATION_MESSAGE}) and returns the
+     *  {@link Enum} answer that the user selected from the existing options.
+     *  The presenter function is used to convert the enum options to strings that
+     *  will be displayed in the dialog for the user to select from. <br>
+     *  This is useful when your enum constant naming adheres to a specific naming convention,
+     *  like capitalized snake case, and you want to present the options in a more user-centric format.
+     *  Note that this method is blocking and will only return when the user has selected
+     *  an option in the dialog.
+     *
+     * @return The {@link Enum} instance that the user selected in the dialog.
+     */
+    public Optional<E> showAsInfo( Function<E, String> presenter ) {
+        return _type(JOptionPane.INFORMATION_MESSAGE).show(presenter);
     }
 
     /**
@@ -289,7 +373,23 @@ public final class OptionsDialog<E extends Enum<E>>
      * @return The {@link Enum} instance that the user selected in the dialog.
      */
     public Optional<E> showAsPlain() {
-        return _type(JOptionPane.PLAIN_MESSAGE).show();
+        return showAsPlain(Object::toString);
+    }
+
+    /**
+     *  Shows the options dialog as a plain dialog (see {@link JOptionPane#PLAIN_MESSAGE}) and returns the
+     *  {@link Enum} answer that the user selected from the existing options.
+     *  The presenter function is used to convert the enum options to strings that
+     *  will be displayed in the dialog for the user to select from. <br>
+     *  This is useful when your enum constant naming adheres to a specific naming convention,
+     *  like capitalized snake case, and you want to present the options in a more user-centric format.
+     *  Note that this method is blocking and will only return when the user has selected
+     *  an option in the dialog.
+     *
+     * @return The {@link Enum} instance that the user selected in the dialog.
+     */
+    public Optional<E> showAsPlain( Function<E, String> presenter ) {
+        return _type(JOptionPane.PLAIN_MESSAGE).show(presenter);
     }
 
     /**
@@ -300,9 +400,27 @@ public final class OptionsDialog<E extends Enum<E>>
      *  otherwise it will return the {@link Enum} that the user selected.
      *
      * @return The {@link Enum} that the user selected in the dialog wrapped in an {@link Optional}
-     *        or an empty {@link Optional} if the user closed the dialog.
+     *         or an empty {@link Optional} if the user closed the dialog.
      */
     public Optional<E> show() {
+        return this.show(Object::toString);
+    }
+
+    /**
+     *  Calling this method causes the dialog to be shown to the user.
+     *  The method is blocking and will only return when the user has selected an option
+     *  or closed the dialog.
+     *  If the dialog is closed, the method will return an empty {@link Optional},
+     *  otherwise it will return the {@link Enum} that the user selected.
+     *  The presenter function is used to convert the enum options to strings that
+     *  will be displayed in the dialog for the user to select from. <br>
+     *  This is useful when your enum constant naming adheres to a specific naming convention,
+     *  like capitalized snake case, and you want to present the options in a more user-centric format.
+     *
+     * @return The {@link Enum} that the user selected in the dialog wrapped in an {@link Optional}
+     *         or an empty {@link Optional} if the user closed the dialog.
+     */
+    public Optional<E> show( Function<E, String> presenter ) {
         E[] options = _options;
         if ( options == null ) {
             if ( _property != null )
@@ -315,16 +433,32 @@ public final class OptionsDialog<E extends Enum<E>>
             options = (E[])new Enum<?>[0];
 
         String[] asStr = new String[options.length];
-        for ( int i = 0; i < options.length; i++ )
-            asStr[i] = options[i].toString();
+        for ( int i = 0; i < options.length; i++ ) {
+            try {
+                asStr[i] = presenter.apply(options[i]);
+            } catch ( Exception e ) {
+                log.warn("An exception occurred while converting an enum option to a string!", e);
+                asStr[i] = options[i].toString();
+            }
+        }
 
-        String defaultOption = _default != null ? _default.toString() : null;
+        E defaultOption = _default;
 
         if ( defaultOption == null ) {
             if ( _property != null && _property.isPresent() )
-                defaultOption = _property.get().toString();
+                defaultOption = _property.get();
             else if ( options.length > 0 )
-                defaultOption = options[0].toString();
+                defaultOption = options[0];
+        }
+
+        String defaultOptionStr = "";
+        if ( defaultOption != null ) {
+            try {
+                defaultOptionStr = presenter.apply(defaultOption);
+            } catch ( Exception e ) {
+                log.warn("An exception occurred while converting the default option to a string!", e);
+                defaultOptionStr = defaultOption.toString();
+            }
         }
 
         int type = _type;
@@ -344,7 +478,7 @@ public final class OptionsDialog<E extends Enum<E>>
                                     type,                       // type of the dialog
                                     _icon,                      // icon to display
                                     asStr,                      // options to display
-                                    defaultOption               // default option
+                                    defaultOptionStr               // default option
                                 );
 
         if ( _property != null && selectedIdx >= 0 && options[selectedIdx] != null )

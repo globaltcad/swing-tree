@@ -178,6 +178,10 @@ public final class UIForProgressBar<P extends JProgressBar> extends UIForAnySwin
     }
 
     /**
+     *  Allows you to model the progress of the progress bar in terms of an integer based property
+     *  which will update the progress bar value whenever it is changed, typically
+     *  in your view model or controller.
+     *
      * @param val An integer property used to dynamically update the value of the progress bar.
      * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if {@code value} is {@code null}.

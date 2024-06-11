@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 public class NoteGuesserViewModel
@@ -168,10 +169,10 @@ public class NoteGuesserViewModel
         if ( ni == 4 ) name = "g";
         if ( ni == 5 ) name = "a";
         if ( ni == 6 ) name = "b";
-        if      ( octave == 0 ) name = name.toUpperCase();
-        else if ( octave == 1 ) name = name.toLowerCase();
-        else if ( octave == 2 ) name = name.toLowerCase() + "1";
-        else if ( octave == 3 ) name = name.toLowerCase() + "2";
+        if      ( octave == 0 ) name = name.toUpperCase(Locale.ENGLISH);
+        else if ( octave == 1 ) name = name.toLowerCase(Locale.ENGLISH);
+        else if ( octave == 2 ) name = name.toLowerCase(Locale.ENGLISH) + "1";
+        else if ( octave == 3 ) name = name.toLowerCase(Locale.ENGLISH) + "2";
         return name;
     }
 
