@@ -101,7 +101,7 @@ final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
                         e
                     );
             }
-            if ( newStyles == null && mapped != _styles[i] ) {
+            if ( newStyles == null && !mapped.equals(_styles[i]) ) {
                 newStyles = Arrays.copyOf(_styles, _styles.length);
                 // We avoid heap allocation if possible!
             }

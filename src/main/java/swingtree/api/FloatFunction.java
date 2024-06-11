@@ -12,6 +12,9 @@ import com.google.errorprone.annotations.Immutable;
 public interface FloatFunction
 {
     /**
+     *  Applies this function to the given float value
+     *  and returns the result.
+     *
      * @param in The input float value.
      * @return The output float value.
      */

@@ -1,6 +1,7 @@
 package swingtree.combo
 
-
+import sprouts.Val
+import sprouts.Vals
 import swingtree.threading.EventProcessor
 import swingtree.UI
 import swingtree.SwingTree
@@ -14,6 +15,8 @@ import sprouts.Vars
 
 import javax.swing.DefaultComboBoxModel
 import javax.swing.JComboBox
+import javax.swing.JList
+import java.util.function.Supplier
 
 import static swingtree.UI.comboBox
 
@@ -33,6 +36,10 @@ class Combo_Box_Specification extends Specification
     def setupSpec() {
         SwingTree.get().setEventProcessor(EventProcessor.COUPLED)
         // This is so that the test thread is also allowed to perform UI operations
+    }
+
+    enum Animal {
+        CAT, DOG, COW, PIG
     }
 
     def 'Swing tree is a wrapper around Swing, which means you can create the combo box yourself.'()
@@ -465,6 +472,72 @@ class Combo_Box_Specification extends Specification
 		then : 'The combo box has been updated as expected!'
 		    combo.selectedItem == 1
 		    combo.editor.item == 1
+    }
+
+    def 'Create combo box UIs with simple text render functions.'(
+        Supplier<UIForCombo<?, JComboBox<?>>> uiSupplier
+    ) {
+        reportInfo """
+            The type of items a combo box holds need to be presented
+            to the user in a human readable way. The most common and convenient
+            way to do this is to use a simple text representation of the items.
+            This can be achieved by providing a function that converts the items
+            to strings.
+            
+            In this example we are using the following enum type
+            to model the items of the combo box:
+            ```
+            enum Animal {
+                CAT, DOG, COW, PIG
+            }
+            ```
+            We are going to use these constant to
+            as a basis for various kinds of ways to model the combo box
+            state and also how to render them.
+        """
+        given : 'We create a combo box that is bound to the property.'
+            var ui = uiSupplier.get()
+        and : 'We build a combo box component.'
+            var combo = ui.get(JComboBox)
+        expect : 'There are all 4 options available.'
+            combo.itemCount == 4
+            combo.getItemAt(0) == Animal.CAT
+            combo.getItemAt(1) == Animal.DOG
+            combo.getItemAt(2) == Animal.COW
+            combo.getItemAt(3) == Animal.PIG
+
+        and : 'We check if the renderer exists and is working.'
+            combo.renderer != null
+
+        when : 'We call the renderer for each item.'
+            var renderer = combo.renderer
+            var fakeJList = new JList<Animal>()
+            var rendered = [
+                renderer.getListCellRendererComponent(fakeJList, Animal.CAT, 0, false, false),
+                renderer.getListCellRendererComponent(fakeJList, Animal.DOG, 1, false, false),
+                renderer.getListCellRendererComponent(fakeJList, Animal.COW, 2, false, false),
+                renderer.getListCellRendererComponent(fakeJList, Animal.PIG, 3, false, false)
+            ]
+        then : 'The renderer returns the expected text representations.'
+            rendered[0].text == "cat"
+            rendered[1].text == "dog"
+            rendered[2].text == "cow"
+            rendered[3].text == "pig"
+        where : """
+            We are using the following factory methods from the `UI` namespace.
+            Note that the `UI.comboBox` method is overloaded and can take
+            all kinds of arguments to model the state of the combo box.
+        """
+            uiSupplier << [
+                { UI.comboBox(Animal.values() as List, a -> a.name().toLowerCase()) },
+                { UI.comboBox(Vars.of(Animal.CAT, Animal.DOG, Animal.COW, Animal.PIG), a -> a.name().toLowerCase()) },
+                { UI.comboBox(Vals.of(Animal.CAT, Animal.DOG, Animal.COW, Animal.PIG), a -> a.name().toLowerCase()) },
+                { UI.comboBox(Var.of(Animal.CAT), Animal.values() as List, a -> a.name().toLowerCase()) },
+                { UI.comboBox(Var.of(Animal.CAT), Vars.of(Animal.CAT, Animal.DOG, Animal.COW, Animal.PIG), a -> a.name().toLowerCase()) },
+                { UI.comboBox(Var.of(Animal.CAT), Vals.of(Animal.CAT, Animal.DOG, Animal.COW, Animal.PIG), a -> a.name().toLowerCase()) },
+                { UI.comboBox(Var.of(Animal.CAT), Var.of(Animal.values()), a -> a.name().toLowerCase()) },
+                { UI.comboBox(Var.of(Animal.CAT), Val.of(Animal.values()), a -> a.name().toLowerCase()) }
+            ]
     }
 
 }

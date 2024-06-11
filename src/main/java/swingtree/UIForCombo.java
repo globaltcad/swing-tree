@@ -18,6 +18,7 @@ import java.awt.event.ActionListener;
 import java.lang.ref.WeakReference;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  *  A SwingTree builder node designed for configuring {@link JComboBox} instances.
@@ -319,8 +320,8 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
                 ._this();
     }
 
-    public final <V extends E> UIForCombo<E,C> _withRenderer( Render.Builder<C,V> renderBuilder ) {
-        NullUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
+    public final <V extends E> UIForCombo<E,C> _withRenderer( RenderBuilder<C,V> renderBuilder ) {
+        NullUtil.nullArgCheck(renderBuilder, "renderBuilder", RenderBuilder.class);
         return _with( thisComponent -> {
                     thisComponent.setRenderer((ListCellRenderer<E>) renderBuilder.buildForCombo((C)thisComponent));
                 })
@@ -341,8 +342,8 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
      *      .when(Number.class).asText( cell -> "Number: "+cell.getValue() )
      *  );
      *  }</pre>
-     *  Note that inside the lambda function, you can use the {@link Render.Builder} to define
-     *  for what type of item you want to render the item in a specific way and the {@link Render.As}
+     *  Note that inside the lambda function, you can use the {@link RenderBuilder} to define
+     *  for what type of item you want to render the item in a specific way and the {@link RenderAs}
      *  to define how the item should be rendered.
      *  <p>
      *  You may want to know that a similar API is also available for the {@link javax.swing.JList}
@@ -355,11 +356,11 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
      * @param <V> The type of the value that is being rendered in this combo box.
      */
     public final <V extends E> UIForCombo<E,C> withRenderer(
-        Configurator<Render.Builder<C,V>> renderBuilder
+        Configurator<RenderBuilder<C,V>> renderBuilder
     ) {
         Class<Object> commonType = Object.class;
         Objects.requireNonNull(commonType);
-        Render.Builder render = Render.forCombo(commonType);
+        RenderBuilder render = RenderBuilder.forCombo(commonType);
         try {
             render = renderBuilder.configure(render);
         } catch (Exception e) {
@@ -383,6 +384,19 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
                     thisComponent.setRenderer(renderer);
                 })
                 ._this();
+    }
+
+    /**
+     *  Use this to specify a custom text based cell renderer for each item in the combo box.
+     *  The renderer is a function that takes a {@link CellDelegate} as input
+     *  and returns a {@link String} which will be used as the text for the combo box item.
+     *
+     * @param renderer The function that will be used to render the combo box items.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final UIForCombo<E,C> withTextRenderer( Function<CellDelegate<C,E>, String> renderer ) {
+        Objects.requireNonNull(renderer, "renderer");
+        return withRenderer( it -> it.when((Class<E>) Object.class).asText( renderer ) );
     }
 
     /**

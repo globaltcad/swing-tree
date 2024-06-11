@@ -1,9 +1,9 @@
 package swingtree.renderer
 
-
+import swingtree.CellDelegate
 import swingtree.SwingTree
+import swingtree.api.Configurator
 import swingtree.threading.EventProcessor
-import swingtree.Render
 import swingtree.UI
 import spock.lang.Narrative
 import spock.lang.Specification
@@ -45,17 +45,17 @@ class Table_Renderer_Spec extends Specification
                 A mocked cell interpreter which interprets the state of the table cell
                 and then defines how it should be rendered (by setting a UI component).
             """
-            var render = Mock(Render.Cell.Interpreter)
+            var render = Mock(Configurator)
 
         when : 'We attach the interpreter to a table renderer which we then attach to the table.'
             ui = ui.withRendererForColumn("A", it->it.when(String).as(render) )
         and : 'We we access the resulting TableCellRenderer instance from the UI.'
             var found = ui.get(JTable).getColumn("A").cellRenderer
         and : 'Finally we access the component from the renderer (which is responsible for the actual rendering).'
-            found.getTableCellRendererComponent(null, "1", false, false, 0, 0)
+            found.getTableCellRendererComponent(new JTable(), "1", false, false, 0, 0)
 
         then : 'The mocked cell interpreter is called.'
-            1 * render.interpret(_)
+            1 * render.configure(_)
     }
 
     def 'We can create a simple table cell renderer through a UI factory method.'()
@@ -73,7 +73,7 @@ class Table_Renderer_Spec extends Specification
                 A mocked cell interpreter which interprets the state of the table cell
                 and then defines how it should be rendered (by setting a UI component).
             """
-            var render = Mock(Render.Cell.Interpreter)
+            var render = Mock(Configurator)
 
         expect : 'The table UI has the following state:'
             table.getColumnName(0) == "A" // default column names
@@ -91,10 +91,10 @@ class Table_Renderer_Spec extends Specification
                         .getColumn(1)
                         .cellRenderer
         and : 'Finally we access the component from the renderer (which is responsible for the actual rendering).'
-            found.getTableCellRendererComponent(null, "1", false, false, 0, 0)
+            found.getTableCellRendererComponent(new JTable(), "1", false, false, 0, 0)
 
         then : 'The mocked cell interpreter is called.'
-            1 * render.interpret(_)
+            1 * render.configure(_)
     }
 
     def 'We can create a simple column major table cell renderer through a UI factory method.'()
@@ -112,7 +112,7 @@ class Table_Renderer_Spec extends Specification
                 A mocked cell interpreter which interprets the state of the table cell
                 and then defines how it should be rendered (by setting a UI component).
             """
-            var render = Mock(Render.Cell.Interpreter)
+            var render = Mock(Configurator)
 
         expect : 'The table UI has the following state:'
             table.getColumnName(0) == "A" // default column names
@@ -131,10 +131,10 @@ class Table_Renderer_Spec extends Specification
                             .getColumn(1)
                             .cellRenderer
         and : 'Finally we access the component from the renderer (which is responsible for the actual rendering).'
-            found.getTableCellRendererComponent(null, "1", false, false, 0, 0)
+            found.getTableCellRendererComponent(new JTable(), "1", false, false, 0, 0)
 
         then : 'The mocked cell interpreter is called.'
-            1 * render.interpret(_)
+            1 * render.configure(_)
     }
 
     def 'A map based table can have a custom cell renderer.'()
@@ -153,7 +153,7 @@ class Table_Renderer_Spec extends Specification
                 A mocked cell interpreter which interprets the state of the table cell
                 and then defines how it should be rendered (by setting a UI component).
             """
-            var render = Mock(Render.Cell.Interpreter)
+            var render = Mock(Configurator)
 
         expect : 'The table UI has the following state:'
             table.getColumnName(0) == "X"
@@ -172,10 +172,10 @@ class Table_Renderer_Spec extends Specification
                                 .getColumn(1)
                                 .cellRenderer
         and : 'Finally we access the component from the renderer (which is responsible for the actual rendering).'
-            found.getTableCellRendererComponent(null, "1", false, false, 0, 0)
+            found.getTableCellRendererComponent(new JTable(), "1", false, false, 0, 0)
 
         then : 'The mocked cell interpreter is called.'
-            1 * render.interpret(_)
+            1 * render.configure(_)
     }
 
     def 'You can render the cells of a table as text by using the "asText" method.'()
@@ -201,7 +201,7 @@ class Table_Renderer_Spec extends Specification
             var found = ui.get(JTable)
                                     .getDefaultRenderer(Object)
         and : 'Finally we access the component from the renderer (which is responsible for the actual rendering).'
-            var component = found.getTableCellRendererComponent(null, 1, false, false, 0, 0)
+            var component = found.getTableCellRendererComponent(new JTable(), 1, false, false, 0, 0)
 
         then : 'The cell is rendered as text (based on a JLabel).'
             component instanceof JLabel

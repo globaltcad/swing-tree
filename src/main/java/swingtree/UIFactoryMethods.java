@@ -42,6 +42,7 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -2820,6 +2821,45 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
+     *  Use this to create a builder for a new {@link JComboBox} instance
+     *  where the provided enum based property dynamically models the selected item
+     *  as well as all possible options (all the enum states).
+     *  The property will be updated whenever the user
+     *  selects a new item in the {@link JComboBox} and the {@link JComboBox}
+     *  will be updated whenever the property changes in your code (see {@link Var#set(Object)}).
+     *  <br>
+     *  Here's an example of how to use this method: <br>
+     *  <pre>{@code
+     *      // In your view model:
+     *      enum Size { SMALL, MEDIUM, LARGE }
+     *      private Var<Size> selection = Var.of(Size.SMALL);
+     *
+     *      public Var<Size> selection() { return selection; }
+     *
+     *      // In your view:
+     *      UI.comboBox(vm.selection(), e -> switch (e) {
+     *          case SMALL -> "Small";
+     *          case MEDIUM -> "Medium";
+     *          case LARGE -> "Large";
+     *      })
+     * }</pre>
+     * <p>
+     * Note that the second argument is a function that maps each enum state to the text
+     * which is actually displayed in the combo box to the user.
+     *
+     * @param selectedItem A property modelling the selected item in the combo box.
+     * @return A builder instance for the new {@link JComboBox}, which enables fluent method chaining.
+     * @param <E> The type of the elements in the combo box.
+     */
+    public static <E extends Enum<E>> UIForCombo<E,JComboBox<E>> comboBox( Var<E> selectedItem, Function<E, String> renderer ) {
+        NullUtil.nullArgCheck(selectedItem, "selectedItem", Var.class);
+        // We get an array of possible enum states from the enum class
+        return comboBox(selectedItem.type().getEnumConstants())
+                .withSelectedItem(selectedItem)
+                .withTextRenderer(cell -> cell.value().map(renderer).orElse(""));
+    }
+
+    /**
      *  Use this to declare a builder for a new {@link JComboBox} instance
      *  with the provided list of elements as selectable items.
      *
@@ -2831,6 +2871,35 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     public static <E> UIForCombo<E,JComboBox<E>> comboBox( java.util.List<E> items ) {
         NullUtil.nullArgCheck(items, "items", UI.List.class);
         return ((UIForCombo)comboBox()).withItems(items);
+    }
+
+    /**
+     *   Use this to declare a builder for a new {@link JComboBox} instance
+     *  with the provided list of elements as selectable items and a
+     *  custom renderer function to display the items in the combo box
+     *  as text.
+     *  <br>
+     *  Here's an example of how to use this method: <br>
+     *  <pre>{@code
+     *      // In your view model:
+     *      List<String> items = List.of("Apple", "Banana", "Cherry");
+     *      // In your view:
+     *      UI.comboBox(items, fruit -> fruit.toUpperCase())
+     *  }</pre>
+     *  In this example, the combo box will display the items as "APPLE", "BANANA", "CHERRY".
+     *  The provided function is called for each item in the list to determine the text
+     *  that should be displayed in the combo box.
+     *
+     * @param items The list of elements to be selectable in the {@link JComboBox}.
+     * @param renderer A function that maps each item to the text that should be displayed in the combo box.
+     * @return A builder instance for the {@link JComboBox} type, to allow for fluent method chaining.
+     * @param <E> The type of the elements in the list.
+     */
+     public static <E> UIForCombo<E,JComboBox<E>> comboBox( java.util.List<E> items, Function<E, String> renderer ) {
+        NullUtil.nullArgCheck(items, "items", UI.List.class);
+        Objects.requireNonNull(renderer, "renderer");
+        return comboBox(items)
+                .withTextRenderer( cell -> cell.value().map(renderer).orElse("") );
     }
 
     /**
@@ -2852,6 +2921,33 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
+     *  Creates a declarative combo box UI based on the provided list of items,
+     *  which may not be modified by the user. <br>
+     *  An additional renderer function is provided to customize how the items
+     *  are displayed as texts in the combo box.<br>
+     *  Here's an example of how the method may be used: <br>
+     *  <pre>{@code
+     *      // In your view model:
+     *      List<String> items = List.of("John", "Jane", "Jack");
+     *      // In your view:
+     *      UI.comboBoxWithUnmodifiable(items, name -> name.toLowerCase())
+     *  }</pre>
+     *  In this example, the combo box will display the items as "john", "jane", "jack".
+     *  The provided function is called for each item in the list to determine the text
+     *  that should be displayed in the combo box.
+     *
+     * @param items The list of elements to be selectable in the {@link JComboBox}.
+     * @param renderer A function that maps each item to the text that should be displayed in the combo box.
+     * @return A builder instance for the {@link JComboBox} type, to allow for fluent method chaining.
+     * @param <E> The type of the elements in the list.
+     */
+    public static <E> UIForCombo<E,JComboBox<E>> comboBoxWithUnmodifiable( java.util.List<E> items, Function<E, String> renderer ) {
+        Objects.requireNonNull(renderer, "renderer");
+        return comboBoxWithUnmodifiable(items)
+                .withTextRenderer( cell -> cell.value().map(renderer).orElse("") );
+    }
+
+    /**
      *  Creates a combo box UI builder node with a {@link Var} property as the model
      *  for the current selection and a list of items as a dynamically sized model for the
      *  selectable items.
@@ -2870,17 +2966,83 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
+     *  Creates a declarative combo box UI based on the provided selection property
+     *  and the list of items as well as a custom renderer function to display the items
+     *  as text in the combo box. <br>
+     *  Here's an example of how the method can be used: <br>
+     *  <pre>{@code
+     *      // In your view model:
+     *      List<String> days = List.of("Monday", "Tuesday", "Wednesday");
+     *      Var<String> selectedDay = Var.of("Monday");
+     *      // In your view:
+     *      UI.comboBox(selectedDay, days, day -> "Day: " + day)
+     *      // The combo box will display the items as "Day: Monday", "Day: Tuesday", "Day: Wednesday"
+     *  }</pre>
+     *  In this example, the provided function is called for each item in the list to determine the text
+     *  that should be displayed in the combo box.
+     *
+     * @param selection The property holding the current selection, which will be updated whenever the user selects a new item.
+     * @param items The list of selectable items.
+     * @param renderer A function that maps each item to the text that should be displayed in the combo box.
+     * @return A builder instance for the {@link JComboBox} type, to allow for fluent method chaining.
+     * @param <E> The type of the elements in the list.
+     */
+    public static <E> UIForCombo<E,JComboBox<E>> comboBox(
+        Var<E> selection, java.util.List<E> items, Function<E, String> renderer
+    ) {
+        NullUtil.nullArgCheck(items, "items", UI.List.class);
+        NullUtil.nullArgCheck(selection, "selection", Var.class);
+        NullUtil.nullArgCheck(renderer, "renderer", Function.class);
+        return comboBox(selection, items)
+                .withTextRenderer( cell -> cell.value().map(renderer).orElse("") );
+    }
+
+
+    /**
      *  Use this to create a builder for a new  {@link JComboBox} instance
      *  with the provided properties list object as selectable (and mutable) items.
      *
      * @param items The {@link Vars} properties of elements to be selectable in the {@link JComboBox}.
      * @param <E> The type of the elements in the list.
-     * @return A builder instance for the provided {@link JComboBox}, which enables fluent method chaining.
+     * @return A declarative builder for the provided {@link JComboBox}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
     public static <E> UIForCombo<E,JComboBox<E>> comboBox( Vars<E> items ) {
         NullUtil.nullArgCheck(items, "items", Vars.class);
         return ((UIForCombo)comboBox()).withItems(items);
+    }
+
+    /**
+     *  Creates a declarative UI builder for the {@link JComboBox} component type
+     *  where the provided property list dynamically models the selectable items
+     *  in the combo box and a renderer function determines how the items are displayed
+     *  as text in the combo box dropdown list. <br>
+     *  The following example demonstrates how this method may be used: <br>
+     *  <pre>{@code
+     *    // In your view model:
+     *    enum Coffee { ESPRESSO, LATTE, CAPPUCCINO }
+     *    Vars<Coffee> items = Vars.of(Coffee.ESPRESSO,
+     *                                 Coffee.LATTE,
+     *                                 Coffee.CAPPUCCINO);
+     *    // In your view:
+     *    UI.comboBox(items, coffee -> switch (coffee) {
+     *      case ESPRESSO -> "Espresso";
+     *      case LATTE -> "Latte";
+     *      case CAPPUCCINO -> "Cappuccino";
+     *    })
+     *    .onSelection( it -> ... )
+     *  }</pre>
+     *
+     * @param items The property holding the list of selectable items.
+     * @param renderer A function that maps each item to the text that should be displayed in the combo box.
+     * @return A declarative builder for the {@link JComboBox} type, to allow for fluent method chaining.
+     * @param <E> The type of the elements in the list.
+     */
+    public static <E> UIForCombo<E,JComboBox<E>> comboBox( Vars<E> items, Function<E, String> renderer ) {
+        NullUtil.nullArgCheck(items, "items", Vars.class);
+        NullUtil.nullArgCheck(renderer, "renderer", Function.class);
+        return comboBox(items)
+                .withTextRenderer( cell -> cell.value().map(renderer).orElse("") );
     }
 
     /**
@@ -2895,6 +3057,42 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     public static <E> UIForCombo<E,JComboBox<E>> comboBox( Vals<E> items ) {
         NullUtil.nullArgCheck(items, "items", Vals.class);
         return ((UIForCombo)comboBox()).withItems(items);
+    }
+
+    /**
+     *  Creates a declarative UI builder for the {@link JComboBox} component type
+     *  where the provided property list dynamically models the selectable items
+     *  in the combo box and a renderer function determines how the items are displayed
+     *  as text in the combo box dropdown list. <br>
+     *  The following example demonstrates how this method may be used: <br>
+     *  <pre>{@code
+     *    // In your view model:
+     *    enum Coffee { ESPRESSO, LATTE, CAPPUCCINO }
+     *    Vals<Coffee> items = Vals.of(Coffee.ESPRESSO,
+     *                                 Coffee.LATTE,
+     *                                 Coffee.CAPPUCCINO);
+     *    // In your view:
+     *    UI.comboBox(items, coffee -> switch (coffee) {
+     *      case ESPRESSO -> "Espresso";
+     *      case LATTE -> "Latte";
+     *      case CAPPUCCINO -> "Cappuccino";
+     *    })
+     *    .onSelection( it -> ... )
+     *  }</pre>
+     *  Note that the provided list may not be modified by the user
+     *  due to the use of the {@link Vals} property type, which is an immutable
+     *  view of the list of items.
+     *
+     * @param items The property holding the list of selectable items.
+     * @param renderer A function that maps each item to the text that should be displayed in the combo box.
+     * @return A declarative builder for the {@link JComboBox} type, to allow for fluent method chaining.
+     * @param <E> The type of the elements in the list.
+     */
+    public static <E> UIForCombo<E,JComboBox<E>> comboBox( Vals<E> items, Function<E, String> renderer ) {
+        NullUtil.nullArgCheck(items, "items", Vals.class);
+        NullUtil.nullArgCheck(renderer, "renderer", Function.class);
+        return comboBox(items)
+                .withTextRenderer( cell -> cell.value().map(renderer).orElse("") );
     }
 
     /**
@@ -2916,9 +3114,48 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
+     *  Creates a declarative combo box UI based on the provided selection property,
+     *  a property list of selectable items as well as a custom renderer
+     *  function to display the items as the desired text in the combo box. <br>
+     *  Here's an example of how the method can be used: <br>
+     *  <pre>{@code
+     *      // In your view model:
+     *      enum Sentiment { POSITIVE, NEUTRAL, NEGATIVE }
+     *      Var<Sentiment> selected = Var.of(Sentiment.NEUTRAL);
+     *      Vars<Sentiment> sentiments = Vars.of(Sentiment.POSITIVE,
+     *                                           Sentiment.NEUTRAL,
+     *                                           Sentiment.NEGATIVE);
+     *      // In your view:
+     *      UI.comboBox(selected, sentiments, s -> switch (s) {
+     *          case POSITIVE -> "Positive";
+     *          case NEUTRAL -> "Neutral";
+     *          case NEGATIVE -> "Negative";
+     *      })
+     *  }</pre>
+     *  In the example above, the provided function is called for each item in the list
+     *  to determine the text that should be displayed in the combo box dropdown list.
+     *
+     * @param selection The property holding the current selection, which will be updated whenever the user selects a new item.
+     * @param items A property list of selectable items.
+     * @param renderer A function that maps each item to the text that should be displayed in the combo box.
+     * @return A declarative builder for the {@link JComboBox} type, to allow for fluent method chaining.
+     * @param <E> The type of the elements in the list.
+     */
+    public static <E> UIForCombo<E,JComboBox<E>> comboBox(
+        Var<E> selection, Vars<E> items, Function<E, String> renderer
+    ) {
+        NullUtil.nullArgCheck(items, "items", Vars.class);
+        NullUtil.nullArgCheck(selection, "selection", Var.class);
+        NullUtil.nullArgCheck(renderer, "renderer", Function.class);
+        return comboBox(selection, items)
+                .withTextRenderer( cell -> cell.value().map(renderer).orElse("") );
+    }
+
+    /**
      *  Creates a combo box UI builder node with a {@link Var} property as the model
      *  for the current selection and a property list of items as a dynamically sized model for the
      *  selectable items which may not be modified by the user.
+     *  Use {@link #comboBox(Var, Vars)} if you want the user to be able to modify the items.
      *
      * @param selection The property holding the current selection.
      * @param items The list of selectable items which may not be modified by the user.
@@ -2929,6 +3166,47 @@ public abstract class UIFactoryMethods extends UILayoutConstants
         NullUtil.nullArgCheck(items, "items", Vals.class);
         NullUtil.nullArgCheck(selection, "selection", Var.class);
         return ((UIForCombo)comboBox()).withItems(selection, items);
+    }
+
+    /**
+     *  Creates a declarative combo box UI based on the provided selection property,
+     *  a property list of selectable items as well as a custom renderer
+     *  function to display the items as the desired text in the combo box. <br>
+     *  Here's an example of how the method can be used: <br>
+     *  <pre>{@code
+     *      // In your view model:
+     *      enum BloodType { A, B, AB, O }
+     *      Var<Sentiment> selected = Var.of(BloodType.A);
+     *      Vals<Sentiment> types = Vals.of(BloodType.A,
+     *                                      BloodType.B,
+     *                                      BloodType.AB,
+     *                                      BloodType.O);
+     *      // In your view:
+     *      UI.comboBox(selected, types, t -> switch (t) {
+     *          case A -> "Type A";
+     *          case B -> "Type B";
+     *          case AB -> "Type AB";
+     *          case O -> "Type O";
+     *      })
+     *  }</pre>
+     *  In the example above, the provided function is called for each item in the list
+     *  to determine the text that should be displayed in the combo box dropdown list.
+     *  Note that we are using the {@link Vals} property type to ensure the list of items
+     *  is immutable and cannot be modified by the user.
+     *  If you want the user to be able to modify the items, use {@link #comboBox(Var, Vars, Function)}.
+     *
+     * @param selection The property holding the current selection, which will be updated whenever the user selects a new item.
+     * @param items A property list of selectable items which may not be modified by the user.
+     * @param renderer A function that maps each item to the text that should be displayed in the combo box.
+     * @return A declarative builder for the {@link JComboBox} type, to allow for fluent method chaining.
+     * @param <E> The type of the elements in the list.
+     */
+    public static <E> UIForCombo<E,JComboBox<E>> comboBox( Var<E> selection, Vals<E> items, Function<E, String> renderer ) {
+        NullUtil.nullArgCheck(items, "items", Vals.class);
+        NullUtil.nullArgCheck(selection, "selection", Var.class);
+        NullUtil.nullArgCheck(renderer, "renderer", Function.class);
+        return comboBox(selection, items)
+                .withTextRenderer( cell -> cell.value().map(renderer).orElse("") );
     }
 
     /**
@@ -2966,6 +3244,44 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
+     *  Creates a declarative combo box UI based on the provided selection property,
+     *  a property of an array of selectable items and a custom renderer
+     *  function to display the items as the desired text in the combo box. <br>
+     *  Here's an example of how the method can be used: <br>
+     *  <pre>{@code
+     *      // In your view model:
+     *      enum Cost { CHEAP, MODERATE, EXPENSIVE }
+     *      Var<Cost> selected = Var.of(Cost.CHEAP);
+     *      Var<Cost[]> costs = Var.of(Cost.values());
+     *      // In your view:
+     *      UI.comboBox(selected, costs, c -> switch (c) {
+     *          case CHEAP -> "Cheap";
+     *          case MODERATE -> "Moderate";
+     *          case EXPENSIVE -> "Expensive";
+     *      })
+     *  }</pre>
+     *  In the example above, the provided function is called for each item in the list
+     *  to determine the text that should be displayed in the combo box dropdown list.
+     *  Note that changing the contents of the array in the property may not properly
+     *  update the selectable options in the combo box. Instead, ensure that the
+     *  {@link Var#set(Object)}, or {@link Var#fireChange(Channel)} method is used
+     *  to update the available options in the combo box.
+     *
+     * @param var The property holding the current selection, which will be updated whenever the user selects a new item.
+     * @param items A property array of selectable items which can be mutated by the user.
+     * @param renderer A function that maps each item to the text that should be displayed in the combo box.
+     * @return A declarative builder for the {@link JComboBox} type, to allow for fluent method chaining.
+     * @param <E> The type of the elements in the list.
+     */
+    public static <E> UIForCombo<E,JComboBox<E>> comboBox( Var<E> var, Var<E[]> items, Function<E, String> renderer ) {
+        NullUtil.nullArgCheck(items, "items", UI.List.class);
+        NullUtil.nullArgCheck(var, "var", Var.class);
+        NullUtil.nullArgCheck(renderer, "renderer", Function.class);
+        return comboBox(var, items)
+                .withTextRenderer( cell -> cell.value().map(renderer).orElse("") );
+    }
+
+    /**
      *  Creates a combo box UI builder node with a {@link Var} property as the model
      *  for the current selection and an array property of items as a selectable items model
      *  of variable length.
@@ -2981,6 +3297,44 @@ public abstract class UIFactoryMethods extends UILayoutConstants
         NullUtil.nullArgCheck(items, "items", UI.List.class);
         NullUtil.nullArgCheck(selectedItem, "selectedItem", Var.class);
         return ((UIForCombo)comboBox()).withItems(selectedItem, items);
+    }
+
+    /**
+     *  Creates a declarative combo box UI based on the provided selection property,
+     *  a property of an array of selectable items and a custom renderer
+     *  function to display the items as the desired text in the combo box. <br>
+     *  Here's an example of how the method can be used: <br>
+     *  <pre>{@code
+     *      // In your view model:
+     *      enum Vehicle { TRAIN, BIKE, BUS }
+     *      Var<Vehicle> selected = Var.of(Vehicle.BIKE);
+     *      Val<Vehicle[]> vehicles = Val.of(Vehicle.values());
+     *      // In your view:
+     *      UI.comboBox(selected, vehicles, v -> switch (v) {
+     *          case TRAIN -> "Train";
+     *          case BIKE -> "Bike";
+     *          case BUS -> "Bus";
+     *      })
+     *  }</pre>
+     *  In this example the provided function is called for each item in the list
+     *  to determine the text that should be displayed in the combo box dropdown list.
+     *  Note that changing the contents of the array in the property may not properly
+     *  update the selectable options in the combo box. Instead, ensure that the
+     *  {@link Var#set(Object)}, or {@link Var#fireChange(Channel)} method is used
+     *  to update the available options in the combo box.
+     *
+     * @param selectedItem The property holding the current selection, which will be updated whenever the user selects a new item.
+     * @param items A property array of selectable items which may not be modified by the user.
+     * @param renderer A function that maps each item to the text that should be displayed in the combo box.
+     * @return A declarative builder for the {@link JComboBox} type, to allow for fluent method chaining.
+     * @param <E> The type of the elements in the list.
+     */
+    public static <E> UIForCombo<E,JComboBox<E>> comboBox( Var<E> selectedItem, Val<E[]> items, Function<E, String> renderer ) {
+        NullUtil.nullArgCheck(items, "items", UI.List.class);
+        NullUtil.nullArgCheck(selectedItem, "selectedItem", Var.class);
+        NullUtil.nullArgCheck(renderer, "renderer", Function.class);
+        return comboBox(selectedItem, items)
+                .withTextRenderer( cell -> cell.value().map(renderer).orElse("") );
     }
 
     /**

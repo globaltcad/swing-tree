@@ -239,8 +239,8 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
                 ._this();
     }
 
-    private final <V extends E> UIForList<E, L> _withRenderer( Render.Builder<L,V> renderBuilder ) {
-        NullUtil.nullArgCheck(renderBuilder, "renderBuilder", Render.Builder.class);
+    private final <V extends E> UIForList<E, L> _withRenderer( RenderBuilder<L,V> renderBuilder ) {
+        NullUtil.nullArgCheck(renderBuilder, "renderBuilder", RenderBuilder.class);
         return _with( thisComponent -> {
                     thisComponent.setCellRenderer((ListCellRenderer<E>) renderBuilder.buildForList(thisComponent));
                 })
@@ -286,11 +286,11 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
      * @param <V> The type of the value that is being rendered in this combo box.
      */
     public final <V extends E> UIForList<E, L> withRenderer(
-        Configurator<Render.Builder<L,V>> renderBuilder
+        Configurator<RenderBuilder<L,V>> renderBuilder
     ) {
         Class<Object> commonType = Object.class;
         Objects.requireNonNull(commonType);
-        Render.Builder render = Render.forList(commonType);
+        RenderBuilder render = RenderBuilder.forList(commonType);
         try {
             render = renderBuilder.configure(render);
         } catch (Exception e) {

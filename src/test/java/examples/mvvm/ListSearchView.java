@@ -4,6 +4,7 @@ package examples.mvvm;
 import swingtree.threading.EventProcessor;
 import swingtree.UI;
 
+import javax.swing.JLabel;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
@@ -32,7 +33,7 @@ public class ListSearchView extends Panel
                 .add(SHRINK.and(WRAP), label("Search for:"))
                 .add(PUSH.and(GROW).and(SPAN).and(WRAP),
                     listOf(vm.getRandomColors())
-                    .withRenderComponent( it -> new Component() {
+                    .withRenderComponent( it -> new JLabel(" ") {
                         @Override
                         public void paint(Graphics g) {
                             g.setColor(it.entry().orElse(Color.BLACK));
