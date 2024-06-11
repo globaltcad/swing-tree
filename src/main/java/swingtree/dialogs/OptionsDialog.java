@@ -21,6 +21,25 @@ import java.util.function.Function;
  *  This class is intended to be used as part of the {@link UI} API
  *  by calling the {@link UI#choice(String, Enum[])} or {@link UI#choice(String, Var)} factory methods.
  *  <p>
+ *  Here a simple usage example:
+ *  <pre>{@code
+ *      // In your view model:
+ *      public enum MyOptions { YES, NO, CANCEL }
+ *      private final Var<MyOptions> selectedOption = Var.of(MyOptions.YES);
+ *      // In your view:
+ *      UI.choice("Select an option:", vm.selectedOption())
+ *      .parent(this)
+ *      .showAsQuestion( o -> switch(o) {
+ *          case YES    -> "Yes, please!";
+ *          case NO     -> "No, thank you!";
+ *          case CANCEL -> "Cancel";
+ *      });
+ *  }</pre>
+ *  In this example, the user will be presented with a dialog
+ *  containing the message "Select an option:" and the enum options "YES", "NO" and "CANCEL"
+ *  presented as "Yes, please!", "No, thank you!" and "Cancel" respectively.
+ *  The dialog will know the available options from the {@link Var} instance "selectedOption".
+ *  <p>
  *  Note that this API translates to the
  *  {@link JOptionPane#showOptionDialog(Component, Object, String, int, int, Icon, Object[], Object)} method.
  */
