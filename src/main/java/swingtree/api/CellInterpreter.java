@@ -16,14 +16,13 @@ import java.util.function.Consumer;
  * @param <V> The type of the value of the cell.
  */
 @FunctionalInterface
-public
-interface CellInterpreter<C extends JComponent, V> {
-
+public interface CellInterpreter<C extends JComponent, V>
+{
     /**
      * Interprets the value of a {@link CellDelegate} and produces a {@link Component}
      * which is then used to render the cell.
      *
      * @param cell The cell which is to be rendered.
      */
-    void interpret(CellDelegate<C, V> cell);
+    CellDelegate<C, V> interpret(CellDelegate<C, V> cell);
 }

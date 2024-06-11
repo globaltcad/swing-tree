@@ -1,5 +1,6 @@
 package swingtree;
 
+import org.jspecify.annotations.Nullable;
 import swingtree.api.CellInterpreter;
 import swingtree.api.Configurator;
 
@@ -46,7 +47,7 @@ public final class RenderBuilder<C extends JComponent, E> {
 
     private final Class<C> _componentType;
     private final Class<E> _elementType;
-    private final Map<Class<?>, List<Consumer<CellDelegate<C, ?>>>> _rendererLookup = new LinkedHashMap<>(16);
+    private final Map<Class<?>, List<Configurator<CellDelegate<C, ?>>>> _rendererLookup = new LinkedHashMap<>(16);
 
 
     static <E> RenderBuilder<JList<E>,E> forList(Class<E> elementType) {
@@ -106,42 +107,48 @@ public final class RenderBuilder<C extends JComponent, E> {
         NullUtil.nullArgCheck(valueType, "valueType", Class.class);
         NullUtil.nullArgCheck(predicate, "predicate", Predicate.class);
         NullUtil.nullArgCheck(valueInterpreter, "valueInterpreter", CellInterpreter.class);
-        List<Consumer<CellDelegate<C, ?>>> found = _rendererLookup.computeIfAbsent(valueType, k -> new ArrayList<>());
+        List<Configurator<CellDelegate<C, ?>>> found = _rendererLookup.computeIfAbsent(valueType, k -> new ArrayList<>());
         found.add(cell -> {
             if (predicate.test(cell))
-                valueInterpreter.interpret(cell);
+                return valueInterpreter.interpret(cell);
+            else
+                return cell;
         });
     }
 
     private class SimpleTableCellRenderer extends DefaultTableCellRenderer {
         @Override
         public Component getTableCellRendererComponent(
-                JTable table,
-                Object value,
-                boolean isSelected,
-                boolean hasFocus,
-                final int row,
+                JTable           table,
+                @Nullable Object value,
+                boolean          isSelected,
+                boolean          hasFocus,
+                final int        row,
                 int column
         ) {
-            List<Consumer<CellDelegate<C, ?>>> interpreter = _find(value, _rendererLookup);
+            List<Configurator<CellDelegate<C, ?>>> interpreter = _find(value, _rendererLookup);
             if (interpreter.isEmpty())
                 return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
             else {
-                Component[] componentRef = new Component[1];
-                Object[] defaultValueRef = new Object[1];
+                @Nullable Component[] componentRef = new Component[1];
+                @Nullable Object[] defaultValueRef = new Object[1];
                 List<String> toolTips = new ArrayList<>();
                 CellDelegate<JTable, Object> cell = new CellDelegate<>(
                         table, value, isSelected, hasFocus, row, column,
                         componentRef, toolTips, defaultValueRef,
                         c -> SimpleTableCellRenderer.super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column)
-                );
+                    );
 
-                interpreter.forEach(consumer -> consumer.accept((CellDelegate<C, ?>) cell));
+                for ( Configurator<CellDelegate<C,?>> configurator : interpreter ) {
+                    CellDelegate newCell = configurator.configure((CellDelegate)cell);
+                    if ( newCell != null )
+                        cell = newCell;
+                }
                 Component choice;
-                if (componentRef[0] != null)
-                    choice = componentRef[0];
-                else if (defaultValueRef[0] != null)
-                    choice = super.getTableCellRendererComponent(table, defaultValueRef[0], isSelected, hasFocus, row, column);
+                if (cell.getRenderer().isPresent())
+                    choice = cell.getRenderer().get();
+                else if (cell.defaultValue().isPresent())
+                    choice = super.getTableCellRendererComponent(table, cell.defaultValue().get(), isSelected, hasFocus, row, column);
                 else
                     choice = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
@@ -169,12 +176,12 @@ public final class RenderBuilder<C extends JComponent, E> {
             final boolean isSelected,
             final boolean hasFocus
         ) {
-            List<Consumer<CellDelegate<C, ?>>> interpreter = _find(value, _rendererLookup);
+            List<Configurator<CellDelegate<C, ?>>> interpreter = _find(value, _rendererLookup);
             if (interpreter.isEmpty())
                 return super.getListCellRendererComponent(list, value, row, isSelected, hasFocus);
             else {
-                Component[] componentRef = new Component[1];
-                Object[] defaultValueRef = new Object[1];
+                @Nullable Component[] componentRef = new Component[1];
+                @Nullable Object[] defaultValueRef = new Object[1];
                 List<String> toolTips = new ArrayList<>();
                 CellDelegate<O, Object> cell = new CellDelegate<>(
                         _component, value, isSelected, hasFocus, row,
@@ -182,12 +189,16 @@ public final class RenderBuilder<C extends JComponent, E> {
                         c -> super.getListCellRendererComponent(list, value, row, isSelected, hasFocus)
                 );
 
-                interpreter.forEach(consumer -> consumer.accept((CellDelegate<C, ?>) cell));
+                for ( Configurator<CellDelegate<C,?>> configurator : interpreter ) {
+                    CellDelegate newCell = configurator.configure((CellDelegate)cell);
+                    if ( newCell != null )
+                        cell = newCell;
+                }
                 Component choice;
-                if (componentRef[0] != null)
-                    choice = componentRef[0];
-                else if (defaultValueRef[0] != null)
-                    choice = super.getListCellRendererComponent(list, defaultValueRef[0], row, isSelected, hasFocus);
+                if (cell.getRenderer().isPresent())
+                    choice = cell.getRenderer().get();
+                else if (cell.defaultValue().isPresent())
+                    choice = super.getListCellRendererComponent(list, cell.defaultValue().get(), row, isSelected, hasFocus);
                 else
                     choice = super.getListCellRendererComponent(list, value, row, isSelected, hasFocus);
 
@@ -199,13 +210,13 @@ public final class RenderBuilder<C extends JComponent, E> {
         }
     }
 
-    private static <C extends JComponent> List<Consumer<CellDelegate<C, ?>>> _find(
-        Object value,
-        Map<Class<?>, List<Consumer<CellDelegate<C, ?>>>> rendererLookup
+    private static <C extends JComponent> List<Configurator<CellDelegate<C, ?>>> _find(
+        @Nullable Object value,
+        Map<Class<?>, List<Configurator<CellDelegate<C, ?>>>> rendererLookup
     ) {
         Class<?> type = (value == null ? Object.class : value.getClass());
-        List<Consumer<CellDelegate<C, ?>>> cellRenderer = new ArrayList<>();
-        for (Map.Entry<Class<?>, List<Consumer<CellDelegate<C, ?>>>> e : rendererLookup.entrySet()) {
+        List<Configurator<CellDelegate<C, ?>>> cellRenderer = new ArrayList<>();
+        for (Map.Entry<Class<?>, List<Configurator<CellDelegate<C, ?>>>> e : rendererLookup.entrySet()) {
             if (e.getKey().isAssignableFrom(type))
                 cellRenderer.addAll(e.getValue());
         }
@@ -372,7 +383,7 @@ public final class RenderBuilder<C extends JComponent, E> {
 
             if ( border != null ) l.setBorder(border);
 
-            cell.setRenderer(l);
+            return cell.setRenderer(l);
         };
     }
 

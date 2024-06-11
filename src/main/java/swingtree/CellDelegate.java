@@ -1,10 +1,13 @@
 package swingtree;
 
+import org.jspecify.annotations.Nullable;
+
 import javax.swing.JComponent;
 import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -21,38 +24,38 @@ import java.util.function.Function;
 public class CellDelegate<C extends JComponent, V>
 {
     private final C owner;
-    private final V value;
+    private final @Nullable V value;
     private final boolean isSelected;
     private final boolean hasFocus;
     private final int row;
     private final int column;
     private final Component[] componentRef;
     private final List<String> toolTips;
-    private final Object[] defaultValueRef;
+    private final V[] defaultValueRef;
     private final Function<CellDelegate<C, V>, Component> defaultRenderer;
 
     public CellDelegate(
         C owner,
-        V value,
+        @Nullable V value,
         boolean isSelected,
         boolean hasFocus,
         int row,
         int column,
         Component[] componentRef,
         List<String> toolTips,
-        Object[] defaultValueRef,
+        V[] defaultValueRef,
         Function<CellDelegate<C, V>, Component> defaultRenderer
     ) {
-        this.owner = owner;
-        this.value = value;
-        this.isSelected = isSelected;
-        this.hasFocus = hasFocus;
-        this.row = row;
-        this.column = column;
-        this.componentRef = componentRef;
-        this.toolTips = toolTips;
-        this.defaultValueRef = defaultValueRef;
-        this.defaultRenderer = defaultRenderer;
+        this.owner           = Objects.requireNonNull(owner);
+        this.value           = value;
+        this.isSelected      = isSelected;
+        this.hasFocus        = hasFocus;
+        this.row             = row;
+        this.column          = column;
+        this.componentRef    = Objects.requireNonNull(componentRef);
+        this.toolTips        = Objects.requireNonNull(toolTips);
+        this.defaultValueRef = Objects.requireNonNull(defaultValueRef);
+        this.defaultRenderer = Objects.requireNonNull(defaultRenderer);
     }
 
     public C getComponent() {
@@ -83,16 +86,17 @@ public class CellDelegate<C extends JComponent, V>
         return column;
     }
 
-    public Component getRenderer() {
-        return defaultRenderer.apply(this);
+    public Optional<Component> getRenderer() {
+        return Optional.ofNullable(componentRef[0]);
     }
 
-    public void setRenderer(Component component) {
+    public CellDelegate<C, V> setRenderer(Component component) {
         componentRef[0] = component;
+        return this;
     }
 
-    public void setRenderer(Consumer<Graphics2D> painter) {
-        setRenderer(new Component() {
+    public CellDelegate<C, V> setRenderer( Consumer<Graphics2D> painter ) {
+        return setRenderer(new Component() {
             @Override
             public void paint(Graphics g) {
                 super.paint(g);
@@ -101,11 +105,17 @@ public class CellDelegate<C extends JComponent, V>
         });
     }
 
-    public void setToolTip(String toolTip) {
+    public CellDelegate<C, V> setToolTip(String toolTip) {
         toolTips.add(toolTip);
+        return this;
     }
 
-    public void setDefaultRenderValue(Object newValue) {
+    public Optional<V> defaultValue() {
+        return Optional.ofNullable(defaultValueRef[0]);
+    }
+
+    public CellDelegate<C, V> setDefaultRenderValue(V newValue) {
         defaultValueRef[0] = newValue;
+        return this;
     }
 }

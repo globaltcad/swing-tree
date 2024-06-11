@@ -363,6 +363,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
         Class<E> itemType,
         Configurator<BasicTableModel.Builder<E>> dataModelBuilder
     ) {
+        Objects.requireNonNull(itemType);
         Objects.requireNonNull(dataModelBuilder);
         BasicTableModel.Builder<E> builder = new BasicTableModel.Builder<>(itemType);
         try {
