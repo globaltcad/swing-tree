@@ -132,7 +132,7 @@ public class CellDelegate<C extends JComponent, V>
         return Optional.ofNullable(defaultValueRef);
     }
 
-    public CellDelegate<C, V> withDefaultRenderValue( V newValue ) {
+    public CellDelegate<C, V> withDefaultValue( V newValue ) {
         return new CellDelegate<>(
             owner,
             value,
