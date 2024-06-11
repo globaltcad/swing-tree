@@ -10,7 +10,6 @@ import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.Color;
 import java.awt.Component;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -134,10 +133,9 @@ public final class RenderBuilder<C extends JComponent, E> {
                 @Nullable Object[] defaultValueRef = new Object[1];
                 List<String> toolTips = new ArrayList<>();
                 CellDelegate<JTable, Object> cell = new CellDelegate<>(
-                        table, value, isSelected, hasFocus, row, column,
-                        componentRef, toolTips, defaultValueRef,
-                        c -> SimpleTableCellRenderer.super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column)
-                    );
+                                                            table, value, isSelected,
+                                                            hasFocus, row, column, null, toolTips, null
+                                                        );
 
                 for ( Configurator<CellDelegate<C,?>> configurator : interpreter ) {
                     CellDelegate newCell = configurator.configure((CellDelegate)cell);
@@ -180,14 +178,11 @@ public final class RenderBuilder<C extends JComponent, E> {
             if (interpreter.isEmpty())
                 return super.getListCellRendererComponent(list, value, row, isSelected, hasFocus);
             else {
-                @Nullable Component[] componentRef = new Component[1];
-                @Nullable Object[] defaultValueRef = new Object[1];
                 List<String> toolTips = new ArrayList<>();
                 CellDelegate<O, Object> cell = new CellDelegate<>(
-                        _component, value, isSelected, hasFocus, row,
-                        0, componentRef, toolTips, defaultValueRef,
-                        c -> super.getListCellRendererComponent(list, value, row, isSelected, hasFocus)
-                );
+                                                        _component, value, isSelected,
+                                                        hasFocus, row, 0, null, toolTips, null
+                                                    );
 
                 for ( Configurator<CellDelegate<C,?>> configurator : interpreter ) {
                     CellDelegate newCell = configurator.configure((CellDelegate)cell);

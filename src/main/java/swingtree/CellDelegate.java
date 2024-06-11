@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * This class models the state of an individual table/list/drop down cell alongside
@@ -29,10 +28,9 @@ public class CellDelegate<C extends JComponent, V>
     private final boolean hasFocus;
     private final int row;
     private final int column;
-    private final Component[] componentRef;
+    private @Nullable Component componentRef;
     private final List<String> toolTips;
-    private final V[] defaultValueRef;
-    private final Function<CellDelegate<C, V>, Component> defaultRenderer;
+    private @Nullable V defaultValueRef;
 
     public CellDelegate(
         C owner,
@@ -41,10 +39,9 @@ public class CellDelegate<C extends JComponent, V>
         boolean hasFocus,
         int row,
         int column,
-        Component[] componentRef,
+        @Nullable Component renderer,
         List<String> toolTips,
-        V[] defaultValueRef,
-        Function<CellDelegate<C, V>, Component> defaultRenderer
+        @Nullable V defaultValue
     ) {
         this.owner           = Objects.requireNonNull(owner);
         this.value           = value;
@@ -52,10 +49,9 @@ public class CellDelegate<C extends JComponent, V>
         this.hasFocus        = hasFocus;
         this.row             = row;
         this.column          = column;
-        this.componentRef    = Objects.requireNonNull(componentRef);
+        this.componentRef    = renderer;
         this.toolTips        = Objects.requireNonNull(toolTips);
-        this.defaultValueRef = Objects.requireNonNull(defaultValueRef);
-        this.defaultRenderer = Objects.requireNonNull(defaultRenderer);
+        this.defaultValueRef = defaultValue;
     }
 
     public C getComponent() {
@@ -87,11 +83,11 @@ public class CellDelegate<C extends JComponent, V>
     }
 
     public Optional<Component> getRenderer() {
-        return Optional.ofNullable(componentRef[0]);
+        return Optional.ofNullable(componentRef);
     }
 
     public CellDelegate<C, V> setRenderer(Component component) {
-        componentRef[0] = component;
+        componentRef = component;
         return this;
     }
 
@@ -111,11 +107,11 @@ public class CellDelegate<C extends JComponent, V>
     }
 
     public Optional<V> defaultValue() {
-        return Optional.ofNullable(defaultValueRef[0]);
+        return Optional.ofNullable(defaultValueRef);
     }
 
     public CellDelegate<C, V> setDefaultRenderValue(V newValue) {
-        defaultValueRef[0] = newValue;
+        defaultValueRef = newValue;
         return this;
     }
 }
