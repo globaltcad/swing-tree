@@ -18,6 +18,10 @@ import java.util.function.Consumer;
  * the value of the cell, its position within the table
  * as well as a renderer in the form of a AWT {@link Component}
  * which may or not be replaced or modified.
+ * <br>
+ * When configuring your cell, you may use methods like
+ * {@link CellDelegate#withRenderer(Component)} or {@link CellDelegate#withRenderer(Consumer)}
+ * to define how the cell should be rendered.
  *
  * @param <V> The value type of the entry of this {@link CellDelegate}.
  */

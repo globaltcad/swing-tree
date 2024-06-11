@@ -1,7 +1,6 @@
 package swingtree;
 
 import org.jspecify.annotations.Nullable;
-import swingtree.api.CellInterpreter;
 import swingtree.api.Configurator;
 
 import javax.swing.*;
@@ -82,7 +81,7 @@ public final class RenderBuilder<C extends JComponent, E> {
      * Use this to specify a specific type for which you want custom rendering
      * as well as a predicate which tests if a cell value should be rendered.
      * The object returned by this method allows you to specify how to render the values
-     * using methods like {@link RenderAs#as(CellInterpreter)} or {@link RenderAs#asText(Function)}.
+     * using methods like {@link RenderAs#as(Configurator)} or {@link RenderAs#asText(Function)}.
      *
      * @param valueType      The type of cell value, for which you want custom rendering.
      * @param valueValidator A predicate which should return true if the cell value should be rendered.
@@ -98,18 +97,18 @@ public final class RenderBuilder<C extends JComponent, E> {
         return new RenderAs<>(this, valueType, valueValidator);
     }
 
-    void _store(
+    <V> void _store(
         Class valueType,
         Predicate predicate,
-        CellInterpreter valueInterpreter
+        Configurator<CellDelegate<C, V>> valueInterpreter
     ) {
         NullUtil.nullArgCheck(valueType, "valueType", Class.class);
         NullUtil.nullArgCheck(predicate, "predicate", Predicate.class);
-        NullUtil.nullArgCheck(valueInterpreter, "valueInterpreter", CellInterpreter.class);
+        NullUtil.nullArgCheck(valueInterpreter, "valueInterpreter", Configurator.class);
         List<Configurator<CellDelegate<C, ?>>> found = _rendererLookup.computeIfAbsent(valueType, k -> new ArrayList<>());
         found.add(cell -> {
             if (predicate.test(cell))
-                return valueInterpreter.interpret(cell);
+                return valueInterpreter.configure((CellDelegate<C, V>) cell);
             else
                 return cell;
         });
@@ -278,7 +277,7 @@ public final class RenderBuilder<C extends JComponent, E> {
     }
 
 
-    static <C extends JComponent, V> CellInterpreter<C,V> _createDefaultTextRenderer(
+    static <C extends JComponent, V> Configurator<CellDelegate<C, V>> _createDefaultTextRenderer(
             Function<CellDelegate<C, V>, String> renderer
     ) {
         return cell -> {

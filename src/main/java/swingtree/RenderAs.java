@@ -1,7 +1,7 @@
 package swingtree;
 
 import org.slf4j.LoggerFactory;
-import swingtree.api.CellInterpreter;
+import swingtree.api.Configurator;
 
 import javax.swing.JComponent;
 import java.awt.Component;
@@ -60,8 +60,8 @@ public final class RenderAs<C extends JComponent, E, T extends E>
      * @param valueInterpreter A lambda which customizes the provided cell.
      * @return The builder API allowing method chaining.
      */
-    public RenderBuilder<C, E> as( CellInterpreter<C, T> valueInterpreter ) {
-        NullUtil.nullArgCheck(valueInterpreter, "valueInterpreter", CellInterpreter.class);
+    public RenderBuilder<C, E> as( Configurator<CellDelegate<C, T>> valueInterpreter ) {
+        NullUtil.nullArgCheck(valueInterpreter, "valueInterpreter", Configurator.class);
         _builder._store(_valueType, _valueValidator, valueInterpreter);
         return _builder;
     }
