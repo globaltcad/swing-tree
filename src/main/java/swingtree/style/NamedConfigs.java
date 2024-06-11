@@ -149,6 +149,9 @@ final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
     }
 
     /**
+     *  Returns true if at least one of the named styles in this instance passes the test.
+     *  The test is performed by the provided predicate.
+     *
      * @param namedStyleTester The predicate to test the named styles against.
      * @return True if at least one of the named styles in this instance passes the test.
      */

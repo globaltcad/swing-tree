@@ -270,6 +270,11 @@ public final class SplitItemDelegate<I extends JMenuItem> extends AbstractDelega
     }
 
     /**
+     *  A convenience method which takes the supplied {@link String} and prepends it to the
+     *  text displayed on the {@link JSplitButton}.
+     *  This method is equivalent to calling {@link #setButtonText(String)} with the concatenation of the
+     *  supplied {@link String} and the current text displayed on the {@link JSplitButton}.
+     *
      * @param prefix The text which should be prepended to the text displayed on the {@link JSplitButton}.
      * @return This {@link SplitItemDelegate} instance to allow for method chaining.
      */
