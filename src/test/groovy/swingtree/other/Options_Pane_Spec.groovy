@@ -167,12 +167,14 @@ class Options_Pane_Spec extends Specification
     {
         reportInfo """
             The `UI.choice(String, Var)` method returns a builder object
-            for configuring the options dialog.
-            The builder API is fluent and allows you to configure the dialog
-            in a declarative way.
-            
-            You do not need to specify the options as they will automatically be generated from 
+            for configuring the options dialog, where the options are 
+            based on all of the enum values of the provided enum type
+            defined by the `Var` property.
+            So you do not need to specify the options specifically,
+            as they will automatically be generated from 
             the enum values for you.
+            The builder API is fluent and allows you to configure the dialog
+            in a declarative way through method chaining.
         """
         given : 'We create a simple property to store the answer in (and get the options from).'
             var enumProperty = Var.of(ConfirmAnswer.YES)
@@ -218,7 +220,7 @@ class Options_Pane_Spec extends Specification
     {
         reportInfo """
             The `UI.choice(String, Enum[])` method returns a builder object
-            for configuring the options dialog.
+            for configuring the options dialog with the provided enum based options.
             The builder API is fluent and allows you to configure the dialog
             in a declarative way.
             
