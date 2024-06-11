@@ -442,13 +442,23 @@ public final class OptionsDialog<E extends Enum<E>>
             }
         }
 
-        String defaultOption = _default != null ? _default.toString() : null;
+        E defaultOption = _default;
 
         if ( defaultOption == null ) {
             if ( _property != null && _property.isPresent() )
-                defaultOption = _property.get().toString();
+                defaultOption = _property.get();
             else if ( options.length > 0 )
-                defaultOption = options[0].toString();
+                defaultOption = options[0];
+        }
+
+        String defaultOptionStr = "";
+        if ( defaultOption != null ) {
+            try {
+                defaultOptionStr = presenter.apply(defaultOption);
+            } catch ( Exception e ) {
+                log.warn("An exception occurred while converting the default option to a string!", e);
+                defaultOptionStr = defaultOption.toString();
+            }
         }
 
         int type = _type;
@@ -468,7 +478,7 @@ public final class OptionsDialog<E extends Enum<E>>
                                     type,                       // type of the dialog
                                     _icon,                      // icon to display
                                     asStr,                      // options to display
-                                    defaultOption               // default option
+                                    defaultOptionStr               // default option
                                 );
 
         if ( _property != null && selectedIdx >= 0 && options[selectedIdx] != null )

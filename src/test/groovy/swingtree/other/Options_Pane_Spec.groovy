@@ -214,6 +214,104 @@ class Options_Pane_Spec extends Specification
             swingtree.dialogs.Context.summoner = realSummoner
     }
 
+    def 'Use `UI.choice(String, Enum[])` for building an options dialog for a set of enum based options.'()
+    {
+        reportInfo """
+            The `UI.choice(String, Enum[])` method returns a builder object
+            for configuring the options dialog.
+            The builder API is fluent and allows you to configure the dialog
+            in a declarative way.
+            
+            You do not need to specify the options as they will automatically be generated from 
+            the enum values for you.
+        """
+        given : """
+            We mock the `JOptionPane` API through a package private delegate, 
+            the `swingtree.dialogs.OptionsDialogSummoner` API.
+            Note that this is a super simple delegate for the `JOptionPane` factory methods.
+            We do this this for mocking the `JOptionPane` API in this specification.
+            This stuff is package private so please ignore this little implementation detail
+            in your own code. 
+        """
+            var realSummoner = swingtree.dialogs.Context.summoner
+            var summoner = Mock(swingtree.dialogs.OptionsDialogSummoner)
+            swingtree.dialogs.Context.summoner = summoner
+
+        when : 'We invoke the `choice` method on the `UI` API.'
+            var answer =
+                    UI.choice("What is your favorite color?", ConfirmAnswer.YES, ConfirmAnswer.NO, ConfirmAnswer.CANCEL)
+                    .titled("A Question for You!")
+                    .icon((Icon)null)
+                    .defaultOption(ConfirmAnswer.NO)
+                    .show()
+
+        then : 'The dialog summoner API is called with the correct arguments exactly once.'
+            1 * summoner.showOptionDialog(
+                    null,
+                    'What is your favorite color?', // message
+                    'A Question for You!', // title
+                    -1,
+                    3,
+                    null,
+                    ['YES', 'NO', 'CANCEL'],
+                    'NO'
+            ) >> 1
+        and : 'Due to the mock returning `1` the answer should be the enum value with index `1`, namely `NO`.'
+            answer.get() == ConfirmAnswer.NO
+
+        cleanup : 'We put back the original summoner.'
+            swingtree.dialogs.Context.summoner = realSummoner
+    }
+
+    def 'Pass a lambda to the show method of an options dialog to create unique option presentations.'()
+    {
+        reportInfo """
+            The `UI.choice(String, Enum[])` method returns a builder object
+            for configuring the options dialog.
+            It exposes a fluent builder API which allows you to configure the dialog
+            in a declarative way.
+            When calling the show method you can pass a lambda which
+            takes each option and returns a string representation of it
+            which will be displayed in the dialog to the user.
+        """
+        given : """
+            We mock the `JOptionPane` API through a package private delegate, 
+            the `swingtree.dialogs.OptionsDialogSummoner` API.
+            Note that this is a super simple delegate for the `JOptionPane` factory methods.
+            We do this this for mocking the `JOptionPane` API in this specification.
+            This stuff is package private so please ignore this little implementation detail
+            in your own code. 
+        """
+            var realSummoner = swingtree.dialogs.Context.summoner
+            var summoner = Mock(swingtree.dialogs.OptionsDialogSummoner)
+            swingtree.dialogs.Context.summoner = summoner
+
+        when : 'We invoke the `choice` method on the `UI` API.'
+            var answer =
+                    UI.choice("What is your favorite color?", ConfirmAnswer.YES, ConfirmAnswer.NO, ConfirmAnswer.CANCEL)
+                    .titled("A Question for You!")
+                    .icon((Icon)null)
+                    .defaultOption(ConfirmAnswer.NO)
+                    .show( o -> o.toString().toLowerCase() )
+
+        then : 'The dialog summoner API is called with the correct arguments exactly once.'
+            1 * summoner.showOptionDialog(
+                    null,
+                    'What is your favorite color?', // message
+                    'A Question for You!', // title
+                    -1,
+                    3,
+                    null,
+                    ['yes', 'no', 'cancel'],
+                    'no'
+            ) >> 1
+        and : 'Due to the mock returning `1` the answer should be the enum value with index `1`, namely `no`.'
+            answer.get() == ConfirmAnswer.NO
+
+        cleanup : 'We put back the original summoner.'
+            swingtree.dialogs.Context.summoner = realSummoner
+    }
+
     def 'Use `confirmation(String)` to build a simple conformation dialog returning a simple answer enum.'()
     {
         reportInfo """
