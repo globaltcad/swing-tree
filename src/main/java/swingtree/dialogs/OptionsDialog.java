@@ -293,6 +293,12 @@ public final class OptionsDialog<E extends Enum<E>>
     }
 
     /**
+     *  Calling this method causes the dialog to be shown to the user.
+     *  The method is blocking and will only return when the user has selected an option
+     *  or closed the dialog.
+     *  If the dialog is closed, the method will return an empty {@link Optional},
+     *  otherwise it will return the {@link Enum} that the user selected.
+     *
      * @return The {@link Enum} that the user selected in the dialog wrapped in an {@link Optional}
      *        or an empty {@link Optional} if the user closed the dialog.
      */

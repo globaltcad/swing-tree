@@ -151,6 +151,11 @@ public final class UIForProgressBar<P extends JProgressBar> extends UIForAnySwin
     }
 
     /**
+     *  Use this to specify the current progress value in terms of a double value between 0 and 1,
+     *  where 0 represents 0% progress and 1 represents 100% progress.
+     *  Note that the actual value of the progress bar will be calculated based on the min and max values
+     *  currently specified for the progress bar.
+     *
      * @param progress The progress value, a number between 0 and 1, to set for this {@link JProgressBar}.
      *              Note that this will be converted to an integer value between the min and max values.
      * @return This very instance, which enables builder-style method chaining.
