@@ -7,10 +7,18 @@ import swingtree.UI;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.util.Optional;
 
 import static swingtree.UI.*;
 
+/**
+ *  A simple application for configuring a SwingTree style on a panel.
+ *  It renders a preview of the style and generates the code for it,
+ *  which you can copy and paste into your application.
+ */
 public class BoxShadowPickerView extends UI.Panel
 {
     public BoxShadowPickerView(BoxShadowPickerViewModel vm) {
@@ -171,16 +179,26 @@ public class BoxShadowPickerView extends UI.Panel
         .add(GROW.and(PUSH_X),
             panel(FILL.and(INS(16))).withBorderTitled("Code")
             .add(GROW,
-                scrollPane().withStyle( it -> it.borderWidth(0) )
-                .withStyle( s -> s.borderWidth(0).borderColor(Color.BLUE) )
+                scrollPane()
+                .withStyle( it -> it.borderWidth(0).borderColor(Color.BLUE) )
                 .add(
-                    textArea(vm.code()).isEditableIf(false)
+                    textArea(vm.code()).withLayout(FILL)
+                    .isEditableIf(false)
                     .withStyle( it ->
                         it.font(new Font("Monospaced", Font.PLAIN, 15))
                           .fontColor(Color.BLUE.darker())
                           .fontSelectionColor(new Color(20, 200, 100, 100))
                           .borderWidth(0)
                           .borderColor(Color.GREEN)
+                    )
+                    .add(TOP.and(RIGHT),
+                        button("Copy").onClick( e -> {
+                            String code = vm.code().get();
+                            // Copy to clipboard
+                            StringSelection stringSelection = new StringSelection(code);
+                            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                            clipboard.setContents(stringSelection, null);
+                        })
                     )
                 )
             )

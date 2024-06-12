@@ -12,6 +12,11 @@ import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ *  The view model for the {@link BoxShadowPickerView} which is a UI for configuring
+ *  the style of a panel with a box shadow.
+ *  This is also a good demonstration of how to use the MVVM pattern with SwingTree.
+ */
 public class BoxShadowPickerViewModel
 {
     private final Event repaint = Event.create();
