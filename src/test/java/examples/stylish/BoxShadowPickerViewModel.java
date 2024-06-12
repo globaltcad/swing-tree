@@ -12,6 +12,11 @@ import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ *  The view model for the {@link BoxShadowPickerView} which is a UI for configuring
+ *  the style of a panel with a box shadow.
+ *  This is also a good demonstration of how to use the MVVM pattern with SwingTree.
+ */
 public class BoxShadowPickerViewModel
 {
     private final Event repaint = Event.create();
@@ -29,7 +34,6 @@ public class BoxShadowPickerViewModel
     private final Var<Integer> marginBottom = Var.of(30).onChange(From.VIEW,  it -> repaint.fire() );
 
     // Border
-    private final Var<Color>   borderColor     = Var.of(new Color(0,0.4f,1)).onChange(From.VIEW,  it -> repaint.fire() );
     private final Var<UI.Edge>    borderEdge      = Var.of(UI.Edge.EVERY).onChange(From.VIEW, it -> updateEdgeSelection(it.get()) );
     private final Var<UI.Corner>  borderCorner    = Var.of(UI.Corner.EVERY).onChange(From.VIEW, it -> updateCornerSelection(it.get()) );
 
@@ -42,14 +46,10 @@ public class BoxShadowPickerViewModel
     public class BorderEdgeViewModel
     {
         private final Var<Integer> borderWidth = Var.of(3).onChange(From.VIEW, it -> repaint.fire() );
+        private final Var<Color>   borderColor = Var.of(new Color(0,0.4f,1)).onChange(From.VIEW,  it -> repaint.fire() );
 
-        public JComponent createView() {
-            return
-                UI.box("fill, wrap 2", "[shrink][grow]")
-                .add(UI.label("Width:"))
-                .add("growx", UI.slider(UI.Align.HORIZONTAL, 0, 100, borderWidth))
-                .get(JBox.class);
-        }
+        public Var<Integer> borderWidth() { return borderWidth; }
+        public Var<Color> borderColor() { return borderColor; }
     }
 
     public class BorderCornerViewModel{
@@ -57,15 +57,8 @@ public class BoxShadowPickerViewModel
         private final Var<Integer> borderArcWidth  = Var.of(25).onChange(From.VIEW,  it -> repaint.fire() );
         private final Var<Integer> borderArcHeight = Var.of(25).onChange(From.VIEW,  it -> repaint.fire() );
 
-        public JComponent createView() {
-            return
-                UI.box("fill, wrap 2", "[shrink][grow]")
-                .add(UI.label("Width:"))
-                .add("growx", UI.slider(UI.Align.HORIZONTAL, 0, 100, borderArcWidth))
-                .add(UI.label("Height:"))
-                .add("growx", UI.slider(UI.Align.HORIZONTAL, 0, 100, borderArcHeight))
-                .get(JBox.class);
-        }
+        public Var<Integer> borderArcWidth() { return borderArcWidth; }
+        public Var<Integer> borderArcHeight() { return borderArcHeight; }
     }
 
     // Background
@@ -142,6 +135,11 @@ public class BoxShadowPickerViewModel
     public int topBorderWidth() { return getEdgeModel(UI.Edge.TOP).borderWidth.get(); }
     public int bottomBorderWidth() { return getEdgeModel(UI.Edge.BOTTOM).borderWidth.get(); }
 
+    public Color topBorderColor() { return getEdgeModel(UI.Edge.TOP).borderColor.get(); }
+    public Color rightBorderColor() { return getEdgeModel(UI.Edge.RIGHT).borderColor.get(); }
+    public Color bottomBorderColor() { return getEdgeModel(UI.Edge.BOTTOM).borderColor.get(); }
+    public Color leftBorderColor() { return getEdgeModel(UI.Edge.LEFT).borderColor.get(); }
+
     private BoxShadowPickerViewModel.BorderEdgeViewModel getEdgeModel(UI.Edge edge) {
         // We check if the
         if ( currentEdgeModel.is(edgeModels.get(UI.Edge.EVERY)) )
@@ -162,8 +160,6 @@ public class BoxShadowPickerViewModel
 
         return cornerModels.get(corner);
     }
-
-    public Var<Color> borderColor() { return borderColor; }
 
     public Var<Color> backgroundColor() { return backgroundColor; }
 
@@ -195,10 +191,10 @@ public class BoxShadowPickerViewModel
         }
         else
             cornerRadius =
-                "     .borderRadiusAt(Corner.TOP_LEFT, " + arcWidthAt(UI.Corner.TOP_LEFT) + ", " + arcHeightAt(UI.Corner.TOP_LEFT) + ")\n" +
-                "     .borderRadiusAt(Corner.TOP_RIGHT, " + arcWidthAt(UI.Corner.TOP_RIGHT) + ", " + arcHeightAt(UI.Corner.TOP_RIGHT) + ")\n" +
-                "     .borderRadiusAt(Corner.BOTTOM_LEFT, " + arcWidthAt(UI.Corner.BOTTOM_LEFT) + ", " + arcHeightAt(UI.Corner.BOTTOM_LEFT) + ")\n" +
-                "     .borderRadiusAt(Corner.BOTTOM_RIGHT, " + arcWidthAt(UI.Corner.BOTTOM_RIGHT) + ", " + arcHeightAt(UI.Corner.BOTTOM_RIGHT) + ")\n";
+                "     .borderRadiusAt(UI.Corner.TOP_LEFT, " + arcWidthAt(UI.Corner.TOP_LEFT) + ", " + arcHeightAt(UI.Corner.TOP_LEFT) + ")\n" +
+                "     .borderRadiusAt(UI.Corner.TOP_RIGHT, " + arcWidthAt(UI.Corner.TOP_RIGHT) + ", " + arcHeightAt(UI.Corner.TOP_RIGHT) + ")\n" +
+                "     .borderRadiusAt(UI.Corner.BOTTOM_LEFT, " + arcWidthAt(UI.Corner.BOTTOM_LEFT) + ", " + arcHeightAt(UI.Corner.BOTTOM_LEFT) + ")\n" +
+                "     .borderRadiusAt(UI.Corner.BOTTOM_RIGHT, " + arcWidthAt(UI.Corner.BOTTOM_RIGHT) + ", " + arcHeightAt(UI.Corner.BOTTOM_RIGHT) + ")\n";
 
         String borderWidth = "";
         if ( this.borderEdge.is(UI.Edge.EVERY) ) {
@@ -210,19 +206,31 @@ public class BoxShadowPickerViewModel
         }
         else
             borderWidth =
-                "     .borderWidthAt(Edge.LEFT, " + leftBorderWidth() + ")\n" +
-                "     .borderWidthAt(Edge.TOP, " + topBorderWidth() + ")\n" +
-                "     .borderWidthAt(Edge.RIGHT, " + rightBorderWidth() + ")\n" +
-                "     .borderWidthAt(Edge.BOTTOM, " + bottomBorderWidth() + ")\n";
+                "     .borderWidthAt(UI.Edge.LEFT, " + leftBorderWidth() + ")\n" +
+                "     .borderWidthAt(UI.Edge.TOP, " + topBorderWidth() + ")\n" +
+                "     .borderWidthAt(UI.Edge.RIGHT, " + rightBorderWidth() + ")\n" +
+                "     .borderWidthAt(UI.Edge.BOTTOM, " + bottomBorderWidth() + ")\n";
+
+        String borderColoring = "";
+        boolean allColorsAreTheSame = topBorderColor().equals(rightBorderColor()) && topBorderColor().equals(bottomBorderColor()) && topBorderColor().equals(leftBorderColor());
+        if ( allColorsAreTheSame )
+            borderColoring = topBorderColor().equals(Color.BLACK) ? "" : "     .borderColor(" + str(topBorderColor()) + ")\n";
+        else
+            borderColoring =
+                "     .borderColors(\n" +
+                "         " + str(topBorderColor()) + ",\n" +
+                "         " + str(rightBorderColor()) + ",\n" +
+                "         " + str(bottomBorderColor()) + ",\n" +
+                "         " + str(leftBorderColor()) + "\n" +
+                "     )\n";
 
         code.set(
             "panel(FILL)\n" +
-            ".withStyle( it ->\n" +
-            "    it\n" +
+            ".withStyle( it -> it\n" +
             "     .backgroundColor("+ str(backgroundColor) + ")\n" +
             "     .foundationColor(" + str(foundationColor) + ")\n" +
             ( drawSmiley().is(false) ? "" :
-            "     .backgroundPainter( g2d -> {\n" +
+            "     .painter(UI.Layer.BACKGROUND, g2d -> {\n" +
             "         if ( vm.drawSmiley().is(false) ) return;\n" +
             "         int w = it.component().getWidth() - " + str(paddingLeft) + " - " + str(paddingRight) + " - 100;\n" +
             "         int h = it.component().getHeight() - " + str(paddingTop) + " - " + str(paddingBottom) + " - 100;\n" +
@@ -235,7 +243,7 @@ public class BoxShadowPickerViewModel
             "     .margin(" + str(marginTop) + ", " + str(marginRight) + ", " + str(marginBottom) + ", " + str(marginLeft) + ")\n" +
             cornerRadius +
             borderWidth +
-            (borderWidth.isEmpty() ? "" : "     .borderColor(" + str(borderColor) + ")\n") +
+            (borderWidth.isEmpty() ? "" : borderColoring) +
             "     .shadowColor(" + str(shadowColor) + ")\n" +
             ( horizontalShadowOffset.is(0) ? "" : "     .shadowHorizontalOffset(" + str(horizontalShadowOffset) + ")\n" ) +
             ( verticalShadowOffset.is(0) ? "" : "     .shadowVerticalOffset(" + str(verticalShadowOffset) + ")\n" ) +
@@ -269,9 +277,12 @@ public class BoxShadowPickerViewModel
 
     private String str(Val<?> v) {
         if ( v.type() == Color.class ) {
-            Color c = (Color) v.get();
-            return "new Color(" + c.getRed() + "," + c.getGreen() + "," + c.getBlue() + "," + c.getAlpha() + ")";
+            return str((Color) v.get());
         }
         return v.get().toString();
+    }
+
+    private String str(Color c) {
+        return "new java.awt.Color(" + c.getRed() + "," + c.getGreen() + "," + c.getBlue() + "," + c.getAlpha() + ")";
     }
 }
