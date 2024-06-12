@@ -100,23 +100,33 @@ public class BoxShadowPickerView extends UI.Panel
             )
             .add(GROW_X.and(GROW_Y),
                 panel(FILL.and(WRAP(3)), "[shrink][grow][shrink]").withBorderTitled("Border")
-                .add(label("Color:"))
-                .add(GROW_X.and(PUSH_X),
-                    textField(vm.shadowColor().mapTo(Integer.class, Color::getRGB).itemAsString())
-                    .onContentChange( it -> {
-                        parseColor(it.get().getText()).ifPresent(color -> {vm.borderColor().set(From.VIEW, color);});
-                    })
-                )
-                .add(WRAP, panel(FILL).withBackground(vm.borderColor()))
                 .add(SPAN,
                     panel(FILL.and(WRAP(3)), "[shrink][grow][shrink]").withBorderTitled("Corners")
-                    .add(SPAN, comboBox(vm.borderCorner()))
-                    .add(SPAN, vm.currentCornerModel(), viewModel -> UI.of(viewModel.createView()))
+                    .add(SPAN, comboBox(vm.borderCorner(), BoxShadowPickerView::enumToTitleString))
+                    .add(SPAN, vm.currentCornerModel(), viewModel ->
+                        UI.box(FILL.and(WRAP(2)), "[shrink][grow]")
+                        .add(UI.label("Width:"))
+                        .add(GROW_X, UI.slider(UI.Align.HORIZONTAL, 0, 100, viewModel.borderArcWidth()))
+                        .add(UI.label("Height:"))
+                        .add(GROW_X, UI.slider(UI.Align.HORIZONTAL, 0, 100, viewModel.borderArcHeight()))
+                    )
                 )
                 .add(SPAN,
                     panel(FILL.and(WRAP(3)), "[shrink][grow][shrink]").withBorderTitled("Edges")
-                    .add(SPAN, comboBox(vm.borderEdge()))
-                    .add(SPAN, vm.currentEdgeModel(), viewModel -> UI.of(viewModel.createView()))
+                    .add(SPAN, comboBox(vm.borderEdge(), BoxShadowPickerView::enumToTitleString))
+                    .add(SPAN, vm.currentEdgeModel(), viewModel ->
+                        UI.box(FILL.and(WRAP(3)), "[shrink][grow]")
+                        .add(UI.label("Width:"))
+                        .add(GROW_X.and(SPAN(2)), UI.slider(UI.Align.HORIZONTAL, 0, 100, viewModel.borderWidth()))
+                        .add(label("Color:"))
+                        .add(GROW_X.and(PUSH_X),
+                            textField(viewModel.borderColor().mapTo(Integer.class, Color::getRGB).itemAsString())
+                            .onContentChange( it -> {
+                                parseColor(it.get().getText()).ifPresent(color -> {viewModel.borderColor().set(From.VIEW, color);});
+                            })
+                        )
+                        .add(WRAP, panel(FILL).withBackground(viewModel.borderColor()))
+                    )
                 )
             )
             .add(GROW.and(SPAN),
@@ -149,7 +159,7 @@ public class BoxShadowPickerView extends UI.Panel
                          .shadowSpreadRadius(vm.shadowSpreadRadius().get())
                          .shadowIsInset(vm.shadowInset().get())
                          .borderWidths(vm.topBorderWidth(), vm.rightBorderWidth(), vm.bottomBorderWidth(), vm.leftBorderWidth())
-                         .borderColor(vm.borderColor().get())
+                         .borderColors(vm.topBorderColor(), vm.rightBorderColor(), vm.bottomBorderColor(), vm.leftBorderColor())
                     )
                     .add(TOP.and(SPAN).and(ALIGN_CENTER), label("Label"))
                     .add(LEFT, button("Button"))
@@ -203,6 +213,18 @@ public class BoxShadowPickerView extends UI.Panel
         } catch (NumberFormatException e) {
             return Optional.empty();
         }
+    }
+
+    private static String enumToTitleString( Enum<?> e ) {
+        // Example THIS_IS_AN_ENUM -> This Is An Enum
+        String[] parts = e.name().split("_");
+        StringBuilder sb = new StringBuilder();
+        for ( String part : parts ) {
+            sb.append(part.substring(0, 1).toUpperCase());
+            sb.append(part.substring(1).toLowerCase());
+            sb.append(" ");
+        }
+        return sb.toString().trim();
     }
 
     public static void main( String... args ) { UI.show(f ->new BoxShadowPickerView(new BoxShadowPickerViewModel())); }
