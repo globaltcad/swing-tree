@@ -144,8 +144,8 @@ public final class RenderBuilder<C extends JComponent, E> {
                 Component choice;
                 if (cell.renderer().isPresent())
                     choice = cell.renderer().get();
-                else if (cell.defaultValue().isPresent())
-                    choice = super.getTableCellRendererComponent(table, cell.defaultValue().get(), isSelected, hasFocus, row, column);
+                else if (cell.presentationValue().isPresent())
+                    choice = super.getTableCellRendererComponent(table, cell.presentationValue().get(), isSelected, hasFocus, row, column);
                 else
                     choice = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
@@ -191,8 +191,8 @@ public final class RenderBuilder<C extends JComponent, E> {
                 Component choice;
                 if (cell.renderer().isPresent())
                     choice = cell.renderer().get();
-                else if (cell.defaultValue().isPresent())
-                    choice = super.getListCellRendererComponent(list, cell.defaultValue().get(), row, isSelected, hasFocus);
+                else if (cell.presentationValue().isPresent())
+                    choice = super.getListCellRendererComponent(list, cell.presentationValue().get(), row, isSelected, hasFocus);
                 else
                     choice = super.getListCellRendererComponent(list, value, row, isSelected, hasFocus);
 
