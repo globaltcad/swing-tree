@@ -1,6 +1,8 @@
 package swingtree;
 
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.JComponent;
 import java.awt.Component;
@@ -11,6 +13,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * This class models the state of an individual table/list/drop down cell alongside
@@ -27,6 +30,8 @@ import java.util.function.Consumer;
  */
 public class CellDelegate<C extends JComponent, V>
 {
+    private static final Logger log = LoggerFactory.getLogger(CellDelegate.class);
+
     private final C                   owner;
     private final @Nullable V         value;
     private final boolean             isSelected;
@@ -36,6 +41,7 @@ public class CellDelegate<C extends JComponent, V>
     private final @Nullable Component componentRef;
     private final List<String>        toolTips;
     private final @Nullable Object    presentationValue;
+    private final Supplier<Component> defaultRenderSource;
 
 
     public CellDelegate(
@@ -47,17 +53,19 @@ public class CellDelegate<C extends JComponent, V>
         int                 column,
         @Nullable Component renderer,
         List<String>        toolTips,
-        @Nullable Object    presentationValue
+        @Nullable Object    presentationValue,
+        Supplier<Component> defaultRenderSource
     ) {
-        this.owner             = Objects.requireNonNull(owner);
-        this.value             = value;
-        this.isSelected        = isSelected;
-        this.hasFocus          = hasFocus;
-        this.row               = row;
-        this.column            = column;
-        this.componentRef      = renderer;
-        this.toolTips          = Objects.requireNonNull(toolTips);
-        this.presentationValue = presentationValue;
+        this.owner               = Objects.requireNonNull(owner);
+        this.value               = value;
+        this.isSelected          = isSelected;
+        this.hasFocus            = hasFocus;
+        this.row                 = row;
+        this.column              = column;
+        this.componentRef        = renderer;
+        this.toolTips            = Objects.requireNonNull(toolTips);
+        this.presentationValue   = presentationValue;
+        this.defaultRenderSource = Objects.requireNonNull(defaultRenderSource);
     }
 
     public C getComponent() {
@@ -102,7 +110,8 @@ public class CellDelegate<C extends JComponent, V>
             column,
             component,
             toolTips,
-                presentationValue
+            presentationValue,
+            defaultRenderSource
         );
     }
 
@@ -128,7 +137,8 @@ public class CellDelegate<C extends JComponent, V>
             column,
             componentRef,
             newToolTips,
-                presentationValue
+            presentationValue,
+            defaultRenderSource
         );
     }
 
@@ -165,7 +175,17 @@ public class CellDelegate<C extends JComponent, V>
             column,
             componentRef,
             toolTips,
-            toBeShown
+            toBeShown,
+            defaultRenderSource
         );
+    }
+
+    public CellDelegate<C, V> withDefaultRenderer() {
+        try {
+            return this.withRenderer(this.defaultRenderSource.get());
+        } catch (Exception e) {
+            log.error("Failed to create default renderer!", e);
+        }
+        return this;
     }
 }
