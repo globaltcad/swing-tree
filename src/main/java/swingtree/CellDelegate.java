@@ -1,6 +1,8 @@
 package swingtree;
 
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.JComponent;
 import java.awt.Component;
@@ -11,6 +13,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * This class models the state of an individual table/list/drop down cell alongside
@@ -27,6 +30,8 @@ import java.util.function.Consumer;
  */
 public class CellDelegate<C extends JComponent, V>
 {
+    private static final Logger log = LoggerFactory.getLogger(CellDelegate.class);
+
     private final C                   owner;
     private final @Nullable V         value;
     private final boolean             isSelected;
@@ -35,7 +40,8 @@ public class CellDelegate<C extends JComponent, V>
     private final int                 column;
     private final @Nullable Component componentRef;
     private final List<String>        toolTips;
-    private final @Nullable V         defaultValueRef;
+    private final @Nullable Object    presentationValue;
+    private final Supplier<Component> defaultRenderSource;
 
 
     public CellDelegate(
@@ -47,17 +53,19 @@ public class CellDelegate<C extends JComponent, V>
         int                 column,
         @Nullable Component renderer,
         List<String>        toolTips,
-        @Nullable V         defaultValue
+        @Nullable Object    presentationValue,
+        Supplier<Component> defaultRenderSource
     ) {
-        this.owner           = Objects.requireNonNull(owner);
-        this.value           = value;
-        this.isSelected      = isSelected;
-        this.hasFocus        = hasFocus;
-        this.row             = row;
-        this.column          = column;
-        this.componentRef    = renderer;
-        this.toolTips        = Objects.requireNonNull(toolTips);
-        this.defaultValueRef = defaultValue;
+        this.owner               = Objects.requireNonNull(owner);
+        this.value               = value;
+        this.isSelected          = isSelected;
+        this.hasFocus            = hasFocus;
+        this.row                 = row;
+        this.column              = column;
+        this.componentRef        = renderer;
+        this.toolTips            = Objects.requireNonNull(toolTips);
+        this.presentationValue   = presentationValue;
+        this.defaultRenderSource = Objects.requireNonNull(defaultRenderSource);
     }
 
     public C getComponent() {
@@ -102,7 +110,8 @@ public class CellDelegate<C extends JComponent, V>
             column,
             component,
             toolTips,
-            defaultValueRef
+            presentationValue,
+            defaultRenderSource
         );
     }
 
@@ -128,15 +137,35 @@ public class CellDelegate<C extends JComponent, V>
             column,
             componentRef,
             newToolTips,
-            defaultValueRef
+            presentationValue,
+            defaultRenderSource
         );
     }
 
-    public Optional<V> defaultValue() {
-        return Optional.ofNullable(defaultValueRef);
+    /**
+     *  The presentation value is the first choice of the
+     *  cell renderer to be used for rendering and presentation
+     *  to the user. If it does not exist then the regular
+     *  cell value is used for rendering.
+     *
+     * @return An optional of the presentation value.
+     *         It may be an empty optional if no presentation value was specified.
+     */
+    public Optional<Object> presentationValue() {
+        return Optional.ofNullable(presentationValue);
     }
 
-    public CellDelegate<C, V> withDefaultValue( V newValue ) {
+    /**
+     *  Represents the value how it should be displayed
+     *  to the user by the cell renderer. By default, this
+     *  value is null, in which case the regular cell value is
+     *  presented to the user.
+     *
+     * @param toBeShown The object which should be used by the renderer
+     *                  to present to the user, typically a String.
+     * @return An updated cell delegate object with the new presentation value.
+     */
+    public CellDelegate<C, V> withPresentationValue( @Nullable Object toBeShown ) {
         return new CellDelegate<>(
             owner,
             value,
@@ -146,7 +175,17 @@ public class CellDelegate<C extends JComponent, V>
             column,
             componentRef,
             toolTips,
-            newValue
+            toBeShown,
+            defaultRenderSource
         );
+    }
+
+    public CellDelegate<C, V> withDefaultRenderer() {
+        try {
+            return this.withRenderer(this.defaultRenderSource.get());
+        } catch (Exception e) {
+            log.error("Failed to create default renderer!", e);
+        }
+        return this;
     }
 }
