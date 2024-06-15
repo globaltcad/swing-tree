@@ -623,12 +623,35 @@ public final class GradientConf implements Simplifiable<GradientConf>
                 if ( color != UI.Color.UNDEFINED )
                     realColors[index++] = color;
 
+            _avoidTransparentBlackLeakage(realColors);
             return of(_span, _type, realColors, _offset, _size, _area, _boundary, focus, rotation, _fractions, _cycle);
         }
 
-        if ( !focus.equals(_focus) )
+        if ( !focus.equals(_focus) ) {
+            _avoidTransparentBlackLeakage(_colors);
             return of(_span, _type, _colors, _offset, _size, _area, _boundary, focus, rotation, _fractions, _cycle);
+        }
 
+        _avoidTransparentBlackLeakage(_colors);
         return this;
+    }
+
+    @SuppressWarnings("ReferenceEquality")
+    private static void _avoidTransparentBlackLeakage(Color[] realColors) {
+        for ( int i = 0; i < realColors.length; i++ ) {
+            Color currentColor = realColors[i];
+            if ( currentColor == UI.Color.TRANSPARENT ) {
+                Color leftColor  = ( i > 0                     ? realColors[i - 1] : null);
+                Color rightColor = ( i < realColors.length - 1 ? realColors[i + 1] : null);
+                leftColor  = (leftColor  == null ? rightColor : leftColor);
+                rightColor = (rightColor == null ? leftColor : rightColor);
+                leftColor  = (leftColor  == null ? currentColor : leftColor);
+                rightColor = (rightColor == null ? currentColor : rightColor);
+                int averageR = ( leftColor.getRed()   + rightColor.getRed()   ) / 2;
+                int averageG = ( leftColor.getGreen() + rightColor.getGreen() ) / 2;
+                int averageB = ( leftColor.getBlue()  + rightColor.getBlue()  ) / 2;
+                realColors[i] = new Color(averageR, averageG, averageB, 0);
+            }
+        }
     }
 }
