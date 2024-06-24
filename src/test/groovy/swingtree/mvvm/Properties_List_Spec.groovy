@@ -380,7 +380,8 @@ class Properties_List_Spec extends Specification
             list == [42, 73, 1, 2]
             set == [42, 73, 1, 2] as Set
             map == ["a": 42, "b": 73, "c": 1, "d": 2]
-            valMap == ["a": Val.of(42), "b": Val.of(73), "c": Val.of(1), "d": Val.of(2)]
+            valMap != ["a": Val.of(42), "b": Val.of(73), "c": Val.of(1), "d": Val.of(2)]
+            valMap == ["a": vars.at(0), "b": vars.at(1), "c": vars.at(2), "d": vars.at(3)]
         and : 'All of these collections are of the correct type.'
             list instanceof List
             set instanceof Set
@@ -406,11 +407,11 @@ class Properties_List_Spec extends Specification
     def 'The "makeDistinct" method on a mutable list of properties modifies the list in-place.'()
     {
         reportInfo """
-            The "makeDistinct" method makes sure that there are only unique values in the Vals list.
+            The `makeDistinct` method makes sure that there are only unique values in the Vals list.
             It does this by removing all duplicates from the list.
             This is especially useful when you use the properties to model 
             combo box or radio button selections.
-            This modification will be reported to all change listeners,
+            This modification will be reported to all "show" listeners,
             which are usually used to update the UI.
         """
         given : 'A "Vars" class with 4 properties that have unique ids.'
@@ -428,8 +429,8 @@ class Properties_List_Spec extends Specification
             vars.makeDistinct()
         then : 'The list has been modified in-place.'
             vars.size() == 3
-            vars == Vars.of(Var.of(3.1415f), Var.of(2.7182f), Var.of(1.6180f))
-        and : 'The change listeners have been called.'
+            vars.toList() == [3.1415f, 2.7182f, 1.6180f]
+        and : 'The "show" listeners have been called.'
             changes == [Change.DISTINCT]
     }
 
