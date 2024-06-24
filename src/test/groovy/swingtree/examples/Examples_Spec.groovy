@@ -11,6 +11,7 @@ import examples.games.notepicker.NoteGuesserViewModel
 import examples.games.kanapicker.KanaPickerView
 import examples.games.kanapicker.KanaPickerViewModel
 import examples.lists.ListTestExample
+import examples.mvc.FunctionalMVC
 import examples.mvvm.*
 import examples.simple.Form
 import examples.simple.ListRendering
@@ -364,6 +365,11 @@ class Examples_Spec extends Specification
     def 'The `ListTestExample` class can be created.'()
     {
         expect : new ListTestExample()
+    }
+
+    def 'The `ListTestExample` class can be created.'()
+    {
+        expect : FunctionalMVC.createView()
     }
 
     def 'How SwingTree compares to a GUI Editor based implementation.'()
