@@ -42,7 +42,6 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -242,9 +241,6 @@ public abstract class UIFactoryMethods extends UILayoutConstants
         }
         return font;
     }
-
-
-
 
     /**
      *  This returns an instance of a generic swing tree builder
