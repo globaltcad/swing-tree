@@ -46,9 +46,9 @@ class Auto_Cleaning_Spec extends Specification
             System.gc()
             Thread.sleep(100)
         then : 'The binding of the view model to the view was garbage collected from the properties.'
-            vm.forename._actions.values().every( list -> list.isEmpty() )
-            vm.surname._actions.values().every( list -> list.isEmpty() )
-            vm.favouriteNumber._actions.values().every( list -> list.isEmpty() )
+            vm.forename.numberOfChangeListeners() == 0
+            vm.surname.numberOfChangeListeners() == 0
+            vm.favouriteNumber.numberOfChangeListeners() == 0
     }
 
 }

@@ -4073,20 +4073,37 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     protected <M> void _addViewableProps( Vals<M> models, @Nullable String attr, ViewSupplier<M> viewSupplier, C thisComponent ) {
         _onShow( models, thisComponent, (c, delegate) -> {
             // we simply redo all the components.
+            Vals<M> newValues = delegate.newValues();
+            Vals<M> oldValues = delegate.oldValues();
+
             switch ( delegate.changeType() ) {
-                case SET: _updateComponentAt(delegate.index(), delegate.newValue().get(), viewSupplier, attr, c); break;
+                case SET:
+                    for ( int i = 0; i < newValues.size(); i++ ) {
+                        int position = i + delegate.index();
+                        _updateComponentAt(position, newValues.at(i).get(), viewSupplier, attr, c);
+                    }
+                    break;
                 case ADD:
-                    if ( delegate.index() < 0 && delegate.newValue().isEmpty() ) {
+                    if ( delegate.index() < 0 && newValues.any(Val::isEmpty) ) {
                         // This is basically a add all operation, so we clear the components first.
                         _clearComponentsOf(c);
                         // and then we add all the components.
                         for ( int i = 0; i < delegate.vals().size(); i++ )
                             _addComponentAt( i, delegate.vals().at(i).get(), viewSupplier, attr, c );
                     }
-                    else
-                        _addComponentAt( delegate.index(), delegate.newValue().get(), viewSupplier, attr, c );
+                    else {
+                        for ( int i = 0; i < newValues.size(); i++ ) {
+                            int position = i + delegate.index();
+                            _addComponentAt(position, newValues.at(i).get(), viewSupplier, attr, c);
+                        }
+                    }
                     break;
-                case REMOVE: _removeComponentAt(delegate.index(), c); break;
+                case REMOVE:
+                    for ( int i = oldValues.size() - 1; i >= 0; i-- ) {
+                        int position = i + delegate.index();
+                        _removeComponentAt(position, c);
+                    }
+                    break;
                 case CLEAR: _clearComponentsOf(c); break;
                 case NONE: break;
                 default: throw new IllegalStateException("Unknown type: "+delegate.changeType());
