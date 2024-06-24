@@ -2764,6 +2764,29 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
+     *  Use this create a UI declaration for the {@link JComboBox} component type
+     *  with the provided array of elements as selectable items
+     *  and a lambda function converting each item into a
+     *  user-friendly {@link String} representation. <br>
+     *  Note that the user may modify the items in the provided array
+     *  (if the combo box is editable), if you do not want that,
+     *  consider using {@link UI#comboBoxWithUnmodifiable(Object[])}
+     *  or {@link UI#comboBoxWithUnmodifiable(java.util.List)}.
+     *
+     * @param items The array of elements to be selectable in the {@link JComboBox}.
+     * @param renderer A lambda function which is used for mapping each entry to a
+     *                 user-friendly {@link String} representation.
+     * @param <E> The type of the elements in the {@link JComboBox}.
+     * @return A builder instance for the new {@link JComboBox}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code component} is {@code null}.
+     */
+    public static <E> UIForCombo<E,JComboBox<E>> comboBox( E[] items, Function<E,String> renderer ) {
+        NullUtil.nullArgCheck(items, "items", Object[].class);
+        return comboBox(items)
+                .withTextRenderer(cell -> cell.value().map(renderer).orElse(""));
+    }
+
+    /**
      *  Use this to declare a UI builder for the {@link JComboBox} type
      *  with the provided array of elements as selectable items which
      *  may not be modified by the user.
@@ -2778,6 +2801,27 @@ public abstract class UIFactoryMethods extends UILayoutConstants
         NullUtil.nullArgCheck(items, "items", Object[].class); // Unmodifiable
         java.util.List<E> unmodifiableList = Collections.unmodifiableList(java.util.Arrays.asList(items));
         return comboBox(unmodifiableList);
+    }
+
+    /**
+     *  Use this to declare a UI builder for the {@link JComboBox} type
+     *  with the provided array of elements as selectable items which
+     *  may not be modified by the user.
+     *  Use this create a UI declaration for the {@link JComboBox} component type
+     *  with the provided array of elements as selectable <b>but unmodifiable</b> items
+     *  and a lambda function converting each item into a
+     *  user-friendly {@link String} representation. <br>
+     *
+     * @param items The unmodifiable array of elements to be selectable in the drop down list of the combo box.
+     * @param <E> The type of the elements in the {@link JComboBox}.
+     * @return A builder instance for the new {@link JComboBox}, which enables fluent method chaining.
+     * @throws IllegalArgumentException if {@code component} is {@code null}.
+     */
+    public static <E> UIForCombo<E,JComboBox<E>> comboBoxWithUnmodifiable( E[] items, Function<E,String> renderer ) {
+        NullUtil.nullArgCheck(items, "items", Object[].class); // Unmodifiable
+        java.util.List<E> unmodifiableList = Collections.unmodifiableList(java.util.Arrays.asList(items));
+        return comboBox(unmodifiableList)
+                .withTextRenderer(cell -> cell.value().map(renderer).orElse(""));
     }
 
     /**
@@ -2844,6 +2888,8 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * which is actually displayed in the combo box to the user.
      *
      * @param selectedItem A property modelling the selected item in the combo box.
+     * @param renderer A lambda function which is used for mapping each entry to a
+     *                 user friendly {@link String} representation.
      * @return A builder instance for the new {@link JComboBox}, which enables fluent method chaining.
      * @param <E> The type of the elements in the combo box.
      */
@@ -3223,6 +3269,29 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
+     *  Creates a combo box UI declaration with a {@link Var} property as the model
+     *  for the current selection and an array of items as a fixed-size model for the
+     *  selectable items, as well as a lambda function which maps each combo box item
+     *  to a user-friendly {@link String} representation.
+     *  <p>
+     *  Note that the provided array may be mutated by the combo box UI component.
+     *
+     * @param var The property holding the current selection.
+     * @param items The array of selectable items.
+     * @param renderer A function that maps each item to the text that should be displayed in the combo box.
+     *                 It is intended to make the type of entry more human readable and thereby user-friendly.
+     * @return A builder instance for the provided {@link JList}, which enables fluent method chaining.
+     * @param <E> The type of the elements in the combo box.
+     */
+    public static <E> UIForCombo<E,JComboBox<E>> comboBox(
+        Var<E> var, E[] items, Function<E, String> renderer
+    ) {
+        NullUtil.nullArgCheck(items, "items", UI.List.class);
+        return comboBox(var, items)
+                .withTextRenderer( cell -> cell.value().map(renderer).orElse("") );
+    }
+
+    /**
      *  Creates a combo box UI builder node with a {@link Var} property as the model
      *  for the current selection and an array property of items as a selectable items model
      *  of variable length.
@@ -3343,6 +3412,23 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     public static <E> UIForCombo<E,JComboBox<E>> comboBox( ComboBoxModel<E> model ) {
         NullUtil.nullArgCheck(model, "model", ComboBoxModel.class);
         return (UIForCombo)comboBox().peek( c -> ((JComboBox)c).setModel(model) );
+    }
+
+    /**
+     *  Created a combo box UI builder node with the provided {@link ComboBoxModel}
+     *  and a lambda function mapping each model entry to a user-friendly
+     *  human-readable {@link String} representation.
+     *
+     * @param model The model to be used by the combo box.
+     * @param renderer A function that maps each item to the text that should be displayed in the combo box.
+     *                 It is intended to make the type of entry more human-readable and thereby user-friendly.
+     * @return A builder instance for the provided {@link JList}, which enables fluent method chaining.
+     * @param <E> The type of the elements in the combo box.
+     */
+    public static <E> UIForCombo<E,JComboBox<E>> comboBox( ComboBoxModel<E> model, Function<E, String> renderer ) {
+        NullUtil.nullArgCheck(model, "model", ComboBoxModel.class);
+        return comboBox(model)
+                .withTextRenderer( cell -> cell.value().map(renderer).orElse("") );
     }
 
     /**
