@@ -172,7 +172,7 @@ class Properties_Spec extends Specification
             thrown(NoSuchElementException)
     }
 
-    def 'The equality and hash code of a property are based on its value, type and id!'()
+    def 'The equality and hash code of a mutable property is based on its identity!'()
     {
         given : 'We create various kinds of properties...'
             Var<Integer> num = Var.of(1)
@@ -183,6 +183,35 @@ class Properties_Spec extends Specification
             Var<Boolean> bool = Var.ofNullable(Boolean, null)
             Var<int[]> arr1 = Var.of(new int[]{1,2,3})
             Var<int[]> arr2 = Var.of(new int[]{1,2,3})
+        expect : 'The properties are equal if they have the same identity.'
+            num.equals(num2) == false
+            num.equals(str)  == false
+            num.equals(str2) == false
+        and : 'If they have the same value and id they are still not equal.'
+            str2.equals(str3) == false
+            str2.equals(bool) == false
+        and : 'Also properties with arrays are not equal if they have the same values.'
+            arr1.equals(arr2) == false
+        and : 'All of this is also true for their hash codes:'
+            num.hashCode() != num2.hashCode()
+            num.hashCode() != str.hashCode()
+            num.hashCode() != str2.hashCode()
+            str2.hashCode() != str3.hashCode()
+            str2.hashCode() != bool.hashCode()
+            arr1.hashCode() != arr2.hashCode()
+    }
+
+    def 'The equality and hash code of an immutable property are based on its value, type and id!'()
+    {
+        given : 'We create various kinds of properties...'
+            Val<Integer> num = Val.of(1)
+            Val<Long>    num2 = Val.of(1L)
+            Val<String>  str = Val.of("Hello World")
+            Val<String>  str2 = Val.ofNullable(String, null)
+            Val<String>  str3 = Val.ofNullable(String, null)
+            Val<Boolean> bool = Val.ofNullable(Boolean, null)
+            Val<int[]> arr1 = Val.of(new int[]{1,2,3})
+            Val<int[]> arr2 = Val.of(new int[]{1,2,3})
         expect : 'The properties are equal if they have the same value, type and id.'
             num.equals(num2) == false
             num.equals(str)  == false
