@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UIForJFrame.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">UIForJFrame.java</span></div><h1>UIForJFrame.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import org.jspecify.annotations.Nullable;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.Objects;
+import java.util.Optional;
+
+/**
+ * A declarative builder for {@link JFrame} components.
+ * Use {@link #show()} at the end of your declaration to display the {@link JFrame} window on the screen.
+ *
+ * @param &lt;F&gt; The type of the {@link JFrame} that this builder is responsible for.
+ */
+public final class UIForJFrame&lt;F extends JFrame&gt; extends UIForAnyWindow&lt;UIForJFrame&lt;F&gt;, F&gt;
+{
+	private final BuilderState&lt;F&gt; _state;
+
+	/**
+	 * @param state The {@link BuilderState} modelling how the underlying component is built.
+	 */
+<span class="fc" id="L23">	UIForJFrame( BuilderState&lt;F&gt; state ) {</span>
+<span class="fc" id="L24">		Objects.requireNonNull(state);</span>
+<span class="fc" id="L25">		_state = state;</span>
+<span class="fc" id="L26">	}</span>
+
+	@Override
+	protected BuilderState&lt;F&gt; _state() {
+<span class="fc" id="L30">		return _state;</span>
+	}
+
+	@Override
+	protected UIForJFrame&lt;F&gt; _newBuilderWithState(BuilderState&lt;F&gt; newState ) {
+<span class="fc" id="L35">		return new UIForJFrame&lt;&gt;(newState);</span>
+	}
+
+	@Override
+	protected void _addComponentTo(F thisComponent, Component addedComponent, @Nullable Object constraints) {
+<span class="pc bpc" id="L40" title="1 of 2 branches missed.">		thisComponent.add(constraints == null ? null : constraints.toString(), addedComponent);</span>
+<span class="fc" id="L41">	}</span>
+
+	@Override
+	public void show() {
+<span class="fc" id="L45">		JFrame frame = get(_state.componentType());</span>
+<span class="fc" id="L46">		Component[] components = frame.getComponents();</span>
+<span class="fc" id="L47">		frame.setLocationRelativeTo(null); // Initial centering!v</span>
+<span class="fc" id="L48">		frame.pack(); // Otherwise some components resize strangely or are not shown at all...</span>
+		// Make sure that the window is centered on the screen again but with the component:
+<span class="fc" id="L50">		frame.setLocationRelativeTo(null);</span>
+		// We set the size to fit the component:
+<span class="pc bpc" id="L52" title="1 of 2 branches missed.">		if ( components.length &gt; 0 ) {</span>
+<span class="nc" id="L53">			Dimension size = frame.getSize();</span>
+<span class="nc bnc" id="L54" title="All 2 branches missed.">			if ( size == null ) // The frame has no size! It is best to set the size to the preferred size of the component:</span>
+<span class="nc" id="L55">				size = components[0].getPreferredSize();</span>
+
+<span class="nc bnc" id="L57" title="All 2 branches missed.">			if ( size == null ) // The component has no preferred size! It is best to set the size to the minimum size of the component:</span>
+<span class="nc" id="L58">				size = components[0].getMinimumSize();</span>
+
+<span class="nc bnc" id="L60" title="All 2 branches missed.">			if ( size == null ) // The component has no minimum size! Let's just look up the size of the component:</span>
+<span class="nc" id="L61">				size = components[0].getSize();</span>
+
+<span class="nc" id="L63">			frame.setSize(size);</span>
+		}
+
+<span class="fc" id="L66">		frame.setVisible(true);</span>
+<span class="fc" id="L67">	}</span>
+
+	@Override protected Optional&lt;JRootPane&gt; _getRootPaneOf(F thisWindow) {
+<span class="fc" id="L70">		return Optional.ofNullable(thisWindow.getRootPane());</span>
+	}
+
+	@Override
+	protected void _setTitleOf(F thisWindow, String title) {
+<span class="fc" id="L75">		thisWindow.setTitle(title);</span>
+<span class="fc" id="L76">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

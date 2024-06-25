@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ComponentDragEventDelegate.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">ComponentDragEventDelegate.java</span></div><h1>ComponentDragEventDelegate.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import sprouts.Action;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+
+
+/**
+ *  A {@link JComponent} and {@link MouseEvent} delegate providing useful context information to various {@link sprouts.Action} listeners
+ *  used by {@link UIForAnySwing#onMouseDrag(Action)} like for example the {@link #mouseX()} and
+ *  {@link #mouseY()} of the event as well as more drag specific information like
+ *  {@link #dragEvents()} and {@link #dragPositions()}.
+ */
+public final class ComponentDragEventDelegate&lt;C extends JComponent&gt; extends ComponentMouseEventDelegate&lt;C&gt;
+{
+<span class="nc" id="L22">    private final List&lt;MouseEvent&gt; _dragEventHistory = new java.util.ArrayList&lt;&gt;();</span>
+
+
+    ComponentDragEventDelegate(
+            C component,
+            MouseEvent event,
+            List&lt;MouseEvent&gt; dragEventHistory
+    ) {
+<span class="nc" id="L30">        super(component, event);</span>
+<span class="nc" id="L31">        _dragEventHistory.addAll(dragEventHistory);</span>
+<span class="nc" id="L32">    }</span>
+
+    /**
+     *  Provides a list of all {@link MouseEvent}s of a continuous mouse drag performed on the component.
+     *  When a drag ends, the list is cleared.
+     *
+     * @return A list of all {@link MouseEvent}s of a continuous mouse drag performed on the component.
+     */
+    public List&lt;MouseEvent&gt; dragEvents() {
+<span class="nc" id="L41">        return Collections.unmodifiableList(_dragEventHistory);</span>
+    }
+
+    /**
+     *  SwingTree keeps track of the most recent mouse drag events of a continuous drag.
+     *  This method returns a list of all mouse position {@link Point}s of a continuous mouse drag
+     *  performed on the component.
+     *
+     * @return A list of all mouse position {@link Point}s of a continuous mouse drag performed on the component.
+     *         The points of this list represent the mouse movement track since the start of a continuous drag.
+     */
+    public List&lt;Point&gt; dragPositions() {
+<span class="nc" id="L53">        return Collections.unmodifiableList(_dragEventHistory.stream().map(MouseEvent::getPoint).collect(Collectors.toList()));</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

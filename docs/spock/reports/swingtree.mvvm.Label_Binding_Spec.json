@@ -1,0 +1,307 @@
+{
+  "className":"swingtree.mvvm.Label_Binding_Spec",
+  "title":"Label Binding",
+  "narrative":"As a developer, I want to bind a label to a property so\n    that the label is updated when the property changes.\n    Binding is a powerful feature that allows us to create\n    UIs which are not only decoupled from the business logic of\n    an application, but also make it easy to create UIs which\n    are dynamic and reactive.",
+  "subjects":[],
+  "statistics":{
+    "runs":"11",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"?"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"We can bind to the text of a label.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that for a binding to work, the property must be a `Var` or `Val`\n            implementation. All you have to do to then change the state of the UI component\n            is changing the state of the property by calling its \"set\" method.\n            Internally it will then call the \"show()\" method for you \n            which triggers the observers registered by the UI.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a simple swing-tree property for modelling the text.","code":["Val<String> text = Var.of(\"Hello World\")"]},
+
+        {"kind":"when","text":"We create and bind to a label UI node...","code":["var ui = UI.label(\"\").withText(text)"]},
+
+        {"kind":"and","text":"We build the component.","code":["var label = ui.get(JLabel)"]},
+
+        {"kind":"then","text":"The label should be updated when the property changes.","code":["label.text == \"Hello World\""]},
+
+        {"kind":"when","text":"We change the property value...","code":["text.set(\"Goodbye World\")"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The label should be updated.","code":["label.text == \"Goodbye World\""]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"We can bind to the foreground and background color of a UI node.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create 2 simple swing-tree properties for modelling colors.","code":["Val<Color> color1 = Var.of(Color.RED)","Val<Color> color2 = Var.of(Color.BLUE)"]},
+
+        {"kind":"when","text":"We create and bind to a label UI node...","code":["var ui =","        UI.label(\"\")","        .withForeground(color1)","        .withBackground(color2)"]},
+
+        {"kind":"and","text":"We build the root component of the UI tree.","code":["var label = ui.get(JLabel)"]},
+
+        {"kind":"then","text":"The label should have the property colors.","code":["label.foreground == Color.RED","label.background == Color.BLUE"]},
+
+        {"kind":"when","text":"We change the color values of both properties...","code":["color1.set(Color.GREEN)","color2.set(Color.YELLOW)"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The label colors are updated.","code":["label.foreground == Color.GREEN","label.background == Color.YELLOW"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"It is possible to bind to the minimum, maximum and preferred size of a label [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that this works for all kind of UI nodes, not just labels.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"We create a simple swing-tree property for modelling the size.","code":["Val<Dimension> minSize = Var.of(new Dimension(100, 100))","Val<Dimension> maxSize = Var.of(new Dimension(200, 200))","Val<Dimension> prefSize = Var.of(new Dimension(150, 150))"]},
+
+        {"kind":"when","text":"We create and bind to a label UI node...","code":["var ui =","        UI.label(\"\")","        .withMinSize(minSize)","        .withMaxSize(maxSize)","        .withPrefSize(prefSize)"]},
+
+        {"kind":"and","text":"We build the root component of the UI tree.","code":["var label = ui.get(JLabel)"]},
+
+        {"kind":"then","text":"The label should be updated when the property changes.","code":["label.minimumSize == new Dimension(100 * uiScale, 100 * uiScale)","label.maximumSize == new Dimension(200 * uiScale, 200 * uiScale)","label.preferredSize == new Dimension(150 * uiScale, 150 * uiScale)"]},
+
+        {"kind":"when","text":"We change the items of the properties...","code":["minSize.set(new Dimension(50, 50))","maxSize.set(new Dimension(100, 100))","prefSize.set(new Dimension(75, 75))"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The label should be updated.","code":["label.minimumSize == new Dimension(50 * uiScale, 50 * uiScale)","label.maximumSize == new Dimension(100 * uiScale, 100 * uiScale)","label.preferredSize == new Dimension(75 * uiScale, 75 * uiScale)"]},
+
+        {"kind":"where","text":"\n            We use the following integer scaling factors simulating different high DPI scenarios.\n            Note that usually the UI is scaled by 1, 1.5 an 2 (for 4k screens for example).\n            A scaling factor of 3 is rather unusual, however it is possible to scale it by 3 nonetheless.\n        ","code":{"uiScale":["3","2","1"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"It is possible to bind to the minimum, maximum and preferred size of a label [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that this works for all kind of UI nodes, not just labels.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"We create a simple swing-tree property for modelling the size.","code":["Val<Dimension> minSize = Var.of(new Dimension(100, 100))","Val<Dimension> maxSize = Var.of(new Dimension(200, 200))","Val<Dimension> prefSize = Var.of(new Dimension(150, 150))"]},
+
+        {"kind":"when","text":"We create and bind to a label UI node...","code":["var ui =","        UI.label(\"\")","        .withMinSize(minSize)","        .withMaxSize(maxSize)","        .withPrefSize(prefSize)"]},
+
+        {"kind":"and","text":"We build the root component of the UI tree.","code":["var label = ui.get(JLabel)"]},
+
+        {"kind":"then","text":"The label should be updated when the property changes.","code":["label.minimumSize == new Dimension(100 * uiScale, 100 * uiScale)","label.maximumSize == new Dimension(200 * uiScale, 200 * uiScale)","label.preferredSize == new Dimension(150 * uiScale, 150 * uiScale)"]},
+
+        {"kind":"when","text":"We change the items of the properties...","code":["minSize.set(new Dimension(50, 50))","maxSize.set(new Dimension(100, 100))","prefSize.set(new Dimension(75, 75))"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The label should be updated.","code":["label.minimumSize == new Dimension(50 * uiScale, 50 * uiScale)","label.maximumSize == new Dimension(100 * uiScale, 100 * uiScale)","label.preferredSize == new Dimension(75 * uiScale, 75 * uiScale)"]},
+
+        {"kind":"where","text":"\n            We use the following integer scaling factors simulating different high DPI scenarios.\n            Note that usually the UI is scaled by 1, 1.5 an 2 (for 4k screens for example).\n            A scaling factor of 3 is rather unusual, however it is possible to scale it by 3 nonetheless.\n        ","code":{"uiScale":["3","2","1"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"It is possible to bind to the minimum, maximum and preferred size of a label [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that this works for all kind of UI nodes, not just labels.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"We create a simple swing-tree property for modelling the size.","code":["Val<Dimension> minSize = Var.of(new Dimension(100, 100))","Val<Dimension> maxSize = Var.of(new Dimension(200, 200))","Val<Dimension> prefSize = Var.of(new Dimension(150, 150))"]},
+
+        {"kind":"when","text":"We create and bind to a label UI node...","code":["var ui =","        UI.label(\"\")","        .withMinSize(minSize)","        .withMaxSize(maxSize)","        .withPrefSize(prefSize)"]},
+
+        {"kind":"and","text":"We build the root component of the UI tree.","code":["var label = ui.get(JLabel)"]},
+
+        {"kind":"then","text":"The label should be updated when the property changes.","code":["label.minimumSize == new Dimension(100 * uiScale, 100 * uiScale)","label.maximumSize == new Dimension(200 * uiScale, 200 * uiScale)","label.preferredSize == new Dimension(150 * uiScale, 150 * uiScale)"]},
+
+        {"kind":"when","text":"We change the items of the properties...","code":["minSize.set(new Dimension(50, 50))","maxSize.set(new Dimension(100, 100))","prefSize.set(new Dimension(75, 75))"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The label should be updated.","code":["label.minimumSize == new Dimension(50 * uiScale, 50 * uiScale)","label.maximumSize == new Dimension(100 * uiScale, 100 * uiScale)","label.preferredSize == new Dimension(75 * uiScale, 75 * uiScale)"]},
+
+        {"kind":"where","text":"\n            We use the following integer scaling factors simulating different high DPI scenarios.\n            Note that usually the UI is scaled by 1, 1.5 an 2 (for 4k screens for example).\n            A scaling factor of 3 is rather unusual, however it is possible to scale it by 3 nonetheless.\n        ","code":{"uiScale":["3","2","1"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"You can bind a variable to the \"enable\" flag of a label.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that this works for all kind of UI nodes, not just labels.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a simple swing-tree property for modelling the size.","code":["Val<Boolean> enabled = Var.of(true)"]},
+
+        {"kind":"when","text":"We create and bind to a label UI node...","code":["var ui =","        UI.label(\"\")","        .isEnabledIf(enabled)"]},
+
+        {"kind":"and","text":"We build the root component of the UI tree.","code":["var label = ui.get(JLabel)"]},
+
+        {"kind":"then","text":"The label should be updated when the property changes.","code":["label.enabled == true"]},
+
+        {"kind":"when","text":"We change the items of the properties...","code":["enabled.set(false)"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The label should be updated.","code":["label.enabled == false"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"You can bind a variable to the \"visible\" flag of a label.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that this works for all kind of UI nodes, not just labels.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a simple swing-tree property for modelling the size.","code":["Val<Boolean> visible = Var.of(true)"]},
+
+        {"kind":"when","text":"We create and bind to a label UI node...","code":["var ui =","        UI.label(\"\")","        .isVisibleIf(visible)"]},
+
+        {"kind":"and","text":"We build the root component of the UI tree.","code":["var label = ui.get(JLabel)"]},
+
+        {"kind":"then","text":"The label should be updated when the property changes.","code":["label.visible == true"]},
+
+        {"kind":"when","text":"We change the items of the properties...","code":["visible.set(false)"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The label should be updated.","code":["label.visible == false"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A property can define the horizontal and vertical alignment of a label.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Not only should a view model contain state relevant for modelling the\n            text displayed on a label,\n            but it should also model state defining how the UI component should\n            behave and look like depending on your business logic.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a simple swing-tree property for modelling the size.","code":["Val<UI.HorizontalAlignment> horizontal = Var.of(UI.HorizontalAlignment.LEFT)","Val<UI.VerticalAlignment> vertical = Var.of(UI.VerticalAlignment.TOP)"]},
+
+        {"kind":"when","text":"We create and bind to a label UI node...","code":["var ui =","        UI.label(\"\")","        .withHorizontalAlignment(horizontal)","        .withVerticalAlignment(vertical)"]},
+
+        {"kind":"and","text":"We build the root component of the UI tree.","code":["var label = ui.get(JLabel)"]},
+
+        {"kind":"then","text":"The label should be updated when the property changes.","code":["label.horizontalAlignment == SwingConstants.LEFT","label.verticalAlignment == SwingConstants.TOP"]},
+
+        {"kind":"when","text":"We change the items of the properties...","code":["horizontal.set(UI.HorizontalAlignment.CENTER)","vertical.set(UI.VerticalAlignment.BOTTOM)"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The label should be updated.","code":["label.horizontalAlignment == SwingConstants.CENTER","label.verticalAlignment == SwingConstants.BOTTOM"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A property can define the image relative horizontal and vertical alignment of a label.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Not only should a view model contain state relevant for modelling the\n            text displayed on a label,\n            but it should also model state defining how the UI component should\n            behave and look like depending on your business logic.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a simple swing-tree property for modelling the size.","code":["Val<UI.HorizontalAlignment> horizontal = Var.of(UI.HorizontalAlignment.LEFT)","Val<UI.VerticalAlignment> vertical = Var.of(UI.VerticalAlignment.TOP)"]},
+
+        {"kind":"when","text":"We create and bind to a label UI node...","code":["var ui =","        UI.label(\"\")","        .withHorizontalTextPosition(horizontal)","        .withVerticalTextPosition(vertical)"]},
+
+        {"kind":"and","text":"We build the root component.","code":["var label = ui.get(JLabel)"]},
+
+        {"kind":"then","text":"The label should be updated when the property changes.","code":["label.horizontalTextPosition == SwingConstants.LEFT","label.verticalTextPosition == SwingConstants.TOP"]},
+
+        {"kind":"when","text":"We change the items of the properties...","code":["horizontal.set(UI.HorizontalAlignment.CENTER)","vertical.set(UI.VerticalAlignment.BOTTOM)"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The label should be updated.","code":["label.horizontalTextPosition == SwingConstants.CENTER","label.verticalTextPosition == SwingConstants.BOTTOM"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"You can dynamically model the font size of your labels using an integer based property.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Not only should a view model contain state relevant for modelling the\n            text displayed on a label,\n            but it should also model state defining how the UI component should\n            behave and look like depending on your business logic.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a simple swing-tree property for modelling the size.","code":["Val<Integer> fontSize = Var.of(12)"]},
+
+        {"kind":"when","text":"We create and bind to a label UI node...","code":["var ui =","        UI.label(\"\")","        .withFontSize(fontSize)"]},
+
+        {"kind":"and","text":"We build the root component.","code":["var label = ui.get(JLabel)"]},
+
+        {"kind":"then","text":"The label should be updated when the property changes.","code":["label.font.size == 12"]},
+
+        {"kind":"when","text":"We change the items of the properties...","code":["fontSize.set(24)"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The label should be updated.","code":["label.font.size == 24"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"We can store icons inside properties and then bind them to labels.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Not only should a view model contain state relevant for modelling the\n            text displayed on a label, but it should also model what may be depicted on\n            the label, for example an icon.\n            Therefore you can also bind an icon to a label through a property.\n\n            But note that you may not use the `Icon` or `ImageIcon` classes directly,\n            instead you must use implementations of the `IconDeclaration` interface,\n            which merely models the resource location of the icon, but does not load\n            the whole icon itself.\n\n            The reason for this distinction is the fact that traditional Swing icons\n            are heavy objects whose loading may or may not succeed, and so they are\n            not suitable for direct use in a property as part of your view model.\n            Instead, you should use the `IconDeclaration` interface, which is a\n            lightweight value object that merely models the resource location of the icon\n            even if it is not yet loaded or even does not exist at all.\n\n            This is especially useful in case of unit tests for you view model,\n            where the icon may not be available at all, but you still want to test\n            the behaviour of your view model.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create an `IconDeclaration`, which is essentially just a resource location value object.","code":["IconDeclaration iconDeclaration = IconDeclaration.of(\"img/seed.png\")"]},
+
+        {"kind":"and","text":"We create a simple swing-tree property for modelling the icon declaration.","code":["Val<IconDeclaration> icon = Var.of(iconDeclaration)","var originalIcon = icon.orElseThrow()"]},
+
+        {"kind":"when","text":"We create and bind to a label UI node...","code":["var ui =","        UI.label(\"\")","        .withIcon(icon)"]},
+
+        {"kind":"and","text":"We build the root component.","code":["var label = ui.get(JLabel)"]},
+
+        {"kind":"then","text":"The label should be updated when the property changes.","code":["label.icon != null","label.icon === originalIcon.find().get()","label.icon.iconHeight == 512","label.icon.iconWidth == 512"]},
+
+        {"kind":"when","text":"We change the items of the properties...","code":["icon.set(IconDeclaration.of(\"img/swing.png\"))"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The label should be a different one.","code":["label.icon != null","label.icon !== originalIcon.find().get()","label.icon.iconHeight == 512","label.icon.iconWidth == 512"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}

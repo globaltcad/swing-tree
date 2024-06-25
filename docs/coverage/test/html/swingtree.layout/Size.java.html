@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Size.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.layout</a> &gt; <span class="el_source">Size.java</span></div><h1>Size.java</h1><pre class="source lang-java linenums">package swingtree.layout;
+
+import com.google.errorprone.annotations.Immutable;
+import org.jspecify.annotations.Nullable;
+import swingtree.api.Styler;
+import swingtree.style.ComponentStyleDelegate;
+import swingtree.style.ImageConf;
+
+import java.awt.Dimension;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
+
+/**
+ *  An immutable value object that represents a size
+ *  in the form of a width and height or lack thereof.
+ *  This is used to represent the size of icons
+ *  as part of {@link swingtree.api.IconDeclaration}s
+ *  and the SwingTree style API, see {@link swingtree.UIForAnySwing#withStyle(Styler)},
+ *  {@link ComponentStyleDelegate#image(swingtree.api.Configurator)} and
+ *  {@link ImageConf#size(int, int)}.
+ */
+@Immutable
+public final class Size
+{
+<span class="fc" id="L26">    private static final Size UNKNOWN = new Size(-1, -1);</span>
+
+    /**
+     *  Exposes the {@link #UNKNOWN} size instance, which is a null object
+     *  that represents an unknown size. It uses -1 for both width and height
+     *  and will return {@link Optional#empty()} for both width and height.
+     *
+     * @return A {@link Size} instance that represents an unknown size.
+     */
+    public static Size unknown() {
+<span class="fc" id="L36">        return UNKNOWN;</span>
+    }
+
+    /**
+     *  A factory method that creates a {@link Size} instance from a width and height.
+     *  If the width or height is negative, the returned size will have be the {@link #UNKNOWN} size with
+     *  a width or height of -1.
+     *
+     * @param width The width of the size.
+     * @param height The height of the size.
+     * @return A {@link Size} instance that represents the given width and height.
+     */
+    public static Size of( float width, float height ) {
+<span class="fc bfc" id="L49" title="All 4 branches covered.">        if ( width &lt; 0 &amp;&amp; height &lt; 0 )</span>
+<span class="fc" id="L50">            return UNKNOWN;</span>
+<span class="fc" id="L51">        return new Size( width, height );</span>
+    }
+
+    /**
+     *  A factory method that creates a {@link Size} instance from a {@link Dimension}.
+     * @param dimension The dimension to convert to a {@link Size} instance.
+     * @return A {@link Size} instance that represents the given dimension.
+     */
+    public static Size of( @Nullable Dimension dimension ) {
+<span class="nc bnc" id="L60" title="All 2 branches missed.">        if ( dimension == null )</span>
+<span class="nc" id="L61">            return UNKNOWN;</span>
+<span class="nc" id="L62">        return of(dimension.width, dimension.height);</span>
+    }
+
+    final float _width;
+    final float _height;
+
+
+<span class="fc" id="L69">    private Size( float width, float height ) {</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">        _width  = width  &lt; 0 ? -1 : width;</span>
+<span class="fc bfc" id="L71" title="All 2 branches covered.">        _height = height &lt; 0 ? -1 : height;</span>
+<span class="fc" id="L72">    }</span>
+
+    /**
+     *  The width of this {@link Size} instance may not be specified,
+     *  in which case this method returns {@link Optional#empty()}
+     *  and the thing that this configuration is applied to should
+     *  resort to its default width.
+     *
+     * @return The width of this {@link Size} instance or {@link Optional#empty()} if unknown.
+     */
+    public Optional&lt;Float&gt; width() {
+<span class="fc bfc" id="L83" title="All 2 branches covered.">        return ( _width &lt; 0 ? Optional.empty() : Optional.of(_width) );</span>
+    }
+
+    /**
+     *  The height of this {@link Size} instance may not be specified,
+     *  in which case this method returns {@link Optional#empty()}
+     *  and the thing that this configuration is applied to should
+     *  resort to its default height.
+     *
+     * @return The height of this {@link Size} instance or {@link Optional#empty()} if unknown.
+     */
+    public Optional&lt;Float&gt; height() {
+<span class="fc bfc" id="L95" title="All 2 branches covered.">        return ( _height &lt; 0 ? Optional.empty() : Optional.of(_height) );</span>
+    }
+
+    public boolean hasPositiveWidth() {
+<span class="fc bfc" id="L99" title="All 2 branches covered.">        return _width &gt; 0;</span>
+    }
+
+    public boolean hasPositiveHeight() {
+<span class="pc bpc" id="L103" title="1 of 2 branches missed.">        return _height &gt; 0;</span>
+    }
+
+    /**
+     *  Creates an updated {@link Size} instance with the given width.
+     *  If the width is negative, the width of the returned size will be -1.
+     * @param width The width of the size to create.
+     * @return A new {@link Size} instance with the given width.
+     */
+    public Size withWidth( int width ) {
+<span class="fc" id="L113">        return new Size(width, _height);</span>
+    }
+
+    /**
+     *  Creates an updated {@link Size} instance with the given height.
+     *  If the height is negative, the height of the returned size will be -1.
+     * @param height The height of the size to create.
+     * @return A new {@link Size} instance with the given height.
+     */
+    public Size withHeight( int height ) {
+<span class="fc" id="L123">        return new Size(_width, height);</span>
+    }
+
+    public Dimension toDimension() {
+<span class="nc" id="L127">        return new Dimension((int) _width, (int) _height);</span>
+    }
+
+    public Size scale( double scaleFactor ) {
+<span class="fc bfc" id="L131" title="All 2 branches covered.">        float width  = _width  &lt; 0 ? -1 : Math.round(_width  * scaleFactor);</span>
+<span class="fc bfc" id="L132" title="All 2 branches covered.">        float height = _height &lt; 0 ? -1 : Math.round(_height * scaleFactor);</span>
+<span class="fc" id="L133">        return of(width, height);</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L138">        return this.getClass().getSimpleName()+&quot;[&quot; +</span>
+<span class="nc" id="L139">                    &quot;width=&quot;  + _toString( _width  ) + &quot;, &quot;+</span>
+<span class="nc" id="L140">                    &quot;height=&quot; + _toString( _height ) +</span>
+                &quot;]&quot;;
+    }
+
+    private static String _toString( float value ) {
+<span class="nc bnc" id="L145" title="All 2 branches missed.">        return value &lt; 0 ? &quot;?&quot; : String.valueOf(value).replace(&quot;.0&quot;, &quot;&quot;);</span>
+    }
+
+    @Override
+    public boolean equals( Object o ) {
+<span class="fc bfc" id="L150" title="All 2 branches covered.">        if ( o == this ) return true;</span>
+<span class="pc bpc" id="L151" title="1 of 2 branches missed.">        if ( o == null ) return false;</span>
+<span class="pc bpc" id="L152" title="1 of 2 branches missed.">        if ( o.getClass() != this.getClass() ) return false;</span>
+<span class="fc" id="L153">        Size that = (Size)o;</span>
+<span class="fc bfc" id="L154" title="All 4 branches covered.">        return _width  == that._width &amp;&amp;</span>
+               _height == that._height;
+    }
+
+    @Override
+    public int hashCode() {
+<span class="fc" id="L160">        return Objects.hash(_width, _height);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

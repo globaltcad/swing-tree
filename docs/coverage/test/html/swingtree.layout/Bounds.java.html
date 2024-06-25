@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Bounds.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.layout</a> &gt; <span class="el_source">Bounds.java</span></div><h1>Bounds.java</h1><pre class="source lang-java linenums">package swingtree.layout;
+
+import com.google.errorprone.annotations.Immutable;
+
+import java.awt.Rectangle;
+import java.util.Objects;
+
+/**
+ *  An immutable value object that represents the position and size of a component
+ *  in the form of an x and y coordinate modeled by a {@link Location} object
+ *  and a width and height modeled by a {@link Size} object.
+ *  Note the rectangular bounds object is positioned in a coordinate system
+ *  where the y-axis is growing positively downwards and the x-axis is growing
+ *  positively to the right.
+ *  &lt;p&gt;
+ *  Also note that the {@link #equals(Object)} and {@link #hashCode()} methods
+ *  are implemented to compare the {@link Location} and {@link Size} objects
+ *  for value based equality instead of reference based equality.
+ */
+@Immutable
+public final class Bounds
+{
+<span class="fc" id="L23">    private final static Bounds EMPTY = new Bounds(Location.origin(), Size.unknown());</span>
+
+    /**
+     *  Returns an empty bounds object, which is the null object for this class.
+     *  &lt;p&gt;
+     *  The returned bounds object has a location of {@link Location#origin()}
+     *  and a size of {@link Size#unknown()}.
+     *
+     *  @return an empty bounds object that is the null object for this class.
+     */
+    public static Bounds none() {
+<span class="fc" id="L34">        return EMPTY;</span>
+    }
+
+    private final Location _location;
+    private final Size     _size;
+
+    /**
+     *  Returns a bounds object with the specified location and size.
+     *  &lt;p&gt;
+     *  If the location is {@link Location#origin()} and the size is
+     *  {@link Size#unknown()} then the {@link #none()} object is returned.
+     *
+     *  @param location the location of the bounds object.
+     *  @param size the size of the bounds object.
+     *  @return a bounds object with the specified location and size.
+     */
+    public static Bounds of( Location location, Size size ) {
+<span class="fc" id="L51">        Objects.requireNonNull(location);</span>
+<span class="fc" id="L52">        Objects.requireNonNull(size);</span>
+<span class="pc bpc" id="L53" title="2 of 4 branches missed.">        if ( location.equals(Location.origin()) &amp;&amp; size.equals(Size.unknown()) )</span>
+<span class="nc" id="L54">            return EMPTY;</span>
+
+<span class="fc" id="L56">        return new Bounds(location, size);</span>
+    }
+
+    /**
+     *  Returns a bounds object with the specified location and size
+     *  in the form of x and y coordinates, width and height.
+     *  &lt;p&gt;
+     *  If the width or height is less than zero then the {@link #none()}
+     *  object is returned.
+     *
+     *  @param x the x coordinate of the location of the bounds object.
+     *  @param y the y coordinate of the location of the bounds object.
+     *  @param width the width of the bounds object.
+     *  @param height the height of the bounds object.
+     *  @return a bounds object with the specified location and size
+     *  in the form of x and y coordinates, width and height.
+     */
+    public static Bounds of( int x, int y, int width, int height ) {
+<span class="pc bpc" id="L74" title="2 of 4 branches missed.">        if ( width &lt; 0 || height &lt; 0 )</span>
+<span class="nc" id="L75">            return EMPTY;</span>
+
+<span class="fc" id="L77">        return new Bounds(Location.of(x, y), Size.of(width, height));</span>
+    }
+
+    public static Bounds of( float x, float y, float width, float height ) {
+<span class="nc bnc" id="L81" title="All 4 branches missed.">        if ( width &lt; 0 || height &lt; 0 )</span>
+<span class="nc" id="L82">            return EMPTY;</span>
+
+<span class="nc" id="L84">        return new Bounds(Location.of(x, y), Size.of(width, height));</span>
+    }
+
+<span class="fc" id="L87">    private Bounds( Location location, Size size ) {</span>
+<span class="fc" id="L88">        _location = Objects.requireNonNull(location);</span>
+<span class="fc" id="L89">        _size     = Objects.requireNonNull(size);</span>
+<span class="fc" id="L90">    }</span>
+
+    /**
+     *  If you think of the bounds object as a rectangle, then the
+     *  {@link Location} defines the top left corner and the {@link Size}
+     *  defines the width and height of the rectangle.
+     *  Note that the y-axis is growing positively downwards and the x-axis
+     *  is growing positively to the right.
+     *
+     * @return The {@link Location} of this bounds object,
+     *         which contains the x and y coordinates.
+     */
+    public Location location() {
+<span class="fc" id="L103">        return _location;</span>
+    }
+
+    /**
+     *  Allows you to check weather the bounds object has a width
+     *  that is greater than zero.
+     *
+     * @return The truth value of whether this bounds object has a width,
+     *       which is true if the width is greater than zero.
+     */
+<span class="nc bnc" id="L113" title="All 2 branches missed.">    public boolean hasWidth() { return _size._width &gt; 0; }</span>
+
+    /**
+     *  Allows you to check weather the bounds object has a height
+     *  that is greater than zero.
+     *
+     * @return The truth value of whether this bounds object has a height,
+     *       which is true if the height is greater than zero.
+     */
+    public boolean hasHeight() {
+<span class="nc bnc" id="L123" title="All 2 branches missed.">        return _size._height &gt; 0;</span>
+    }
+
+    /**
+     *  The {@link Size} of define the width and height of the bounds
+     *  starting from the x and y coordinates of the {@link Location}.
+     *  Note that the {@link Location} is always the top left corner
+     *  of the bounds object where the y-axis is growing positively downwards
+     *  and the x-axis is growing positively to the right.
+     *
+     * @return The {@link Size} of this bounds object,
+     *        which contains the width and height.
+     */
+    public Size size() {
+<span class="fc" id="L137">        return _size;</span>
+    }
+
+    /**
+     *  Allows you to create an updated version of this bounds object with the
+     *  specified x-coordinate and the same y-coordinate and size as this bounds instance.
+     *  See also {@link #withY(int)}, {@link #withWidth(int)}, and {@link #withHeight(int)}.
+     *
+     * @param x A new x coordinate for the location of this bounds object.
+     * @return A new bounds object with a new location that has the specified x coordinate.
+     */
+    public Bounds withX( int x ) {
+<span class="nc" id="L149">        return new Bounds(_location.withX(x), _size);</span>
+    }
+
+    /**
+     *  Allows you to create an updated version of this bounds object with the
+     *  specified y-coordinate and the same x-coordinate and size as this bounds instance.
+     *  See also {@link #withX(int)}, {@link #withWidth(int)}, and {@link #withHeight(int)}.
+     *
+     * @param y A new y coordinate for the location of this bounds object.
+     * @return A new bounds object with a new location that has the specified y coordinate.
+     */
+    public Bounds withY( int y ) {
+<span class="nc" id="L161">        return new Bounds(_location.withY(y), _size);</span>
+    }
+
+    /**
+     *  Allows you to create an updated version of this bounds object with the
+     *  specified width and the same x and y coordinates as well as height as this bounds instance.
+     *  See also {@link #withX(int)}, {@link #withY(int)}, and {@link #withHeight(int)}.
+     *
+     * @param width A new width for the size of this bounds object.
+     * @return A new bounds object with a new size that has the specified width.
+     */
+    public Bounds withWidth( int width ) {
+<span class="nc" id="L173">        return new Bounds(_location, _size.withWidth(width));</span>
+    }
+
+    /**
+     *  Allows you to create an updated version of this bounds object with the
+     *  specified height and the same x and y coordinates as well as width as this bounds instance.
+     *  See also {@link #withX(int)}, {@link #withY(int)}, and {@link #withWidth(int)}.
+     *
+     * @param height A new height for the size of this bounds object.
+     * @return A new bounds object with a new size that has the specified height.
+     */
+    public Bounds withHeight( int height ) {
+<span class="nc" id="L185">        return new Bounds(_location, _size.withHeight(height));</span>
+    }
+
+    /**
+     *  Allows you to check weather the bounds object has the specified
+     *  width and height, which is true if the width and height are equal
+     *  to the width and height of the {@link Size} of this bounds object
+     *  (see {@link #size()}).
+     *
+     * @param width A new width for the size of this bounds object.
+     * @param height A new height for the size of this bounds object.
+     * @return A new bounds object with a new size that has the specified width and height.
+     */
+    public boolean hasSize( int width, int height ) {
+<span class="nc bnc" id="L199" title="All 4 branches missed.">        return _size._width == width &amp;&amp; _size._height == height;</span>
+    }
+
+    /**
+     *  Allows you to check weather the bounds object has the specified
+     *  width, which is true if the width is equal to the width of the
+     *  {@link Size} of this bounds object (see {@link #size()}).
+     *
+     * @param width An integer value to compare to the width of this bounds object.
+     * @return The truth value of whether the specified width is equal to the width of this bounds object.
+     */
+    public boolean hasWidth( int width ) {
+<span class="fc bfc" id="L211" title="All 2 branches covered.">        return _size._width == width;</span>
+    }
+
+    /**
+     *  Allows you to check weather the bounds object has the specified
+     *  height, which is true if the height is equal to the height of the
+     *  {@link Size} of this bounds object (see {@link #size()}).
+     *
+     * @param height An integer value to compare to the height of this bounds object.
+     * @return The truth value of whether the specified height is equal to the height of this bounds object.
+     */
+    public boolean hasHeight( int height ) {
+<span class="fc bfc" id="L223" title="All 2 branches covered.">        return _size._height == height;</span>
+    }
+
+    /**
+     *  The bounds object has a location and size which form a rectangular area
+     *  exposed by this method as a float value defined by the width multiplied by the height.
+     *
+     * @return The area of this bounds object, which is the width multiplied by the height.
+     */
+    public float area() {
+<span class="nc" id="L233">        return _size._width * _size._height;</span>
+    }
+
+    /**
+     *  The bounds object has a location and size which form a rectangular area
+     *  which can easily be converted to a {@link Rectangle} object using this method.
+     *
+     * @return A {@link Rectangle} object with the same location and size as this bounds object.
+     */
+    public Rectangle toRectangle() {
+<span class="nc" id="L243">        return new Rectangle((int) _location.x(), (int) _location.y(), (int) _size._width, (int) _size._height);</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L248">        return this.getClass().getSimpleName()+&quot;[&quot; +</span>
+                    &quot;location=&quot; + _location + &quot;, &quot;+
+                    &quot;size=&quot;     + _size     +
+                &quot;]&quot;;
+    }
+
+    /**
+     *  A convent method to check if the specified x and y coordinates and width and height
+     *  are equal to the location and size of this bounds object.
+     *  This is equivalent to calling {@link #equals(Object)} with
+     *  a new bounds object created with the specified x and y coordinates and width and height
+     *  like so: {@code equals(Bounds.of(x, y, width, height))}.
+     *
+     * @param x An integer value to compare to the x coordinate of the location of this bounds object.
+     * @param y An integer value to compare to the y coordinate of the location of this bounds object.
+     * @param width An integer value to compare to the width of this bounds object.
+     * @param height An integer value to compare to the height of this bounds object.
+     * @return The truth value of whether the specified x and y coordinates and width and height
+     *        are equal to the location and size of this bounds object.
+     */
+    public boolean equals( int x, int y, int width, int height ) {
+<span class="pc bpc" id="L269" title="1 of 8 branches missed.">        return _location.x() == x &amp;&amp; _location.y() == y &amp;&amp; _size._width == width &amp;&amp; _size._height == height;</span>
+    }
+
+    @Override
+    public boolean equals( Object o ) {
+<span class="pc bpc" id="L274" title="1 of 2 branches missed.">        if ( o == this ) return true;</span>
+<span class="pc bpc" id="L275" title="1 of 2 branches missed.">        if ( o == null ) return false;</span>
+<span class="pc bpc" id="L276" title="1 of 2 branches missed.">        if ( o.getClass() != this.getClass() ) return false;</span>
+<span class="fc" id="L277">        Bounds that = (Bounds)o;</span>
+<span class="fc bfc" id="L278" title="All 2 branches covered.">        return Objects.equals(this._location, that._location) &amp;&amp;</span>
+<span class="pc bpc" id="L279" title="1 of 2 branches missed.">               Objects.equals(this._size,     that._size);</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="nc" id="L284">        return Objects.hash(_location, _size);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

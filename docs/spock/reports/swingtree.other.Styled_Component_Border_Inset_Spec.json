@@ -1,0 +1,466 @@
+{
+  "className":"swingtree.other.Styled_Component_Border_Inset_Spec",
+  "title":"The SwingTree Border Insets",
+  "narrative":"SwingTree uses a custom `Border` implementation to support the styling\n    of components. This includes the definition of the border, margin, padding\n    dimensions which together form the whole border insets of a component.\n\n    The border insets are then used by Swing to determine the size of the component\n    and its children.\n\n    In this specification we will test the border insets of components\n    that are heavily styled through the SwingTree styling API.",
+  "subjects":[],
+  "statistics":{
+    "runs":"20",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"?"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"A heavily styled text field will have the correct border insets! [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"Now we create a text field UI with a custom styler lambda and a button.","code":["var seed = Utility.loadImage(\"img/seed.png\")","var trees = Utility.loadImage(\"img/trees.png\")","var ui =","        UI.textField(\"I am fancy! :)\").withLayout(\"fill, ins 0\").withPrefSize(190, 25)","        .withStyle( it -> it","            .fontSize(16)","            .paddingLeft(26)","            .marginRight(25)","            .paddingRight(-20)","            .image(UI.Layer.BORDER, image -> image","                .image(seed)","                .placement(UI.Placement.LEFT)","                .width(30).autoFit(true)","                .padding(3)","            )","        )","        .add(\"right\",","            UI.button(19, 19, new ImageIcon(trees))","            .withStyle( it -> it","                .padding(0)","                .cursor(UI.Cursor.HAND)","            )","            .makePlain()","        );"]},
+
+        {"kind":"and","text":"We unpack the component and its border:","code":["var component = ui.get(JTextField)","var border = component.getBorder()"]},
+
+        {"kind":"expect","text":"The insets are as expected.","code":["border.getBorderInsets(component) == new Insets(2, (int)(26*uiScale), 2, (int)(25*uiScale - 20*uiScale))","border.getMarginInsets() == new Insets(0,0,0,(int)(25*uiScale))","border.getPaddingInsets() == new Insets(2, (int)(26*uiScale), 2, (int)(-20*uiScale))","border.getFullPaddingInsets() == new Insets(2, (int)(26*uiScale), 2, (int)(25*uiScale - 20*uiScale))"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","2","3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A heavily styled text field will have the correct border insets! [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"Now we create a text field UI with a custom styler lambda and a button.","code":["var seed = Utility.loadImage(\"img/seed.png\")","var trees = Utility.loadImage(\"img/trees.png\")","var ui =","        UI.textField(\"I am fancy! :)\").withLayout(\"fill, ins 0\").withPrefSize(190, 25)","        .withStyle( it -> it","            .fontSize(16)","            .paddingLeft(26)","            .marginRight(25)","            .paddingRight(-20)","            .image(UI.Layer.BORDER, image -> image","                .image(seed)","                .placement(UI.Placement.LEFT)","                .width(30).autoFit(true)","                .padding(3)","            )","        )","        .add(\"right\",","            UI.button(19, 19, new ImageIcon(trees))","            .withStyle( it -> it","                .padding(0)","                .cursor(UI.Cursor.HAND)","            )","            .makePlain()","        );"]},
+
+        {"kind":"and","text":"We unpack the component and its border:","code":["var component = ui.get(JTextField)","var border = component.getBorder()"]},
+
+        {"kind":"expect","text":"The insets are as expected.","code":["border.getBorderInsets(component) == new Insets(2, (int)(26*uiScale), 2, (int)(25*uiScale - 20*uiScale))","border.getMarginInsets() == new Insets(0,0,0,(int)(25*uiScale))","border.getPaddingInsets() == new Insets(2, (int)(26*uiScale), 2, (int)(-20*uiScale))","border.getFullPaddingInsets() == new Insets(2, (int)(26*uiScale), 2, (int)(25*uiScale - 20*uiScale))"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","2","3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A heavily styled text field will have the correct border insets! [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"Now we create a text field UI with a custom styler lambda and a button.","code":["var seed = Utility.loadImage(\"img/seed.png\")","var trees = Utility.loadImage(\"img/trees.png\")","var ui =","        UI.textField(\"I am fancy! :)\").withLayout(\"fill, ins 0\").withPrefSize(190, 25)","        .withStyle( it -> it","            .fontSize(16)","            .paddingLeft(26)","            .marginRight(25)","            .paddingRight(-20)","            .image(UI.Layer.BORDER, image -> image","                .image(seed)","                .placement(UI.Placement.LEFT)","                .width(30).autoFit(true)","                .padding(3)","            )","        )","        .add(\"right\",","            UI.button(19, 19, new ImageIcon(trees))","            .withStyle( it -> it","                .padding(0)","                .cursor(UI.Cursor.HAND)","            )","            .makePlain()","        );"]},
+
+        {"kind":"and","text":"We unpack the component and its border:","code":["var component = ui.get(JTextField)","var border = component.getBorder()"]},
+
+        {"kind":"expect","text":"The insets are as expected.","code":["border.getBorderInsets(component) == new Insets(2, (int)(26*uiScale), 2, (int)(25*uiScale - 20*uiScale))","border.getMarginInsets() == new Insets(0,0,0,(int)(25*uiScale))","border.getPaddingInsets() == new Insets(2, (int)(26*uiScale), 2, (int)(-20*uiScale))","border.getFullPaddingInsets() == new Insets(2, (int)(26*uiScale), 2, (int)(25*uiScale - 20*uiScale))"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","2","3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A heavily styled slider will have the correct border insets! [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"Now we create a slider UI with a custom styler lambda:","code":["var ui =","        UI.slider(UI.Align.HORIZONTAL, 0, 100, 50)","        .withStyle( it -> it","            .size(280, 38)","            .prefSize(280, 38)","            .borderRadius(20)","            .backgroundColor(new Color(0.4f, 0.85f, 1))","            .foundationColor(new Color(0.4f, 0.85f, 1))","            .shadow(UI.Layer.BACKGROUND, \"bright\", s -> s","                .color(new Color(0.7f, 0.95f, 1f, 0.35f))","                .offset(-11)","            )","            .shadow(UI.Layer.BACKGROUND, \"dark\", s -> s","                .color(new Color(0, 0.1f, 0.2f, 0.20f))","                .offset(+4)","            )","            .shadowBlurRadius(4)","            .shadowSpreadRadius(-2)","            .shadowIsInset(true)","            .padding(6)","            .margin(10)","        );"]},
+
+        {"kind":"and","text":"We unpack the component and its border:","code":["var component = ui.get(JSlider)","var border = component.getBorder()"]},
+
+        {"kind":"expect","text":"The insets are as expected.","code":["border.getBorderInsets(component) == new Insets((int)(16*uiScale), (int)(16*uiScale), (int)(16*uiScale), (int)(16*uiScale))","border.getMarginInsets() == new Insets((int)(10*uiScale),(int)(10*uiScale),(int)(10*uiScale),(int)(10*uiScale))","border.getPaddingInsets() == new Insets((int)(6*uiScale), (int)(6*uiScale), (int)(6*uiScale), (int)(6*uiScale))","border.getFullPaddingInsets() == new Insets((int)(16*uiScale), (int)(16*uiScale), (int)(16*uiScale), (int)(16*uiScale))"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","2","3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A heavily styled slider will have the correct border insets! [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"Now we create a slider UI with a custom styler lambda:","code":["var ui =","        UI.slider(UI.Align.HORIZONTAL, 0, 100, 50)","        .withStyle( it -> it","            .size(280, 38)","            .prefSize(280, 38)","            .borderRadius(20)","            .backgroundColor(new Color(0.4f, 0.85f, 1))","            .foundationColor(new Color(0.4f, 0.85f, 1))","            .shadow(UI.Layer.BACKGROUND, \"bright\", s -> s","                .color(new Color(0.7f, 0.95f, 1f, 0.35f))","                .offset(-11)","            )","            .shadow(UI.Layer.BACKGROUND, \"dark\", s -> s","                .color(new Color(0, 0.1f, 0.2f, 0.20f))","                .offset(+4)","            )","            .shadowBlurRadius(4)","            .shadowSpreadRadius(-2)","            .shadowIsInset(true)","            .padding(6)","            .margin(10)","        );"]},
+
+        {"kind":"and","text":"We unpack the component and its border:","code":["var component = ui.get(JSlider)","var border = component.getBorder()"]},
+
+        {"kind":"expect","text":"The insets are as expected.","code":["border.getBorderInsets(component) == new Insets((int)(16*uiScale), (int)(16*uiScale), (int)(16*uiScale), (int)(16*uiScale))","border.getMarginInsets() == new Insets((int)(10*uiScale),(int)(10*uiScale),(int)(10*uiScale),(int)(10*uiScale))","border.getPaddingInsets() == new Insets((int)(6*uiScale), (int)(6*uiScale), (int)(6*uiScale), (int)(6*uiScale))","border.getFullPaddingInsets() == new Insets((int)(16*uiScale), (int)(16*uiScale), (int)(16*uiScale), (int)(16*uiScale))"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","2","3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A heavily styled slider will have the correct border insets! [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"Now we create a slider UI with a custom styler lambda:","code":["var ui =","        UI.slider(UI.Align.HORIZONTAL, 0, 100, 50)","        .withStyle( it -> it","            .size(280, 38)","            .prefSize(280, 38)","            .borderRadius(20)","            .backgroundColor(new Color(0.4f, 0.85f, 1))","            .foundationColor(new Color(0.4f, 0.85f, 1))","            .shadow(UI.Layer.BACKGROUND, \"bright\", s -> s","                .color(new Color(0.7f, 0.95f, 1f, 0.35f))","                .offset(-11)","            )","            .shadow(UI.Layer.BACKGROUND, \"dark\", s -> s","                .color(new Color(0, 0.1f, 0.2f, 0.20f))","                .offset(+4)","            )","            .shadowBlurRadius(4)","            .shadowSpreadRadius(-2)","            .shadowIsInset(true)","            .padding(6)","            .margin(10)","        );"]},
+
+        {"kind":"and","text":"We unpack the component and its border:","code":["var component = ui.get(JSlider)","var border = component.getBorder()"]},
+
+        {"kind":"expect","text":"The insets are as expected.","code":["border.getBorderInsets(component) == new Insets((int)(16*uiScale), (int)(16*uiScale), (int)(16*uiScale), (int)(16*uiScale))","border.getMarginInsets() == new Insets((int)(10*uiScale),(int)(10*uiScale),(int)(10*uiScale),(int)(10*uiScale))","border.getPaddingInsets() == new Insets((int)(6*uiScale), (int)(6*uiScale), (int)(6*uiScale), (int)(6*uiScale))","border.getFullPaddingInsets() == new Insets((int)(16*uiScale), (int)(16*uiScale), (int)(16*uiScale), (int)(16*uiScale))"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","2","3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `JMenuItem` will not loose its default Nimbus border insets when styled! [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Many components have default borders with default insets. \n            When using the nimbus look and feel, then the menu item \n            will have a default border with default insets.\n            When you then style the menu item \n            (which SwingTree largely does through the border), \n            then you should not loose these default insets provided by the nimbus look and feel.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first switch to the nimbus look and feel","code":["Utility.setLaF(Utility.LaF.NIMBUS)"]},
+
+        {"kind":"and","text":"\n            Then we create a menu item saying \"SwingTree\" in japanese and \n            then we style it with a custom styler lambda.\n        ","code":["var ui =","        UI.menuItem(\"ブランコツリー\")","        .withStyle(styler);"]},
+
+        {"kind":"and","text":"We unpack the component and its border:","code":["var component = ui.get(JMenuItem)","var border = component.getBorder()"]},
+
+        {"kind":"expect","text":"The insets are as expected.","code":["border.getBorderInsets(component) == new Insets(1, 12, 2, 13)"]},
+
+        {"kind":"and","text":"It has the expected border type:","code":["borderType.isAssignableFrom(border.getClass())"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","2","3","1","2","3","1","2","3","1","2","3","1","2"],"styler":["{ it -> it }","{ it -> it }","{ it -> it }","{ it -> it.foregroundColor(Color.BLUE) }","{ it -> it.foregroundColor(Color.BLUE) }","{ it -> it.foregroundColor(Color.BLUE) }","{ it -> it.cursor(UI.Cursor.HAND) }","{ it -> it.cursor(UI.Cursor.HAND) }","{ it -> it.cursor(UI.Cursor.HAND) }","{ it -> it.foundationColor(Color.BLUE) }","{ it -> it.foundationColor(Color.BLUE) }","{ it -> it.foundationColor(Color.BLUE) }","{ it -> it.painter(UI.Layer.BORDER,     g2d->{}) }","{ it -> it.painter(UI.Layer.CONTENT,    g2d->{}) }"],"borderType":["javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","swingtree.style.StyleAndAnimationBorder","swingtree.style.StyleAndAnimationBorder"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `JMenuItem` will not loose its default Nimbus border insets when styled! [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Many components have default borders with default insets. \n            When using the nimbus look and feel, then the menu item \n            will have a default border with default insets.\n            When you then style the menu item \n            (which SwingTree largely does through the border), \n            then you should not loose these default insets provided by the nimbus look and feel.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first switch to the nimbus look and feel","code":["Utility.setLaF(Utility.LaF.NIMBUS)"]},
+
+        {"kind":"and","text":"\n            Then we create a menu item saying \"SwingTree\" in japanese and \n            then we style it with a custom styler lambda.\n        ","code":["var ui =","        UI.menuItem(\"ブランコツリー\")","        .withStyle(styler);"]},
+
+        {"kind":"and","text":"We unpack the component and its border:","code":["var component = ui.get(JMenuItem)","var border = component.getBorder()"]},
+
+        {"kind":"expect","text":"The insets are as expected.","code":["border.getBorderInsets(component) == new Insets(1, 12, 2, 13)"]},
+
+        {"kind":"and","text":"It has the expected border type:","code":["borderType.isAssignableFrom(border.getClass())"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","2","3","1","2","3","1","2","3","1","2","3","1","2"],"styler":["{ it -> it }","{ it -> it }","{ it -> it }","{ it -> it.foregroundColor(Color.BLUE) }","{ it -> it.foregroundColor(Color.BLUE) }","{ it -> it.foregroundColor(Color.BLUE) }","{ it -> it.cursor(UI.Cursor.HAND) }","{ it -> it.cursor(UI.Cursor.HAND) }","{ it -> it.cursor(UI.Cursor.HAND) }","{ it -> it.foundationColor(Color.BLUE) }","{ it -> it.foundationColor(Color.BLUE) }","{ it -> it.foundationColor(Color.BLUE) }","{ it -> it.painter(UI.Layer.BORDER,     g2d->{}) }","{ it -> it.painter(UI.Layer.CONTENT,    g2d->{}) }"],"borderType":["javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","swingtree.style.StyleAndAnimationBorder","swingtree.style.StyleAndAnimationBorder"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `JMenuItem` will not loose its default Nimbus border insets when styled! [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Many components have default borders with default insets. \n            When using the nimbus look and feel, then the menu item \n            will have a default border with default insets.\n            When you then style the menu item \n            (which SwingTree largely does through the border), \n            then you should not loose these default insets provided by the nimbus look and feel.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first switch to the nimbus look and feel","code":["Utility.setLaF(Utility.LaF.NIMBUS)"]},
+
+        {"kind":"and","text":"\n            Then we create a menu item saying \"SwingTree\" in japanese and \n            then we style it with a custom styler lambda.\n        ","code":["var ui =","        UI.menuItem(\"ブランコツリー\")","        .withStyle(styler);"]},
+
+        {"kind":"and","text":"We unpack the component and its border:","code":["var component = ui.get(JMenuItem)","var border = component.getBorder()"]},
+
+        {"kind":"expect","text":"The insets are as expected.","code":["border.getBorderInsets(component) == new Insets(1, 12, 2, 13)"]},
+
+        {"kind":"and","text":"It has the expected border type:","code":["borderType.isAssignableFrom(border.getClass())"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","2","3","1","2","3","1","2","3","1","2","3","1","2"],"styler":["{ it -> it }","{ it -> it }","{ it -> it }","{ it -> it.foregroundColor(Color.BLUE) }","{ it -> it.foregroundColor(Color.BLUE) }","{ it -> it.foregroundColor(Color.BLUE) }","{ it -> it.cursor(UI.Cursor.HAND) }","{ it -> it.cursor(UI.Cursor.HAND) }","{ it -> it.cursor(UI.Cursor.HAND) }","{ it -> it.foundationColor(Color.BLUE) }","{ it -> it.foundationColor(Color.BLUE) }","{ it -> it.foundationColor(Color.BLUE) }","{ it -> it.painter(UI.Layer.BORDER,     g2d->{}) }","{ it -> it.painter(UI.Layer.CONTENT,    g2d->{}) }"],"borderType":["javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","swingtree.style.StyleAndAnimationBorder","swingtree.style.StyleAndAnimationBorder"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `JMenuItem` will not loose its default Nimbus border insets when styled! [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Many components have default borders with default insets. \n            When using the nimbus look and feel, then the menu item \n            will have a default border with default insets.\n            When you then style the menu item \n            (which SwingTree largely does through the border), \n            then you should not loose these default insets provided by the nimbus look and feel.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first switch to the nimbus look and feel","code":["Utility.setLaF(Utility.LaF.NIMBUS)"]},
+
+        {"kind":"and","text":"\n            Then we create a menu item saying \"SwingTree\" in japanese and \n            then we style it with a custom styler lambda.\n        ","code":["var ui =","        UI.menuItem(\"ブランコツリー\")","        .withStyle(styler);"]},
+
+        {"kind":"and","text":"We unpack the component and its border:","code":["var component = ui.get(JMenuItem)","var border = component.getBorder()"]},
+
+        {"kind":"expect","text":"The insets are as expected.","code":["border.getBorderInsets(component) == new Insets(1, 12, 2, 13)"]},
+
+        {"kind":"and","text":"It has the expected border type:","code":["borderType.isAssignableFrom(border.getClass())"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","2","3","1","2","3","1","2","3","1","2","3","1","2"],"styler":["{ it -> it }","{ it -> it }","{ it -> it }","{ it -> it.foregroundColor(Color.BLUE) }","{ it -> it.foregroundColor(Color.BLUE) }","{ it -> it.foregroundColor(Color.BLUE) }","{ it -> it.cursor(UI.Cursor.HAND) }","{ it -> it.cursor(UI.Cursor.HAND) }","{ it -> it.cursor(UI.Cursor.HAND) }","{ it -> it.foundationColor(Color.BLUE) }","{ it -> it.foundationColor(Color.BLUE) }","{ it -> it.foundationColor(Color.BLUE) }","{ it -> it.painter(UI.Layer.BORDER,     g2d->{}) }","{ it -> it.painter(UI.Layer.CONTENT,    g2d->{}) }"],"borderType":["javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","swingtree.style.StyleAndAnimationBorder","swingtree.style.StyleAndAnimationBorder"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `JMenuItem` will not loose its default Nimbus border insets when styled! [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Many components have default borders with default insets. \n            When using the nimbus look and feel, then the menu item \n            will have a default border with default insets.\n            When you then style the menu item \n            (which SwingTree largely does through the border), \n            then you should not loose these default insets provided by the nimbus look and feel.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first switch to the nimbus look and feel","code":["Utility.setLaF(Utility.LaF.NIMBUS)"]},
+
+        {"kind":"and","text":"\n            Then we create a menu item saying \"SwingTree\" in japanese and \n            then we style it with a custom styler lambda.\n        ","code":["var ui =","        UI.menuItem(\"ブランコツリー\")","        .withStyle(styler);"]},
+
+        {"kind":"and","text":"We unpack the component and its border:","code":["var component = ui.get(JMenuItem)","var border = component.getBorder()"]},
+
+        {"kind":"expect","text":"The insets are as expected.","code":["border.getBorderInsets(component) == new Insets(1, 12, 2, 13)"]},
+
+        {"kind":"and","text":"It has the expected border type:","code":["borderType.isAssignableFrom(border.getClass())"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","2","3","1","2","3","1","2","3","1","2","3","1","2"],"styler":["{ it -> it }","{ it -> it }","{ it -> it }","{ it -> it.foregroundColor(Color.BLUE) }","{ it -> it.foregroundColor(Color.BLUE) }","{ it -> it.foregroundColor(Color.BLUE) }","{ it -> it.cursor(UI.Cursor.HAND) }","{ it -> it.cursor(UI.Cursor.HAND) }","{ it -> it.cursor(UI.Cursor.HAND) }","{ it -> it.foundationColor(Color.BLUE) }","{ it -> it.foundationColor(Color.BLUE) }","{ it -> it.foundationColor(Color.BLUE) }","{ it -> it.painter(UI.Layer.BORDER,     g2d->{}) }","{ it -> it.painter(UI.Layer.CONTENT,    g2d->{}) }"],"borderType":["javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","swingtree.style.StyleAndAnimationBorder","swingtree.style.StyleAndAnimationBorder"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `JMenuItem` will not loose its default Nimbus border insets when styled! [5]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Many components have default borders with default insets. \n            When using the nimbus look and feel, then the menu item \n            will have a default border with default insets.\n            When you then style the menu item \n            (which SwingTree largely does through the border), \n            then you should not loose these default insets provided by the nimbus look and feel.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first switch to the nimbus look and feel","code":["Utility.setLaF(Utility.LaF.NIMBUS)"]},
+
+        {"kind":"and","text":"\n            Then we create a menu item saying \"SwingTree\" in japanese and \n            then we style it with a custom styler lambda.\n        ","code":["var ui =","        UI.menuItem(\"ブランコツリー\")","        .withStyle(styler);"]},
+
+        {"kind":"and","text":"We unpack the component and its border:","code":["var component = ui.get(JMenuItem)","var border = component.getBorder()"]},
+
+        {"kind":"expect","text":"The insets are as expected.","code":["border.getBorderInsets(component) == new Insets(1, 12, 2, 13)"]},
+
+        {"kind":"and","text":"It has the expected border type:","code":["borderType.isAssignableFrom(border.getClass())"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","2","3","1","2","3","1","2","3","1","2","3","1","2"],"styler":["{ it -> it }","{ it -> it }","{ it -> it }","{ it -> it.foregroundColor(Color.BLUE) }","{ it -> it.foregroundColor(Color.BLUE) }","{ it -> it.foregroundColor(Color.BLUE) }","{ it -> it.cursor(UI.Cursor.HAND) }","{ it -> it.cursor(UI.Cursor.HAND) }","{ it -> it.cursor(UI.Cursor.HAND) }","{ it -> it.foundationColor(Color.BLUE) }","{ it -> it.foundationColor(Color.BLUE) }","{ it -> it.foundationColor(Color.BLUE) }","{ it -> it.painter(UI.Layer.BORDER,     g2d->{}) }","{ it -> it.painter(UI.Layer.CONTENT,    g2d->{}) }"],"borderType":["javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","swingtree.style.StyleAndAnimationBorder","swingtree.style.StyleAndAnimationBorder"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `JMenuItem` will not loose its default Nimbus border insets when styled! [6]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Many components have default borders with default insets. \n            When using the nimbus look and feel, then the menu item \n            will have a default border with default insets.\n            When you then style the menu item \n            (which SwingTree largely does through the border), \n            then you should not loose these default insets provided by the nimbus look and feel.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first switch to the nimbus look and feel","code":["Utility.setLaF(Utility.LaF.NIMBUS)"]},
+
+        {"kind":"and","text":"\n            Then we create a menu item saying \"SwingTree\" in japanese and \n            then we style it with a custom styler lambda.\n        ","code":["var ui =","        UI.menuItem(\"ブランコツリー\")","        .withStyle(styler);"]},
+
+        {"kind":"and","text":"We unpack the component and its border:","code":["var component = ui.get(JMenuItem)","var border = component.getBorder()"]},
+
+        {"kind":"expect","text":"The insets are as expected.","code":["border.getBorderInsets(component) == new Insets(1, 12, 2, 13)"]},
+
+        {"kind":"and","text":"It has the expected border type:","code":["borderType.isAssignableFrom(border.getClass())"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","2","3","1","2","3","1","2","3","1","2","3","1","2"],"styler":["{ it -> it }","{ it -> it }","{ it -> it }","{ it -> it.foregroundColor(Color.BLUE) }","{ it -> it.foregroundColor(Color.BLUE) }","{ it -> it.foregroundColor(Color.BLUE) }","{ it -> it.cursor(UI.Cursor.HAND) }","{ it -> it.cursor(UI.Cursor.HAND) }","{ it -> it.cursor(UI.Cursor.HAND) }","{ it -> it.foundationColor(Color.BLUE) }","{ it -> it.foundationColor(Color.BLUE) }","{ it -> it.foundationColor(Color.BLUE) }","{ it -> it.painter(UI.Layer.BORDER,     g2d->{}) }","{ it -> it.painter(UI.Layer.CONTENT,    g2d->{}) }"],"borderType":["javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","swingtree.style.StyleAndAnimationBorder","swingtree.style.StyleAndAnimationBorder"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `JMenuItem` will not loose its default Nimbus border insets when styled! [7]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Many components have default borders with default insets. \n            When using the nimbus look and feel, then the menu item \n            will have a default border with default insets.\n            When you then style the menu item \n            (which SwingTree largely does through the border), \n            then you should not loose these default insets provided by the nimbus look and feel.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first switch to the nimbus look and feel","code":["Utility.setLaF(Utility.LaF.NIMBUS)"]},
+
+        {"kind":"and","text":"\n            Then we create a menu item saying \"SwingTree\" in japanese and \n            then we style it with a custom styler lambda.\n        ","code":["var ui =","        UI.menuItem(\"ブランコツリー\")","        .withStyle(styler);"]},
+
+        {"kind":"and","text":"We unpack the component and its border:","code":["var component = ui.get(JMenuItem)","var border = component.getBorder()"]},
+
+        {"kind":"expect","text":"The insets are as expected.","code":["border.getBorderInsets(component) == new Insets(1, 12, 2, 13)"]},
+
+        {"kind":"and","text":"It has the expected border type:","code":["borderType.isAssignableFrom(border.getClass())"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","2","3","1","2","3","1","2","3","1","2","3","1","2"],"styler":["{ it -> it }","{ it -> it }","{ it -> it }","{ it -> it.foregroundColor(Color.BLUE) }","{ it -> it.foregroundColor(Color.BLUE) }","{ it -> it.foregroundColor(Color.BLUE) }","{ it -> it.cursor(UI.Cursor.HAND) }","{ it -> it.cursor(UI.Cursor.HAND) }","{ it -> it.cursor(UI.Cursor.HAND) }","{ it -> it.foundationColor(Color.BLUE) }","{ it -> it.foundationColor(Color.BLUE) }","{ it -> it.foundationColor(Color.BLUE) }","{ it -> it.painter(UI.Layer.BORDER,     g2d->{}) }","{ it -> it.painter(UI.Layer.CONTENT,    g2d->{}) }"],"borderType":["javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","swingtree.style.StyleAndAnimationBorder","swingtree.style.StyleAndAnimationBorder"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `JMenuItem` will not loose its default Nimbus border insets when styled! [8]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Many components have default borders with default insets. \n            When using the nimbus look and feel, then the menu item \n            will have a default border with default insets.\n            When you then style the menu item \n            (which SwingTree largely does through the border), \n            then you should not loose these default insets provided by the nimbus look and feel.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first switch to the nimbus look and feel","code":["Utility.setLaF(Utility.LaF.NIMBUS)"]},
+
+        {"kind":"and","text":"\n            Then we create a menu item saying \"SwingTree\" in japanese and \n            then we style it with a custom styler lambda.\n        ","code":["var ui =","        UI.menuItem(\"ブランコツリー\")","        .withStyle(styler);"]},
+
+        {"kind":"and","text":"We unpack the component and its border:","code":["var component = ui.get(JMenuItem)","var border = component.getBorder()"]},
+
+        {"kind":"expect","text":"The insets are as expected.","code":["border.getBorderInsets(component) == new Insets(1, 12, 2, 13)"]},
+
+        {"kind":"and","text":"It has the expected border type:","code":["borderType.isAssignableFrom(border.getClass())"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","2","3","1","2","3","1","2","3","1","2","3","1","2"],"styler":["{ it -> it }","{ it -> it }","{ it -> it }","{ it -> it.foregroundColor(Color.BLUE) }","{ it -> it.foregroundColor(Color.BLUE) }","{ it -> it.foregroundColor(Color.BLUE) }","{ it -> it.cursor(UI.Cursor.HAND) }","{ it -> it.cursor(UI.Cursor.HAND) }","{ it -> it.cursor(UI.Cursor.HAND) }","{ it -> it.foundationColor(Color.BLUE) }","{ it -> it.foundationColor(Color.BLUE) }","{ it -> it.foundationColor(Color.BLUE) }","{ it -> it.painter(UI.Layer.BORDER,     g2d->{}) }","{ it -> it.painter(UI.Layer.CONTENT,    g2d->{}) }"],"borderType":["javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","swingtree.style.StyleAndAnimationBorder","swingtree.style.StyleAndAnimationBorder"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `JMenuItem` will not loose its default Nimbus border insets when styled! [9]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Many components have default borders with default insets. \n            When using the nimbus look and feel, then the menu item \n            will have a default border with default insets.\n            When you then style the menu item \n            (which SwingTree largely does through the border), \n            then you should not loose these default insets provided by the nimbus look and feel.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first switch to the nimbus look and feel","code":["Utility.setLaF(Utility.LaF.NIMBUS)"]},
+
+        {"kind":"and","text":"\n            Then we create a menu item saying \"SwingTree\" in japanese and \n            then we style it with a custom styler lambda.\n        ","code":["var ui =","        UI.menuItem(\"ブランコツリー\")","        .withStyle(styler);"]},
+
+        {"kind":"and","text":"We unpack the component and its border:","code":["var component = ui.get(JMenuItem)","var border = component.getBorder()"]},
+
+        {"kind":"expect","text":"The insets are as expected.","code":["border.getBorderInsets(component) == new Insets(1, 12, 2, 13)"]},
+
+        {"kind":"and","text":"It has the expected border type:","code":["borderType.isAssignableFrom(border.getClass())"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","2","3","1","2","3","1","2","3","1","2","3","1","2"],"styler":["{ it -> it }","{ it -> it }","{ it -> it }","{ it -> it.foregroundColor(Color.BLUE) }","{ it -> it.foregroundColor(Color.BLUE) }","{ it -> it.foregroundColor(Color.BLUE) }","{ it -> it.cursor(UI.Cursor.HAND) }","{ it -> it.cursor(UI.Cursor.HAND) }","{ it -> it.cursor(UI.Cursor.HAND) }","{ it -> it.foundationColor(Color.BLUE) }","{ it -> it.foundationColor(Color.BLUE) }","{ it -> it.foundationColor(Color.BLUE) }","{ it -> it.painter(UI.Layer.BORDER,     g2d->{}) }","{ it -> it.painter(UI.Layer.CONTENT,    g2d->{}) }"],"borderType":["javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","swingtree.style.StyleAndAnimationBorder","swingtree.style.StyleAndAnimationBorder"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `JMenuItem` will not loose its default Nimbus border insets when styled! [10]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Many components have default borders with default insets. \n            When using the nimbus look and feel, then the menu item \n            will have a default border with default insets.\n            When you then style the menu item \n            (which SwingTree largely does through the border), \n            then you should not loose these default insets provided by the nimbus look and feel.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first switch to the nimbus look and feel","code":["Utility.setLaF(Utility.LaF.NIMBUS)"]},
+
+        {"kind":"and","text":"\n            Then we create a menu item saying \"SwingTree\" in japanese and \n            then we style it with a custom styler lambda.\n        ","code":["var ui =","        UI.menuItem(\"ブランコツリー\")","        .withStyle(styler);"]},
+
+        {"kind":"and","text":"We unpack the component and its border:","code":["var component = ui.get(JMenuItem)","var border = component.getBorder()"]},
+
+        {"kind":"expect","text":"The insets are as expected.","code":["border.getBorderInsets(component) == new Insets(1, 12, 2, 13)"]},
+
+        {"kind":"and","text":"It has the expected border type:","code":["borderType.isAssignableFrom(border.getClass())"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","2","3","1","2","3","1","2","3","1","2","3","1","2"],"styler":["{ it -> it }","{ it -> it }","{ it -> it }","{ it -> it.foregroundColor(Color.BLUE) }","{ it -> it.foregroundColor(Color.BLUE) }","{ it -> it.foregroundColor(Color.BLUE) }","{ it -> it.cursor(UI.Cursor.HAND) }","{ it -> it.cursor(UI.Cursor.HAND) }","{ it -> it.cursor(UI.Cursor.HAND) }","{ it -> it.foundationColor(Color.BLUE) }","{ it -> it.foundationColor(Color.BLUE) }","{ it -> it.foundationColor(Color.BLUE) }","{ it -> it.painter(UI.Layer.BORDER,     g2d->{}) }","{ it -> it.painter(UI.Layer.CONTENT,    g2d->{}) }"],"borderType":["javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","swingtree.style.StyleAndAnimationBorder","swingtree.style.StyleAndAnimationBorder"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `JMenuItem` will not loose its default Nimbus border insets when styled! [11]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Many components have default borders with default insets. \n            When using the nimbus look and feel, then the menu item \n            will have a default border with default insets.\n            When you then style the menu item \n            (which SwingTree largely does through the border), \n            then you should not loose these default insets provided by the nimbus look and feel.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first switch to the nimbus look and feel","code":["Utility.setLaF(Utility.LaF.NIMBUS)"]},
+
+        {"kind":"and","text":"\n            Then we create a menu item saying \"SwingTree\" in japanese and \n            then we style it with a custom styler lambda.\n        ","code":["var ui =","        UI.menuItem(\"ブランコツリー\")","        .withStyle(styler);"]},
+
+        {"kind":"and","text":"We unpack the component and its border:","code":["var component = ui.get(JMenuItem)","var border = component.getBorder()"]},
+
+        {"kind":"expect","text":"The insets are as expected.","code":["border.getBorderInsets(component) == new Insets(1, 12, 2, 13)"]},
+
+        {"kind":"and","text":"It has the expected border type:","code":["borderType.isAssignableFrom(border.getClass())"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","2","3","1","2","3","1","2","3","1","2","3","1","2"],"styler":["{ it -> it }","{ it -> it }","{ it -> it }","{ it -> it.foregroundColor(Color.BLUE) }","{ it -> it.foregroundColor(Color.BLUE) }","{ it -> it.foregroundColor(Color.BLUE) }","{ it -> it.cursor(UI.Cursor.HAND) }","{ it -> it.cursor(UI.Cursor.HAND) }","{ it -> it.cursor(UI.Cursor.HAND) }","{ it -> it.foundationColor(Color.BLUE) }","{ it -> it.foundationColor(Color.BLUE) }","{ it -> it.foundationColor(Color.BLUE) }","{ it -> it.painter(UI.Layer.BORDER,     g2d->{}) }","{ it -> it.painter(UI.Layer.CONTENT,    g2d->{}) }"],"borderType":["javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","swingtree.style.StyleAndAnimationBorder","swingtree.style.StyleAndAnimationBorder"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `JMenuItem` will not loose its default Nimbus border insets when styled! [12]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Many components have default borders with default insets. \n            When using the nimbus look and feel, then the menu item \n            will have a default border with default insets.\n            When you then style the menu item \n            (which SwingTree largely does through the border), \n            then you should not loose these default insets provided by the nimbus look and feel.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first switch to the nimbus look and feel","code":["Utility.setLaF(Utility.LaF.NIMBUS)"]},
+
+        {"kind":"and","text":"\n            Then we create a menu item saying \"SwingTree\" in japanese and \n            then we style it with a custom styler lambda.\n        ","code":["var ui =","        UI.menuItem(\"ブランコツリー\")","        .withStyle(styler);"]},
+
+        {"kind":"and","text":"We unpack the component and its border:","code":["var component = ui.get(JMenuItem)","var border = component.getBorder()"]},
+
+        {"kind":"expect","text":"The insets are as expected.","code":["border.getBorderInsets(component) == new Insets(1, 12, 2, 13)"]},
+
+        {"kind":"and","text":"It has the expected border type:","code":["borderType.isAssignableFrom(border.getClass())"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","2","3","1","2","3","1","2","3","1","2","3","1","2"],"styler":["{ it -> it }","{ it -> it }","{ it -> it }","{ it -> it.foregroundColor(Color.BLUE) }","{ it -> it.foregroundColor(Color.BLUE) }","{ it -> it.foregroundColor(Color.BLUE) }","{ it -> it.cursor(UI.Cursor.HAND) }","{ it -> it.cursor(UI.Cursor.HAND) }","{ it -> it.cursor(UI.Cursor.HAND) }","{ it -> it.foundationColor(Color.BLUE) }","{ it -> it.foundationColor(Color.BLUE) }","{ it -> it.foundationColor(Color.BLUE) }","{ it -> it.painter(UI.Layer.BORDER,     g2d->{}) }","{ it -> it.painter(UI.Layer.CONTENT,    g2d->{}) }"],"borderType":["javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","swingtree.style.StyleAndAnimationBorder","swingtree.style.StyleAndAnimationBorder"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `JMenuItem` will not loose its default Nimbus border insets when styled! [13]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Many components have default borders with default insets. \n            When using the nimbus look and feel, then the menu item \n            will have a default border with default insets.\n            When you then style the menu item \n            (which SwingTree largely does through the border), \n            then you should not loose these default insets provided by the nimbus look and feel.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first switch to the nimbus look and feel","code":["Utility.setLaF(Utility.LaF.NIMBUS)"]},
+
+        {"kind":"and","text":"\n            Then we create a menu item saying \"SwingTree\" in japanese and \n            then we style it with a custom styler lambda.\n        ","code":["var ui =","        UI.menuItem(\"ブランコツリー\")","        .withStyle(styler);"]},
+
+        {"kind":"and","text":"We unpack the component and its border:","code":["var component = ui.get(JMenuItem)","var border = component.getBorder()"]},
+
+        {"kind":"expect","text":"The insets are as expected.","code":["border.getBorderInsets(component) == new Insets(1, 12, 2, 13)"]},
+
+        {"kind":"and","text":"It has the expected border type:","code":["borderType.isAssignableFrom(border.getClass())"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","2","3","1","2","3","1","2","3","1","2","3","1","2"],"styler":["{ it -> it }","{ it -> it }","{ it -> it }","{ it -> it.foregroundColor(Color.BLUE) }","{ it -> it.foregroundColor(Color.BLUE) }","{ it -> it.foregroundColor(Color.BLUE) }","{ it -> it.cursor(UI.Cursor.HAND) }","{ it -> it.cursor(UI.Cursor.HAND) }","{ it -> it.cursor(UI.Cursor.HAND) }","{ it -> it.foundationColor(Color.BLUE) }","{ it -> it.foundationColor(Color.BLUE) }","{ it -> it.foundationColor(Color.BLUE) }","{ it -> it.painter(UI.Layer.BORDER,     g2d->{}) }","{ it -> it.painter(UI.Layer.CONTENT,    g2d->{}) }"],"borderType":["javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","swingtree.style.StyleAndAnimationBorder","swingtree.style.StyleAndAnimationBorder"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}

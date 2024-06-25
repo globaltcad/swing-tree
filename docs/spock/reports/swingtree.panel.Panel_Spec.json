@@ -1,0 +1,359 @@
+{
+  "className":"swingtree.panel.Panel_Spec",
+  "title":"Panels",
+  "narrative":"Just like in regular Swing, the JPanel is the most basic\n    yet most important type of component in Swing-Tree\n    and you can create one using the `UI.panel()` factory method.\n    Don't hesitate to use as the main tool for grouping and structuring\n    your UI, just like you would use the 'div' tag in HTML.",
+  "subjects":["swingtree.UIForPanel"],
+  "statistics":{
+    "runs":"15",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"?"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"A panel node can be created using the UI.panel() factory method.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"when","text":"We create a panel...","code":["def ui = UI.panel()"]},
+
+        {"kind":"and","text":"We actually build the component:","code":["def panel = ui.get(JPanel)"]},
+
+        {"kind":"then","text":"The panel is not null.","code":["panel != null"]},
+
+        {"kind":"and","text":"We confirm that the panel is a JPanel.","code":["panel instanceof JPanel"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A panel can be created with a layout manager.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"when","text":"We create a panel with a layout manager...","code":["def ui = UI.panel().withLayout(new FlowLayout())"]},
+
+        {"kind":"and","text":"We actually build the component:","code":["def panel = ui.get(JPanel)"]},
+
+        {"kind":"then","text":"The panel is not null.","code":["panel != null"]},
+
+        {"kind":"and","text":"The UI node wraps a JPanel.","code":["panel instanceof JPanel"]},
+
+        {"kind":"and","text":"The panel has a FlowLayout.","code":["panel.layout instanceof FlowLayout"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A transparent panel can be created with a custom flow layout manager.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"when","text":"We create a panel with a layout manager...","code":["def ui = UI.box().withLayout(new FlowLayout())"]},
+
+        {"kind":"and","text":"We actually build the component:","code":["def box = ui.get(JBox)"]},
+
+        {"kind":"then","text":"The box is not null.","code":["box != null"]},
+
+        {"kind":"and","text":"The UI node wraps a JBox.","code":["box instanceof JBox"]},
+
+        {"kind":"and","text":"The panel has a FlowLayout.","code":["box.layout instanceof FlowLayout"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"All of the \"box(..)\" factory methods will create transparent panels without insets. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create build the component...","code":["var box = ui.get(JBox)"]},
+
+        {"kind":"expect","text":"The panel is transparent.","code":["box.isOpaque() == false"]},
+
+        {"kind":"and","text":"The panel has no insets.","code":["box.layout.layoutConstraints.contains(\"ins 0\")"]},
+
+        {"kind":"where","text":"The following UI nodes are created using the \"box(..)\" factory methods.","code":{"ui":["UI.box()","UI.box(\"fill\")","UI.box(\"fill\", \"[grow]12[shrink]\")","UI.box(\"fill\", \"[grow]12[shrink]\", \"[grow]12[shrink]\")","UI.box(UI.FILL & UI.FLOW_X)","UI.box(UI.FILL & UI.FLOW_X, \"[grow]12[shrink]\")","UI.box(UI.FILL & UI.FLOW_X, \"[grow]12[shrink]\", \"[grow]12[shrink]\")",""]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"All of the \"box(..)\" factory methods will create transparent panels without insets. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create build the component...","code":["var box = ui.get(JBox)"]},
+
+        {"kind":"expect","text":"The panel is transparent.","code":["box.isOpaque() == false"]},
+
+        {"kind":"and","text":"The panel has no insets.","code":["box.layout.layoutConstraints.contains(\"ins 0\")"]},
+
+        {"kind":"where","text":"The following UI nodes are created using the \"box(..)\" factory methods.","code":{"ui":["UI.box()","UI.box(\"fill\")","UI.box(\"fill\", \"[grow]12[shrink]\")","UI.box(\"fill\", \"[grow]12[shrink]\", \"[grow]12[shrink]\")","UI.box(UI.FILL & UI.FLOW_X)","UI.box(UI.FILL & UI.FLOW_X, \"[grow]12[shrink]\")","UI.box(UI.FILL & UI.FLOW_X, \"[grow]12[shrink]\", \"[grow]12[shrink]\")",""]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"All of the \"box(..)\" factory methods will create transparent panels without insets. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create build the component...","code":["var box = ui.get(JBox)"]},
+
+        {"kind":"expect","text":"The panel is transparent.","code":["box.isOpaque() == false"]},
+
+        {"kind":"and","text":"The panel has no insets.","code":["box.layout.layoutConstraints.contains(\"ins 0\")"]},
+
+        {"kind":"where","text":"The following UI nodes are created using the \"box(..)\" factory methods.","code":{"ui":["UI.box()","UI.box(\"fill\")","UI.box(\"fill\", \"[grow]12[shrink]\")","UI.box(\"fill\", \"[grow]12[shrink]\", \"[grow]12[shrink]\")","UI.box(UI.FILL & UI.FLOW_X)","UI.box(UI.FILL & UI.FLOW_X, \"[grow]12[shrink]\")","UI.box(UI.FILL & UI.FLOW_X, \"[grow]12[shrink]\", \"[grow]12[shrink]\")",""]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"All of the \"box(..)\" factory methods will create transparent panels without insets. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create build the component...","code":["var box = ui.get(JBox)"]},
+
+        {"kind":"expect","text":"The panel is transparent.","code":["box.isOpaque() == false"]},
+
+        {"kind":"and","text":"The panel has no insets.","code":["box.layout.layoutConstraints.contains(\"ins 0\")"]},
+
+        {"kind":"where","text":"The following UI nodes are created using the \"box(..)\" factory methods.","code":{"ui":["UI.box()","UI.box(\"fill\")","UI.box(\"fill\", \"[grow]12[shrink]\")","UI.box(\"fill\", \"[grow]12[shrink]\", \"[grow]12[shrink]\")","UI.box(UI.FILL & UI.FLOW_X)","UI.box(UI.FILL & UI.FLOW_X, \"[grow]12[shrink]\")","UI.box(UI.FILL & UI.FLOW_X, \"[grow]12[shrink]\", \"[grow]12[shrink]\")",""]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"All of the \"box(..)\" factory methods will create transparent panels without insets. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create build the component...","code":["var box = ui.get(JBox)"]},
+
+        {"kind":"expect","text":"The panel is transparent.","code":["box.isOpaque() == false"]},
+
+        {"kind":"and","text":"The panel has no insets.","code":["box.layout.layoutConstraints.contains(\"ins 0\")"]},
+
+        {"kind":"where","text":"The following UI nodes are created using the \"box(..)\" factory methods.","code":{"ui":["UI.box()","UI.box(\"fill\")","UI.box(\"fill\", \"[grow]12[shrink]\")","UI.box(\"fill\", \"[grow]12[shrink]\", \"[grow]12[shrink]\")","UI.box(UI.FILL & UI.FLOW_X)","UI.box(UI.FILL & UI.FLOW_X, \"[grow]12[shrink]\")","UI.box(UI.FILL & UI.FLOW_X, \"[grow]12[shrink]\", \"[grow]12[shrink]\")",""]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"All of the \"box(..)\" factory methods will create transparent panels without insets. [5]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create build the component...","code":["var box = ui.get(JBox)"]},
+
+        {"kind":"expect","text":"The panel is transparent.","code":["box.isOpaque() == false"]},
+
+        {"kind":"and","text":"The panel has no insets.","code":["box.layout.layoutConstraints.contains(\"ins 0\")"]},
+
+        {"kind":"where","text":"The following UI nodes are created using the \"box(..)\" factory methods.","code":{"ui":["UI.box()","UI.box(\"fill\")","UI.box(\"fill\", \"[grow]12[shrink]\")","UI.box(\"fill\", \"[grow]12[shrink]\", \"[grow]12[shrink]\")","UI.box(UI.FILL & UI.FLOW_X)","UI.box(UI.FILL & UI.FLOW_X, \"[grow]12[shrink]\")","UI.box(UI.FILL & UI.FLOW_X, \"[grow]12[shrink]\", \"[grow]12[shrink]\")",""]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"All of the \"box(..)\" factory methods will create transparent panels without insets. [6]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create build the component...","code":["var box = ui.get(JBox)"]},
+
+        {"kind":"expect","text":"The panel is transparent.","code":["box.isOpaque() == false"]},
+
+        {"kind":"and","text":"The panel has no insets.","code":["box.layout.layoutConstraints.contains(\"ins 0\")"]},
+
+        {"kind":"where","text":"The following UI nodes are created using the \"box(..)\" factory methods.","code":{"ui":["UI.box()","UI.box(\"fill\")","UI.box(\"fill\", \"[grow]12[shrink]\")","UI.box(\"fill\", \"[grow]12[shrink]\", \"[grow]12[shrink]\")","UI.box(UI.FILL & UI.FLOW_X)","UI.box(UI.FILL & UI.FLOW_X, \"[grow]12[shrink]\")","UI.box(UI.FILL & UI.FLOW_X, \"[grow]12[shrink]\", \"[grow]12[shrink]\")",""]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The default layout manager is always a MigLayout",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a panel...","code":["def ui = UI.panel()"]},
+
+        {"kind":"and","text":"We build the panel:","code":["def panel = ui.get(JPanel)"]},
+
+        {"kind":"expect","text":"The panel has a MigLayout.","code":["panel.layout instanceof MigLayout"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Panels can be nested using the `add(..) method.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a panel of panels:","code":["def ui =","        UI.panel()","        .add(UI.panel())","        .add(UI.panel())","        .add(UI.panel())"]},
+
+        {"kind":"and","text":"We actually build the component:","code":["def panel = ui.get(JPanel)"]},
+
+        {"kind":"expect","text":"The panel has 3 children.","code":["panel.components.size() == 3"]},
+
+        {"kind":"and","text":"All children are JPanels.","code":["panel.components.every { it instanceof JPanel }"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The dimensions of a panel can be bound to a property. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"A simple property modelling the width of a panel.","code":["var width = Var.of(300)"]},
+
+        {"kind":"and","text":"A simple property modelling the height of a panel.","code":["var height = Var.of(200)"]},
+
+        {"kind":"and","text":"A panel bound to both properties","code":["def ui = UI.panel()","            .withPrefWidth(width)","            .withPrefHeight(height)"]},
+
+        {"kind":"and","text":"We actually build the component:","code":["def panel = ui.get(JPanel)"]},
+
+        {"kind":"expect","text":"The panel has the correct width and height.","code":["panel.preferredSize.width == (int) ( 300 * uiScale )","panel.preferredSize.height == (int) ( 200 * uiScale )"]},
+
+        {"kind":"when","text":"We change the width of the panel.","code":["width.set(400)"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The panel has the correct width and height.","code":["panel.preferredSize.width == (int) ( 400 * uiScale )","panel.preferredSize.height == (int) ( 200 * uiScale )"]},
+
+        {"kind":"when","text":"We change the height of the panel.","code":["height.set(300)"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The panel has the correct width and height.","code":["panel.preferredSize.width == (int) ( 400 * uiScale )","panel.preferredSize.height == (int) ( 300 * uiScale )"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1.0f","1.5f","2.0f"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The dimensions of a panel can be bound to a property. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"A simple property modelling the width of a panel.","code":["var width = Var.of(300)"]},
+
+        {"kind":"and","text":"A simple property modelling the height of a panel.","code":["var height = Var.of(200)"]},
+
+        {"kind":"and","text":"A panel bound to both properties","code":["def ui = UI.panel()","            .withPrefWidth(width)","            .withPrefHeight(height)"]},
+
+        {"kind":"and","text":"We actually build the component:","code":["def panel = ui.get(JPanel)"]},
+
+        {"kind":"expect","text":"The panel has the correct width and height.","code":["panel.preferredSize.width == (int) ( 300 * uiScale )","panel.preferredSize.height == (int) ( 200 * uiScale )"]},
+
+        {"kind":"when","text":"We change the width of the panel.","code":["width.set(400)"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The panel has the correct width and height.","code":["panel.preferredSize.width == (int) ( 400 * uiScale )","panel.preferredSize.height == (int) ( 200 * uiScale )"]},
+
+        {"kind":"when","text":"We change the height of the panel.","code":["height.set(300)"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The panel has the correct width and height.","code":["panel.preferredSize.width == (int) ( 400 * uiScale )","panel.preferredSize.height == (int) ( 300 * uiScale )"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1.0f","1.5f","2.0f"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The dimensions of a panel can be bound to a property. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"A simple property modelling the width of a panel.","code":["var width = Var.of(300)"]},
+
+        {"kind":"and","text":"A simple property modelling the height of a panel.","code":["var height = Var.of(200)"]},
+
+        {"kind":"and","text":"A panel bound to both properties","code":["def ui = UI.panel()","            .withPrefWidth(width)","            .withPrefHeight(height)"]},
+
+        {"kind":"and","text":"We actually build the component:","code":["def panel = ui.get(JPanel)"]},
+
+        {"kind":"expect","text":"The panel has the correct width and height.","code":["panel.preferredSize.width == (int) ( 300 * uiScale )","panel.preferredSize.height == (int) ( 200 * uiScale )"]},
+
+        {"kind":"when","text":"We change the width of the panel.","code":["width.set(400)"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The panel has the correct width and height.","code":["panel.preferredSize.width == (int) ( 400 * uiScale )","panel.preferredSize.height == (int) ( 200 * uiScale )"]},
+
+        {"kind":"when","text":"We change the height of the panel.","code":["height.set(300)"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The panel has the correct width and height.","code":["panel.preferredSize.width == (int) ( 400 * uiScale )","panel.preferredSize.height == (int) ( 300 * uiScale )"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1.0f","1.5f","2.0f"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}

@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DimensionalityConf.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">DimensionalityConf.java</span></div><h1>DimensionalityConf.java</h1><pre class="source lang-java linenums">package swingtree.style;
+
+import com.google.errorprone.annotations.Immutable;
+import swingtree.layout.Size;
+
+import java.util.Objects;
+import java.util.Optional;
+
+/**
+ *  A style that defines the dimensionality of a component
+ *  in the form of a minimum, maximum, preferred and regular size.
+ *  The layout manager of a component will use this information
+ *  to determine the actual size of the component in the layout.
+ **/
+@Immutable
+final class DimensionalityConf
+{
+<span class="fc" id="L18">    private static final DimensionalityConf _NONE = new DimensionalityConf(</span>
+<span class="fc" id="L19">                                                            Size.unknown(),</span>
+<span class="fc" id="L20">                                                            Size.unknown(),</span>
+<span class="fc" id="L21">                                                            Size.unknown(),</span>
+<span class="fc" id="L22">                                                            Size.unknown()</span>
+                                                        );
+
+<span class="fc" id="L25">    static DimensionalityConf none() { return _NONE; }</span>
+
+    static DimensionalityConf of(
+        Size minSize,
+        Size maxSize,
+        Size preferredSize,
+        Size size
+    ) {
+<span class="fc" id="L33">        if (</span>
+<span class="fc bfc" id="L34" title="All 2 branches covered.">            minSize       .equals( _NONE._minSize       ) &amp;&amp;</span>
+<span class="pc bpc" id="L35" title="1 of 2 branches missed.">            maxSize       .equals( _NONE._maxSize       ) &amp;&amp;</span>
+<span class="fc bfc" id="L36" title="All 2 branches covered.">            preferredSize .equals( _NONE._preferredSize ) &amp;&amp;</span>
+<span class="fc bfc" id="L37" title="All 2 branches covered.">            size          .equals( _NONE._size          )</span>
+        )
+<span class="fc" id="L39">            return _NONE;</span>
+        else
+<span class="fc" id="L41">            return new DimensionalityConf(minSize, maxSize, preferredSize, size);</span>
+    }
+
+
+    private final Size _minSize;
+    private final Size _maxSize;
+    private final Size _preferredSize;
+    private final Size _size;
+
+
+    private DimensionalityConf(
+        Size minSize,
+        Size maxSize,
+        Size preferredSize,
+        Size size
+<span class="fc" id="L56">    ) {</span>
+<span class="fc" id="L57">        _minSize       = Objects.requireNonNull(minSize);</span>
+<span class="fc" id="L58">        _maxSize       = Objects.requireNonNull(maxSize);</span>
+<span class="fc" id="L59">        _preferredSize = Objects.requireNonNull(preferredSize);</span>
+<span class="fc" id="L60">        _size          = Objects.requireNonNull(size);</span>
+<span class="fc" id="L61">    }</span>
+
+    DimensionalityConf _withMinWidth(int minWidth ) {
+<span class="fc" id="L64">        return DimensionalityConf.of(_minSize.withWidth(minWidth), _maxSize, _preferredSize, _size);</span>
+    }
+
+    DimensionalityConf _withMinHeight(int minHeight ) {
+<span class="fc" id="L68">        return DimensionalityConf.of(_minSize.withHeight(minHeight), _maxSize, _preferredSize, _size);</span>
+    }
+
+    DimensionalityConf _withMinSize(Size minSize ) {
+<span class="fc" id="L72">        return DimensionalityConf.of(minSize, _maxSize, _preferredSize, _size);</span>
+    }
+
+    DimensionalityConf _withMaxWidth(int maxWidth ) {
+<span class="fc" id="L76">        return DimensionalityConf.of(_minSize, _maxSize.withWidth(maxWidth), _preferredSize, _size);</span>
+    }
+
+    DimensionalityConf _withMaxHeight(int maxHeight ) {
+<span class="fc" id="L80">        return DimensionalityConf.of(_minSize, _maxSize.withHeight(maxHeight), _preferredSize, _size);</span>
+    }
+
+    DimensionalityConf _withMaxSize(Size maxSize ) {
+<span class="fc" id="L84">        return DimensionalityConf.of(_minSize, maxSize, _preferredSize, _size);</span>
+    }
+
+    DimensionalityConf _withPreferredWidth(int preferredWidth ) {
+<span class="fc" id="L88">        return DimensionalityConf.of(_minSize, _maxSize, _preferredSize.withWidth(preferredWidth), _size);</span>
+    }
+
+    DimensionalityConf _withPreferredHeight(int preferredHeight ) {
+<span class="fc" id="L92">        return DimensionalityConf.of(_minSize, _maxSize, _preferredSize.withHeight(preferredHeight), _size);</span>
+    }
+
+    DimensionalityConf _withPreferredSize(Size preferredSize ) {
+<span class="fc" id="L96">        return DimensionalityConf.of(_minSize, _maxSize, preferredSize, _size);</span>
+    }
+
+    DimensionalityConf _withWidth(int width ) {
+<span class="fc" id="L100">        return DimensionalityConf.of(_minSize, _maxSize, _preferredSize, _size.withWidth(width));</span>
+    }
+
+    DimensionalityConf _withHeight(int height ) {
+<span class="fc" id="L104">        return DimensionalityConf.of(_minSize, _maxSize, _preferredSize, _size.withHeight(height));</span>
+    }
+
+    DimensionalityConf _withSize(Size size ) {
+<span class="fc" id="L108">        return DimensionalityConf.of(_minSize, _maxSize, _preferredSize, size);</span>
+    }
+
+<span class="fc" id="L111">    public Optional&lt;Integer&gt; minWidth() { return _minSize.width().map(Number::intValue); }</span>
+
+<span class="fc" id="L113">    public Optional&lt;Integer&gt; minHeight() { return _minSize.height().map(Number::intValue); }</span>
+
+<span class="fc" id="L115">    public Optional&lt;Integer&gt; maxWidth() { return _maxSize.width().map(Number::intValue); }</span>
+
+<span class="fc" id="L117">    public Optional&lt;Integer&gt; maxHeight() { return _maxSize.height().map(Number::intValue); }</span>
+
+<span class="fc" id="L119">    public Optional&lt;Integer&gt; preferredWidth() { return _preferredSize.width().map(Number::intValue); }</span>
+
+<span class="fc" id="L121">    public Optional&lt;Integer&gt; preferredHeight() { return _preferredSize.height().map(Number::intValue); }</span>
+
+<span class="fc" id="L123">    public Optional&lt;Integer&gt; width() { return _size.width().map(Number::intValue); }</span>
+
+<span class="fc" id="L125">    public Optional&lt;Integer&gt; height() { return _size.height().map(Number::intValue); }</span>
+
+    DimensionalityConf _scale(double scale ) {
+<span class="fc" id="L128">        return DimensionalityConf.of(</span>
+<span class="fc" id="L129">                    _minSize.scale(scale),</span>
+<span class="fc" id="L130">                    _maxSize.scale(scale),</span>
+<span class="fc" id="L131">                    _preferredSize.scale(scale),</span>
+<span class="fc" id="L132">                    _size.scale(scale)</span>
+                );
+    }
+
+    DimensionalityConf simplified() {
+<span class="fc bfc" id="L137" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
+<span class="fc" id="L138">            return _NONE;</span>
+
+<span class="fc bfc" id="L140" title="All 4 branches covered.">        Size simplifiedMinSize       = _minSize.width().orElse(0f) == 0f &amp;&amp; _minSize.height().orElse(0f) == 0f ? _NONE._minSize : _minSize;</span>
+<span class="fc bfc" id="L141" title="All 4 branches covered.">        Size simplifiedMaxSize       = _maxSize.width().orElse(0f) == 0f &amp;&amp; _maxSize.height().orElse(0f) == 0f ? _NONE._maxSize : _maxSize;</span>
+<span class="fc bfc" id="L142" title="All 4 branches covered.">        Size simplifiedPreferredSize = _preferredSize.width().orElse(0f) == 0 &amp;&amp; _preferredSize.height().orElse(0f) == 0 ? _NONE._preferredSize : _preferredSize;</span>
+<span class="fc bfc" id="L143" title="All 4 branches covered.">        Size simplifiedSize          = _size.width().orElse(0f) == 0 &amp;&amp; _size.height().orElse(0f) == 0 ? _NONE._size : _size;</span>
+
+<span class="fc" id="L145">        return DimensionalityConf.of(</span>
+                    simplifiedMinSize,
+                    simplifiedMaxSize,
+                    simplifiedPreferredSize,
+                    simplifiedSize
+                );
+    }
+
+    @Override
+    public String toString() {
+<span class="fc bfc" id="L155" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
+<span class="fc" id="L156">            return this.getClass().getSimpleName() + &quot;[NONE]&quot;;</span>
+
+<span class="fc" id="L158">        return</span>
+<span class="fc" id="L159">            this.getClass().getSimpleName() + &quot;[&quot; +</span>
+<span class="fc" id="L160">                    &quot;minWidth=&quot;        + _minSize.width().map(this::_toString).orElse(&quot;?&quot;) + &quot;, &quot; +</span>
+<span class="fc" id="L161">                    &quot;minHeight=&quot;       + _minSize.height().map(this::_toString).orElse(&quot;?&quot;) + &quot;, &quot; +</span>
+<span class="fc" id="L162">                    &quot;maxWidth=&quot;        + _maxSize.height().map(this::_toString).orElse(&quot;?&quot;) + &quot;, &quot; +</span>
+<span class="fc" id="L163">                    &quot;maxHeight=&quot;       + _maxSize.width().map(this::_toString).orElse(&quot;?&quot;) + &quot;, &quot; +</span>
+<span class="fc" id="L164">                    &quot;preferredWidth=&quot;  + _preferredSize.width().map(this::_toString).orElse(&quot;?&quot;) + &quot;, &quot; +</span>
+<span class="fc" id="L165">                    &quot;preferredHeight=&quot; + _preferredSize.height().map(this::_toString).orElse(&quot;?&quot;) + &quot;, &quot; +</span>
+<span class="fc" id="L166">                    &quot;width=&quot;           + _size.width().map(this::_toString).orElse(&quot;?&quot;) + &quot;, &quot; +</span>
+<span class="fc" id="L167">                    &quot;height=&quot;          + _size.height().map(this::_toString).orElse(&quot;?&quot;) +</span>
+                &quot;]&quot;;
+    }
+
+    private String _toString( Float value ) {
+<span class="fc" id="L172">        return String.valueOf(value).replace(&quot;.0&quot;, &quot;&quot;);</span>
+    }
+
+    @Override
+    public final boolean equals( Object o ) {
+<span class="fc bfc" id="L177" title="All 2 branches covered.">        if ( this == o ) return true;</span>
+<span class="pc bpc" id="L178" title="1 of 2 branches missed.">        if ( !(o instanceof DimensionalityConf) ) return false;</span>
+<span class="fc" id="L179">        DimensionalityConf that = (DimensionalityConf) o;</span>
+<span class="fc bfc" id="L180" title="All 2 branches covered.">        return Objects.equals(_minSize,        that._minSize)       &amp;&amp;</span>
+<span class="pc bpc" id="L181" title="1 of 2 branches missed.">               Objects.equals(_maxSize,        that._maxSize)       &amp;&amp;</span>
+<span class="fc bfc" id="L182" title="All 2 branches covered.">               Objects.equals(_preferredSize,  that._preferredSize) &amp;&amp;</span>
+<span class="fc bfc" id="L183" title="All 2 branches covered.">               Objects.equals(_size,           that._size);</span>
+    }
+
+    @Override
+    public final int hashCode() {
+<span class="fc" id="L188">        return Objects.hash(_minSize, _maxSize, _preferredSize, _size);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

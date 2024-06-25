@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StyleTrait.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">StyleTrait.java</span></div><h1>StyleTrait.java</h1><pre class="source lang-java linenums">package swingtree.style;
+
+import com.google.errorprone.annotations.Immutable;
+import swingtree.api.Styler;
+
+import javax.swing.*;
+import java.util.Objects;
+
+/**
+ *  A {@link StyleTrait} contains a set of properties that will be used to
+ *  target specific {@link JComponent}s matching said properties, so that
+ *  you can associate custom {@link Styler} lambdas with them
+ *  which are using the {@link ComponentStyleDelegate} API
+ *  to configure the style of the component. &lt;br&gt;
+ *  See {@link StyleSheet#add(StyleTrait, Styler)} for more information. &lt;br&gt;
+ *  Instances of this are supposed to be created and registered inside
+ *  custom {@link StyleSheet} extensions, more specifically a {@link swingtree.style.StyleSheet#configure()}
+ *  implementation in which you can register your {@link StyleTrait}s and
+ *  {@link Styler}s using the {@link StyleSheet#add(StyleTrait, Styler)} method.
+ *
+ * @param &lt;C&gt; The type of {@link JComponent} this {@link StyleTrait} is for.
+ */
+public final class StyleTrait&lt;C extends JComponent&gt;
+{
+    private final String   _group;
+    private final String   _id;
+    private final String[] _toInherit;
+    private final Class&lt;C&gt; _type;
+
+<span class="fc" id="L30">    private StyleTrait( String id, String groupTag, String[] inherits, Class&lt;C&gt; type ) {</span>
+<span class="fc" id="L31">        _id        = Objects.requireNonNull(id);</span>
+<span class="fc" id="L32">        _group     = Objects.requireNonNull(groupTag);</span>
+<span class="fc" id="L33">        _toInherit = Objects.requireNonNull(inherits).clone();</span>
+<span class="fc" id="L34">        _type      = Objects.requireNonNull(type);</span>
+        // And we check for duplicates and throw an exception if we find any.
+<span class="fc bfc" id="L36" title="All 2 branches covered.">        for ( int i = 0; i &lt; _toInherit.length - 1; i++ )</span>
+<span class="pc bpc" id="L37" title="1 of 2 branches missed.">            if ( _toInherit[ i ].equals( _toInherit[ i + 1 ] ) )</span>
+<span class="nc" id="L38">                throw new IllegalArgumentException(</span>
+                            &quot;Duplicate inheritance found in &quot; + this + &quot;!&quot;
+                        );
+<span class="fc" id="L41">    }</span>
+
+<span class="fc" id="L43">    StyleTrait() { this( &quot;&quot;, &quot;&quot;, new String[0], (Class&lt;C&gt;) JComponent.class ); }</span>
+
+
+<span class="fc" id="L46">    String group()       { return _group;     }</span>
+
+<span class="fc" id="L48">    String id()          { return _id;        }</span>
+
+<span class="fc" id="L50">    String[] toInherit() { return _toInherit; }</span>
+
+<span class="fc" id="L52">    Class&lt;?&gt; type()      { return _type;      }</span>
+
+    /**
+     *  Creates a new {@link StyleTrait} with the same properties as this one,
+     *  but with the given group name. &lt;br&gt;
+     *  &lt;b&gt;
+     *      Note that this method defines the group in terms of a {@link String}
+     *      which can be problematic with respect to compile-time safety. &lt;br&gt;
+     *      Please consider using {@link #group(Enum)} instead.
+     *  &lt;/b&gt;
+     *
+     * @param group The new group name.
+     * @return A new {@link StyleTrait} with the same properties as this one,
+     *         but with the given group name.
+     */
+<span class="fc" id="L67">    public StyleTrait&lt;C&gt; group( String group ) { return new StyleTrait&lt;&gt;(_id, group, _toInherit, _type); }</span>
+
+    /**
+     *  Creates a new {@link StyleTrait} with the same properties as this one,
+     *  but with the given group in terms of an {@link Enum}. &lt;br&gt;
+     *
+     * @param group The new group in terms of an {@link Enum}.
+     * @param &lt;E&gt; The type of the {@link Enum} to use as the group enum
+     * @return A new {@link StyleTrait} with the same properties as this one,
+     *         but with the given group name.
+     */
+<span class="fc" id="L78">    public &lt;E extends Enum&lt;E&gt;&gt; StyleTrait&lt;C&gt; group( E group ) { return group(StyleUtil.toString(Objects.requireNonNull(group))); }</span>
+
+    /**
+     *  Creates a new {@link StyleTrait} with the same properties as this one,
+     *  but with the given id. &lt;br&gt;
+     *  &lt;b&gt;
+     *      Note that this method defines the id in terms of a {@link String}
+     *      which can be problematic with respect to compile-time safety. &lt;br&gt;
+     *      Please consider using {@link #id(Enum)} instead.
+     *  &lt;/b&gt;
+     *
+     * @param id The new id.
+     * @return A new {@link StyleTrait} with the same properties as this one,
+     *         but with the given id.
+     */
+<span class="fc" id="L93">    public StyleTrait&lt;C&gt; id( String id ) { return new StyleTrait&lt;&gt;(id, _group, _toInherit, _type); }</span>
+
+    /**
+     *  Creates a new {@link StyleTrait} with the same properties as this one,
+     *  but with the given id in terms of an {@link Enum}. &lt;br&gt;
+     *
+     * @param id The new id in terms of an {@link Enum}.
+     * @param &lt;E&gt; The type of the {@link Enum} to use as the id enum
+     * @return A new {@link StyleTrait} with the same properties as this one,
+     *         but with the given id.
+     */
+<span class="nc" id="L104">    public &lt;E extends Enum&lt;E&gt;&gt; StyleTrait&lt;C&gt; id( E id ) { return id(StyleUtil.toString(Objects.requireNonNull(id))); }</span>
+
+    /**
+     *  Creates a new {@link StyleTrait} with the same properties as this one,
+     *  but with an array of groups to inherit from. &lt;br&gt;
+     *  &lt;b&gt;
+     *      Note that this method defines the groups in terms of {@link String}s
+     *      which can be problematic with respect to compile-time safety. &lt;br&gt;
+     *      Please consider using {@link #inherits(Enum[])} instead.
+     *  &lt;/b&gt;
+     *
+     * @param superGroups The new groups to inherit from.
+     * @return A new {@link StyleTrait} with the same properties as this one,
+     *         but with the given groups to inherit from.
+     */
+<span class="fc" id="L119">    public StyleTrait&lt;C&gt; inherits( String... superGroups ) { return new StyleTrait&lt;&gt;(_id, _group, superGroups, _type ); }</span>
+
+    /**
+     *  Creates a new {@link StyleTrait} with the same properties as this one,
+     *  but with an array of groups to inherit from in terms of {@link Enum}s. &lt;br&gt;
+     *
+     * @param superGroups The new groups to inherit from in terms of {@link Enum}s.
+     * @param &lt;E&gt; The type of the {@link Enum}s to use as the super group enums
+     * @return A new {@link StyleTrait} with the same properties as this one,
+     *         but with the given groups to inherit from.
+     */
+    @SafeVarargs
+    public final &lt;E extends Enum&lt;E&gt;&gt; StyleTrait&lt;C&gt; inherits( E... superGroups ) {
+<span class="fc" id="L132">        Objects.requireNonNull(superGroups);</span>
+<span class="fc" id="L133">        String[] superGroupNames = new String[superGroups.length];</span>
+<span class="fc bfc" id="L134" title="All 2 branches covered.">        for ( int i = 0; i &lt; superGroups.length; i++ ) {</span>
+<span class="fc" id="L135">            E superGroup = Objects.requireNonNull(superGroups[i]);</span>
+<span class="fc" id="L136">            superGroupNames[i] = StyleUtil.toString(superGroup);</span>
+        }
+<span class="fc" id="L138">        return inherits(superGroupNames);</span>
+    }
+
+    /**
+     *  Creates a new {@link StyleTrait} with the same properties as this one,
+     *  but with the given component type to which a style should be applied. &lt;br&gt;
+     *
+     * @param type The new type.
+     * @param &lt;T&gt; The type of the {@link JComponent} to use as the type
+     * @return A new {@link StyleTrait} with the same properties as this one,
+     *         but with the given type.
+     */
+<span class="fc" id="L150">    public &lt;T extends C&gt; StyleTrait&lt;T&gt; type( Class&lt;T&gt; type ) { return new StyleTrait&lt;&gt;(_id, _group, _toInherit, type ); }</span>
+
+    boolean isApplicableTo( JComponent component ) {
+<span class="fc" id="L153">        Objects.requireNonNull(component);</span>
+<span class="fc" id="L154">        boolean typeIsCompatible = _type.isAssignableFrom(component.getClass());</span>
+<span class="fc bfc" id="L155" title="All 4 branches covered.">        boolean idIsCompatible   = _id.isEmpty() || _id.equals(component.getName());</span>
+<span class="fc" id="L156">        boolean belongsToApplicableGroup = ComponentExtension.from(component)</span>
+<span class="fc" id="L157">                                              .getStyleGroups()</span>
+<span class="fc" id="L158">                                              .stream()</span>
+<span class="fc" id="L159">                                              .anyMatch( sg -&gt; sg.equals(_group));</span>
+
+<span class="fc bfc" id="L161" title="All 4 branches covered.">        boolean nameIsCompatible = _group.isEmpty() || belongsToApplicableGroup;</span>
+<span class="fc bfc" id="L162" title="All 6 branches covered.">        return typeIsCompatible &amp;&amp; idIsCompatible &amp;&amp; nameIsCompatible;</span>
+    }
+
+    boolean thisInherits( StyleTrait&lt;?&gt; other ) {
+
+<span class="fc bfc" id="L167" title="All 4 branches covered.">        if ( !this.id().isEmpty() || !other.id().isEmpty() )</span>
+<span class="fc" id="L168">            return false;</span>
+
+<span class="fc" id="L170">        boolean thisGroupIsExtensionOfOther = false;</span>
+<span class="fc bfc" id="L171" title="All 2 branches covered.">        for ( String superGroup : this.toInherit() )</span>
+<span class="fc bfc" id="L172" title="All 2 branches covered.">            if ( superGroup.equals( other.group() ) ) {</span>
+<span class="fc" id="L173">                thisGroupIsExtensionOfOther = true;</span>
+<span class="fc" id="L174">                break;</span>
+            }
+
+<span class="fc" id="L177">        boolean thisTypeIsSubclassOfOther = other.type().isAssignableFrom(this.type());</span>
+
+<span class="fc bfc" id="L179" title="All 4 branches covered.">        if ( thisGroupIsExtensionOfOther &amp;&amp; !thisTypeIsSubclassOfOther )</span>
+<span class="fc" id="L180">            throw new IllegalArgumentException(</span>
+                    this + &quot; is an extension of &quot; + other + &quot; but is not a subclass of it.&quot;
+                );
+
+<span class="fc bfc" id="L184" title="All 6 branches covered.">        return ( thisGroupIsExtensionOfOther || other.group().isEmpty() ) &amp;&amp; thisTypeIsSubclassOfOther;</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="fc" id="L189">        String inherits = java.util.Arrays.toString(_toInherit);</span>
+<span class="fc" id="L190">        return &quot;StyleTrait[&quot; +</span>
+                    &quot;id='&quot;      + _id      + &quot;', &quot; +
+                    &quot;group='&quot;   + _group   + &quot;', &quot; +
+                    &quot;inherits=&quot; + inherits + &quot;, &quot;  +
+                    &quot;type=&quot;     + _type    +
+                ']';
+    }
+
+    @Override
+    public int hashCode() {
+<span class="fc" id="L200">        int hash = 7;</span>
+<span class="fc bfc" id="L201" title="All 2 branches covered.">        for ( String inherit : _toInherit )</span>
+<span class="fc" id="L202">            hash = 31 * hash + inherit.hashCode();</span>
+
+<span class="fc" id="L204">        return Objects.hash( _id, _group, hash, _type );</span>
+    }
+
+    @Override
+    public boolean equals( Object other ) {
+<span class="pc bpc" id="L209" title="1 of 2 branches missed.">        if ( !( other instanceof StyleTrait ) )</span>
+<span class="nc" id="L210">            return false;</span>
+
+<span class="fc" id="L212">        StyleTrait&lt;?&gt; that = (StyleTrait&lt;?&gt;) other;</span>
+<span class="fc bfc" id="L213" title="All 2 branches covered.">        return _id    .equals( that._id    ) &amp;&amp;</span>
+<span class="fc bfc" id="L214" title="All 2 branches covered.">               _group .equals( that._group ) &amp;&amp;</span>
+<span class="fc bfc" id="L215" title="All 2 branches covered.">               _type  .equals( that._type  ) &amp;&amp;</span>
+<span class="pc bpc" id="L216" title="1 of 2 branches missed.">                java.util.Arrays.equals(_toInherit, that._toInherit);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
