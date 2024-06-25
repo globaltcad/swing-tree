@@ -71,10 +71,10 @@ public interface AnimatedStyler&lt;C extends JComponent&gt;
             try {
 <span class="nc" id="L72">                result = style( state, delegate );</span>
 <span class="nc" id="L73">            } catch ( Exception e ) {</span>
-<span class="nc" id="L74">                e.printStackTrace();</span>
+<span class="nc" id="L74">                Constants.LOG.error(&quot;Failed to evaluate composed style&quot;, e);</span>
 <span class="nc" id="L75">            }</span>
 <span class="nc" id="L76">            return other.style( state, result );</span>
         };
     }
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

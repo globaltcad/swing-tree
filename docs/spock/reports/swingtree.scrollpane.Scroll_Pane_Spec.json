@@ -23,7 +23,7 @@
       "blocks":[
         {"kind":"given","text":"We create a scroll pane with a custom scroll bar policy.","code":["var ui =","        UI.scrollPane()","        .withScrollBarPolicy(UI.Active.NEVER)"]},
 
-        {"kind":"and","text":"We actually build the component:","code":["var scrollPane = ui.component"]},
+        {"kind":"and","text":"Then we build the scroll pane component:","code":["var scrollPane = ui.get(JScrollPane)"]},
 
         {"kind":"expect","text":"The scroll pane has the expected scroll bar policies.","code":["scrollPane.getHorizontalScrollBarPolicy() == JScrollPane.HORIZONTAL_SCROLLBAR_NEVER","scrollPane.getVerticalScrollBarPolicy() == JScrollPane.VERTICAL_SCROLLBAR_NEVER"]}
       ],
@@ -40,7 +40,7 @@
       "blocks":[
         {"kind":"given","text":"We create a scroll pane with a custom scroll bar policy.","code":["var ui =","        UI.scrollPane()","        .withHorizontalScrollBarPolicy(UI.Active.NEVER)","        .withVerticalScrollBarPolicy(UI.Active.ALWAYS)"]},
 
-        {"kind":"and","text":"We actually build the component:","code":["var scrollPane = ui.component"]},
+        {"kind":"and","text":"We actually build the component:","code":["var scrollPane = ui.get(JScrollPane)"]},
 
         {"kind":"expect","text":"The scroll pane has the expected scroll bar policies.","code":["scrollPane.getHorizontalScrollBarPolicy() == JScrollPane.HORIZONTAL_SCROLLBAR_NEVER","scrollPane.getVerticalScrollBarPolicy() == JScrollPane.VERTICAL_SCROLLBAR_ALWAYS"]}
       ],
@@ -57,7 +57,7 @@
       "blocks":[
         {"kind":"given","text":"We create a scroll pane with a custom scroll increment.","code":["var ui =","        UI.scrollPane()","        .withHorizontalScrollIncrement(42)","        .withVerticalScrollIncrement(24)"]},
 
-        {"kind":"and","text":"We actually build the component:","code":["var scrollPane = ui.component"]},
+        {"kind":"and","text":"We actually build the component:","code":["var scrollPane = ui.get(JScrollPane)"]},
 
         {"kind":"expect","text":"The scroll pane has the expected scroll increments.","code":["scrollPane.getHorizontalScrollBar().getUnitIncrement() == 42","scrollPane.getVerticalScrollBar().getUnitIncrement() == 24"]}
       ],
@@ -74,7 +74,7 @@
       "blocks":[
         {"kind":"given","text":"We create a scroll pane with a custom scroll increment.","code":["var ui =","        UI.scrollPane()","        .withScrollIncrement(42)"]},
 
-        {"kind":"and","text":"We actually build the component:","code":["var scrollPane = ui.component"]},
+        {"kind":"and","text":"We actually build the component:","code":["var scrollPane = ui.get(JScrollPane)"]},
 
         {"kind":"expect","text":"The scroll pane has the expected scroll increments, both vertical and horizontally.","code":["scrollPane.getHorizontalScrollBar().getUnitIncrement() == 42","scrollPane.getVerticalScrollBar().getUnitIncrement() == 42"]}
       ],
@@ -91,7 +91,7 @@
       "blocks":[
         {"kind":"given","text":"We create a scroll pane with a custom block scroll increment.","code":["var ui =","        UI.scrollPane()","        .withHorizontalBlockScrollIncrement(42)","        .withVerticalBlockScrollIncrement(24)"]},
 
-        {"kind":"and","text":"We actually build the component:","code":["var scrollPane = ui.component"]},
+        {"kind":"and","text":"We actually build the component:","code":["var scrollPane = ui.get(JScrollPane)"]},
 
         {"kind":"expect","text":"The scroll pane has the expected block scroll increments.","code":["scrollPane.getHorizontalScrollBar().getBlockIncrement() == 42","scrollPane.getVerticalScrollBar().getBlockIncrement() == 24"]}
       ],
@@ -108,7 +108,7 @@
       "blocks":[
         {"kind":"given","text":"We create a scroll pane with a custom block scroll increment.","code":["var ui =","        UI.scrollPane()","        .withBlockScrollIncrement(42)"]},
 
-        {"kind":"and","text":"We actually build the component:","code":["var scrollPane = ui.component"]},
+        {"kind":"and","text":"We actually build the component:","code":["var scrollPane = ui.get(JScrollPane)"]},
 
         {"kind":"expect","text":"The scroll pane has the expected block scroll increments, both vertical and horizontally.","code":["scrollPane.getHorizontalScrollBar().getBlockIncrement() == 42","scrollPane.getVerticalScrollBar().getBlockIncrement() == 42"]}
       ],

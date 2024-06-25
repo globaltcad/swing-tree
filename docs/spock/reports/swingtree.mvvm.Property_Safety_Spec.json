@@ -4,7 +4,7 @@
   "narrative":"Properties are a core concept in Swing-Tree. They are in essence\n    just wrapper classes used to represent the state of your views.\n    Because of this, it is important that properties are\n    are nullable only when they need to be, and that they are\n    immutable only when they need to be.\n\n    Furthermore, using nullable properties in Swing-Tree\n    will be prohibited it is does not make sense.\n    For example, you may not use null to model the text of a label,\n    instead, the empty String \"\" must be used!",
   "subjects":["sprouts.Val","sprouts.Var","sprouts.Vals","sprouts.Vars"],
   "statistics":{
-    "runs":"9",
+    "runs":"14",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -52,11 +52,30 @@
     },
   
     {
-      "id":"A \"Val\" instance is immutable.",
+      "id":"A \"Val\" instance is immutable. [0]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            A \"Val\" instance is immutable because it is a wrapper around a\n            value that is not intended to be changed. If the value is\n            intended to be changed, then the developer should use a \"Var\"\n            type instead.\n            The \"Val\" interface is a supertype of the \"Var\" interface, so it is\n            mainly used as a way to protect mutable properties from\n            being accidentally changed outside of the intended scope.\n            Creating a Val from its factory method \"of\" will always return\n            an immutable instance.\n        ","\n            A \"Val\" instance is immutable because it is a wrapper around a\n            value that is not intended to be changed. If the value is\n            intended to be changed, then the developer should use a \"Var\"\n            type instead.\n            The \"Val\" interface is a supertype of the \"Var\" interface, so it is\n            mainly used as a way to protect mutable properties from\n            being accidentally changed outside of the intended scope.\n            Creating a Val from its factory method \"of\" will always return\n            an immutable instance.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            A \"Val\" instance is immutable because it is a wrapper around a\n            value that is not intended to be changed. If the value is\n            intended to be changed, then the developer should use a \"Var\"\n            type instead.\n            The \"Val\" interface is a supertype of the \"Var\" interface, so it is\n            mainly used as a way to protect mutable properties from\n            being accidentally changed outside of the intended scope.\n            Creating a Val from its factory method \"of\" will always return\n            an immutable instance.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A \"Val\" instance wrapping a simple integer.","code":["def val = Val.of(42)"]},
+
+        {"kind":"when","text":"The value is changed...","code":["code(val)"]},
+
+        {"kind":"then","text":"...an exception is thrown.","code":["thrown(Exception)"]},
+
+        {"kind":"where","text":"The following ways of trying to modify the state of the property should fail:","code":{"code":["{ it.set(7) }","{ it.set(From.VIEW, 9) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A \"Val\" instance is immutable. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A \"Val\" instance is immutable because it is a wrapper around a\n            value that is not intended to be changed. If the value is\n            intended to be changed, then the developer should use a \"Var\"\n            type instead.\n            The \"Val\" interface is a supertype of the \"Var\" interface, so it is\n            mainly used as a way to protect mutable properties from\n            being accidentally changed outside of the intended scope.\n            Creating a Val from its factory method \"of\" will always return\n            an immutable instance.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"A \"Val\" instance wrapping a simple integer.","code":["def val = Val.of(42)"]},
@@ -107,7 +126,83 @@
     },
   
     {
-      "id":"\"Vals\", a list of properties, is immutable.",
+      "id":"\"Vals\", a list of properties, is immutable. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"A \"Vals\" instance wrapping a simple integer.","code":["def vals = Vals.of(42)"]},
+
+        {"kind":"when","text":"The value is changed...","code":["code(vals)"]},
+
+        {"kind":"then","text":"...an exception is thrown.","code":["thrown(Exception)"]},
+
+        {"kind":"where","text":"The following ways of trying to modify the state of the property should fail:","code":{"code":["{ it.add(7)      }","{ it.addAt(0, 7) }","{ it.removeAt(9) }","{ it.sort()      }","{ it.clear()     }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"\"Vals\", a list of properties, is immutable. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"A \"Vals\" instance wrapping a simple integer.","code":["def vals = Vals.of(42)"]},
+
+        {"kind":"when","text":"The value is changed...","code":["code(vals)"]},
+
+        {"kind":"then","text":"...an exception is thrown.","code":["thrown(Exception)"]},
+
+        {"kind":"where","text":"The following ways of trying to modify the state of the property should fail:","code":{"code":["{ it.add(7)      }","{ it.addAt(0, 7) }","{ it.removeAt(9) }","{ it.sort()      }","{ it.clear()     }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"\"Vals\", a list of properties, is immutable. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"A \"Vals\" instance wrapping a simple integer.","code":["def vals = Vals.of(42)"]},
+
+        {"kind":"when","text":"The value is changed...","code":["code(vals)"]},
+
+        {"kind":"then","text":"...an exception is thrown.","code":["thrown(Exception)"]},
+
+        {"kind":"where","text":"The following ways of trying to modify the state of the property should fail:","code":{"code":["{ it.add(7)      }","{ it.addAt(0, 7) }","{ it.removeAt(9) }","{ it.sort()      }","{ it.clear()     }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"\"Vals\", a list of properties, is immutable. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"A \"Vals\" instance wrapping a simple integer.","code":["def vals = Vals.of(42)"]},
+
+        {"kind":"when","text":"The value is changed...","code":["code(vals)"]},
+
+        {"kind":"then","text":"...an exception is thrown.","code":["thrown(Exception)"]},
+
+        {"kind":"where","text":"The following ways of trying to modify the state of the property should fail:","code":{"code":["{ it.add(7)      }","{ it.addAt(0, 7) }","{ it.removeAt(9) }","{ it.sort()      }","{ it.clear()     }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"\"Vals\", a list of properties, is immutable. [4]",
       "result":"PASS",
       "duration":"?",
       "iterations":{

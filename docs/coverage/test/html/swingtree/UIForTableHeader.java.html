@@ -113,7 +113,7 @@ public final class UIForTableHeader&lt;H extends UI.TableHeader&gt; extends UIFo
      * @param renderBuilder The builder for the renderer to set.
      * @return This builder node.
      */
-    UIForTableHeader&lt;H&gt; withDefaultRenderer( Render.Builder&lt;JTable, ?&gt; renderBuilder ) {
+    UIForTableHeader&lt;H&gt; withDefaultRenderer( RenderBuilder&lt;JTable, ?&gt; renderBuilder ) {
 <span class="nc" id="L117">        Objects.requireNonNull(renderBuilder);</span>
 <span class="nc" id="L118">        return _with( thisComponent -&gt; {</span>
 <span class="nc" id="L119">                    thisComponent.setDefaultRenderer(renderBuilder.getForTable());</span>
@@ -121,4 +121,4 @@ public final class UIForTableHeader&lt;H extends UI.TableHeader&gt; extends UIFo
 <span class="nc" id="L121">                ._this();</span>
     }
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NamedConfigs.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">NamedConfigs.java</span></div><h1>NamedConfigs.java</h1><pre class="source lang-java linenums">package swingtree.style;
+
+import com.google.errorprone.annotations.Immutable;
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import swingtree.api.Configurator;
+
+import java.util.*;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+/**
+ *  An immutable value container that stores {@link NamedConf} instances
+ *  representing a mapping of unique string names to styles of type {@link S}.
+ *  The {@link NamedConf} instances are stored in an array and can be accessed
+ *  by their unique name.
+ *  Yes, this class could have been a linked hashmap or treemap
+ *  however, we do not expect the existence of more than a handful
+ *  of named styles in a {@link StyleConf} instance which is why we chose
+ *  to use an array instead as it is more memory as well as CPU efficient
+ *  to just iterate over a few array elements than to use a hashmap or treemap.
+ *
+ * @param &lt;S&gt; The type of the style.
+ */
+@Immutable(containerOf = &quot;S&quot;)
+@SuppressWarnings(&quot;Immutable&quot;)
+final class NamedConfigs&lt;S&gt; implements Simplifiable&lt;NamedConfigs&lt;S&gt;&gt;
+{
+<span class="fc" id="L31">    private static final NamedConfigs&lt;?&gt; EMPTY = new NamedConfigs&lt;&gt;();</span>
+<span class="fc" id="L32">    private static final Logger log = LoggerFactory.getLogger(NamedConfigs.class);</span>
+
+    static &lt;S&gt; NamedConfigs&lt;S&gt; of(NamedConf&lt;S&gt; defaultStyle ) {
+<span class="fc" id="L35">        return new NamedConfigs&lt;&gt;( defaultStyle );</span>
+    }
+
+<span class="fc" id="L38">    static &lt;S&gt; NamedConfigs&lt;S&gt; empty() { return (NamedConfigs&lt;S&gt;) EMPTY; }</span>
+
+    private final NamedConf&lt;S&gt;[] _styles;
+
+
+    @SafeVarargs
+<span class="fc" id="L44">    private NamedConfigs(NamedConf&lt;S&gt;... styles ) {</span>
+<span class="fc" id="L45">        _styles = Objects.requireNonNull(styles);</span>
+        // No nll entries:
+<span class="fc bfc" id="L47" title="All 2 branches covered.">        for ( NamedConf&lt;S&gt; style : styles )</span>
+<span class="fc" id="L48">            Objects.requireNonNull(style);</span>
+
+        // No duplicate names:
+<span class="fc" id="L51">        Set&lt;String&gt; names = new HashSet&lt;&gt;(styles.length * 2);</span>
+<span class="fc bfc" id="L52" title="All 2 branches covered.">        for ( NamedConf&lt;S&gt; style : styles )</span>
+<span class="pc bpc" id="L53" title="1 of 2 branches missed.">            if ( !names.add(style.name()) )</span>
+<span class="nc" id="L54">                throw new IllegalArgumentException(&quot;Duplicate style name: &quot; + style.name());</span>
+<span class="fc" id="L55">    }</span>
+
+<span class="fc" id="L57">    public int size() { return _styles.length; }</span>
+
+<span class="fc" id="L59">    public List&lt;NamedConf&lt;S&gt;&gt; namedStyles() { return Collections.unmodifiableList(Arrays.asList(_styles)); }</span>
+
+    public Stream&lt;S&gt; stylesStream() {
+<span class="fc" id="L62">        return namedStyles()</span>
+<span class="fc" id="L63">                .stream()</span>
+<span class="fc" id="L64">                .map(NamedConf::style);</span>
+    }
+
+    public NamedConfigs&lt;S&gt; withNamedStyle(String name, S style ) {
+<span class="fc" id="L68">        Objects.requireNonNull(name);</span>
+<span class="fc" id="L69">        Objects.requireNonNull(style);</span>
+
+<span class="fc" id="L71">        int foundIndex = _findNamedStyle(name);</span>
+
+<span class="fc bfc" id="L73" title="All 2 branches covered.">        if ( foundIndex == -1 ) {</span>
+<span class="fc" id="L74">            NamedConf&lt;S&gt;[] styles = Arrays.copyOf(_styles, _styles.length + 1);</span>
+<span class="fc" id="L75">            styles[styles.length - 1] = NamedConf.of(name, style);</span>
+<span class="fc" id="L76">            return new NamedConfigs&lt;&gt;(styles);</span>
+        }
+
+<span class="fc" id="L79">        NamedConf&lt;S&gt;[] styles = Arrays.copyOf(_styles, _styles.length);</span>
+<span class="fc" id="L80">        styles[foundIndex] = NamedConf.of(name, style);</span>
+<span class="fc" id="L81">        return new NamedConfigs&lt;&gt;(styles);</span>
+    }
+
+    public NamedConfigs&lt;S&gt; mapStyles( Configurator&lt;S&gt; f ) {
+<span class="fc" id="L85">        Objects.requireNonNull(f);</span>
+<span class="fc" id="L86">        return mapNamedStyles( ns -&gt; NamedConf.of(ns.name(), f.configure(ns.style())) );</span>
+    }
+
+    public NamedConfigs&lt;S&gt; mapNamedStyles( Configurator&lt;NamedConf&lt;S&gt;&gt; f ) {
+<span class="fc" id="L90">        Objects.requireNonNull(f);</span>
+
+<span class="fc" id="L92">        NamedConf&lt;S&gt;[] newStyles = null;</span>
+<span class="fc bfc" id="L93" title="All 2 branches covered.">        for ( int i = 0; i &lt; _styles.length; i++ ) {</span>
+<span class="fc" id="L94">            NamedConf&lt;S&gt; mapped = _styles[i];</span>
+            try {
+<span class="fc" id="L96">                mapped = f.configure(_styles[i]);</span>
+<span class="nc" id="L97">            } catch ( Exception e ) {</span>
+<span class="nc" id="L98">                log.error(</span>
+                        &quot;Failed to map named style '&quot; + _styles[i] + &quot;' using &quot; +
+                        &quot;the provided function '&quot; + f + &quot;'.&quot;,
+                        e
+                    );
+<span class="fc" id="L103">            }</span>
+<span class="fc bfc" id="L104" title="All 4 branches covered.">            if ( newStyles == null &amp;&amp; !mapped.equals(_styles[i]) ) {</span>
+<span class="fc" id="L105">                newStyles = Arrays.copyOf(_styles, _styles.length);</span>
+                // We avoid heap allocation if possible!
+            }
+<span class="fc bfc" id="L108" title="All 2 branches covered.">            if ( newStyles != null )</span>
+<span class="fc" id="L109">                newStyles[i] = mapped;</span>
+        }
+<span class="fc bfc" id="L111" title="All 2 branches covered.">        if ( newStyles == null )</span>
+<span class="fc" id="L112">            return this;</span>
+
+<span class="fc" id="L114">        return new NamedConfigs&lt;&gt;(newStyles);</span>
+    }
+
+    private int _findNamedStyle( String name ) {
+<span class="fc bfc" id="L118" title="All 2 branches covered.">        for ( int i = 0; i &lt; _styles.length; i++ ) {</span>
+<span class="fc bfc" id="L119" title="All 2 branches covered.">            if ( _styles[i].name().equals(name) )</span>
+<span class="fc" id="L120">                return i;</span>
+        }
+<span class="fc" id="L122">        return -1;</span>
+    }
+
+    public @Nullable S get(String name ) {
+<span class="fc" id="L126">        Objects.requireNonNull(name);</span>
+
+<span class="fc" id="L128">        int foundIndex = _findNamedStyle(name);</span>
+
+<span class="fc bfc" id="L130" title="All 2 branches covered.">        if ( foundIndex == -1 )</span>
+<span class="fc" id="L131">            return null;</span>
+
+<span class="fc" id="L133">        return _styles[foundIndex].style();</span>
+    }
+
+    public Optional&lt;S&gt; find( String name ) {
+<span class="fc" id="L137">        Objects.requireNonNull(name);</span>
+<span class="fc" id="L138">        return Optional.ofNullable(get(name));</span>
+    }
+
+    public List&lt;S&gt; sortedByNames() {
+<span class="fc" id="L142">        return Collections.unmodifiableList(</span>
+<span class="fc" id="L143">                    namedStyles()</span>
+<span class="fc" id="L144">                    .stream()</span>
+<span class="fc" id="L145">                    .sorted(Comparator.comparing(NamedConf::name))</span>
+<span class="fc" id="L146">                    .map(NamedConf::style)</span>
+<span class="fc" id="L147">                    .collect(Collectors.toList())</span>
+                );
+    }
+
+    /**
+     *  Returns true if at least one of the named styles in this instance passes the test.
+     *  The test is performed by the provided predicate.
+     *
+     * @param namedStyleTester The predicate to test the named styles against.
+     * @return True if at least one of the named styles in this instance passes the test.
+     */
+    public boolean any( Predicate&lt;NamedConf&lt;S&gt;&gt; namedStyleTester ) {
+<span class="fc" id="L159">        return Arrays.stream(_styles).anyMatch(namedStyleTester);</span>
+    }
+
+    public String toString( String defaultName, String styleType ) {
+<span class="fc bfc" id="L163" title="All 2 branches covered.">        if ( styleType.isEmpty() )</span>
+<span class="fc" id="L164">            styleType = this.getClass().getSimpleName();</span>
+        else
+<span class="fc" id="L166">            styleType += &quot;=&quot;;</span>
+<span class="fc bfc" id="L167" title="All 2 branches covered.">        if ( this.size() == 1 )</span>
+<span class="fc" id="L168">            return String.valueOf(this.get(defaultName));</span>
+        else
+<span class="fc" id="L170">            return this.namedStyles()</span>
+<span class="fc" id="L171">                    .stream()</span>
+<span class="fc" id="L172">                    .map(e -&gt; e.name() + &quot;=&quot; + e.style())</span>
+<span class="fc" id="L173">                    .collect(Collectors.joining(&quot;, &quot;, styleType+&quot;[&quot;, &quot;]&quot;));</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L178">        StringBuilder sb = new StringBuilder();</span>
+<span class="nc" id="L179">        sb.append(getClass().getSimpleName()).append(&quot;[&quot;);</span>
+<span class="nc bnc" id="L180" title="All 2 branches missed.">        for ( int i = 0; i &lt; _styles.length; i++ ) {</span>
+<span class="nc" id="L181">            sb.append(_styles[i].name()).append(&quot;=&quot;).append(_styles[i].style());</span>
+<span class="nc bnc" id="L182" title="All 2 branches missed.">            if ( i &lt; _styles.length - 1 )</span>
+<span class="nc" id="L183">                sb.append(&quot;, &quot;);</span>
+        }
+<span class="nc" id="L185">        sb.append(&quot;]&quot;);</span>
+<span class="nc" id="L186">        return sb.toString();</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="fc" id="L191">        return Arrays.hashCode(_styles);</span>
+    }
+
+    @Override
+    public boolean equals( Object obj ) {
+<span class="pc bpc" id="L196" title="1 of 2 branches missed.">        if ( obj == null ) return false;</span>
+<span class="fc bfc" id="L197" title="All 2 branches covered.">        if ( obj == this ) return true;</span>
+<span class="pc bpc" id="L198" title="1 of 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
+<span class="fc" id="L199">        NamedConfigs&lt;?&gt; rhs = (NamedConfigs&lt;?&gt;) obj;</span>
+<span class="fc" id="L200">        return Arrays.equals(_styles, rhs._styles);</span>
+    }
+
+    @Override
+    public NamedConfigs&lt;S&gt; simplified() {
+<span class="fc" id="L205">        return mapNamedStyles(NamedConf::simplified);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

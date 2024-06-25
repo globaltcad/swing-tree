@@ -149,7 +149,9 @@
 
         {"kind":"and","text":"A simple combo box UI.","code":["var ui =","        UI.comboBox(\"Item 1\", \"Item 2\", \"Item 3\")","        .onSelection( it -> trace.add(\"1\") )","        .onSelection( it -> trace.add(\"2\") )","        .onSelection( it -> trace.add(\"3\") )","        .onSelection( it -> trace.add(\"4\") )","        .onSelection( it -> trace.add(\"5\") )","        .onSelection( it -> trace.add(\"6\") )","        .onSelection( it -> trace.add(\"7\") )"]},
 
-        {"kind":"when","text":"An item is selected in the combo box.","code":["ui.component.setSelectedIndex(1)","UI.sync()"]},
+        {"kind":"and","text":"We build the combo box:","code":["var comboBox = ui.get(JComboBox)"]},
+
+        {"kind":"when","text":"An item is selected in the combo box.","code":["comboBox.setSelectedIndex(1)","UI.sync()"]},
 
         {"kind":"then","text":"The handlers are triggered in the same order as they were registered.","code":["trace == [\"1\", \"2\", \"3\", \"4\", \"5\", \"6\", \"7\"]"]}
       ],

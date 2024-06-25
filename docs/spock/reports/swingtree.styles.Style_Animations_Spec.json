@@ -4,7 +4,7 @@
   "narrative":"Styles in SwingTree are based on a functional style engine\n    which reevaluates your styles whenever your component is\n    repainted.\n    This makes them a perfect fit for animations.\n    Continue reading to learn how to animate your styles.",
   "subjects":[],
   "statistics":{
-    "runs":"4",
+    "runs":"5",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -13,6 +13,33 @@
   },
   "headers":[],"tags":{},"see":[],
   "features":[ 
+    {
+      "id":"A transitory style animation always ends with a progress of 1.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            In this example we use a transitory style animation to record the progress of the animation.\n            The important note here is that the progress of the animation will always end with 1.\n            What this means for you in practice is that you can use this fact as \n            a signal to perform some action once the animation has completed.\n\n            So you can use the progress in a way where the animated style will be\n            reset to its original state once the animation has completed.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create an event object for triggering the animation.","code":["var event = sprouts.Event.create()"]},
+
+        {"kind":"and","text":"Two lists in which we record the progress and cycle values of the animation.","code":["var proresses = []","var cycles = []"]},
+
+        {"kind":"and","text":"We create a simple `JTogglButton` UI component with a style animation.","code":["var ui = UI.toggleButton(\"Click me!\")","                .withTransitoryStyle(event, LifeTime.of(0.05, TimeUnit.SECONDS), (state, conf) -> {","                    proresses << state.progress()","                    cycles << state.cycle()","                    return conf;","                })"]},
+
+        {"kind":"and","text":"We actually build the component:","code":["var button = ui.get(JToggleButton)"]},
+
+        {"kind":"expect","text":"Initially the two lists are empty.","code":["proresses.isEmpty()","cycles.isEmpty()"]},
+
+        {"kind":"when","text":"We trigger the animation.","code":["event.fire()","Thread.sleep(100)","UI.sync()","button.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"\n            The progress of the animation will always end with 1.\n        ","code":["proresses.last() == 1"]},
+
+        {"kind":"and","text":"\n            The cycle of the animation will always end with 1.\n        ","code":["cycles.last() == 0"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
     {
       "id":"An `onMouseClick` event style animation is only temporary.",
       "result":"PASS",
@@ -29,7 +56,7 @@
 
         {"kind":"when","text":"We simulate a user click event programmatically","code":["label.dispatchEvent(new MouseEvent(label, MouseEvent.MOUSE_CLICKED, System.currentTimeMillis(), 0, 0, 0, 1, false))","Thread.sleep(100)","UI.sync()","label.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
 
-        {"kind":"then","text":"The label will have a border and a background color.","code":["label.border != null","label.background != new Color(238, 238, 238)","label.foreground == new Color(51, 51, 51)","label.getUI() instanceof MetalLabelUI"]}
+        {"kind":"then","text":"The label will have a border and the custom colors...","code":["new PollingConditions(timeout: 10, initialDelay: 0, factor: 1.25).eventually {","    assert label.border != null","}","label.background != new Color(238, 238, 238)","label.foreground == new Color(51, 51, 51)","label.getUI() instanceof MetalLabelUI"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -52,7 +79,7 @@
 
         {"kind":"then","text":"The label will have a border and a background color.","code":["label.border != null","label.font.size > 13"]},
 
-        {"kind":"and","text":"SwingTree will haver overridden the default label UI in order to support the shadow.","code":["!(label.getUI() instanceof MetalLabelUI)"]}
+        {"kind":"and","text":"The UI of the component was not overridden, because the shadow can be rendered through the border of the component.","code":["(label.getUI() instanceof MetalLabelUI)","label.border != null"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -71,11 +98,11 @@
 
         {"kind":"when","text":"We simulate a user click event programmatically","code":["label.dispatchEvent(new MouseEvent(label, MouseEvent.MOUSE_CLICKED, System.currentTimeMillis(), 0, 0, 0, 1, false))","Thread.sleep(50)","UI.sync()","label.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
 
-        {"kind":"then","text":"\n            The border will have a custom border installed.\n        ","code":["label.border != null","label.background != new Color(238, 238, 238)","label.foreground == new Color(51, 51, 51)","label.getUI() instanceof MetalLabelUI"]},
+        {"kind":"then","text":"\n            The label will have a custom border installed.\n        ","code":["new PollingConditions(timeout: 10, initialDelay: 0, factor: 1.25).eventually {","    assert label.border != null","}","label.background != new Color(238, 238, 238)","label.foreground == new Color(51, 51, 51)","label.getUI() instanceof MetalLabelUI"]},
 
         {"kind":"when","text":"We wait for the animation to end...","code":["Thread.sleep(2000)","UI.sync()","label.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
 
-        {"kind":"then","text":"\n            The border will have been uninstalled.\n        ","code":["label.border == null","label.background == new Color(238, 238, 238)","label.foreground == new Color(51, 51, 51)","label.getUI() instanceof MetalLabelUI"]}
+        {"kind":"then","text":"\n            The border will have been uninstalled.\n        ","code":["new PollingConditions(timeout: 10, initialDelay: 0, factor: 1.25).eventually {","    assert label.border == null","}","label.background == new Color(238, 238, 238)","label.foreground == new Color(51, 51, 51)","label.getUI() instanceof MetalLabelUI"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },

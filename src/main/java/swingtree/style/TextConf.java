@@ -13,7 +13,7 @@ import java.util.function.Function;
  *  An immutable configuration type which holds custom
  *  text as well as placement and font properties used for
  *  rendering text onto a Swing component. <br>
- *  This objects is exposed inside the {@link ComponentStyleDelegate#text(Function)}
+ *  This objects is exposed inside the {@link ComponentStyleDelegate#text(Configurator)}
  *  as a way to configure custom text properties of a component
  *  as part of the style API exposed by {@link swingtree.UIForAnySwing#withStyle(Styler)}.
  *  <p>
@@ -33,7 +33,7 @@ import java.util.function.Function;
  *      )
  *  }</pre>
  *  In this small example you can see the usage of {@link TextConf#content(String)},
- *  {@link TextConf#placement(UI.Placement)} and {@link TextConf#font(Function)}.
+ *  {@link TextConf#placement(UI.Placement)} and {@link TextConf#font(Configurator)}.
  *  But there are much more properties available to configure the text rendering
  *  as part of the style API. <br>
  *  <p>
@@ -49,7 +49,7 @@ import java.util.function.Function;
  *      <li><b>Font</b>
  *          The {@link FontConf} object is its own rich configuration object
  *          which holds all font properties like size, style, color, etc.
- *          You can configure it through {@link TextConf#font(Function)}.<br>
+ *          You can configure it through {@link TextConf#font(Configurator)}.<br>
  *          The default font configuration is {@link FontConf#none()}.
  *      </li>
  *      <li><b>Clip Area</b>

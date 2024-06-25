@@ -85,14 +85,17 @@ public final class UIForPopup&lt;P extends JPopupMenu&gt; extends UIForAnySwing&
 
     private void _onPopupOpen( P thisComponent, Consumer&lt;PopupMenuEvent&gt; consumer ) {
 <span class="nc" id="L87">        thisComponent.addPopupMenuListener(new PopupMenuListener() {</span>
+            @Override
             public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
                 // This method is called before the popup menu becomes visible.
-<span class="nc" id="L90">                consumer.accept(e);</span>
-<span class="nc" id="L91">            }</span>
-<span class="nc" id="L92">            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {/* Not relevant here */}</span>
-<span class="nc" id="L93">            public void popupMenuCanceled(PopupMenuEvent e) {/* Not relevant here */}</span>
+<span class="nc" id="L91">                consumer.accept(e);</span>
+<span class="nc" id="L92">            }</span>
+            @Override
+<span class="nc" id="L94">            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {/* Not relevant here */}</span>
+            @Override
+<span class="nc" id="L96">            public void popupMenuCanceled(PopupMenuEvent e) {/* Not relevant here */}</span>
         });
-<span class="nc" id="L95">    }</span>
+<span class="nc" id="L98">    }</span>
 
     /**
      *  Registers a listener to be notified when the popup becomes invisible,
@@ -102,24 +105,27 @@ public final class UIForPopup&lt;P extends JPopupMenu&gt; extends UIForAnySwing&
      * @return This builder node, to allow for method chaining.
      */
     public UIForPopup&lt;P&gt; onInvisible( Action&lt;ComponentDelegate&lt;P, PopupMenuEvent&gt;&gt; action ) {
-<span class="nc" id="L105">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
-<span class="nc" id="L106">        return _with( thisComponent -&gt; {</span>
-<span class="nc" id="L107">                    _onPopupClose(thisComponent,</span>
-<span class="nc" id="L108">                        e -&gt; _runInApp(()-&gt;action.accept(new ComponentDelegate&lt;&gt;( (P) thisComponent, e )) )</span>
+<span class="nc" id="L108">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
+<span class="nc" id="L109">        return _with( thisComponent -&gt; {</span>
+<span class="nc" id="L110">                    _onPopupClose(thisComponent,</span>
+<span class="nc" id="L111">                        e -&gt; _runInApp(()-&gt;action.accept(new ComponentDelegate&lt;&gt;( (P) thisComponent, e )) )</span>
                     );
-<span class="nc" id="L110">                })</span>
-<span class="nc" id="L111">                ._this();</span>
+<span class="nc" id="L113">                })</span>
+<span class="nc" id="L114">                ._this();</span>
     }
 
     private void _onPopupClose( P thisComponent, Consumer&lt;PopupMenuEvent&gt; consumer ) {
-<span class="nc" id="L115">        thisComponent.addPopupMenuListener(new PopupMenuListener() {</span>
-<span class="nc" id="L116">            public void popupMenuWillBecomeVisible(PopupMenuEvent e) {/* Not relevant here */}</span>
+<span class="nc" id="L118">        thisComponent.addPopupMenuListener(new PopupMenuListener() {</span>
+            @Override
+<span class="nc" id="L120">            public void popupMenuWillBecomeVisible(PopupMenuEvent e) {/* Not relevant here */}</span>
+            @Override
             public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
-<span class="nc" id="L118">                consumer.accept(e); // This method is called before the popup menu becomes invisible</span>
-<span class="nc" id="L119">            }</span>
-<span class="nc" id="L120">            public void popupMenuCanceled(PopupMenuEvent e) {/* Not relevant here */}</span>
+<span class="nc" id="L123">                consumer.accept(e); // This method is called before the popup menu becomes invisible</span>
+<span class="nc" id="L124">            }</span>
+            @Override
+<span class="nc" id="L126">            public void popupMenuCanceled(PopupMenuEvent e) {/* Not relevant here */}</span>
         });
-<span class="nc" id="L122">    }</span>
+<span class="nc" id="L128">    }</span>
 
     /**
      *  Registers a listener to be notified when the popup is canceled.
@@ -129,31 +135,34 @@ public final class UIForPopup&lt;P extends JPopupMenu&gt; extends UIForAnySwing&
      * @return this
      */
     public UIForPopup&lt;P&gt; onCancel( Action&lt;ComponentDelegate&lt;P, PopupMenuEvent&gt;&gt; action ) {
-<span class="nc" id="L132">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
-<span class="nc" id="L133">        return _with( thisComponent -&gt; {</span>
-<span class="nc" id="L134">                    _onPopupCancel(thisComponent,</span>
-<span class="nc" id="L135">                        e -&gt; _runInApp(()-&gt;action.accept(new ComponentDelegate&lt;&gt;( thisComponent, e )) )</span>
+<span class="nc" id="L138">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
+<span class="nc" id="L139">        return _with( thisComponent -&gt; {</span>
+<span class="nc" id="L140">                    _onPopupCancel(thisComponent,</span>
+<span class="nc" id="L141">                        e -&gt; _runInApp(()-&gt;action.accept(new ComponentDelegate&lt;&gt;( thisComponent, e )) )</span>
                     );
-<span class="nc" id="L137">                })</span>
-<span class="nc" id="L138">                ._this();</span>
+<span class="nc" id="L143">                })</span>
+<span class="nc" id="L144">                ._this();</span>
     }
 
     private void _onPopupCancel( P thisComponent, Consumer&lt;PopupMenuEvent&gt; consumer ) {
-<span class="nc" id="L142">        thisComponent.addPopupMenuListener(new PopupMenuListener() {</span>
-<span class="nc" id="L143">            public void popupMenuWillBecomeVisible(PopupMenuEvent e) {/* Not relevant here */}</span>
-<span class="nc" id="L144">            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {/* Not relevant here */}</span>
+<span class="nc" id="L148">        thisComponent.addPopupMenuListener(new PopupMenuListener() {</span>
+            @Override
+<span class="nc" id="L150">            public void popupMenuWillBecomeVisible(PopupMenuEvent e) {/* Not relevant here */}</span>
+            @Override
+<span class="nc" id="L152">            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {/* Not relevant here */}</span>
+            @Override
             public void popupMenuCanceled(PopupMenuEvent e) {
-<span class="nc" id="L146">                consumer.accept(e); // This method is called when the popup menu is canceled</span>
-<span class="nc" id="L147">            }</span>
+<span class="nc" id="L155">                consumer.accept(e); // This method is called when the popup menu is canceled</span>
+<span class="nc" id="L156">            }</span>
         });
-<span class="nc" id="L149">    }</span>
+<span class="nc" id="L158">    }</span>
 
 
-<span class="nc" id="L152">    public UIForPopup&lt;P&gt; add(JMenuItem item) { return this.add(UI.of(item)); }</span>
+<span class="nc" id="L161">    public UIForPopup&lt;P&gt; add(JMenuItem item) { return this.add(UI.of(item)); }</span>
 
-<span class="nc" id="L154">    public UIForPopup&lt;P&gt; add(JSeparator separator) { return this.add(UI.of(separator)); }</span>
+<span class="nc" id="L163">    public UIForPopup&lt;P&gt; add(JSeparator separator) { return this.add(UI.of(separator)); }</span>
 
-<span class="nc" id="L156">    public UIForPopup&lt;P&gt; add(JPanel panel) { return this.add(UI.of(panel)); }</span>
+<span class="nc" id="L165">    public UIForPopup&lt;P&gt; add(JPanel panel) { return this.add(UI.of(panel)); }</span>
 }
 
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

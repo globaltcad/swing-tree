@@ -46,19 +46,31 @@ public abstract class AbstractTextComponentDelegate
     }
 
     /**
+     *  The filter bypass type is used as a way to circumvent calling back into the Document to change it.
+     *  Document implementations that wish to support a DocumentFilter must provide an implementation that
+     *  will not call back into the DocumentFilter when the following methods are invoked from the DocumentFilter.
+     *
      * @return The {@link DocumentFilter.FilterBypass} object that can be used to modify the document.
      */
     public DocumentFilter.FilterBypass getFilterBypass() {
-<span class="nc" id="L52">        return filterBypass;</span>
+<span class="nc" id="L56">        return filterBypass;</span>
     }
 
+    /**
+     *  The offset at which the text change occurred.
+     *  @return The offset at which the text change occurred.
+     */
     public int getOffset() {
-<span class="fc" id="L56">        return offset;</span>
+<span class="fc" id="L64">        return offset;</span>
     }
 
+    /**
+     *  The length of the text change.
+     *  @return The length of the text change.
+     */
     public int getLength() {
-<span class="fc" id="L60">        return length;</span>
+<span class="fc" id="L72">        return length;</span>
     }
 
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

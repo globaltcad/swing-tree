@@ -32,19 +32,26 @@ public final class ComponentDragEventDelegate&lt;C extends JComponent&gt; extend
 <span class="nc" id="L32">    }</span>
 
     /**
+     *  Provides a list of all {@link MouseEvent}s of a continuous mouse drag performed on the component.
+     *  When a drag ends, the list is cleared.
+     *
      * @return A list of all {@link MouseEvent}s of a continuous mouse drag performed on the component.
      */
     public List&lt;MouseEvent&gt; dragEvents() {
-<span class="nc" id="L38">        return Collections.unmodifiableList(_dragEventHistory);</span>
+<span class="nc" id="L41">        return Collections.unmodifiableList(_dragEventHistory);</span>
     }
 
     /**
+     *  SwingTree keeps track of the most recent mouse drag events of a continuous drag.
+     *  This method returns a list of all mouse position {@link Point}s of a continuous mouse drag
+     *  performed on the component.
+     *
      * @return A list of all mouse position {@link Point}s of a continuous mouse drag performed on the component.
      *         The points of this list represent the mouse movement track since the start of a continuous drag.
      */
     public List&lt;Point&gt; dragPositions() {
-<span class="nc" id="L46">        return Collections.unmodifiableList(_dragEventHistory.stream().map(MouseEvent::getPoint).collect(Collectors.toList()));</span>
+<span class="nc" id="L53">        return Collections.unmodifiableList(_dragEventHistory.stream().map(MouseEvent::getPoint).collect(Collectors.toList()));</span>
     }
 
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

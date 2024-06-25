@@ -4,7 +4,7 @@
   "narrative":"In raw Swing a common way to present a simple message or a set of options to the user is to\n    the static methods of the `JOptionPane` API to summon and display a dialog.\n    SwingTree makes this API more intuitive and declarative through the `UI` API.\n\n    This specification demonstrates the use of this API.",
   "subjects":["swingtree.dialogs.ConfirmAnswer","swingtree.dialogs.ConfirmDialog","swingtree.dialogs.MessageDialog","swingtree.dialogs.OptionsDialog"],
   "statistics":{
-    "runs":"13",
+    "runs":"15",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -89,18 +89,60 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            The `UI.choice(String, Var)` method returns a builder object\n            for configuring the options dialog.\n            The builder API is fluent and allows you to configure the dialog\n            in a declarative way.\n\n            You do not need to specify the options as they will automatically be generated from \n            the enum values for you.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            The `UI.choice(String, Var)` method returns a builder object\n            for configuring the options dialog, where the options are \n            based on all of the enum values of the provided enum type\n            defined by the `Var` property.\n            So you do not need to specify the options specifically,\n            as they will automatically be generated from \n            the enum values for you.\n            The builder API is fluent and allows you to configure the dialog\n            in a declarative way through method chaining.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create a simple property to store the answer in (and get the options from).","code":["var enumProperty = Var.of(ConfirmAnswer.YES)"]},
 
         {"kind":"and","text":"\n            We mock the `JOptionPane` API through a package private delegate, \n            the `swingtree.dialogs.OptionsDialogSummoner` API.\n            Note that this is a super simple delegate for the `JOptionPane` factory methods.\n            We do this this for mocking the `JOptionPane` API in this specification.\n            This stuff is package private so please ignore this little implementation detail\n            in your own code. \n        ","code":["var realSummoner = swingtree.dialogs.Context.summoner","var summoner = Mock(swingtree.dialogs.OptionsDialogSummoner)","swingtree.dialogs.Context.summoner = summoner"]},
 
-        {"kind":"when","text":"We invoke the `choice` method on the `UI` API.","code":["UI.choice(\"Is the answer to life, the universe and everything really 42?\", enumProperty)","    .titled(\"A Question for You!\")","    .icon(null)","    .defaultOption(ConfirmAnswer.CLOSE)","    .show()"]},
+        {"kind":"when","text":"We invoke the `choice` method on the `UI` API.","code":["UI.choice(\"Is the answer to life, the universe and everything really 42?\", enumProperty)","    .titled(\"A Question for You!\")","    .icon((Icon)null)","    .defaultOption(ConfirmAnswer.CLOSE)","    .show()"]},
 
         {"kind":"then","text":"The dialog summoner API is called with the correct arguments exactly once.","code":["1 * summoner.showOptionDialog(","        null,","        'Is the answer to life, the universe and everything really 42?',","        'A Question for You!', // title","        -1,","        3,","        null,","        ['YES', 'NO', 'CANCEL', 'CLOSE'],","        'CLOSE'",") >> 0"]},
 
         {"kind":"and","text":"Due to the mock returning `0` the answer should be the enum value with index `0`, namely `YES`.","code":["enumProperty.get() == ConfirmAnswer.YES"]},
+
+        {"kind":"cleanup","text":"We put back the original summoner.","code":["swingtree.dialogs.Context.summoner = realSummoner"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use `UI.choice(String, Enum[])` for building an options dialog for a set of enum based options.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `UI.choice(String, Enum[])` method returns a builder object\n            for configuring the options dialog with the provided enum based options.\n            The builder API is fluent and allows you to configure the dialog\n            in a declarative way.\n\n            You do not need to specify the options as they will automatically be generated from \n            the enum values for you.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We mock the `JOptionPane` API through a package private delegate, \n            the `swingtree.dialogs.OptionsDialogSummoner` API.\n            Note that this is a super simple delegate for the `JOptionPane` factory methods.\n            We do this this for mocking the `JOptionPane` API in this specification.\n            This stuff is package private so please ignore this little implementation detail\n            in your own code. \n        ","code":["var realSummoner = swingtree.dialogs.Context.summoner","var summoner = Mock(swingtree.dialogs.OptionsDialogSummoner)","swingtree.dialogs.Context.summoner = summoner"]},
+
+        {"kind":"when","text":"We invoke the `choice` method on the `UI` API.","code":["var answer =","        UI.choice(\"What is your favorite color?\", ConfirmAnswer.YES, ConfirmAnswer.NO, ConfirmAnswer.CANCEL)","        .titled(\"A Question for You!\")","        .icon((Icon)null)","        .defaultOption(ConfirmAnswer.NO)","        .show()"]},
+
+        {"kind":"then","text":"The dialog summoner API is called with the correct arguments exactly once.","code":["1 * summoner.showOptionDialog(","        null,","        'What is your favorite color?', // message","        'A Question for You!', // title","        -1,","        3,","        null,","        ['YES', 'NO', 'CANCEL'],","        'NO'",") >> 1"]},
+
+        {"kind":"and","text":"Due to the mock returning `1` the answer should be the enum value with index `1`, namely `NO`.","code":["answer.get() == ConfirmAnswer.NO"]},
+
+        {"kind":"cleanup","text":"We put back the original summoner.","code":["swingtree.dialogs.Context.summoner = realSummoner"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Pass a lambda to the show method of an options dialog to create unique option presentations.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `UI.choice(String, Enum[])` method returns a builder object\n            for configuring the options dialog.\n            It exposes a fluent builder API which allows you to configure the dialog\n            in a declarative way.\n            When calling the show method you can pass a lambda which\n            takes each option and returns a string representation of it\n            which will be displayed in the dialog to the user.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We mock the `JOptionPane` API through a package private delegate, \n            the `swingtree.dialogs.OptionsDialogSummoner` API.\n            Note that this is a super simple delegate for the `JOptionPane` factory methods.\n            We do this this for mocking the `JOptionPane` API in this specification.\n            This stuff is package private so please ignore this little implementation detail\n            in your own code. \n        ","code":["var realSummoner = swingtree.dialogs.Context.summoner","var summoner = Mock(swingtree.dialogs.OptionsDialogSummoner)","swingtree.dialogs.Context.summoner = summoner"]},
+
+        {"kind":"when","text":"We invoke the `choice` method on the `UI` API.","code":["var answer =","        UI.choice(\"What is your favorite color?\", ConfirmAnswer.YES, ConfirmAnswer.NO, ConfirmAnswer.CANCEL)","        .titled(\"A Question for You!\")","        .icon((Icon)null)","        .defaultOption(ConfirmAnswer.NO)","        .show( o -> o.toString().toLowerCase() )"]},
+
+        {"kind":"then","text":"The dialog summoner API is called with the correct arguments exactly once.","code":["1 * summoner.showOptionDialog(","        null,","        'What is your favorite color?', // message","        'A Question for You!', // title","        -1,","        3,","        null,","        ['yes', 'no', 'cancel'],","        'no'",") >> 1"]},
+
+        {"kind":"and","text":"Due to the mock returning `1` the answer should be the enum value with index `1`, namely `no`.","code":["answer.get() == ConfirmAnswer.NO"]},
 
         {"kind":"cleanup","text":"We put back the original summoner.","code":["swingtree.dialogs.Context.summoner = realSummoner"]}
       ],
@@ -117,7 +159,7 @@
       "blocks":[
         {"kind":"given","text":"\n            We first mock the `JOptionPane` API through a package private delegate, \n            the `swingtree.dialogs.OptionsDialogSummoner` API.\n            Note that this is a super simple delegate for the `JOptionPane` factory methods.\n            We do this this for mocking the `JOptionPane` API in this specification.\n            This stuff is package private so please ignore this little implementation detail\n            in your own code. \n        ","code":["var realSummoner = swingtree.dialogs.Context.summoner","var summoner = Mock(swingtree.dialogs.OptionsDialogSummoner)","swingtree.dialogs.Context.summoner = summoner"]},
 
-        {"kind":"when","text":"We invoke the `confirmation` method on the `UI` API.","code":["var answer =","            UI.confirmation(\"Have you read the terms and conditions?\")","            .titled(\"Confirm or Deny\")","            .icon(null)","            .yesOption(\"Sure, who hasn't?\")","            .noOption(\"No, Sorry!\")","            .defaultOption(ConfirmAnswer.YES)","            .show()"]},
+        {"kind":"when","text":"We invoke the `confirmation` method on the `UI` API.","code":["var answer =","            UI.confirmation(\"Have you read the terms and conditions?\")","            .titled(\"Confirm or Deny\")","            .icon((Icon)null)","            .yesOption(\"Sure, who hasn't?\")","            .noOption(\"No, Sorry!\")","            .defaultOption(ConfirmAnswer.YES)","            .show()"]},
 
         {"kind":"then","text":"The dialog summoner API is called with the correct arguments exactly once.","code":["1 * summoner.showOptionDialog(","        null,","        'Have you read the terms and conditions?', // message","        'Confirm or Deny', // title","        1,","        3,","        null,","        ['Sure, who hasn\\'t?', 'No, Sorry!', 'Cancel'],","        'Sure, who hasn\\'t?'",") >> 1"]},
 

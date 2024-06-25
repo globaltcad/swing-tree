@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ConfirmDialog.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.dialogs</a> &gt; <span class="el_source">ConfirmDialog.java</span></div><h1>ConfirmDialog.java</h1><pre class="source lang-java linenums">package swingtree.dialogs;
 
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import swingtree.UI;
+import swingtree.api.IconDeclaration;
 
 import javax.swing.Icon;
 import javax.swing.JOptionPane;
@@ -21,7 +23,7 @@ import java.util.Objects;
  */
 public final class ConfirmDialog
 {
-<span class="fc" id="L24">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(ConfirmDialog.class);</span>
+<span class="fc" id="L26">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(ConfirmDialog.class);</span>
 
     /**
      *  Creates a new {@link ConfirmDialog} instance with the specified question.
@@ -29,8 +31,8 @@ public final class ConfirmDialog
      *  @return A new {@link ConfirmDialog} instance with the specified question.
      */
     public static ConfirmDialog asking(String question ) {
-<span class="fc" id="L32">        Objects.requireNonNull(question);</span>
-<span class="fc" id="L33">        return new ConfirmDialog(</span>
+<span class="fc" id="L34">        Objects.requireNonNull(question);</span>
+<span class="fc" id="L35">        return new ConfirmDialog(</span>
                     -1,
                     &quot;&quot;,
                     question,
@@ -43,101 +45,152 @@ public final class ConfirmDialog
                 );
     }
 
-    private final int           _type;
-    private final String        _title;
-    private final String        _message;
-    private final String        _yesOption;
-    private final String        _noOption;
-    private final String        _cancelOption;
-    private final ConfirmAnswer _defaultOption;
-    private final Icon          _icon;
-    private final Component     _parent;
+    private final int                  _type;
+    private final String               _title;
+    private final String               _message;
+    private final String               _yesOption;
+    private final String               _noOption;
+    private final String               _cancelOption;
+    private final ConfirmAnswer        _defaultOption;
+    private final @Nullable Icon       _icon;
+    private final @Nullable Component  _parent;
 
 
     private ConfirmDialog(
-        int type,
-        String        title,
-        String        message,
-        String        yesOption,
-        String        noOption,
-        String        cancelOption,
-        ConfirmAnswer defaultOption,
-        Icon          icon,
-        Component     parent
-<span class="fc" id="L67">    ) {</span>
-<span class="fc" id="L68">        _type          = type;</span>
-<span class="fc" id="L69">        _title         = Objects.requireNonNull(title);</span>
-<span class="fc" id="L70">        _message       = Objects.requireNonNull(message);</span>
-<span class="fc" id="L71">        _yesOption     = Objects.requireNonNull(yesOption);</span>
-<span class="fc" id="L72">        _noOption      = Objects.requireNonNull(noOption);</span>
-<span class="fc" id="L73">        _cancelOption  = Objects.requireNonNull(cancelOption);</span>
-<span class="fc" id="L74">        _defaultOption = Objects.requireNonNull(defaultOption);</span>
-<span class="fc" id="L75">        _icon          = icon;</span>
-<span class="fc" id="L76">        _parent        = parent;</span>
-<span class="fc" id="L77">    }</span>
+        int                 type,
+        String              title,
+        String              message,
+        String              yesOption,
+        String              noOption,
+        String              cancelOption,
+        ConfirmAnswer       defaultOption,
+        @Nullable Icon      icon,
+        @Nullable Component parent
+<span class="fc" id="L69">    ) {</span>
+<span class="fc" id="L70">        _type          = type;</span>
+<span class="fc" id="L71">        _title         = Objects.requireNonNull(title);</span>
+<span class="fc" id="L72">        _message       = Objects.requireNonNull(message);</span>
+<span class="fc" id="L73">        _yesOption     = Objects.requireNonNull(yesOption);</span>
+<span class="fc" id="L74">        _noOption      = Objects.requireNonNull(noOption);</span>
+<span class="fc" id="L75">        _cancelOption  = Objects.requireNonNull(cancelOption);</span>
+<span class="fc" id="L76">        _defaultOption = Objects.requireNonNull(defaultOption);</span>
+<span class="fc" id="L77">        _icon          = icon;</span>
+<span class="fc" id="L78">        _parent        = parent;</span>
+<span class="fc" id="L79">    }</span>
 
     /**
+     *  This method allows you to specify the title of the dialog,
+     *  which is the text that will be displayed in the title bar of the dialog window.
+     *  If you don't specify a title, a default title may be used based on the dialog type,
+     *  so a title does not need to be specified here for the dialog to be shown.
+     *
      * @param title The title of the dialog.
      * @return A new {@link ConfirmDialog} instance with the specified title.
      */
-    public ConfirmDialog titled(String title ) {
-<span class="fc" id="L84">        return new ConfirmDialog(_type, title, _message, _yesOption, _noOption, _cancelOption, _defaultOption, _icon, _parent);</span>
+    public ConfirmDialog titled( String title ) {
+<span class="fc" id="L91">        return new ConfirmDialog(_type, title, _message, _yesOption, _noOption, _cancelOption, _defaultOption, _icon, _parent);</span>
     }
 
     /**
+     *  This method allows you to specify some text that will be used to represent the {@link ConfirmAnswer#YES}
+     *  option in the dialog. &lt;br&gt;
+     *  So when the user clicks on that option, the dialog will return {@link ConfirmAnswer#YES}.
+     *
      * @param yesOption The text of the &quot;yes&quot; option.
      * @return A new {@link ConfirmDialog} instance with the specified &quot;yes&quot; option text.
      */
-    public ConfirmDialog yesOption(String yesOption ) {
-<span class="fc" id="L92">        return new ConfirmDialog(_type, _title, _message, yesOption, _noOption, _cancelOption, _defaultOption, _icon, _parent);</span>
+    public ConfirmDialog yesOption( String yesOption ) {
+<span class="fc" id="L103">        return new ConfirmDialog(_type, _title, _message, yesOption, _noOption, _cancelOption, _defaultOption, _icon, _parent);</span>
     }
 
     /**
+     *  This method allows you to specify some text that will be used to represent the {@link ConfirmAnswer#NO}
+     *  option in the dialog. &lt;br&gt;
+     *  So when the user clicks on that option, the dialog will return {@link ConfirmAnswer#NO}.
+     *
      * @param noOption The text of the &quot;no&quot; option.
      * @return A new {@link ConfirmDialog} instance with the specified &quot;no&quot; option text.
      */
-    public ConfirmDialog noOption(String noOption ) {
-<span class="fc" id="L100">        return new ConfirmDialog(_type, _title, _message, _yesOption, noOption, _cancelOption, _defaultOption, _icon, _parent);</span>
+    public ConfirmDialog noOption( String noOption ) {
+<span class="fc" id="L115">        return new ConfirmDialog(_type, _title, _message, _yesOption, noOption, _cancelOption, _defaultOption, _icon, _parent);</span>
     }
 
     /**
+     *  This method allows you to specify some text that will be used to represent the {@link ConfirmAnswer#CANCEL}
+     *  option in the dialog. &lt;br&gt;
+     *  So when the user clicks on that option, the dialog will return {@link ConfirmAnswer#CANCEL}.
+     *
      * @param cancelOption The text of the &quot;cancel&quot; option.
      * @return A new {@link ConfirmDialog} instance with the specified &quot;cancel&quot; option text.
      */
     public ConfirmDialog cancelOption( String cancelOption ) {
-<span class="nc" id="L108">        return new ConfirmDialog(_type, _title, _message, _yesOption, _noOption, cancelOption, _defaultOption, _icon, _parent);</span>
+<span class="nc" id="L127">        return new ConfirmDialog(_type, _title, _message, _yesOption, _noOption, cancelOption, _defaultOption, _icon, _parent);</span>
     }
 
     /**
+     *  Use this to specify the default option for the dialog, which is the option
+     *  which will have the initial focus when the dialog is shown. &lt;br&gt;
+     *  So when the user presses the &quot;Enter&quot; key, the dialog will return the option
+     *  that was set as the default option.
+     *
      * @param defaultOption The text of the default option.
      * @return A new {@link ConfirmDialog} instance with the specified default option text.
      */
     public ConfirmDialog defaultOption( ConfirmAnswer defaultOption ) {
-<span class="fc" id="L116">        return new ConfirmDialog(_type, _title, _message, _yesOption, _noOption, _cancelOption, defaultOption, _icon, _parent);</span>
+<span class="fc" id="L140">        return new ConfirmDialog(_type, _title, _message, _yesOption, _noOption, _cancelOption, defaultOption, _icon, _parent);</span>
     }
 
     /**
+     *  Use this to specify the icon for the confirm dialog through an {@link IconDeclaration},
+     *  which is a constant that represents the icon resource with a preferred size.
+     *  The icon will be loaded and cached automatically for you when using the declaration based approach.
+     *
+     * @param icon The icon declaration of the dialog, which may contain the path to the icon resource.
+     * @return A new {@link ConfirmDialog} instance with the specified icon declaration.
+     */
+    public ConfirmDialog icon( IconDeclaration icon ) {
+<span class="nc" id="L152">        Objects.requireNonNull(icon);</span>
+<span class="nc" id="L153">        return icon.find().map(this::icon).orElse(this);</span>
+    }
+
+    /**
+     *  Defines the icon for the dialog, whose appearance and position may vary depending on the
+     *  look and feel of the current system.
+     *  Consider using the {@link #icon(IconDeclaration)} method over this one
+     *  as it reduces the risk of icon loading issues.
+     *
      * @param icon The icon of the dialog.
      * @return A new {@link ConfirmDialog} instance with the specified icon.
      */
     public ConfirmDialog icon( Icon icon ) {
-<span class="fc" id="L124">        return new ConfirmDialog(_type, _title, _message, _yesOption, _noOption, _cancelOption, _defaultOption, icon, _parent);</span>
+<span class="fc" id="L166">        return new ConfirmDialog(_type, _title, _message, _yesOption, _noOption, _cancelOption, _defaultOption, icon, _parent);</span>
     }
 
     /**
+     *  Use this to display a custom icon in the dialog by
+     *  providing the path to the icon resource.
+     *  Consider using the {@link #icon(IconDeclaration)} method over this one
+     *  as you may also specify the preferred size of the icon through the declaration.
+     *
      * @param path The path to the icon of the dialog.
      * @return A new {@link ConfirmDialog} instance with the specified icon.
      */
-    public ConfirmDialog icon(String path ) {
-<span class="nc" id="L132">        return new ConfirmDialog(_type, _title, _message, _yesOption, _noOption, _cancelOption, _defaultOption, UI.findIcon(path).orElse(null), _parent);</span>
+    public ConfirmDialog icon( String path ) {
+<span class="nc" id="L179">        Objects.requireNonNull(path);</span>
+<span class="nc" id="L180">        return new ConfirmDialog(_type, _title, _message, _yesOption, _noOption, _cancelOption, _defaultOption, UI.findIcon(path).orElse(null), _parent);</span>
     }
 
     /**
+     *  Allows you to specify the parent component of the dialog, which is the component
+     *  that the dialog will be centered on top of. &lt;br&gt;
+     *  This is useful when you want to make the dialog modal to a specific component,
+     *  but a parent component is not required to show the dialog.
+     *
      * @param parent The parent component of the dialog.
      * @return A new {@link ConfirmDialog} instance with the specified parent component.
      */
-    public ConfirmDialog parent(Component parent ) {
-<span class="nc" id="L140">        return new ConfirmDialog(_type, _title, _message, _yesOption, _noOption, _cancelOption, _defaultOption, _icon, parent);</span>
+    public ConfirmDialog parent( Component parent ) {
+<span class="nc" id="L193">        return new ConfirmDialog(_type, _title, _message, _yesOption, _noOption, _cancelOption, _defaultOption, _icon, parent);</span>
     }
 
     /**
@@ -152,7 +205,7 @@ public final class ConfirmDialog
      * @return A new {@link ConfirmDialog} instance with the specified type.
      */
     private ConfirmDialog _type( int type ) {
-<span class="fc" id="L155">        return new ConfirmDialog(type, _title, _message, _yesOption, _noOption, _cancelOption, _defaultOption, _icon, _parent);</span>
+<span class="fc" id="L208">        return new ConfirmDialog(type, _title, _message, _yesOption, _noOption, _cancelOption, _defaultOption, _icon, _parent);</span>
     }
 
     /**
@@ -164,7 +217,7 @@ public final class ConfirmDialog
      * @return The {@link ConfirmAnswer} that the user selected in the dialog.
      */
     public ConfirmAnswer showAsQuestion() {
-<span class="fc" id="L167">        return _type(JOptionPane.QUESTION_MESSAGE).show();</span>
+<span class="fc" id="L220">        return _type(JOptionPane.QUESTION_MESSAGE).show();</span>
     }
 
     /**
@@ -176,7 +229,7 @@ public final class ConfirmDialog
      * @return The {@link ConfirmAnswer} that the user selected in the dialog.
      */
     public ConfirmAnswer showAsError() {
-<span class="nc" id="L179">        return _type(JOptionPane.ERROR_MESSAGE).show();</span>
+<span class="nc" id="L232">        return _type(JOptionPane.ERROR_MESSAGE).show();</span>
     }
 
     /**
@@ -188,7 +241,7 @@ public final class ConfirmDialog
      * @return The {@link ConfirmAnswer} that the user selected in the dialog.
      */
     public ConfirmAnswer showAsInfo() {
-<span class="nc" id="L191">        return _type(JOptionPane.INFORMATION_MESSAGE).show();</span>
+<span class="nc" id="L244">        return _type(JOptionPane.INFORMATION_MESSAGE).show();</span>
     }
 
     /**
@@ -200,7 +253,7 @@ public final class ConfirmDialog
      * @return The {@link ConfirmAnswer} that the user selected in the dialog.
      */
     public ConfirmAnswer showAsWarning() {
-<span class="nc" id="L203">        return _type(JOptionPane.WARNING_MESSAGE).show();</span>
+<span class="nc" id="L256">        return _type(JOptionPane.WARNING_MESSAGE).show();</span>
     }
 
     /**
@@ -212,81 +265,82 @@ public final class ConfirmDialog
      * @return The {@link ConfirmAnswer} that the user selected in the dialog.
      */
     public ConfirmAnswer showPlain() {
-<span class="nc" id="L215">        return _type(JOptionPane.PLAIN_MESSAGE).show();</span>
+<span class="nc" id="L268">        return _type(JOptionPane.PLAIN_MESSAGE).show();</span>
     }
 
     /**
+     *  Use this to summon the dialog with the current settings and wait
+     *  for the user to select an option. &lt;br&gt;
+     *  The answer will be returned as a {@link ConfirmAnswer} enum.
+     *  Note that this method is blocking and will only return when the user has selected
+     *  an option in the dialog.
+     *
      * @return The {@link ConfirmAnswer} that the user selected in the dialog.
      */
     public ConfirmAnswer show() {
         try {
-<span class="fc" id="L223">            return UI.runAndGet(() -&gt; {</span>
-<span class="fc" id="L224">                String yes    = _yesOption.trim();</span>
-<span class="fc" id="L225">                String no     = _noOption.trim();</span>
-<span class="fc" id="L226">                String cancel = _cancelOption.trim();</span>
+<span class="fc" id="L282">            return UI.runAndGet(() -&gt; {</span>
+<span class="fc" id="L283">                String yes    = _yesOption.trim();</span>
+<span class="fc" id="L284">                String no     = _noOption.trim();</span>
+<span class="fc" id="L285">                String cancel = _cancelOption.trim();</span>
 
-<span class="fc" id="L228">                List&lt;Object&gt; options = new ArrayList&lt;&gt;();</span>
-<span class="pc bpc" id="L229" title="1 of 2 branches missed.">                if ( !yes.isEmpty()    )</span>
-<span class="fc" id="L230">                    options.add(yes);</span>
-<span class="pc bpc" id="L231" title="2 of 4 branches missed.">                if ( !yes.isEmpty() &amp;&amp; !no.isEmpty() )</span>
-<span class="fc" id="L232">                    options.add(no);</span>
-<span class="pc bpc" id="L233" title="2 of 4 branches missed.">                if ( !cancel.isEmpty() &amp;&amp; !options.isEmpty() )</span>
-<span class="fc" id="L234">                    options.add(cancel);</span>
+<span class="fc" id="L287">                List&lt;Object&gt; options = new ArrayList&lt;&gt;();</span>
+<span class="pc bpc" id="L288" title="1 of 2 branches missed.">                if ( !yes.isEmpty()    )</span>
+<span class="fc" id="L289">                    options.add(yes);</span>
+<span class="pc bpc" id="L290" title="2 of 4 branches missed.">                if ( !yes.isEmpty() &amp;&amp; !no.isEmpty() )</span>
+<span class="fc" id="L291">                    options.add(no);</span>
+<span class="pc bpc" id="L292" title="2 of 4 branches missed.">                if ( !cancel.isEmpty() &amp;&amp; !options.isEmpty() )</span>
+<span class="fc" id="L293">                    options.add(cancel);</span>
 
-<span class="fc" id="L236">                int optionsType = JOptionPane.DEFAULT_OPTION;</span>
-<span class="pc bpc" id="L237" title="4 of 6 branches missed.">                if ( !yes.isEmpty() &amp;&amp; no.isEmpty() &amp;&amp; cancel.isEmpty() )</span>
-<span class="nc" id="L238">                    optionsType = JOptionPane.OK_OPTION;</span>
-<span class="pc bpc" id="L239" title="3 of 6 branches missed.">                if ( !yes.isEmpty() &amp;&amp; !no.isEmpty() &amp;&amp; cancel.isEmpty() )</span>
-<span class="nc" id="L240">                    optionsType = JOptionPane.YES_NO_OPTION;</span>
-<span class="pc bpc" id="L241" title="3 of 6 branches missed.">                if ( !yes.isEmpty() &amp;&amp; !no.isEmpty() &amp;&amp; !cancel.isEmpty() )</span>
-<span class="fc" id="L242">                    optionsType = JOptionPane.YES_NO_CANCEL_OPTION;</span>
-<span class="pc bpc" id="L243" title="4 of 6 branches missed.">                if ( !yes.isEmpty() &amp;&amp; no.isEmpty() &amp;&amp; !cancel.isEmpty() )</span>
-<span class="nc" id="L244">                    optionsType = JOptionPane.OK_CANCEL_OPTION;</span>
+<span class="fc" id="L295">                int optionsType = JOptionPane.DEFAULT_OPTION;</span>
+<span class="pc bpc" id="L296" title="4 of 6 branches missed.">                if ( !yes.isEmpty() &amp;&amp; no.isEmpty() &amp;&amp; cancel.isEmpty() )</span>
+<span class="nc" id="L297">                    optionsType = JOptionPane.OK_OPTION;</span>
+<span class="pc bpc" id="L298" title="3 of 6 branches missed.">                if ( !yes.isEmpty() &amp;&amp; !no.isEmpty() &amp;&amp; cancel.isEmpty() )</span>
+<span class="nc" id="L299">                    optionsType = JOptionPane.YES_NO_OPTION;</span>
+<span class="pc bpc" id="L300" title="3 of 6 branches missed.">                if ( !yes.isEmpty() &amp;&amp; !no.isEmpty() &amp;&amp; !cancel.isEmpty() )</span>
+<span class="fc" id="L301">                    optionsType = JOptionPane.YES_NO_CANCEL_OPTION;</span>
+<span class="pc bpc" id="L302" title="4 of 6 branches missed.">                if ( !yes.isEmpty() &amp;&amp; no.isEmpty() &amp;&amp; !cancel.isEmpty() )</span>
+<span class="nc" id="L303">                    optionsType = JOptionPane.OK_CANCEL_OPTION;</span>
 
-<span class="fc" id="L246">                int type = _type;</span>
-<span class="fc bfc" id="L247" title="All 2 branches covered.">                if ( type == -1 ) {</span>
-<span class="pc bpc" id="L248" title="2 of 4 branches missed.">                    if ( optionsType == JOptionPane.YES_NO_OPTION || optionsType == JOptionPane.YES_NO_CANCEL_OPTION )</span>
-<span class="fc" id="L249">                        type = JOptionPane.QUESTION_MESSAGE;</span>
+<span class="fc" id="L305">                int type = _type;</span>
+<span class="fc bfc" id="L306" title="All 2 branches covered.">                if ( type == -1 ) {</span>
+<span class="pc bpc" id="L307" title="2 of 4 branches missed.">                    if ( optionsType == JOptionPane.YES_NO_OPTION || optionsType == JOptionPane.YES_NO_CANCEL_OPTION )</span>
+<span class="fc" id="L308">                        type = JOptionPane.QUESTION_MESSAGE;</span>
                     else
-<span class="nc" id="L251">                        type = JOptionPane.PLAIN_MESSAGE;</span>
+<span class="nc" id="L310">                        type = JOptionPane.PLAIN_MESSAGE;</span>
                 }
 
-<span class="fc" id="L254">                String title = _title.trim();</span>
-<span class="pc bpc" id="L255" title="1 of 2 branches missed.">                if ( title.isEmpty() ) {</span>
-<span class="nc bnc" id="L256" title="All 2 branches missed.">                    if ( type == JOptionPane.QUESTION_MESSAGE )</span>
-<span class="nc" id="L257">                        title = &quot;Confirm&quot;;</span>
-<span class="nc bnc" id="L258" title="All 2 branches missed.">                    if ( type == JOptionPane.ERROR_MESSAGE )</span>
-<span class="nc" id="L259">                        title = &quot;Error&quot;;</span>
-<span class="nc bnc" id="L260" title="All 2 branches missed.">                    if ( type == JOptionPane.INFORMATION_MESSAGE )</span>
-<span class="nc" id="L261">                        title = &quot;Info&quot;;</span>
-<span class="nc bnc" id="L262" title="All 2 branches missed.">                    if ( type == JOptionPane.WARNING_MESSAGE )</span>
-<span class="nc" id="L263">                        title = &quot;Warning&quot;;</span>
-<span class="nc bnc" id="L264" title="All 2 branches missed.">                    if ( type == JOptionPane.PLAIN_MESSAGE )</span>
-<span class="nc" id="L265">                        title = &quot;Message&quot;;</span>
+<span class="fc" id="L313">                String title = _title.trim();</span>
+<span class="pc bpc" id="L314" title="1 of 2 branches missed.">                if ( title.isEmpty() ) {</span>
+<span class="nc bnc" id="L315" title="All 2 branches missed.">                    if ( type == JOptionPane.QUESTION_MESSAGE )</span>
+<span class="nc" id="L316">                        title = &quot;Confirm&quot;;</span>
+<span class="nc bnc" id="L317" title="All 2 branches missed.">                    if ( type == JOptionPane.ERROR_MESSAGE )</span>
+<span class="nc" id="L318">                        title = &quot;Error&quot;;</span>
+<span class="nc bnc" id="L319" title="All 2 branches missed.">                    if ( type == JOptionPane.INFORMATION_MESSAGE )</span>
+<span class="nc" id="L320">                        title = &quot;Info&quot;;</span>
+<span class="nc bnc" id="L321" title="All 2 branches missed.">                    if ( type == JOptionPane.WARNING_MESSAGE )</span>
+<span class="nc" id="L322">                        title = &quot;Warning&quot;;</span>
+<span class="nc bnc" id="L323" title="All 2 branches missed.">                    if ( type == JOptionPane.PLAIN_MESSAGE )</span>
+<span class="nc" id="L324">                        title = &quot;Message&quot;;</span>
                 }
 
-<span class="fc" id="L268">                String defaultOption = &quot;&quot;;</span>
-<span class="pc bpc" id="L269" title="3 of 4 branches missed.">                switch ( _defaultOption ) {</span>
-                    case YES:
-<span class="fc" id="L271">                        defaultOption = yes;</span>
-<span class="fc" id="L272">                        break;</span>
-                    case NO:
-<span class="nc" id="L274">                        defaultOption = no;</span>
-<span class="nc" id="L275">                        break;</span>
-                    case CANCEL:
-<span class="nc" id="L277">                        defaultOption = cancel;</span>
-                        break;
+<span class="fc" id="L327">                String defaultOption = &quot;&quot;;</span>
+<span class="pc bpc" id="L328" title="3 of 4 branches missed.">                switch ( _defaultOption ) {</span>
+<span class="fc" id="L329">                    case YES:    defaultOption = yes;    break;</span>
+<span class="nc" id="L330">                    case NO:     defaultOption = no;     break;</span>
+<span class="nc" id="L331">                    case CANCEL: defaultOption = cancel; break;</span>
+                    default: break;
                 }
 
-<span class="fc" id="L281">                return ConfirmAnswer.from(Context.summoner.showOptionDialog(</span>
+<span class="fc" id="L335">                return ConfirmAnswer.from(Context.summoner.showOptionDialog(</span>
                             _parent, _message, title, optionsType,
-<span class="fc" id="L283">                            type, _icon, options.toArray(), defaultOption</span>
+<span class="fc" id="L337">                            type, _icon, options.toArray(), defaultOption</span>
                         ));
             });
-<span class="nc" id="L286">        } catch (Exception e) {</span>
-<span class="nc" id="L287">            log.error(&quot;Failed to show confirm dialog, returning 'CANCEL' as dialog result!&quot;, e);</span>
-<span class="nc" id="L288">            return ConfirmAnswer.CANCEL;</span>
+<span class="nc" id="L340">        } catch (Exception e) {</span>
+<span class="nc" id="L341">            log.error(&quot;Failed to show confirm dialog, returning 'CANCEL' as dialog result!&quot;, e);</span>
+<span class="nc" id="L342">            return ConfirmAnswer.CANCEL;</span>
         }
     }
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

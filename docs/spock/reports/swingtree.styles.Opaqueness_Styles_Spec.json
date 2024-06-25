@@ -4,7 +4,7 @@
   "narrative":"This specification focuses on the opaqueness of Swing components and\n    how the SwingTree style engine relates to it.\n    The opaqueness flag of a component is an interesting property.\n    You might think that it merely controls whether the background of\n    the component is painted or not.\n\n    But it is actually more than that.\n\n    This flag is at the center of some important rendering optimizations in Swing.\n    If a component is reporting itself as opaque, then Swing assumes that a repaint\n    only needs to be done on that component and not on any of its ancestors.\n    This is a big deal because it means that Swing can avoid repainting a lot of\n    components in the hierarchy.\n\n    This sound relatively straightforward, but it becomes a lot more complicated together\n    with the SwingTree style API and its underlying styling engine.\n    So for example, if a component has rounded corners, and no foundational background\n    color, then it is technically not opaque.\n    Leaving it opaque will cause strange rendering artifacts, due to the parent component\n    not being repainted.\n\n    In this specification we will explore the different scenarios and how the SwingTree\n    style engine deals with them.",
   "subjects":[],
   "statistics":{
-    "runs":"19",
+    "runs":"40",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -440,13 +440,13 @@
       "blocks":[
         {"kind":"given","text":"We first define a boolean flag property that we will use to control the transition:","code":["var isOn = Var.of(false)"]},
 
-        {"kind":"and","text":"Then we create the slider based UI declaration, which is styled to either have an undefined or transparent background color:","code":["var ui =","        UI.slider(UI.Align.HORIZONTAL)","        .withTransitionalStyle(isOn, LifeTime.of(1, TimeUnit.MILLISECONDS), (state, it) -> it","            .backgroundColor(","                state.progress() == 0","                    ? UI.COLOR_UNDEFINED","                    : new Color(0,0,0,0)","            )","        )"]},
+        {"kind":"and","text":"Then we create the slider based UI declaration, which is styled to either have an undefined or transparent background color:","code":["var ui =","        UI.slider(UI.Align.HORIZONTAL)","        .withTransitionalStyle(isOn, LifeTime.of(1, TimeUnit.MILLISECONDS), (state, it) -> it","            .backgroundColor(","                state.progress() == 0","                    ? UI.Color.UNDEFINED","                    : new Color(0,0,0,0)","            )","        )"]},
 
         {"kind":"and","text":"We build the underlying `JSlider`:","code":["var slider = ui.get(javax.swing.JSlider)"]},
 
         {"kind":"expect","text":"\n            The component has to be opaque because the \"undefined\" background color \n            is conceptually equivalent to \"no color specified\" and therefore \n            causes the slider to have its default background color, which is opaque.\n        ","code":["slider.isOpaque() == true"]},
 
-        {"kind":"and","text":"Due to the usage of `UI.COLOR_UNDEFINED`, the background color of the slider is undefined too:","code":["slider.getBackground() == null"]},
+        {"kind":"and","text":"Due to the usage of `UI.Color.UNDEFINED`, the background color of the slider is undefined too:","code":["slider.getBackground() == null"]},
 
         {"kind":"when","text":"We set the `isOn` flag to true in order to start the transition:","code":["isOn.set(true)"]},
 
@@ -462,24 +462,61 @@
 
         {"kind":"then","text":"\n            We are back to the initial state where the slider is opaque again\n            due to the background color being undefined (which causes the slider to have its default background color).\n        ","code":["slider.isOpaque() == true"]},
 
-        {"kind":"and","text":"Due to the usage of `UI.COLOR_UNDEFINED`, the background color of the slider is undefined too:","code":["slider.getBackground() == null"]}
+        {"kind":"and","text":"Due to the usage of `UI.Color.UNDEFINED`, the background color of the slider is undefined too:","code":["slider.getBackground() == null"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
   
     {
-      "id":"A check box (which typically opaque) may become non-opaque when transitioning to various styles.",
+      "id":"A toggle button (which typically opaque) will become non-opaque when transitioning to a transparent background color.",
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n\n            A check box is a component that is opaque by default.\n\n            This test demonstrates that a check box will become non-opaque when transitioning\n            to various style configurations\n\n        ","\n\n            A check box is a component that is opaque by default.\n\n            This test demonstrates that a check box will become non-opaque when transitioning\n            to various style configurations\n\n        ","\n\n            A check box is a component that is opaque by default.\n\n            This test demonstrates that a check box will become non-opaque when transitioning\n            to various style configurations\n\n        ","\n\n            A check box is a component that is opaque by default.\n\n            This test demonstrates that a check box will become non-opaque when transitioning\n            to various style configurations\n\n        ","\n\n            A check box is a component that is opaque by default.\n\n            This test demonstrates that a check box will become non-opaque when transitioning\n            to various style configurations\n\n        ","\n\n            A check box is a component that is opaque by default.\n\n            This test demonstrates that a check box will become non-opaque when transitioning\n            to various style configurations\n\n        ","\n\n            A check box is a component that is opaque by default.\n\n            This test demonstrates that a check box will become non-opaque when transitioning\n            to various style configurations\n\n        ","\n\n            A check box is a component that is opaque by default.\n\n            This test demonstrates that a check box will become non-opaque when transitioning\n            to various style configurations\n\n        ","\n\n            A check box is a component that is opaque by default.\n\n            This test demonstrates that a check box will become non-opaque when transitioning\n            to various style configurations\n\n        ","\n\n            A check box is a component that is opaque by default.\n\n            This test demonstrates that a check box will become non-opaque when transitioning\n            to various style configurations\n\n        ","\n\n            A check box is a component that is opaque by default.\n\n            This test demonstrates that a check box will become non-opaque when transitioning\n            to various style configurations\n\n        ","\n\n            A check box is a component that is opaque by default.\n\n            This test demonstrates that a check box will become non-opaque when transitioning\n            to various style configurations\n\n        ","\n\n            A check box is a component that is opaque by default.\n\n            This test demonstrates that a check box will become non-opaque when transitioning\n            to various style configurations\n\n        ","\n\n            A check box is a component that is opaque by default.\n\n            This test demonstrates that a check box will become non-opaque when transitioning\n            to various style configurations\n\n        ","\n\n            A check box is a component that is opaque by default.\n\n            This test demonstrates that a check box will become non-opaque when transitioning\n            to various style configurations\n\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            A toggle button is a component that is opaque by default as it has a default background\n            color. When it receives a transparent background color, than it will no longer be opaque however.\n            This test demonstrates that it will become non opaque when transitioning\n            to a transparent background color.\n\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We first define a boolean flag property that we will use to control the transition:","code":["var isOn = Var.of(false)"]},
 
-        {"kind":"and","text":"Then we create the slider based UI declaration, which is styled to temporarily have an opaque background color:","code":["var ui =","        UI.checkBox(\"Checked?\")","        .withTransitionalStyle(isOn, LifeTime.of(1, TimeUnit.MILLISECONDS), (state, it) -> it","            .margin(margin)","            .borderRadius(radius)","            .backgroundColor( state.progress() == 1 ? background : \"\" )","            .foundationColor( state.progress() == 1 ? foundation : \"\" )","            .borderColor( state.progress() == 1 ? borderColor : \"\" )","            .borderWidth( state.progress() == 1 ? border : 0 )","            .gradient(g -> g.colors( state.progress() == 1 ? gradient : []))","        )"]},
+        {"kind":"and","text":"Then we create the button based UI declaration, which is styled to either have an undefined or transparent background color:","code":["var ui =","        UI.toggleButton(\"Toggle Me!\")","        .withTransitionalStyle(isOn, LifeTime.of(1, TimeUnit.MILLISECONDS), (state, it) -> it","            .backgroundColor(","                state.progress() == 0","                    ? UI.Color.UNDEFINED","                    : new Color(0,0,0,0)","            )","        )"]},
 
-        {"kind":"and","text":"We build the underlying check box:","code":["var checkBox = ui.get(javax.swing.JCheckBox)"]},
+        {"kind":"and","text":"We build the underlying `JToggleButton`:","code":["var toggleButton = ui.get(javax.swing.JToggleButton)"]},
+
+        {"kind":"expect","text":"\n            The component has to be opaque because the \"undefined\" background color \n            is conceptually equivalent to \"no color specified\" and therefore \n            causes the slider to have its default background color, which is opaque.\n        ","code":["toggleButton.isOpaque() == true"]},
+
+        {"kind":"and","text":"Due to the usage of `UI.Color.UNDEFINED`, the background color of the button is now undefined:","code":["toggleButton.getBackground() == UI.Color.UNDEFINED"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true in order to start the transition:","code":["isOn.set(true)"]},
+
+        {"kind":"and","text":"We wait for the transition to complete:","code":["Thread.sleep(50)","UI.sync()"]},
+
+        {"kind":"then","text":"\n            The button is now non opaque because the `isOn` flag is true, which translates to \n            an animation progress transitioning to 1,\n            causing the background color to have a transparent alpha channel of 0.\n        ","code":["toggleButton.isOpaque() == false"]},
+
+        {"kind":"and","text":"We confirm, the background color of the button is transparent:","code":["toggleButton.getBackground().getAlpha() == 0"]},
+
+        {"kind":"when","text":"\n            We now want to go back to the initial state, so we set the `isOn` flag to false again...\n        ","code":["isOn.set(false)"]},
+
+        {"kind":"and","text":"...again we wait for the transition to complete...","code":["Thread.sleep(50)","UI.sync()"]},
+
+        {"kind":"then","text":"\n            We are back to the initial state where the button is opaque again\n            due to the background color being undefined (which causes the slider to have its default background color).\n        ","code":["toggleButton.isOpaque() == true"]},
+
+        {"kind":"and","text":"Due to the usage of `UI.Color.UNDEFINED`, the background color of the slider is undefined again:","code":["toggleButton.getBackground() == UI.Color.UNDEFINED"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A check box (which typically opaque) may become non-opaque when transitioning to various styles. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A check box is a component that is opaque by default.\n\n            This test demonstrates that a check box will become non-opaque when transitioning\n            to various style configurations\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first define a boolean flag property that we will use to control the transition:","code":["var isOn = Var.of(false)"]},
+
+        {"kind":"and","text":"Then we create the slider based UI declaration, which is styled to temporarily have an opaque background color:","code":["var ui =","        UI.checkBox(\"Checked?\")","        .withTransitionalStyle(isOn, LifeTime.of(1, TimeUnit.MILLISECONDS), (state, it) -> it","            .margin( state.progress() == 1 ? margin : 0 )","            .borderRadius( state.progress() == 1 ? radius : 0 )","            .backgroundColor( state.progress() == 1 ? background : \"\" )","            .foundationColor( state.progress() == 1 ? foundation : \"\" )","            .borderColor( state.progress() == 1 ? borderColor : \"\" )","            .borderWidth( state.progress() == 1 ? border : 0 )","            .gradient(g -> g.colors( state.progress() == 1 ? gradient : new String[0]))","        )"]},
+
+        {"kind":"and","text":"We build the underlying check box:","code":["var checkBox = ui.get(JCheckBox)"]},
 
         {"kind":"expect","text":"\n            The component has to be opaque because it was not yet styled and it is also opaque by default.\n            So the parent component will not be visible behind the background.\n        ","code":["checkBox.isOpaque() == true"]},
 
@@ -496,6 +533,582 @@
         {"kind":"then","text":"\n            We are back to the initial state where the check box is now opaque again\n        ","code":["checkBox.isOpaque() == true"]},
 
         {"kind":"where","text":"","code":{"opaque":["false","true","false","false","false","true","true","false","true","false","false","false","true","false","false"],"margin":["0","0","1","0","0","1","0","0","0","1","0","0","0","0","0"],"radius":["0","0","0","1","0","0","1","0","0","0","1","0","0","0","0"],"border":["0","0","0","0","1","0","0","1","1","0","0","1","0","0","0"],"borderColor":["\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgb(0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\""],"foundation":["\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\""],"background":["\"rgba(0,0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgba(0,0,0, 0)\"","\"rgba(0,0,0, 0)\"","\"rgba(0,0,0, 0)\""],"gradient":["[]","[]","[]","[]","[]","[]","[]","[]","[]","[\"red\", \"green\"]","[\"red\", \"green\"]","[\"red\", \"green\"]","[\"red\", \"green\"]","[\"red\", \"rgba(0,0,0,0)\"]","[\"rgba(0,0,0,0)\", \"green\"]"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A check box (which typically opaque) may become non-opaque when transitioning to various styles. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A check box is a component that is opaque by default.\n\n            This test demonstrates that a check box will become non-opaque when transitioning\n            to various style configurations\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first define a boolean flag property that we will use to control the transition:","code":["var isOn = Var.of(false)"]},
+
+        {"kind":"and","text":"Then we create the slider based UI declaration, which is styled to temporarily have an opaque background color:","code":["var ui =","        UI.checkBox(\"Checked?\")","        .withTransitionalStyle(isOn, LifeTime.of(1, TimeUnit.MILLISECONDS), (state, it) -> it","            .margin( state.progress() == 1 ? margin : 0 )","            .borderRadius( state.progress() == 1 ? radius : 0 )","            .backgroundColor( state.progress() == 1 ? background : \"\" )","            .foundationColor( state.progress() == 1 ? foundation : \"\" )","            .borderColor( state.progress() == 1 ? borderColor : \"\" )","            .borderWidth( state.progress() == 1 ? border : 0 )","            .gradient(g -> g.colors( state.progress() == 1 ? gradient : new String[0]))","        )"]},
+
+        {"kind":"and","text":"We build the underlying check box:","code":["var checkBox = ui.get(JCheckBox)"]},
+
+        {"kind":"expect","text":"\n            The component has to be opaque because it was not yet styled and it is also opaque by default.\n            So the parent component will not be visible behind the background.\n        ","code":["checkBox.isOpaque() == true"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true in order to start the transition:","code":["isOn.set(true)"]},
+
+        {"kind":"and","text":"We wait for the transition to complete:","code":["Thread.sleep(50)","UI.sync()"]},
+
+        {"kind":"then","text":"\n            The check box has the expected opaqueness because the `isOn` flag is true, which translates to \n            an animation progress transitioning to 1,\n            causing the various styles to take effect!\n        ","code":["checkBox.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"\n            We now want to go back to the initial state, so we set the `isOn` flag to false again...\n        ","code":["isOn.set(false)"]},
+
+        {"kind":"and","text":"...again we wait for the transition to complete...","code":["Thread.sleep(50)","UI.sync()"]},
+
+        {"kind":"then","text":"\n            We are back to the initial state where the check box is now opaque again\n        ","code":["checkBox.isOpaque() == true"]},
+
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","false","false","true","true","false","true","false","false","false","true","false","false"],"margin":["0","0","1","0","0","1","0","0","0","1","0","0","0","0","0"],"radius":["0","0","0","1","0","0","1","0","0","0","1","0","0","0","0"],"border":["0","0","0","0","1","0","0","1","1","0","0","1","0","0","0"],"borderColor":["\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgb(0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\""],"foundation":["\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\""],"background":["\"rgba(0,0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgba(0,0,0, 0)\"","\"rgba(0,0,0, 0)\"","\"rgba(0,0,0, 0)\""],"gradient":["[]","[]","[]","[]","[]","[]","[]","[]","[]","[\"red\", \"green\"]","[\"red\", \"green\"]","[\"red\", \"green\"]","[\"red\", \"green\"]","[\"red\", \"rgba(0,0,0,0)\"]","[\"rgba(0,0,0,0)\", \"green\"]"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A check box (which typically opaque) may become non-opaque when transitioning to various styles. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A check box is a component that is opaque by default.\n\n            This test demonstrates that a check box will become non-opaque when transitioning\n            to various style configurations\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first define a boolean flag property that we will use to control the transition:","code":["var isOn = Var.of(false)"]},
+
+        {"kind":"and","text":"Then we create the slider based UI declaration, which is styled to temporarily have an opaque background color:","code":["var ui =","        UI.checkBox(\"Checked?\")","        .withTransitionalStyle(isOn, LifeTime.of(1, TimeUnit.MILLISECONDS), (state, it) -> it","            .margin( state.progress() == 1 ? margin : 0 )","            .borderRadius( state.progress() == 1 ? radius : 0 )","            .backgroundColor( state.progress() == 1 ? background : \"\" )","            .foundationColor( state.progress() == 1 ? foundation : \"\" )","            .borderColor( state.progress() == 1 ? borderColor : \"\" )","            .borderWidth( state.progress() == 1 ? border : 0 )","            .gradient(g -> g.colors( state.progress() == 1 ? gradient : new String[0]))","        )"]},
+
+        {"kind":"and","text":"We build the underlying check box:","code":["var checkBox = ui.get(JCheckBox)"]},
+
+        {"kind":"expect","text":"\n            The component has to be opaque because it was not yet styled and it is also opaque by default.\n            So the parent component will not be visible behind the background.\n        ","code":["checkBox.isOpaque() == true"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true in order to start the transition:","code":["isOn.set(true)"]},
+
+        {"kind":"and","text":"We wait for the transition to complete:","code":["Thread.sleep(50)","UI.sync()"]},
+
+        {"kind":"then","text":"\n            The check box has the expected opaqueness because the `isOn` flag is true, which translates to \n            an animation progress transitioning to 1,\n            causing the various styles to take effect!\n        ","code":["checkBox.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"\n            We now want to go back to the initial state, so we set the `isOn` flag to false again...\n        ","code":["isOn.set(false)"]},
+
+        {"kind":"and","text":"...again we wait for the transition to complete...","code":["Thread.sleep(50)","UI.sync()"]},
+
+        {"kind":"then","text":"\n            We are back to the initial state where the check box is now opaque again\n        ","code":["checkBox.isOpaque() == true"]},
+
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","false","false","true","true","false","true","false","false","false","true","false","false"],"margin":["0","0","1","0","0","1","0","0","0","1","0","0","0","0","0"],"radius":["0","0","0","1","0","0","1","0","0","0","1","0","0","0","0"],"border":["0","0","0","0","1","0","0","1","1","0","0","1","0","0","0"],"borderColor":["\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgb(0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\""],"foundation":["\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\""],"background":["\"rgba(0,0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgba(0,0,0, 0)\"","\"rgba(0,0,0, 0)\"","\"rgba(0,0,0, 0)\""],"gradient":["[]","[]","[]","[]","[]","[]","[]","[]","[]","[\"red\", \"green\"]","[\"red\", \"green\"]","[\"red\", \"green\"]","[\"red\", \"green\"]","[\"red\", \"rgba(0,0,0,0)\"]","[\"rgba(0,0,0,0)\", \"green\"]"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A check box (which typically opaque) may become non-opaque when transitioning to various styles. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A check box is a component that is opaque by default.\n\n            This test demonstrates that a check box will become non-opaque when transitioning\n            to various style configurations\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first define a boolean flag property that we will use to control the transition:","code":["var isOn = Var.of(false)"]},
+
+        {"kind":"and","text":"Then we create the slider based UI declaration, which is styled to temporarily have an opaque background color:","code":["var ui =","        UI.checkBox(\"Checked?\")","        .withTransitionalStyle(isOn, LifeTime.of(1, TimeUnit.MILLISECONDS), (state, it) -> it","            .margin( state.progress() == 1 ? margin : 0 )","            .borderRadius( state.progress() == 1 ? radius : 0 )","            .backgroundColor( state.progress() == 1 ? background : \"\" )","            .foundationColor( state.progress() == 1 ? foundation : \"\" )","            .borderColor( state.progress() == 1 ? borderColor : \"\" )","            .borderWidth( state.progress() == 1 ? border : 0 )","            .gradient(g -> g.colors( state.progress() == 1 ? gradient : new String[0]))","        )"]},
+
+        {"kind":"and","text":"We build the underlying check box:","code":["var checkBox = ui.get(JCheckBox)"]},
+
+        {"kind":"expect","text":"\n            The component has to be opaque because it was not yet styled and it is also opaque by default.\n            So the parent component will not be visible behind the background.\n        ","code":["checkBox.isOpaque() == true"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true in order to start the transition:","code":["isOn.set(true)"]},
+
+        {"kind":"and","text":"We wait for the transition to complete:","code":["Thread.sleep(50)","UI.sync()"]},
+
+        {"kind":"then","text":"\n            The check box has the expected opaqueness because the `isOn` flag is true, which translates to \n            an animation progress transitioning to 1,\n            causing the various styles to take effect!\n        ","code":["checkBox.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"\n            We now want to go back to the initial state, so we set the `isOn` flag to false again...\n        ","code":["isOn.set(false)"]},
+
+        {"kind":"and","text":"...again we wait for the transition to complete...","code":["Thread.sleep(50)","UI.sync()"]},
+
+        {"kind":"then","text":"\n            We are back to the initial state where the check box is now opaque again\n        ","code":["checkBox.isOpaque() == true"]},
+
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","false","false","true","true","false","true","false","false","false","true","false","false"],"margin":["0","0","1","0","0","1","0","0","0","1","0","0","0","0","0"],"radius":["0","0","0","1","0","0","1","0","0","0","1","0","0","0","0"],"border":["0","0","0","0","1","0","0","1","1","0","0","1","0","0","0"],"borderColor":["\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgb(0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\""],"foundation":["\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\""],"background":["\"rgba(0,0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgba(0,0,0, 0)\"","\"rgba(0,0,0, 0)\"","\"rgba(0,0,0, 0)\""],"gradient":["[]","[]","[]","[]","[]","[]","[]","[]","[]","[\"red\", \"green\"]","[\"red\", \"green\"]","[\"red\", \"green\"]","[\"red\", \"green\"]","[\"red\", \"rgba(0,0,0,0)\"]","[\"rgba(0,0,0,0)\", \"green\"]"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A check box (which typically opaque) may become non-opaque when transitioning to various styles. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A check box is a component that is opaque by default.\n\n            This test demonstrates that a check box will become non-opaque when transitioning\n            to various style configurations\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first define a boolean flag property that we will use to control the transition:","code":["var isOn = Var.of(false)"]},
+
+        {"kind":"and","text":"Then we create the slider based UI declaration, which is styled to temporarily have an opaque background color:","code":["var ui =","        UI.checkBox(\"Checked?\")","        .withTransitionalStyle(isOn, LifeTime.of(1, TimeUnit.MILLISECONDS), (state, it) -> it","            .margin( state.progress() == 1 ? margin : 0 )","            .borderRadius( state.progress() == 1 ? radius : 0 )","            .backgroundColor( state.progress() == 1 ? background : \"\" )","            .foundationColor( state.progress() == 1 ? foundation : \"\" )","            .borderColor( state.progress() == 1 ? borderColor : \"\" )","            .borderWidth( state.progress() == 1 ? border : 0 )","            .gradient(g -> g.colors( state.progress() == 1 ? gradient : new String[0]))","        )"]},
+
+        {"kind":"and","text":"We build the underlying check box:","code":["var checkBox = ui.get(JCheckBox)"]},
+
+        {"kind":"expect","text":"\n            The component has to be opaque because it was not yet styled and it is also opaque by default.\n            So the parent component will not be visible behind the background.\n        ","code":["checkBox.isOpaque() == true"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true in order to start the transition:","code":["isOn.set(true)"]},
+
+        {"kind":"and","text":"We wait for the transition to complete:","code":["Thread.sleep(50)","UI.sync()"]},
+
+        {"kind":"then","text":"\n            The check box has the expected opaqueness because the `isOn` flag is true, which translates to \n            an animation progress transitioning to 1,\n            causing the various styles to take effect!\n        ","code":["checkBox.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"\n            We now want to go back to the initial state, so we set the `isOn` flag to false again...\n        ","code":["isOn.set(false)"]},
+
+        {"kind":"and","text":"...again we wait for the transition to complete...","code":["Thread.sleep(50)","UI.sync()"]},
+
+        {"kind":"then","text":"\n            We are back to the initial state where the check box is now opaque again\n        ","code":["checkBox.isOpaque() == true"]},
+
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","false","false","true","true","false","true","false","false","false","true","false","false"],"margin":["0","0","1","0","0","1","0","0","0","1","0","0","0","0","0"],"radius":["0","0","0","1","0","0","1","0","0","0","1","0","0","0","0"],"border":["0","0","0","0","1","0","0","1","1","0","0","1","0","0","0"],"borderColor":["\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgb(0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\""],"foundation":["\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\""],"background":["\"rgba(0,0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgba(0,0,0, 0)\"","\"rgba(0,0,0, 0)\"","\"rgba(0,0,0, 0)\""],"gradient":["[]","[]","[]","[]","[]","[]","[]","[]","[]","[\"red\", \"green\"]","[\"red\", \"green\"]","[\"red\", \"green\"]","[\"red\", \"green\"]","[\"red\", \"rgba(0,0,0,0)\"]","[\"rgba(0,0,0,0)\", \"green\"]"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A check box (which typically opaque) may become non-opaque when transitioning to various styles. [5]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A check box is a component that is opaque by default.\n\n            This test demonstrates that a check box will become non-opaque when transitioning\n            to various style configurations\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first define a boolean flag property that we will use to control the transition:","code":["var isOn = Var.of(false)"]},
+
+        {"kind":"and","text":"Then we create the slider based UI declaration, which is styled to temporarily have an opaque background color:","code":["var ui =","        UI.checkBox(\"Checked?\")","        .withTransitionalStyle(isOn, LifeTime.of(1, TimeUnit.MILLISECONDS), (state, it) -> it","            .margin( state.progress() == 1 ? margin : 0 )","            .borderRadius( state.progress() == 1 ? radius : 0 )","            .backgroundColor( state.progress() == 1 ? background : \"\" )","            .foundationColor( state.progress() == 1 ? foundation : \"\" )","            .borderColor( state.progress() == 1 ? borderColor : \"\" )","            .borderWidth( state.progress() == 1 ? border : 0 )","            .gradient(g -> g.colors( state.progress() == 1 ? gradient : new String[0]))","        )"]},
+
+        {"kind":"and","text":"We build the underlying check box:","code":["var checkBox = ui.get(JCheckBox)"]},
+
+        {"kind":"expect","text":"\n            The component has to be opaque because it was not yet styled and it is also opaque by default.\n            So the parent component will not be visible behind the background.\n        ","code":["checkBox.isOpaque() == true"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true in order to start the transition:","code":["isOn.set(true)"]},
+
+        {"kind":"and","text":"We wait for the transition to complete:","code":["Thread.sleep(50)","UI.sync()"]},
+
+        {"kind":"then","text":"\n            The check box has the expected opaqueness because the `isOn` flag is true, which translates to \n            an animation progress transitioning to 1,\n            causing the various styles to take effect!\n        ","code":["checkBox.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"\n            We now want to go back to the initial state, so we set the `isOn` flag to false again...\n        ","code":["isOn.set(false)"]},
+
+        {"kind":"and","text":"...again we wait for the transition to complete...","code":["Thread.sleep(50)","UI.sync()"]},
+
+        {"kind":"then","text":"\n            We are back to the initial state where the check box is now opaque again\n        ","code":["checkBox.isOpaque() == true"]},
+
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","false","false","true","true","false","true","false","false","false","true","false","false"],"margin":["0","0","1","0","0","1","0","0","0","1","0","0","0","0","0"],"radius":["0","0","0","1","0","0","1","0","0","0","1","0","0","0","0"],"border":["0","0","0","0","1","0","0","1","1","0","0","1","0","0","0"],"borderColor":["\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgb(0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\""],"foundation":["\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\""],"background":["\"rgba(0,0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgba(0,0,0, 0)\"","\"rgba(0,0,0, 0)\"","\"rgba(0,0,0, 0)\""],"gradient":["[]","[]","[]","[]","[]","[]","[]","[]","[]","[\"red\", \"green\"]","[\"red\", \"green\"]","[\"red\", \"green\"]","[\"red\", \"green\"]","[\"red\", \"rgba(0,0,0,0)\"]","[\"rgba(0,0,0,0)\", \"green\"]"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A check box (which typically opaque) may become non-opaque when transitioning to various styles. [6]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A check box is a component that is opaque by default.\n\n            This test demonstrates that a check box will become non-opaque when transitioning\n            to various style configurations\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first define a boolean flag property that we will use to control the transition:","code":["var isOn = Var.of(false)"]},
+
+        {"kind":"and","text":"Then we create the slider based UI declaration, which is styled to temporarily have an opaque background color:","code":["var ui =","        UI.checkBox(\"Checked?\")","        .withTransitionalStyle(isOn, LifeTime.of(1, TimeUnit.MILLISECONDS), (state, it) -> it","            .margin( state.progress() == 1 ? margin : 0 )","            .borderRadius( state.progress() == 1 ? radius : 0 )","            .backgroundColor( state.progress() == 1 ? background : \"\" )","            .foundationColor( state.progress() == 1 ? foundation : \"\" )","            .borderColor( state.progress() == 1 ? borderColor : \"\" )","            .borderWidth( state.progress() == 1 ? border : 0 )","            .gradient(g -> g.colors( state.progress() == 1 ? gradient : new String[0]))","        )"]},
+
+        {"kind":"and","text":"We build the underlying check box:","code":["var checkBox = ui.get(JCheckBox)"]},
+
+        {"kind":"expect","text":"\n            The component has to be opaque because it was not yet styled and it is also opaque by default.\n            So the parent component will not be visible behind the background.\n        ","code":["checkBox.isOpaque() == true"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true in order to start the transition:","code":["isOn.set(true)"]},
+
+        {"kind":"and","text":"We wait for the transition to complete:","code":["Thread.sleep(50)","UI.sync()"]},
+
+        {"kind":"then","text":"\n            The check box has the expected opaqueness because the `isOn` flag is true, which translates to \n            an animation progress transitioning to 1,\n            causing the various styles to take effect!\n        ","code":["checkBox.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"\n            We now want to go back to the initial state, so we set the `isOn` flag to false again...\n        ","code":["isOn.set(false)"]},
+
+        {"kind":"and","text":"...again we wait for the transition to complete...","code":["Thread.sleep(50)","UI.sync()"]},
+
+        {"kind":"then","text":"\n            We are back to the initial state where the check box is now opaque again\n        ","code":["checkBox.isOpaque() == true"]},
+
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","false","false","true","true","false","true","false","false","false","true","false","false"],"margin":["0","0","1","0","0","1","0","0","0","1","0","0","0","0","0"],"radius":["0","0","0","1","0","0","1","0","0","0","1","0","0","0","0"],"border":["0","0","0","0","1","0","0","1","1","0","0","1","0","0","0"],"borderColor":["\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgb(0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\""],"foundation":["\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\""],"background":["\"rgba(0,0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgba(0,0,0, 0)\"","\"rgba(0,0,0, 0)\"","\"rgba(0,0,0, 0)\""],"gradient":["[]","[]","[]","[]","[]","[]","[]","[]","[]","[\"red\", \"green\"]","[\"red\", \"green\"]","[\"red\", \"green\"]","[\"red\", \"green\"]","[\"red\", \"rgba(0,0,0,0)\"]","[\"rgba(0,0,0,0)\", \"green\"]"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A check box (which typically opaque) may become non-opaque when transitioning to various styles. [7]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A check box is a component that is opaque by default.\n\n            This test demonstrates that a check box will become non-opaque when transitioning\n            to various style configurations\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first define a boolean flag property that we will use to control the transition:","code":["var isOn = Var.of(false)"]},
+
+        {"kind":"and","text":"Then we create the slider based UI declaration, which is styled to temporarily have an opaque background color:","code":["var ui =","        UI.checkBox(\"Checked?\")","        .withTransitionalStyle(isOn, LifeTime.of(1, TimeUnit.MILLISECONDS), (state, it) -> it","            .margin( state.progress() == 1 ? margin : 0 )","            .borderRadius( state.progress() == 1 ? radius : 0 )","            .backgroundColor( state.progress() == 1 ? background : \"\" )","            .foundationColor( state.progress() == 1 ? foundation : \"\" )","            .borderColor( state.progress() == 1 ? borderColor : \"\" )","            .borderWidth( state.progress() == 1 ? border : 0 )","            .gradient(g -> g.colors( state.progress() == 1 ? gradient : new String[0]))","        )"]},
+
+        {"kind":"and","text":"We build the underlying check box:","code":["var checkBox = ui.get(JCheckBox)"]},
+
+        {"kind":"expect","text":"\n            The component has to be opaque because it was not yet styled and it is also opaque by default.\n            So the parent component will not be visible behind the background.\n        ","code":["checkBox.isOpaque() == true"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true in order to start the transition:","code":["isOn.set(true)"]},
+
+        {"kind":"and","text":"We wait for the transition to complete:","code":["Thread.sleep(50)","UI.sync()"]},
+
+        {"kind":"then","text":"\n            The check box has the expected opaqueness because the `isOn` flag is true, which translates to \n            an animation progress transitioning to 1,\n            causing the various styles to take effect!\n        ","code":["checkBox.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"\n            We now want to go back to the initial state, so we set the `isOn` flag to false again...\n        ","code":["isOn.set(false)"]},
+
+        {"kind":"and","text":"...again we wait for the transition to complete...","code":["Thread.sleep(50)","UI.sync()"]},
+
+        {"kind":"then","text":"\n            We are back to the initial state where the check box is now opaque again\n        ","code":["checkBox.isOpaque() == true"]},
+
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","false","false","true","true","false","true","false","false","false","true","false","false"],"margin":["0","0","1","0","0","1","0","0","0","1","0","0","0","0","0"],"radius":["0","0","0","1","0","0","1","0","0","0","1","0","0","0","0"],"border":["0","0","0","0","1","0","0","1","1","0","0","1","0","0","0"],"borderColor":["\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgb(0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\""],"foundation":["\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\""],"background":["\"rgba(0,0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgba(0,0,0, 0)\"","\"rgba(0,0,0, 0)\"","\"rgba(0,0,0, 0)\""],"gradient":["[]","[]","[]","[]","[]","[]","[]","[]","[]","[\"red\", \"green\"]","[\"red\", \"green\"]","[\"red\", \"green\"]","[\"red\", \"green\"]","[\"red\", \"rgba(0,0,0,0)\"]","[\"rgba(0,0,0,0)\", \"green\"]"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A check box (which typically opaque) may become non-opaque when transitioning to various styles. [8]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A check box is a component that is opaque by default.\n\n            This test demonstrates that a check box will become non-opaque when transitioning\n            to various style configurations\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first define a boolean flag property that we will use to control the transition:","code":["var isOn = Var.of(false)"]},
+
+        {"kind":"and","text":"Then we create the slider based UI declaration, which is styled to temporarily have an opaque background color:","code":["var ui =","        UI.checkBox(\"Checked?\")","        .withTransitionalStyle(isOn, LifeTime.of(1, TimeUnit.MILLISECONDS), (state, it) -> it","            .margin( state.progress() == 1 ? margin : 0 )","            .borderRadius( state.progress() == 1 ? radius : 0 )","            .backgroundColor( state.progress() == 1 ? background : \"\" )","            .foundationColor( state.progress() == 1 ? foundation : \"\" )","            .borderColor( state.progress() == 1 ? borderColor : \"\" )","            .borderWidth( state.progress() == 1 ? border : 0 )","            .gradient(g -> g.colors( state.progress() == 1 ? gradient : new String[0]))","        )"]},
+
+        {"kind":"and","text":"We build the underlying check box:","code":["var checkBox = ui.get(JCheckBox)"]},
+
+        {"kind":"expect","text":"\n            The component has to be opaque because it was not yet styled and it is also opaque by default.\n            So the parent component will not be visible behind the background.\n        ","code":["checkBox.isOpaque() == true"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true in order to start the transition:","code":["isOn.set(true)"]},
+
+        {"kind":"and","text":"We wait for the transition to complete:","code":["Thread.sleep(50)","UI.sync()"]},
+
+        {"kind":"then","text":"\n            The check box has the expected opaqueness because the `isOn` flag is true, which translates to \n            an animation progress transitioning to 1,\n            causing the various styles to take effect!\n        ","code":["checkBox.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"\n            We now want to go back to the initial state, so we set the `isOn` flag to false again...\n        ","code":["isOn.set(false)"]},
+
+        {"kind":"and","text":"...again we wait for the transition to complete...","code":["Thread.sleep(50)","UI.sync()"]},
+
+        {"kind":"then","text":"\n            We are back to the initial state where the check box is now opaque again\n        ","code":["checkBox.isOpaque() == true"]},
+
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","false","false","true","true","false","true","false","false","false","true","false","false"],"margin":["0","0","1","0","0","1","0","0","0","1","0","0","0","0","0"],"radius":["0","0","0","1","0","0","1","0","0","0","1","0","0","0","0"],"border":["0","0","0","0","1","0","0","1","1","0","0","1","0","0","0"],"borderColor":["\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgb(0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\""],"foundation":["\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\""],"background":["\"rgba(0,0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgba(0,0,0, 0)\"","\"rgba(0,0,0, 0)\"","\"rgba(0,0,0, 0)\""],"gradient":["[]","[]","[]","[]","[]","[]","[]","[]","[]","[\"red\", \"green\"]","[\"red\", \"green\"]","[\"red\", \"green\"]","[\"red\", \"green\"]","[\"red\", \"rgba(0,0,0,0)\"]","[\"rgba(0,0,0,0)\", \"green\"]"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A check box (which typically opaque) may become non-opaque when transitioning to various styles. [9]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A check box is a component that is opaque by default.\n\n            This test demonstrates that a check box will become non-opaque when transitioning\n            to various style configurations\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first define a boolean flag property that we will use to control the transition:","code":["var isOn = Var.of(false)"]},
+
+        {"kind":"and","text":"Then we create the slider based UI declaration, which is styled to temporarily have an opaque background color:","code":["var ui =","        UI.checkBox(\"Checked?\")","        .withTransitionalStyle(isOn, LifeTime.of(1, TimeUnit.MILLISECONDS), (state, it) -> it","            .margin( state.progress() == 1 ? margin : 0 )","            .borderRadius( state.progress() == 1 ? radius : 0 )","            .backgroundColor( state.progress() == 1 ? background : \"\" )","            .foundationColor( state.progress() == 1 ? foundation : \"\" )","            .borderColor( state.progress() == 1 ? borderColor : \"\" )","            .borderWidth( state.progress() == 1 ? border : 0 )","            .gradient(g -> g.colors( state.progress() == 1 ? gradient : new String[0]))","        )"]},
+
+        {"kind":"and","text":"We build the underlying check box:","code":["var checkBox = ui.get(JCheckBox)"]},
+
+        {"kind":"expect","text":"\n            The component has to be opaque because it was not yet styled and it is also opaque by default.\n            So the parent component will not be visible behind the background.\n        ","code":["checkBox.isOpaque() == true"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true in order to start the transition:","code":["isOn.set(true)"]},
+
+        {"kind":"and","text":"We wait for the transition to complete:","code":["Thread.sleep(50)","UI.sync()"]},
+
+        {"kind":"then","text":"\n            The check box has the expected opaqueness because the `isOn` flag is true, which translates to \n            an animation progress transitioning to 1,\n            causing the various styles to take effect!\n        ","code":["checkBox.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"\n            We now want to go back to the initial state, so we set the `isOn` flag to false again...\n        ","code":["isOn.set(false)"]},
+
+        {"kind":"and","text":"...again we wait for the transition to complete...","code":["Thread.sleep(50)","UI.sync()"]},
+
+        {"kind":"then","text":"\n            We are back to the initial state where the check box is now opaque again\n        ","code":["checkBox.isOpaque() == true"]},
+
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","false","false","true","true","false","true","false","false","false","true","false","false"],"margin":["0","0","1","0","0","1","0","0","0","1","0","0","0","0","0"],"radius":["0","0","0","1","0","0","1","0","0","0","1","0","0","0","0"],"border":["0","0","0","0","1","0","0","1","1","0","0","1","0","0","0"],"borderColor":["\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgb(0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\""],"foundation":["\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\""],"background":["\"rgba(0,0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgba(0,0,0, 0)\"","\"rgba(0,0,0, 0)\"","\"rgba(0,0,0, 0)\""],"gradient":["[]","[]","[]","[]","[]","[]","[]","[]","[]","[\"red\", \"green\"]","[\"red\", \"green\"]","[\"red\", \"green\"]","[\"red\", \"green\"]","[\"red\", \"rgba(0,0,0,0)\"]","[\"rgba(0,0,0,0)\", \"green\"]"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A check box (which typically opaque) may become non-opaque when transitioning to various styles. [10]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A check box is a component that is opaque by default.\n\n            This test demonstrates that a check box will become non-opaque when transitioning\n            to various style configurations\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first define a boolean flag property that we will use to control the transition:","code":["var isOn = Var.of(false)"]},
+
+        {"kind":"and","text":"Then we create the slider based UI declaration, which is styled to temporarily have an opaque background color:","code":["var ui =","        UI.checkBox(\"Checked?\")","        .withTransitionalStyle(isOn, LifeTime.of(1, TimeUnit.MILLISECONDS), (state, it) -> it","            .margin( state.progress() == 1 ? margin : 0 )","            .borderRadius( state.progress() == 1 ? radius : 0 )","            .backgroundColor( state.progress() == 1 ? background : \"\" )","            .foundationColor( state.progress() == 1 ? foundation : \"\" )","            .borderColor( state.progress() == 1 ? borderColor : \"\" )","            .borderWidth( state.progress() == 1 ? border : 0 )","            .gradient(g -> g.colors( state.progress() == 1 ? gradient : new String[0]))","        )"]},
+
+        {"kind":"and","text":"We build the underlying check box:","code":["var checkBox = ui.get(JCheckBox)"]},
+
+        {"kind":"expect","text":"\n            The component has to be opaque because it was not yet styled and it is also opaque by default.\n            So the parent component will not be visible behind the background.\n        ","code":["checkBox.isOpaque() == true"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true in order to start the transition:","code":["isOn.set(true)"]},
+
+        {"kind":"and","text":"We wait for the transition to complete:","code":["Thread.sleep(50)","UI.sync()"]},
+
+        {"kind":"then","text":"\n            The check box has the expected opaqueness because the `isOn` flag is true, which translates to \n            an animation progress transitioning to 1,\n            causing the various styles to take effect!\n        ","code":["checkBox.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"\n            We now want to go back to the initial state, so we set the `isOn` flag to false again...\n        ","code":["isOn.set(false)"]},
+
+        {"kind":"and","text":"...again we wait for the transition to complete...","code":["Thread.sleep(50)","UI.sync()"]},
+
+        {"kind":"then","text":"\n            We are back to the initial state where the check box is now opaque again\n        ","code":["checkBox.isOpaque() == true"]},
+
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","false","false","true","true","false","true","false","false","false","true","false","false"],"margin":["0","0","1","0","0","1","0","0","0","1","0","0","0","0","0"],"radius":["0","0","0","1","0","0","1","0","0","0","1","0","0","0","0"],"border":["0","0","0","0","1","0","0","1","1","0","0","1","0","0","0"],"borderColor":["\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgb(0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\""],"foundation":["\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\""],"background":["\"rgba(0,0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgba(0,0,0, 0)\"","\"rgba(0,0,0, 0)\"","\"rgba(0,0,0, 0)\""],"gradient":["[]","[]","[]","[]","[]","[]","[]","[]","[]","[\"red\", \"green\"]","[\"red\", \"green\"]","[\"red\", \"green\"]","[\"red\", \"green\"]","[\"red\", \"rgba(0,0,0,0)\"]","[\"rgba(0,0,0,0)\", \"green\"]"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A check box (which typically opaque) may become non-opaque when transitioning to various styles. [11]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A check box is a component that is opaque by default.\n\n            This test demonstrates that a check box will become non-opaque when transitioning\n            to various style configurations\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first define a boolean flag property that we will use to control the transition:","code":["var isOn = Var.of(false)"]},
+
+        {"kind":"and","text":"Then we create the slider based UI declaration, which is styled to temporarily have an opaque background color:","code":["var ui =","        UI.checkBox(\"Checked?\")","        .withTransitionalStyle(isOn, LifeTime.of(1, TimeUnit.MILLISECONDS), (state, it) -> it","            .margin( state.progress() == 1 ? margin : 0 )","            .borderRadius( state.progress() == 1 ? radius : 0 )","            .backgroundColor( state.progress() == 1 ? background : \"\" )","            .foundationColor( state.progress() == 1 ? foundation : \"\" )","            .borderColor( state.progress() == 1 ? borderColor : \"\" )","            .borderWidth( state.progress() == 1 ? border : 0 )","            .gradient(g -> g.colors( state.progress() == 1 ? gradient : new String[0]))","        )"]},
+
+        {"kind":"and","text":"We build the underlying check box:","code":["var checkBox = ui.get(JCheckBox)"]},
+
+        {"kind":"expect","text":"\n            The component has to be opaque because it was not yet styled and it is also opaque by default.\n            So the parent component will not be visible behind the background.\n        ","code":["checkBox.isOpaque() == true"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true in order to start the transition:","code":["isOn.set(true)"]},
+
+        {"kind":"and","text":"We wait for the transition to complete:","code":["Thread.sleep(50)","UI.sync()"]},
+
+        {"kind":"then","text":"\n            The check box has the expected opaqueness because the `isOn` flag is true, which translates to \n            an animation progress transitioning to 1,\n            causing the various styles to take effect!\n        ","code":["checkBox.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"\n            We now want to go back to the initial state, so we set the `isOn` flag to false again...\n        ","code":["isOn.set(false)"]},
+
+        {"kind":"and","text":"...again we wait for the transition to complete...","code":["Thread.sleep(50)","UI.sync()"]},
+
+        {"kind":"then","text":"\n            We are back to the initial state where the check box is now opaque again\n        ","code":["checkBox.isOpaque() == true"]},
+
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","false","false","true","true","false","true","false","false","false","true","false","false"],"margin":["0","0","1","0","0","1","0","0","0","1","0","0","0","0","0"],"radius":["0","0","0","1","0","0","1","0","0","0","1","0","0","0","0"],"border":["0","0","0","0","1","0","0","1","1","0","0","1","0","0","0"],"borderColor":["\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgb(0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\""],"foundation":["\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\""],"background":["\"rgba(0,0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgba(0,0,0, 0)\"","\"rgba(0,0,0, 0)\"","\"rgba(0,0,0, 0)\""],"gradient":["[]","[]","[]","[]","[]","[]","[]","[]","[]","[\"red\", \"green\"]","[\"red\", \"green\"]","[\"red\", \"green\"]","[\"red\", \"green\"]","[\"red\", \"rgba(0,0,0,0)\"]","[\"rgba(0,0,0,0)\", \"green\"]"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A check box (which typically opaque) may become non-opaque when transitioning to various styles. [12]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A check box is a component that is opaque by default.\n\n            This test demonstrates that a check box will become non-opaque when transitioning\n            to various style configurations\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first define a boolean flag property that we will use to control the transition:","code":["var isOn = Var.of(false)"]},
+
+        {"kind":"and","text":"Then we create the slider based UI declaration, which is styled to temporarily have an opaque background color:","code":["var ui =","        UI.checkBox(\"Checked?\")","        .withTransitionalStyle(isOn, LifeTime.of(1, TimeUnit.MILLISECONDS), (state, it) -> it","            .margin( state.progress() == 1 ? margin : 0 )","            .borderRadius( state.progress() == 1 ? radius : 0 )","            .backgroundColor( state.progress() == 1 ? background : \"\" )","            .foundationColor( state.progress() == 1 ? foundation : \"\" )","            .borderColor( state.progress() == 1 ? borderColor : \"\" )","            .borderWidth( state.progress() == 1 ? border : 0 )","            .gradient(g -> g.colors( state.progress() == 1 ? gradient : new String[0]))","        )"]},
+
+        {"kind":"and","text":"We build the underlying check box:","code":["var checkBox = ui.get(JCheckBox)"]},
+
+        {"kind":"expect","text":"\n            The component has to be opaque because it was not yet styled and it is also opaque by default.\n            So the parent component will not be visible behind the background.\n        ","code":["checkBox.isOpaque() == true"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true in order to start the transition:","code":["isOn.set(true)"]},
+
+        {"kind":"and","text":"We wait for the transition to complete:","code":["Thread.sleep(50)","UI.sync()"]},
+
+        {"kind":"then","text":"\n            The check box has the expected opaqueness because the `isOn` flag is true, which translates to \n            an animation progress transitioning to 1,\n            causing the various styles to take effect!\n        ","code":["checkBox.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"\n            We now want to go back to the initial state, so we set the `isOn` flag to false again...\n        ","code":["isOn.set(false)"]},
+
+        {"kind":"and","text":"...again we wait for the transition to complete...","code":["Thread.sleep(50)","UI.sync()"]},
+
+        {"kind":"then","text":"\n            We are back to the initial state where the check box is now opaque again\n        ","code":["checkBox.isOpaque() == true"]},
+
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","false","false","true","true","false","true","false","false","false","true","false","false"],"margin":["0","0","1","0","0","1","0","0","0","1","0","0","0","0","0"],"radius":["0","0","0","1","0","0","1","0","0","0","1","0","0","0","0"],"border":["0","0","0","0","1","0","0","1","1","0","0","1","0","0","0"],"borderColor":["\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgb(0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\""],"foundation":["\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\""],"background":["\"rgba(0,0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgba(0,0,0, 0)\"","\"rgba(0,0,0, 0)\"","\"rgba(0,0,0, 0)\""],"gradient":["[]","[]","[]","[]","[]","[]","[]","[]","[]","[\"red\", \"green\"]","[\"red\", \"green\"]","[\"red\", \"green\"]","[\"red\", \"green\"]","[\"red\", \"rgba(0,0,0,0)\"]","[\"rgba(0,0,0,0)\", \"green\"]"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A check box (which typically opaque) may become non-opaque when transitioning to various styles. [13]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A check box is a component that is opaque by default.\n\n            This test demonstrates that a check box will become non-opaque when transitioning\n            to various style configurations\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first define a boolean flag property that we will use to control the transition:","code":["var isOn = Var.of(false)"]},
+
+        {"kind":"and","text":"Then we create the slider based UI declaration, which is styled to temporarily have an opaque background color:","code":["var ui =","        UI.checkBox(\"Checked?\")","        .withTransitionalStyle(isOn, LifeTime.of(1, TimeUnit.MILLISECONDS), (state, it) -> it","            .margin( state.progress() == 1 ? margin : 0 )","            .borderRadius( state.progress() == 1 ? radius : 0 )","            .backgroundColor( state.progress() == 1 ? background : \"\" )","            .foundationColor( state.progress() == 1 ? foundation : \"\" )","            .borderColor( state.progress() == 1 ? borderColor : \"\" )","            .borderWidth( state.progress() == 1 ? border : 0 )","            .gradient(g -> g.colors( state.progress() == 1 ? gradient : new String[0]))","        )"]},
+
+        {"kind":"and","text":"We build the underlying check box:","code":["var checkBox = ui.get(JCheckBox)"]},
+
+        {"kind":"expect","text":"\n            The component has to be opaque because it was not yet styled and it is also opaque by default.\n            So the parent component will not be visible behind the background.\n        ","code":["checkBox.isOpaque() == true"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true in order to start the transition:","code":["isOn.set(true)"]},
+
+        {"kind":"and","text":"We wait for the transition to complete:","code":["Thread.sleep(50)","UI.sync()"]},
+
+        {"kind":"then","text":"\n            The check box has the expected opaqueness because the `isOn` flag is true, which translates to \n            an animation progress transitioning to 1,\n            causing the various styles to take effect!\n        ","code":["checkBox.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"\n            We now want to go back to the initial state, so we set the `isOn` flag to false again...\n        ","code":["isOn.set(false)"]},
+
+        {"kind":"and","text":"...again we wait for the transition to complete...","code":["Thread.sleep(50)","UI.sync()"]},
+
+        {"kind":"then","text":"\n            We are back to the initial state where the check box is now opaque again\n        ","code":["checkBox.isOpaque() == true"]},
+
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","false","false","true","true","false","true","false","false","false","true","false","false"],"margin":["0","0","1","0","0","1","0","0","0","1","0","0","0","0","0"],"radius":["0","0","0","1","0","0","1","0","0","0","1","0","0","0","0"],"border":["0","0","0","0","1","0","0","1","1","0","0","1","0","0","0"],"borderColor":["\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgb(0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\""],"foundation":["\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\""],"background":["\"rgba(0,0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgba(0,0,0, 0)\"","\"rgba(0,0,0, 0)\"","\"rgba(0,0,0, 0)\""],"gradient":["[]","[]","[]","[]","[]","[]","[]","[]","[]","[\"red\", \"green\"]","[\"red\", \"green\"]","[\"red\", \"green\"]","[\"red\", \"green\"]","[\"red\", \"rgba(0,0,0,0)\"]","[\"rgba(0,0,0,0)\", \"green\"]"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A check box (which typically opaque) may become non-opaque when transitioning to various styles. [14]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A check box is a component that is opaque by default.\n\n            This test demonstrates that a check box will become non-opaque when transitioning\n            to various style configurations\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first define a boolean flag property that we will use to control the transition:","code":["var isOn = Var.of(false)"]},
+
+        {"kind":"and","text":"Then we create the slider based UI declaration, which is styled to temporarily have an opaque background color:","code":["var ui =","        UI.checkBox(\"Checked?\")","        .withTransitionalStyle(isOn, LifeTime.of(1, TimeUnit.MILLISECONDS), (state, it) -> it","            .margin( state.progress() == 1 ? margin : 0 )","            .borderRadius( state.progress() == 1 ? radius : 0 )","            .backgroundColor( state.progress() == 1 ? background : \"\" )","            .foundationColor( state.progress() == 1 ? foundation : \"\" )","            .borderColor( state.progress() == 1 ? borderColor : \"\" )","            .borderWidth( state.progress() == 1 ? border : 0 )","            .gradient(g -> g.colors( state.progress() == 1 ? gradient : new String[0]))","        )"]},
+
+        {"kind":"and","text":"We build the underlying check box:","code":["var checkBox = ui.get(JCheckBox)"]},
+
+        {"kind":"expect","text":"\n            The component has to be opaque because it was not yet styled and it is also opaque by default.\n            So the parent component will not be visible behind the background.\n        ","code":["checkBox.isOpaque() == true"]},
+
+        {"kind":"when","text":"We set the `isOn` flag to true in order to start the transition:","code":["isOn.set(true)"]},
+
+        {"kind":"and","text":"We wait for the transition to complete:","code":["Thread.sleep(50)","UI.sync()"]},
+
+        {"kind":"then","text":"\n            The check box has the expected opaqueness because the `isOn` flag is true, which translates to \n            an animation progress transitioning to 1,\n            causing the various styles to take effect!\n        ","code":["checkBox.isOpaque() == opaque"]},
+
+        {"kind":"when","text":"\n            We now want to go back to the initial state, so we set the `isOn` flag to false again...\n        ","code":["isOn.set(false)"]},
+
+        {"kind":"and","text":"...again we wait for the transition to complete...","code":["Thread.sleep(50)","UI.sync()"]},
+
+        {"kind":"then","text":"\n            We are back to the initial state where the check box is now opaque again\n        ","code":["checkBox.isOpaque() == true"]},
+
+        {"kind":"where","text":"","code":{"opaque":["false","true","false","false","false","true","true","false","true","false","false","false","true","false","false"],"margin":["0","0","1","0","0","1","0","0","0","1","0","0","0","0","0"],"radius":["0","0","0","1","0","0","1","0","0","0","1","0","0","0","0"],"border":["0","0","0","0","1","0","0","1","1","0","0","1","0","0","0"],"borderColor":["\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgb(0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\""],"foundation":["\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\"","\"rgba(0,0,0,0)\""],"background":["\"rgba(0,0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgb(0,0,0)\"","\"rgba(0,0,0, 0)\"","\"rgba(0,0,0, 0)\"","\"rgba(0,0,0, 0)\""],"gradient":["[]","[]","[]","[]","[]","[]","[]","[]","[]","[\"red\", \"green\"]","[\"red\", \"green\"]","[\"red\", \"green\"]","[\"red\", \"green\"]","[\"red\", \"rgba(0,0,0,0)\"]","[\"rgba(0,0,0,0)\", \"green\"]"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A plain button will be opaque, even if it has a custom painter. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A plain button is a component that is opaque by default,\n            but when you call the `makePlain()` method on the button, it will become non-opaque.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We declare a plain button with a custom painter:","code":["var button =","        UI.button(\"Hello World\")","        .makePlain()","        .withStyle( style )","        .get(JButton)"]},
+
+        {"kind":"expect","text":"\n            The component has to be opaque because the button is not plain.\n        ","code":["!button.isOpaque()"]},
+
+        {"kind":"and","text":"It has a transparent background color!","code":["button.getBackground() === UI.Color.TRANSPARENT"]},
+
+        {"kind":"where","text":"","code":{"style":["{ it -> it.painter(UI.Layer.BORDER, g2d -> { }) }","{ it -> it.painter(UI.Layer.BORDER, g2d -> { }).padding(3) }","{ it -> it.painter(UI.Layer.BORDER, g2d -> { }).margin(3) }","{ it -> it.painter(UI.Layer.BACKGROUND, g2d -> { }) }","{ it -> it.painter(UI.Layer.BACKGROUND, g2d -> { }).padding(3) }","{ it -> it.painter(UI.Layer.BACKGROUND, g2d -> { }).margin(3) }",""]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A plain button will be opaque, even if it has a custom painter. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A plain button is a component that is opaque by default,\n            but when you call the `makePlain()` method on the button, it will become non-opaque.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We declare a plain button with a custom painter:","code":["var button =","        UI.button(\"Hello World\")","        .makePlain()","        .withStyle( style )","        .get(JButton)"]},
+
+        {"kind":"expect","text":"\n            The component has to be opaque because the button is not plain.\n        ","code":["!button.isOpaque()"]},
+
+        {"kind":"and","text":"It has a transparent background color!","code":["button.getBackground() === UI.Color.TRANSPARENT"]},
+
+        {"kind":"where","text":"","code":{"style":["{ it -> it.painter(UI.Layer.BORDER, g2d -> { }) }","{ it -> it.painter(UI.Layer.BORDER, g2d -> { }).padding(3) }","{ it -> it.painter(UI.Layer.BORDER, g2d -> { }).margin(3) }","{ it -> it.painter(UI.Layer.BACKGROUND, g2d -> { }) }","{ it -> it.painter(UI.Layer.BACKGROUND, g2d -> { }).padding(3) }","{ it -> it.painter(UI.Layer.BACKGROUND, g2d -> { }).margin(3) }",""]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A plain button will be opaque, even if it has a custom painter. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A plain button is a component that is opaque by default,\n            but when you call the `makePlain()` method on the button, it will become non-opaque.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We declare a plain button with a custom painter:","code":["var button =","        UI.button(\"Hello World\")","        .makePlain()","        .withStyle( style )","        .get(JButton)"]},
+
+        {"kind":"expect","text":"\n            The component has to be opaque because the button is not plain.\n        ","code":["!button.isOpaque()"]},
+
+        {"kind":"and","text":"It has a transparent background color!","code":["button.getBackground() === UI.Color.TRANSPARENT"]},
+
+        {"kind":"where","text":"","code":{"style":["{ it -> it.painter(UI.Layer.BORDER, g2d -> { }) }","{ it -> it.painter(UI.Layer.BORDER, g2d -> { }).padding(3) }","{ it -> it.painter(UI.Layer.BORDER, g2d -> { }).margin(3) }","{ it -> it.painter(UI.Layer.BACKGROUND, g2d -> { }) }","{ it -> it.painter(UI.Layer.BACKGROUND, g2d -> { }).padding(3) }","{ it -> it.painter(UI.Layer.BACKGROUND, g2d -> { }).margin(3) }",""]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A plain button will be opaque, even if it has a custom painter. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A plain button is a component that is opaque by default,\n            but when you call the `makePlain()` method on the button, it will become non-opaque.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We declare a plain button with a custom painter:","code":["var button =","        UI.button(\"Hello World\")","        .makePlain()","        .withStyle( style )","        .get(JButton)"]},
+
+        {"kind":"expect","text":"\n            The component has to be opaque because the button is not plain.\n        ","code":["!button.isOpaque()"]},
+
+        {"kind":"and","text":"It has a transparent background color!","code":["button.getBackground() === UI.Color.TRANSPARENT"]},
+
+        {"kind":"where","text":"","code":{"style":["{ it -> it.painter(UI.Layer.BORDER, g2d -> { }) }","{ it -> it.painter(UI.Layer.BORDER, g2d -> { }).padding(3) }","{ it -> it.painter(UI.Layer.BORDER, g2d -> { }).margin(3) }","{ it -> it.painter(UI.Layer.BACKGROUND, g2d -> { }) }","{ it -> it.painter(UI.Layer.BACKGROUND, g2d -> { }).padding(3) }","{ it -> it.painter(UI.Layer.BACKGROUND, g2d -> { }).margin(3) }",""]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A plain button will be opaque, even if it has a custom painter. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A plain button is a component that is opaque by default,\n            but when you call the `makePlain()` method on the button, it will become non-opaque.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We declare a plain button with a custom painter:","code":["var button =","        UI.button(\"Hello World\")","        .makePlain()","        .withStyle( style )","        .get(JButton)"]},
+
+        {"kind":"expect","text":"\n            The component has to be opaque because the button is not plain.\n        ","code":["!button.isOpaque()"]},
+
+        {"kind":"and","text":"It has a transparent background color!","code":["button.getBackground() === UI.Color.TRANSPARENT"]},
+
+        {"kind":"where","text":"","code":{"style":["{ it -> it.painter(UI.Layer.BORDER, g2d -> { }) }","{ it -> it.painter(UI.Layer.BORDER, g2d -> { }).padding(3) }","{ it -> it.painter(UI.Layer.BORDER, g2d -> { }).margin(3) }","{ it -> it.painter(UI.Layer.BACKGROUND, g2d -> { }) }","{ it -> it.painter(UI.Layer.BACKGROUND, g2d -> { }).padding(3) }","{ it -> it.painter(UI.Layer.BACKGROUND, g2d -> { }).margin(3) }",""]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A plain button will be opaque, even if it has a custom painter. [5]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A plain button is a component that is opaque by default,\n            but when you call the `makePlain()` method on the button, it will become non-opaque.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We declare a plain button with a custom painter:","code":["var button =","        UI.button(\"Hello World\")","        .makePlain()","        .withStyle( style )","        .get(JButton)"]},
+
+        {"kind":"expect","text":"\n            The component has to be opaque because the button is not plain.\n        ","code":["!button.isOpaque()"]},
+
+        {"kind":"and","text":"It has a transparent background color!","code":["button.getBackground() === UI.Color.TRANSPARENT"]},
+
+        {"kind":"where","text":"","code":{"style":["{ it -> it.painter(UI.Layer.BORDER, g2d -> { }) }","{ it -> it.painter(UI.Layer.BORDER, g2d -> { }).padding(3) }","{ it -> it.painter(UI.Layer.BORDER, g2d -> { }).margin(3) }","{ it -> it.painter(UI.Layer.BACKGROUND, g2d -> { }) }","{ it -> it.painter(UI.Layer.BACKGROUND, g2d -> { }).padding(3) }","{ it -> it.painter(UI.Layer.BACKGROUND, g2d -> { }).margin(3) }",""]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

@@ -15,41 +15,53 @@ import javax.swing.JToggleButton;
 <span class="fc" id="L15">public abstract class UIForAnyToggleButton&lt;I, B extends JToggleButton&gt; extends UIForAnyButton&lt;I, B&gt;</span>
 {
     /**
-     *  Use this to dynamically bind to an enum based {@link sprouts.Var}
-     *  instance which will be used to dynamically model the selection state of the
-     *  wrapped {@link JToggleButton} type by checking
-     *  weather the property matches the provided enum or not.
+     *  Use this to dynamically bind the selection flag of the button to a {@link Var}
+     *  property which will determine the selection state of the button based on the
+     *  equality of the property value and the provided reference value.
+     *  So if the first {@code state} argument is equal to the value of the {@code selection} property,
+     *  the button will be selected, otherwise it will be deselected.&lt;br&gt;
+     *  A typical use case is to bind a button to an enum property, like so: &lt;br&gt;
+     *  &lt;pre&gt;{@code
+     *      // In your view model:
+     *      enum Step { ONE, TWO, THREE }
+     *      Var&lt;Step&gt; step = Var.of(Step.ONE);
      *
-     * @param state The reference {@link Enum} which this {@link JToggleButton} should represent.
+     *      // In your view:
+     *      UI.radioButton(&quot;Two&quot;).isSelectedIf(Step.TWO, vm.getStep());
+     *  }&lt;/pre&gt;
+     *  As you can see, the radio button will be selected if the enum property is equal to the supplied enum value
+     *  and deselected otherwise. &lt;br&gt;
+     *  &lt;br&gt;
+     * &lt;i&gt;Hint: Use {@code myProperty.fire(From.VIEW_MODEL)} in your view model to send the property value to this view component.&lt;/i&gt;
+     *
+     * @param state The reference value which this {@link JToggleButton} should represent.
      * @param selection The {@link sprouts.Var} instance which will be used
-     *                  to dynamically model the selection state of the wrapped {@link JToggleButton} type.
-     * @param &lt;E&gt; The type of the enum.
-     * @return This builder node.
+     *                  to dynamically model the selection state of the wrapped {@link JToggleButton} type
+     *                  based on the equality of the {@code state} argument and the value of the property.
+     * @param &lt;E&gt; The type of the property value.
+     * @return The current builder type, to allow for further method chaining.
      * @throws IllegalArgumentException if {@code selected} is {@code null}.
      */
-    public final &lt;E extends Enum&lt;E&gt;&gt; I isSelectedIf( E state, Var&lt;E&gt; selection ) {
-<span class="nc" id="L31">        NullUtil.nullArgCheck(state, &quot;state&quot;, Enum.class);</span>
-<span class="nc" id="L32">        NullUtil.nullArgCheck(selection, &quot;selection&quot;, Var.class);</span>
-<span class="nc" id="L33">        NullUtil.nullPropertyCheck(selection, &quot;selection&quot;, &quot;Null is not a valid selection state.&quot;);</span>
-<span class="nc" id="L34">        return _withOnShow( selection, (button,s) -&gt; {</span>
-<span class="nc" id="L35">                   _setSelectedSilently(button, state.equals(s));</span>
-<span class="nc" id="L36">               })</span>
-<span class="nc" id="L37">               ._with( button -&gt; {</span>
-<span class="nc" id="L38">                   _setSelectedSilently(button, state.equals(selection.get()));</span>
-<span class="nc" id="L39">                   String currentText = button.getText();</span>
-<span class="nc bnc" id="L40" title="All 4 branches missed.">                   if ( currentText == null || currentText.isEmpty() )</span>
-<span class="nc" id="L41">                       button.setText( state.toString() );</span>
-
+    public final &lt;E&gt; I isSelectedIf( E state, Var&lt;E&gt; selection ) {
+<span class="fc" id="L46">        NullUtil.nullArgCheck(state, &quot;state&quot;, Enum.class);</span>
+<span class="fc" id="L47">        NullUtil.nullArgCheck(selection, &quot;selection&quot;, Var.class);</span>
+<span class="fc" id="L48">        NullUtil.nullPropertyCheck(selection, &quot;selection&quot;, &quot;Null is not a valid selection state.&quot;);</span>
+<span class="fc" id="L49">        return _withOnShow( selection, (button,s) -&gt; {</span>
+<span class="fc" id="L50">                   _setSelectedSilently(button, state.equals(s));</span>
+<span class="fc" id="L51">               })</span>
+<span class="fc" id="L52">               ._with( button -&gt; {</span>
+<span class="fc" id="L53">                   _setSelectedSilently(button, state.equals(selection.get()));</span>
                    // When the user clicks the button, we update the selection property!
                    // But only if the button is selected, otherwise we'll ignore the click.
                    // And we also trigger &quot;set&quot; events for the button, so that other buttons
                    // can be updated to reflect the new selection state.
-<span class="nc" id="L47">                   _onChange(button, event -&gt; {</span>
-<span class="nc bnc" id="L48" title="All 2 branches missed.">                       if ( button.isSelected() )</span>
-<span class="nc" id="L49">                           selection.set(From.VIEW,  state ).fireChange(From.VIEW_MODEL);</span>
-<span class="nc" id="L50">                   });</span>
-<span class="nc" id="L51">               })</span>
-<span class="nc" id="L52">               ._this();</span>
+<span class="fc" id="L58">                   _onChange(button, event -&gt; {</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">                       if ( button.isSelected() )</span>
+<span class="nc" id="L60">                           selection.set(From.VIEW,  state ).fireChange(From.VIEW_MODEL);</span>
+<span class="nc" id="L61">                   });</span>
+<span class="fc" id="L62">               })</span>
+<span class="fc" id="L63">               ._this();</span>
     }
+
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

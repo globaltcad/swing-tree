@@ -23,7 +23,7 @@
       "blocks":[
         {"kind":"given","text":"We create a UI builder node containing a simple split button.","code":["var ui = UI.splitButton(\"\")"]},
 
-        {"kind":"expect","text":"It wraps a JSplitButton.","code":["ui.component instanceof JSplitButton"]},
+        {"kind":"expect","text":"It wraps a JSplitButton.","code":["ui.get(JSplitButton) instanceof JSplitButton"]},
 
         {"kind":"when","text":"","code":["ui.onSplitClick(null)"]},
 

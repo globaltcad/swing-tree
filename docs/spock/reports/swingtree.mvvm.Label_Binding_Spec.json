@@ -4,7 +4,7 @@
   "narrative":"As a developer, I want to bind a label to a property so\n    that the label is updated when the property changes.\n    Binding is a powerful feature that allows us to create\n    UIs which are not only decoupled from the business logic of\n    an application, but also make it easy to create UIs which\n    are dynamic and reactive.",
   "subjects":[],
   "statistics":{
-    "runs":"9",
+    "runs":"11",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -64,11 +64,69 @@
     },
   
     {
-      "id":"It is possible to bind to the minimum, maximum and preferred size of a label",
+      "id":"It is possible to bind to the minimum, maximum and preferred size of a label [0]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            Note that this works for all kind of UI nodes, not just labels.\n        ","\n            Note that this works for all kind of UI nodes, not just labels.\n        ","\n            Note that this works for all kind of UI nodes, not just labels.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            Note that this works for all kind of UI nodes, not just labels.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"We create a simple swing-tree property for modelling the size.","code":["Val<Dimension> minSize = Var.of(new Dimension(100, 100))","Val<Dimension> maxSize = Var.of(new Dimension(200, 200))","Val<Dimension> prefSize = Var.of(new Dimension(150, 150))"]},
+
+        {"kind":"when","text":"We create and bind to a label UI node...","code":["var ui =","        UI.label(\"\")","        .withMinSize(minSize)","        .withMaxSize(maxSize)","        .withPrefSize(prefSize)"]},
+
+        {"kind":"and","text":"We build the root component of the UI tree.","code":["var label = ui.get(JLabel)"]},
+
+        {"kind":"then","text":"The label should be updated when the property changes.","code":["label.minimumSize == new Dimension(100 * uiScale, 100 * uiScale)","label.maximumSize == new Dimension(200 * uiScale, 200 * uiScale)","label.preferredSize == new Dimension(150 * uiScale, 150 * uiScale)"]},
+
+        {"kind":"when","text":"We change the items of the properties...","code":["minSize.set(new Dimension(50, 50))","maxSize.set(new Dimension(100, 100))","prefSize.set(new Dimension(75, 75))"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The label should be updated.","code":["label.minimumSize == new Dimension(50 * uiScale, 50 * uiScale)","label.maximumSize == new Dimension(100 * uiScale, 100 * uiScale)","label.preferredSize == new Dimension(75 * uiScale, 75 * uiScale)"]},
+
+        {"kind":"where","text":"\n            We use the following integer scaling factors simulating different high DPI scenarios.\n            Note that usually the UI is scaled by 1, 1.5 an 2 (for 4k screens for example).\n            A scaling factor of 3 is rather unusual, however it is possible to scale it by 3 nonetheless.\n        ","code":{"uiScale":["3","2","1"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"It is possible to bind to the minimum, maximum and preferred size of a label [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that this works for all kind of UI nodes, not just labels.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"We create a simple swing-tree property for modelling the size.","code":["Val<Dimension> minSize = Var.of(new Dimension(100, 100))","Val<Dimension> maxSize = Var.of(new Dimension(200, 200))","Val<Dimension> prefSize = Var.of(new Dimension(150, 150))"]},
+
+        {"kind":"when","text":"We create and bind to a label UI node...","code":["var ui =","        UI.label(\"\")","        .withMinSize(minSize)","        .withMaxSize(maxSize)","        .withPrefSize(prefSize)"]},
+
+        {"kind":"and","text":"We build the root component of the UI tree.","code":["var label = ui.get(JLabel)"]},
+
+        {"kind":"then","text":"The label should be updated when the property changes.","code":["label.minimumSize == new Dimension(100 * uiScale, 100 * uiScale)","label.maximumSize == new Dimension(200 * uiScale, 200 * uiScale)","label.preferredSize == new Dimension(150 * uiScale, 150 * uiScale)"]},
+
+        {"kind":"when","text":"We change the items of the properties...","code":["minSize.set(new Dimension(50, 50))","maxSize.set(new Dimension(100, 100))","prefSize.set(new Dimension(75, 75))"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The label should be updated.","code":["label.minimumSize == new Dimension(50 * uiScale, 50 * uiScale)","label.maximumSize == new Dimension(100 * uiScale, 100 * uiScale)","label.preferredSize == new Dimension(75 * uiScale, 75 * uiScale)"]},
+
+        {"kind":"where","text":"\n            We use the following integer scaling factors simulating different high DPI scenarios.\n            Note that usually the UI is scaled by 1, 1.5 an 2 (for 4k screens for example).\n            A scaling factor of 3 is rather unusual, however it is possible to scale it by 3 nonetheless.\n        ","code":{"uiScale":["3","2","1"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"It is possible to bind to the minimum, maximum and preferred size of a label [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that this works for all kind of UI nodes, not just labels.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},

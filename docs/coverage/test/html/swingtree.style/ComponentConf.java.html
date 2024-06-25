@@ -1,144 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ComponentConf.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">ComponentConf.java</span></div><h1>ComponentConf.java</h1><pre class="source lang-java linenums">package swingtree.style;
 
+import com.google.errorprone.annotations.Immutable;
 import swingtree.UI;
 import swingtree.layout.Bounds;
+import swingtree.layout.Size;
 
-import javax.swing.JComponent;
-import javax.swing.border.Border;
-import java.awt.Graphics;
-import java.awt.Insets;
-import java.awt.Shape;
-import java.awt.geom.Area;
 import java.util.Objects;
-import java.util.Optional;
 
 /**
- *  An immutable snapshot of essential component state needed for rendering
- *  the style of a component.
- *  This is immutable to use it as a basis for caching.
- *  When the snapshot changes compared to the previous one, the image buffer based
- *  render cache is being invalidated and the component is rendered again
- *  (potentially with a new cached image buffer).
+ *  An immutable snapshot of all the essential component state needed for rendering
+ *  and configuring the component state.
  */
+@Immutable
+@SuppressWarnings(&quot;Immutable&quot;)
 final class ComponentConf
 {
     public static ComponentConf none() {
-<span class="fc" id="L26">        return new ComponentConf(</span>
-<span class="fc" id="L27">                    Style.none(),</span>
-<span class="fc" id="L28">                    Bounds.none(),</span>
-<span class="fc" id="L29">                    Outline.none(),</span>
-                    new ComponentAreas()
+<span class="fc" id="L19">        return new ComponentConf(</span>
+<span class="fc" id="L20">                    StyleConf.none(),</span>
+<span class="fc" id="L21">                    Bounds.none(),</span>
+<span class="fc" id="L22">                    Outline.none()</span>
                 );
     }
 
-    private final Style   _style;
-    private final Bounds  _currentBounds;
-    private final Outline _baseOutline;
+    private final StyleConf _styleConf;
+    private final Bounds    _currentBounds;
+    private final Outline   _marginCorrection;
 
-    private final ComponentAreas _areas;
-
-<span class="fc" id="L40">    private boolean _wasAlreadyHashed = false;</span>
-<span class="fc" id="L41">    private int     _hashCode         = 0; // cached hash code</span>
+<span class="fc" id="L30">    private boolean _wasAlreadyHashed = false;</span>
+<span class="fc" id="L31">    private int     _hashCode         = 0; // cached hash code</span>
 
 
-    private ComponentConf(
-        Style          style,
-        Bounds         currentBounds,
-        Outline        baseOutline,
-        ComponentAreas componentAreas
-<span class="fc" id="L49">    ) {</span>
-<span class="fc" id="L50">        _style         = Objects.requireNonNull(style);</span>
-<span class="fc" id="L51">        _currentBounds = Objects.requireNonNull(currentBounds);</span>
-<span class="fc" id="L52">        _baseOutline   = Objects.requireNonNull(baseOutline);</span>
-<span class="fc" id="L53">        _areas         = Objects.requireNonNull(componentAreas);</span>
-<span class="fc" id="L54">    }</span>
+    ComponentConf(
+            StyleConf styleConf,
+            Bounds currentBounds,
+            Outline marginCorrection
+<span class="fc" id="L38">    ) {</span>
+<span class="fc" id="L39">        _styleConf        = Objects.requireNonNull(styleConf);</span>
+<span class="fc" id="L40">        _currentBounds    = Objects.requireNonNull(currentBounds);</span>
+<span class="fc" id="L41">        _marginCorrection = Objects.requireNonNull(marginCorrection);</span>
+<span class="fc" id="L42">    }</span>
 
-<span class="fc" id="L56">    Style style() { return _style; }</span>
+<span class="fc" id="L44">    StyleConf style() { return _styleConf; }</span>
 
-<span class="fc" id="L58">    Bounds currentBounds() { return _currentBounds; }</span>
+<span class="fc" id="L46">    Bounds currentBounds() { return _currentBounds; }</span>
 
-<span class="fc" id="L60">    Outline baseOutline() { return _baseOutline; }</span>
+<span class="fc" id="L48">    Outline areaMarginCorrection() { return _marginCorrection; }</span>
 
-    Optional&lt;Shape&gt; componentArea() {
-<span class="fc" id="L63">        Shape contentClip = null;</span>
-<span class="fc bfc" id="L64" title="All 4 branches covered.">        if ( _areas.bodyArea().exists() || _style.margin().isPositive() )</span>
-<span class="fc" id="L65">            contentClip = get(UI.ComponentArea.BODY);</span>
-
-<span class="fc" id="L67">        return Optional.ofNullable(contentClip);</span>
-    }
-
-    public Area get( UI.ComponentArea areaType ) {
-<span class="pc bpc" id="L71" title="3 of 6 branches missed.">        switch ( areaType ) {</span>
-            case ALL:
-<span class="nc" id="L73">                return null; // No clipping</span>
-            case BODY:
-<span class="fc" id="L75">                return _areas.bodyArea().getFor(this, _areas); // all - exterior == interior + border</span>
-            case INTERIOR:
-<span class="nc" id="L77">                return _areas.interiorArea().getFor(this, _areas); // all - exterior - border == content - border</span>
-            case BORDER:
-<span class="fc" id="L79">                return _areas.borderArea().getFor(this, _areas); // all - exterior - interior</span>
-            case EXTERIOR:
-<span class="fc" id="L81">                return _areas.exteriorArea().getFor(this, _areas); // all - border - interior</span>
-            default:
-<span class="nc" id="L83">                return null;</span>
-        }
-    }
-
-
-    void paintClippedTo(UI.ComponentArea area, Graphics g, Runnable painter ) {
-<span class="fc" id="L89">        Shape oldClip = g.getClip();</span>
-
-<span class="fc" id="L91">        Shape newClip = get(area);</span>
-<span class="pc bpc" id="L92" title="2 of 4 branches missed.">        if ( newClip != null &amp;&amp; newClip != oldClip ) {</span>
-<span class="fc" id="L93">            newClip = StyleUtility.intersect(newClip, oldClip);</span>
-<span class="fc" id="L94">            g.setClip(newClip);</span>
-        }
-
-<span class="fc" id="L97">        painter.run();</span>
-
-<span class="fc" id="L99">        g.setClip(oldClip);</span>
-<span class="fc" id="L100">    }</span>
-
-    ComponentConf with( Style style, JComponent component )
-    {
-<span class="fc" id="L104">        Outline outline = Outline.none();</span>
-<span class="fc" id="L105">        Border border = component.getBorder();</span>
-<span class="fc bfc" id="L106" title="All 2 branches covered.">        if ( border instanceof StyleAndAnimationBorder ) {</span>
-<span class="fc" id="L107">            Insets base = ((StyleAndAnimationBorder&lt;?&gt;) border).getBaseInsets(true);</span>
-<span class="fc" id="L108">            outline = Outline.of(base.top, base.left, base.bottom, base.right);</span>
-        }
-
-<span class="fc" id="L111">        boolean sameStyle   = _style.equals(style);</span>
-<span class="fc" id="L112">        boolean sameBounds  = _currentBounds.equals(component.getX(), component.getY(), component.getWidth(), component.getHeight());</span>
-<span class="fc" id="L113">        boolean sameOutline = _baseOutline.equals(outline);</span>
-<span class="pc bpc" id="L114" title="1 of 6 branches missed.">        if ( sameStyle &amp;&amp; sameBounds &amp;&amp; sameOutline )</span>
-<span class="fc" id="L115">            return this;</span>
-
-<span class="fc" id="L117">        ComponentConf newConf = new ComponentConf(</span>
-                                    style,
-<span class="fc" id="L119">                                    Bounds.of(component.getX(), component.getY(), component.getWidth(), component.getHeight()),</span>
-                                    outline,
-                                    _areas
-                                );
-
-<span class="fc" id="L124">        return new ComponentConf(</span>
-                        newConf._style,
-                        newConf._currentBounds,
-                        newConf._baseOutline,
-<span class="fc" id="L128">                        _areas.validate(this, newConf)</span>
-                );
-    }
-
-    ComponentConf withStyle( Style style ) {
-<span class="nc bnc" id="L133" title="All 2 branches missed.">        if ( _style.equals(style) )</span>
-<span class="nc" id="L134">            return this;</span>
-
-<span class="nc" id="L136">        return new ComponentConf(</span>
-                    style,
-                    _currentBounds,
-                    _baseOutline,
-                    _areas
-                );
+    ComponentConf withSize( int width, int height ) {
+<span class="fc" id="L51">        return new ComponentConf(</span>
+                   _styleConf,
+<span class="fc" id="L53">                   Bounds.of(_currentBounds.location(), Size.of(width, height)),</span>
+                _marginCorrection
+               );
     }
 
     /**
@@ -147,43 +61,38 @@ final class ComponentConf
      * @param layer The layer to retain.
      * @return A new {@link ComponentConf} instance which only contains style information relevant to the provided {@link UI.Layer}.
      */
-    ComponentConf onlyRetainingLayer( UI.Layer layer ) {
-<span class="fc" id="L151">        return new ComponentConf(</span>
-<span class="fc" id="L152">                    _style.onlyRetainingRenderCacheRelevantConfForLayer(layer),</span>
-<span class="fc" id="L153">                    _currentBounds.withX(0).withY(0),</span>
-                    _baseOutline,
-                    _areas
-                );
+    LayerRenderConf toRenderConfFor(UI.Layer layer ) {
+<span class="fc" id="L65">        return LayerRenderConf.of(layer,this);</span>
     }
 
     @Override
     public String toString() {
-<span class="nc" id="L161">        return this.getClass().getSimpleName()+&quot;[&quot; +</span>
-                    &quot;style=&quot;         + _style         + &quot;, &quot;+
-                    &quot;bounds=&quot;        + _currentBounds + &quot;, &quot;+
-                    &quot;baseOutline=&quot;   + _baseOutline   + &quot;, &quot;+
+<span class="nc" id="L70">        return this.getClass().getSimpleName()+&quot;[&quot; +</span>
+                    &quot;style=&quot;                + _styleConf + &quot;, &quot;+
+                    &quot;bounds=&quot;               + _currentBounds + &quot;, &quot;+
+                    &quot;areaMarginCorrection=&quot; + _marginCorrection + &quot;, &quot;+
                 &quot;]&quot;;
     }
 
     @Override
     public boolean equals( Object o ) {
-<span class="pc bpc" id="L170" title="1 of 2 branches missed.">        if ( o == this ) return true;</span>
-<span class="pc bpc" id="L171" title="1 of 2 branches missed.">        if ( o == null ) return false;</span>
-<span class="pc bpc" id="L172" title="1 of 2 branches missed.">        if ( o.getClass() != this.getClass() ) return false;</span>
-<span class="fc" id="L173">        ComponentConf other = (ComponentConf) o;</span>
-<span class="fc bfc" id="L174" title="All 2 branches covered.">        return Objects.equals(_style, other._style)</span>
-<span class="fc bfc" id="L175" title="All 2 branches covered.">            &amp;&amp; Objects.equals(_currentBounds, other._currentBounds)</span>
-<span class="pc bpc" id="L176" title="1 of 2 branches missed.">            &amp;&amp; Objects.equals(_baseOutline, other._baseOutline);</span>
+<span class="pc bpc" id="L79" title="1 of 2 branches missed.">        if ( o == this ) return true;</span>
+<span class="pc bpc" id="L80" title="1 of 2 branches missed.">        if ( o == null ) return false;</span>
+<span class="pc bpc" id="L81" title="1 of 2 branches missed.">        if ( o.getClass() != this.getClass() ) return false;</span>
+<span class="fc" id="L82">        ComponentConf other = (ComponentConf) o;</span>
+<span class="fc bfc" id="L83" title="All 2 branches covered.">        return Objects.equals(_styleConf, other._styleConf)</span>
+<span class="fc bfc" id="L84" title="All 2 branches covered.">            &amp;&amp; Objects.equals(_currentBounds, other._currentBounds)</span>
+<span class="pc bpc" id="L85" title="1 of 2 branches missed.">            &amp;&amp; Objects.equals(_marginCorrection, other._marginCorrection);</span>
     }
 
     @Override
     public int hashCode() {
-<span class="fc bfc" id="L181" title="All 2 branches covered.">        if ( _wasAlreadyHashed )</span>
-<span class="fc" id="L182">            return _hashCode;</span>
+<span class="nc bnc" id="L90" title="All 2 branches missed.">        if ( _wasAlreadyHashed )</span>
+<span class="nc" id="L91">            return _hashCode;</span>
 
-<span class="fc" id="L184">        _hashCode = Objects.hash(_style, _currentBounds, _baseOutline);</span>
-<span class="fc" id="L185">        _wasAlreadyHashed = true;</span>
-<span class="fc" id="L186">        return _hashCode;</span>
+<span class="nc" id="L93">        _hashCode = Objects.hash(_styleConf, _currentBounds, _marginCorrection);</span>
+<span class="nc" id="L94">        _wasAlreadyHashed = true;</span>
+<span class="nc" id="L95">        return _hashCode;</span>
     }
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

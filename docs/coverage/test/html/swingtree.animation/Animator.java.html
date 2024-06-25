@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Animator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.animation</a> &gt; <span class="el_source">Animator.java</span></div><h1>Animator.java</h1><pre class="source lang-java linenums">package swingtree.animation;
 
+import org.jspecify.annotations.Nullable;
 import swingtree.ComponentDelegate;
 
 import java.awt.*;
@@ -37,10 +38,10 @@ import java.util.function.Predicate;
  */
 public class Animator
 {
-    private final LifeTime      _lifeTime;  // Never null
-    private final Stride        _stride;    // Never null
-    private final Component     _component; // may be null
-    private final RunCondition _condition; // may be null
+    private final LifeTime                _lifeTime;  // Never null
+    private final Stride                  _stride;    // Never null
+    private final @Nullable Component     _component; // may be null
+    private final @Nullable RunCondition _condition; // may be null
 
 
     /**
@@ -52,7 +53,7 @@ public class Animator
      * @return An {@link Animator} instance that can be used to define how the animation should be executed.
      */
     public static Animator animateFor( LifeTime lifeTime ) {
-<span class="fc" id="L55">        return animateFor( lifeTime, Stride.PROGRESSIVE );</span>
+<span class="fc" id="L56">        return animateFor( lifeTime, Stride.PROGRESSIVE );</span>
     }
 
     /**
@@ -65,7 +66,7 @@ public class Animator
      * @return An {@link Animator} instance that can be used to define how the animation should be executed.
      */
     public static Animator animateFor( LifeTime lifeTime, Stride stride ) {
-<span class="fc" id="L68">        return new Animator( lifeTime, stride, null, null );</span>
+<span class="fc" id="L69">        return new Animator( lifeTime, stride, null, null );</span>
     }
 
     /**
@@ -78,7 +79,7 @@ public class Animator
      * @return An {@link Animator} instance that can be used to define how the animation should be executed.
      */
     public static Animator animateFor( LifeTime lifeTime, Component component ) {
-<span class="fc" id="L81">        return animateFor( lifeTime, Stride.PROGRESSIVE, component );</span>
+<span class="fc" id="L82">        return animateFor( lifeTime, Stride.PROGRESSIVE, component );</span>
     }
 
     /**
@@ -93,16 +94,21 @@ public class Animator
      * @return An {@link Animator} instance that can be used to define how the animation should be executed.
      */
     public static Animator animateFor( LifeTime lifeTime, Stride stride, Component component ) {
-<span class="fc" id="L96">        return new Animator( lifeTime, stride, component, null );</span>
+<span class="fc" id="L97">        return new Animator( lifeTime, stride, component, null );</span>
     }
 
 
-<span class="fc" id="L100">    private Animator( LifeTime lifeTime, Stride stride, Component component, RunCondition animation ) {</span>
-<span class="fc" id="L101">        _lifeTime  = Objects.requireNonNull(lifeTime);</span>
-<span class="fc" id="L102">        _stride    = Objects.requireNonNull(stride);</span>
-<span class="fc" id="L103">        _component = component; // may be null</span>
-<span class="fc" id="L104">        _condition = animation; // may be null</span>
-<span class="fc" id="L105">    }</span>
+    private Animator(
+        LifeTime               lifeTime,
+        Stride                 stride,
+        @Nullable Component    component,
+        @Nullable RunCondition animation
+<span class="fc" id="L106">    ) {</span>
+<span class="fc" id="L107">        _lifeTime  = Objects.requireNonNull(lifeTime);</span>
+<span class="fc" id="L108">        _stride    = Objects.requireNonNull(stride);</span>
+<span class="fc" id="L109">        _component = component; // may be null</span>
+<span class="fc" id="L110">        _condition = animation; // may be null</span>
+<span class="fc" id="L111">    }</span>
 
     /**
      *  Use this to define a stop condition for the animation.
@@ -112,7 +118,7 @@ public class Animator
      * @return A new {@link Animator} instance that will be executed until the given stop condition is true.
      */
     public Animator until( Predicate&lt;AnimationState&gt; shouldStop ) {
-<span class="nc" id="L115">        return this.asLongAs( shouldStop.negate() );</span>
+<span class="nc" id="L121">        return this.asLongAs( shouldStop.negate() );</span>
     }
 
     /**
@@ -123,11 +129,11 @@ public class Animator
      * @return A new {@link Animator} instance that will be executed as long as the given running condition is true.
      */
     public Animator asLongAs( Predicate&lt;AnimationState&gt; shouldRun ) {
-<span class="fc" id="L126">        return new Animator(_lifeTime, _stride, _component, state -&gt; {</span>
-<span class="fc bfc" id="L127" title="All 2 branches covered.">                    if ( shouldRun.test(state) )</span>
-<span class="pc bpc" id="L128" title="3 of 4 branches missed.">                        return _condition == null || _condition.shouldContinue(state);</span>
+<span class="fc" id="L132">        return new Animator(_lifeTime, _stride, _component, state -&gt; {</span>
+<span class="fc bfc" id="L133" title="All 2 branches covered.">                    if ( shouldRun.test(state) )</span>
+<span class="pc bpc" id="L134" title="3 of 4 branches missed.">                        return _condition == null || _condition.shouldContinue(state);</span>
 
-<span class="fc" id="L130">                    return false;</span>
+<span class="fc" id="L136">                    return false;</span>
                 });
     }
 
@@ -140,15 +146,15 @@ public class Animator
      * @param animation The animation that should be executed.
      */
     public void go( Animation animation ) {
-<span class="fc bfc" id="L143" title="All 2 branches covered.">        RunCondition shouldRun = Optional.ofNullable(_condition).orElse( state -&gt; state.repeats() == 0 );</span>
-<span class="fc" id="L144">        AnimationRunner.add( new ComponentAnimator(</span>
+<span class="fc bfc" id="L149" title="All 2 branches covered.">        RunCondition shouldRun = Optional.ofNullable(_condition).orElse( state -&gt; state.repeats() == 0 );</span>
+<span class="fc" id="L150">        AnimationRunner.add( new ComponentAnimator(</span>
                 _component,
-<span class="fc" id="L146">                LifeSpan.startingNowWith(Objects.requireNonNull(_lifeTime)),</span>
+<span class="fc" id="L152">                LifeSpan.startingNowWith(Objects.requireNonNull(_lifeTime)),</span>
                 _stride,
                 shouldRun,
                 animation
             ));
-<span class="fc" id="L151">    }</span>
+<span class="fc" id="L157">    }</span>
 
     /**
      *  Runs the given animation based on a time offset in the given time unit
@@ -169,15 +175,15 @@ public class Animator
      * @param animation The animation that should be executed.
      */
     public void goWithOffset( long offset, TimeUnit unit, Animation animation ) {
-<span class="fc bfc" id="L172" title="All 2 branches covered.">        RunCondition shouldRun = Optional.ofNullable(_condition).orElse( state -&gt; state.repeats() == 0 );</span>
-<span class="fc" id="L173">        AnimationRunner.add( new ComponentAnimator(</span>
+<span class="fc bfc" id="L178" title="All 2 branches covered.">        RunCondition shouldRun = Optional.ofNullable(_condition).orElse( state -&gt; state.repeats() == 0 );</span>
+<span class="fc" id="L179">        AnimationRunner.add( new ComponentAnimator(</span>
                 _component,
-<span class="fc" id="L175">                LifeSpan.startingNowWithOffset(offset, unit, Objects.requireNonNull(_lifeTime)),</span>
+<span class="fc" id="L181">                LifeSpan.startingNowWithOffset(offset, unit, Objects.requireNonNull(_lifeTime)),</span>
                 _stride,
                 shouldRun,
                 animation
             ));
-<span class="fc" id="L180">    }</span>
+<span class="fc" id="L186">    }</span>
 
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

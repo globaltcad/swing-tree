@@ -4,7 +4,7 @@
   "narrative":"In Swing drop downs are called combo boxes and they are used to select\n    one item from a list of options.\n\n    This specification will show you how you can create them and\n    how you can interact with them using SwingTree.",
   "subjects":["swingtree.UIForCombo"],
   "statistics":{
-    "runs":"14",
+    "runs":"33",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -132,7 +132,7 @@
 
         {"kind":"and","text":"The selected item is set.","code":["combo.getSelectedItem() == \"B\""]},
 
-        {"kind":"when","text":"We simulate the user typing \"XY\" into the combo box.","code":["combo.editor.item = \"XY\""]},
+        {"kind":"when","text":"We simulate the user typing \"XY\" into the combo box.","code":["UI.runNow( () -> combo.editor.item = \"XY\" )","UI.sync()"]},
 
         {"kind":"then","text":"The combo box is updated.","code":["combo.getSelectedItem() == \"XY\""]},
 
@@ -307,11 +307,264 @@
     },
   
     {
-      "id":"An editable combo box will try to parse any kind of user input to match bound properties.",
+      "id":"An editable combo box will try to parse any kind of user input to match bound properties. [0]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            When you bind a selection property to an editable combo box, the combo box\n            will try to parse user input so that it can be converted to the type of the\n            selection property. \n            If the String can be parsed, the combo box will update the selection property\n            to the parsed value.\n            On the other hand, if the String cannot be parsed, the combo box will not\n            update the selection property.\n        ","\n            When you bind a selection property to an editable combo box, the combo box\n            will try to parse user input so that it can be converted to the type of the\n            selection property. \n            If the String can be parsed, the combo box will update the selection property\n            to the parsed value.\n            On the other hand, if the String cannot be parsed, the combo box will not\n            update the selection property.\n        ","\n            When you bind a selection property to an editable combo box, the combo box\n            will try to parse user input so that it can be converted to the type of the\n            selection property. \n            If the String can be parsed, the combo box will update the selection property\n            to the parsed value.\n            On the other hand, if the String cannot be parsed, the combo box will not\n            update the selection property.\n        ","\n            When you bind a selection property to an editable combo box, the combo box\n            will try to parse user input so that it can be converted to the type of the\n            selection property. \n            If the String can be parsed, the combo box will update the selection property\n            to the parsed value.\n            On the other hand, if the String cannot be parsed, the combo box will not\n            update the selection property.\n        ","\n            When you bind a selection property to an editable combo box, the combo box\n            will try to parse user input so that it can be converted to the type of the\n            selection property. \n            If the String can be parsed, the combo box will update the selection property\n            to the parsed value.\n            On the other hand, if the String cannot be parsed, the combo box will not\n            update the selection property.\n        ","\n            When you bind a selection property to an editable combo box, the combo box\n            will try to parse user input so that it can be converted to the type of the\n            selection property. \n            If the String can be parsed, the combo box will update the selection property\n            to the parsed value.\n            On the other hand, if the String cannot be parsed, the combo box will not\n            update the selection property.\n        ","\n            When you bind a selection property to an editable combo box, the combo box\n            will try to parse user input so that it can be converted to the type of the\n            selection property. \n            If the String can be parsed, the combo box will update the selection property\n            to the parsed value.\n            On the other hand, if the String cannot be parsed, the combo box will not\n            update the selection property.\n        ","\n            When you bind a selection property to an editable combo box, the combo box\n            will try to parse user input so that it can be converted to the type of the\n            selection property. \n            If the String can be parsed, the combo box will update the selection property\n            to the parsed value.\n            On the other hand, if the String cannot be parsed, the combo box will not\n            update the selection property.\n        ","\n            When you bind a selection property to an editable combo box, the combo box\n            will try to parse user input so that it can be converted to the type of the\n            selection property. \n            If the String can be parsed, the combo box will update the selection property\n            to the parsed value.\n            On the other hand, if the String cannot be parsed, the combo box will not\n            update the selection property.\n        ","\n            When you bind a selection property to an editable combo box, the combo box\n            will try to parse user input so that it can be converted to the type of the\n            selection property. \n            If the String can be parsed, the combo box will update the selection property\n            to the parsed value.\n            On the other hand, if the String cannot be parsed, the combo box will not\n            update the selection property.\n        ","\n            When you bind a selection property to an editable combo box, the combo box\n            will try to parse user input so that it can be converted to the type of the\n            selection property. \n            If the String can be parsed, the combo box will update the selection property\n            to the parsed value.\n            On the other hand, if the String cannot be parsed, the combo box will not\n            update the selection property.\n        ","\n            When you bind a selection property to an editable combo box, the combo box\n            will try to parse user input so that it can be converted to the type of the\n            selection property. \n            If the String can be parsed, the combo box will update the selection property\n            to the parsed value.\n            On the other hand, if the String cannot be parsed, the combo box will not\n            update the selection property.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            When you bind a selection property to an editable combo box, the combo box\n            will try to parse user input so that it can be converted to the type of the\n            selection property. \n            If the String can be parsed, the combo box will update the selection property\n            to the parsed value.\n            On the other hand, if the String cannot be parsed, the combo box will not\n            update the selection property.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a combo box that is bound to the property.","code":["var ui =","            UI.comboBox(selection, items)","            .isEditableIf(true)"]},
+
+        {"kind":"and","text":"We get the combo box.","code":["var combo = ui.get(JComboBox)"]},
+
+        {"kind":"expect","text":"The combo box is initialized with the current selection.","code":["combo.getSelectedItem() == selection.get()"]},
+
+        {"kind":"when","text":"We simulate the user editing the combo box.","code":["combo.setSelectedItem(input)","UI.sync()"]},
+
+        {"kind":"then","text":"The combo box updates the selection property to the parsed value.","code":["selection.get() == expectedSelection"]},
+
+        {"kind":"where","text":"We use the following data table to populate the used variables:","code":{"input":["'99'","'42'","'true'","'false'","'yes'","'no'","'3.14'","'2.71'","'foo'","'bar'","'666L'","'777L'"],"selection":["Var.of(42)","Var.of(42)","Var.of(false)","Var.of(false)","Var.of(false)","Var.of(false)","Var.of(3.14)","Var.of(3.14)","Var.of('foo')","Var.of('foo')","Var.of(666L)","Var.of(666L)"],"items":["[73, 42, 17]","[73, 42, 17]","[true, false]","[true, false]","[true, false]","[true, false]","[3.14, 2.71]","[3.14, 2.71]","['foo', 'bar']","['foo', 'bar']","[666L, 777L]","[666L, 777L]"],"expectedSelection":["99","42","true","false","true","false","3.14","2.71","'foo'","'bar'","666L","777L"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An editable combo box will try to parse any kind of user input to match bound properties. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When you bind a selection property to an editable combo box, the combo box\n            will try to parse user input so that it can be converted to the type of the\n            selection property. \n            If the String can be parsed, the combo box will update the selection property\n            to the parsed value.\n            On the other hand, if the String cannot be parsed, the combo box will not\n            update the selection property.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a combo box that is bound to the property.","code":["var ui =","            UI.comboBox(selection, items)","            .isEditableIf(true)"]},
+
+        {"kind":"and","text":"We get the combo box.","code":["var combo = ui.get(JComboBox)"]},
+
+        {"kind":"expect","text":"The combo box is initialized with the current selection.","code":["combo.getSelectedItem() == selection.get()"]},
+
+        {"kind":"when","text":"We simulate the user editing the combo box.","code":["combo.setSelectedItem(input)","UI.sync()"]},
+
+        {"kind":"then","text":"The combo box updates the selection property to the parsed value.","code":["selection.get() == expectedSelection"]},
+
+        {"kind":"where","text":"We use the following data table to populate the used variables:","code":{"input":["'99'","'42'","'true'","'false'","'yes'","'no'","'3.14'","'2.71'","'foo'","'bar'","'666L'","'777L'"],"selection":["Var.of(42)","Var.of(42)","Var.of(false)","Var.of(false)","Var.of(false)","Var.of(false)","Var.of(3.14)","Var.of(3.14)","Var.of('foo')","Var.of('foo')","Var.of(666L)","Var.of(666L)"],"items":["[73, 42, 17]","[73, 42, 17]","[true, false]","[true, false]","[true, false]","[true, false]","[3.14, 2.71]","[3.14, 2.71]","['foo', 'bar']","['foo', 'bar']","[666L, 777L]","[666L, 777L]"],"expectedSelection":["99","42","true","false","true","false","3.14","2.71","'foo'","'bar'","666L","777L"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An editable combo box will try to parse any kind of user input to match bound properties. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When you bind a selection property to an editable combo box, the combo box\n            will try to parse user input so that it can be converted to the type of the\n            selection property. \n            If the String can be parsed, the combo box will update the selection property\n            to the parsed value.\n            On the other hand, if the String cannot be parsed, the combo box will not\n            update the selection property.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a combo box that is bound to the property.","code":["var ui =","            UI.comboBox(selection, items)","            .isEditableIf(true)"]},
+
+        {"kind":"and","text":"We get the combo box.","code":["var combo = ui.get(JComboBox)"]},
+
+        {"kind":"expect","text":"The combo box is initialized with the current selection.","code":["combo.getSelectedItem() == selection.get()"]},
+
+        {"kind":"when","text":"We simulate the user editing the combo box.","code":["combo.setSelectedItem(input)","UI.sync()"]},
+
+        {"kind":"then","text":"The combo box updates the selection property to the parsed value.","code":["selection.get() == expectedSelection"]},
+
+        {"kind":"where","text":"We use the following data table to populate the used variables:","code":{"input":["'99'","'42'","'true'","'false'","'yes'","'no'","'3.14'","'2.71'","'foo'","'bar'","'666L'","'777L'"],"selection":["Var.of(42)","Var.of(42)","Var.of(false)","Var.of(false)","Var.of(false)","Var.of(false)","Var.of(3.14)","Var.of(3.14)","Var.of('foo')","Var.of('foo')","Var.of(666L)","Var.of(666L)"],"items":["[73, 42, 17]","[73, 42, 17]","[true, false]","[true, false]","[true, false]","[true, false]","[3.14, 2.71]","[3.14, 2.71]","['foo', 'bar']","['foo', 'bar']","[666L, 777L]","[666L, 777L]"],"expectedSelection":["99","42","true","false","true","false","3.14","2.71","'foo'","'bar'","666L","777L"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An editable combo box will try to parse any kind of user input to match bound properties. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When you bind a selection property to an editable combo box, the combo box\n            will try to parse user input so that it can be converted to the type of the\n            selection property. \n            If the String can be parsed, the combo box will update the selection property\n            to the parsed value.\n            On the other hand, if the String cannot be parsed, the combo box will not\n            update the selection property.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a combo box that is bound to the property.","code":["var ui =","            UI.comboBox(selection, items)","            .isEditableIf(true)"]},
+
+        {"kind":"and","text":"We get the combo box.","code":["var combo = ui.get(JComboBox)"]},
+
+        {"kind":"expect","text":"The combo box is initialized with the current selection.","code":["combo.getSelectedItem() == selection.get()"]},
+
+        {"kind":"when","text":"We simulate the user editing the combo box.","code":["combo.setSelectedItem(input)","UI.sync()"]},
+
+        {"kind":"then","text":"The combo box updates the selection property to the parsed value.","code":["selection.get() == expectedSelection"]},
+
+        {"kind":"where","text":"We use the following data table to populate the used variables:","code":{"input":["'99'","'42'","'true'","'false'","'yes'","'no'","'3.14'","'2.71'","'foo'","'bar'","'666L'","'777L'"],"selection":["Var.of(42)","Var.of(42)","Var.of(false)","Var.of(false)","Var.of(false)","Var.of(false)","Var.of(3.14)","Var.of(3.14)","Var.of('foo')","Var.of('foo')","Var.of(666L)","Var.of(666L)"],"items":["[73, 42, 17]","[73, 42, 17]","[true, false]","[true, false]","[true, false]","[true, false]","[3.14, 2.71]","[3.14, 2.71]","['foo', 'bar']","['foo', 'bar']","[666L, 777L]","[666L, 777L]"],"expectedSelection":["99","42","true","false","true","false","3.14","2.71","'foo'","'bar'","666L","777L"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An editable combo box will try to parse any kind of user input to match bound properties. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When you bind a selection property to an editable combo box, the combo box\n            will try to parse user input so that it can be converted to the type of the\n            selection property. \n            If the String can be parsed, the combo box will update the selection property\n            to the parsed value.\n            On the other hand, if the String cannot be parsed, the combo box will not\n            update the selection property.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a combo box that is bound to the property.","code":["var ui =","            UI.comboBox(selection, items)","            .isEditableIf(true)"]},
+
+        {"kind":"and","text":"We get the combo box.","code":["var combo = ui.get(JComboBox)"]},
+
+        {"kind":"expect","text":"The combo box is initialized with the current selection.","code":["combo.getSelectedItem() == selection.get()"]},
+
+        {"kind":"when","text":"We simulate the user editing the combo box.","code":["combo.setSelectedItem(input)","UI.sync()"]},
+
+        {"kind":"then","text":"The combo box updates the selection property to the parsed value.","code":["selection.get() == expectedSelection"]},
+
+        {"kind":"where","text":"We use the following data table to populate the used variables:","code":{"input":["'99'","'42'","'true'","'false'","'yes'","'no'","'3.14'","'2.71'","'foo'","'bar'","'666L'","'777L'"],"selection":["Var.of(42)","Var.of(42)","Var.of(false)","Var.of(false)","Var.of(false)","Var.of(false)","Var.of(3.14)","Var.of(3.14)","Var.of('foo')","Var.of('foo')","Var.of(666L)","Var.of(666L)"],"items":["[73, 42, 17]","[73, 42, 17]","[true, false]","[true, false]","[true, false]","[true, false]","[3.14, 2.71]","[3.14, 2.71]","['foo', 'bar']","['foo', 'bar']","[666L, 777L]","[666L, 777L]"],"expectedSelection":["99","42","true","false","true","false","3.14","2.71","'foo'","'bar'","666L","777L"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An editable combo box will try to parse any kind of user input to match bound properties. [5]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When you bind a selection property to an editable combo box, the combo box\n            will try to parse user input so that it can be converted to the type of the\n            selection property. \n            If the String can be parsed, the combo box will update the selection property\n            to the parsed value.\n            On the other hand, if the String cannot be parsed, the combo box will not\n            update the selection property.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a combo box that is bound to the property.","code":["var ui =","            UI.comboBox(selection, items)","            .isEditableIf(true)"]},
+
+        {"kind":"and","text":"We get the combo box.","code":["var combo = ui.get(JComboBox)"]},
+
+        {"kind":"expect","text":"The combo box is initialized with the current selection.","code":["combo.getSelectedItem() == selection.get()"]},
+
+        {"kind":"when","text":"We simulate the user editing the combo box.","code":["combo.setSelectedItem(input)","UI.sync()"]},
+
+        {"kind":"then","text":"The combo box updates the selection property to the parsed value.","code":["selection.get() == expectedSelection"]},
+
+        {"kind":"where","text":"We use the following data table to populate the used variables:","code":{"input":["'99'","'42'","'true'","'false'","'yes'","'no'","'3.14'","'2.71'","'foo'","'bar'","'666L'","'777L'"],"selection":["Var.of(42)","Var.of(42)","Var.of(false)","Var.of(false)","Var.of(false)","Var.of(false)","Var.of(3.14)","Var.of(3.14)","Var.of('foo')","Var.of('foo')","Var.of(666L)","Var.of(666L)"],"items":["[73, 42, 17]","[73, 42, 17]","[true, false]","[true, false]","[true, false]","[true, false]","[3.14, 2.71]","[3.14, 2.71]","['foo', 'bar']","['foo', 'bar']","[666L, 777L]","[666L, 777L]"],"expectedSelection":["99","42","true","false","true","false","3.14","2.71","'foo'","'bar'","666L","777L"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An editable combo box will try to parse any kind of user input to match bound properties. [6]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When you bind a selection property to an editable combo box, the combo box\n            will try to parse user input so that it can be converted to the type of the\n            selection property. \n            If the String can be parsed, the combo box will update the selection property\n            to the parsed value.\n            On the other hand, if the String cannot be parsed, the combo box will not\n            update the selection property.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a combo box that is bound to the property.","code":["var ui =","            UI.comboBox(selection, items)","            .isEditableIf(true)"]},
+
+        {"kind":"and","text":"We get the combo box.","code":["var combo = ui.get(JComboBox)"]},
+
+        {"kind":"expect","text":"The combo box is initialized with the current selection.","code":["combo.getSelectedItem() == selection.get()"]},
+
+        {"kind":"when","text":"We simulate the user editing the combo box.","code":["combo.setSelectedItem(input)","UI.sync()"]},
+
+        {"kind":"then","text":"The combo box updates the selection property to the parsed value.","code":["selection.get() == expectedSelection"]},
+
+        {"kind":"where","text":"We use the following data table to populate the used variables:","code":{"input":["'99'","'42'","'true'","'false'","'yes'","'no'","'3.14'","'2.71'","'foo'","'bar'","'666L'","'777L'"],"selection":["Var.of(42)","Var.of(42)","Var.of(false)","Var.of(false)","Var.of(false)","Var.of(false)","Var.of(3.14)","Var.of(3.14)","Var.of('foo')","Var.of('foo')","Var.of(666L)","Var.of(666L)"],"items":["[73, 42, 17]","[73, 42, 17]","[true, false]","[true, false]","[true, false]","[true, false]","[3.14, 2.71]","[3.14, 2.71]","['foo', 'bar']","['foo', 'bar']","[666L, 777L]","[666L, 777L]"],"expectedSelection":["99","42","true","false","true","false","3.14","2.71","'foo'","'bar'","666L","777L"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An editable combo box will try to parse any kind of user input to match bound properties. [7]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When you bind a selection property to an editable combo box, the combo box\n            will try to parse user input so that it can be converted to the type of the\n            selection property. \n            If the String can be parsed, the combo box will update the selection property\n            to the parsed value.\n            On the other hand, if the String cannot be parsed, the combo box will not\n            update the selection property.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a combo box that is bound to the property.","code":["var ui =","            UI.comboBox(selection, items)","            .isEditableIf(true)"]},
+
+        {"kind":"and","text":"We get the combo box.","code":["var combo = ui.get(JComboBox)"]},
+
+        {"kind":"expect","text":"The combo box is initialized with the current selection.","code":["combo.getSelectedItem() == selection.get()"]},
+
+        {"kind":"when","text":"We simulate the user editing the combo box.","code":["combo.setSelectedItem(input)","UI.sync()"]},
+
+        {"kind":"then","text":"The combo box updates the selection property to the parsed value.","code":["selection.get() == expectedSelection"]},
+
+        {"kind":"where","text":"We use the following data table to populate the used variables:","code":{"input":["'99'","'42'","'true'","'false'","'yes'","'no'","'3.14'","'2.71'","'foo'","'bar'","'666L'","'777L'"],"selection":["Var.of(42)","Var.of(42)","Var.of(false)","Var.of(false)","Var.of(false)","Var.of(false)","Var.of(3.14)","Var.of(3.14)","Var.of('foo')","Var.of('foo')","Var.of(666L)","Var.of(666L)"],"items":["[73, 42, 17]","[73, 42, 17]","[true, false]","[true, false]","[true, false]","[true, false]","[3.14, 2.71]","[3.14, 2.71]","['foo', 'bar']","['foo', 'bar']","[666L, 777L]","[666L, 777L]"],"expectedSelection":["99","42","true","false","true","false","3.14","2.71","'foo'","'bar'","666L","777L"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An editable combo box will try to parse any kind of user input to match bound properties. [8]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When you bind a selection property to an editable combo box, the combo box\n            will try to parse user input so that it can be converted to the type of the\n            selection property. \n            If the String can be parsed, the combo box will update the selection property\n            to the parsed value.\n            On the other hand, if the String cannot be parsed, the combo box will not\n            update the selection property.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a combo box that is bound to the property.","code":["var ui =","            UI.comboBox(selection, items)","            .isEditableIf(true)"]},
+
+        {"kind":"and","text":"We get the combo box.","code":["var combo = ui.get(JComboBox)"]},
+
+        {"kind":"expect","text":"The combo box is initialized with the current selection.","code":["combo.getSelectedItem() == selection.get()"]},
+
+        {"kind":"when","text":"We simulate the user editing the combo box.","code":["combo.setSelectedItem(input)","UI.sync()"]},
+
+        {"kind":"then","text":"The combo box updates the selection property to the parsed value.","code":["selection.get() == expectedSelection"]},
+
+        {"kind":"where","text":"We use the following data table to populate the used variables:","code":{"input":["'99'","'42'","'true'","'false'","'yes'","'no'","'3.14'","'2.71'","'foo'","'bar'","'666L'","'777L'"],"selection":["Var.of(42)","Var.of(42)","Var.of(false)","Var.of(false)","Var.of(false)","Var.of(false)","Var.of(3.14)","Var.of(3.14)","Var.of('foo')","Var.of('foo')","Var.of(666L)","Var.of(666L)"],"items":["[73, 42, 17]","[73, 42, 17]","[true, false]","[true, false]","[true, false]","[true, false]","[3.14, 2.71]","[3.14, 2.71]","['foo', 'bar']","['foo', 'bar']","[666L, 777L]","[666L, 777L]"],"expectedSelection":["99","42","true","false","true","false","3.14","2.71","'foo'","'bar'","666L","777L"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An editable combo box will try to parse any kind of user input to match bound properties. [9]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When you bind a selection property to an editable combo box, the combo box\n            will try to parse user input so that it can be converted to the type of the\n            selection property. \n            If the String can be parsed, the combo box will update the selection property\n            to the parsed value.\n            On the other hand, if the String cannot be parsed, the combo box will not\n            update the selection property.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a combo box that is bound to the property.","code":["var ui =","            UI.comboBox(selection, items)","            .isEditableIf(true)"]},
+
+        {"kind":"and","text":"We get the combo box.","code":["var combo = ui.get(JComboBox)"]},
+
+        {"kind":"expect","text":"The combo box is initialized with the current selection.","code":["combo.getSelectedItem() == selection.get()"]},
+
+        {"kind":"when","text":"We simulate the user editing the combo box.","code":["combo.setSelectedItem(input)","UI.sync()"]},
+
+        {"kind":"then","text":"The combo box updates the selection property to the parsed value.","code":["selection.get() == expectedSelection"]},
+
+        {"kind":"where","text":"We use the following data table to populate the used variables:","code":{"input":["'99'","'42'","'true'","'false'","'yes'","'no'","'3.14'","'2.71'","'foo'","'bar'","'666L'","'777L'"],"selection":["Var.of(42)","Var.of(42)","Var.of(false)","Var.of(false)","Var.of(false)","Var.of(false)","Var.of(3.14)","Var.of(3.14)","Var.of('foo')","Var.of('foo')","Var.of(666L)","Var.of(666L)"],"items":["[73, 42, 17]","[73, 42, 17]","[true, false]","[true, false]","[true, false]","[true, false]","[3.14, 2.71]","[3.14, 2.71]","['foo', 'bar']","['foo', 'bar']","[666L, 777L]","[666L, 777L]"],"expectedSelection":["99","42","true","false","true","false","3.14","2.71","'foo'","'bar'","666L","777L"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An editable combo box will try to parse any kind of user input to match bound properties. [10]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When you bind a selection property to an editable combo box, the combo box\n            will try to parse user input so that it can be converted to the type of the\n            selection property. \n            If the String can be parsed, the combo box will update the selection property\n            to the parsed value.\n            On the other hand, if the String cannot be parsed, the combo box will not\n            update the selection property.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a combo box that is bound to the property.","code":["var ui =","            UI.comboBox(selection, items)","            .isEditableIf(true)"]},
+
+        {"kind":"and","text":"We get the combo box.","code":["var combo = ui.get(JComboBox)"]},
+
+        {"kind":"expect","text":"The combo box is initialized with the current selection.","code":["combo.getSelectedItem() == selection.get()"]},
+
+        {"kind":"when","text":"We simulate the user editing the combo box.","code":["combo.setSelectedItem(input)","UI.sync()"]},
+
+        {"kind":"then","text":"The combo box updates the selection property to the parsed value.","code":["selection.get() == expectedSelection"]},
+
+        {"kind":"where","text":"We use the following data table to populate the used variables:","code":{"input":["'99'","'42'","'true'","'false'","'yes'","'no'","'3.14'","'2.71'","'foo'","'bar'","'666L'","'777L'"],"selection":["Var.of(42)","Var.of(42)","Var.of(false)","Var.of(false)","Var.of(false)","Var.of(false)","Var.of(3.14)","Var.of(3.14)","Var.of('foo')","Var.of('foo')","Var.of(666L)","Var.of(666L)"],"items":["[73, 42, 17]","[73, 42, 17]","[true, false]","[true, false]","[true, false]","[true, false]","[3.14, 2.71]","[3.14, 2.71]","['foo', 'bar']","['foo', 'bar']","[666L, 777L]","[666L, 777L]"],"expectedSelection":["99","42","true","false","true","false","3.14","2.71","'foo'","'bar'","666L","777L"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An editable combo box will try to parse any kind of user input to match bound properties. [11]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When you bind a selection property to an editable combo box, the combo box\n            will try to parse user input so that it can be converted to the type of the\n            selection property. \n            If the String can be parsed, the combo box will update the selection property\n            to the parsed value.\n            On the other hand, if the String cannot be parsed, the combo box will not\n            update the selection property.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create a combo box that is bound to the property.","code":["var ui =","            UI.comboBox(selection, items)","            .isEditableIf(true)"]},
@@ -367,6 +620,206 @@
         {"kind":"when","text":"We change the selected property to 1...","code":["\t\t    selected.set(1)","UI.sync()"]},
 
         {"kind":"then","text":"The combo box has been updated as expected!","code":["\t\t    combo.selectedItem == 1","\t\t    combo.editor.item == 1"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Create combo box UIs with simple text render functions. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The type of items a combo box holds need to be presented\n            to the user in a human readable way. The most common and convenient\n            way to do this is to use a simple text representation of the items.\n            This can be achieved by providing a function that converts the items\n            to strings.\n\n            In this example we are using the following enum type\n            to model the items of the combo box:\n            ```\n            enum Animal {\n                CAT, DOG, COW, PIG\n            }\n            ```\n            We are going to use these constant to\n            as a basis for various kinds of ways to model the combo box\n            state and also how to render them.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a combo box that is bound to the property.","code":["var ui = uiSupplier.get()"]},
+
+        {"kind":"and","text":"We build a combo box component.","code":["var combo = ui.get(JComboBox)"]},
+
+        {"kind":"expect","text":"There are all 4 options available.","code":["combo.itemCount == 4","combo.getItemAt(0) == Animal.CAT","combo.getItemAt(1) == Animal.DOG","combo.getItemAt(2) == Animal.COW","combo.getItemAt(3) == Animal.PIG"]},
+
+        {"kind":"and","text":"We check if the renderer exists and is working.","code":["combo.renderer != null"]},
+
+        {"kind":"when","text":"We call the renderer for each item.","code":["var renderer = combo.renderer","var fakeJList = new JList<Animal>()","var rendered = [","    renderer.getListCellRendererComponent(fakeJList, Animal.CAT, 0, false, false),","    renderer.getListCellRendererComponent(fakeJList, Animal.DOG, 1, false, false),","    renderer.getListCellRendererComponent(fakeJList, Animal.COW, 2, false, false),","    renderer.getListCellRendererComponent(fakeJList, Animal.PIG, 3, false, false)","]"]},
+
+        {"kind":"then","text":"The renderer returns the expected text representations.","code":["rendered[0].text == \"cat\"","rendered[1].text == \"dog\"","rendered[2].text == \"cow\"","rendered[3].text == \"pig\""]},
+
+        {"kind":"where","text":"\n            We are using the following factory methods from the `UI` namespace.\n            Note that the `UI.comboBox` method is overloaded and can take\n            all kinds of arguments to model the state of the combo box.\n        ","code":{"uiSupplier":["{ UI.comboBox(Animal.values() as List, a -> a.name().toLowerCase()) }","{ UI.comboBox(Vars.of(Animal.CAT, Animal.DOG, Animal.COW, Animal.PIG), a -> a.name().toLowerCase()) }","{ UI.comboBox(Vals.of(Animal.CAT, Animal.DOG, Animal.COW, Animal.PIG), a -> a.name().toLowerCase()) }","{ UI.comboBox(Var.of(Animal.CAT), Animal.values() as List, a -> a.name().toLowerCase()) }","{ UI.comboBox(Var.of(Animal.CAT), Vars.of(Animal.CAT, Animal.DOG, Animal.COW, Animal.PIG), a -> a.name().toLowerCase()) }","{ UI.comboBox(Var.of(Animal.CAT), Vals.of(Animal.CAT, Animal.DOG, Animal.COW, Animal.PIG), a -> a.name().toLowerCase()) }","{ UI.comboBox(Var.of(Animal.CAT), Var.of(Animal.values()), a -> a.name().toLowerCase()) }","{ UI.comboBox(Var.of(Animal.CAT), Val.of(Animal.values()), a -> a.name().toLowerCase()) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Create combo box UIs with simple text render functions. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The type of items a combo box holds need to be presented\n            to the user in a human readable way. The most common and convenient\n            way to do this is to use a simple text representation of the items.\n            This can be achieved by providing a function that converts the items\n            to strings.\n\n            In this example we are using the following enum type\n            to model the items of the combo box:\n            ```\n            enum Animal {\n                CAT, DOG, COW, PIG\n            }\n            ```\n            We are going to use these constant to\n            as a basis for various kinds of ways to model the combo box\n            state and also how to render them.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a combo box that is bound to the property.","code":["var ui = uiSupplier.get()"]},
+
+        {"kind":"and","text":"We build a combo box component.","code":["var combo = ui.get(JComboBox)"]},
+
+        {"kind":"expect","text":"There are all 4 options available.","code":["combo.itemCount == 4","combo.getItemAt(0) == Animal.CAT","combo.getItemAt(1) == Animal.DOG","combo.getItemAt(2) == Animal.COW","combo.getItemAt(3) == Animal.PIG"]},
+
+        {"kind":"and","text":"We check if the renderer exists and is working.","code":["combo.renderer != null"]},
+
+        {"kind":"when","text":"We call the renderer for each item.","code":["var renderer = combo.renderer","var fakeJList = new JList<Animal>()","var rendered = [","    renderer.getListCellRendererComponent(fakeJList, Animal.CAT, 0, false, false),","    renderer.getListCellRendererComponent(fakeJList, Animal.DOG, 1, false, false),","    renderer.getListCellRendererComponent(fakeJList, Animal.COW, 2, false, false),","    renderer.getListCellRendererComponent(fakeJList, Animal.PIG, 3, false, false)","]"]},
+
+        {"kind":"then","text":"The renderer returns the expected text representations.","code":["rendered[0].text == \"cat\"","rendered[1].text == \"dog\"","rendered[2].text == \"cow\"","rendered[3].text == \"pig\""]},
+
+        {"kind":"where","text":"\n            We are using the following factory methods from the `UI` namespace.\n            Note that the `UI.comboBox` method is overloaded and can take\n            all kinds of arguments to model the state of the combo box.\n        ","code":{"uiSupplier":["{ UI.comboBox(Animal.values() as List, a -> a.name().toLowerCase()) }","{ UI.comboBox(Vars.of(Animal.CAT, Animal.DOG, Animal.COW, Animal.PIG), a -> a.name().toLowerCase()) }","{ UI.comboBox(Vals.of(Animal.CAT, Animal.DOG, Animal.COW, Animal.PIG), a -> a.name().toLowerCase()) }","{ UI.comboBox(Var.of(Animal.CAT), Animal.values() as List, a -> a.name().toLowerCase()) }","{ UI.comboBox(Var.of(Animal.CAT), Vars.of(Animal.CAT, Animal.DOG, Animal.COW, Animal.PIG), a -> a.name().toLowerCase()) }","{ UI.comboBox(Var.of(Animal.CAT), Vals.of(Animal.CAT, Animal.DOG, Animal.COW, Animal.PIG), a -> a.name().toLowerCase()) }","{ UI.comboBox(Var.of(Animal.CAT), Var.of(Animal.values()), a -> a.name().toLowerCase()) }","{ UI.comboBox(Var.of(Animal.CAT), Val.of(Animal.values()), a -> a.name().toLowerCase()) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Create combo box UIs with simple text render functions. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The type of items a combo box holds need to be presented\n            to the user in a human readable way. The most common and convenient\n            way to do this is to use a simple text representation of the items.\n            This can be achieved by providing a function that converts the items\n            to strings.\n\n            In this example we are using the following enum type\n            to model the items of the combo box:\n            ```\n            enum Animal {\n                CAT, DOG, COW, PIG\n            }\n            ```\n            We are going to use these constant to\n            as a basis for various kinds of ways to model the combo box\n            state and also how to render them.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a combo box that is bound to the property.","code":["var ui = uiSupplier.get()"]},
+
+        {"kind":"and","text":"We build a combo box component.","code":["var combo = ui.get(JComboBox)"]},
+
+        {"kind":"expect","text":"There are all 4 options available.","code":["combo.itemCount == 4","combo.getItemAt(0) == Animal.CAT","combo.getItemAt(1) == Animal.DOG","combo.getItemAt(2) == Animal.COW","combo.getItemAt(3) == Animal.PIG"]},
+
+        {"kind":"and","text":"We check if the renderer exists and is working.","code":["combo.renderer != null"]},
+
+        {"kind":"when","text":"We call the renderer for each item.","code":["var renderer = combo.renderer","var fakeJList = new JList<Animal>()","var rendered = [","    renderer.getListCellRendererComponent(fakeJList, Animal.CAT, 0, false, false),","    renderer.getListCellRendererComponent(fakeJList, Animal.DOG, 1, false, false),","    renderer.getListCellRendererComponent(fakeJList, Animal.COW, 2, false, false),","    renderer.getListCellRendererComponent(fakeJList, Animal.PIG, 3, false, false)","]"]},
+
+        {"kind":"then","text":"The renderer returns the expected text representations.","code":["rendered[0].text == \"cat\"","rendered[1].text == \"dog\"","rendered[2].text == \"cow\"","rendered[3].text == \"pig\""]},
+
+        {"kind":"where","text":"\n            We are using the following factory methods from the `UI` namespace.\n            Note that the `UI.comboBox` method is overloaded and can take\n            all kinds of arguments to model the state of the combo box.\n        ","code":{"uiSupplier":["{ UI.comboBox(Animal.values() as List, a -> a.name().toLowerCase()) }","{ UI.comboBox(Vars.of(Animal.CAT, Animal.DOG, Animal.COW, Animal.PIG), a -> a.name().toLowerCase()) }","{ UI.comboBox(Vals.of(Animal.CAT, Animal.DOG, Animal.COW, Animal.PIG), a -> a.name().toLowerCase()) }","{ UI.comboBox(Var.of(Animal.CAT), Animal.values() as List, a -> a.name().toLowerCase()) }","{ UI.comboBox(Var.of(Animal.CAT), Vars.of(Animal.CAT, Animal.DOG, Animal.COW, Animal.PIG), a -> a.name().toLowerCase()) }","{ UI.comboBox(Var.of(Animal.CAT), Vals.of(Animal.CAT, Animal.DOG, Animal.COW, Animal.PIG), a -> a.name().toLowerCase()) }","{ UI.comboBox(Var.of(Animal.CAT), Var.of(Animal.values()), a -> a.name().toLowerCase()) }","{ UI.comboBox(Var.of(Animal.CAT), Val.of(Animal.values()), a -> a.name().toLowerCase()) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Create combo box UIs with simple text render functions. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The type of items a combo box holds need to be presented\n            to the user in a human readable way. The most common and convenient\n            way to do this is to use a simple text representation of the items.\n            This can be achieved by providing a function that converts the items\n            to strings.\n\n            In this example we are using the following enum type\n            to model the items of the combo box:\n            ```\n            enum Animal {\n                CAT, DOG, COW, PIG\n            }\n            ```\n            We are going to use these constant to\n            as a basis for various kinds of ways to model the combo box\n            state and also how to render them.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a combo box that is bound to the property.","code":["var ui = uiSupplier.get()"]},
+
+        {"kind":"and","text":"We build a combo box component.","code":["var combo = ui.get(JComboBox)"]},
+
+        {"kind":"expect","text":"There are all 4 options available.","code":["combo.itemCount == 4","combo.getItemAt(0) == Animal.CAT","combo.getItemAt(1) == Animal.DOG","combo.getItemAt(2) == Animal.COW","combo.getItemAt(3) == Animal.PIG"]},
+
+        {"kind":"and","text":"We check if the renderer exists and is working.","code":["combo.renderer != null"]},
+
+        {"kind":"when","text":"We call the renderer for each item.","code":["var renderer = combo.renderer","var fakeJList = new JList<Animal>()","var rendered = [","    renderer.getListCellRendererComponent(fakeJList, Animal.CAT, 0, false, false),","    renderer.getListCellRendererComponent(fakeJList, Animal.DOG, 1, false, false),","    renderer.getListCellRendererComponent(fakeJList, Animal.COW, 2, false, false),","    renderer.getListCellRendererComponent(fakeJList, Animal.PIG, 3, false, false)","]"]},
+
+        {"kind":"then","text":"The renderer returns the expected text representations.","code":["rendered[0].text == \"cat\"","rendered[1].text == \"dog\"","rendered[2].text == \"cow\"","rendered[3].text == \"pig\""]},
+
+        {"kind":"where","text":"\n            We are using the following factory methods from the `UI` namespace.\n            Note that the `UI.comboBox` method is overloaded and can take\n            all kinds of arguments to model the state of the combo box.\n        ","code":{"uiSupplier":["{ UI.comboBox(Animal.values() as List, a -> a.name().toLowerCase()) }","{ UI.comboBox(Vars.of(Animal.CAT, Animal.DOG, Animal.COW, Animal.PIG), a -> a.name().toLowerCase()) }","{ UI.comboBox(Vals.of(Animal.CAT, Animal.DOG, Animal.COW, Animal.PIG), a -> a.name().toLowerCase()) }","{ UI.comboBox(Var.of(Animal.CAT), Animal.values() as List, a -> a.name().toLowerCase()) }","{ UI.comboBox(Var.of(Animal.CAT), Vars.of(Animal.CAT, Animal.DOG, Animal.COW, Animal.PIG), a -> a.name().toLowerCase()) }","{ UI.comboBox(Var.of(Animal.CAT), Vals.of(Animal.CAT, Animal.DOG, Animal.COW, Animal.PIG), a -> a.name().toLowerCase()) }","{ UI.comboBox(Var.of(Animal.CAT), Var.of(Animal.values()), a -> a.name().toLowerCase()) }","{ UI.comboBox(Var.of(Animal.CAT), Val.of(Animal.values()), a -> a.name().toLowerCase()) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Create combo box UIs with simple text render functions. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The type of items a combo box holds need to be presented\n            to the user in a human readable way. The most common and convenient\n            way to do this is to use a simple text representation of the items.\n            This can be achieved by providing a function that converts the items\n            to strings.\n\n            In this example we are using the following enum type\n            to model the items of the combo box:\n            ```\n            enum Animal {\n                CAT, DOG, COW, PIG\n            }\n            ```\n            We are going to use these constant to\n            as a basis for various kinds of ways to model the combo box\n            state and also how to render them.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a combo box that is bound to the property.","code":["var ui = uiSupplier.get()"]},
+
+        {"kind":"and","text":"We build a combo box component.","code":["var combo = ui.get(JComboBox)"]},
+
+        {"kind":"expect","text":"There are all 4 options available.","code":["combo.itemCount == 4","combo.getItemAt(0) == Animal.CAT","combo.getItemAt(1) == Animal.DOG","combo.getItemAt(2) == Animal.COW","combo.getItemAt(3) == Animal.PIG"]},
+
+        {"kind":"and","text":"We check if the renderer exists and is working.","code":["combo.renderer != null"]},
+
+        {"kind":"when","text":"We call the renderer for each item.","code":["var renderer = combo.renderer","var fakeJList = new JList<Animal>()","var rendered = [","    renderer.getListCellRendererComponent(fakeJList, Animal.CAT, 0, false, false),","    renderer.getListCellRendererComponent(fakeJList, Animal.DOG, 1, false, false),","    renderer.getListCellRendererComponent(fakeJList, Animal.COW, 2, false, false),","    renderer.getListCellRendererComponent(fakeJList, Animal.PIG, 3, false, false)","]"]},
+
+        {"kind":"then","text":"The renderer returns the expected text representations.","code":["rendered[0].text == \"cat\"","rendered[1].text == \"dog\"","rendered[2].text == \"cow\"","rendered[3].text == \"pig\""]},
+
+        {"kind":"where","text":"\n            We are using the following factory methods from the `UI` namespace.\n            Note that the `UI.comboBox` method is overloaded and can take\n            all kinds of arguments to model the state of the combo box.\n        ","code":{"uiSupplier":["{ UI.comboBox(Animal.values() as List, a -> a.name().toLowerCase()) }","{ UI.comboBox(Vars.of(Animal.CAT, Animal.DOG, Animal.COW, Animal.PIG), a -> a.name().toLowerCase()) }","{ UI.comboBox(Vals.of(Animal.CAT, Animal.DOG, Animal.COW, Animal.PIG), a -> a.name().toLowerCase()) }","{ UI.comboBox(Var.of(Animal.CAT), Animal.values() as List, a -> a.name().toLowerCase()) }","{ UI.comboBox(Var.of(Animal.CAT), Vars.of(Animal.CAT, Animal.DOG, Animal.COW, Animal.PIG), a -> a.name().toLowerCase()) }","{ UI.comboBox(Var.of(Animal.CAT), Vals.of(Animal.CAT, Animal.DOG, Animal.COW, Animal.PIG), a -> a.name().toLowerCase()) }","{ UI.comboBox(Var.of(Animal.CAT), Var.of(Animal.values()), a -> a.name().toLowerCase()) }","{ UI.comboBox(Var.of(Animal.CAT), Val.of(Animal.values()), a -> a.name().toLowerCase()) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Create combo box UIs with simple text render functions. [5]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The type of items a combo box holds need to be presented\n            to the user in a human readable way. The most common and convenient\n            way to do this is to use a simple text representation of the items.\n            This can be achieved by providing a function that converts the items\n            to strings.\n\n            In this example we are using the following enum type\n            to model the items of the combo box:\n            ```\n            enum Animal {\n                CAT, DOG, COW, PIG\n            }\n            ```\n            We are going to use these constant to\n            as a basis for various kinds of ways to model the combo box\n            state and also how to render them.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a combo box that is bound to the property.","code":["var ui = uiSupplier.get()"]},
+
+        {"kind":"and","text":"We build a combo box component.","code":["var combo = ui.get(JComboBox)"]},
+
+        {"kind":"expect","text":"There are all 4 options available.","code":["combo.itemCount == 4","combo.getItemAt(0) == Animal.CAT","combo.getItemAt(1) == Animal.DOG","combo.getItemAt(2) == Animal.COW","combo.getItemAt(3) == Animal.PIG"]},
+
+        {"kind":"and","text":"We check if the renderer exists and is working.","code":["combo.renderer != null"]},
+
+        {"kind":"when","text":"We call the renderer for each item.","code":["var renderer = combo.renderer","var fakeJList = new JList<Animal>()","var rendered = [","    renderer.getListCellRendererComponent(fakeJList, Animal.CAT, 0, false, false),","    renderer.getListCellRendererComponent(fakeJList, Animal.DOG, 1, false, false),","    renderer.getListCellRendererComponent(fakeJList, Animal.COW, 2, false, false),","    renderer.getListCellRendererComponent(fakeJList, Animal.PIG, 3, false, false)","]"]},
+
+        {"kind":"then","text":"The renderer returns the expected text representations.","code":["rendered[0].text == \"cat\"","rendered[1].text == \"dog\"","rendered[2].text == \"cow\"","rendered[3].text == \"pig\""]},
+
+        {"kind":"where","text":"\n            We are using the following factory methods from the `UI` namespace.\n            Note that the `UI.comboBox` method is overloaded and can take\n            all kinds of arguments to model the state of the combo box.\n        ","code":{"uiSupplier":["{ UI.comboBox(Animal.values() as List, a -> a.name().toLowerCase()) }","{ UI.comboBox(Vars.of(Animal.CAT, Animal.DOG, Animal.COW, Animal.PIG), a -> a.name().toLowerCase()) }","{ UI.comboBox(Vals.of(Animal.CAT, Animal.DOG, Animal.COW, Animal.PIG), a -> a.name().toLowerCase()) }","{ UI.comboBox(Var.of(Animal.CAT), Animal.values() as List, a -> a.name().toLowerCase()) }","{ UI.comboBox(Var.of(Animal.CAT), Vars.of(Animal.CAT, Animal.DOG, Animal.COW, Animal.PIG), a -> a.name().toLowerCase()) }","{ UI.comboBox(Var.of(Animal.CAT), Vals.of(Animal.CAT, Animal.DOG, Animal.COW, Animal.PIG), a -> a.name().toLowerCase()) }","{ UI.comboBox(Var.of(Animal.CAT), Var.of(Animal.values()), a -> a.name().toLowerCase()) }","{ UI.comboBox(Var.of(Animal.CAT), Val.of(Animal.values()), a -> a.name().toLowerCase()) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Create combo box UIs with simple text render functions. [6]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The type of items a combo box holds need to be presented\n            to the user in a human readable way. The most common and convenient\n            way to do this is to use a simple text representation of the items.\n            This can be achieved by providing a function that converts the items\n            to strings.\n\n            In this example we are using the following enum type\n            to model the items of the combo box:\n            ```\n            enum Animal {\n                CAT, DOG, COW, PIG\n            }\n            ```\n            We are going to use these constant to\n            as a basis for various kinds of ways to model the combo box\n            state and also how to render them.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a combo box that is bound to the property.","code":["var ui = uiSupplier.get()"]},
+
+        {"kind":"and","text":"We build a combo box component.","code":["var combo = ui.get(JComboBox)"]},
+
+        {"kind":"expect","text":"There are all 4 options available.","code":["combo.itemCount == 4","combo.getItemAt(0) == Animal.CAT","combo.getItemAt(1) == Animal.DOG","combo.getItemAt(2) == Animal.COW","combo.getItemAt(3) == Animal.PIG"]},
+
+        {"kind":"and","text":"We check if the renderer exists and is working.","code":["combo.renderer != null"]},
+
+        {"kind":"when","text":"We call the renderer for each item.","code":["var renderer = combo.renderer","var fakeJList = new JList<Animal>()","var rendered = [","    renderer.getListCellRendererComponent(fakeJList, Animal.CAT, 0, false, false),","    renderer.getListCellRendererComponent(fakeJList, Animal.DOG, 1, false, false),","    renderer.getListCellRendererComponent(fakeJList, Animal.COW, 2, false, false),","    renderer.getListCellRendererComponent(fakeJList, Animal.PIG, 3, false, false)","]"]},
+
+        {"kind":"then","text":"The renderer returns the expected text representations.","code":["rendered[0].text == \"cat\"","rendered[1].text == \"dog\"","rendered[2].text == \"cow\"","rendered[3].text == \"pig\""]},
+
+        {"kind":"where","text":"\n            We are using the following factory methods from the `UI` namespace.\n            Note that the `UI.comboBox` method is overloaded and can take\n            all kinds of arguments to model the state of the combo box.\n        ","code":{"uiSupplier":["{ UI.comboBox(Animal.values() as List, a -> a.name().toLowerCase()) }","{ UI.comboBox(Vars.of(Animal.CAT, Animal.DOG, Animal.COW, Animal.PIG), a -> a.name().toLowerCase()) }","{ UI.comboBox(Vals.of(Animal.CAT, Animal.DOG, Animal.COW, Animal.PIG), a -> a.name().toLowerCase()) }","{ UI.comboBox(Var.of(Animal.CAT), Animal.values() as List, a -> a.name().toLowerCase()) }","{ UI.comboBox(Var.of(Animal.CAT), Vars.of(Animal.CAT, Animal.DOG, Animal.COW, Animal.PIG), a -> a.name().toLowerCase()) }","{ UI.comboBox(Var.of(Animal.CAT), Vals.of(Animal.CAT, Animal.DOG, Animal.COW, Animal.PIG), a -> a.name().toLowerCase()) }","{ UI.comboBox(Var.of(Animal.CAT), Var.of(Animal.values()), a -> a.name().toLowerCase()) }","{ UI.comboBox(Var.of(Animal.CAT), Val.of(Animal.values()), a -> a.name().toLowerCase()) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Create combo box UIs with simple text render functions. [7]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The type of items a combo box holds need to be presented\n            to the user in a human readable way. The most common and convenient\n            way to do this is to use a simple text representation of the items.\n            This can be achieved by providing a function that converts the items\n            to strings.\n\n            In this example we are using the following enum type\n            to model the items of the combo box:\n            ```\n            enum Animal {\n                CAT, DOG, COW, PIG\n            }\n            ```\n            We are going to use these constant to\n            as a basis for various kinds of ways to model the combo box\n            state and also how to render them.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a combo box that is bound to the property.","code":["var ui = uiSupplier.get()"]},
+
+        {"kind":"and","text":"We build a combo box component.","code":["var combo = ui.get(JComboBox)"]},
+
+        {"kind":"expect","text":"There are all 4 options available.","code":["combo.itemCount == 4","combo.getItemAt(0) == Animal.CAT","combo.getItemAt(1) == Animal.DOG","combo.getItemAt(2) == Animal.COW","combo.getItemAt(3) == Animal.PIG"]},
+
+        {"kind":"and","text":"We check if the renderer exists and is working.","code":["combo.renderer != null"]},
+
+        {"kind":"when","text":"We call the renderer for each item.","code":["var renderer = combo.renderer","var fakeJList = new JList<Animal>()","var rendered = [","    renderer.getListCellRendererComponent(fakeJList, Animal.CAT, 0, false, false),","    renderer.getListCellRendererComponent(fakeJList, Animal.DOG, 1, false, false),","    renderer.getListCellRendererComponent(fakeJList, Animal.COW, 2, false, false),","    renderer.getListCellRendererComponent(fakeJList, Animal.PIG, 3, false, false)","]"]},
+
+        {"kind":"then","text":"The renderer returns the expected text representations.","code":["rendered[0].text == \"cat\"","rendered[1].text == \"dog\"","rendered[2].text == \"cow\"","rendered[3].text == \"pig\""]},
+
+        {"kind":"where","text":"\n            We are using the following factory methods from the `UI` namespace.\n            Note that the `UI.comboBox` method is overloaded and can take\n            all kinds of arguments to model the state of the combo box.\n        ","code":{"uiSupplier":["{ UI.comboBox(Animal.values() as List, a -> a.name().toLowerCase()) }","{ UI.comboBox(Vars.of(Animal.CAT, Animal.DOG, Animal.COW, Animal.PIG), a -> a.name().toLowerCase()) }","{ UI.comboBox(Vals.of(Animal.CAT, Animal.DOG, Animal.COW, Animal.PIG), a -> a.name().toLowerCase()) }","{ UI.comboBox(Var.of(Animal.CAT), Animal.values() as List, a -> a.name().toLowerCase()) }","{ UI.comboBox(Var.of(Animal.CAT), Vars.of(Animal.CAT, Animal.DOG, Animal.COW, Animal.PIG), a -> a.name().toLowerCase()) }","{ UI.comboBox(Var.of(Animal.CAT), Vals.of(Animal.CAT, Animal.DOG, Animal.COW, Animal.PIG), a -> a.name().toLowerCase()) }","{ UI.comboBox(Var.of(Animal.CAT), Var.of(Animal.values()), a -> a.name().toLowerCase()) }","{ UI.comboBox(Var.of(Animal.CAT), Val.of(Animal.values()), a -> a.name().toLowerCase()) }"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

@@ -115,19 +115,23 @@ public final class UIForSlider&lt;S extends JSlider&gt; extends UIForAnySwing&lt
 <span class="fc" id="L115">    }</span>
 
     /**
+     *  Binds the supplied {@link Val} property to the min value of the slider
+     *  so that when the value of the property changes, the min value of the slider will be updated accordingly.
+     *  For more information about the underlying value in the component, see {@link JSlider#setMinimum(int)}.
+     *
      * @param min The min property used to dynamically update the min value of the slider.
      * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if {@code min} is {@code null}.
      */
     public final UIForSlider&lt;S&gt; withMin( Val&lt;Integer&gt; min ) {
-<span class="nc" id="L123">        NullUtil.nullArgCheck( min, &quot;min&quot;, Val.class );</span>
-<span class="nc" id="L124">        return _withOnShow( min, (thisComponent,v) -&gt; {</span>
-<span class="nc" id="L125">                    _setMin(thisComponent, min.orElseThrow());</span>
-<span class="nc" id="L126">                })</span>
-<span class="nc" id="L127">                ._with( thisComponent -&gt; {</span>
-<span class="nc" id="L128">                    _setMin(thisComponent, min.orElseThrow());</span>
-<span class="nc" id="L129">                })</span>
-<span class="nc" id="L130">                ._this();</span>
+<span class="nc" id="L127">        NullUtil.nullArgCheck( min, &quot;min&quot;, Val.class );</span>
+<span class="nc" id="L128">        return _withOnShow( min, (thisComponent,v) -&gt; {</span>
+<span class="nc" id="L129">                    _setMin(thisComponent, min.orElseThrow());</span>
+<span class="nc" id="L130">                })</span>
+<span class="nc" id="L131">                ._with( thisComponent -&gt; {</span>
+<span class="nc" id="L132">                    _setMin(thisComponent, min.orElseThrow());</span>
+<span class="nc" id="L133">                })</span>
+<span class="nc" id="L134">                ._this();</span>
     }
 
     /**
@@ -138,30 +142,34 @@ public final class UIForSlider&lt;S extends JSlider&gt; extends UIForAnySwing&lt
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForSlider&lt;S&gt; withMax( int max ) {
-<span class="fc" id="L141">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L142">                    _setMax( thisComponent, max );</span>
-<span class="fc" id="L143">                })</span>
-<span class="fc" id="L144">                ._this();</span>
+<span class="fc" id="L145">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L146">                    _setMax( thisComponent, max );</span>
+<span class="fc" id="L147">                })</span>
+<span class="fc" id="L148">                ._this();</span>
     }
 
     private void _setMax( S thisComponent, int max ) {
-<span class="fc" id="L148">        _doWithoutListeners(thisComponent, ()-&gt;thisComponent.setMaximum( max ));</span>
-<span class="fc" id="L149">    }</span>
+<span class="fc" id="L152">        _doWithoutListeners(thisComponent, ()-&gt;thisComponent.setMaximum( max ));</span>
+<span class="fc" id="L153">    }</span>
 
     /**
+     *  Binds the supplied {@link Val} property to the max value of the slider.
+     *  When the value of the property changes, the max value of the slider will be updated accordingly.
+     *  For more information about the underlying value in the component, see {@link JSlider#setMaximum(int)}.
+     *
      * @param max An integer property used to dynamically update the max value of the slider.
      * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if {@code max} is {@code null}.
      */
     public final UIForSlider&lt;S&gt; withMax( Val&lt;Integer&gt; max ) {
-<span class="nc" id="L157">        NullUtil.nullArgCheck( max, &quot;max&quot;, Val.class );</span>
-<span class="nc" id="L158">        return _withOnShow( max, (thisComponent,v) -&gt; {</span>
-<span class="nc" id="L159">                    _setMax(thisComponent, max.orElseThrow());</span>
-<span class="nc" id="L160">                })</span>
-<span class="nc" id="L161">                ._with( thisComponent -&gt; {</span>
-<span class="nc" id="L162">                    _setMax(thisComponent, max.orElseThrow());</span>
-<span class="nc" id="L163">                })</span>
-<span class="nc" id="L164">                ._this();</span>
+<span class="nc" id="L165">        NullUtil.nullArgCheck( max, &quot;max&quot;, Val.class );</span>
+<span class="nc" id="L166">        return _withOnShow( max, (thisComponent,v) -&gt; {</span>
+<span class="nc" id="L167">                    _setMax(thisComponent, max.orElseThrow());</span>
+<span class="nc" id="L168">                })</span>
+<span class="nc" id="L169">                ._with( thisComponent -&gt; {</span>
+<span class="nc" id="L170">                    _setMax(thisComponent, max.orElseThrow());</span>
+<span class="nc" id="L171">                })</span>
+<span class="nc" id="L172">                ._this();</span>
     }
 
     /**
@@ -172,49 +180,61 @@ public final class UIForSlider&lt;S extends JSlider&gt; extends UIForAnySwing&lt
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForSlider&lt;S&gt; withValue( int value ) {
-<span class="fc" id="L175">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L176">                    _setValue( thisComponent, value );</span>
-<span class="fc" id="L177">                })</span>
-<span class="fc" id="L178">                ._this();</span>
+<span class="fc" id="L183">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L184">                    _setValue( thisComponent, value );</span>
+<span class="fc" id="L185">                })</span>
+<span class="fc" id="L186">                ._this();</span>
     }
 
     private void _setValue( S thisComponent, int value ) {
-<span class="fc" id="L182">        _doWithoutListeners(thisComponent, ()-&gt;thisComponent.setValue( value ));</span>
-<span class="fc" id="L183">    }</span>
+<span class="fc" id="L190">        _doWithoutListeners(thisComponent, ()-&gt;thisComponent.setValue( value ));</span>
+<span class="fc" id="L191">    }</span>
 
     /**
+     *  Binds the supplied {@link Val} property to the value of the slider,
+     *  which causes the knob of the slider to move when the value of the property changes.
+     *  But note that the supplied property is a read only, so when the user updates
+     *  the value of the slider, the property will not be updated.
+     *  Use {@link #withValue(Var)} if you want to bind a property bidirectionally.
+     *  For more information about the underlying value in the component, see {@link JSlider#setValue(int)}.
+     *
      * @param val An integer property used to dynamically update the value of the slider.
      * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if {@code value} is {@code null}.
      */
     public final UIForSlider&lt;S&gt; withValue( Val&lt;Integer&gt; val ) {
-<span class="nc" id="L191">        NullUtil.nullArgCheck( val, &quot;val&quot;, Val.class );</span>
-<span class="nc" id="L192">        return _withOnShow( val, (thisComponent,v) -&gt; {</span>
-<span class="nc" id="L193">                    _setValue(thisComponent, val.orElseThrow());</span>
-<span class="nc" id="L194">                })</span>
-<span class="nc" id="L195">                ._with( thisComponent -&gt; {</span>
-<span class="nc" id="L196">                    _setValue(thisComponent, val.orElseThrow());</span>
-<span class="nc" id="L197">                })</span>
-<span class="nc" id="L198">                ._this();</span>
+<span class="nc" id="L206">        NullUtil.nullArgCheck( val, &quot;val&quot;, Val.class );</span>
+<span class="nc" id="L207">        return _withOnShow( val, (thisComponent,v) -&gt; {</span>
+<span class="nc" id="L208">                    _setValue(thisComponent, val.orElseThrow());</span>
+<span class="nc" id="L209">                })</span>
+<span class="nc" id="L210">                ._with( thisComponent -&gt; {</span>
+<span class="nc" id="L211">                    _setValue(thisComponent, val.orElseThrow());</span>
+<span class="nc" id="L212">                })</span>
+<span class="nc" id="L213">                ._this();</span>
     }
 
     /**
+     *  Use this to bind the supplied {@link Var} property to the value of the slider.
+     *  When the value of the slider changes, the value of the {@link Var} will be updated
+     *  and when the item of the {@link Var} is changed as part of the application logic,
+     *  the value of the slider will be updated accordingly.
+     *
      * @param var An integer property used to dynamically update the value of the slider.
      * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if {@code value} is {@code null}.
      */
     public final UIForSlider&lt;S&gt; withValue( Var&lt;Integer&gt; var ) {
-<span class="fc" id="L207">        NullUtil.nullArgCheck( var, &quot;var&quot;, Var.class );</span>
-<span class="fc" id="L208">        return _withOnShow( var, (thisComponent,v) -&gt; {</span>
-<span class="nc" id="L209">                    _setValue(thisComponent, v);</span>
-<span class="nc" id="L210">                })</span>
-<span class="fc" id="L211">                ._with( thisComponent -&gt; {</span>
-<span class="fc" id="L212">                    _onChange(thisComponent,</span>
-<span class="nc" id="L213">                        e -&gt; _runInApp(thisComponent.getValue(), newItem -&gt; var.set(From.VIEW, newItem) )</span>
+<span class="fc" id="L227">        NullUtil.nullArgCheck( var, &quot;var&quot;, Var.class );</span>
+<span class="fc" id="L228">        return _withOnShow( var, (thisComponent,v) -&gt; {</span>
+<span class="nc" id="L229">                    _setValue(thisComponent, v);</span>
+<span class="nc" id="L230">                })</span>
+<span class="fc" id="L231">                ._with( thisComponent -&gt; {</span>
+<span class="fc" id="L232">                    _onChange(thisComponent,</span>
+<span class="nc" id="L233">                        e -&gt; _runInApp(thisComponent.getValue(), newItem -&gt; var.set(From.VIEW, newItem) )</span>
                     );
-<span class="fc" id="L215">                    _setValue(thisComponent, var.orElseThrow());</span>
-<span class="fc" id="L216">                })</span>
-<span class="fc" id="L217">                ._this();</span>
+<span class="fc" id="L235">                    _setValue(thisComponent, var.orElseThrow());</span>
+<span class="fc" id="L236">                })</span>
+<span class="fc" id="L237">                ._this();</span>
     }
 
     /**
@@ -225,10 +245,10 @@ public final class UIForSlider&lt;S extends JSlider&gt; extends UIForAnySwing&lt
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForSlider&lt;S&gt; withMajorTickSpacing( int spacing ) {
-<span class="nc" id="L228">        return _with( thisComponent -&gt; {</span>
-<span class="nc" id="L229">                    thisComponent.setMajorTickSpacing( spacing );</span>
-<span class="nc" id="L230">                })</span>
-<span class="nc" id="L231">                ._this();</span>
+<span class="nc" id="L248">        return _with( thisComponent -&gt; {</span>
+<span class="nc" id="L249">                    thisComponent.setMajorTickSpacing( spacing );</span>
+<span class="nc" id="L250">                })</span>
+<span class="nc" id="L251">                ._this();</span>
     }
 
     /**
@@ -239,10 +259,10 @@ public final class UIForSlider&lt;S extends JSlider&gt; extends UIForAnySwing&lt
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForSlider&lt;S&gt; withMinorTickSpacing( int spacing ) {
-<span class="nc" id="L242">        return _with( thisComponent -&gt; {</span>
-<span class="nc" id="L243">                    thisComponent.setMinorTickSpacing( spacing );</span>
-<span class="nc" id="L244">                })</span>
-<span class="nc" id="L245">                ._this();</span>
+<span class="nc" id="L262">        return _with( thisComponent -&gt; {</span>
+<span class="nc" id="L263">                    thisComponent.setMinorTickSpacing( spacing );</span>
+<span class="nc" id="L264">                })</span>
+<span class="nc" id="L265">                ._this();</span>
     }
 
     /**
@@ -253,15 +273,15 @@ public final class UIForSlider&lt;S extends JSlider&gt; extends UIForAnySwing&lt
      * @throws IllegalArgumentException if {@code spacing} is {@code null}.
      */
     public final UIForSlider&lt;S&gt; withMajorTickSpacing( Val&lt;Integer&gt; spacing ) {
-<span class="nc" id="L256">        NullUtil.nullArgCheck( spacing, &quot;spacing&quot;, Val.class );</span>
-<span class="nc" id="L257">        NullUtil.nullPropertyCheck( spacing, &quot;spacing&quot; );</span>
-<span class="nc" id="L258">        return _withOnShow( spacing, (thisComponent,v) -&gt; {</span>
-<span class="nc" id="L259">                    thisComponent.setMajorTickSpacing(v);</span>
-<span class="nc" id="L260">                })</span>
-<span class="nc" id="L261">                ._with( thisComponent -&gt; {</span>
-<span class="nc" id="L262">                    thisComponent.setMajorTickSpacing( spacing.orElseThrow() );</span>
-<span class="nc" id="L263">                })</span>
-<span class="nc" id="L264">                ._this();</span>
+<span class="nc" id="L276">        NullUtil.nullArgCheck( spacing, &quot;spacing&quot;, Val.class );</span>
+<span class="nc" id="L277">        NullUtil.nullPropertyCheck( spacing, &quot;spacing&quot; );</span>
+<span class="nc" id="L278">        return _withOnShow( spacing, (thisComponent,v) -&gt; {</span>
+<span class="nc" id="L279">                    thisComponent.setMajorTickSpacing(v);</span>
+<span class="nc" id="L280">                })</span>
+<span class="nc" id="L281">                ._with( thisComponent -&gt; {</span>
+<span class="nc" id="L282">                    thisComponent.setMajorTickSpacing( spacing.orElseThrow() );</span>
+<span class="nc" id="L283">                })</span>
+<span class="nc" id="L284">                ._this();</span>
     }
 
     /**
@@ -272,30 +292,30 @@ public final class UIForSlider&lt;S extends JSlider&gt; extends UIForAnySwing&lt
      * @throws IllegalArgumentException if {@code spacing} is {@code null}.
      */
     public final UIForSlider&lt;S&gt; withMinorTickSpacing( Val&lt;Integer&gt; spacing ) {
-<span class="nc" id="L275">        NullUtil.nullArgCheck( spacing, &quot;spacing&quot;, Val.class );</span>
-<span class="nc" id="L276">        NullUtil.nullPropertyCheck( spacing, &quot;spacing&quot; );</span>
-<span class="nc" id="L277">        return _withOnShow( spacing, (thisComponent,v) -&gt; {</span>
-<span class="nc" id="L278">                    thisComponent.setMinorTickSpacing(v);</span>
-<span class="nc" id="L279">                })</span>
-<span class="nc" id="L280">                ._with( thisComponent -&gt; {</span>
-<span class="nc" id="L281">                    thisComponent.setMinorTickSpacing( spacing.orElseThrow() );</span>
-<span class="nc" id="L282">                })</span>
-<span class="nc" id="L283">                ._this();</span>
+<span class="nc" id="L295">        NullUtil.nullArgCheck( spacing, &quot;spacing&quot;, Val.class );</span>
+<span class="nc" id="L296">        NullUtil.nullPropertyCheck( spacing, &quot;spacing&quot; );</span>
+<span class="nc" id="L297">        return _withOnShow( spacing, (thisComponent,v) -&gt; {</span>
+<span class="nc" id="L298">                    thisComponent.setMinorTickSpacing(v);</span>
+<span class="nc" id="L299">                })</span>
+<span class="nc" id="L300">                ._with( thisComponent -&gt; {</span>
+<span class="nc" id="L301">                    thisComponent.setMinorTickSpacing( spacing.orElseThrow() );</span>
+<span class="nc" id="L302">                })</span>
+<span class="nc" id="L303">                ._this();</span>
     }
 
 
     private void _doWithoutListeners( S thisComponent, Runnable someTask ) {
         // We need to first remove the change listener, otherwise we might trigger unwanted events.
-<span class="fc" id="L289">        ChangeListener[] listeners = thisComponent.getChangeListeners();</span>
-<span class="fc bfc" id="L290" title="All 2 branches covered.">        for ( ChangeListener listener : listeners )</span>
-<span class="fc" id="L291">            thisComponent.removeChangeListener( listener );</span>
+<span class="fc" id="L309">        ChangeListener[] listeners = thisComponent.getChangeListeners();</span>
+<span class="fc bfc" id="L310" title="All 2 branches covered.">        for ( ChangeListener listener : listeners )</span>
+<span class="fc" id="L311">            thisComponent.removeChangeListener( listener );</span>
 
-<span class="fc" id="L293">        someTask.run();</span>
+<span class="fc" id="L313">        someTask.run();</span>
 
         // Now we can add the listeners back.
-<span class="fc bfc" id="L296" title="All 2 branches covered.">        for ( ChangeListener listener : listeners )</span>
-<span class="fc" id="L297">            thisComponent.addChangeListener( listener );</span>
-<span class="fc" id="L298">    }</span>
+<span class="fc bfc" id="L316" title="All 2 branches covered.">        for ( ChangeListener listener : listeners )</span>
+<span class="fc" id="L317">            thisComponent.addChangeListener( listener );</span>
+<span class="fc" id="L318">    }</span>
 
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -25,7 +25,7 @@
 
         {"kind":"when","text":"We schedule an animation that will run 3 times and has a duration of 0.1 seconds.","code":["UI.animateFor(0.1, TimeUnit.SECONDS)","    .asLongAs({ it.repeats() < 3 })","    .go({","        progressValues[(int)it.repeats()] << it.progress()","    })"]},
 
-        {"kind":"and","text":"We wait for the animation to finish","code":["TimeUnit.MILLISECONDS.sleep(500)"]},
+        {"kind":"and","text":"We wait for the animation to finish","code":["TimeUnit.MILLISECONDS.sleep(350)","UI.sync()","TimeUnit.MILLISECONDS.sleep(350)","UI.sync()"]},
 
         {"kind":"then","text":"The animation has been executed at least once","code":["progressValues.values().flatten().size() > 0"]},
 
@@ -75,13 +75,11 @@
 
         {"kind":"when","text":"","code":["var button =","        UI.button(\"Click me! Or don't.\")","        .onClick({","            it.animateFor(0.1, TimeUnit.SECONDS)","                .asLongAs({ it.repeats() < 4 })","                .go(state -> {","                    if ( !iterations.contains(state.repeats()) )","                        iterations << state.repeats()","                    progresses    << state.progress()","                    cycles        << state.cycle()","                    cyclesPlus42  << state.cyclePlus(0.42)","                    cyclesMinus42 << state.cycleMinus(0.42)","                })","        })","        .get(JButton)"]},
 
-        {"kind":"and","text":"","code":["TimeUnit.MILLISECONDS.sleep(410)"]},
-
         {"kind":"then","text":"Initially the animation has not been executed yet.","code":["iterations == []"]},
 
-        {"kind":"when","text":"We simulate a click on the button","code":["button.doClick()"]},
+        {"kind":"when","text":"We simulate a click on the button","code":["UI.runNow( () -> button.doClick() )"]},
 
-        {"kind":"and","text":"We wait for the animation to finish","code":["TimeUnit.MILLISECONDS.sleep(410)"]},
+        {"kind":"and","text":"We wait for the animation to finish","code":["UI.sync()","TimeUnit.MILLISECONDS.sleep(350)","UI.sync()","TimeUnit.MILLISECONDS.sleep(350)"]},
 
         {"kind":"then","text":"The animation has been completed 4 times.","code":["iterations == [0, 1, 2, 3]"]},
 

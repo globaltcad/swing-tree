@@ -1,10 +1,10 @@
 {
   "className":"swingtree.mvvm.Button_Binding_Spec",
   "title":"Button Binding",
-  "narrative":"As a developer, I want to bind a button to a property so\n    that is is updated when the property changes.\n    Binding is a powerful feature that allows us to create\n    UIs which are not only decoupled from the business logic of\n    an application, but also make it easy to create UIs which\n    are dynamic and reactive.",
-  "subjects":[],
+  "narrative":"As a developer, I want to bind a button to a property so\n    that is is updated when the property changes.\n    Binding is a powerful feature that allows us to create\n    UIs which are not only decoupled from the business logic of\n    an application, but also make it easy to create UIs which\n    are dynamic and reactive.\n\n    A typical use case for button types is to bind\n    their selection state to a property in the view model.\n    This property may be boolean based, or something entirely\n    different.",
+  "subjects":["swingtree.UIForAnyButton","swingtree.UIForToggleButton","swingtree.UIForRadioButton"],
   "statistics":{
-    "runs":"6",
+    "runs":"8",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -102,7 +102,7 @@
 
         {"kind":"and","text":"We create three radio buttons and bind them to the properties.","code":["var ui1 = UI.radioButton(\"1\").withButtonGroup(buttonGroup).isSelectedIf(selected1)","var ui2 = UI.radioButton(\"2\").withButtonGroup(buttonGroup).isSelectedIf(selected2)","var ui3 = UI.radioButton(\"3\").withButtonGroup(buttonGroup).isSelectedIf(selected3)"]},
 
-        {"kind":"and","text":"We create the three buttons:","code":["var button1 = ui1.component","var button2 = ui2.component","var button3 = ui3.component"]},
+        {"kind":"and","text":"We create the three buttons:","code":["var button1 = ui1.get(JRadioButton)","var button2 = ui2.get(JRadioButton)","var button3 = ui3.get(JRadioButton)"]},
 
         {"kind":"when","text":"We select the first radio button...","code":["button1.selected = true"]},
 
@@ -135,11 +135,13 @@
       "blocks":[
         {"kind":"given","text":"We create a simple swing-tree property for modelling the selection state.","code":["Val<SelectionState> selectionState = Var.of(SelectionState.NOT_SELECTED)"]},
 
-        {"kind":"when","text":"We create and bind to a button UI node...","code":["var ui = UI.button(\"\").isSelectedIf(SelectionState.SELECTED, selectionState)"]},
+        {"kind":"when","text":"We create and bind to a button UI node...","code":["var ui = UI.button(\"test\").isSelectedIf(SelectionState.SELECTED, selectionState)"]},
 
         {"kind":"and","text":"Build the component:","code":["var button = ui.get(JButton)"]},
 
         {"kind":"then","text":"The button should be updated when the property is changed and shown.","code":["button.selected == false"]},
+
+        {"kind":"and","text":"The button has the expected text.","code":["button.text == \"test\""]},
 
         {"kind":"when","text":"We change the property value...","code":["selectionState.set(SelectionState.SELECTED)"]},
 
@@ -160,15 +162,71 @@
       "blocks":[
         {"kind":"given","text":"We create a simple swing-tree property for modelling the selection state.","code":["Val<SelectionState> selectionState = Var.of(SelectionState.NOT_SELECTED)"]},
 
-        {"kind":"when","text":"We create and bind to a button UI node...","code":["var ui = UI.button(\"\").isSelectedIfNot(SelectionState.SELECTED, selectionState)"]},
+        {"kind":"when","text":"We create and bind to a button UI node...","code":["var ui = UI.button(\"test\").isSelectedIfNot(SelectionState.SELECTED, selectionState)"]},
 
         {"kind":"and","text":"Build the component:","code":["var button = ui.get(JButton)"]},
 
         {"kind":"then","text":"The button should be updated when the property is changed and shown.","code":["button.selected == true"]},
 
+        {"kind":"and","text":"The button has the expected text.","code":["button.text == \"test\""]},
+
         {"kind":"when","text":"We change the property value...","code":["selectionState.set(SelectionState.SELECTED)","UI.sync()"]},
 
         {"kind":"then","text":"The button should be updated.","code":["button.selected == false"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Directly bind any property to the selection state of a radio button.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A typical use-case is for a radio button\n            to be selected in case of a property to\n            be equal to a certain value and deselected\n            otherwise.\n\n            In this example, the property is String based.\n            and the radio button is selected in case the\n            property is equal to a specific target value.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We first create the variables which are typically \n            used in the view model.\n            A property and a target value.\n        ","code":["var food = Var.of(\"おにぎり\")","var target = \"ビーガン\""]},
+
+        {"kind":"and","text":"\n            We then create a radio button and bind the selection\n            state of the radio button to the property.\n        ","code":["var radioButton =","        UI.radioButton(\"Is Vegan\", target, food)","        .get(JRadioButton.class)"]},
+
+        {"kind":"expect","text":"\n            The radio button is deselected initially\n            because the property value is not equal to the target value.\n        ","code":["!radioButton.isSelected()"]},
+
+        {"kind":"and","text":"The radio button has the expected text.","code":["radioButton.text == \"Is Vegan\""]},
+
+        {"kind":"when","text":"We then change the property to the target value.","code":["food.set(target)","UI.sync()"]},
+
+        {"kind":"then","text":"The radio button is selected as the property value is equal to the target value.","code":["radioButton.isSelected()"]},
+
+        {"kind":"when","text":"We then change the property to a different value.","code":["food.set(\"カレー\")","UI.sync()"]},
+
+        {"kind":"then","text":"The radio button is deselected again.","code":["!radioButton.isSelected()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Directly bind an enum based property to the selection state of a radio button.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A typical use-case is for a radio button\n            to be selected in case of an enum property to\n            be equal to a certain value and deselected\n            otherwise.\n\n            In this example, the property is based on the following enum:\n            ```\n            enum Size { SMALL, MEDIUM, LARGE }\n            ```\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We first create the variables which are typically \n            used in the view model.\n            A property and a target value.\n        ","code":["var size = Var.of(Size.SMALL)","var target = Size.LARGE"]},
+
+        {"kind":"and","text":"\n            We then create a radio button and bind the selection\n            state of the radio button to the property.\n        ","code":["var radioButton =","        UI.radioButton( target, size )","        .get(JRadioButton.class)"]},
+
+        {"kind":"expect","text":"\n            The radio button is deselected initially\n            because the property value is not equal to the target value.\n        ","code":["!radioButton.isSelected()"]},
+
+        {"kind":"and","text":"The radio button has the expected text.","code":["radioButton.text == \"LARGE\""]},
+
+        {"kind":"when","text":"We then change the property to the target value.","code":["size.set(target)","UI.sync()"]},
+
+        {"kind":"then","text":"The radio button is selected as the property value is equal to the target value.","code":["radioButton.isSelected()"]},
+
+        {"kind":"when","text":"We then change the property to a different value.","code":["size.set(Size.MEDIUM)","UI.sync()"]},
+
+        {"kind":"then","text":"The radio button is deselected again.","code":["!radioButton.isSelected()"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

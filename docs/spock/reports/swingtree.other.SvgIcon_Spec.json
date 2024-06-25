@@ -89,7 +89,7 @@
       "blocks":[
         {"kind":"given","text":"We load an icon from a file.","code":["var declaration = IconDeclaration.of(\"/img/my-name-is-so-idiotic-that-it-will-probably-never-exist.svg\")","var icon = UI.findSvgIcon(declaration)"]},
 
-        {"kind":"expect","text":"The icon is not loaded.","code":["icon.isEmpty()"]}
+        {"kind":"expect","text":"The icon is not loaded.","code":["!icon.isPresent()"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -104,7 +104,7 @@
       "blocks":[
         {"kind":"given","text":"We load an icon from a file.","code":["var declaration = IconDeclaration.of(\"/img/my-name-is-so-idiotic-that-it-will-probably-never-exist.svg\")","var icon = UI.findIcon(declaration)"]},
 
-        {"kind":"expect","text":"The icon is not loaded.","code":["icon.isEmpty()"]}
+        {"kind":"expect","text":"The icon is not loaded.","code":["!icon.isPresent()"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

@@ -28,13 +28,13 @@ import java.util.Objects;
 public interface BasicTableModel extends TableModel
 {
     /** {@inheritDoc} */
-    int getRowCount();
+    @Override int getRowCount();
     /** {@inheritDoc} */
-    int getColumnCount();
+    @Override int getColumnCount();
     /** {@inheritDoc} */
-    Object getValueAt(int rowIndex, int columnIndex);
+    @Override Object getValueAt(int rowIndex, int columnIndex);
     /** {@inheritDoc} */
-    void setValueAt(Object aValue, int rowIndex, int columnIndex);
+    @Override void setValueAt(Object aValue, int rowIndex, int columnIndex);
     /** {@inheritDoc} */
 <span class="nc" id="L39">    @Override default Class&lt;?&gt; getColumnClass(int columnIndex) { return Object.class; }</span>
     /** {@inheritDoc} */
@@ -232,4 +232,4 @@ public interface BasicTableModel extends TableModel
      }
 
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

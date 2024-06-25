@@ -4,7 +4,7 @@
   "narrative":"SwingTree offers a fluent API for assembling Swing components\n    into a GUI tree, hence the name SwingTree.\n    It is designed around the idea of using method chaining\n    and statement nesting to facilitate the creation of a GUI tree.\n    This is a common pattern in many libraries, and is often referred to as a\n    Builder pattern, which is ruffly the what SwingTree consists of.\n\n    But you may be surprised to hear that one SwingTree builder\n    is not like the other. There are actually three different\n    builder modes! Although they all look the same and their declarations\n    will lead to the creation of the same GUI tree, they differ in terms\n    of their purpose and how they ought not to be used.\n\n    The three modes are:\n\n    * Declarative Only Factory Builder Mode\n    * Declarative Only Builder Mode\n    * Free Builder Mode\n\n    Sounds confusing! So let's break it down.\n\n    The first two modes are declarative only, which means that the\n    methods designed for chaining first dispose of the current builder and\n    then return a new instance of the builder. This disposed builder\n    is then disabled and can no longer be used to build the GUI tree.\n    This is done to prevent the builder from being used in any other way\n    than for building the GUI tree declaratively.\n\n    The difference between the two declarative modes is that the\n    factory builder mode behaves very similar to the stream API\n    in that all of the operations defined by the chain of method\n    calls are composed into a single function that is executed\n    when the component is being accessed.\n    Every time the component is accessed, a new component is created\n    and then sent through the chain of build operations.\n    Most builders in SwingTree are factory builders,\n    given that they are not created with a component instance\n    passed to their constructor.\n\n    The last mode is the free builder mode, which is the most unrestricted\n    of the three modes. It is spanned when switching to procedural\n    code using the various `apply` methods on the builder.\n    Make sure not to overuse this mode, as writing\n    GUI code procedurally is usually messier than declarative design.\n\n    If this is still confusing, don't worry.\n    The following examples will make it clear\n    where each mode is used and how they differ.\n\n    You actually do not need to know about the different modes\n    to use SwingTree, but it is good to know about them\n    to understand the design of the library.",
   "subjects":["swingtree.UIForAnySwing"],
   "statistics":{
-    "runs":"2",
+    "runs":"12",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -14,11 +14,221 @@
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
-      "id":"A regular builder is a factory builder",
+      "id":"A regular builder is a factory builder [0]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            If you use SwingTree as intended you will resort to using\n            the various factory methods in the `UI` namespace to create\n            your builder instances.\n\n            The once which do not take a component instance as an argument\n            are the once which will return a factory builder instances.\n        ","\n            If you use SwingTree as intended you will resort to using\n            the various factory methods in the `UI` namespace to create\n            your builder instances.\n\n            The once which do not take a component instance as an argument\n            are the once which will return a factory builder instances.\n        ","\n            If you use SwingTree as intended you will resort to using\n            the various factory methods in the `UI` namespace to create\n            your builder instances.\n\n            The once which do not take a component instance as an argument\n            are the once which will return a factory builder instances.\n        ","\n            If you use SwingTree as intended you will resort to using\n            the various factory methods in the `UI` namespace to create\n            your builder instances.\n\n            The once which do not take a component instance as an argument\n            are the once which will return a factory builder instances.\n        ","\n            If you use SwingTree as intended you will resort to using\n            the various factory methods in the `UI` namespace to create\n            your builder instances.\n\n            The once which do not take a component instance as an argument\n            are the once which will return a factory builder instances.\n        ","\n            If you use SwingTree as intended you will resort to using\n            the various factory methods in the `UI` namespace to create\n            your builder instances.\n\n            The once which do not take a component instance as an argument\n            are the once which will return a factory builder instances.\n        ","\n            If you use SwingTree as intended you will resort to using\n            the various factory methods in the `UI` namespace to create\n            your builder instances.\n\n            The once which do not take a component instance as an argument\n            are the once which will return a factory builder instances.\n        ","\n            If you use SwingTree as intended you will resort to using\n            the various factory methods in the `UI` namespace to create\n            your builder instances.\n\n            The once which do not take a component instance as an argument\n            are the once which will return a factory builder instances.\n        ","\n            If you use SwingTree as intended you will resort to using\n            the various factory methods in the `UI` namespace to create\n            your builder instances.\n\n            The once which do not take a component instance as an argument\n            are the once which will return a factory builder instances.\n        ","\n            If you use SwingTree as intended you will resort to using\n            the various factory methods in the `UI` namespace to create\n            your builder instances.\n\n            The once which do not take a component instance as an argument\n            are the once which will return a factory builder instances.\n        ","\n            If you use SwingTree as intended you will resort to using\n            the various factory methods in the `UI` namespace to create\n            your builder instances.\n\n            The once which do not take a component instance as an argument\n            are the once which will return a factory builder instances.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            If you use SwingTree as intended you will resort to using\n            the various factory methods in the `UI` namespace to create\n            your builder instances.\n\n            The once which do not take a component instance as an argument\n            are the once which will return a factory builder instances.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first demonstrate the factory builder mode using the `panel` method","code":["var panel = UI.panel()"]},
+
+        {"kind":"expect","text":"The builder will produce a `JPanel` instance","code":["panel.get(JPanel) instanceof JPanel"]},
+
+        {"kind":"and","text":"Every time we access the panel, a new instance is created","code":["panel.get(JPanel) !== panel.get(JPanel)","panel.get(JPanel) !== panel.get(JPanel)","panel.get(JPanel) !== panel.get(JPanel)"]},
+
+        {"kind":"and","text":"This is also true for any other UI builder created using such kinds of factory methods:","code":["anyUiBuilder.get(JComponent) !== anyUiBuilder.get(JComponent)"]},
+
+        {"kind":"where","text":"We can observe the same behavior for many other factory methods, including:","code":{"anyUiBuilder":["UI.panel()","UI.scrollPane()","UI.table()","UI.button()","UI.label(\"Hey! :)\")","UI.textField()","UI.textArea(\"A B C\")","UI.comboBox()","UI.list()","UI.toggleButton()","UI.radioButton(\"Toggle Me!\")",""]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A regular builder is a factory builder [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            If you use SwingTree as intended you will resort to using\n            the various factory methods in the `UI` namespace to create\n            your builder instances.\n\n            The once which do not take a component instance as an argument\n            are the once which will return a factory builder instances.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first demonstrate the factory builder mode using the `panel` method","code":["var panel = UI.panel()"]},
+
+        {"kind":"expect","text":"The builder will produce a `JPanel` instance","code":["panel.get(JPanel) instanceof JPanel"]},
+
+        {"kind":"and","text":"Every time we access the panel, a new instance is created","code":["panel.get(JPanel) !== panel.get(JPanel)","panel.get(JPanel) !== panel.get(JPanel)","panel.get(JPanel) !== panel.get(JPanel)"]},
+
+        {"kind":"and","text":"This is also true for any other UI builder created using such kinds of factory methods:","code":["anyUiBuilder.get(JComponent) !== anyUiBuilder.get(JComponent)"]},
+
+        {"kind":"where","text":"We can observe the same behavior for many other factory methods, including:","code":{"anyUiBuilder":["UI.panel()","UI.scrollPane()","UI.table()","UI.button()","UI.label(\"Hey! :)\")","UI.textField()","UI.textArea(\"A B C\")","UI.comboBox()","UI.list()","UI.toggleButton()","UI.radioButton(\"Toggle Me!\")",""]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A regular builder is a factory builder [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            If you use SwingTree as intended you will resort to using\n            the various factory methods in the `UI` namespace to create\n            your builder instances.\n\n            The once which do not take a component instance as an argument\n            are the once which will return a factory builder instances.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first demonstrate the factory builder mode using the `panel` method","code":["var panel = UI.panel()"]},
+
+        {"kind":"expect","text":"The builder will produce a `JPanel` instance","code":["panel.get(JPanel) instanceof JPanel"]},
+
+        {"kind":"and","text":"Every time we access the panel, a new instance is created","code":["panel.get(JPanel) !== panel.get(JPanel)","panel.get(JPanel) !== panel.get(JPanel)","panel.get(JPanel) !== panel.get(JPanel)"]},
+
+        {"kind":"and","text":"This is also true for any other UI builder created using such kinds of factory methods:","code":["anyUiBuilder.get(JComponent) !== anyUiBuilder.get(JComponent)"]},
+
+        {"kind":"where","text":"We can observe the same behavior for many other factory methods, including:","code":{"anyUiBuilder":["UI.panel()","UI.scrollPane()","UI.table()","UI.button()","UI.label(\"Hey! :)\")","UI.textField()","UI.textArea(\"A B C\")","UI.comboBox()","UI.list()","UI.toggleButton()","UI.radioButton(\"Toggle Me!\")",""]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A regular builder is a factory builder [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            If you use SwingTree as intended you will resort to using\n            the various factory methods in the `UI` namespace to create\n            your builder instances.\n\n            The once which do not take a component instance as an argument\n            are the once which will return a factory builder instances.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first demonstrate the factory builder mode using the `panel` method","code":["var panel = UI.panel()"]},
+
+        {"kind":"expect","text":"The builder will produce a `JPanel` instance","code":["panel.get(JPanel) instanceof JPanel"]},
+
+        {"kind":"and","text":"Every time we access the panel, a new instance is created","code":["panel.get(JPanel) !== panel.get(JPanel)","panel.get(JPanel) !== panel.get(JPanel)","panel.get(JPanel) !== panel.get(JPanel)"]},
+
+        {"kind":"and","text":"This is also true for any other UI builder created using such kinds of factory methods:","code":["anyUiBuilder.get(JComponent) !== anyUiBuilder.get(JComponent)"]},
+
+        {"kind":"where","text":"We can observe the same behavior for many other factory methods, including:","code":{"anyUiBuilder":["UI.panel()","UI.scrollPane()","UI.table()","UI.button()","UI.label(\"Hey! :)\")","UI.textField()","UI.textArea(\"A B C\")","UI.comboBox()","UI.list()","UI.toggleButton()","UI.radioButton(\"Toggle Me!\")",""]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A regular builder is a factory builder [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            If you use SwingTree as intended you will resort to using\n            the various factory methods in the `UI` namespace to create\n            your builder instances.\n\n            The once which do not take a component instance as an argument\n            are the once which will return a factory builder instances.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first demonstrate the factory builder mode using the `panel` method","code":["var panel = UI.panel()"]},
+
+        {"kind":"expect","text":"The builder will produce a `JPanel` instance","code":["panel.get(JPanel) instanceof JPanel"]},
+
+        {"kind":"and","text":"Every time we access the panel, a new instance is created","code":["panel.get(JPanel) !== panel.get(JPanel)","panel.get(JPanel) !== panel.get(JPanel)","panel.get(JPanel) !== panel.get(JPanel)"]},
+
+        {"kind":"and","text":"This is also true for any other UI builder created using such kinds of factory methods:","code":["anyUiBuilder.get(JComponent) !== anyUiBuilder.get(JComponent)"]},
+
+        {"kind":"where","text":"We can observe the same behavior for many other factory methods, including:","code":{"anyUiBuilder":["UI.panel()","UI.scrollPane()","UI.table()","UI.button()","UI.label(\"Hey! :)\")","UI.textField()","UI.textArea(\"A B C\")","UI.comboBox()","UI.list()","UI.toggleButton()","UI.radioButton(\"Toggle Me!\")",""]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A regular builder is a factory builder [5]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            If you use SwingTree as intended you will resort to using\n            the various factory methods in the `UI` namespace to create\n            your builder instances.\n\n            The once which do not take a component instance as an argument\n            are the once which will return a factory builder instances.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first demonstrate the factory builder mode using the `panel` method","code":["var panel = UI.panel()"]},
+
+        {"kind":"expect","text":"The builder will produce a `JPanel` instance","code":["panel.get(JPanel) instanceof JPanel"]},
+
+        {"kind":"and","text":"Every time we access the panel, a new instance is created","code":["panel.get(JPanel) !== panel.get(JPanel)","panel.get(JPanel) !== panel.get(JPanel)","panel.get(JPanel) !== panel.get(JPanel)"]},
+
+        {"kind":"and","text":"This is also true for any other UI builder created using such kinds of factory methods:","code":["anyUiBuilder.get(JComponent) !== anyUiBuilder.get(JComponent)"]},
+
+        {"kind":"where","text":"We can observe the same behavior for many other factory methods, including:","code":{"anyUiBuilder":["UI.panel()","UI.scrollPane()","UI.table()","UI.button()","UI.label(\"Hey! :)\")","UI.textField()","UI.textArea(\"A B C\")","UI.comboBox()","UI.list()","UI.toggleButton()","UI.radioButton(\"Toggle Me!\")",""]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A regular builder is a factory builder [6]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            If you use SwingTree as intended you will resort to using\n            the various factory methods in the `UI` namespace to create\n            your builder instances.\n\n            The once which do not take a component instance as an argument\n            are the once which will return a factory builder instances.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first demonstrate the factory builder mode using the `panel` method","code":["var panel = UI.panel()"]},
+
+        {"kind":"expect","text":"The builder will produce a `JPanel` instance","code":["panel.get(JPanel) instanceof JPanel"]},
+
+        {"kind":"and","text":"Every time we access the panel, a new instance is created","code":["panel.get(JPanel) !== panel.get(JPanel)","panel.get(JPanel) !== panel.get(JPanel)","panel.get(JPanel) !== panel.get(JPanel)"]},
+
+        {"kind":"and","text":"This is also true for any other UI builder created using such kinds of factory methods:","code":["anyUiBuilder.get(JComponent) !== anyUiBuilder.get(JComponent)"]},
+
+        {"kind":"where","text":"We can observe the same behavior for many other factory methods, including:","code":{"anyUiBuilder":["UI.panel()","UI.scrollPane()","UI.table()","UI.button()","UI.label(\"Hey! :)\")","UI.textField()","UI.textArea(\"A B C\")","UI.comboBox()","UI.list()","UI.toggleButton()","UI.radioButton(\"Toggle Me!\")",""]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A regular builder is a factory builder [7]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            If you use SwingTree as intended you will resort to using\n            the various factory methods in the `UI` namespace to create\n            your builder instances.\n\n            The once which do not take a component instance as an argument\n            are the once which will return a factory builder instances.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first demonstrate the factory builder mode using the `panel` method","code":["var panel = UI.panel()"]},
+
+        {"kind":"expect","text":"The builder will produce a `JPanel` instance","code":["panel.get(JPanel) instanceof JPanel"]},
+
+        {"kind":"and","text":"Every time we access the panel, a new instance is created","code":["panel.get(JPanel) !== panel.get(JPanel)","panel.get(JPanel) !== panel.get(JPanel)","panel.get(JPanel) !== panel.get(JPanel)"]},
+
+        {"kind":"and","text":"This is also true for any other UI builder created using such kinds of factory methods:","code":["anyUiBuilder.get(JComponent) !== anyUiBuilder.get(JComponent)"]},
+
+        {"kind":"where","text":"We can observe the same behavior for many other factory methods, including:","code":{"anyUiBuilder":["UI.panel()","UI.scrollPane()","UI.table()","UI.button()","UI.label(\"Hey! :)\")","UI.textField()","UI.textArea(\"A B C\")","UI.comboBox()","UI.list()","UI.toggleButton()","UI.radioButton(\"Toggle Me!\")",""]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A regular builder is a factory builder [8]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            If you use SwingTree as intended you will resort to using\n            the various factory methods in the `UI` namespace to create\n            your builder instances.\n\n            The once which do not take a component instance as an argument\n            are the once which will return a factory builder instances.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first demonstrate the factory builder mode using the `panel` method","code":["var panel = UI.panel()"]},
+
+        {"kind":"expect","text":"The builder will produce a `JPanel` instance","code":["panel.get(JPanel) instanceof JPanel"]},
+
+        {"kind":"and","text":"Every time we access the panel, a new instance is created","code":["panel.get(JPanel) !== panel.get(JPanel)","panel.get(JPanel) !== panel.get(JPanel)","panel.get(JPanel) !== panel.get(JPanel)"]},
+
+        {"kind":"and","text":"This is also true for any other UI builder created using such kinds of factory methods:","code":["anyUiBuilder.get(JComponent) !== anyUiBuilder.get(JComponent)"]},
+
+        {"kind":"where","text":"We can observe the same behavior for many other factory methods, including:","code":{"anyUiBuilder":["UI.panel()","UI.scrollPane()","UI.table()","UI.button()","UI.label(\"Hey! :)\")","UI.textField()","UI.textArea(\"A B C\")","UI.comboBox()","UI.list()","UI.toggleButton()","UI.radioButton(\"Toggle Me!\")",""]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A regular builder is a factory builder [9]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            If you use SwingTree as intended you will resort to using\n            the various factory methods in the `UI` namespace to create\n            your builder instances.\n\n            The once which do not take a component instance as an argument\n            are the once which will return a factory builder instances.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We first demonstrate the factory builder mode using the `panel` method","code":["var panel = UI.panel()"]},
+
+        {"kind":"expect","text":"The builder will produce a `JPanel` instance","code":["panel.get(JPanel) instanceof JPanel"]},
+
+        {"kind":"and","text":"Every time we access the panel, a new instance is created","code":["panel.get(JPanel) !== panel.get(JPanel)","panel.get(JPanel) !== panel.get(JPanel)","panel.get(JPanel) !== panel.get(JPanel)"]},
+
+        {"kind":"and","text":"This is also true for any other UI builder created using such kinds of factory methods:","code":["anyUiBuilder.get(JComponent) !== anyUiBuilder.get(JComponent)"]},
+
+        {"kind":"where","text":"We can observe the same behavior for many other factory methods, including:","code":{"anyUiBuilder":["UI.panel()","UI.scrollPane()","UI.table()","UI.button()","UI.label(\"Hey! :)\")","UI.textField()","UI.textArea(\"A B C\")","UI.comboBox()","UI.list()","UI.toggleButton()","UI.radioButton(\"Toggle Me!\")",""]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A regular builder is a factory builder [10]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            If you use SwingTree as intended you will resort to using\n            the various factory methods in the `UI` namespace to create\n            your builder instances.\n\n            The once which do not take a component instance as an argument\n            are the once which will return a factory builder instances.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We first demonstrate the factory builder mode using the `panel` method","code":["var panel = UI.panel()"]},

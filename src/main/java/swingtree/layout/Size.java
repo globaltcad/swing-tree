@@ -17,7 +17,7 @@ import java.util.function.Function;
  *  This is used to represent the size of icons
  *  as part of {@link swingtree.api.IconDeclaration}s
  *  and the SwingTree style API, see {@link swingtree.UIForAnySwing#withStyle(Styler)},
- *  {@link ComponentStyleDelegate#image(Function)} and
+ *  {@link ComponentStyleDelegate#image(swingtree.api.Configurator)} and
  *  {@link ImageConf#size(int, int)}.
  */
 @Immutable

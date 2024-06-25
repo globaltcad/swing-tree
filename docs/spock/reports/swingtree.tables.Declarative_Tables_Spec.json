@@ -23,7 +23,7 @@
       "blocks":[
         {"kind":"given","text":"A simple table UI with a map based data table model.","code":["var ui =","        UI.table(UI.MapData.EDITABLE, { [\"X\":[\"a\", \"b\", \"c\"], \"Y\":[\"1\", \"2\", \"3\"]] })"]},
 
-        {"kind":"and","text":"We actually build the component:","code":["var table = ui.component"]},
+        {"kind":"and","text":"We actually build the component:","code":["var table = ui.get(JTable)"]},
 
         {"kind":"expect","text":"The table UI has the following state:","code":["table.getColumnName(0) == \"X\"","table.getColumnName(1) == \"Y\"","table.getRowCount() == 3","table.getColumnCount() == 2","table.getValueAt(0, 0) == \"a\"","table.getValueAt(0, 1) == \"1\""]}
       ],
@@ -40,7 +40,7 @@
       "blocks":[
         {"kind":"given","text":"","code":["var ui = UI.table(UI.ListData.COLUMN_MAJOR_EDITABLE, { [[\"a\", \"b\", \"c\"], [\"x\", \"y\", \"z\"]] })"]},
 
-        {"kind":"and","text":"We actually build the component:","code":["var table = ui.component"]},
+        {"kind":"and","text":"We actually build the component:","code":["var table = ui.get(JTable)"]},
 
         {"kind":"expect","text":"The table UI has the following state:","code":["table.getColumnName(0) == \"A\" // default column names","table.getColumnName(1) == \"B\"","table.getRowCount() == 3","table.getColumnCount() == 2","table.getValueAt(0, 0) == \"a\"","table.getValueAt(0, 1) == \"x\"","table.getValueAt(1, 0) == \"b\"","table.getValueAt(1, 1) == \"y\"","table.getValueAt(2, 0) == \"c\"","table.getValueAt(2, 1) == \"z\""]}
       ],
@@ -57,7 +57,7 @@
       "blocks":[
         {"kind":"given","text":"We have an update event and some data.","code":["var data = [1, 2, 3, 4]","var update = Event.create()"]},
 
-        {"kind":"and","text":"We create a table with a lambda based table model.","code":["var ui =","        UI.table().withModel(","            UI.tableModel()","            .colName( col -> [\"X\", \"Y\", \"Z\"].get(col) )","            .colCount( () -> 3 )","            .rowCount( () -> data.size() )","            .getsEntryAt( (r, c) -> data[r] )","            .updateOn(update)","        )"]},
+        {"kind":"and","text":"We create a table with a lambda based table model.","code":["var ui =","        UI.table().withModel( m -> m","            .colName( col -> [\"X\", \"Y\", \"Z\"].get(col) )","            .colCount( () -> 3 )","            .rowCount( () -> data.size() )","            .getsEntryAt( (r, c) -> data[r] )","            .updateOn(update)","        )"]},
 
         {"kind":"and","text":"We actually build the component:","code":["var table = ui.get(JTable)"]},
 

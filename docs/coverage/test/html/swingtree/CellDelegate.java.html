@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CellDelegate.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">CellDelegate.java</span></div><h1>CellDelegate.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.swing.JComponent;
+import java.awt.Component;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
+/**
+ * This class models the state of an individual table/list/drop down cell alongside
+ * various properties that a cell should have, like for example
+ * the value of the cell, its position within the table
+ * as well as a renderer in the form of a AWT {@link Component}
+ * which may or not be replaced or modified.
+ * &lt;br&gt;
+ * When configuring your cell, you may use methods like
+ * {@link CellDelegate#withRenderer(Component)} or {@link CellDelegate#withRenderer(Consumer)}
+ * to define how the cell should be rendered.
+ *
+ * @param &lt;V&gt; The value type of the entry of this {@link CellDelegate}.
+ */
+public class CellDelegate&lt;C extends JComponent, V&gt;
+{
+<span class="fc" id="L33">    private static final Logger log = LoggerFactory.getLogger(CellDelegate.class);</span>
+
+    private final C                   owner;
+    private final @Nullable V         value;
+    private final boolean             isSelected;
+    private final boolean             hasFocus;
+    private final int                 row;
+    private final int                 column;
+    private final @Nullable Component componentRef;
+    private final List&lt;String&gt;        toolTips;
+    private final @Nullable Object    presentationValue;
+    private final Supplier&lt;Component&gt; defaultRenderSource;
+
+
+    public CellDelegate(
+        C                   owner,
+        @Nullable V         value,
+        boolean             isSelected,
+        boolean             hasFocus,
+        int                 row,
+        int                 column,
+        @Nullable Component renderer,
+        List&lt;String&gt;        toolTips,
+        @Nullable Object    presentationValue,
+        Supplier&lt;Component&gt; defaultRenderSource
+<span class="fc" id="L58">    ) {</span>
+<span class="fc" id="L59">        this.owner               = Objects.requireNonNull(owner);</span>
+<span class="fc" id="L60">        this.value               = value;</span>
+<span class="fc" id="L61">        this.isSelected          = isSelected;</span>
+<span class="fc" id="L62">        this.hasFocus            = hasFocus;</span>
+<span class="fc" id="L63">        this.row                 = row;</span>
+<span class="fc" id="L64">        this.column              = column;</span>
+<span class="fc" id="L65">        this.componentRef        = renderer;</span>
+<span class="fc" id="L66">        this.toolTips            = Objects.requireNonNull(toolTips);</span>
+<span class="fc" id="L67">        this.presentationValue   = presentationValue;</span>
+<span class="fc" id="L68">        this.defaultRenderSource = Objects.requireNonNull(defaultRenderSource);</span>
+<span class="fc" id="L69">    }</span>
+
+    public C getComponent() {
+<span class="fc" id="L72">        return owner;</span>
+    }
+
+    public Optional&lt;V&gt; value() {
+<span class="fc" id="L76">        return Optional.ofNullable(value);</span>
+    }
+
+    public Optional&lt;String&gt; valueAsString() {
+<span class="fc" id="L80">        return value().map(Object::toString);</span>
+    }
+
+    public boolean isSelected() {
+<span class="fc" id="L84">        return isSelected;</span>
+    }
+
+    public boolean hasFocus() {
+<span class="fc" id="L88">        return hasFocus;</span>
+    }
+
+    public int getRow() {
+<span class="fc" id="L92">        return row;</span>
+    }
+
+    public int getColumn() {
+<span class="nc" id="L96">        return column;</span>
+    }
+
+    public Optional&lt;Component&gt; renderer() {
+<span class="fc" id="L100">        return Optional.ofNullable(componentRef);</span>
+    }
+
+    public CellDelegate&lt;C, V&gt; withRenderer(Component component) {
+<span class="fc" id="L104">        return new CellDelegate&lt;&gt;(</span>
+            owner,
+            value,
+            isSelected,
+            hasFocus,
+            row,
+            column,
+            component,
+            toolTips,
+            presentationValue,
+            defaultRenderSource
+        );
+    }
+
+    public CellDelegate&lt;C, V&gt; withRenderer( Consumer&lt;Graphics2D&gt; painter ) {
+<span class="nc" id="L119">        return withRenderer(new Component() {</span>
+            @Override
+            public void paint(Graphics g) {
+<span class="nc" id="L122">                super.paint(g);</span>
+<span class="nc" id="L123">                painter.accept((Graphics2D) g);</span>
+<span class="nc" id="L124">            }</span>
+        });
+    }
+
+    public CellDelegate&lt;C, V&gt; withToolTip( String toolTip ) {
+<span class="nc" id="L129">        ArrayList&lt;String&gt; newToolTips = new ArrayList&lt;&gt;(toolTips);</span>
+<span class="nc" id="L130">        newToolTips.add(toolTip);</span>
+<span class="nc" id="L131">        return new CellDelegate&lt;&gt;(</span>
+            owner,
+            value,
+            isSelected,
+            hasFocus,
+            row,
+            column,
+            componentRef,
+            newToolTips,
+            presentationValue,
+            defaultRenderSource
+        );
+    }
+
+    /**
+     *  The presentation value is the first choice of the
+     *  cell renderer to be used for rendering and presentation
+     *  to the user. If it does not exist then the regular
+     *  cell value is used for rendering.
+     *
+     * @return An optional of the presentation value.
+     *         It may be an empty optional if no presentation value was specified.
+     */
+    public Optional&lt;Object&gt; presentationValue() {
+<span class="nc" id="L155">        return Optional.ofNullable(presentationValue);</span>
+    }
+
+    /**
+     *  Represents the value how it should be displayed
+     *  to the user by the cell renderer. By default, this
+     *  value is null, in which case the regular cell value is
+     *  presented to the user.
+     *
+     * @param toBeShown The object which should be used by the renderer
+     *                  to present to the user, typically a String.
+     * @return An updated cell delegate object with the new presentation value.
+     */
+    public CellDelegate&lt;C, V&gt; withPresentationValue( @Nullable Object toBeShown ) {
+<span class="nc" id="L169">        return new CellDelegate&lt;&gt;(</span>
+            owner,
+            value,
+            isSelected,
+            hasFocus,
+            row,
+            column,
+            componentRef,
+            toolTips,
+            toBeShown,
+            defaultRenderSource
+        );
+    }
+
+    public CellDelegate&lt;C, V&gt; withDefaultRenderer() {
+        try {
+<span class="nc" id="L185">            return this.withRenderer(this.defaultRenderSource.get());</span>
+<span class="nc" id="L186">        } catch (Exception e) {</span>
+<span class="nc" id="L187">            log.error(&quot;Failed to create default renderer!&quot;, e);</span>
+        }
+<span class="nc" id="L189">        return this;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

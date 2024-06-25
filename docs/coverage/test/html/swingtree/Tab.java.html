@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Tab.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">Tab.java</span></div><h1>Tab.java</h1><pre class="source lang-java linenums">package swingtree;
 
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import sprouts.Action;
 import sprouts.From;
@@ -33,81 +34,91 @@ import java.util.Optional;
  */
 public final class Tab
 {
-<span class="fc" id="L36">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(Tab.class);</span>
+<span class="fc" id="L37">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(Tab.class);</span>
 
-    private final JComponent   _contents;
-    private final JComponent   _headerComponent;
-    private final Val&lt;String&gt;  _title;
-    private final Var&lt;Boolean&gt; _isSelected;
-    private final Val&lt;Boolean&gt; _isEnabled;
-    private final Val&lt;Icon&gt;    _icon;
-    private final Val&lt;String&gt;  _tip;
-    private final Action&lt;ComponentDelegate&lt;JTabbedPane, ChangeEvent&gt;&gt; _onSelected;
+    @Nullable private final JComponent   _contents;
+    @Nullable private final JComponent   _headerComponent;
+    @Nullable private final Val&lt;String&gt;  _title;
+    @Nullable private final Var&lt;Boolean&gt; _isSelected;
+    @Nullable private final Val&lt;Boolean&gt; _isEnabled;
+    @Nullable private final Val&lt;Icon&gt;    _icon;
+    @Nullable private final Val&lt;String&gt;  _tip;
+    @Nullable private final Action&lt;ComponentDelegate&lt;JTabbedPane, ChangeEvent&gt;&gt; _onSelected;
+    @Nullable private final Action&lt;ComponentDelegate&lt;JTabbedPane, MouseEvent&gt;&gt;  _onMouseClick;
 
-    private final Action&lt;ComponentDelegate&lt;JTabbedPane, MouseEvent&gt;&gt;  _onMouseClick;
 
     Tab(
-        JComponent   contents,
-        JComponent   headerComponent,
-        Val&lt;String&gt;  title,
-        Var&lt;Boolean&gt; isSelected,
-        Val&lt;Boolean&gt; isEnabled,
-        Val&lt;Icon&gt;    icon,
-        Val&lt;String&gt;  tip,
-        Action&lt;ComponentDelegate&lt;JTabbedPane, ChangeEvent&gt;&gt; onSelected,
-        Action&lt;ComponentDelegate&lt;JTabbedPane, MouseEvent&gt;&gt;  onMouseClick
-<span class="fc" id="L59">    ) {</span>
-<span class="fc bfc" id="L60" title="All 2 branches covered.">        if ( headerComponent == null )</span>
-<span class="fc" id="L61">            NullUtil.nullArgCheck(title,&quot;title&quot;,String.class);</span>
-<span class="fc bfc" id="L62" title="All 2 branches covered.">        if ( title == null )</span>
-<span class="fc" id="L63">            NullUtil.nullArgCheck(headerComponent,&quot;headerComponent&quot;,JComponent.class);</span>
+        @Nullable JComponent   contents,
+        @Nullable JComponent   headerComponent,
+        @Nullable Val&lt;String&gt;  title,
+        @Nullable Var&lt;Boolean&gt; isSelected,
+        @Nullable Val&lt;Boolean&gt; isEnabled,
+        @Nullable Val&lt;Icon&gt;    icon,
+        @Nullable Val&lt;String&gt;  tip,
+        @Nullable Action&lt;ComponentDelegate&lt;JTabbedPane, ChangeEvent&gt;&gt; onSelected,
+        @Nullable Action&lt;ComponentDelegate&lt;JTabbedPane, MouseEvent&gt;&gt;  onMouseClick
+<span class="fc" id="L60">    ) {</span>
+<span class="fc bfc" id="L61" title="All 2 branches covered.">        if ( headerComponent == null )</span>
+<span class="fc" id="L62">            NullUtil.nullArgCheck(title,&quot;title&quot;,String.class);</span>
+<span class="fc bfc" id="L63" title="All 2 branches covered.">        if ( title == null )</span>
+<span class="fc" id="L64">            NullUtil.nullArgCheck(headerComponent,&quot;headerComponent&quot;,JComponent.class);</span>
 
-<span class="fc" id="L65">        _contents        = contents;</span>
-<span class="fc" id="L66">        _headerComponent = headerComponent;</span>
-<span class="fc" id="L67">        _title           = title;</span>
-<span class="fc" id="L68">        _isSelected      = isSelected;</span>
-<span class="fc" id="L69">        _isEnabled       = isEnabled;</span>
-<span class="fc" id="L70">        _icon            = icon;</span>
-<span class="fc" id="L71">        _tip             = tip;</span>
-<span class="fc" id="L72">        _onSelected      = onSelected;</span>
-<span class="fc" id="L73">        _onMouseClick    = onMouseClick;</span>
-<span class="fc" id="L74">    }</span>
+<span class="fc" id="L66">        _contents        = contents;</span>
+<span class="fc" id="L67">        _headerComponent = headerComponent;</span>
+<span class="fc" id="L68">        _title           = title;</span>
+<span class="fc" id="L69">        _isSelected      = isSelected;</span>
+<span class="fc" id="L70">        _isEnabled       = isEnabled;</span>
+<span class="fc" id="L71">        _icon            = icon;</span>
+<span class="fc" id="L72">        _tip             = tip;</span>
+<span class="fc" id="L73">        _onSelected      = onSelected;</span>
+<span class="fc" id="L74">        _onMouseClick    = onMouseClick;</span>
+<span class="fc" id="L75">    }</span>
 
     /**
+     *  Use this to make the tab selected by default.
      * @param isSelected The selected state of the tab.
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
     public final Tab isSelectedIf( boolean isSelected ) {
-<span class="nc bnc" id="L81" title="All 2 branches missed.">        if ( _isSelected != null )</span>
-<span class="nc" id="L82">            log.warn(&quot;Selection flag already specified!&quot;, new Throwable());</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">        if ( _isSelected != null )</span>
+<span class="nc" id="L84">            log.warn(&quot;Selection flag already specified!&quot;, new Throwable());</span>
 
-<span class="nc" id="L84">        return new Tab(_contents, _headerComponent, _title, Var.of(isSelected), _isEnabled, _icon, _tip, _onSelected, _onMouseClick);</span>
+<span class="nc" id="L86">        return new Tab(_contents, _headerComponent, _title, Var.of(isSelected), _isEnabled, _icon, _tip, _onSelected, _onMouseClick);</span>
     }
 
     /**
+     *  Binds the boolean property passed to this method to the selected state of the tab,
+     *  which means that when the state of the property changes, the selected state of the tab will change accordingly.
+     *  Conversely, when the tab is selected, the property will be set to true, otherwise it will be set to false.
+     *
      * @param isSelected The selected state property of the tab.
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
     public final Tab isSelectedIf( Var&lt;Boolean&gt; isSelected ) {
-<span class="fc" id="L92">        NullUtil.nullArgCheck(isSelected,&quot;isSelected&quot;,Val.class);</span>
-<span class="pc bpc" id="L93" title="1 of 2 branches missed.">        if ( _isSelected != null )</span>
-<span class="nc" id="L94">            log.warn(&quot;Selection flag already specified!&quot;, new Throwable());</span>
+<span class="fc" id="L98">        NullUtil.nullArgCheck(isSelected,&quot;isSelected&quot;,Val.class);</span>
+<span class="pc bpc" id="L99" title="1 of 2 branches missed.">        if ( _isSelected != null )</span>
+<span class="nc" id="L100">            log.warn(&quot;Selection flag already specified!&quot;, new Throwable());</span>
 
-<span class="fc" id="L96">        return new Tab(_contents, _headerComponent, _title, isSelected, _isEnabled, _icon, _tip, _onSelected, _onMouseClick);</span>
+<span class="fc" id="L102">        return new Tab(_contents, _headerComponent, _title, isSelected, _isEnabled, _icon, _tip, _onSelected, _onMouseClick);</span>
     }
 
     /**
+     *  Binds the boolean property passed to this method to the selected state of the tab,
+     *  which means that when the state of the property changes, the selected state of the tab will change accordingly.
+     *  Note that this is not a two-way binding, so when the user changes the selection state of the tab,
+     *  the property will not be updated.
+     *
      * @param isSelected The selected state property of the tab.
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
     public final Tab isSelectedIf( Val&lt;Boolean&gt; isSelected ) {
-<span class="nc" id="L104">        NullUtil.nullArgCheck(isSelected,&quot;isSelected&quot;,Val.class);</span>
-<span class="nc bnc" id="L105" title="All 2 branches missed.">        if ( _isSelected != null )</span>
-<span class="nc" id="L106">            log.warn(&quot;Selection flag already specified!&quot;, new Throwable());</span>
+<span class="nc" id="L115">        NullUtil.nullArgCheck(isSelected,&quot;isSelected&quot;,Val.class);</span>
+<span class="nc bnc" id="L116" title="All 2 branches missed.">        if ( _isSelected != null )</span>
+<span class="nc" id="L117">            log.warn(&quot;Selection flag already specified!&quot;, new Throwable());</span>
 
-<span class="nc" id="L108">        Var&lt;Boolean&gt; isSelectedMut = Var.of(isSelected.get());</span>
-<span class="nc" id="L109">        isSelected.onChange(From.VIEW_MODEL, it -&gt; isSelectedMut.set(it.get()) );</span>
-<span class="nc" id="L110">        return new Tab(_contents, _headerComponent, _title, isSelectedMut, _isEnabled, _icon, _tip, _onSelected, _onMouseClick);</span>
+<span class="nc" id="L119">        Var&lt;Boolean&gt; isSelectedMut = Var.of(isSelected.get());</span>
+<span class="nc" id="L120">        isSelected.onChange(From.VIEW_MODEL, it -&gt; isSelectedMut.set(it.get()) );</span>
+<span class="nc" id="L121">        return new Tab(_contents, _headerComponent, _title, isSelectedMut, _isEnabled, _icon, _tip, _onSelected, _onMouseClick);</span>
     }
 
     /**
@@ -121,37 +132,41 @@ public final class Tab
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
     public final &lt;E extends Enum&lt;E&gt;&gt; Tab isSelectedIf( E state, Var&lt;E&gt; selectedState ) {
-<span class="nc" id="L124">        NullUtil.nullArgCheck(state,&quot;state&quot;,Enum.class);</span>
-<span class="nc" id="L125">        NullUtil.nullArgCheck(selectedState,&quot;selectedState&quot;,Var.class);</span>
-<span class="nc bnc" id="L126" title="All 2 branches missed.">        if ( _isSelected != null )</span>
-<span class="nc" id="L127">            log.warn(&quot;Selection flag already specified!&quot;, new Throwable());</span>
+<span class="nc" id="L135">        NullUtil.nullArgCheck(state,&quot;state&quot;,Enum.class);</span>
+<span class="nc" id="L136">        NullUtil.nullArgCheck(selectedState,&quot;selectedState&quot;,Var.class);</span>
+<span class="nc bnc" id="L137" title="All 2 branches missed.">        if ( _isSelected != null )</span>
+<span class="nc" id="L138">            log.warn(&quot;Selection flag already specified!&quot;, new Throwable());</span>
 
-<span class="nc bnc" id="L129" title="All 2 branches missed.">        Var&lt;Boolean&gt; isSelected = Var.of(state == selectedState.get());</span>
-<span class="nc bnc" id="L130" title="All 2 branches missed.">        selectedState.onChange(From.VIEW_MODEL,  it -&gt; isSelected.set(state == it.get()) );</span>
-<span class="nc bnc" id="L131" title="All 2 branches missed.">        isSelected.onChange(From.VIEW_MODEL,  it -&gt; { if ( it.get() ) selectedState.set(state); });</span>
-<span class="nc" id="L132">        return new Tab(_contents, _headerComponent, _title, isSelected, _isEnabled, _icon, _tip, _onSelected, _onMouseClick);</span>
+<span class="nc bnc" id="L140" title="All 2 branches missed.">        Var&lt;Boolean&gt; isSelected = Var.of(state == selectedState.get());</span>
+<span class="nc bnc" id="L141" title="All 2 branches missed.">        selectedState.onChange(From.VIEW_MODEL,  it -&gt; isSelected.set(state == it.get()) );</span>
+<span class="nc bnc" id="L142" title="All 2 branches missed.">        isSelected.onChange(From.VIEW_MODEL,  it -&gt; { if ( it.get() ) selectedState.set(state); });</span>
+<span class="nc" id="L143">        return new Tab(_contents, _headerComponent, _title, isSelected, _isEnabled, _icon, _tip, _onSelected, _onMouseClick);</span>
     }
 
     /**
+     *  A tab may be enabled or disabled, which you can specify with this method.
+     *
      * @param isEnabled The enabled state of the tab.
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
     public final Tab isEnabledIf( boolean isEnabled ) {
-<span class="nc bnc" id="L140" title="All 2 branches missed.">        if ( _isEnabled != null )</span>
-<span class="nc" id="L141">            log.warn(&quot;Enabled flag already specified!&quot;, new Throwable());</span>
+<span class="nc bnc" id="L153" title="All 2 branches missed.">        if ( _isEnabled != null )</span>
+<span class="nc" id="L154">            log.warn(&quot;Enabled flag already specified!&quot;, new Throwable());</span>
 
-<span class="nc" id="L143">        return new Tab(_contents, _headerComponent, _title, _isSelected, Val.of(isEnabled), _icon, _tip, _onSelected, _onMouseClick);</span>
+<span class="nc" id="L156">        return new Tab(_contents, _headerComponent, _title, _isSelected, Val.of(isEnabled), _icon, _tip, _onSelected, _onMouseClick);</span>
     }
 
     /**
+     *   Binds the boolean property passed to this method to the enabled state of the tab,
+     *   which means that when the state of the property changes, the enabled state of the tab will change accordingly.
      * @param isEnabled The enabled state property of the tab.
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
     public final Tab isEnabledIf( Val&lt;Boolean&gt; isEnabled ) {
-<span class="fc" id="L151">        NullUtil.nullArgCheck(isEnabled,&quot;isEnabled&quot;,Val.class);</span>
-<span class="pc bpc" id="L152" title="1 of 2 branches missed.">        if ( _isEnabled != null )</span>
-<span class="nc" id="L153">            log.warn(&quot;Enabled flag already specified!&quot;, new Throwable());</span>
-<span class="fc" id="L154">        return new Tab(_contents, _headerComponent, _title, _isSelected, isEnabled, _icon, _tip, _onSelected, _onMouseClick);</span>
+<span class="fc" id="L166">        NullUtil.nullArgCheck(isEnabled,&quot;isEnabled&quot;,Val.class);</span>
+<span class="pc bpc" id="L167" title="1 of 2 branches missed.">        if ( _isEnabled != null )</span>
+<span class="nc" id="L168">            log.warn(&quot;Enabled flag already specified!&quot;, new Throwable());</span>
+<span class="fc" id="L169">        return new Tab(_contents, _headerComponent, _title, _isSelected, isEnabled, _icon, _tip, _onSelected, _onMouseClick);</span>
     }
 
     /**
@@ -165,24 +180,26 @@ public final class Tab
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
     public final &lt;E extends Enum&lt;E&gt;&gt; Tab isEnabledIf( E state, Var&lt;E&gt; enabledState ) {
-<span class="nc" id="L168">        NullUtil.nullArgCheck(state,&quot;state&quot;,Enum.class);</span>
-<span class="nc" id="L169">        NullUtil.nullArgCheck(enabledState,&quot;enabledState&quot;,Var.class);</span>
-<span class="nc bnc" id="L170" title="All 2 branches missed.">        if ( _isEnabled != null )</span>
-<span class="nc" id="L171">            log.warn(&quot;Enabled flag already specified!&quot;, new Throwable());</span>
-<span class="nc bnc" id="L172" title="All 2 branches missed.">        Var&lt;Boolean&gt; isEnabled = Var.of(state == enabledState.get());</span>
-<span class="nc bnc" id="L173" title="All 2 branches missed.">        enabledState.onChange(From.VIEW_MODEL,  it -&gt; isEnabled.set(state == it.get()) );</span>
-<span class="nc" id="L174">        return new Tab(_contents, _headerComponent, _title, _isSelected, isEnabled, _icon, _tip, _onSelected, _onMouseClick);</span>
+<span class="nc" id="L183">        NullUtil.nullArgCheck(state,&quot;state&quot;,Enum.class);</span>
+<span class="nc" id="L184">        NullUtil.nullArgCheck(enabledState,&quot;enabledState&quot;,Var.class);</span>
+<span class="nc bnc" id="L185" title="All 2 branches missed.">        if ( _isEnabled != null )</span>
+<span class="nc" id="L186">            log.warn(&quot;Enabled flag already specified!&quot;, new Throwable());</span>
+<span class="nc bnc" id="L187" title="All 2 branches missed.">        Var&lt;Boolean&gt; isEnabled = Var.of(state == enabledState.get());</span>
+<span class="nc bnc" id="L188" title="All 2 branches missed.">        enabledState.onChange(From.VIEW_MODEL,  it -&gt; isEnabled.set(state == it.get()) );</span>
+<span class="nc" id="L189">        return new Tab(_contents, _headerComponent, _title, _isSelected, isEnabled, _icon, _tip, _onSelected, _onMouseClick);</span>
     }
 
     /**
+     *  A tab header may have an icon displayed in it, which you can specify with this method.
+     *
      * @param icon The icon which should be displayed in the tab header.
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
     public final Tab withIcon( Icon icon ) {
-<span class="nc" id="L182">        NullUtil.nullArgCheck(icon,&quot;icon&quot;,Icon.class);</span>
-<span class="nc bnc" id="L183" title="All 2 branches missed.">        if ( _icon != null )</span>
-<span class="nc" id="L184">            log.warn(&quot;Icon already specified!&quot;, new Throwable());</span>
-<span class="nc" id="L185">        return new Tab(_contents, _headerComponent, _title, _isSelected, _isEnabled, Val.of(icon), _tip, _onSelected, _onMouseClick);</span>
+<span class="nc" id="L199">        NullUtil.nullArgCheck(icon,&quot;icon&quot;,Icon.class);</span>
+<span class="nc bnc" id="L200" title="All 2 branches missed.">        if ( _icon != null )</span>
+<span class="nc" id="L201">            log.warn(&quot;Icon already specified!&quot;, new Throwable());</span>
+<span class="nc" id="L202">        return new Tab(_contents, _headerComponent, _title, _isSelected, _isEnabled, Val.of(icon), _tip, _onSelected, _onMouseClick);</span>
     }
 
     /**
@@ -194,8 +211,8 @@ public final class Tab
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
     public final Tab withIcon( IconDeclaration icon ) {
-<span class="nc" id="L197">        Objects.requireNonNull(icon);</span>
-<span class="nc" id="L198">        return icon.find().map(this::withIcon).orElse(this);</span>
+<span class="nc" id="L214">        Objects.requireNonNull(icon);</span>
+<span class="nc" id="L215">        return icon.find().map(this::withIcon).orElse(this);</span>
     }
 
     /**
@@ -223,40 +240,46 @@ public final class Tab
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
     public final Tab withIcon( Val&lt;IconDeclaration&gt; iconDeclaration ) {
-<span class="fc" id="L226">        NullUtil.nullArgCheck(iconDeclaration,&quot;icon&quot;,Val.class);</span>
-<span class="pc bpc" id="L227" title="1 of 2 branches missed.">        if ( _icon != null )</span>
-<span class="nc" id="L228">            log.warn(&quot;Icon already specified!&quot;, new Throwable());</span>
-<span class="fc" id="L229">        Val&lt;Icon&gt; asIcon = iconDeclaration.viewAs( Icon.class, it -&gt; it.find().orElse(null) );</span>
-<span class="fc" id="L230">        return new Tab(_contents, _headerComponent, _title, _isSelected, _isEnabled, asIcon, _tip, _onSelected, _onMouseClick);</span>
+<span class="fc" id="L243">        NullUtil.nullArgCheck(iconDeclaration,&quot;icon&quot;,Val.class);</span>
+<span class="pc bpc" id="L244" title="1 of 2 branches missed.">        if ( _icon != null )</span>
+<span class="nc" id="L245">            log.warn(&quot;Icon already specified!&quot;, new Throwable());</span>
+<span class="fc" id="L246">        Val&lt;Icon&gt; asIcon = iconDeclaration.viewAs( Icon.class, it -&gt; it.find().orElse(null) );</span>
+<span class="fc" id="L247">        return new Tab(_contents, _headerComponent, _title, _isSelected, _isEnabled, asIcon, _tip, _onSelected, _onMouseClick);</span>
     }
 
     /**
+     *  Allows you to define the tooltip which should be displayed when hovering over the tab header.
+     *
      * @param tip The tooltip which should be displayed when hovering over the tab header.
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
     public final Tab withTip( String tip ) {
-<span class="fc" id="L238">        NullUtil.nullArgCheck(tip,&quot;tip&quot;,String.class);</span>
-<span class="pc bpc" id="L239" title="1 of 2 branches missed.">        if ( _tip != null )</span>
-<span class="nc" id="L240">            log.warn(&quot;Tip already specified!&quot;, new Throwable());</span>
-<span class="fc" id="L241">        return new Tab(_contents, _headerComponent, _title, _isSelected, _isEnabled, _icon, Val.of(tip), _onSelected, _onMouseClick);</span>
+<span class="fc" id="L257">        NullUtil.nullArgCheck(tip,&quot;tip&quot;,String.class);</span>
+<span class="pc bpc" id="L258" title="1 of 2 branches missed.">        if ( _tip != null )</span>
+<span class="nc" id="L259">            log.warn(&quot;Tip already specified!&quot;, new Throwable());</span>
+<span class="fc" id="L260">        return new Tab(_contents, _headerComponent, _title, _isSelected, _isEnabled, _icon, Val.of(tip), _onSelected, _onMouseClick);</span>
     }
 
     /**
+     *  Allows you to bind a string property to the tooltip of the tab.
+     *  When the item of the property changes, the tooltip will be updated accordingly.
+     *  You can see the tooltip when hovering over the tab header.
+     *
      * @param tip The tooltip property which should be displayed when hovering over the tab header.
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
     public final Tab withTip( Val&lt;String&gt; tip ) {
-<span class="fc" id="L249">        NullUtil.nullArgCheck(tip,&quot;tip&quot;,String.class);</span>
-<span class="pc bpc" id="L250" title="1 of 2 branches missed.">        if ( _tip != null )</span>
-<span class="nc" id="L251">            log.warn(&quot;Tip already specified!&quot;, new Throwable());</span>
-<span class="fc" id="L252">        return new Tab(_contents, _headerComponent, _title, _isSelected, _isEnabled, _icon, tip, _onSelected, _onMouseClick);</span>
+<span class="fc" id="L272">        NullUtil.nullArgCheck(tip,&quot;tip&quot;,String.class);</span>
+<span class="pc bpc" id="L273" title="1 of 2 branches missed.">        if ( _tip != null )</span>
+<span class="nc" id="L274">            log.warn(&quot;Tip already specified!&quot;, new Throwable());</span>
+<span class="fc" id="L275">        return new Tab(_contents, _headerComponent, _title, _isSelected, _isEnabled, _icon, tip, _onSelected, _onMouseClick);</span>
     }
 
     public final Tab withHeader( JComponent headerComponent ) {
-<span class="fc" id="L256">        NullUtil.nullArgCheck(headerComponent,&quot;headerComponent&quot;,JComponent.class);</span>
-<span class="pc bpc" id="L257" title="1 of 2 branches missed.">        if ( _headerComponent != null )</span>
-<span class="nc" id="L258">            log.warn(&quot;Header component already specified!&quot;, new Throwable());</span>
-<span class="fc" id="L259">        return new Tab(_contents, headerComponent, _title, _isSelected, _isEnabled, _icon, _tip, _onSelected, _onMouseClick);</span>
+<span class="fc" id="L279">        NullUtil.nullArgCheck(headerComponent,&quot;headerComponent&quot;,JComponent.class);</span>
+<span class="pc bpc" id="L280" title="1 of 2 branches missed.">        if ( _headerComponent != null )</span>
+<span class="nc" id="L281">            log.warn(&quot;Header component already specified!&quot;, new Throwable());</span>
+<span class="fc" id="L282">        return new Tab(_contents, headerComponent, _title, _isSelected, _isEnabled, _icon, _tip, _onSelected, _onMouseClick);</span>
     }
 
     /**
@@ -267,8 +290,8 @@ public final class Tab
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
     public final Tab withHeader( UIForAnySwing&lt;?,?&gt; headerComponent ) {
-<span class="fc" id="L270">        NullUtil.nullArgCheck(headerComponent,&quot;headerComponent&quot;, UIForAnySwing.class);</span>
-<span class="fc" id="L271">        return this.withHeader( headerComponent.getComponent() );</span>
+<span class="fc" id="L293">        NullUtil.nullArgCheck(headerComponent,&quot;headerComponent&quot;, UIForAnySwing.class);</span>
+<span class="fc" id="L294">        return this.withHeader( headerComponent.getComponent() );</span>
     }
 
     /**
@@ -278,9 +301,9 @@ public final class Tab
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
     public final Tab add( UIForAnySwing&lt;?,?&gt; contents ) {
-<span class="pc bpc" id="L281" title="1 of 2 branches missed.">        if ( _contents != null )</span>
-<span class="nc" id="L282">            log.warn(&quot;Content component already specified!&quot;, new Throwable());</span>
-<span class="fc" id="L283">        return new Tab(contents.getComponent(), _headerComponent, _title, _isSelected, _isEnabled, _icon, _tip, _onSelected, _onMouseClick);</span>
+<span class="pc bpc" id="L304" title="1 of 2 branches missed.">        if ( _contents != null )</span>
+<span class="nc" id="L305">            log.warn(&quot;Content component already specified!&quot;, new Throwable());</span>
+<span class="fc" id="L306">        return new Tab(contents.getComponent(), _headerComponent, _title, _isSelected, _isEnabled, _icon, _tip, _onSelected, _onMouseClick);</span>
     }
 
     /**
@@ -290,19 +313,22 @@ public final class Tab
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
     public final Tab add( JComponent contents ) {
-<span class="nc bnc" id="L293" title="All 2 branches missed.">        if ( _contents != null )</span>
-<span class="nc" id="L294">            log.warn(&quot;Content component already specified!&quot;, new Throwable());</span>
-<span class="nc" id="L295">        return new Tab(contents, _headerComponent, _title, _isSelected, _isEnabled, _icon, _tip, _onSelected, _onMouseClick);</span>
+<span class="nc bnc" id="L316" title="All 2 branches missed.">        if ( _contents != null )</span>
+<span class="nc" id="L317">            log.warn(&quot;Content component already specified!&quot;, new Throwable());</span>
+<span class="nc" id="L318">        return new Tab(contents, _headerComponent, _title, _isSelected, _isEnabled, _icon, _tip, _onSelected, _onMouseClick);</span>
     }
 
     /**
+     *  Use this to register and catch generic {@link ChangeEvent} based selection events for this tab
+     *  and perform some action when the tab is selected.
+     *
      * @param onSelected The action to be executed when the tab is selected.
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
     public final Tab onSelection( Action&lt;ComponentDelegate&lt;JTabbedPane, ChangeEvent&gt;&gt; onSelected ) {
-<span class="pc bpc" id="L303" title="1 of 2 branches missed.">        if ( _onSelected != null )</span>
-<span class="nc" id="L304">            onSelected = _onSelected.andThen(onSelected);</span>
-<span class="fc" id="L305">        return new Tab(_contents, _headerComponent, _title, _isSelected, _isEnabled, _icon, _tip, onSelected, _onMouseClick);</span>
+<span class="pc bpc" id="L329" title="1 of 2 branches missed.">        if ( _onSelected != null )</span>
+<span class="nc" id="L330">            onSelected = _onSelected.andThen(onSelected);</span>
+<span class="fc" id="L331">        return new Tab(_contents, _headerComponent, _title, _isSelected, _isEnabled, _icon, _tip, onSelected, _onMouseClick);</span>
     }
 
     /**
@@ -313,27 +339,27 @@ public final class Tab
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
     public final Tab onMouseClick( Action&lt;ComponentDelegate&lt;JTabbedPane, MouseEvent&gt;&gt; onClick ) {
-<span class="pc bpc" id="L316" title="1 of 2 branches missed.">        if ( _onMouseClick != null )</span>
-<span class="nc" id="L317">            onClick = _onMouseClick.andThen(onClick);</span>
-<span class="fc" id="L318">        return new Tab(_contents, _headerComponent, _title, _isSelected, _isEnabled, _icon, _tip, _onSelected, onClick);</span>
+<span class="pc bpc" id="L342" title="1 of 2 branches missed.">        if ( _onMouseClick != null )</span>
+<span class="nc" id="L343">            onClick = _onMouseClick.andThen(onClick);</span>
+<span class="fc" id="L344">        return new Tab(_contents, _headerComponent, _title, _isSelected, _isEnabled, _icon, _tip, _onSelected, onClick);</span>
     }
 
-<span class="fc" id="L321">    final Optional&lt;JComponent&gt; contents() { return Optional.ofNullable(_contents); }</span>
+<span class="fc" id="L347">    final Optional&lt;JComponent&gt; contents() { return Optional.ofNullable(_contents); }</span>
 
-<span class="fc" id="L323">    final Optional&lt;Val&lt;String&gt;&gt; title() { return Optional.ofNullable(_title); }</span>
+<span class="fc" id="L349">    final Optional&lt;Val&lt;String&gt;&gt; title() { return Optional.ofNullable(_title); }</span>
 
-<span class="fc" id="L325">    final Optional&lt;Var&lt;Boolean&gt;&gt; isSelected() { return Optional.ofNullable(_isSelected); }</span>
+<span class="fc" id="L351">    final Optional&lt;Var&lt;Boolean&gt;&gt; isSelected() { return Optional.ofNullable(_isSelected); }</span>
 
-<span class="fc" id="L327">    final Optional&lt;Val&lt;Boolean&gt;&gt; isEnabled() { return Optional.ofNullable(_isEnabled); }</span>
+<span class="fc" id="L353">    final Optional&lt;Val&lt;Boolean&gt;&gt; isEnabled() { return Optional.ofNullable(_isEnabled); }</span>
 
-<span class="fc" id="L329">    final Optional&lt;Val&lt;Icon&gt;&gt; icon() { return Optional.ofNullable(_icon); }</span>
+<span class="fc" id="L355">    final Optional&lt;Val&lt;Icon&gt;&gt; icon() { return Optional.ofNullable(_icon); }</span>
 
-<span class="fc" id="L331">    final Optional&lt;Val&lt;String&gt;&gt; tip() { return Optional.ofNullable(_tip); }</span>
+<span class="fc" id="L357">    final Optional&lt;Val&lt;String&gt;&gt; tip() { return Optional.ofNullable(_tip); }</span>
 
-<span class="fc" id="L333">    final Optional&lt;JComponent&gt; headerContents() { return Optional.ofNullable(_headerComponent); }</span>
+<span class="fc" id="L359">    final Optional&lt;JComponent&gt; headerContents() { return Optional.ofNullable(_headerComponent); }</span>
 
-<span class="fc" id="L335">    final Optional&lt;Action&lt;ComponentDelegate&lt;JTabbedPane, ChangeEvent&gt;&gt;&gt; onSelection() { return Optional.ofNullable(_onSelected); }</span>
+<span class="fc" id="L361">    final Optional&lt;Action&lt;ComponentDelegate&lt;JTabbedPane, ChangeEvent&gt;&gt;&gt; onSelection() { return Optional.ofNullable(_onSelected); }</span>
 
-<span class="fc" id="L337">    final Optional&lt;Action&lt;ComponentDelegate&lt;JTabbedPane, MouseEvent&gt;&gt;&gt; onMouseClick() { return Optional.ofNullable(_onMouseClick); }</span>
+<span class="fc" id="L363">    final Optional&lt;Action&lt;ComponentDelegate&lt;JTabbedPane, MouseEvent&gt;&gt;&gt; onMouseClick() { return Optional.ofNullable(_onMouseClick); }</span>
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

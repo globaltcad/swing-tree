@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Outline.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">Outline.java</span></div><h1>Outline.java</h1><pre class="source lang-java linenums">package swingtree.style;
 
+import com.google.errorprone.annotations.Immutable;
+import org.jspecify.annotations.Nullable;
+
+import java.awt.Insets;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
@@ -13,196 +17,265 @@ import java.util.function.Function;
  *  was specified through the styling API or not so that the default properties of a component
  *  can be preserved (the insets of a layout manager, for example).
  */
+@Immutable
 final class Outline
 {
-<span class="fc" id="L18">    private static final Outline _NONE = new Outline(null, null, null, null);</span>
+<span class="fc" id="L23">    private static final Outline _NONE = new Outline(null, null, null, null);</span>
 
-<span class="fc" id="L20">    static Outline none() { return _NONE; }</span>
+<span class="fc" id="L25">    static Outline none() { return _NONE; }</span>
 
     static Outline of( float top, float right, float bottom, float left ) {
-<span class="fc" id="L23">        return new Outline(top, right, bottom, left);</span>
+<span class="fc" id="L28">        return new Outline(top, right, bottom, left);</span>
+    }
+
+    static Outline of( float topAndBottom, float rightAndLeft ) {
+<span class="fc" id="L32">        return new Outline(topAndBottom, rightAndLeft, topAndBottom, rightAndLeft);</span>
     }
 
     static Outline of( double top, double right, double bottom, double left ) {
-<span class="fc" id="L27">        return new Outline((float) top, (float) right, (float) bottom, (float) left);</span>
+<span class="fc" id="L36">        return new Outline((float) top, (float) right, (float) bottom, (float) left);</span>
     }
 
     static Outline of( float allSides ) {
-<span class="fc" id="L31">        return new Outline(allSides, allSides, allSides, allSides);</span>
+<span class="fc" id="L40">        return new Outline(allSides, allSides, allSides, allSides);</span>
+    }
+
+    static Outline of( Insets insets ) {
+<span class="fc" id="L44">        return of(insets.top, insets.right, insets.bottom, insets.left);</span>
     }
 
 
-    private final Float top;
-    private final Float right;
-    private final Float bottom;
-    private final Float left;
+    private final @Nullable Float top;
+    private final @Nullable Float right;
+    private final @Nullable Float bottom;
+    private final @Nullable Float left;
 
 
-    static Outline ofNullable( Float top, Float right, Float bottom, Float left ) {
-<span class="fc bfc" id="L42" title="All 8 branches covered.">        if ( top == null &amp;&amp; right == null &amp;&amp; bottom == null &amp;&amp; left == null )</span>
-<span class="fc" id="L43">            return _NONE;</span>
+    static Outline ofNullable( @Nullable Float top, @Nullable Float right, @Nullable Float bottom, @Nullable Float left ) {
+<span class="fc bfc" id="L55" title="All 8 branches covered.">        if ( top == null &amp;&amp; right == null &amp;&amp; bottom == null &amp;&amp; left == null )</span>
+<span class="fc" id="L56">            return _NONE;</span>
 
-<span class="fc" id="L45">        return new Outline(top, right, bottom, left);</span>
+<span class="fc" id="L58">        return new Outline(top, right, bottom, left);</span>
     }
     
-<span class="fc" id="L48">    private Outline( Float top, Float right, Float bottom, Float left ) {</span>
-<span class="fc" id="L49">        this.top    = top;</span>
-<span class="fc" id="L50">        this.right  = right;</span>
-<span class="fc" id="L51">        this.bottom = bottom;</span>
-<span class="fc" id="L52">        this.left   = left;</span>
-<span class="fc" id="L53">    }</span>
+<span class="fc" id="L61">    private Outline( @Nullable Float top, @Nullable Float right, @Nullable Float bottom, @Nullable Float left ) {</span>
+<span class="fc" id="L62">        this.top    = top;</span>
+<span class="fc" id="L63">        this.right  = right;</span>
+<span class="fc" id="L64">        this.bottom = bottom;</span>
+<span class="fc" id="L65">        this.left   = left;</span>
+<span class="fc" id="L66">    }</span>
 
     /**
+     *  The top outline value in the form of an {@link Optional}, where {@link Optional#empty()}
+     *  means that the top outline was not specified.
+     *
      * @return An {@link Optional} containing the top outline value if it was specified,
      *        {@link Optional#empty()} otherwise.
      */
-<span class="fc" id="L59">    Optional&lt;Float&gt; top() { return Optional.ofNullable(top); }</span>
+<span class="fc" id="L75">    Optional&lt;Float&gt; top() { return Optional.ofNullable(top); }</span>
 
     /**
+     *  An optional value for the right outline.
+     *
      * @return An {@link Optional} containing the right outline value if it was specified,
      *        {@link Optional#empty()} otherwise.
      */
-<span class="fc" id="L65">    Optional&lt;Float&gt; right() { return Optional.ofNullable(right); }</span>
+<span class="fc" id="L83">    Optional&lt;Float&gt; right() { return Optional.ofNullable(right); }</span>
 
     /**
+     *  The bottom outline value in the form of an {@link Optional}, where {@link Optional#empty()}
+     *  means that the bottom outline was not specified.
+     *
      * @return An {@link Optional} containing the bottom outline value if it was specified,
      *        {@link Optional#empty()} otherwise.
      */
-<span class="fc" id="L71">    Optional&lt;Float&gt; bottom() { return Optional.ofNullable(bottom); }</span>
+<span class="fc" id="L92">    Optional&lt;Float&gt; bottom() { return Optional.ofNullable(bottom); }</span>
 
     /**
+     *  Returns an optional value for the left outline where {@link Optional#empty()}
+     *  means that the left outline was not specified.
+     *
      * @return An {@link Optional} containing the left outline value if it was specified,
      *        {@link Optional#empty()} otherwise.
      */
-<span class="fc" id="L77">    Optional&lt;Float&gt; left() { return Optional.ofNullable(left); }</span>
+<span class="fc" id="L101">    Optional&lt;Float&gt; left() { return Optional.ofNullable(left); }</span>
 
     /**
+     *  Creates an updated {@link Outline} with the specified {@code top} outline value.
+     *
      * @param top The top outline value.
      * @return A new {@link Outline} with the specified top outline value.
      */
-<span class="fc" id="L83">    Outline withTop( float top ) { return Outline.ofNullable(top, right, bottom, left); }</span>
+<span class="fc" id="L109">    Outline withTop( float top ) { return Outline.ofNullable(top, right, bottom, left); }</span>
 
     /**
+     *  Creates an updated {@link Outline} with the specified {@code right} outline value.
+     *
      * @param right The right outline value.
      * @return A new {@link Outline} with the specified right outline value.
      */
-<span class="fc" id="L89">    Outline withRight( float right ) { return Outline.ofNullable(top, right, bottom, left); }</span>
+<span class="fc" id="L117">    Outline withRight( float right ) { return Outline.ofNullable(top, right, bottom, left); }</span>
 
     /**
+     *  Creates an updated {@link Outline} with the specified {@code bottom} outline value.
+     *
      * @param bottom The bottom outline value.
      * @return A new {@link Outline} with the specified bottom outline value.
      */
-<span class="fc" id="L95">    Outline withBottom( float bottom ) { return Outline.ofNullable(top, right, bottom, left); }</span>
+<span class="fc" id="L125">    Outline withBottom( float bottom ) { return Outline.ofNullable(top, right, bottom, left); }</span>
 
     /**
+     *  Creates an updated {@link Outline} with the specified {@code left} outline value.
      * @param left The left outline value.
      * @return A new {@link Outline} with the specified left outline value.
      */
-<span class="fc" id="L101">    Outline withLeft( float left ) { return Outline.ofNullable(top, right, bottom, left); }</span>
+<span class="fc" id="L132">    Outline withLeft( float left ) { return Outline.ofNullable(top, right, bottom, left); }</span>
+
+    Outline minus( Outline other ) {
+<span class="nc" id="L135">        return Outline.ofNullable(</span>
+<span class="nc bnc" id="L136" title="All 4 branches missed.">                    top    == null ? null : top    - (other.top    == null ? 0 : other.top),</span>
+<span class="nc bnc" id="L137" title="All 4 branches missed.">                    right  == null ? null : right  - (other.right  == null ? 0 : other.right),</span>
+<span class="nc bnc" id="L138" title="All 4 branches missed.">                    bottom == null ? null : bottom - (other.bottom == null ? 0 : other.bottom),</span>
+<span class="nc bnc" id="L139" title="All 4 branches missed.">                    left   == null ? null : left   - (other.left   == null ? 0 : other.left)</span>
+                );
+    }
 
     /**
+     *  An {@link Outline} may be scaled by a factor to increase or decrease the thickness of the outline.
+     *  If any of the sides was not specified, it will remain unspecified.
+     *
      * @param scale The scale factor.
      * @return A new {@link Outline} with the outline values scaled by the specified factor.
      */
     Outline scale( double scale ) {
-<span class="fc" id="L108">        return Outline.ofNullable(</span>
-<span class="fc bfc" id="L109" title="All 2 branches covered.">                    top    == null ? null : (float) ( top    * scale ),</span>
-<span class="fc bfc" id="L110" title="All 2 branches covered.">                    right  == null ? null : (float) ( right  * scale ),</span>
-<span class="fc bfc" id="L111" title="All 2 branches covered.">                    bottom == null ? null : (float) ( bottom * scale ),</span>
-<span class="fc bfc" id="L112" title="All 2 branches covered.">                    left   == null ? null : (float) ( left   * scale )</span>
+<span class="fc" id="L151">        return Outline.ofNullable(</span>
+<span class="fc bfc" id="L152" title="All 2 branches covered.">                    top    == null ? null : (float) ( top    * scale ),</span>
+<span class="fc bfc" id="L153" title="All 2 branches covered.">                    right  == null ? null : (float) ( right  * scale ),</span>
+<span class="fc bfc" id="L154" title="All 2 branches covered.">                    bottom == null ? null : (float) ( bottom * scale ),</span>
+<span class="fc bfc" id="L155" title="All 2 branches covered.">                    left   == null ? null : (float) ( left   * scale )</span>
                 );
     }
 
     Outline simplified() {
-<span class="fc bfc" id="L117" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
-<span class="fc" id="L118">            return _NONE;</span>
+<span class="fc bfc" id="L160" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
+<span class="fc" id="L161">            return _NONE;</span>
 
-<span class="fc bfc" id="L120" title="All 2 branches covered.">        Float top    = Objects.equals(this.top   , 0f) ? null : this.top;</span>
-<span class="fc bfc" id="L121" title="All 2 branches covered.">        Float right  = Objects.equals(this.right , 0f) ? null : this.right;</span>
-<span class="fc bfc" id="L122" title="All 2 branches covered.">        Float bottom = Objects.equals(this.bottom, 0f) ? null : this.bottom;</span>
-<span class="fc bfc" id="L123" title="All 2 branches covered.">        Float left   = Objects.equals(this.left  , 0f) ? null : this.left;</span>
+<span class="fc bfc" id="L163" title="All 2 branches covered.">        Float top    = Objects.equals(this.top   , 0f) ? null : this.top;</span>
+<span class="fc bfc" id="L164" title="All 2 branches covered.">        Float right  = Objects.equals(this.right , 0f) ? null : this.right;</span>
+<span class="fc bfc" id="L165" title="All 2 branches covered.">        Float bottom = Objects.equals(this.bottom, 0f) ? null : this.bottom;</span>
+<span class="fc bfc" id="L166" title="All 2 branches covered.">        Float left   = Objects.equals(this.left  , 0f) ? null : this.left;</span>
 
-<span class="fc bfc" id="L125" title="All 8 branches covered.">        if ( top == null &amp;&amp; right == null &amp;&amp; bottom == null &amp;&amp; left == null )</span>
-<span class="fc" id="L126">            return _NONE;</span>
+<span class="fc bfc" id="L168" title="All 8 branches covered.">        if ( top == null &amp;&amp; right == null &amp;&amp; bottom == null &amp;&amp; left == null )</span>
+<span class="fc" id="L169">            return _NONE;</span>
 
-<span class="fc" id="L128">        return Outline.ofNullable(top, right, bottom, left);</span>
+<span class="fc" id="L171">        return Outline.ofNullable(top, right, bottom, left);</span>
     }
 
     /**
+     *  Determines if any of the outline values are not null and positive,
+     *  which means that the outline is visible as part of the component's
+     *  appearance or layout.
+     *
      * @return {@code true} if any of the outline values are not null and positive,
      *         {@code false} otherwise.
      */
     public boolean isPositive() {
-<span class="fc bfc" id="L136" title="All 6 branches covered.">        return top    != null &amp;&amp; top    &gt; 0 ||</span>
-<span class="fc bfc" id="L137" title="All 4 branches covered.">               right  != null &amp;&amp; right  &gt; 0 ||</span>
-<span class="fc bfc" id="L138" title="All 4 branches covered.">               bottom != null &amp;&amp; bottom &gt; 0 ||</span>
-<span class="fc bfc" id="L139" title="All 2 branches covered.">               left   != null &amp;&amp; left   &gt; 0;</span>
+<span class="pc bpc" id="L183" title="1 of 6 branches missed.">        return ( top    != null &amp;&amp; top    &gt; 0 ) ||</span>
+<span class="pc bpc" id="L184" title="1 of 4 branches missed.">               ( right  != null &amp;&amp; right  &gt; 0 ) ||</span>
+<span class="pc bpc" id="L185" title="1 of 4 branches missed.">               ( bottom != null &amp;&amp; bottom &gt; 0 ) ||</span>
+<span class="pc bpc" id="L186" title="1 of 2 branches missed.">               ( left   != null &amp;&amp; left   &gt; 0 );</span>
     }
 
-    private static Float _plus( Float a, Float b ) {
-<span class="fc bfc" id="L143" title="All 4 branches covered.">        if ( a == null &amp;&amp; b == null )</span>
-<span class="fc" id="L144">            return null;</span>
-<span class="fc bfc" id="L145" title="All 4 branches covered.">        return a == null ? b : b == null ? a : a + b;</span>
+    private static @Nullable Float _plus( @Nullable Float a, @Nullable Float b ) {
+<span class="fc bfc" id="L190" title="All 4 branches covered.">        if ( a == null &amp;&amp; b == null )</span>
+<span class="fc" id="L191">            return null;</span>
+<span class="fc bfc" id="L192" title="All 4 branches covered.">        return a == null ? b : b == null ? a : a + b;</span>
     }
 
+    /**
+     *  Adds the outline values of this {@link Outline} with the specified {@code other} {@link Outline} values.
+     *
+     * @param other The other {@link Outline} to merge with.
+     * @return A new {@link Outline} with the merged outline values.
+     */
     public Outline plus( Outline other ) {
-<span class="fc bfc" id="L149" title="All 2 branches covered.">        if ( this == _NONE )</span>
-<span class="fc" id="L150">            return other;</span>
-<span class="fc bfc" id="L151" title="All 2 branches covered.">        if ( other == _NONE )</span>
-<span class="fc" id="L152">            return this;</span>
+<span class="fc bfc" id="L202" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
+<span class="fc" id="L203">            return other;</span>
+<span class="fc bfc" id="L204" title="All 2 branches covered.">        if ( other.equals(_NONE) )</span>
+<span class="fc" id="L205">            return this;</span>
 
-<span class="fc" id="L154">        return Outline.ofNullable(</span>
-<span class="fc" id="L155">                    _plus(top,    other.top   ),</span>
-<span class="fc" id="L156">                    _plus(right,  other.right ),</span>
-<span class="fc" id="L157">                    _plus(bottom, other.bottom),</span>
-<span class="fc" id="L158">                    _plus(left,   other.left  )</span>
+<span class="fc" id="L207">        return Outline.ofNullable(</span>
+<span class="fc" id="L208">                    _plus(top,    other.top   ),</span>
+<span class="fc" id="L209">                    _plus(right,  other.right ),</span>
+<span class="fc" id="L210">                    _plus(bottom, other.bottom),</span>
+<span class="fc" id="L211">                    _plus(left,   other.left  )</span>
                 );
     }
 
-    public Outline map( Function&lt;Float, Float&gt; mapper ) {
-<span class="fc" id="L163">        return Outline.ofNullable(</span>
-<span class="fc bfc" id="L164" title="All 2 branches covered.">                    top    == null ? null : mapper.apply(top),</span>
-<span class="fc bfc" id="L165" title="All 2 branches covered.">                    right  == null ? null : mapper.apply(right),</span>
-<span class="fc bfc" id="L166" title="All 2 branches covered.">                    bottom == null ? null : mapper.apply(bottom),</span>
-<span class="fc bfc" id="L167" title="All 2 branches covered.">                    left   == null ? null : mapper.apply(left)</span>
+    public Outline or( Outline other ) {
+<span class="fc bfc" id="L216" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
+<span class="fc" id="L217">            return other;</span>
+<span class="fc bfc" id="L218" title="All 2 branches covered.">        if ( other.equals(_NONE) )</span>
+<span class="fc" id="L219">            return this;</span>
+
+<span class="fc" id="L221">        return Outline.ofNullable(</span>
+<span class="fc bfc" id="L222" title="All 2 branches covered.">                    top    == null ? other.top    : top,</span>
+<span class="pc bpc" id="L223" title="1 of 2 branches missed.">                    right  == null ? other.right  : right,</span>
+<span class="fc bfc" id="L224" title="All 2 branches covered.">                    bottom == null ? other.bottom : bottom,</span>
+<span class="fc bfc" id="L225" title="All 2 branches covered.">                    left   == null ? other.left   : left</span>
+                );
+    }
+
+    /**
+     *  Maps the outline values of this {@link Outline} using the specified {@code mapper} function.
+     *
+     * @param mapper The mapper function.
+     * @return A new {@link Outline} with the mapped outline values.
+     */
+    public Outline map( Function&lt;Float, @Nullable Float&gt; mapper ) {
+<span class="fc" id="L236">        return Outline.ofNullable(</span>
+<span class="fc bfc" id="L237" title="All 2 branches covered.">                    top    == null ? null : mapper.apply(top),</span>
+<span class="fc bfc" id="L238" title="All 2 branches covered.">                    right  == null ? null : mapper.apply(right),</span>
+<span class="fc bfc" id="L239" title="All 2 branches covered.">                    bottom == null ? null : mapper.apply(bottom),</span>
+<span class="fc bfc" id="L240" title="All 2 branches covered.">                    left   == null ? null : mapper.apply(left)</span>
                 );
     }
 
     @Override
     public int hashCode() {
-<span class="fc" id="L173">        int hash = 7;</span>
-<span class="fc" id="L174">        hash = 97 * hash + Objects.hashCode(this.top);</span>
-<span class="fc" id="L175">        hash = 97 * hash + Objects.hashCode(this.right);</span>
-<span class="fc" id="L176">        hash = 97 * hash + Objects.hashCode(this.bottom);</span>
-<span class="fc" id="L177">        hash = 97 * hash + Objects.hashCode(this.left);</span>
-<span class="fc" id="L178">        return hash;</span>
+<span class="fc" id="L246">        int hash = 7;</span>
+<span class="fc" id="L247">        hash = 97 * hash + Objects.hashCode(this.top);</span>
+<span class="fc" id="L248">        hash = 97 * hash + Objects.hashCode(this.right);</span>
+<span class="fc" id="L249">        hash = 97 * hash + Objects.hashCode(this.bottom);</span>
+<span class="fc" id="L250">        hash = 97 * hash + Objects.hashCode(this.left);</span>
+<span class="fc" id="L251">        return hash;</span>
     }
 
     @Override
     public boolean equals( Object obj ) {
-<span class="pc bpc" id="L183" title="1 of 2 branches missed.">        if ( obj == null ) return false;</span>
-<span class="fc bfc" id="L184" title="All 2 branches covered.">        if ( obj == this ) return true;</span>
-<span class="pc bpc" id="L185" title="1 of 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
-<span class="fc" id="L186">        Outline rhs = (Outline) obj;</span>
-<span class="fc bfc" id="L187" title="All 2 branches covered.">        return Objects.equals(top,    rhs.top   ) &amp;&amp;</span>
-<span class="fc bfc" id="L188" title="All 2 branches covered.">               Objects.equals(right,  rhs.right ) &amp;&amp;</span>
-<span class="fc bfc" id="L189" title="All 2 branches covered.">               Objects.equals(bottom, rhs.bottom) &amp;&amp;</span>
-<span class="fc bfc" id="L190" title="All 2 branches covered.">               Objects.equals(left,   rhs.left  );</span>
+<span class="pc bpc" id="L256" title="1 of 2 branches missed.">        if ( obj == null ) return false;</span>
+<span class="fc bfc" id="L257" title="All 2 branches covered.">        if ( obj == this ) return true;</span>
+<span class="pc bpc" id="L258" title="1 of 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
+<span class="fc" id="L259">        Outline rhs = (Outline) obj;</span>
+<span class="fc bfc" id="L260" title="All 2 branches covered.">        return Objects.equals(top,    rhs.top   ) &amp;&amp;</span>
+<span class="fc bfc" id="L261" title="All 2 branches covered.">               Objects.equals(right,  rhs.right ) &amp;&amp;</span>
+<span class="fc bfc" id="L262" title="All 2 branches covered.">               Objects.equals(bottom, rhs.bottom) &amp;&amp;</span>
+<span class="fc bfc" id="L263" title="All 2 branches covered.">               Objects.equals(left,   rhs.left  );</span>
     }
 
     @Override
     public String toString() {
-<span class="fc" id="L195">        return this.getClass().getSimpleName() + &quot;[&quot; +</span>
-<span class="fc" id="L196">                    &quot;top=&quot;    + _toString( top    ) + &quot;, &quot; +</span>
-<span class="fc" id="L197">                    &quot;right=&quot;  + _toString( right  ) + &quot;, &quot; +</span>
-<span class="fc" id="L198">                    &quot;bottom=&quot; + _toString( bottom ) + &quot;, &quot; +</span>
-<span class="fc" id="L199">                    &quot;left=&quot;   + _toString( left   ) +</span>
+<span class="fc" id="L268">        return this.getClass().getSimpleName() + &quot;[&quot; +</span>
+<span class="fc" id="L269">                    &quot;top=&quot;    + _toString( top    ) + &quot;, &quot; +</span>
+<span class="fc" id="L270">                    &quot;right=&quot;  + _toString( right  ) + &quot;, &quot; +</span>
+<span class="fc" id="L271">                    &quot;bottom=&quot; + _toString( bottom ) + &quot;, &quot; +</span>
+<span class="fc" id="L272">                    &quot;left=&quot;   + _toString( left   ) +</span>
                 &quot;]&quot;;
     }
 
-    private static String _toString( Float value ) {
-<span class="fc bfc" id="L204" title="All 2 branches covered.">        return value == null ? &quot;?&quot; : value.toString().replace(&quot;.0&quot;, &quot;&quot;);</span>
+    private static String _toString( @Nullable Float value ) {
+<span class="fc bfc" id="L277" title="All 2 branches covered.">        return value == null ? &quot;?&quot; : value.toString().replace(&quot;.0&quot;, &quot;&quot;);</span>
     }
 
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -42,17 +42,24 @@ public class UIForButton&lt;B extends AbstractButton&gt; extends UIForAnyButton&
 <span class="nc" id="L42">                        return;</span>
                     }
 <span class="fc" id="L44">                    UI.runLater(()-&gt;{</span>
-                        // We do this later because in this point in time the UI is probably not
+                        // We do this later because at this point in time the UI is probably not
                         // yet fully built (swing-tree is using the builder-pattern).
-<span class="fc" id="L47">                        JButton button = (JButton) thisButton;</span>
-<span class="fc" id="L48">                        JRootPane rootPane = SwingUtilities.getRootPane(button);</span>
-<span class="pc bpc" id="L49" title="1 of 2 branches missed.">                        if ( rootPane != null )</span>
-<span class="fc" id="L50">                            rootPane.setDefaultButton(button);</span>
-                        else
-<span class="nc" id="L52">                            log.warn(&quot;Method 'makeDefaultButton()' called on a JButton component that is not in a JRootPane.&quot;);</span>
-<span class="fc" id="L53">                    });</span>
-<span class="fc" id="L54">                })</span>
-<span class="fc" id="L55">                ._this();</span>
+<span class="fc" id="L47">                        _trySetDefaultButton((JButton) thisButton, 3);</span>
+<span class="fc" id="L48">                    });</span>
+<span class="fc" id="L49">                })</span>
+<span class="fc" id="L50">                ._this();</span>
     }
+
+    private void _trySetDefaultButton(JButton button, int tries) {
+<span class="fc" id="L54">            JRootPane rootPane = SwingUtilities.getRootPane(button);</span>
+<span class="pc bpc" id="L55" title="1 of 2 branches missed.">            if ( rootPane != null )</span>
+<span class="fc" id="L56">                rootPane.setDefaultButton(button);</span>
+            else {
+<span class="nc bnc" id="L58" title="All 2 branches missed.">                if ( tries &gt; 0 )</span>
+<span class="nc" id="L59">                    UI.runLater(100, () -&gt; _trySetDefaultButton(button, tries - 1) );</span>
+                else
+<span class="nc" id="L61">                    log.warn(&quot;Method 'makeDefaultButton()' called on a JButton component that is not in a JRootPane.&quot;);</span>
+            }
+<span class="fc" id="L63">    }</span>
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

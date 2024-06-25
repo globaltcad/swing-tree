@@ -32,21 +32,25 @@ public final class TextRemoveDelegate extends AbstractTextComponentDelegate
 <span class="fc" id="L32">    }</span>
 
     /**
+     *  This method exposes the actual text that is being removed from the document
+     *  as part of the current text removal event.
+     *  If nothing is removed from the document, an empty {@link String} is returned.
+     *
      * @return The text to be removed or an empty {@link String} if no text is to be removed.
      *         Null is never returned.
      *
      */
     public String getTextToBeRemoved() {
         try {
-<span class="fc" id="L41">            return getComponent().getDocument().getText(getOffset(), getLength());</span>
-<span class="nc" id="L42">        } catch (BadLocationException e) {</span>
-<span class="nc" id="L43">            log.error(</span>
+<span class="fc" id="L45">            return getComponent().getDocument().getText(getOffset(), getLength());</span>
+<span class="nc" id="L46">        } catch (BadLocationException e) {</span>
+<span class="nc" id="L47">            log.error(</span>
                     &quot;Failed to read the text to be removed from the document &quot; +
-<span class="nc" id="L45">                    &quot;at offset &quot;+ getOffset() + &quot; and using length &quot; + getLength() + &quot;!&quot;,</span>
+<span class="nc" id="L49">                    &quot;at offset &quot;+ getOffset() + &quot; and using length &quot; + getLength() + &quot;!&quot;,</span>
                     e
                 );
-<span class="nc" id="L48">            return &quot;&quot;;</span>
+<span class="nc" id="L52">            return &quot;&quot;;</span>
         }
     }
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

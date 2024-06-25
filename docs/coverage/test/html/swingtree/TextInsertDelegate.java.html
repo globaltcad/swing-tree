@@ -36,18 +36,27 @@ public final class TextInsertDelegate extends AbstractTextComponentDelegate
 <span class="fc" id="L36">    }</span>
 
     /**
+     *  Exposes the text that is being inserted.
+     *  See {@link DocumentFilter#insertString(DocumentFilter.FilterBypass, int, String, AttributeSet)}
+     *  for more information.
+     *
      * @return The text to be inserted or an empty {@link String} if no text is to be inserted.
      *         Null is never returned.
      */
     public String getTextToBeInserted() {
-<span class="fc" id="L43">        return text;</span>
+<span class="fc" id="L47">        return text;</span>
     }
 
     /**
+     *  Exposes the attribute set of the text to be inserted.
+     *  An attribute is a key-value pair that can be used to store
+     *  arbitrary data about the text to be inserted.
+     *  See {@link DocumentFilter#insertString(DocumentFilter.FilterBypass, int, String, AttributeSet)}
+     *  for more information about the underlying source of this attribute set.
      * @return The attribute set of the text to be inserted.
      */
-    public AttributeSet attributeSet() {
-<span class="nc" id="L50">        return attributeSet;</span>
+    public final AttributeSet attributeSet() {
+<span class="nc" id="L59">        return attributeSet;</span>
     }
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

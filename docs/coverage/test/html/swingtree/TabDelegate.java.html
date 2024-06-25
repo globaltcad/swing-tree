@@ -30,38 +30,47 @@ public final class TabDelegate extends ComponentMouseEventDelegate&lt;JTabbedPan
 <span class="fc" id="L30">    }</span>
 
     /**
+     *  Exposes the index of the currently selected tab.
      * @return The index of the clicked tab.
      */
     public final int selectedTabIndex() {
-<span class="nc" id="L36">        return _selectedTabIndex;</span>
+<span class="nc" id="L37">        return _selectedTabIndex;</span>
     }
 
     /**
+     *  Exposes the index of the currently delegated tab,
+     *  in the form of an integer starting at 0.
+     *  It represents the position of the tab in the array
+     *  of all existing tabs within the underlying {@link JTabbedPane}.
+     *
      * @return The index of the clicked tab.
      */
     public final int tabIndex() {
-<span class="fc" id="L43">        return _tabIndex;</span>
+<span class="fc" id="L49">        return _tabIndex;</span>
     }
 
     /**
-     * @return The component of the clicked tab.
+     *  Reports whether the clicked tab is the currently selected tab,
+     *  which is determined by comparing the index of the clicked tab with the index of the currently selected tab.
+     * @return True if the clicked tab is the currently selected tab.
      */
     public final boolean tabIsSelected() {
-<span class="nc bnc" id="L50" title="All 2 branches missed.">        return selectedTabIndex() == tabIndex();</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">        return selectedTabIndex() == tabIndex();</span>
     }
 
     /**
+     *  Use this to access the tab component of the delegated tab.
      * @return The component of the clicked tab.
      */
     public final JComponent tabComponent() {
-<span class="nc" id="L57">        Component found = get().getComponentAt(tabIndex());</span>
-<span class="nc bnc" id="L58" title="All 2 branches missed.">        if ( found instanceof JComponent )</span>
-<span class="nc" id="L59">            return (JComponent) found;</span>
+<span class="nc" id="L66">        Component found = get().getComponentAt(tabIndex());</span>
+<span class="nc bnc" id="L67" title="All 2 branches missed.">        if ( found instanceof JComponent )</span>
+<span class="nc" id="L68">            return (JComponent) found;</span>
         else
-<span class="nc" id="L61">            throw new RuntimeException(</span>
-<span class="nc" id="L62">                    &quot;The component at index &quot; + tabIndex() + &quot; is not a JComponent&quot;</span>
+<span class="nc" id="L70">            throw new RuntimeException(</span>
+<span class="nc" id="L71">                    &quot;The component at index &quot; + tabIndex() + &quot; is not a JComponent&quot;</span>
                 );
     }
 
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

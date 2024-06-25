@@ -4,7 +4,7 @@
   "narrative":"Swing-Tree allows you to create a Model-View-ViewModel (MVVM) architecture\n    based on 2 simple property interfaces: `Val`, and `Var`!\n\n    `Val` is a read-only property, and `Var` is a read-write property.\n\n    The state of both properties can be observed by the view using simple listeners.\n    This happens automatically when you pass them to the Swing-Tree view.\n    If you want to trigger an action when the property changes, you\n    have to pass the `Var` property to the view and define a action\n    for it inside of your view model.",
   "subjects":[],
   "statistics":{
-    "runs":"24",
+    "runs":"25",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -48,9 +48,17 @@
 
         {"kind":"then","text":"The view was successfully created.","code":["button != null"]},
 
-        {"kind":"when","text":"We press the button.","code":["button.doClick()"]},
+        {"kind":"when","text":"We press the button.","code":["UI.runNow({","    button.model.setPressed(true)","})"]},
 
-        {"kind":"then","text":"\n                The property was updated 2 times, because the pressed state switches \n                from false to true and then false again.\n            ","code":["pressedStates == [true, false]"]}
+        {"kind":"then","text":"\n                The property was updated a single time.\n            ","code":["pressedStates == [true]"]},
+
+        {"kind":"when","text":"We release the button.","code":["UI.runNow({","    button.model.setPressed(false)","})"]},
+
+        {"kind":"then","text":"\n                The property was updated a single time.\n            ","code":["pressedStates == [true, false]"]},
+
+        {"kind":"when","text":"\n            We release a second time...\n        ","code":["UI.runNow({","    button.model.setPressed(false)","})"]},
+
+        {"kind":"then","text":"\n            The property was not updated a second time,\n            because the model already knows that the button is not pressed.\n        ","code":["pressedStates == [true, false]"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -339,7 +347,7 @@
     },
   
     {
-      "id":"View Models can be represented by properties lists.",
+      "id":"View Models can be represented by property lists.",
       "result":"PASS",
       "duration":"?",
       "iterations":{
@@ -373,6 +381,55 @@
         {"kind":"when","text":"We clear the view model property list.","code":["vms.clear()","UI.sync()"]},
 
         {"kind":"then","text":"We expect all views to be removed. (except for the \"super\" view)","code":["!new Utility.Query(panel).find(JPanel, \"sub-1\").isPresent()","!new Utility.Query(panel).find(JPanel, \"sub-2\").isPresent()","!new Utility.Query(panel).find(JPanel, \"sub-3\").isPresent()","!new Utility.Query(panel).find(JPanel, \"sub-4\").isPresent()","new Utility.Query(panel).find(JPanel, \"super\").isPresent()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A dynamic property list based UI declaration can have layout constraints.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            In larger GUIs usually consist views which themselves consist of multiple\n            sub views. This is also true for their view models which are usually\n            structured in the same tree like fashion. \n            Often times however, your views are highly dynamic and you want to\n            be able to swap out sub views at runtime. In this case it is useful\n            to represent your view models as property lists, especially if \n            one view consists of multiple sub views.\n            Simply implement the 'Viewable' interface in your view model and\n            you can bind it to a view using the \"Vars\" class wrapping your viewables.\n            When the property list changes, the view will be updated automatically.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create 4 view models with 4 locally created views:","code":["var vm1 = \"Dummy View Model 1\"","var vm2 = \"Dummy View Model 2\"","var vm3 = \"Dummy View Model 3\"","var vm4 = \"Dummy View Model 4\"","ViewSupplier<String> viewer = viewModel -> {","    switch ( viewModel ) {","        case \"Dummy View Model 1\":","                return UI.panel().id(\"sub-1\")","        case \"Dummy View Model 2\":","                return UI.panel().id(\"sub-2\")","        case \"Dummy View Model 3\":","                return UI.panel().id(\"sub-3\")","        case \"Dummy View Model 4\":","                    return UI.panel().id(\"sub-4\")","    }","}"]},
+
+        {"kind":"and","text":"A property list storing the view models.","code":["var vms = Vars.of(vm1, vm2, vm3, vm4)"]},
+
+        {"kind":"and","text":"Finally a view which binds to the view model property list.","code":["var ui = UI.panel()","            .add(UI.label(\"Dynamic Super View:\"))","            .add(","                UI.panel(\"wrap 1\").id(\"super\")","                .add(\"growx\", vms, viewer)","            )"]},
+
+        {"kind":"and","text":"We build the component and get its layout.","code":["var panel = ui.get(JPanel)"]},
+
+        {"kind":"expect","text":"We query the UI for the views and verify that the \"super\" and \"sub-1\" views are present.","code":["new Utility.Query(panel).find(JPanel, \"super\").isPresent()","new Utility.Query(panel).find(JPanel, \"sub-1\").isPresent()","new Utility.Query(panel).find(JPanel, \"sub-2\").isPresent()","new Utility.Query(panel).find(JPanel, \"sub-3\").isPresent()","new Utility.Query(panel).find(JPanel, \"sub-4\").isPresent()"]},
+
+        {"kind":"when","text":"We unpack the layout manager for the \"super\" view.","code":["var layout = (MigLayout) new Utility.Query(panel).find(JPanel, \"super\").get().getLayout()"]},
+
+        {"kind":"then","text":"Each sub view has the layout constraints \"growx\".","code":["layout.getComponentConstraints(new Utility.Query(panel).find(JPanel, \"sub-1\").get()) == \"growx\"","layout.getComponentConstraints(new Utility.Query(panel).find(JPanel, \"sub-2\").get()) == \"growx\"","layout.getComponentConstraints(new Utility.Query(panel).find(JPanel, \"sub-3\").get()) == \"growx\"","layout.getComponentConstraints(new Utility.Query(panel).find(JPanel, \"sub-4\").get()) == \"growx\""]},
+
+        {"kind":"when","text":"We remove something from the view model property list.","code":["vms.remove(vm1)","UI.sync()"]},
+
+        {"kind":"then","text":"We expect all views to be present except for the \"sub-2\" view.","code":["new Utility.Query(panel).find(JPanel, \"super\").isPresent()","!new Utility.Query(panel).find(JPanel, \"sub-1\").isPresent()","new Utility.Query(panel).find(JPanel, \"sub-2\").isPresent()","new Utility.Query(panel).find(JPanel, \"sub-3\").isPresent()","new Utility.Query(panel).find(JPanel, \"sub-4\").isPresent()"]},
+
+        {"kind":"and","text":"The layout manager was updated accordingly:","code":["layout.constraintMap.size() == 3","layout.getComponentConstraints(new Utility.Query(panel).find(JPanel, \"sub-2\").get()) == \"growx\"","layout.getComponentConstraints(new Utility.Query(panel).find(JPanel, \"sub-3\").get()) == \"growx\"","layout.getComponentConstraints(new Utility.Query(panel).find(JPanel, \"sub-4\").get()) == \"growx\""]},
+
+        {"kind":"when","text":"We remove something else from the view model property list but this time, for a change, use the index.","code":["vms.removeAt(1) // vm3","UI.sync()"]},
+
+        {"kind":"then","text":"We expect all views to be present except for the \"sub-1\" and \"sub-3\" views.","code":["new Utility.Query(panel).find(JPanel, \"super\").isPresent()","!new Utility.Query(panel).find(JPanel, \"sub-1\").isPresent()","new Utility.Query(panel).find(JPanel, \"sub-2\").isPresent()","!new Utility.Query(panel).find(JPanel, \"sub-3\").isPresent()","new Utility.Query(panel).find(JPanel, \"sub-4\").isPresent()"]},
+
+        {"kind":"and","text":"Again, as expected, the layout manager was updated accordingly:","code":["layout.constraintMap.size() == 2","layout.getComponentConstraints(new Utility.Query(panel).find(JPanel, \"sub-2\").get()) == \"growx\"","layout.getComponentConstraints(new Utility.Query(panel).find(JPanel, \"sub-4\").get()) == \"growx\""]},
+
+        {"kind":"when","text":"We reintroduce \"vm1\"...","code":["vms.add(vm1)","UI.sync()"]},
+
+        {"kind":"then","text":"We expect all views to be present except for the \"sub-3\" view.","code":["new Utility.Query(panel).find(JPanel, \"super\").isPresent()","new Utility.Query(panel).find(JPanel, \"sub-1\").isPresent()","new Utility.Query(panel).find(JPanel, \"sub-2\").isPresent()","!new Utility.Query(panel).find(JPanel, \"sub-3\").isPresent()","new Utility.Query(panel).find(JPanel, \"sub-4\").isPresent()"]},
+
+        {"kind":"and","text":"The layout manager also knows about the new constraint:","code":["layout.constraintMap.size() == 3","layout.getComponentConstraints(new Utility.Query(panel).find(JPanel, \"sub-1\").get()) == \"growx\"","layout.getComponentConstraints(new Utility.Query(panel).find(JPanel, \"sub-2\").get()) == \"growx\"","layout.getComponentConstraints(new Utility.Query(panel).find(JPanel, \"sub-4\").get()) == \"growx\""]},
+
+        {"kind":"when","text":"We clear the view model property list.","code":["vms.clear()","UI.sync()"]},
+
+        {"kind":"then","text":"We expect all views to be removed. (except for the \"super\" view)","code":["!new Utility.Query(panel).find(JPanel, \"sub-1\").isPresent()","!new Utility.Query(panel).find(JPanel, \"sub-2\").isPresent()","!new Utility.Query(panel).find(JPanel, \"sub-3\").isPresent()","!new Utility.Query(panel).find(JPanel, \"sub-4\").isPresent()","new Utility.Query(panel).find(JPanel, \"super\").isPresent()"]},
+
+        {"kind":"and","text":"The layout manager reports no constraints.","code":["layout.constraintMap.size() == 0"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },

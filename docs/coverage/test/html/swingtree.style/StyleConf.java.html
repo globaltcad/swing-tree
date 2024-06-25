@@ -1,0 +1,697 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StyleConf.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">StyleConf.java</span></div><h1>StyleConf.java</h1><pre class="source lang-java linenums">package swingtree.style;
+
+import com.google.errorprone.annotations.Immutable;
+import swingtree.UI;
+import swingtree.api.Configurator;
+import swingtree.api.Painter;
+
+import java.awt.*;
+import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
+
+/**
+ *  An immutable config container with cloning based update methods designed
+ *  for functional {@link javax.swing.JComponent} styling.
+ *  The styling in SwingTree is completely functional, meaning that changing a property
+ *  of a {@link StyleConf} instance will always return a new {@link StyleConf} instance with the
+ *  updated property.
+ *  &lt;p&gt;
+ *  Consider the following example demonstrating how a {@link javax.swing.JPanel} is styled through the SwingTree
+ *  style API, which consists of a functional {@link swingtree.api.Styler} lambda that processes a
+ *  {@link ComponentStyleDelegate} instance that internally assembles a {@link StyleConf} object:
+ *  &lt;pre&gt;{@code
+ *  panel(FILL)
+ *  .withStyle( it -&gt; it
+ *      .foundationColor(new Color(26,191,230))
+ *      .backgroundColor(new Color(255,255,255))
+ *      .paddingTop(30)
+ *      .paddingLeft(35)
+ *      .paddingRight(35)
+ *      .paddingBottom(30)
+ *      .borderRadius(25, 25)
+ *      .borderWidth(3)
+ *      .borderColor(new Color(0,102,255))
+ *      .shadowColor(new Color(64,64,64))
+ *      .shadowBlurRadius(6)
+ *      .shadowSpreadRadius(5)
+ *      .shadowInset(false)
+ *  )
+ *  }&lt;/pre&gt;
+ *
+ *  This design is inspired by the CSS styling language and the use of immutable objects
+ *  is a key feature of the SwingTree API which makes it possible to safely compose
+ *  {@link swingtree.api.Styler} lambdas into a complex style pipeline
+ *  without having to worry about side effects.
+ *  See {@link swingtree.style.StyleSheet} for more information about
+ *  how this composition of styles is achieved in practice.
+ */
+@Immutable
+@SuppressWarnings(&quot;ReferenceEquality&quot;)
+public final class StyleConf
+{
+<span class="fc" id="L53">    private static final StyleConf _NONE = new StyleConf(</span>
+<span class="fc" id="L54">                                            LayoutConf.none(),</span>
+<span class="fc" id="L55">                                            BorderConf.none(),</span>
+<span class="fc" id="L56">                                            BaseConf.none(),</span>
+<span class="fc" id="L57">                                            FontConf.none(),</span>
+<span class="fc" id="L58">                                            DimensionalityConf.none(),</span>
+<span class="fc" id="L59">                                            StyleConfLayers.empty(),</span>
+<span class="fc" id="L60">                                            NamedConfigs.empty()</span>
+                                        );
+
+    /**
+     *  Exposes the &quot;null object&quot; pattern for {@link StyleConf} instances.
+     *  So the constant returned by this method is the default instance
+     *  that represents the absence of a style.
+     *
+     * @return The default style instance, representing the absence of a style.
+     */
+<span class="fc" id="L70">    public static StyleConf none() { return _NONE; }</span>
+
+    static StyleConf of(
+        LayoutConf layout,
+        BorderConf border,
+        BaseConf base,
+        FontConf font,
+        DimensionalityConf dimensionality,
+        StyleConfLayers layers,
+        NamedConfigs&lt;String&gt; properties
+    ) {
+<span class="fc bfc" id="L81" title="All 14 branches covered.">        if (</span>
+            layout         == _NONE._layout &amp;&amp;
+            border         == _NONE._border &amp;&amp;
+            base           == _NONE._base &amp;&amp;
+            font           == _NONE._font &amp;&amp;
+            dimensionality == _NONE._dimensionality &amp;&amp;
+            layers         == _NONE._layers &amp;&amp;
+            properties     == _NONE._properties
+        )
+<span class="fc" id="L90">            return _NONE;</span>
+        else
+<span class="fc" id="L92">            return new StyleConf(layout, border, base, font, dimensionality, layers, properties);</span>
+    }
+
+
+    private final LayoutConf           _layout;
+    private final BorderConf           _border;
+    private final BaseConf             _base;
+    private final FontConf             _font;
+    private final DimensionalityConf   _dimensionality;
+    private final StyleConfLayers      _layers;
+    private final NamedConfigs&lt;String&gt; _properties;
+
+
+    private StyleConf(
+        LayoutConf           layout,
+        BorderConf           border,
+        BaseConf             base,
+        FontConf             font,
+        DimensionalityConf   dimensionality,
+        StyleConfLayers      layers,
+        NamedConfigs&lt;String&gt; properties
+<span class="fc" id="L113">    ) {</span>
+<span class="fc" id="L114">        _layout         = Objects.requireNonNull(layout);</span>
+<span class="fc" id="L115">        _border         = Objects.requireNonNull(border);</span>
+<span class="fc" id="L116">        _base           = Objects.requireNonNull(base);</span>
+<span class="fc" id="L117">        _font           = Objects.requireNonNull(font);</span>
+<span class="fc" id="L118">        _dimensionality = Objects.requireNonNull(dimensionality);</span>
+<span class="fc" id="L119">        _layers         = Objects.requireNonNull(layers);</span>
+<span class="fc" id="L120">        _properties     = Objects.requireNonNull(properties);</span>
+<span class="fc" id="L121">    }</span>
+
+<span class="fc" id="L123">    public Optional&lt;Object&gt; layoutConstraint() { return _layout.constraint(); }</span>
+
+<span class="fc" id="L125">    public LayoutConf layout() { return _layout; }</span>
+
+<span class="fc" id="L127">    Outline padding() { return _border.padding(); }</span>
+
+<span class="fc" id="L129">    Outline margin() { return _border.margin(); }</span>
+
+<span class="fc" id="L131">    BorderConf border() { return _border; }</span>
+
+<span class="fc" id="L133">    BaseConf base() { return _base; }</span>
+
+<span class="fc" id="L135">    DimensionalityConf dimensionality() { return _dimensionality; }</span>
+
+<span class="fc" id="L137">    StyleConfLayers layers() { return _layers; }</span>
+
+<span class="fc" id="L139">    StyleConfLayer layer(UI.Layer layer ) { return _layers.get(layer); }</span>
+
+    /**
+     *  Exposes the default shadow style configuration object.
+     * @return The default shadow style.
+     */
+    public ShadowConf shadow() {
+<span class="fc" id="L146">        ShadowConf found =</span>
+<span class="fc" id="L147">                        _layers.get(ShadowConf.DEFAULT_LAYER)</span>
+<span class="fc" id="L148">                        .shadows()</span>
+<span class="fc" id="L149">                        .get(StyleUtil.DEFAULT_KEY);</span>
+
+<span class="pc bpc" id="L151" title="1 of 2 branches missed.">        return found != null ? found : ShadowConf.none();</span>
+    }
+
+    /**
+     *  Internally, a style configuration consists of a set of layers defined by the {@link UI.Layer} enum.
+     *  Using this method you can retrieve all shadow styles for a particular layer
+     *  and with the provided name.
+     *
+     * @param layer The layer to retrieve the shadow style from.
+     * @param shadowName The name of the shadow style to retrieve.
+     * @return The shadow style with the provided name.
+     */
+    public ShadowConf shadow( UI.Layer layer, String shadowName ) {
+<span class="fc" id="L164">        Objects.requireNonNull(shadowName);</span>
+<span class="fc" id="L165">        StyleConfLayer layerConf = _layers.get(layer);</span>
+<span class="fc" id="L166">        NamedConfigs&lt;ShadowConf&gt; shadows = layerConf.shadows();</span>
+<span class="fc" id="L167">        ShadowConf found = shadows.get(shadowName);</span>
+<span class="fc bfc" id="L168" title="All 2 branches covered.">        return found != null ? found : ShadowConf.none();</span>
+    }
+
+    /**
+     *  Internally, a style configuration consists of a set of layers defined by the {@link UI.Layer} enum.
+     *  You can retrieve all shadow styles for a specific layer by calling this method.
+     *
+     * @return An unmodifiable list of all shadow styles sorted by their names in ascending alphabetical order.
+     */
+    List&lt;ShadowConf&gt; shadows( UI.Layer layer ) {
+<span class="nc" id="L178">        return Collections.unmodifiableList(</span>
+<span class="nc" id="L179">                        _layers.get(layer)</span>
+<span class="nc" id="L180">                        .shadows()</span>
+<span class="nc" id="L181">                        .namedStyles()</span>
+<span class="nc" id="L182">                        .stream()</span>
+<span class="nc" id="L183">                        .sorted(Comparator.comparing(NamedConf::name))</span>
+<span class="nc" id="L184">                        .map(NamedConf::style)</span>
+<span class="nc" id="L185">                        .collect(Collectors.toList())</span>
+                    );
+    }
+
+    NamedConfigs&lt;ShadowConf&gt; shadowsMap(UI.Layer layer) {
+<span class="fc" id="L190">        return _layers.get(layer).shadows();</span>
+    }
+
+    boolean hasVisibleShadows(UI.Layer layer) {
+<span class="fc" id="L194">        return _layers.get(layer)</span>
+<span class="fc" id="L195">                .shadows()</span>
+<span class="fc" id="L196">                .stylesStream()</span>
+<span class="pc bpc" id="L197" title="1 of 4 branches missed.">                .anyMatch(s -&gt; s.color().isPresent() &amp;&amp; s.color().get().getAlpha() &gt; 0 );</span>
+    }
+
+<span class="fc" id="L200">    public FontConf font() { return _font; }</span>
+
+    /**
+     *  Returns a new {@link StyleConf} instance with the given layout constraint.
+     * @return An unmodifiable list of painters sorted by their names in ascending alphabetical order.
+     */
+    List&lt;PainterConf&gt; painters( UI.Layer layer ) {
+<span class="fc" id="L207">        return Collections.unmodifiableList(</span>
+<span class="fc" id="L208">                            new ArrayList&lt;&gt;(_layers.get(layer)</span>
+<span class="fc" id="L209">                                .painters()</span>
+<span class="fc" id="L210">                                .sortedByNames()</span>
+                            )
+                        );
+    }
+
+    StyleConf painter(UI.Layer layer, UI.ComponentArea area, String painterName, Painter painter ) {
+<span class="fc" id="L216">        Objects.requireNonNull(painterName);</span>
+<span class="fc" id="L217">        Objects.requireNonNull(painter);</span>
+        // We clone the painter map:
+<span class="fc" id="L219">        NamedConfigs&lt;PainterConf&gt; newPainters = _layers.get(layer)</span>
+<span class="fc" id="L220">                                                    .painters()</span>
+<span class="fc" id="L221">                                                    .withNamedStyle(</span>
+                                                        painterName, // Existing painters are overwritten if they have the same name.
+<span class="fc" id="L223">                                                        PainterConf.of(painter, area)</span>
+                                                    ); 
+<span class="fc" id="L225">        return _withPainters(layer, newPainters);</span>
+    }
+
+    boolean hasPaintersOnLayer(UI.Layer layer ) {
+<span class="fc bfc" id="L229" title="All 2 branches covered.">        return _layers.get(layer).painters().stylesStream().anyMatch(p -&gt; !Painter.none().equals(p.painter()));</span>
+    }
+
+    boolean hasImagesOnLayer(UI.Layer layer ) {
+<span class="fc bfc" id="L233" title="All 4 branches covered.">        return _layers.get(layer).images().stylesStream().anyMatch(i -&gt; i.image().isPresent() || i.primer().isPresent());</span>
+    }
+
+    List&lt;GradientConf&gt; gradients( UI.Layer layer ) {
+<span class="fc" id="L237">        return _layers.get(layer).gradients().sortedByNames();</span>
+    }
+
+    boolean hasCustomGradients() {
+<span class="nc" id="L241">        boolean hasCustomGradients = false;</span>
+<span class="nc bnc" id="L242" title="All 2 branches missed.">        for ( UI.Layer layer : UI.Layer.values() ) {</span>
+<span class="nc bnc" id="L243" title="All 2 branches missed.">            if ( hasCustomGradients(layer) ) {</span>
+<span class="nc" id="L244">                hasCustomGradients = true;</span>
+<span class="nc" id="L245">                break;</span>
+            }
+        }
+<span class="nc" id="L248">        return hasCustomGradients;</span>
+    }
+
+    boolean hasCustomGradients( UI.Layer layer ) {
+<span class="nc" id="L252">        NamedConfigs&lt;GradientConf&gt; gradients = _layers.get(layer).gradients();</span>
+<span class="nc bnc" id="L253" title="All 4 branches missed.">        return !( gradients.size() == 1 &amp;&amp; GradientConf.none().equals(gradients.get(StyleUtil.DEFAULT_KEY)) );</span>
+    }
+
+    boolean hasVisibleGradientsOnLayer( UI.Layer layer ) {
+<span class="fc" id="L257">        List&lt;GradientConf&gt; gradients = gradients(layer);</span>
+<span class="pc bpc" id="L258" title="1 of 2 branches missed.">        if ( gradients.isEmpty() ) return false;</span>
+<span class="fc bfc" id="L259" title="All 2 branches covered.">        return gradients.stream().anyMatch( s -&gt; s.colors().length &gt; 0 );</span>
+    }
+
+    List&lt;NoiseConf&gt; noises( UI.Layer layer ) {
+<span class="fc" id="L263">        return _layers.get(layer).noises().sortedByNames();</span>
+    }
+
+    boolean hasVisibleNoisesOnLayer( UI.Layer layer ) {
+<span class="fc" id="L267">        List&lt;NoiseConf&gt; noises = noises(layer);</span>
+<span class="pc bpc" id="L268" title="1 of 2 branches missed.">        if ( noises.isEmpty() ) return false;</span>
+<span class="fc bfc" id="L269" title="All 2 branches covered.">        return noises.stream().anyMatch( s -&gt; !s.equals(NoiseConf.none()) );</span>
+    }
+
+    List&lt;UI.ComponentArea&gt; gradientCoveredAreas() {
+<span class="fc" id="L273">        return gradientCoveredAreas(UI.Layer.values());</span>
+    }
+
+    List&lt;UI.ComponentArea&gt; gradientCoveredAreas( UI.Layer... layers ) {
+<span class="fc" id="L277">        return Arrays.stream(layers)</span>
+<span class="fc" id="L278">                .map(_layers::get)</span>
+<span class="fc" id="L279">                .map(StyleConfLayer::gradients)</span>
+<span class="fc" id="L280">                .flatMap( g -&gt; g</span>
+<span class="fc" id="L281">                    .stylesStream()</span>
+<span class="fc bfc" id="L282" title="All 2 branches covered.">                    .map( grad -&gt; grad.isOpaque() ? grad.area() : null )</span>
+<span class="fc" id="L283">                    .filter(Objects::nonNull)</span>
+                )
+<span class="fc" id="L285">                .distinct()</span>
+<span class="fc" id="L286">                .collect(Collectors.toList());</span>
+    }
+
+    List&lt;UI.ComponentArea&gt; noiseCoveredAreas() {
+<span class="fc" id="L290">        return noiseCoveredAreas(UI.Layer.values());</span>
+    }
+
+    List&lt;UI.ComponentArea&gt; noiseCoveredAreas( UI.Layer... layers ) {
+<span class="fc" id="L294">        return Arrays.stream(layers)</span>
+<span class="fc" id="L295">                .map(_layers::get)</span>
+<span class="fc" id="L296">                .map(StyleConfLayer::noises)</span>
+<span class="fc" id="L297">                .flatMap( n -&gt; n</span>
+<span class="fc" id="L298">                    .stylesStream()</span>
+<span class="fc bfc" id="L299" title="All 2 branches covered.">                    .map( noise -&gt; noise.isOpaque() ? noise.area() : null )</span>
+<span class="fc" id="L300">                    .filter(Objects::nonNull)</span>
+                )
+<span class="fc" id="L302">                .distinct()</span>
+<span class="fc" id="L303">                .collect(Collectors.toList());</span>
+    }
+
+    List&lt;UI.ComponentArea&gt; noiseAndGradientCoveredAreas() {
+<span class="fc" id="L307">        List&lt;UI.ComponentArea&gt; areas = new ArrayList&lt;&gt;(gradientCoveredAreas());</span>
+<span class="fc" id="L308">        areas.addAll(noiseCoveredAreas());</span>
+<span class="fc" id="L309">        return areas;</span>
+    }
+
+<span class="nc" id="L312">    public StyleConf foundationColor( Color color ) { return _withBase(base().foundationColor(color)); }</span>
+
+<span class="fc" id="L314">    public StyleConf backgroundColor( Color color ) { return _withBase(base().backgroundColor(color)); }</span>
+
+    StyleConf _withLayout( LayoutConf layout ) {
+<span class="pc bpc" id="L317" title="1 of 2 branches missed.">        if ( layout == _layout )</span>
+<span class="nc" id="L318">            return this;</span>
+
+<span class="fc" id="L320">        return StyleConf.of(layout, _border, _base, _font, _dimensionality, _layers, _properties);</span>
+    }
+
+    StyleConf _withBorder( BorderConf border ) {
+<span class="fc bfc" id="L324" title="All 2 branches covered.">        if ( border == _border )</span>
+<span class="fc" id="L325">            return this;</span>
+
+<span class="fc" id="L327">        return StyleConf.of(_layout, border, _base, _font, _dimensionality, _layers, _properties);</span>
+    }
+
+    StyleConf _withBase( BaseConf background ) {
+<span class="fc bfc" id="L331" title="All 2 branches covered.">        if ( background == _base )</span>
+<span class="fc" id="L332">            return this;</span>
+
+<span class="fc" id="L334">        return StyleConf.of(_layout, _border, background, _font, _dimensionality, _layers, _properties);</span>
+    }
+
+    StyleConf _withFont( FontConf font ) {
+<span class="fc bfc" id="L338" title="All 2 branches covered.">        if ( font == _font )</span>
+<span class="fc" id="L339">            return this;</span>
+
+<span class="fc" id="L341">        return StyleConf.of(_layout, _border, _base, font, _dimensionality, _layers, _properties);</span>
+    }
+
+    StyleConf _withDimensionality( DimensionalityConf dimensionality ) {
+<span class="fc bfc" id="L345" title="All 2 branches covered.">        if ( dimensionality == _dimensionality )</span>
+<span class="fc" id="L346">            return this;</span>
+
+<span class="fc" id="L348">        return StyleConf.of(_layout, _border, _base, _font, dimensionality, _layers, _properties);</span>
+    }
+
+    StyleConf _withShadow( UI.Layer layer, NamedConfigs&lt;ShadowConf&gt; shadows ) {
+<span class="fc" id="L352">        return StyleConf.of(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withShadows(shadows)), _properties);</span>
+    }
+
+    StyleConf _withProperties( NamedConfigs&lt;String&gt; properties ) {
+<span class="pc bpc" id="L356" title="1 of 2 branches missed.">        if ( properties == _properties )</span>
+<span class="nc" id="L357">            return this;</span>
+
+<span class="fc" id="L359">        return StyleConf.of(_layout, _border, _base, _font, _dimensionality, _layers, properties);</span>
+    }
+
+    StyleConf _withShadow( UI.Layer layer, Configurator&lt;ShadowConf&gt; styler ) {
+        // A new map is created where all the styler is applied to all the values:
+<span class="fc" id="L364">        NamedConfigs&lt;ShadowConf&gt; styledShadows = _layers.get(layer).shadows().mapStyles(styler);</span>
+<span class="fc" id="L365">        return _withShadow(layer, styledShadows);</span>
+    }
+
+    StyleConf _withShadow( Configurator&lt;ShadowConf&gt; styler ) {
+<span class="fc" id="L369">        return _withLayers(_layers.map( layer -&gt; layer.withShadows(layer.shadows().mapStyles(styler)) ));</span>
+    }
+
+    StyleConf _withGradients( UI.Layer layer, NamedConfigs&lt;GradientConf&gt; shades ) {
+<span class="fc" id="L373">        Objects.requireNonNull(shades);</span>
+<span class="fc" id="L374">        return StyleConf.of(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withGradients(shades)), _properties);</span>
+    }
+
+    StyleConf _withNoises( UI.Layer layer, NamedConfigs&lt;NoiseConf&gt; noises ) {
+<span class="fc" id="L378">        Objects.requireNonNull(noises);</span>
+<span class="fc" id="L379">        return StyleConf.of(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withNoises(noises)), _properties);</span>
+    }
+
+    StyleConf _withImages( UI.Layer layer, NamedConfigs&lt;ImageConf&gt; images ) {
+<span class="fc" id="L383">        return StyleConf.of(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withImages(images)), _properties);</span>
+    }
+
+    StyleConf _withTexts( UI.Layer layer, NamedConfigs&lt;TextConf&gt; texts ) {
+<span class="fc" id="L387">        return StyleConf.of(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withTexts(texts)), _properties);</span>
+    }
+
+    StyleConf _withLayers( StyleConfLayers layers ) {
+<span class="fc bfc" id="L391" title="All 2 branches covered.">        if ( layers == _layers )</span>
+<span class="fc" id="L392">            return this;</span>
+
+<span class="fc" id="L394">        return StyleConf.of(_layout, _border, _base, _font, _dimensionality, layers, _properties);</span>
+    }
+
+    StyleConf _withPainters( UI.Layer layer, NamedConfigs&lt;PainterConf&gt; painters ) {
+<span class="fc" id="L398">        Objects.requireNonNull(painters);</span>
+<span class="fc" id="L399">        return StyleConf.of(_layout, _border, _base, _font, _dimensionality, _layers.with(layer, _layers.get(layer).withPainters(painters)), _properties);</span>
+    }
+
+    StyleConf property( String key, String value ) {
+<span class="fc" id="L403">        Objects.requireNonNull(key);</span>
+<span class="fc" id="L404">        Objects.requireNonNull(value);</span>
+<span class="fc" id="L405">        return _withProperties(_properties.withNamedStyle(key, value));</span>
+    }
+
+    List&lt;NamedConf&lt;String&gt;&gt; properties() {
+<span class="fc" id="L409">        return _properties.namedStyles()</span>
+<span class="fc" id="L410">                            .stream()</span>
+<span class="fc" id="L411">                            .sorted(Comparator.comparing(NamedConf::name))</span>
+<span class="fc" id="L412">                            .collect(Collectors.toList());</span>
+    }
+
+    StyleConf gradient( UI.Layer layer, String shadeName, Configurator&lt;GradientConf&gt; styler ) {
+<span class="fc" id="L416">        Objects.requireNonNull(shadeName);</span>
+<span class="fc" id="L417">        Objects.requireNonNull(styler);</span>
+<span class="fc" id="L418">        GradientConf gradConf = _layers.get(layer).gradients().find(shadeName).orElse(GradientConf.none());</span>
+        // We clone the shadow map:
+<span class="fc" id="L420">        NamedConfigs&lt;GradientConf&gt; newShadows = _layers.get(layer).gradients().withNamedStyle(shadeName, styler.configure(gradConf));</span>
+<span class="fc" id="L421">        return _withGradients(layer, newShadows);</span>
+    }
+
+    GradientConf gradient( UI.Layer layer, String gradName ) {
+<span class="fc" id="L425">        Objects.requireNonNull(gradName);</span>
+<span class="fc" id="L426">        StyleConfLayer layerConf = _layers.get(layer);</span>
+<span class="fc" id="L427">        NamedConfigs&lt;GradientConf&gt; gradients = layerConf.gradients();</span>
+<span class="fc" id="L428">        GradientConf found = gradients.get(gradName);</span>
+<span class="pc bpc" id="L429" title="1 of 2 branches missed.">        return found != null ? found : GradientConf.none();</span>
+    }
+
+    StyleConf noise( UI.Layer layer, String noiseName, Configurator&lt;NoiseConf&gt; styler ) {
+<span class="fc" id="L433">        Objects.requireNonNull(noiseName);</span>
+<span class="fc" id="L434">        Objects.requireNonNull(styler);</span>
+<span class="fc" id="L435">        NoiseConf noise = _layers.get(layer).noises().find(noiseName).orElse(NoiseConf.none());</span>
+        // We clone the noise map:
+<span class="fc" id="L437">        NamedConfigs&lt;NoiseConf&gt; newNoises = _layers.get(layer).noises().withNamedStyle(noiseName, styler.configure(noise));</span>
+<span class="fc" id="L438">        return _withNoises(layer, newNoises);</span>
+    }
+
+    StyleConf images(UI.Layer layer, String imageName, Configurator&lt;ImageConf&gt; styler ) {
+<span class="fc" id="L442">        Objects.requireNonNull(imageName);</span>
+<span class="fc" id="L443">        Objects.requireNonNull(styler);</span>
+<span class="fc" id="L444">        ImageConf ground = _layers.get(layer).images().find(imageName).orElse(ImageConf.none());</span>
+        // We clone the ground map:
+<span class="fc" id="L446">        NamedConfigs&lt;ImageConf&gt; newImages = _layers.get(layer).images().withNamedStyle(imageName, styler.configure(ground));</span>
+<span class="fc" id="L447">        return _withImages( layer, newImages );</span>
+    }
+
+    List&lt;ImageConf&gt; images( UI.Layer layer ) {
+<span class="fc" id="L451">        return _layers.get(layer).images().sortedByNames();</span>
+    }
+
+    StyleConf text(UI.Layer layer, String textName, Configurator&lt;TextConf&gt; styler ) {
+<span class="fc" id="L455">        Objects.requireNonNull(textName);</span>
+<span class="fc" id="L456">        Objects.requireNonNull(styler);</span>
+<span class="fc" id="L457">        TextConf text = _layers.get(layer).texts().find(textName).orElse(TextConf.none());</span>
+        // We clone the text map:
+<span class="fc" id="L459">        NamedConfigs&lt;TextConf&gt; newTexts = _layers.get(layer).texts().withNamedStyle(textName, styler.configure(text));</span>
+<span class="fc" id="L460">        return _withTexts( layer, newTexts );</span>
+    }
+
+    StyleConf text( Configurator&lt;TextConf&gt; styler ) {
+<span class="fc" id="L464">        return _withLayers(_layers.map( layer -&gt; layer.withTexts(layer.texts().mapStyles(styler)) ));</span>
+    }
+
+    List&lt;TextConf&gt; texts( UI.Layer layer ) {
+<span class="nc" id="L468">        return _layers.get(layer).texts().sortedByNames();</span>
+    }
+
+    StyleConf scale( double scale ) {
+<span class="fc" id="L472">        return StyleConf.of(</span>
+                    _layout,
+<span class="fc" id="L474">                    _border._scale(scale),</span>
+                    _base, // Just colors and the cursor
+<span class="fc" id="L476">                    _font._scale(scale),</span>
+<span class="fc" id="L477">                    _dimensionality._scale(scale),</span>
+<span class="fc" id="L478">                    _layers._scale(scale),</span>
+                    _properties
+                );
+    }
+
+    StyleConf simplified() {
+<span class="fc" id="L484">        return _withBase(_base.simplified())</span>
+<span class="fc" id="L485">               ._withBorder(_border.simplified())</span>
+<span class="fc" id="L486">               ._withDimensionality(_dimensionality.simplified())</span>
+<span class="fc" id="L487">               ._withLayers(_layers.simplified());</span>
+    }
+
+    StyleConf correctedForRounding() {
+<span class="fc" id="L491">        return _withBorder(_border.correctedForRounding());</span>
+    }
+
+    boolean hasEqualLayoutAs( StyleConf otherStyle ) {
+<span class="fc" id="L495">        return Objects.equals(_layout, otherStyle._layout);</span>
+    }
+
+    boolean hasEqualMarginAndPaddingAs( StyleConf otherStyle ) {
+<span class="fc bfc" id="L499" title="All 2 branches covered.">        return Objects.equals(_border.margin(), otherStyle._border.margin()) &amp;&amp;</span>
+<span class="fc bfc" id="L500" title="All 2 branches covered.">               Objects.equals(_border.padding(), otherStyle._border.padding());</span>
+    }
+
+    boolean hasEqualBorderAs( StyleConf otherStyle ) {
+<span class="fc" id="L504">        return Objects.equals(_border, otherStyle._border);</span>
+    }
+
+    boolean hasEqualBaseAs( StyleConf otherStyle ) {
+<span class="fc" id="L508">        return Objects.equals(_base, otherStyle._base);</span>
+    }
+
+    boolean hasEqualFontAs( StyleConf otherStyle ) {
+<span class="fc" id="L512">        return Objects.equals(_font, otherStyle._font);</span>
+    }
+
+    boolean hasEqualDimensionalityAs( StyleConf otherStyle ) {
+<span class="fc" id="L516">        return Objects.equals(_dimensionality, otherStyle._dimensionality);</span>
+    }
+
+    boolean hasEqualFilterAs( StyleConf otherStyle ) {
+<span class="fc" id="L520">        return _layers.filter().equals(otherStyle._layers.filter());</span>
+    }
+
+    boolean hasEqualShadowsAs( StyleConf otherStyle ) {
+<span class="fc" id="L524">        boolean allLayersAreEqual = true;</span>
+<span class="fc bfc" id="L525" title="All 2 branches covered.">        for ( UI.Layer layer : UI.Layer.values() ) {</span>
+<span class="fc bfc" id="L526" title="All 2 branches covered.">            if ( !hasEqualShadowsAs(layer, otherStyle) ) {</span>
+<span class="fc" id="L527">                allLayersAreEqual = false;</span>
+<span class="fc" id="L528">                break;</span>
+            }
+        }
+<span class="fc" id="L531">        return allLayersAreEqual;</span>
+    }
+
+    boolean hasEqualShadowsAs( UI.Layer layer, StyleConf otherStyle ) {
+<span class="fc" id="L535">        StyleConfLayer thisLayer = _layers.get(layer);</span>
+<span class="fc" id="L536">        StyleConfLayer otherLayer = otherStyle._layers.get(layer);</span>
+<span class="pc bpc" id="L537" title="3 of 4 branches missed.">        if ( thisLayer == null &amp;&amp; otherLayer == null )</span>
+<span class="nc" id="L538">            return true;</span>
+<span class="pc bpc" id="L539" title="2 of 4 branches missed.">        if ( thisLayer == null || otherLayer == null )</span>
+<span class="nc" id="L540">            return false;</span>
+<span class="fc" id="L541">        return thisLayer.hasEqualShadowsAs(otherLayer);</span>
+    }
+
+    boolean hasEqualPaintersAs( StyleConf otherStyle ) {
+<span class="fc" id="L545">        boolean allLayersAreEqual = true;</span>
+<span class="fc bfc" id="L546" title="All 2 branches covered.">        for ( UI.Layer layer : UI.Layer.values() ) {</span>
+<span class="fc bfc" id="L547" title="All 2 branches covered.">            if ( !hasEqualPaintersAs(layer, otherStyle) ) {</span>
+<span class="fc" id="L548">                allLayersAreEqual = false;</span>
+<span class="fc" id="L549">                break;</span>
+            }
+        }
+<span class="fc" id="L552">        return allLayersAreEqual;</span>
+    }
+
+    boolean hasEqualPaintersAs( UI.Layer layer, StyleConf otherStyle ) {
+<span class="fc" id="L556">        StyleConfLayer thisLayer = _layers.get(layer);</span>
+<span class="fc" id="L557">        StyleConfLayer otherLayer = otherStyle._layers.get(layer);</span>
+<span class="pc bpc" id="L558" title="3 of 4 branches missed.">        if ( thisLayer == null &amp;&amp; otherLayer == null )</span>
+<span class="nc" id="L559">            return true;</span>
+<span class="pc bpc" id="L560" title="2 of 4 branches missed.">        if ( thisLayer == null || otherLayer == null )</span>
+<span class="nc" id="L561">            return false;</span>
+<span class="fc" id="L562">        return thisLayer.hasEqualPaintersAs(otherLayer);</span>
+    }
+
+    boolean hasEqualGradientsAs( StyleConf otherStyle ) {
+<span class="fc" id="L566">        boolean allLayersAreEqual = true;</span>
+<span class="fc bfc" id="L567" title="All 2 branches covered.">        for ( UI.Layer layer : UI.Layer.values() ) {</span>
+<span class="fc bfc" id="L568" title="All 2 branches covered.">            if ( !hasEqualGradientsAs(layer, otherStyle) ) {</span>
+<span class="fc" id="L569">                allLayersAreEqual = false;</span>
+<span class="fc" id="L570">                break;</span>
+            }
+        }
+<span class="fc" id="L573">        return allLayersAreEqual;</span>
+    }
+
+    boolean hasEqualGradientsAs( UI.Layer layer, StyleConf otherStyle ) {
+<span class="fc" id="L577">        StyleConfLayer thisLayer = _layers.get(layer);</span>
+<span class="fc" id="L578">        StyleConfLayer otherLayer = otherStyle._layers.get(layer);</span>
+<span class="pc bpc" id="L579" title="3 of 4 branches missed.">        if ( thisLayer == null &amp;&amp; otherLayer == null )</span>
+<span class="nc" id="L580">            return true;</span>
+<span class="pc bpc" id="L581" title="2 of 4 branches missed.">        if ( thisLayer == null || otherLayer == null )</span>
+<span class="nc" id="L582">            return false;</span>
+<span class="fc" id="L583">        return thisLayer.hasEqualGradientsAs(otherLayer);</span>
+    }
+
+    boolean hasEqualNoisesAs( StyleConf otherStyle ) {
+<span class="fc" id="L587">        boolean allLayersAreEqual = true;</span>
+<span class="fc bfc" id="L588" title="All 2 branches covered.">        for ( UI.Layer layer : UI.Layer.values() ) {</span>
+<span class="fc bfc" id="L589" title="All 2 branches covered.">            if ( !hasEqualNoisesAs(layer, otherStyle) ) {</span>
+<span class="fc" id="L590">                allLayersAreEqual = false;</span>
+<span class="fc" id="L591">                break;</span>
+            }
+        }
+<span class="fc" id="L594">        return allLayersAreEqual;</span>
+    }
+
+    boolean hasEqualNoisesAs( UI.Layer layer, StyleConf otherStyle ) {
+<span class="fc" id="L598">        StyleConfLayer thisLayer = _layers.get(layer);</span>
+<span class="fc" id="L599">        StyleConfLayer otherLayer = otherStyle._layers.get(layer);</span>
+<span class="pc bpc" id="L600" title="3 of 4 branches missed.">        if ( thisLayer == null &amp;&amp; otherLayer == null )</span>
+<span class="nc" id="L601">            return true;</span>
+<span class="pc bpc" id="L602" title="2 of 4 branches missed.">        if ( thisLayer == null || otherLayer == null )</span>
+<span class="nc" id="L603">            return false;</span>
+<span class="fc" id="L604">        return thisLayer.hasEqualNoisesAs(otherLayer);</span>
+    }
+
+    boolean hasEqualImagesAs(StyleConf otherStyle ) {
+<span class="fc" id="L608">        boolean allLayersAreEqual = true;</span>
+<span class="fc bfc" id="L609" title="All 2 branches covered.">        for ( UI.Layer layer : UI.Layer.values() ) {</span>
+<span class="fc bfc" id="L610" title="All 2 branches covered.">            if ( !hasEqualImagesAs(layer, otherStyle) ) {</span>
+<span class="fc" id="L611">                allLayersAreEqual = false;</span>
+<span class="fc" id="L612">                break;</span>
+            }
+        }
+<span class="fc" id="L615">        return allLayersAreEqual;</span>
+    }
+
+    boolean hasEqualImagesAs( UI.Layer layer, StyleConf otherStyle ) {
+<span class="fc" id="L619">        StyleConfLayer thisLayer = _layers.get(layer);</span>
+<span class="fc" id="L620">        StyleConfLayer otherLayer = otherStyle._layers.get(layer);</span>
+<span class="pc bpc" id="L621" title="3 of 4 branches missed.">        if ( thisLayer == null &amp;&amp; otherLayer == null )</span>
+<span class="nc" id="L622">            return true;</span>
+<span class="pc bpc" id="L623" title="2 of 4 branches missed.">        if ( thisLayer == null || otherLayer == null )</span>
+<span class="nc" id="L624">            return false;</span>
+<span class="fc" id="L625">        return thisLayer.hasEqualImagesAs(otherLayer);</span>
+    }
+
+    boolean hasEqualTextsAs( StyleConf otherStyle ) {
+<span class="fc" id="L629">        boolean allLayersAreEqual = true;</span>
+<span class="fc bfc" id="L630" title="All 2 branches covered.">        for ( UI.Layer layer : UI.Layer.values() ) {</span>
+<span class="pc bpc" id="L631" title="1 of 2 branches missed.">            if ( !hasEqualTextsAs(layer, otherStyle) ) {</span>
+<span class="nc" id="L632">                allLayersAreEqual = false;</span>
+<span class="nc" id="L633">                break;</span>
+            }
+        }
+<span class="fc" id="L636">        return allLayersAreEqual;</span>
+    }
+
+    boolean hasEqualTextsAs( UI.Layer layer, StyleConf otherStyle ) {
+<span class="fc" id="L640">        StyleConfLayer thisLayer = _layers.get(layer);</span>
+<span class="fc" id="L641">        StyleConfLayer otherLayer = otherStyle._layers.get(layer);</span>
+<span class="pc bpc" id="L642" title="3 of 4 branches missed.">        if ( thisLayer == null &amp;&amp; otherLayer == null )</span>
+<span class="nc" id="L643">            return true;</span>
+<span class="pc bpc" id="L644" title="2 of 4 branches missed.">        if ( thisLayer == null || otherLayer == null )</span>
+<span class="nc" id="L645">            return false;</span>
+<span class="fc" id="L646">        return thisLayer.hasEqualTextsAs(otherLayer);</span>
+    }
+
+    boolean hasEqualPropertiesAs( StyleConf otherStyle ) {
+<span class="fc" id="L650">        return Objects.equals(_properties, otherStyle._properties);</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="fc" id="L655">        return Objects.hash(</span>
+                    _layout, _border, _base, _font, _dimensionality, _layers, _properties
+                );
+    }
+
+    @Override
+    public boolean equals( Object obj ) {
+<span class="fc bfc" id="L662" title="All 2 branches covered.">        if ( obj == this ) return true;</span>
+<span class="pc bpc" id="L663" title="1 of 2 branches missed.">        if ( obj == null ) return false;</span>
+<span class="pc bpc" id="L664" title="1 of 2 branches missed.">        if ( !(obj instanceof StyleConf) ) return false;</span>
+<span class="fc" id="L665">        StyleConf other = (StyleConf) obj;</span>
+<span class="fc bfc" id="L666" title="All 2 branches covered.">        return hasEqualLayoutAs(other)         &amp;&amp;</span>
+<span class="fc bfc" id="L667" title="All 2 branches covered.">               hasEqualBorderAs(other)         &amp;&amp;</span>
+<span class="fc bfc" id="L668" title="All 2 branches covered.">               hasEqualBaseAs(other)           &amp;&amp;</span>
+<span class="fc bfc" id="L669" title="All 2 branches covered.">               hasEqualFontAs(other)           &amp;&amp;</span>
+<span class="fc bfc" id="L670" title="All 2 branches covered.">               hasEqualDimensionalityAs(other) &amp;&amp;</span>
+<span class="fc bfc" id="L671" title="All 2 branches covered.">               hasEqualFilterAs(other)         &amp;&amp;</span>
+<span class="fc bfc" id="L672" title="All 2 branches covered.">               hasEqualShadowsAs(other)        &amp;&amp;</span>
+<span class="fc bfc" id="L673" title="All 2 branches covered.">               hasEqualPaintersAs(other)       &amp;&amp;</span>
+<span class="fc bfc" id="L674" title="All 2 branches covered.">               hasEqualGradientsAs(other)      &amp;&amp;</span>
+<span class="fc bfc" id="L675" title="All 2 branches covered.">               hasEqualNoisesAs(other)         &amp;&amp;</span>
+<span class="fc bfc" id="L676" title="All 2 branches covered.">               hasEqualImagesAs(other)         &amp;&amp;</span>
+<span class="pc bpc" id="L677" title="1 of 2 branches missed.">               hasEqualTextsAs(other)          &amp;&amp;</span>
+<span class="fc bfc" id="L678" title="All 2 branches covered.">               hasEqualPropertiesAs(other);</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="fc" id="L683">        String propertiesString = _properties.toString(StyleUtil.DEFAULT_KEY, &quot;properties&quot;);</span>
+
+<span class="fc" id="L685">        return this.getClass().getSimpleName() + &quot;[&quot; +</span>
+                    _layout          + &quot;, &quot; +
+                    _border          + &quot;, &quot; +
+                    _base            + &quot;, &quot; +
+                    _font            + &quot;, &quot; +
+                    _dimensionality  + &quot;, &quot; +
+                    _layers          + &quot;, &quot; +
+                    propertiesString +
+                &quot;]&quot;;
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

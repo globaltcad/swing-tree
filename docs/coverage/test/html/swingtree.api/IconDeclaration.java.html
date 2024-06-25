@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>IconDeclaration.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.api</a> &gt; <span class="el_source">IconDeclaration.java</span></div><h1>IconDeclaration.java</h1><pre class="source lang-java linenums">package swingtree.api;
 
+import com.google.errorprone.annotations.Immutable;
 import swingtree.UI;
 import swingtree.layout.Size;
 
@@ -63,9 +64,14 @@ import java.util.Optional;
  *  where the icon may not be available at all, yet you can still test the
  *  behavior of your view model.
  */
+@Immutable
 public interface IconDeclaration
 {
     /**
+     *  The most important part of the identity of an
+     *  icon declaration is the path to the icon resource.
+     *  This path may be relative to the classpath or may be an absolute path.
+     *
      * @return The path to the icon resource, which is relative
      *         to the classpath or may be an absolute path.
      */
@@ -80,74 +86,102 @@ public interface IconDeclaration
      *          which means that the icon should be loaded in its original size.
      */
     default Size size() {
-<span class="fc" id="L83">        return Size.unknown();</span>
+<span class="fc" id="L89">        return Size.unknown();</span>
     }
 
     /**
+     *  This method is used to find the icon resource
+     *  and load it as an {@link ImageIcon} instance
+     *  wrapped in an {@link Optional},
+     *  or return an empty {@link Optional} if the icon resource
+     *  could not be found.
+     *
      * @return An {@link Optional} that contains the {@link ImageIcon}
      *         if the icon resource was found, otherwise an empty {@link Optional}.
      */
     default Optional&lt;ImageIcon&gt; find() {
-<span class="fc" id="L91">        return UI.findIcon(this);</span>
+<span class="fc" id="L103">        return UI.findIcon(this);</span>
     }
 
     /**
+     *  Creates and returns an updated {@link IconDeclaration} instance
+     *  with a new preferred size for the icon.
+     *
      * @param size The preferred size of the icon in the form of a {@link Size} instance.
      * @return A new {@link IconDeclaration} instance with the same path
      *        but with the given size.
      */
     default IconDeclaration withSize( Size size ) {
-<span class="nc" id="L100">        return IconDeclaration.of(size, path());</span>
+<span class="nc" id="L115">        return IconDeclaration.of(size, path());</span>
     }
 
     /**
+     *  Creates and returns an updated {@link IconDeclaration} instance
+     *  with a new preferred width and height for the icon.
+     *
      * @param width The preferred width of the icon.
      * @param height The preferred height of the icon.
      * @return A new {@link IconDeclaration} instance with the same path
      *        but with the specified width and height as preferred size.
      */
     default IconDeclaration withSize( int width, int height ) {
-<span class="fc" id="L110">        return IconDeclaration.of(Size.of(width, height), path());</span>
+<span class="fc" id="L128">        return IconDeclaration.of(Size.of(width, height), path());</span>
     }
 
     /**
+     *  Creates and returns an updated {@link IconDeclaration} instance
+     *  with a new preferred width for the icon.
+     *
      * @param width The preferred width of the icon.
      * @return A new {@link IconDeclaration} instance with the same path
      *        but with the specified width as preferred width.
      */
     default IconDeclaration withWidth( int width ) {
-<span class="nc" id="L119">        return IconDeclaration.of(size().withWidth(width), path());</span>
+<span class="nc" id="L140">        return IconDeclaration.of(size().withWidth(width), path());</span>
     }
 
     /**
+     *  Allows you to create an updated {@link IconDeclaration} instance
+     *  with a new preferred height for the icon.
+     *
      * @param height The preferred height of the icon.
      * @return A new {@link IconDeclaration} instance with the same path
      *        but with the specified height as preferred height.
      */
     default IconDeclaration withHeight( int height ) {
-<span class="nc" id="L128">        return IconDeclaration.of(size().withHeight(height), path());</span>
+<span class="nc" id="L152">        return IconDeclaration.of(size().withHeight(height), path());</span>
     }
 
     /**
+     *  This method is used to find an {@link ImageIcon} of a specific type
+     *  and load and return it wrapped in an {@link Optional},
+     *  or return an empty {@link Optional} if the icon resource could not be found.
+     *
      * @param type The type of icon to find.
      * @return An {@link Optional} that contains the {@link ImageIcon} of the given type.
      * @param &lt;T&gt; The type of icon to find.
      */
     default &lt;T extends ImageIcon&gt; Optional&lt;T&gt; find( Class&lt;T&gt; type ) {
-<span class="fc" id="L137">        return UI.findIcon(this).map(type::cast);</span>
+<span class="fc" id="L165">        return UI.findIcon(this).map(type::cast);</span>
     }
 
     /**
+     *  A factory method for creating an {@link IconDeclaration} instance
+     *  from the provided path to the icon resource.
+     *
      * @param path The path to the icon resource, which may be relative
      *             to the classpath or may be an absolute path.
      * @return A new {@link IconDeclaration} instance
      *        that represents the given icon resource as a constant.
      */
     static IconDeclaration of( String path ) {
-<span class="fc" id="L147">        return of(Size.unknown(), path);</span>
+<span class="fc" id="L178">        return of(Size.unknown(), path);</span>
     }
 
     /**
+     *  A factory method for creating an {@link IconDeclaration} instance
+     *  from the provided path to the icon resource and the preferred size.
+     *
      * @param size The preferred size of the icon.
      * @param path The path to the icon resource, which may be relative
      *             to the classpath or may be an absolute path.
@@ -155,36 +189,9 @@ public interface IconDeclaration
      *        that represents the given icon resource as a constant.
      */
     static IconDeclaration of( Size size, String path ) {
-<span class="fc" id="L158">        Objects.requireNonNull(size);</span>
-<span class="fc" id="L159">        Objects.requireNonNull(path);</span>
-<span class="fc" id="L160">        return new IconDeclaration() {</span>
-            @Override
-            public Size size() {
-<span class="fc" id="L163">                return size;</span>
-            }
-            @Override
-            public String path() {
-<span class="fc" id="L167">                return path;</span>
-            }
-            @Override
-            public String toString() {
-<span class="nc" id="L171">                return this.getClass().getSimpleName()+&quot;[&quot;+</span>
-<span class="nc bnc" id="L172" title="All 2 branches missed.">                            &quot;size=&quot; + ( size().equals(Size.unknown()) ? &quot;?&quot; : size() ) + &quot;, &quot; +</span>
-<span class="nc" id="L173">                            &quot;path='&quot; + path() + &quot;'&quot; +</span>
-                        &quot;]&quot;;
-            }
-            @Override public int hashCode() {
-<span class="fc" id="L177">                return Objects.hash(path(), size());</span>
-            }
-            @Override public boolean equals( Object other ) {
-<span class="pc bpc" id="L180" title="1 of 2 branches missed.">                if ( other == this ) return true;</span>
-<span class="pc bpc" id="L181" title="1 of 2 branches missed.">                if ( other == null ) return false;</span>
-<span class="pc bpc" id="L182" title="1 of 2 branches missed.">                if ( other.getClass() != this.getClass() ) return false;</span>
-<span class="fc" id="L183">                IconDeclaration that = (IconDeclaration) other;</span>
-<span class="fc bfc" id="L184" title="All 2 branches covered.">                return Objects.equals(this.path(), that.path())</span>
-<span class="pc bpc" id="L185" title="1 of 2 branches missed.">                    &amp;&amp; Objects.equals(this.size(), that.size());</span>
-            }
-        };
+<span class="fc" id="L192">        Objects.requireNonNull(size);</span>
+<span class="fc" id="L193">        Objects.requireNonNull(path);</span>
+<span class="fc" id="L194">        return new BasicIconDeclaration(size, path);</span>
     }
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

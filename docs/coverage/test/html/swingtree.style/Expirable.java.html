@@ -20,19 +20,25 @@ final class Expirable&lt;T&gt;
 <span class="fc" id="L20">    }</span>
 
     /**
+     *  Determines if the lifetime of this instance is expired,
+     *  which is based on the current time and the start and end
+     *  of the lifespan.
      *  @return True if the lifetime of this instance is expired,
      *          false otherwise.
      **/
-<span class="fc" id="L26">    boolean isExpired() { return _lifeSpan.isExpired(); }</span>
+<span class="nc" id="L29">    boolean isExpired() { return _lifeSpan.isExpired(); }</span>
 
     /**
+     *  Exposes the thing that can expire.
      *  @return The payload of this instance.
      **/
-<span class="fc" id="L31">    T get() { return _value; }</span>
+<span class="fc" id="L35">    T get() { return _value; }</span>
 
     /**
+     *  Exposes the lifespan of this instance,
+     *  which is used to determine if the payload is expired.
      *  @return The time span of this instance.
      **/
-<span class="nc" id="L36">    LifeSpan getLifeSpan() { return _lifeSpan; }</span>
+<span class="nc" id="L42">    LifeSpan getLifeSpan() { return _lifeSpan; }</span>
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

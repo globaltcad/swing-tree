@@ -7,24 +7,27 @@ import java.util.Objects;
 
 /**
  *  A SwingTree builder node designed for configuring {@link JMenu} instances.
+ *  This class is not meant to be instantiated directly, but rather through
+ *  the {@link UI#menu()} or {@link UI#menu(String)} methods among others.
  */
 public final class UIForMenu&lt;M extends JMenu&gt; extends UIForAnyMenuItem&lt;UIForMenu&lt;M&gt;, M&gt;
 {
     private final BuilderState&lt;M&gt; _state;
 
-<span class="nc" id="L15">    UIForMenu( BuilderState&lt;M&gt; state ) {</span>
-<span class="nc" id="L16">        Objects.requireNonNull(state);</span>
-<span class="nc" id="L17">        _state = state;</span>
-<span class="nc" id="L18">    }</span>
+
+<span class="nc" id="L18">    UIForMenu( BuilderState&lt;M&gt; state ) {</span>
+<span class="nc" id="L19">        Objects.requireNonNull(state);</span>
+<span class="nc" id="L20">        _state = state;</span>
+<span class="nc" id="L21">    }</span>
 
     @Override
     protected BuilderState&lt;M&gt; _state() {
-<span class="nc" id="L22">        return _state;</span>
+<span class="nc" id="L25">        return _state;</span>
     }
     
     @Override
-    protected UIForMenu&lt;M&gt; _newBuilderWithState(BuilderState&lt;M&gt; newState ) {
-<span class="nc" id="L27">        return new UIForMenu&lt;&gt;(newState);</span>
+    protected UIForMenu&lt;M&gt; _newBuilderWithState( BuilderState&lt;M&gt; newState ) {
+<span class="nc" id="L30">        return new UIForMenu&lt;&gt;(newState);</span>
     }
 
     /**
@@ -35,10 +38,10 @@ public final class UIForMenu&lt;M extends JMenu&gt; extends UIForAnyMenuItem&lt;
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForMenu&lt;M&gt; popupMenuIsVisibleIf( boolean popupMenuVisible ) {
-<span class="nc" id="L38">        return _with( thisComponent -&gt; {</span>
-<span class="nc" id="L39">                    thisComponent.setPopupMenuVisible(popupMenuVisible);</span>
-<span class="nc" id="L40">                })</span>
-<span class="nc" id="L41">                ._this();</span>
+<span class="nc" id="L41">        return _with( thisComponent -&gt; {</span>
+<span class="nc" id="L42">                    thisComponent.setPopupMenuVisible(popupMenuVisible);</span>
+<span class="nc" id="L43">                })</span>
+<span class="nc" id="L44">                ._this();</span>
     }
 
     /**
@@ -49,14 +52,14 @@ public final class UIForMenu&lt;M extends JMenu&gt; extends UIForAnyMenuItem&lt;
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForMenu&lt;M&gt; popupMenuIsVisibleIf( Val&lt;Boolean&gt; val ) {
-<span class="nc" id="L52">        return _withOnShow( val, (thisComponent, it) -&gt; {</span>
-<span class="nc" id="L53">                    thisComponent.setPopupMenuVisible( it );</span>
-<span class="nc" id="L54">                })</span>
-<span class="nc" id="L55">                ._with( thisComponent -&gt; {</span>
-<span class="nc" id="L56">                    thisComponent.setPopupMenuVisible( val.get() );</span>
+<span class="nc" id="L55">        return _withOnShow( val, (thisComponent, it) -&gt; {</span>
+<span class="nc" id="L56">                    thisComponent.setPopupMenuVisible( it );</span>
 <span class="nc" id="L57">                })</span>
-<span class="nc" id="L58">                ._this();</span>
+<span class="nc" id="L58">                ._with( thisComponent -&gt; {</span>
+<span class="nc" id="L59">                    thisComponent.setPopupMenuVisible( val.get() );</span>
+<span class="nc" id="L60">                })</span>
+<span class="nc" id="L61">                ._this();</span>
     }
 
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

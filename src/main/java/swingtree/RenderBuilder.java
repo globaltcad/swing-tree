@@ -34,6 +34,7 @@ import java.util.function.Predicate;
  *              });
  *          })
  *      )
+ *  }</pre>
  * 	<p>
  * 	<b>Please take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
  * 	where you can browse a collection of examples demonstrating how to use the API of this class.</b>

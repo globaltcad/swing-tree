@@ -364,7 +364,7 @@
 
         {"kind":"when","text":"We turn the list of properties into different collection types...","code":["var list = vars.toList()","var set = vars.toSet()","var map = vars.toMap()","var valMap = vars.toValMap()"]},
 
-        {"kind":"then","text":"The collections have the correct size and values.","code":["list.size() == 4","set.size() == 4","map.size() == 4","valMap.size() == 4","list == [42, 73, 1, 2]","set == [42, 73, 1, 2] as Set","map == [\"a\": 42, \"b\": 73, \"c\": 1, \"d\": 2]","valMap == [\"a\": Val.of(42), \"b\": Val.of(73), \"c\": Val.of(1), \"d\": Val.of(2)]"]},
+        {"kind":"then","text":"The collections have the correct size and values.","code":["list.size() == 4","set.size() == 4","map.size() == 4","valMap.size() == 4","list == [42, 73, 1, 2]","set == [42, 73, 1, 2] as Set","map == [\"a\": 42, \"b\": 73, \"c\": 1, \"d\": 2]","valMap != [\"a\": Val.of(42), \"b\": Val.of(73), \"c\": Val.of(1), \"d\": Val.of(2)]","valMap == [\"a\": vars.at(0), \"b\": vars.at(1), \"c\": vars.at(2), \"d\": vars.at(3)]"]},
 
         {"kind":"and","text":"All of these collections are of the correct type.","code":["list instanceof List","set instanceof Set","map instanceof Map","valMap instanceof Map"]}
       ],
@@ -393,7 +393,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            The \"makeDistinct\" method makes sure that there are only unique values in the Vals list.\n            It does this by removing all duplicates from the list.\n            This is especially useful when you use the properties to model \n            combo box or radio button selections.\n            This modification will be reported to all change listeners,\n            which are usually used to update the UI.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            The `makeDistinct` method makes sure that there are only unique values in the Vals list.\n            It does this by removing all duplicates from the list.\n            This is especially useful when you use the properties to model \n            combo box or radio button selections.\n            This modification will be reported to all \"show\" listeners,\n            which are usually used to update the UI.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"A \"Vars\" class with 4 properties that have unique ids.","code":["var vars = Vars.of(","                                    Var.of(3.1415f),","                                    Var.of(2.7182f),","                                    Var.of(3.1415f),","                                    Var.of(1.6180f)","                                )"]},
@@ -402,9 +402,9 @@
 
         {"kind":"when","text":"We call the \"makeDistinct\" method.","code":["vars.makeDistinct()"]},
 
-        {"kind":"then","text":"The list has been modified in-place.","code":["vars.size() == 3","vars == Vars.of(Var.of(3.1415f), Var.of(2.7182f), Var.of(1.6180f))"]},
+        {"kind":"then","text":"The list has been modified in-place.","code":["vars.size() == 3","vars.toList() == [3.1415f, 2.7182f, 1.6180f]"]},
 
-        {"kind":"and","text":"The change listeners have been called.","code":["changes == [Change.DISTINCT]"]}
+        {"kind":"and","text":"The \"show\" listeners have been called.","code":["changes == [Change.DISTINCT]"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

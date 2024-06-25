@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LayerCache.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">LayerCache.java</span></div><h1>LayerCache.java</h1><pre class="source lang-java linenums">package swingtree.style;
 
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import swingtree.UI;
-import swingtree.layout.Bounds;
 import swingtree.layout.Size;
 
 import javax.swing.ImageIcon;
@@ -15,83 +17,90 @@ import java.util.function.BiConsumer;
 
 /**
  *  A {@link BufferedImage} based cache for the rendering of a particular layer of a component's style. &lt;br&gt;
- *  So if the {@link ComponentConf} of a component changes, the cache is invalidated and the layer
+ *  So if the {@link LayerRenderConf} of a component changes, the cache is invalidated and the layer
  *  is rendered again. &lt;br&gt;
- *  This is made possible by the fact that the {@link ComponentConf} is deeply immutable and can be used
+ *  This is made possible by the fact that the {@link LayerRenderConf} is deeply immutable and can be used
  *  as a key data structure for caching.
  */
 final class LayerCache
 {
-<span class="fc" id="L25">    private static final Map&lt;ComponentConf, CachedImage&gt; _CACHE = new WeakHashMap&lt;&gt;();</span>
+<span class="fc" id="L27">    private static final Map&lt;LayerRenderConf, CachedImage&gt; _CACHE = new WeakHashMap&lt;&gt;();</span>
+<span class="fc" id="L28">    private static final Logger log = LoggerFactory.getLogger(LayerCache.class);</span>
 
 
     private static final class CachedImage extends BufferedImage
     {
-        private WeakReference&lt;ComponentConf&gt; _key;
-<span class="fc" id="L31">        private boolean _isRendered = false;</span>
+        private WeakReference&lt;LayerRenderConf&gt; _key;
+<span class="fc" id="L34">        private boolean _isRendered = false;</span>
 
-        CachedImage( int width, int height, ComponentConf cacheKey ) {
-<span class="fc" id="L34">            super(width, height, BufferedImage.TYPE_INT_ARGB);</span>
-<span class="fc" id="L35">            _key = new WeakReference&lt;&gt;(cacheKey);</span>
-<span class="fc" id="L36">        }</span>
+        CachedImage( int width, int height, LayerRenderConf cacheKey ) {
+<span class="fc" id="L37">            super(width, height, BufferedImage.TYPE_INT_ARGB);</span>
+<span class="fc" id="L38">            _key = new WeakReference&lt;&gt;(cacheKey);</span>
+<span class="fc" id="L39">        }</span>
 
         @Override
         public Graphics2D createGraphics() {
-<span class="pc bpc" id="L40" title="1 of 2 branches missed.">            if ( _isRendered )</span>
-<span class="nc" id="L41">                throw new IllegalStateException(&quot;This image has already been rendered into!&quot;);</span>
-<span class="fc" id="L42">            _isRendered = true;</span>
-<span class="fc" id="L43">            return super.createGraphics();</span>
+<span class="pc bpc" id="L43" title="1 of 2 branches missed.">            if ( _isRendered )</span>
+<span class="nc" id="L44">                throw new IllegalStateException(&quot;This image has already been rendered into!&quot;);</span>
+<span class="fc" id="L45">            _isRendered = true;</span>
+<span class="fc" id="L46">            return super.createGraphics();</span>
         }
 
-        public ComponentConf getKeyOrElse( ComponentConf newFallbackKey ) {
-<span class="fc" id="L47">            ComponentConf key = _key.get();</span>
-<span class="pc bpc" id="L48" title="1 of 2 branches missed.">            if ( key == null ) {</span>
-<span class="nc" id="L49">                _key = new WeakReference&lt;&gt;(newFallbackKey);</span>
-<span class="nc" id="L50">                key = newFallbackKey;</span>
+        public LayerRenderConf getKeyOrElse( LayerRenderConf newFallbackKey ) {
+<span class="fc" id="L50">            LayerRenderConf key = _key.get();</span>
+<span class="pc bpc" id="L51" title="1 of 2 branches missed.">            if ( key == null ) {</span>
+<span class="nc" id="L52">                _key = new WeakReference&lt;&gt;(newFallbackKey);</span>
+<span class="nc" id="L53">                key = newFallbackKey;</span>
             }
-<span class="fc" id="L52">            return key;</span>
+<span class="fc" id="L55">            return key;</span>
         }
 
         public boolean isRendered() {
-<span class="fc" id="L56">            return _isRendered;</span>
+<span class="fc" id="L59">            return _isRendered;</span>
         }
     }
 
 
-    private final UI.Layer   _layer;
-    private CachedImage      _localCache;
-    private ComponentConf    _strongRef; // The key must be referenced strongly so that the value is not garbage collected (the cached image)
-<span class="fc" id="L64">    private boolean          _cachingMakesSense = false;</span>
-<span class="fc" id="L65">    private boolean          _isInitialized     = false;</span>
+    private final UI.Layer        _layer;
+    private @Nullable CachedImage _localCache;
+    private LayerRenderConf       _layerRenderData; // The key must be referenced strongly so that the value is not garbage collected (the cached image)
+<span class="fc" id="L67">    private boolean               _cachingMakesSense = false;</span>
+<span class="fc" id="L68">    private boolean               _isInitialized     = false;</span>
 
 
-<span class="fc" id="L68">    public LayerCache( UI.Layer layer ) {</span>
-<span class="fc" id="L69">        _layer = Objects.requireNonNull(layer);</span>
-<span class="fc" id="L70">    }</span>
+<span class="fc" id="L71">    public LayerCache( UI.Layer layer ) {</span>
+<span class="fc" id="L72">        _layer           = Objects.requireNonNull(layer);</span>
+<span class="fc" id="L73">        _layerRenderData = LayerRenderConf.none();</span>
+<span class="fc" id="L74">    }</span>
 
-    public boolean hasBufferedImage() {
-<span class="fc bfc" id="L73" title="All 2 branches covered.">        return _localCache != null;</span>
+    LayerRenderConf getCurrentRenderInputData() {
+<span class="nc" id="L77">        return _layerRenderData;</span>
     }
 
-    private void _allocateOrGetCachedBuffer( ComponentConf styleConf )
+    public boolean hasBufferedImage() {
+<span class="fc bfc" id="L81" title="All 2 branches covered.">        return _localCache != null;</span>
+    }
+
+    private void _allocateOrGetCachedBuffer( LayerRenderConf layerRenderConf)
     {
-<span class="fc" id="L78">        Map&lt;ComponentConf, CachedImage&gt; CACHE = _CACHE;</span>
+<span class="fc" id="L86">        Map&lt;LayerRenderConf, CachedImage&gt; CACHE = _CACHE;</span>
 
-<span class="fc" id="L80">        CachedImage bufferedImage = CACHE.get(styleConf);</span>
+<span class="fc" id="L88">        CachedImage bufferedImage = CACHE.get(layerRenderConf);</span>
 
-<span class="fc bfc" id="L82" title="All 2 branches covered.">        if ( bufferedImage == null ) {</span>
-<span class="fc" id="L83">            Size size = styleConf.currentBounds().size();</span>
-<span class="fc" id="L84">            bufferedImage = new CachedImage(</span>
-<span class="fc" id="L85">                                size.width().map(Number::intValue).orElse(1),</span>
-<span class="fc" id="L86">                                size.height().map(Number::intValue).orElse(1),</span>
-                                styleConf
+<span class="fc bfc" id="L90" title="All 2 branches covered.">        if ( bufferedImage == null ) {</span>
+<span class="fc" id="L91">            Size size = layerRenderConf.boxModel().size();</span>
+<span class="fc" id="L92">            bufferedImage = new CachedImage(</span>
+<span class="fc" id="L93">                                size.width().map(Number::intValue).orElse(1),</span>
+<span class="fc" id="L94">                                size.height().map(Number::intValue).orElse(1),</span>
+                                layerRenderConf
                             );
-<span class="fc" id="L89">            CACHE.put(styleConf, bufferedImage);</span>
-<span class="fc" id="L90">            _strongRef = styleConf;</span>
-<span class="fc" id="L91">        }</span>
+<span class="fc" id="L97">            CACHE.put(layerRenderConf, bufferedImage);</span>
+
+<span class="fc" id="L99">            _layerRenderData = layerRenderConf;</span>
+<span class="fc" id="L100">        }</span>
         else {
             // We keep a strong reference to the state so that the cached image is not garbage collected
-<span class="fc" id="L94">            _strongRef = bufferedImage.getKeyOrElse(styleConf);</span>
+<span class="fc" id="L103">            _layerRenderData = bufferedImage.getKeyOrElse(layerRenderConf);</span>
             /*
                 The reason why we take the key stored in the cached image as a strong reference is because this
                 key object is also the key in the global (weak) hash map based cache
@@ -102,144 +111,155 @@ final class LayerCache
             */
         }
 
-<span class="fc" id="L105">        _localCache = bufferedImage;</span>
-<span class="fc" id="L106">    }</span>
+<span class="fc" id="L114">        _localCache = bufferedImage;</span>
+<span class="fc" id="L115">    }</span>
 
     private void _freeLocalCache() {
-<span class="fc" id="L109">        _strongRef         = null;</span>
-<span class="fc" id="L110">        _localCache        = null;</span>
-<span class="fc" id="L111">        _cachingMakesSense = false;</span>
-<span class="fc" id="L112">        _isInitialized     = false;</span>
-<span class="fc" id="L113">    }</span>
+<span class="fc" id="L118">        _localCache        = null;</span>
+<span class="fc" id="L119">        _cachingMakesSense = false;</span>
+<span class="fc" id="L120">        _isInitialized     = false;</span>
+<span class="fc" id="L121">    }</span>
 
-    public final void validate( ComponentConf oldState, ComponentConf newState )
+    public final void validate( ComponentConf oldConf, ComponentConf newConf )
     {
-<span class="fc bfc" id="L117" title="All 4 branches covered.">        if ( newState.currentBounds().hasWidth(0) || newState.currentBounds().hasHeight(0) )</span>
-<span class="fc" id="L118">            return;</span>
-
-<span class="fc" id="L120">        oldState = oldState.onlyRetainingLayer(_layer);</span>
-<span class="fc" id="L121">        newState = newState.onlyRetainingLayer(_layer);</span>
-
-<span class="fc bfc" id="L123" title="All 4 branches covered.">        boolean validationNeeded = ( !_isInitialized || !oldState.equals(newState) );</span>
-
-<span class="fc" id="L125">        _isInitialized = true;</span>
-
-<span class="fc bfc" id="L127" title="All 2 branches covered.">        if ( validationNeeded )</span>
-<span class="fc" id="L128">            _cachingMakesSense = _cachingMakesSenseFor(newState);</span>
-
-<span class="fc bfc" id="L130" title="All 2 branches covered.">        if ( !_cachingMakesSense ) {</span>
-<span class="fc" id="L131">            _freeLocalCache();</span>
-<span class="fc" id="L132">            return;</span>
+<span class="fc bfc" id="L125" title="All 4 branches covered.">        if ( newConf.currentBounds().hasWidth(0) || newConf.currentBounds().hasHeight(0) ) {</span>
+<span class="fc" id="L126">            _layerRenderData = LayerRenderConf.none();</span>
+<span class="fc" id="L127">            return;</span>
         }
 
-<span class="fc" id="L135">        boolean cacheIsInvalid = true;</span>
-<span class="pc bpc" id="L136" title="1 of 2 branches missed.">        boolean cacheIsFull    = _CACHE.size() &gt; 128;</span>
+<span class="fc" id="L130">        final LayerRenderConf oldState = oldConf.toRenderConfFor(_layer);</span>
+<span class="fc" id="L131">        final LayerRenderConf newState = newConf.toRenderConfFor(_layer);</span>
 
-<span class="fc" id="L138">        boolean newBufferNeeded = false;</span>
+<span class="fc bfc" id="L133" title="All 4 branches covered.">        boolean validationNeeded = ( !_isInitialized || !oldState.equals(newState) );</span>
 
-<span class="fc bfc" id="L140" title="All 2 branches covered.">        if ( _localCache == null )</span>
-<span class="fc" id="L141">            newBufferNeeded = true;</span>
+<span class="fc" id="L135">        _isInitialized = true;</span>
+
+<span class="fc bfc" id="L137" title="All 2 branches covered.">        if ( validationNeeded )</span>
+<span class="fc" id="L138">            _cachingMakesSense = _cachingMakesSenseFor(newState);</span>
+
+<span class="fc bfc" id="L140" title="All 2 branches covered.">        if ( !_cachingMakesSense ) {</span>
+<span class="fc" id="L141">            _freeLocalCache();</span>
+<span class="fc" id="L142">            _layerRenderData = newState;</span>
+<span class="fc" id="L143">            return;</span>
+        }
+
+<span class="fc" id="L146">        boolean cacheIsInvalid = true;</span>
+<span class="fc bfc" id="L147" title="All 2 branches covered.">        boolean cacheIsFull    = _CACHE.size() &gt; 128;</span>
+
+<span class="fc" id="L149">        boolean newBufferNeeded = false;</span>
+
+<span class="fc bfc" id="L151" title="All 2 branches covered.">        if ( _localCache == null )</span>
+<span class="fc" id="L152">            newBufferNeeded = true;</span>
         else
-<span class="fc bfc" id="L143" title="All 2 branches covered.">            cacheIsInvalid = !oldState.equals(newState);</span>
+<span class="fc bfc" id="L154" title="All 2 branches covered.">            cacheIsInvalid = !oldState.equals(newState);</span>
 
-<span class="fc bfc" id="L145" title="All 2 branches covered.">        if ( cacheIsInvalid ) {</span>
-<span class="fc" id="L146">            _freeLocalCache();</span>
-<span class="fc" id="L147">            newBufferNeeded = true;</span>
+<span class="fc bfc" id="L156" title="All 2 branches covered.">        if ( cacheIsInvalid ) {</span>
+<span class="fc" id="L157">            _freeLocalCache();</span>
+<span class="fc" id="L158">            newBufferNeeded = true;</span>
         }
 
-<span class="pc bpc" id="L150" title="1 of 2 branches missed.">        if ( cacheIsFull )</span>
-<span class="nc" id="L151">            return;</span>
+<span class="fc bfc" id="L161" title="All 2 branches covered.">        if ( cacheIsFull ) {</span>
+<span class="fc" id="L162">            _layerRenderData = newState;</span>
+<span class="fc" id="L163">            return;</span>
+        }
 
-<span class="fc bfc" id="L153" title="All 2 branches covered.">        if ( newBufferNeeded )</span>
-<span class="fc" id="L154">            _allocateOrGetCachedBuffer(newState);</span>
-<span class="fc" id="L155">    }</span>
+<span class="fc bfc" id="L166" title="All 2 branches covered.">        if ( newBufferNeeded )</span>
+<span class="fc" id="L167">            _allocateOrGetCachedBuffer(newState);</span>
+<span class="fc" id="L168">    }</span>
 
-    public final void paint( ComponentConf conf, Graphics2D g, BiConsumer&lt;ComponentConf, Graphics2D&gt; renderer )
+    public final void paint( Graphics2D g, BiConsumer&lt;LayerRenderConf, Graphics2D&gt; renderer )
     {
-<span class="fc" id="L159">        Bounds componentBounds = conf.currentBounds();</span>
+<span class="fc" id="L172">        Size size = _layerRenderData.boxModel().size();</span>
 
-<span class="pc bpc" id="L161" title="1 of 4 branches missed.">        if ( componentBounds.hasWidth(0) || componentBounds.hasHeight(0) )</span>
-<span class="fc" id="L162">            return;</span>
+<span class="pc bpc" id="L174" title="1 of 4 branches missed.">        if ( size.width().orElse(0f) == 0f || size.height().orElse(0f) == 0f )</span>
+<span class="fc" id="L175">            return;</span>
 
-<span class="fc bfc" id="L164" title="All 2 branches covered.">        if ( !_cachingMakesSense ) {</span>
-<span class="fc bfc" id="L165" title="All 2 branches covered.">            renderer.accept(_strongRef == null ? conf : _strongRef, g);</span>
-<span class="fc" id="L166">            return;</span>
+<span class="fc bfc" id="L177" title="All 2 branches covered.">        if ( !_cachingMakesSense ) {</span>
+<span class="fc" id="L178">            renderer.accept(_layerRenderData, g);</span>
+<span class="fc" id="L179">            return;</span>
         }
 
-<span class="pc bpc" id="L169" title="1 of 2 branches missed.">        if ( _localCache == null )</span>
-<span class="nc" id="L170">            return;</span>
+<span class="pc bpc" id="L182" title="1 of 2 branches missed.">        if ( _localCache == null )</span>
+<span class="nc" id="L183">            return;</span>
 
-<span class="fc bfc" id="L172" title="All 2 branches covered.">        if ( !_localCache.isRendered() ) {</span>
-<span class="fc" id="L173">            Graphics2D g2 = _localCache.createGraphics();</span>
+<span class="fc bfc" id="L185" title="All 2 branches covered.">        if ( !_localCache.isRendered() ) {</span>
+<span class="fc" id="L186">            Graphics2D g2 = _localCache.createGraphics();</span>
             try {
-<span class="fc" id="L175">                g2.setFont(g.getFont());</span>
-<span class="fc" id="L176">                g2.setColor(g.getColor());</span>
-<span class="fc" id="L177">                g2.setBackground(g.getBackground());</span>
-<span class="fc" id="L178">                g2.setComposite(g.getComposite());</span>
-<span class="fc" id="L179">                g2.setClip(null); // We want to capture the full style and clip it later (see g.drawImage(_cache, 0, 0, null); below.</span>
-<span class="fc" id="L180">                g2.setComposite(g.getComposite());</span>
-<span class="fc" id="L181">                g2.setPaint(g.getPaint());</span>
-<span class="fc" id="L182">                g2.setRenderingHints(g.getRenderingHints());</span>
-<span class="fc" id="L183">                g2.setStroke(g.getStroke());</span>
+<span class="fc" id="L188">                StyleUtil.transferConfigurations(g, g2);</span>
             }
-<span class="fc" id="L185">            catch (Exception ignored) {}</span>
+<span class="fc" id="L190">            catch ( Exception ignored ) {</span>
+<span class="fc" id="L191">                log.debug(&quot;Error while transferring configurations to the cached image graphics context.&quot;);</span>
+            }
             finally {
-<span class="pc bpc" id="L187" title="1 of 2 branches missed.">                renderer.accept(_strongRef == null ? conf : _strongRef, g2);</span>
-<span class="fc" id="L188">                g2.dispose();</span>
+<span class="fc" id="L194">                renderer.accept(_layerRenderData, g2);</span>
+<span class="fc" id="L195">                g2.dispose();</span>
             }
         }
 
-<span class="fc" id="L192">        g.drawImage(_localCache, 0, 0, null);</span>
-<span class="fc" id="L193">    }</span>
+<span class="fc" id="L199">        g.drawImage(_localCache, 0, 0, null);</span>
+<span class="fc" id="L200">    }</span>
 
-    public boolean _cachingMakesSenseFor( ComponentConf state )
+    public boolean _cachingMakesSenseFor( LayerRenderConf state )
     {
-<span class="fc" id="L197">        Bounds bounds = state.currentBounds();</span>
-<span class="pc bpc" id="L198" title="1 of 4 branches missed.">        if ( !bounds.hasWidth() || !bounds.hasHeight() )</span>
-<span class="fc" id="L199">            return false;</span>
+<span class="fc" id="L204">        final Size size = state.boxModel().size();</span>
 
-<span class="fc bfc" id="L201" title="All 2 branches covered.">        if ( state.style().hasPaintersOnLayer(_layer) )</span>
-<span class="fc" id="L202">            return false; // We don't know what the painters will do, so we don't cache their painting!</span>
+<span class="pc bpc" id="L206" title="1 of 4 branches missed.">        if ( !size.hasPositiveWidth() || !size.hasPositiveHeight() )</span>
+<span class="fc" id="L207">            return false;</span>
 
-<span class="fc" id="L204">        int heavyStyleCount = 0;</span>
-<span class="fc bfc" id="L205" title="All 2 branches covered.">        for ( ImageStyle imageStyle : state.style().images(_layer) )</span>
-<span class="fc bfc" id="L206" title="All 4 branches covered.">            if ( !imageStyle.equals(ImageStyle.none()) &amp;&amp; imageStyle.image().isPresent() ) {</span>
-<span class="fc" id="L207">                ImageIcon icon = imageStyle.image().get();</span>
-<span class="fc bfc" id="L208" title="All 2 branches covered.">                boolean isSpecialIcon = ( icon.getClass() != ImageIcon.class );</span>
-<span class="pc bpc" id="L209" title="1 of 4 branches missed.">                boolean hasSize = ( icon.getIconHeight() &gt; 0 || icon.getIconWidth() &gt; 0 );</span>
-<span class="pc bpc" id="L210" title="1 of 4 branches missed.">                if ( isSpecialIcon || hasSize )</span>
-<span class="fc" id="L211">                    heavyStyleCount++;</span>
+<span class="fc bfc" id="L209" title="All 2 branches covered.">        if ( state.layer().hasPaintersWhichCannotBeCached() )</span>
+<span class="fc" id="L210">            return false; // We don't know what the painters will do, so we don't cache their painting!</span>
+
+<span class="fc" id="L212">        int heavyStyleCount = 0;</span>
+
+<span class="fc bfc" id="L214" title="All 2 branches covered.">        for ( ImageConf imageConf : state.layer().images().sortedByNames() )</span>
+<span class="fc bfc" id="L215" title="All 4 branches covered.">            if ( !imageConf.equals(ImageConf.none()) &amp;&amp; imageConf.image().isPresent() ) {</span>
+<span class="fc" id="L216">                ImageIcon icon = imageConf.image().get();</span>
+<span class="fc bfc" id="L217" title="All 2 branches covered.">                boolean isSpecialIcon = ( icon.getClass() != ImageIcon.class );</span>
+<span class="pc bpc" id="L218" title="1 of 4 branches missed.">                boolean hasSize = ( icon.getIconHeight() &gt; 0 || icon.getIconWidth() &gt; 0 );</span>
+<span class="pc bpc" id="L219" title="1 of 4 branches missed.">                if ( isSpecialIcon || hasSize )</span>
+<span class="fc" id="L220">                    heavyStyleCount++;</span>
             }
-<span class="fc bfc" id="L213" title="All 2 branches covered.">        for ( GradientStyle gradient : state.style().gradients(_layer) )</span>
-<span class="pc bpc" id="L214" title="1 of 4 branches missed.">            if ( !gradient.equals(GradientStyle.none()) &amp;&amp; gradient.colors().length &gt; 0 )</span>
-<span class="fc" id="L215">                heavyStyleCount++;</span>
-<span class="fc bfc" id="L216" title="All 2 branches covered.">        for ( ShadowStyle shadow : state.style().shadows(_layer) )</span>
-<span class="pc bpc" id="L217" title="1 of 4 branches missed.">            if ( !shadow.equals(ShadowStyle.none()) &amp;&amp; shadow.color().isPresent() )</span>
-<span class="fc" id="L218">                heavyStyleCount++;</span>
+<span class="fc bfc" id="L222" title="All 2 branches covered.">        for ( GradientConf gradient : state.layer().gradients().sortedByNames() )</span>
+<span class="pc bpc" id="L223" title="1 of 4 branches missed.">            if ( !gradient.equals(GradientConf.none()) &amp;&amp; gradient.colors().length &gt; 0 )</span>
+<span class="fc" id="L224">                heavyStyleCount++;</span>
+<span class="fc bfc" id="L225" title="All 2 branches covered.">        for ( NoiseConf noise : state.layer().noises().sortedByNames() )</span>
+<span class="pc bpc" id="L226" title="1 of 4 branches missed.">            if ( !noise.equals(NoiseConf.none()) &amp;&amp; noise.colors().length &gt; 0 )</span>
+<span class="fc" id="L227">                heavyStyleCount++;</span>
+<span class="fc bfc" id="L228" title="All 2 branches covered.">        for ( TextConf text : state.layer().texts().sortedByNames() )</span>
+<span class="pc bpc" id="L229" title="1 of 4 branches missed.">            if ( !text.equals(TextConf.none()) &amp;&amp; !text.content().isEmpty() )</span>
+<span class="fc" id="L230">                heavyStyleCount++;</span>
+<span class="fc bfc" id="L231" title="All 2 branches covered.">        for ( ShadowConf shadow : state.layer().shadows().sortedByNames() )</span>
+<span class="pc bpc" id="L232" title="1 of 4 branches missed.">            if ( !shadow.equals(ShadowConf.none()) &amp;&amp; shadow.color().isPresent() )</span>
+<span class="fc" id="L233">                heavyStyleCount++;</span>
 
-<span class="fc" id="L220">        BorderStyle border = state.style().border();</span>
-<span class="fc" id="L221">        boolean rounded = border.hasAnyNonZeroArcs();</span>
+<span class="fc" id="L235">        final BaseColorConf baseCoors = state.baseColors();</span>
+<span class="fc" id="L236">        final BoxModelConf  boxModel  = state.boxModel();</span>
+<span class="fc" id="L237">        final boolean       isRounded = boxModel.hasAnyNonZeroArcs();</span>
 
-<span class="fc bfc" id="L223" title="All 2 branches covered.">        if ( _layer == UI.Layer.BORDER ) {</span>
-<span class="fc bfc" id="L224" title="All 2 branches covered.">            boolean hasWidth = !Outline.none().equals(border.widths());</span>
-<span class="pc bpc" id="L225" title="1 of 4 branches missed.">            if ( hasWidth &amp;&amp; border.color().isPresent() )</span>
-<span class="fc" id="L226">                heavyStyleCount++;</span>
+<span class="fc bfc" id="L239" title="All 2 branches covered.">        if ( _layer == UI.Layer.BORDER ) {</span>
+<span class="fc bfc" id="L240" title="All 2 branches covered.">            boolean hasWidth = !Outline.none().equals(boxModel.widths());</span>
+<span class="fc bfc" id="L241" title="All 2 branches covered.">            boolean hasColoring = !baseCoors.borderColor().equals(BorderColorsConf.none());</span>
+<span class="pc bpc" id="L242" title="1 of 4 branches missed.">            if ( hasWidth &amp;&amp; hasColoring )</span>
+<span class="fc" id="L243">                heavyStyleCount++;</span>
         }
-<span class="fc bfc" id="L228" title="All 2 branches covered.">        if ( _layer == UI.Layer.BACKGROUND ) {</span>
-<span class="fc" id="L229">            BaseStyle base = state.style().base();</span>
-<span class="fc bfc" id="L230" title="All 4 branches covered.">            boolean roundedOrHasMargin = rounded || !state.style().margin().equals(Outline.none());</span>
-<span class="fc bfc" id="L231" title="All 4 branches covered.">            if ( base.backgroundColor().isPresent() &amp;&amp; roundedOrHasMargin )</span>
-<span class="fc" id="L232">                heavyStyleCount++;</span>
+<span class="fc bfc" id="L245" title="All 2 branches covered.">        if ( _layer == UI.Layer.BACKGROUND ) {</span>
+<span class="fc bfc" id="L246" title="All 4 branches covered.">            boolean roundedOrHasMargin = isRounded || !boxModel.margin().equals(Outline.none());</span>
+<span class="fc bfc" id="L247" title="All 2 branches covered.">            if ( roundedOrHasMargin ) {</span>
+<span class="fc bfc" id="L248" title="All 4 branches covered.">                if ( baseCoors.backgroundColor().filter( c -&gt; c.getAlpha() &gt; 0 ).isPresent() )</span>
+<span class="fc" id="L249">                    heavyStyleCount++;</span>
+<span class="fc bfc" id="L250" title="All 4 branches covered.">                if ( baseCoors.foundationColor().filter( c -&gt; c.getAlpha() &gt; 0 ).isPresent() )</span>
+<span class="fc" id="L251">                    heavyStyleCount++;</span>
+            }
         }
 
-<span class="fc bfc" id="L235" title="All 2 branches covered.">        if ( heavyStyleCount &lt; 1 )</span>
-<span class="fc" id="L236">            return false;</span>
+<span class="fc bfc" id="L255" title="All 2 branches covered.">        if ( heavyStyleCount &lt; 1 )</span>
+<span class="fc" id="L256">            return false;</span>
 
-<span class="fc" id="L238">        int threshold = 256 * 256 * Math.min(heavyStyleCount, 5);</span>
-<span class="fc" id="L239">        int pixelCount = (int) bounds.area();</span>
+<span class="fc" id="L258">        final int threshold = 256 * 256 * Math.min(heavyStyleCount, 5);</span>
+<span class="fc" id="L259">        final int pixelCount = (int) (size.width().orElse(0f) * size.height().orElse(0f));</span>
 
-<span class="fc bfc" id="L241" title="All 2 branches covered.">        return pixelCount &lt;= threshold;</span>
+<span class="fc bfc" id="L261" title="All 2 branches covered.">        return pixelCount &lt;= threshold;</span>
     }
 
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

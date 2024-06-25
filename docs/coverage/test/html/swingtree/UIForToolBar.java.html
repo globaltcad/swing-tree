@@ -31,34 +31,43 @@ public final class UIForToolBar&lt;T extends JToolBar&gt; extends UIForAnySwing&
     }
 
     /**
+     *  Use this to set the orientation of the {@link JToolBar},
+     *  which is a layout mode that is either horizontal or vertical.
+     *  It translates to a call to {@link JToolBar#setOrientation(int)}.
+     *
      * @param alignment The {@link UI.Align} value mapping to the {@link JToolBar}'s orientation.
      *                  See {@link JToolBar#setOrientation(int)}.
      * @return This builder node.
      */
     public final UIForToolBar&lt;T&gt; withOrientation( UI.Align alignment ) {
-<span class="nc" id="L39">        NullUtil.nullArgCheck(alignment, &quot;alignment&quot;, UI.Align.class);</span>
-<span class="nc" id="L40">        return _with( thisComponent -&gt; {</span>
-<span class="nc" id="L41">                    thisComponent.setOrientation(alignment.forToolBar());</span>
-<span class="nc" id="L42">                })</span>
-<span class="nc" id="L43">                ._this();</span>
+<span class="nc" id="L43">        NullUtil.nullArgCheck(alignment, &quot;alignment&quot;, UI.Align.class);</span>
+<span class="nc" id="L44">        return _with( thisComponent -&gt; {</span>
+<span class="nc" id="L45">                    thisComponent.setOrientation(alignment.forToolBar());</span>
+<span class="nc" id="L46">                })</span>
+<span class="nc" id="L47">                ._this();</span>
     }
 
     /**
+     *  Dynamically determines the orientation of the {@link JToolBar} based on the value of the given {@link Val},
+     *  which means that whenever the value of the {@link Val} changes, the orientation of the {@link JToolBar} will change.
+     *  This translates to a call to {@link JToolBar#setOrientation(int)}.
+     *  The orientation must have either the value HORIZONTAL or VERTICAL.
+     *
      * @param alignment The {@link UI.Align} property mapping to the {@link JToolBar}'s orientation.
      *                  See {@link JToolBar#setOrientation(int)}.
      * @return This builder node.
      */
     public final UIForToolBar&lt;T&gt; withOrientation( Val&lt;UI.Align&gt; alignment ) {
-<span class="nc" id="L52">        NullUtil.nullArgCheck(alignment, &quot;alignment&quot;, Val.class);</span>
-<span class="nc" id="L53">        NullUtil.nullPropertyCheck(alignment, &quot;alignment&quot;, &quot;Null is not a valid alignment.&quot;);</span>
-<span class="nc" id="L54">        return _withOnShow( alignment, (c,v) -&gt; {</span>
-<span class="nc" id="L55">                    c.setOrientation(v.forToolBar());</span>
-<span class="nc" id="L56">                })</span>
-<span class="nc" id="L57">                ._with( thisComponent -&gt; {</span>
-<span class="nc" id="L58">                    thisComponent.setOrientation(alignment.orElseThrow().forToolBar());</span>
-<span class="nc" id="L59">                })</span>
-<span class="nc" id="L60">                ._this();</span>
+<span class="nc" id="L61">        NullUtil.nullArgCheck(alignment, &quot;alignment&quot;, Val.class);</span>
+<span class="nc" id="L62">        NullUtil.nullPropertyCheck(alignment, &quot;alignment&quot;, &quot;Null is not a valid alignment.&quot;);</span>
+<span class="nc" id="L63">        return _withOnShow( alignment, (c,v) -&gt; {</span>
+<span class="nc" id="L64">                    c.setOrientation(v.forToolBar());</span>
+<span class="nc" id="L65">                })</span>
+<span class="nc" id="L66">                ._with( thisComponent -&gt; {</span>
+<span class="nc" id="L67">                    thisComponent.setOrientation(alignment.orElseThrow().forToolBar());</span>
+<span class="nc" id="L68">                })</span>
+<span class="nc" id="L69">                ._this();</span>
     }
 
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

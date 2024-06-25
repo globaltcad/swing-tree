@@ -23,7 +23,7 @@
       "blocks":[
         {"kind":"given","text":"We create a basic split button which will not have any behaviour.","code":["var ui =","    UI.splitButton(\"I am displayed on the button!\")","    .add(UI.splitItem(\"I am the first drop down item.\"))","    .add(UI.splitItem(\"I am the second item.\"))","    .add(UI.splitItem(\"And I am the third.\"))"]},
 
-        {"kind":"and","text":"We get the built split button component.","code":["var button = ui.component"]},
+        {"kind":"and","text":"We get the built split button component.","code":["var button = ui.get(JSplitButton)"]},
 
         {"kind":"expect","text":"The component wrapped by the UI builder is in fact a split button:","code":["button instanceof JSplitButton"]},
 
@@ -44,7 +44,7 @@
       "blocks":[
         {"kind":"given","text":"We create split button displaying the current selection.","code":["var ui =","    UI.splitButton(\"I will be replaced!\")","    .onSelection( it -> it.displayCurrentItemText() )","    .add(UI.splitItem(\"first\"))","    .add(UI.splitItem(\"second\"))","    .add(UI.splitItem(\"third\"))"]},
 
-        {"kind":"and","text":"We get the built split button component.","code":["var button = ui.component"]},
+        {"kind":"and","text":"We get the built split button component.","code":["var button = ui.get(JSplitButton)"]},
 
         {"kind":"expect","text":"The split button has the correct text displayed","code":["button.text == \"I will be replaced!\""]},
 
@@ -65,7 +65,7 @@
       "blocks":[
         {"kind":"given","text":"We create split button displaying only selection \"second\".","code":["var ui =","    UI.splitButton(\"I may be replaced!\")","    .add(UI.splitItem(\"first\"))","    .add(UI.splitItem(\"second\").onSelection( it -> it.displayCurrentItemText() ))","    .add(UI.splitItem(\"third\"))"]},
 
-        {"kind":"and","text":"We get the built split button component.","code":["var button = ui.component"]},
+        {"kind":"and","text":"We get the built split button component.","code":["var button = ui.get(JSplitButton)"]},
 
         {"kind":"expect","text":"The split button has the correct text displayed","code":["button.text == \"I may be replaced!\""]},
 
@@ -94,7 +94,7 @@
       "blocks":[
         {"kind":"given","text":"We create split button with 2 different kinds of events.","code":["var ui =","    UI.splitButton(\"I may be replaced!\")","    .onSelection( it -> it.setButtonText(\"default text\")  )","    .add(UI.splitItem(\"first\"))","    .add(UI.splitItem(\"second\").onButtonClick( it -> it.setButtonText(\"text by second item\") ))","    .add(UI.splitItem(\"third\"))"]},
 
-        {"kind":"and","text":"We get the built split button component.","code":["var button = ui.component"]},
+        {"kind":"and","text":"We get the built split button component.","code":["var button = ui.get(JSplitButton)"]},
 
         {"kind":"expect","text":"The split button has the correct text displayed","code":["button.text == \"I may be replaced!\""]},
 
@@ -123,7 +123,7 @@
       "blocks":[
         {"kind":"given","text":"We create split button with 3 button click events.","code":["var ui =","    UI.splitButton(\"I may be replaced!\")","    .add(UI.splitItem(\"first\").onButtonClick( it -> it.setButtonText(\"1\")) )","    .add(UI.splitItem(\"second\").makeSelected().onButtonClick( it -> it.setButtonText(\"2\") ))","    .add(UI.splitItem(\"third\").onButtonClick( it -> it.setButtonText(\"3\")) )"]},
 
-        {"kind":"and","text":"We get the built split button component.","code":["var button = ui.component"]},
+        {"kind":"and","text":"We get the built split button component.","code":["var button = ui.get(JSplitButton)"]},
 
         {"kind":"when","text":"We click the button.","code":["UI.runNow( () -> button.doClick() );"]},
 
@@ -142,7 +142,7 @@
       "blocks":[
         {"kind":"given","text":"We create split button with 3 button click events.","code":["var ui =","    UI.splitButton(\"triggered:\")","    .add(UI.splitItem(\"first\").onButtonClick( it -> it.appendToButtonText(\" 1\") ))","    .add(UI.splitItem(\"second\").makeSelected().onButtonClick( it -> it.appendToButtonText(\" 2\") ))","    .add(UI.splitItem(\"third\").makeSelected().onButtonClick( it -> it.appendToButtonText(\" 3\") ))"]},
 
-        {"kind":"and","text":"We get the built split button component.","code":["var button = ui.component"]},
+        {"kind":"and","text":"We get the built split button component.","code":["var button = ui.get(JSplitButton)"]},
 
         {"kind":"when","text":"We click the button.","code":["UI.runNow( () -> button.doClick() );"]},
 
@@ -161,7 +161,7 @@
       "blocks":[
         {"kind":"given","text":"We create split button with 3 button click events and a selection action.","code":["var ui =","    UI.splitButton(\"triggered:\")","    .add(UI.splitItem(\"first\").makeSelected().onButtonClick( it -> it.appendToButtonText(\" 1\") ))","    .add(","        UI.splitItem(\"second\")","        .onButtonClick( it -> it.setButtonText(it.buttonText+\" 2\") )","        .onSelection( it -> it.selectOnlyCurrentItem() )","    )","    .add(UI.splitItem(\"third\").makeSelected().onButtonClick( it -> it.appendToButtonText(\" 3\") ))"]},
 
-        {"kind":"and","text":"We get the built split button component.","code":["var button = ui.component"]},
+        {"kind":"and","text":"We get the built split button component.","code":["var button = ui.get(JSplitButton)"]},
 
         {"kind":"when","text":"We click the button.","code":["UI.runNow( () -> button.doClick() );"]},
 
@@ -188,23 +188,23 @@
       "blocks":[
         {"kind":"given","text":"We create a UI builder node containing a simple split button.","code":["var ui = UI.splitButton(\"\")"]},
 
-        {"kind":"and","text":"We get the built split button component.","code":["var button = ui.component"]},
+        {"kind":"and","text":"We get the built split button component.","code":["var button = ui.get(JSplitButton)"]},
 
         {"kind":"expect","text":"It wraps a JSplitButton.","code":["button instanceof JSplitButton"]},
 
-        {"kind":"when","text":"We add a menu item to the split button.","code":["ui = ui.add(new JMenuItem(\"First\"))","button = ui.component"]},
+        {"kind":"when","text":"We add a menu item to the split button.","code":["ui = ui.add(new JMenuItem(\"First\"))","button = ui.get(JSplitButton)"]},
 
         {"kind":"then","text":"The split button has a popup menu with one component.","code":["button.popupMenu.components.length == 1"]},
 
-        {"kind":"when","text":"We add another menu item to the split button.","code":["ui = ui.add(UI.menuItem(\"Second\"))","button = ui.component"]},
+        {"kind":"when","text":"We add another menu item to the split button.","code":["ui = ui.add(UI.menuItem(\"Second\"))","button = ui.get(JSplitButton)"]},
 
         {"kind":"then","text":"The split button has a popup menu with two components.","code":["button.popupMenu.components.length == 2"]},
 
-        {"kind":"when","text":"We add a split item to the split button.","code":["ui = ui.add(UI.splitItem(\"Second\"))","button = ui.component"]},
+        {"kind":"when","text":"We add a split item to the split button.","code":["ui = ui.add(UI.splitItem(\"Second\"))","button = ui.get(JSplitButton)"]},
 
         {"kind":"then","text":"The split button has a popup menu with three components.","code":["button.popupMenu.components.length == 3"]},
 
-        {"kind":"when","text":"We add a split radio button to the split button.","code":["button = ui.add(UI.splitRadioItem(\"Fourth\")).component"]},
+        {"kind":"when","text":"We add a split radio button to the split button.","code":["button = ui.add(UI.splitRadioItem(\"Fourth\")).get(JSplitButton)"]},
 
         {"kind":"then","text":"The split button has a popup menu with four components.","code":["button.popupMenu.components.length == 4"]},
 
@@ -225,7 +225,7 @@
 
         {"kind":"and","text":"We create a UI builder node for the enum states.","code":["var ui = UI.splitButton(selection)"]},
 
-        {"kind":"and","text":"We get the built split button component.","code":["var button = ui.component"]},
+        {"kind":"and","text":"We get the built split button component.","code":["var button = ui.get(JSplitButton)"]},
 
         {"kind":"expect","text":"It wraps a JSplitButton.","code":["button instanceof JSplitButton"]},
 
@@ -246,7 +246,7 @@
 
         {"kind":"and","text":"We create a UI builder node for the enum states.","code":["var ui = UI.splitButton(selection, event)"]},
 
-        {"kind":"and","text":"We get the built split button component.","code":["var button = ui.component"]},
+        {"kind":"and","text":"We get the built split button component.","code":["var button = ui.get(JSplitButton)"]},
 
         {"kind":"expect","text":"It wraps a JSplitButton.","code":["button instanceof JSplitButton"]},
 

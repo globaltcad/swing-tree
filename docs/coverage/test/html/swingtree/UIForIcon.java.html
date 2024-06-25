@@ -15,7 +15,7 @@ public final class UIForIcon&lt;I extends JIcon&gt; extends UIForAnySwing&lt;UIF
      * Extensions of the {@link  UIForAnySwing} always wrap
      * a single component for which they are responsible.
      *
-     * @param component The JComponent type which will be managed by this builder.
+     * @param state The state of the builder used for creating an icon based component.
      */
 <span class="fc" id="L20">    UIForIcon( BuilderState&lt;I&gt; state ) {</span>
 <span class="fc" id="L21">        Objects.requireNonNull(state);</span>
@@ -28,8 +28,8 @@ public final class UIForIcon&lt;I extends JIcon&gt; extends UIForAnySwing&lt;UIF
     }
     
     @Override
-    protected UIForIcon&lt;I&gt; _newBuilderWithState(BuilderState&lt;I&gt; newState ) {
+    protected UIForIcon&lt;I&gt; _newBuilderWithState( BuilderState&lt;I&gt; newState ) {
 <span class="fc" id="L32">        return new UIForIcon&lt;&gt;(newState);</span>
     }
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

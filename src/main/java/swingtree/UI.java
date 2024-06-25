@@ -404,7 +404,7 @@ public final class UI extends UIFactoryMethods
     /**
      *  Use these enum instances to specify the gradient type for various sub styles,
      *  like for example the gradient style API exposed by {@link ComponentStyleDelegate#gradient(Layer, String, Configurator)}
-     *  or {@link ComponentStyleDelegate#gradient(Function)} methods (see {@link UIForAnySwing#withStyle(Styler)}).
+     *  or {@link ComponentStyleDelegate#gradient(Configurator)} methods (see {@link UIForAnySwing#withStyle(Styler)}).
      *  <p>
      *  {@link GradientConf#type(GradientType)} method exposed by methods like
      *  {@link ComponentStyleDelegate#gradient(String, Configurator)} or {@link ComponentStyleDelegate#gradient(Layer, String, Configurator)}.
@@ -465,11 +465,11 @@ public final class UI extends UIFactoryMethods
 
     /**
      *  Use these enum instances to specify the gradient alignment for various sub styles,
-     *  like for example the gradient style API exposed by {@link ComponentStyleDelegate#gradient(Function)}
-     *  or {@link ComponentStyleDelegate#gradient(Function)} methods (see {@link UIForAnySwing#withStyle(Styler)}).
+     *  like for example the gradient style API exposed by {@link ComponentStyleDelegate#gradient(Configurator)}
+     *  or {@link ComponentStyleDelegate#gradient(Configurator)} methods (see {@link UIForAnySwing#withStyle(Styler)}).
      * <p>
      *  {@link GradientConf#span(Span)} method exposed by methods like
-     *  {@link ComponentStyleDelegate#gradient(String, Function)} or {@link ComponentStyleDelegate#gradient(Layer, String, Function)}.
+     *  {@link ComponentStyleDelegate#gradient(String, Configurator)} or {@link ComponentStyleDelegate#gradient(Layer, String, Configurator)}.
      */
     @Immutable
     public enum Span implements UIEnum<Span>
@@ -492,7 +492,7 @@ public final class UI extends UIFactoryMethods
 
     /**
      *  Used to specify the cycle method for a gradient conf in the style API.
-     *  See {@link UIForAnySwing#withStyle(Styler)} and {@link ComponentStyleDelegate#gradient(Function)}.
+     *  See {@link UIForAnySwing#withStyle(Styler)} and {@link ComponentStyleDelegate#gradient(Configurator)}.
      *  <br>
      *  The following list describes what each enum instance represents:
      *  <ul>

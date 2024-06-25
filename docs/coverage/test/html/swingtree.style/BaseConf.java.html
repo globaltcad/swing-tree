@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BaseConf.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">BaseConf.java</span></div><h1>BaseConf.java</h1><pre class="source lang-java linenums">package swingtree.style;
+
+import com.google.errorprone.annotations.Immutable;
+import org.jspecify.annotations.Nullable;
+import swingtree.UI;
+
+import javax.swing.ImageIcon;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.util.Objects;
+import java.util.Optional;
+
+/**
+ *  An immutable, wither-like copy method based config object for basic component style
+ *  properties like background color, foundation color, foreground color and the cursor.
+ *  Instances of this are part of the full {@link StyleConf} configuration that is used to
+ *  style a component in all kinds of ways.
+ */
+@Immutable
+@SuppressWarnings(&quot;Immutable&quot;)
+final class BaseConf
+{
+<span class="fc" id="L23">    private static final BaseConf _NONE = new BaseConf(</span>
+                                                    null,
+                                                    UI.FitComponent.NO,
+                                                    null,
+                                                    null,
+                                                    null,
+                                                    null,
+                                                    UI.ComponentOrientation.UNKNOWN
+                                                 );
+
+    /**
+     *  Returns the default {@link BaseConf} which represents the absence of a base style.
+     *
+     * @return The default {@link BaseConf}, containing no style properties.
+     */
+<span class="fc" id="L38">    public static BaseConf none() { return _NONE; }</span>
+
+
+    private final @Nullable ImageIcon     _icon;
+    private final UI.FitComponent         _fit;
+    private final @Nullable Color         _foundationColor;
+    private final @Nullable Color         _backgroundColor;
+    private final @Nullable Color         _foregroundColor;
+    private final @Nullable Cursor        _cursor;
+    private final UI.ComponentOrientation _orientation;
+
+
+    private BaseConf(
+        @Nullable ImageIcon     icon,
+        UI.FitComponent         fit,
+        @Nullable Color         foundation,
+        @Nullable Color         background,
+        @Nullable Color         foregroundColor,
+        @Nullable Cursor        cursor,
+        UI.ComponentOrientation orientation
+<span class="fc" id="L58">    ) {</span>
+<span class="fc" id="L59">        _icon            = icon;</span>
+<span class="fc" id="L60">        _fit             = Objects.requireNonNull(fit);</span>
+<span class="fc" id="L61">        _foundationColor = foundation;</span>
+<span class="fc" id="L62">        _backgroundColor = background;</span>
+<span class="fc" id="L63">        _foregroundColor = foregroundColor;</span>
+<span class="fc" id="L64">        _cursor          = cursor;</span>
+<span class="fc" id="L65">        _orientation     = orientation;</span>
+<span class="fc" id="L66">    }</span>
+
+    boolean requiresCustomUI() {
+<span class="fc bfc" id="L69" title="All 2 branches covered.">        return !Objects.equals(_foundationColor, _NONE._foundationColor) ||</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">               !Objects.equals(_backgroundColor, _NONE._backgroundColor);</span>
+    }
+
+    boolean isBasic() {
+<span class="nc bnc" id="L74" title="All 2 branches missed.">        return Objects.equals(_foundationColor, _NONE._foundationColor) &amp;&amp;</span>
+<span class="nc bnc" id="L75" title="All 2 branches missed.">                Objects.equals(_backgroundColor, _NONE._backgroundColor);</span>
+    }
+
+<span class="fc" id="L78">    public Optional&lt;ImageIcon&gt; icon() { return Optional.ofNullable(_icon); }</span>
+
+<span class="fc" id="L80">    public UI.FitComponent fit() { return _fit; }</span>
+
+<span class="fc" id="L82">    public Optional&lt;Color&gt; foundationColor() { return Optional.ofNullable(_foundationColor); }</span>
+
+<span class="fc" id="L84">    public Optional&lt;Color&gt; backgroundColor() { return Optional.ofNullable(_backgroundColor); }</span>
+
+<span class="fc" id="L86">    public Optional&lt;Color&gt; foregroundColor() { return Optional.ofNullable(_foregroundColor); }</span>
+
+<span class="fc" id="L88">    public Optional&lt;Cursor&gt; cursor() { return Optional.ofNullable(_cursor); }</span>
+
+<span class="fc" id="L90">    public UI.ComponentOrientation orientation() { return _orientation; }</span>
+
+    boolean hasAnyColors() {
+<span class="fc bfc" id="L93" title="All 6 branches covered.">        return _backgroundColor != null || _foundationColor != null || _foregroundColor != null;</span>
+    }
+
+    BaseConf icon( ImageIcon icon ) {
+<span class="nc" id="L97">        return new BaseConf(icon, _fit, _foundationColor, _backgroundColor, _foregroundColor, _cursor, _orientation);</span>
+    }
+
+    BaseConf fit( UI.FitComponent fit ) {
+<span class="nc" id="L101">        return new BaseConf(_icon, fit, _foundationColor, _backgroundColor, _foregroundColor, _cursor, _orientation);</span>
+    }
+
+    BaseConf foundationColor( Color foundation ) {
+<span class="fc" id="L105">        return new BaseConf(_icon, _fit, foundation, _backgroundColor, _foregroundColor, _cursor, _orientation);</span>
+    }
+
+    BaseConf backgroundColor( Color color ) {
+<span class="fc" id="L109">        return new BaseConf(_icon, _fit, _foundationColor, color, _foregroundColor, _cursor, _orientation);</span>
+    }
+
+    BaseConf foregroundColor( Color color ) {
+<span class="fc" id="L113">        return new BaseConf(_icon, _fit, _foundationColor, _backgroundColor, color, _cursor, _orientation);</span>
+    }
+
+    BaseConf cursor( Cursor cursor ) {
+<span class="fc" id="L117">        return new BaseConf(_icon, _fit, _foundationColor, _backgroundColor, _foregroundColor, cursor, _orientation);</span>
+    }
+
+    BaseConf orientation( UI.ComponentOrientation orientation ) {
+<span class="fc" id="L121">        return new BaseConf(_icon, _fit, _foundationColor, _backgroundColor, _foregroundColor, _cursor, orientation);</span>
+    }
+
+    BaseConf simplified() {
+<span class="fc bfc" id="L125" title="All 2 branches covered.">        Color simplifiedFoundation = StyleUtil.isUndefinedColor(_foundationColor) ? null : _foundationColor;</span>
+
+<span class="fc bfc" id="L127" title="All 2 branches covered.">        if ( Objects.equals(simplifiedFoundation, _foundationColor) )</span>
+<span class="fc" id="L128">            return this;</span>
+        else
+<span class="fc" id="L130">            return new BaseConf(_icon, _fit, null, _backgroundColor, _foregroundColor, _cursor, _orientation);</span>
+    }
+
+    @Override
+<span class="fc" id="L134">    public int hashCode() { return Objects.hash(_icon, _fit, _backgroundColor, _foundationColor, _foregroundColor, _cursor, _orientation); }</span>
+
+    @Override
+    @SuppressWarnings(&quot;ReferenceEquality&quot;)
+    public boolean equals( Object obj ) {
+<span class="pc bpc" id="L139" title="1 of 2 branches missed.">        if ( obj == null ) return false;</span>
+<span class="fc bfc" id="L140" title="All 2 branches covered.">        if ( obj == this ) return true;</span>
+<span class="pc bpc" id="L141" title="1 of 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
+<span class="fc" id="L142">        BaseConf rhs = (BaseConf) obj;</span>
+
+<span class="fc" id="L144">        boolean sameBackground = Objects.equals(_backgroundColor, rhs._backgroundColor);</span>
+<span class="fc bfc" id="L145" title="All 4 branches covered.">        if ( StyleUtil.isUndefinedColor(_backgroundColor) || StyleUtil.isUndefinedColor(rhs._backgroundColor) )</span>
+<span class="pc bpc" id="L146" title="1 of 2 branches missed.">            sameBackground = _backgroundColor == rhs._backgroundColor;</span>
+
+<span class="fc" id="L148">        boolean sameFoundation = Objects.equals(_foundationColor, rhs._foundationColor);</span>
+<span class="pc bpc" id="L149" title="2 of 4 branches missed.">        if ( StyleUtil.isUndefinedColor(_foundationColor) || StyleUtil.isUndefinedColor(rhs._foundationColor) )</span>
+<span class="nc bnc" id="L150" title="All 2 branches missed.">            sameFoundation = _foundationColor == rhs._foundationColor;</span>
+
+<span class="fc" id="L152">        boolean sameForeground = Objects.equals(_foregroundColor, rhs._foregroundColor);</span>
+<span class="fc bfc" id="L153" title="All 4 branches covered.">        if ( StyleUtil.isUndefinedColor(_foregroundColor) || StyleUtil.isUndefinedColor(rhs._foregroundColor) )</span>
+<span class="pc bpc" id="L154" title="1 of 2 branches missed.">            sameForeground = _foregroundColor == rhs._foregroundColor;</span>
+
+<span class="pc bpc" id="L156" title="1 of 2 branches missed.">        return Objects.equals(_icon,            rhs._icon           ) &amp;&amp;</span>
+<span class="pc bpc" id="L157" title="1 of 8 branches missed.">               Objects.equals(_fit,             rhs._fit            ) &amp;&amp;</span>
+               sameBackground                                         &amp;&amp;
+               sameFoundation                                         &amp;&amp;
+               sameForeground                                         &amp;&amp;
+<span class="fc bfc" id="L161" title="All 2 branches covered.">               Objects.equals(_cursor,          rhs._cursor         ) &amp;&amp;</span>
+<span class="fc bfc" id="L162" title="All 2 branches covered.">               Objects.equals(_orientation,     rhs._orientation    );</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="fc bfc" id="L167" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
+<span class="fc" id="L168">            return this.getClass().getSimpleName() + &quot;[NONE]&quot;;</span>
+<span class="fc" id="L169">        return this.getClass().getSimpleName() + &quot;[&quot; +</span>
+<span class="pc bpc" id="L170" title="1 of 2 branches missed.">                    &quot;icon=&quot;            + ( _icon       == null ? &quot;?&quot; : _icon.toString()  ) + &quot;, &quot; +</span>
+                    &quot;fitComponent=&quot;    + _fit                                              + &quot;, &quot; +
+<span class="fc" id="L172">                    &quot;backgroundColor=&quot; + StyleUtil.toString(_backgroundColor)           + &quot;, &quot; +</span>
+<span class="fc" id="L173">                    &quot;foundationColor=&quot; + StyleUtil.toString(_foundationColor)           + &quot;, &quot; +</span>
+<span class="fc" id="L174">                    &quot;foregroundColor=&quot; + StyleUtil.toString(_foregroundColor)           + &quot;, &quot; +</span>
+<span class="pc bpc" id="L175" title="1 of 2 branches missed.">                    &quot;cursor=&quot;          + ( _cursor == null ? &quot;?&quot; : _cursor.toString() )    + &quot;, &quot; +</span>
+                    &quot;orientation=&quot;     + _orientation                                      +
+                &quot;]&quot;;
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

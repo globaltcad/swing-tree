@@ -44,7 +44,7 @@
 
         {"kind":"and","text":"We build the component tree.","code":["var frame = ui.get(JFrame)"]},
 
-        {"kind":"and","text":"We wait for the UI thread to do its thing.","code":["Thread.sleep(1000)","UI.sync()"]},
+        {"kind":"and","text":"We wait for the UI thread to do its thing.","code":["UI.sync()","Thread.sleep(1_000)","UI.sync()"]},
 
         {"kind":"expect","text":"","code":["new Utility.Query(frame).find(JTextArea,     \"C1\").isPresent()","new Utility.Query(frame).find(JCheckBox,     \"C2\").isPresent()","new Utility.Query(frame).find(JButton,       \"C3\").isPresent()","new Utility.Query(frame).find(JToggleButton, \"C4\").isPresent()"]},
 

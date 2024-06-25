@@ -18,41 +18,55 @@ import javax.swing.JOptionPane;
 <span class="fc" id="L18">    CLOSE;</span>
 
     /**
+     *  A convenience method equivalent to {@code myEnum == ConfirmAnswer.YES}.
+     *
      * @return {@code true} if the user selected the &quot;yes&quot; option, {@code false} otherwise.
      */
-<span class="nc bnc" id="L23" title="All 2 branches missed.">    public boolean isYes() { return this == YES; }</span>
+<span class="nc bnc" id="L25" title="All 2 branches missed.">    public boolean isYes() { return this == YES; }</span>
 
     /**
+     *  A convenience method equivalent to {@code myEnum == ConfirmAnswer.NO}.
+     *
      * @return {@code true} if the user selected the &quot;no&quot; option, {@code false} otherwise.
      */
-<span class="nc bnc" id="L28" title="All 2 branches missed.">    public boolean isNo() { return this == NO; }</span>
+<span class="nc bnc" id="L32" title="All 2 branches missed.">    public boolean isNo() { return this == NO; }</span>
 
     /**
+     *  A convenience method equivalent to {@code myEnum == ConfirmAnswer.CANCEL}.
+     *
      * @return {@code true} if the user selected the &quot;cancel&quot; option, {@code false} otherwise.
      */
-<span class="nc bnc" id="L33" title="All 2 branches missed.">    public boolean isCancel() { return this == CANCEL; }</span>
+<span class="nc bnc" id="L39" title="All 2 branches missed.">    public boolean isCancel() { return this == CANCEL; }</span>
 
     /**
+     *  A convenience method equivalent to {@code myEnum == ConfirmAnswer.CLOSE}.
+     *
      * @return {@code true} if the user selected the &quot;close&quot; option, {@code false} otherwise.
      */
-<span class="nc bnc" id="L38" title="All 2 branches missed.">    public boolean isClose() { return this == CLOSE; }</span>
+<span class="nc bnc" id="L46" title="All 2 branches missed.">    public boolean isClose() { return this == CLOSE; }</span>
 
     /**
-     * @return {@code true} if the user selected the &quot;cancel&quot; option, ot they closed the dialog, {@code false} otherwise.
+     *  A convenience method to check if the user
+     *  selected the &quot;cancel&quot; option, or closed the dialog.
+     *  This is equivalent to {@code myEnum == ConfirmAnswer.CANCEL || myEnum == ConfirmAnswer.CLOSE}.
+     *
+     * @return {@code true} if the user selected the &quot;cancel&quot; option, or they closed the dialog, {@code false} otherwise.
      */
-<span class="nc bnc" id="L43" title="All 4 branches missed.">    public boolean isCancelOrClose() { return isCancel() || isClose(); }</span>
+<span class="nc bnc" id="L55" title="All 4 branches missed.">    public boolean isCancelOrClose() { return isCancel() || isClose(); }</span>
 
     /**
+     *  Converts a {@link JOptionPane} constant to a {@link ConfirmAnswer} enum.
+     *
      * @return The {@link JOptionPane} constant corresponding to this answer.
      */
     static ConfirmAnswer from( int option ) {
-<span class="pc bpc" id="L49" title="3 of 4 branches missed.">        switch ( option ) {</span>
-<span class="nc" id="L50">            case JOptionPane.YES_OPTION:    return YES;</span>
-<span class="fc" id="L51">            case JOptionPane.NO_OPTION:     return NO;</span>
-<span class="nc" id="L52">            case JOptionPane.CLOSED_OPTION: return CLOSE;</span>
+<span class="pc bpc" id="L63" title="3 of 4 branches missed.">        switch ( option ) {</span>
+<span class="nc" id="L64">            case JOptionPane.YES_OPTION:    return YES;</span>
+<span class="fc" id="L65">            case JOptionPane.NO_OPTION:     return NO;</span>
+<span class="nc" id="L66">            case JOptionPane.CLOSED_OPTION: return CLOSE;</span>
             default:
-<span class="nc" id="L54">                return CANCEL;</span>
+<span class="nc" id="L68">                return CANCEL;</span>
         }
     }
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

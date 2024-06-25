@@ -4,7 +4,7 @@
   "narrative":"SwingTree includes support for writing UIs using the MVVM pattern,\n    by shipping with a set of properties that can be bound to UI components\n    to model their state.\n    This specification demonstrates how to bind the properties of\n    you view model to the SwingTree UI.",
   "subjects":["sprouts.Val","sprouts.Var"],
   "statistics":{
-    "runs":"16",
+    "runs":"26",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -14,11 +14,11 @@
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
-      "id":"We can bind a property to the size of a swing component.",
+      "id":"We can bind a property to the size of a swing component. [0]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            Note that the binding of a Swing-Tree property will only have side effects\n            when it is deliberately triggered to execute its side effects.\n            This is important to allow you to decide yourself when\n            the state of a property is \"ready\" for display in the UI.\n        ","\n            Note that the binding of a Swing-Tree property will only have side effects\n            when it is deliberately triggered to execute its side effects.\n            This is important to allow you to decide yourself when\n            the state of a property is \"ready\" for display in the UI.\n        ","\n            Note that the binding of a Swing-Tree property will only have side effects\n            when it is deliberately triggered to execute its side effects.\n            This is important to allow you to decide yourself when\n            the state of a property is \"ready\" for display in the UI.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            Note that the binding of a Swing-Tree property will only have side effects\n            when it is deliberately triggered to execute its side effects.\n            This is important to allow you to decide yourself when\n            the state of a property is \"ready\" for display in the UI.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
@@ -43,7 +43,65 @@
     },
   
     {
-      "id":"Simple integer properties can be bound to the width or height of components.",
+      "id":"We can bind a property to the size of a swing component. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that the binding of a Swing-Tree property will only have side effects\n            when it is deliberately triggered to execute its side effects.\n            This is important to allow you to decide yourself when\n            the state of a property is \"ready\" for display in the UI.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"We create a property representing the size of a component.","code":["Val<Dimension> size = Var.of(new Dimension(100, 100))"]},
+
+        {"kind":"and","text":"We create a UI to which we want to bind:","code":["var ui = UI.panel(\"fill, wrap 1\")","            .add(UI.label(\"Hello World\").withPrefSize(size))","            .add(UI.button(\"Click Me\").withMinSize(size))","            .add(UI.textField(\"Hello World\").withMaxSize(size))"]},
+
+        {"kind":"and","text":"We build the component:","code":["var panel = ui.get(JPanel)"]},
+
+        {"kind":"expect","text":"The components will have the size of the property.","code":["panel.components[0].preferredSize == new Dimension((int)(100 * uiScale), (int)(100 * uiScale))","panel.components[1].minimumSize == new Dimension((int)(100 * uiScale), (int)(100 * uiScale))","panel.components[2].maximumSize == new Dimension((int)(100 * uiScale), (int)(100 * uiScale))"]},
+
+        {"kind":"when","text":"We change the value of the property.","code":["size.set(new Dimension(200, 200))"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The components will have the new sizes.","code":["panel.components[0].preferredSize == new Dimension((int)(200 * uiScale), (int)(200 * uiScale))","panel.components[1].minimumSize == new Dimension((int)(200 * uiScale), (int)(200 * uiScale))","panel.components[2].maximumSize == new Dimension((int)(200 * uiScale), (int)(200 * uiScale))"]},
+
+        {"kind":"where","text":"\n            We use the following integer scaling factors simulating different high DPI scenarios.\n            Note that usually the UI is scaled by 1, 1.5 an 2 (for 4k screens for example).\n            A scaling factor of 3 is rather unusual, however it is possible to scale it by 3 nonetheless.\n        ","code":{"uiScale":["3","2","1"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"We can bind a property to the size of a swing component. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Note that the binding of a Swing-Tree property will only have side effects\n            when it is deliberately triggered to execute its side effects.\n            This is important to allow you to decide yourself when\n            the state of a property is \"ready\" for display in the UI.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"We create a property representing the size of a component.","code":["Val<Dimension> size = Var.of(new Dimension(100, 100))"]},
+
+        {"kind":"and","text":"We create a UI to which we want to bind:","code":["var ui = UI.panel(\"fill, wrap 1\")","            .add(UI.label(\"Hello World\").withPrefSize(size))","            .add(UI.button(\"Click Me\").withMinSize(size))","            .add(UI.textField(\"Hello World\").withMaxSize(size))"]},
+
+        {"kind":"and","text":"We build the component:","code":["var panel = ui.get(JPanel)"]},
+
+        {"kind":"expect","text":"The components will have the size of the property.","code":["panel.components[0].preferredSize == new Dimension((int)(100 * uiScale), (int)(100 * uiScale))","panel.components[1].minimumSize == new Dimension((int)(100 * uiScale), (int)(100 * uiScale))","panel.components[2].maximumSize == new Dimension((int)(100 * uiScale), (int)(100 * uiScale))"]},
+
+        {"kind":"when","text":"We change the value of the property.","code":["size.set(new Dimension(200, 200))"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The components will have the new sizes.","code":["panel.components[0].preferredSize == new Dimension((int)(200 * uiScale), (int)(200 * uiScale))","panel.components[1].minimumSize == new Dimension((int)(200 * uiScale), (int)(200 * uiScale))","panel.components[2].maximumSize == new Dimension((int)(200 * uiScale), (int)(200 * uiScale))"]},
+
+        {"kind":"where","text":"\n            We use the following integer scaling factors simulating different high DPI scenarios.\n            Note that usually the UI is scaled by 1, 1.5 an 2 (for 4k screens for example).\n            A scaling factor of 3 is rather unusual, however it is possible to scale it by 3 nonetheless.\n        ","code":{"uiScale":["3","2","1"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Simple integer properties can be bound to the width or height of components. [0]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
@@ -72,7 +130,123 @@
     },
   
     {
-      "id":"Bind to both width and height independently if you want to.",
+      "id":"Simple integer properties can be bound to the width or height of components. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"We create properties representing the width and heights of a components.","code":["Var<Integer> minWidth = Var.of(60)","Var<Integer> prefHeight = Var.of(40)","Var<Integer> maxWidth = Var.of(90)"]},
+
+        {"kind":"and","text":"We create a UI to which we want to bind:","code":["var ui = UI.panel(\"fill, wrap 1\")","            .add(UI.label(\"Hello World\").withMinWidth(minWidth))","            .add(UI.button(\"Click Me\").withPrefHeight(prefHeight))","            .add(UI.textField(\"Hello World\").withMaxWidth(maxWidth))"]},
+
+        {"kind":"and","text":"We build the component:","code":["var panel = ui.get(JPanel)"]},
+
+        {"kind":"expect","text":"The components will have the sizes of the properties.","code":["panel.components[0].minimumSize.width == (int) ( 60 * uiScale )","panel.components[1].preferredSize.height == (int) ( 40 * uiScale )","panel.components[2].maximumSize.width == (int) ( 90 * uiScale )"]},
+
+        {"kind":"when","text":"We change the value of the properties.","code":["minWidth.set(100)","prefHeight.set(80)","maxWidth.set(120)"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The components will have the new sizes.","code":["panel.components[0].minimumSize.width == (int) ( 100 * uiScale )","panel.components[1].preferredSize.height == (int) ( 80 * uiScale )","panel.components[2].maximumSize.width == (int) ( 120 * uiScale )"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1f","1.5f","2f"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Simple integer properties can be bound to the width or height of components. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"We create properties representing the width and heights of a components.","code":["Var<Integer> minWidth = Var.of(60)","Var<Integer> prefHeight = Var.of(40)","Var<Integer> maxWidth = Var.of(90)"]},
+
+        {"kind":"and","text":"We create a UI to which we want to bind:","code":["var ui = UI.panel(\"fill, wrap 1\")","            .add(UI.label(\"Hello World\").withMinWidth(minWidth))","            .add(UI.button(\"Click Me\").withPrefHeight(prefHeight))","            .add(UI.textField(\"Hello World\").withMaxWidth(maxWidth))"]},
+
+        {"kind":"and","text":"We build the component:","code":["var panel = ui.get(JPanel)"]},
+
+        {"kind":"expect","text":"The components will have the sizes of the properties.","code":["panel.components[0].minimumSize.width == (int) ( 60 * uiScale )","panel.components[1].preferredSize.height == (int) ( 40 * uiScale )","panel.components[2].maximumSize.width == (int) ( 90 * uiScale )"]},
+
+        {"kind":"when","text":"We change the value of the properties.","code":["minWidth.set(100)","prefHeight.set(80)","maxWidth.set(120)"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The components will have the new sizes.","code":["panel.components[0].minimumSize.width == (int) ( 100 * uiScale )","panel.components[1].preferredSize.height == (int) ( 80 * uiScale )","panel.components[2].maximumSize.width == (int) ( 120 * uiScale )"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1f","1.5f","2f"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Bind to both width and height independently if you want to. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"We create a property representing the width of a component.","code":["Var<Integer> width = Var.of(60)","Var<Integer> height = Var.of(40)"]},
+
+        {"kind":"and","text":"We create a UI to which we want to bind:","code":["var ui = UI.panel(\"fill, wrap 1\")","            .add(UI.label(\"Hello World\").withMinSize(width, height))","            .add(UI.toggleButton(\"Click Me\").withPrefSize(width, height))","            .add(UI.textArea(\"Hello World\").withMaxSize(width, height))"]},
+
+        {"kind":"and","text":"We build the component:","code":["var panel = ui.get(JPanel)"]},
+
+        {"kind":"expect","text":"The components will have the sizes of the properties.","code":["panel.components[0].minimumSize == new Dimension(60 * uiScale, 40 * uiScale)","panel.components[1].preferredSize == new Dimension(60 * uiScale, 40 * uiScale)","panel.components[2].maximumSize == new Dimension(60 * uiScale, 40 * uiScale)"]},
+
+        {"kind":"when","text":"We change the value of the properties.","code":["width.set(100)","height.set(80)"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The components will have the new sizes.","code":["panel.components[0].minimumSize == new Dimension(100 * uiScale, 80 * uiScale)","panel.components[1].preferredSize == new Dimension(100 * uiScale, 80 * uiScale)","panel.components[2].maximumSize == new Dimension(100 * uiScale, 80 * uiScale)"]},
+
+        {"kind":"where","text":"\n            We use the following integer scaling factors simulating different high DPI scenarios.\n            Note that usually the UI is scaled by 1, 1.5 an 2 (for 4k screens for example).\n            A scaling factor of 3 is rather unusual, however it is possible to scale it by 3 nonetheless.\n        ","code":{"uiScale":["3","2","1"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Bind to both width and height independently if you want to. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"We create a property representing the width of a component.","code":["Var<Integer> width = Var.of(60)","Var<Integer> height = Var.of(40)"]},
+
+        {"kind":"and","text":"We create a UI to which we want to bind:","code":["var ui = UI.panel(\"fill, wrap 1\")","            .add(UI.label(\"Hello World\").withMinSize(width, height))","            .add(UI.toggleButton(\"Click Me\").withPrefSize(width, height))","            .add(UI.textArea(\"Hello World\").withMaxSize(width, height))"]},
+
+        {"kind":"and","text":"We build the component:","code":["var panel = ui.get(JPanel)"]},
+
+        {"kind":"expect","text":"The components will have the sizes of the properties.","code":["panel.components[0].minimumSize == new Dimension(60 * uiScale, 40 * uiScale)","panel.components[1].preferredSize == new Dimension(60 * uiScale, 40 * uiScale)","panel.components[2].maximumSize == new Dimension(60 * uiScale, 40 * uiScale)"]},
+
+        {"kind":"when","text":"We change the value of the properties.","code":["width.set(100)","height.set(80)"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The components will have the new sizes.","code":["panel.components[0].minimumSize == new Dimension(100 * uiScale, 80 * uiScale)","panel.components[1].preferredSize == new Dimension(100 * uiScale, 80 * uiScale)","panel.components[2].maximumSize == new Dimension(100 * uiScale, 80 * uiScale)"]},
+
+        {"kind":"where","text":"\n            We use the following integer scaling factors simulating different high DPI scenarios.\n            Note that usually the UI is scaled by 1, 1.5 an 2 (for 4k screens for example).\n            A scaling factor of 3 is rather unusual, however it is possible to scale it by 3 nonetheless.\n        ","code":{"uiScale":["3","2","1"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Bind to both width and height independently if you want to. [2]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
@@ -371,7 +545,7 @@
     },
   
     {
-      "id":"Minimum as well as maximum height of UI components can be modelled using integer properties.",
+      "id":"Minimum as well as maximum height of UI components can be modelled using integer properties. [0]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
@@ -404,7 +578,143 @@
     },
   
     {
-      "id":"The width and height of UI components can be modelled using integer properties.",
+      "id":"Minimum as well as maximum height of UI components can be modelled using integer properties. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"We create a property representing the minimum and maximum height.","code":["Val<Integer> property = Var.of(50)"]},
+
+        {"kind":"and","text":"We create a UI to which we want to bind:","code":["var ui = UI.panel(\"fill, wrap 1\")","            .add(UI.label(\"Below me is a text area!\"))","            .add(UI.textArea(\"hi\").withMinHeight(property))","            .add(UI.label(\"Below me is another text area!\"))","            .add(UI.textArea(\"Hey\").withMaxHeight(property))"]},
+
+        {"kind":"and","text":"We build the component:","code":["var panel = ui.get(JPanel)"]},
+
+        {"kind":"expect","text":"The minimum height of the first text area will be 50 * uiScale.","code":["panel.components[1].minimumSize.height == 50 * uiScale"]},
+
+        {"kind":"and","text":"The maximum height of the second text area will be 50 * uiScale.","code":["panel.components[3].maximumSize.height == 50 * uiScale"]},
+
+        {"kind":"when","text":"We change the value of the property.","code":["property.set(100)"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The minimum height of the first text area will be 100 * uiScale.","code":["panel.components[1].minimumSize.height == 100 * uiScale"]},
+
+        {"kind":"and","text":"The maximum height of the second text area will be 100 * uiScale.","code":["panel.components[3].maximumSize.height == 100 * uiScale"]},
+
+        {"kind":"where","text":"\n            We use the following integer scaling factors simulating different high DPI scenarios.\n            Note that usually the UI is scaled by 1, 1.5 an 2 (for 4k screens for example).\n            A scaling factor of 3 is rather unusual, however it is possible to scale it by 3 nonetheless.\n        ","code":{"uiScale":["3","2","1"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Minimum as well as maximum height of UI components can be modelled using integer properties. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"We create a property representing the minimum and maximum height.","code":["Val<Integer> property = Var.of(50)"]},
+
+        {"kind":"and","text":"We create a UI to which we want to bind:","code":["var ui = UI.panel(\"fill, wrap 1\")","            .add(UI.label(\"Below me is a text area!\"))","            .add(UI.textArea(\"hi\").withMinHeight(property))","            .add(UI.label(\"Below me is another text area!\"))","            .add(UI.textArea(\"Hey\").withMaxHeight(property))"]},
+
+        {"kind":"and","text":"We build the component:","code":["var panel = ui.get(JPanel)"]},
+
+        {"kind":"expect","text":"The minimum height of the first text area will be 50 * uiScale.","code":["panel.components[1].minimumSize.height == 50 * uiScale"]},
+
+        {"kind":"and","text":"The maximum height of the second text area will be 50 * uiScale.","code":["panel.components[3].maximumSize.height == 50 * uiScale"]},
+
+        {"kind":"when","text":"We change the value of the property.","code":["property.set(100)"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The minimum height of the first text area will be 100 * uiScale.","code":["panel.components[1].minimumSize.height == 100 * uiScale"]},
+
+        {"kind":"and","text":"The maximum height of the second text area will be 100 * uiScale.","code":["panel.components[3].maximumSize.height == 100 * uiScale"]},
+
+        {"kind":"where","text":"\n            We use the following integer scaling factors simulating different high DPI scenarios.\n            Note that usually the UI is scaled by 1, 1.5 an 2 (for 4k screens for example).\n            A scaling factor of 3 is rather unusual, however it is possible to scale it by 3 nonetheless.\n        ","code":{"uiScale":["3","2","1"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The width and height of UI components can be modelled using integer properties. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"We create a property representing the width and height.","code":["Val<Integer> widthProperty = Var.of(50)","Val<Integer> heightProperty = Var.of(100)"]},
+
+        {"kind":"and","text":"We create a UI to which we want to bind:","code":["var ui = UI.panel(\"fill, wrap 1\")","            .add(UI.label(\"Below me is a text area!\"))","            .add(UI.textArea(\"hi\").withWidth(widthProperty).withHeight(heightProperty))","            .add(UI.label(\"Below me is another text area!\"))","            .add(UI.textArea(\"Hey\").withWidth(heightProperty).withHeight(widthProperty))"]},
+
+        {"kind":"and","text":"We build the component:","code":["var panel = ui.get(JPanel)"]},
+
+        {"kind":"expect","text":"The width of the first text area will be 50 * uiScale.","code":["panel.components[1].size.width == 50 * uiScale"]},
+
+        {"kind":"and","text":"The height of the first text area will be 100 * uiScale.","code":["panel.components[1].size.height == 100 * uiScale"]},
+
+        {"kind":"and","text":"The width of the second text area will be 100 * uiScale.","code":["panel.components[3].size.width == 100 * uiScale"]},
+
+        {"kind":"and","text":"The height of the second text area will be 50 * uiScale.","code":["panel.components[3].size.height == 50 * uiScale"]},
+
+        {"kind":"when","text":"We change the value of the property.","code":["widthProperty.set(100)","heightProperty.set(50)"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The dimensions of both UI components will be as expected.","code":["panel.components[1].size.width == 100 * uiScale","panel.components[1].size.height == 50 * uiScale","panel.components[3].size.width == 50 * uiScale","panel.components[3].size.height == 100 * uiScale"]},
+
+        {"kind":"where","text":"\n            We use the following integer scaling factors simulating different high DPI scenarios.\n            Note that usually the UI is scaled by 1, 1.5 an 2 (for 4k screens for example).\n            A scaling factor of 3 is rather unusual, however it is possible to scale it by 3 nonetheless.\n        ","code":{"uiScale":["3","2","1"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The width and height of UI components can be modelled using integer properties. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"We create a property representing the width and height.","code":["Val<Integer> widthProperty = Var.of(50)","Val<Integer> heightProperty = Var.of(100)"]},
+
+        {"kind":"and","text":"We create a UI to which we want to bind:","code":["var ui = UI.panel(\"fill, wrap 1\")","            .add(UI.label(\"Below me is a text area!\"))","            .add(UI.textArea(\"hi\").withWidth(widthProperty).withHeight(heightProperty))","            .add(UI.label(\"Below me is another text area!\"))","            .add(UI.textArea(\"Hey\").withWidth(heightProperty).withHeight(widthProperty))"]},
+
+        {"kind":"and","text":"We build the component:","code":["var panel = ui.get(JPanel)"]},
+
+        {"kind":"expect","text":"The width of the first text area will be 50 * uiScale.","code":["panel.components[1].size.width == 50 * uiScale"]},
+
+        {"kind":"and","text":"The height of the first text area will be 100 * uiScale.","code":["panel.components[1].size.height == 100 * uiScale"]},
+
+        {"kind":"and","text":"The width of the second text area will be 100 * uiScale.","code":["panel.components[3].size.width == 100 * uiScale"]},
+
+        {"kind":"and","text":"The height of the second text area will be 50 * uiScale.","code":["panel.components[3].size.height == 50 * uiScale"]},
+
+        {"kind":"when","text":"We change the value of the property.","code":["widthProperty.set(100)","heightProperty.set(50)"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The dimensions of both UI components will be as expected.","code":["panel.components[1].size.width == 100 * uiScale","panel.components[1].size.height == 50 * uiScale","panel.components[3].size.width == 50 * uiScale","panel.components[3].size.height == 100 * uiScale"]},
+
+        {"kind":"where","text":"\n            We use the following integer scaling factors simulating different high DPI scenarios.\n            Note that usually the UI is scaled by 1, 1.5 an 2 (for 4k screens for example).\n            A scaling factor of 3 is rather unusual, however it is possible to scale it by 3 nonetheless.\n        ","code":{"uiScale":["3","2","1"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The width and height of UI components can be modelled using integer properties. [2]",
       "result":"PASS",
       "duration":"?",
       "iterations":{

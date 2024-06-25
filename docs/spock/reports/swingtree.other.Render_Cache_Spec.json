@@ -27,43 +27,51 @@
 
         {"kind":"and","text":"Finally, a mocked graphics object we can use to check if the cache was hit or not:","code":["var g = Mock(Graphics2D)"]},
 
-        {"kind":"when","text":"We try to do an initial paint into the cache...","code":["cache.validate(key0, key0)","cache.paint(key0, g,  (conf, g2) -> {g2.fillRect(0,0,10,10) })"]},
+        {"kind":"when","text":"We try to do an initial paint into the cache...","code":["cache.validate(key0, key0)","cache.paint(g,  (conf, g2) -> {g2.fillRect(0,0,10,10) })"]},
+
+        {"kind":"then","text":"We did not render anything, because the component has no size!","code":["0 * g.fillRect(0,0,10,10)"]},
+
+        {"kind":"and","text":"","code":["!cache.hasBufferedImage()"]},
+
+        {"kind":"when","text":"We change the size...","code":["key0 = key0.withSize(100, 100)"]},
+
+        {"kind":"and","text":"Try to do an initial paint into the cache...","code":["cache.validate(key0, key0)","cache.paint(g,  (conf, g2) -> {g2.fillRect(0,0,10,10) })"]},
 
         {"kind":"then","text":"We did not render into the cache, instead we just painted eagerly!","code":["1 * g.fillRect(0,0,10,10)"]},
 
         {"kind":"and","text":"","code":["!cache.hasBufferedImage()"]},
 
-        {"kind":"when","text":"We try to do it a second time...","code":["cache.validate(key0, key0)","cache.paint(key0, g,  (conf, g2) -> {g2.fillRect(0,0,10,10) })"]},
+        {"kind":"when","text":"We try to do it a second time...","code":["cache.validate(key0, key0)","cache.paint(g,  (conf, g2) -> {g2.fillRect(0,0,10,10) })"]},
 
         {"kind":"then","text":"Still, we just painted eagerly!","code":["1 * g.fillRect(0,0,10,10)"]},
 
         {"kind":"and","text":"","code":["!cache.hasBufferedImage()"]},
 
-        {"kind":"when","text":"We change the style configuration object to something that can be painted...","code":["var key = ComponentExtension.from(","            UI.button(\"Hello World\").withStyle(conf -> conf","                .backgroundColor(Color.BLACK)","                .foregroundColor(Color.WHITE)","                .size(120, 80)","                .borderRadius(40)","            )","            .getComponent()","        )","        .getConf();"]},
+        {"kind":"when","text":"We change the style configuration object to something that can be painted...","code":["var key = ComponentExtension.from(","            UI.button(\"Hello World\").withStyle(conf -> conf","                .backgroundColor(Color.BLACK)","                .foregroundColor(Color.WHITE)","                .size(120, 80)","                .borderRadius(40)","            )","            .get(JButton)","        )","        .getConf();"]},
 
-        {"kind":"and","text":"Then we do another round of validation and painting...","code":["cache.validate(key0, key)","var didRendering = false","cache.paint(key, g,  (conf, g2) -> {","    g2.fillRect(0,0,10,10);","    didRendering = true;","})"]},
+        {"kind":"and","text":"Then we do another round of validation and painting...","code":["cache.validate(key0, key)","var didRendering = false","cache.paint(g,  (conf, g2) -> {","    g2.fillRect(0,0,10,10);","    didRendering = true;","})"]},
 
         {"kind":"then","text":"We did not paint into the cache!","code":["didRendering","1 * g.fillRect(0,0,10,10)","0 * g.drawImage({it instanceof BufferedImage},0,0,null)"]},
 
         {"kind":"and","text":"","code":["cache.hasBufferedImage()"]},
 
-        {"kind":"when","text":"We do it again...","code":["cache.validate(key, key)","didRendering = false","cache.paint(key, g,  (conf, g2) -> {","    g2.fillRect(0,0,10,10);","    didRendering = true;","})"]},
+        {"kind":"when","text":"We do it again...","code":["cache.validate(key, key)","didRendering = false","cache.paint(g,  (conf, g2) -> {","    g2.fillRect(0,0,10,10);","    didRendering = true;","})"]},
 
         {"kind":"then","text":"Instead of the painter lambda being called, the buffer was used!","code":["didRendering","0 * g.fillRect(0,0,10,10)","1 * g.drawImage({it instanceof BufferedImage},0,0,null)"]},
 
-        {"kind":"when","text":"We repeat this process then the buffer will be used every time!","code":["didRendering = false","cache.validate(key, key)","cache.paint(key, g,  (conf, g2) -> {","    g2.fillRect(0,0,10,10);","    didRendering = true;","})","cache.validate(key, key)","cache.paint(key, g,  (conf, g2) -> {","    g2.fillRect(0,0,10,10);","    didRendering = true;","})","cache.validate(key, key)","cache.paint(key, g,  (conf, g2) -> {","    g2.fillRect(0,0,10,10);","    didRendering = true;","})"]},
+        {"kind":"when","text":"We repeat this process then the buffer will be used every time!","code":["didRendering = false","cache.validate(key, key)","cache.paint(g,  (conf, g2) -> {","    g2.fillRect(0,0,10,10);","    didRendering = true;","})","cache.validate(key, key)","cache.paint(g,  (conf, g2) -> {","    g2.fillRect(0,0,10,10);","    didRendering = true;","})","cache.validate(key, key)","cache.paint(g,  (conf, g2) -> {","    g2.fillRect(0,0,10,10);","    didRendering = true;","})"]},
 
         {"kind":"then","text":"Instead of the painter lambda being called, the buffer was used!","code":["!didRendering","0 * g.fillRect(0,0,10,10)","3 * g.drawImage({it instanceof BufferedImage},0,0,null)"]},
 
-        {"kind":"when","text":"However, we create a successor configuration object...","code":["var key2 = ComponentExtension.from(","            UI.button(\"Hello World\").withStyle(conf -> conf","                .backgroundColor(Color.BLACK)","                .foregroundColor(Color.WHITE)","                .size(120, 80)","                .borderRadius(40)","                .foundationColor(Color.GREEN)","            )","            .getComponent()","        )","        .getConf();"]},
+        {"kind":"when","text":"However, we create a successor configuration object...","code":["var key2 = ComponentExtension.from(","            UI.button(\"Hello World\").withStyle(conf -> conf","                .backgroundColor(Color.BLACK)","                .foregroundColor(Color.WHITE)","                .size(120, 80)","                .borderRadius(40)","                .foundationColor(Color.GREEN)","            )","            .get(JButton)","        )","        .getConf();"]},
 
-        {"kind":"and","text":"And we revalidate the cache...","code":["cache.validate(key, key2)","didRendering = false","cache.paint(key2, g,  (conf, g2) -> {","    g2.fillRect(0,0,10,10);","    didRendering = true;","})"]},
+        {"kind":"and","text":"And we revalidate the cache...","code":["cache.validate(key, key2)","didRendering = false","cache.paint(g,  (conf, g2) -> {","    g2.fillRect(0,0,10,10);","    didRendering = true;","})"]},
 
         {"kind":"then","text":"The painting lambda was used to rerender the cache!","code":["didRendering","1 * g.fillRect(0,0,10,10)","0 * g.drawImage({it instanceof BufferedImage},0,0,null)"]},
 
         {"kind":"and","text":"And the buffer is still there!","code":["cache.hasBufferedImage()"]},
 
-        {"kind":"when","text":"We now repeat the process using the successor config...","code":["cache.validate(key2, key2)","cache.paint(key2, g,  (conf, g2) -> {g2.fillRect(0,0,10,10) })","cache.validate(key2, key2)","cache.paint(key2, g,  (conf, g2) -> {g2.fillRect(0,0,10,10) })","cache.validate(key2, key2)","cache.paint(key2, g,  (conf, g2) -> {g2.fillRect(0,0,10,10) })"]},
+        {"kind":"when","text":"We now repeat the process using the successor config...","code":["cache.validate(key2, key2)","cache.paint(g,  (conf, g2) -> {g2.fillRect(0,0,10,10) })","cache.validate(key2, key2)","cache.paint(g,  (conf, g2) -> {g2.fillRect(0,0,10,10) })","cache.validate(key2, key2)","cache.paint(g,  (conf, g2) -> {g2.fillRect(0,0,10,10) })"]},
 
         {"kind":"then","text":"Instead of the painter lambda being called, the buffer was used again!","code":["0 * g.fillRect(0,0,10,10)","3 * g.drawImage({it instanceof BufferedImage},0,0,null)"]}
       ],

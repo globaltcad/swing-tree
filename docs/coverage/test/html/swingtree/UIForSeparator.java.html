@@ -20,7 +20,7 @@ public final class UIForSeparator&lt;S extends JSeparator&gt; extends UIForAnySw
      * Instances of ths {@link UIForSeparator} always wrap
      * a single {@link JSeparator} for which they are responsible and expose helpful utility methods.
      *
-     * @param component The JComponent type which will be managed by this builder.
+     * @param state The state of the builder.
      */
 <span class="fc" id="L25">    UIForSeparator( BuilderState&lt;S&gt; state ) {</span>
 <span class="fc" id="L26">        Objects.requireNonNull(state);</span>
@@ -56,56 +56,67 @@ public final class UIForSeparator&lt;S extends JSeparator&gt; extends UIForAnySw
     }
 
     /**
+     *  Binds the supplied alignment property to the orientation of the separator,
+     *  so that whenever the property changes, the orientation of the separator will be updated accordingly.
+     *
      * @param align The alignment property used to dynamically update the alignment of the separator.
      * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if {@code align} is {@code null}.
      */
     public final UIForSeparator&lt;S&gt; withOrientation( Val&lt;UI.Align&gt; align ) {
-<span class="nc" id="L64">        NullUtil.nullArgCheck( align, &quot;align&quot;, Val.class );</span>
-<span class="nc" id="L65">        NullUtil.nullPropertyCheck( align, &quot;align&quot;, &quot;Null is not a valid alignment.&quot; );</span>
-<span class="nc" id="L66">        return _withOnShow( align, (c,v) -&gt; {</span>
-<span class="nc" id="L67">                    c.setOrientation( v.forSeparator() );</span>
-<span class="nc" id="L68">                })</span>
-<span class="nc" id="L69">                ._with( thisComponent -&gt; {</span>
-<span class="nc" id="L70">                    thisComponent.setOrientation( align.orElseThrow().forSeparator() );</span>
+<span class="nc" id="L67">        NullUtil.nullArgCheck( align, &quot;align&quot;, Val.class );</span>
+<span class="nc" id="L68">        NullUtil.nullPropertyCheck( align, &quot;align&quot;, &quot;Null is not a valid alignment.&quot; );</span>
+<span class="nc" id="L69">        return _withOnShow( align, (c,v) -&gt; {</span>
+<span class="nc" id="L70">                    c.setOrientation( v.forSeparator() );</span>
 <span class="nc" id="L71">                })</span>
-<span class="nc" id="L72">                ._this();</span>
+<span class="nc" id="L72">                ._with( thisComponent -&gt; {</span>
+<span class="nc" id="L73">                    thisComponent.setOrientation( align.orElseThrow().forSeparator() );</span>
+<span class="nc" id="L74">                })</span>
+<span class="nc" id="L75">                ._this();</span>
     }
 
     /**
+     *  Sets the length of the separation line either horizontally or vertically
+     *  depending on the orientation of the separator.
+     *  This method is an alignment aware convenience method for
+     *  {@link JSeparator#setPreferredSize(Dimension)}.
+     *
      * @param separatorLength The length of the separation line.
      * @return This very builder to allow for method chaining.
      */
     public final UIForSeparator&lt;S&gt; withLength( int separatorLength ) {
-<span class="nc" id="L80">        return _with( thisComponent -&gt; {</span>
-<span class="nc" id="L81">                    _setLength( thisComponent, separatorLength );</span>
-<span class="nc" id="L82">                })</span>
-<span class="nc" id="L83">                ._this();</span>
+<span class="nc" id="L88">        return _with( thisComponent -&gt; {</span>
+<span class="nc" id="L89">                    _setLength( thisComponent, separatorLength );</span>
+<span class="nc" id="L90">                })</span>
+<span class="nc" id="L91">                ._this();</span>
     }
 
     private void _setLength( S thisComponent, int separatorLength ) {
-<span class="nc" id="L87">        Dimension d = thisComponent.getPreferredSize();</span>
-<span class="nc bnc" id="L88" title="All 2 branches missed.">        if ( thisComponent.getOrientation() == JSeparator.VERTICAL )</span>
-<span class="nc" id="L89">            d.height = separatorLength;</span>
-<span class="nc bnc" id="L90" title="All 2 branches missed.">        else if ( thisComponent.getOrientation() == JSeparator.HORIZONTAL )</span>
-<span class="nc" id="L91">            d.width = separatorLength;</span>
-<span class="nc" id="L92">        thisComponent.setPreferredSize(d);</span>
-<span class="nc" id="L93">    }</span>
+<span class="nc" id="L95">        Dimension d = thisComponent.getPreferredSize();</span>
+<span class="nc bnc" id="L96" title="All 2 branches missed.">        if ( thisComponent.getOrientation() == JSeparator.VERTICAL )</span>
+<span class="nc" id="L97">            d.height = UI.scale(separatorLength);</span>
+<span class="nc bnc" id="L98" title="All 2 branches missed.">        else if ( thisComponent.getOrientation() == JSeparator.HORIZONTAL )</span>
+<span class="nc" id="L99">            d.width = UI.scale(separatorLength);</span>
+<span class="nc" id="L100">        thisComponent.setPreferredSize(d);</span>
+<span class="nc" id="L101">    }</span>
 
     /**
+     *  Binds the provided integer property to the length of the separation line.,
+     *  which means that whenever the property changes, the length of the separation line will be updated accordingly.
+     *
      * @param separatorLength The property dynamically determining the length of the separation line.
      * @return This very builder to allow for method chaining.
      */
     public UIForSeparator&lt;S&gt; withLength( Val&lt;Integer&gt; separatorLength ) {
-<span class="nc" id="L100">        NullUtil.nullArgCheck( separatorLength, &quot;separatorLength&quot;, Val.class );</span>
-<span class="nc" id="L101">        NullUtil.nullPropertyCheck( separatorLength, &quot;separatorLength&quot;, &quot;Null is not a valid separator length.&quot; );</span>
-<span class="nc" id="L102">        return _withOnShow( separatorLength, (thisComponent,it) -&gt; {</span>
-<span class="nc" id="L103">                    _setLength( thisComponent, it );</span>
-<span class="nc" id="L104">                })</span>
-<span class="nc" id="L105">                ._with( thisComponent -&gt; {</span>
-<span class="nc" id="L106">                    _setLength( thisComponent, separatorLength.orElseThrow() );</span>
-<span class="nc" id="L107">                })</span>
-<span class="nc" id="L108">                ._this();</span>
+<span class="nc" id="L111">        NullUtil.nullArgCheck( separatorLength, &quot;separatorLength&quot;, Val.class );</span>
+<span class="nc" id="L112">        NullUtil.nullPropertyCheck( separatorLength, &quot;separatorLength&quot;, &quot;Null is not a valid separator length.&quot; );</span>
+<span class="nc" id="L113">        return _withOnShow( separatorLength, (thisComponent,it) -&gt; {</span>
+<span class="nc" id="L114">                    _setLength( thisComponent, it );</span>
+<span class="nc" id="L115">                })</span>
+<span class="nc" id="L116">                ._with( thisComponent -&gt; {</span>
+<span class="nc" id="L117">                    _setLength( thisComponent, separatorLength.orElseThrow() );</span>
+<span class="nc" id="L118">                })</span>
+<span class="nc" id="L119">                ._this();</span>
     }
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
