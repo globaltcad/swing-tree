@@ -9,6 +9,7 @@ import swingtree.threading.EventProcessor;
 
 import javax.swing.JComponent;
 import java.awt.Component;
+import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Objects;
@@ -33,6 +34,16 @@ import java.util.function.Supplier;
  */
 abstract class UIForAnything<I, C extends E, E extends Component>
 {
+    private interface Ref<T> {
+        static <T> Ref<T> of(Reference<T> ref) {
+            return ref::get;
+        }
+        static <T> Ref<T> of(T value) {
+            return ()->value;
+        }
+        @Nullable T get();
+    }
+
     /**
      *  The type class of the component managed by this builder.
      *  See documentation for method "build" for more information.
@@ -521,7 +532,13 @@ abstract class UIForAnything<I, C extends E, E extends Component>
     {
         Objects.requireNonNull(val);
         Objects.requireNonNull(displayAction);
-        _onShow( new WeakReference<>(val), new WeakReference<>(thisComponent), displayAction );
+        Ref<Val<T>> valRef;
+        if ( !val.isMutable() )
+            valRef = Ref.of(new WeakReference<>(val));
+        else //TODO: if ( val.isLens() || val.isView() )
+            valRef = Ref.of(val);
+
+        _onShow( valRef, Ref.of(new WeakReference<>(thisComponent)), displayAction );
     }
 
     protected final <T> UIForAnything<I,C,E> _withOnShow( Val<T> val, BiConsumer<C, T> displayAction )
@@ -532,9 +549,9 @@ abstract class UIForAnything<I, C extends E, E extends Component>
     }
 
     private <T> void _onShow(
-        WeakReference<Val<T>> propertyRef,
-        WeakReference<C>      componentRef,
-        BiConsumer<C, T>      displayAction
+        Ref<Val<T>>       propertyRef,
+        Ref<C>            componentRef,
+        BiConsumer<C, T>  displayAction
     ) {
         Objects.requireNonNull(propertyRef);
         Objects.requireNonNull(componentRef);
