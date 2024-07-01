@@ -101,7 +101,9 @@ record, instead of modifying the existing instance.
 
 ## The View ##
 
-This is where SwingTree and Sprouts come into play.
+This is all nice and good, but how do we connect this to the UI?
+The key to this is the `Var` class from the Sprouts library
+and the previously mentioned "withers" of the view model records.
 Check out the following code snippet:
 
 ```java
@@ -119,10 +121,8 @@ public static class CalculatorView extends JPanel {
         .add("width 40px::",
             comboBox(inputs.zoomTo(CalculatorInputs::operator, CalculatorInputs::withOperator), o ->
                 switch ( o ) {
-                    case ADD -> " + ";
-                    case SUBTRACT -> " - ";
-                    case MULTIPLY -> " * ";
-                    case DIVIDE -> " / ";
+                    case ADD -> " + "; case SUBTRACT -> " - ";
+                    case MULTIPLY -> " * "; case DIVIDE -> " / ";
                 }
             )
         )
@@ -150,6 +150,27 @@ public static class CalculatorView extends JPanel {
     }
 }
 ```
+
+Running this code will look like this:
+
+![Calculator](../img/tutorial/Functional-MVVM-Calculator.png)
+
+Take a moment to read through the code and get a feel for it.
+What you may find particularly interesting is the `zoomTo` method.
+It returns a so-called **property lens** that allows you to
+focus on a specific field of the view model and update it
+through one of its "withers". 
+You can define these lenses recursively to focus on nested components
+of the view model, which is a powerful way to create sub-views for sub-models.
+
+What happens under the hood is that the lens creates a new `Var`
+that is bi-directionally bound to the original `Var` and only
+updates the focused property of the view model when the lens is set.
+You can also register change listeners on the lens to react to changes
+of the focused property. Note that lenses are smart, they will only
+trigger change events when the focused property actually changes.
+So even if the whole view model is updated, only the focused property
+will trigger a change event.
 
 
 
