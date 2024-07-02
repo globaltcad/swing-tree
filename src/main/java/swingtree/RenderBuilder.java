@@ -119,6 +119,7 @@ public final class RenderBuilder<C extends JComponent, E> {
     private class SimpleTableCellRenderer implements TableCellRenderer
     {
         private final DefaultTableCellRenderer _defaultRenderer = new DefaultTableCellRenderer();
+        private @Nullable Component _lastCustomRenderer;
 
         @Override
         public Component getTableCellRendererComponent(
@@ -127,7 +128,7 @@ public final class RenderBuilder<C extends JComponent, E> {
                 boolean          isSelected,
                 boolean          hasFocus,
                 final int        row,
-                int column
+                int              column
         ) {
             List<Configurator<CellDelegate<C, ?>>> interpreter = _find(value, _rendererLookup);
             if (interpreter.isEmpty())
@@ -135,6 +136,7 @@ public final class RenderBuilder<C extends JComponent, E> {
             else {
                 List<String> toolTips = new ArrayList<>();
                 CellDelegate<JTable, Object> cell = CellDelegate.of(
+                                                            _lastCustomRenderer,
                                                             table, value, isSelected,
                                                             hasFocus, false, row, column,
                                                             ()->_defaultRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column)
@@ -146,12 +148,16 @@ public final class RenderBuilder<C extends JComponent, E> {
                         cell = newCell;
                 }
                 Component choice;
-                if (cell.renderer().isPresent())
+                if (cell.renderer().isPresent()) {
                     choice = cell.renderer().get();
-                else if (cell.presentationValue().isPresent())
+                    _lastCustomRenderer = choice;
+                } else if (cell.presentationValue().isPresent()) {
                     choice = _defaultRenderer.getTableCellRendererComponent(table, cell.presentationValue().get(), isSelected, hasFocus, row, column);
-                else
+                    _lastCustomRenderer = null;
+                } else {
                     choice = _defaultRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                    _lastCustomRenderer = null;
+                }
 
                 if (!toolTips.isEmpty() && choice instanceof JComponent)
                     ((JComponent) choice).setToolTipText(String.join("; ", toolTips));
@@ -166,6 +172,7 @@ public final class RenderBuilder<C extends JComponent, E> {
     {
         private final O _component;
         private final DefaultListCellRenderer _defaultRenderer = new DefaultListCellRenderer();
+        private @Nullable Component _lastCustomRenderer;
 
         private SimpleListCellRenderer(O component) {
             _component = Objects.requireNonNull(component);
@@ -184,6 +191,7 @@ public final class RenderBuilder<C extends JComponent, E> {
                 return _defaultRenderer.getListCellRendererComponent(list, value, row, isSelected, hasFocus);
             else {
                 CellDelegate<O, Object> cell = CellDelegate.of(
+                                                        _lastCustomRenderer,
                                                         _component, value, isSelected,
                                                         hasFocus, false, row, 0,
                                                         ()->_defaultRenderer.getListCellRendererComponent(list, value, row, isSelected, hasFocus)
@@ -195,12 +203,16 @@ public final class RenderBuilder<C extends JComponent, E> {
                         cell = newCell;
                 }
                 Component choice;
-                if (cell.renderer().isPresent())
+                if (cell.renderer().isPresent()) {
                     choice = cell.renderer().get();
-                else if (cell.presentationValue().isPresent())
+                    _lastCustomRenderer = choice;
+                } else if (cell.presentationValue().isPresent()) {
                     choice = _defaultRenderer.getListCellRendererComponent(list, cell.presentationValue().get(), row, isSelected, hasFocus);
-                else
+                    _lastCustomRenderer = null;
+                } else {
                     choice = _defaultRenderer.getListCellRendererComponent(list, value, row, isSelected, hasFocus);
+                    _lastCustomRenderer = null;
+                }
 
                 if (!cell.toolTips().isEmpty() && choice instanceof JComponent)
                     ((JComponent) choice).setToolTipText(String.join("; ", cell.toolTips()));
