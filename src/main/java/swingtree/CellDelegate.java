@@ -113,11 +113,11 @@ public final class CellDelegate<C extends JComponent, V>
         return Collections.unmodifiableList(toolTips);
     }
 
-    public int getRow() {
+    public int row() {
         return row;
     }
 
-    public int getColumn() {
+    public int column() {
         return column;
     }
 

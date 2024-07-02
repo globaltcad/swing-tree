@@ -346,7 +346,7 @@ public final class RenderBuilder<C extends JComponent, E> {
                 if ( normalBg != null )
                     normalBg = new Color( normalBg.getRGB() ); // This is because of a weired JDK bug it seems!
 
-                if ( cell.getRow() % 2 == 1 ) {
+                if ( cell.row() % 2 == 1 ) {
                     // We determine if the base color is more bright or dark,
                     // and then we set the foreground color accordingly
                     double brightness = (0.299 * normalBg.getRed() + 0.587 * normalBg.getGreen() + 0.114 * normalBg.getBlue()) / 255;
