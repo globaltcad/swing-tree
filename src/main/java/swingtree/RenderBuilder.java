@@ -162,7 +162,7 @@ public final class RenderBuilder<C extends JComponent, E> {
 
     }
 
-    private class SimpleListCellRenderer<O extends C> implements ListCellRenderer
+    private class SimpleListCellRenderer<O extends C> implements ListCellRenderer<Object>
     {
         private final O _component;
         private final DefaultListCellRenderer _defaultRenderer = new DefaultListCellRenderer();
