@@ -240,7 +240,7 @@ class Basic_UI_Builder_Examples_Spec extends Specification
         and : 'The combo box will have the correct selected item.'
             comboBox.selectedItem == Keyboard.Key.A
         and : 'The combo box will have a renderer that renders the enum value as a lower case string.'
-            comboBox.renderer instanceof DefaultListCellRenderer
+            comboBox.renderer instanceof swingtree.CellBuilder.SimpleListCellRenderer
             comboBox.renderer.getListCellRendererComponent(null, Keyboard.Key.A, 0, false, false).text == "a"
 
         when : 'We change the selection...'
