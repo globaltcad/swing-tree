@@ -134,7 +134,6 @@ public final class RenderBuilder<C extends JComponent, E> {
             if (interpreter.isEmpty())
                 return _defaultRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
             else {
-                List<String> toolTips = new ArrayList<>();
                 CellDelegate<JTable, Object> cell = CellDelegate.of(
                                                             _lastCustomRenderer,
                                                             table, value, isSelected,
@@ -159,8 +158,8 @@ public final class RenderBuilder<C extends JComponent, E> {
                     _lastCustomRenderer = null;
                 }
 
-                if (!toolTips.isEmpty() && choice instanceof JComponent)
-                    ((JComponent) choice).setToolTipText(String.join("; ", toolTips));
+                if (!cell.toolTips().isEmpty() && choice instanceof JComponent)
+                    ((JComponent) choice).setToolTipText(String.join("; ", cell.toolTips()));
 
                 return choice;
             }
