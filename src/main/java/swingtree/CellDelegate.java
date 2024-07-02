@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.JComponent;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -30,6 +31,7 @@ public final class CellDelegate<C extends JComponent, V>
     private static final Logger log = LoggerFactory.getLogger(CellDelegate.class);
 
     public static <C extends JComponent, V> CellDelegate<C, V> of(
+        @Nullable Component lastRenderer,
         C                   owner,
         @Nullable V         value,
         boolean             isSelected,
@@ -48,7 +50,7 @@ public final class CellDelegate<C extends JComponent, V>
             isEditing,
             row,
             column,
-            null,
+            lastRenderer,
             toolTips,
             null,
             defaultRenderSource
@@ -153,6 +155,38 @@ public final class CellDelegate<C extends JComponent, V>
                 super.paint(g);
                 painter.accept((Graphics2D) g);
             }
+            /*
+                 The following methods are overridden as a performance measure to
+                 to prune code-paths are often called in the case of renders
+                 but which we know are unnecessary.  Great care should be taken
+                 when writing your own renderer to weigh the benefits and
+                 drawbacks of overriding methods like these.
+             */
+            @Override
+            public boolean isOpaque() {
+                Color back = getBackground();
+                Component p = getParent();
+                if (p != null) {
+                    p = p.getParent();
+                }
+                // p should now be the JTable.
+                boolean colorMatch = (back != null) && (p != null) &&
+                        back.equals(p.getBackground()) &&
+                        p.isOpaque();
+                return !colorMatch && super.isOpaque();
+            }
+            @Override
+            public void invalidate() {}
+            @Override
+            public void validate() {}
+            @Override
+            public void revalidate() {}
+            @Override
+            public void repaint(long tm, int x, int y, int width, int height) {}
+            @Override
+            public void repaint() {}
+            @Override
+            public void firePropertyChange(String propertyName, boolean oldValue, boolean newValue) { }
         });
     }
 
