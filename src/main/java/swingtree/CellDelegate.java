@@ -34,6 +34,7 @@ public final class CellDelegate<C extends JComponent, V>
         @Nullable V         value,
         boolean             isSelected,
         boolean             hasFocus,
+        boolean             isEditing,
         int                 row,
         int                 column,
         Supplier<Component> defaultRenderSource
@@ -44,6 +45,7 @@ public final class CellDelegate<C extends JComponent, V>
             value,
             isSelected,
             hasFocus,
+            isEditing,
             row,
             column,
             null,
@@ -57,6 +59,7 @@ public final class CellDelegate<C extends JComponent, V>
     private final @Nullable V         value;
     private final boolean             isSelected;
     private final boolean             hasFocus;
+    private final boolean             isEditing;
     private final int                 row;
     private final int                 column;
     private final @Nullable Component cellRenderer;
@@ -70,6 +73,7 @@ public final class CellDelegate<C extends JComponent, V>
         @Nullable V         value,
         boolean             isSelected,
         boolean             hasFocus,
+        boolean             isEditing,
         int                 row,
         int                 column,
         @Nullable Component renderer,
@@ -81,6 +85,7 @@ public final class CellDelegate<C extends JComponent, V>
         this.value               = value;
         this.isSelected          = isSelected;
         this.hasFocus            = hasFocus;
+        this.isEditing           = isEditing;
         this.row                 = row;
         this.column              = column;
         this.cellRenderer        = renderer;
@@ -131,6 +136,7 @@ public final class CellDelegate<C extends JComponent, V>
             value,
             isSelected,
             hasFocus,
+            isEditing,
             row,
             column,
             component,
@@ -158,9 +164,10 @@ public final class CellDelegate<C extends JComponent, V>
             value,
             isSelected,
             hasFocus,
+            isEditing,
             row,
             column,
-                cellRenderer,
+            cellRenderer,
             newToolTips,
             presentationValue,
             defaultRenderSource
@@ -196,9 +203,10 @@ public final class CellDelegate<C extends JComponent, V>
             value,
             isSelected,
             hasFocus,
+            isEditing,
             row,
             column,
-                cellRenderer,
+            cellRenderer,
             toolTips,
             toBeShown,
             defaultRenderSource

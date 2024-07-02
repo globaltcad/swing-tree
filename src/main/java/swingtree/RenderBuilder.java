@@ -132,7 +132,7 @@ public final class RenderBuilder<C extends JComponent, E> {
                 List<String> toolTips = new ArrayList<>();
                 CellDelegate<JTable, Object> cell = CellDelegate.of(
                                                             table, value, isSelected,
-                                                            hasFocus, row, column,
+                                                            hasFocus, false, row, column,
                                                             ()->SimpleTableCellRenderer.super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column)
                                                         );
 
@@ -179,7 +179,7 @@ public final class RenderBuilder<C extends JComponent, E> {
             else {
                 CellDelegate<O, Object> cell = CellDelegate.of(
                                                         _component, value, isSelected,
-                                                        hasFocus, row, 0,
+                                                        hasFocus, false, row, 0,
                                                         ()->SimpleListCellRenderer.super.getListCellRendererComponent(list, value, row, isSelected, hasFocus)
                                                     );
 
