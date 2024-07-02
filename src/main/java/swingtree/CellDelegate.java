@@ -59,7 +59,7 @@ public final class CellDelegate<C extends JComponent, V>
     private final boolean             hasFocus;
     private final int                 row;
     private final int                 column;
-    private final @Nullable Component componentRef;
+    private final @Nullable Component cellRenderer;
     private final List<String>        toolTips;
     private final @Nullable Object    presentationValue;
     private final Supplier<Component> defaultRenderSource;
@@ -83,7 +83,7 @@ public final class CellDelegate<C extends JComponent, V>
         this.hasFocus            = hasFocus;
         this.row                 = row;
         this.column              = column;
-        this.componentRef        = renderer;
+        this.cellRenderer        = renderer;
         this.toolTips            = Objects.requireNonNull(toolTips);
         this.presentationValue   = presentationValue;
         this.defaultRenderSource = Objects.requireNonNull(defaultRenderSource);
@@ -122,7 +122,7 @@ public final class CellDelegate<C extends JComponent, V>
     }
 
     public Optional<Component> renderer() {
-        return Optional.ofNullable(componentRef);
+        return Optional.ofNullable(cellRenderer);
     }
 
     public CellDelegate<C, V> withRenderer(Component component) {
@@ -160,7 +160,7 @@ public final class CellDelegate<C extends JComponent, V>
             hasFocus,
             row,
             column,
-            componentRef,
+                cellRenderer,
             newToolTips,
             presentationValue,
             defaultRenderSource
@@ -198,7 +198,7 @@ public final class CellDelegate<C extends JComponent, V>
             hasFocus,
             row,
             column,
-            componentRef,
+                cellRenderer,
             toolTips,
             toBeShown,
             defaultRenderSource
