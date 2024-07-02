@@ -48,25 +48,25 @@ import java.util.function.Predicate;
  * @param <C> The type of the component which is used to render the cell.
  * @param <E> The type of the value of the cell.
  */
-public final class RenderBuilder<C extends JComponent, E> {
+public final class CellBuilder<C extends JComponent, E> {
 
     private final Class<C> _componentType;
     private final Class<E> _elementType;
     private final Map<Class<?>, List<Configurator<CellDelegate<C, ?>>>> _rendererLookup = new LinkedHashMap<>(16);
 
 
-    static <E> RenderBuilder<JList<E>,E> forList(Class<E> elementType) {
-        return (RenderBuilder) new RenderBuilder<>(JList.class, elementType);
+    static <E> CellBuilder<JList<E>,E> forList(Class<E> elementType) {
+        return (CellBuilder) new CellBuilder<>(JList.class, elementType);
     }
-    static <C extends JComboBox<E>, E> RenderBuilder<C,E> forCombo(Class<E> elementType) {
-        return (RenderBuilder) new RenderBuilder<>(JComboBox.class, elementType);
+    static <C extends JComboBox<E>, E> CellBuilder<C,E> forCombo(Class<E> elementType) {
+        return (CellBuilder) new CellBuilder<>(JComboBox.class, elementType);
     }
-    static <E> RenderBuilder<JTable,E> forTable(Class<E> elementType) {
-        return (RenderBuilder) new RenderBuilder<>(JTable.class, elementType);
+    static <E> CellBuilder<JTable,E> forTable(Class<E> elementType) {
+        return (CellBuilder) new CellBuilder<>(JTable.class, elementType);
     }
 
 
-    private RenderBuilder(Class<C> componentType, Class<E> elementType) {
+    private CellBuilder(Class<C> componentType, Class<E> elementType) {
         _componentType = componentType;
         _elementType = elementType;
     }

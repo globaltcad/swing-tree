@@ -116,10 +116,10 @@ public final class UIForTableHeader<H extends UI.TableHeader> extends UIForAnySw
      * @return This builder node.
      */
     UIForTableHeader<H> withRenderer(
-        Configurator<RenderBuilder<H, Object>> renderBuilder
+        Configurator<CellBuilder<H, Object>> renderBuilder
     ) {
-        NullUtil.nullArgCheck(renderBuilder, "renderBuilder", RenderBuilder.class);
-        RenderBuilder<H, Object> builder = _renderTable();
+        NullUtil.nullArgCheck(renderBuilder, "renderBuilder", CellBuilder.class);
+        CellBuilder<H, Object> builder = _renderTable();
         try {
             builder = renderBuilder.configure(builder);
         } catch (Exception e) {
@@ -130,8 +130,8 @@ public final class UIForTableHeader<H extends UI.TableHeader> extends UIForAnySw
         return withDefaultRenderer(builder.getForTable());
     }
 
-    private static <T extends JTableHeader> RenderBuilder<T, Object> _renderTable() {
-        return (RenderBuilder) RenderBuilder.forTable(Object.class);
+    private static <T extends JTableHeader> CellBuilder<T, Object> _renderTable() {
+        return (CellBuilder) CellBuilder.forTable(Object.class);
     }
 
 }

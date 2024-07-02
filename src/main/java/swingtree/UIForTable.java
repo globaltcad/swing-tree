@@ -71,8 +71,8 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
                 ._this();
     }
 
-    private static <T extends JTable> RenderBuilder<T, Object> _renderTable() {
-        return (RenderBuilder) RenderBuilder.forTable(Object.class);
+    private static <T extends JTable> CellBuilder<T, Object> _renderTable() {
+        return (CellBuilder) CellBuilder.forTable(Object.class);
     }
 
     /**
@@ -95,7 +95,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      * The above example would render the first column of the table as a string surrounded by square brackets,
      * and the second column as a float or double value surrounded by parentheses.
      * Note that the API allows you to specify how specific types of table entry values
-     * should be rendered. This is done by calling the {@link RenderBuilder#when(Class)} method
+     * should be rendered. This is done by calling the {@link CellBuilder#when(Class)} method
      * before calling the {@link RenderAs#asText(Function)} method.
      *
      * @param columnName The name of the column for which the cell renderer will be built.
@@ -106,10 +106,10 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      */
     public final UIForTable<T> withRendererForColumn(
         String columnName,
-        Configurator<RenderBuilder<T, Object>> renderBuilder
+        Configurator<CellBuilder<T, Object>> renderBuilder
     ) {
-        NullUtil.nullArgCheck(renderBuilder, "renderBuilder", RenderBuilder.class);
-        RenderBuilder<T, Object> builder = _renderTable();
+        NullUtil.nullArgCheck(renderBuilder, "renderBuilder", CellBuilder.class);
+        CellBuilder<T, Object> builder = _renderTable();
         try {
             builder = renderBuilder.configure(builder);
         } catch (Exception e) {
@@ -139,7 +139,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      * The above example would render the first column of the table as a string surrounded by square brackets,
      * and the second column as a float or double value surrounded by parentheses.
      * Note that the API allows you to specify how specific types of table entry values
-     * should be rendered. This is done by calling the {@link RenderBuilder#when(Class)} method
+     * should be rendered. This is done by calling the {@link CellBuilder#when(Class)} method
      * before calling the {@link RenderAs#asText(Function)} method.
      *
      * @param columnIndex The index of the column for which the cell renderer will be built.
@@ -150,10 +150,10 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      */
     public final UIForTable<T> withRendererForColumn(
         int columnIndex,
-        Configurator<RenderBuilder<T, Object>> renderBuilder
+        Configurator<CellBuilder<T, Object>> renderBuilder
     ) {
-        NullUtil.nullArgCheck(renderBuilder, "renderBuilder", RenderBuilder.class);
-        RenderBuilder<T, Object> builder = _renderTable();
+        NullUtil.nullArgCheck(renderBuilder, "renderBuilder", CellBuilder.class);
+        CellBuilder<T, Object> builder = _renderTable();
         try {
             builder = renderBuilder.configure(builder);
         } catch (Exception e) {
@@ -246,10 +246,10 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      * @return This builder node.
      */
     public final UIForTable<T> withRenderer(
-        Configurator<RenderBuilder<T, Object>> renderBuilder
+        Configurator<CellBuilder<T, Object>> renderBuilder
     ) {
-        NullUtil.nullArgCheck(renderBuilder, "renderBuilder", RenderBuilder.class);
-        RenderBuilder<T, Object> builder = _renderTable();
+        NullUtil.nullArgCheck(renderBuilder, "renderBuilder", CellBuilder.class);
+        CellBuilder<T, Object> builder = _renderTable();
         try {
             builder = renderBuilder.configure(builder);
         } catch (Exception e) {
