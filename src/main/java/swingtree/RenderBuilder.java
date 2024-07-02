@@ -5,8 +5,11 @@ import swingtree.api.Configurator;
 
 import javax.swing.*;
 import javax.swing.border.Border;
+import javax.swing.event.CellEditorListener;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.tree.TreeCellEditor;
 import java.awt.Color;
 import java.awt.Component;
 import java.util.*;
@@ -116,31 +119,21 @@ public final class RenderBuilder<C extends JComponent, E> {
         });
     }
 
-    private class SimpleTableCellRenderer implements TableCellRenderer
+    private class SimpleTableCellRenderer implements TableCellRenderer, TableCellEditor, TreeCellEditor
     {
         private final DefaultTableCellRenderer _defaultRenderer = new DefaultTableCellRenderer();
+        private final BasicCellEditor _basicEditor = new BasicCellEditor();
         private @Nullable Component _lastCustomRenderer;
 
-        @Override
-        public Component getTableCellRendererComponent(
-                JTable           table,
-                @Nullable Object value,
-                boolean          isSelected,
-                boolean          hasFocus,
-                final int        row,
-                int              column
+        public <T extends JComponent> Component _update(
+            Function<@Nullable Object, Component> defaultRenderer,
+            CellDelegate<T, Object> cell
         ) {
+            @Nullable Object value = cell.value().orElse(null);
             List<Configurator<CellDelegate<C, ?>>> interpreter = _find(value, _rendererLookup);
-            if (interpreter.isEmpty())
-                return _defaultRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            if ( interpreter.isEmpty() )
+                return defaultRenderer.apply(value);
             else {
-                CellDelegate<JTable, Object> cell = CellDelegate.of(
-                                                            _lastCustomRenderer,
-                                                            table, value, isSelected,
-                                                            hasFocus, false, row, column,
-                                                            ()->_defaultRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column)
-                                                        );
-
                 for ( Configurator<CellDelegate<C,?>> configurator : interpreter ) {
                     CellDelegate newCell = configurator.configure((CellDelegate)cell);
                     if ( newCell != null )
@@ -151,10 +144,10 @@ public final class RenderBuilder<C extends JComponent, E> {
                     choice = cell.renderer().get();
                     _lastCustomRenderer = choice;
                 } else if (cell.presentationValue().isPresent()) {
-                    choice = _defaultRenderer.getTableCellRendererComponent(table, cell.presentationValue().get(), isSelected, hasFocus, row, column);
+                    choice = defaultRenderer.apply(cell.presentationValue().get());
                     _lastCustomRenderer = null;
                 } else {
-                    choice = _defaultRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                    choice = defaultRenderer.apply(value);
                     _lastCustomRenderer = null;
                 }
 
@@ -165,6 +158,96 @@ public final class RenderBuilder<C extends JComponent, E> {
             }
         }
 
+        @Override
+        public Component getTableCellRendererComponent(
+            final JTable           table,
+            final @Nullable Object value,
+            final boolean          isSelected,
+            final boolean          hasFocus,
+            final int              row,
+            final int              column
+        ) {
+            return _update(
+                         localValue -> _defaultRenderer.getTableCellRendererComponent(table, localValue, isSelected, hasFocus, row, column),
+                         CellDelegate.of(
+                             _lastCustomRenderer,
+                             table, value, isSelected, hasFocus, false, row, column,
+                             () -> _defaultRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column)
+                         )
+                    );
+        }
+
+        @Override
+        public Component getTableCellEditorComponent(
+            final JTable           table,
+            final @Nullable Object value,
+            final boolean          isSelected,
+            final int              row,
+            final int              column
+        ) {
+            return _update(
+                         localValue -> _basicEditor.getTableCellEditorComponent(table, localValue, isSelected, row, column),
+                         CellDelegate.of(
+                             _lastCustomRenderer,
+                             table, value, isSelected, true, true, row, column,
+                             () -> _basicEditor.getTableCellEditorComponent(table, value, isSelected, row, column)
+                         )
+                    );
+        }
+
+        @Override
+        public Component getTreeCellEditorComponent(
+            final JTree            tree,
+            final @Nullable Object value,
+            final boolean          isSelected,
+            final boolean          expanded,
+            final boolean          leaf,
+            final int              row
+        ) {
+            return _update(
+                         localValue -> _basicEditor.getTreeCellEditorComponent(tree, localValue, isSelected, expanded, leaf, row),
+                         CellDelegate.of(
+                             _lastCustomRenderer, tree, value, isSelected,
+                             true, true, row, 0,
+                             () -> _basicEditor.getTreeCellEditorComponent(tree, value, isSelected, expanded, leaf, row)
+                         )
+                    );
+        }
+
+        @Override
+        public @Nullable Object getCellEditorValue() {
+            return _basicEditor.getCellEditorValue();
+        }
+
+        @Override
+        public boolean isCellEditable(EventObject anEvent) {
+            return _basicEditor.isCellEditable(anEvent);
+        }
+
+        @Override
+        public boolean shouldSelectCell(EventObject anEvent) {
+            return _basicEditor.shouldSelectCell(anEvent);
+        }
+
+        @Override
+        public boolean stopCellEditing() {
+            return _basicEditor.stopCellEditing();
+        }
+
+        @Override
+        public void cancelCellEditing() {
+            _basicEditor.cancelCellEditing();
+        }
+
+        @Override
+        public void addCellEditorListener(CellEditorListener l) {
+            _basicEditor.addCellEditorListener(l);
+        }
+
+        @Override
+        public void removeCellEditorListener(CellEditorListener l) {
+            _basicEditor.removeCellEditorListener(l);
+        }
     }
 
     private class SimpleListCellRenderer<O extends C> implements ListCellRenderer<Object>
