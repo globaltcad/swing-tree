@@ -1,6 +1,8 @@
 package swingtree;
 
-import javax.swing.JTable;
+import swingtree.api.Configurator;
+
+import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
 import java.util.Objects;
 import java.util.function.Function;
@@ -12,6 +14,7 @@ import java.util.function.Function;
  */
 public final class UIForTableHeader<H extends UI.TableHeader> extends UIForAnySwing<UIForTableHeader<H>, H>
 {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UIForTableHeader.class);
     private final BuilderState<H> _state;
 
     /**
@@ -97,8 +100,7 @@ public final class UIForTableHeader<H extends UI.TableHeader> extends UIForAnySw
      *     .withHeader(
      *         UI.tableHeader()
      *         .withMaxWidth(100)
-     *         .withDefaultRenderer(
-     *             UI.renderTable()
+     *         .withRenderer( it -> it
      *             .when(Integer.class)
      *             .asText( cell ->
      *                 cell.valueAsString()
@@ -113,11 +115,23 @@ public final class UIForTableHeader<H extends UI.TableHeader> extends UIForAnySw
      * @param renderBuilder The builder for the renderer to set.
      * @return This builder node.
      */
-    UIForTableHeader<H> withDefaultRenderer( RenderBuilder<JTable, ?> renderBuilder ) {
-        Objects.requireNonNull(renderBuilder);
-        return _with( thisComponent -> {
-                    thisComponent.setDefaultRenderer(renderBuilder.getForTable());
-                })
-                ._this();
+    UIForTableHeader<H> withRenderer(
+        Configurator<RenderBuilder<H, Object>> renderBuilder
+    ) {
+        NullUtil.nullArgCheck(renderBuilder, "renderBuilder", RenderBuilder.class);
+        RenderBuilder<H, Object> builder = _renderTable();
+        try {
+            builder = renderBuilder.configure(builder);
+        } catch (Exception e) {
+            log.error("Error while building table renderer.", e);
+            return this;
+        }
+        Objects.requireNonNull(builder);
+        return withDefaultRenderer(builder.getForTable());
     }
+
+    private static <T extends JTableHeader> RenderBuilder<T, Object> _renderTable() {
+        return (RenderBuilder) RenderBuilder.forTable(Object.class);
+    }
+
 }
