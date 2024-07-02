@@ -130,9 +130,9 @@ public final class RenderBuilder<C extends JComponent, E> {
                 return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
             else {
                 List<String> toolTips = new ArrayList<>();
-                CellDelegate<JTable, Object> cell = new CellDelegate<>(
+                CellDelegate<JTable, Object> cell = CellDelegate.of(
                                                             table, value, isSelected,
-                                                            hasFocus, row, column, null, toolTips, null,
+                                                            hasFocus, row, column,
                                                             ()->SimpleTableCellRenderer.super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column)
                                                         );
 
@@ -177,10 +177,9 @@ public final class RenderBuilder<C extends JComponent, E> {
             if (interpreter.isEmpty())
                 return super.getListCellRendererComponent(list, value, row, isSelected, hasFocus);
             else {
-                List<String> toolTips = new ArrayList<>();
-                CellDelegate<O, Object> cell = new CellDelegate<>(
+                CellDelegate<O, Object> cell = CellDelegate.of(
                                                         _component, value, isSelected,
-                                                        hasFocus, row, 0, null, toolTips, null,
+                                                        hasFocus, row, 0,
                                                         ()->SimpleListCellRenderer.super.getListCellRendererComponent(list, value, row, isSelected, hasFocus)
                                                     );
 
@@ -197,8 +196,8 @@ public final class RenderBuilder<C extends JComponent, E> {
                 else
                     choice = super.getListCellRendererComponent(list, value, row, isSelected, hasFocus);
 
-                if (!toolTips.isEmpty() && choice instanceof JComponent)
-                    ((JComponent) choice).setToolTipText(String.join("; ", toolTips));
+                if (!cell.toolTips().isEmpty() && choice instanceof JComponent)
+                    ((JComponent) choice).setToolTipText(String.join("; ", cell.toolTips()));
 
                 return choice;
             }

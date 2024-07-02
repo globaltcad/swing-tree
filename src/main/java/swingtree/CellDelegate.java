@@ -8,10 +8,7 @@ import javax.swing.JComponent;
 import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -28,9 +25,33 @@ import java.util.function.Supplier;
  *
  * @param <V> The value type of the entry of this {@link CellDelegate}.
  */
-public class CellDelegate<C extends JComponent, V>
+public final class CellDelegate<C extends JComponent, V>
 {
     private static final Logger log = LoggerFactory.getLogger(CellDelegate.class);
+
+    public static <C extends JComponent, V> CellDelegate<C, V> of(
+        C                   owner,
+        @Nullable V         value,
+        boolean             isSelected,
+        boolean             hasFocus,
+        int                 row,
+        int                 column,
+        Supplier<Component> defaultRenderSource
+    ) {
+        List<String> toolTips = new ArrayList<>();
+        return new CellDelegate<>(
+            owner,
+            value,
+            isSelected,
+            hasFocus,
+            row,
+            column,
+            null,
+            toolTips,
+            null,
+            defaultRenderSource
+        );
+    }
 
     private final C                   owner;
     private final @Nullable V         value;
@@ -44,7 +65,7 @@ public class CellDelegate<C extends JComponent, V>
     private final Supplier<Component> defaultRenderSource;
 
 
-    public CellDelegate(
+    private CellDelegate(
         C                   owner,
         @Nullable V         value,
         boolean             isSelected,
@@ -86,6 +107,10 @@ public class CellDelegate<C extends JComponent, V>
 
     public boolean hasFocus() {
         return hasFocus;
+    }
+
+    public List<String> toolTips() {
+        return Collections.unmodifiableList(toolTips);
     }
 
     public int getRow() {
