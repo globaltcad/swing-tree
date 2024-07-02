@@ -364,6 +364,14 @@ public final class RenderBuilder<C extends JComponent, E> {
             throw new IllegalArgumentException("Renderer was set up to be used for a JTable!");
     }
 
+    TreeCellRenderer getForTree() {
+        _addDefaultRendering();
+        if (JTree.class.isAssignableFrom(_componentType))
+            return new SimpleTableCellRenderer();
+        else
+            throw new IllegalArgumentException("Renderer was set up to be used for a JTree!");
+    }
+
     /**
      * Like many things in the SwingTree library, this class is
      * essentially a convenient builder for a {@link ListCellRenderer}.
