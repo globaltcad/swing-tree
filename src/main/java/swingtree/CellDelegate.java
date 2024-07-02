@@ -37,6 +37,8 @@ public final class CellDelegate<C extends JComponent, V>
         boolean             isSelected,
         boolean             hasFocus,
         boolean             isEditing,
+        boolean             isExpanded,
+        boolean             isLeaf,
         int                 row,
         int                 column,
         Supplier<Component> defaultRenderSource
@@ -48,6 +50,8 @@ public final class CellDelegate<C extends JComponent, V>
             isSelected,
             hasFocus,
             isEditing,
+            isExpanded,
+            isLeaf,
             row,
             column,
             lastRenderer,
@@ -62,6 +66,8 @@ public final class CellDelegate<C extends JComponent, V>
     private final boolean             isSelected;
     private final boolean             hasFocus;
     private final boolean             isEditing;
+    private final boolean             isExpanded;
+    private final boolean             isLeaf;
     private final int                 row;
     private final int                 column;
     private final @Nullable Component cellRenderer;
@@ -76,6 +82,8 @@ public final class CellDelegate<C extends JComponent, V>
         boolean             isSelected,
         boolean             hasFocus,
         boolean             isEditing,
+        boolean             isExpanded,
+        boolean             isLeaf,
         int                 row,
         int                 column,
         @Nullable Component renderer,
@@ -88,6 +96,8 @@ public final class CellDelegate<C extends JComponent, V>
         this.isSelected          = isSelected;
         this.hasFocus            = hasFocus;
         this.isEditing           = isEditing;
+        this.isExpanded          = isExpanded;
+        this.isLeaf              = isLeaf;
         this.row                 = row;
         this.column              = column;
         this.cellRenderer        = renderer;
@@ -116,6 +126,18 @@ public final class CellDelegate<C extends JComponent, V>
         return hasFocus;
     }
 
+    public boolean isEditing() {
+        return isEditing;
+    }
+
+    public boolean isExpanded() {
+        return isExpanded;
+    }
+
+    public boolean isLeaf() {
+        return isLeaf;
+    }
+
     public List<String> toolTips() {
         return Collections.unmodifiableList(toolTips);
     }
@@ -139,6 +161,8 @@ public final class CellDelegate<C extends JComponent, V>
             isSelected,
             hasFocus,
             isEditing,
+            isExpanded,
+            isLeaf,
             row,
             column,
             component,
@@ -199,6 +223,8 @@ public final class CellDelegate<C extends JComponent, V>
             isSelected,
             hasFocus,
             isEditing,
+            isExpanded,
+            isLeaf,
             row,
             column,
             cellRenderer,
@@ -238,6 +264,8 @@ public final class CellDelegate<C extends JComponent, V>
             isSelected,
             hasFocus,
             isEditing,
+            isExpanded,
+            isLeaf,
             row,
             column,
             cellRenderer,

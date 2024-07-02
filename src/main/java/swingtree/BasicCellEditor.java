@@ -44,6 +44,10 @@ final class BasicCellEditor extends AbstractCellEditor implements TableCellEdito
         textField.addActionListener(delegate);
     }
 
+    public @Nullable Component getComponent() {
+        return editorComponent;
+    }
+
     public void setEditor(final JCheckBox checkBox) {
         editorComponent = checkBox;
         delegate = new EditorDelegate() {

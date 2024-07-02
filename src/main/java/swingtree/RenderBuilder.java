@@ -9,7 +9,9 @@ import javax.swing.event.CellEditorListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeCellEditor;
+import javax.swing.tree.TreeCellRenderer;
 import java.awt.Color;
 import java.awt.Component;
 import java.util.*;
@@ -119,11 +121,13 @@ public final class RenderBuilder<C extends JComponent, E> {
         });
     }
 
-    private class SimpleTableCellRenderer implements TableCellRenderer, TableCellEditor, TreeCellEditor
+    private class SimpleTableCellRenderer implements TableCellRenderer, TableCellEditor, TreeCellRenderer, TreeCellEditor
     {
         private final DefaultTableCellRenderer _defaultRenderer = new DefaultTableCellRenderer();
+        private final DefaultTreeCellRenderer _defaultTreeRenderer = new DefaultTreeCellRenderer();
         private final BasicCellEditor _basicEditor = new BasicCellEditor();
         private @Nullable Component _lastCustomRenderer;
+
 
         public <T extends JComponent> Component _update(
             Function<@Nullable Object, Component> defaultRenderer,
@@ -143,6 +147,7 @@ public final class RenderBuilder<C extends JComponent, E> {
                 if (cell.renderer().isPresent()) {
                     choice = cell.renderer().get();
                     _lastCustomRenderer = choice;
+                    _setEditor(choice);
                 } else if (cell.presentationValue().isPresent()) {
                     choice = defaultRenderer.apply(cell.presentationValue().get());
                     _lastCustomRenderer = null;
@@ -155,6 +160,18 @@ public final class RenderBuilder<C extends JComponent, E> {
                     ((JComponent) choice).setToolTipText(String.join("; ", cell.toolTips()));
 
                 return choice;
+            }
+        }
+
+        private void _setEditor(Component choice) {
+            if ( _basicEditor.getComponent() == choice )
+                return;
+            if (choice instanceof JCheckBox) {
+                _basicEditor.setEditor((JCheckBox) choice);
+            } else if (choice instanceof JComboBox) {
+                _basicEditor.setEditor((JComboBox<?>) choice);
+            } else if (choice instanceof JTextField) {
+                _basicEditor.setEditor((JTextField) choice);
             }
         }
 
@@ -171,7 +188,7 @@ public final class RenderBuilder<C extends JComponent, E> {
                          localValue -> _defaultRenderer.getTableCellRendererComponent(table, localValue, isSelected, hasFocus, row, column),
                          CellDelegate.of(
                              _lastCustomRenderer,
-                             table, value, isSelected, hasFocus, false, row, column,
+                             table, value, isSelected, hasFocus, false, false, false, row, column,
                              () -> _defaultRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column)
                          )
                     );
@@ -189,8 +206,28 @@ public final class RenderBuilder<C extends JComponent, E> {
                          localValue -> _basicEditor.getTableCellEditorComponent(table, localValue, isSelected, row, column),
                          CellDelegate.of(
                              _lastCustomRenderer,
-                             table, value, isSelected, true, true, row, column,
+                             table, value, isSelected, true, true, false, false, row, column,
                              () -> _basicEditor.getTableCellEditorComponent(table, value, isSelected, row, column)
+                         )
+                    );
+        }
+
+        @Override
+        public Component getTreeCellRendererComponent(
+            final JTree            tree,
+            final @Nullable Object value,
+            final boolean          selected,
+            final boolean          expanded,
+            final boolean          leaf,
+            final int              row,
+            final boolean          hasFocus
+        ) {
+            return _update(
+                         localValue -> _defaultTreeRenderer.getTreeCellRendererComponent(tree, localValue, selected, expanded, leaf, row, hasFocus),
+                         CellDelegate.of(
+                             _lastCustomRenderer,
+                             tree, value, selected, hasFocus, false, expanded, leaf, row, 0,
+                             () -> _defaultTreeRenderer.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus)
                          )
                     );
         }
@@ -208,7 +245,7 @@ public final class RenderBuilder<C extends JComponent, E> {
                          localValue -> _basicEditor.getTreeCellEditorComponent(tree, localValue, isSelected, expanded, leaf, row),
                          CellDelegate.of(
                              _lastCustomRenderer, tree, value, isSelected,
-                             true, true, row, 0,
+                             true, true, expanded, leaf, row, 0,
                              () -> _basicEditor.getTreeCellEditorComponent(tree, value, isSelected, expanded, leaf, row)
                          )
                     );
@@ -275,7 +312,7 @@ public final class RenderBuilder<C extends JComponent, E> {
                 CellDelegate<O, Object> cell = CellDelegate.of(
                                                         _lastCustomRenderer,
                                                         _component, value, isSelected,
-                                                        hasFocus, false, row, 0,
+                                                        hasFocus, false, false, false, row, 0,
                                                         ()->_defaultRenderer.getListCellRendererComponent(list, value, row, isSelected, hasFocus)
                                                     );
 
