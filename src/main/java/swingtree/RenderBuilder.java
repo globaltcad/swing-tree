@@ -6,6 +6,7 @@ import swingtree.api.Configurator;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellRenderer;
 import java.awt.Color;
 import java.awt.Component;
 import java.util.*;
@@ -115,7 +116,10 @@ public final class RenderBuilder<C extends JComponent, E> {
         });
     }
 
-    private class SimpleTableCellRenderer extends DefaultTableCellRenderer {
+    private class SimpleTableCellRenderer implements TableCellRenderer
+    {
+        private final DefaultTableCellRenderer _defaultRenderer = new DefaultTableCellRenderer();
+
         @Override
         public Component getTableCellRendererComponent(
                 JTable           table,
@@ -127,13 +131,13 @@ public final class RenderBuilder<C extends JComponent, E> {
         ) {
             List<Configurator<CellDelegate<C, ?>>> interpreter = _find(value, _rendererLookup);
             if (interpreter.isEmpty())
-                return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                return _defaultRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
             else {
                 List<String> toolTips = new ArrayList<>();
                 CellDelegate<JTable, Object> cell = CellDelegate.of(
                                                             table, value, isSelected,
                                                             hasFocus, false, row, column,
-                                                            ()->SimpleTableCellRenderer.super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column)
+                                                            ()->_defaultRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column)
                                                         );
 
                 for ( Configurator<CellDelegate<C,?>> configurator : interpreter ) {
@@ -145,9 +149,9 @@ public final class RenderBuilder<C extends JComponent, E> {
                 if (cell.renderer().isPresent())
                     choice = cell.renderer().get();
                 else if (cell.presentationValue().isPresent())
-                    choice = super.getTableCellRendererComponent(table, cell.presentationValue().get(), isSelected, hasFocus, row, column);
+                    choice = _defaultRenderer.getTableCellRendererComponent(table, cell.presentationValue().get(), isSelected, hasFocus, row, column);
                 else
-                    choice = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                    choice = _defaultRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
                 if (!toolTips.isEmpty() && choice instanceof JComponent)
                     ((JComponent) choice).setToolTipText(String.join("; ", toolTips));
@@ -158,8 +162,10 @@ public final class RenderBuilder<C extends JComponent, E> {
 
     }
 
-    private class SimpleListCellRenderer<O extends C> extends DefaultListCellRenderer {
+    private class SimpleListCellRenderer<O extends C> implements ListCellRenderer
+    {
         private final O _component;
+        private final DefaultListCellRenderer _defaultRenderer = new DefaultListCellRenderer();
 
         private SimpleListCellRenderer(O component) {
             _component = Objects.requireNonNull(component);
@@ -175,12 +181,12 @@ public final class RenderBuilder<C extends JComponent, E> {
         ) {
             List<Configurator<CellDelegate<C, ?>>> interpreter = _find(value, _rendererLookup);
             if (interpreter.isEmpty())
-                return super.getListCellRendererComponent(list, value, row, isSelected, hasFocus);
+                return _defaultRenderer.getListCellRendererComponent(list, value, row, isSelected, hasFocus);
             else {
                 CellDelegate<O, Object> cell = CellDelegate.of(
                                                         _component, value, isSelected,
                                                         hasFocus, false, row, 0,
-                                                        ()->SimpleListCellRenderer.super.getListCellRendererComponent(list, value, row, isSelected, hasFocus)
+                                                        ()->_defaultRenderer.getListCellRendererComponent(list, value, row, isSelected, hasFocus)
                                                     );
 
                 for ( Configurator<CellDelegate<C,?>> configurator : interpreter ) {
@@ -192,9 +198,9 @@ public final class RenderBuilder<C extends JComponent, E> {
                 if (cell.renderer().isPresent())
                     choice = cell.renderer().get();
                 else if (cell.presentationValue().isPresent())
-                    choice = super.getListCellRendererComponent(list, cell.presentationValue().get(), row, isSelected, hasFocus);
+                    choice = _defaultRenderer.getListCellRendererComponent(list, cell.presentationValue().get(), row, isSelected, hasFocus);
                 else
-                    choice = super.getListCellRendererComponent(list, value, row, isSelected, hasFocus);
+                    choice = _defaultRenderer.getListCellRendererComponent(list, value, row, isSelected, hasFocus);
 
                 if (!cell.toolTips().isEmpty() && choice instanceof JComponent)
                     ((JComponent) choice).setToolTipText(String.join("; ", cell.toolTips()));
@@ -219,7 +225,7 @@ public final class RenderBuilder<C extends JComponent, E> {
         return cellRenderer;
     }
 
-    DefaultTableCellRenderer getForTable() {
+    TableCellRenderer getForTable() {
         _addDefaultRendering();
         if (JTable.class.isAssignableFrom(_componentType))
             return new SimpleTableCellRenderer();
