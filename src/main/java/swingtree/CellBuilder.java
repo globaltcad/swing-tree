@@ -14,7 +14,9 @@ import javax.swing.tree.TreeCellEditor;
 import javax.swing.tree.TreeCellRenderer;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -128,9 +130,13 @@ public final class CellBuilder<C extends JComponent, E> {
         private final BasicCellEditor _basicEditor = new BasicCellEditor();
         private @Nullable Component _lastCustomRenderer;
 
+        SimpleTableCellRenderer() {
+            _basicEditor.setEditor(new JTextField());
+        }
 
-        public <T extends JComponent> Component _update(
+        public <T extends JComponent> Component _updateAndGetComponent(
             Function<@Nullable Object, Component> defaultRenderer,
+            Consumer<@Nullable Component> saveComponent,
             CellDelegate<T, Object> cell
         ) {
             @Nullable Object value = cell.value().orElse(null);
@@ -146,14 +152,13 @@ public final class CellBuilder<C extends JComponent, E> {
                 Component choice;
                 if (cell.renderer().isPresent()) {
                     choice = cell.renderer().get();
-                    _lastCustomRenderer = choice;
-                    _setEditor(choice);
+                    saveComponent.accept(choice);
                 } else if (cell.presentationValue().isPresent()) {
                     choice = defaultRenderer.apply(cell.presentationValue().get());
-                    _lastCustomRenderer = null;
+                    saveComponent.accept(null);
                 } else {
                     choice = defaultRenderer.apply(value);
-                    _lastCustomRenderer = null;
+                    saveComponent.accept(null);
                 }
 
                 if (!cell.toolTips().isEmpty() && choice instanceof JComponent)
@@ -163,7 +168,7 @@ public final class CellBuilder<C extends JComponent, E> {
             }
         }
 
-        private void _setEditor(Component choice) {
+        private void _setEditor(@Nullable Component choice) {
             if ( _basicEditor.getComponent() == choice )
                 return;
             if (choice instanceof JCheckBox) {
@@ -175,6 +180,29 @@ public final class CellBuilder<C extends JComponent, E> {
             }
         }
 
+        private void _setRenderer(@Nullable Component choice) {
+            _lastCustomRenderer = choice;
+        }
+
+        private Component _fit(JTable table, int row, int column, Component renderer) {
+            Dimension minSize = renderer.getMinimumSize();
+            Dimension maxSize = renderer.getMaximumSize();
+            Dimension cellSize = table.getCellRect(row, column, false).getSize();
+            if ( maxSize.width > 0 && cellSize.width > maxSize.width ) {
+                table.getColumn(column).setMinWidth(cellSize.width);
+            }
+            if ( maxSize.height > 0 && cellSize.height > maxSize.height ) {
+                table.setRowHeight(row, cellSize.height);
+            }
+            if ( minSize.width > 0 && cellSize.width < minSize.width ) {
+                table.getColumn(column).setMinWidth(minSize.width);
+            }
+            if ( minSize.height > 0 && cellSize.height < minSize.height ) {
+                table.setRowHeight(row, minSize.height);
+            }
+            return renderer;
+        }
+
         @Override
         public Component getTableCellRendererComponent(
             final JTable           table,
@@ -184,13 +212,16 @@ public final class CellBuilder<C extends JComponent, E> {
             final int              row,
             final int              column
         ) {
-            return _update(
-                         localValue -> _defaultRenderer.getTableCellRendererComponent(table, localValue, isSelected, hasFocus, row, column),
-                         CellDelegate.of(
-                             _lastCustomRenderer,
-                             table, value, isSelected, hasFocus, false, false, false, row, column,
-                             () -> _defaultRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column)
-                         )
+            return _fit(table, row, column,
+                        _updateAndGetComponent(
+                             localValue -> _defaultRenderer.getTableCellRendererComponent(table, localValue, isSelected, hasFocus, row, column),
+                             this::_setRenderer,
+                             CellDelegate.of(
+                                 _lastCustomRenderer,
+                                 table, value, isSelected, hasFocus, false, false, false, row, column,
+                                 () -> _defaultRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column)
+                             )
+                        )
                     );
         }
 
@@ -202,13 +233,16 @@ public final class CellBuilder<C extends JComponent, E> {
             final int              row,
             final int              column
         ) {
-            return _update(
-                         localValue -> _basicEditor.getTableCellEditorComponent(table, localValue, isSelected, row, column),
-                         CellDelegate.of(
-                             _lastCustomRenderer,
-                             table, value, isSelected, true, true, false, false, row, column,
-                             () -> _basicEditor.getTableCellEditorComponent(table, value, isSelected, row, column)
-                         )
+            return _fit(table, row, column,
+                        _updateAndGetComponent(
+                             localValue -> _basicEditor.getTableCellEditorComponent(table, localValue, isSelected, row, column),
+                             this::_setEditor,
+                             CellDelegate.of(
+                                 _basicEditor.getComponent(),
+                                 table, value, isSelected, true, true, false, false, row, column,
+                                 () -> _basicEditor.getTableCellEditorComponent(table, value, isSelected, row, column)
+                             )
+                        )
                     );
         }
 
@@ -222,8 +256,9 @@ public final class CellBuilder<C extends JComponent, E> {
             final int              row,
             final boolean          hasFocus
         ) {
-            return _update(
+            return _updateAndGetComponent(
                          localValue -> _defaultTreeRenderer.getTreeCellRendererComponent(tree, localValue, selected, expanded, leaf, row, hasFocus),
+                         this::_setRenderer,
                          CellDelegate.of(
                              _lastCustomRenderer,
                              tree, value, selected, hasFocus, false, expanded, leaf, row, 0,
@@ -241,10 +276,11 @@ public final class CellBuilder<C extends JComponent, E> {
             final boolean          leaf,
             final int              row
         ) {
-            return _update(
+            return _updateAndGetComponent(
                          localValue -> _basicEditor.getTreeCellEditorComponent(tree, localValue, isSelected, expanded, leaf, row),
+                         this::_setEditor,
                          CellDelegate.of(
-                             _lastCustomRenderer, tree, value, isSelected,
+                             _basicEditor.getComponent(), tree, value, isSelected,
                              true, true, expanded, leaf, row, 0,
                              () -> _basicEditor.getTreeCellEditorComponent(tree, value, isSelected, expanded, leaf, row)
                          )
@@ -421,13 +457,26 @@ public final class CellBuilder<C extends JComponent, E> {
         _store(Object.class, cell -> true, _createDefaultTextRenderer(cell -> cell.valueAsString().orElse("")));
     }
 
+    static class InternalLabelForRendering extends JLabel {
+        InternalLabelForRendering(String text) {
+            super(text);
+            setOpaque(true);
+        }
+    }
 
     static <C extends JComponent, V> Configurator<CellDelegate<C, V>> _createDefaultTextRenderer(
             Function<CellDelegate<C, V>, String> renderer
     ) {
         return cell -> {
-            JLabel l = new JLabel(renderer.apply(cell));
-            l.setOpaque(true);
+            Component existing = cell.renderer().orElse(null);
+            InternalLabelForRendering l = (existing instanceof InternalLabelForRendering) ? (InternalLabelForRendering) existing : null;
+            if ( existing != null && l == null )
+                return cell; // The user has defined a custom renderer, so we don't touch it.
+
+            if ( l == null )
+                l = new InternalLabelForRendering(renderer.apply(cell));
+            else
+                l.setText(renderer.apply(cell));
 
             Color bg = null;
             Color fg = null;
