@@ -3,6 +3,7 @@ package swingtree;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import swingtree.api.Configurator;
 
 import javax.swing.JComponent;
 import java.awt.Color;
@@ -106,70 +107,224 @@ public final class CellDelegate<C extends JComponent, V>
         this.defaultRenderSource = Objects.requireNonNull(defaultRenderSource);
     }
 
-    public C getComponent() {
+    /**
+     *  Returns the owner of this cell, i.e. the component
+     *  which contains this cell, like a table, list or drop down.
+     *
+     * @return The owner of this cell, typically a table, list or drop down.
+     */
+    public C getOwner() {
         return owner;
     }
 
+    /**
+     *  Returns the value of this cell, which is the data
+     *  that this cell represents. The value is wrapped in an
+     *  {@link Optional} to indicate that the value may be null.
+     *  A cell value is typically a string, number or custom user object.
+     *
+     * @return An optional of the value of this cell, or an empty optional if the value is null.
+     */
     public Optional<V> value() {
         return Optional.ofNullable(value);
     }
 
+    /**
+     *  Returns the value of this cell as a string, if the value
+     *  is not null. If the value is null, then an empty optional
+     *  is returned.
+     *
+     * @return An optional of the value of this cell as a string,
+     *         or an empty optional if the value is null.
+     */
     public Optional<String> valueAsString() {
         return value().map(Object::toString);
     }
 
+    /**
+     *  The flag returned by this method indicates whether this cell
+     *  is selected or not. A cell is selected when the user interacts
+     *  with it, like clicking on it or navigating to it using the keyboard.
+     *  You may want to use this flag to change the appearance of the cell
+     *  when it is selected. For example, you may want to highlight the cell
+     *  by changing its background color.
+     *
+     * @return True if the cell is selected, false otherwise.
+     */
     public boolean isSelected() {
         return isSelected;
     }
 
+    /**
+     *  Just like any other component, a cell may have focus or not.
+     *  The focus is typically indicated by a border around the cell.
+     *  It is an important property to consider when designing your cell
+     *  renderer, as you may want to change the appearance of the cell
+     *  when it has focus.
+     *
+     *  @return True if the cell has focus, false otherwise.
+     */
     public boolean hasFocus() {
         return hasFocus;
     }
 
+    /**
+     *  This method returns true if the cell is currently being edited.
+     *  A cell is typically edited when the user double-clicks on it
+     *  or presses the F2 key. When a cell is being edited, then the cell
+     *  renderer wrapped by this cell will be used as an editor.
+     *  You may want to use this flag to change the appearance of the cell
+     *  when it is being edited. For example, you may want to show a text
+     *  field instead of a label when the cell is being edited.
+     *
+     * @return True if the cell is being edited, false otherwise.
+     *         Note that you can reliably say that when this flag
+     *         is true, then the cell builder is being used to construct
+     *         or maintain an editor.
+     */
     public boolean isEditing() {
         return isEditing;
     }
 
+    /**
+     *  This method returns true if the cell is expanded, i.e. if it
+     *  is a parent cell in a {@link javax.swing.JTree}.
+     *  You may want to use this flag to change the appearance of the cell
+     *  when it is expanded.You may, for example, want to show a different
+     *  icon when the cell is expanded.
+     *
+     * @return True if the cell is expanded, false otherwise.
+     */
     public boolean isExpanded() {
         return isExpanded;
     }
 
+    /**
+     *  This method returns true if the cell is a leaf, i.e. if it
+     *  is a child cell in a {@link javax.swing.JTree}.
+     *  You may want to use this flag to change the appearance of the cell
+     *  when it is a leaf. You may, for example, want to show a different
+     *  icon when the cell is a leaf.
+     *
+     * @return True if the cell is a leaf, false otherwise.
+     */
     public boolean isLeaf() {
         return isLeaf;
     }
 
+    /**
+     *  Exposes a list of tool tips that should be shown when the user
+     *  hovers over the cell. The tool tips are strings that provide
+     *  additional information about the cell to the user.
+     *
+     * @return An unmodifiable list of tool tips that should be shown when the user hovers over the cell.
+     */
     public List<String> toolTips() {
         return Collections.unmodifiableList(toolTips);
     }
 
+    /**
+     *  Gives you the row index of the cell in the table, list or drop down.
+     *  It tells you the location of the cell in the vertical direction.
+     *
+     * @return The row index of the cell in the table, list or drop down.
+     */
     public int row() {
         return row;
     }
 
+    /**
+     *  Gives you the column index of the cell in the table, list or drop down.
+     *  It tells you the location of the cell in the horizontal direction.
+     *
+     * @return The column index of the cell in the table, list or drop down.
+     */
     public int column() {
         return column;
     }
 
+    /**
+     *  Returns the renderer/editor of this cell, which is the component
+     *  that is used to render the cell to the user. The renderer
+     *  is typically a label, text field or some other custom component.
+     *  It is wrapped in an {@link Optional} to indicate
+     *  that the renderer may be null.<br>
+     *  Note that in case of the {@link CellDelegate#isEditing()} method
+     *  returning true, the component stored in this optional is used as an editor.
+     *  If the cell is not being edited, then the component is used as a renderer.<br>
+     *  Two components are persisted across multiple calls to the
+     *  {@link CellBuilder}s {@link RenderAs#as(Configurator)} method, one
+     *  for the renderer and one for the editor. <br>
+     *  Also note that not all types of components are suitable to
+     *  be used as editors. For example, a label is not suitable to be used as an editor.
+     *  Instead, you should use a text field or a combo box as an editor.
+     *
+     * @return An optional of the renderer of this cell, or an empty optional if the renderer is null.
+     *         In case of the {@link CellDelegate#isEditing()} method returning true,
+     *         the component stored in this optional is used as an editor.
+     *         The cell will remember the renderer and editor components across multiple calls
+     *         to the {@link CellBuilder}s {@link RenderAs#as(Configurator)} method.
+     */
     public Optional<Component> renderer() {
         return Optional.ofNullable(cellRenderer);
     }
 
-    public CellDelegate<C, V> withRenderer(Component component) {
-        return new CellDelegate<>(
-            owner,
-            value,
-            isSelected,
-            hasFocus,
-            isEditing,
-            isExpanded,
-            isLeaf,
-            row,
-            column,
-            component,
-            toolTips,
-            presentationValue,
-            defaultRenderSource
-        );
+    /**
+     *  Allows you to configure the renderer of this cell by providing
+     *  a configurator lambda, which takes an {@link Optional} of the
+     *  current renderer and returns a (potentially updated) {@link Optional}
+     *  of the new renderer. <br>
+     *  The benefit of using this method is that you can easily initialize
+     *  the renderer with a new component through the {@link Optional#or(Supplier)}
+     *  method, and then update it in every refresh coll inside the
+     *  {@link Optional#map(java.util.function.Function)} method. <br>
+     *  This may look like the following:
+     *  <pre>{@code
+     *      UI.table()
+     *      .withRenderer( it -> it
+     *          .when(Object.class).as( cell -> cell
+     *              .withRenderer( renderer -> renderer
+     *                  .or( () -> UI.textField().get(JTextField.class) )
+     *                  .map( r -> { r.setText(cell.valueAsString().orElse("")); return r; } )
+     *              )
+     *          )
+     *      )
+     *      // ...
+     *  }</pre>
+     *  In this example, the renderer is initialized with a text field
+     *  if it is not present, and then the text field is continuously updated
+     *  with the value of the cell. <br>
+     *
+     * @param configurator The {@link Configurator} lambda which takes an {@link Optional}
+     *                     of the current renderer/editor and returns a (potentially updated or initialized)
+     *                     {@link Optional} of the new renderer/editor.
+     * @return An updated cell delegate object with the new renderer/editor.
+     *        If the configurator returns an empty optional, then the renderer/editor
+     *        of the cell will be reset to null.
+     */
+    public CellDelegate<C,V> withRenderer( Configurator<Optional<Component>> configurator ) {
+        Optional<Component> newRenderer = configurator.configure(renderer());
+        return _withRenderer(newRenderer.orElse(null));
+    }
+
+    /**
+     *  Creates an updated cell delegate object with the given component
+     *  as the renderer/editor of the cell. The renderer/editor is the
+     *  component that is used to render the cell to the user. It is
+     *  typically a label, text field or some other custom component.
+     *  <br>
+     *  Note that in case of the {@link CellDelegate#isEditing()} method
+     *  returning true, this {@link CellDelegate} is used for constructing
+     *  or maintaining an editor. If the cell is not being edited, then
+     *  this {@link CellDelegate} is used for rendering.<br>
+     *  Either way, the component is memorized across multiple calls to the
+     *  {@link CellBuilder}s {@link RenderAs#as(Configurator)} method.
+     *
+     * @param component The component to be used as the renderer/editor of the cell.
+     * @return An updated cell delegate object with the new renderer/editor.
+     */
+    public CellDelegate<C, V> withRenderer( Component component ) {
+        return _withRenderer(component);
     }
 
     public CellDelegate<C, V> withRenderer( Consumer<Graphics2D> painter ) {
@@ -212,6 +367,42 @@ public final class CellDelegate<C extends JComponent, V>
             @Override
             public void firePropertyChange(String propertyName, boolean oldValue, boolean newValue) { }
         });
+    }
+
+    /**
+     *   Creates an updated cell delegate object with the default cell
+     *   renderer component based on the {@link javax.swing.DefaultListCellRenderer},
+     *   {@link javax.swing.table.DefaultTableCellRenderer} and {@link javax.swing.tree.DefaultTreeCellRenderer}
+     *   classes.
+     *
+     * @return An updated cell delegate object with the default renderer component.
+     *         This will override any custom renderer that was previously specified.
+     */
+    public CellDelegate<C, V> withDefaultRenderer() {
+        try {
+            return this.withRenderer(this.defaultRenderSource.get());
+        } catch (Exception e) {
+            log.error("Failed to create default renderer!", e);
+        }
+        return this;
+    }
+
+    public CellDelegate<C, V> _withRenderer(@Nullable Component component) {
+        return new CellDelegate<>(
+            owner,
+            value,
+            isSelected,
+            hasFocus,
+            isEditing,
+            isExpanded,
+            isLeaf,
+            row,
+            column,
+            component,
+            toolTips,
+            presentationValue,
+            defaultRenderSource
+        );
     }
 
     public CellDelegate<C, V> withToolTip( String toolTip ) {
@@ -275,12 +466,4 @@ public final class CellDelegate<C extends JComponent, V>
         );
     }
 
-    public CellDelegate<C, V> withDefaultRenderer() {
-        try {
-            return this.withRenderer(this.defaultRenderSource.get());
-        } catch (Exception e) {
-            log.error("Failed to create default renderer!", e);
-        }
-        return this;
-    }
 }

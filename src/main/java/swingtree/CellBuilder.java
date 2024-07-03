@@ -481,8 +481,8 @@ public final class CellBuilder<C extends JComponent, E> {
             Color bg = null;
             Color fg = null;
 
-            if ( cell.getComponent() instanceof JList ) {
-                JList<?> jList = (JList<?>) cell.getComponent();
+            if ( cell.getOwner() instanceof JList ) {
+                JList<?> jList = (JList<?>) cell.getOwner();
                 bg = jList.getSelectionBackground();
                 fg = jList.getSelectionForeground();
                 if ( bg == null )
@@ -491,8 +491,8 @@ public final class CellBuilder<C extends JComponent, E> {
                     fg = UIManager.getColor("List.selectionForeground");
             }
 
-            if ( cell.getComponent() instanceof JTable ) {
-                JTable jTable = (JTable) cell.getComponent();
+            if ( cell.getOwner() instanceof JTable ) {
+                JTable jTable = (JTable) cell.getOwner();
                 bg = jTable.getSelectionBackground();
                 fg = jTable.getSelectionForeground();
                 if ( bg == null )
@@ -501,10 +501,10 @@ public final class CellBuilder<C extends JComponent, E> {
                     fg = UIManager.getColor("Table.selectionForeground");
             }
 
-            if ( bg == null && cell.getComponent() != null )
-                bg = cell.getComponent().getBackground();
-            if ( fg == null && cell.getComponent() != null )
-                fg = cell.getComponent().getForeground();
+            if ( bg == null && cell.getOwner() != null )
+                bg = cell.getOwner().getBackground();
+            if ( fg == null && cell.getOwner() != null )
+                fg = cell.getOwner().getForeground();
 
             if ( bg == null )
                 bg = UIManager.getColor( "ComboBox.selectionBackground" );
@@ -533,8 +533,8 @@ public final class CellBuilder<C extends JComponent, E> {
             }
             else {
                 Color normalBg = Color.WHITE;
-                if (  cell.getComponent() != null )
-                    normalBg = cell.getComponent().getBackground();
+                if (  cell.getOwner() != null )
+                    normalBg = cell.getOwner().getBackground();
 
                 // We need to make sure the color is a user color, not a LaF color:
                 if ( normalBg != null )
@@ -550,8 +550,8 @@ public final class CellBuilder<C extends JComponent, E> {
                         normalBg = darker(normalBg);
                 }
                 if ( bg != null ) l.setBackground( normalBg );
-                if ( fg != null && cell.getComponent() != null )
-                    l.setForeground( cell.getComponent().getForeground() );
+                if ( fg != null && cell.getOwner() != null )
+                    l.setForeground( cell.getOwner().getForeground() );
             }
 
             // TODO:
