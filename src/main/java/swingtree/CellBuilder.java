@@ -1,6 +1,7 @@
 package swingtree;
 
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
 import swingtree.api.Configurator;
 
 import javax.swing.*;
@@ -51,6 +52,8 @@ import java.util.function.Predicate;
  * @param <E> The type of the value of the cell.
  */
 public final class CellBuilder<C extends JComponent, E> {
+
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(CellBuilder.class);
 
     private final Class<C> _componentType;
     private final Class<E> _elementType;
@@ -151,7 +154,7 @@ public final class CellBuilder<C extends JComponent, E> {
                 }
                 Component choice;
                 if (cell.view().isPresent()) {
-                    choice = cell.view().get();
+                    choice = cell.view().orElseThrow();
                     saveComponent.accept(choice);
                 } else if (cell.presentationValue().isPresent()) {
                     choice = defaultRenderer.apply(cell.presentationValue().get());
@@ -185,20 +188,24 @@ public final class CellBuilder<C extends JComponent, E> {
         }
 
         private Component _fit(JTable table, int row, int column, Component renderer) {
-            Dimension minSize = renderer.getMinimumSize();
-            Dimension maxSize = renderer.getMaximumSize();
-            Dimension cellSize = table.getCellRect(row, column, false).getSize();
-            if ( maxSize.width > 0 && cellSize.width > maxSize.width ) {
-                table.getColumn(column).setMinWidth(cellSize.width);
-            }
-            if ( maxSize.height > 0 && cellSize.height > maxSize.height ) {
-                table.setRowHeight(row, cellSize.height);
-            }
-            if ( minSize.width > 0 && cellSize.width < minSize.width ) {
-                table.getColumn(column).setMinWidth(minSize.width);
-            }
-            if ( minSize.height > 0 && cellSize.height < minSize.height ) {
-                table.setRowHeight(row, minSize.height);
+            try {
+                Dimension minSize = renderer.getMinimumSize();
+                Dimension maxSize = renderer.getMaximumSize();
+                Dimension cellSize = table.getCellRect(row, column, false).getSize();
+                if ( maxSize.width > 0 && cellSize.width > maxSize.width ) {
+                    table.getColumn(column).setMinWidth(cellSize.width);
+                }
+                if ( maxSize.height > 0 && cellSize.height > maxSize.height ) {
+                    table.setRowHeight(row, cellSize.height);
+                }
+                if ( minSize.width > 0 && cellSize.width < minSize.width ) {
+                    table.getColumn(column).setMinWidth(minSize.width);
+                }
+                if ( minSize.height > 0 && cellSize.height < minSize.height ) {
+                    table.setRowHeight(row, minSize.height);
+                }
+            } catch (Exception e) {
+                log.error("Failed to fit cell size", e);
             }
             return renderer;
         }
@@ -359,7 +366,7 @@ public final class CellBuilder<C extends JComponent, E> {
                 }
                 Component choice;
                 if (cell.view().isPresent()) {
-                    choice = cell.view().get();
+                    choice = cell.view().orElseThrow();
                     _lastCustomRenderer = choice;
                 } else if (cell.presentationValue().isPresent()) {
                     choice = _defaultRenderer.getListCellRendererComponent(list, cell.presentationValue().get(), row, isSelected, hasFocus);
@@ -468,7 +475,7 @@ public final class CellBuilder<C extends JComponent, E> {
             Function<CellDelegate<C, V>, String> renderer
     ) {
         return cell -> {
-            Component existing = cell.view().orElse(null);
+            Component existing = cell.view().orElseNullable(null);
             InternalLabelForRendering l = (existing instanceof InternalLabelForRendering) ? (InternalLabelForRendering) existing : null;
             if ( existing != null && l == null )
                 return cell; // The user has defined a custom renderer, so we don't touch it.

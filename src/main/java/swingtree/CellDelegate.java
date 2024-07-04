@@ -12,6 +12,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -289,27 +290,27 @@ public final class CellDelegate<C extends JComponent, V>
      *         The cell will remember the renderer and editor components across multiple calls
      *         to the {@link CellBuilder}s {@link RenderAs#as(Configurator)} method.
      */
-    public Optional<Component> view() {
-        return Optional.ofNullable(view);
+    public OptionalUI<Component> view() {
+        return OptionalUI.ofNullable(view);
     }
 
     /**
      *  Allows you to configure the view of this cell by providing
-     *  a configurator lambda, which takes an {@link Optional} of the
-     *  current renderer and returns a (potentially updated) {@link Optional}
+     *  a configurator lambda, which takes an {@link OptionalUI} of the
+     *  current renderer and returns a (potentially updated) {@link OptionalUI}
      *  of the new renderer. <br>
      *  The benefit of using this method is that you can easily initialize
-     *  the renderer with a new component through the {@link Optional#or(Supplier)}
+     *  the renderer with a new component through the {@link OptionalUI#orGet(Supplier)}
      *  method, and then update it in every refresh coll inside the
-     *  {@link Optional#map(java.util.function.Function)} method. <br>
+     *  {@link OptionalUI#update(java.util.function.Function)} method. <br>
      *  This may look like the following:
      *  <pre>{@code
      *      UI.table()
      *      .withRenderer( it -> it
      *          .when(Object.class).as( cell -> cell
      *              .view( comp -> comp
-     *                  .or( () -> UI.textField().get(JTextField.class) )
-     *                  .map( r -> { r.setText(cell.valueAsString().orElse("")); return r; } )
+     *                  .update( r -> { r.setText(cell.valueAsString().orElse("")); return r; } )
+     *                  .orGet( () -> UI.textField().get(JTextField.class) )
      *              )
      *          )
      *      )
@@ -319,16 +320,16 @@ public final class CellDelegate<C extends JComponent, V>
      *  if it is not present, and then the text field is continuously updated
      *  with the value of the cell. <br>
      *
-     * @param configurator The {@link Configurator} lambda which takes an {@link Optional}
-     *                     of the current renderer/editor and returns a (potentially updated or initialized)
-     *                     {@link Optional} of the new renderer/editor.
-     * @return An updated cell delegate object with the new renderer/editor.
-     *        If the configurator returns an empty optional, then the renderer/editor
+     * @param configurator The {@link Configurator} lambda which takes an {@link OptionalUI}
+     *                     of the current view and returns a (potentially updated or initialized)
+     *                     {@link OptionalUI} of the new view.
+     * @return An updated cell delegate object with the new view.
+     *        If the configurator returns an empty optional, then the view
      *        of the cell will be reset to null.
      */
-    public CellDelegate<C,V> view( Configurator<Optional<Component>> configurator ) {
-        Optional<Component> newRenderer = configurator.configure(view());
-        return _withRenderer(newRenderer.orElse(null));
+    public CellDelegate<C,V> view( Configurator<OptionalUI<Component>> configurator ) {
+        OptionalUI<Component> newRenderer = configurator.configure(view());
+        return _withRenderer(newRenderer.orElseNullable(null));
     }
 
     /**
@@ -344,8 +345,9 @@ public final class CellDelegate<C extends JComponent, V>
      *  Either way, the component is memorized across multiple calls to the
      *  {@link CellBuilder}s {@link RenderAs#as(Configurator)} method.
      *
-     * @param component The component to be used as the renderer/editor of the cell.
-     * @return An updated cell delegate object with the new renderer/editor.
+     * @param component The component to be used as the view of the cell.
+     * @return An updated cell delegate object with the new view to
+     *          serve as the renderer/editor of the cell.
      */
     public CellDelegate<C, V> view( Component component ) {
         return _withRenderer(component);

@@ -1,5 +1,6 @@
 package swingtree;
 
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.awt.*;
@@ -28,7 +29,7 @@ import java.util.function.Supplier;
  * class; use of identity-sensitive operations (including reference equality
  * ({@code ==}), identity hash code, or synchronization) on instances of
  * {@code OptionalUI} may have unpredictable results and should be avoided.
- *
+ * <p>
  * Note that
  * {@code OptionalUI} is primarily intended for use as a SwingTree query return type where
  * there is a clear need to represent "no result," and where returning {@code null} as well
@@ -91,7 +92,7 @@ public final class OptionalUI<C extends Component> {
      *         is non-{@code null}, otherwise an empty {@code OptionalUI}
      */
     @SuppressWarnings("unchecked")
-    static <T extends Component> OptionalUI<T> ofNullable(T component) {
+    static <T extends Component> OptionalUI<T> ofNullable(@Nullable T component) {
         return component == null ? (OptionalUI<T>) EMPTY
                 : new OptionalUI<>(component);
     }
@@ -108,7 +109,6 @@ public final class OptionalUI<C extends Component> {
      * {@code false}.
      *
      * @return  {@code true} if a component is not present, otherwise {@code false}
-     * @since   11
      */
     public boolean isEmpty() { return _component == null; }
 
@@ -135,7 +135,6 @@ public final class OptionalUI<C extends Component> {
      * @throws NullPointerException if a component is present and the given action
      *         is {@code null}, or no component is present and the given empty-based
      *         action is {@code null}.
-     * @since 9
      */
     public void ifPresentOrElse( Consumer<? super C> action, Runnable emptyAction ) {
         UI.run(()->{
@@ -209,6 +208,33 @@ public final class OptionalUI<C extends Component> {
     }
 
     /**
+     *  An alternative to {@link #map(Function)} that maps to the same type in yet another
+     *  {@code OptionalUI} instance. This is useful for chaining UI centric operations.
+     *  The mapping function should return an {@code OptionalUI} instance.
+     *
+     * @param mapper The mapping function to apply to a component, if present.
+     * @return an {@code OptionalUI} describing the result of applying a mapping
+     *         function to the UI component of this {@code OptionalUI}, if a component is
+     *         present, otherwise an empty {@code OptionalUI}
+     * @throws NullPointerException if the mapping function is {@code null}
+     */
+    public OptionalUI<C> update( Function<C, C> mapper ) {
+        Objects.requireNonNull(mapper);
+        if ( !this.isPresent() ) return this;
+        else {
+            if ( UI.thisIsUIThread() )
+                return OptionalUI.ofNullable(mapper.apply(_component));
+            else {
+                try {
+                    return UI.runAndGet(() -> update(mapper));
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        }
+    }
+
+    /**
      * If a component is present, returns an {@code OptionalUI} describing the component,
      * otherwise returns an {@code OptionalUI} produced by the supplying function.
      * Use this to provide for alternative UI tree querying operations.
@@ -220,7 +246,6 @@ public final class OptionalUI<C extends Component> {
      *         {@code OptionalUI} produced by the supplying function.
      * @throws NullPointerException if the supplying function is {@code null} or
      *         produces a {@code null} result
-     * @since 9
      */
     public OptionalUI<C> or(Supplier<? extends OptionalUI<? extends C>> supplier) {
         Objects.requireNonNull(supplier);
@@ -233,6 +258,28 @@ public final class OptionalUI<C extends Component> {
     }
 
     /**
+     * If a component is present, returns an {@code OptionalUI} describing the component,
+     * otherwise returns an {@code OptionalUI} produced by the supplying function.
+     * Use this to provide for alternative UI tree querying operations.
+     *
+     * @param supplier the supplying function that produces an {@code OptionalUI}
+     *        to be returned
+     * @return returns an {@code OptionalUI} describing the component of this
+     *         {@code OptionalUI}, if a component is present, otherwise an
+     *         {@code OptionalUI} produced by the supplying function.
+     * @throws NullPointerException if the supplying function is {@code null} or
+     *         produces a {@code null} result
+     */
+    public OptionalUI<C> orGet( Supplier<? extends C> supplier ) {
+        Objects.requireNonNull(supplier);
+        if ( this.isPresent() ) return this;
+        else {
+            C c = supplier.get();
+            return OptionalUI.ofNullable(c);
+        }
+    }
+
+    /**
      * If a component is present, returns the component, otherwise returns
      * {@code other} or throws a null pointer exception if {@code other} is
      * {@code null}.
@@ -241,7 +288,7 @@ public final class OptionalUI<C extends Component> {
      *        May not be {@code null}.
      * @return the component, if present, otherwise {@code other}
      */
-    public C orElseNullable( C other ) {
+    public @Nullable C orElseNullable( @Nullable C other ) {
         if ( !UI.thisIsUIThread() )
             throw new RuntimeException("The UI component may only be accessed by the UI thread!");
         return _component != null ? _component : other;
@@ -255,7 +302,7 @@ public final class OptionalUI<C extends Component> {
      *        May not be {@code null}, use {@link #orElseNullable(Component)} if it can be null.
      * @return the component, if present, otherwise {@code other}
      */
-    public C orElse(C other) {
+    public C orElse( @NonNull C other ) {
         if ( !UI.thisIsUIThread() )
             throw new RuntimeException("The UI component may only be accessed by the UI thread!");
         Objects.requireNonNull(other);
@@ -295,7 +342,6 @@ public final class OptionalUI<C extends Component> {
      *
      * @return the non-{@code null} component described by this {@code OptionalUI}
      * @throws NoSuchElementException if no component is present
-     * @since 10
      */
     public C orElseThrow() {
         if ( !UI.thisIsUIThread() )
@@ -309,7 +355,7 @@ public final class OptionalUI<C extends Component> {
     /**
      * If a component is present, returns the component, otherwise throws an exception
      * produced by the exception supplying function.
-     *
+     * <p>
      * Note that
      * A method reference to the exception constructor with an empty argument
      * list can be used as the supplier. For example,
@@ -368,7 +414,7 @@ public final class OptionalUI<C extends Component> {
      * Returns a non-empty string representation of this {@code OptionalUI}
      * suitable for debugging.  The exact presentation format is unspecified and
      * may vary between implementations and versions.
-     *
+     * <p>
      * If a component is present the result must include its string representation
      * in the result.  Empty and present {@code OptionalUI}s must be unambiguously
      * differentiable.
