@@ -15,15 +15,37 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
- * This class models the state of an individual table/list/drop down cell alongside
+ * This class models the state of an individual table/tree/list/drop down cell alongside
  * various properties that a cell should have, like for example
- * the value of the cell, its position within the table
- * as well as a renderer in the form of a AWT {@link Component}
- * which may or not be replaced or modified.
+ * the value of the cell, its position within the component
+ * as well as a renderer/editor in the form of an AWT {@link Component}
+ * which may or may not be replaced or modified.
  * <br>
+ * The {@link CellDelegate} is exposed to the {@link RenderAs#as(Configurator)}
+ * method after a {@link CellBuilder#when(Class)} call as part of various
+ * cell builder APIs like: <br>
+ * <ul>
+ *     <li>{@link UIForTable#withRenderer(Configurator)}</li>
+ *     <li>{@link UIForTable#withRendererForColumn(String, Configurator)} </li>
+ *     <li>{@link UIForTable#withRendererForColumn(int, Configurator)} </li>
+ *     <li>{@link UIForList#withRenderer(Configurator)} </li>
+ * </ul>
  * When configuring your cell, you may use methods like
  * {@link CellDelegate#withRenderer(Component)} or {@link CellDelegate#withRenderer(Consumer)}
  * to define how the cell should be rendered.
+ * <p>
+ * Note that the {@link CellDelegate#isEditing()} flag determines
+ * two important modes in which this class is exposed to {@link RenderAs#as(Configurator)}.
+ * If the {@code isEditing()} is true, then you are expected to configure a
+ * cell editor component for the {@link CellDelegate#renderer()} property.
+ * If the {@code isEditing()} is false, then you are expected to configure a simple
+ * cell renderer component for the {@link CellDelegate#renderer()} property.<br>
+ * Note that for each state of the {@code isEditing()} flag, the renderer component
+ * is persisted across multiple calls to the {@link RenderAs#as(Configurator)} method.
+ * <p>
+ * This design allows you to easily define and continuously update both a
+ * renderer and an editor for a cell on a single call to the {@link RenderAs#as(Configurator)} method, and then
+ * to update the renderer or editor in every subsequent call to the same method.
  *
  * @param <V> The value type of the entry of this {@link CellDelegate}.
  */
