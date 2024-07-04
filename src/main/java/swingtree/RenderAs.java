@@ -78,7 +78,7 @@ public final class RenderAs<C extends JComponent, E, T extends E>
      * @return The builder API allowing method chaining.
      */
     public CellBuilder<C, E> asComponent(Function<CellDelegate<C ,T>, Component> renderer ) {
-        return this.as( cell -> cell.withRenderer(renderer.apply(cell)) );
+        return this.as( cell -> cell.view(renderer.apply(cell)) );
     }
 
     /**
@@ -111,7 +111,7 @@ public final class RenderAs<C extends JComponent, E, T extends E>
      * @return The builder API allowing method chaining.
      */
     public CellBuilder<C, E> render(BiConsumer<CellDelegate<C ,T>, Graphics2D> renderer ) {
-        return this.as( cell -> cell.withRenderer(new JComponent( ){
+        return this.as( cell -> cell.view(new JComponent( ){
             @Override public void paintComponent(Graphics g) {
                 try {
                     renderer.accept(cell, (Graphics2D) g);

@@ -150,8 +150,8 @@ public final class CellBuilder<C extends JComponent, E> {
                         cell = newCell;
                 }
                 Component choice;
-                if (cell.renderer().isPresent()) {
-                    choice = cell.renderer().get();
+                if (cell.view().isPresent()) {
+                    choice = cell.view().get();
                     saveComponent.accept(choice);
                 } else if (cell.presentationValue().isPresent()) {
                     choice = defaultRenderer.apply(cell.presentationValue().get());
@@ -358,8 +358,8 @@ public final class CellBuilder<C extends JComponent, E> {
                         cell = newCell;
                 }
                 Component choice;
-                if (cell.renderer().isPresent()) {
-                    choice = cell.renderer().get();
+                if (cell.view().isPresent()) {
+                    choice = cell.view().get();
                     _lastCustomRenderer = choice;
                 } else if (cell.presentationValue().isPresent()) {
                     choice = _defaultRenderer.getListCellRendererComponent(list, cell.presentationValue().get(), row, isSelected, hasFocus);
@@ -468,7 +468,7 @@ public final class CellBuilder<C extends JComponent, E> {
             Function<CellDelegate<C, V>, String> renderer
     ) {
         return cell -> {
-            Component existing = cell.renderer().orElse(null);
+            Component existing = cell.view().orElse(null);
             InternalLabelForRendering l = (existing instanceof InternalLabelForRendering) ? (InternalLabelForRendering) existing : null;
             if ( existing != null && l == null )
                 return cell; // The user has defined a custom renderer, so we don't touch it.
@@ -571,7 +571,7 @@ public final class CellBuilder<C extends JComponent, E> {
 
             if ( border != null ) l.setBorder(border);
 
-            return cell.withRenderer(l);
+            return cell.view(l);
         };
     }
 

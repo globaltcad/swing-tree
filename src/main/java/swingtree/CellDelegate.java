@@ -18,7 +18,7 @@ import java.util.function.Supplier;
  * This class models the state of an individual table/tree/list/drop down cell alongside
  * various properties that a cell should have, like for example
  * the value of the cell, its position within the component
- * as well as a renderer/editor in the form of an AWT {@link Component}
+ * as well as a {@link CellDelegate#view()} (renderer/editor) in the form of an AWT {@link Component}
  * which may or may not be replaced or modified.
  * <br>
  * The {@link CellDelegate} is exposed to the {@link RenderAs#as(Configurator)}
@@ -31,16 +31,16 @@ import java.util.function.Supplier;
  *     <li>{@link UIForList#withRenderer(Configurator)} </li>
  * </ul>
  * When configuring your cell, you may use methods like
- * {@link CellDelegate#withRenderer(Component)} or {@link CellDelegate#withRenderer(Consumer)}
+ * {@link CellDelegate#view(Component)} or {@link CellDelegate#withRenderer(Consumer)}
  * to define how the cell should be rendered.
  * <p>
  * Note that the {@link CellDelegate#isEditing()} flag determines
  * two important modes in which this class is exposed to {@link RenderAs#as(Configurator)}.
  * If the {@code isEditing()} is true, then you are expected to configure a
- * cell editor component for the {@link CellDelegate#renderer()} property.
+ * cell editor component for the {@link CellDelegate#view()} property.
  * If the {@code isEditing()} is false, then you are expected to configure a simple
- * cell renderer component for the {@link CellDelegate#renderer()} property.<br>
- * Note that for each state of the {@code isEditing()} flag, the renderer component
+ * cell renderer component as the {@link CellDelegate#view()} property.<br>
+ * Note that for each state of the {@code isEditing()} flag, the view component
  * is persisted across multiple calls to the {@link RenderAs#as(Configurator)} method.
  * <p>
  * This design allows you to easily define and continuously update both a
@@ -93,7 +93,7 @@ public final class CellDelegate<C extends JComponent, V>
     private final boolean             isLeaf;
     private final int                 row;
     private final int                 column;
-    private final @Nullable Component cellRenderer;
+    private final @Nullable Component view;
     private final List<String>        toolTips;
     private final @Nullable Object    presentationValue;
     private final Supplier<Component> defaultRenderSource;
@@ -123,7 +123,7 @@ public final class CellDelegate<C extends JComponent, V>
         this.isLeaf              = isLeaf;
         this.row                 = row;
         this.column              = column;
-        this.cellRenderer        = renderer;
+        this.view = renderer;
         this.toolTips            = Objects.requireNonNull(toolTips);
         this.presentationValue   = presentationValue;
         this.defaultRenderSource = Objects.requireNonNull(defaultRenderSource);
@@ -267,32 +267,34 @@ public final class CellDelegate<C extends JComponent, V>
 
     /**
      *  Returns the renderer/editor of this cell, which is the component
-     *  that is used to render the cell to the user. The renderer
+     *  that is used to display the cell to the user. The view
      *  is typically a label, text field or some other custom component.
-     *  It is wrapped in an {@link Optional} to indicate
-     *  that the renderer may be null.<br>
+     *  It is wrapped in an {@link Optional} to clearly indicate
+     *  that it may be null.<br>
      *  Note that in case of the {@link CellDelegate#isEditing()} method
      *  returning true, the component stored in this optional is used as an editor.
      *  If the cell is not being edited, then the component is used as a renderer.<br>
      *  Two components are persisted across multiple calls to the
      *  {@link CellBuilder}s {@link RenderAs#as(Configurator)} method, one
-     *  for the renderer and one for the editor. <br>
+     *  for the renderer and one for the editor. (So technically there are two views)<br>
      *  Also note that not all types of components are suitable to
      *  be used as editors. For example, a label is not suitable to be used as an editor.
-     *  Instead, you should use a text field or a combo box as an editor.
+     *  Instead, you should use a text field or a combo box as an editor.<br>
+     *  If a component is not suitable to be used as an editor, then it
+     *  will simply be ignored in exchange for a default editor.
      *
-     * @return An optional of the renderer of this cell, or an empty optional if the renderer is null.
+     * @return An optional of the view of this cell, or an empty optional if the view is null.
      *         In case of the {@link CellDelegate#isEditing()} method returning true,
      *         the component stored in this optional is used as an editor.
      *         The cell will remember the renderer and editor components across multiple calls
      *         to the {@link CellBuilder}s {@link RenderAs#as(Configurator)} method.
      */
-    public Optional<Component> renderer() {
-        return Optional.ofNullable(cellRenderer);
+    public Optional<Component> view() {
+        return Optional.ofNullable(view);
     }
 
     /**
-     *  Allows you to configure the renderer of this cell by providing
+     *  Allows you to configure the view of this cell by providing
      *  a configurator lambda, which takes an {@link Optional} of the
      *  current renderer and returns a (potentially updated) {@link Optional}
      *  of the new renderer. <br>
@@ -305,7 +307,7 @@ public final class CellDelegate<C extends JComponent, V>
      *      UI.table()
      *      .withRenderer( it -> it
      *          .when(Object.class).as( cell -> cell
-     *              .withRenderer( renderer -> renderer
+     *              .view( comp -> comp
      *                  .or( () -> UI.textField().get(JTextField.class) )
      *                  .map( r -> { r.setText(cell.valueAsString().orElse("")); return r; } )
      *              )
@@ -313,7 +315,7 @@ public final class CellDelegate<C extends JComponent, V>
      *      )
      *      // ...
      *  }</pre>
-     *  In this example, the renderer is initialized with a text field
+     *  In this example, the view is initialized with a text field
      *  if it is not present, and then the text field is continuously updated
      *  with the value of the cell. <br>
      *
@@ -324,14 +326,14 @@ public final class CellDelegate<C extends JComponent, V>
      *        If the configurator returns an empty optional, then the renderer/editor
      *        of the cell will be reset to null.
      */
-    public CellDelegate<C,V> withRenderer( Configurator<Optional<Component>> configurator ) {
-        Optional<Component> newRenderer = configurator.configure(renderer());
+    public CellDelegate<C,V> view( Configurator<Optional<Component>> configurator ) {
+        Optional<Component> newRenderer = configurator.configure(view());
         return _withRenderer(newRenderer.orElse(null));
     }
 
     /**
      *  Creates an updated cell delegate object with the given component
-     *  as the renderer/editor of the cell. The renderer/editor is the
+     *  as the view (renderer/editor) of the cell. view is the
      *  component that is used to render the cell to the user. It is
      *  typically a label, text field or some other custom component.
      *  <br>
@@ -345,12 +347,12 @@ public final class CellDelegate<C extends JComponent, V>
      * @param component The component to be used as the renderer/editor of the cell.
      * @return An updated cell delegate object with the new renderer/editor.
      */
-    public CellDelegate<C, V> withRenderer( Component component ) {
+    public CellDelegate<C, V> view( Component component ) {
         return _withRenderer(component);
     }
 
     public CellDelegate<C, V> withRenderer( Consumer<Graphics2D> painter ) {
-        return withRenderer(new Component() {
+        return view(new Component() {
             @Override
             public void paint(Graphics g) {
                 super.paint(g);
@@ -400,9 +402,9 @@ public final class CellDelegate<C extends JComponent, V>
      * @return An updated cell delegate object with the default renderer component.
      *         This will override any custom renderer that was previously specified.
      */
-    public CellDelegate<C, V> withDefaultRenderer() {
+    public CellDelegate<C, V> withDefaultView() {
         try {
-            return this.withRenderer(this.defaultRenderSource.get());
+            return this.view(this.defaultRenderSource.get());
         } catch (Exception e) {
             log.error("Failed to create default renderer!", e);
         }
@@ -440,7 +442,7 @@ public final class CellDelegate<C extends JComponent, V>
             isLeaf,
             row,
             column,
-            cellRenderer,
+            view,
             newToolTips,
             presentationValue,
             defaultRenderSource
@@ -481,7 +483,7 @@ public final class CellDelegate<C extends JComponent, V>
             isLeaf,
             row,
             column,
-            cellRenderer,
+            view,
             toolTips,
             toBeShown,
             defaultRenderSource
