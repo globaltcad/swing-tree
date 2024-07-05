@@ -2,6 +2,8 @@ package swingtree;
 
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.Component;
 import java.util.NoSuchElementException;
@@ -44,6 +46,9 @@ import java.util.function.Supplier;
  * @param <C> the type of component held by this instance
  */
 public final class OptionalUI<C extends Component> {
+
+    private static final Logger log = LoggerFactory.getLogger(OptionalUI.class);
+
     /**
      * Common instance for {@code empty()}.
      */
@@ -138,10 +143,14 @@ public final class OptionalUI<C extends Component> {
      */
     public void ifPresentOrElse( Consumer<? super C> action, Runnable emptyAction ) {
         UI.run(()->{
-            if ( _component != null )
-                action.accept(_component);
-            else
-                emptyAction.run();
+            try {
+                if (_component != null)
+                    action.accept(_component);
+                else
+                    emptyAction.run();
+            } catch (Exception e) {
+                log.error("Error performing action on UI component of OptionalUI instance.", e);
+            }
         });
     }
 
@@ -161,16 +170,24 @@ public final class OptionalUI<C extends Component> {
         if (!isPresent()) {
             return this;
         } else {
-            if ( !UI.thisIsUIThread() ) {
-                try {
-                    return UI.runAndGet(() -> filter(predicate));
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+            try {
+                if (!UI.thisIsUIThread()) {
+                    try {
+                        return UI.runAndGet(() -> filter(predicate));
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                } else
+                    return predicate.test(_component) ? this : empty();
+            } catch (Exception e) {
+                log.error(
+                    "Error filtering UI component of OptionalUI instance. " +
+                    "Returning current OptionalUI instance instead.",
+                    e
+                );
             }
-            else
-                return predicate.test(_component) ? this : empty();
         }
+        return this;
     }
 
     /**
@@ -192,19 +209,28 @@ public final class OptionalUI<C extends Component> {
         Objects.requireNonNull(mapper);
         if ( !this.isPresent() ) return Optional.empty();
         else {
-            if ( UI.thisIsUIThread() )
-                return Optional.ofNullable(mapper.apply(_component));
-            else {
-                try {
-                    Optional<U> opt = UI.runAndGet(() -> map(mapper));
-                    if ( opt.isPresent() && (opt.get() instanceof Component || opt.get() instanceof UIForAnySwing) )
-                        throw new RuntimeException("A Swing component may not leak to another thread!");
-                    else return opt;
-                } catch (Exception ex) {
-                    throw new RuntimeException(ex);
+            try {
+                if (UI.thisIsUIThread())
+                    return Optional.ofNullable(mapper.apply(_component));
+                else {
+                    try {
+                        Optional<U> opt = UI.runAndGet(() -> map(mapper));
+                        if (opt.isPresent() && (opt.get() instanceof Component || opt.get() instanceof UIForAnySwing))
+                            throw new RuntimeException("A Swing component may not leak to another thread!");
+                        else return opt;
+                    } catch (Exception ex) {
+                        throw new RuntimeException(ex);
+                    }
                 }
+            } catch (Exception ex) {
+                log.error(
+                    "Error mapping OptionalUI to Optional instance! " +
+                    "Returning current OptionalUI instance instead.",
+                    ex
+                );
             }
         }
+        return Optional.empty();
     }
 
     /**
@@ -222,15 +248,24 @@ public final class OptionalUI<C extends Component> {
         Objects.requireNonNull(mapper);
         if ( !this.isPresent() ) return this;
         else {
-            if ( UI.thisIsUIThread() )
-                return OptionalUI.ofNullable(mapper.apply(_component));
-            else {
-                try {
-                    return UI.runAndGet(() -> update(mapper));
-                } catch (Exception ex) {
-                    throw new RuntimeException(ex);
+            try {
+                if (UI.thisIsUIThread())
+                    return OptionalUI.ofNullable(mapper.apply(_component));
+                else {
+                    try {
+                        return UI.runAndGet(() -> update(mapper));
+                    } catch (Exception ex) {
+                        throw new RuntimeException(ex);
+                    }
                 }
+            } catch (Exception ex) {
+                log.error(
+                    "Error creating an updated OptionalUI instance! " +
+                    "Returning current OptionalUI instance instead.",
+                    ex
+                );
             }
+            return this;
         }
     }
 
@@ -256,24 +291,33 @@ public final class OptionalUI<C extends Component> {
         Objects.requireNonNull(mapper);
         if ( !this.isPresent() ) return this;
         else {
-            if ( UI.thisIsUIThread() ) {
-                Objects.requireNonNull(_component);
-                // Check if the component is assignable to the given type
-                if ( type.isAssignableFrom(_component.getClass()) ) {
-                    @SuppressWarnings("unchecked")
-                    U u = (U) _component;
-                    return OptionalUI.ofNullable(mapper.apply(u));
+            try {
+                if (UI.thisIsUIThread()) {
+                    Objects.requireNonNull(_component);
+                    // Check if the component is assignable to the given type
+                    if (type.isAssignableFrom(_component.getClass())) {
+                        @SuppressWarnings("unchecked")
+                        U u = (U) _component;
+                        return OptionalUI.ofNullable(mapper.apply(u));
+                    } else {
+                        return this;
+                    }
                 } else {
-                    return this;
+                    try {
+                        return UI.runAndGet(() -> updateIf(type, mapper));
+                    } catch (Exception ex) {
+                        throw new RuntimeException(ex);
+                    }
                 }
-            } else {
-                try {
-                    return UI.runAndGet(() -> updateIf(type, mapper));
-                } catch (Exception ex) {
-                    throw new RuntimeException(ex);
-                }
+            } catch (Exception ex) {
+                log.error(
+                    "Error creating an updated OptionalUI instance! " +
+                    "Returning current OptionalUI instance instead.",
+                    ex
+                );
             }
         }
+        return this;
     }
 
     /**
@@ -314,10 +358,19 @@ public final class OptionalUI<C extends Component> {
         Objects.requireNonNull(supplier);
         if ( this.isPresent() ) return this;
         else {
-            @SuppressWarnings("unchecked")
-            OptionalUI<C> r = (OptionalUI<C>) supplier.get();
-            return Objects.requireNonNull(r);
+            try {
+                @SuppressWarnings("unchecked")
+                OptionalUI<C> r = (OptionalUI<C>) supplier.get();
+                return Objects.requireNonNull(r);
+            } catch (Exception e) {
+                log.error(
+                    "Error creating fetching alternative OptionalUI instance! " +
+                    "Returning current OptionalUI instead.",
+                    e
+                );
+            }
         }
+        return this;
     }
 
     /**
@@ -339,9 +392,18 @@ public final class OptionalUI<C extends Component> {
         Objects.requireNonNull(supplier);
         if ( this.isPresent() ) return this;
         else {
-            C c = supplier.get();
-            return OptionalUI.ofNullable(c);
+            try {
+                C c = supplier.get();
+                return OptionalUI.ofNullable(c);
+            } catch (Exception e) {
+                log.error(
+                    "Error creating fetching alternative UI component! " +
+                    "Returning current OptionalUI instead.",
+                    e
+                );
+            }
         }
+        return this;
     }
 
     /**
@@ -371,9 +433,18 @@ public final class OptionalUI<C extends Component> {
                 return this;
         else
         {
-            C c = supplier.get();
-            return OptionalUI.ofNullable(c);
+            try {
+                C c = supplier.get();
+                return OptionalUI.ofNullable(c);
+            } catch (Exception e) {
+                log.error(
+                    "Error creating fetching alternative UI component! " +
+                    "Returning current OptionalUI instead.",
+                    e
+                );
+            }
         }
+        return this;
     }
 
     /**
@@ -394,9 +465,18 @@ public final class OptionalUI<C extends Component> {
         Objects.requireNonNull(supplier);
         if ( this.isPresent() ) return this;
         else {
-            UIForAnything<?,A,B> ui = supplier.get();
-            return OptionalUI.ofNullable(ui.get(ui.getType()));
+            try {
+                UIForAnything<?, A, B> ui = supplier.get();
+                return OptionalUI.ofNullable(ui.get(ui.getType()));
+            } catch (Exception e) {
+                log.error(
+                    "Error creating fetching alternative UI component! " +
+                    "Returning current OptionalUI instead.",
+                    e
+                );
+            }
         }
+        return this;
     }
 
     /**
@@ -425,9 +505,18 @@ public final class OptionalUI<C extends Component> {
                 return this;
         else
         {
-            UIForAnything<?,A,B> ui = supplier.get();
-            return OptionalUI.ofNullable(ui.get(ui.getType()));
+            try {
+                UIForAnything<?, A, B> ui = supplier.get();
+                return OptionalUI.ofNullable(ui.get(ui.getType()));
+            } catch (Exception e) {
+                log.error(
+                    "Error creating fetching alternative UI component! " +
+                    "Returning current OptionalUI instead.",
+                    e
+                );
+            }
         }
+        return this;
     }
 
     /**
