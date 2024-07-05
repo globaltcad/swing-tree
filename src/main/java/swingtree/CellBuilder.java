@@ -389,17 +389,17 @@ public final class CellBuilder<C extends JComponent, E> {
                 return Optional.empty();
             JComboBox<?> comboBox = (JComboBox<?>) _component;
 
-            CellDelegate<JComboBox, Object> cell = CellDelegate.of(
+            CellDelegate<JComboBox<?>, Object> cell = CellDelegate.of(
                 null, comboBox, null, false, false, true, false, false, 0, 0, () -> null
             );
-            List<Configurator<CellDelegate<C, ?>>> interpreter = _find(null, _rendererLookup);
+            List<Configurator<CellDelegate<C, ?>>> interpreter = _findAll(_rendererLookup);
             if (interpreter.isEmpty())
                 return Optional.empty();
             else {
                 for ( Configurator<CellDelegate<C,?>> configurator : interpreter ) {
-                    CellDelegate newCell = configurator.configure((CellDelegate)cell);
+                    CellDelegate<JComboBox<?>,Object> newCell = configurator.configure((CellDelegate)cell);
                     if ( newCell != null )
-                        cell = newCell;
+                        cell = newCell.view( v -> v.update( c -> c instanceof JTextField ? c : null ) );
                 }
 
                 if (!cell.view().isPresent())
@@ -427,7 +427,19 @@ public final class CellBuilder<C extends JComponent, E> {
             if (e.getKey().isAssignableFrom(type))
                 cellRenderer.addAll(e.getValue());
         }
-        // We reverse the cell renderers, so that the most specific one is first
+        // We reverse the cell renderers, so that the most un-specific one is first
+        Collections.reverse(cellRenderer);
+        return cellRenderer;
+    }
+
+    private static <C extends JComponent> List<Configurator<CellDelegate<C,?>>> _findAll(
+            Map<Class<?>, List<Configurator<CellDelegate<C, ?>>>> rendererLookup
+    ) {
+        List<Configurator<CellDelegate<C, ?>>> cellRenderer = new ArrayList<>();
+        for (List<Configurator<CellDelegate<C, ?>>> e : rendererLookup.values()) {
+            cellRenderer.addAll(e);
+        }
+        // We reverse the cell renderers, so that the most un-specific one is first
         Collections.reverse(cellRenderer);
         return cellRenderer;
     }
@@ -506,6 +518,9 @@ public final class CellBuilder<C extends JComponent, E> {
             Function<CellDelegate<C, V>, String> renderer
     ) {
         return cell -> {
+            if ( cell.isEditing() )
+                return cell;
+
             Component existing = cell.view().orElseNullable(null);
             InternalLabelForRendering l = (existing instanceof InternalLabelForRendering) ? (InternalLabelForRendering) existing : null;
             if ( existing != null && l == null )

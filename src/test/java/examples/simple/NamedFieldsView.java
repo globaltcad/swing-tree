@@ -13,6 +13,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import java.awt.Color;
+import java.time.DayOfWeek;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -173,6 +174,21 @@ public class NamedFieldsView extends JPanel {
                     .border((3*state.progress()), Color.BLACK)
                     .marginLeft( (int)(conf.component().getWidth()*state.progress()/2) )
                     .marginRight( (int)(conf.component().getWidth()*state.regress()/2) )
+                )
+            )
+        )
+        .add(
+            UI.comboBox(DayOfWeek.values()).isEditableIf(true)
+            .withCell( it -> it.when(DayOfWeek.class).as( cell -> cell
+                    .view( comp -> comp
+                        .orGet(JTextField::new)
+                        .updateIf(cell.isEditing(), v -> {
+                            JTextField tf = new JTextField();
+                            tf.setBackground(Color.YELLOW);
+                            tf.setText(cell.valueAsString().orElse(""));
+                            return tf;
+                        })
+                    )
                 )
             )
         )

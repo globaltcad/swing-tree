@@ -277,6 +277,27 @@ public final class OptionalUI<C extends Component> {
     }
 
     /**
+     *  An alternative to {@link #update(Function)} and {@link #map(Function)} that maps to
+     *  the same type in yet another {@code OptionalUI} instance but with the
+     *  difference that the mapping function is only applied if the component is
+     *  present <b>and the supplied boolean is true</b>. <br>
+     *  It is a conditional mapping operation.
+     *
+     * @param condition The boolean to check before applying the mapping function.
+     * @param mapper The mapping function to apply to a component, if present and the condition is true.
+     * @return An {@code OptionalUI} describing the result of applying a mapping
+     *        function to the UI component of this {@code OptionalUI}, if a component is
+     *        present and the condition is true, otherwise an empty {@code OptionalUI}.
+     * @throws NullPointerException if the mapping function is {@code null}
+     */
+    public OptionalUI<C> updateIf( boolean condition, Function<C, C> mapper ) {
+        Objects.requireNonNull(mapper);
+        if ( !condition ) return this;
+        else
+            return update(mapper);
+    }
+
+    /**
      * If a component is present, returns an {@code OptionalUI} describing the component,
      * otherwise returns an {@code OptionalUI} produced by the supplying function.
      * Use this to provide alternative UI components.
@@ -493,4 +514,5 @@ public final class OptionalUI<C extends Component> {
                 ? String.format("OptionalUI[%s]", _component)
                 : "OptionalUI.empty";
     }
+
 }
