@@ -320,10 +320,10 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
                 ._this();
     }
 
-    public final <V extends E> UIForCombo<E,C> _withRenderer( CellBuilder<C,V> cellBuilder) {
-        NullUtil.nullArgCheck(cellBuilder, "renderBuilder", CellBuilder.class);
+    public final <V extends E> UIForCombo<E,C> _withRendererAndEditor(CellBuilder<C,V> cellBuilder) {
+        NullUtil.nullArgCheck(cellBuilder, "cellBuilder", CellBuilder.class);
         return _with( thisComponent -> {
-                    cellBuilder.buildForCombo((C)thisComponent, false);
+                    cellBuilder.buildForCombo((C)thisComponent, true);
                 })
                 ._this();
     }
@@ -368,7 +368,7 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
             return this;
         }
         Objects.requireNonNull(render);
-        return _withRenderer(render);
+        return _withRendererAndEditor(render);
     }
 
     /**

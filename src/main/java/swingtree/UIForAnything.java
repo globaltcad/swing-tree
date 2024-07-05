@@ -1,6 +1,8 @@
 package swingtree;
 
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sprouts.*;
 import swingtree.api.Peeker;
 import swingtree.style.ComponentExtension;
@@ -34,6 +36,8 @@ import java.util.function.Supplier;
  */
 public abstract class UIForAnything<I, C extends E, E extends Component>
 {
+    private static final Logger log = LoggerFactory.getLogger(UIForAnything.class);
+
     private interface Ref<T> {
         static <T> Ref<T> of(Reference<T> ref) {
             return ref::get;
@@ -306,7 +310,34 @@ public abstract class UIForAnything<I, C extends E, E extends Component>
                     "The type of the component wrapped by this builder is '" + _state().componentType() + "', " +
                     "but the provided type is '" + type + "' which is not assignable from '" + _state().componentType() + "'."
                 );
-        return getComponent();
+
+        if ( !UI.thisIsUIThread() ) {
+            boolean isCoupled       = _state().eventProcessor() == EventProcessor.COUPLED;
+            boolean isCoupledStrict = _state().eventProcessor() == EventProcessor.COUPLED_STRICT;
+
+            if ( !isCoupled && !isCoupledStrict )
+                throw new IllegalStateException(
+                        "This UI is configured to be decoupled from the application thread, " +
+                        "which means that it can only be modified from the EDT. " +
+                        "Please use 'UI.run(()->...)' method to execute your modifications on the EDT."
+                    );
+
+            String currentThreadName = Optional.ofNullable(Thread.currentThread().getName()).orElse("");
+
+            if ( !currentThreadName.trim().equalsIgnoreCase("test worker") )
+                log.warn(
+                    "This UI is being built on thread '" + currentThreadName + "', " +
+                    "which is not the EDT (GUI thread). This may lead to unexpected behavior! " +
+                    "Please make sure to build your UI on the EDT.\n" +
+                    "Consider taking a look at 'UI.run(()->...)', 'UI.runAndGet(()->...)', 'UI.runLater(()->...)', " +
+                    "among other methods to ensure that your UI is built on the EDT.\n" +
+                    "Running 'UI.runAndGet(()->...)' for you now...",
+                    new Throwable()
+                );
+
+            return UI.runAndGet(()->_state().component());
+        }
+        return _state().component();
     }
 
     /**

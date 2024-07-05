@@ -126,7 +126,7 @@ public final class CellBuilder<C extends JComponent, E> {
         });
     }
 
-    private class SimpleTableCellRenderer implements TableCellRenderer, TableCellEditor, TreeCellRenderer, TreeCellEditor
+    class SimpleTableCellRenderer implements TableCellRenderer, TableCellEditor, TreeCellRenderer, TreeCellEditor
     {
         private final DefaultTableCellRenderer _defaultRenderer = new DefaultTableCellRenderer();
         private final DefaultTreeCellRenderer _defaultTreeRenderer = new DefaultTreeCellRenderer();
@@ -432,11 +432,12 @@ public final class CellBuilder<C extends JComponent, E> {
         return cellRenderer;
     }
 
-    TableCellRenderer getForTable() {
+    SimpleTableCellRenderer getForTable() {
         _addDefaultRendering();
-        if (JTable.class.isAssignableFrom(_componentType))
-            return new SimpleTableCellRenderer();
-        else
+        if (JTable.class.isAssignableFrom(_componentType)) {
+            SimpleTableCellRenderer renderer = new SimpleTableCellRenderer();
+            return renderer;
+        } else
             throw new IllegalArgumentException("Renderer was set up to be used for a JTable!");
     }
 
