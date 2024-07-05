@@ -16,6 +16,8 @@ import sprouts.Vars
 import javax.swing.DefaultComboBoxModel
 import javax.swing.JComboBox
 import javax.swing.JList
+import java.awt.Color
+import java.time.DayOfWeek
 import java.util.function.Supplier
 
 import static swingtree.UI.comboBox
@@ -495,7 +497,7 @@ class Combo_Box_Specification extends Specification
             as a basis for various kinds of ways to model the combo box
             state and also how to render them.
         """
-        given : 'We create a combo box that is bound to the property.'
+        given : 'We create a combo box from the UI supplier.'
             var ui = uiSupplier.get()
         and : 'We build a combo box component.'
             var combo = ui.get(JComboBox)
@@ -555,6 +557,49 @@ class Combo_Box_Specification extends Specification
                 { UI.comboBox(Var.of(Animal.CAT), Var.of(Animal.values()), a -> a.name().toLowerCase()) },
                 { UI.comboBox(Var.of(Animal.CAT), Val.of(Animal.values()), a -> a.name().toLowerCase()) }
             ]
+    }
+
+    def 'Use `withCell(Configurator)` to configure both a renderer and editor for you combobox.'()
+    {
+        reportInfo """
+            The `withCell(Configurator)` method constitutes a useful API point
+            which exposes you to a fluent API for configuring which kind of item
+            should be rendered using which kind of renderer and editor.
+            
+            The `Configurator` lambda passed to the `withCell` method receives
+            a fluent API for defining which kind of item should be rendered
+            using which kind of renderer and editor.
+            
+            So this may look like this:
+            ```java
+                .when(Animal.class).as( cell -> ... )
+                .when(String.class).as( cell -> ... )
+                //...
+            ```
+            And inside this inner `Configurator` lambda you are exposed
+            to a delegate object of a particular cell in the combo box.
+            You may update and return this cell with a view component
+            used for either rendering, editing or both.
+        """
+        given : 'We create a combo box for the days of the week and a custom cell configuration.'
+            var ui =
+                        UI.comboBox(DayOfWeek.values())
+                        .withCell( it -> it
+                            .when(DayOfWeek.class).as( cell -> cell
+                                .view( comp -> comp
+                                    .orGetUI({UI.textField().withBackground(Color.MAGENTA)})
+                                )
+                            )
+                        )
+        and : 'We build the combo box.'
+            var combo = ui.get(JComboBox)
+        and : 'We get the renderer and editor supplier.'
+            var renderer = combo.renderer
+            var editor = combo.editor
+        expect :
+            renderer != null
+            editor != null
+
     }
 
 }

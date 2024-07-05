@@ -143,17 +143,18 @@ public class NamedFieldsView extends JPanel {
                 .withCell( it -> it
                     .when(Object.class).as( cell -> cell
                         .view( comp -> comp
-                        .update( r -> r instanceof JLabel ? null : r )
+                        .updateIf(JLabel.class, r -> null )
+                        .updateIf(JTextField.class, tf -> {
+                            tf.setText(cell.valueAsString().orElse("") );
+                            return tf;
+                        })
                         .update( r -> {
-                            if ( r instanceof JTextField )
-                                ((JTextField)r).setText(cell.valueAsString().orElse(""));
                             r.setBackground(cell.hasFocus() ? Color.YELLOW : Color.WHITE);
                             return r;
                         })
-                        .orGet(()->
+                        .orGetUI(()->
                            UI.textField()
                            .withMinHeight(30)
-                           .get(JTextField.class)
                         ))
                     )
                 )

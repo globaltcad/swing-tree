@@ -11,7 +11,7 @@ import java.awt.event.*;
 import java.util.EventObject;
 import java.util.Objects;
 
-final class BasicCellEditor extends AbstractCellEditor implements TableCellEditor, TreeCellEditor {
+final class InternalCellEditor extends AbstractCellEditor implements TableCellEditor, TreeCellEditor {
 
 
     /** The Swing component being edited. */
@@ -93,7 +93,7 @@ final class BasicCellEditor extends AbstractCellEditor implements TableCellEdito
                 if (comboBox.isEditable()) {
                     // Commit edited value.
                     comboBox.actionPerformed(new ActionEvent(
-                            BasicCellEditor.this, 0, ""));
+                            InternalCellEditor.this, 0, ""));
                 }
                 return super.stopCellEditing();
             }
@@ -305,7 +305,7 @@ final class BasicCellEditor extends AbstractCellEditor implements TableCellEdito
          * @see #stopCellEditing
          */
         public void actionPerformed(ActionEvent e) {
-            BasicCellEditor.this.stopCellEditing();
+            InternalCellEditor.this.stopCellEditing();
         }
 
         /**
@@ -314,7 +314,7 @@ final class BasicCellEditor extends AbstractCellEditor implements TableCellEdito
          * @see #stopCellEditing
          */
         public void itemStateChanged(ItemEvent e) {
-            BasicCellEditor.this.stopCellEditing();
+            InternalCellEditor.this.stopCellEditing();
         }
     }
 

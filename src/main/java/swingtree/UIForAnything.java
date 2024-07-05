@@ -32,7 +32,7 @@ import java.util.function.Supplier;
  * @param <C> The type parameter representing the concrete component type which this builder is responsible for building.
  * @param <E> The component type parameter which ought to be built in some way.
  */
-abstract class UIForAnything<I, C extends E, E extends Component>
+public abstract class UIForAnything<I, C extends E, E extends Component>
 {
     private interface Ref<T> {
         static <T> Ref<T> of(Reference<T> ref) {

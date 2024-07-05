@@ -3,7 +3,7 @@ package swingtree;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
-import java.awt.*;
+import java.awt.Component;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
@@ -235,9 +235,51 @@ public final class OptionalUI<C extends Component> {
     }
 
     /**
+     *  An alternative to {@link #update(Function)} and {@link #map(Function)} that maps to
+     *  the same type in yet another {@code OptionalUI} instance but with the
+     *  difference that the mapping function is only applied if the component is
+     *  present <b>and assignable to the given type</b>. <br>
+     *  It is a type conditional mapping operation.
+     *
+     * @param type The type to check if the component is assignable to.
+     * @param mapper The mapping function to apply to a component of the given type, if present.
+     * @return An {@code OptionalUI} describing the result of applying a mapping
+     *        function to the UI component of this {@code OptionalUI}, if a component is
+     *        present and the component is assignable to the given type, otherwise an
+     *        empty {@code OptionalUI}.
+     * @param <U> The type of the component returned from the mapping function.
+     * @throws NullPointerException if the mapping function is {@code null}
+     * @throws NullPointerException if the given type is {@code null}
+     */
+    public <U extends C> OptionalUI<C> updateIf(Class<U> type, Function<U, U> mapper) {
+        Objects.requireNonNull(type);
+        Objects.requireNonNull(mapper);
+        if ( !this.isPresent() ) return this;
+        else {
+            if ( UI.thisIsUIThread() ) {
+                Objects.requireNonNull(_component);
+                // Check if the component is assignable to the given type
+                if ( type.isAssignableFrom(_component.getClass()) ) {
+                    @SuppressWarnings("unchecked")
+                    U u = (U) _component;
+                    return OptionalUI.ofNullable(mapper.apply(u));
+                } else {
+                    return this;
+                }
+            } else {
+                try {
+                    return UI.runAndGet(() -> updateIf(type, mapper));
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        }
+    }
+
+    /**
      * If a component is present, returns an {@code OptionalUI} describing the component,
      * otherwise returns an {@code OptionalUI} produced by the supplying function.
-     * Use this to provide for alternative UI tree querying operations.
+     * Use this to provide alternative UI components.
      *
      * @param supplier the supplying function that produces an {@code OptionalUI}
      *        to be returned
@@ -247,7 +289,7 @@ public final class OptionalUI<C extends Component> {
      * @throws NullPointerException if the supplying function is {@code null} or
      *         produces a {@code null} result
      */
-    public OptionalUI<C> or(Supplier<? extends OptionalUI<? extends C>> supplier) {
+    public OptionalUI<C> or( Supplier<? extends OptionalUI<? extends C>> supplier ) {
         Objects.requireNonNull(supplier);
         if ( this.isPresent() ) return this;
         else {
@@ -259,8 +301,9 @@ public final class OptionalUI<C extends Component> {
 
     /**
      * If a component is present, returns an {@code OptionalUI} describing the component,
-     * otherwise returns an {@code OptionalUI} produced by the supplying function.
-     * Use this to provide for alternative UI tree querying operations.
+     * otherwise returns a {@code OptionalUI} containing the component
+     * supplied by the given function.
+     * Use this to define alternative UI components.
      *
      * @param supplier the supplying function that produces an {@code OptionalUI}
      *        to be returned
@@ -276,6 +319,29 @@ public final class OptionalUI<C extends Component> {
         else {
             C c = supplier.get();
             return OptionalUI.ofNullable(c);
+        }
+    }
+
+    /**
+     * If a component is present, returns an {@code OptionalUI} describing the component,
+     * otherwise returns a {@code OptionalUI} containing the component built by the UI declaration
+     * inside the supplying function.
+     * Use this to provide alternative UI components.
+     *
+     * @param supplier the supplying function that produces a UI declaration
+     *                 to be used if no component is present.
+     * @return returns an {@code OptionalUI} describing the component of this
+     *         {@code OptionalUI}, if a component is present, otherwise an
+     *         {@code OptionalUI} produced by the supplying function.
+     * @throws NullPointerException if the supplying function is {@code null} or
+     *         produces a {@code null} result
+     */
+    public <A extends B, B extends C> OptionalUI<C> orGetUI( Supplier<UIForAnything<?,A,B>> supplier ) {
+        Objects.requireNonNull(supplier);
+        if ( this.isPresent() ) return this;
+        else {
+            UIForAnything<?,A,B> ui = supplier.get();
+            return OptionalUI.ofNullable(ui.get(ui.getType()));
         }
     }
 

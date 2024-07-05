@@ -130,7 +130,7 @@ public final class CellBuilder<C extends JComponent, E> {
     {
         private final DefaultTableCellRenderer _defaultRenderer = new DefaultTableCellRenderer();
         private final DefaultTreeCellRenderer _defaultTreeRenderer = new DefaultTreeCellRenderer();
-        private final BasicCellEditor _basicEditor = new BasicCellEditor();
+        private final InternalCellEditor _basicEditor = new InternalCellEditor();
         private @Nullable Component _lastCustomRenderer;
 
         SimpleTableCellRenderer() {
@@ -334,6 +334,7 @@ public final class CellBuilder<C extends JComponent, E> {
     {
         private final O _component;
         private final DefaultListCellRenderer _defaultRenderer = new DefaultListCellRenderer();
+        //private final ComboBoxEditor _basicEditor = new ComboBoxEditor();
         private @Nullable Component _lastCustomRenderer;
 
         private SimpleListCellRenderer(O component) {
@@ -382,6 +383,38 @@ public final class CellBuilder<C extends JComponent, E> {
                 return choice;
             }
         }
+
+        Optional<ComboBoxEditor> establishEditor() {
+            if ( !( _component instanceof JComboBox ) )
+                return Optional.empty();
+            JComboBox<?> comboBox = (JComboBox<?>) _component;
+
+            CellDelegate<JComboBox, Object> cell = CellDelegate.of(
+                null, comboBox, null, false, false, true, false, false, 0, 0, () -> null
+            );
+            List<Configurator<CellDelegate<C, ?>>> interpreter = _find(null, _rendererLookup);
+            if (interpreter.isEmpty())
+                return Optional.empty();
+            else {
+                for ( Configurator<CellDelegate<C,?>> configurator : interpreter ) {
+                    CellDelegate newCell = configurator.configure((CellDelegate)cell);
+                    if ( newCell != null )
+                        cell = newCell;
+                }
+
+                if (!cell.view().isPresent())
+                    return Optional.empty();
+
+                Component choice = cell.view().orElseThrow();
+
+                if ( !(choice instanceof JTextField) )
+                    return Optional.empty();
+
+                JTextField textField = (JTextField) choice;
+
+                return Optional.of(new InternalComboBoxCellEditor(textField));
+            }
+        }
     }
 
     private static <C extends JComponent> List<Configurator<CellDelegate<C, ?>>> _find(
@@ -425,11 +458,13 @@ public final class CellBuilder<C extends JComponent, E> {
      * @param list The list for which the renderer is to be built.
      * @return The new {@link ListCellRenderer} instance specific to the given list.
      */
-    ListCellRenderer<E> buildForList( C list ) {
+    void buildForList( C list ) {
         _addDefaultRendering();
-        if (JList.class.isAssignableFrom(_componentType))
-            return (ListCellRenderer<E>) new SimpleListCellRenderer<>(list);
-        else if (JComboBox.class.isAssignableFrom(_componentType))
+        if (JList.class.isAssignableFrom(_componentType)) {
+            SimpleListCellRenderer<C> renderer = new SimpleListCellRenderer<>(list);
+            JList<E> jList = (JList<E>) list;
+            jList.setCellRenderer(renderer);
+        } else if (JComboBox.class.isAssignableFrom(_componentType))
             throw new IllegalArgumentException(
                     "Renderer was set up to be used for a JList! (not " + _componentType.getSimpleName() + ")"
             );
@@ -439,21 +474,16 @@ public final class CellBuilder<C extends JComponent, E> {
             );
     }
 
-    /**
-     * Like many things in the SwingTree library, this class is
-     * essentially a convenient builder for a {@link ListCellRenderer}.
-     * This internal method actually builds the {@link ListCellRenderer} instance,
-     * see {@link UIForList#withCell(swingtree.api.Configurator)} for more details
-     * about how to use this class as pat of the main API.
-     *
-     * @param comboBox The combo box for which the renderer is to be built.
-     * @return The new {@link ListCellRenderer} instance specific to the given combo box.
-     */
-    ListCellRenderer<E> buildForCombo(C comboBox) {
+    void buildForCombo(C comboBox, boolean establishEditorAlso) {
         _addDefaultRendering();
-        if (JComboBox.class.isAssignableFrom(_componentType))
-            return (ListCellRenderer<E>) new SimpleListCellRenderer<>(comboBox);
-        else
+        if (JComboBox.class.isAssignableFrom(_componentType)) {
+            SimpleListCellRenderer<C> renderer = new SimpleListCellRenderer<>(comboBox);
+            JComboBox<E> combo = (JComboBox<E>) comboBox;
+            combo.setRenderer(renderer);
+            if (establishEditorAlso) {
+                renderer.establishEditor().ifPresent(combo::setEditor);
+            }
+        } else
             throw new IllegalArgumentException(
                     "Renderer was set up to be used for a JComboBox! (not " + _componentType.getSimpleName() + ")"
             );
