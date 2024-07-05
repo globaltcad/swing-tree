@@ -153,7 +153,7 @@ public class NamedFieldsView extends JPanel {
                             r.setBackground(cell.hasFocus() ? Color.YELLOW : Color.WHITE);
                             return r;
                         })
-                        .orGetUI(()->
+                        .orGetUi(()->
                            UI.textField()
                            .withMinHeight(30)
                         ))

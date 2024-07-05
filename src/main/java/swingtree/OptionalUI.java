@@ -321,13 +321,14 @@ public final class OptionalUI<C extends Component> {
     }
 
     /**
-     * If a component is present, returns an {@code OptionalUI} describing the component,
-     * otherwise returns a {@code OptionalUI} containing the component
-     * supplied by the given function.
+     * If no component is present, the supplying function is called to provide an
+     * alternative UI component to be used in place of the missing component.
+     * Otherwise, returns a {@code OptionalUI} containing the current component
+     * and the supplying function is not called.
      * Use this to define alternative UI components.
      *
-     * @param supplier the supplying function that produces an {@code OptionalUI}
-     *        to be returned
+     * @param supplier the supplying function that produces a UI component to be
+     *                 used if no component is present.
      * @return returns an {@code OptionalUI} describing the component of this
      *         {@code OptionalUI}, if a component is present, otherwise an
      *         {@code OptionalUI} produced by the supplying function.
@@ -338,6 +339,38 @@ public final class OptionalUI<C extends Component> {
         Objects.requireNonNull(supplier);
         if ( this.isPresent() ) return this;
         else {
+            C c = supplier.get();
+            return OptionalUI.ofNullable(c);
+        }
+    }
+
+    /**
+     * If no component is present and the supplied boolean is true,
+     * the supplying function is called to provide an
+     * alternative UI component to be used in place of the missing component.
+     * Otherwise, returns a {@code OptionalUI} containing the current component
+     * and the supplying function is not called.
+     * Use this to define alternative UI components if a condition is met.
+     *
+     * @param condition The boolean condition to check before calling the supplying function.
+     *                  If false, the supplying function is simply ignored.
+     * @param supplier the supplying function that produces a UI component to be
+     *                 used if no component is present.
+     * @return returns an {@code OptionalUI} describing the component of this
+     *         {@code OptionalUI}, if a component is present, otherwise an
+     *         {@code OptionalUI} produced by the supplying function.
+     * @throws NullPointerException if the supplying function is {@code null} or
+     *         produces a {@code null} result
+     */
+    public OptionalUI<C> orGetIf( boolean condition, Supplier<? extends C> supplier ) {
+        Objects.requireNonNull(supplier);
+        if ( !condition )
+            return this;
+        else
+            if ( this.isPresent() )
+                return this;
+        else
+        {
             C c = supplier.get();
             return OptionalUI.ofNullable(c);
         }
@@ -357,10 +390,41 @@ public final class OptionalUI<C extends Component> {
      * @throws NullPointerException if the supplying function is {@code null} or
      *         produces a {@code null} result
      */
-    public <A extends B, B extends C> OptionalUI<C> orGetUI( Supplier<UIForAnything<?,A,B>> supplier ) {
+    public <A extends B, B extends C> OptionalUI<C> orGetUi( Supplier<UIForAnything<?,A,B>> supplier ) {
         Objects.requireNonNull(supplier);
         if ( this.isPresent() ) return this;
         else {
+            UIForAnything<?,A,B> ui = supplier.get();
+            return OptionalUI.ofNullable(ui.get(ui.getType()));
+        }
+    }
+
+    /**
+     * If no component is present and the supplied boolean is true,
+     * the supplying function is called to provide an
+     * alternative UI declaration to be used to build the missing component.
+     * Otherwise, returns the current {@code OptionalUI} and the supplying function is not called.
+     * Use this to define alternative UI declaration if a condition is met.
+     *
+     * @param condition The boolean condition to check before calling the supplying function.
+     *                  If false, the supplying function is simply ignored.
+     * @param supplier the supplying function that produces a UI declaration
+     *                 to be used if no component is present.
+     * @return returns an {@code OptionalUI} describing the component of this
+     *         {@code OptionalUI}, if a component is present, otherwise an
+     *         {@code OptionalUI} produced by the supplying function.
+     * @throws NullPointerException if the supplying function is {@code null} or
+     *         produces a {@code null} result
+     */
+    public <A extends B, B extends C> OptionalUI<C> orGetUiIf( boolean condition, Supplier<UIForAnything<?,A,B>> supplier ) {
+        Objects.requireNonNull(supplier);
+        if ( !condition )
+            return this;
+        else
+            if ( this.isPresent() )
+                return this;
+        else
+        {
             UIForAnything<?,A,B> ui = supplier.get();
             return OptionalUI.ofNullable(ui.get(ui.getType()));
         }

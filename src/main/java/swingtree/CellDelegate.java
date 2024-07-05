@@ -299,7 +299,7 @@ public final class CellDelegate<C extends JComponent, V>
      *  current renderer and returns a (potentially updated) {@link OptionalUI}
      *  of the new renderer. <br>
      *  The benefit of using this method is that you can easily initialize
-     *  the renderer with a new component through the {@link OptionalUI#orGetUI(Supplier)}
+     *  the renderer with a new component through the {@link OptionalUI#orGetUi(Supplier)}
      *  method, and then update it in every refresh coll inside the
      *  {@link OptionalUI#update(java.util.function.Function)} method. <br>
      *  This may look like the following:
@@ -309,7 +309,7 @@ public final class CellDelegate<C extends JComponent, V>
      *          .when(Object.class).as( cell -> cell
      *              .view( comp -> comp
      *                  .update( r -> { r.setText(cell.valueAsString().orElse("")); return r; } )
-     *                  .orGetUI( () -> UI.textField().withBackground(Color.CYAN) )
+     *                  .orGetUi( () -> UI.textField().withBackground(Color.CYAN) )
      *              )
      *          )
      *      )
