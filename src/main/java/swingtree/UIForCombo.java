@@ -336,7 +336,7 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
      *  This is done like so:
      *  <pre>{@code
      *  UI.comboBox(new Object[]{":-)", 42L, '§'})
-     *  .withRenderer( it -> it
+     *  .withCell( it -> it
      *      .when(String.class).asText( cell -> "String: "+cell.getValue() )
      *      .when(Character.class).asText( cell -> "Char: "+cell.getValue() )
      *      .when(Number.class).asText( cell -> "Number: "+cell.getValue() )
@@ -347,15 +347,15 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
      *  to define how the item should be rendered.
      *  <p>
      *  You may want to know that a similar API is also available for the {@link javax.swing.JList}
-     *  and {@link javax.swing.JTable} components, see {@link UIForList#withRenderer(Configurator)},
-     *  {@link UIForTable#withRenderer(Configurator)} and {@link UI#table(Configurator)}
+     *  and {@link javax.swing.JTable} components, see {@link UIForList#withCell(Configurator)},
+     *  {@link UIForTable#withCell(Configurator)} and {@link UI#table(Configurator)}
      *  for more information.
      *
      * @param renderBuilder A lambda function that configures the renderer for this combo box.
      * @return This combo box instance for further configuration.
      * @param <V> The type of the value that is being rendered in this combo box.
      */
-    public final <V extends E> UIForCombo<E,C> withRenderer(
+    public final <V extends E> UIForCombo<E,C> withCell(
         Configurator<CellBuilder<C,V>> renderBuilder
     ) {
         Class<Object> commonType = Object.class;
@@ -396,7 +396,7 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
      */
     public final UIForCombo<E,C> withTextRenderer( Function<CellDelegate<C,E>, String> renderer ) {
         Objects.requireNonNull(renderer, "renderer");
-        return withRenderer( it -> it.when((Class<E>) Object.class).asText( renderer ) );
+        return withCell(it -> it.when((Class<E>) Object.class).asText( renderer ) );
     }
 
     /**

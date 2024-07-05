@@ -228,7 +228,7 @@ class Basic_UI_Builder_Examples_Spec extends Specification
         and : 'We creat a combo box with a cell renderer that renders the enum value as a lower case string.'
             var ui =
                     UI.comboBox(sel)
-                    .withRenderer( it -> it
+                    .withCell(it -> it
                         .when(Keyboard.Key)
                         .asText( cell -> cell.value().map( k -> k.name().toLowerCase() ).orElse("") )
                     )
@@ -241,7 +241,7 @@ class Basic_UI_Builder_Examples_Spec extends Specification
             comboBox.selectedItem == Keyboard.Key.A
         and : 'The combo box will have a renderer that renders the enum value as a lower case string.'
             comboBox.renderer instanceof swingtree.CellBuilder.SimpleListCellRenderer
-            comboBox.renderer.getListCellRendererComponent(null, Keyboard.Key.A, 0, false, false).text == "a"
+            UI.runAndGet({comboBox.renderer.getListCellRendererComponent(null, Keyboard.Key.A, 0, false, false)}).text == "a"
 
         when : 'We change the selection...'
             sel.set(Keyboard.Key.B)

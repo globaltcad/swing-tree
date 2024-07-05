@@ -1,6 +1,6 @@
 package swingtree.renderer
 
-import swingtree.CellDelegate
+
 import swingtree.SwingTree
 import swingtree.api.Configurator
 import swingtree.threading.EventProcessor
@@ -48,11 +48,11 @@ class Table_Renderer_Spec extends Specification
             var render = Mock(Configurator)
 
         when : 'We attach the interpreter to a table renderer which we then attach to the table.'
-            ui = ui.withRendererForColumn("A", it->it.when(String).as(render) )
+            ui = ui.withCellForColumn("A", it->it.when(String).as(render) )
         and : 'We we access the resulting TableCellRenderer instance from the UI.'
             var found = ui.get(JTable).getColumn("A").cellRenderer
         and : 'Finally we access the component from the renderer (which is responsible for the actual rendering).'
-            found.getTableCellRendererComponent(new JTable(), "1", false, false, 0, 0)
+            UI.runAndGet({found.getTableCellRendererComponent(new JTable(), "1", false, false, 0, 0)})
 
         then : 'The mocked cell interpreter is called.'
             1 * render.configure(_)
@@ -83,7 +83,7 @@ class Table_Renderer_Spec extends Specification
             table.getValueAt(0, 1) == "b"
 
         when : 'We build a table renderer for strings and pass our mocked renderer to it.'
-            ui = ui.withRendererForColumn(1, it->it.when(String).as(render) )
+            ui = ui.withCellForColumn(1, it->it.when(String).as(render) )
             table = ui.get(JTable)
         and : 'We we access the resulting TableCellRenderer instance from the UI.'
             var found = table
@@ -91,7 +91,7 @@ class Table_Renderer_Spec extends Specification
                         .getColumn(1)
                         .cellRenderer
         and : 'Finally we access the component from the renderer (which is responsible for the actual rendering).'
-            found.getTableCellRendererComponent(new JTable(), "1", false, false, 0, 0)
+            UI.runAndGet({found.getTableCellRendererComponent(new JTable(), "1", false, false, 0, 0)})
 
         then : 'The mocked cell interpreter is called.'
             1 * render.configure(_)
@@ -123,7 +123,7 @@ class Table_Renderer_Spec extends Specification
             table.getValueAt(0, 1) == "1"
 
         when : 'We build a table renderer for strings and pass our mocked renderer to it.'
-            ui = ui.withRendererForColumn(1, it->it.when(String).as(render) )
+            ui = ui.withCellForColumn(1, it->it.when(String).as(render) )
             table = ui.get(JTable)
         and :
             var found = table
@@ -131,7 +131,7 @@ class Table_Renderer_Spec extends Specification
                             .getColumn(1)
                             .cellRenderer
         and : 'Finally we access the component from the renderer (which is responsible for the actual rendering).'
-            found.getTableCellRendererComponent(new JTable(), "1", false, false, 0, 0)
+            UI.runAndGet({found.getTableCellRendererComponent(new JTable(), "1", false, false, 0, 0)})
 
         then : 'The mocked cell interpreter is called.'
             1 * render.configure(_)
@@ -164,7 +164,7 @@ class Table_Renderer_Spec extends Specification
             table.getValueAt(0, 1) == "1"
 
         when : 'We build a table renderer for strings and pass our mocked renderer to it.'
-            ui = ui.withRendererForColumn(1, it->it.when(String).as(render) )
+            ui = ui.withCellForColumn(1, it->it.when(String).as(render) )
             table = ui.get(JTable)
         and : 'We we access the resulting TableCellRenderer instance from the UI.'
             var found = table
@@ -172,7 +172,7 @@ class Table_Renderer_Spec extends Specification
                                 .getColumn(1)
                                 .cellRenderer
         and : 'Finally we access the component from the renderer (which is responsible for the actual rendering).'
-            found.getTableCellRendererComponent(new JTable(), "1", false, false, 0, 0)
+            UI.runAndGet({found.getTableCellRendererComponent(new JTable(), "1", false, false, 0, 0)})
 
         then : 'The mocked cell interpreter is called.'
             1 * render.configure(_)
@@ -194,14 +194,14 @@ class Table_Renderer_Spec extends Specification
             """
             var ui =
                         UI.table(UI.ListData.ROW_MAJOR_EDITABLE, { [[1, 2, 3], [7, 8, 9]] })
-                        .withRenderer(
+                        .withCell(
                             it -> it.when(Integer).asText( cell -> cell.valueAsString().orElse("")+"!" )
                         )
         when : 'We access the resulting TableCellRenderer instance from the UI.'
             var found = ui.get(JTable)
                                     .getDefaultRenderer(Object)
         and : 'Finally we access the component from the renderer (which is responsible for the actual rendering).'
-            var component = found.getTableCellRendererComponent(new JTable(), 1, false, false, 0, 0)
+            var component = UI.runAndGet({found.getTableCellRendererComponent(new JTable(), 1, false, false, 0, 0)})
 
         then : 'The cell is rendered as text (based on a JLabel).'
             component instanceof JLabel

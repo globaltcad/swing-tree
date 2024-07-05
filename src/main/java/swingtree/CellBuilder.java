@@ -23,8 +23,8 @@ import java.util.function.Predicate;
 
 /**
  *  A builder type for creating cell renderer for a list, combo box or table
- *  using a fluent API, typically through methods like {@link UIForList#withRenderer(Configurator)},
- *  {@link UIForCombo#withRenderer(Configurator)} or {@link UIForTable#withRenderer(Configurator)},
+ *  using a fluent API, typically through methods like {@link UIForList#withCell(Configurator)},
+ *  {@link UIForCombo#withCell(Configurator)} or {@link UIForTable#withCell(Configurator)},
  *  where the builder is exposed to the configurator lambda. <p>
  *  A typical usage of this API may look something like this:
  *  <pre>{@code
@@ -419,7 +419,7 @@ public final class CellBuilder<C extends JComponent, E> {
      * Like many things in the SwingTree library, this class is
      * essentially a convenient builder for a {@link ListCellRenderer}.
      * This internal method actually builds the {@link ListCellRenderer} instance,
-     * see {@link UIForList#withRenderer(swingtree.api.Configurator)} for more details
+     * see {@link UIForList#withCell(swingtree.api.Configurator)} for more details
      * about how to use this class as pat of the main API.
      *
      * @param list The list for which the renderer is to be built.
@@ -443,7 +443,7 @@ public final class CellBuilder<C extends JComponent, E> {
      * Like many things in the SwingTree library, this class is
      * essentially a convenient builder for a {@link ListCellRenderer}.
      * This internal method actually builds the {@link ListCellRenderer} instance,
-     * see {@link UIForList#withRenderer(swingtree.api.Configurator)} for more details
+     * see {@link UIForList#withCell(swingtree.api.Configurator)} for more details
      * about how to use this class as pat of the main API.
      *
      * @param comboBox The combo box for which the renderer is to be built.

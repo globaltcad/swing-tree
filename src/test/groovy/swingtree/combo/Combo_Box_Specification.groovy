@@ -512,17 +512,34 @@ class Combo_Box_Specification extends Specification
         when : 'We call the renderer for each item.'
             var renderer = combo.renderer
             var fakeJList = new JList<Animal>()
-            var rendered = [
+            var rendered = UI.runAndGet(()->[
+                renderer.getListCellRendererComponent(fakeJList, Animal.CAT, 0, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, Animal.DOG, 1, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, Animal.COW, 2, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, Animal.PIG, 3, false, false).text
+            ])
+        then : 'The renderer returns the expected text representations.'
+            rendered[0] == "cat"
+            rendered[1] == "dog"
+            rendered[2] == "cow"
+            rendered[3] == "pig"
+        when : 'We do not record the rendered results, but the components...'
+            rendered = UI.runAndGet(()->[
                 renderer.getListCellRendererComponent(fakeJList, Animal.CAT, 0, false, false),
                 renderer.getListCellRendererComponent(fakeJList, Animal.DOG, 1, false, false),
                 renderer.getListCellRendererComponent(fakeJList, Animal.COW, 2, false, false),
                 renderer.getListCellRendererComponent(fakeJList, Animal.PIG, 3, false, false)
-            ]
-        then : 'The renderer returns the expected text representations.'
-            rendered[0].text == "cat"
-            rendered[1].text == "dog"
-            rendered[2].text == "cow"
+            ])
+        then : 'All components will report the last rendered text.'
+            rendered[0].text == "pig"
+            rendered[1].text == "pig"
+            rendered[2].text == "pig"
             rendered[3].text == "pig"
+        and : 'That is because they are all the same component instance.'
+            rendered[0] === rendered[1]
+            rendered[1] === rendered[2]
+            rendered[2] === rendered[3]
+
         where : """
             We are using the following factory methods from the `UI` namespace.
             Note that the `UI.comboBox` method is overloaded and can take

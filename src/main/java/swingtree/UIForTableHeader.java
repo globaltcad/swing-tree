@@ -100,7 +100,7 @@ public final class UIForTableHeader<H extends UI.TableHeader> extends UIForAnySw
      *     .withHeader(
      *         UI.tableHeader()
      *         .withMaxWidth(100)
-     *         .withRenderer( it -> it
+     *         .withCell( it -> it
      *             .when(Integer.class)
      *             .asText( cell ->
      *                 cell.valueAsString()
@@ -115,7 +115,7 @@ public final class UIForTableHeader<H extends UI.TableHeader> extends UIForAnySw
      * @param renderBuilder The builder for the renderer to set.
      * @return This builder node.
      */
-    UIForTableHeader<H> withRenderer(
+    UIForTableHeader<H> withCell(
         Configurator<CellBuilder<H, Object>> renderBuilder
     ) {
         NullUtil.nullArgCheck(renderBuilder, "renderBuilder", CellBuilder.class);

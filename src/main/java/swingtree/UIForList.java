@@ -202,6 +202,9 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
      * lambda expression, which return a {@link javax.swing.JComponent} instance
      * that is used by the {@link JList} to render each entry.
      * In this case a colored rectangle is rendered for each entry.
+     * <p>
+     * <b>Note that the preferred way to build a list cell renderer for various item types
+     * is to use the {@link #withCell(Configurator)} method, which provides a more rich and fluent builder API.</b>
      *
      * @param renderer The {@link ListEntryRenderer} that will be used to supply {@link javax.swing.JComponent}s
      *                 responsible for rendering each entry of the {@link JList} instance.
@@ -252,6 +255,9 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
      * by supplying a custom component for each item through the
      * {@link ListCellRenderer#getListCellRendererComponent(JList, Object, int, boolean, boolean)} method.
      * <p>
+     * Also see {@link #withCell(Configurator)} method, which is the preferred way to build
+     * a list cell renderer for various item types using a more rich and fluent builder API.
+     *
      * @param renderer The {@link ListCellRenderer} that will be used to paint each cell in the list.
      * @return This very instance, which enables builder-style method chaining.
      */
@@ -270,22 +276,22 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
      *  A typical usage may look something like this:
      *  <pre>{@code
      *  UI.list(new Object[]{":-)", 42L, '§'})
-     *  .withRenderer( it -> it
+     *  .withCell( it -> it
      *      .when(String.class).asText( cell -> "String: "+cell.getValue() )
      *      .when(Character.class).asText( cell -> "Char: "+cell.getValue() )
      *      .when(Number.class).asText( cell -> "Number: "+cell.getValue() )
      *  );
      *  }</pre>
      *  Note that a similar API is also available for the {@link javax.swing.JComboBox}
-     *  and {@link javax.swing.JTable} components, see {@link UIForCombo#withRenderer(Configurator)},
-     *  {@link UIForTable#withRenderer(Configurator)} and {@link UIForTable#withRendererForColumn(int, Configurator)}
+     *  and {@link javax.swing.JTable} components, see {@link UIForCombo#withCell(Configurator)},
+     *  {@link UIForTable#withCell(Configurator)} and {@link UIForTable#withCellForColumn(int, Configurator)}
      *  for more information.
      *
      * @param renderBuilder A lambda function that configures the renderer for this combo box.
      * @return This combo box instance for further configuration.
      * @param <V> The type of the value that is being rendered in this combo box.
      */
-    public final <V extends E> UIForList<E, L> withRenderer(
+    public final <V extends E> UIForList<E, L> withCell(
         Configurator<CellBuilder<L,V>> renderBuilder
     ) {
         Class<Object> commonType = Object.class;

@@ -12,7 +12,6 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -26,10 +25,10 @@ import java.util.function.Supplier;
  * method after a {@link CellBuilder#when(Class)} call as part of various
  * cell builder APIs like: <br>
  * <ul>
- *     <li>{@link UIForTable#withRenderer(Configurator)}</li>
- *     <li>{@link UIForTable#withRendererForColumn(String, Configurator)} </li>
- *     <li>{@link UIForTable#withRendererForColumn(int, Configurator)} </li>
- *     <li>{@link UIForList#withRenderer(Configurator)} </li>
+ *     <li>{@link UIForTable#withCell(Configurator)}</li>
+ *     <li>{@link UIForTable#withCellForColumn(String, Configurator)} </li>
+ *     <li>{@link UIForTable#withCellForColumn(int, Configurator)} </li>
+ *     <li>{@link UIForList#withCell(Configurator)} </li>
  * </ul>
  * When configuring your cell, you may use methods like
  * {@link CellDelegate#view(Component)} or {@link CellDelegate#withRenderer(Consumer)}

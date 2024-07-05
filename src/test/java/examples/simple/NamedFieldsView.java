@@ -9,7 +9,9 @@ import swingtree.api.IconDeclaration;
 import swingtree.style.SvgIcon;
 
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import java.awt.Color;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -138,6 +140,23 @@ public class NamedFieldsView extends JPanel {
                     data.put("C", Stream.of("C1", "C2", "C3").collect(Collectors.toList()));
                     return data;
                 })
+                .withCell( it -> it
+                    .when(Object.class).as( cell -> cell
+                        .view( comp -> comp
+                        .update( r -> r instanceof JLabel ? null : r )
+                        .update( r -> {
+                            if ( r instanceof JTextField )
+                                ((JTextField)r).setText(cell.valueAsString().orElse(""));
+                            r.setBackground(cell.hasFocus() ? Color.YELLOW : Color.WHITE);
+                            return r;
+                        })
+                        .orGet(()->
+                           UI.textField()
+                           .withMinHeight(30)
+                           .get(JTextField.class)
+                        ))
+                    )
+                )
             )
         )
         .add("growx, pushx, span",

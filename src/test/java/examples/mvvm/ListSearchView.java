@@ -6,7 +6,6 @@ import swingtree.UI;
 
 import javax.swing.JLabel;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Graphics;
 import java.time.LocalDateTime;
 
@@ -23,12 +22,12 @@ public class ListSearchView extends Panel
                 .add(SHRINK.and(WRAP), label("Last search:"))
                 .add(PUSH.and(GROW),
                     UI.list(vm.lastSearchTimes())
-                    .withRenderer( it -> it.when(LocalDateTime.class).asText(cell -> cell.value().get().toString() ))
+                    .withCell(it -> it.when(LocalDateTime.class).asText(cell -> cell.value().get().toString() ))
                     .withBorder(vm.listBorder())
                 )
                 .add(PUSH.and(GROW).and(WRAP),
                     UI.list(vm.searchTerms())
-                    .withRenderer( it -> it.when(String.class).asText(cell -> cell.value().get() ))
+                    .withCell(it -> it.when(String.class).asText(cell -> cell.value().get() ))
                 )
                 .add(SHRINK.and(WRAP), label("Search for:"))
                 .add(PUSH.and(GROW).and(SPAN).and(WRAP),
