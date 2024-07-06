@@ -100,7 +100,7 @@ public final class UIForTableHeader<H extends UI.TableHeader> extends UIForAnySw
      *     .withHeader(
      *         UI.tableHeader()
      *         .withMaxWidth(100)
-     *         .withCell( it -> it
+     *         .withCells( it -> it
      *             .when(Integer.class)
      *             .asText( cell ->
      *                 cell.valueAsString()

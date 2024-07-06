@@ -561,10 +561,10 @@ class Combo_Box_Specification extends Specification
             ]
     }
 
-    def 'Use `withCell(Configurator)` to configure both a renderer and editor for your combobox.'()
+    def 'Use `withCells(Configurator)` to configure both a renderer and editor for your combobox.'()
     {
         reportInfo """
-            The `withCell(Configurator)` method constitutes a useful API point
+            The `withCells(Configurator)` method constitutes a useful API point
             which exposes you to a fluent API for configuring which kind of item
             should be rendered using which kind of renderer and editor.
             
@@ -596,6 +596,81 @@ class Combo_Box_Specification extends Specification
                                         return label
                                     })
                                 )
+                            )
+                        )
+        and : 'We build the combo box.'
+            var combo = ui.get(JComboBox)
+        and : 'We get the renderer and editor supplier.'
+            var renderer = combo.renderer
+            var editor = combo.editor
+        expect :
+            renderer != null
+            editor != null
+        and : 'The editor was initialized with the text field having a magenta background.'
+            editor.getEditorComponent() instanceof JTextField
+            editor.getEditorComponent().background == Color.MAGENTA
+        and : 'The renderer was initialized with a label showing the day of the week.'
+            var fakeJList = new JList<DayOfWeek>()
+            var rendered = UI.runAndGet(()->[
+                renderer.getListCellRendererComponent(fakeJList, DayOfWeek.MONDAY, 0, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, DayOfWeek.TUESDAY, 1, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, DayOfWeek.WEDNESDAY, 2, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, DayOfWeek.THURSDAY, 3, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, DayOfWeek.FRIDAY, 4, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, DayOfWeek.SATURDAY, 5, false, false).text,
+                renderer.getListCellRendererComponent(fakeJList, DayOfWeek.SUNDAY, 6, false, false).text
+            ])
+        and : 'The renderer returns the expected text representations.'
+            rendered[0] == "Day: MONDAY"
+            rendered[1] == "Day: TUESDAY"
+            rendered[2] == "Day: WEDNESDAY"
+            rendered[3] == "Day: THURSDAY"
+            rendered[4] == "Day: FRIDAY"
+            rendered[5] == "Day: SATURDAY"
+            rendered[6] == "Day: SUNDAY"
+    }
+
+    def 'Use `withCell(Configurator)` to configure both a renderer and editor for your combobox.'()
+    {
+        reportInfo """
+            The `withCell(Configurator)` method constitutes a useful API point
+            which exposes you to a fluent API for configuring how a particular cell
+            should be displayed.
+            
+            The `Configurator` lambda passed to the `withCell` method receives
+            a delegate object of a particular cell in the combo box.
+            You may update and return this cell with a view component
+            used for either rendering, editing or both.
+            
+            So this may look like this:
+            ```java
+                .withCell( cell -> cell
+                    .view( comp -> comp
+                        .orGetUiIf(cell.isEditing(), {UI.textField().withBackground(Color.MAGENTA)})
+                        .orGetUiIf(!cell.isEditing(), {UI.label("")})
+                        .updateIf(JLabel.class, label -> {
+                            label.text = "Day: " + cell.valueAsString().orElse("")
+                            return label
+                        })
+                    )
+                )
+            ```
+            Here you can see that the `Configurator` lambda receives a `cell` object
+            which is a delegate object of a particular cell in the combo box.
+            The view of this cell is updated with a text field or a label depending
+            on whether the cell is currently being edited or not.
+        """
+        given : 'We create a combo box for the days of the week and a custom cell configuration.'
+            var ui =
+                        UI.comboBox(DayOfWeek.values())
+                        .withCell(cell -> cell
+                            .view( comp -> comp
+                                .orGetUiIf(cell.isEditing(), {UI.textField().withBackground(Color.MAGENTA)})
+                                .orGetUiIf(!cell.isEditing(), {UI.label("")})
+                                .updateIf(JLabel.class, label -> {
+                                    label.text = "Day: " + cell.valueAsString().orElse("")
+                                    return label
+                                })
                             )
                         )
         and : 'We build the combo box.'
