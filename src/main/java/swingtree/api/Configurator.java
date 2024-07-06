@@ -9,9 +9,9 @@ package swingtree.api;
  *  <ul>
  *      <li>{@link swingtree.UIForTable#withModel(Configurator)}</li>
  *      <li>{@link swingtree.UIForTable#withModel(Class, Configurator)} </li>
- *      <li>{@link swingtree.UIForTable#withCell(Configurator)} </li>
- *      <li>{@link swingtree.UIForList#withCell(Configurator)} </li>
- *      <li>{@link swingtree.UIForCombo#withCell(Configurator)} </li>
+ *      <li>{@link swingtree.UIForTable#withCells(Configurator)} </li>
+ *      <li>{@link swingtree.UIForList#withCells(Configurator)} </li>
+ *      <li>{@link swingtree.UIForCombo#withCells(Configurator)} </li>
  *  </ul>
  *  <p>
  *  Configurators are also heavily used for defining the <i>style</i>

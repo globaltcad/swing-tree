@@ -22,12 +22,12 @@ public class ListSearchView extends Panel
                 .add(SHRINK.and(WRAP), label("Last search:"))
                 .add(PUSH.and(GROW),
                     UI.list(vm.lastSearchTimes())
-                    .withCell(it -> it.when(LocalDateTime.class).asText(cell -> cell.value().get().toString() ))
+                    .withCells(it -> it.when(LocalDateTime.class).asText(cell -> cell.value().get().toString() ))
                     .withBorder(vm.listBorder())
                 )
                 .add(PUSH.and(GROW).and(WRAP),
                     UI.list(vm.searchTerms())
-                    .withCell(it -> it.when(String.class).asText(cell -> cell.value().get() ))
+                    .withCells(it -> it.when(String.class).asText(cell -> cell.value().get() ))
                 )
                 .add(SHRINK.and(WRAP), label("Search for:"))
                 .add(PUSH.and(GROW).and(SPAN).and(WRAP),

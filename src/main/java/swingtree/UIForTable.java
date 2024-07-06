@@ -11,6 +11,7 @@ import swingtree.api.model.TableMapDataSource;
 
 import javax.swing.*;
 import javax.swing.table.*;
+import java.awt.Component;
 import java.util.*;
 import java.util.function.Function;
 
@@ -104,7 +105,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      *                      Call the appropriate methods on the builder API to configure the cell renderer.
      * @return This builder node.
      */
-    public final UIForTable<T> withCellForColumn(
+    public final UIForTable<T> withCellsForColumn(
         String columnName,
         Configurator<CellBuilder<T, Object>> renderBuilder
     ) {
@@ -117,6 +118,48 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
             return this;
         }
         return _withCellRendererForColumn(columnName, builder.getForTable());
+    }
+
+    /**
+     *  Use this to build a basic table cell renderer for a particular column.
+     *  The second argument passed to this method is a lambda function
+     *  which accepts a {@link CellDelegate} representing the cell to be rendered.
+     *  You may then return an updated cell with a desired view component
+     *  through methods like {@link CellDelegate#view(Component)} or {@link CellDelegate#view(Configurator)}.
+     *  Here an example of how this method may be used:
+     * <pre>{@code
+     *     UI.table(UI.ListData.ROW_MAJOR_EDITABLE, ()->List.of(List.of(1, 2, 3), List.of(7, 8, 9)) )
+     *     .withCellForColumn(0, cell -> cell
+     *          .view( comp -> comp
+     *              .orGet(JLabel::new) // initialize a new JLabel if not already present
+     *              .updateIf(JLabel.class, l -> {
+     *                  l.setText(cell.valueAsString().orElse(""));
+     *                  l.setBackground(cell.isSelected() ? Color.YELLOW : Color.WHITE);
+     *                  return l;
+     *              })
+     *              //...
+     *          )
+     *     )
+     *     .withCellForColumn(1, cell -> cell
+     *          .view( comp -> comp
+     *              //...
+     *          )
+     *     );
+     * }</pre>
+     * Also see {@link #withCellForColumn(int, Configurator)} method to build a cell renderer for a column by index,
+     * and {@link #withCell(Configurator)} method to build a cell renderer for all columns of the table.
+     *
+     * @param columnName The name of the column for which the cell renderer will be built.
+     * @param cellConfigurator A lambda function which configures the cell view.
+     * @return This builder node.
+     */
+    public final UIForTable<T> withCellForColumn(
+        String columnName,
+        Configurator<CellDelegate<T, Object>> cellConfigurator
+    ) {
+        Objects.requireNonNull(cellConfigurator);
+        Objects.requireNonNull(columnName);
+        return withCellsForColumn(columnName, it -> it.when((Class)Object.class).as(cellConfigurator));
     }
 
     /**
@@ -148,7 +191,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      *                      Call the appropriate methods on the builder API to configure the cell renderer.
      * @return This builder node.
      */
-    public final UIForTable<T> withCellForColumn(
+    public final UIForTable<T> withCellsForColumn(
         int columnIndex,
         Configurator<CellBuilder<T, Object>> renderBuilder
     ) {
@@ -164,11 +207,52 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
     }
 
     /**
+     *  Use this to build a basic table cell renderer for a particular column.
+     *  The second argument passed to this method is a lambda function
+     *  which accepts a {@link CellDelegate} representing the cell to be rendered.
+     *  You may then return an updated cell with a desired view component
+     *  through methods like {@link CellDelegate#view(Component)} or {@link CellDelegate#view(Configurator)}.
+     *  Here an example of how this method may be used:
+     * <pre>{@code
+     *     UI.table(UI.ListData.ROW_MAJOR_EDITABLE, ()->List.of(List.of(1, 2, 3), List.of(7, 8, 9)) )
+     *     .withCellForColumn(0, cell -> cell
+     *          .view( comp -> comp
+     *              .orGet(JLabel::new) // initialize a new JLabel if not already present
+     *              .updateIf(JLabel.class, l -> {
+     *                  l.setText(cell.valueAsString().orElse(""));
+     *                  l.setBackground(cell.isSelected() ? Color.YELLOW : Color.WHITE);
+     *                  return l;
+     *              })
+     *              //...
+     *          )
+     *     )
+     *     .withCellForColumn(1, cell -> cell
+     *          .view( comp -> comp
+     *              //...
+     *          )
+     *     );
+     * }</pre>
+     * Also see {@link #withCellForColumn(String, Configurator)} method to build a cell renderer for a column by name,
+     * and {@link #withCell(Configurator)} method to build a cell renderer for all columns of the table.
+     *
+     * @param columnIndex The index of the column for which the cell renderer will be built.
+     * @param cellConfigurator A lambda function which configures the cell view.
+     * @return This builder node.
+     */
+    public final UIForTable<T> withCellForColumn(
+        int columnIndex,
+        Configurator<CellDelegate<T, Object>> cellConfigurator
+    ) {
+        Objects.requireNonNull(cellConfigurator);
+        return withCellsForColumn(columnIndex, it -> it.when((Class)Object.class).as(cellConfigurator));
+    }
+
+    /**
      * Use this to register a table cell renderer for a particular column.
      * A {@link TableCellRenderer} is a supplier of {@link java.awt.Component} instances which are used to render
      * the cells of a table.
      * <b>Note that in SwingTree, the preferred way of defining a cell renderer for a particular column is through the
-     * {@link #withCellForColumn(String, Configurator)} method, which allows for a more fluent and declarative
+     * {@link #withCellsForColumn(String, Configurator)} method, which allows for a more fluent and declarative
      * way of defining cell renderers.</b>
      *
      * @param columnName The name of the column for which the cell renderer will be registered.
@@ -201,7 +285,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      * A {@link TableCellRenderer} is a supplier of {@link java.awt.Component} instances which are used to render
      * the cells of a table.
      * <b>Note that in SwingTree, the preferred way of defining a cell renderer for a particular column is through the
-     * {@link #withCellForColumn(int, Configurator)} method, which allows for a more fluent and declarative
+     * {@link #withCellsForColumn(int, Configurator)} method, which allows for a more fluent and declarative
      * way of defining cell renderers.</b>
      *
      * @param columnIndex The index of the column for which the cell renderer will be registered.
@@ -230,7 +314,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      *  A {@link TableCellRenderer} is a supplier of {@link java.awt.Component} instances which are used to render
      *  the cells of a table.<br><br>
      *  <b>Note that in SwingTree, the preferred way of defining a cell renderer is through the
-     *  {@link #withCell(Configurator)} method, which allows for a more fluent and declarative
+     *  {@link #withCells(Configurator)} method, which allows for a more fluent and declarative
      *  way of defining cell renderers.</b>
      *
      * @param renderer A provider of {@link java.awt.Component} instances which are used to render the cells of a table.
@@ -259,23 +343,27 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      *  Here is an example of how this method is used:
      *  <pre>{@code
      *    UI.table()
-     *    .withCell( it -> it
+     *    .withCells( it -> it
      *        .when(SomeDataType.class)
      *        .asText( cell -> cell.value().get().toString() )
      *    )
      *    // ...
      *  }</pre>
      *  You may want to know that a similar API is also available for the {@link javax.swing.JList}
-     *  and {@link javax.swing.JComboBox} components, see {@link UIForList#withCell(Configurator)},
-     *  {@link UIForCombo#withCell(Configurator)} for more information.
-     *
+     *  and {@link javax.swing.JComboBox} components, see {@link UIForList#withCells(Configurator)},
+     *  {@link UIForCombo#withCells(Configurator)} for more information.
+     *  <p>
+     *  <b>
+     *      Also see {@link #withCell(Configurator)} method, which constitutes the preferred way
+     *      to build a list cell renderer as it is simpler, more concise and less error-prone.
+     *  </b>
      *
      * @param renderBuilder A lambda function which exposes the builder API for a cell renderer
      *                      and returns the builder API for a cell renderer.
      *                      Call the appropriate methods on the builder API to configure the cell renderer.
      * @return This builder node.
      */
-    public final UIForTable<T> withCell(
+    public final UIForTable<T> withCells(
         Configurator<CellBuilder<T, Object>> renderBuilder
     ) {
         NullUtil.nullArgCheck(renderBuilder, "renderBuilder", CellBuilder.class);
@@ -288,6 +376,50 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
         }
         Objects.requireNonNull(builder);
         return _withCellRenderer(builder.getForTable());
+    }
+
+    /**
+     *  Allows for the configuration of a cell view for the items of the {@link JTable} instance.
+     *  The {@link Configurator} lambda function passed to this method receives a {@link CellDelegate}
+     *  exposing a wide range of properties describing the state of the cell, like
+     *  its current item, its index, its selection state, etc.
+     *  You may update return an updated cell with a desired view component
+     *  through methods like {@link CellDelegate#view(Component)} or {@link CellDelegate#view(Configurator)}.
+     *  <p>
+     *  Here code snippet demonstrating how this method may be used
+     *  as part of a UI declaration:
+     *  <pre>{@code
+     *      UI.table(UI.MapData.EDITABLE,()->{
+     *          Map<String, List<String>> data = new LinkedHashMap<>();
+     *          data.put("A", List.of("A1", "A2", "A3"));
+     *          data.put("B", List.of("B1", "B2", "B3"));
+     *          data.put("C", List.of("C1", "C2", "C3"));
+     *          return data;
+     *      })
+     *      .withCell( cell -> cell
+     *          .view( comp -> comp
+     *              .orGet(JLabel::new) // initialize a new JLabel if not already present
+     *              .updateIf(JLabel.class, tf -> {
+     *                  tf.setText(cell.valueAsString().orElse(""));
+     *                  tf.setBackground(cell.isSelected() ? Color.YELLOW : Color.WHITE);
+     *                  return tf;
+     *              })
+     *          )
+     *      )
+     *  }</pre>
+     *  In this example, a new {@link JTable} is created from a map of column names to lists of strings.
+     *  The {@link Configurator} lambda function passed to this method configures the cell view
+     *  by setting the text of a {@link JLabel} to the value of the cell, and setting the background
+     *  color of the label to yellow if the cell is selected, and white otherwise.
+     *
+     * @param cellConfigurator The {@link Configurator} lambda function that configures the cell view.
+     * @return This instance of the builder node to allow for fluent method chaining.
+     * @param <V> The type of the value that is being rendered in this combo box.
+     */
+    public final <V> UIForTable<T> withCell(
+            Configurator<CellDelegate<T, V>> cellConfigurator
+    ) {
+        return withCells( it -> it.when((Class)Object.class).as(cellConfigurator) );
     }
 
     /**

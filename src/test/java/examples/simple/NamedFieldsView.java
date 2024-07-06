@@ -141,7 +141,7 @@ public class NamedFieldsView extends JPanel {
                     data.put("C", Stream.of("C1", "C2", "C3").collect(Collectors.toList()));
                     return data;
                 })
-                .withCell( it -> it
+                .withCells( it -> it
                     .when(Object.class).as( cell -> cell
                         .view( comp -> comp
                         .updateIf(JLabel.class, r -> null )
@@ -179,7 +179,7 @@ public class NamedFieldsView extends JPanel {
         )
         .add(
             UI.comboBox(DayOfWeek.values()).isEditableIf(true)
-            .withCell( it -> it.when(DayOfWeek.class).as( cell -> cell
+            .withCells( it -> it.when(DayOfWeek.class).as(cell -> cell
                     .view( comp -> comp
                         .orGet(JTextField::new)
                         .updateIf(cell.isEditing(), v -> {

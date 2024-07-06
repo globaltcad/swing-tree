@@ -228,7 +228,7 @@ class Basic_UI_Builder_Examples_Spec extends Specification
         and : 'We creat a combo box with a cell renderer that renders the enum value as a lower case string.'
             var ui =
                     UI.comboBox(sel)
-                    .withCell(it -> it
+                    .withCells(it -> it
                         .when(Keyboard.Key)
                         .asText( cell -> cell.value().map( k -> k.name().toLowerCase() ).orElse("") )
                     )

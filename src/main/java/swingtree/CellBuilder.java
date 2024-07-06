@@ -23,12 +23,12 @@ import java.util.function.Predicate;
 
 /**
  *  A builder type for creating cell renderer for a list, combo box or table
- *  using a fluent API, typically through methods like {@link UIForList#withCell(Configurator)},
- *  {@link UIForCombo#withCell(Configurator)} or {@link UIForTable#withCell(Configurator)},
+ *  using a fluent API, typically through methods like {@link UIForList#withCells(Configurator)},
+ *  {@link UIForCombo#withCells(Configurator)} or {@link UIForTable#withCells(Configurator)},
  *  where the builder is exposed to the configurator lambda. <p>
  *  A typical usage of this API may look something like this:
  *  <pre>{@code
- *      .withRenderer( it -> it
+ *      .withCells( it -> it
  *          .when( Number.class )
  *          .asText( cell -> cell.valueAsString().orElse("")+" km/h" )
  *          .when( String.class )

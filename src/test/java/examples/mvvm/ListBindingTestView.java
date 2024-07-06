@@ -28,7 +28,7 @@ public class ListBindingTestView extends Panel
             panel(FILL)
             .add(PUSH.and(GROW),
                 listOf(vm.colorNames())
-                .withCell(it -> it
+                .withCells(it -> it
                     .when(String.class)
                     .asText( cell -> cell.value().get() )
                     //.render( (cell, g2d) -> {

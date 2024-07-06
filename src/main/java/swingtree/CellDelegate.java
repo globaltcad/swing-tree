@@ -26,9 +26,13 @@ import java.util.function.Supplier;
  * cell builder APIs like: <br>
  * <ul>
  *     <li>{@link UIForTable#withCell(Configurator)}</li>
+ *     <li>{@link UIForTable#withCells(Configurator)}</li>
  *     <li>{@link UIForTable#withCellForColumn(String, Configurator)} </li>
+ *     <li>{@link UIForTable#withCellsForColumn(String, Configurator)} </li>
  *     <li>{@link UIForTable#withCellForColumn(int, Configurator)} </li>
+ *     <li>{@link UIForTable#withCellsForColumn(int, Configurator)} </li>
  *     <li>{@link UIForList#withCell(Configurator)} </li>
+ *     <li>{@link UIForList#withCells(Configurator)} </li>
  * </ul>
  * When configuring your cell, you may use methods like
  * {@link CellDelegate#view(Component)} or {@link CellDelegate#withRenderer(Consumer)}

@@ -586,7 +586,7 @@ class Combo_Box_Specification extends Specification
         given : 'We create a combo box for the days of the week and a custom cell configuration.'
             var ui =
                         UI.comboBox(DayOfWeek.values())
-                        .withCell( it -> it
+                        .withCells(it -> it
                             .when(DayOfWeek.class).as( cell -> cell
                                 .view( comp -> comp
                                     .orGetUiIf(cell.isEditing(), {UI.textField().withBackground(Color.MAGENTA)})
