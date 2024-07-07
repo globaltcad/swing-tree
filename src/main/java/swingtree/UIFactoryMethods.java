@@ -2783,7 +2783,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     public static <E> UIForCombo<E,JComboBox<E>> comboBox( E[] items, Function<E,String> renderer ) {
         NullUtil.nullArgCheck(items, "items", Object[].class);
         return comboBox(items)
-                .withTextRenderer(cell -> cell.value().map(renderer).orElse(""));
+                .withTextRenderer(cell -> cell.entry().map(renderer).orElse(""));
     }
 
     /**
@@ -2821,7 +2821,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
         NullUtil.nullArgCheck(items, "items", Object[].class); // Unmodifiable
         java.util.List<E> unmodifiableList = Collections.unmodifiableList(java.util.Arrays.asList(items));
         return comboBox(unmodifiableList)
-                .withTextRenderer(cell -> cell.value().map(renderer).orElse(""));
+                .withTextRenderer(cell -> cell.entry().map(renderer).orElse(""));
     }
 
     /**
@@ -2898,7 +2898,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
         // We get an array of possible enum states from the enum class
         return comboBox(selectedItem.type().getEnumConstants())
                 .withSelectedItem(selectedItem)
-                .withTextRenderer(cell -> cell.value().map(renderer).orElse(""));
+                .withTextRenderer(cell -> cell.entry().map(renderer).orElse(""));
     }
 
     /**
@@ -2941,7 +2941,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
         NullUtil.nullArgCheck(items, "items", UI.List.class);
         Objects.requireNonNull(renderer, "renderer");
         return comboBox(items)
-                .withTextRenderer( cell -> cell.value().map(renderer).orElse("") );
+                .withTextRenderer( cell -> cell.entry().map(renderer).orElse("") );
     }
 
     /**
@@ -2986,7 +2986,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     public static <E> UIForCombo<E,JComboBox<E>> comboBoxWithUnmodifiable( java.util.List<E> items, Function<E, String> renderer ) {
         Objects.requireNonNull(renderer, "renderer");
         return comboBoxWithUnmodifiable(items)
-                .withTextRenderer( cell -> cell.value().map(renderer).orElse("") );
+                .withTextRenderer( cell -> cell.entry().map(renderer).orElse("") );
     }
 
     /**
@@ -3036,7 +3036,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
         NullUtil.nullArgCheck(selection, "selection", Var.class);
         NullUtil.nullArgCheck(renderer, "renderer", Function.class);
         return comboBox(selection, items)
-                .withTextRenderer( cell -> cell.value().map(renderer).orElse("") );
+                .withTextRenderer( cell -> cell.entry().map(renderer).orElse("") );
     }
 
 
@@ -3084,7 +3084,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
         NullUtil.nullArgCheck(items, "items", Vars.class);
         NullUtil.nullArgCheck(renderer, "renderer", Function.class);
         return comboBox(items)
-                .withTextRenderer( cell -> cell.value().map(renderer).orElse("") );
+                .withTextRenderer( cell -> cell.entry().map(renderer).orElse("") );
     }
 
     /**
@@ -3134,7 +3134,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
         NullUtil.nullArgCheck(items, "items", Vals.class);
         NullUtil.nullArgCheck(renderer, "renderer", Function.class);
         return comboBox(items)
-                .withTextRenderer( cell -> cell.value().map(renderer).orElse("") );
+                .withTextRenderer( cell -> cell.entry().map(renderer).orElse("") );
     }
 
     /**
@@ -3190,7 +3190,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
         NullUtil.nullArgCheck(selection, "selection", Var.class);
         NullUtil.nullArgCheck(renderer, "renderer", Function.class);
         return comboBox(selection, items)
-                .withTextRenderer( cell -> cell.value().map(renderer).orElse("") );
+                .withTextRenderer( cell -> cell.entry().map(renderer).orElse("") );
     }
 
     /**
@@ -3248,7 +3248,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
         NullUtil.nullArgCheck(selection, "selection", Var.class);
         NullUtil.nullArgCheck(renderer, "renderer", Function.class);
         return comboBox(selection, items)
-                .withTextRenderer( cell -> cell.value().map(renderer).orElse("") );
+                .withTextRenderer( cell -> cell.entry().map(renderer).orElse("") );
     }
 
     /**
@@ -3288,7 +3288,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     ) {
         NullUtil.nullArgCheck(items, "items", UI.List.class);
         return comboBox(var, items)
-                .withTextRenderer( cell -> cell.value().map(renderer).orElse("") );
+                .withTextRenderer( cell -> cell.entry().map(renderer).orElse("") );
     }
 
     /**
@@ -3343,7 +3343,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
         NullUtil.nullArgCheck(var, "var", Var.class);
         NullUtil.nullArgCheck(renderer, "renderer", Function.class);
         return comboBox(var, items)
-                .withTextRenderer( cell -> cell.value().map(renderer).orElse("") );
+                .withTextRenderer( cell -> cell.entry().map(renderer).orElse("") );
     }
 
     /**
@@ -3399,7 +3399,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
         NullUtil.nullArgCheck(selectedItem, "selectedItem", Var.class);
         NullUtil.nullArgCheck(renderer, "renderer", Function.class);
         return comboBox(selectedItem, items)
-                .withTextRenderer( cell -> cell.value().map(renderer).orElse("") );
+                .withTextRenderer( cell -> cell.entry().map(renderer).orElse("") );
     }
 
     /**
@@ -3428,7 +3428,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     public static <E> UIForCombo<E,JComboBox<E>> comboBox( ComboBoxModel<E> model, Function<E, String> renderer ) {
         NullUtil.nullArgCheck(model, "model", ComboBoxModel.class);
         return comboBox(model)
-                .withTextRenderer( cell -> cell.value().map(renderer).orElse("") );
+                .withTextRenderer( cell -> cell.entry().map(renderer).orElse("") );
     }
 
     /**
@@ -6030,13 +6030,15 @@ public abstract class UIFactoryMethods extends UILayoutConstants
                 c = uiSupplier.apply(frame);
 
             this.component = c;
-            frame.add(component);
-            frame.pack(); // Otherwise some components resize strangely or are not shown at all...
-            // Make sure that the window is centered on the screen again but with the component:
-            frame.setLocationRelativeTo(null);
-            // We set the size to fit the component:
-            _determineSize();
-            frame.setVisible(true);
+            UI.runNow(()->{
+                frame.add(component);
+                frame.pack(); // Otherwise some components resize strangely or are not shown at all...
+                // Make sure that the window is centered on the screen again but with the component:
+                frame.setLocationRelativeTo(null);
+                // We set the size to fit the component:
+                _determineSize();
+                frame.setVisible(true);
+            });
         }
         private void _determineSize() {
             Dimension size = frame.getSize();

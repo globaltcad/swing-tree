@@ -11,6 +11,7 @@ import swingtree.api.ListEntryRenderer;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
+import java.awt.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -202,6 +203,9 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
      * lambda expression, which return a {@link javax.swing.JComponent} instance
      * that is used by the {@link JList} to render each entry.
      * In this case a colored rectangle is rendered for each entry.
+     * <p>
+     * <b>Note that the preferred way to build a list cell renderer for various item types
+     * is to use the {@link #withCell(Configurator)} method, which provides a more rich and fluent builder API.</b>
      *
      * @param renderer The {@link ListEntryRenderer} that will be used to supply {@link javax.swing.JComponent}s
      *                 responsible for rendering each entry of the {@link JList} instance.
@@ -239,10 +243,10 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
                 ._this();
     }
 
-    private final <V extends E> UIForList<E, L> _withRenderer( RenderBuilder<L,V> renderBuilder ) {
-        NullUtil.nullArgCheck(renderBuilder, "renderBuilder", RenderBuilder.class);
+    private final <V extends E> UIForList<E, L> _withRenderer( CellBuilder<L,V> cellBuilder ) {
+        NullUtil.nullArgCheck(cellBuilder, "renderBuilder", CellBuilder.class);
         return _with( thisComponent -> {
-                    thisComponent.setCellRenderer((ListCellRenderer<E>) renderBuilder.buildForList(thisComponent));
+                    cellBuilder.buildForList(thisComponent);
                 })
                 ._this();
     }
@@ -252,6 +256,9 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
      * by supplying a custom component for each item through the
      * {@link ListCellRenderer#getListCellRendererComponent(JList, Object, int, boolean, boolean)} method.
      * <p>
+     * Also see {@link #withCells(Configurator)} method, which is the preferred way to build
+     * a list cell renderer for various item types using a more rich and fluent builder API.
+     *
      * @param renderer The {@link ListCellRenderer} that will be used to paint each cell in the list.
      * @return This very instance, which enables builder-style method chaining.
      */
@@ -267,30 +274,36 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
      *  by defining a renderer for each type or using {@link Object} as a common type
      *  using the fluent builder API exposed to the {@link Configurator}
      *  lambda function passed to this method. <br>
-     *  A typical usage may look something like this:
+     *  This method is typically used when the list holds inhomogeneous item
+     *  types which you want to be handled differently in the list view.
      *  <pre>{@code
      *  UI.list(new Object[]{":-)", 42L, '§'})
-     *  .withRenderer( it -> it
+     *  .withCells( it -> it
      *      .when(String.class).asText( cell -> "String: "+cell.getValue() )
      *      .when(Character.class).asText( cell -> "Char: "+cell.getValue() )
      *      .when(Number.class).asText( cell -> "Number: "+cell.getValue() )
      *  );
      *  }</pre>
      *  Note that a similar API is also available for the {@link javax.swing.JComboBox}
-     *  and {@link javax.swing.JTable} components, see {@link UIForCombo#withRenderer(Configurator)},
-     *  {@link UIForTable#withRenderer(Configurator)} and {@link UIForTable#withRendererForColumn(int, Configurator)}
+     *  and {@link javax.swing.JTable} components, see {@link UIForCombo#withCells(Configurator)},
+     *  {@link UIForTable#withCells(Configurator)} and {@link UIForTable#withCellsForColumn(int, Configurator)}
      *  for more information.
+     *  <p>
+     *  <b>
+     *      Also see {@link #withCell(Configurator)} method, which constitutes the preferred way
+     *      to build a list cell renderer as it is simpler, more concise and less error-prone.
+     *  </b>
      *
      * @param renderBuilder A lambda function that configures the renderer for this combo box.
      * @return This combo box instance for further configuration.
      * @param <V> The type of the value that is being rendered in this combo box.
      */
-    public final <V extends E> UIForList<E, L> withRenderer(
-        Configurator<RenderBuilder<L,V>> renderBuilder
+    public final <V extends E> UIForList<E, L> withCells(
+        Configurator<CellBuilder<L,V>> renderBuilder
     ) {
         Class<Object> commonType = Object.class;
         Objects.requireNonNull(commonType);
-        RenderBuilder render = RenderBuilder.forList(commonType);
+        CellBuilder render = CellBuilder.forList(commonType);
         try {
             render = renderBuilder.configure(render);
         } catch (Exception e) {
@@ -301,6 +314,41 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
         return _withRenderer(render);
     }
 
+    /**
+     *  Allows for the configuration of a cell view for the items of the {@link JList} instance.
+     *  The {@link Configurator} lambda function passed to this method receives a {@link CellConf}
+     *  exposing the current item value and the current selection state of the cell.
+     *  You may update return an updated cell with a desired view component
+     *  through methods like {@link CellConf#view(Component)} or {@link CellConf#view(Configurator)}.
+     *  <p>
+     *  Here code snippet demonstrating how this method may be used
+     *  as part of a UI declaration:
+     *  <pre>{@code
+     *      UI.list(new Month[]{Month.JANUARY, Month.FEBRUARY, Month.MARCH})
+     *      .withCell( cell -> cell
+     *          .view( comp -> comp
+     *              .orGet(JLabel::new) // initialize a new JLabel if not already present
+     *              .updateIf(JLabel.class, tf -> {
+     *                  tf.setText(cell.valueAsString().orElse(""));
+     *                  tf.setBackground(cell.isSelected() ? Color.YELLOW : Color.WHITE);
+     *                  return tf;
+     *              })
+     *          )
+     *      )
+     *  }</pre>
+     *  In this example, a new {@link JList} is created for an array of objects.
+     *  The {@link Configurator} lambda function passed to the {@link #withCell(Configurator)} method
+     *  configures the cell view for each item in the list.
+     *
+     * @param cellConfigurator The {@link Configurator} lambda function that configures the cell view.
+     * @return This instance of the builder node to allow for fluent method chaining.
+     * @param <V> The type of the value that is being rendered in this combo box.
+     */
+    public final <V extends E> UIForList<E, L> withCell(
+            Configurator<CellConf<L, V>> cellConfigurator
+    ) {
+        return withCells( it -> it.when((Class)Object.class).as(cellConfigurator) );
+    }
 
     private static class ValsListModel<E> extends AbstractListModel<E>
     {

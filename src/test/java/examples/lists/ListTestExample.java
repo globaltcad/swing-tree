@@ -36,8 +36,8 @@ public class ListTestExample extends JPanel {
             .add(UI.label("Files:"))
             .add(
                 UI.list(selectedFile, files)
-                .withRenderer(
-                    it -> it.when(File.class).asText( cell -> "Name: " + cell.value().get().getName() )
+                .withCells(
+                    it -> it.when(File.class).asText( cell -> "Name: " + cell.entry().get().getName() )
                 )
             )
         )

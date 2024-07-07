@@ -9,8 +9,11 @@ import swingtree.api.IconDeclaration;
 import swingtree.style.SvgIcon;
 
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import java.awt.Color;
+import java.time.DayOfWeek;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -138,6 +141,24 @@ public class NamedFieldsView extends JPanel {
                     data.put("C", Stream.of("C1", "C2", "C3").collect(Collectors.toList()));
                     return data;
                 })
+                .withCells( it -> it
+                    .when(Object.class).as( cell -> cell
+                        .view( comp -> comp
+                        .updateIf(JLabel.class, r -> null )
+                        .updateIf(JTextField.class, tf -> {
+                            tf.setText(cell.entryAsString() );
+                            return tf;
+                        })
+                        .update( r -> {
+                            r.setBackground(cell.hasFocus() ? Color.YELLOW : Color.WHITE);
+                            return r;
+                        })
+                        .orGetUi(()->
+                           UI.textField()
+                           .withMinHeight(30)
+                        ))
+                    )
+                )
             )
         )
         .add("growx, pushx, span",
@@ -153,6 +174,21 @@ public class NamedFieldsView extends JPanel {
                     .border((3*state.progress()), Color.BLACK)
                     .marginLeft( (int)(conf.component().getWidth()*state.progress()/2) )
                     .marginRight( (int)(conf.component().getWidth()*state.regress()/2) )
+                )
+            )
+        )
+        .add(
+            UI.comboBox(DayOfWeek.values()).isEditableIf(true)
+            .withCells( it -> it.when(DayOfWeek.class).as(cell -> cell
+                    .view( comp -> comp
+                        .orGet(JTextField::new)
+                        .updateIf(cell.isEditing(), v -> {
+                            JTextField tf = new JTextField();
+                            tf.setBackground(Color.YELLOW);
+                            tf.setText(cell.entryAsString());
+                            return tf;
+                        })
+                    )
                 )
             )
         )

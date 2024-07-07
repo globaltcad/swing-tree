@@ -320,47 +320,51 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
                 ._this();
     }
 
-    public final <V extends E> UIForCombo<E,C> _withRenderer( RenderBuilder<C,V> renderBuilder ) {
-        NullUtil.nullArgCheck(renderBuilder, "renderBuilder", RenderBuilder.class);
+    public final <V extends E> UIForCombo<E,C> _withRendererAndEditor(CellBuilder<C,V> cellBuilder) {
+        NullUtil.nullArgCheck(cellBuilder, "cellBuilder", CellBuilder.class);
         return _with( thisComponent -> {
-                    thisComponent.setRenderer((ListCellRenderer<E>) renderBuilder.buildForCombo((C)thisComponent));
+                    cellBuilder.buildForCombo((C)thisComponent, true);
                 })
                 ._this();
     }
 
     /**
-     *  Use this to define a generic combo box renderer for various item types..
+     *  Use this to define a generic combo box view/renderer for any type of item.
      *  You would typically want to use this method to render generic types where the only
      *  common type is {@link Object}, yet you still want to render the items
      *  in a specific way depending on their actual type. <br>
      *  This is done like so:
      *  <pre>{@code
      *  UI.comboBox(new Object[]{":-)", 42L, '§'})
-     *  .withRenderer( it -> it
+     *  .withCells( it -> it
      *      .when(String.class).asText( cell -> "String: "+cell.getValue() )
      *      .when(Character.class).asText( cell -> "Char: "+cell.getValue() )
      *      .when(Number.class).asText( cell -> "Number: "+cell.getValue() )
      *  );
      *  }</pre>
-     *  Note that inside the lambda function, you can use the {@link RenderBuilder} to define
+     *  Note that inside the lambda function, you can use the {@link CellBuilder} to define
      *  for what type of item you want to render the item in a specific way and the {@link RenderAs}
      *  to define how the item should be rendered.
      *  <p>
      *  You may want to know that a similar API is also available for the {@link javax.swing.JList}
-     *  and {@link javax.swing.JTable} components, see {@link UIForList#withRenderer(Configurator)},
-     *  {@link UIForTable#withRenderer(Configurator)} and {@link UI#table(Configurator)}
+     *  and {@link javax.swing.JTable} components, see {@link UIForList#withCells(Configurator)},
+     *  {@link UIForTable#withCells(Configurator)} and {@link UI#table(Configurator)}
      *  for more information.
+     * <p>
+     * <b>Note that the preferred way of building a list cell view
+     * is through the {@link #withCell(Configurator)} method, which is
+     * way simpler as it does not assume the combobox has an item type ambiguity.</b>
      *
      * @param renderBuilder A lambda function that configures the renderer for this combo box.
      * @return This combo box instance for further configuration.
      * @param <V> The type of the value that is being rendered in this combo box.
      */
-    public final <V extends E> UIForCombo<E,C> withRenderer(
-        Configurator<RenderBuilder<C,V>> renderBuilder
+    public final <V extends E> UIForCombo<E,C> withCells(
+        Configurator<CellBuilder<C,V>> renderBuilder
     ) {
         Class<Object> commonType = Object.class;
         Objects.requireNonNull(commonType);
-        RenderBuilder render = RenderBuilder.forCombo(commonType);
+        CellBuilder render = CellBuilder.forCombo(commonType);
         try {
             render = renderBuilder.configure(render);
         } catch (Exception e) {
@@ -368,7 +372,37 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
             return this;
         }
         Objects.requireNonNull(render);
-        return _withRenderer(render);
+        return _withRendererAndEditor(render);
+    }
+
+    /**
+     *  Use this method to configure how the combo box views should
+     *  be rendered for a specific type of item. This is useful when you have a
+     *  combo box with a single type of item, and you want to render the items
+     *  according to your specific needs. <br>
+     *  An example of how to use this method is as follows:
+     *  <pre>{@code
+     *      UI.comboBox(TimeUnit.values())
+     *      .withCell( cell -> cell
+     *          .view( comp -> comp
+     *              .orGet(JLabel::new)
+     *              .updateIf(JLabel.class, label -> {
+     *                  label.setText(cell.valueAsString().orElse(""));
+     *                  return label;
+     *              })
+     *          )
+     *      );
+     *  }</pre>
+     *
+     * @param cellConfigurator The configurator for the cell, receiving a {@link CellConf} as input
+     *                         and returning an updated CellDelegate.
+     * @return This very instance, which enables builder-style method chaining.
+     * @param <V> The type of the value that is being rendered in this combo box.
+     */
+    public final <V extends E> UIForCombo<E,C> withCell(
+        Configurator<CellConf<C,V>> cellConfigurator
+    ) {
+        return withCells(it -> it.when((Class) Object.class).as(cellConfigurator));
     }
 
     /**
@@ -388,15 +422,15 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
 
     /**
      *  Use this to specify a custom text based cell renderer for each item in the combo box.
-     *  The renderer is a function that takes a {@link CellDelegate} as input
+     *  The renderer is a function that takes a {@link CellConf} as input
      *  and returns a {@link String} which will be used as the text for the combo box item.
      *
      * @param renderer The function that will be used to render the combo box items.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final UIForCombo<E,C> withTextRenderer( Function<CellDelegate<C,E>, String> renderer ) {
+    public final UIForCombo<E,C> withTextRenderer( Function<CellConf<C,E>, String> renderer ) {
         Objects.requireNonNull(renderer, "renderer");
-        return withRenderer( it -> it.when((Class<E>) Object.class).asText( renderer ) );
+        return withCells(it -> it.when((Class<E>) Object.class).asText( renderer ) );
     }
 
     /**

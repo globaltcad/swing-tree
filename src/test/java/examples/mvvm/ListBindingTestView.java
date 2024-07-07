@@ -3,9 +3,6 @@ package examples.mvvm;
 import swingtree.UI;
 import swingtree.threading.EventProcessor;
 
-import javax.swing.JLabel;
-import javax.swing.JList;
-
 import static swingtree.UI.*;
 
 /**
@@ -31,18 +28,9 @@ public class ListBindingTestView extends Panel
             panel(FILL)
             .add(PUSH.and(GROW),
                 listOf(vm.colorNames())
-                .withRenderer( it -> it
+                .withCells(it -> it
                     .when(String.class)
-                    .asText( cell -> cell.value().get() )
-                    //.render( (cell, g2d) -> {
-                    //    cell.setRenderer(new JLabel(""));
-                    //    // We draw the string:
-                    //    g2d.setColor(Color.BLACK);
-                    //    g2d.drawString(cell.value().get(), 10, 20);
-                    //    // We draw the color:
-                    //    g2d.setColor(color(cell.value().get()));
-                    //    g2d.fillRect(0, 0, 50, 50);
-                    //})
+                    .asText( cell -> cell.entry().get() )
                 )
             )
             .add(
