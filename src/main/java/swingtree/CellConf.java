@@ -158,15 +158,23 @@ public final class CellConf<C extends JComponent, V>
     }
 
     /**
-     *  Returns an {@link Optional} of the entry of this cell as a string, if the entry
-     *  is not null. If the entry is null, then an empty {@link Optional}
-     *  is returned.
+     *  Returns the entry of this cell as a string. If the entry
+     *  is null, then an empty string is returned. This method is
+     *  useful when you want to display the entry of the cell as a string,
+     *  and do not have a special meaning assigned to null entries.
+     *  (Which is the preferred way to handle null entries)
      *
-     * @return An optional of the entry of this cell as a string,
-     *         or an empty optional if the entry is null.
+     * @return The entry of this cell as a string, or an empty string if the entry is null.
+     *        Note that the string representation of the entry is obtained by calling
+     *        the {@link Object#toString()} method on the entry.
      */
-    public Optional<String> entryAsString() {
-        return entry().map(Object::toString);
+    public String entryAsString() {
+        try {
+            return entry().map(Object::toString).orElse("");
+        } catch (Exception e) {
+            log.error("Failed to convert entry to string!", e);
+        }
+        return "";
     }
 
     /**

@@ -29,7 +29,7 @@ public class ListRendering extends Panel
                 .withEntries(Stream.of(Test.A, Test.B, Test.C).collect(Collectors.toList()))
                 .withCells( it -> it
                     .when(Test.class)
-                    .asText( cell -> cell.entryAsString().orElse("") )
+                    .asText( cell -> cell.entryAsString() )
                 )
             )
         )

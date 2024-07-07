@@ -506,7 +506,7 @@ public final class CellBuilder<C extends JComponent, E> {
 
     private void _addDefaultRendering() {
         // We use the default text renderer for objects
-        _store(Object.class, cell -> true, _createDefaultTextRenderer(cell -> cell.entryAsString().orElse("")));
+        _store(Object.class, cell -> true, _createDefaultTextRenderer(cell -> cell.entryAsString()));
     }
 
     static class InternalLabelForRendering extends JLabel {
