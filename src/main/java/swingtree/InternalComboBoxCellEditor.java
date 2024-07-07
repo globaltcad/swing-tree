@@ -13,7 +13,6 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.security.AccessController;
 import java.security.PrivilegedExceptionAction;
 import java.security.SecureClassLoader;
@@ -98,7 +97,7 @@ final class InternalComboBoxCellEditor implements ComboBoxEditor,FocusListener {
                 // Must take the value from the editor and get the value and cast it to the new type.
                 Class<?> cls = oldValue.getClass();
                 try {
-                    Method method = MethodUtil.getMethod(cls, "valueOf", new Class<?>[]{String.class});
+                    Method method = cls.getMethod("valueOf", new Class<?>[]{String.class});
                     newValue = MethodUtil.invoke(method, oldValue, new Object[] { editor.getText()});
                 } catch (Exception ex) {
                     // Fail silently and return the newValue (a String object)
@@ -196,12 +195,6 @@ final class InternalComboBoxCellEditor implements ComboBoxEditor,FocusListener {
             }
         }
 
-        public static Method getMethod(Class<?> cls, String name, Class<?>[] args)
-            throws NoSuchMethodException {
-            ReflectUtil.checkPackageAccess(cls);
-            return cls.getMethod(name, args);
-        }
-
         private static Method getTrampoline() {
             try {
                 return AccessController.doPrivileged(
@@ -230,74 +223,6 @@ final class InternalComboBoxCellEditor implements ComboBoxEditor,FocusListener {
             return null;
         }
 
-    }
-
-    static class ReflectUtil {
-
-        private ReflectUtil() {
-        }
-
-        /**
-         * Checks package access on the given class.
-         * <p>
-         * If it is a {@link Proxy#isProxyClass(java.lang.Class)} that implements
-         * a non-public interface (i.e. may be in a non-restricted package),
-         * also check the package access on the proxy interfaces.
-         */
-        public static void checkPackageAccess(Class<?> clazz) {
-            SecurityManager s = System.getSecurityManager();
-            if (s != null) {
-                privateCheckPackageAccess(s, clazz);
-            }
-        }
-
-        /**
-         * NOTE: should only be called if a SecurityManager is installed
-         */
-        private static void privateCheckPackageAccess(SecurityManager s, Class<?> clazz) {
-            while (clazz.isArray()) {
-                clazz = clazz.getComponentType();
-            }
-
-            String pkg = clazz.getPackageName();
-            if (pkg != null && !pkg.isEmpty()) {
-                s.checkPackageAccess(pkg);
-            }
-
-            if (isNonPublicProxyClass(clazz)) {
-                privateCheckProxyPackageAccess(s, clazz);
-            }
-        }
-
-        /**
-         * NOTE: should only be called if a SecurityManager is installed
-         */
-        private static void privateCheckProxyPackageAccess(SecurityManager s, Class<?> clazz) {
-            // check proxy interfaces if the given class is a proxy class
-            if (Proxy.isProxyClass(clazz)) {
-                for (Class<?> intf : clazz.getInterfaces()) {
-                    privateCheckPackageAccess(s, intf);
-                }
-            }
-        }
-
-
-        // Note that bytecode instrumentation tools may exclude 'sun.*'
-        // classes but not generated proxy classes and so keep it in com.sun.*
-        public static final String PROXY_PACKAGE = "com.sun.proxy";
-
-        /**
-         * Test if the given class is a proxy class that implements
-         * non-public interface.  Such proxy class may be in a non-restricted
-         * package that bypasses checkPackageAccess.
-         */
-        public static boolean isNonPublicProxyClass(Class<?> cls) {
-            if (!Proxy.isProxyClass(cls)) {
-                return false;
-            }
-            String pkg = cls.getPackageName();
-            return pkg == null || !pkg.startsWith(PROXY_PACKAGE);
-        }
     }
 
 }
