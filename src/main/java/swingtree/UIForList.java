@@ -316,10 +316,10 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
 
     /**
      *  Allows for the configuration of a cell view for the items of the {@link JList} instance.
-     *  The {@link Configurator} lambda function passed to this method receives a {@link CellDelegate}
+     *  The {@link Configurator} lambda function passed to this method receives a {@link CellConf}
      *  exposing the current item value and the current selection state of the cell.
      *  You may update return an updated cell with a desired view component
-     *  through methods like {@link CellDelegate#view(Component)} or {@link CellDelegate#view(Configurator)}.
+     *  through methods like {@link CellConf#view(Component)} or {@link CellConf#view(Configurator)}.
      *  <p>
      *  Here code snippet demonstrating how this method may be used
      *  as part of a UI declaration:
@@ -345,7 +345,7 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
      * @param <V> The type of the value that is being rendered in this combo box.
      */
     public final <V extends E> UIForList<E, L> withCell(
-            Configurator<CellDelegate<L, V>> cellConfigurator
+            Configurator<CellConf<L, V>> cellConfigurator
     ) {
         return withCells( it -> it.when((Class)Object.class).as(cellConfigurator) );
     }

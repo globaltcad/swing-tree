@@ -57,7 +57,7 @@ public final class CellBuilder<C extends JComponent, E> {
 
     private final Class<C> _componentType;
     private final Class<E> _elementType;
-    private final Map<Class<?>, List<Configurator<CellDelegate<C, ?>>>> _rendererLookup = new LinkedHashMap<>(16);
+    private final Map<Class<?>, List<Configurator<CellConf<C, ?>>>> _rendererLookup = new LinkedHashMap<>(16);
 
 
     static <E> CellBuilder<JList<E>,E> forList(Class<E> elementType) {
@@ -102,7 +102,7 @@ public final class CellBuilder<C extends JComponent, E> {
      */
     public <T extends E> RenderAs<C, E, T> when(
         Class<T> valueType,
-        Predicate<CellDelegate<C, T>> valueValidator
+        Predicate<CellConf<C, T>> valueValidator
     ) {
         NullUtil.nullArgCheck(valueType, "valueType", Class.class);
         NullUtil.nullArgCheck(valueValidator, "valueValidator", Predicate.class);
@@ -112,15 +112,15 @@ public final class CellBuilder<C extends JComponent, E> {
     <V> void _store(
         Class valueType,
         Predicate predicate,
-        Configurator<CellDelegate<C, V>> valueInterpreter
+        Configurator<CellConf<C, V>> valueInterpreter
     ) {
         NullUtil.nullArgCheck(valueType, "valueType", Class.class);
         NullUtil.nullArgCheck(predicate, "predicate", Predicate.class);
         NullUtil.nullArgCheck(valueInterpreter, "valueInterpreter", Configurator.class);
-        List<Configurator<CellDelegate<C, ?>>> found = _rendererLookup.computeIfAbsent(valueType, k -> new ArrayList<>());
+        List<Configurator<CellConf<C, ?>>> found = _rendererLookup.computeIfAbsent(valueType, k -> new ArrayList<>());
         found.add(cell -> {
             if (predicate.test(cell))
-                return valueInterpreter.configure((CellDelegate<C, V>) cell);
+                return valueInterpreter.configure((CellConf<C, V>) cell);
             else
                 return cell;
         });
@@ -138,15 +138,15 @@ public final class CellBuilder<C extends JComponent, E> {
         public <T extends JComponent> Component _updateAndGetComponent(
             Function<@Nullable Object, Component> defaultRenderer,
             Consumer<@Nullable Component> saveComponent,
-            CellDelegate<T, Object> cell
+            CellConf<T, Object> cell
         ) {
             @Nullable Object value = cell.item().orElse(null);
-            List<Configurator<CellDelegate<C, ?>>> interpreter = _find(value, _rendererLookup);
+            List<Configurator<CellConf<C, ?>>> interpreter = _find(value, _rendererLookup);
             if ( interpreter.isEmpty() )
                 return defaultRenderer.apply(value);
             else {
-                for ( Configurator<CellDelegate<C,?>> configurator : interpreter ) {
-                    CellDelegate newCell = configurator.configure((CellDelegate)cell);
+                for ( Configurator<CellConf<C,?>> configurator : interpreter ) {
+                    CellConf newCell = configurator.configure((CellConf)cell);
                     if ( newCell != null )
                         cell = newCell;
                 }
@@ -225,7 +225,7 @@ public final class CellBuilder<C extends JComponent, E> {
                         _updateAndGetComponent(
                              localValue -> _defaultRenderer.getTableCellRendererComponent(table, localValue, isSelected, hasFocus, row, column),
                              this::_setRenderer,
-                             CellDelegate.of(
+                             CellConf.of(
                                  _lastCustomRenderer,
                                  table, value, isSelected, hasFocus, false, false, false, row, column,
                                  () -> _defaultRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column)
@@ -246,7 +246,7 @@ public final class CellBuilder<C extends JComponent, E> {
                         _updateAndGetComponent(
                              localValue -> _basicEditor.getTableCellEditorComponent(table, localValue, isSelected, row, column),
                              this::_setEditor,
-                             CellDelegate.of(
+                             CellConf.of(
                                  _basicEditor.getCustomComponent(),
                                  table, value, isSelected, true, true, false, false, row, column,
                                  () -> _basicEditor.getTableCellEditorComponent(table, value, isSelected, row, column)
@@ -268,7 +268,7 @@ public final class CellBuilder<C extends JComponent, E> {
             return _updateAndGetComponent(
                          localValue -> _defaultTreeRenderer.getTreeCellRendererComponent(tree, localValue, selected, expanded, leaf, row, hasFocus),
                          this::_setRenderer,
-                         CellDelegate.of(
+                         CellConf.of(
                              _lastCustomRenderer,
                              tree, value, selected, hasFocus, false, expanded, leaf, row, 0,
                              () -> _defaultTreeRenderer.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus)
@@ -288,7 +288,7 @@ public final class CellBuilder<C extends JComponent, E> {
             return _updateAndGetComponent(
                          localValue -> _basicEditor.getTreeCellEditorComponent(tree, localValue, isSelected, expanded, leaf, row),
                          this::_setEditor,
-                         CellDelegate.of(
+                         CellConf.of(
                              _basicEditor.getComponent(), tree, value, isSelected,
                              true, true, expanded, leaf, row, 0,
                              () -> _basicEditor.getTreeCellEditorComponent(tree, value, isSelected, expanded, leaf, row)
@@ -351,19 +351,19 @@ public final class CellBuilder<C extends JComponent, E> {
             final boolean isSelected,
             final boolean hasFocus
         ) {
-            List<Configurator<CellDelegate<C, ?>>> interpreter = _find(value, _rendererLookup);
+            List<Configurator<CellConf<C, ?>>> interpreter = _find(value, _rendererLookup);
             if (interpreter.isEmpty())
                 return _defaultRenderer.getListCellRendererComponent(list, value, row, isSelected, hasFocus);
             else {
-                CellDelegate<O, Object> cell = CellDelegate.of(
+                CellConf<O, Object> cell = CellConf.of(
                                                         _lastCustomRenderer,
                                                         _component, value, isSelected,
                                                         hasFocus, false, false, false, row, 0,
                                                         ()->_defaultRenderer.getListCellRendererComponent(list, value, row, isSelected, hasFocus)
                                                     );
 
-                for ( Configurator<CellDelegate<C,?>> configurator : interpreter ) {
-                    CellDelegate newCell = configurator.configure((CellDelegate)cell);
+                for ( Configurator<CellConf<C,?>> configurator : interpreter ) {
+                    CellConf newCell = configurator.configure((CellConf)cell);
                     if ( newCell != null )
                         cell = newCell;
                 }
@@ -391,15 +391,15 @@ public final class CellBuilder<C extends JComponent, E> {
                 return Optional.empty();
             JComboBox<?> comboBox = (JComboBox<?>) _component;
 
-            CellDelegate<JComboBox<?>, Object> cell = CellDelegate.of(
+            CellConf<JComboBox<?>, Object> cell = CellConf.of(
                 null, comboBox, null, false, false, true, false, false, 0, 0, () -> null
             );
-            List<Configurator<CellDelegate<C, ?>>> interpreter = _findAll(_rendererLookup);
+            List<Configurator<CellConf<C, ?>>> interpreter = _findAll(_rendererLookup);
             if (interpreter.isEmpty())
                 return Optional.empty();
             else {
-                for ( Configurator<CellDelegate<C,?>> configurator : interpreter ) {
-                    CellDelegate<JComboBox<?>,Object> newCell = configurator.configure((CellDelegate)cell);
+                for ( Configurator<CellConf<C,?>> configurator : interpreter ) {
+                    CellConf<JComboBox<?>,Object> newCell = configurator.configure((CellConf)cell);
                     if ( newCell != null )
                         cell = newCell.view( v -> v.update( c -> c instanceof JTextField ? c : null ) );
                 }
@@ -419,13 +419,13 @@ public final class CellBuilder<C extends JComponent, E> {
         }
     }
 
-    private static <C extends JComponent> List<Configurator<CellDelegate<C, ?>>> _find(
+    private static <C extends JComponent> List<Configurator<CellConf<C, ?>>> _find(
         @Nullable Object value,
-        Map<Class<?>, List<Configurator<CellDelegate<C, ?>>>> rendererLookup
+        Map<Class<?>, List<Configurator<CellConf<C, ?>>>> rendererLookup
     ) {
         Class<?> type = (value == null ? Object.class : value.getClass());
-        List<Configurator<CellDelegate<C, ?>>> cellRenderer = new ArrayList<>();
-        for (Map.Entry<Class<?>, List<Configurator<CellDelegate<C, ?>>>> e : rendererLookup.entrySet()) {
+        List<Configurator<CellConf<C, ?>>> cellRenderer = new ArrayList<>();
+        for (Map.Entry<Class<?>, List<Configurator<CellConf<C, ?>>>> e : rendererLookup.entrySet()) {
             if (e.getKey().isAssignableFrom(type))
                 cellRenderer.addAll(e.getValue());
         }
@@ -434,11 +434,11 @@ public final class CellBuilder<C extends JComponent, E> {
         return cellRenderer;
     }
 
-    private static <C extends JComponent> List<Configurator<CellDelegate<C,?>>> _findAll(
-            Map<Class<?>, List<Configurator<CellDelegate<C, ?>>>> rendererLookup
+    private static <C extends JComponent> List<Configurator<CellConf<C,?>>> _findAll(
+            Map<Class<?>, List<Configurator<CellConf<C, ?>>>> rendererLookup
     ) {
-        List<Configurator<CellDelegate<C, ?>>> cellRenderer = new ArrayList<>();
-        for (List<Configurator<CellDelegate<C, ?>>> e : rendererLookup.values()) {
+        List<Configurator<CellConf<C, ?>>> cellRenderer = new ArrayList<>();
+        for (List<Configurator<CellConf<C, ?>>> e : rendererLookup.values()) {
             cellRenderer.addAll(e);
         }
         // We reverse the cell renderers, so that the most un-specific one is first
@@ -516,8 +516,8 @@ public final class CellBuilder<C extends JComponent, E> {
         }
     }
 
-    static <C extends JComponent, V> Configurator<CellDelegate<C, V>> _createDefaultTextRenderer(
-            Function<CellDelegate<C, V>, String> renderer
+    static <C extends JComponent, V> Configurator<CellConf<C, V>> _createDefaultTextRenderer(
+            Function<CellConf<C, V>, String> renderer
     ) {
         return cell -> {
             if ( cell.isEditing() )

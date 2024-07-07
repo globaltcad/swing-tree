@@ -19,10 +19,10 @@ import java.util.function.Supplier;
  * This class models the state of an individual table/tree/list/drop down cell alongside
  * various properties that a cell should have, like for example
  * the value of the cell, its position within the component
- * as well as a {@link CellDelegate#view()} (renderer/editor) in the form of an AWT {@link Component}
+ * as well as a {@link CellConf#view()} (renderer/editor) in the form of an AWT {@link Component}
  * which may or may not be replaced or modified.
  * <br>
- * The {@link CellDelegate} is exposed to the {@link RenderAs#as(Configurator)}
+ * The {@link CellConf} is exposed to the {@link RenderAs#as(Configurator)}
  * method after a {@link CellBuilder#when(Class)} call as part of various
  * cell builder APIs like: <br>
  * <ul>
@@ -36,15 +36,15 @@ import java.util.function.Supplier;
  *     <li>{@link UIForList#withCells(Configurator)} </li>
  * </ul>
  * When configuring your cell, you may use methods like
- * {@link CellDelegate#view(Component)} or {@link CellDelegate#renderer(Size,Consumer)}
+ * {@link CellConf#view(Component)} or {@link CellConf#renderer(Size,Consumer)}
  * to define how the cell should be rendered.
  * <p>
- * Note that the {@link CellDelegate#isEditing()} flag determines
+ * Note that the {@link CellConf#isEditing()} flag determines
  * two important modes in which this class is exposed to {@link RenderAs#as(Configurator)}.
  * If the {@code isEditing()} is true, then you are expected to configure a
- * cell editor component for the {@link CellDelegate#view()} property.
+ * cell editor component for the {@link CellConf#view()} property.
  * If the {@code isEditing()} is false, then you are expected to configure a simple
- * cell renderer component as the {@link CellDelegate#view()} property.<br>
+ * cell renderer component as the {@link CellConf#view()} property.<br>
  * Note that for each state of the {@code isEditing()} flag, the view component
  * is persisted across multiple calls to the {@link RenderAs#as(Configurator)} method.
  * <p>
@@ -52,13 +52,13 @@ import java.util.function.Supplier;
  * renderer and an editor for a cell on a single call to the {@link RenderAs#as(Configurator)} method, and then
  * to update the renderer or editor in every subsequent call to the same method.
  *
- * @param <V> The item type of the entry of this {@link CellDelegate}.
+ * @param <V> The item type of the entry of this {@link CellConf}.
  */
-public final class CellDelegate<C extends JComponent, V>
+public final class CellConf<C extends JComponent, V>
 {
-    private static final Logger log = LoggerFactory.getLogger(CellDelegate.class);
+    private static final Logger log = LoggerFactory.getLogger(CellConf.class);
 
-    public static <C extends JComponent, V> CellDelegate<C, V> of(
+    public static <C extends JComponent, V> CellConf<C, V> of(
         @Nullable Component lastRenderer,
         C                   owner,
         @Nullable V         item,
@@ -72,7 +72,7 @@ public final class CellDelegate<C extends JComponent, V>
         Supplier<Component> defaultRenderSource
     ) {
         List<String> toolTips = new ArrayList<>();
-        return new CellDelegate<>(
+        return new CellConf<>(
             owner,
             item,
             isSelected,
@@ -104,7 +104,7 @@ public final class CellDelegate<C extends JComponent, V>
     private final Supplier<Component> defaultRenderSource;
 
 
-    private CellDelegate(
+    private CellConf(
         C                   host,
         @Nullable V         item,
         boolean             isSelected,
@@ -276,7 +276,7 @@ public final class CellDelegate<C extends JComponent, V>
      *  is typically a label, text field or some other custom component.
      *  It is wrapped in an {@link Optional} to clearly indicate
      *  that it may be null.<br>
-     *  Note that in case of the {@link CellDelegate#isEditing()} method
+     *  Note that in case of the {@link CellConf#isEditing()} method
      *  returning true, the component stored in this optional is used as an editor.
      *  If the cell is not being edited, then the component is used as a renderer.<br>
      *  Two components are persisted across multiple calls to the
@@ -289,7 +289,7 @@ public final class CellDelegate<C extends JComponent, V>
      *  will simply be ignored in exchange for a default editor.
      *
      * @return An optional of the view of this cell, or an empty optional if the view is null.
-     *         In case of the {@link CellDelegate#isEditing()} method returning true,
+     *         In case of the {@link CellConf#isEditing()} method returning true,
      *         the component stored in this optional is used as an editor.
      *         The cell will remember the renderer and editor components across multiple calls
      *         to the {@link CellBuilder}s {@link RenderAs#as(Configurator)} method.
@@ -329,7 +329,7 @@ public final class CellDelegate<C extends JComponent, V>
      *        If the configurator returns an empty optional, then the view
      *        of the cell will be reset to null.
      */
-    public CellDelegate<C,V> view( Configurator<OptionalUI<Component>> configurator ) {
+    public CellConf<C,V> view(Configurator<OptionalUI<Component>> configurator ) {
         OptionalUI<Component> newRenderer = configurator.configure(view());
         return _withRenderer(newRenderer.orElseNullable(null));
     }
@@ -340,10 +340,10 @@ public final class CellDelegate<C extends JComponent, V>
      *  component that is used to render the cell to the user. It is
      *  typically a label, text field or some other custom component.
      *  <br>
-     *  Note that in case of the {@link CellDelegate#isEditing()} method
-     *  returning true, this {@link CellDelegate} is used for constructing
+     *  Note that in case of the {@link CellConf#isEditing()} method
+     *  returning true, this {@link CellConf} is used for constructing
      *  or maintaining an editor. If the cell is not being edited, then
-     *  this {@link CellDelegate} is used for rendering.<br>
+     *  this {@link CellConf} is used for rendering.<br>
      *  Either way, the component is memorized across multiple calls to the
      *  {@link CellBuilder}s {@link RenderAs#as(Configurator)} method. <br>
      *
@@ -357,14 +357,14 @@ public final class CellDelegate<C extends JComponent, V>
      *  }</pre>
      *  But keep in mind that in this example the label will be recreated
      *  on every refresh call, which is not very efficient. It is better
-     *  to use the {@link CellDelegate#view(Configurator)} method to
+     *  to use the {@link CellConf#view(Configurator)} method to
      *  initialize the view once and then update it in every refresh call.
      *
      * @param component The component to be used as the view of the cell.
      * @return An updated cell delegate object with the new view to
      *          serve as the renderer/editor of the cell.
      */
-    public CellDelegate<C, V> view( Component component ) {
+    public CellConf<C, V> view(Component component ) {
         return _withRenderer(component);
     }
 
@@ -378,10 +378,10 @@ public final class CellDelegate<C extends JComponent, V>
      *  specific way. For example, you may want to paint the cell
      *  with a gradient background or a custom border.
      *  <br>
-     *  Note that in case of the {@link CellDelegate#isEditing()} method
-     *  returning true, this {@link CellDelegate} is used for constructing
+     *  Note that in case of the {@link CellConf#isEditing()} method
+     *  returning true, this {@link CellConf} is used for constructing
      *  or maintaining an editor. If the cell is not being edited, then
-     *  this {@link CellDelegate} is used for rendering.<br>
+     *  this {@link CellConf} is used for rendering.<br>
      *  Either way, the component is memorized across multiple calls to the
      *  {@link CellBuilder}s {@link RenderAs#as(Configurator)} method.
      *
@@ -390,7 +390,7 @@ public final class CellDelegate<C extends JComponent, V>
      * @return An updated cell delegate object with the new view to
      *          serve as the renderer/editor of the cell.
      */
-    public CellDelegate<C, V> renderer( Size cellSize, Consumer<Graphics2D> painter ) {
+    public CellConf<C, V> renderer(Size cellSize, Consumer<Graphics2D> painter ) {
         Component component = new Component() {
             @Override
             public void paint(Graphics g) {
@@ -445,7 +445,7 @@ public final class CellDelegate<C extends JComponent, V>
      * @return An updated cell delegate object with the default view component.
      *         This will override any custom view that was previously specified.
      */
-    public CellDelegate<C, V> viewDefault() {
+    public CellConf<C, V> viewDefault() {
         try {
             return this.view(this.defaultRenderSource.get());
         } catch (Exception e) {
@@ -454,8 +454,8 @@ public final class CellDelegate<C extends JComponent, V>
         return this;
     }
 
-    public CellDelegate<C, V> _withRenderer( @Nullable Component component ) {
-        return new CellDelegate<>(
+    public CellConf<C, V> _withRenderer(@Nullable Component component ) {
+        return new CellConf<>(
             parent,
             item,
             isSelected,
@@ -480,10 +480,10 @@ public final class CellDelegate<C extends JComponent, V>
      * @param toolTip The tool tip to be added to the list of tool tips.
      * @return An updated cell delegate object with the new tool tip.
      */
-    public CellDelegate<C, V> toolTip( String toolTip ) {
+    public CellConf<C, V> toolTip(String toolTip ) {
         ArrayList<String> newToolTips = new ArrayList<>(toolTips);
         newToolTips.add(toolTip);
-        return new CellDelegate<>(
+        return new CellConf<>(
             parent,
             item,
             isSelected,
@@ -529,8 +529,8 @@ public final class CellDelegate<C extends JComponent, V>
      *                  to present to the user, typically a String.
      * @return An updated cell delegate object with the new presentation value.
      */
-    public CellDelegate<C, V> presentationItem( @Nullable Object toBeShown ) {
-        return new CellDelegate<>(
+    public CellConf<C, V> presentationItem(@Nullable Object toBeShown ) {
+        return new CellConf<>(
             parent,
             item,
             isSelected,

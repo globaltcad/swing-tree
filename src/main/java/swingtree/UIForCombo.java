@@ -394,13 +394,13 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
      *      );
      *  }</pre>
      *
-     * @param cellConfigurator The configurator for the cell, receiving a {@link CellDelegate} as input
+     * @param cellConfigurator The configurator for the cell, receiving a {@link CellConf} as input
      *                         and returning an updated CellDelegate.
      * @return This very instance, which enables builder-style method chaining.
      * @param <V> The type of the value that is being rendered in this combo box.
      */
     public final <V extends E> UIForCombo<E,C> withCell(
-        Configurator<CellDelegate<C,V>> cellConfigurator
+        Configurator<CellConf<C,V>> cellConfigurator
     ) {
         return withCells(it -> it.when((Class) Object.class).as(cellConfigurator));
     }
@@ -422,13 +422,13 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
 
     /**
      *  Use this to specify a custom text based cell renderer for each item in the combo box.
-     *  The renderer is a function that takes a {@link CellDelegate} as input
+     *  The renderer is a function that takes a {@link CellConf} as input
      *  and returns a {@link String} which will be used as the text for the combo box item.
      *
      * @param renderer The function that will be used to render the combo box items.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final UIForCombo<E,C> withTextRenderer( Function<CellDelegate<C,E>, String> renderer ) {
+    public final UIForCombo<E,C> withTextRenderer( Function<CellConf<C,E>, String> renderer ) {
         Objects.requireNonNull(renderer, "renderer");
         return withCells(it -> it.when((Class<E>) Object.class).asText( renderer ) );
     }

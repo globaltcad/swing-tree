@@ -123,9 +123,9 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
     /**
      *  Use this to build a basic table cell renderer for a particular column.
      *  The second argument passed to this method is a lambda function
-     *  which accepts a {@link CellDelegate} representing the cell to be rendered.
+     *  which accepts a {@link CellConf} representing the cell to be rendered.
      *  You may then return an updated cell with a desired view component
-     *  through methods like {@link CellDelegate#view(Component)} or {@link CellDelegate#view(Configurator)}.
+     *  through methods like {@link CellConf#view(Component)} or {@link CellConf#view(Configurator)}.
      *  Here an example of how this method may be used:
      * <pre>{@code
      *     UI.table(UI.ListData.ROW_MAJOR_EDITABLE, ()->List.of(List.of(1, 2, 3), List.of(7, 8, 9)) )
@@ -155,7 +155,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      */
     public final UIForTable<T> withCellForColumn(
         String columnName,
-        Configurator<CellDelegate<T, Object>> cellConfigurator
+        Configurator<CellConf<T, Object>> cellConfigurator
     ) {
         Objects.requireNonNull(cellConfigurator);
         Objects.requireNonNull(columnName);
@@ -209,9 +209,9 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
     /**
      *  Use this to build a basic table cell renderer for a particular column.
      *  The second argument passed to this method is a lambda function
-     *  which accepts a {@link CellDelegate} representing the cell to be rendered.
+     *  which accepts a {@link CellConf} representing the cell to be rendered.
      *  You may then return an updated cell with a desired view component
-     *  through methods like {@link CellDelegate#view(Component)} or {@link CellDelegate#view(Configurator)}.
+     *  through methods like {@link CellConf#view(Component)} or {@link CellConf#view(Configurator)}.
      *  Here an example of how this method may be used:
      * <pre>{@code
      *     UI.table(UI.ListData.ROW_MAJOR_EDITABLE, ()->List.of(List.of(1, 2, 3), List.of(7, 8, 9)) )
@@ -241,7 +241,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      */
     public final UIForTable<T> withCellForColumn(
         int columnIndex,
-        Configurator<CellDelegate<T, Object>> cellConfigurator
+        Configurator<CellConf<T, Object>> cellConfigurator
     ) {
         Objects.requireNonNull(cellConfigurator);
         return withCellsForColumn(columnIndex, it -> it.when((Class)Object.class).as(cellConfigurator));
@@ -380,11 +380,11 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
 
     /**
      *  Allows for the configuration of a cell view for the items of the {@link JTable} instance.
-     *  The {@link Configurator} lambda function passed to this method receives a {@link CellDelegate}
+     *  The {@link Configurator} lambda function passed to this method receives a {@link CellConf}
      *  exposing a wide range of properties describing the state of the cell, like
      *  its current item, its index, its selection state, etc.
      *  You may update return an updated cell with a desired view component
-     *  through methods like {@link CellDelegate#view(Component)} or {@link CellDelegate#view(Configurator)}.
+     *  through methods like {@link CellConf#view(Component)} or {@link CellConf#view(Configurator)}.
      *  <p>
      *  Here code snippet demonstrating how this method may be used
      *  as part of a UI declaration:
@@ -417,7 +417,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      * @param <V> The type of the value that is being rendered in this combo box.
      */
     public final <V> UIForTable<T> withCell(
-            Configurator<CellDelegate<T, V>> cellConfigurator
+            Configurator<CellConf<T, V>> cellConfigurator
     ) {
         return withCells( it -> it.when((Class)Object.class).as(cellConfigurator) );
     }
