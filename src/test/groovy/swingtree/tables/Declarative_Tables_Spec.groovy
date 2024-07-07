@@ -245,7 +245,7 @@ class Declarative_Tables_Spec extends Specification
                         .view( comp -> comp
                             .orGetUi({UI.textField().withBackground(Color.MAGENTA)})
                             .updateIf(JTextField.class, tf -> {
-                                tf.text = cell.itemAsString().orElse("")
+                                tf.text = cell.entryAsString().orElse("")
                                 tf.foreground = cell.isSelected() ? Color.RED : Color.WHITE
                                 return tf
                             })

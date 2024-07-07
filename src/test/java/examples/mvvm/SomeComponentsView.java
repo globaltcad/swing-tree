@@ -39,7 +39,7 @@ public class SomeComponentsView extends Panel
 				comboBox(vm.getBaseSize())
 				.withCells( it -> it
 				    .when(SomeComponentsViewModel.BaseSize.class)
-					.asText( cell -> cell.item().map(SomeComponentsViewModel.BaseSize::title).orElse("") )
+					.asText( cell -> cell.entry().map(SomeComponentsViewModel.BaseSize::title).orElse("") )
 				)
 			)
 		)

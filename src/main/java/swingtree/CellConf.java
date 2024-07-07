@@ -13,6 +13,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -52,7 +53,7 @@ import java.util.function.Supplier;
  * renderer and an editor for a cell on a single call to the {@link RenderAs#as(Configurator)} method, and then
  * to update the renderer or editor in every subsequent call to the same method.
  *
- * @param <V> The item type of the entry of this {@link CellConf}.
+ * @param <V> The entry type of the entry of this {@link CellConf}.
  */
 public final class CellConf<C extends JComponent, V>
 {
@@ -61,7 +62,7 @@ public final class CellConf<C extends JComponent, V>
     public static <C extends JComponent, V> CellConf<C, V> of(
         @Nullable Component lastRenderer,
         C                   owner,
-        @Nullable V         item,
+        @Nullable V         entry,
         boolean             isSelected,
         boolean             hasFocus,
         boolean             isEditing,
@@ -74,7 +75,7 @@ public final class CellConf<C extends JComponent, V>
         List<String> toolTips = new ArrayList<>();
         return new CellConf<>(
             owner,
-            item,
+            entry,
             isSelected,
             hasFocus,
             isEditing,
@@ -89,8 +90,8 @@ public final class CellConf<C extends JComponent, V>
         );
     }
 
-    private final C parent;
-    private final @Nullable V         item;
+    private final C                   parent;
+    private final @Nullable V         entry;
     private final boolean             isSelected;
     private final boolean             hasFocus;
     private final boolean             isEditing;
@@ -100,13 +101,13 @@ public final class CellConf<C extends JComponent, V>
     private final int                 column;
     private final @Nullable Component view;
     private final List<String>        toolTips;
-    private final @Nullable Object    presentationValue;
+    private final @Nullable Object    presentationEntry;
     private final Supplier<Component> defaultRenderSource;
 
 
     private CellConf(
         C                   host,
-        @Nullable V         item,
+        @Nullable V         entry,
         boolean             isSelected,
         boolean             hasFocus,
         boolean             isEditing,
@@ -114,13 +115,13 @@ public final class CellConf<C extends JComponent, V>
         boolean             isLeaf,
         int                 row,
         int                 column,
-        @Nullable Component renderer,
+        @Nullable Component view,
         List<String>        toolTips,
-        @Nullable Object    presentationValue,
+        @Nullable Object    presentationEntry,
         Supplier<Component> defaultRenderSource
     ) {
-        this.parent = Objects.requireNonNull(host);
-        this.item                = item;
+        this.parent              = Objects.requireNonNull(host);
+        this.entry               = entry;
         this.isSelected          = isSelected;
         this.hasFocus            = hasFocus;
         this.isEditing           = isEditing;
@@ -128,9 +129,9 @@ public final class CellConf<C extends JComponent, V>
         this.isLeaf              = isLeaf;
         this.row                 = row;
         this.column              = column;
-        this.view = renderer;
+        this.view                = view;
         this.toolTips            = Objects.requireNonNull(toolTips);
-        this.presentationValue   = presentationValue;
+        this.presentationEntry = presentationEntry;
         this.defaultRenderSource = Objects.requireNonNull(defaultRenderSource);
     }
 
@@ -145,27 +146,27 @@ public final class CellConf<C extends JComponent, V>
     }
 
     /**
-     *  Returns the item of this cell, which is the data
-     *  that this cell represents. The value is wrapped in an
-     *  {@link Optional} to indicate that the value may be null.
-     *  A cell value is typically a string, number or custom user object.
+     *  Returns the entry of this cell, which is the data
+     *  that this cell represents. The entry is wrapped in an
+     *  {@link Optional} to indicate that the entry may be null.
+     *  A cell entry is typically a string, number or custom user object.
      *
-     * @return An optional of the value of this cell, or an empty optional if the item is null.
+     * @return An optional of the entry of this cell, or an empty optional if the entry is null.
      */
-    public Optional<V> item() {
-        return Optional.ofNullable(item);
+    public Optional<V> entry() {
+        return Optional.ofNullable(entry);
     }
 
     /**
-     *  Returns the item of this cell as a string, if the value
-     *  is not null. If the value is null, then an empty optional
+     *  Returns an {@link Optional} of the entry of this cell as a string, if the entry
+     *  is not null. If the entry is null, then an empty {@link Optional}
      *  is returned.
      *
-     * @return An optional of the value of this cell as a string,
-     *         or an empty optional if the value is null.
+     * @return An optional of the entry of this cell as a string,
+     *         or an empty optional if the entry is null.
      */
-    public Optional<String> itemAsString() {
-        return item().map(Object::toString);
+    public Optional<String> entryAsString() {
+        return entry().map(Object::toString);
     }
 
     /**
@@ -312,7 +313,7 @@ public final class CellConf<C extends JComponent, V>
      *      UI.table()
      *      .withCell(cell -> cell
      *          .view( comp -> comp
-     *              .update( r -> { r.setText(cell.itemAsString().orElse("")); return r; } )
+     *              .update( r -> { r.setText(cell.entryAsString().orElse("")); return r; } )
      *              .orGetUi( () -> UI.textField().withBackground(Color.CYAN) )
      *          )
      *      )
@@ -320,7 +321,7 @@ public final class CellConf<C extends JComponent, V>
      *  }</pre>
      *  In this example, the view is initialized with a text field
      *  if it is not present, and then the text field is continuously updated
-     *  with the value of the cell. <br>
+     *  with the entry of the cell. <br>
      *
      * @param configurator The {@link Configurator} lambda which takes an {@link OptionalUI}
      *                     of the current view and returns a (potentially updated or initialized)
@@ -364,7 +365,7 @@ public final class CellConf<C extends JComponent, V>
      * @return An updated cell delegate object with the new view to
      *          serve as the renderer/editor of the cell.
      */
-    public CellConf<C, V> view(Component component ) {
+    public CellConf<C, V> view( Component component ) {
         return _withRenderer(component);
     }
 
@@ -390,7 +391,7 @@ public final class CellConf<C extends JComponent, V>
      * @return An updated cell delegate object with the new view to
      *          serve as the renderer/editor of the cell.
      */
-    public CellConf<C, V> renderer(Size cellSize, Consumer<Graphics2D> painter ) {
+    public CellConf<C, V> renderer( Size cellSize, Consumer<Graphics2D> painter ) {
         Component component = new Component() {
             @Override
             public void paint(Graphics g) {
@@ -398,7 +399,7 @@ public final class CellConf<C extends JComponent, V>
                 painter.accept((Graphics2D) g);
             }
             /*
-                 The following methods are overridden as a performance measure to
+                 The following methods are overridden as a performance measure
                  to prune code-paths are often called in the case of renders
                  but which we know are unnecessary.  Great care should be taken
                  when writing your own renderer to weigh the benefits and
@@ -457,7 +458,7 @@ public final class CellConf<C extends JComponent, V>
     public CellConf<C, V> _withRenderer(@Nullable Component component ) {
         return new CellConf<>(
             parent,
-            item,
+            entry,
             isSelected,
             hasFocus,
             isEditing,
@@ -467,7 +468,7 @@ public final class CellConf<C extends JComponent, V>
             column,
             component,
             toolTips,
-            presentationValue,
+            presentationEntry,
             defaultRenderSource
         );
     }
@@ -480,12 +481,12 @@ public final class CellConf<C extends JComponent, V>
      * @param toolTip The tool tip to be added to the list of tool tips.
      * @return An updated cell delegate object with the new tool tip.
      */
-    public CellConf<C, V> toolTip(String toolTip ) {
+    public CellConf<C, V> toolTip( String toolTip ) {
         ArrayList<String> newToolTips = new ArrayList<>(toolTips);
         newToolTips.add(toolTip);
         return new CellConf<>(
             parent,
-            item,
+            entry,
             isSelected,
             hasFocus,
             isEditing,
@@ -495,44 +496,44 @@ public final class CellConf<C extends JComponent, V>
             column,
             view,
             newToolTips,
-            presentationValue,
+            presentationEntry,
             defaultRenderSource
         );
     }
 
     /**
-     *  The presentation value is the first choice of the
+     *  The presentation entry is the first choice of the
      *  default cell view to be used for rendering and presentation
      *  to the user. If it does not exist then the regular
-     *  cell value is used for rendering by the default view.
+     *  cell entry is used for rendering by the default view.
      *  Note that if you supply your own custom view/renderer component,
-     *  then the presentation value is ignored.
+     *  then the presentation entry is ignored.
      *
-     * @return An optional of the presentation value.
-     *         It may be an empty optional if no presentation value was specified.
+     * @return An optional of the presentation entry.
+     *         It may be an empty optional if no presentation entry was specified.
      */
-    public Optional<Object> presentationItem() {
-        return Optional.ofNullable(presentationValue);
+    public Optional<Object> presentationEntry() {
+        return Optional.ofNullable(presentationEntry);
     }
 
     /**
-     *  The presentation value is the first choice of the
+     *  The presentation entry is the first choice of the
      *  default cell view to be used for rendering and presentation
      *  to the user.
-     *  By default, this value is null,
+     *  By default, this entry is null,
      *  in which case it does not exist the regular
-     *  cell value is used for rendering by the default view.
+     *  cell entry is used for rendering by the default view.
      *  Note that if you supply your own custom view/renderer component,
-     *  then the presentation value is ignored.
+     *  then the presentation entry is ignored.
      *
      * @param toBeShown The object which should be used by the renderer
      *                  to present to the user, typically a String.
-     * @return An updated cell delegate object with the new presentation value.
+     * @return An updated cell delegate object with the new presentation entry.
      */
-    public CellConf<C, V> presentationItem(@Nullable Object toBeShown ) {
+    public CellConf<C, V> presentationEntry( @Nullable Object toBeShown ) {
         return new CellConf<>(
             parent,
-            item,
+            entry,
             isSelected,
             hasFocus,
             isEditing,
@@ -545,6 +546,32 @@ public final class CellConf<C extends JComponent, V>
             toBeShown,
             defaultRenderSource
         );
+    }
+
+    /**
+     *  The presentation entry is the first choice of the
+     *  default cell view to be used for rendering and presentation
+     *  to the user. A common use case is to convert the cell entry to
+     *  a presentation entry that is more suitable for the default view.
+     *  This method allows you to convert the cell entry to a presentation
+     *  entry by applying a function to it. The function takes the cell entry
+     *  as an argument and returns the presentation entry.
+     *  Note that if you supply your own custom view/renderer component,
+     *  then the presentation entry is ignored.
+     *
+     * @param presenter The function that converts the cell entry to a presentation entry.
+     * @return An updated cell delegate object with the new presentation entry.
+     * @throws NullPointerException If the presenter function is null.
+     */
+    public CellConf<C, V> entryToPresentation( Function<@Nullable V, @Nullable Object> presenter ) {
+        Objects.requireNonNull(presenter);
+        @Nullable V entry = this.entry;
+        try {
+            return presentationEntry(presenter.apply(entry));
+        } catch (Exception e) {
+            log.error("Failed to convert entry to presentation entry!", e);
+        }
+        return this;
     }
 
 }

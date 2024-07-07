@@ -140,7 +140,7 @@ public final class CellBuilder<C extends JComponent, E> {
             Consumer<@Nullable Component> saveComponent,
             CellConf<T, Object> cell
         ) {
-            @Nullable Object value = cell.item().orElse(null);
+            @Nullable Object value = cell.entry().orElse(null);
             List<Configurator<CellConf<C, ?>>> interpreter = _find(value, _rendererLookup);
             if ( interpreter.isEmpty() )
                 return defaultRenderer.apply(value);
@@ -154,8 +154,8 @@ public final class CellBuilder<C extends JComponent, E> {
                 if (cell.view().isPresent()) {
                     choice = cell.view().orElseThrow();
                     saveComponent.accept(choice);
-                } else if (cell.presentationItem().isPresent()) {
-                    choice = defaultRenderer.apply(cell.presentationItem().get());
+                } else if (cell.presentationEntry().isPresent()) {
+                    choice = defaultRenderer.apply(cell.presentationEntry().get());
                     saveComponent.accept(null);
                 } else {
                     choice = defaultRenderer.apply(value);
@@ -371,8 +371,8 @@ public final class CellBuilder<C extends JComponent, E> {
                 if (cell.view().isPresent()) {
                     choice = cell.view().orElseThrow();
                     _lastCustomRenderer = choice;
-                } else if (cell.presentationItem().isPresent()) {
-                    choice = _defaultRenderer.getListCellRendererComponent(list, cell.presentationItem().get(), row, isSelected, hasFocus);
+                } else if (cell.presentationEntry().isPresent()) {
+                    choice = _defaultRenderer.getListCellRendererComponent(list, cell.presentationEntry().get(), row, isSelected, hasFocus);
                     _lastCustomRenderer = null;
                 } else {
                     choice = _defaultRenderer.getListCellRendererComponent(list, value, row, isSelected, hasFocus);
@@ -506,7 +506,7 @@ public final class CellBuilder<C extends JComponent, E> {
 
     private void _addDefaultRendering() {
         // We use the default text renderer for objects
-        _store(Object.class, cell -> true, _createDefaultTextRenderer(cell -> cell.itemAsString().orElse("")));
+        _store(Object.class, cell -> true, _createDefaultTextRenderer(cell -> cell.entryAsString().orElse("")));
     }
 
     static class InternalLabelForRendering extends JLabel {

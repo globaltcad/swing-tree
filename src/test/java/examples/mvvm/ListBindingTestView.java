@@ -30,7 +30,7 @@ public class ListBindingTestView extends Panel
                 listOf(vm.colorNames())
                 .withCells(it -> it
                     .when(String.class)
-                    .asText( cell -> cell.item().get() )
+                    .asText( cell -> cell.entry().get() )
                 )
             )
             .add(

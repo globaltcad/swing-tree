@@ -592,7 +592,7 @@ class Combo_Box_Specification extends Specification
                                     .orGetUiIf(cell.isEditing(), {UI.textField().withBackground(Color.MAGENTA)})
                                     .orGetUiIf(!cell.isEditing(), {UI.label("")})
                                     .updateIf(JLabel.class, label -> {
-                                        label.text = "Day: " + cell.itemAsString().orElse("")
+                                        label.text = "Day: " + cell.entryAsString().orElse("")
                                         return label
                                     })
                                 )
@@ -668,7 +668,7 @@ class Combo_Box_Specification extends Specification
                                 .orGetUiIf(cell.isEditing(), {UI.textField().withBackground(Color.MAGENTA)})
                                 .orGetUiIf(!cell.isEditing(), {UI.label("")})
                                 .updateIf(JLabel.class, label -> {
-                                    label.text = "Day: " + cell.itemAsString().orElse("")
+                                    label.text = "Day: " + cell.entryAsString().orElse("")
                                     return label
                                 })
                             )
