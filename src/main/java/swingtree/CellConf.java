@@ -329,7 +329,7 @@ public final class CellConf<C extends JComponent, V>
      *        If the configurator returns an empty optional, then the view
      *        of the cell will be reset to null.
      */
-    public CellConf<C,V> view(Configurator<OptionalUI<Component>> configurator ) {
+    public CellConf<C,V> view( Configurator<OptionalUI<Component>> configurator ) {
         OptionalUI<Component> newRenderer = configurator.configure(view());
         return _withRenderer(newRenderer.orElseNullable(null));
     }
