@@ -30,16 +30,7 @@ public class ListBindingTestView extends Panel
                 listOf(vm.colorNames())
                 .withCells(it -> it
                     .when(String.class)
-                    .asText( cell -> cell.value().get() )
-                    //.render( (cell, g2d) -> {
-                    //    cell.setRenderer(new JLabel(""));
-                    //    // We draw the string:
-                    //    g2d.setColor(Color.BLACK);
-                    //    g2d.drawString(cell.value().get(), 10, 20);
-                    //    // We draw the color:
-                    //    g2d.setColor(color(cell.value().get()));
-                    //    g2d.fillRect(0, 0, 50, 50);
-                    //})
+                    .asText( cell -> cell.item().get() )
                 )
             )
             .add(

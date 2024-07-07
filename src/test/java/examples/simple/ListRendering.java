@@ -29,7 +29,7 @@ public class ListRendering extends Panel
                 .withEntries(Stream.of(Test.A, Test.B, Test.C).collect(Collectors.toList()))
                 .withCells( it -> it
                     .when(Test.class)
-                    .asText( cell -> cell.valueAsString().orElse("") )
+                    .asText( cell -> cell.itemAsString().orElse("") )
                 )
             )
         )
@@ -38,10 +38,10 @@ public class ListRendering extends Panel
             .add(GROW,
                 listOf(new Number[]{1f, 2L, 3.0, 4})
                 .withCells( it -> it
-                    .when(Integer.class).asText( cell -> "Integer: "+cell.value().get() )
-                    .when(Long.class).asText( cell -> "Long: "+cell.value().get() )
-                    .when(Float.class).asText( cell -> "Float: "+cell.value().get() )
-                    .when(Number.class).asText( cell -> "Something else: "+cell.value().get() )
+                    .when(Integer.class).asText( cell -> "Integer: "+cell.item().get() )
+                    .when(Long.class).asText( cell -> "Long: "+cell.item().get() )
+                    .when(Float.class).asText( cell -> "Float: "+cell.item().get() )
+                    .when(Number.class).asText( cell -> "Something else: "+cell.item().get() )
                 )
             )
         );

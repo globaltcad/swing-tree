@@ -37,7 +37,7 @@ public class ListTestExample extends JPanel {
             .add(
                 UI.list(selectedFile, files)
                 .withCells(
-                    it -> it.when(File.class).asText( cell -> "Name: " + cell.value().get().getName() )
+                    it -> it.when(File.class).asText( cell -> "Name: " + cell.item().get().getName() )
                 )
             )
         )

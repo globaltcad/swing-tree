@@ -146,7 +146,7 @@ public class NamedFieldsView extends JPanel {
                         .view( comp -> comp
                         .updateIf(JLabel.class, r -> null )
                         .updateIf(JTextField.class, tf -> {
-                            tf.setText(cell.valueAsString().orElse("") );
+                            tf.setText(cell.itemAsString().orElse("") );
                             return tf;
                         })
                         .update( r -> {
@@ -185,7 +185,7 @@ public class NamedFieldsView extends JPanel {
                         .updateIf(cell.isEditing(), v -> {
                             JTextField tf = new JTextField();
                             tf.setBackground(Color.YELLOW);
-                            tf.setText(cell.valueAsString().orElse(""));
+                            tf.setText(cell.itemAsString().orElse(""));
                             return tf;
                         })
                     )

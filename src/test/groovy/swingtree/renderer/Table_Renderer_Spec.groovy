@@ -195,7 +195,7 @@ class Table_Renderer_Spec extends Specification
             var ui =
                         UI.table(UI.ListData.ROW_MAJOR_EDITABLE, { [[1, 2, 3], [7, 8, 9]] })
                         .withCells(
-                            it -> it.when(Integer).asText( cell -> cell.valueAsString().orElse("")+"!" )
+                            it -> it.when(Integer).asText( cell -> cell.itemAsString().orElse("")+"!" )
                         )
         when : 'We access the resulting TableCellRenderer instance from the UI.'
             var found = ui.get(JTable)

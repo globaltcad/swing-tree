@@ -140,7 +140,7 @@ public final class CellBuilder<C extends JComponent, E> {
             Consumer<@Nullable Component> saveComponent,
             CellDelegate<T, Object> cell
         ) {
-            @Nullable Object value = cell.value().orElse(null);
+            @Nullable Object value = cell.item().orElse(null);
             List<Configurator<CellDelegate<C, ?>>> interpreter = _find(value, _rendererLookup);
             if ( interpreter.isEmpty() )
                 return defaultRenderer.apply(value);
@@ -154,8 +154,8 @@ public final class CellBuilder<C extends JComponent, E> {
                 if (cell.view().isPresent()) {
                     choice = cell.view().orElseThrow();
                     saveComponent.accept(choice);
-                } else if (cell.presentationValue().isPresent()) {
-                    choice = defaultRenderer.apply(cell.presentationValue().get());
+                } else if (cell.presentationItem().isPresent()) {
+                    choice = defaultRenderer.apply(cell.presentationItem().get());
                     saveComponent.accept(null);
                 } else {
                     choice = defaultRenderer.apply(value);
@@ -371,8 +371,8 @@ public final class CellBuilder<C extends JComponent, E> {
                 if (cell.view().isPresent()) {
                     choice = cell.view().orElseThrow();
                     _lastCustomRenderer = choice;
-                } else if (cell.presentationValue().isPresent()) {
-                    choice = _defaultRenderer.getListCellRendererComponent(list, cell.presentationValue().get(), row, isSelected, hasFocus);
+                } else if (cell.presentationItem().isPresent()) {
+                    choice = _defaultRenderer.getListCellRendererComponent(list, cell.presentationItem().get(), row, isSelected, hasFocus);
                     _lastCustomRenderer = null;
                 } else {
                     choice = _defaultRenderer.getListCellRendererComponent(list, value, row, isSelected, hasFocus);
@@ -506,7 +506,7 @@ public final class CellBuilder<C extends JComponent, E> {
 
     private void _addDefaultRendering() {
         // We use the default text renderer for objects
-        _store(Object.class, cell -> true, _createDefaultTextRenderer(cell -> cell.valueAsString().orElse("")));
+        _store(Object.class, cell -> true, _createDefaultTextRenderer(cell -> cell.itemAsString().orElse("")));
     }
 
     static class InternalLabelForRendering extends JLabel {
@@ -536,8 +536,8 @@ public final class CellBuilder<C extends JComponent, E> {
             Color bg = null;
             Color fg = null;
 
-            if ( cell.getOwner() instanceof JList ) {
-                JList<?> jList = (JList<?>) cell.getOwner();
+            if ( cell.getHost() instanceof JList ) {
+                JList<?> jList = (JList<?>) cell.getHost();
                 bg = jList.getSelectionBackground();
                 fg = jList.getSelectionForeground();
                 if ( bg == null )
@@ -546,8 +546,8 @@ public final class CellBuilder<C extends JComponent, E> {
                     fg = UIManager.getColor("List.selectionForeground");
             }
 
-            if ( cell.getOwner() instanceof JTable ) {
-                JTable jTable = (JTable) cell.getOwner();
+            if ( cell.getHost() instanceof JTable ) {
+                JTable jTable = (JTable) cell.getHost();
                 bg = jTable.getSelectionBackground();
                 fg = jTable.getSelectionForeground();
                 if ( bg == null )
@@ -556,10 +556,10 @@ public final class CellBuilder<C extends JComponent, E> {
                     fg = UIManager.getColor("Table.selectionForeground");
             }
 
-            if ( bg == null && cell.getOwner() != null )
-                bg = cell.getOwner().getBackground();
-            if ( fg == null && cell.getOwner() != null )
-                fg = cell.getOwner().getForeground();
+            if ( bg == null && cell.getHost() != null )
+                bg = cell.getHost().getBackground();
+            if ( fg == null && cell.getHost() != null )
+                fg = cell.getHost().getForeground();
 
             if ( bg == null )
                 bg = UIManager.getColor( "ComboBox.selectionBackground" );
@@ -588,8 +588,8 @@ public final class CellBuilder<C extends JComponent, E> {
             }
             else {
                 Color normalBg = Color.WHITE;
-                if (  cell.getOwner() != null )
-                    normalBg = cell.getOwner().getBackground();
+                if (  cell.getHost() != null )
+                    normalBg = cell.getHost().getBackground();
 
                 // We need to make sure the color is a user color, not a LaF color:
                 if ( normalBg != null )
@@ -605,8 +605,8 @@ public final class CellBuilder<C extends JComponent, E> {
                         normalBg = darker(normalBg);
                 }
                 if ( bg != null ) l.setBackground( normalBg );
-                if ( fg != null && cell.getOwner() != null )
-                    l.setForeground( cell.getOwner().getForeground() );
+                if ( fg != null && cell.getHost() != null )
+                    l.setForeground( cell.getHost().getForeground() );
             }
 
             // TODO:

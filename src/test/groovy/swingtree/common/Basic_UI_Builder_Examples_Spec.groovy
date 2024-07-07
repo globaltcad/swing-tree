@@ -230,7 +230,7 @@ class Basic_UI_Builder_Examples_Spec extends Specification
                     UI.comboBox(sel)
                     .withCells(it -> it
                         .when(Keyboard.Key)
-                        .asText( cell -> cell.value().map( k -> k.name().toLowerCase() ).orElse("") )
+                        .asText( cell -> cell.item().map(k -> k.name().toLowerCase() ).orElse("") )
                     )
         and : 'We actually build the component:'
             var comboBox = ui.get(JComboBox)
