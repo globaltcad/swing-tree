@@ -147,6 +147,59 @@ class Declarative_Tables_Spec extends Specification
             table.getValueAt(1, 2) == 9
     }
 
+    def 'Configure which cells are editable or not as part of the table model declaration.'()
+    {
+        reportInfo """
+            The data model builder API allows you to define a lambda based table model
+            where you can also specify if a cell is editable or not
+            based on the row and column index.
+            
+            In the example below we define a table model where the cells are editable
+            based on a flag and the condition `(r==1 || c==0)`.
+        """
+        given : 'We have some row major matrix like data.'
+            var data = [
+                            [1, 2, 3],
+                            [4, 5, 6],
+                        ]
+        and : 'A flag for controlling if we allow editing.'
+            var editable = false
+        and : 'A table with a lambda based table model where the data rows are the columns.'
+            var ui =
+                    UI.table().withModel( m -> m
+                        .colName( col -> ["A", "B"].get(col) )
+                        .colCount( () -> 2 )
+                        .rowCount( () -> 3 )
+                        .getsEntryAt( (r, c) -> data[c][r] )
+                        .isEditableIf((r, c) -> editable && (r==1 || c==0))
+                    )
+        and : 'We build the table.'
+            var table = ui.get(JTable)
+        expect : 'The table has the right dimensions:'
+            table.rowCount == 3
+            table.columnCount == 2
+
+        and : """
+            Initially, none of the simulated user edits through `editCellAt(int row, int column, EventObject e)`
+            will be successful, because the table is not editable.
+        """
+            !UI.runAndGet({table.editCellAt(0, 0, new EventObject(table))})
+            !UI.runAndGet({table.editCellAt(0, 1, new EventObject(table))})
+            !UI.runAndGet({table.editCellAt(1, 0, new EventObject(table))})
+            !UI.runAndGet({table.editCellAt(1, 1, new EventObject(table))})
+            !UI.runAndGet({table.editCellAt(2, 0, new EventObject(table))})
+            !UI.runAndGet({table.editCellAt(2, 1, new EventObject(table))})
+        when : 'We allow editing.'
+            editable = true
+        then : 'The table is editable for every cell where `(r==1 || c==0)` yields true.'
+            UI.runAndGet({table.editCellAt(0, 0, new EventObject(table))}) == true
+            UI.runAndGet({table.editCellAt(0, 1, new EventObject(table))}) == false
+            UI.runAndGet({table.editCellAt(1, 0, new EventObject(table))}) == true
+            UI.runAndGet({table.editCellAt(1, 1, new EventObject(table))}) == true
+            UI.runAndGet({table.editCellAt(2, 0, new EventObject(table))}) == true
+            UI.runAndGet({table.editCellAt(2, 1, new EventObject(table))}) == false
+    }
+
     def 'Use `withCell(Configurator)` to configure both a renderer and editor for your table.'()
     {
         reportInfo """
