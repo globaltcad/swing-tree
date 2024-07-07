@@ -101,7 +101,7 @@ UI.table()
     .view( comp -> comp
         .orGetUi(()->UI.textField().withBackground(Color.MAGENTA))
         .updateIf(JTextField.class, tf -> {
-            tf.setText(cell.entryAsString().orElse(""));
+            tf.setText(cell.entryAsString());
             tf.setForeground(cell.isSelected() ? Color.RED : Color.WHITE)
             return tf;
         })
