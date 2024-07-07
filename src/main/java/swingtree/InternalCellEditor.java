@@ -28,8 +28,15 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
      */
     private int clickCountToStart = 1;
 
+    private boolean hasDefaultComponent;
 
-    public void setEditor(final JTextField textField) {
+
+    public InternalCellEditor() {
+        _setEditor(new JTextField());
+        hasDefaultComponent = true;
+    }
+
+    private void _setEditor(final JTextField textField) {
         editorComponent = textField;
         this.clickCountToStart = 2;
         delegate = new EditorDelegate() {
@@ -44,7 +51,18 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
         textField.addActionListener(delegate);
     }
 
+    public void setEditor(final JTextField textField) {
+        _setEditor(textField);
+        hasDefaultComponent = false;
+    }
+
     public @Nullable Component getComponent() {
+        return editorComponent;
+    }
+
+    public @Nullable Component getCustomComponent() {
+        if (hasDefaultComponent)
+            return null;
         return editorComponent;
     }
 
@@ -68,6 +86,7 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
         };
         checkBox.addActionListener(delegate);
         checkBox.setRequestFocusEnabled(false);
+        hasDefaultComponent = false;
     }
 
     public void setEditor(final JComboBox<?> comboBox) {
@@ -99,6 +118,7 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
             }
         };
         comboBox.addActionListener(delegate);
+        hasDefaultComponent = false;
     }
 
     /**

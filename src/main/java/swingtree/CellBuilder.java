@@ -133,9 +133,7 @@ public final class CellBuilder<C extends JComponent, E> {
         private final InternalCellEditor _basicEditor = new InternalCellEditor();
         private @Nullable Component _lastCustomRenderer;
 
-        SimpleTableCellRenderer() {
-            _basicEditor.setEditor(new JTextField());
-        }
+        SimpleTableCellRenderer() {}
 
         public <T extends JComponent> Component _updateAndGetComponent(
             Function<@Nullable Object, Component> defaultRenderer,
@@ -169,6 +167,10 @@ public final class CellBuilder<C extends JComponent, E> {
 
                 return choice;
             }
+        }
+
+        public @Nullable Component getEditorComponent() {
+            return _basicEditor.getComponent();
         }
 
         private void _setEditor(@Nullable Component choice) {
@@ -245,7 +247,7 @@ public final class CellBuilder<C extends JComponent, E> {
                              localValue -> _basicEditor.getTableCellEditorComponent(table, localValue, isSelected, row, column),
                              this::_setEditor,
                              CellDelegate.of(
-                                 _basicEditor.getComponent(),
+                                 _basicEditor.getCustomComponent(),
                                  table, value, isSelected, true, true, false, false, row, column,
                                  () -> _basicEditor.getTableCellEditorComponent(table, value, isSelected, row, column)
                              )

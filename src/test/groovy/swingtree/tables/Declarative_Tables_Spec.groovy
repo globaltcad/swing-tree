@@ -6,11 +6,12 @@ import spock.lang.Subject
 import spock.lang.Title
 import sprouts.Event
 import swingtree.SwingTree
-import swingtree.threading.EventProcessor
 import swingtree.UI
 import swingtree.UIForTable
+import swingtree.threading.EventProcessor
 
 import javax.swing.*
+import java.awt.*
 
 @Title("Creating Tables")
 @Narrative("""
@@ -144,6 +145,77 @@ class Declarative_Tables_Spec extends Specification
             table.getValueAt(1, 0) == 7
             table.getValueAt(1, 1) == 8
             table.getValueAt(1, 2) == 9
+    }
+
+    def 'Use `withCell(Configurator)` to configure both a renderer and editor for your table.'()
+    {
+        reportInfo """
+            The `withCell(Configurator)` method constitutes a useful API point
+            which exposes you to a fluent API for configuring how a particular cell
+            should be displayed.
+            
+            The `Configurator` lambda passed to the `withCell` method receives
+            a delegate object of a particular cell in the table.
+            You may update and return this cell with a view component
+            used for either rendering, editing or both.
+            
+            So this may look like this:
+            ```java
+                .withCell( it -> it
+                    .view( comp -> comp
+                        .orGetUiIf(cell.isEditing(), {UI.textField().withBackground(Color.MAGENTA)})
+                        .orGetUiIf(!cell.isEditing(), {UI.label("")})
+                        .updateIf(JLabel.class, label -> {
+                            label.text = "Day: " + cell.valueAsString().orElse("")
+                            return label
+                        })
+                    )
+                )
+            ```
+            Here you can see that the `Configurator` lambda receives a `cell` object
+            which is a delegate object of a particular cell in the combo box.
+            The view of this cell is updated with a text field or a label depending
+            on whether the cell is currently being edited or not.
+        """
+        given : 'We have some data.'
+            var data = [1, 2, 3, 4]
+        and : 'A table with a lambda based table model.'
+            var ui =
+                    UI.table().withModel( m -> m
+                        .colName( col -> ["X", "Y", "Z"].get(col) )
+                        .colCount( () -> 3 )
+                        .rowCount( () -> data.size() )
+                        .getsEntryAt( (r, c) -> data[r] )
+                        .isEditableIf((r, c) -> true)
+                    )
+                    .withCell(cell -> cell
+                        .view( comp -> comp
+                            .orGetUi({UI.textField().withBackground(Color.MAGENTA)})
+                            .updateIf(JTextField.class, tf -> {
+                                tf.text = cell.valueAsString().orElse("")
+                                tf.foreground = cell.isSelected() ? Color.RED : Color.WHITE
+                                return tf
+                            })
+                        )
+                    )
+        and : 'We build the table.'
+            var table = ui.get(JTable)
+        and : 'We get the renderer and editor supplier.'
+            var renderer = table.getDefaultRenderer(Object)
+            var editor = table.getDefaultEditor(Object)
+        expect :
+            renderer != null
+            editor != null
+        and : 'Initially, a default editor is used, because there was no edit event yet!'
+            editor.getEditorComponent() instanceof JTextField
+            editor.getEditorComponent().background != Color.MAGENTA
+
+        when : 'We simulate a user edit through `editCellAt(int row, int column, EventObject e)`.'
+            boolean success = UI.runAndGet({table.editCellAt(0, 0, new EventObject(table))})
+        then : 'The editor is a text field with a magenta background.'
+            success == true
+            editor.getEditorComponent() instanceof JTextField
+            editor.getEditorComponent().background == Color.MAGENTA
     }
 
 }
