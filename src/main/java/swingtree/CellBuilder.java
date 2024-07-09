@@ -195,13 +195,13 @@ public final class CellBuilder<C extends JComponent, E> {
                 Dimension maxSize = renderer.getMaximumSize();
                 Dimension cellSize = table.getCellRect(row, column, false).getSize();
                 if ( maxSize.width > 0 && cellSize.width > maxSize.width ) {
-                    table.getColumn(column).setMinWidth(cellSize.width);
+                    table.getColumnModel().getColumn(column).setMinWidth(cellSize.width);
                 }
                 if ( maxSize.height > 0 && cellSize.height > maxSize.height ) {
                     table.setRowHeight(row, cellSize.height);
                 }
                 if ( minSize.width > 0 && cellSize.width < minSize.width ) {
-                    table.getColumn(column).setMinWidth(minSize.width);
+                    table.getColumnModel().getColumn(column).setMinWidth(minSize.width);
                 }
                 if ( minSize.height > 0 && cellSize.height < minSize.height ) {
                     table.setRowHeight(row, minSize.height);
