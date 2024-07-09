@@ -190,32 +190,19 @@ public final class CellBuilder<C extends JComponent, E> {
             _lastCustomRenderer = choice;
         }
 
-        private Component _fit(JTable table, int row, int column, Component renderer) {
+        private Component _fit(JTable table, int row, int column, Component view) {
             try {
-                Dimension minSize = renderer.getMinimumSize();
-                Dimension maxSize = renderer.getMaximumSize();
-                Dimension cellSize = table.getCellRect(row, column, false).getSize();
+                Dimension minSize = view.getMinimumSize();
                 TableColumn currentColumn = table.getColumnModel().getColumn(column);
-                if ( maxSize.width > 0 && cellSize.width > maxSize.width ) {
-                    if ( currentColumn.getMinWidth() != cellSize.width )
-                        currentColumn.setMinWidth(cellSize.width);
-                }
-                if ( minSize.width > 0 && cellSize.width < minSize.width ) {
-                    if ( currentColumn.getMinWidth() != minSize.width )
-                        currentColumn.setMinWidth(minSize.width);
-                }
-                if ( maxSize.height > 0 && cellSize.height > maxSize.height ) {
-                    if ( table.getRowHeight(row) != cellSize.height )
-                        table.setRowHeight(row, cellSize.height);
-                }
-                if ( minSize.height > 0 && cellSize.height < minSize.height ) {
-                    if ( table.getRowHeight(row) != minSize.height )
-                        table.setRowHeight(row, minSize.height);
-                }
+                if ( currentColumn.getMinWidth() < minSize.width )
+                    currentColumn.setMinWidth(minSize.width);
+                if ( table.getRowHeight(row) < minSize.height )
+                    table.setRowHeight(row, minSize.height);
+
             } catch (Exception e) {
                 log.error("Failed to fit cell size", e);
             }
-            return renderer;
+            return view;
         }
 
         @Override
