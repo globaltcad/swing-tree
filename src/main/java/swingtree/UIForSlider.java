@@ -298,7 +298,7 @@ public final class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSli
         double scale = _goodScaleFor(min, max);
         if ( inverse )
             scale = 1.0 / scale;
-        double newValue = in.doubleValue() / scale;
+        double newValue = in.doubleValue() * scale;
         // No we convert the new value to the target type.
         return _convertTo(target, newValue);
     }
@@ -324,8 +324,8 @@ public final class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSli
         double minVal = min.doubleValue();
         double maxVal = max.doubleValue();
         double diff = maxVal - minVal;
-        // The scale should ensure that we have at least PREFFERED_STEPS steps in integer values.
-        return diff / PREFERRED_STEPS;
+        // The scale should ensure that we have at least PREFERRED_STEPS steps in integer values.
+        return PREFERRED_STEPS / diff;
     }
 
     /**
