@@ -321,7 +321,7 @@ public final class CellConf<C extends JComponent, V>
      *      UI.table()
      *      .withCell(cell -> cell
      *          .view( comp -> comp
-     *              .update( r -> { r.setText(cell.entryAsString().orElse("")); return r; } )
+     *              .update( r -> { r.setText(cell.entryAsString()); return r; } )
      *              .orGetUi( () -> UI.textField().withBackground(Color.CYAN) )
      *          )
      *      )
