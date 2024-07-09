@@ -10,6 +10,7 @@ import javax.swing.event.CellEditorListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeCellEditor;
 import javax.swing.tree.TreeCellRenderer;
@@ -194,17 +195,22 @@ public final class CellBuilder<C extends JComponent, E> {
                 Dimension minSize = renderer.getMinimumSize();
                 Dimension maxSize = renderer.getMaximumSize();
                 Dimension cellSize = table.getCellRect(row, column, false).getSize();
+                TableColumn currentColumn = table.getColumnModel().getColumn(column);
                 if ( maxSize.width > 0 && cellSize.width > maxSize.width ) {
-                    table.getColumnModel().getColumn(column).setMinWidth(cellSize.width);
-                }
-                if ( maxSize.height > 0 && cellSize.height > maxSize.height ) {
-                    table.setRowHeight(row, cellSize.height);
+                    if ( currentColumn.getMinWidth() != cellSize.width )
+                        currentColumn.setMinWidth(cellSize.width);
                 }
                 if ( minSize.width > 0 && cellSize.width < minSize.width ) {
-                    table.getColumnModel().getColumn(column).setMinWidth(minSize.width);
+                    if ( currentColumn.getMinWidth() != minSize.width )
+                        currentColumn.setMinWidth(minSize.width);
+                }
+                if ( maxSize.height > 0 && cellSize.height > maxSize.height ) {
+                    if ( table.getRowHeight(row) != cellSize.height )
+                        table.setRowHeight(row, cellSize.height);
                 }
                 if ( minSize.height > 0 && cellSize.height < minSize.height ) {
-                    table.setRowHeight(row, minSize.height);
+                    if ( table.getRowHeight(row) != minSize.height )
+                        table.setRowHeight(row, minSize.height);
                 }
             } catch (Exception e) {
                 log.error("Failed to fit cell size", e);
