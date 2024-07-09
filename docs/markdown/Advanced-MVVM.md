@@ -210,6 +210,16 @@ and dynamically.
 So when you remove or add a sub-view model to a view bound property list, 
 the view will automatically remove or add the corresponding sub-view.
 
+## Where is the Model? ##
+
+You may have noticed that the above examples do not include model classes.
+The reason is simply that they are too simple to require one.
+But in a real-world application you would want to maintain a model
+that holds the business logic and data of the application like for
+example a model for application settings, database entities or
+network data. The model would typically be updated by the view model,
+whereas the view does not interact with the model directly.
+
 
 
 

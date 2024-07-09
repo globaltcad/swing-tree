@@ -3,7 +3,7 @@
 
 <img src="../img/tutorial/climbing-swing-tree.png" style = "float: right; width: 30%; margin: 2em; -webkit-box-shadow: 0px 0px 18px -2px rgba(0,0,0,0.75); -moz-box-shadow: 0px 0px 18px -2px rgba(0,0,0,0.75); box-shadow: 0px 0px 18px -2px rgba(0,0,0,0.75);">
 
-Welcome to this Swing Tree tutorial! <br>
+Welcome to the SwingTree guide! <br>
 Here you will learn how to climb the tree, and Swing.
 
 You do not need any prior knowledge of Swing to follow this tutorial.
@@ -313,7 +313,9 @@ implementation without having to change the business logic at all!
 How cool is that? :)
 
 If you want to dive deeper into doing MVVM in Swing-Tree,
-check out the [MVVM tutorial](./Advanced-MVVM.md).
+check out the [MVVM tutorial](./Advanced-MVVM.md). <br>
+We **especially** recommend the [MVI](./Functional-MVVM.md) guide
+if you are interested in a more functional (side effect free) approach to MVVM.
 
 ## Growing Leaves ##
 
