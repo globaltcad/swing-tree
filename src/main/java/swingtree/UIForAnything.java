@@ -564,10 +564,17 @@ public abstract class UIForAnything<I, C extends E, E extends Component>
         Objects.requireNonNull(val);
         Objects.requireNonNull(displayAction);
         Ref<Val<T>> valRef;
-        if ( !val.isMutable() )
-            valRef = Ref.of(new WeakReference<>(val));
-        else //TODO: if ( val.isLens() || val.isView() )
+        if ( val.isLens() || val.isView() )
             valRef = Ref.of(val);
+            /*
+                We don't want lenses or views to be garbage collected, so we keep a strong reference to them.
+                The reason for this is that these types of properties
+                are necessarily part of the application state,
+                and they also are only weakly referenced by their
+                parent properties (lenses and views observer their parent properties).
+             */
+        else
+            valRef = Ref.of(new WeakReference<>(val));
 
         _onShow( valRef, Ref.of(new WeakReference<>(thisComponent)), displayAction );
     }
