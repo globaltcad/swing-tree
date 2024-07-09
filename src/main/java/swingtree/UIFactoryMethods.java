@@ -2620,7 +2620,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @see JSlider#setMinimum
      * @see JSlider#setMaximum
      */
-    public static UIForSlider<JSlider> slider(UI.Align align, int min, int max ) {
+    public static UIForSlider<JSlider> slider( UI.Align align, int min, int max ) {
         NullUtil.nullArgCheck(align, "align", UI.Align.class);
         return new UIForSlider<>(new BuilderState<>(JSlider.class, UI.Slider::new))
                 .withOrientation(align)
@@ -2646,7 +2646,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @see JSlider#setMaximum
      * @see JSlider#setValue
      */
-    public static UIForSlider<JSlider> slider(UI.Align align, int min, int max, int value ) {
+    public static UIForSlider<JSlider> slider( UI.Align align, int min, int max, int value ) {
         NullUtil.nullArgCheck(align, "align", UI.Align.class);
         return new UIForSlider<>(new BuilderState<>(JSlider.class, UI.Slider::new))
                 .withOrientation(align)
@@ -2662,13 +2662,14 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * But note that the property is of the read only {@link Val} type,
      * which means that when the user moves the slider, the property will not be updated.
      * <br>
-     * If you want bidirectional binding, use {@link #slider(UI.Align, int, int, Var)}
+     * If you want bidirectional binding, use {@link #slider(UI.Align, N, N, Var)}
      * instead of this method.
      *
      * @param align The alignment determining if the {@link JSlider} aligns vertically or horizontally.
      * @param min The minimum possible value of the slider.
      * @param max The maximum possible value of the slider.
      * @param value The property holding the value of the slider
+     * @param <N> The type of the number used for the slider values.
      * @return A builder instance for the provided {@link JSlider}, which enables fluent method chaining.
      *
      * @throws IllegalArgumentException if {@code align} is {@code null}.
@@ -2678,14 +2679,14 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @see JSlider#setMaximum
      * @see JSlider#setValue
      */
-    public static UIForSlider<JSlider> slider(UI.Align align, int min, int max, Val<Integer> value ) {
+    public static <N extends Number> UIForSlider<JSlider> slider( UI.Align align, N min, N max, Val<N> value ) {
         NullUtil.nullArgCheck(align, "align", UI.Align.class);
         NullUtil.nullPropertyCheck(value, "value", "The state of the slider should not be null!");
+        Objects.requireNonNull(min, "The minimum value of the slider should not be null!");
+        Objects.requireNonNull(max, "The maximum value of the slider should not be null!");
         return new UIForSlider<>(new BuilderState<>(JSlider.class, UI.Slider::new))
                 .withOrientation(align)
-                .withMin(min)
-                .withMax(max)
-                .withValue(value);
+                ._withBinding(Val.of(min), Val.of(max), value, false);
     }
 
     /**
@@ -2708,14 +2709,87 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @see JSlider#setMaximum
      * @see JSlider#setValue
      */
-    public static UIForSlider<JSlider> slider(UI.Align align, int min, int max, Var<Integer> value ) {
+    public static <N extends Number> UIForSlider<JSlider> slider( UI.Align align, N min, N max, Var<N> value ) {
         NullUtil.nullArgCheck(align, "align", UI.Align.class);
+        NullUtil.nullPropertyCheck(value, "value", "The state of the slider should not be null!");
+        Objects.requireNonNull(min, "The minimum value of the slider should not be null!");
+        Objects.requireNonNull(max, "The maximum value of the slider should not be null!");
+        return new UIForSlider<>(new BuilderState<>(JSlider.class, UI.Slider::new))
+                .withOrientation(align)
+                ._withBinding(Val.of(min), Val.of(max), value, true);
+    }
+
+    /**
+     * Creates a slider with the specified alignment and the
+     * specified minimum, maximum, and value property views.
+     * The min, max and value may be updated dynamically
+     * when the properties change their values.
+     * The current value property item will however not be updated
+     * whenever the user moves the slider due to the
+     * usage of the read only {@link Val} type.
+     *
+     * @param align The alignment determining if the {@link JSlider} aligns vertically or horizontally.
+     * @param min The minimum possible value of the slider, which
+     *            may be updated dynamically when the property changes.
+     * @param max The maximum possible value of the slider, which
+     *            may be updated dynamically when the property changes.
+     * @param value The property holding the value of the slider which
+     *              may be updated dynamically when the property changes
+     *              in your code (see {@link Var#set(Object)}).
+     * @return A builder instance for the provided {@link JSlider}, which enables fluent method chaining.
+     *
+     * @throws IllegalArgumentException if {@code align}, {@code min}, {@code max} or {@code value} is {@code null}.
+     *
+     * @see JSlider#setOrientation
+     * @see JSlider#setMinimum
+     * @see JSlider#setMaximum
+     * @see JSlider#setValue
+     */
+    public static <N extends Number> UIForSlider<JSlider> slider( UI.Align align, Val<N> min, Val<N> max, Val<N> value ) {
+        NullUtil.nullArgCheck(align, "align", UI.Align.class);
+        NullUtil.nullPropertyCheck(min, "min", "The minimum value of the slider should not be null!");
+        NullUtil.nullPropertyCheck(max, "max", "The maximum value of the slider should not be null!");
         NullUtil.nullPropertyCheck(value, "value", "The state of the slider should not be null!");
         return new UIForSlider<>(new BuilderState<>(JSlider.class, UI.Slider::new))
                 .withOrientation(align)
-                .withMin(min)
-                .withMax(max)
-                .withValue(value);
+                ._withBinding(min, max, value, false);
+    }
+
+    /**
+     * Creates a slider with the specified alignment and the
+     * specified minimum, maximum, and value property views.
+     * The min, max and value may be updated dynamically
+     * when the properties change their values in your code.
+     * The current value property may also be updated
+     * by the user moving the slider due to the
+     * usage of the read-write {@link Var} type
+     * here in contrast to {@link #slider(UI.Align, Val, Val, Val)}.
+     *
+     * @param align The alignment determining if the {@link JSlider} aligns vertically or horizontally.
+     * @param min The minimum possible value of the slider, which
+     *            may be updated dynamically when the property changes.
+     * @param max The maximum possible value of the slider, which
+     *            may be updated dynamically when the property changes.
+     * @param value The property holding the value of the slider which
+     *              may be updated dynamically when the property changes
+     *              in your code (see {@link Var#set(Object)}) or when the user moves the slider.
+     * @return A builder instance for the provided {@link JSlider}, which enables fluent method chaining.
+     *
+     * @throws IllegalArgumentException if {@code align}, {@code min}, {@code max} or {@code value} is {@code null}.
+     *
+     * @see JSlider#setOrientation
+     * @see JSlider#setMinimum
+     * @see JSlider#setMaximum
+     * @see JSlider#setValue
+     */
+    public static <N extends Number> UIForSlider<JSlider> slider( UI.Align align, Val<N> min, Val<N> max, Var<N> value ) {
+        NullUtil.nullArgCheck(align, "align", UI.Align.class);
+        NullUtil.nullPropertyCheck(min, "min", "The minimum value of the slider should not be null!");
+        NullUtil.nullPropertyCheck(max, "max", "The maximum value of the slider should not be null!");
+        NullUtil.nullPropertyCheck(value, "value", "The state of the slider should not be null!");
+        return new UIForSlider<>(new BuilderState<>(JSlider.class, UI.Slider::new))
+                .withOrientation(align)
+                ._withBinding(min, max, value, true);
     }
 
     /**

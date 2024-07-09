@@ -1,5 +1,6 @@
 package swingtree;
 
+import org.jspecify.annotations.Nullable;
 import sprouts.Action;
 import sprouts.From;
 import sprouts.Val;
@@ -9,7 +10,9 @@ import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.util.Objects;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  *  A SwingTree builder node designed for configuring {@link JSlider} instances.
@@ -19,6 +22,8 @@ import java.util.function.Consumer;
  */
 public final class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSlider<S>, S>
 {
+    private static final int PREFERRED_STEPS = 256;
+
     private final BuilderState<S> _state;
 
     UIForSlider( BuilderState<S> state ) {
@@ -211,6 +216,116 @@ public final class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSli
                     _setValue(thisComponent, val.orElseThrow());
                 })
                 ._this();
+    }
+
+    final <N extends Number> UIForSlider<S> _withBinding(
+        Val<N> userMin, Val<N> userMax, Val<N> userCurrent, boolean biDirectional
+    ) {
+        Objects.requireNonNull(userMin);
+        Objects.requireNonNull(userMax);
+        Objects.requireNonNull(userCurrent);
+        boolean allOfTheSameType = userMin.type() == userMax.type() &&
+                                   userMax.type() == userCurrent.type();
+
+        if ( !allOfTheSameType )
+            throw new IllegalArgumentException("Min, max and current slider values must all be of the same type.");
+
+        Class<N> userType = userMin.type();
+        boolean isWholeNumber = userType == Integer.class || userType == Long.class || userType == Short.class || userType == Byte.class;
+        if ( !isWholeNumber ) {
+            Function<N,Integer> scaleToSliderInt = n -> _scale(Integer.class, n, userMin.orElseThrow(), userMax.orElseThrow(), false);
+            Val<Integer> sliderMin     = userMin.viewAsInt( scaleToSliderInt );
+            Val<Integer> sliderMax     = userMax.viewAsInt( scaleToSliderInt );
+            Val<Integer> sliderCurrent = userCurrent.viewAsInt( scaleToSliderInt );
+            return _withBindingInternal(
+                        sliderMin, sliderMax, sliderCurrent, biDirectional ? (Var) userCurrent : null,
+                        n -> {
+                            if ( sliderMin.is(n) )
+                                return userMin.orElseThrow();
+                            if ( sliderMax.is(n) )
+                                return userMax.orElseThrow();
+                            return _scale(userType, n, userMin.orElseThrow(), userMax.orElseThrow(), true);
+                        }
+                    );
+        }
+        if ( userType != Integer.class )
+            return _withBindingInternal(
+                    userMin.viewAsInt( n -> _convertTo(Integer.class, n) ),
+                    userMax.viewAsInt( n -> _convertTo(Integer.class, n) ),
+                    userCurrent.viewAsInt( n -> _convertTo(Integer.class, n) ),
+                    biDirectional ? (Var<N>) userCurrent : null,
+                    n->_convertTo(userType, n)
+                );
+        else
+            return _withBindingInternal(
+                    userMin,
+                    userMax,
+                    userCurrent,
+                    biDirectional ? (Var<N>) userCurrent : null,
+                    n->_convertTo(userType, n)
+                );
+    }
+
+    final <N extends Number, T extends Number> UIForSlider<S> _withBindingInternal(
+        Val<N> min, Val<N> max, Val<N> current, @Nullable Var<T> target, Function<Integer,T> scaling
+    ) {
+        return _withOnShow( min, (thisComponent,v) -> {
+                    _setMin(thisComponent, min.orElseThrow().intValue());
+                })
+                ._withOnShow( max, (thisComponent,v) -> {
+                    _setMax(thisComponent, max.orElseThrow().intValue());
+                })
+                ._withOnShow( current, (thisComponent,v) -> {
+                    _setValue(thisComponent, current.orElseThrow().intValue());
+                })
+                ._with( thisComponent -> {
+                    _setMin(thisComponent, min.orElseThrow().intValue());
+                    _setMax(thisComponent, max.orElseThrow().intValue());
+                    _setValue(thisComponent, current.orElseThrow().intValue());
+                    if ( target != null ) {
+                        _onChange(thisComponent,
+                            e -> _runInApp(thisComponent.getValue(), newItem -> {
+                                T targetItem = scaling.apply(newItem);
+                                target.set(From.VIEW, targetItem);
+                            })
+                        );
+                    }
+                })
+                ._this();
+    }
+
+    private <N extends Number> N _scale( Class<N> target, Number in, Number min, Number max, boolean inverse ) {
+        double scale = _goodScaleFor(min, max);
+        if ( inverse )
+            scale = 1.0 / scale;
+        double newValue = in.doubleValue() / scale;
+        // No we convert the new value to the target type.
+        return _convertTo(target, newValue);
+    }
+
+    private <N extends Number> N _convertTo( Class<N> target, Number in ) {
+        if ( target == Integer.class )
+            return target.cast(in.intValue());
+        if ( target == Long.class )
+            return target.cast(in.longValue());
+        if ( target == Short.class )
+            return target.cast(in.shortValue());
+        if ( target == Byte.class )
+            return target.cast(in.byteValue());
+        if ( target == Float.class )
+            return target.cast(in.floatValue());
+        if ( target == Double.class )
+            return target.cast(in.doubleValue());
+        throw new IllegalArgumentException("Unsupported number type: " + target);
+    }
+
+
+    private <N extends Number> double _goodScaleFor( N min, N max ) {
+        double minVal = min.doubleValue();
+        double maxVal = max.doubleValue();
+        double diff = maxVal - minVal;
+        // The scale should ensure that we have at least PREFFERED_STEPS steps in integer values.
+        return diff / PREFERRED_STEPS;
     }
 
     /**
