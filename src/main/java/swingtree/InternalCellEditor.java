@@ -56,6 +56,15 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
         hasDefaultComponent = false;
     }
 
+    public void setValue(@Nullable Object value) {
+        try {
+            Objects.requireNonNull(delegate);
+            delegate.setValue(value);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public @Nullable Component getComponent() {
         return editorComponent;
     }

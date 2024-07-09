@@ -18,6 +18,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -138,7 +139,7 @@ public final class CellBuilder<C extends JComponent, E> {
 
         public <T extends JComponent> Component _updateAndGetComponent(
             Function<@Nullable Object, Component> defaultRenderer,
-            Consumer<@Nullable Component> saveComponent,
+            BiConsumer<@Nullable Component, CellConf<?,?>> saveComponent,
             CellConf<T, Object> cell
         ) {
             @Nullable Object value = cell.entry().orElse(null);
@@ -154,13 +155,13 @@ public final class CellBuilder<C extends JComponent, E> {
                 Component choice;
                 if (cell.view().isPresent()) {
                     choice = cell.view().orElseThrow();
-                    saveComponent.accept(choice);
+                    saveComponent.accept(choice, cell);
                 } else if (cell.presentationEntry().isPresent()) {
                     choice = defaultRenderer.apply(cell.presentationEntry().get());
-                    saveComponent.accept(null);
+                    saveComponent.accept(null, cell);
                 } else {
                     choice = defaultRenderer.apply(value);
-                    saveComponent.accept(null);
+                    saveComponent.accept(null, cell);
                 }
 
                 if (!cell.toolTips().isEmpty() && choice instanceof JComponent)
@@ -174,19 +175,33 @@ public final class CellBuilder<C extends JComponent, E> {
             return _basicEditor.getComponent();
         }
 
-        private void _setEditor(@Nullable Component choice) {
+        private void _setEditor(@Nullable Component choice, CellConf<?,?> currentCell) {
             if ( _basicEditor.getComponent() == choice )
                 return;
+            boolean success = false;
             if (choice instanceof JCheckBox) {
                 _basicEditor.setEditor((JCheckBox) choice);
+                success = true;
             } else if (choice instanceof JComboBox) {
                 _basicEditor.setEditor((JComboBox<?>) choice);
+                success = true;
             } else if (choice instanceof JTextField) {
                 _basicEditor.setEditor((JTextField) choice);
+                success = true;
+            }
+            if ( success ) {
+                try {
+                    if ( currentCell.presentationEntry().isPresent() )
+                        _basicEditor.setValue(currentCell.presentationEntry().orElse(null));
+                    else
+                        _basicEditor.setValue(currentCell.entryAsString());
+                } catch (Exception e) {
+                    log.error("Failed to populate cell editor!", e);
+                }
             }
         }
 
-        private void _setRenderer(@Nullable Component choice) {
+        private void _setRenderer(@Nullable Component choice, CellConf<?,?> currentCell) {
             _lastCustomRenderer = choice;
         }
 
