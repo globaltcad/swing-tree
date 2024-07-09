@@ -517,9 +517,9 @@ public final class CellBuilder<C extends JComponent, E> {
         _store(Object.class, cell -> true, _createDefaultTextRenderer(cell -> cell.entryAsString()));
     }
 
-    static class InternalLabelForRendering extends JLabel {
+    static class InternalLabelForRendering extends DefaultListCellRenderer {
         InternalLabelForRendering(String text) {
-            super(text);
+            setText(text);
             setOpaque(true);
         }
     }
