@@ -9,6 +9,7 @@ import static swingtree.UI.*;
 
 public class FunctionalMVVM
 {
+    /*
     public enum Operator {
         ADD, SUBTRACT, MULTIPLY, DIVIDE
     }
@@ -101,4 +102,5 @@ public class FunctionalMVVM
             UI.show(f->new CalculatorView(vm));
         }
     }
+    */
 }
