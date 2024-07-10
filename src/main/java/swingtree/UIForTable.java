@@ -744,12 +744,32 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
 
         @Override
         public @Nullable Object getValueAt( int rowIndex, int columnIndex ) {
-            if ( isNotWithinBounds(rowIndex, columnIndex) ) return null;
+            if ( isNotWithinBounds(rowIndex, columnIndex) )
+                return null;
             List<E> column = getData().values().stream().skip(columnIndex).findFirst().orElse(null);
-            if ( column == null ) return null;
-            if ( rowIndex < 0 || rowIndex >= column.size() ) return null;
+            if ( column == null )
+                return null;
+            if ( rowIndex < 0 || rowIndex >= column.size() )
+                return null;
             return column.get(rowIndex);
         }
+
+        @Override
+        public void setValueAt( Object aValue, int rowIndex, int columnIndex ) {
+            if ( isNotWithinBounds(rowIndex, columnIndex) )
+                return;
+            List<E> column = getData().values().stream().skip(columnIndex).findFirst().orElse(null);
+            if ( column == null )
+                return;
+            if ( rowIndex < 0 || rowIndex >= column.size() )
+                return;
+            try {
+                column.set(rowIndex, (E) aValue);
+            } catch (Exception e) {
+                log.warn("Failed to set value in hash table based table model.", e);
+            }
+        }
+
     }
 
 }
