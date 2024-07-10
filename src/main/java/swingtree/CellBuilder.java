@@ -196,7 +196,7 @@ public final class CellBuilder<C extends JComponent, E> {
                     if ( currentCell.presentationEntry().isPresent() )
                         _basicEditor.setValue(currentCell.presentationEntry().orElse(null));
                     else
-                        _basicEditor.setValue(currentCell.entryAsString());
+                        _basicEditor.setValue(currentCell.entry().orElse(null));
                 } catch (Exception e) {
                     log.error("Failed to populate cell editor!", e);
                 }
@@ -259,6 +259,7 @@ public final class CellBuilder<C extends JComponent, E> {
             final int              row,
             final int              column
         ) {
+            _basicEditor.setValue(value);
             return _fit(table, row, column,
                         _updateAndGetComponent(
                              localValue -> _basicEditor.getTableCellEditorComponent(table, localValue, isSelected, row, column),
@@ -282,6 +283,8 @@ public final class CellBuilder<C extends JComponent, E> {
             final int              row,
             final boolean          hasFocus
         ) {
+            String stringValue = tree.convertValueToText(value, selected, expanded, leaf, row, false);
+            _basicEditor.setValue(stringValue);
             return _updateAndGetComponent(
                          localValue -> _defaultTreeRenderer.getTreeCellRendererComponent(tree, localValue, selected, expanded, leaf, row, hasFocus),
                          this::_setRenderer,
