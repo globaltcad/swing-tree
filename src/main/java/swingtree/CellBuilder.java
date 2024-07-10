@@ -620,8 +620,8 @@ public final class CellBuilder<C extends JComponent, E> {
             }
 
             // TODO:
-            //l.setEnabled(cell.getComponent().isEnabled());
-            //l.setFont(cell.getComponent().getFont());
+            //l.setFont(cell.getHost().getFont()); // Is this a good idea?
+            l.setEnabled(cell.getHost().isEnabled());
 
             Border border = null;
             if ( cell.hasFocus() ) {
