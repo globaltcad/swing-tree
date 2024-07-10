@@ -1,20 +1,26 @@
 package swingtree;
 
 import org.jspecify.annotations.Nullable;
+import sun.reflect.misc.ReflectUtil;
+import sun.swing.SwingUtilities2;
 
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.tree.TreeCellEditor;
-import java.awt.Component;
+import java.awt.*;
 import java.awt.event.*;
 import java.util.EventObject;
 import java.util.Objects;
 
 final class InternalCellEditor extends AbstractCellEditor implements TableCellEditor, TreeCellEditor {
 
+    private final static Class<?>[] argTypes = new Class<?>[]{String.class};
+    private java.lang.reflect.@Nullable Constructor<?> constructor;
+    private @Nullable Object value;
 
     /** The Swing component being edited. */
     private @Nullable JComponent editorComponent;
@@ -38,8 +44,10 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
     public InternalCellEditor(Class<? extends JComponent> hostType) {
         this.hostType = hostType;
         Border defaultBorder = null;
+        JTextField defaultEditorComponent = new JTextField();
         if ( JTable.class.isAssignableFrom(hostType) ) {
             defaultBorder = UIManager.getBorder("Table.editorBorder");
+            defaultEditorComponent.setName("Table.editor");
         } else if ( JTree.class.isAssignableFrom(hostType) ) {
             defaultBorder = UIManager.getBorder("Tree.editorBorder");
         } else if ( JList.class.isAssignableFrom(hostType) ) {
@@ -50,7 +58,6 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
         if ( defaultBorder == null )
             defaultBorder = new EmptyBorder(0,0,0,0);
 
-        JTextField defaultEditorComponent = new JTextField();
         defaultEditorComponent.setBorder(defaultBorder);
         _setEditor(defaultEditorComponent);
         hasDefaultComponent = true;
@@ -203,6 +210,8 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
      * @see EditorDelegate#getCellEditorValue
      */
     public @Nullable Object getCellEditorValue() {
+        if ( JTable.class.isAssignableFrom(hostType) )
+            return this.value;
         Objects.requireNonNull(delegate);
         return delegate.getCellEditorValue();
     }
@@ -234,6 +243,24 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
      */
     public boolean stopCellEditing() {
         Objects.requireNonNull(delegate);
+        if ( JTable.class.isAssignableFrom(hostType) && constructor != null ) {
+            @Nullable Object s = delegate.getCellEditorValue();
+            try {
+                if ("".equals(s)) {
+                    if (constructor.getDeclaringClass() == String.class) {
+                        value = s;
+                    }
+                    return super.stopCellEditing();
+                }
+
+                SwingUtilities2.checkAccess(constructor.getModifiers());
+                value = constructor.newInstance(new Object[]{s});
+            }
+            catch (Exception e) {
+                ((JComponent)getComponent()).setBorder(new LineBorder(Color.red));
+                return false;
+            }
+        }
         return delegate.stopCellEditing();
     }
 
@@ -268,6 +295,26 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
                                                  int row, int column) {
         Objects.requireNonNull(delegate);
         Objects.requireNonNull(editorComponent);
+        if ( JTable.class.isAssignableFrom(hostType) ) {
+            this.value = null;
+            ((JComponent)getComponent()).setBorder(new LineBorder(Color.black));
+            try {
+                Class<?> type = table.getColumnClass(column);
+                // Since our obligation is to produce a value which is
+                // assignable for the required type it is OK to use the
+                // String constructor for columns which are declared
+                // to contain Objects. A String is an Object.
+                if (type == Object.class) {
+                    type = String.class;
+                }
+                ReflectUtil.checkPackageAccess(type);
+                SwingUtilities2.checkAccess(type.getModifiers());
+                constructor = type.getConstructor(argTypes);
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
         delegate.setValue(value);
         if (editorComponent instanceof JCheckBox) {
             //in order to avoid a "flashing" effect when clicking a checkbox
