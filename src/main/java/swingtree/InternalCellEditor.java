@@ -271,16 +271,20 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
     public boolean stopCellEditing() {
         Objects.requireNonNull(delegate);
         if ( JTable.class.isAssignableFrom(hostType) && constructor != null ) {
-            @Nullable Object s = delegate.getCellEditorValue();
+            @Nullable Object o = delegate.getCellEditorValue();
             try {
-                if ("".equals(s)) {
+                if ("".equals(o)) {
                     if (constructor.getDeclaringClass() == String.class) {
-                        value = s;
+                        value = o;
                     }
                     return super.stopCellEditing();
+                } else if ( o != null ) {
+                    if ( constructor.getDeclaringClass().isAssignableFrom(o.getClass()) ) {
+                        value = o;
+                        return super.stopCellEditing();
+                    }
                 }
-
-                value = constructor.newInstance(new Object[]{s});
+                value = constructor.newInstance(new Object[]{o});
             }
             catch (Exception e) {
                 editorComponent.setBorder(new LineBorder(Color.red));
