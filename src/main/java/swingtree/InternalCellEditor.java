@@ -257,7 +257,7 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
                 value = constructor.newInstance(new Object[]{s});
             }
             catch (Exception e) {
-                ((JComponent)getComponent()).setBorder(new LineBorder(Color.red));
+                editorComponent.setBorder(new LineBorder(Color.red));
                 return false;
             }
         }
@@ -297,9 +297,27 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
         Objects.requireNonNull(editorComponent);
         if ( JTable.class.isAssignableFrom(hostType) ) {
             this.value = null;
-            ((JComponent)getComponent()).setBorder(new LineBorder(Color.black));
+            editorComponent.setBorder(new LineBorder(Color.black));
             try {
                 Class<?> type = table.getColumnClass(column);
+                if ( editorComponent instanceof JTextField ) {
+                    JTextField tf = (JTextField) editorComponent;
+                    int alignment = tf.getHorizontalAlignment();
+                    if (Number.class.isAssignableFrom(type)) {
+                        if ( alignment != JTextField.RIGHT )
+                            tf.setHorizontalAlignment(JTextField.RIGHT);
+                    } else {
+                        if ( alignment == JTextField.RIGHT )
+                            tf.setHorizontalAlignment(JTextField.LEADING);
+                    }
+                }
+                if ( editorComponent instanceof JCheckBox ) {
+                    JCheckBox cb = (JCheckBox) editorComponent;
+                    if ( Boolean.class.isAssignableFrom(type) ) {
+                        if ( cb.getHorizontalAlignment() != JCheckBox.CENTER )
+                            cb.setHorizontalAlignment(JCheckBox.CENTER);
+                    }
+                }
                 // Since our obligation is to produce a value which is
                 // assignable for the required type it is OK to use the
                 // String constructor for columns which are declared
