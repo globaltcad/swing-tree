@@ -205,8 +205,8 @@ public final class CellBuilder<C extends JComponent, E> {
             _lastCustomRenderer = choice;
         }
 
-        private Component _fit(JTable table, int row, int column, Component view) {
-            if ( !(view instanceof InternalLabelForRendering) ) {
+        private Component _fit( JTable table, int row, int column, Component view ) {
+            if ( !(view instanceof InternalLabelForRendering) && !(view.getClass() == DefaultListCellRenderer.class) ) {
                 try {
                     Dimension minSize = view.getMinimumSize();
                     TableColumn currentColumn = table.getColumnModel().getColumn(column);
