@@ -206,16 +206,18 @@ public final class CellBuilder<C extends JComponent, E> {
         }
 
         private Component _fit(JTable table, int row, int column, Component view) {
-            try {
-                Dimension minSize = view.getMinimumSize();
-                TableColumn currentColumn = table.getColumnModel().getColumn(column);
-                if ( currentColumn.getMinWidth() < minSize.width )
-                    currentColumn.setMinWidth(minSize.width);
-                if ( table.getRowHeight(row) < minSize.height )
-                    table.setRowHeight(row, minSize.height);
+            if ( !(view instanceof InternalLabelForRendering) ) {
+                try {
+                    Dimension minSize = view.getMinimumSize();
+                    TableColumn currentColumn = table.getColumnModel().getColumn(column);
+                    if (currentColumn.getMinWidth() < minSize.width)
+                        currentColumn.setMinWidth(minSize.width);
+                    if (table.getRowHeight(row) < minSize.height)
+                        table.setRowHeight(row, minSize.height);
 
-            } catch (Exception e) {
-                log.error("Failed to fit cell size", e);
+                } catch (Exception e) {
+                    log.error("Failed to fit cell size", e);
+                }
             }
             return view;
         }
