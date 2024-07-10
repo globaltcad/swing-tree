@@ -19,7 +19,6 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.util.*;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -259,6 +258,7 @@ public final class CellBuilder<C extends JComponent, E> {
             final int              row,
             final int              column
         ) {
+            _basicEditor.updateForTable(table, column);
             _basicEditor.setValue(value);
             return _fit(table, row, column,
                         _updateAndGetComponent(

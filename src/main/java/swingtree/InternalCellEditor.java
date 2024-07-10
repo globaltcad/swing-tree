@@ -1,12 +1,9 @@
 package swingtree;
 
 import org.jspecify.annotations.Nullable;
-import sun.reflect.misc.ReflectUtil;
-import sun.swing.SwingUtilities2;
 
 import javax.swing.*;
 import javax.swing.border.Border;
-import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
@@ -56,7 +53,7 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
             defaultBorder = UIManager.getBorder("ComboBox.editorBorder");
         }
         if ( defaultBorder == null )
-            defaultBorder = new EmptyBorder(0,0,0,0);
+            defaultBorder = new LineBorder(Color.BLACK);
 
         defaultEditorComponent.setBorder(defaultBorder);
         _setEditor(defaultEditorComponent);
@@ -253,7 +250,6 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
                     return super.stopCellEditing();
                 }
 
-                SwingUtilities2.checkAccess(constructor.getModifiers());
                 value = constructor.newInstance(new Object[]{s});
             }
             catch (Exception e) {
@@ -295,9 +291,33 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
                                                  int row, int column) {
         Objects.requireNonNull(delegate);
         Objects.requireNonNull(editorComponent);
+        delegate.setValue(value);
+        if (editorComponent instanceof JCheckBox) {
+            //in order to avoid a "flashing" effect when clicking a checkbox
+            //in a table, it is important for the editor to have as a border
+            //the same border that the renderer has, and have as the background
+            //the same color as the renderer has. This is primarily only
+            //needed for JCheckBox since this editor doesn't fill all the
+            //visual space of the table cell, unlike a text field.
+            TableCellRenderer renderer = table.getCellRenderer(row, column);
+            Component c = renderer.getTableCellRendererComponent(table, value,
+                    isSelected, true, row, column);
+            if (c != null) {
+                editorComponent.setOpaque(true);
+                editorComponent.setBackground(c.getBackground());
+                if (c instanceof JComponent) {
+                    editorComponent.setBorder(((JComponent)c).getBorder());
+                }
+            } else {
+                editorComponent.setOpaque(false);
+            }
+        }
+        return editorComponent;
+    }
+
+    public void updateForTable(JTable table, int column) {
         if ( JTable.class.isAssignableFrom(hostType) ) {
             this.value = null;
-            editorComponent.setBorder(new LineBorder(Color.black));
             try {
                 Class<?> type = table.getColumnClass(column);
                 if ( editorComponent instanceof JTextField ) {
@@ -325,36 +345,12 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
                 if (type == Object.class) {
                     type = String.class;
                 }
-                ReflectUtil.checkPackageAccess(type);
-                SwingUtilities2.checkAccess(type.getModifiers());
                 constructor = type.getConstructor(argTypes);
             }
             catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        delegate.setValue(value);
-        if (editorComponent instanceof JCheckBox) {
-            //in order to avoid a "flashing" effect when clicking a checkbox
-            //in a table, it is important for the editor to have as a border
-            //the same border that the renderer has, and have as the background
-            //the same color as the renderer has. This is primarily only
-            //needed for JCheckBox since this editor doesn't fill all the
-            //visual space of the table cell, unlike a text field.
-            TableCellRenderer renderer = table.getCellRenderer(row, column);
-            Component c = renderer.getTableCellRendererComponent(table, value,
-                    isSelected, true, row, column);
-            if (c != null) {
-                editorComponent.setOpaque(true);
-                editorComponent.setBackground(c.getBackground());
-                if (c instanceof JComponent) {
-                    editorComponent.setBorder(((JComponent)c).getBorder());
-                }
-            } else {
-                editorComponent.setOpaque(false);
-            }
-        }
-        return editorComponent;
     }
 
     /**
