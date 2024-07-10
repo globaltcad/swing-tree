@@ -3,6 +3,8 @@ package swingtree;
 import org.jspecify.annotations.Nullable;
 
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.tree.TreeCellEditor;
@@ -30,10 +32,51 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
 
     private boolean hasDefaultComponent;
 
+    private final Class<? extends JComponent> hostType;
 
-    public InternalCellEditor() {
-        _setEditor(new JTextField());
+
+    public InternalCellEditor(Class<? extends JComponent> hostType) {
+        this.hostType = hostType;
+        Border defaultBorder = null;
+        if ( JTable.class.isAssignableFrom(hostType) ) {
+            defaultBorder = UIManager.getBorder("Table.editorBorder");
+        } else if ( JTree.class.isAssignableFrom(hostType) ) {
+            defaultBorder = UIManager.getBorder("Tree.editorBorder");
+        } else if ( JList.class.isAssignableFrom(hostType) ) {
+            defaultBorder = UIManager.getBorder("List.editorBorder");
+        } else if ( JComboBox.class.isAssignableFrom(hostType) ) {
+            defaultBorder = UIManager.getBorder("ComboBox.editorBorder");
+        }
+        if ( defaultBorder == null )
+            defaultBorder = new EmptyBorder(0,0,0,0);
+
+        JTextField defaultEditorComponent = new JTextField();
+        defaultEditorComponent.setBorder(defaultBorder);
+        _setEditor(defaultEditorComponent);
         hasDefaultComponent = true;
+    }
+
+    private void _setUIManagerInfo(JComponent editor) {
+        String name = "";
+        String info = "";
+        if ( JTable.class.isAssignableFrom(hostType) )
+            info = "isTableCellEditor";
+        else if ( JTree.class.isAssignableFrom(hostType) )
+            info = "isTreeCellEditor";
+        else if ( JList.class.isAssignableFrom(hostType) )
+            info = "isListCellEditor";
+        else if ( JComboBox.class.isAssignableFrom(hostType) )
+            info = "isComboBoxCellEditor";
+
+        if ( editor instanceof JTextField )
+            name = "JTextField";
+        else if ( editor instanceof JCheckBox )
+            name = "JCheckBox";
+        else if ( editor instanceof JComboBox )
+            name = "JComboBox";
+
+        if ( !name.isEmpty() && !info.isEmpty() )
+            editor.putClientProperty(name+"."+info, Boolean.TRUE);
     }
 
     public boolean hasDefaultComponent() {
@@ -53,6 +96,7 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
             }
         };
         textField.addActionListener(delegate);
+        _setUIManagerInfo(textField);
     }
 
     public void setEditor(final JTextField textField) {
@@ -99,12 +143,12 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
         };
         checkBox.addActionListener(delegate);
         checkBox.setRequestFocusEnabled(false);
+        _setUIManagerInfo(checkBox);
         hasDefaultComponent = false;
     }
 
     public void setEditor(final JComboBox<?> comboBox) {
         editorComponent = comboBox;
-        comboBox.putClientProperty("JComboBox.isTableCellEditor", Boolean.TRUE);
         delegate = new EditorDelegate() {
             public void setValue(@Nullable Object value) {
                 comboBox.setSelectedItem(value);
@@ -131,6 +175,7 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
             }
         };
         comboBox.addActionListener(delegate);
+        _setUIManagerInfo(comboBox);
         hasDefaultComponent = false;
     }
 

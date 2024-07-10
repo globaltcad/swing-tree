@@ -132,10 +132,12 @@ public final class CellBuilder<C extends JComponent, E> {
     {
         private final DefaultTableCellRenderer _defaultRenderer = new DefaultTableCellRenderer();
         private final DefaultTreeCellRenderer _defaultTreeRenderer = new DefaultTreeCellRenderer();
-        private final InternalCellEditor _basicEditor = new InternalCellEditor();
+        private final InternalCellEditor _basicEditor;
         private @Nullable Component _lastCustomRenderer;
 
-        SimpleTableCellRenderer() {}
+        SimpleTableCellRenderer(Class<? extends JComponent> hostType) {
+            _basicEditor = new InternalCellEditor(hostType);
+        }
 
         public <T extends JComponent> Component _updateAndGetComponent(
             Function<@Nullable Object, Component> defaultRenderer,
@@ -464,7 +466,7 @@ public final class CellBuilder<C extends JComponent, E> {
     SimpleTableCellRenderer getForTable() {
         _addDefaultRendering();
         if (JTable.class.isAssignableFrom(_componentType)) {
-            SimpleTableCellRenderer renderer = new SimpleTableCellRenderer();
+            SimpleTableCellRenderer renderer = new SimpleTableCellRenderer(_componentType);
             return renderer;
         } else
             throw new IllegalArgumentException("Renderer was set up to be used for a JTable!");
@@ -473,7 +475,7 @@ public final class CellBuilder<C extends JComponent, E> {
     TreeCellRenderer getForTree() {
         _addDefaultRendering();
         if (JTree.class.isAssignableFrom(_componentType))
-            return new SimpleTableCellRenderer();
+            return new SimpleTableCellRenderer(_componentType);
         else
             throw new IllegalArgumentException("Renderer was set up to be used for a JTree!");
     }

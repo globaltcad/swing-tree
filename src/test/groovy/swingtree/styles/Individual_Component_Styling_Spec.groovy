@@ -1201,7 +1201,7 @@ class Individual_Component_Styling_Spec extends Specification
             We are using a set of raw Swing components as well as SwingTree native components
             together with a variety of colors.
             
-            Note that some of the linea looks very strange, 
+            Note that some of the lines looks very strange, 
             they expect the component to return a fully transparent background
             color, after a normal color was specified in the style API.
             But this is not an error, it is completely intentionally by design!
