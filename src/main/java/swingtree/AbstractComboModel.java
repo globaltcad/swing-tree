@@ -64,8 +64,21 @@ abstract class AbstractComboModel<E extends @Nullable Object> implements ComboBo
 
 	@SuppressWarnings("NullAway")
 	@Override public void setSelectedItem( @Nullable Object anItem ) {
-		if ( anItem != null && !_selectedItem.type().isAssignableFrom(anItem.getClass()) )
-			anItem = _convert(anItem.toString());
+		if ( anItem != null ) {
+			Class<E> expectedType = _selectedItem.type();
+			if ( !expectedType.isAssignableFrom(anItem.getClass()) ) {
+				Object convertedItem = _convert(anItem.toString());
+				if ( convertedItem == null )
+					log.warn(
+						"Failed to set selection due to unexpected data type in combo box!\n" +
+						"Expected type '" + expectedType.getName() + "' but encountered object\n" +
+						"of type '" + anItem.getClass().getName() + "' which is not assignable to the former.",
+						new Throwable()
+					);
+				else
+					anItem = convertedItem;
+			}
+		}
         E old = _selectedItem.orElseNull();
 		Object finalAnItem = anItem;
 		doQuietly(()-> {
