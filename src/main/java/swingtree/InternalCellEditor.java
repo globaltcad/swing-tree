@@ -37,27 +37,35 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
 
     private final Class<? extends JComponent> hostType;
 
+    private boolean isInitialized = false;
+
 
     public InternalCellEditor(Class<? extends JComponent> hostType) {
         this.hostType = hostType;
-        Border defaultBorder = null;
-        JTextField defaultEditorComponent = new JTextField();
-        if ( JTable.class.isAssignableFrom(hostType) ) {
-            defaultBorder = UIManager.getBorder("Table.editorBorder");
-            defaultEditorComponent.setName("Table.editor");
-        } else if ( JTree.class.isAssignableFrom(hostType) ) {
-            defaultBorder = UIManager.getBorder("Tree.editorBorder");
-        } else if ( JList.class.isAssignableFrom(hostType) ) {
-            defaultBorder = UIManager.getBorder("List.editorBorder");
-        } else if ( JComboBox.class.isAssignableFrom(hostType) ) {
-            defaultBorder = UIManager.getBorder("ComboBox.editorBorder");
-        }
-        if ( defaultBorder == null )
-            defaultBorder = new LineBorder(Color.BLACK);
+    }
 
-        defaultEditorComponent.setBorder(defaultBorder);
-        _setEditor(defaultEditorComponent);
-        hasDefaultComponent = true;
+    public void ini() {
+        if ( !isInitialized ) {
+            isInitialized = true;
+            Border defaultBorder = null;
+            JTextField defaultEditorComponent = new JTextField();
+            if (JTable.class.isAssignableFrom(hostType)) {
+                defaultBorder = UIManager.getBorder("Table.editorBorder");
+                defaultEditorComponent.setName("Table.editor");
+            } else if (JTree.class.isAssignableFrom(hostType)) {
+                defaultBorder = UIManager.getBorder("Tree.editorBorder");
+            } else if (JList.class.isAssignableFrom(hostType)) {
+                defaultBorder = UIManager.getBorder("List.editorBorder");
+            } else if (JComboBox.class.isAssignableFrom(hostType)) {
+                defaultBorder = UIManager.getBorder("ComboBox.editorBorder");
+            }
+            if (defaultBorder == null)
+                defaultBorder = new LineBorder(Color.BLACK);
+
+            defaultEditorComponent.setBorder(defaultBorder);
+            _setEditor(defaultEditorComponent);
+            hasDefaultComponent = true;
+        }
     }
 
     private void _setUIManagerInfo(JComponent editor) {
