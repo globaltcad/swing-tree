@@ -36,6 +36,10 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
         hasDefaultComponent = true;
     }
 
+    public boolean hasDefaultComponent() {
+        return hasDefaultComponent;
+    }
+
     private void _setEditor(final JTextField textField) {
         editorComponent = textField;
         this.clickCountToStart = 2;

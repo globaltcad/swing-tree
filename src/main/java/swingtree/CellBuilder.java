@@ -206,7 +206,9 @@ public final class CellBuilder<C extends JComponent, E> {
         }
 
         private Component _fit( JTable table, int row, int column, Component view ) {
-            if ( !(view instanceof InternalLabelForRendering) && !(view.getClass() == DefaultListCellRenderer.class) ) {
+            boolean isDefaultRenderer = view instanceof InternalLabelForRendering || view.getClass() == DefaultListCellRenderer.class;
+            boolean isDefaultEditor = _basicEditor.getComponent() == view && _basicEditor.hasDefaultComponent();
+            if ( !isDefaultRenderer && !isDefaultEditor ) {
                 try {
                     Dimension minSize = view.getMinimumSize();
                     TableColumn currentColumn = table.getColumnModel().getColumn(column);
