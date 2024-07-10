@@ -252,11 +252,9 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
                                                 boolean isSelected,
                                                 boolean expanded,
                                                 boolean leaf, int row) {
-        String         stringValue = tree.convertValueToText(value, isSelected,
-                expanded, leaf, row, false);
-
         Objects.requireNonNull(delegate);
         Objects.requireNonNull(editorComponent);
+        String stringValue = tree.convertValueToText(value, isSelected, expanded, leaf, row, false);
         delegate.setValue(stringValue);
         return editorComponent;
     }
