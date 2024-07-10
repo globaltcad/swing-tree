@@ -208,8 +208,12 @@ public final class CellBuilder<C extends JComponent, E> {
 
         private Component _fit( JTable table, int row, int column, Component view ) {
             try {
-                boolean isDefaultRenderer = view instanceof InternalLabelForRendering || view.getClass() == DefaultListCellRenderer.class;
                 boolean isDefaultEditor = _basicEditor.getComponent() == view && _basicEditor.hasDefaultComponent();
+                boolean isDefaultRenderer = view instanceof InternalLabelForRendering ||
+                                            view.getClass() == DefaultListCellRenderer.class ||
+                                            view instanceof DefaultTableCellRenderer ||
+                                            view instanceof DefaultTreeCellRenderer;
+
                 if ( !isDefaultRenderer && !isDefaultEditor ) {
                     /*
                         If you want the table to fit the cell size to the content,
