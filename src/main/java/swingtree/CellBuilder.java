@@ -258,7 +258,7 @@ public final class CellBuilder<C extends JComponent, E> {
             final int              row,
             final int              column
         ) {
-            _basicEditor.ini();
+            _basicEditor.ini(table, row, column);
             _basicEditor.updateForTable(table, column);
             _basicEditor.setValue(value);
             return _fit(table, row, column,
@@ -284,8 +284,8 @@ public final class CellBuilder<C extends JComponent, E> {
             final int              row,
             final boolean          hasFocus
         ) {
-            _basicEditor.ini();
             String stringValue = tree.convertValueToText(value, selected, expanded, leaf, row, false);
+            _basicEditor.ini(tree, row, 0);
             _basicEditor.setValue(stringValue);
             return _updateAndGetComponent(
                          localValue -> _defaultTreeRenderer.getTreeCellRendererComponent(tree, localValue, selected, expanded, leaf, row, hasFocus),
@@ -307,6 +307,7 @@ public final class CellBuilder<C extends JComponent, E> {
             final boolean          leaf,
             final int              row
         ) {
+            _basicEditor.ini(tree, row, 0);
             return _updateAndGetComponent(
                          localValue -> _basicEditor.getTreeCellEditorComponent(tree, localValue, isSelected, expanded, leaf, row),
                          this::_setEditor,

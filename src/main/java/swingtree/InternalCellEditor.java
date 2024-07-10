@@ -44,11 +44,20 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
         this.hostType = hostType;
     }
 
-    public void ini() {
+    public void ini(JComponent host, int row, int col) {
         if ( !isInitialized ) {
             isInitialized = true;
             Border defaultBorder = null;
-            JTextField defaultEditorComponent = new JTextField();
+            JComponent defaultEditorComponent = null;
+            if ( host instanceof JTable ) {
+                JTable table = (JTable) host;
+                Class<?> columnDataType = table.getColumnClass(col);
+                if ( Boolean.class.isAssignableFrom(columnDataType) )
+                    defaultEditorComponent = new JCheckBox();
+            }
+            if ( defaultEditorComponent == null )
+                defaultEditorComponent = new JTextField();
+
             if (JTable.class.isAssignableFrom(hostType)) {
                 defaultBorder = UIManager.getBorder("Table.editorBorder");
                 defaultEditorComponent.setName("Table.editor");
@@ -63,7 +72,11 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
                 defaultBorder = new LineBorder(Color.BLACK);
 
             defaultEditorComponent.setBorder(defaultBorder);
-            _setEditor(defaultEditorComponent);
+            if ( defaultEditorComponent instanceof JTextField )
+                _setEditor((JTextField) defaultEditorComponent);
+            else if ( defaultEditorComponent instanceof JCheckBox )
+                setEditor((JCheckBox) defaultEditorComponent);
+
             hasDefaultComponent = true;
         }
     }
@@ -222,13 +235,22 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
     }
 
     /**
-     * Forwards the message from the <code>CellEditor</code> to
-     * the <code>delegate</code>.
-     * @see EditorDelegate#isCellEditable(EventObject)
+     * Returns true if <code>anEvent</code> is <b>not</b> a
+     * <code>MouseEvent</code>.  Otherwise, it returns true
+     * if the necessary number of clicks have occurred, and
+     * returns false otherwise.
+     *
+     * @param   anEvent         the event
+     * @return  true  if cell is ready for editing, false otherwise
+     * @see #setClickCountToStart
+     * @see #shouldSelectCell
      */
+    @Override
     public boolean isCellEditable(EventObject anEvent) {
-        Objects.requireNonNull(delegate);
-        return delegate.isCellEditable(anEvent);
+        if (anEvent instanceof MouseEvent) {
+            return ((MouseEvent)anEvent).getClickCount() >= clickCountToStart;
+        }
+        return true;
     }
 
     /**
@@ -383,24 +405,6 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
          */
         public void setValue(@Nullable Object value) {
             this.value = value;
-        }
-
-        /**
-         * Returns true if <code>anEvent</code> is <b>not</b> a
-         * <code>MouseEvent</code>.  Otherwise, it returns true
-         * if the necessary number of clicks have occurred, and
-         * returns false otherwise.
-         *
-         * @param   anEvent         the event
-         * @return  true  if cell is ready for editing, false otherwise
-         * @see #setClickCountToStart
-         * @see #shouldSelectCell
-         */
-        public boolean isCellEditable(EventObject anEvent) {
-            if (anEvent instanceof MouseEvent) {
-                return ((MouseEvent)anEvent).getClickCount() >= clickCountToStart;
-            }
-            return true;
         }
 
         /**
