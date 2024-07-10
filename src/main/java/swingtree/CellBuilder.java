@@ -210,6 +210,10 @@ public final class CellBuilder<C extends JComponent, E> {
                 boolean isDefaultRenderer = view instanceof InternalLabelForRendering || view.getClass() == DefaultListCellRenderer.class;
                 boolean isDefaultEditor = _basicEditor.getComponent() == view && _basicEditor.hasDefaultComponent();
                 if ( !isDefaultRenderer && !isDefaultEditor ) {
+                    /*
+                        If you want the table to fit the cell size to the content,
+                        then you have to use a custom view / editor!
+                    */
                     Dimension minSize = view.getMinimumSize();
                     TableColumn currentColumn = table.getColumnModel().getColumn(column);
                     if (currentColumn.getMinWidth() < minSize.width)
