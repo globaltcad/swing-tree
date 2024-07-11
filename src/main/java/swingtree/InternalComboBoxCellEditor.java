@@ -2,6 +2,7 @@
 package swingtree;
 
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
 
 import javax.swing.ComboBoxEditor;
 import javax.swing.JTextField;
@@ -20,6 +21,8 @@ import java.util.List;
 import java.util.Objects;
 
 final class InternalComboBoxCellEditor implements ComboBoxEditor,FocusListener {
+
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(InternalComboBoxCellEditor.class);
 
     private final List<ActionListener> _actionListeners = new java.util.ArrayList<>();
     /**
@@ -142,6 +145,7 @@ final class InternalComboBoxCellEditor implements ComboBoxEditor,FocusListener {
         }
 
         // workaround for 4530952
+        @Override
         public void setText(String s) {
             if (getText().equals(s)) {
                 return;
@@ -149,6 +153,7 @@ final class InternalComboBoxCellEditor implements ComboBoxEditor,FocusListener {
             super.setText(s);
         }
 
+        @Override
         public void setBorder(Border b) {
             if (!(b instanceof UIResource)) {
                 super.setBorder(b);
@@ -199,6 +204,7 @@ final class InternalComboBoxCellEditor implements ComboBoxEditor,FocusListener {
             try {
                 return AccessController.doPrivileged(
                         new PrivilegedExceptionAction<Method>() {
+                            @Override
                             public Method run() throws Exception {
                                 Class<?> t = getTrampolineClass();
                                 Class<?>[] types = {
@@ -219,6 +225,7 @@ final class InternalComboBoxCellEditor implements ComboBoxEditor,FocusListener {
             try {
                 return Class.forName(TRAMPOLINE, true, new MethodUtil());
             } catch (ClassNotFoundException e) {
+                log.debug("Trampoline class not found", e);
             }
             return null;
         }

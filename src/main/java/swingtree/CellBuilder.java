@@ -74,7 +74,18 @@ public final class CellBuilder<C extends JComponent, E> {
 
     private CellBuilder(Class<C> componentType, Class<E> elementType) {
         _componentType = componentType;
-        _elementType = elementType;
+        _elementType   = elementType;
+    }
+
+    private void _checkTypeValidity( @Nullable Object encounteredValue ) {
+        if ( encounteredValue != null ) {
+            if ( !_elementType.isAssignableFrom(encounteredValue.getClass()) )
+                log.debug(
+                    "Encountered an unusual cell entry in component '"+_componentType.getSimpleName()+"'. " +
+                    "Expected type '"+_elementType.getSimpleName()+"', but got '"+encounteredValue.getClass().getSimpleName()+"'."
+                );
+
+        }
     }
 
     /**
@@ -241,6 +252,7 @@ public final class CellBuilder<C extends JComponent, E> {
             final int              row,
             final int              column
         ) {
+            _checkTypeValidity(value);
             return _fit(table, row, column,
                         _updateAndGetComponent(
                              localValue -> _defaultRenderer.getTableCellRendererComponent(table, localValue, isSelected, hasFocus, row, column),
@@ -262,6 +274,7 @@ public final class CellBuilder<C extends JComponent, E> {
             final int              row,
             final int              column
         ) {
+            _checkTypeValidity(value);
             _basicEditor.ini(table, row, column);
             _basicEditor.updateForTable(table, column);
             _basicEditor.setValue(value);
@@ -288,6 +301,7 @@ public final class CellBuilder<C extends JComponent, E> {
             final int              row,
             final boolean          hasFocus
         ) {
+            _checkTypeValidity(value);
             String stringValue = tree.convertValueToText(value, selected, expanded, leaf, row, false);
             _basicEditor.ini(tree, row, 0);
             _basicEditor.setValue(stringValue);
@@ -311,6 +325,7 @@ public final class CellBuilder<C extends JComponent, E> {
             final boolean          leaf,
             final int              row
         ) {
+            _checkTypeValidity(value);
             _basicEditor.ini(tree, row, 0);
             return _updateAndGetComponent(
                          localValue -> _basicEditor.getTreeCellEditorComponent(tree, localValue, isSelected, expanded, leaf, row),
@@ -378,6 +393,7 @@ public final class CellBuilder<C extends JComponent, E> {
             final boolean isSelected,
             final boolean hasFocus
         ) {
+            _checkTypeValidity(value);
             List<Configurator<CellConf<C, ?>>> interpreter = _find(value, _rendererLookup);
             if (interpreter.isEmpty())
                 return _defaultRenderer.getListCellRendererComponent(list, value, row, isSelected, hasFocus);
@@ -498,7 +514,6 @@ public final class CellBuilder<C extends JComponent, E> {
      * about how to use this class as pat of the main API.
      *
      * @param list The list for which the renderer is to be built.
-     * @return The new {@link ListCellRenderer} instance specific to the given list.
      */
     void buildForList( C list ) {
         _addDefaultRendering();

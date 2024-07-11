@@ -1,6 +1,8 @@
 package swingtree;
 
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -16,6 +18,7 @@ import java.util.Objects;
 final class InternalCellEditor extends AbstractCellEditor implements TableCellEditor, TreeCellEditor {
 
     private final static Class<?>[] argTypes = new Class<?>[]{String.class};
+    private static final Logger log = LoggerFactory.getLogger(InternalCellEditor.class);
     private java.lang.reflect.@Nullable Constructor<?> constructor;
     private @Nullable Object value;
 
@@ -112,10 +115,12 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
         editorComponent = textField;
         this.clickCountToStart = 2;
         delegate = new EditorDelegate() {
+            @Override
             public void setValue(@Nullable Object value) {
                 textField.setText((value != null) ? value.toString() : "");
             }
 
+            @Override
             public Object getCellEditorValue() {
                 return textField.getText();
             }
@@ -134,7 +139,7 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
             Objects.requireNonNull(delegate);
             delegate.setValue(value);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.debug("Failed to internal cell editor value for host type '"+hostType.getName()+"'", e);
         }
     }
 
@@ -151,6 +156,7 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
     public void setEditor(final JCheckBox checkBox) {
         editorComponent = checkBox;
         delegate = new EditorDelegate() {
+            @Override
             public void setValue(@Nullable Object value) {
                 boolean selected = false;
                 if (value instanceof Boolean) {
@@ -162,6 +168,7 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
                 checkBox.setSelected(selected);
             }
 
+            @Override
             public Object getCellEditorValue() {
                 return Boolean.valueOf(checkBox.isSelected());
             }
@@ -175,14 +182,17 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
     public void setEditor(final JComboBox<?> comboBox) {
         editorComponent = comboBox;
         delegate = new EditorDelegate() {
+            @Override
             public void setValue(@Nullable Object value) {
                 comboBox.setSelectedItem(value);
             }
 
+            @Override
             public Object getCellEditorValue() {
                 return comboBox.getSelectedItem();
             }
 
+            @Override
             public boolean shouldSelectCell(EventObject anEvent) {
                 if (anEvent instanceof MouseEvent) {
                     MouseEvent e = (MouseEvent)anEvent;
@@ -190,6 +200,7 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
                 }
                 return true;
             }
+            @Override
             public boolean stopCellEditing() {
                 if (comboBox.isEditable()) {
                     // Commit edited value.
@@ -227,6 +238,7 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
      * the <code>delegate</code>.
      * @see EditorDelegate#getCellEditorValue
      */
+    @Override
     public @Nullable Object getCellEditorValue() {
         if ( JTable.class.isAssignableFrom(hostType) )
             return this.value;
@@ -258,6 +270,7 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
      * the <code>delegate</code>.
      * @see EditorDelegate#shouldSelectCell(EventObject)
      */
+    @Override
     public boolean shouldSelectCell(EventObject anEvent) {
         Objects.requireNonNull(delegate);
         return delegate.shouldSelectCell(anEvent);
@@ -268,6 +281,7 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
      * the <code>delegate</code>.
      * @see EditorDelegate#stopCellEditing
      */
+    @Override
     public boolean stopCellEditing() {
         Objects.requireNonNull(delegate);
         if ( JTable.class.isAssignableFrom(hostType) && constructor != null ) {
@@ -287,7 +301,8 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
                 value = constructor.newInstance(new Object[]{o});
             }
             catch (Exception e) {
-                editorComponent.setBorder(new LineBorder(Color.red));
+                if ( editorComponent != null )
+                    editorComponent.setBorder(new LineBorder(Color.red));
                 return false;
             }
         }
@@ -299,12 +314,14 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
      * the <code>delegate</code>.
      * @see EditorDelegate#cancelCellEditing
      */
+    @Override
     public void cancelCellEditing() {
         Objects.requireNonNull(delegate);
         delegate.cancelCellEditing();
     }
 
     /** Implements the <code>TreeCellEditor</code> interface. */
+    @Override
     public Component getTreeCellEditorComponent(JTree tree, @Nullable Object value,
                                                 boolean isSelected,
                                                 boolean expanded,
@@ -320,6 +337,7 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
 //  Implementing the CellEditor Interface
 //
     /** Implements the <code>TableCellEditor</code> interface. */
+    @Override
     public Component getTableCellEditorComponent(JTable table, @Nullable Object value,
                                                  boolean isSelected,
                                                  int row, int column) {
@@ -382,7 +400,7 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
                 constructor = type.getConstructor(argTypes);
             }
             catch (Exception e) {
-                e.printStackTrace();
+                log.debug("Failed to update internal cell editor for host type '"+hostType.getName()+"'", e);
             }
         }
     }
@@ -457,6 +475,7 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
          * @param e the action event
          * @see #stopCellEditing
          */
+        @Override
         public void actionPerformed(ActionEvent e) {
             InternalCellEditor.this.stopCellEditing();
         }
@@ -466,6 +485,7 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
          * @param e the action event
          * @see #stopCellEditing
          */
+        @Override
         public void itemStateChanged(ItemEvent e) {
             InternalCellEditor.this.stopCellEditing();
         }
