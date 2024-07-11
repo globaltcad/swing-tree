@@ -16,7 +16,7 @@ import java.util.*;
 import java.util.function.Function;
 
 /**
- *  A SwingTree builder node designed for configuring {@link JTable} instances allowing
+ *  A SwingTree declarative builder designed for configuring {@link JTable} instances allowing
  *  for a fluent API to build tables in a declarative way.
  */
 public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable<T>, T>
@@ -82,11 +82,11 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      *  Here is an example of how to use this method:
      * <pre>{@code
      *     UI.table(myModel)
-     *     .withCellForColumn("column1", it -> it
+     *     .withCellsForColumn("column1", it -> it
      *         .when(String.class)
      *         .asText( cell -> "[" + cell.valueAsString().orElse("") + "]" ) )
      *     )
-     *     .withCellForColumn("column2", it -> it
+     *     .withCellsForColumn("column2", it -> it
      *         .when(Float.class)
      *         .asText( cell -> "(" + cell.valueAsString().orElse("") + "f)" ) )
      *         .when(Double.class)
@@ -98,6 +98,14 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      * Note that the API allows you to specify how specific types of table entry values
      * should be rendered. This is done by calling the {@link CellBuilder#when(Class)} method
      * before calling the {@link RenderAs#asText(Function)} method.
+     * <br>
+     * <b>
+     *     Due to this method being inherently based on the expectation of type ambiguity it is
+     *     a rather verbose way of defining how your cells should look and behave. The simpler and
+     *     preferred way of defining cell views is through the {@link #withCell(Configurator)},
+     *     {@link #withCellForColumn(String, Configurator)} and {@link #withCellForColumn(int, Configurator)}
+     *     methods.
+     * </b>
      *
      * @param columnName The name of the column for which the cell renderer will be built.
      * @param renderBuilder A lambda function which exposes a fluent builder API for a cell renderer
@@ -148,6 +156,16 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      * }</pre>
      * Also see {@link #withCellForColumn(int, Configurator)} method to build a cell renderer for a column by index,
      * and {@link #withCell(Configurator)} method to build a cell renderer for all columns of the table.
+     * <br>
+     * This API also supports the configuration of cell editors as the supplied lambda will also be
+     * called by an underlying {@link TableCellEditor} implementation when the cell is in editing mode.
+     * The cell will indicate that it needs an editor component by having the {@link CellConf#isEditing()}
+     * set to true. You can then decide to return a different view component for the cell editor
+     * by checking this property. The next time the lambda is invoked with the {@link CellConf#isEditing()}
+     * flag is set to true, then the cell will still contain the same editor component as previously specified.
+     * In case of the flag being false, the cell will contain the view component
+     * that was provided the last time the cell was not in editing mode.
+     *
      *
      * @param columnName The name of the column for which the cell renderer will be built.
      * @param cellConfigurator A lambda function which configures the cell view.
@@ -183,7 +201,16 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      * and the second column as a float or double value surrounded by parentheses.
      * Note that the API allows you to specify how specific types of table entry values
      * should be rendered. This is done by calling the {@link CellBuilder#when(Class)} method
-     * before calling the {@link RenderAs#asText(Function)} method.
+     * before calling the {@link RenderAs#asText(Function)} method. <br>
+     * <br>
+     * <b>
+     *      Due to this method being inherently based on the expectation of type ambiguity it is
+     *      a rather verbose way of defining how your cells should look and behave. The simpler and
+     *      preferred way of defining cell views is through the {@link #withCell(Configurator)},
+     *      {@link #withCellForColumn(String, Configurator)} and {@link #withCellForColumn(int, Configurator)}
+     *      methods.
+     * </b>
+     *
      *
      * @param columnIndex The index of the column for which the cell renderer will be built.
      * @param renderBuilder A lambda function which exposes a fluent builder API for a cell renderer
@@ -207,9 +234,9 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
     }
 
     /**
-     *  Use this to build a basic table cell renderer for a particular column.
+     *  Use this to build a basic table cell view for a particular column.
      *  The second argument passed to this method is a lambda function
-     *  which accepts a {@link CellConf} representing the cell to be rendered.
+     *  which accepts a {@link CellConf} representing the cell to be rendered and possibly even edited.
      *  You may then return an updated cell with a desired view component
      *  through methods like {@link CellConf#view(Component)} or {@link CellConf#view(Configurator)}.
      *  Here an example of how this method may be used:
@@ -234,10 +261,22 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      * }</pre>
      * Also see {@link #withCellForColumn(String, Configurator)} method to build a cell renderer for a column by name,
      * and {@link #withCell(Configurator)} method to build a cell renderer for all columns of the table.
+     * <br>
+     * This API also supports the configuration of cell editors as the supplied lambda will also be
+     * called by an underlying {@link TableCellEditor} implementation when the cell is in editing mode.
+     * The cell will indicate that it needs an editor component by having the {@link CellConf#isEditing()}
+     * set to true. You can then decide to return a different view component for the cell editor
+     * by checking this property. The next time the lambda is invoked with the {@link CellConf#isEditing()}
+     * flag is set to true, then the cell will still contain the same editor component as previously specified.
+     * In case of the flag being false, the cell will contain the view component
+     * that was provided the last time the cell was not in editing mode.
      *
      * @param columnIndex The index of the column for which the cell renderer will be built.
      * @param cellConfigurator A lambda function which configures the cell view.
-     * @return This builder node.
+     *                         The lambda is invoked in two main situations: when the cell is in editing mode
+     *                         and when the cell is not in editing mode (only rendering).
+     *                         You may decide what to store in the cell based on its state.
+     * @return This instance of the builder, to allow for declarative method chaining.
      */
     public final UIForTable<T> withCellForColumn(
         int columnIndex,
@@ -252,8 +291,8 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      * A {@link TableCellRenderer} is a supplier of {@link java.awt.Component} instances which are used to render
      * the cells of a table.
      * <b>Note that in SwingTree, the preferred way of defining a cell renderer for a particular column is through the
-     * {@link #withCellsForColumn(String, Configurator)} method, which allows for a more fluent and declarative
-     * way of defining cell renderers.</b>
+     * {@link #withCellForColumn(String, Configurator)} method, which allows for a more fluent and declarative
+     * way of defining cell renderers as well as editors.</b>
      *
      * @param columnName The name of the column for which the cell renderer will be registered.
      * @param renderer The cell renderer to be registered.
@@ -285,12 +324,12 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      * A {@link TableCellRenderer} is a supplier of {@link java.awt.Component} instances which are used to render
      * the cells of a table.
      * <b>Note that in SwingTree, the preferred way of defining a cell renderer for a particular column is through the
-     * {@link #withCellsForColumn(int, Configurator)} method, which allows for a more fluent and declarative
-     * way of defining cell renderers.</b>
+     * {@link #withCellForColumn(int, Configurator)} method, which allows for a more fluent and declarative
+     * way of defining cell renderers. It also supports both cell rendering and editing.</b>
      *
      * @param columnIndex The index of the column for which the cell renderer will be registered.
      * @param renderer The cell renderer to be registered.
-     * @return This builder node.
+     * @return This builder instance, to allow for method chaining.
      */
     public final UIForTable<T> withCellRendererForColumn( int columnIndex, TableCellRenderer renderer ) {
         NullUtil.nullArgCheck(renderer, "renderer", TableCellRenderer.class);
@@ -310,12 +349,12 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
     }
 
     /**
-     *  Use this to register a table cell renderer for all columns of this table.<br>
+     *  Use this to register a {@link TableCellRenderer} for all columns of this table.<br>
      *  A {@link TableCellRenderer} is a supplier of {@link java.awt.Component} instances which are used to render
      *  the cells of a table.<br><br>
      *  <b>Note that in SwingTree, the preferred way of defining a cell renderer is through the
-     *  {@link #withCells(Configurator)} method, which allows for a more fluent and declarative
-     *  way of defining cell renderers.</b>
+     *  {@link #withCell(Configurator)} method, which allows for a more fluent and declarative
+     *  way of defining cell renderers and also supports both cell rendering and editing.</b>
      *
      * @param renderer A provider of {@link java.awt.Component} instances which are used to render the cells of a table.
      * @return This builder instance, to allow for method chaining.
@@ -411,6 +450,16 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      *  The {@link Configurator} lambda function passed to this method configures the cell view
      *  by setting the text of a {@link JLabel} to the value of the cell, and setting the background
      *  color of the label to yellow if the cell is selected, and white otherwise.
+     *  <br>
+     *  This API also supports the configuration of cell editors as the supplied lambda will also be
+     *  called by an underlying {@link TableCellEditor} implementation when the cell is in editing mode.
+     *  The cell will indicate that it needs an editor component by having the {@link CellConf#isEditing()}
+     *  set to true. You can then decide to return a different view component for the cell editor
+     *  by checking this property. The next time the lambda is invoked with the {@link CellConf#isEditing()}
+     *  flag is set to true, then the cell will still contain the same editor component as previously specified.
+     *  In case of the flag being false, the cell will contain the view component
+     *  that was provided the last time the cell was not in editing mode.
+     *
      *
      * @param cellConfigurator The {@link Configurator} lambda function that configures the cell view.
      * @return This instance of the builder node to allow for fluent method chaining.
@@ -424,6 +473,10 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
 
     /**
      * Use this to register a table cell editor for a particular column.
+     * <b>Note that in SwingTree, the preferred way of defining a cell editor for a particular column is through the
+     * {@link #withCellForColumn(String, Configurator)} method, which allows for a more fluent and declarative
+     * way of defining cell editors.</b>
+     *
      * @param columnName The name of the column for which the cell editor will be registered.
      * @param editor The cell editor to be registered.
      * @return This builder instance, to allow for method chaining.
@@ -439,6 +492,9 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
 
     /**
      * Use this to register a table cell editor for a particular column.
+     * <b>Note that in SwingTree, the preferred way of defining a cell editor for a particular column is through the
+     * {@link #withCellForColumn(int, Configurator)} method, which allows for a more fluent and declarative
+     * way of defining cell editors.</b>
      * @param columnIndex The index of the column for which the cell editor will be registered.
      * @param editor The cell editor to be registered.
      * @return This builder node, to allow for builder-style method chaining.
@@ -455,6 +511,11 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      *  Use this to set a table model.
      *  The provided argument is a builder object whose build method will be called
      *  for you instead of having to call the build method on the builder object yourself.
+     *  <b>
+     *      The preferred way of setting a table model is through the {@link #withModel(Configurator)}
+     *      which exposes a fluent builder API for binding the table model to a data source
+     *      without any boilerplate code.
+     *  </b>
      * @param dataModelBuilder The builder object which will be used to build and then set the table model.
      * @return This builder object.
      */
@@ -744,12 +805,32 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
 
         @Override
         public @Nullable Object getValueAt( int rowIndex, int columnIndex ) {
-            if ( isNotWithinBounds(rowIndex, columnIndex) ) return null;
+            if ( isNotWithinBounds(rowIndex, columnIndex) )
+                return null;
             List<E> column = getData().values().stream().skip(columnIndex).findFirst().orElse(null);
-            if ( column == null ) return null;
-            if ( rowIndex < 0 || rowIndex >= column.size() ) return null;
+            if ( column == null )
+                return null;
+            if ( rowIndex < 0 || rowIndex >= column.size() )
+                return null;
             return column.get(rowIndex);
         }
+
+        @Override
+        public void setValueAt( Object aValue, int rowIndex, int columnIndex ) {
+            if ( isNotWithinBounds(rowIndex, columnIndex) )
+                return;
+            List<E> column = getData().values().stream().skip(columnIndex).findFirst().orElse(null);
+            if ( column == null )
+                return;
+            if ( rowIndex < 0 || rowIndex >= column.size() )
+                return;
+            try {
+                column.set(rowIndex, (E) aValue);
+            } catch (Exception e) {
+                log.warn("Failed to set value in hash table based table model.", e);
+            }
+        }
+
     }
 
 }

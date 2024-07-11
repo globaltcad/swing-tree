@@ -40,6 +40,11 @@ public class NamedFieldsView extends JPanel {
         IconDeclaration svgT    = ()->"img/dandelion.svg";
         IconDeclaration pngT    = ()->"img/seed.png";
 
+        Map<String, List<String>> data = new LinkedHashMap<>();
+        data.put("A", Stream.of("A1", "A2", "A3").collect(Collectors.toList()));
+        data.put("B", Stream.of("B1", "B2", "B3").collect(Collectors.toList()));
+        data.put("C", Stream.of("C1", "C2", "C3").collect(Collectors.toList()));
+
         UI.of(this).withLayout("fill, wrap 2", "[grow][grow]")
         .add(
             UI.panel("fill, wrap 1", "[grow]")
@@ -135,10 +140,6 @@ public class NamedFieldsView extends JPanel {
             UI.scrollPane().withMaxWidth(300)
             .add(
                 UI.table(UI.MapData.EDITABLE,()->{
-                    Map<String, List<String>> data = new LinkedHashMap<>();
-                    data.put("A", Stream.of("A1", "A2", "A3").collect(Collectors.toList()));
-                    data.put("B", Stream.of("B1", "B2", "B3").collect(Collectors.toList()));
-                    data.put("C", Stream.of("C1", "C2", "C3").collect(Collectors.toList()));
                     return data;
                 })
                 .withCells( it -> it
