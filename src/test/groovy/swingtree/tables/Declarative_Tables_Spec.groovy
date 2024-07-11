@@ -259,9 +259,8 @@ class Declarative_Tables_Spec extends Specification
         expect :
             renderer != null
             editor != null
-        and : 'Initially, a default editor is used, because there was no edit event yet!'
-            editor.getEditorComponent() instanceof JTextField
-            editor.getEditorComponent().background != Color.MAGENTA
+        and : 'Initially, the editor is not setup.'
+            editor.getEditorComponent() == null
 
         when : 'We simulate a user edit through `editCellAt(int row, int column, EventObject e)`.'
             boolean success = UI.runAndGet({table.editCellAt(0, 0, new EventObject(table))})
