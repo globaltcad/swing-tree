@@ -159,10 +159,23 @@ class Examples_Spec extends Specification
         expect : new BoxShadowPickerView(new BoxShadowPickerViewModel())
     }
 
+    def 'The MVI based box shadow picker example UI defined in the examples can be created.'()
+    {
+        reportInfo """
+            Not only is the ${Utility.link('box shadow picker example', examples.mvi.stylepicker.BoxShadowPickerView)} 
+            an advanced example of how to write MVI applications with SwingTree,
+            it is also a nice little tool that shows you how to use the 
+            SwingTree style API to override the default look and feel of Swing components.
+        """
+        expect : new examples.mvi.stylepicker.BoxShadowPickerView(
+                    sprouts.Var.of(examples.mvi.stylepicker.BoxShadowPickerViewModel.ini())
+                )
+    }
+
     def 'The glass view example UI defined in the examples can be created.'()
     {
         reportInfo """
-            The ${Utility.link('glass view example', BoxShadowPickerView)} is
+            The ${Utility.link('glass view example', GlassUIView)} is
             an advanced styling example which demonstrates how
             you can apply a glass effect to components
             using a custom filter configuration.
