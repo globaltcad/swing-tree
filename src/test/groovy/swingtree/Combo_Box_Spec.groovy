@@ -32,7 +32,7 @@ import static swingtree.UI.comboBox
 
 """)
 @Subject([UIForCombo])
-class Combo_Box_Specification extends Specification
+class Combo_Box_Spec extends Specification
 {
     def setupSpec() {
         SwingTree.get().setEventProcessor(EventProcessor.COUPLED)

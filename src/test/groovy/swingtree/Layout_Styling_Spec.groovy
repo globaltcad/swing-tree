@@ -23,7 +23,7 @@ import java.awt.*
     to define the layout of your components.
 
 ''')
-class Layout_Styling extends Specification
+class Layout_Styling_Spec extends Specification
 {
     def 'The x and y alignment values of a component can be configured through the styling API'()
     {
