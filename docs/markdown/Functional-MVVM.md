@@ -231,6 +231,16 @@ opportunities for performance optimizations
 through parallelism, lazy evaluation, structural sharing
 and caching.
 
+## More Code Please! ##
+
+If you want to see some fully executable examples
+of the SwingTree based MVI architecture in action,
+check out the following in this project:
+
+- [A Calculator](../../src/test/java/examples/mvi/calculator/CalculatorView.java)
+- [A Style Picker](../../src/test/java/examples/mvi/stylepicker/BoxShadowPickerView.java)
+- [Team View](../../src/test/java/examples/mvi/team/TeamView.java)
+
 ## MVI Theory ##
 
 Now after we have seen a simple example of how to implement
