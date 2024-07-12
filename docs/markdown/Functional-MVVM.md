@@ -4,6 +4,8 @@
 > This guide is strongly related to the [Advanced MVVM](Advanced-MVVM.md) guide.
 > You may want to check it out first if you are not familiar with the MVVM pattern.
 
+<img src="../img/tutorial/the-MVI-cycle.png" style = "float: right; width: 33%; margin: 2em;">
+
 One of the most powerful feature built into SwingTree
 and its [MVVM property API](https://github.com/globaltcad/sprouts)
 is the ability to design the Model-View-ViewModel architecture
@@ -100,7 +102,7 @@ Even the `runCalculation` method returns a new instance
 of the `CalculatorViewModel` with the updated output
 record, instead of modifying the existing instance.
 
-## The View ##
+### The View ###
 
 This is all nice and good, but **how do we connect this to the UI?** <br>
 The key is the `Var` class from the Sprouts library
@@ -173,7 +175,7 @@ trigger change events when the focused field actually changes.
 So even if the whole view model is updated, only a change of the focused field
 will trigger a change event in the lens.
 
-## Where is the Model? ##
+### Where is the Model? ###
 
 You may have noticed that the example does not include a "Model" class,
 as in the classical MVVM (Model-View-ViewModel) pattern.
@@ -184,7 +186,7 @@ like for example a model for application settings, database entities or
 network data. The model would typically be updated by the view model, 
 whereas the view does not interact with the model directly.
 
-## Dealing with Lists ##
+### Dealing with Lists ###
 
 The above example is nice and all, but what if your application
 requires you to model and display multiple things at once,
@@ -231,6 +233,16 @@ opportunities for performance optimizations
 through parallelism, lazy evaluation, structural sharing
 and caching.
 
+### More Code Please! ###
+
+If you want to see some fully executable examples
+of the SwingTree based MVI architecture in action,
+check out the following in this project:
+
+- [A Calculator](../../src/test/java/examples/mvi/calculator/CalculatorView.java)
+- [A Style Picker](../../src/test/java/examples/mvi/stylepicker/BoxShadowPickerView.java)
+- [Team View](../../src/test/java/examples/mvi/team/TeamView.java)
+
 ## MVI Theory ##
 
 Now after we have seen a simple example of how to implement
@@ -253,7 +265,8 @@ events = view( model( intent( events ) ) )
   that will be passed as parameter to `model()` function.
   This could be a simple string to set a value of the model to or 
   more complex data structure like an Object. 
-  We could say we have the intention to change the model with an intent.
+  This function exists to translate the user input to a format that
+  represents their intention to change the model.
   So it is also where we have parts of our business logic.
 - `model()`: The `model()` function takes the output from `intent()` as 
   input to create an updated (View)Model. The output of this function is a 
@@ -262,7 +275,7 @@ events = view( model( intent( events ) ) )
   We don’t change an already existing Model object instance to avoid side effects
   in other parts of the app which have a reference to the same Model object.
   We create a new Model according to the changes described by the intent.
-  Please note, that the `model()` function is the only piece of your code 
+  Please note, that in theory the `model()` function is the only piece of your code 
   that is allowed to create a new Model object!
   Then this new immutable Model is the output of this function.
   Also note that the `model()` function calls deeper parts of the apps business logic 
@@ -276,11 +289,57 @@ events = view( model( intent( events ) ) )
   SwingTree being based on Swing and AWT, which is designed from
   the ground up to be stateful and side-effectful.
 
+You may have noticed that none of the above methods can be found in the example code.
+This is because in practise these methods are really just application layers
+which consist of multiple functions and classes.
+The `intent(..)` function for example, could have been implemented like this:
+
+```java
+public CalculatorViewModel intent(CalculatorViewModel model, CalcAction action){
+    return switch ( action ) {
+        case LEFT_CHANGED -> model.withInputs(model.inputs().withLeft(action.payload()));
+        case RIGHT_CHANGED -> model.withInputs(model.inputs().withRight(action.payload()));
+        case OPERATOR_CHANGED -> model.withInputs(model.inputs().withOperator(action.payload()));
+        case RUN_CALCULATION -> model.runCalculation();
+    };
+}
+```
+
+As you can see, instead of multiple wither methods for updating the model state,
+we have a single method that takes in the old model, an action and then returns 
+a new model based on the action.
+This is a common pattern in the original MVI, where all GUI components
+dispatch all of their actions solely through this single `intent()` function,
+which then updates the model accordingly. <br>
+Although this might make sense in a programming language without compile time type 
+and call site checking, like JavaScript, where the pattern initially originated from, 
+it is not necessary in Java to implement this sort of action routing, 
+since we can safely track where each wither / update method is called from.
+
+This is also true for the `model()` function, which in the example is represented
+by the `runCalculation()` method of the view model. <br>
+The GUI components in the original MVI pattern would not call the `model()` function
+directly, but instead dispatch actions to the `intent()` function, which then calls the `model()`
+function to get the updated model. <br>
+But again, there is no reason to have this action needing to go through
+an extra layer of indirection/encapsulation in Java, since we can safely
+track where each update method is called from.
+
+Due to the lack of compile time type checking, you will typically find more 
+of this single function + event routing based MVI in the
+JavaScript world [where the pattern supposedly originated from](https://cycle.js.org/).
+
 ### More About MVI in Other Frameworks: ###
 
+For more information about MVI in other frameworks,
+check out the following links:
+
+- [Cycle.js](https://cycle.js.org/)
 - [MVI in React](https://github.com/zaberazaber/Model-View-Intent-Architecture-in-React)
 - [MVI Design Pattern on Android](https://xizzhu.me/post/2021-06-21-android-mvi-kotlin-coroutines-flow-compose/)
 - [Reactive Android Apps with MVI](https://hannesdorfmann.com/android/mosby3-mvi-1/)
+
+
 
 
 

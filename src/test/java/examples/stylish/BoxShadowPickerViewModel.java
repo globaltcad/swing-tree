@@ -19,6 +19,24 @@ import java.util.Map;
  */
 public class BoxShadowPickerViewModel
 {
+    public class BorderEdgeViewModel
+    {
+        private final Var<Integer> borderWidth = Var.of(3).onChange(From.VIEW, it -> repaint.fire() );
+        private final Var<Color>   borderColor = Var.of(new Color(0,0.4f,1)).onChange(From.VIEW,  it -> repaint.fire() );
+
+        public Var<Integer> borderWidth() { return borderWidth; }
+        public Var<Color> borderColor() { return borderColor; }
+    }
+
+    public class BorderCornerViewModel{
+
+        private final Var<Integer> borderArcWidth  = Var.of(25).onChange(From.VIEW,  it -> repaint.fire() );
+        private final Var<Integer> borderArcHeight = Var.of(25).onChange(From.VIEW,  it -> repaint.fire() );
+
+        public Var<Integer> borderArcWidth() { return borderArcWidth; }
+        public Var<Integer> borderArcHeight() { return borderArcHeight; }
+    }
+
     private final Event repaint = Event.create();
 
     // Padding
@@ -42,24 +60,6 @@ public class BoxShadowPickerViewModel
 
     private final Var<BorderEdgeViewModel> currentEdgeModel = Var.ofNullable(BorderEdgeViewModel.class, null);
     private final Var<BorderCornerViewModel> currentCornerModel = Var.ofNullable(BorderCornerViewModel.class, null);
-
-    public class BorderEdgeViewModel
-    {
-        private final Var<Integer> borderWidth = Var.of(3).onChange(From.VIEW, it -> repaint.fire() );
-        private final Var<Color>   borderColor = Var.of(new Color(0,0.4f,1)).onChange(From.VIEW,  it -> repaint.fire() );
-
-        public Var<Integer> borderWidth() { return borderWidth; }
-        public Var<Color> borderColor() { return borderColor; }
-    }
-
-    public class BorderCornerViewModel{
-
-        private final Var<Integer> borderArcWidth  = Var.of(25).onChange(From.VIEW,  it -> repaint.fire() );
-        private final Var<Integer> borderArcHeight = Var.of(25).onChange(From.VIEW,  it -> repaint.fire() );
-
-        public Var<Integer> borderArcWidth() { return borderArcWidth; }
-        public Var<Integer> borderArcHeight() { return borderArcHeight; }
-    }
 
     // Background
     private final Var<Color> backgroundColor = Var.of(new Color(0.1f, 0.75f, 0.9f)).onChange(From.VIEW,  it -> repaint.fire() );

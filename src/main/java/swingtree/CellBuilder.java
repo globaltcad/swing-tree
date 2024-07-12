@@ -443,8 +443,16 @@ public final class CellBuilder<C extends JComponent, E> {
             else {
                 for ( Configurator<CellConf<C,?>> configurator : interpreter ) {
                     CellConf<JComboBox<?>,Object> newCell = configurator.configure((CellConf)cell);
-                    if ( newCell != null )
-                        cell = newCell.view( v -> v.update( c -> c instanceof JTextField ? c : null ) );
+                    try {
+                        if ( newCell != null )
+                            cell = newCell.view( v -> v.update( c -> c instanceof JTextField ? c : null ) );
+                    } catch (Exception e) {
+                        log.error(
+                                "Failed to establish cell editor through cell configurator " +
+                                "for component '"+_component.getClass().getSimpleName()+"'.",
+                                e
+                            );
+                    }
                 }
 
                 if (!cell.view().isPresent())
