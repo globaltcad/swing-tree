@@ -19,39 +19,42 @@ import static swingtree.UI.*;
  *  A simple application for configuring a SwingTree style on a panel.
  *  It renders a preview of the style and generates the code for it,
  *  which you can copy and paste into your application.
+ *  This example goes together with the {@link BoxShadowPickerViewModel}
+ *  and it demonstrates the MVI pattern with SwingTree.
  */
 public class BoxShadowPickerView extends Panel
 {
     public BoxShadowPickerView(Var<BoxShadowPickerViewModel> vm) {
-        Var<Integer> paddingTop = vm.zoomTo(BoxShadowPickerViewModel::paddingTop, BoxShadowPickerViewModel::withPaddingTop);
-        Var<Integer> paddingLeft = vm.zoomTo(BoxShadowPickerViewModel::paddingLeft, BoxShadowPickerViewModel::withPaddingLeft);
-        Var<Integer> paddingRight = vm.zoomTo(BoxShadowPickerViewModel::paddingRight, BoxShadowPickerViewModel::withPaddingRight);
-        Var<Integer> paddingBottom = vm.zoomTo(BoxShadowPickerViewModel::paddingBottom, BoxShadowPickerViewModel::withPaddingBottom);
-        Var<Integer> marginTop = vm.zoomTo(BoxShadowPickerViewModel::marginTop, BoxShadowPickerViewModel::withMarginTop);
-        Var<Integer> marginLeft = vm.zoomTo(BoxShadowPickerViewModel::marginLeft, BoxShadowPickerViewModel::withMarginLeft);
-        Var<Integer> marginRight = vm.zoomTo(BoxShadowPickerViewModel::marginRight, BoxShadowPickerViewModel::withMarginRight);
-        Var<Integer> marginBottom = vm.zoomTo(BoxShadowPickerViewModel::marginBottom, BoxShadowPickerViewModel::withMarginBottom);
+        Var<Integer> paddingTop     = vm.zoomTo(BoxShadowPickerViewModel::paddingTop, BoxShadowPickerViewModel::withPaddingTop);
+        Var<Integer> paddingLeft    = vm.zoomTo(BoxShadowPickerViewModel::paddingLeft, BoxShadowPickerViewModel::withPaddingLeft);
+        Var<Integer> paddingRight   = vm.zoomTo(BoxShadowPickerViewModel::paddingRight, BoxShadowPickerViewModel::withPaddingRight);
+        Var<Integer> paddingBottom  = vm.zoomTo(BoxShadowPickerViewModel::paddingBottom, BoxShadowPickerViewModel::withPaddingBottom);
+        Var<Integer> marginTop      = vm.zoomTo(BoxShadowPickerViewModel::marginTop, BoxShadowPickerViewModel::withMarginTop);
+        Var<Integer> marginLeft     = vm.zoomTo(BoxShadowPickerViewModel::marginLeft, BoxShadowPickerViewModel::withMarginLeft);
+        Var<Integer> marginRight    = vm.zoomTo(BoxShadowPickerViewModel::marginRight, BoxShadowPickerViewModel::withMarginRight);
+        Var<Integer> marginBottom   = vm.zoomTo(BoxShadowPickerViewModel::marginBottom, BoxShadowPickerViewModel::withMarginBottom);
+
         Var<Integer> horizontalShadowOffset = vm.zoomTo(BoxShadowPickerViewModel::horizontalShadowOffset, BoxShadowPickerViewModel::withHorizontalShadowOffset);
-        Var<Integer> verticalShadowOffset = vm.zoomTo(BoxShadowPickerViewModel::verticalShadowOffset, BoxShadowPickerViewModel::withVerticalShadowOffset);
-        Var<Integer> shadowBlurRadius = vm.zoomTo(BoxShadowPickerViewModel::shadowBlurRadius, BoxShadowPickerViewModel::withShadowBlurRadius);
-        Var<Integer> shadowSpreadRadius = vm.zoomTo(BoxShadowPickerViewModel::shadowSpreadRadius, BoxShadowPickerViewModel::withShadowSpreadRadius);
-        Var<Color> shadowColor = vm.zoomTo(BoxShadowPickerViewModel::shadowColor, BoxShadowPickerViewModel::withShadowColor);
+        Var<Integer> verticalShadowOffset   = vm.zoomTo(BoxShadowPickerViewModel::verticalShadowOffset, BoxShadowPickerViewModel::withVerticalShadowOffset);
+        Var<Integer> shadowBlurRadius       = vm.zoomTo(BoxShadowPickerViewModel::shadowBlurRadius, BoxShadowPickerViewModel::withShadowBlurRadius);
+        Var<Integer> shadowSpreadRadius     = vm.zoomTo(BoxShadowPickerViewModel::shadowSpreadRadius, BoxShadowPickerViewModel::withShadowSpreadRadius);
+        Var<Color>   shadowColor            = vm.zoomTo(BoxShadowPickerViewModel::shadowColor, BoxShadowPickerViewModel::withShadowColor);
+        Var<Boolean> shadowInset            = vm.zoomTo(BoxShadowPickerViewModel::shadowInset, BoxShadowPickerViewModel::withShadowInset);
+
         Var<Color> backgroundColor = vm.zoomTo(BoxShadowPickerViewModel::backgroundColor, BoxShadowPickerViewModel::withBackgroundColor);
         Var<Color> foundationColor = vm.zoomTo(BoxShadowPickerViewModel::foundationColor, BoxShadowPickerViewModel::withFoundationColor);
-        Var<Boolean> shadowInset = vm.zoomTo(BoxShadowPickerViewModel::shadowInset, BoxShadowPickerViewModel::withShadowInset);
-        Var<Boolean> drawSmiley = vm.zoomTo(BoxShadowPickerViewModel::drawSmiley, BoxShadowPickerViewModel::withDrawSmiley);
+
+        Var<Boolean> drawSmiley     = vm.zoomTo(BoxShadowPickerViewModel::drawSmiley, BoxShadowPickerViewModel::withDrawSmiley);
         Var<UI.Corner> borderCorner = vm.zoomTo(BoxShadowPickerViewModel::borderCorner, BoxShadowPickerViewModel::withBorderCorner);
         Var<BoxShadowPickerViewModel.BorderCornerViewModel> currentCornerModel = vm.zoomTo(BoxShadowPickerViewModel::currentCornerModel, BoxShadowPickerViewModel::withCurrentCornerModel);
-        Var<Integer> borderArcWidth = currentCornerModel.zoomTo(BoxShadowPickerViewModel.BorderCornerViewModel::borderArcWidth, BoxShadowPickerViewModel.BorderCornerViewModel::withBorderArcWidth);
+        Var<Integer> borderArcWidth  = currentCornerModel.zoomTo(BoxShadowPickerViewModel.BorderCornerViewModel::borderArcWidth, BoxShadowPickerViewModel.BorderCornerViewModel::withBorderArcWidth);
         Var<Integer> borderArcHeight = currentCornerModel.zoomTo(BoxShadowPickerViewModel.BorderCornerViewModel::borderArcHeight, BoxShadowPickerViewModel.BorderCornerViewModel::withBorderArcHeight);
-        Var<UI.Edge> borderEdge = vm.zoomTo(BoxShadowPickerViewModel::borderEdge, BoxShadowPickerViewModel::withBorderEdge);
+        Var<UI.Edge> borderEdge      = vm.zoomTo(BoxShadowPickerViewModel::borderEdge, BoxShadowPickerViewModel::withBorderEdge);
         Var<BoxShadowPickerViewModel.BorderEdgeViewModel> currentEdgeModel = vm.zoomTo(BoxShadowPickerViewModel::currentEdgeModel, BoxShadowPickerViewModel::withCurrentEdgeModel);
-        Var<Integer> borderWidth = currentEdgeModel.zoomTo(BoxShadowPickerViewModel.BorderEdgeViewModel::borderWidth, BoxShadowPickerViewModel.BorderEdgeViewModel::withBorderWidth);
-        Var<Color> borderColor = currentEdgeModel.zoomTo(BoxShadowPickerViewModel.BorderEdgeViewModel::borderColor, BoxShadowPickerViewModel.BorderEdgeViewModel::withBorderColor);
-        Var<String> code = vm.zoomTo(BoxShadowPickerViewModel::code, BoxShadowPickerViewModel::withCode);
-        vm.onChange(From.ALL, it -> {
-            System.out.println("VM changed: " + it);
-        });
+        Var<Integer> borderWidth     = currentEdgeModel.zoomTo(BoxShadowPickerViewModel.BorderEdgeViewModel::borderWidth, BoxShadowPickerViewModel.BorderEdgeViewModel::withBorderWidth);
+        Var<Color> borderColor       = currentEdgeModel.zoomTo(BoxShadowPickerViewModel.BorderEdgeViewModel::borderColor, BoxShadowPickerViewModel.BorderEdgeViewModel::withBorderColor);
+        Var<String> code             = vm.zoomTo(BoxShadowPickerViewModel::code, BoxShadowPickerViewModel::withCode);
+
         FlatLightLaf.setup();
         of(this).withLayout(WRAP(2).and(INS(12)), "[]12[]")
         .add(
