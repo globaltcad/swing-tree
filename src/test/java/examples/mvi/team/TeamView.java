@@ -1,4 +1,4 @@
-package examples.mvc;
+package examples.mvi.team;
 
 import sprouts.Var;
 import swingtree.UI;
@@ -6,71 +6,13 @@ import swingtree.UIForAnySwing;
 
 import javax.swing.JPanel;
 
-public class FunctionalMVC
+/**
+ *  A demonstration of the MVI design pattern using SwingTree
+ *  and an underlying data structure representing a team
+ *  for which the user can edit the members and their occupations.
+ */
+public class TeamView
 {
-    private static class Occupation {
-        private final String name;
-        private final String description;
-
-        private Occupation(String name, String description) {
-            this.name = name;
-            this.description = description;
-        }
-        public String getName() { return name; }
-        public String getDescription() { return description; }
-        public Occupation withName(String name) { return new Occupation(name, description); }
-        public Occupation withDescription(String description) { return new Occupation(name, description); }
-    }
-
-    public enum Gender {
-        MALE, FEMALE, DIVERSE
-    }
-
-    private static class Person {
-        private final String name;
-        private final int    age;
-        private final Occupation occupation;
-        private final Gender gender;
-
-
-        public Person(String name, int age, Occupation occupation, Gender gender ) {
-            this.name = name;
-            this.age = age;
-            this.occupation = occupation;
-            this.gender = gender;
-        }
-        public String getName() { return name; }
-        public int getAge() { return age; }
-        public Occupation getOccupation() { return occupation; }
-        public Person withName(String name ) { return new Person(name, age, occupation, gender); }
-        public Person withAge(int age ) { return new Person(name, age, occupation, gender); }
-        public Person withOccupation(Occupation occupation ) { return new Person(name, age, occupation, gender); }
-        public Person withGender(Gender gender) { return new Person(name, age, occupation, gender); }
-    }
-
-    private static class Team {
-        private final String id;
-        private final Person lead;
-        private final Person firstMember;
-        private final Person secondMember;
-
-        public Team(String id, Person lead, Person firstMember, Person secondMember) {
-            this.id = id;
-            this.lead = lead;
-            this.firstMember = firstMember;
-            this.secondMember = secondMember;
-        }
-        public String getId() { return id; }
-        public Person getLead() { return lead; }
-        public Person getFirstMember() { return firstMember; }
-        public Person getSecondMember() { return secondMember; }
-        public Team withId(String id ) { return new Team(id, lead, firstMember, secondMember); }
-        public Team withLead( Person lead ) { return new Team(id, lead, firstMember, secondMember); }
-        public Team withFirstMember( Person firstMember ) { return new Team(id, lead, firstMember, secondMember); }
-        public Team withSecondMember( Person secondMember ) { return new Team(id, lead, firstMember, secondMember); }
-    }
-
-
     public static void main(String... args) {
         Var<Team> team = Var.ofNull(Team.class);
         team.set(

@@ -11,7 +11,8 @@ import examples.games.notepicker.NoteGuesserViewModel
 import examples.games.kanapicker.KanaPickerView
 import examples.games.kanapicker.KanaPickerViewModel
 import examples.lists.ListTestExample
-import examples.mvc.FunctionalMVC
+import examples.mvi.calculator.CalculatorView
+import examples.mvi.team.TeamView
 import examples.mvvm.*
 import examples.simple.Form
 import examples.simple.ListRendering
@@ -365,12 +366,17 @@ class Examples_Spec extends Specification
         expect : new ListTestExample()
     }
 
-    def 'The `ListTestExample` class can be created.'()
+    def 'The `TeamView` class can be created.'()
     {
-        expect : FunctionalMVC.createView()
+        expect : TeamView.createView()
     }
 
-    def 'How SwingTree compares to a GUI Editor based implementation.'()
+    def 'The `CalculatorView` class can be created.'()
+    {
+        expect : CalculatorView.createView()
+    }
+
+    def 'How SwingTree code compares to a GUI Editor based implementation.'()
     {
         reportInfo """
             This example GUI serves as a comparison between SwingTree
