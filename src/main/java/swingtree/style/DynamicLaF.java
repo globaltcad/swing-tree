@@ -299,7 +299,9 @@ final class DynamicLaF
 
         PanelStyler() {}
 
-        @Override public void paint(Graphics g, JComponent c ) { ComponentExtension.from(c).paintBackground(g, null); }
+        @Override public void paint(Graphics g, JComponent c ) {
+            ComponentExtension.from(c).paintBackground(g, true, null);
+        }
         @Override public void update( Graphics g, JComponent c ) { paint(g, c); }
         @Override
         public boolean contains(JComponent c, int x, int y) { return _contains(c, x, y, ()->super.contains(c, x, y)); }
@@ -314,12 +316,11 @@ final class DynamicLaF
         }
 
         @Override public void paint( Graphics g, JComponent c ) {
-            if ( _formerUI == null )
-                ComponentExtension.from(c).paintBackground(g, null);
-            else
-                ComponentExtension.from(c).paintBackground(g, localGraphics->{
+            boolean customWipe = _formerUI == null;
+            ComponentExtension.from(c).paintBackground(g, customWipe, localGraphics->{
+                if ( _formerUI != null )
                     _paintComponentThroughFormerUI(_formerUI, localGraphics, c);
-                });
+            });
         }
         @Override public void update( Graphics g, JComponent c ) { paint(g, c); }
         @Override
@@ -335,10 +336,7 @@ final class DynamicLaF
         }
 
         @Override public void paint( Graphics g, JComponent c ) {
-            //if ( _formerUI == null ) // TODO
-            //    ComponentExtension.from(c).paintBackground(g, null);
-            //else
-            ComponentExtension.from(c).paintBackground(g, localGraphics->{
+            ComponentExtension.from(c).paintBackground(g, false, localGraphics->{
                 if ( _formerUI != null )
                     _paintComponentThroughFormerUI(_formerUI, localGraphics, c);
                 else
@@ -382,15 +380,12 @@ final class DynamicLaF
                     );
             });
 
-            if ( _formerUI == null )
-                ComponentExtension.from(c).paintBackground(g, null);
-            else {
-                boolean shouldPaintFormerUI = (insetLeft == 0 && insetRight == 0 && insetTop == 0 && insetBottom == 0);
-                ComponentExtension.from(c).paintBackground(g, localGraphics -> {
-                    if (shouldPaintFormerUI)
-                        _paintComponentThroughFormerUI(_formerUI, localGraphics, c);
-                });
-            }
+            boolean customWipe = _formerUI == null;
+            boolean shouldPaintFormerUI = (insetLeft == 0 && insetRight == 0 && insetTop == 0 && insetBottom == 0);
+            ComponentExtension.from(c).paintBackground(g, customWipe, localGraphics -> {
+                if (shouldPaintFormerUI && _formerUI != null)
+                    _paintComponentThroughFormerUI(_formerUI, localGraphics, c);
+            });
         }
 
         @Override public void update( Graphics g, JComponent c ) { paint(g, c); }
