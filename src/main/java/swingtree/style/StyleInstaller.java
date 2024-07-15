@@ -253,6 +253,7 @@ final class StyleInstaller<C extends JComponent>
             }
         }
 
+        boolean hasUndefinedNullBackground = false;
         if ( hasBackground ) {
             boolean backgroundIsAlreadySet = Objects.equals( owner.getBackground(), newStyle.base().backgroundColor().get() );
             if ( !backgroundIsAlreadySet || StyleUtil.isUndefinedColor(newStyle.base().backgroundColor().get()) )
@@ -262,8 +263,14 @@ final class StyleInstaller<C extends JComponent>
                                                 .filter( c -> !StyleUtil.isUndefinedColor(c) )
                                                 .orElse(null);
 
+                if ( newColor == null )
+                    hasUndefinedNullBackground = true;
+
                 backgroundSetter = () -> {
-                    if ( !Objects.equals( owner.getBackground(), newColor ) )
+                    if ( newColor == null ) {
+                        if ( owner.isBackgroundSet() )
+                            owner.setBackground(null);
+                    } else if ( !Objects.equals( owner.getBackground(), newColor ) )
                         owner.setBackground(newColor);
                 };
                 /*
@@ -376,7 +383,7 @@ final class StyleInstaller<C extends JComponent>
             boolean bypassLaFBackgroundPainting = requiresBackgroundPainting || (hasBackground && isSwingTreeComponent);
 
             if ( bypassLaFBackgroundPainting )
-                if ( backgroundIsActuallyBackground )
+                if ( backgroundIsActuallyBackground && !hasUndefinedNullBackground )
                     backgroundSetter = () -> {
                         if ( !Objects.equals( owner.getBackground(), UI.Color.UNDEFINED ) )
                             owner.setBackground(UI.Color.UNDEFINED);

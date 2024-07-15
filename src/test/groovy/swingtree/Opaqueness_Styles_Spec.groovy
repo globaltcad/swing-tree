@@ -927,8 +927,11 @@ class Opaqueness_Styles_Spec extends Specification
             causes the slider to have its default background color, which is opaque.
         """
             toggleButton.isOpaque() == true
-        and : 'Due to the usage of `UI.Color.UNDEFINED`, the background color of the button is now undefined:'
-            toggleButton.getBackground() == UI.Color.UNDEFINED
+        and : """
+            Due to the usage of `UI.Color.UNDEFINED`, the background color of the button is now undefined
+            in the sense tha it has the default background.
+        """
+            toggleButton.getBackground() == new JToggleButton().getBackground()
 
         when : 'We set the `isOn` flag to true in order to start the transition:'
             isOn.set(true)
@@ -957,8 +960,11 @@ class Opaqueness_Styles_Spec extends Specification
             due to the background color being undefined (which causes the slider to have its default background color).
         """
             toggleButton.isOpaque() == true
-        and : 'Due to the usage of `UI.Color.UNDEFINED`, the background color of the slider is undefined again:'
-            toggleButton.getBackground() == UI.Color.UNDEFINED
+        and : """
+            Again, due to the usage of `UI.Color.UNDEFINED`, the background color of the button 
+            is back to its original default background color.
+        """
+            toggleButton.getBackground() == new JToggleButton().getBackground()
     }
 
     def 'A check box (which typically opaque) may become non-opaque when transitioning to various styles.'(

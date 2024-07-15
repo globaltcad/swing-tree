@@ -464,9 +464,34 @@ public final class ComponentExtension<C extends JComponent>
         paintBackground(g, lookAndFeelPaint);
     }
 
+    /**
+     *  Does a SwingTree based background painting call with a call bck for look and feel based
+     *  drawing...
+     *  If The {@code lookAndFeelPainting} param is null, then it is assumed that SwingTree is the
+     *  sole owner of this components look and feel, in which case it will fill the rectangle.
+     *
+     * @param graphics The {@link Graphics2D} API used for doing the 2D draw calls...
+     * @param lookAndFeelPainting The look and feel background painting (usually just filling the component rectangle).
+     *                            If this is null, then this means it is up to this SwingTree method to overwrite
+     *                            what is in the graphics buffer by filling the rectangle...
+     */
     void paintBackground( Graphics graphics, @Nullable Consumer<Graphics> lookAndFeelPainting )
     {
         _doPaintStep(PaintStep.BACKGROUND, graphics, internalGraphics -> {
+            if ( lookAndFeelPainting == null ) {
+                if ( _owner.isOpaque() ) {
+                    internalGraphics.setColor(_owner.getBackground());
+                    int width = _owner.getWidth();
+                    int height = _owner.getHeight();
+                    internalGraphics.fillRect(0, 0, width, height);
+                    /*
+                        If "lookAndFeelPainting" is null then this means there is no
+                        native ComponentUI, instead it is upd to SwingTree to override what was
+                        rendered previously in the buffer.
+                    */
+                }
+            }
+
             Shape baseClip = internalGraphics.getClip();
             _outerBaseClip = baseClip;
 
