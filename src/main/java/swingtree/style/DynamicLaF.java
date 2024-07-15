@@ -299,7 +299,9 @@ final class DynamicLaF
 
         PanelStyler() {}
 
-        @Override public void paint(Graphics g, JComponent c ) { ComponentExtension.from(c).paintBackground(g, null); }
+        @Override public void paint(Graphics g, JComponent c ) {
+            ComponentExtension.from(c).paintBackground(g, true, null);
+        }
         @Override public void update( Graphics g, JComponent c ) { paint(g, c); }
         @Override
         public boolean contains(JComponent c, int x, int y) { return _contains(c, x, y, ()->super.contains(c, x, y)); }
@@ -307,15 +309,17 @@ final class DynamicLaF
 
     static class ButtonStyler extends BasicButtonUI
     {
-        private final ButtonUI _formerUI;
+        private final @Nullable ButtonUI _formerUI;
 
-        ButtonStyler(ButtonUI formerUI) {
+        ButtonStyler( @Nullable ButtonUI formerUI ) {
             _formerUI = ( formerUI instanceof ButtonStyler ) ? ((ButtonStyler)formerUI)._formerUI : formerUI;
         }
 
         @Override public void paint( Graphics g, JComponent c ) {
-            ComponentExtension.from(c).paintBackground(g, localGraphics->{
-                _paintComponentThroughFormerUI(_formerUI, localGraphics, c);
+            boolean customWipe = _formerUI == null;
+            ComponentExtension.from(c).paintBackground(g, customWipe, localGraphics->{
+                if ( _formerUI != null )
+                    _paintComponentThroughFormerUI(_formerUI, localGraphics, c);
             });
         }
         @Override public void update( Graphics g, JComponent c ) { paint(g, c); }
@@ -332,7 +336,7 @@ final class DynamicLaF
         }
 
         @Override public void paint( Graphics g, JComponent c ) {
-            ComponentExtension.from(c).paintBackground(g, localGraphics->{
+            ComponentExtension.from(c).paintBackground(g, false, localGraphics->{
                 if ( _formerUI != null )
                     _paintComponentThroughFormerUI(_formerUI, localGraphics, c);
                 else
@@ -346,9 +350,9 @@ final class DynamicLaF
 
     static class TextFieldStyler extends BasicTextFieldUI
     {
-        private final TextUI _formerUI;
+        private final @Nullable TextUI _formerUI;
 
-        TextFieldStyler(TextUI formerUI) {
+        TextFieldStyler(@Nullable TextUI formerUI) {
             _formerUI = ( formerUI instanceof TextFieldStyler ) ? ((TextFieldStyler)formerUI)._formerUI : formerUI;
         }
         @Override protected void paintSafely(Graphics g) {
@@ -376,9 +380,10 @@ final class DynamicLaF
                     );
             });
 
-            boolean shouldPaintFormerUI = ( insetLeft == 0 && insetRight == 0 && insetTop == 0 && insetBottom == 0 );
-            ComponentExtension.from(c).paintBackground(g, localGraphics->{
-                if ( shouldPaintFormerUI )
+            boolean customWipe = _formerUI == null;
+            boolean shouldPaintFormerUI = (insetLeft == 0 && insetRight == 0 && insetTop == 0 && insetBottom == 0);
+            ComponentExtension.from(c).paintBackground(g, customWipe, localGraphics -> {
+                if (shouldPaintFormerUI && _formerUI != null)
                     _paintComponentThroughFormerUI(_formerUI, localGraphics, c);
             });
         }

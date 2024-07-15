@@ -927,8 +927,12 @@ class Opaqueness_Styles_Spec extends Specification
             causes the slider to have its default background color, which is opaque.
         """
             toggleButton.isOpaque() == true
-        and : 'Due to the usage of `UI.Color.UNDEFINED`, the background color of the button is now undefined:'
-            toggleButton.getBackground() == UI.Color.UNDEFINED
+        and : """
+            Due to the usage of `UI.Color.UNDEFINED`, the background color of the button is now undefined
+            in the sense tha it has the default background.
+        """
+            !toggleButton.isBackgroundSet()
+            toggleButton.getBackground() == null
 
         when : 'We set the `isOn` flag to true in order to start the transition:'
             isOn.set(true)
@@ -957,8 +961,12 @@ class Opaqueness_Styles_Spec extends Specification
             due to the background color being undefined (which causes the slider to have its default background color).
         """
             toggleButton.isOpaque() == true
-        and : 'Due to the usage of `UI.Color.UNDEFINED`, the background color of the slider is undefined again:'
-            toggleButton.getBackground() == UI.Color.UNDEFINED
+        and : """
+            Again, due to the usage of `UI.Color.UNDEFINED`, the background color of the button 
+            is back to its original default background color.
+        """
+            !toggleButton.isBackgroundSet()
+            toggleButton.getBackground() == null
     }
 
     def 'A check box (which typically opaque) may become non-opaque when transitioning to various styles.'(
@@ -974,7 +982,7 @@ class Opaqueness_Styles_Spec extends Specification
         """
         given : 'We first define a boolean flag property that we will use to control the transition:'
             var isOn = Var.of(false)
-        and : 'Then we create the slider based UI declaration, which is styled to temporarily have an opaque background color:'
+        and : 'Then we create the check box based UI declaration, which is styled to temporarily styled:'
             var ui =
                     UI.checkBox("Checked?")
                     .withTransitionalStyle(isOn, LifeTime.of(1, TimeUnit.MILLISECONDS), (state, it) -> it
@@ -1045,6 +1053,73 @@ class Opaqueness_Styles_Spec extends Specification
 
             false   | 0      | 0      | 0      |   "rgba(0,0,0,0)"  |   "rgba(0,0,0,0)"  |   "rgba(0,0,0, 0)" | ["red", "rgba(0,0,0,0)"]
             false   | 0      | 0      | 0      |   "rgba(0,0,0,0)"  |   "rgba(0,0,0,0)"  |   "rgba(0,0,0, 0)" | ["rgba(0,0,0,0)", "green"]
+    }
+
+    def 'A `JTextPane` (which typically opaque) may become non-opaque when transitioning to various styles.'(
+        boolean opaque, Styler<?> styler
+    ) {
+        reportInfo """
+ 
+            A text pane is a component that is opaque by default.
+            This test demonstrates that it may or may not change its opaqueness
+            depending on what kind of styles are applied to it.
+
+        """
+        given : 'We first define a boolean flag property that we will use to control the transition:'
+            var isOn = Var.of(false)
+        and : 'Then we create the text pane based UI declaration, which is temporarily styled:'
+            var ui =
+                    UI.textPane().withText("Important text...")
+                    .withTransitionalStyle(isOn, LifeTime.of(1, TimeUnit.MILLISECONDS), (state, it) ->
+                        state.progress() == 1 ? styler.style(it) : it
+                    )
+
+        and : 'We build the underlying menu:'
+            var textPane = ui.get(JTextPane)
+
+        expect : """
+            The component has to be opaque because it was not yet styled and it is also opaque by default.
+            So the parent component will not be visible behind the background.
+        """
+            textPane.isOpaque() == true
+
+        when : 'We set the `isOn` flag to true in order to start the transition:'
+            isOn.set(true)
+        and : 'We wait for the transition to complete:'
+            Thread.sleep(50)
+            UI.sync()
+
+        then : """
+            The menu has the expected opaqueness because the `isOn` flag is true, which translates to 
+            an animation progress transitioning to 1,
+            causing the various styles to take effect!
+        """
+            textPane.isOpaque() == opaque
+
+        when : """
+            We now want to go back to the initial state, so we set the `isOn` flag to false again...
+        """
+            isOn.set(false)
+        and : '...again we wait for the transition to complete...'
+            Thread.sleep(50)
+            UI.sync()
+        then : """
+            We are back to the initial state where the text pane is now opaque again
+        """
+            textPane.isOpaque() == true
+
+        where :
+            opaque | styler
+            true   | {it}
+            true   | {it.backgroundColor("red")}
+            false  | {it.backgroundColor("transparent red")}
+            true   | {it.backgroundColor(UI.color(255,255,255, 255))}
+            false  | {it.backgroundColor(UI.color(255,255,255, 254))}
+            false  | {it.backgroundColor(UI.Color.TRANSPARENT)}
+            true   | {it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors("red", "green"))}
+            false  | {it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors("red", "transparent green"))}
+            true   | {it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors("red", "green")).border(1, "blue")}
+            false  | {it.backgroundColor(UI.Color.TRANSPARENT).gradient(g -> g.colors("red", "green")).border(1, "transparent blue")}
     }
 
     def 'A plain button will be opaque, even if it has a custom painter.'(

@@ -461,12 +461,40 @@ public final class ComponentExtension<C extends JComponent>
             return; // We render ĥere through the custom installed UI!
             // So the method call below will be called within lookAndFeelPaint.run();
         }
-        paintBackground(g, lookAndFeelPaint);
+        paintBackground(g, false, lookAndFeelPaint);
     }
 
-    void paintBackground( Graphics graphics, @Nullable Consumer<Graphics> lookAndFeelPainting )
+    /**
+     *  Does a SwingTree based background painting call with a call bck for look and feel based
+     *  drawing...
+     *  If The {@code needsCustomWipe} flag is true, then it is assumed that SwingTree is the
+     *  sole owner of this components look and feel, in which case it will fill the component area
+     *  to cover up what was previously rendered (which is necessary in case of the component being opaque).
+     *
+     * @param graphics The {@link Graphics2D} API used for doing the 2D draw calls...
+     * @param needsCustomWipe If this is true, then this means it is up to this SwingTree method to overwrite
+     *                          what is in the graphics buffer by filling the rectangle in case of the
+     *                          component being opaque. If this is false, we trust the look and feel to do it.
+     * @param lookAndFeelPainting The look and feel background painting (usually just filling the component rectangle).
+     *                            If this is null, then the {@code needsCustomWipe} flag should be true as well.
+     */
+    void paintBackground( Graphics graphics, boolean needsCustomWipe, @Nullable Consumer<Graphics> lookAndFeelPainting )
     {
         _doPaintStep(PaintStep.BACKGROUND, graphics, internalGraphics -> {
+            if ( needsCustomWipe ) {
+                if ( _owner.isOpaque() ) {
+                    internalGraphics.setColor(_owner.getBackground());
+                    int width = _owner.getWidth();
+                    int height = _owner.getHeight();
+                    internalGraphics.fillRect(0, 0, width, height);
+                    /*
+                        If "lookAndFeelPainting" is null then this means there is no
+                        native ComponentUI, instead it is upd to SwingTree to override what was
+                        rendered previously in the buffer.
+                    */
+                }
+            }
+
             Shape baseClip = internalGraphics.getClip();
             _outerBaseClip = baseClip;
 
