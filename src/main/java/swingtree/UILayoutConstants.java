@@ -139,6 +139,10 @@ public abstract class UILayoutConstants
     public static AddConstraint BOTTOM = AddConstraint.of("bottom");
     public static AddConstraint LEFT = AddConstraint.of("left");
     public static AddConstraint CENTER = AddConstraint.of("center");
+    public static AddConstraint GAP_LEFT(int size) { return AddConstraint.of("gapleft "+size); }
+    public static AddConstraint GAP_RIGHT(int size) { return AddConstraint.of("gapright "+size); }
+    public static AddConstraint GAP_TOP(int size) { return AddConstraint.of("gaptop "+size); }
+    public static AddConstraint GAP_BOTTOM(int size) { return AddConstraint.of("gapbottom "+size); }
     public static AddConstraint GAP_LEFT_PUSH = AddConstraint.of("gapleft push");
     public static AddConstraint GAP_RIGHT_PUSH = AddConstraint.of("gapright push");
     public static AddConstraint GAP_TOP_PUSH = AddConstraint.of("gaptop push");
