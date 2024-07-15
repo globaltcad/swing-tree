@@ -88,7 +88,9 @@ final class StyleSource<C extends JComponent>
         }
 
         try {
-            styleConf = _localStyler.style(new ComponentStyleDelegate<>(owner, styleConf)).style();
+            ComponentStyleDelegate<C> updated = _localStyler.style(new ComponentStyleDelegate<>(owner, styleConf));
+            Objects.requireNonNull(updated);
+            styleConf = updated.style();
         } catch (Exception e) {
             log.error("An exception occurred while applying the local styler for component '"+owner+"'.", e);
             /*
