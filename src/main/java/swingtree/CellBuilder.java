@@ -633,8 +633,8 @@ public final class CellBuilder<C extends JComponent, E> {
                 fg = new Color( fg.getRGB() );
 
             if (cell.isSelected()) {
-                if ( bg != null ) l.setBackground(bg);
-                if ( fg != null ) l.setForeground(fg);
+                if ( bg != null ) _setBackgroundColor(l, bg);
+                if ( fg != null ) _setForegroundColor(l, fg);
             }
             else {
                 Color normalBg = Color.WHITE;
@@ -654,14 +654,16 @@ public final class CellBuilder<C extends JComponent, E> {
                     else
                         normalBg = darker(normalBg);
                 }
-                if ( bg != null ) l.setBackground( normalBg );
+                if ( bg != null )
+                    _setBackgroundColor( l, normalBg );
                 if ( fg != null && cell.getHost() != null )
-                    l.setForeground( cell.getHost().getForeground() );
+                    _setForegroundColor( l, cell.getHost().getForeground() );
             }
 
             // TODO:
             //l.setFont(cell.getHost().getFont()); // Is this a good idea?
-            l.setEnabled(cell.getHost().isEnabled());
+            if ( l.isEnabled() != cell.getHost().isEnabled() )
+                l.setEnabled(cell.getHost().isEnabled());
 
             Border border = null;
             if ( cell.hasFocus() ) {
@@ -674,10 +676,35 @@ public final class CellBuilder<C extends JComponent, E> {
             else
                 border = UIManager.getBorder( "List.cellNoFocusBorder" );
 
-            if ( border != null ) l.setBorder(border);
+            if ( border != null && border != l.getBorder() )
+                l.setBorder(border);
 
             return cell.view(l);
         };
+    }
+
+    private static void _setBackgroundColor( JComponent comp, @Nullable Color color ) {
+        if ( color == null ) {
+            if ( comp.isBackgroundSet() )
+                comp.setBackground(null);
+            else
+                return; // Already null!
+        }
+        else
+            if ( !Objects.equals(comp.getBackground(), color) )
+                comp.setBackground( color );
+    }
+
+    private static void _setForegroundColor( JComponent comp, @Nullable Color color ) {
+        if ( color == null ) {
+            if ( comp.isForegroundSet() )
+                comp.setForeground(null);
+            else
+                return; // Already null!
+        }
+        else
+            if ( !Objects.equals(comp.getForeground(), color) )
+                comp.setForeground( color );
     }
 
 
