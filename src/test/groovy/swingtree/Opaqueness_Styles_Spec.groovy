@@ -931,7 +931,8 @@ class Opaqueness_Styles_Spec extends Specification
             Due to the usage of `UI.Color.UNDEFINED`, the background color of the button is now undefined
             in the sense tha it has the default background.
         """
-            toggleButton.getBackground() == new JToggleButton().getBackground()
+            !toggleButton.isBackgroundSet()
+            toggleButton.getBackground() == null
 
         when : 'We set the `isOn` flag to true in order to start the transition:'
             isOn.set(true)
@@ -964,7 +965,8 @@ class Opaqueness_Styles_Spec extends Specification
             Again, due to the usage of `UI.Color.UNDEFINED`, the background color of the button 
             is back to its original default background color.
         """
-            toggleButton.getBackground() == new JToggleButton().getBackground()
+            !toggleButton.isBackgroundSet()
+            toggleButton.getBackground() == null
     }
 
     def 'A check box (which typically opaque) may become non-opaque when transitioning to various styles.'(
