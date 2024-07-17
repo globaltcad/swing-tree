@@ -18,6 +18,7 @@ import javax.swing.JComponent
 import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JSpinner
+import javax.swing.JTextPane
 import javax.swing.JToggleButton
 import javax.swing.UIManager
 import java.awt.*
@@ -1014,5 +1015,59 @@ class Styles_Spec extends Specification
 
         where :
             uiScale << [ 1.0f, 2.0f, 3.0f ]
+    }
+
+    def 'Compared to other colors with an alpha of 0, using `UI.Color.TRANSPARENT` in a gradient style avoids color leakage.'()
+    {
+        reportInfo """
+            When using a color with an alpha value of 0 in the color list of a gradient,
+            then during the transition to a neighbouring color with an alpha of 255, the 
+            "true color" of the transparent color will leak through.
+            
+            So lets say we have two neighbouring colors (255, 0, 0, 0) and (0,0,0,255).
+            When transitioning from the first to the second color, the red color will leak through.
+            So an interpolated color might be (128, 0, 0, 128) instead of (0, 0, 0, 255).
+            
+            You might want this lind of effect to happen, but if you don't then you can always
+            use the `UI.Color.TRANSPARENT` constant, which is a color that the style engine
+            will turn into a color that is also transparent, but otherwise an interpolation
+            between the two neighbouring colors. 
+        """
+        given : """
+            We first create a simple text pane with a gradient style that transitions
+            through various colors, including some transparent colors.
+        """
+            var ui = UI.textPane()
+                        .withStyle( it -> it
+                            .gradient(UI.Layer.BACKGROUND, g -> g
+                                .colors(
+                                    Color.RED,
+                                    UI.Color.TRANSPARENT,
+                                    Color.BLUE,
+                                    new java.awt.Color(0, 255, 0, 0), // transparent green
+                                    Color.WHITE
+                                )
+                                .span(UI.Span.TOP_TO_BOTTOM)
+                                .type(UI.GradientType.LINEAR)
+                            )
+                        )
+        and : 'We build the text pane component...'
+            var textPane = ui.get(JTextPane)
+        and : 'Finally we access the underlying style configuration of the text pane...'
+            var style = ComponentExtension.from(textPane).getStyle()
+        expect : """
+            Now we look at the gradient colors an verify that their are all
+            the same as the ones we specified in the style configuration, but with the
+            difference that the `UI.Color.TRANSPARENT` constant has been replaced
+            with a color that is also fully transparent, but otherwise an interpolation
+            between the two neighbouring colors.
+        """
+            style.layers().get(UI.Layer.BACKGROUND).gradients().get("default").colors() == [
+                Color.RED,
+                new Color(127, 0, 127, 0), // Interpolated
+                Color.BLUE,
+                new Color(0, 255, 0, 0),
+                Color.WHITE
+            ]
     }
 }
