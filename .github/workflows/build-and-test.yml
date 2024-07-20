@@ -22,6 +22,3 @@ jobs:
       - name: Tear down xvfb on Linux and macOS
         run: killall Xvfb
         if: runner.os != 'Windows'
-      - name: Tear down xvfb on Windows
-        run: taskkill /F /IM Xvfb*
-        if: runner.os == 'Windows'
