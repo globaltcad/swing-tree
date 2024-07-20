@@ -10,6 +10,7 @@ import swingtree.animation.Animator
 import swingtree.animation.Animation
 import swingtree.animation.AnimationState
 import swingtree.animation.LifeTime
+import utility.Wait
 
 import javax.swing.JButton
 import javax.swing.JLabel
@@ -23,7 +24,7 @@ import java.util.concurrent.TimeUnit
     Animations are a great way to improve the UX of your application.
     Swing-Tree has a built in animation scheduler that can execute animations 
     given that you have at least specified the duration of the animation.
-    Internally the animation scheduler is a "Timer" that will regularly update
+    Internally the animation scheduler is a `Timer` that will regularly update
     your animations and then remove them from the scheduler once they are finished.
 
 ''')
@@ -50,13 +51,15 @@ class Animations_Spec extends Specification
                 .go({
                     progressValues[(int)it.repeats()] << it.progress()
                 })
-        and : 'We wait for the animation to finish'
-            TimeUnit.MILLISECONDS.sleep(350)
-            UI.sync()
-            TimeUnit.MILLISECONDS.sleep(350)
-            UI.sync()
-        then : 'The animation has been executed at least once'
-            progressValues.values().flatten().size() > 0
+        then : 'We wait for each animation to finish with a full progress:'
+            Wait.until({progressValues[2].contains(1d)},2_500)
+        and : """
+            We confirm that the animation has been executed fully!
+            The animation scheduler always ensures that the last animation run is
+            executed with a progress value of 1.0. 
+            This is to ensure that the animation is always finished predictably.
+        """
+            progressValues[2].last() == 1
         and : 'The progress values are always between 0 and 1'
             progressValues[0].every { it >= 0 && it <= 1 }
             progressValues[1].every { it >= 0 && it <= 1 }
@@ -65,12 +68,6 @@ class Animations_Spec extends Specification
             progressValues[0] == new ArrayList(progressValues[0]).sort()
             progressValues[1] == new ArrayList(progressValues[1]).sort()
             progressValues[2] == new ArrayList(progressValues[2]).sort()
-        and : """
-            The animation scheduler always ensures that the last animation run is
-            executed with a progress value of 1.0. 
-            This is to ensure that the animation is always finished predictably.
-        """
-            progressValues[2].last() == 1
     }
 
     def 'Use the API exposed by `UI.animateFor(..)` to schedule regressive animations (whose progress goes from 1 to 0)'()
@@ -89,10 +86,15 @@ class Animations_Spec extends Specification
                 .go({
                     progressValues[(int)it.repeats()] << it.progress()
                 })
-        and : 'We wait for the animation to finish'
-            TimeUnit.MILLISECONDS.sleep(500)
-        then : 'The animation has been executed at least once'
-            progressValues.values().flatten().size() > 0
+        then : 'We wait for each animation to finish with a full regress:'
+            Wait.until({progressValues[2].contains(0d)},2_500)
+        and : """
+            We confirm that the animation has been executed fully!
+            The animation scheduler always ensures that in case of a regressive animation,
+            the last animation run is always executed with a progress value of 0.0. 
+            This is to ensure that the animation is always terminated predictably.
+        """
+            progressValues[2].last() == 0
         and : 'The progress values are always between 0 and 1'
             progressValues[0].every { it >= 0 && it <= 1 }
             progressValues[1].every { it >= 0 && it <= 1 }
@@ -101,12 +103,6 @@ class Animations_Spec extends Specification
             progressValues[0] == new ArrayList(progressValues[0]).sort().reverse()
             progressValues[1] == new ArrayList(progressValues[1]).sort().reverse()
             progressValues[2] == new ArrayList(progressValues[2]).sort().reverse()
-        and : """
-            The animation scheduler always ensures that the last animation run is
-            executed with a progress value of 0.0. 
-            This is to ensure that the animation is always finished predictably.
-        """
-            progressValues[2].last() == 0
     }
 
     def 'The event delegation object of a user event can be used to register animations.'()
@@ -129,9 +125,10 @@ class Animations_Spec extends Specification
             var button =
                     UI.button("Click me! Or don't.")
                     .onClick({
-                        it.animateFor(0.1, TimeUnit.SECONDS)
+                        it.animateFor(0.2, TimeUnit.SECONDS)
                             .asLongAs({ it.repeats() < 4 })
                             .go(state -> {
+                                println state
                                 if ( !iterations.contains(state.repeats()) )
                                     iterations << state.repeats()
                                 progresses    << state.progress()
@@ -147,10 +144,9 @@ class Animations_Spec extends Specification
         when : 'We simulate a click on the button'
             UI.runNow( () -> button.doClick() )
         and : 'We wait for the animation to finish'
+            Wait.until({ iterations.size() == 4 && progresses.last() == 1 },2_500)
+            Thread.sleep(100)
             UI.sync()
-            TimeUnit.MILLISECONDS.sleep(350)
-            UI.sync()
-            TimeUnit.MILLISECONDS.sleep(350)
         then : 'The animation has been completed 4 times.'
             iterations == [0, 1, 2, 3]
         and : 'The progress and cycle values are always between 0 and 1'
@@ -195,7 +191,7 @@ class Animations_Spec extends Specification
                   @Override void finish(AnimationState state) { wasFinished++ }
               })
         and :
-            TimeUnit.MILLISECONDS.sleep(100)
+            Wait.until({ wasFinished > 0 },2_500)
 
         then :
             wasFinished == 1
@@ -203,13 +199,16 @@ class Animations_Spec extends Specification
 
     def 'Animate the color of a label when it is clicked.'()
     {
-        given : 'A JLabel that will animate its color when it is clicked.'
+        given : 'A simple list used as a trace for the animation runs.'
+            var trace = []
+        and : 'A JLabel that will animate its color when it is clicked.'
             var label =
                     UI.label("Some text! :)")
                     .onMouseClick(it -> {
                         it.animateFor(1, TimeUnit.SECONDS, state ->{
                             float highlight = (float) (1f - (float) state.progress())
                             it.component.setForeground(new Color(highlight, 1, highlight))
+                            trace << state.progress()
                           })
                     })
                     .get(JLabel)
@@ -220,7 +219,7 @@ class Animations_Spec extends Specification
         when :
             label.dispatchEvent(new MouseEvent(label, MouseEvent.MOUSE_CLICKED, System.currentTimeMillis(), 0, 0, 0, 1, false))
         and :
-            TimeUnit.SECONDS.sleep(2)
+            Wait.until({ trace.contains(1d) },2_500)
         then :
             label.getForeground().getGreen() == 255
             label.getForeground().getRed() < 10
