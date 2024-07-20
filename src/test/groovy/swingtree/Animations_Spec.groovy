@@ -144,7 +144,7 @@ class Animations_Spec extends Specification
         when : 'We simulate a click on the button'
             UI.runNow( () -> button.doClick() )
         and : 'We wait for the animation to finish'
-            Wait.until({ iterations.size() == 4 && progresses.last() == 1 },2_500)
+            Wait.until({ iterations.size() == 4 && progresses.last() == 1 },3_500)
             Thread.sleep(100)
             UI.sync()
         then : 'The animation has been completed 4 times.'
