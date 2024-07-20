@@ -32,6 +32,7 @@ import swingtree.style.ComponentExtension
 import swingtree.threading.EventProcessor
 import utility.SwingTreeTestConfigurator
 import utility.Utility
+import utility.Wait
 
 import javax.swing.*
 import java.awt.*
@@ -348,7 +349,7 @@ class Examples_Spec extends Specification
 
         when : 'We simulate the user entering an invalid number:'
             speedTextField.text = "§"
-            UI.sync()
+            Wait.until({speedTextField.text == "§"}, 2_500)
         then : 'The UI is updated to reflect the invalid value.'
             speedTextField.text == "§"
             speedTextField.background == Color.RED

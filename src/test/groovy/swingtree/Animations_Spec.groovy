@@ -46,7 +46,7 @@ class Animations_Spec extends Specification
             var progressValues = [0:[],1:[],2:[]]
 
         when : 'We schedule an animation that will run 3 times and has a duration of 0.1 seconds.'
-            UI.animateFor(0.1, TimeUnit.SECONDS)
+            UI.animateFor(0.2, TimeUnit.SECONDS)
                 .asLongAs({ it.repeats() < 3 })
                 .go({
                     progressValues[(int)it.repeats()] << it.progress()
