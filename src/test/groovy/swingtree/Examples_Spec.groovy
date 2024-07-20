@@ -348,9 +348,9 @@ class Examples_Spec extends Specification
             similarity1 > 95
 
         when : 'We simulate the user entering an invalid number:'
-            speedTextField.text = "§"
-            Wait.until({speedTextField.text == "§"}, 2_500)
-        then : 'The UI is updated to reflect the invalid value.'
+            UI.run({ speedTextField.text = "§" })
+            Wait.until({speedTextField.text == "§"}, 3_500)
+        then : 'The text field is updated to reflect the invalid value.'
             speedTextField.text == "§"
             speedTextField.background == Color.RED
 

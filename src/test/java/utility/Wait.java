@@ -1,5 +1,7 @@
 package utility;
 
+import swingtree.UI;
+
 import java.util.function.Supplier;
 
 /**
@@ -15,6 +17,7 @@ public class Wait {
             if (condition.get()) {
                 return true;
             }
+            UI.sync();
         }
         return false;
     }
