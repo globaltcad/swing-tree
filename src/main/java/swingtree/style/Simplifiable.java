@@ -17,6 +17,14 @@ package swingtree.style;
 interface Simplifiable<I>
 {
     /**
+     *  Implementations of this are intended to examine the
+     *  state of this configuration instance and return a
+     *  simpler, less ambitious variant if possible.
+     *  If for example a config object describes the
+     *  color and with of a border as (0,red) then this
+     *  can be reduced to (0,null) due to the width 0
+     *  causing the color to be completely irrelevant.
+     *
      * @return A new simplified instance of the same type.
      */
     I simplified();
