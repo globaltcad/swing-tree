@@ -349,7 +349,7 @@ class Examples_Spec extends Specification
 
         when : 'We simulate the user entering an invalid number:'
             UI.run({ speedTextField.text = "§" })
-            Wait.until({speedTextField.text == "§"}, 3_500)
+            Wait.until({speedTextField.text == "§" && speedTextField.background == Color.RED}, 3_500)
         then : 'The text field is updated to reflect the invalid value.'
             speedTextField.text == "§"
             speedTextField.background == Color.RED
