@@ -64,6 +64,16 @@ abstract class AbstractComboModel<E extends @Nullable Object> implements ComboBo
 
 	@SuppressWarnings("NullAway")
 	@Override public void setSelectedItem( @Nullable Object anItem ) {
+		if ( !UI.thisIsUIThread() ) {
+			log.warn(
+				"Detected thread '"+Thread.currentThread().getName()+"' modifying a combobox data model " +
+				"instead of the expected EDT (AWT) GUI-Thread! Delegating modification to EDT now...",
+				new Throwable()
+			);
+			@Nullable Object scopedItem = anItem;
+			UI.runNow(()->setSelectedItem(scopedItem));
+			return;
+		}
 		if ( anItem != null ) {
 			Class<E> expectedType = _selectedItem.type();
 			if ( !expectedType.isAssignableFrom(anItem.getClass()) ) {
