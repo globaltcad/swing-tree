@@ -23,5 +23,5 @@ jobs:
         run: killall Xvfb
         if: runner.os != 'Windows'
       - name: Tear down xvfb on Windows
-        run: taskkill /F /IM Xvfb.exe
+        run: taskkill /F /IM Xvfb*
         if: runner.os == 'Windows'
