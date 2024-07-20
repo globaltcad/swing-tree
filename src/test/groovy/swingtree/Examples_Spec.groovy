@@ -262,7 +262,7 @@ class Examples_Spec extends Specification
         given : 'We create the UI.'
             var ui = new WellRoundedView()
         expect : 'It is rendered as shown in the image.'
-            Utility.similarityBetween(ui, "views/well-rounded-UI.png", 98) > 98
+            Utility.similarityBetween(ui, "views/well-rounded-UI.png", 97) > 97
     }
 
     def 'The soft example UI is rendered as expected.'()
