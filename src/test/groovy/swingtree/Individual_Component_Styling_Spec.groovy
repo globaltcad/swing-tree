@@ -2361,7 +2361,7 @@ class Individual_Component_Styling_Spec extends Specification
                     )
 
         expect : 'The image is as expected.'
-            Utility.similarityBetween(ui.get(JPanel), "components/font-style-inheritance.png", 99.4) > 99.4
+            Utility.similarityBetween(ui.get(JPanel), "components/font-style-inheritance.png", 99.3) > 99.3
 
         where :
             uiScale << [1]

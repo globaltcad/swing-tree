@@ -414,7 +414,7 @@ class Combo_Box_Spec extends Specification
             combo.getSelectedItem() == selection.get()
 
         when : 'We simulate the user editing the combo box.'
-            combo.setSelectedItem(input)
+            UI.runNow(()->combo.setSelectedItem(input))
             UI.sync()
         then : 'The combo box updates the selection property to the parsed value.'
             selection.get() == expectedSelection
